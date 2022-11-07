@@ -20,6 +20,7 @@ from sas.qtgui.Utilities.HidableDialog import HidableDialog
 from sas.qtgui.MainWindow.GuiManager import Acknowledgements, GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.Utilities.HidableDialog import HidableDialog
 
 
 class GuiManagerTest:
@@ -123,7 +124,8 @@ class GuiManagerTest:
         mocker.patch.object(sys, 'exit')
 
         # Say No to the close dialog
-        mocker.patch.object(HidableDialog, 'exec', return_value=False)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
+        mocker.patch.object(HidableDialog, 'exec', return_value=0)
 
         # Open, then close the manager
         manager.quitApplication()
@@ -132,7 +134,8 @@ class GuiManagerTest:
         assert HidableDialog.exec.called
 
         # Say Yes to the close dialog
-        mocker.patch.object(HidableDialog, 'exec', return_value=True)
+        mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
+        mocker.patch.object(HidableDialog, 'exec', return_value=1)
 
         # Open, then close the manager
         manager.quitApplication()
