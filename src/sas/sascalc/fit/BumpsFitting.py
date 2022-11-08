@@ -237,22 +237,6 @@ class ParameterExpressions(object):
         self.models = state
         self._setup()
 
-    def _allComputedParamsUncertaintiesDefined(self):
-        '''
-        Verify if all computed (constraints) parameters contain uncertainties.
-        Returns False as soon as one parameter is not an uncertainties object.
-        '''
-        for model in self.models:
-            if model.computed_pars:
-                for p in model.computed_pars:
-                    check = isinstance(p.value, uncertainties.core.AffineScalarFunc)
-                    if not check:
-                        check = isinstance(p.value, uncertainties.core.Variable)
-                    if not check:
-                        return False
-        return True
-
-
 class BumpsFit(FitEngine):
     """
     Fit a model using bumps.
@@ -326,19 +310,7 @@ class BumpsFit(FitEngine):
                     param.value = val
 
         # Propagate correlated uncertainty through constraints.
-        # Hack to deal with linked constraints, e.g. M2=M1, M3=M2, M4=M3, ...
-        # TODO: Find better way of handling this?
-        MAX_ITER = 10
-        iter = 0
-        while not problem.setp_hook._allComputedParamsUncertaintiesDefined():
-            iter += 1
-            if iter > MAX_ITER:
-                logging.warn(f"Handling of uncertainties of constrained parameters "
-                            f"exited after {MAX_ITER} iterations.\n"
-                            f"This could be due to a too complex constraining scheme "
-                            f"or a very long chain of linked constraints.")
-                break
-            problem.setp_hook()
+        problem.setp_hook()
 
         # collect the results
         all_results = []

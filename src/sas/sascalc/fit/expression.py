@@ -356,7 +356,6 @@ def order_dependencies(pairs):
     Order elements from pairs so that b comes before a in the
     ordered list for all pairs (a, b).
     """
-    #print("order_dependencies", pairs)
     emptyset = set()
     order = []
 
@@ -364,7 +363,6 @@ def order_dependencies(pairs):
     # Note: pairs is array or list, so use "len(pairs) > 0" to check for empty.
     left, right = [set(s) for s in zip(*pairs)] if len(pairs) > 0 else ([], [])
     while len(pairs) > 0:
-        #print "within", pairs
         # Find which items only occur on the right
         independent = right - left
         if independent == emptyset:
@@ -379,10 +377,10 @@ def order_dependencies(pairs):
         else:
             left, right = [set(s) for s in zip(*pairs)]
             resolved = dependent - left
-        #print "independent", independent, "dependent", dependent, "resolvable", resolved
+
         order += resolved
-        #print "new order", order
-    order.reverse()
+
+    #order.reverse()
     return order
 
 # ========= Test code ========
