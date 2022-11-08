@@ -1,12 +1,17 @@
 from abc import ABC, abstractmethod
 
+import logging
+
+logger = logging.getLogger("GL Subsystem")
+
 class Renderable(ABC):
     """ Interface for everything that can be rendered with the OpenGL widget"""
 
     @abstractmethod
     def render_wireframe(self):
-        pass
+        logger.debug(f"{self.__class__} does not support wireframe rendering")
+
 
     @abstractmethod
     def render_solid(self):
-        pass
+        logger.debug(f"{self.__class__} does not support solid rendering")
