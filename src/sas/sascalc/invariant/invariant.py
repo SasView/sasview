@@ -463,7 +463,7 @@ class InvariantCalculator(object):
         if new_data.dy is None or len(new_data.x) != len(new_data.dy) or \
             (min(new_data.dy) == 0 and max(new_data.dy) == 0):
             new_data.dy = np.ones(len(new_data.x))
-        return  new_data
+        return new_data
 
     def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
         """
@@ -914,7 +914,8 @@ class InvariantCalculator(object):
         self.get_qstar(extrapolation)
 
         if self._qstar <= 0:
-            msg = "Invalid invariant: Invariant Q* must be greater than zero"
+            msg = "Invalid invariant: Invariant Q* must be greater than zero\n"
+            msg += "Please check if scale and background values are correct"
             raise RuntimeError(msg)
 
         # Compute intermediate constant
