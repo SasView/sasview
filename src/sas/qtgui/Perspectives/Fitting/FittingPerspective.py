@@ -183,6 +183,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
     def preferences(self):
         return [self.fit_options_widget, self.gpu_options_widget]
 
+    def configuration_values(self):
+        return {'FITTING_DEFAULT_OPTIMIZER': 'lm'}
+
     def currentTabDataId(self):
         """
         Returns the data ID of the current tab
