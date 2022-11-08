@@ -180,6 +180,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 state[i] = {'fit_params': [line_dict]}
         return state
 
+    def preferences(self):
+        return [self.fit_options_widget, self.gpu_options_widget]
+
     def currentTabDataId(self):
         """
         Returns the data ID of the current tab
