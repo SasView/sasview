@@ -8,20 +8,19 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from sas.qtgui.UI import images_rc
-from sas.qtgui.UI import main_resources_rc
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from bumps import fitters
 import bumps.options
 
 from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
 # Set the default optimizer
 fitters.FIT_DEFAULT_ID = 'lm'
 
 
-class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
+class FittingOptions(PreferencesWidget, Ui_FittingOptions):
     """
     Hard-coded version of the fit options dialog available from BUMPS.
     This should be make more "dynamic".
@@ -42,8 +41,6 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     def __init__(self, parent=None, config=None):
         super(FittingOptions, self).__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.config = config
 
