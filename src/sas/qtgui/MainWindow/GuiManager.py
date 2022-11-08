@@ -203,7 +203,7 @@ class GuiManager:
             try:
                 loaded_perspective = perspective(parent=self)
                 loaded_dict[name] = loaded_perspective
-                pref_widgets = loaded_perspective.register_preferences()
+                pref_widgets = loaded_perspective.preferences
                 for widget in pref_widgets:
                     self.preferences.addWidget(widget)
             except Exception as e:
