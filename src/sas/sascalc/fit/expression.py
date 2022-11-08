@@ -306,6 +306,7 @@ def _compile_constraints(symtab, exprs, context={}, html=False):
 
     if errors:
         return None, errors
+    #print(f"{symtab=}\n  {deps=}\n  {order=}\n")
 
     # Rather than using the full path to the parameters in the parameter
     # expressions, instead use Pn, and substitute Pn.value for each occurrence
@@ -380,7 +381,6 @@ def order_dependencies(pairs):
 
         order += resolved
 
-    #order.reverse()
     return order
 
 # ========= Test code ========
@@ -389,20 +389,21 @@ def _check(msg, pairs):
     Verify that the list n contains the given items, and that the list
     satisfies the partial ordering given by the pairs in partial order.
     """
+    # pairs are a list of (lhs, rhs)
+    # lhs may be repeated e.g., x = a+b has pairs (x, a) and (x, b)
+    # lhs may be in rhs e.g., x = a+b; b = 2*c has pairs (x, a) (x, b), (b, c)
+    # find lhs eval order; since (x, b) is a pair then b must come before x
     # Note: pairs is array or list, so use "len(pairs) > 0" to check for empty.
-    left, right = zip(*pairs) if len(pairs) > 0 else ([], [])
-    items = set(left)
-    n = order_dependencies(pairs)
-    if set(n) != items or len(n) != len(items):
-        n.sort()
-        items = list(items)
-        items.sort()
+    lhs_list, rhs_list = zip(*pairs) if len(pairs) > 0 else ([], [])
+    items = set(lhs_list) # items = all LHS, removing duplicates
+    order = order_dependencies(pairs)
+    if set(order) != set(items) or len(order) != len(items):
         raise ValueError("%s expect %s to contain %s for %s"
-                         % (msg, n, items, pairs))
-    for lo, hi in pairs:
-        if lo in n and hi in n and n.index(lo) >= n.index(hi):
+                         % (msg, order, sorted(items), pairs))
+    for lhs, rhs in pairs:
+        if lhs in order and rhs in order and order.index(rhs) >= order.index(lhs):
             raise ValueError("%s expect %s before %s in %s for %s"
-                             % (msg, lo, hi, n, pairs))
+                             % (msg, lhs, rhs, order, pairs))
 
 def test_deps():
     import numpy as np
@@ -478,14 +479,21 @@ def test_expr():
     p3_circular = TestParameter('M1.G1', expression='other + 6')
     p3_self = TestParameter('M1.G1', expression='M1.G1')
     p4 = TestParameter('constant', expression='2*pi*35')
-    # Simple chain
+    p5 = TestParameter('chain', expression='2+other')
+    # Simple pairs
     assert (set(_find_dependencies(*world(p1, p2, p3)))
             == set([(p2.path, p1.path), (p2.path, p3.path)]))
+    # Chain
+    assert (set(_find_dependencies(*world(p1, p2, p3, p5)))
+            == set([(p2.path, p1.path), (p2.path, p3.path), (p5.path, p2.path)]))
     # Constant expression
     assert set(_find_dependencies(*world(p1, p4))) == set([(p4.path, None)])
     # No dependencies
     assert not set(_find_dependencies(*world(p1, p3)))
 
+    # Make sure 'other' is evaluated before 'chain'
+    assert (order_dependencies(_find_dependencies(*world(p1, p2, p3, p5)))
+            == [p2.path, p5.path])
     # Check function builder
     fn = compile_constraints(*world(p1, p2, p3))
 
