@@ -43,7 +43,6 @@ class PreferencesWidget(QWidget):
         self.config_params: List[str] = []
         # A mapping of parameter names to messages displayed when prompting for a restart
         self.restart_params: Dict[str, str] = {}
-        self.restart_required: bool = False
         # Create generic layout
         self.verticalLayout = QVBoxLayout()
         self.setLayout(self.verticalLayout)
@@ -69,7 +68,6 @@ class PreferencesWidget(QWidget):
     def restoreGUIValuesFromConfig(self):
         """A generic method that blocks all signalling, and restores the GUI values from the config file.
         Called when staging is cancelled or defaults should be restored."""
-        self.restart_required = False
         self._toggleBlockAllSignaling(True)
         self._restoreFromConfig()
         self._toggleBlockAllSignaling(False)
