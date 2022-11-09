@@ -1,10 +1,14 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 import numpy as np
 
 from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
+
+from sas.qtgui.GL.Renderable import Renderable
+from sas.qtgui.GL.Color import Color
+
 class GraphWidget(QtOpenGL.QGLWidget):
 
 
@@ -31,6 +35,8 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self.view_centre_difference = None
         self.view_azimuth_difference = None
         self.view_elevation_difference = None
+
+        self._items: List[Renderable] = []
 
     def test_paint(self):
         glTranslatef(-2.5, 0.5, -6.0)
@@ -66,6 +72,11 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
 
         self.test_paint()
+
+        for item in self._items:
+            item.render_solid()
+            item.render_wireframe()
+
 
 
     def projection_matrix(self):
@@ -139,15 +150,21 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
         self.update()
 
+    def add(self, item: Renderable):
+        self._items.append(item)
+
 def main():
     """ Show a demo of the opengl window """
     import os
+    from sas.qtgui.GL.Cube import Cube
 
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     app = QtWidgets.QApplication([])
 
     mainWindow = QtWidgets.QMainWindow()
     viewer = GraphWidget(mainWindow)
+
+    viewer.add(Cube(edge_colors=Color(1,1,1)))
 
     mainWindow.setCentralWidget(viewer)
 
