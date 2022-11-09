@@ -1079,8 +1079,9 @@ class GuiManager:
     def actionFit_Options(self):
         """
         """
-        if getattr(self._current_perspective, "fit_options_widget"):
-            self._current_perspective.fit_options_widget.show()
+        if hasattr(self._current_perspective, "fit_options_widget"):
+            self.preferences.show()
+            self.preferences.setMenuByName(self._current_perspective.fit_options_widget.name)
         pass
 
     def actionGPU_Options(self):
