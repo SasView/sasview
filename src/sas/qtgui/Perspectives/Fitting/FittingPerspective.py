@@ -78,7 +78,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
-        self.fit_options_widget = FittingOptions(self, config=self.fit_options)
+        self.fit_options_widget = FittingOptions(config=self.fit_options)
         self.fit_options.selected_id = fitters.MPFit.id
 
         # Listen to GUI Manager signal updating fit options
@@ -180,11 +180,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 state[i] = {'fit_params': [line_dict]}
         return state
 
+    @property
     def preferences(self):
-        return [self.fit_options_widget, self.gpu_options_widget]
-
-    def configuration_values(self):
-        return {'FITTING_DEFAULT_OPTIMIZER': 'lm'}
+        return [self.fit_options_widget]
 
     def currentTabDataId(self):
         """
