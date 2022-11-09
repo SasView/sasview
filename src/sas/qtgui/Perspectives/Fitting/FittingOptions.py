@@ -47,11 +47,6 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         self.config = config
         self.config_params = ['FITTING_DEFAULT_OPTIMIZER']
 
-        # no reason to have this widget resizable
-        self.setFixedSize(self.minimumSizeHint())
-
-        self.setWindowTitle("Fit Algorithms")
-
         # Fill up the algorithm combo, based on what BUMPS says is available
         self.active_fitters = [n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS]
         self.cbAlgorithm.addItems(self.active_fitters)
