@@ -13,6 +13,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from bumps import fitters
 import bumps.options
 
+from sas.system.config import config
 from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
@@ -43,6 +44,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         self.setupUi(self)
 
         self.config = config
+        self.config_params = ['FITTING_DEFAULT_OPTIMIZER']
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
@@ -50,7 +52,9 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         self.setWindowTitle("Fit Algorithms")
 
         # Fill up the algorithm combo, based on what BUMPS says is available
-        self.cbAlgorithm.addItems([n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS])
+        self.active_fitters = [n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS]
+        self.cbAlgorithm.addItems(self.active_fitters)
+        self.cbAlgorithmDefault.addItems(self.active_fitters)
 
         # Handle the Apply button click
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.onApply)
@@ -59,11 +63,13 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
         # Handle the combo box changes
         self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
+        self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
 
         # Set the default index
-        default_name = [n.name for n in fitters.FITTERS if n.id == fitters.FIT_DEFAULT_ID][0]
+        default_name = [n.name for n in fitters.FITTERS if n.id == config.FITTING_DEFAULT_OPTIMIZER][0]
         default_index = self.cbAlgorithm.findText(default_name)
         self.cbAlgorithm.setCurrentIndex(default_index)
+        self.cbAlgorithmDefault.setCurrentIndex(default_index)
         # previous algorithm choice
         self.previous_index = default_index
 
@@ -71,10 +77,25 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         self.assignValidators()
 
         # Set defaults
-        self.current_fitter_id = fitters.FIT_DEFAULT_ID
+        self.current_fitter_id = getattr(config, 'FITTING_DEFAULT_OPTIMIZER', fitters.FIT_DEFAULT_ID)
 
         # OK has to be initialized to True, after initial validator setup
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
+
+    #
+    # Preference Widget required methods
+
+    def _addAllWidgets(self):
+        # Use pre-built UI for this item
+        pass
+
+    def _toggleBlockAllSignaling(self, toggle: bool):
+        self.cbAlgorithmDefault.blockSignals(toggle)
+
+    def _restoreFromConfig(self):
+        optimizer_key = config.FITTING_DEFAULT_OPTIMIZER
+        optimizer_name = bumps.options.FIT_CONFIG.names[optimizer_key]
+        self.cbAlgorithmDefault.setCurrentIndex(self.cbAlgorithmDefault.findText(optimizer_name))
 
     def assignValidators(self):
         """
@@ -110,6 +131,10 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
             self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(False)
 
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
+
+    def onDefaultAlgorithmChange(self, index):
+        # TODO: write this...
+        pass
 
     def onAlgorithmChange(self, index):
         """
