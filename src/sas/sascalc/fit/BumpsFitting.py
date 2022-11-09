@@ -297,17 +297,14 @@ class BumpsFit(FitEngine):
                 param.value = uncertainties.ufloat(val, err)
         else:
             try:
-                uncertainties.correlated_values(values, cov)
-            except:
-                # No convergence
-                for param, val, err in zip(varying, values, errs):
-                    # Convert all varying parameters to uncertainties objects
-                    param.value = uncertainties.ufloat(val, err)
-            else:
                 # Use the covariance matrix to calculate error in the parameter
                 fitted = uncertainties.correlated_values(values, cov)
                 for param, val in zip(varying, fitted):
                     param.value = val
+            except Exception:
+                # No convergence. Convert all varying parameters to uncertainties objects
+                for param, val, err in zip(varying, values, errs):
+                    param.value = uncertainties.ufloat(val, err)
 
         # Propagate correlated uncertainty through constraints.
         problem.setp_hook()
@@ -348,19 +345,6 @@ class BumpsFit(FitEngine):
                     # to other parameter already constrained.
                     # Is this still needed with the added _allComputedParamsUncertaintiesDefined test?
                     else:
-                        # Details of p
-                        param_model, param_name = p.name.split(".")[0], p.name.split(".")[1]
-                        # Constraints applied on p, list comprehension most efficient method, will always return a
-                        # list with 1 entry
-                        constraints = [model.constraints for model in models if model.name == param_model][0]
-                        # Parameters p is constrained on.
-                        # This does not work if the tying parameter is not in varying list, i.e.
-                        # if there are linked constraints
-                        reference_params = [v for v in varying if str(v.name) in str(constraints[param_name])]
-                        err_exp = str(constraints[param_name])
-                        # Convert string entries into variable names within the code.
-                        for i, _ in enumerate(reference_params):
-                            err_exp = err_exp.replace(reference_params[i].name, f"reference_params[{i}].value")
                         try:
                             # Evaluate a string containing constraints as if it where a line of code
                             pvec.append(eval(err_exp).n)
