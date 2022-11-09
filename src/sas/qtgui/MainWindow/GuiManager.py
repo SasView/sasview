@@ -147,7 +147,13 @@ class GuiManager:
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
-        # Add FileDialog widget as docked
+        # Preferences Panel must exist before perspectives are loaded
+        self.preferences = PreferencesPanel(self._parent)
+
+        # Load all perspectives - Preferences panel must exist
+        self.loadAllPerspectives()
+
+        # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
@@ -164,10 +170,6 @@ class GuiManager:
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
-        self.preferences = PreferencesPanel(self._parent)
-
-        # Load all perspectives - Must come after preferences panel is created
-        self.loadAllPerspectives()
 
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
