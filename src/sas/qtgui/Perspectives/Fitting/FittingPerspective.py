@@ -182,7 +182,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
     @property
     def preferences(self):
-        return [self.fit_options_widget]
+        return [self.fit_options_widget, self.gpu_options_widget]
 
     def currentTabDataId(self):
         """
