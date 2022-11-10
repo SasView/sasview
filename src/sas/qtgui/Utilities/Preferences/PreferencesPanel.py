@@ -1,4 +1,6 @@
 import logging
+import os
+import sys
 
 from PyQt5.QtWidgets import QDialog, QWidget, QDialogButtonBox, QMessageBox
 from PyQt5.QtCore import Qt
@@ -99,12 +101,14 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         for k, v in self._staged_changes.items():
             setattr(config, k, v)
         if any(self._staged_requiring_restart):
-            message = "SasView must restart for the following values to take effect:\n"
+            message = "SasView must restart for the following values to take effect. Do you wish to restart?:\n"
             for val in self._staged_requiring_restart:
                 message += f"\t-{val}\n"
-            msgBox = QMessageBox(QMessageBox.Information, "", message, QMessageBox.Ok)
+            msgBox = QMessageBox(QMessageBox.Information, "", message, QMessageBox.Yes|QMessageBox.No)
             msgBox.show()
-            msgBox.exec()
+            if msgBox.exec() == QMessageBox.Yes:
+                self.parent.guiManager.quitApplication()
+                os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
         self._staged_requiring_restart = []
         self._staged_changes = {}
 
