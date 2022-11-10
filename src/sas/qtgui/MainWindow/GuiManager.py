@@ -1089,7 +1089,8 @@ class GuiManager:
         Load the OpenCL selection dialog if the fitting perspective is active
         """
         if hasattr(self._current_perspective, "gpu_options_widget"):
-            self._current_perspective.gpu_options_widget.show()
+            self.preferences.show()
+            self.preferences.setMenuByName(self._current_perspective.gpu_options_widget.name)
         pass
 
     def actionFit_Results(self):
