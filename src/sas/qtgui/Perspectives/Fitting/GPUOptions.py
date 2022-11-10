@@ -43,6 +43,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
     """
 
     cl_options = None
+    name = "GPU Options"
     testingDoneSignal = QtCore.pyqtSignal(str)
     testingFailedSignal = QtCore.pyqtSignal(str)
 
@@ -64,6 +65,17 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         self.testingDoneSignal.connect(self.testCompleted)
         self.testingFailedSignal.connect(self.testFailed)
 
+    def restoreGUIValuesFromConfig(self):
+        pass
+
+    def _restoreFromConfig(self):
+        pass
+
+    def _toggleBlockAllSignaling(self, toggle: bool):
+        pass
+
+    def _addAllWidgets(self):
+        pass
 
     def add_options(self):
         """
