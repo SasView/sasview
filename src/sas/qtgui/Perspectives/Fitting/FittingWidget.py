@@ -1168,7 +1168,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         for model_key in self.model_dict.keys():
             for row in range(self.model_dict[model_key].rowCount()):
-                if self.model_dict[model_key].item(row,0).data(role=QtCore.Qt.UserRole) != param:
+                param_name = self.model_dict[model_key].item(row,0).text()
+                if model_key == 'poly':
+                    param_name = self.polyNameToParam(param_name)
+                if param_name != param:
                     continue
                 return self.rowHasConstraint(row, model_key=model_key)
 
