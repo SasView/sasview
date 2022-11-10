@@ -54,14 +54,14 @@ def prepare():
     # Find the directories for the source and build
     root = abspath(dirname(realpath(__file__)))
 
-    # TODO: Do we prioritize the sister repo or the installed package?
+    # TODO: Do we prioritize the sibling repo or the installed package?
     # TODO: Can we use sasview/run.py from a distributed sasview.exe?
     # Put supporting packages on the path if they are not already available.
-    for sister in ('periodictable', 'bumps', 'sasdata', 'sasmodels'):
+    for sibling in ('periodictable', 'bumps', 'sasdata', 'sasmodels'):
         try:
-            import_module(sister)
+            import_module(sibling)
         except:
-            addpath(joinpath(root, '..', sister))
+            addpath(joinpath(root, '..', sibling))
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))

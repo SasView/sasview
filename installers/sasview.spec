@@ -1,7 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import sys
-import os
 from pathlib import Path
 import warnings
 import platform

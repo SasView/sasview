@@ -1,8 +1,8 @@
 # UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
 # ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
+import logging
 import os
 import sys
-import logging
 
 from sas.system.version import __version__
 from sas.system import config

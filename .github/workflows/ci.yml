@@ -80,7 +80,7 @@ jobs:
           python -m pip install matplotlib~=3.5.2
           python -m pip install lxml
 
-      - name: Install pywin32 (Windows + Linux)
+      - name: Install pywin32 (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
           python -m pip install pywin32
