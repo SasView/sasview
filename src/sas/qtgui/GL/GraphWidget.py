@@ -12,7 +12,7 @@ from sas.qtgui.GL.Color import Color
 class GraphWidget(QtOpenGL.QGLWidget):
 
 
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumSize(640, 480)
 
