@@ -1,5 +1,4 @@
 from typing import Sequence, Tuple, Union, Optional
-from abc import abstractmethod
 
 import numpy as np
 
@@ -9,38 +8,120 @@ from sas.qtgui.GL.Renderable import Renderable
 from sas.qtgui.GL.Color import Color
 
 
-class SolidModel(Renderable):
+def color_sequence_to_array(colors: Union[Sequence[Color], Color]):
+    if isinstance(colors, Color):
+        return None
+    else:
+        return np.array([color.to_array for color in colors], dtype=float)
+
+
+class ModelBase(Renderable):
+    """ Base class for all models"""
+
+    def __init__(self, vertices: Sequence[Tuple[float, float, float]]):
+        self._vertices = vertices
+        self._vertex_array = np.array(vertices, dtype=float)
+
+    @property
+    def vertices(self):
+        return self._vertices
+
+    @vertices.setter
+    def vertices(self, new_vertices):
+        self._vertices = new_vertices
+        self._vertex_array = np.array(new_vertices, dtype=float)
+        self._recalculate_normals()
+
+    def _recalculate_normals(self):
+        pass
+
+
+class SolidModel(ModelBase):
     """ Base class for the two solid models"""
     def __init__(self,
                  vertices: Sequence[Tuple[float, float, float]],
-                 meshes: Sequence[Sequence[int]]):
+                 triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]]):
+
+        ModelBase.__init__(self, vertices)
 
         self.solid_render_enabled = False
-        self.vertices = vertices
-        self.meshes = meshes
+
+        self._triangle_meshes = triangle_meshes
+        self._triangle_mesh_arrays = [np.array(x) for x in triangle_meshes]
+
+    @property
+    def triangle_meshes(self) -> Sequence[Sequence[Tuple[int, int, int]]]:
+        return self._triangle_meshes
+
+    @triangle_meshes.setter
+    def triangle_meshes(self, new_triangle_meshes: Sequence[Sequence[int]]):
+        self._triangle_meshes = new_triangle_meshes
+        self._triangle_mesh_arrays = [np.array(x) for x in new_triangle_meshes]
+        self._recalculate_normals()
+
+    def _recalculate_normals(self):
+        # TODO: Will be required if a reflectance model is used
+        pass
 
 
 class SolidVertexModel(SolidModel):
     def __init__(self,
                  vertices: Sequence[Tuple[float, float, float]],
-                 meshes: Sequence[Sequence[int]],
-                 vertex_colours: Optional[Union[Sequence[Color], Color]]):
+                 triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]],
+                 vertex_colors: Optional[Union[Sequence[Color], Color]]):
 
-        super().__init__(vertices, meshes)
+        super().__init__(vertices, triangle_meshes)
 
-        self.vertex_colours = vertex_colours
+        self._vertex_colors = vertex_colors
+        self._vertex_color_array = None if isinstance(vertex_colors, Color) else np.array(vertex_colors, dtype=float)
+
+        self.solid_render_enabled = self.vertex_colors is not None
+
+    @property
+    def vertex_colors(self):
+        return self._vertex_colors
+
+    @vertex_colors.setter
+    def vertex_colors(self, new_vertex_colors):
+        self.vertex_colors = new_vertex_colors
+        self._vertex_color_array = color_sequence_to_array(new_vertex_colors)
+        self.solid_render_enabled = self.vertex_colors is not None
 
     def render_solid(self):
-        pass
+        if self.solid_render_enabled:
+
+            if isinstance(self._vertex_colors, Color):
+
+                glEnableClientState(GL_VERTEX_ARRAY)
+                self._vertex_colors.set()
+
+                glVertexPointerf(self._vertex_array)
+
+                for triangle_mesh in self._triangle_mesh_arrays:
+                    glDrawElementsui(GL_TRIANGLES, triangle_mesh)
+
+
+            else:
+
+                # TODO: This branch of the if clause needs testing
+
+                glEnableClientState(GL_VERTEX_ARRAY)
+                glEnableClientState(GL_COLOR_ARRAY)
+
+                glVertexPointerf(self._vertex_array)
+                glColorPointerf(self._vertex_color_array)
+
+                for triangle_mesh in self._triangle_mesh_arrays:
+                    glDrawElementsui(GL_TRIANGLES, triangle_mesh)
 
 
 class SolidFaceModel(SolidModel):
     def __init__(self,
                  vertices: Sequence[Tuple[float, float, float]],
-                 meshes: Sequence[Sequence[int]],
+                 triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]],
                  face_colours: Optional[Union[Sequence[Color], Color]]):
 
-        super().__init__(vertices, meshes)
+        super().__init__(vertices, triangle_meshes)
 
         self.face_colours = face_colours
 
@@ -48,15 +129,18 @@ class SolidFaceModel(SolidModel):
         pass
 
 
-class WireModel(Renderable):
+class WireModel(ModelBase):
+    """ Wireframe Model """
+
     def __init__(self,
                  vertices: Sequence[Tuple[float, float, float]],
                  edges: Sequence[Tuple[int, int]],
                  edge_colors: Optional[Union[Sequence[Color], Color]]):
 
+        super().__init__(vertices)
+
         self.wireframe_render_enabled = False
         self.edges = edges
-        self.vertices = vertices
         self.edge_colors = edge_colors
 
     def render_wireframe(self):
@@ -75,7 +159,7 @@ class WireModel(Renderable):
 
                 glEnd()
 
-            else:  # Assume here that the type is correctly specified, thus colors are a sequence
+            else:  # Assume here that the correct type is supplied, thus colors are a sequence
 
                 glBegin(GL_LINES)
                 for edge, color in zip(self.edges, colors):
@@ -93,18 +177,20 @@ class FullVertexModel(SolidVertexModel, WireModel):
     def __init__(self,
                  vertices: Sequence[Tuple[float, float, float]],
                  edges: Sequence[Tuple[int, int]],
-                 meshes: Sequence[Sequence[int]],
+                 triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]],
                  edge_colors: Optional[Union[Sequence[Color], Color]],
                  vertex_colors: Optional[Union[Sequence[Color], Color]]):
 
         SolidVertexModel.__init__(self,
                                   vertices=vertices,
-                                  meshes=meshes,
-                                  vertex_colours=vertex_colors)
+                                  triangle_meshes=triangle_meshes,
+                                  vertex_colors=vertex_colors)
         WireModel.__init__(self,
                            vertices=vertices,
                            edges=edges,
                            edge_colors=edge_colors)
+
+
 
 
 class FullFaceModel(SolidFaceModel, WireModel):
@@ -113,13 +199,13 @@ class FullFaceModel(SolidFaceModel, WireModel):
     def __init__(self,
                  vertices: Sequence[Tuple[float, float, float]],
                  edges: Sequence[Tuple[int, int]],
-                 meshes: Sequence[Sequence[int]],
+                 triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]],
                  edge_colors: Optional[Union[Sequence[Color], Color]],
                  face_colors: Optional[Union[Sequence[Color], Color]]):
 
         SolidFaceModel.__init__(self,
                                 vertices=vertices,
-                                meshes=meshes,
+                                triangle_meshes=triangle_meshes,
                                 face_colours=face_colors)
         WireModel.__init__(self,
                            vertices=vertices,

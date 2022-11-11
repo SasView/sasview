@@ -164,7 +164,7 @@ def main():
     mainWindow = QtWidgets.QMainWindow()
     viewer = GraphWidget(mainWindow)
 
-    viewer.add(Cube(edge_colors=Color(1,1,1)))
+    viewer.add(Cube(edge_colors=Color(1,1,1), face_colors=Color(0,1,0)))
 
     mainWindow.setCentralWidget(viewer)
 

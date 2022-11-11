@@ -1,10 +1,10 @@
 from typing import Optional, Union, Sequence
 
-from sas.qtgui.GL.Models import FullFaceModel, WireModel
+from sas.qtgui.GL.Models import FullVertexModel, WireModel
 from sas.qtgui.GL.Color import Color
 
 
-class Cube(WireModel):
+class Cube(FullVertexModel):
     """ Unit cube centred at 0,0,0"""
 
     cube_vertices = [
@@ -33,6 +33,21 @@ class Cube(WireModel):
         (0, 2)
     ]
 
+    cube_triangles = [
+        [(1,2,3),
+         (1,0,2)],
+        [(0,6,2),
+         (0,4,6)],
+        [(4,7,6),
+         (4,5,7)],
+        [(5,3,7),
+         (5,1,3)],
+        [(2,7,3),
+         (2,6,7)],
+        [(1,4,0),
+         (1,5,4)]
+    ]
+
     def __init__(self,
                  face_colors: Optional[Union[Sequence[Color],Color]]=None,
                  edge_colors: Optional[Union[Sequence[Color],Color]]=None):
@@ -40,7 +55,9 @@ class Cube(WireModel):
         super().__init__(
             vertices=Cube.cube_vertices,
             edges=Cube.cube_edges,
-            edge_colors=edge_colors)
+            triangle_meshes=Cube.cube_triangles,
+            edge_colors=edge_colors,
+            vertex_colors=face_colors)
 
         self.vertices = Cube.cube_vertices
         self.edges = Cube.cube_edges
@@ -52,7 +69,7 @@ class Cube(WireModel):
             self.wireframe_render_enabled = True
             self.edge_colors = edge_colors
 
-        if face_colors is not None:
+        if face_colors is None:
             self.solid_render_enabled = False
             self.face_colors = []
         else:
