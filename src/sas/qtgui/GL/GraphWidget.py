@@ -19,7 +19,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self.view_azimuth = 0.0
         self.view_elevation = 0.0
         self.view_distance = 5.0
-        self.view_centre = (0.0, 0.0, 0.0)
+        self.view_centre = np.array([0.0, 0.0, 0.0])
         self.view_fov = 60
 
         self.background_color = (0, 0, 0, 0)
@@ -28,13 +28,13 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self.mouse_sensitivity_azimuth = 0.1
         self.mouse_sensitivity_elevation = 0.1
         self.mouse_sensitivity_distance = 1.0
-        self.mouse_sensitivity_position = 1.0
+        self.mouse_sensitivity_position = 0.01
 
         # Mouse control variables
         self.mouse_position = None
-        self.view_centre_difference = None
-        self.view_azimuth_difference = None
-        self.view_elevation_difference = None
+        self.view_centre_difference = np.array([0.0, 0.0, 0.0])
+        self.view_azimuth_difference = 0.0
+        self.view_elevation_difference = 0.0
 
         self._items: List[Renderable] = []
 
@@ -70,7 +70,6 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
         self.set_model_view()
 
-
         self.test_paint()
 
         for item in self._items:
@@ -103,18 +102,13 @@ class GraphWidget(QtOpenGL.QGLWidget):
         tr = QtGui.QMatrix4x4()
         tr.translate(0.0, 0.0, -self.view_distance)
 
-        azimuth = self.view_azimuth
-        elevation = self.view_elevation
-
-        if self.view_azimuth_difference is not None:
-            azimuth += self.view_azimuth_difference
-
-        if self.view_elevation_difference is not None:
-            elevation += self.view_elevation_difference
+        azimuth = self.view_azimuth + self.view_azimuth_difference
+        elevation = self.view_elevation + self.view_elevation_difference
+        centre = self.view_centre + self.view_centre_difference
 
         tr.rotate(elevation, 1, 0, 0)
         tr.rotate(azimuth, 0, 0, -1)
-        tr.translate(*self.view_centre)
+        tr.translate(*centre)
         return tr
 
     def set_model_view(self):
@@ -133,20 +127,23 @@ class GraphWidget(QtOpenGL.QGLWidget):
             self.view_elevation_difference = self.mouse_sensitivity_elevation * diff.y()
 
         elif ev.buttons() == QtCore.Qt.MouseButton.RightButton:
-            self.view_centre_difference = [self.mouse_sensitivity_position * diff.x(), 0,
-                                           self.mouse_sensitivity_position * diff.y()]
+            print("right button")
+            self.view_centre_difference = np.array([self.mouse_sensitivity_position * diff.x(), 0,
+                                           self.mouse_sensitivity_position * diff.y()])
 
         self.update()
     def mouseReleaseEvent(self, ev):
         # Mouse released, add dragging offset the view variables
 
-        # self.view_centre += np.array(self.view_centre_difference)
+        print(self.view_centre, self.view_centre_difference)
+
+        self.view_centre += np.array(self.view_centre_difference)
         self.view_elevation += self.view_elevation_difference
         self.view_azimuth += self.view_azimuth_difference
 
-        self.view_centre_difference = None
-        self.view_azimuth_difference = None
-        self.view_elevation_difference = None
+        self.view_centre_difference = np.array([0.0,0.0,0.0])
+        self.view_azimuth_difference = 0.0
+        self.view_elevation_difference = 0.0
 
         self.update()
 
