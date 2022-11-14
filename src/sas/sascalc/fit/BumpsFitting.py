@@ -282,6 +282,7 @@ class BumpsFit(FitEngine):
         values, errs, cov = result['value'], result['stderr'], result[
             'covariance']
         assert values is not None and errs is not None
+        assert len(values) == cov.shape[0] == cov.shape[1]
 
         # Propagate uncertainty through the parameter expressions
         # We are going to abuse bumps a little here and stuff uncertainty
@@ -332,42 +333,16 @@ class BumpsFit(FitEngine):
                 pvec = list()
                 stderr = list()
                 for p in pars:
-                    # If p is already defined as an uncertainties object it is not constrained based on another
-                    # parameter
-                    if isinstance(p.value, uncertainties.core.Variable) or \
-                            isinstance(p.value, uncertainties.core.AffineScalarFunc):
-                        # value.n returns value p
+                    try:
+                        assert isinstance(p.value, (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))
+                        # value.n returns param value
                         pvec.append(p.value.n)
-                        # value.s returns error in p
+                        # value.s returns param error
                         stderr.append(p.value.s)
-                    # p constrained based on another parameter
-                    # Warning: This will not work for parameters that are tied
-                    # to other parameter already constrained.
-                    # Is this still needed with the added _allComputedParamsUncertaintiesDefined test?
-                    else:
-                        try:
-                            # Evaluate a string containing constraints as if it where a line of code
-                            pvec.append(eval(err_exp).n)
-                            stderr.append(eval(err_exp).s)
-                        except NameError as e:
-                            pvec.append(p.value)
-                            stderr.append(0)
-                            # Get model causing error
-                            name_error = e.args[0].split()[1].strip("'")
-                            # Safety net if following code does not work
-                            error_param = name_error
-                            # Get parameter causing error
-                            constraints_sections = constraints[param_name].split(".")
-                            for i in range(len(constraints_sections)):
-                                if name_error in constraints_sections[i]:
-                                    error_param = f"{name_error}.{constraints_sections[i+1]}"
-                            logging.warn(f"Not all uncertainties in constrained parameters could be defined.\n" 
-                                         f"Attempting to constrain {p}, based on {error_param}. "
-                                         f"However, {error_param} is not in the list of varying parameters.")
-                        except Exception as e:
-                            pvec.append(p.value)
-                            stderr.append(0)
-                            logging.error(e)
+                    except Exception as e:
+                        pvec.append(p.value)
+                        stderr.append(0)
+                        logging.error(e)
 
                 fitting_result.pvec = (np.array(pvec))
                 fitting_result.stderr = (np.array(stderr))
@@ -379,6 +354,7 @@ class BumpsFit(FitEngine):
                 fitting_result.fitness = np.NaN
 
             all_results.append(fitting_result)
+
         all_results[0].mesg = result['errors']
 
         if q is not None:
