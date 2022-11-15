@@ -333,16 +333,11 @@ class BumpsFit(FitEngine):
                 pvec = list()
                 stderr = list()
                 for p in pars:
-                    try:
-                        assert isinstance(p.value, (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))
-                        # value.n returns param value
-                        pvec.append(p.value.n)
-                        # value.s returns param error
-                        stderr.append(p.value.s)
-                    except Exception as e:
-                        pvec.append(p.value)
-                        stderr.append(0)
-                        logging.error(e)
+                    assert isinstance(p.value, (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))
+                    # value.n returns param value
+                    pvec.append(p.value.n)
+                    # value.s returns param error
+                    stderr.append(p.value.s)
 
                 fitting_result.pvec = (np.array(pvec))
                 fitting_result.stderr = (np.array(stderr))
