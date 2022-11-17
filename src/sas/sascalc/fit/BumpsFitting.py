@@ -329,23 +329,14 @@ class BumpsFit(FitEngine):
             if result['uncertainty'] is not None:
                 fitting_result.uncertainty_state = result['uncertainty']
 
-            if fitting_result.success:
-                pvec = list()
-                stderr = list()
-                for p in pars:
-                    assert isinstance(p.value, (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))
-                    # value.n returns param value
-                    pvec.append(p.value.n)
-                    # value.s returns param error
-                    stderr.append(p.value.s)
+            fitting_result.pvec = np.array([getattr(p.value, 'n', p.value) for p in pars])
+            fitting_result.stderr = np.array([getattr(p.value, 's', 0) for p in pars])
+            DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
+            fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
 
-                fitting_result.pvec = (np.array(pvec))
-                fitting_result.stderr = (np.array(stderr))
-                DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
-                fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
-            else:
-                fitting_result.pvec = np.asarray([p.value for p in pars])
-                fitting_result.stderr = np.NaN * np.ones(len(pars))
+           # TODO: Let the GUI decided how to handle success/failure.
+            if not fitting_result.success:
+                fitting_result.stderr[:] = np.NaN
                 fitting_result.fitness = np.NaN
 
             all_results.append(fitting_result)
