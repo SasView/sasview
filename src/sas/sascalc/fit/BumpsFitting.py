@@ -310,8 +310,11 @@ class BumpsFit(FitEngine):
         # Propagate correlated uncertainty through constraints.
         problem.setp_hook()
 
-        # collect the results
+        # Collect the results
         all_results = []
+
+        # Check if uncertainty is missing for any parameter
+        uncertainty_warning = False
 
         for fitting_module in problem.models:
             fitness = fitting_module.fitness
@@ -334,6 +337,14 @@ class BumpsFit(FitEngine):
             DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
             fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
 
+            # Warn user about any parameter that is not an uncertainty object
+            miss_uncertainty = [p for p in pars if not isinstance(p.value,
+                              (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))]
+            if miss_uncertainty:
+                uncertainty_warning = True
+                for p in miss_uncertainty:
+                    logging.warn(p.name + " uncertainty could not be calculated.")
+
            # TODO: Let the GUI decided how to handle success/failure.
             if not fitting_result.success:
                 fitting_result.stderr[:] = np.NaN
@@ -342,6 +353,9 @@ class BumpsFit(FitEngine):
             all_results.append(fitting_result)
 
         all_results[0].mesg = result['errors']
+
+        if uncertainty_warning:
+            logging.warn("Consider checking related constraint definitions and status of parameters used there.")
 
         if q is not None:
             q.put(all_results)
