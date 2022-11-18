@@ -385,11 +385,17 @@
   <tabstop>editMolecularFormula</tabstop>
   <tabstop>editMassDensity</tabstop>
   <tabstop>editNeutronWavelength</tabstop>
+  <tabstop>editXrayWavelength</tabstop>
   <tabstop>editNeutronSldReal</tabstop>
   <tabstop>editNeutronSldImag</tabstop>
+  <tabstop>editXraySldReal</tabstop>
+  <tabstop>editXraySldImag</tabstop>
   <tabstop>editNeutronIncXs</tabstop>
   <tabstop>editNeutronAbsXs</tabstop>
   <tabstop>editNeutronLength</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>helpButton</tabstop>
+  <tabstop>recalculateButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

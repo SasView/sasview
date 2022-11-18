@@ -158,6 +158,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>deltaq_in</tabstop>
+  <tabstop>lengthscale_out</tabstop>
+  <tabstop>computeButton</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>helpButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

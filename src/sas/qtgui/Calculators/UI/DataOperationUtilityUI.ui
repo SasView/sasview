@@ -477,6 +477,20 @@ Append(Combine): |</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>txtOutputData</tabstop>
+  <tabstop>cbData1</tabstop>
+  <tabstop>cbOperator</tabstop>
+  <tabstop>cbData2</tabstop>
+  <tabstop>txtNumber</tabstop>
+  <tabstop>graphOutput</tabstop>
+  <tabstop>graphData1</tabstop>
+  <tabstop>graphData2</tabstop>
+  <tabstop>cmdReset</tabstop>
+  <tabstop>cmdCompute</tabstop>
+  <tabstop>cmdClose</tabstop>
+  <tabstop>cmdHelp</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

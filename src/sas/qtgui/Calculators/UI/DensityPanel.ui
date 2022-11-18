@@ -218,7 +218,6 @@
   <tabstop>editMolarMass</tabstop>
   <tabstop>editMolarVolume</tabstop>
   <tabstop>editMassDensity</tabstop>
-  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections>
