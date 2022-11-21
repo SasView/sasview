@@ -38,17 +38,6 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
         self._items: List[Renderable] = []
 
-    def test_paint(self):
-        glTranslatef(-2.5, 0.5, -6.0)
-        glColor3f( 1.0, 1.5, 0.0 )
-        glPolygonMode(GL_FRONT, GL_FILL)
-        glBegin(GL_TRIANGLES)
-        glVertex3f(1.0,0.0,0.0)
-        glVertex3f(0.0,1.0,0.0)
-        glVertex3f(0.0,0.0,0.0)
-        glEnd()
-        glFlush()
-
     def initializeGL(self):
         glClearDepth(1.0)
         glDepthFunc(GL_LESS)
@@ -56,13 +45,19 @@ class GraphWidget(QtOpenGL.QGLWidget):
         glShadeModel(GL_SMOOTH)
 
     def default_viewport(self):
-        return 0, 0, int(self.width() * self.devicePixelRatioF()), int(self.height() * self.devicePixelRatioF())
+        x = int(self.width() * self.devicePixelRatioF())
+        y = int(self.height() * self.devicePixelRatioF())
+        # return -x//2, -y//2, x//2, y//2
+        # return -y//2, -x//2, x, y
+        return 0, 0, x, y
+
 
     def paintGL(self):
         """
         Paint the GL viewport
         """
 
+        glViewport(*self.default_viewport())
         self.set_projection()
 
         glClearColor(*self.background_color)
