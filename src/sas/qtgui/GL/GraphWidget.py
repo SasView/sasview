@@ -26,7 +26,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
         # Mouse control settings
         self.mouse_sensitivity_azimuth = 0.1
-        self.mouse_sensitivity_elevation = 0.1
+        self.mouse_sensitivity_elevation = 0.5
         self.mouse_sensitivity_distance = 1.0
         self.mouse_sensitivity_position = 0.01
 
@@ -70,7 +70,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
         self.set_model_view()
 
-        self.test_paint()
+        # self.test_paint()
 
         for item in self._items:
             item.render_solid()
@@ -98,22 +98,26 @@ class GraphWidget(QtOpenGL.QGLWidget):
         # gluPerspective(45.0,1.33,0.1, 100.0)
         glLoadMatrixf(np.array(self.projection_matrix().data(), dtype=np.float32))
 
-    def view_matrix(self):
-        tr = QtGui.QMatrix4x4()
-        tr.translate(0.0, 0.0, -self.view_distance)
+    def set_model_view(self):
 
-        azimuth = self.view_azimuth + self.view_azimuth_difference
-        elevation = self.view_elevation + self.view_elevation_difference
+
+        tr = QtGui.QMatrix4x4()
+        # tr.translate(0.0, 0.0, -self.view_distance)
+        tr.translate(0.0,0.0,-self.view_distance)
+
+
+        azimuth = np.radians(self.view_azimuth + self.view_azimuth_difference)
+        elevation = np.radians(np.clip(self.view_elevation + self.view_elevation_difference, -90, 90))
         centre = self.view_centre + self.view_centre_difference
 
-        tr.rotate(elevation, 1, 0, 0)
-        tr.rotate(azimuth, 0, 0, -1)
-        tr.translate(*centre)
-        return tr
+        x = centre[0] + self.view_distance*np.cos(azimuth)*np.cos(elevation)
+        y = centre[1] - self.view_distance*np.sin(azimuth)*np.cos(elevation)
+        z = centre[2] + self.view_distance*np.sin(elevation)
 
-    def set_model_view(self):
-        glMatrixMode(GL_MODELVIEW)
-        glLoadMatrixf(np.array(self.view_matrix().data(), dtype=np.float32))
+        gluLookAt(
+            x, y, z,
+            centre[0], centre[1], centre[2],
+            0.0, 0.0, 1.0)
 
     def mousePressEvent(self, ev):
         self.mouse_position = ev.localPos()
@@ -127,15 +131,12 @@ class GraphWidget(QtOpenGL.QGLWidget):
             self.view_elevation_difference = self.mouse_sensitivity_elevation * diff.y()
 
         elif ev.buttons() == QtCore.Qt.MouseButton.RightButton:
-            print("right button")
             self.view_centre_difference = np.array([self.mouse_sensitivity_position * diff.x(), 0,
                                            self.mouse_sensitivity_position * diff.y()])
 
         self.update()
     def mouseReleaseEvent(self, ev):
         # Mouse released, add dragging offset the view variables
-
-        print(self.view_centre, self.view_centre_difference)
 
         self.view_centre += np.array(self.view_centre_difference)
         self.view_elevation += self.view_elevation_difference
