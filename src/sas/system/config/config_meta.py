@@ -208,18 +208,11 @@ class ConfigBase:
 
         # This section deals with control variables for the config
 
-        if not hasattr(self, "_meta_attributes"):
+        if not hasattr(self, "_meta_attributes") or key in self._meta_attributes:
 
             # The class is not set up at this point, don't do any checks
             super().__setattr__(key, value)
             return
-
-        else:
-
-            # The class is set up, check whether we are trying to set a control variable
-            if key in self._meta_attributes:
-                super().__setattr__(key, value)
-                return
 
             # otherwise continue to part that handles values
 
