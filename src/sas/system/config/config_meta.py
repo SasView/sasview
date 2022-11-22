@@ -215,7 +215,7 @@ class ConfigBase:
 
                 return
 
-        # This section deals with control values
+        # This section deals with config values themselves
         if getattr(self, "_locked", False):
             try:
                 super().__setattr__(key, self._schema[key].coerce(value))
