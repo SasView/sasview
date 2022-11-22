@@ -11,6 +11,30 @@ from sasmodels.custom import load_module_from_path
 
 logger = logging.getLogger(__name__)
 
+CUSTOM_CONFIG = r'''
+"""
+Application appearance custom configuration
+"""
+DATAPANEL_WIDTH = -1
+CLEANUP_PLOT = False
+FIXED_PANEL = True
+PLOPANEL_WIDTH = -1
+DATALOADER_SHOW = True
+GUIFRAME_HEIGHT = -1
+GUIFRAME_WIDTH = -1
+CONTROL_WIDTH = -1
+CONTROL_HEIGHT = -1
+DEFAULT_OPEN_FOLDER = None
+WELCOME_PANEL_SHOW = False
+TOOLBAR_SHOW = True
+DEFAULT_PERSPECTIVE = "Fitting"
+SAS_OPENCL = "None"
+MARKETPLACE_URL = "http://marketplace.sasview.org/"
+
+# Logging options
+FILTER_DEBUG_LOGS = True
+'''
+
 def dirn(path, n):
     """
     Return the directory n up from the current path
@@ -83,15 +107,14 @@ def make_custom_config_path(user_dir):
     path = os.path.join(dirname, "custom_config.py")
     return path
 
-def setup_custom_config(app_dir, user_dir):
+def setup_custom_config(user_dir):
     path = make_custom_config_path(user_dir)
     if not os.path.isfile(path):
         try:
-            # if the custom config file does not exist, copy the default from
-            # the app dir
-            shutil.copyfile(os.path.join(app_dir, "custom_config.py"), path)
+            with open(path, 'w+') as f:
+                f.write(CUSTOM_CONFIG)
         except Exception:
-            logger.error("Could not copy default custom config.")
+            logger.error("Could not write default custom config.")
 
     #Adding SAS_OPENCL if it doesn't exist in the config file
     # - to support backcompability
