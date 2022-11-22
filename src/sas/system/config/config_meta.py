@@ -224,9 +224,10 @@ class ConfigBase:
         else:
 
             if key not in self.__dict__:
-                raise ConfigLocked("New attribute attempt")
+                raise ConfigLocked(f"New attribute attempt: {key} = {value}")
 
             super().__setattr__(key, value)
+
     def validate(self, key, value):
         """ Check whether a value conforms to the type in the schema"""
         return self._schema[key].validate(value)
