@@ -206,8 +206,9 @@ class ConfigBase:
 
     def __setattr__(self, key, value):
 
-        if key in self._meta_attributes:
-            setattr(self, key, value)
+        if hasattr(self, "_meta_attributes"):
+            if key in self._meta_attributes:
+                setattr(self, key, value)
 
         if getattr(self, "_locked", False):
             try:
