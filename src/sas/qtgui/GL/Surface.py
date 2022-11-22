@@ -1,22 +1,14 @@
 from typing import Optional, Tuple
 import numpy as np
 
-from matplotlib import cm as ColorMap
+from matplotlib.colors import Colormap
 
-from Models import FullVertexModel
-
-
-class Surface(FullVertexModel):
-
-    """ Surface plot
+from sas.qtgui.GL.Models import FullVertexModel, WireModel
+from sas.qtgui.GL.Color import Color
 
 
-    x_values: 1D array of x values
-    y_values: 1D array of y values
-    z_data: 2D array of z values
-    colormap: Optional colour map
+class Surface(WireModel):
 
-    """
 
     @staticmethod
     def calculate_edge_indices(nx, ny):
@@ -35,7 +27,17 @@ class Surface(FullVertexModel):
                  x_values: np.ndarray,
                  y_values: np.ndarray,
                  z_data: np.ndarray,
-                 colormap: Optional[ColorMap]=None):
+                 colormap: Optional[Colormap]=None):
+
+        """ Surface plot
+
+
+        :param x_values: 1D array of x values
+        :param y_values: 1D array of y values
+        :param z_data: 2D array of z values
+        :param colormap: Optional[Colormap] colour map
+
+        """
 
         if colormap is None:
             pass
@@ -43,15 +45,20 @@ class Surface(FullVertexModel):
         self.x_data, self.y_data = np.meshgrid(x_values, y_values)
         self.z_data = z_data
 
+        self.n_x = len(x_values)
+        self.n_y = len(y_values)
+
         super().__init__(
-            vertices=Cube.cube_vertices,
-            edges=self.calculate_edge_indices(len(x_values), len(y_values)),
-            triangle_meshes=Cube.cube_triangles,
-            edge_colors=edge_colors,
-            vertex_colors=self._get_colors(z_data, colormap))
+            vertices=[(float(x), float(y), float(z)) for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))],
+            edges=self.calculate_edge_indices(self.n_x, self.n_y),
+            edge_colors=Color(1.0,1.0,1.0),
+            )
 
-    def _get_colors(self, z_values, colormap) -> Sequence[Color]:
-        return []
+        self.wireframe_render_enabled = True
 
-    def set_z_data(self, z_data):
-        pass
+
+    # def _get_colors(self, z_values, colormap) -> Sequence[Color]:
+    #     return []
+    #
+    # def set_z_data(self, z_data):
+    #     pass

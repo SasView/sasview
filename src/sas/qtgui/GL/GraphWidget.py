@@ -8,6 +8,7 @@ from OpenGL.GLU import *
 
 from sas.qtgui.GL.Renderable import Renderable
 from sas.qtgui.GL.Color import Color
+from sas.qtgui.GL.Surface import Surface
 
 class GraphWidget(QtOpenGL.QGLWidget):
 
@@ -157,7 +158,15 @@ def main():
     mainWindow = QtWidgets.QMainWindow()
     viewer = GraphWidget(mainWindow)
 
-    viewer.add(Cube(edge_colors=Color(1,1,1), face_colors=Color(0,1,0)))
+    # viewer.add(Cube(edge_colors=Color(1,1,1), face_colors=Color(0,1,0)))
+    x = np.linspace(-1, 1, 101)
+    y = np.linspace(-1, 1, 101)
+    x_grid, y_grid = np.meshgrid(x, y)
+
+    r_sq = x_grid**2 + y_grid**2
+    z = np.cos(np.sqrt(r_sq))/(r_sq+1)
+
+    viewer.add(Surface(x, y, z))
 
     mainWindow.setCentralWidget(viewer)
 
