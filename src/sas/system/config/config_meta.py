@@ -207,15 +207,15 @@ class ConfigBase:
     def __setattr__(self, key, value):
 
 
-        # We want to be able to be able to control things in the config
+        # This section deals with control variables for the config
         if hasattr(self, "_meta_attributes"):
             if key in self._meta_attributes:
 
-                setattr(self, key, value)
+                super().__setattr__(self, key, value)
 
                 return
 
-
+        # This section deals with control values
         if getattr(self, "_locked", False):
             try:
                 super().__setattr__(key, self._schema[key].coerce(value))
