@@ -233,8 +233,6 @@ class ConfigBase:
                 if key not in self.__dict__:
                     raise ConfigLocked(f"New attribute attempt: {key} = {value}")
 
-                super().__setattr__(key, value)
-
                 try:
                     super().__setattr__(key, self._schema[key].coerce(value))
 
