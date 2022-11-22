@@ -47,7 +47,7 @@ class PreferencesPanelTest:
     def testDefaults(self, widget):
         """Test the freshly-opened panel with no changes made"""
         assert widget.stackedWidget.count() == widget.listWidget.count()
-        assert 0 == widget.stackedWidget.currentIndex()
+        assert widget.listWidget.currentRow() == widget.stackedWidget.currentIndex()
 
     def testPreferencesInteractions(self, widget):
         """Test the base interactions in window behavior"""
