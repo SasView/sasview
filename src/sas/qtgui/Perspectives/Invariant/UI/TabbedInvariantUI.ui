@@ -720,6 +720,39 @@ while extrapolating the low-Q region</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>txtName</tabstop>
+  <tabstop>txtTotalQMin</tabstop>
+  <tabstop>txtTotalQMax</tabstop>
+  <tabstop>txtVolFract</tabstop>
+  <tabstop>txtVolFractErr</tabstop>
+  <tabstop>txtSpecSurf</tabstop>
+  <tabstop>txtSpecSurfErr</tabstop>
+  <tabstop>txtInvariantTot</tabstop>
+  <tabstop>txtInvariantTotErr</tabstop>
+  <tabstop>cmdCalculate</tabstop>
+  <tabstop>cmdStatus</tabstop>
+  <tabstop>cmdHelp</tabstop>
+  <tabstop>txtBackgd</tabstop>
+  <tabstop>txtScale</tabstop>
+  <tabstop>txtContrast</tabstop>
+  <tabstop>txtPorodCst</tabstop>
+  <tabstop>txtExtrapolQMin</tabstop>
+  <tabstop>txtExtrapolQMax</tabstop>
+  <tabstop>chkLowQ</tabstop>
+  <tabstop>txtNptsLowQ</tabstop>
+  <tabstop>chkHighQ</tabstop>
+  <tabstop>txtNptsHighQ</tabstop>
+  <tabstop>rbGuinier</tabstop>
+  <tabstop>rbFitLowQ</tabstop>
+  <tabstop>rbFitHighQ</tabstop>
+  <tabstop>rbPowerLawLowQ</tabstop>
+  <tabstop>rbFixLowQ</tabstop>
+  <tabstop>rbFixHighQ</tabstop>
+  <tabstop>txtPowerLowQ</tabstop>
+  <tabstop>txtPowerHighQ</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

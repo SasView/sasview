@@ -366,6 +366,20 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cmdLinkUT</tabstop>
+  <tabstop>cmdLinkUMD</tabstop>
+  <tabstop>cmdLinkNIST</tabstop>
+  <tabstop>cmdLinkESS</tabstop>
+  <tabstop>cmdLinkISIS</tabstop>
+  <tabstop>cmdLinkDELFT</tabstop>
+  <tabstop>cmdLinkILL</tabstop>
+  <tabstop>cmdLinkANSTO</tabstop>
+  <tabstop>cmdLinkDIAMOND</tabstop>
+  <tabstop>cmdLinkBAM</tabstop>
+  <tabstop>cmdLinkSNS</tabstop>
+  <tabstop>cmdOK</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
