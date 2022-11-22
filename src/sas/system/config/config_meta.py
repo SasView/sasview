@@ -205,9 +205,9 @@ class ConfigBase:
         return schema
 
     def __setattr__(self, key, value):
-        if hasattr(self, "_locked") and self._locked:
-            if key not in self.__dict__:
-                raise ConfigLocked("New attribute attempt")
+
+        if key in self._meta_attributes:
+            setattr(self, key, value)
 
         if getattr(self, "_locked", False):
             try:
@@ -215,6 +215,10 @@ class ConfigBase:
             except CoercionError:
                 raise TypeError(f"Tried to set bad value '{value}' to config entry of type '{self._schema[key]}'")
         else:
+
+            if key not in self.__dict__:
+                raise ConfigLocked("New attribute attempt")
+
             super().__setattr__(key, value)
     def validate(self, key, value):
         """ Check whether a value conforms to the type in the schema"""
