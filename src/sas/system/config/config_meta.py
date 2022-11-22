@@ -206,9 +206,15 @@ class ConfigBase:
 
     def __setattr__(self, key, value):
 
+
+        # We want to be able to be able to control things in the config
         if hasattr(self, "_meta_attributes"):
             if key in self._meta_attributes:
+
                 setattr(self, key, value)
+
+                return
+
 
         if getattr(self, "_locked", False):
             try:
