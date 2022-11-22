@@ -224,16 +224,24 @@ class ConfigBase:
             # otherwise continue to part that handles values
 
         # This section deals with config values themselves
-        if getattr(self, "_locked", False):
-            try:
-                super().__setattr__(key, self._schema[key].coerce(value))
-            except CoercionError:
-                raise TypeError(f"Tried to set bad value '{value}' to config entry of type '{self._schema[key]}'")
+        if hasattr(self, "_locked"):
+            # Initialised
+
+            if getattr(self, "_locked", False):
+                try:
+                    super().__setattr__(key, self._schema[key].coerce(value))
+                except CoercionError:
+                    raise TypeError(f"Tried to set bad value '{value}' to config entry of type '{self._schema[key]}'")
+
+            else:
+                # Config if locked
+                if key not in self.__dict__:
+                    raise ConfigLocked(f"New attribute attempt: {key} = {value}")
+
+                super().__setattr__(key, value)
+
         else:
-
-            if key not in self.__dict__:
-                raise ConfigLocked(f"New attribute attempt: {key} = {value}")
-
+            # Not fully initialised
             super().__setattr__(key, value)
 
     def validate(self, key, value):
