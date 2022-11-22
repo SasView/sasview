@@ -37,6 +37,8 @@ class Surface(FullVertexModel):
                  z_data: np.ndarray,
                  colormap: Optional[ColorMap]=None):
 
+        if colormap is None:
+            pass
 
         self.x_data, self.y_data = np.meshgrid(x_values, y_values)
         self.z_data = z_data
