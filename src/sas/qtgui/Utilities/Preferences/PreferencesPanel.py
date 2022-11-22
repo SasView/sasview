@@ -103,7 +103,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         if any(self._staged_requiring_restart):
             message = "SasView must restart for the following values to take effect. Do you wish to restart?:\n"
             for val in self._staged_requiring_restart:
-                message += f"\t-{val}\n"
+                message += f" -{val}\n"
             msgBox = QMessageBox(QMessageBox.Information, "", message, QMessageBox.Yes|QMessageBox.No)
             msgBox.show()
             if msgBox.exec() == QMessageBox.Yes:
