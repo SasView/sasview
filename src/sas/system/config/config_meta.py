@@ -49,6 +49,11 @@ class ConfigBase:
                                  "_deleted_attributes", "_meta_attributes",
                                  "_disable_writing", "_bad_entries"]
 
+    @property
+    def defaults(self):
+        """ Expose the default values to allow resetting of defaults. No setter should ever be created for this! """
+        return self._defaults
+
     def config_filename(self, create_if_nonexistent=False):
         """Filename for saving config items"""
         version_parts = sas.system.version.__version__.split(".")
@@ -200,10 +205,38 @@ class ConfigBase:
         return schema
 
     def __setattr__(self, key, value):
-        if hasattr(self, "_locked") and self._locked:
-            if key not in self.__dict__:
-                raise ConfigLocked("New attribute attempt")
 
+        # This section deals with control variables for the config
+
+        if not hasattr(self, "_meta_attributes") or key in self._meta_attributes:
+
+            # The class is not set up at this point, don't do any checks
+            super().__setattr__(key, value)
+            return
+
+            # otherwise continue to part that handles values
+
+        # This section deals with config values themselves
+        if hasattr(self, "_locked"):
+            # Should be initialised...
+
+            if getattr(self, "_locked"):
+                # ...and locked
+
+                if key not in self.__dict__:
+                    raise ConfigLocked(f"New attribute attempt: {key} = {value}")
+
+                try:
+                    super().__setattr__(key, self._schema[key].coerce(value))
+
+                except CoercionError:
+                    raise TypeError(f"Tried to set bad value '{value}' to config entry of type '{self._schema[key]}'")
+
+                return
+
+        # Not fully initialised
         super().__setattr__(key, value)
 
-
+    def validate(self, key, value):
+        """ Check whether a value conforms to the type in the schema"""
+        return self._schema[key].validate(value)
