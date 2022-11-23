@@ -7,7 +7,7 @@ from sas.qtgui.GL.Models import FullVertexModel, WireModel
 from sas.qtgui.GL.Color import Color
 
 
-class Surface(WireModel):
+class Surface(FullVertexModel):
 
 
     @staticmethod
@@ -22,6 +22,15 @@ class Surface(WireModel):
                 all_edges.append((j*nx + i, (j+1)*nx + i))
 
         return all_edges
+
+    @staticmethod
+    def calculate_triangles(nx, ny):
+        triangles = []
+        for i in range(nx-1):
+            for j in range(ny-1):
+                triangles.append((j*nx + i, (j+1)*nx+(i+1), j*nx + (i + 1)))
+                triangles.append((j*nx + i, (j+1)*nx + i, (j+1)*nx + (i+1)))
+        return triangles
 
     def __init__(self,
                  x_values: np.ndarray,
@@ -50,11 +59,14 @@ class Surface(WireModel):
 
         super().__init__(
             vertices=[(float(x), float(y), float(z)) for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))],
-            edges=self.calculate_edge_indices(self.n_x, self.n_y),
+            edges=Surface.calculate_edge_indices(self.n_x, self.n_y),
+            triangle_meshes=[Surface.calculate_triangles(self.n_x, self.n_y)],
             edge_colors=Color(1.0,1.0,1.0),
+            vertex_colors=Color(0.0,0.4,0.0)
             )
 
         self.wireframe_render_enabled = True
+        self.solid_render_enabled = True
 
 
     # def _get_colors(self, z_values, colormap) -> Sequence[Color]:

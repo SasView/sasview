@@ -25,11 +25,15 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
         self.background_color = (0, 0, 0, 0)
 
+        self.min_distance = 0.1
+        self.max_distance = 250
+
         # Mouse control settings
         self.mouse_sensitivity_azimuth = 0.1
         self.mouse_sensitivity_elevation = 0.5
         self.mouse_sensitivity_distance = 1.0
         self.mouse_sensitivity_position = 0.01
+        self.scroll_sensitivity = 0.0005
 
         # Mouse control variables
         self.mouse_position = None
@@ -141,6 +145,26 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self.view_centre_difference = np.array([0.0,0.0,0.0])
         self.view_azimuth_difference = 0.0
         self.view_elevation_difference = 0.0
+
+        self.update()
+
+    def wheelEvent(self, event: QtGui.QWheelEvent):
+        scroll_amount = event.angleDelta().y()
+
+        print(scroll_amount)
+
+        self.view_distance *= np.exp(scroll_amount * self.scroll_sensitivity)
+
+        print(self.view_distance, type(self.view_distance))
+
+        #
+        # if self.view_distance < self.min_distance:
+        #     self.view_distance = self.min_distance
+        #
+        # if self.view_distance > self.max_distance:
+        #     self.view_distance = self.max_distance
+
+        event.accept()
 
         self.update()
 
