@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Callable
 import numpy as np
 
 from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
@@ -9,11 +9,15 @@ from OpenGL.GLU import *
 from sas.qtgui.GL.Renderable import Renderable
 from sas.qtgui.GL.Color import Color
 from sas.qtgui.GL.Surface import Surface
+from sas.qtgui.GL.Cone import Cone
 
 class GraphWidget(QtOpenGL.QGLWidget):
 
 
-    def __init__(self, parent=None):
+    def __init__(self,
+                 parent=None,
+                 on_key: Callable[[int], None]=lambda x: None):
+
         super().__init__(parent)
         self.setMinimumSize(640, 480)
 
@@ -29,7 +33,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self.max_distance = 250
 
         # Mouse control settings
-        self.mouse_sensitivity_azimuth = 0.1
+        self.mouse_sensitivity_azimuth = 0.2
         self.mouse_sensitivity_elevation = 0.5
         self.mouse_sensitivity_distance = 1.0
         self.mouse_sensitivity_position = 0.01
@@ -42,6 +46,9 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self.view_elevation_difference = 0.0
 
         self._items: List[Renderable] = []
+
+        # Save the key callback
+        self.on_key = on_key
 
     def initializeGL(self):
         glClearDepth(1.0)
@@ -170,10 +177,13 @@ class GraphWidget(QtOpenGL.QGLWidget):
     def add(self, item: Renderable):
         self._items.append(item)
 
+    def keyPressEvent(self, event: QtGui.QKeyEvent):
+        print("Key press")
+        self.on_key(event.key())
+
 def main():
     """ Show a demo of the opengl window """
     import os
-    from sas.qtgui.GL.Cube import Cube
 
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     app = QtWidgets.QApplication([])
@@ -181,7 +191,6 @@ def main():
     mainWindow = QtWidgets.QMainWindow()
     viewer = GraphWidget(mainWindow)
 
-    # viewer.add(Cube(edge_colors=Color(1,1,1), face_colors=Color(0,1,0)))
     x = np.linspace(-1, 1, 101)
     y = np.linspace(-1, 1, 101)
     x_grid, y_grid = np.meshgrid(x, y)

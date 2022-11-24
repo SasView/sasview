@@ -114,6 +114,9 @@ class SolidVertexModel(SolidModel):
                 for triangle_mesh in self._triangle_mesh_arrays:
                     glDrawElementsui(GL_TRIANGLES, triangle_mesh)
 
+                glDisableClientState(GL_COLOR_ARRAY)
+                glDisableClientState(GL_VERTEX_ARRAY)
+
 
 class SolidFaceModel(SolidModel):
     def __init__(self,
