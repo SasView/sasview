@@ -14,7 +14,7 @@ from sas.qtgui.GL.cone import Cone
 class GraphWidget(QtOpenGL.QGLWidget):
 
 
-    def __init__(self, on_key: Callable[[int], None] = lambda x: None, parent=None):
+    def __init__(self, parent=None, on_key: Callable[[int], None] = lambda x: None):
 
         super().__init__(parent)
         self.setMinimumSize(640, 480)
@@ -112,7 +112,6 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
     def set_model_view(self):
 
-
         tr = QtGui.QMatrix4x4()
         # tr.translate(0.0, 0.0, -self.view_distance)
         tr.translate(0.0,0.0,-self.view_distance)
@@ -130,6 +129,10 @@ class GraphWidget(QtOpenGL.QGLWidget):
             x, y, z,
             centre[0], centre[1], centre[2],
             0.0, 0.0, 1.0)
+
+
+        glMatrixMode(GL_MODELVIEW)
+
 
     def mousePressEvent(self, ev):
         self.mouse_position = ev.localPos()

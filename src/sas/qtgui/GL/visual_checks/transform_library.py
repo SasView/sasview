@@ -14,7 +14,7 @@ from sas.qtgui.GL.cube import Cube
 from sas.qtgui.GL.cylinder import Cylinder
 from sas.qtgui.GL.icosahedron import Icosahedron
 from sas.qtgui.GL.sphere import Sphere
-from sas.qtgui.GL.transforms import SceneGraphNode, Translation, Rotation, Scale
+from sas.qtgui.GL.transforms import SceneGraphNode, Translation, Rotation, Scaling
 
 def transform_tests():
     """ Shows all the existing primitives that can be rendered, press a key to go through them
@@ -51,32 +51,33 @@ def transform_tests():
     for i in range(3):
         for j in range(3):
             for k in range(3):
-                components = Translation(-2*(i-1), -2*(j-1), -2*(k-1), Scale(2**(i-1), 2**(j-1), 2**(k-1), cube))
-                scaling_components.append(components)
+                component = Translation(-2 * (i-1), -2 * (j-1), -2 * (k-1), Scaling(2 ** (i - 1), 2 ** (j - 1), 2 ** (k - 1), cube))
+                scaling_components.append(component)
 
-    scaling_test = Scale(0.5, 0.5, 0.5, *scaling_components)
+    scaling_test = Scaling(0.5, 0.5, 0.5, *scaling_components)
 
 
-    cone_sphere = Scale(0.5, 0.5, 0.5,
-                        cone,
-                        Translation(0,1,0,
-                                    Scale(0.5, 0.5, 0.5,
-                                          icos)))
+    cone_sphere = Scaling(0.5, 0.5, 0.5,
+                          cone,
+                          Translation(0, 1, 1,
+                                      Scaling(0.5, 0.5, 0.5,
+                                              icos)))
 
     # Rotations
     scaling_components = []
     for i in range(3):
         for j in range(3):
             for k in range(3):
-                components = Translation(-2*(i-1), -2*(j-1), -2*(k-1), Scale(2**(i-1), 2**(j-1), 2**(k-1), cone_sphere))
-                scaling_components.append(components)
+                component = Translation(-2 * (i-1), -2 * (j-1), -2 * (k-1), Scaling(2 ** (i - 1), 2 ** (j - 1), 2 ** (k - 1), cone_sphere))
+                scaling_components.append(component)
 
-    scaling_test = Scale(0.5, 0.5, 0.5, *scaling_components)
+    rotation_test = Scaling(0.5, 0.5, 0.5, *scaling_components)
 
 
     item_list = [
-        translate_test,
-        scaling_test
+        # translate_test,
+        # scaling_test,
+        rotation_test
     ]
 
     # Turn off all of them
@@ -87,7 +88,7 @@ def transform_tests():
 
     # Thing for going through each of the draw types of the primatives
 
-    def item_states(item: ModelBase):
+    def item_states(item: SceneGraphNode):
 
         item.solid_render_enabled = True
         item.wireframe_render_enabled = True

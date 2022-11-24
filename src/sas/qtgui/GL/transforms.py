@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import numpy as np
@@ -8,7 +9,7 @@ from OpenGL.GLU import *
 from sas.qtgui.GL.renderable import Renderable
 
 
-
+logger = logging.getLogger("GL.transforms")
 
 class SceneGraphNode(Renderable):
     """
@@ -39,6 +40,10 @@ class SceneGraphNode(Renderable):
             glPushMatrix()
             self.apply()
 
+            # Check stack
+            if glGetIntegerv(GL_MODELVIEW_STACK_DEPTH) >= 16:
+                logger.info("GL Stack size utilisation {glGetIntegerv(GL_MODELVIEW_STACK_DEPTH))}, the limit could be as low as is 16")
+
             # Render children
             for child in self.children:
                 child.render_solid()
@@ -53,6 +58,11 @@ class SceneGraphNode(Renderable):
             # Apply transform
             glPushMatrix()
             self.apply()
+
+            # Check stack
+            if glGetIntegerv(GL_MODELVIEW_STACK_DEPTH) >= 16:
+                logger.info("GL Stack size utilisation {glGetIntegerv(GL_MODELVIEW_STACK_DEPTH))}, the limit could be as low as is 16")
+
 
             # Render children
             for child in self.children:
@@ -101,7 +111,7 @@ class Translation(SceneGraphNode):
         glTranslate(self.x, self.y, self.z)
 
 
-class Scale(SceneGraphNode):
+class Scaling(SceneGraphNode):
 
     def __init__(self, x: float, y: float, z: float, *children: Renderable):
         """
