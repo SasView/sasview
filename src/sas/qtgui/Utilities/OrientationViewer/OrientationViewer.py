@@ -11,7 +11,7 @@ from sasmodels.core import load_model_info, build_model
 from sasmodels.data import empty_data2D
 from sasmodels.direct_model import DirectModel
 
-from sas.qtgui.GL.Scene import GraphWidget
+from sas.qtgui.GL.scene import GraphWidget
 
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import OrientationViewierController, Orientation
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewerGraphics import OrientationViewerGraphics

@@ -181,6 +181,11 @@ class GraphWidget(QtOpenGL.QGLWidget):
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         self.on_key(event.key())
 
+
+
+
+
+
 def main():
     """ Show a demo of the opengl window """
     import os

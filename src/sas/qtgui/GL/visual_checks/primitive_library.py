@@ -5,7 +5,7 @@ import numpy as np
 
 from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
 
-from sas.qtgui.GL.Scene import GraphWidget
+from sas.qtgui.GL.scene import GraphWidget
 from sas.qtgui.GL.models import ModelBase
 from sas.qtgui.GL.color import Color
 from sas.qtgui.GL.surface import Surface
@@ -34,6 +34,7 @@ def primative_library():
 
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     app = QtWidgets.QApplication([])
+
 
     item_list = [
         mesh_example(),
