@@ -21,7 +21,7 @@ def transform_tests():
 
     1) 4 shapes in a vertical 2 unit x 2 unit grid - as cylinder and cone have r=1, they should touch
     2) 27 cubes in 3x3x3 grid, with scaling changing (1/2, 1, 2) in the same dimension as the translation
-    3)
+    3) As above but rotations by 45 degrees in around axis in the same dimension as the translation
 
     """
 
@@ -52,6 +52,23 @@ def transform_tests():
         for j in range(3):
             for k in range(3):
                 components = Translation(-2*(i-1), -2*(j-1), -2*(k-1), Scale(2**(i-1), 2**(j-1), 2**(k-1), cube))
+                scaling_components.append(components)
+
+    scaling_test = Scale(0.5, 0.5, 0.5, *scaling_components)
+
+
+    cone_sphere = Scale(0.5, 0.5, 0.5,
+                        cone,
+                        Translation(0,1,0,
+                                    Scale(0.5, 0.5, 0.5,
+                                          icos)))
+
+    # Rotations
+    scaling_components = []
+    for i in range(3):
+        for j in range(3):
+            for k in range(3):
+                components = Translation(-2*(i-1), -2*(j-1), -2*(k-1), Scale(2**(i-1), 2**(j-1), 2**(k-1), cone_sphere))
                 scaling_components.append(components)
 
     scaling_test = Scale(0.5, 0.5, 0.5, *scaling_components)
