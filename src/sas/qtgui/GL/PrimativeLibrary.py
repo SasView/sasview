@@ -11,6 +11,7 @@ from sas.qtgui.GL.Color import Color
 from sas.qtgui.GL.Surface import Surface
 from sas.qtgui.GL.Cone import Cone
 from sas.qtgui.GL.Cube import Cube
+from sas.qtgui.GL.Cylinder import Cylinder
 
 
 def mesh_example():
@@ -33,9 +34,11 @@ def primative_library():
     app = QtWidgets.QApplication([])
 
     item_list = [
-        mesh_example(),
-        Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0, 1, 0)),
-        Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 1, 0))]
+        # mesh_example(),
+        # Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0, 0)),
+        # Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0)),
+        Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0, 0.7))
+    ]
 
     # Turn off all of them
     for item in item_list:
@@ -48,22 +51,22 @@ def primative_library():
     def item_states(item: ModelBase):
 
         item.solid_render_enabled = True
-        item.solid_render_enabled = True
+        item.wireframe_render_enabled = True
 
         yield None
 
         item.solid_render_enabled = False
-        item.solid_render_enabled = True
+        item.wireframe_render_enabled = True
 
         yield None
 
         item.solid_render_enabled = True
-        item.solid_render_enabled = False
+        item.wireframe_render_enabled = False
 
         yield None
 
         item.solid_render_enabled = False
-        item.solid_render_enabled = False
+        item.wireframe_render_enabled = False
 
     def scan_states():
         while True:
@@ -74,14 +77,17 @@ def primative_library():
     state = scan_states()
     next(state)
 
-    # Keyboard callback
-    def enable_disable(key: int):
-        print(key)
-        next(state)
 
     mainWindow = QtWidgets.QMainWindow()
-    viewer = GraphWidget(mainWindow, on_key=enable_disable)
+    viewer = GraphWidget(parent=mainWindow)
 
+    # Keyboard callback
+    def enable_disable(key):
+        print(key)
+        next(state)
+        viewer.update()
+
+    viewer.on_key = enable_disable
 
     for item in item_list:
         viewer.add(item)

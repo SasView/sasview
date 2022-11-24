@@ -14,9 +14,7 @@ from sas.qtgui.GL.Cone import Cone
 class GraphWidget(QtOpenGL.QGLWidget):
 
 
-    def __init__(self,
-                 parent=None,
-                 on_key: Callable[[int], None]=lambda x: None):
+    def __init__(self, on_key: Callable[[int], None] = lambda x: None, parent=None):
 
         super().__init__(parent)
         self.setMinimumSize(640, 480)
@@ -47,8 +45,11 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
         self._items: List[Renderable] = []
 
-        # Save the key callback
+        self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
+
+        # Save the on_key callback
         self.on_key = on_key
+
 
     def initializeGL(self):
         glClearDepth(1.0)
@@ -178,7 +179,6 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self._items.append(item)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
-        print("Key press")
         self.on_key(event.key())
 
 def main():
