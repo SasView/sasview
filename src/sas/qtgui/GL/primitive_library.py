@@ -12,7 +12,7 @@ from sas.qtgui.GL.surface import Surface
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
 from sas.qtgui.GL.cylinder import Cylinder
-from sas.qtgui.GL.sphere import Icosahedron
+from sas.qtgui.GL.icosahedron import Icosahedron
 
 
 def mesh_example():
@@ -27,7 +27,7 @@ def mesh_example():
 
 
 def primative_library():
-    """ Shows all the existing primitives that can be rendered, space to go through them"""
+    """ Shows all the existing primitives that can be rendered, press a key to go through them"""
 
     import os
 
@@ -35,10 +35,10 @@ def primative_library():
     app = QtWidgets.QApplication([])
 
     item_list = [
-        # mesh_example(),
-        # Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0.2, 0)),
-        # Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0.2)),
-        # Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.2, 0.7)),
+        mesh_example(),
+        Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0.2, 0)),
+        Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0.2)),
+        Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.2, 0.7)),
         Icosahedron(edge_colors=Color(1, 1, 1), vertex_colors=Color(0.7, 0, 0.7))
     ]
 
