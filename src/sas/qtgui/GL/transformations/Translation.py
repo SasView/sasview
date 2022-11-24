@@ -1,5 +1,5 @@
 import numpy as np
-from sas.qtgui.GL.Renderable import Renderable
+from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.transformations.SceneGraphNode import SceneGraphNode
 
 from OpenGL.GL import *

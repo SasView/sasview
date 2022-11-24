@@ -4,8 +4,8 @@ import numpy as np
 
 from OpenGL.GL import *
 
-from sas.qtgui.GL.Renderable import Renderable
-from sas.qtgui.GL.Color import Color
+from sas.qtgui.GL.renderable import Renderable
+from sas.qtgui.GL.color import Color
 
 
 def color_sequence_to_array(colors: Union[Sequence[Color], Color]):

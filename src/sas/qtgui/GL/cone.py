@@ -2,8 +2,8 @@ from typing import Optional, Union, Sequence, List, Tuple
 
 import numpy as np
 
-from sas.qtgui.GL.Models import FullVertexModel, WireModel
-from sas.qtgui.GL.Color import Color
+from sas.qtgui.GL.models import FullVertexModel, WireModel
+from sas.qtgui.GL.color import Color
 
 
 class Cone(FullVertexModel):

@@ -5,13 +5,14 @@ import numpy as np
 
 from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
 
-from sas.qtgui.GL.GraphWidget import GraphWidget
-from sas.qtgui.GL.Models import WireModel, SolidModel, ModelBase
-from sas.qtgui.GL.Color import Color
-from sas.qtgui.GL.Surface import Surface
-from sas.qtgui.GL.Cone import Cone
-from sas.qtgui.GL.Cube import Cube
-from sas.qtgui.GL.Cylinder import Cylinder
+from sas.qtgui.GL.Scene import GraphWidget
+from sas.qtgui.GL.models import WireModel, SolidModel, ModelBase
+from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.surface import Surface
+from sas.qtgui.GL.cone import Cone
+from sas.qtgui.GL.cube import Cube
+from sas.qtgui.GL.cylinder import Cylinder
+from sas.qtgui.GL.sphere import Icosahedron
 
 
 def mesh_example():
@@ -34,10 +35,11 @@ def primative_library():
     app = QtWidgets.QApplication([])
 
     item_list = [
-        mesh_example(),
-        Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0, 0)),
-        Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0)),
-        Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0, 0.7))
+        # mesh_example(),
+        # Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0.2, 0)),
+        # Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0.2)),
+        # Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.2, 0.7)),
+        Icosahedron(edge_colors=Color(1, 1, 1), vertex_colors=Color(0.7, 0, 0.7))
     ]
 
     # Turn off all of them

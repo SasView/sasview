@@ -3,7 +3,7 @@ import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-from sas.qtgui.GL.Renderable import Renderable
+from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.transformations.SceneGraphNode import SceneGraphNode
 
 

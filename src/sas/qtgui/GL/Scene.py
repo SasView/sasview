@@ -6,10 +6,10 @@ from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-from sas.qtgui.GL.Renderable import Renderable
-from sas.qtgui.GL.Color import Color
-from sas.qtgui.GL.Surface import Surface
-from sas.qtgui.GL.Cone import Cone
+from sas.qtgui.GL.renderable import Renderable
+from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.surface import Surface
+from sas.qtgui.GL.cone import Cone
 
 class GraphWidget(QtOpenGL.QGLWidget):
 

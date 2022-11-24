@@ -1,7 +1,7 @@
 from typing import Optional, Union, Sequence
 
-from sas.qtgui.GL.Models import FullVertexModel, WireModel
-from sas.qtgui.GL.Color import Color
+from sas.qtgui.GL.models import FullVertexModel, WireModel
+from sas.qtgui.GL.color import Color
 
 
 class Cube(FullVertexModel):
