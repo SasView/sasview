@@ -82,7 +82,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
         glEnable(GL_POLYGON_OFFSET_FILL)
 
         for item in self._items:
-            glPolygonOffset(0.0, 20.0)
+            glPolygonOffset(1.0, 10.0)
             item.render_solid()
             glPolygonOffset(0.0, 0.0)
             item.render_wireframe()

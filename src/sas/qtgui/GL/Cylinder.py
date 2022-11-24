@@ -28,13 +28,22 @@ class Cylinder(FullVertexModel):
         return [(i+offset + 1, (i + 1) % n + offset + 1, offset) for i in range(n)]
 
     @staticmethod
-    def cylinder_side_triangles(n):
-        pass
+    def cylinder_side_triangles(n) -> List[Tuple[int, int, int]]:
+        sides = []
+        for i in range(n):
+            # Squares into triangles
+
+            # Bottom left, top right, bottom right
+            sides.append((i + 1, (i + 1) % n + n + 2, (i + 1) % n + 1))
+            # Top right, bottom left, top left
+            sides.append(((i + 1) % n + n + 2, i + 1, i + n + 2))
+        return sides
 
     @staticmethod
     def cylinder_triangles(n) -> List[List[Tuple[int, int, int]]]:
         return [
             Cylinder.cylinder_face_triangles(n, 0),
+            Cylinder.cylinder_side_triangles(n),
             [tuple(reversed(x)) for x in Cylinder.cylinder_face_triangles(n, n+1)]
         ]
 

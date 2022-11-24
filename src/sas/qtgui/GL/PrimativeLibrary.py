@@ -34,9 +34,9 @@ def primative_library():
     app = QtWidgets.QApplication([])
 
     item_list = [
-        # mesh_example(),
-        # Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0, 0)),
-        # Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0)),
+        mesh_example(),
+        Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0, 0)),
+        Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0)),
         Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0, 0.7))
     ]
 
@@ -83,7 +83,6 @@ def primative_library():
 
     # Keyboard callback
     def enable_disable(key):
-        print(key)
         next(state)
         viewer.update()
 
