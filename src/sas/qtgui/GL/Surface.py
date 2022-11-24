@@ -1,23 +1,25 @@
+import logging
 from typing import Optional, Tuple
 import numpy as np
 
-from matplotlib.colors import Colormap
+import matplotlib as mpl
 
 from sas.qtgui.GL.Models import FullVertexModel, WireModel
-from sas.qtgui.GL.Color import Color
+from sas.qtgui.GL.Color import Color, ColorMap
 
+logger = logging.getLogger("GL.Surface")
 
 class Surface(FullVertexModel):
 
 
     @staticmethod
-    def calculate_edge_indices(nx, ny):
+    def calculate_edge_indices(nx, ny, gap=1):
         all_edges = []
         for i in range(nx-1):
-            for j in range(ny):
+            for j in range(0, ny, gap):
                 all_edges.append((j*nx + i, j*nx + i + 1))
 
-        for i in range(nx):
+        for i in range(0, nx, gap):
             for j in range(ny-1):
                 all_edges.append((j*nx + i, (j+1)*nx + i))
 
@@ -36,7 +38,8 @@ class Surface(FullVertexModel):
                  x_values: np.ndarray,
                  y_values: np.ndarray,
                  z_data: np.ndarray,
-                 colormap: Optional[Colormap]=None):
+                 colormap: str= ColorMap._default_colormap,
+                 edge_skip: int=1):
 
         """ Surface plot
 
@@ -44,12 +47,10 @@ class Surface(FullVertexModel):
         :param x_values: 1D array of x values
         :param y_values: 1D array of y values
         :param z_data: 2D array of z values
-        :param colormap: Optional[Colormap] colour map
-
+        :param colormap: name of a matplotlib colour map
+        :param edge_skip: skip every `edge_skip` index when drawing wireframe
         """
 
-        if colormap is None:
-            pass
 
         self.x_data, self.y_data = np.meshgrid(x_values, y_values)
         self.z_data = z_data
@@ -57,12 +58,16 @@ class Surface(FullVertexModel):
         self.n_x = len(x_values)
         self.n_y = len(y_values)
 
+        self.colormap = ColorMap(colormap)
+
+        verts = [(float(x), float(y), float(z)) for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
+
         super().__init__(
-            vertices=[(float(x), float(y), float(z)) for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))],
-            edges=Surface.calculate_edge_indices(self.n_x, self.n_y),
+            vertices=verts,
+            edges=Surface.calculate_edge_indices(self.n_x, self.n_y, edge_skip),
             triangle_meshes=[Surface.calculate_triangles(self.n_x, self.n_y)],
             edge_colors=Color(1.0,1.0,1.0),
-            vertex_colors=Color(0.0,0.4,0.0)
+            vertex_colors=self.colormap.color_array([z for _, _, z in verts])
             )
 
         self.wireframe_render_enabled = True

@@ -73,7 +73,7 @@ class SolidVertexModel(SolidModel):
         super().__init__(vertices, triangle_meshes)
 
         self._vertex_colors = vertex_colors
-        self._vertex_color_array = None if isinstance(vertex_colors, Color) else np.array(vertex_colors, dtype=float)
+        self._vertex_color_array = None if isinstance(vertex_colors, Color) else np.array([color.to_array() for color in vertex_colors], dtype=float)
 
         self.solid_render_enabled = self.vertex_colors is not None
 
@@ -84,7 +84,7 @@ class SolidVertexModel(SolidModel):
     @vertex_colors.setter
     def vertex_colors(self, new_vertex_colors):
         self.vertex_colors = new_vertex_colors
-        self._vertex_color_array = color_sequence_to_array(new_vertex_colors)
+        self._vertex_color_array = None if isinstance(new_vertex_colors, Color) else np.array([color.to_array() for color in new_vertex_colors], dtype=float)
         self.solid_render_enabled = self.vertex_colors is not None
 
     def render_solid(self):

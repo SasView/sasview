@@ -71,11 +71,15 @@ class GraphWidget(QtOpenGL.QGLWidget):
         self.set_model_view()
 
         # self.test_paint()
+        glEnable(GL_POLYGON_OFFSET_FILL)
 
         for item in self._items:
+            glPolygonOffset(0.0, 20.0)
             item.render_solid()
+            glPolygonOffset(0.0, 0.0)
             item.render_wireframe()
 
+        glPolygonOffset(0.0, 0.0)
 
 
     def projection_matrix(self):
@@ -151,18 +155,13 @@ class GraphWidget(QtOpenGL.QGLWidget):
     def wheelEvent(self, event: QtGui.QWheelEvent):
         scroll_amount = event.angleDelta().y()
 
-        print(scroll_amount)
-
         self.view_distance *= np.exp(scroll_amount * self.scroll_sensitivity)
 
-        print(self.view_distance, type(self.view_distance))
+        if self.view_distance < self.min_distance:
+            self.view_distance = self.min_distance
 
-        #
-        # if self.view_distance < self.min_distance:
-        #     self.view_distance = self.min_distance
-        #
-        # if self.view_distance > self.max_distance:
-        #     self.view_distance = self.max_distance
+        if self.view_distance > self.max_distance:
+            self.view_distance = self.max_distance
 
         event.accept()
 
@@ -190,7 +189,7 @@ def main():
     r_sq = x_grid**2 + y_grid**2
     z = np.cos(np.sqrt(r_sq))/(r_sq+1)
 
-    viewer.add(Surface(x, y, z))
+    viewer.add(Surface(x, y, z, edge_skip=4))
 
     mainWindow.setCentralWidget(viewer)
 
