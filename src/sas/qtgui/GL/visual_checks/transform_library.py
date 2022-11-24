@@ -22,7 +22,7 @@ def transform_tests():
     1) 4 shapes in a vertical 2 unit x 2 unit grid - as cylinder and cone have r=1, they should touch
     2) 27 cubes in 3x3x3 grid, with scaling changing (1/2, 1, 2) in the same dimension as the translation
     3)
-    
+
     """
 
     import os
