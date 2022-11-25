@@ -1,19 +1,13 @@
 """ As close a thing as there are to tests for GL"""
 
-from typing import Optional, Tuple, List, Callable
-import numpy as np
-
-from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
+from PyQt5 import QtWidgets
 
 from sas.qtgui.GL.scene import GraphWidget
-from sas.qtgui.GL.models import ModelBase
 from sas.qtgui.GL.color import Color
-from sas.qtgui.GL.surface import Surface
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
 from sas.qtgui.GL.cylinder import Cylinder
 from sas.qtgui.GL.icosahedron import Icosahedron
-from sas.qtgui.GL.sphere import Sphere
 from sas.qtgui.GL.transforms import SceneGraphNode, Translation, Rotation, Scaling
 
 def transform_tests():
@@ -57,13 +51,14 @@ def transform_tests():
     scaling_test = Scaling(0.5, 0.5, 0.5, *scaling_components)
 
 
+
+    # Rotations
     cone_sphere = Scaling(0.5, 0.5, 0.5,
                           cone,
                           Translation(0, 1, 1,
                                       Scaling(0.5, 0.5, 0.5,
                                               icos)))
 
-    # Rotations
     scaling_components = []
     for i in range(3):
         for j in range(3):
@@ -77,6 +72,10 @@ def transform_tests():
 
     rotation_test = Scaling(0.5, 0.5, 0.5, *scaling_components)
 
+
+    #
+    # Thing to iterate through the different tests
+    #
 
     item_list = [
         translate_test,
@@ -110,6 +109,10 @@ def transform_tests():
 
     state = scan_states()
     next(state)
+
+    #
+    # Set up and show window
+    #
 
 
     mainWindow = QtWidgets.QMainWindow()

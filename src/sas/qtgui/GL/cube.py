@@ -50,14 +50,16 @@ class Cube(FullModel):
 
     def __init__(self,
                  face_colors: Optional[Union[Sequence[Color],Color]]=None,
-                 edge_colors: Optional[Union[Sequence[Color],Color]]=None):
+                 edge_colors: Optional[Union[Sequence[Color],Color]]=None,
+                 color_by_mesh: bool=False):
 
         super().__init__(
             vertices=Cube.cube_vertices,
             edges=Cube.cube_edges,
             triangle_meshes=Cube.cube_triangles,
             edge_colors=edge_colors,
-            vertex_colors=face_colors)
+            vertex_colors=face_colors,
+            color_by_mesh=color_by_mesh)
 
         self.vertices = Cube.cube_vertices
         self.edges = Cube.cube_edges

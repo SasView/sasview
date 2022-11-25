@@ -1,9 +1,8 @@
 """ As close a thing as there are to tests for GL"""
 
-from typing import Optional, Tuple, List, Callable
 import numpy as np
 
-from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
+from PyQt5 import QtWidgets
 
 from sas.qtgui.GL.scene import GraphWidget
 from sas.qtgui.GL.models import ModelBase

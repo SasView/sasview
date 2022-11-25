@@ -1,3 +1,9 @@
+
+"""
+3D Model classes
+"""
+
+
 from typing import Sequence, Tuple, Union, Optional
 
 import numpy as np
@@ -6,7 +12,6 @@ from OpenGL.GL import *
 
 from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.color import Color
-
 
 def color_sequence_to_array(colors: Union[Sequence[Color], Color]):
     if isinstance(colors, Color):

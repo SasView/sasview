@@ -1,10 +1,7 @@
 import logging
-from typing import Optional, Tuple
 import numpy as np
 
-import matplotlib as mpl
-
-from sas.qtgui.GL.models import FullModel, WireModel
+from sas.qtgui.GL.models import FullModel
 from sas.qtgui.GL.color import Color, ColorMap
 
 logger = logging.getLogger("GL.Surface")
@@ -14,6 +11,7 @@ class Surface(FullModel):
 
     @staticmethod
     def calculate_edge_indices(nx, ny, gap=1):
+        """ Helper function to calculate the indices of the edges"""
         all_edges = []
         for i in range(nx-1):
             for j in range(0, ny, gap):
@@ -27,6 +25,7 @@ class Surface(FullModel):
 
     @staticmethod
     def calculate_triangles(nx, ny):
+        """ Helper function to calculate the indices of the triangles in the mesh"""
         triangles = []
         for i in range(nx-1):
             for j in range(ny-1):
@@ -60,7 +59,8 @@ class Surface(FullModel):
 
         self.colormap = ColorMap(colormap)
 
-        verts = [(float(x), float(y), float(z)) for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
+        verts = [(float(x), float(y), float(z))
+                 for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
 
         super().__init__(
             vertices=verts,
@@ -74,8 +74,12 @@ class Surface(FullModel):
         self.solid_render_enabled = True
 
 
-    # def _get_colors(self, z_values, colormap) -> Sequence[Color]:
-    #     return []
-    #
-    # def set_z_data(self, z_data):
-    #     pass
+    def set_z_data(self, z_data):
+
+        "Set the z data on this surface plot"
+
+        self.z_data = z_data
+        verts = [(float(x), float(y), float(z))
+                 for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
+
+        self.colors = self.colormap.color_array([z for _, _, z in verts])

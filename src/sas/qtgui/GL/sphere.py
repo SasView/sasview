@@ -9,6 +9,7 @@ from sas.qtgui.GL.color import Color
 class Sphere(FullModel):
     @staticmethod
     def sphere_vertices(n_horizontal, n_segments):
+        """ Helper function: Vertices of the UV sphere primitive"""
         vertices = [(0.0, 0.0, 1.0)]
 
         for theta in (np.pi/n_horizontal)*np.arange(0.5, n_horizontal):
@@ -25,6 +26,8 @@ class Sphere(FullModel):
 
     @staticmethod
     def sphere_edges(n_horizontal, n_segments, grid_gap):
+
+        """ Helper function: Edges of the UV sphere primitive"""
         edges = []
 
         # Bands
@@ -41,6 +44,7 @@ class Sphere(FullModel):
 
     @staticmethod
     def sphere_triangles(n_horizontal, n_segments):
+        """ Helper function: Triangles of the UV sphere primitive"""
         triangles = []
         last_index = n_horizontal*n_segments + 1
 
