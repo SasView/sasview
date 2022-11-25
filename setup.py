@@ -168,6 +168,12 @@ package_dir["sas.qtgui.UI"] = os.path.join(
     "src", "sas", "qtgui", "UI")
 packages.append("sas.qtgui.UI")
 
+## GL
+package_dir["sas.qtgui.GL"] = os.path.join(
+    "src", "sas", "qtgui", "GL")
+packages.append("sas.qtgui.GL")
+
+
 ## UnitTesting
 package_dir["sas.qtgui.UnitTesting"] = os.path.join(
     "src", "sas", "qtgui", "UnitTesting")
@@ -188,12 +194,17 @@ package_dir["sas.qtgui.Utilities.Reports.UI"] = os.path.join(
     "src", "sas", "qtgui", "Utilities", "Reports", "UI")
 packages.append("sas.qtgui.Utilities.Reports.UI")
 
-package_dir["sas.qtgui.Utilities.Preferences}"] = os.path.join(
+package_dir["sas.qtgui.Utilities.Preferences"] = os.path.join(
     "src", "sas", "qtgui", "Utilities", "Preferences")
 packages.append("sas.qtgui.Utilities.Preferences")
 package_dir["sas.qtgui.Utilities.Preferences.UI"] = os.path.join(
     "src", "sas", "qtgui", "Utilities", "Preferences", "UI")
 packages.append("sas.qtgui.Utilities.Preferences.UI")
+
+package_dir["sas.qtgui.Utilities.OrientationViewer"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "OrientationViewer")
+packages.append("sas.qtgui.Utilities.OrientationViewer")
+
 
 package_dir["sas.qtgui.Calculators"] = os.path.join(
     "src", "sas", "qtgui", "Calculators")
