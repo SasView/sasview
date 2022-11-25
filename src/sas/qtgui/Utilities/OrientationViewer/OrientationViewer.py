@@ -34,7 +34,9 @@ def createCubeTransform(theta_deg: float, phi_deg: float, psi_deg: float, scalin
 
     return trans_mat
 
+
 class OrientationViewer(QtWidgets.QWidget):
+    """ Orientation viewer widget """
 
     # Dimensions of scattering cuboid
     a = 0.1
@@ -43,7 +45,8 @@ class OrientationViewer(QtWidgets.QWidget):
 
     arrow_size = 0.2
     arrow_color = Color(0.9, 0.9, 0.9)
-    ghost_color = Color(0.6, 0.6, 0.6)
+    ghost_color = Color(0.0, 0.6, 0.2)
+    cube_color = Color(0.0, 0.8, 0.0)
 
     cuboid_scaling = [a, b, c]
 
@@ -56,6 +59,14 @@ class OrientationViewer(QtWidgets.QWidget):
 
     log_I_range = log_I_max - log_I_min
 
+    @staticmethod
+    def create_ghost():
+        """ Helper function: Create a ghost cube"""
+        return Scaling(OrientationViewer.a,
+                       OrientationViewer.b,
+                       OrientationViewer.c,
+                       Cube(edge_colors=OrientationViewer.ghost_color))
+
     def __init__(self, parent=None):
         super().__init__()
 
@@ -64,6 +75,7 @@ class OrientationViewer(QtWidgets.QWidget):
         self.parent = parent
 
         self.scene = Scene()
+        self.scene.view_elevation = 20
 
         self.scene.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -108,22 +120,31 @@ class OrientationViewer(QtWidgets.QWidget):
 
         self.scene.add(self.image_plane)
 
+        self.ghost_index = np.linspace(-2, 2, OrientationViewer.n_ghosts_per_perameter)
+        # self.ghost_index = np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter)
 
-        for a in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
+        self.all_ghosts = []
+        for a in self.ghost_index:
             b_ghosts = []
-            for b in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
+            for b in self.ghost_index:
                 c_ghosts = []
-                for c in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
-                    ghost = Cube(edge_colors=OrientationViewer.ghost_color)
-
+                for c in self.ghost_index:
+                    ghost = Rotation(0, 0, 0, 1, OrientationViewer.create_ghost())
+                    c_ghosts.append(ghost)
+                ghosts = Rotation(0,0,1,0, *c_ghosts)
+                b_ghosts.append(ghosts)
+            ghosts = Rotation(0,0,0,1,*b_ghosts)
+            self.all_ghosts.append(ghosts)
 
 
         self.first_rotation = Rotation(0,0,0,1,
                         Scaling(OrientationViewer.a,
                                 OrientationViewer.b,
                                 OrientationViewer.c,
-                                Cube(edge_colors=Color(1,1,1), colors=Color(0,1,0))
-                            ))
+                                Cube(
+                                    edge_colors=OrientationViewer.ghost_color,
+                                    colors=OrientationViewer.cube_color)),
+                        *self.all_ghosts)
 
         self.second_rotation = Rotation(0,0,1,0,self.first_rotation)
         self.third_rotation = Rotation(0,0,0,1,self.second_rotation)
@@ -169,6 +190,14 @@ class OrientationViewer(QtWidgets.QWidget):
         self.scene.update()
 
 
+    def orient_ghosts(self, orientation: Orientation):
+
+        for a, a_ghosts in zip(self.ghost_index, self.all_ghosts):
+            a_ghosts.angle = 0.5*a*orientation.dtheta
+            for b, b_ghosts in zip(self.ghost_index, a_ghosts.children):
+                b_ghosts.angle = 0.5*b*orientation.dphi
+                for c, c_ghosts in zip(self.ghost_index, b_ghosts.children):
+                    c_ghosts.angle = 0.5*c*orientation.dpsi
 
     def on_angle_changed(self, orientation: Optional[Orientation]):
 
@@ -183,14 +212,8 @@ class OrientationViewer(QtWidgets.QWidget):
         self.second_rotation.angle = orientation.theta
         self.third_rotation.angle = orientation.phi
 
-        # for a, b, c, ghost in self.ghosts:
-        #
-        #     ghost.setTransform(
-        #         OrientationViewerGraphics.createCubeTransform(
-        #             orientation.theta + 0.5*a*orientation.dtheta,
-        #             orientation.phi + 0.5*b*orientation.dphi,
-        #             orientation.psi + 0.5*c*orientation.dpsi,
-        #             OrientationViewer.cuboid_scaling))
+        self.orient_ghosts(orientation)
+
 
         self._set_image_data(orientation)
 
@@ -209,14 +232,7 @@ class OrientationViewer(QtWidgets.QWidget):
         self.second_rotation.angle = orientation.theta
         self.third_rotation.angle = orientation.phi
 
-        # for a, b, c, ghost in self.ghosts:
-        #
-        #     ghost.setTransform(
-        #         OrientationViewerGraphics.createCubeTransform(
-        #             orientation.theta + 0.5*a*orientation.dtheta,
-        #             orientation.phi + 0.5*b*orientation.dphi,
-        #             orientation.psi + 0.5*c*orientation.dpsi,
-        #             OrientationViewer.cuboid_scaling))
+        self.orient_ghosts(orientation)
 
         self.scene.update()
 
