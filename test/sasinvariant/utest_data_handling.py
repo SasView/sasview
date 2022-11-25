@@ -425,7 +425,7 @@ class TestGuinierExtrapolation(unittest.TestCase):
                           qmax=qmax,
                           power=inv._low_extrapolation_power)
         self.assertAlmostEqual(self.scale,
-                               inv._low_extrapolation_function.cuboid_scaling, 6)
+                               inv._low_extrapolation_function.scale, 6)
         self.assertAlmostEqual(self.rg,
                                inv._low_extrapolation_function.radius, 6)
 
@@ -477,7 +477,7 @@ class TestPowerLawExtrapolation(unittest.TestCase):
                           power=inv._low_extrapolation_power)
 
         self.assertAlmostEqual(self.scale,
-                               inv._low_extrapolation_function.cuboid_scaling, 6)
+                               inv._low_extrapolation_function.scale, 6)
         self.assertAlmostEqual(self.m, inv._low_extrapolation_function.power, 6)
 
 
@@ -568,7 +568,7 @@ class TestDataExtraLow(unittest.TestCase):
                           qmax=qmax,
                           power=inv._low_extrapolation_power)
         self.assertAlmostEqual(self.scale,
-                               inv._low_extrapolation_function.cuboid_scaling, 6)
+                               inv._low_extrapolation_function.scale, 6)
         self.assertAlmostEqual(self.rg,
                                inv._low_extrapolation_function.radius, 6)
 

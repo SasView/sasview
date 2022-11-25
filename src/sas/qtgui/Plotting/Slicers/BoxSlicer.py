@@ -179,7 +179,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
         data = self.data
-        if hasattr(data, "scale") and data.cuboid_scaling == 'linear' and \
+        if hasattr(data, "scale") and data.scale == 'linear' and \
                 self.data.name.count("Residuals") > 0:
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
