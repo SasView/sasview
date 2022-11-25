@@ -37,8 +37,8 @@ def primative_library():
 
     item_list = [
         mesh_example(),
-        Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0.2, 0)),
-        Cube(edge_colors=Color(1, 1, 1), face_colors=[
+        Cube(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0.2, 0)),
+        Cube(edge_colors=Color(1, 1, 1), colors=[
             Color(1,0,0),
             Color(0,1,0),
             Color(0,0,1),

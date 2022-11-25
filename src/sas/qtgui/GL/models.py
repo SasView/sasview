@@ -86,7 +86,12 @@ class SolidVertexModel(SolidModel):
         self.color_by_mesh = color_by_mesh
 
         self._colors = colors
-        self._vertex_color_array = None if isinstance(colors, Color) or color_by_mesh else np.array([color.to_array() for color in colors], dtype=float)
+
+        if colors is None or isinstance(colors, Color) or color_by_mesh:
+            self._vertex_color_array = None
+        else:
+            self._vertex_color_array = np.array([color.to_array() for color in colors], dtype=float)
+
 
         self.solid_render_enabled = self.colors is not None
 
@@ -95,9 +100,13 @@ class SolidVertexModel(SolidModel):
         return self._colors
 
     @colors.setter
-    def colors(self, new_vertex_colors):
-        self._colors = new_vertex_colors
-        self._vertex_color_array = None if isinstance(new_vertex_colors, Color) else np.array([color.to_array() for color in new_vertex_colors], dtype=float)
+    def colors(self, new_colors):
+        self._colors = new_colors
+        if new_colors is None or isinstance(new_colors, Color) or self.color_by_mesh:
+            self._vertex_color_array = None
+        else:
+            self._vertex_color_array = np.array([color.to_array() for color in new_colors], dtype=float)
+
         self.solid_render_enabled = self.colors is not None
 
     def render_solid(self):

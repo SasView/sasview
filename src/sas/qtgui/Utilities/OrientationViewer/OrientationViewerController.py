@@ -22,7 +22,8 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
 
     """ Widget that controls the orientation viewer"""
 
-    valueEdited = pyqtSignal(Orientation, name='valueEdited')
+    sliderSet = pyqtSignal(Orientation, name='sliderSet')
+    sliderMoved = pyqtSignal(Orientation, name='sliderMoved')
 
     def __init__(self, parent=None):
         super().__init__()
@@ -32,12 +33,19 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
         self.setLabels(Orientation())
 
         # All sliders emit the same signal - the angular coordinates in degrees
-        self.thetaSlider.valueChanged.connect(self.onAngleChange)
-        self.phiSlider.valueChanged.connect(self.onAngleChange)
-        self.psiSlider.valueChanged.connect(self.onAngleChange)
-        self.deltaTheta.valueChanged.connect(self.onAngleChange)
-        self.deltaPhi.valueChanged.connect(self.onAngleChange)
-        self.deltaPsi.valueChanged.connect(self.onAngleChange)
+        self.thetaSlider.sliderReleased.connect(self.onSliderSet)
+        self.phiSlider.sliderReleased.connect(self.onSliderSet)
+        self.psiSlider.sliderReleased.connect(self.onSliderSet)
+        self.deltaTheta.sliderReleased.connect(self.onSliderSet)
+        self.deltaPhi.sliderReleased.connect(self.onSliderSet)
+        self.deltaPsi.sliderReleased.connect(self.onSliderSet)
+
+        self.thetaSlider.valueChanged.connect(self.onSliderMoved)
+        self.phiSlider.valueChanged.connect(self.onSliderMoved)
+        self.psiSlider.valueChanged.connect(self.onSliderMoved)
+        self.deltaTheta.valueChanged.connect(self.onSliderMoved)
+        self.deltaPhi.valueChanged.connect(self.onSliderMoved)
+        self.deltaPsi.valueChanged.connect(self.onSliderMoved)
 
     def setLabels(self, orientation: Orientation):
 
@@ -50,7 +58,7 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
         self.deltaPsiNumber.setText(f"{orientation.dpsi}°")
 
 
-    def onAngleChange(self):
+    def onSliderSet(self):
         theta = self.thetaSlider.value()
         phi = self.phiSlider.value()
         psi = self.psiSlider.value()
@@ -60,8 +68,24 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
         dpsi = self.deltaPsi.value()
 
         orientation = Orientation(theta, phi, psi, dtheta, dphi, dpsi)
-        self.valueEdited.emit(orientation)
+        self.sliderSet.emit(orientation)
         self.setLabels(orientation)
+
+    def onSliderMoved(self):
+
+        theta = self.thetaSlider.value()
+        phi = self.phiSlider.value()
+        psi = self.psiSlider.value()
+
+        dtheta = self.deltaTheta.value()
+        dphi = self.deltaPhi.value()
+        dpsi = self.deltaPsi.value()
+
+        orientation = Orientation(theta, phi, psi, dtheta, dphi, dpsi)
+        self.sliderMoved.emit(orientation)
+        self.setLabels(orientation)
+
+
 
 
 def main():

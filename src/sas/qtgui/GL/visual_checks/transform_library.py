@@ -24,7 +24,7 @@ def transform_tests():
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     app = QtWidgets.QApplication([])
 
-    cube = Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0.2, 0))
+    cube = Cube(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0.2, 0))
     cone = Cone(edge_colors=Color(1, 1, 1), colors=Color(0, 0.7, 0.2))
     cylinder = Cylinder(edge_colors=Color(1, 1, 1), colors=Color(0, 0.2, 0.7))
     icos = Icosahedron(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0, 0.7))

@@ -21,7 +21,6 @@ from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
 
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import OrientationViewierController, Orientation
-from sas.qtgui.Utilities.OrientationViewer.FloodBarrier import FloodBarrier
 
 
 def createCubeTransform(theta_deg: float, phi_deg: float, psi_deg: float, scaling: List[float]) -> np.ndarray:
@@ -44,11 +43,12 @@ class OrientationViewer(QtWidgets.QWidget):
 
     arrow_size = 0.2
     arrow_color = Color(0.9, 0.9, 0.9)
+    ghost_color = Color(0.6, 0.6, 0.6)
 
     cuboid_scaling = [a, b, c]
 
     n_ghosts_per_perameter = 8
-    n_q_samples = 129
+    n_q_samples = 128
     log_I_max = 10
     log_I_min = -3
     q_max = 0.5
@@ -59,10 +59,9 @@ class OrientationViewer(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__()
 
-        self.parent = parent
+        self._colormap_name = 'viridis'
 
-        # Put a barrier that will stop a flood of events going to the calculator
-        self.set_image_data = FloodBarrier[Orientation](self._set_image_data, Orientation(), 0.5)
+        self.parent = parent
 
         self.scene = Scene()
 
@@ -75,7 +74,7 @@ class OrientationViewer(QtWidgets.QWidget):
         layout.addWidget(self.controller)
         self.setLayout(layout)
 
-        self.arrow = Translation(0,0,1,
+        self.arrow = Translation(0,0,1.5,
                          Rotation(180,0,1,0,
                              Scaling(
                                 OrientationViewer.arrow_size,
@@ -101,40 +100,59 @@ class OrientationViewer(QtWidgets.QWidget):
                             self.image_plane_data,
                             edge_skip=8)
 
+        self.surface.wireframe_render_enabled = False
+        # self.surface.colormap = 'Greys'
+
+
         self.image_plane = Translation(0,0,-1, Scaling(0.5, 0.5, 0.5, self.surface))
 
         self.scene.add(self.image_plane)
 
-        # ghost_alpha = 1/(OrientationViewer.n_ghosts_per_perameter**3)
-        # self.ghosts = []
-        # for a in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
-        #     for b in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
-        #         for c in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
-        #             ghost = OrientationViewerGraphics.create_cube(ghost_alpha)
-        #             self.graph.addItem(ghost)
-        #             self.ghosts.append((a, b, c, ghost))
+
+        for a in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
+            b_ghosts = []
+            for b in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
+                c_ghosts = []
+                for c in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
+                    ghost = Cube(edge_colors=OrientationViewer.ghost_color)
+
+
+
+        self.first_rotation = Rotation(0,0,0,1,
+                        Scaling(OrientationViewer.a,
+                                OrientationViewer.b,
+                                OrientationViewer.c,
+                                Cube(edge_colors=Color(1,1,1), colors=Color(0,1,0))
+                            ))
+
+        self.second_rotation = Rotation(0,0,1,0,self.first_rotation)
+        self.third_rotation = Rotation(0,0,0,1,self.second_rotation)
+
+        self.cubes = Translation(0,0,0.5,self.third_rotation)
+
+        self.scene.add(self.cubes)
+
         #
-        #
-        #
-        # self.graph.addItem(self.arrow)
-        # self.graph.addItem(self.image_plane)
-        #
-        # self.arrow.rotate(180, 1, 0, 0)
-        # self.arrow.scale(0.05, 0.05, 0.05)
-        # self.arrow.translate(0,0,1)
-        #
-        # self.image_plane.translate(0,0,-0.5) # It's 1 unit thick, so half way
+
         #
         # for _, _, _, ghost in self.ghosts:
         #     ghost.setTransform(OrientationViewerGraphics.createCubeTransform(0, 0, 0, OrientationViewer.cuboid_scaling))
         #
         #
-        self.controller.valueEdited.connect(self.on_angle_change)
+        self.controller.sliderSet.connect(self.on_angle_changed)
+        self.controller.sliderMoved.connect(self.on_angle_changing)
 
         self.calculator = OrientationViewer.create_calculator()
-        self.on_angle_change(Orientation())
+        self.on_angle_changed(Orientation())
 
+    @property
+    def colormap(self) -> str:
+        return self._colormap_name
 
+    @colormap.setter
+    def colormap(self, colormap_name: str):
+        self._colormap_name = colormap_name
+        self.surface.colormap = self._colormap_name
 
     def _set_image_data(self, orientation: Orientation):
         """ Set the data on the plot"""
@@ -144,21 +162,27 @@ class OrientationViewer(QtWidgets.QWidget):
         scaled_data = (np.log(data) - OrientationViewer.log_I_min) / OrientationViewer.log_I_range
         self.image_plane_data = np.clip(scaled_data, 0, 1)
 
-        print(self.image_plane_data)
-
         self.surface.set_z_data(self.image_plane_data)
+
+        # self.surface.colormap = self.colormap
 
         self.scene.update()
 
 
 
-    def on_angle_change(self, orientation: Optional[Orientation]):
+    def on_angle_changed(self, orientation: Optional[Orientation]):
 
         """ Response to angle change"""
 
         if orientation is None:
             return
-        #
+
+
+        #r_mat = Rz(phi_deg) @ Ry(theta_deg) @ Rz(psi_deg) @ np.diag(scaling)
+        self.first_rotation.angle = orientation.psi
+        self.second_rotation.angle = orientation.theta
+        self.third_rotation.angle = orientation.phi
+
         # for a, b, c, ghost in self.ghosts:
         #
         #     ghost.setTransform(
@@ -168,7 +192,33 @@ class OrientationViewer(QtWidgets.QWidget):
         #             orientation.psi + 0.5*c*orientation.dpsi,
         #             OrientationViewer.cuboid_scaling))
 
-        self.set_image_data(orientation)
+        self._set_image_data(orientation)
+
+
+    def on_angle_changing(self, orientation: Optional[Orientation]):
+
+        """ Response to angle change"""
+
+        if orientation is None:
+            return
+
+        # self.surface.colormap = "Greys"
+
+        #r_mat = Rz(phi_deg) @ Ry(theta_deg) @ Rz(psi_deg) @ np.diag(scaling)
+        self.first_rotation.angle = orientation.psi
+        self.second_rotation.angle = orientation.theta
+        self.third_rotation.angle = orientation.phi
+
+        # for a, b, c, ghost in self.ghosts:
+        #
+        #     ghost.setTransform(
+        #         OrientationViewerGraphics.createCubeTransform(
+        #             orientation.theta + 0.5*a*orientation.dtheta,
+        #             orientation.phi + 0.5*b*orientation.dphi,
+        #             orientation.psi + 0.5*c*orientation.dpsi,
+        #             OrientationViewer.cuboid_scaling))
+
+        self.scene.update()
 
     @staticmethod
     def create_calculator():
@@ -179,7 +229,6 @@ class OrientationViewer(QtWidgets.QWidget):
         model = build_model(model_info)
         q = np.linspace(-OrientationViewer.q_max, OrientationViewer.q_max, OrientationViewer.n_q_samples)
         data = empty_data2D(q, q)
-        print(data.data.shape)
         calculator = DirectModel(data, model)
 
         return calculator

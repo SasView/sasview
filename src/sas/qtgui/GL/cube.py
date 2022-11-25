@@ -49,7 +49,7 @@ class Cube(FullModel):
     ]
 
     def __init__(self,
-                 face_colors: Optional[Union[Sequence[Color],Color]]=None,
+                 colors: Optional[Union[Sequence[Color], Color]]=None,
                  edge_colors: Optional[Union[Sequence[Color],Color]]=None,
                  color_by_mesh: bool=False):
 
@@ -58,7 +58,7 @@ class Cube(FullModel):
             edges=Cube.cube_edges,
             triangle_meshes=Cube.cube_triangles,
             edge_colors=edge_colors,
-            colors=face_colors,
+            colors=colors,
             color_by_mesh=color_by_mesh)
 
         self.vertices = Cube.cube_vertices
@@ -71,12 +71,12 @@ class Cube(FullModel):
             self.wireframe_render_enabled = True
             self.edge_colors = edge_colors
 
-        if face_colors is None:
+        if colors is None:
             self.solid_render_enabled = False
             self.face_colors = []
         else:
             self.solid_render_enabled = True
-            self.face_colors = face_colors
+            self.face_colors = colors
 
 
 

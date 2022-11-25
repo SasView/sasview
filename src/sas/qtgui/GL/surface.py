@@ -61,7 +61,9 @@ class Surface(FullModel):
         self.n_x = len(x_values)
         self.n_y = len(y_values)
 
-        self.colormap = ColorMap(colormap, min_value=c_range[0], max_value=c_range[1])
+        self.c_range = c_range
+        self._colormap_name = colormap
+        self._colormap = ColorMap(colormap, min_value=c_range[0], max_value=c_range[1])
 
         verts = [(float(x), float(y), float(z))
                  for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
@@ -71,7 +73,7 @@ class Surface(FullModel):
             edges=Surface.calculate_edge_indices(self.n_x, self.n_y, edge_skip),
             triangle_meshes=[Surface.calculate_triangles(self.n_x, self.n_y)],
             edge_colors=Color(1.0,1.0,1.0),
-            colors=self.colormap.color_array([z for _, _, z in verts])
+            colors=self._colormap.color_array([z for _, _, z in verts])
             )
 
         self.wireframe_render_enabled = True
@@ -87,4 +89,16 @@ class Surface(FullModel):
                  for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
 
         self.vertices = verts
-        self.colors = self.colormap.color_array([z for _, _, z in verts])
+        self.colors = self._colormap.color_array([z for _, _, z in verts])
+
+    @property
+    def colormap(self) -> str:
+        """ Name of the colormap"""
+        return self._colormap_name
+
+    @colormap.setter
+    def colormap(self, colormap: str):
+        if self._colormap_name != colormap:
+            self._colormap = ColorMap(colormap, min_value=self.c_range[0], max_value=self.c_range[1])
+            self.colors = self._colormap.color_array([z for _, _, z in self.vertices])
+            self._colormap_name = colormap
