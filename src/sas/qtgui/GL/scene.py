@@ -11,7 +11,7 @@ from sas.qtgui.GL.color import Color
 from sas.qtgui.GL.surface import Surface
 from sas.qtgui.GL.cone import Cone
 
-class GraphWidget(QtOpenGL.QGLWidget):
+class Scene(QtOpenGL.QGLWidget):
 
 
     def __init__(self, parent=None, on_key: Callable[[int], None] = lambda x: None):
@@ -197,7 +197,7 @@ def main():
     app = QtWidgets.QApplication([])
 
     mainWindow = QtWidgets.QMainWindow()
-    viewer = GraphWidget(mainWindow)
+    viewer = Scene(mainWindow)
 
     x = np.linspace(-1, 1, 101)
     y = np.linspace(-1, 1, 101)

@@ -68,7 +68,7 @@ class Sphere(FullModel):
                  n_horizontal: int = 21,
                  n_segments: int = 28,
                  grid_gap: int = 1,
-                 vertex_colors: Optional[Union[Sequence[Color], Color]]=None,
+                 colors: Optional[Union[Sequence[Color], Color]]=None,
                  edge_colors: Optional[Union[Sequence[Color],Color]]=None):
 
         """
@@ -78,7 +78,7 @@ class Sphere(FullModel):
         :param n_horizontal: Number of horizontal bands
         :param n_segments: Number of segments (angular)
         :param grid_gap: Coarse grain the wireframe by skipping every 'grid_gap' coordinates
-        :param vertex_colors: List of colours for each vertex, or a single color for all
+        :param colors: List of colours for each vertex, or a single color for all
         :param edge_colors: List of colours for each edge, or a single color for all
 
         Note: For aesthetically pleasing results with `grid_gap`, `n_segments` should be a multiple
@@ -97,7 +97,7 @@ class Sphere(FullModel):
             edges=Sphere.sphere_edges(n_horizontal, n_segments, grid_gap),
             triangle_meshes=Sphere.sphere_triangles(n_horizontal, n_segments),
             edge_colors=edge_colors,
-            vertex_colors=vertex_colors)
+            colors=colors)
 
         if edge_colors is None:
             self.wireframe_render_enabled = False
@@ -106,9 +106,9 @@ class Sphere(FullModel):
             self.wireframe_render_enabled = True
             self.edge_colors = edge_colors
 
-        if vertex_colors is None:
+        if colors is None:
             self.solid_render_enabled = False
             self.face_colors = []
         else:
             self.solid_render_enabled = True
-            self.face_colors = vertex_colors
+            self.face_colors = colors

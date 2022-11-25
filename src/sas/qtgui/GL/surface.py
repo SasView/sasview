@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import logging
 import numpy as np
 
@@ -38,6 +40,7 @@ class Surface(FullModel):
                  y_values: np.ndarray,
                  z_data: np.ndarray,
                  colormap: str= ColorMap._default_colormap,
+                 c_range: Tuple[float, float] = (0, 1),
                  edge_skip: int=1):
 
         """ Surface plot
@@ -47,6 +50,7 @@ class Surface(FullModel):
         :param y_values: 1D array of y values
         :param z_data: 2D array of z values
         :param colormap: name of a matplotlib colour map
+        :param c_range: min and max values for the color map to span
         :param edge_skip: skip every `edge_skip` index when drawing wireframe
         """
 
@@ -57,7 +61,7 @@ class Surface(FullModel):
         self.n_x = len(x_values)
         self.n_y = len(y_values)
 
-        self.colormap = ColorMap(colormap)
+        self.colormap = ColorMap(colormap, min_value=c_range[0], max_value=c_range[1])
 
         verts = [(float(x), float(y), float(z))
                  for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
@@ -67,7 +71,7 @@ class Surface(FullModel):
             edges=Surface.calculate_edge_indices(self.n_x, self.n_y, edge_skip),
             triangle_meshes=[Surface.calculate_triangles(self.n_x, self.n_y)],
             edge_colors=Color(1.0,1.0,1.0),
-            vertex_colors=self.colormap.color_array([z for _, _, z in verts])
+            colors=self.colormap.color_array([z for _, _, z in verts])
             )
 
         self.wireframe_render_enabled = True
@@ -82,4 +86,5 @@ class Surface(FullModel):
         verts = [(float(x), float(y), float(z))
                  for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
 
+        self.vertices = verts
         self.colors = self.colormap.color_array([z for _, _, z in verts])

@@ -85,28 +85,28 @@ class SolidVertexModel(SolidModel):
 
         self.color_by_mesh = color_by_mesh
 
-        self._vertex_colors = colors
+        self._colors = colors
         self._vertex_color_array = None if isinstance(colors, Color) or color_by_mesh else np.array([color.to_array() for color in colors], dtype=float)
 
         self.solid_render_enabled = self.colors is not None
 
     @property
     def colors(self):
-        return self._vertex_colors
+        return self._colors
 
     @colors.setter
     def colors(self, new_vertex_colors):
-        self.colors = new_vertex_colors
+        self._colors = new_vertex_colors
         self._vertex_color_array = None if isinstance(new_vertex_colors, Color) else np.array([color.to_array() for color in new_vertex_colors], dtype=float)
         self.solid_render_enabled = self.colors is not None
 
     def render_solid(self):
         if self.solid_render_enabled:
 
-            if isinstance(self._vertex_colors, Color):
+            if isinstance(self._colors, Color):
 
                 glEnableClientState(GL_VERTEX_ARRAY)
-                self._vertex_colors.set()
+                self._colors.set()
 
                 glVertexPointerf(self._vertex_array)
 
@@ -205,7 +205,7 @@ class FullModel(SolidVertexModel, WireModel):
                  edges: Sequence[Tuple[int, int]],
                  triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]],
                  edge_colors: Optional[Union[Sequence[Color], Color]],
-                 vertex_colors: Optional[Union[Sequence[Color], Color]],
+                 colors: Optional[Union[Sequence[Color], Color]],
                  color_by_mesh: bool = False):
 
 
@@ -213,7 +213,7 @@ class FullModel(SolidVertexModel, WireModel):
         SolidVertexModel.__init__(self,
                                   vertices=vertices,
                                   triangle_meshes=triangle_meshes,
-                                  colors=vertex_colors,
+                                  colors=colors,
                                   color_by_mesh=color_by_mesh)
         WireModel.__init__(self,
                            vertices=vertices,

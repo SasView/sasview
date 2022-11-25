@@ -11,12 +11,17 @@ from sasmodels.core import load_model_info, build_model
 from sasmodels.data import empty_data2D
 from sasmodels.direct_model import DirectModel
 
-from sas.qtgui.GL.scene import GraphWidget
+from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.scene import Scene
+from sas.qtgui.GL.transforms import Rotation, Scaling, Translation
+from sas.qtgui.GL.surface import Surface
+from sas.qtgui.GL.cylinder import Cylinder
+from sas.qtgui.GL.cone import Cone
+from sas.qtgui.GL.cube import Cube
 
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import OrientationViewierController, Orientation
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewerGraphics import OrientationViewerGraphics
 from sas.qtgui.Utilities.OrientationViewer.FloodBarrier import FloodBarrier
-
 
 
 
@@ -27,10 +32,13 @@ class OrientationViewer(QtWidgets.QWidget):
     b = 0.4
     c = 1.0
 
+    arrow_size = 0.2
+    arrow_color = Color(0.9, 0.9, 0.9)
+
     cuboid_scaling = [a, b, c]
 
     n_ghosts_per_perameter = 8
-    n_q_samples = 256
+    n_q_samples = 129
     log_I_max = 10
     log_I_min = -3
     q_max = 0.5
@@ -46,35 +54,47 @@ class OrientationViewer(QtWidgets.QWidget):
         # Put a barrier that will stop a flood of events going to the calculator
         self.set_image_data = FloodBarrier[Orientation](self._set_image_data, Orientation(), 0.5)
 
-        self.graph = GraphWidget()
+        self.scene = Scene()
 
-        self.graph.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.scene.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.controller = OrientationViewierController()
 
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.graph)
+        layout.addWidget(self.scene)
         layout.addWidget(self.controller)
         self.setLayout(layout)
-        #
-        # self.arrow = OrientationViewerGraphics.create_arrow()
-        # self.image_plane_coordinate_points = np.linspace(-3, 3, 256)
-        #
-        # # temporary plot data
-        # x, y = np.meshgrid(self.image_plane_coordinate_points, self.image_plane_coordinate_points)
-        # self.image_plane_data = np.zeros_like(x)
-        #
-        # self.colormap = mpl.colormaps["viridis"]
-        #
-        # self.image_plane_colors = self.colormap(self.image_plane_data)
-        #
-        # self.image_plane = gl.GLSurfacePlotItem(
-        #     self.image_plane_coordinate_points,
-        #     self.image_plane_coordinate_points,
-        #     self.image_plane_data,
-        #     self.image_plane_colors
-        # )
-        #
+
+        self.arrow = Translation(0,0,1,
+                         Rotation(180,0,1,0,
+                             Scaling(
+                                OrientationViewer.arrow_size,
+                                OrientationViewer.arrow_size,
+                                OrientationViewer.arrow_size,
+                                Scaling(0.1, 0.1, 1,
+                                    Cylinder(colors=OrientationViewer.arrow_color)),
+                                Translation(0,0,1.3,
+                                        Scaling(0.3, 0.3, 0.3,
+                                            Cone(colors=OrientationViewer.arrow_color))))))
+
+        self.scene.add(self.arrow)
+
+        self.image_plane_coordinate_points = np.linspace(-3, 3, OrientationViewer.n_q_samples)
+
+        # temporary plot data
+        x, y = np.meshgrid(self.image_plane_coordinate_points, self.image_plane_coordinate_points)
+        self.image_plane_data = np.zeros_like(x)
+
+        self.surface = Surface(
+                            self.image_plane_coordinate_points,
+                            self.image_plane_coordinate_points,
+                            self.image_plane_data,
+                            edge_skip=8)
+
+        self.image_plane = Translation(0,0,-1, Scaling(0.5, 0.5, 0.5, self.surface))
+
+        self.scene.add(self.image_plane)
+
         # ghost_alpha = 1/(OrientationViewer.n_ghosts_per_perameter**3)
         # self.ghosts = []
         # for a in np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter):
@@ -99,39 +119,44 @@ class OrientationViewer(QtWidgets.QWidget):
         #     ghost.setTransform(OrientationViewerGraphics.createCubeTransform(0, 0, 0, OrientationViewer.cuboid_scaling))
         #
         #
-        # self.controller.valueEdited.connect(self.on_angle_change)
-        #
-        # self.calculator = OrientationViewer.create_calculator()
-        # self.on_angle_change(Orientation())
+        self.controller.valueEdited.connect(self.on_angle_change)
+
+        self.calculator = OrientationViewer.create_calculator()
+        self.on_angle_change(Orientation())
 
 
 
     def _set_image_data(self, orientation: Orientation):
+        """ Set the data on the plot"""
 
         data = self.scatering_data(orientation)
 
         scaled_data = (np.log(data) - OrientationViewer.log_I_min) / OrientationViewer.log_I_range
         self.image_plane_data = np.clip(scaled_data, 0, 1)
 
-        self.image_plane_colors = self.colormap(self.image_plane_data)
+        print(self.image_plane_data)
 
-        self.image_plane.setData(z=self.image_plane_data, colors=self.image_plane_colors)
+        self.surface.set_z_data(self.image_plane_data)
+
+        self.scene.update()
 
 
 
     def on_angle_change(self, orientation: Optional[Orientation]):
 
+        """ Response to angle change"""
+
         if orientation is None:
             return
-
-        for a, b, c, ghost in self.ghosts:
-
-            ghost.setTransform(
-                OrientationViewerGraphics.createCubeTransform(
-                    orientation.theta + 0.5*a*orientation.dtheta,
-                    orientation.phi + 0.5*b*orientation.dphi,
-                    orientation.psi + 0.5*c*orientation.dpsi,
-                    OrientationViewer.cuboid_scaling))
+        #
+        # for a, b, c, ghost in self.ghosts:
+        #
+        #     ghost.setTransform(
+        #         OrientationViewerGraphics.createCubeTransform(
+        #             orientation.theta + 0.5*a*orientation.dtheta,
+        #             orientation.phi + 0.5*b*orientation.dphi,
+        #             orientation.psi + 0.5*c*orientation.dpsi,
+        #             OrientationViewer.cuboid_scaling))
 
         self.set_image_data(orientation)
 
@@ -140,11 +165,11 @@ class OrientationViewer(QtWidgets.QWidget):
         """
         Make a parallelepiped model calculator for q range -qmax to qmax with n samples
         """
-
         model_info = load_model_info("parallelepiped")
         model = build_model(model_info)
         q = np.linspace(-OrientationViewer.q_max, OrientationViewer.q_max, OrientationViewer.n_q_samples)
         data = empty_data2D(q, q)
+        print(data.data.shape)
         calculator = DirectModel(data, model)
 
         return calculator

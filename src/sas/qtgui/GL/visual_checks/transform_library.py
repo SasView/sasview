@@ -2,7 +2,7 @@
 
 from PyQt5 import QtWidgets
 
-from sas.qtgui.GL.scene import GraphWidget
+from sas.qtgui.GL.scene import Scene
 from sas.qtgui.GL.color import Color
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
@@ -25,9 +25,9 @@ def transform_tests():
     app = QtWidgets.QApplication([])
 
     cube = Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0.2, 0))
-    cone = Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0.2))
-    cylinder = Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.2, 0.7))
-    icos = Icosahedron(edge_colors=Color(1, 1, 1), vertex_colors=Color(0.7, 0, 0.7))
+    cone = Cone(edge_colors=Color(1, 1, 1), colors=Color(0, 0.7, 0.2))
+    cylinder = Cylinder(edge_colors=Color(1, 1, 1), colors=Color(0, 0.2, 0.7))
+    icos = Icosahedron(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0, 0.7))
 
 
     # Translations
@@ -116,7 +116,7 @@ def transform_tests():
 
 
     mainWindow = QtWidgets.QMainWindow()
-    viewer = GraphWidget(parent=mainWindow)
+    viewer = Scene(parent=mainWindow)
 
     # Keyboard callback
     def enable_disable(key):

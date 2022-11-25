@@ -4,7 +4,7 @@ import numpy as np
 
 from PyQt5 import QtWidgets
 
-from sas.qtgui.GL.scene import GraphWidget
+from sas.qtgui.GL.scene import Scene
 from sas.qtgui.GL.models import ModelBase
 from sas.qtgui.GL.color import Color
 from sas.qtgui.GL.surface import Surface
@@ -46,11 +46,11 @@ def primative_library():
             Color(0,1,1),
             Color(1,0,1)
         ], color_by_mesh=True),
-        Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0.2)),
-        Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.2, 0.7)),
-        Icosahedron(edge_colors=Color(1, 1, 1), vertex_colors=Color(0.7, 0, 0.7)),
-        Sphere(edge_colors=Color(1, 1, 1), vertex_colors=Color(0.7, 0.7, 0.0)),
-        Sphere(edge_colors=Color(1, 1, 1), vertex_colors=Color(0.7, 0.4, 0.0), grid_gap=4)
+        Cone(edge_colors=Color(1, 1, 1), colors=Color(0, 0.7, 0.2)),
+        Cylinder(edge_colors=Color(1, 1, 1), colors=Color(0, 0.2, 0.7)),
+        Icosahedron(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0, 0.7)),
+        Sphere(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0.7, 0.0)),
+        Sphere(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0.4, 0.0), grid_gap=4)
     ]
 
     # Turn off all of them
@@ -92,7 +92,7 @@ def primative_library():
 
 
     mainWindow = QtWidgets.QMainWindow()
-    viewer = GraphWidget(parent=mainWindow)
+    viewer = Scene(parent=mainWindow)
 
     # Keyboard callback
     def enable_disable(key):

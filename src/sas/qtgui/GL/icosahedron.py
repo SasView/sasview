@@ -77,7 +77,7 @@ class Icosahedron(FullModel):
     ]]
 
     def __init__(self,
-                 vertex_colors: Optional[Union[Sequence[Color], Color]]=None,
+                 colors: Optional[Union[Sequence[Color], Color]]=None,
                  edge_colors: Optional[Union[Sequence[Color],Color]]=None):
 
         super().__init__(
@@ -85,7 +85,7 @@ class Icosahedron(FullModel):
             edges=Icosahedron.ico_edges,
             triangle_meshes=Icosahedron.ico_triangles,
             edge_colors=edge_colors,
-            vertex_colors=vertex_colors)
+            colors=colors)
 
 
         if edge_colors is None:
@@ -95,9 +95,9 @@ class Icosahedron(FullModel):
             self.wireframe_render_enabled = True
             self.edge_colors = edge_colors
 
-        if vertex_colors is None:
+        if colors is None:
             self.solid_render_enabled = False
             self.face_colors = []
         else:
             self.solid_render_enabled = True
-            self.face_colors = vertex_colors
+            self.face_colors = colors

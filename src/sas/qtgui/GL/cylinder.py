@@ -54,7 +54,7 @@ class Cylinder(FullModel):
 
     def __init__(self,
                  n: int = 20,
-                 vertex_colors: Optional[Union[Sequence[Color], Color]]=None,
+                 colors: Optional[Union[Sequence[Color], Color]]=None,
                  edge_colors: Optional[Union[Sequence[Color],Color]]=None):
 
         super().__init__(
@@ -62,7 +62,7 @@ class Cylinder(FullModel):
             edges=Cylinder.cylinder_edges(n),
             triangle_meshes=Cylinder.cylinder_triangles(n),
             edge_colors=edge_colors,
-            vertex_colors=vertex_colors)
+            colors=colors)
 
         if edge_colors is None:
             self.wireframe_render_enabled = False
@@ -71,9 +71,9 @@ class Cylinder(FullModel):
             self.wireframe_render_enabled = True
             self.edge_colors = edge_colors
 
-        if vertex_colors is None:
+        if colors is None:
             self.solid_render_enabled = False
             self.face_colors = []
         else:
             self.solid_render_enabled = True
-            self.face_colors = vertex_colors
+            self.face_colors = colors

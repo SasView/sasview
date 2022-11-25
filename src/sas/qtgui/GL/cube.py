@@ -58,7 +58,7 @@ class Cube(FullModel):
             edges=Cube.cube_edges,
             triangle_meshes=Cube.cube_triangles,
             edge_colors=edge_colors,
-            vertex_colors=face_colors,
+            colors=face_colors,
             color_by_mesh=color_by_mesh)
 
         self.vertices = Cube.cube_vertices
