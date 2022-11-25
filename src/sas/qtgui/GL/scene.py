@@ -190,7 +190,7 @@ class GraphWidget(QtOpenGL.QGLWidget):
 
 
 def main():
-    """ Show a demo of the opengl window """
+    """ Show a demo of the opengl.rst window """
     import os
 
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
