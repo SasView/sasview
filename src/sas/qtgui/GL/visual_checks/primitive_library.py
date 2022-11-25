@@ -38,6 +38,14 @@ def primative_library():
     item_list = [
         mesh_example(),
         Cube(edge_colors=Color(1, 1, 1), face_colors=Color(0.7, 0.2, 0)),
+        Cube(edge_colors=Color(1, 1, 1), face_colors=[
+            Color(1,0,0),
+            Color(0,1,0),
+            Color(0,0,1),
+            Color(1,1,0),
+            Color(0,1,1),
+            Color(1,0,1)
+        ], color_by_mesh=True),
         Cone(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.7, 0.2)),
         Cylinder(edge_colors=Color(1, 1, 1), vertex_colors=Color(0, 0.2, 0.7)),
         Icosahedron(edge_colors=Color(1, 1, 1), vertex_colors=Color(0.7, 0, 0.7)),
