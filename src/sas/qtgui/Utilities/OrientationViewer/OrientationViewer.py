@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 import numpy as np
 
 from PyQt5 import QtWidgets
@@ -10,6 +10,7 @@ import matplotlib as mpl
 from sasmodels.core import load_model_info, build_model
 from sasmodels.data import empty_data2D
 from sasmodels.direct_model import DirectModel
+from sasmodels.jitter import Rx, Ry, Rz
 
 from sas.qtgui.GL.color import Color
 from sas.qtgui.GL.scene import Scene
@@ -20,10 +21,19 @@ from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
 
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import OrientationViewierController, Orientation
-from sas.qtgui.Utilities.OrientationViewer.OrientationViewerGraphics import OrientationViewerGraphics
 from sas.qtgui.Utilities.OrientationViewer.FloodBarrier import FloodBarrier
 
 
+def createCubeTransform(theta_deg: float, phi_deg: float, psi_deg: float, scaling: List[float]) -> np.ndarray:
+    # Get rotation matrix
+    r_mat = Rz(phi_deg) @ Ry(theta_deg) @ Rz(psi_deg) @ np.diag(scaling)
+
+    # Get the 4x4 transformation matrix, by (1) padding by zeros (2) setting the corner element to 1
+    trans_mat = np.pad(r_mat, ((0, 1), (0, 1)))
+    trans_mat[-1, -1] = 1
+    trans_mat[2, -1] = 2
+
+    return trans_mat
 
 class OrientationViewer(QtWidgets.QWidget):
 

@@ -131,3 +131,20 @@ class Scaling(SceneGraphNode):
     def apply(self):
         glScale(self.x, self.y, self.z)
 
+class MatrixTransform(SceneGraphNode):
+
+    def __init__(self, matrix: np.ndarray, *children: Renderable):
+        """
+
+        Apply a 4x4 transformation matrix to the children of this node
+
+        :param matrix: a 4x4 transformation matrix
+
+        """
+
+        super().__init__(*children)
+
+        self.matrix = matrix
+
+    def apply(self):
+        glMultMatrixd(self.matrix)
