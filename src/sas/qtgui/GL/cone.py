@@ -2,11 +2,11 @@ from typing import Optional, Union, Sequence, List, Tuple
 
 import numpy as np
 
-from sas.qtgui.GL.models import FullVertexModel, WireModel
+from sas.qtgui.GL.models import FullModel, WireModel
 from sas.qtgui.GL.color import Color
 
 
-class Cone(FullVertexModel):
+class Cone(FullModel):
     """ Graphics primitive: Radius 1, Height 2 cone "centred" at (0,0,0)"""
 
     @staticmethod

@@ -68,15 +68,19 @@ def transform_tests():
     for i in range(3):
         for j in range(3):
             for k in range(3):
-                component = Translation(-2 * (i-1), -2 * (j-1), -2 * (k-1), Scaling(2 ** (i - 1), 2 ** (j - 1), 2 ** (k - 1), cone_sphere))
+                component = Translation(-2 * (i-1), -2 * (j-1), -2 * (k-1),
+                                        Rotation(45*(i - 1), 1, 0, 0,
+                                                 Rotation(45*(j-1), 0, 1, 0,
+                                                          Rotation(45*(k-1), 0, 0, 1,
+                                                                   cone_sphere))))
                 scaling_components.append(component)
 
     rotation_test = Scaling(0.5, 0.5, 0.5, *scaling_components)
 
 
     item_list = [
-        # translate_test,
-        # scaling_test,
+        translate_test,
+        scaling_test,
         rotation_test
     ]
 

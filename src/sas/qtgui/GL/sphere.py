@@ -2,11 +2,11 @@ from typing import Optional, Union, Sequence
 
 import numpy as np
 
-from sas.qtgui.GL.models import FullVertexModel
+from sas.qtgui.GL.models import FullModel
 from sas.qtgui.GL.color import Color
 
 
-class Sphere(FullVertexModel):
+class Sphere(FullModel):
     @staticmethod
     def sphere_vertices(n_horizontal, n_segments):
         vertices = [(0.0, 0.0, 1.0)]

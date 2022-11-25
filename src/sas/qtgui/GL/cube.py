@@ -1,10 +1,10 @@
 from typing import Optional, Union, Sequence
 
-from sas.qtgui.GL.models import FullVertexModel, WireModel
+from sas.qtgui.GL.models import FullModel, WireModel
 from sas.qtgui.GL.color import Color
 
 
-class Cube(FullVertexModel):
+class Cube(FullModel):
     """ Unit cube centred at 0,0,0"""
 
     cube_vertices = [

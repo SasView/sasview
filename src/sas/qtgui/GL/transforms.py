@@ -31,7 +31,7 @@ class SceneGraphNode(Renderable):
         self.children.append(child)
 
     def apply(self):
-        pass
+        """ GL operations needed to apply any transformations associated with this node """
 
     def render_solid(self):
         if self.solid_render_enabled:
@@ -75,20 +75,21 @@ class SceneGraphNode(Renderable):
 class Rotation(SceneGraphNode):
 
 
-    def __init__(self, angle, axis, *children: Renderable):
+    def __init__(self, angle, x, y, z, *children: Renderable):
         """
         Rotate the children of this node
 
-        :param angle: angle of rotation in TODO
+        :param angle: angle of rotation in degrees
         :param axis: axis for rotation
         """
         super().__init__(*children)
         self.angle = angle
-        self.axis = axis
+        self.x = x
+        self.y = y
+        self.z = z
 
     def apply(self):
-        pass
-
+        glRotate(self.angle, self.x, self.y, self.z)
 
 
 class Translation(SceneGraphNode):

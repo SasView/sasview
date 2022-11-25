@@ -3,13 +3,13 @@ from typing import Optional, Union, Sequence
 import numpy as np
 
 from sas.qtgui.GL.color import Color
-from sas.qtgui.GL.models import FullVertexModel
+from sas.qtgui.GL.models import FullModel
 
 ico_ring_h = np.sqrt(1/5)
 ico_ring_r = np.sqrt(4/5)
 
 
-class Icosahedron(FullVertexModel):
+class Icosahedron(FullModel):
     """ Icosahedron centred at 0,0,0"""
 
 

@@ -4,12 +4,12 @@ import numpy as np
 
 import matplotlib as mpl
 
-from sas.qtgui.GL.models import FullVertexModel, WireModel
+from sas.qtgui.GL.models import FullModel, WireModel
 from sas.qtgui.GL.color import Color, ColorMap
 
 logger = logging.getLogger("GL.Surface")
 
-class Surface(FullVertexModel):
+class Surface(FullModel):
 
 
     @staticmethod
