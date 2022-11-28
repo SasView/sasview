@@ -74,29 +74,11 @@ jobs:
         run: |
           sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
 
-      - name: Install lxml and MPL (Windows + Linux)
-        if: ${{ !startsWith(matrix.os, 'macos') }}
-        run: |
-          python -m pip install matplotlib~=3.5.2
-          python -m pip install lxml
-
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install wheel setuptools
           python -m pip install -r build_tools/requirements.txt
-
-      - name: Install PyQt (Windows + Linux)
-        if: ${{ !startsWith(matrix.os, 'macos') }}
-        run: |
-          python -m pip install PyQt5
-
-      - name: Install lxml, matplotlib and PyQt (OSX)
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        run: |
-          python -m pip install PyQt5==5.13
-          python -m pip install matplotlib~=3.5.2
-          python -m pip install --no-binary lxml lxml
 
       - name: Install pyopencl (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
