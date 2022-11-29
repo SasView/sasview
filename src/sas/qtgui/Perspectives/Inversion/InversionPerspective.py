@@ -699,7 +699,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                 self.nTermsSuggested))
             self.regConstantSuggestionButton.setText("{:-3.2g}".format(
                 REGULARIZATION))
-            self.updateGuiValues()
+            # self.updateGuiValues()
             self.setupModel()
         else:
             self.dataList.setCurrentIndex(0)
