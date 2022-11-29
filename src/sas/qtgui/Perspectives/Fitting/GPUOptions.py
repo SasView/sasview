@@ -136,8 +136,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         self.progressBar.setMaximum(number_of_tests)
         self.progressBar.setVisible(True)
         self.testButton.setEnabled(False)
-        self.okButton.setEnabled(False)
-        self.resetButton.setEnabled(False)
         no_opencl_msg = self.set_sas_open_cl()
 
         test_thread = threads.deferToThread(self.testThread, no_opencl_msg)
@@ -251,8 +249,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         """
         self.progressBar.setVisible(False)
         self.testButton.setEnabled(True)
-        self.okButton.setEnabled(True)
-        self.resetButton.setEnabled(True)
 
         logging.error(str(msg))
 
@@ -262,8 +258,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         """
         self.progressBar.setVisible(False)
         self.testButton.setEnabled(True)
-        self.okButton.setEnabled(True)
-        self.resetButton.setEnabled(True)
 
         GPUTestResults(self, msg)
 
