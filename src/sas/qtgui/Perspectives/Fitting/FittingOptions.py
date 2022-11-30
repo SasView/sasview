@@ -158,10 +158,8 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         # keep reference
         self.previous_index = index
 
-    def onApply(self):
-        """
-        Update the fitter object
-        """
+    def applyNonConfigValues(self):
+        """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
         options = self.config.values[self.current_fitter_id]
         for option in options.keys():
             # Find the widget name of the option
@@ -209,7 +207,6 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
         # Update the BUMPS singleton
         [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]
-        self.close()
 
     def onHelp(self):
         """
