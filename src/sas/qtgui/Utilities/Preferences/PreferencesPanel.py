@@ -92,6 +92,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def _saveStagedChanges(self):
         """ When OK or Apply are clicked, all staged changes should be applied to the config. """
+        for i in range(self.stackedWidget.count()):
+            self.stackedWidget.widget(i).applyNonConfigValues()
         for k, v in self._staged_changes.items():
             setattr(config, k, v)
         self._staged_changes = {}

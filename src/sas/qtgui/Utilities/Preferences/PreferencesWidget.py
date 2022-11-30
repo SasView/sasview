@@ -76,6 +76,11 @@ class PreferencesWidget(QWidget):
         """A pseudo-abstract class that children should override. Toggles signalling for all elements. """
         raise NotImplementedError(f"{self.name} has not implemented _toggleBlockAllSignalling.")
 
+    def applyNonConfigValues(self):
+        """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
+        pass
+
+
     #############################################################
     # GUI Helper methods for widgets that don't have a UI element
 
