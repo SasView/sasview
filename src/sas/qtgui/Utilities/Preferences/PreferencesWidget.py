@@ -33,21 +33,22 @@ class PreferencesWidget(QWidget):
     """A helper class that bundles all values needed to add a new widget to the preferences panel
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, build_gui=True):
         super(PreferencesWidget, self).__init__()
         # Keep parent as None until widget is added to preferences panel, then this will become th
         self.parent = None
         self.name: str = name
         # All parameter names used in this panel
         self.config_params: List[str] = []
-        # Create generic layout
-        self.verticalLayout = QVBoxLayout()
-        self.setLayout(self.verticalLayout)
-        # Child class generates GUI elements
-        self._addAllWidgets()
-        # Push all elements to the top of the window
-        self.verticalLayout.addStretch()
-        self.adjustSize()
+        if build_gui:
+            # Create generic layout
+            self.verticalLayout = QVBoxLayout()
+            self.setLayout(self.verticalLayout)
+            # Child class generates GUI elements
+            self._addAllWidgets()
+            # Push all elements to the top of the window
+            self.verticalLayout.addStretch()
+            self.adjustSize()
 
     def restoreDefaults(self):
         """Generic method to restore all default values for the widget. """
