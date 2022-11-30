@@ -17,6 +17,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from PyQt5 import QtGui, QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
 from sas.system import env
 from sas import config
@@ -37,7 +38,8 @@ except AttributeError:
 
 logger = logging.getLogger(__name__)
 
-class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
+
+class GPUOptions(PreferencesWidget, Ui_GPUOptions):
     """
     OpenCL Dialog to select the desired OpenCL driver
     """
@@ -47,9 +49,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
     testingDoneSignal = QtCore.pyqtSignal(str)
     testingFailedSignal = QtCore.pyqtSignal(str)
 
-    def __init__(self, parent=None):
-        super(GPUOptions, self).__init__(parent)
-        self.parent = parent
+    def __init__(self):
+        super(GPUOptions, self).__init__(self.name, False)
         self.setupUi(self)
 
         self.radio_buttons = []
@@ -64,9 +65,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         self.helpButton.clicked.connect(self.helpButtonClicked)
         self.testingDoneSignal.connect(self.testCompleted)
         self.testingFailedSignal.connect(self.testFailed)
-
-    def restoreGUIValuesFromConfig(self):
-        pass
 
     def _restoreFromConfig(self):
         pass

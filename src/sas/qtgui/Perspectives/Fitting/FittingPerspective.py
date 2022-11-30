@@ -85,7 +85,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
 
         # GPU Options
-        self.gpu_options_widget = GPUOptions(self)
+        self.gpu_options_widget = GPUOptions()
 
         self.updateWindowTitle()
 
