@@ -67,7 +67,9 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.testingFailedSignal.connect(self.testFailed)
 
     def _restoreFromConfig(self):
-        pass
+        for i in reversed(range(self.optionsLayout.count())):
+            self.optionsLayout.itemAt(i).widget().setParent(None)
+        self.add_options()
 
     def _toggleBlockAllSignaling(self, toggle: bool):
         pass
