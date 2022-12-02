@@ -41,7 +41,9 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
     name = "Fit Optimizers"
 
     def __init__(self, config=None):
-        super(FittingOptions, self).__init__(self.name)
+        super(FittingOptions, self).__init__(self.name, False)
+        # Use pre-built UI
+        self.setupUi(self)
 
         self.parent = None
         self.config = config
@@ -74,8 +76,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
     # Preference Widget required methods
 
     def _addAllWidgets(self):
-        # Use pre-built UI
-        self.setupUi(self)
+        pass
 
     def _toggleBlockAllSignaling(self, toggle: bool):
         self.cbAlgorithmDefault.blockSignals(toggle)
