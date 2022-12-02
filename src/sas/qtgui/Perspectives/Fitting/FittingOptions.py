@@ -84,6 +84,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         optimizer_key = sasview_config.FITTING_DEFAULT_OPTIMIZER
         optimizer_name = bumps.options.FIT_CONFIG.names[optimizer_key]
         self.cbAlgorithmDefault.setCurrentIndex(self.cbAlgorithmDefault.findText(optimizer_name))
+        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(optimizer_name))
 
     def assignValidators(self):
         """
