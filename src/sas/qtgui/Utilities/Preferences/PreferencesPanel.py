@@ -1,8 +1,10 @@
 import logging
+import os
+import sys
 
-from PyQt5.QtWidgets import QDialog, QPushButton, QWidget, QDialogButtonBox
+from PyQt5.QtWidgets import QDialog, QWidget, QDialogButtonBox, QMessageBox
 from PyQt5.QtCore import Qt
-from typing import Optional, Callable, Dict, Any
+from typing import Optional, Callable, Dict, Any, Union, List
 
 from sas.system import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
@@ -20,6 +22,7 @@ from .PlottingPreferencesWidget import PlottingPreferencesWidget
 BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,
                "Display Settings": DisplayPreferencesWidget,
                }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
+ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +37,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         super(PreferencesPanel, self).__init__(parent)
         self.setupUi(self)
         self._staged_changes = {}
+        self._staged_requiring_restart = []
         self.parent = parent
         self.setWindowTitle("Preferences")
         # Add predefined widgets to window
@@ -80,10 +84,12 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         if hasattr(widget, 'restoreDefaults') and callable(widget.restoreDefaults):
             widget.restoreDefaults()
 
-    def stageSingleChange(self, key, value):
+    def stageSingleChange(self, key: str, value: ConfigType, config_restart_message: Optional[str] = ""):
         """ Preferences widgets should call this method when changing a variable to prevent direct configuration
         changes"""
         self._staged_changes[key] = value
+        if config_restart_message and config_restart_message not in self._staged_requiring_restart:
+            self._staged_requiring_restart.append(config_restart_message)
 
     def _okClicked(self):
         """ Action triggered when the OK button is clicked"""
@@ -94,6 +100,16 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         """ When OK or Apply are clicked, all staged changes should be applied to the config. """
         for k, v in self._staged_changes.items():
             setattr(config, k, v)
+        if any(self._staged_requiring_restart):
+            message = "SasView must restart for the following values to take effect. Do you wish to restart?:\n"
+            for val in self._staged_requiring_restart:
+                message += f" -{val}\n"
+            msgBox = QMessageBox(QMessageBox.Information, "", message, QMessageBox.Yes|QMessageBox.No)
+            msgBox.show()
+            if msgBox.exec() == QMessageBox.Yes:
+                self.parent.guiManager.quitApplication()
+                os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
+        self._staged_requiring_restart = []
         self._staged_changes = {}
 
     def _cancelStaging(self):
