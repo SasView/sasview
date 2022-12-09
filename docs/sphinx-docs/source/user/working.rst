@@ -12,7 +12,7 @@ Working with SasView
 
    Plotting Data/Models <qtgui/MainWindow/graph_help>
 
-   Test Data <example_data/testdata_help>
+   Test Data <sasview/test/testdata_help>
 
    Tutorials <tutorial>
 
@@ -21,5 +21,3 @@ Working with SasView
    Environment Variables <environment>
 
    Model marketplace <marketplace>
-
-   Preferences <qtgui/MainWindow/preferences_help.rst>
