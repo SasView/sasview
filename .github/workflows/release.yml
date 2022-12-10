@@ -1,9 +1,6 @@
 name: Create release
 
 on:
-  push:
-    branches:
-      - release*
   pull_request:
     branches:
       - release*
@@ -107,7 +104,7 @@ jobs:
     ### TODO: Bumps and sasmodels branches needs to be setup manually until we find better mechanism
     - name: Fetch sources for sibling projects
       run: |
-        git clone --depth=1 --branch=v1.0.6 https://github.com/SasView/sasmodels.git ../sasmodels
+        git clone --depth=1 --branch=release_1.0.7 https://github.com/SasView/sasmodels.git ../sasmodels
         git clone --depth=1 --branch=v0.9.0 https://github.com/bumps/bumps.git ../bumps
 
     - name: Build and install sasmodels
@@ -205,20 +202,20 @@ jobs:
         path: installers/dist/SasView5.dmg
         if-no-files-found: error
           
-#     - name: Notarize Release Build (OSX)
-#       if: ${{ matrix.os == 'macos-latest' }}
-#       uses: devbotsxyz/xcode-notarize@v1
-#       with:
-#           product-path: "installers/dist/SasView5.dmg"
-#           primary-bundle-id: "org.sasview.SasView5"
-#           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-#           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+     - name: Notarize Release Build (OSX)
+       if: ${{ matrix.os == 'macos-latest' }}
+       uses: devbotsxyz/xcode-notarize@v1
+       with:
+           product-path: "installers/dist/SasView5.dmg"
+           primary-bundle-id: "org.sasview.SasView5"
+           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
 
-#     - name: Staple Release Build (OSX)
-#       if: ${{ matrix.os == 'macos-latest' }}
-#       uses: devbotsxyz/xcode-staple@v1
-#       with:
-#           product-path: "installers/dist/SasView5.dmg"
+     - name: Staple Release Build (OSX)
+       if: ${{ matrix.os == 'macos-latest' }}
+       uses: devbotsxyz/xcode-staple@v1
+       with:
+           product-path: "installers/dist/SasView5.dmg"
 
     - name: Declare env variables on push only
       if: github.event_name == 'push'
