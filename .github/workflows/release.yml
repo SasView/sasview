@@ -202,19 +202,19 @@ jobs:
         if-no-files-found: error
           
     - name: Notarize Release Build (OSX)
-       if: ${{ matrix.os == 'macos-latest' }}
-       uses: devbotsxyz/xcode-notarize@v1
-       with:
-           product-path: "installers/dist/SasView5.dmg"
-           primary-bundle-id: "org.sasview.SasView5"
-           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: devbotsxyz/xcode-notarize@v1
+      with:
+        product-path: "installers/dist/SasView5.dmg"
+        primary-bundle-id: "org.sasview.SasView5"
+        appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+        appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
 
     - name: Staple Release Build (OSX)
-       if: ${{ matrix.os == 'macos-latest' }}
-       uses: devbotsxyz/xcode-staple@v1
-       with:
-           product-path: "installers/dist/SasView5.dmg"
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: devbotsxyz/xcode-staple@v1
+      with:
+        product-path: "installers/dist/SasView5.dmg"
 
     - name: Declare env variables on push only
       if: github.event_name == 'push'
