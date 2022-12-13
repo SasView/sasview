@@ -203,7 +203,7 @@ jobs:
           
     - name: Notarize Release Build (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
-      uses: devbotsxyz/xcode-notarize@v1
+      uses: GuillaumeFalourd/xcode-notarize@v1
       with:
         product-path: "installers/dist/SasView5.dmg"
         primary-bundle-id: "org.sasview.SasView5"
