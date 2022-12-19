@@ -1,9 +1,6 @@
 name: Create release
 
 on:
-  push:
-    branches:
-      - release*
   pull_request:
     branches:
       - release*
@@ -14,7 +11,6 @@ defaults:
 
 jobs:
   installer:
-
     timeout-minutes: 40
 
     runs-on: ${{ matrix.os }}
@@ -107,7 +103,7 @@ jobs:
     ### TODO: Bumps and sasmodels branches needs to be setup manually until we find better mechanism
     - name: Fetch sources for sibling projects
       run: |
-        git clone --depth=1 --branch=v1.0.6 https://github.com/SasView/sasmodels.git ../sasmodels
+        git clone --depth=1 --branch=release_1.0.7 https://github.com/SasView/sasmodels.git ../sasmodels
         git clone --depth=1 --branch=v0.9.0 https://github.com/bumps/bumps.git ../bumps
 
     - name: Build and install sasmodels
@@ -205,39 +201,17 @@ jobs:
         path: installers/dist/SasView5.dmg
         if-no-files-found: error
           
-#     - name: Notarize Release Build (OSX)
-#       if: ${{ matrix.os == 'macos-latest' }}
-#       uses: devbotsxyz/xcode-notarize@v1
-#       with:
-#           product-path: "installers/dist/SasView5.dmg"
-#           primary-bundle-id: "org.sasview.SasView5"
-#           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-#           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-
-#     - name: Staple Release Build (OSX)
-#       if: ${{ matrix.os == 'macos-latest' }}
-#       uses: devbotsxyz/xcode-staple@v1
-#       with:
-#           product-path: "installers/dist/SasView5.dmg"
-
-    - name: Declare env variables on push only
-      if: github.event_name == 'push'
-      shell: bash
-      run: echo "BRANCH_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-    - name: Declare env variables on pull_request only
-      if: github.event_name == 'pull_request'
-      shell: bash
-      run: echo "BRANCH_NAME=$GITHUB_HEAD_REF" >> $GITHUB_ENV
-
-    - name: Upload installer to GitHub releases
-      uses: ncipollo/release-action@v1
+    - name: Notarize Release Build (OSX)
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: GuillaumeFalourd/xcode-notarize@v1
       with:
-          draft: true
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
-          name: ${{ env.BRANCH_NAME }}
-          tag: ${{ env.BRANCH_NAME }}
+        product-path: "installers/dist/SasView5.dmg"
+        primary-bundle-id: "org.sasview.SasView5"
+        appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+        appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+
+    - name: Staple Release Build (OSX)
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: devbotsxyz/xcode-staple@v1
+      with:
+        product-path: "installers/dist/SasView5.dmg"
