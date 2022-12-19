@@ -119,6 +119,9 @@
             <height>300</height>
            </size>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
          </widget>
         </item>
         <item row="1" column="4">
@@ -216,6 +219,9 @@
             <width>300</width>
             <height>300</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
           </property>
          </widget>
         </item>
@@ -377,6 +383,9 @@ Append(Combine): |</string>
             <width>300</width>
             <height>300</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
           </property>
          </widget>
         </item>

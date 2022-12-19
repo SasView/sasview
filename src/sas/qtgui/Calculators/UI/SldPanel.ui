@@ -332,6 +332,9 @@
           <height>28</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Recalculate</string>
         </property>
