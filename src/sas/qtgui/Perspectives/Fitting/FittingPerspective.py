@@ -217,9 +217,11 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                     constraint.param = constraint_param[1]
                     constraint.value_ex = constraint_param[2]
                     constraint.validate = constraint_param[3]
+                    model_key = tab.getModelKey(constraint)
                     tab.addConstraintToRow(constraint=constraint,
                                            row=tab.getRowFromName(
-                                               constraint_param[1]))
+                                               constraint_param[1]),
+                                           model_key=model_key)
 
     def closeEvent(self, event):
         """
@@ -535,9 +537,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         constraints = []
         for tab in self.getFitTabs():
             tab_name = tab.modelName()
-            tab_constraints = tab.getConstraintsForModel()
-            constraints.extend((tab_name + "." + par, expr)
-                               for par, expr in tab_constraints)
+            tab_constraints = tab.getConstraintsForAllModels()
+            constraints.extend((tab_name + "." + par, expr) for par, expr in tab_constraints)
+
         return constraints
 
     def getSymbolDictForConstraints(self):
