@@ -49,7 +49,7 @@ sasview_data = {
         {'name': 'Alina, Gervaise','affiliation': 'University of Tennessee Knoxville'},
         {'name': 'Attala, Ziggy', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Bakker, Jurrian','affiliation': 'Technical Unviersity Delft'},
-        {'name': 'Beaucage, Peter','affiliation': 'National Institute of Standards and Technology'},
+        {'name': 'Beaucage, Peter','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2147-0728'},
         {'name': 'Bouwman, Wim','affiliation': 'Technical Univeristy Deflt' },
         {'name': 'Bourne, Robert', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-5978-4714'},
@@ -77,7 +77,7 @@ sasview_data = {
         {'name': 'Snow, Tim','affiliation': 'Diamond Light Source','orcid': '0000-0001-7146-6885'},
         {'name': 'Washington, Adam','affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Wilkins, Lucas','affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Wolf, Caitlyn','affiliation': 'National Institute of Standards and Technology'}
+        {'name': 'Wolf, Caitlyn','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2956-7049'}
         ],
     'grants': [{'id': '10.13039/501100000780::654000'}],
     'license': 'BSD-3-Clause',
