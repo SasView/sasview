@@ -166,7 +166,8 @@ class GuiManager(object):
         self.results_frame.setVisible(False)
         self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
 
-        self._workspace.toolBar.setVisible(config.TOOLBAR_SHOW)
+        custom_config = get_custom_config()
+        self._workspace.toolBar.setVisible(custom_config.TOOLBAR_SHOW)
 
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
