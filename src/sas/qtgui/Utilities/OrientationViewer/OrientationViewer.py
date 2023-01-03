@@ -12,13 +12,13 @@ from sasmodels.data import empty_data2D
 from sasmodels.direct_model import DirectModel
 from sasmodels.jitter import Rx, Ry, Rz
 
-from sas.qtgui.GL.color import Color
 from sas.qtgui.GL.scene import Scene
 from sas.qtgui.GL.transforms import Rotation, Scaling, Translation
 from sas.qtgui.GL.surface import Surface
 from sas.qtgui.GL.cylinder import Cylinder
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
+from sas.qtgui.GL.color import uniform_coloring
 
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import OrientationViewierController, Orientation
 
@@ -44,9 +44,9 @@ class OrientationViewer(QtWidgets.QWidget):
     c = 1.0
 
     arrow_size = 0.2
-    arrow_color = Color(0.9, 0.9, 0.9)
-    ghost_color = Color(0.0, 0.6, 0.2)
-    cube_color = Color(0.0, 0.8, 0.0)
+    arrow_color = uniform_coloring(0.9, 0.9, 0.9)
+    ghost_color = uniform_coloring(0.0, 0.6, 0.2)
+    cube_color = uniform_coloring(0.0, 0.8, 0.0)
 
     cuboid_scaling = [a, b, c]
 
@@ -307,7 +307,7 @@ def main():
     mainWindow.show()
 
     mainWindow.resize(600, 600)
-    # app.exec_()
+    app.exec_()
 
 
 if __name__ == "__main__":

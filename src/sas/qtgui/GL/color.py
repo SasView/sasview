@@ -29,7 +29,7 @@ def uniform_coloring(r, g, b, alpha=1.0):
     """ Create a ColorSpecification for colouring with a single colour"""
     return ColorSpecification(
         method=ColorSpecificationMethod.UNIFORM,
-        data=np.array([r, b, g, alpha]))
+        data=np.array([r, g, b, alpha]))
 
 
 def edge_coloring(data: Sequence[Union[Sequence[float], np.ndarray]]) -> ColorSpecification:
