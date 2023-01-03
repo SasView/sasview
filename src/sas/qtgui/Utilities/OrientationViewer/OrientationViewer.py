@@ -256,7 +256,7 @@ class OrientationViewer(QtWidgets.QWidget):
         is_polydisperse = [1 if x > 0 else 0 for x in polydispersity]
         n_polydisperse = np.sum(is_polydisperse)
 
-        samples = int(200 / (n_polydisperse**2.2 + 1)) #
+        samples = int(200 / (n_polydisperse**2 + 1)) #
 
         return (samples * x for x in is_polydisperse)
 
