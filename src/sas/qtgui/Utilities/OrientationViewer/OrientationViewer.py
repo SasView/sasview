@@ -271,6 +271,24 @@ class OrientationViewer(QtWidgets.QWidget):
 
         return np.reshape(data, (OrientationViewer.n_q_samples, OrientationViewer.n_q_samples))
 
+    def closeEvent(self, event):
+        try:
+            _orientation_viewers.remove(self)
+        except ValueError: # Not in list
+            pass
+
+        event.accept()
+
+
+# Code for handling multiple orientation viewers
+_orientation_viewers = []
+def show_orientation_viewer():
+    ov = OrientationViewer()
+    ov.show()
+    ov.resize(600, 600)
+
+    _orientation_viewers.append(ov)
+
 
 
 def main():
