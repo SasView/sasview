@@ -191,9 +191,9 @@ class FullModel(SolidVertexModel, WireModel):
     def __init__(self,
                  vertices: VertexData,
                  edges: EdgeData,
-                 triangle_meshes: TriangleMeshData,
-                 edge_colors: ColorSpecification,
-                 colors: ColorSpecification):
+                 triangle_meshes: Sequence[TriangleMeshData],
+                 edge_colors: Optional[ColorSpecification],
+                 colors: Optional[ColorSpecification]):
 
         SolidVertexModel.__init__(self,
                                   vertices=vertices,

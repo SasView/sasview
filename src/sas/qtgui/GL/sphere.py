@@ -3,7 +3,7 @@ from typing import Optional, Union, Sequence
 import numpy as np
 
 from sas.qtgui.GL.models import FullModel
-from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.color import ColorSpecification
 
 
 class Sphere(FullModel):
@@ -68,8 +68,8 @@ class Sphere(FullModel):
                  n_horizontal: int = 21,
                  n_segments: int = 28,
                  grid_gap: int = 1,
-                 colors: Optional[Union[Sequence[Color], Color]]=None,
-                 edge_colors: Optional[Union[Sequence[Color],Color]]=None):
+                 colors: Optional[ColorSpecification]=None,
+                 edge_colors: Optional[ColorSpecification]=None):
 
         """
 

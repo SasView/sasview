@@ -2,7 +2,7 @@ from typing import Optional, Union, Sequence
 
 import numpy as np
 
-from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.color import ColorSpecification
 from sas.qtgui.GL.models import FullModel
 
 ico_ring_h = np.sqrt(1/5)
@@ -77,8 +77,8 @@ class Icosahedron(FullModel):
     ]]
 
     def __init__(self,
-                 colors: Optional[Union[Sequence[Color], Color]]=None,
-                 edge_colors: Optional[Union[Sequence[Color],Color]]=None):
+                 colors: Optional[ColorSpecification]=None,
+                 edge_colors: Optional[ColorSpecification]=None):
 
         super().__init__(
             vertices=Icosahedron.ico_vertices,

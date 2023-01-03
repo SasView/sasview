@@ -4,7 +4,7 @@ import logging
 import numpy as np
 
 from sas.qtgui.GL.models import FullModel
-from sas.qtgui.GL.color import Color, ColorMap
+from sas.qtgui.GL.color import ColorMap, uniform_coloring
 
 logger = logging.getLogger("GL.Surface")
 
@@ -65,15 +65,18 @@ class Surface(FullModel):
         self._colormap_name = colormap
         self._colormap = ColorMap(colormap, min_value=c_range[0], max_value=c_range[1])
 
-        verts = [(float(x), float(y), float(z))
-                 for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
+        self.x_flat = self.x_data.flatten()
+        self.y_flat = self.y_data.flatten()
+        self.z_flat = self.z_data.flatten()
+
+        verts = np.vstack((self.x_flat, self.y_flat, self.z_flat)).T
 
         super().__init__(
             vertices=verts,
             edges=Surface.calculate_edge_indices(self.n_x, self.n_y, edge_skip),
             triangle_meshes=[Surface.calculate_triangles(self.n_x, self.n_y)],
-            edge_colors=Color(1.0,1.0,1.0),
-            colors=self._colormap.color_array([z for _, _, z in verts])
+            edge_colors=uniform_coloring(1.0,1.0,1.0),
+            colors=self._colormap.vertex_coloring(self.z_flat)
             )
 
         self.wireframe_render_enabled = True
@@ -85,11 +88,10 @@ class Surface(FullModel):
         "Set the z data on this surface plot"
 
         self.z_data = z_data
-        verts = [(float(x), float(y), float(z))
-                 for x, y, z in zip(np.nditer(self.x_data), np.nditer(self.y_data), np.nditer(self.z_data))]
+        self.z_flat = z_data.flatten()
 
-        self.vertices = verts
-        self.colors = self._colormap.color_array([z for _, _, z in verts])
+        self.vertices = np.vstack((self.x_flat, self.y_flat, self.z_flat)).T
+        self.colors = self._colormap.vertex_coloring(self.z_flat)
 
     @property
     def colormap(self) -> str:
@@ -100,5 +102,5 @@ class Surface(FullModel):
     def colormap(self, colormap: str):
         if self._colormap_name != colormap:
             self._colormap = ColorMap(colormap, min_value=self.c_range[0], max_value=self.c_range[1])
-            self.colors = self._colormap.color_array([z for _, _, z in self.vertices])
+            self.colors = self._colormap.vertex_coloring(self.z_flat)
             self._colormap_name = colormap

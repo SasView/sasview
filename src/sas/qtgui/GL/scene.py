@@ -7,9 +7,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 from sas.qtgui.GL.renderable import Renderable
-from sas.qtgui.GL.color import Color
 from sas.qtgui.GL.surface import Surface
-from sas.qtgui.GL.cone import Cone
 
 class Scene(QtOpenGL.QGLWidget):
 

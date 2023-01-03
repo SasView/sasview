@@ -50,7 +50,7 @@ def _component_coloring(data: Sequence[Union[Sequence[float], np.ndarray]]) -> C
         raise ValueError("Colour data should be all n-by-3 or n-by-4")
 
     if data.shape[1] == 3:
-        data = np.concatenate((data, np.ones(data.shape[0], 1)))
+        data = np.concatenate((data, np.ones((data.shape[0], 1))), axis=1)
     elif data.shape[1] == 4:
         pass
     else:
@@ -67,7 +67,7 @@ def vertex_coloring(data: np.ndarray) -> ColorSpecification:
         raise ValueError("Colour data should be all n-by-3 or n-by-4")
 
     if data.shape[1] == 3:
-        data = np.concatenate((data, np.ones(data.shape[0], 1)))
+        data = np.concatenate((data, np.ones((data.shape[0], 1))), axis=1)
     elif data.shape[1] == 4:
         pass
     else:

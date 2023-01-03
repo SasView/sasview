@@ -2,8 +2,8 @@ from typing import Optional, Union, Sequence, List, Tuple
 
 import numpy as np
 
-from sas.qtgui.GL.models import FullModel, WireModel
-from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.models import FullModel
+from sas.qtgui.GL.color import ColorSpecification
 
 
 class Cone(FullModel):
@@ -39,8 +39,8 @@ class Cone(FullModel):
 
     def __init__(self,
                  n: int = 20,
-                 colors: Optional[Union[Sequence[Color], Color]]=None,
-                 edge_colors: Optional[Union[Sequence[Color],Color]]=None):
+                 colors: Optional[ColorSpecification]=None,
+                 edge_colors: Optional[ColorSpecification]=None):
 
         super().__init__(
             vertices=Cone.cone_vertices(n),

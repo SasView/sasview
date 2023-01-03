@@ -6,7 +6,7 @@ from PyQt5 import QtWidgets
 
 from sas.qtgui.GL.scene import Scene
 from sas.qtgui.GL.models import ModelBase
-from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.color import uniform_coloring, mesh_coloring, vertex_coloring
 from sas.qtgui.GL.surface import Surface
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
@@ -29,7 +29,14 @@ def mesh_example():
 def primative_library():
     """ Shows all the existing primitives that can be rendered, press a key to go through them"""
 
-    import os
+    import sys, os, traceback
+    def excepthook(exc_type, exc_value, exc_tb):
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        print("error catched!:")
+        print("error message:\n", tb)
+        QtWidgets.QApplication.quit()
+
+    sys.excepthook = excepthook
 
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     app = QtWidgets.QApplication([])
@@ -37,20 +44,20 @@ def primative_library():
 
     item_list = [
         mesh_example(),
-        Cube(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0.2, 0)),
-        Cube(edge_colors=Color(1, 1, 1), colors=[
-            Color(1,0,0),
-            Color(0,1,0),
-            Color(0,0,1),
-            Color(1,1,0),
-            Color(0,1,1),
-            Color(1,0,1)
-        ], color_by_mesh=True),
-        Cone(edge_colors=Color(1, 1, 1), colors=Color(0, 0.7, 0.2)),
-        Cylinder(edge_colors=Color(1, 1, 1), colors=Color(0, 0.2, 0.7)),
-        Icosahedron(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0, 0.7)),
-        Sphere(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0.7, 0.0)),
-        Sphere(edge_colors=Color(1, 1, 1), colors=Color(0.7, 0.4, 0.0), grid_gap=4)
+        Cube(edge_colors=uniform_coloring(1, 1, 1), colors=uniform_coloring(0.7, 0.2, 0)),
+        Cube(edge_colors=uniform_coloring(1, 1, 1), colors=mesh_coloring([
+            (1,0,0),
+            (0,1,0),
+            (0,0,1),
+            (1,1,0),
+            (0,1,1),
+            (1,0,1)
+        ])),
+        Cone(edge_colors=uniform_coloring(1, 1, 1), colors=uniform_coloring(0, 0.7, 0.2)),
+        Cylinder(edge_colors=uniform_coloring(1, 1, 1), colors=uniform_coloring(0, 0.2, 0.7)),
+        Icosahedron(edge_colors=uniform_coloring(1, 1, 1), colors=uniform_coloring(0.7, 0, 0.7)),
+        Sphere(edge_colors=uniform_coloring(1, 1, 1), colors=uniform_coloring(0.7, 0.7, 0.0)),
+        Sphere(edge_colors=uniform_coloring(1, 1, 1), colors=uniform_coloring(0.7, 0.4, 0.0), grid_gap=4)
     ]
 
     # Turn off all of them
@@ -109,6 +116,9 @@ def primative_library():
     mainWindow.show()
 
     mainWindow.resize(600, 600)
+
+
+
     app.exec_()
 
 

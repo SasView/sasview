@@ -1,7 +1,7 @@
 from typing import Optional, Union, Sequence
 
-from sas.qtgui.GL.models import FullModel, WireModel
-from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.models import FullModel
+from sas.qtgui.GL.color import ColorSpecification
 
 
 class Cube(FullModel):
@@ -49,17 +49,15 @@ class Cube(FullModel):
     ]
 
     def __init__(self,
-                 colors: Optional[Union[Sequence[Color], Color]]=None,
-                 edge_colors: Optional[Union[Sequence[Color],Color]]=None,
-                 color_by_mesh: bool=False):
+                 colors: Optional[ColorSpecification]=None,
+                 edge_colors: Optional[ColorSpecification]=None):
 
         super().__init__(
             vertices=Cube.cube_vertices,
             edges=Cube.cube_edges,
             triangle_meshes=Cube.cube_triangles,
             edge_colors=edge_colors,
-            colors=colors,
-            color_by_mesh=color_by_mesh)
+            colors=colors)
 
         self.vertices = Cube.cube_vertices
         self.edges = Cube.cube_edges

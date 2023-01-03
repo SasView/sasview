@@ -1,9 +1,9 @@
-from typing import Optional, Union, Sequence, List, Tuple
+from typing import Optional, List, Tuple
 
 import numpy as np
 
-from sas.qtgui.GL.models import FullModel, WireModel
-from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.models import FullModel
+from sas.qtgui.GL.color import ColorSpecification
 
 
 class Cylinder(FullModel):
@@ -54,8 +54,8 @@ class Cylinder(FullModel):
 
     def __init__(self,
                  n: int = 20,
-                 colors: Optional[Union[Sequence[Color], Color]]=None,
-                 edge_colors: Optional[Union[Sequence[Color],Color]]=None):
+                 colors: Optional[ColorSpecification]=None,
+                 edge_colors: Optional[ColorSpecification]=None):
 
         super().__init__(
             vertices=Cylinder.cylinder_vertices(n),
