@@ -5,7 +5,7 @@ from PyQt5.QtCore import pyqtSignal
 
 
 
-from sas.qtgui.Utilities.UI.OrientationViewerControllerUI import Ui_OrientationViewierControllerUI
+from sas.qtgui.Utilities.OrientationViewer.UI.OrientationViewerControllerUI import Ui_OrientationViewierControllerUI
 
 class Orientation(NamedTuple):
     """ Data sent when updating the plot"""
