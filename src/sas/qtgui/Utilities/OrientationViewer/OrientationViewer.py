@@ -23,6 +23,8 @@ from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import Or
 class OrientationViewer(QtWidgets.QWidget):
     """ Orientation viewer widget """
 
+
+
     # Dimensions of scattering cuboid
     a = 0.1
     b = 0.4
@@ -55,9 +57,11 @@ class OrientationViewer(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__()
 
-        self._colormap_name = 'viridis'
-
         self.parent = parent
+
+        self.setWindowTitle("Orientation Viewer")
+
+        self._colormap_name = 'viridis'
 
         self.scene = Scene()
         self.scene.view_elevation = 20
