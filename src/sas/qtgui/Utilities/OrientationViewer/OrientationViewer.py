@@ -1,5 +1,7 @@
 from typing import Optional, List
+
 import numpy as np
+from scipy.special import erfinv
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QSizePolicy
@@ -45,6 +47,8 @@ class OrientationViewer(QtWidgets.QWidget):
     polydispersity_distribution = "gaussian"
 
     log_I_range = log_I_max - log_I_min
+
+
 
     @staticmethod
     def create_ghost():
@@ -109,20 +113,19 @@ class OrientationViewer(QtWidgets.QWidget):
 
         self.scene.add(self.image_plane)
 
-        self.ghost_index = np.linspace(-2, 2, OrientationViewer.n_ghosts_per_perameter)
-        # self.ghost_index = np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter)
+        self.ghost_spacings = erfinv(np.linspace(-1, 1, OrientationViewer.n_ghosts_per_perameter+2)[1:-1])/np.sqrt(2)
 
         self.all_ghosts = []
-        for a in self.ghost_index:
+        for a in self.ghost_spacings:
             b_ghosts = []
-            for b in self.ghost_index:
+            for b in self.ghost_spacings:
                 c_ghosts = []
-                for c in self.ghost_index:
+                for c in self.ghost_spacings:
                     ghost = Rotation(0, 0, 0, 1, OrientationViewer.create_ghost())
                     c_ghosts.append(ghost)
                 ghosts = Rotation(0,0,1,0, *c_ghosts)
                 b_ghosts.append(ghosts)
-            ghosts = Rotation(0,0,0,1,*b_ghosts)
+            ghosts = Rotation(0,1,0,0,*b_ghosts)
             self.all_ghosts.append(ghosts)
 
 
@@ -181,12 +184,12 @@ class OrientationViewer(QtWidgets.QWidget):
 
     def orient_ghosts(self, orientation: Orientation):
 
-        for a, a_ghosts in zip(self.ghost_index, self.all_ghosts):
-            a_ghosts.angle = 0.5*a*orientation.dtheta
-            for b, b_ghosts in zip(self.ghost_index, a_ghosts.children):
-                b_ghosts.angle = 0.5*b*orientation.dphi
-                for c, c_ghosts in zip(self.ghost_index, b_ghosts.children):
-                    c_ghosts.angle = 0.5*c*orientation.dpsi
+        for a, a_ghosts in zip(self.ghost_spacings, self.all_ghosts):
+            a_ghosts.angle = a*orientation.dtheta
+            for b, b_ghosts in zip(self.ghost_spacings, a_ghosts.children):
+                b_ghosts.angle = b*orientation.dphi
+                for c, c_ghosts in zip(self.ghost_spacings, b_ghosts.children):
+                    c_ghosts.angle = c*orientation.dpsi
 
     def on_angle_changed(self, orientation: Optional[Orientation]):
 
