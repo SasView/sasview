@@ -1,10 +1,10 @@
-from typing import Sequence
+from typing import Sequence, Union
 
 import logging
-
 import numpy as np
-
 import matplotlib as mpl
+from enum import Enum
+from dataclasses import dataclass
 
 from OpenGL.GL import glColor4f
 
@@ -12,24 +12,68 @@ from OpenGL.GL import glColor4f
 
 logger = logging.getLogger("GL.Color")
 
-class Color():
-    """ A basic color class that makes it easy to set a colour"""
-    def __init__(self, r: float, g: float, b: float, alpha: float=1.0):
-        self.r = float(r)
-        self.g = float(g)
-        self.b = float(b)
-        self.alpha = float(alpha)
+class ColorSpecificationMethod(Enum):
+    """ Specifies how to colour an object"""
+    UNIFORM = 1         # Whole object a single colour
+    BY_COMPONENT = 2    # Each mesh or edge within the object a single colour
+    BY_VERTEX = 3       # Vertex colouring for the whole object
 
-    def set(self):
-        """ Set the GL draw color to this color"""
-        glColor4f(self.r, self.g, self.b, self.alpha)
+@dataclass
+class ColorSpecification:
+    """ Specification of how to colour an object, and the data needed to do so"""
+    method: ColorSpecificationMethod
+    data: np.ndarray
 
-    def to_array(self):
-        """ length 4 array of values, r,g,b,alpha"""
-        return np.array([self.r, self.g, self.b, self.alpha])
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.r}, {self.g}, {self.b}, {self.alpha})"
+def uniform_coloring(r, g, b, alpha=1.0):
+    """ Create a ColorSpecification for colouring with a single colour"""
+    return ColorSpecification(
+        method=ColorSpecificationMethod.UNIFORM,
+        data=np.array([r, b, g, alpha]))
+
+
+def edge_coloring(data: Sequence[Union[Sequence[float], np.ndarray]]) -> ColorSpecification:
+    """ Create a ColorSpecification for colouring each edge within an object a single colour"""
+    return _component_coloring(data)
+
+
+def mesh_coloring(data: Sequence[Union[Sequence[float], np.ndarray]]) -> ColorSpecification:
+    """ Create a ColorSpecification for colouring each mesh within an object a single colour"""
+    return _component_coloring(data)
+
+
+def _component_coloring(data: Sequence[Union[Sequence[float], np.ndarray]]) -> ColorSpecification:
+    """ Create a ColorSpecification for colouring each mesh/edge within an object a single colour"""
+    try:
+        data = np.array(data)
+    except:
+        raise ValueError("Colour data should be all n-by-3 or n-by-4")
+
+    if data.shape[1] == 3:
+        data = np.concatenate((data, np.ones(data.shape[0], 1)))
+    elif data.shape[1] == 4:
+        pass
+    else:
+        raise ValueError("Colour data should be all n-by-3 or n-by-4")
+
+    return ColorSpecification(ColorSpecificationMethod.BY_COMPONENT, data)
+
+
+def vertex_coloring(data: np.ndarray) -> ColorSpecification:
+    """ Create a ColorSpecification for using vertex colouring"""
+    try:
+        data = np.array(data)
+    except:
+        raise ValueError("Colour data should be all n-by-3 or n-by-4")
+
+    if data.shape[1] == 3:
+        data = np.concatenate((data, np.ones(data.shape[0], 1)))
+    elif data.shape[1] == 4:
+        pass
+    else:
+        raise ValueError("Colour data should be all n-by-3 or n-by-4")
+
+    return ColorSpecification(ColorSpecificationMethod.BY_VERTEX, data)
 
 
 class ColorMap():
@@ -46,12 +90,8 @@ class ColorMap():
         self.min_value = min_value
         self.max_value = max_value
 
-    def color(self, value: float):
-        """ Current colormap at this value"""
-        scaled = (value - self.min_value) / (self.max_value - self.min_value)
+    def vertex_coloring(self, values: np.ndarray):
+        """ Evaluate the color map and return a ColorSpecification object"""
+        scaled = (values - self.min_value) / (self.max_value - self.min_value)
         scaled = np.clip(scaled, 0, 1)
-        return Color(*self.colormap(scaled))
-
-    def color_array(self, values: Sequence[float]) -> Sequence[Color]:
-        """ Array of the right form for working with Renderables"""
-        return [self.color(value) for value in values]
+        return vertex_coloring(self.colormap(scaled))

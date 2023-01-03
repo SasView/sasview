@@ -307,7 +307,7 @@ def main():
     mainWindow.show()
 
     mainWindow.resize(600, 600)
-    app.exec_()
+    # app.exec_()
 
 
 if __name__ == "__main__":

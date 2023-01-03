@@ -11,19 +11,17 @@ import numpy as np
 from OpenGL.GL import *
 
 from sas.qtgui.GL.renderable import Renderable
-from sas.qtgui.GL.color import Color
+from sas.qtgui.GL.color import ColorSpecification, ColorSpecificationMethod
 
-def color_sequence_to_array(colors: Union[Sequence[Color], Color]):
-    if isinstance(colors, Color):
-        return None
-    else:
-        return np.array([color.to_array for color in colors], dtype=float)
+VertexData = Union[Sequence[Tuple[float, float, float]], np.ndarray]
+EdgeData = Union[Sequence[Tuple[int, int]], np.ndarray]
+TriangleMeshData = Union[Sequence[Tuple[int, int, int]], np.ndarray]
 
 
 class ModelBase(Renderable):
     """ Base class for all models"""
 
-    def __init__(self, vertices: Sequence[Tuple[float, float, float]]):
+    def __init__(self, vertices: VertexData):
         self._vertices = vertices
         self._vertex_array = np.array(vertices, dtype=float)
 
@@ -33,7 +31,7 @@ class ModelBase(Renderable):
         return self._vertices
 
     @vertices.setter
-    def vertices(self, new_vertices):
+    def vertices(self, new_vertices: VertexData):
         self._vertices = new_vertices
         self._vertex_array = np.array(new_vertices, dtype=float)
 
@@ -42,8 +40,8 @@ class ModelBase(Renderable):
 class SolidModel(ModelBase):
     """ Base class for the solid models"""
     def __init__(self,
-                 vertices: Sequence[Tuple[float, float, float]],
-                 triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]]):
+                 vertices: VertexData,
+                 triangle_meshes: Sequence[TriangleMeshData]):
 
         ModelBase.__init__(self, vertices)
 
@@ -53,21 +51,20 @@ class SolidModel(ModelBase):
         self._triangle_mesh_arrays = [np.array(x) for x in triangle_meshes]
 
     @property
-    def triangle_meshes(self) -> Sequence[Sequence[Tuple[int, int, int]]]:
+    def triangle_meshes(self) -> Sequence[TriangleMeshData]:
         return self._triangle_meshes
 
     @triangle_meshes.setter
-    def triangle_meshes(self, new_triangle_meshes: Sequence[Sequence[int]]):
+    def triangle_meshes(self, new_triangle_meshes: Sequence[TriangleMeshData]):
         self._triangle_meshes = new_triangle_meshes
         self._triangle_mesh_arrays = [np.array(x) for x in new_triangle_meshes]
 
 
 class SolidVertexModel(SolidModel):
     def __init__(self,
-                 vertices: Sequence[Tuple[float, float, float]],
-                 triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]],
-                 colors: Optional[Union[Sequence[Color], Color]],
-                 color_by_mesh: bool = False):
+                 vertices: VertexData,
+                 triangle_meshes: Sequence[TriangleMeshData],
+                 colors: Optional[ColorSpecification]):
 
         """
 
@@ -83,83 +80,59 @@ class SolidVertexModel(SolidModel):
 
         super().__init__(vertices, triangle_meshes)
 
-        self.color_by_mesh = color_by_mesh
-
-        self._colors = colors
-
-        if colors is None or isinstance(colors, Color) or color_by_mesh:
-            self._vertex_color_array = None
-        else:
-            self._vertex_color_array = np.array([color.to_array() for color in colors], dtype=float)
-
+        self.colors = colors
 
         self.solid_render_enabled = self.colors is not None
 
-    @property
-    def colors(self):
-        return self._colors
-
-    @colors.setter
-    def colors(self, new_colors):
-        self._colors = new_colors
-        if new_colors is None or isinstance(new_colors, Color) or self.color_by_mesh:
-            self._vertex_color_array = None
-        else:
-            self._vertex_color_array = np.array([color.to_array() for color in new_colors], dtype=float)
-
-        self.solid_render_enabled = self.colors is not None
 
     def render_solid(self):
         if self.solid_render_enabled:
 
-            if isinstance(self._colors, Color):
+            if self.colors.method == ColorSpecificationMethod.UNIFORM:
 
                 glEnableClientState(GL_VERTEX_ARRAY)
-                self._colors.set()
+                glColor4f(*self.colors.data)
 
                 glVertexPointerf(self._vertex_array)
 
                 for triangle_mesh in self._triangle_mesh_arrays:
                     glDrawElementsui(GL_TRIANGLES, triangle_mesh)
 
+                glDisableClientState(GL_VERTEX_ARRAY)
+
+            elif self.colors.method == ColorSpecificationMethod.BY_COMPONENT:
+
+                glEnableClientState(GL_VERTEX_ARRAY)
+
+                glVertexPointerf(self._vertex_array)
+
+                for triangle_mesh, color in zip(self._triangle_mesh_arrays, self.colors.data):
+                    glColor4f(*color)
+                    glDrawElementsui(GL_TRIANGLES, triangle_mesh)
 
                 glDisableClientState(GL_VERTEX_ARRAY)
 
+            elif self.colors.method == ColorSpecificationMethod.BY_VERTEX:
 
-            else:
+                glEnableClientState(GL_VERTEX_ARRAY)
+                glEnableClientState(GL_COLOR_ARRAY)
 
-                if self.color_by_mesh:
+                glVertexPointerf(self._vertex_array)
+                glColorPointerf(self.colors.data)
 
-                    glEnableClientState(GL_VERTEX_ARRAY)
+                for triangle_mesh in self._triangle_mesh_arrays:
+                    glDrawElementsui(GL_TRIANGLES, triangle_mesh)
 
-                    glVertexPointerf(self._vertex_array)
-
-                    for triangle_mesh, color in zip(self._triangle_mesh_arrays, self.colors):
-                        color.set()
-                        glDrawElementsui(GL_TRIANGLES, triangle_mesh)
-
-                    glDisableClientState(GL_VERTEX_ARRAY)
-
-                else:
-                    glEnableClientState(GL_VERTEX_ARRAY)
-                    glEnableClientState(GL_COLOR_ARRAY)
-
-                    glVertexPointerf(self._vertex_array)
-                    glColorPointerf(self._vertex_color_array)
-
-                    for triangle_mesh in self._triangle_mesh_arrays:
-                        glDrawElementsui(GL_TRIANGLES, triangle_mesh)
-
-                    glDisableClientState(GL_COLOR_ARRAY)
-                    glDisableClientState(GL_VERTEX_ARRAY)
+                glDisableClientState(GL_COLOR_ARRAY)
+                glDisableClientState(GL_VERTEX_ARRAY)
 
 
 class WireModel(ModelBase):
 
     def __init__(self,
-                 vertices: Sequence[Tuple[float, float, float]],
-                 edges: Sequence[Tuple[int, int]],
-                 edge_colors: Optional[Union[Sequence[Color], Color]]):
+                 vertices: VertexData,
+                 edges: EdgeData,
+                 edge_colors: Optional[ColorSpecification]):
 
         """ Wireframe Model
 
@@ -171,7 +144,7 @@ class WireModel(ModelBase):
 
         super().__init__(vertices)
 
-        self.wireframe_render_enabled = False
+        self.wireframe_render_enabled = edge_colors is not None
         self.edges = edges
         self.edge_colors = edge_colors
 
@@ -180,10 +153,10 @@ class WireModel(ModelBase):
             vertices = self.vertices
             colors = self.edge_colors
 
-            if isinstance(colors, Color):
+            if colors.method == ColorSpecificationMethod.UNIFORM:
 
                 glBegin(GL_LINES)
-                colors.set()
+                glColor4f(*colors.data)
 
                 for edge in self.edges:
                     glVertex3f(*vertices[edge[0]])
@@ -191,17 +164,23 @@ class WireModel(ModelBase):
 
                 glEnd()
 
-            else:  # Assume here that the correct type is supplied, thus colors are a sequence
+            elif colors.method == ColorSpecificationMethod.BY_COMPONENT:
 
                 glBegin(GL_LINES)
-                for edge, color in zip(self.edges, colors):
+                for edge, color in zip(self.edges, colors.data):
 
-                    color.set()
+                    glColor4f(*color)
 
                     glVertex3f(*vertices[edge[0]])
                     glVertex3f(*vertices[edge[1]])
 
                 glEnd()
+
+            elif colors.method == ColorSpecificationMethod.BY_VERTEX:
+                raise NotImplementedError("Vertex coloring of wireframe is currently not supported")
+
+            else:
+                raise ValueError(f"Unknown coloring method: {ColorSpecification.method}")
 
 
 class FullModel(SolidVertexModel, WireModel):
@@ -210,20 +189,16 @@ class FullModel(SolidVertexModel, WireModel):
     See SolidVertexModel and WireModel
     """
     def __init__(self,
-                 vertices: Sequence[Tuple[float, float, float]],
-                 edges: Sequence[Tuple[int, int]],
-                 triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]],
-                 edge_colors: Optional[Union[Sequence[Color], Color]],
-                 colors: Optional[Union[Sequence[Color], Color]],
-                 color_by_mesh: bool = False):
-
-
+                 vertices: VertexData,
+                 edges: EdgeData,
+                 triangle_meshes: TriangleMeshData,
+                 edge_colors: ColorSpecification,
+                 colors: ColorSpecification):
 
         SolidVertexModel.__init__(self,
                                   vertices=vertices,
                                   triangle_meshes=triangle_meshes,
-                                  colors=colors,
-                                  color_by_mesh=color_by_mesh)
+                                  colors=colors)
         WireModel.__init__(self,
                            vertices=vertices,
                            edges=edges,
