@@ -7,6 +7,7 @@ Within the `visual_checks` directory there are a couple of stand-alone python fi
 a way of checking the rendering, and catalogue the available functions
 
 
-Class Heirarchy
+Class Hierarchy
 ===============
 
+TODO - data currently in PR.
