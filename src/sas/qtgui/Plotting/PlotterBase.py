@@ -440,7 +440,7 @@ class PlotterBase(QtWidgets.QWidget):
 
         self.txt_widget.setReadOnly(True)
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)
-        self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/sasview-icon.ico"))
+        self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/sasview-icon-backup.ico"))
         self.txt_widget.setWindowTitle("Data Info: %s" % plot_data.filename)
         self.txt_widget.insertPlainText(text_to_show)
 
