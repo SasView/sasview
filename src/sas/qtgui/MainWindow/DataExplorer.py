@@ -1603,7 +1603,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.txt_widget.setReadOnly(True)
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)
-        self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
+        self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/sasview-icon.ico"))
         self.txt_widget.setWindowTitle("Data Info: %s" % data.name)
         self.txt_widget.clear()
         self.txt_widget.insertPlainText(text_to_show)

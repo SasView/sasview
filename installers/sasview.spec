@@ -94,7 +94,7 @@ if platform.system() == 'Darwin':
           name='sasview',
           debug=False,
           upx=False,
-          icon=os.path.join("../src/sas/qtgui/images","ball.icns"),
+          icon=os.path.join("../src/sas/qtgui/images","sasview-icon.icns"),
           version="version.txt",
           console=False )
 else:
@@ -106,7 +106,7 @@ else:
         name='sasview',
         debug=False,
         bootloader_ignore_signals=False,
-        icon=os.path.join("../src/sas/qtgui/images","ball.ico"),
+        icon=os.path.join("../src/sas/qtgui/images","sasview-icon.ico"),
         strip=False,
         upx=True,
         console=False)
@@ -125,6 +125,6 @@ coll = COLLECT(
 if platform.system() == 'Darwin':
     app = BUNDLE(coll,
         name='SasView5.app',
-        icon='../src/sas/qtgui/images/ball.icns',
+        icon='../src/sas/qtgui/images/sasview-icon.icns',
         bundle_identifier='org.sasview.SasView5',
         info_plist={'NSHighResolutionCapable': 'True'})

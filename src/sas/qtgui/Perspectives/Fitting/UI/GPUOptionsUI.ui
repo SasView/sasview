@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../../../../../../../../../Users/UI/res/ball.ico</normaloff>../../../../../../../../../../../Users/UI/res/ball.ico</iconset>
+    <normaloff>../../../../../../../../../../../Users/UI/res/sasview-icon.ico</normaloff>../../../../../../../../../../../Users/UI/res/sasview-icon.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="2">

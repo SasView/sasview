@@ -36,7 +36,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
+    <normaloff>:/res/sasview-icon.ico</normaloff>:/res/sasview-icon.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_7">
    <item row="0" column="0">

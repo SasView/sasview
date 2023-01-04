@@ -1011,5 +1011,5 @@ class Plotter(QtWidgets.QDialog, PlotterWidget):
         QtWidgets.QDialog.__init__(self)
         PlotterWidget.__init__(self, parent=self, manager=parent, quickplot=quickplot)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/res/sasview-icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)

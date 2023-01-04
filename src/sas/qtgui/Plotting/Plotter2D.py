@@ -628,5 +628,5 @@ class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
         QtWidgets.QDialog.__init__(self)
         Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=dimension)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/res/sasview-icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)

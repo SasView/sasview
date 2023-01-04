@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../../UI/main_resources.qrc">
-    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
+    <normaloff>:/res/sasview-icon.ico</normaloff>:/res/sasview-icon.ico</iconset>
   </property>
   <property name="currentIndex">
    <number>0</number>

@@ -26,7 +26,7 @@ UsedUserAreasWarning=no
 LicenseFile=license.txt
 ArchitecturesInstallIn64BitMode=x64
 OutputBaseFilename=setupSasView
-SetupIconFile=dist\sasview\images\ball.ico
+SetupIconFile=dist\sasview\images\sasview-icon.ico
 
 
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
@@ -61,7 +61,7 @@ Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin
 [Icons]
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
-Name: "{group}\SasView";	Filename: "{app}\SasView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
+Name: "{group}\SasView";	Filename: "{app}\SasView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\sasview-icon.ico"
 Name: "{group}\{cm:UninstallProgram, SasView}";	 Filename: "{uninstallexe}" 
 
 [Run]
