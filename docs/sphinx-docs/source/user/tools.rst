@@ -8,22 +8,22 @@ Tools & Utilities
 .. toctree::
    :maxdepth: 1
 
-   Data Operations Utility <qtgui/Calculators/data_operator_help>
+   Data Operations Utility <sasview/Calculators/data_operator_help>
 
-   SLD Calculator <qtgui/Calculators/sld_calculator_help>
+   SLD Calculator <sasview/Calculators/sld_calculator_help>
 
-   Density/Volume Calculator <qtgui/Calculators/density_calculator_help>
+   Density/Volume Calculator <sasview/Calculators/density_calculator_help>
 
-   Slit Size Calculator <qtgui/Calculators/slit_calculator_help>
+   Slit Size Calculator <sasview/Calculators/slit_calculator_help>
 
-   Kiessig Thickness Calculator <qtgui/Calculators/kiessig_calculator_help>
+   Kiessig Thickness Calculator <sasview/Calculators/kiessig_calculator_help>
 
-   Q Resolution Estimator <qtgui/Calculators/resolution_calculator_help>
+   Q Resolution Estimator <sasview/Calculators/resolution_calculator_help>
 
-   Generic SANS Calculator <qtgui/Calculators/sas_calculator_help>
+   Generic SANS Calculator <sasview/Calculators/sas_calculator_help>
 
-   Python Shell <qtgui/Calculators/python_shell_help>
+   Python Shell <sasview/Calculators/python_shell_help>
 
-   Image Viewer <qtgui/Calculators/image_viewer_help>
+   Image Viewer <sasview/Calculators/image_viewer_help>
 
-   File Converter <qtgui/Calculators/file_converter_help>
+   File Converter <sasview/Calculators/file_converter_help>

@@ -194,7 +194,7 @@ class DensityPanel(QtWidgets.QDialog):
             pass
 
     def displayHelp(self):
-        location = "/user/qtgui/Calculators/density_calculator_help.html"
+        location = "/user/sasview/Calculators/density_calculator_help.html"
         self.manager.showHelp(location)
 
 

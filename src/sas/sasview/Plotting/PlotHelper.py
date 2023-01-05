@@ -7,7 +7,7 @@ import sys
 import weakref
 
 # TODO Refactor to allow typing without circular import
-#from sas.qtgui.Plotting.PlotterBase import PlotterBase
+#from sas.sasview.Plotting.PlotterBase import PlotterBase
 
 this = sys.modules[__name__]
 

@@ -6,20 +6,20 @@ Working with SasView
 .. toctree::
    :maxdepth: 1
 
-   Data Formats <qtgui/MainWindow/data_formats_help>
+   Data Formats <sasview/MainWindow/data_formats_help>
 
-   Loading Data <qtgui/MainWindow/data_explorer_help>
+   Loading Data <sasview/MainWindow/data_explorer_help>
 
-   Plotting Data/Models <qtgui/MainWindow/graph_help>
+   Plotting Data/Models <sasview/MainWindow/graph_help>
 
    Test Data <example_data/testdata_help>
 
    Tutorials <tutorial>
 
-   Writing a Plugin Model <qtgui/Perspectives/Fitting/plugin>
+   Writing a Plugin Model <sasview/Perspectives/Fitting/plugin>
 
    Environment Variables <environment>
 
    Model marketplace <marketplace>
 
-   Preferences <qtgui/MainWindow/preferences_help.rst>
+   Preferences <sasview/MainWindow/preferences_help.rst>

@@ -136,7 +136,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
 
     def actionHowTo(self):
         ''' Send the image viewer help URL to the help viewer '''
-        location = "/user/qtgui/Calculators/image_viewer_help.html"
+        location = "/user/sasview/Calculators/image_viewer_help.html"
         self.parent.showHelp(location)
 
     def addPlotter(self):

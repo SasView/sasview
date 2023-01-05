@@ -64,7 +64,7 @@ config.json
 tests.log
 
 # Test reports
-/src/sas/qtgui/Utilities/Reports/report_test*
+/src/sas/sasview/Utilities/Reports/report_test*
 
 # Installer files
 /sasview-install

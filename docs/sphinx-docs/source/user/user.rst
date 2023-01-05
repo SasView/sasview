@@ -6,7 +6,7 @@ SasView User Documentation
 .. toctree::
    :maxdepth: 1
 
-   Model Documentation <qtgui/Perspectives/Fitting/models/index>
+   Model Documentation <sasview/Perspectives/Fitting/models/index>
 
    Menu Bar <menu_bar>
 

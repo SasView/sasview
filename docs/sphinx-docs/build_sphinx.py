@@ -29,7 +29,7 @@ platform = '.%s-%s'%(get_platform(),sys.version[:3])
 SPHINX_ROOT = dirname(abspath(__file__))
 SPHINX_BUILD = joinpath(SPHINX_ROOT, "build")
 SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
-SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
+SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "sasview", "Perspectives")
 
 # sasview paths
 SASVIEW_ROOT = joinpath(SPHINX_ROOT, '..', '..')
@@ -183,8 +183,8 @@ def apidoc():
         "-H", "SasView", # Package header
         SASVIEW_BUILD,
         # omit the following documents from the API documentation
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "GUITests.py"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py"),
+        joinpath(SASVIEW_BUILD, "sas", "sasview", "GUITests.py"),
+        joinpath(SASVIEW_BUILD, "sas", "sasview", "convertUI.py"),
         joinpath(SASVIEW_BUILD, "sas", "sasview", "welcome_panel.py"),
         joinpath(SASVIEW_BUILD, "sas", "sasview", "wxcruft.py"),
     ])

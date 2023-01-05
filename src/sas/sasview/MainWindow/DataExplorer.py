@@ -176,7 +176,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Show the "Loading data" section of help
         """
-        tree_location = "/user/qtgui/MainWindow/data_explorer_help.html"
+        tree_location = "/user/sasview/MainWindow/data_explorer_help.html"
         self.parent.showHelp(tree_location)
 
     def enableGraphCombo(self, combo_text):

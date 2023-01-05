@@ -63,7 +63,7 @@ def SplashScreen():
     """
     pixmap_path = "images/SVwelcome_mini.png"
     if os.path.splitext(sys.argv[0])[1].lower() == ".py":
-        pixmap_path = "src/sas/qtgui/images/SVwelcome_mini.png"
+        pixmap_path = "src/sas/sasview/images/SVwelcome_mini.png"
     pixmap = QPixmap(pixmap_path)
     splashScreen = QSplashScreen(pixmap)
     return splashScreen

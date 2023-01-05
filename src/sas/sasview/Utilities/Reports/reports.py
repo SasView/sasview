@@ -100,7 +100,7 @@ class ReportBase:
                 link(rel="stylesheet", href=style_link)
 
             else:
-                style_data = pkg_resources.read_text("sas.qtgui.Utilities.Reports", "report_style.css")
+                style_data = pkg_resources.read_text("sas.sasview.Utilities.Reports", "report_style.css")
                 style(style_data)
 
         with self._html_doc.body:

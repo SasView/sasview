@@ -19,7 +19,7 @@ from sas.sasview.Plotting.ColorMap import ColorMap
 from sas.sasview.Plotting.BoxSum import BoxSum
 from sas.sasview.Plotting.SlicerParameters import SlicerParameters
 
-# TODO: move to sas.qtgui namespace
+# TODO: move to sas.sasview namespace
 from sas.sasview.Plotting.Slicers.BoxSlicer import BoxInteractorX
 from sas.sasview.Plotting.Slicers.BoxSlicer import BoxInteractorY
 from sas.sasview.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor

@@ -98,7 +98,7 @@ if __name__ == "__main__":
     prepare()
 
     # Run the UI conversion tool when executed from script.  This has to
-    # happen after prepare() so that sas.qtgui is on the path.
+    # happen after prepare() so that sas.sasview is on the path.
     import sas.sasview.convertUI
     setup_sasmodels()
 

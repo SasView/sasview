@@ -32,7 +32,7 @@
   <customwidget>
    <class>QCodeEditor</class>
    <extends>QWidget</extends>
-   <header location="global">sas.qtgui.Utilities.CodeEditor.h</header>
+   <header location="global">sas.sasview.Utilities.CodeEditor.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

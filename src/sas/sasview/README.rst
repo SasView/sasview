@@ -7,7 +7,7 @@ Running
 -------
 Compile UI resources first:
 
-    cd src/sas/qtgui
+    cd src/sas/sasview
     python convertUI.py
 
 Run the GUI with:

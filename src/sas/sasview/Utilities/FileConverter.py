@@ -158,7 +158,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         """
         Display online help related to the file converter
         """
-        location = "/user/qtgui/Calculators/file_converter_help.html"
+        location = "/user/sasview/Calculators/file_converter_help.html"
         self.parent.showHelp(location)
 
     def onIFileOpen(self):
