@@ -10,6 +10,6 @@ import sys
 
 sys.dont_write_bytecode = True
 
-from sas.qtgui.MainWindow.MainWindow import run_sasview
+from sas.sasview.MainWindow.MainWindow import run_sasview
 
 run_sasview()
