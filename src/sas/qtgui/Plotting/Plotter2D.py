@@ -83,6 +83,8 @@ class Plotter2DWidget(PlotterBase):
                 masked_data.dqx_data = masked_data.dqx_data[masked_data.mask == 1]
             if masked_data.dqy_data is not None:
                 masked_data.dqy_data = masked_data.dqy_data[masked_data.mask == 1]
+            if masked_data.q_data is not None:
+                masked_data.q_data = masked_data.q_data[masked_data.mask == 1]
             masked_data.mask = masked_data.mask[masked_data.mask == 1]
         else:
             masked_data = data
