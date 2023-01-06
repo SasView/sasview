@@ -526,7 +526,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def onHelp(self):
         """ Display help when clicking on Help button """
-        treeLocation = "/user/qtgui/Perspectives/Invariant/invariant_help.html"
+        treeLocation = "/user/sasview/Perspectives/Invariant/invariant_help.html"
         self.parent.showHelp(treeLocation)
 
     def setupSlots(self):

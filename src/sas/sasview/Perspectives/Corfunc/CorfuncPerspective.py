@@ -379,7 +379,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         Opens a webpage with help on the perspective
         """
         """ Display help when clicking on Help button """
-        treeLocation = "/user/qtgui/Perspectives/Corfunc/corfunc_help.html"
+        treeLocation = "/user/sasview/Perspectives/Corfunc/corfunc_help.html"
         self.parent.showHelp(treeLocation)
 
     def allowBatch(self):

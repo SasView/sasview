@@ -435,7 +435,7 @@ class PlotterTest:
 
         plotter.plot(data2)
 
-        with patch('sas.qtgui.Plotting.PlotProperties.PlotProperties') as mock:
+        with patch('sas.sasview.Plotting.PlotProperties.PlotProperties') as mock:
             instance = mock.return_value
             mocker.patch.object(QtWidgets.QDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
             instance.symbol.returnvalue=7

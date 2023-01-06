@@ -494,7 +494,7 @@ class DataExplorerTest:
         """
         Test that the Help window gets shown correctly
         """
-        partial_url = "qtgui/MainWindow/data_explorer_help.html"
+        partial_url = "sasview/MainWindow/data_explorer_help.html"
         button1 = form.cmdHelp
         button2 = form.cmdHelp_2
 
@@ -590,7 +590,7 @@ class DataExplorerTest:
                         test_data.notes
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(sas.sasview.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Mask plotting
         mocker.patch.object(form.parent, 'workspace')
@@ -627,7 +627,7 @@ class DataExplorerTest:
         new_data = [(None, manager.create_gui_data(output_object[0], p_file))]
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(sas.sasview.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Mask plotting
         mocker.patch.object(form.parent, 'workspace')
@@ -670,7 +670,7 @@ class DataExplorerTest:
         mocker.patch.object(Plotter, 'show')
 
         # Mask retrieval of the data
-        mocker.patch.object(sas.qtgui.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
+        mocker.patch.object(sas.sasview.Utilities.GuiUtils, 'plotsFromCheckedItems', return_value=new_data)
 
         # Call the plotting method
         form.newPlot()

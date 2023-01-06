@@ -365,7 +365,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        location = "/user/qtgui/Calculators/resolution_calculator_help.html"
+        location = "/user/sasview/Calculators/resolution_calculator_help.html"
         self.manager.showHelp(location)
 
     def onReset(self):

@@ -930,7 +930,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        location = "/user/qtgui/Calculators/sas_calculator_help.html"
+        location = "/user/sasview/Calculators/sas_calculator_help.html"
         self.manager.showHelp(location)
 
     def onReset(self):

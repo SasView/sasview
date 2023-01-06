@@ -30,7 +30,7 @@ class PreferencesPanelTest:
             @staticmethod
             def showHelp(location):
                 """Simulate a help window"""
-                return location == "/user/qtgui/MainWindow/preferences_help.html"
+                return location == "/user/sasview/MainWindow/preferences_help.html"
 
         w = QWidget()
         w.guiManager = DummyClass()

@@ -299,7 +299,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         try:
             help_location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                            "/user/qtgui/Perspectives/Fitting/fitting_help.html#add-multiply-models"
+                            "/user/sasview/Perspectives/Fitting/fitting_help.html#add-multiply-models"
             webbrowser.open('file://' + os.path.realpath(help_location))
         except AttributeError:
             # No manager defined - testing and standalone runs

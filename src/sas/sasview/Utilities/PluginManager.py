@@ -218,5 +218,5 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         """
         Show the help page in the default browser
         """
-        location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#new-plugin-model"
+        location = "/user/sasview/Perspectives/Fitting/fitting_help.html#new-plugin-model"
         self.parent.showHelp(location)

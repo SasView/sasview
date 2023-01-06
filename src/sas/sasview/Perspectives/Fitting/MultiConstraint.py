@@ -167,7 +167,7 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         try:
             help_location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-            "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints"
+            "/user/sasview/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints"
             webbrowser.open('file://' + os.path.realpath(help_location))
         except AttributeError:
             # No manager defined - testing and standalone runs

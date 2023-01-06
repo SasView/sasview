@@ -261,7 +261,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         icon = QtGui.QIcon()
         if is_batch:
-            icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
+            icon.addPixmap(QtGui.QPixmap("src/sas/sasview/images/icons/layers.svg"))
         self.addTab(tab, icon, tab_name)
         # Show the new tab
         self.setCurrentWidget(tab)
@@ -283,7 +283,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         ObjectLibrary.addObject(tab_name, tab)
         self.tabs.append(tab)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/link.svg"))
+        icon.addPixmap(QtGui.QPixmap("src/sas/sasview/images/icons/link.svg"))
         self.addTab(tab, icon, tab_name)
 
         # This will be the last tab, so set the index accordingly

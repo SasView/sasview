@@ -64,7 +64,7 @@ def find_plugin_models_mod():
     """
     plugins_dir = [
         os.path.abspath(path) for path in glob.glob("**/plugin_models",recursive=True)
-        if os.path.normpath("qtgui/Perspectives/Fitting/plugin_models") in os.path.abspath(path)
+        if os.path.normpath("sasview/Perspectives/Fitting/plugin_models") in os.path.abspath(path)
     ][0]
 
     plugins = {}

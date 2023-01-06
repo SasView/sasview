@@ -394,7 +394,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        tree_location = "/user/qtgui/Perspectives/Fitting/"
+        tree_location = "/user/sasview/Perspectives/Fitting/"
 
         helpfile = "fitting_help.html#simultaneous-fit-mode"
         help_location = tree_location + helpfile

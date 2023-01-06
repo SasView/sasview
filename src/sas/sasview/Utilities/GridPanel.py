@@ -185,7 +185,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         Open a local url in the default browser
         """
-        url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
+        url = "/user/sasview/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
         GuiUtils.showHelp(url)
 
 
