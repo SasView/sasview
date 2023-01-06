@@ -185,9 +185,9 @@ class OrientationViewer(QtWidgets.QWidget):
     def orient_ghosts(self, orientation: Orientation):
 
         for a, a_ghosts in zip(self.ghost_spacings, self.all_ghosts):
-            a_ghosts.angle = a*orientation.dtheta
+            a_ghosts.angle = a*orientation.dphi
             for b, b_ghosts in zip(self.ghost_spacings, a_ghosts.children):
-                b_ghosts.angle = b*orientation.dphi
+                b_ghosts.angle = b*orientation.dtheta
                 for c, c_ghosts in zip(self.ghost_spacings, b_ghosts.children):
                     c_ghosts.angle = c*orientation.dpsi
 
