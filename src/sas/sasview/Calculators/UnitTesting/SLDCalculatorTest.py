@@ -7,10 +7,9 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
 # Local
-#from sas.qtgui.Calculators.SldPanel import SldResult
+
 from sas.sasview.Calculators.SldPanel import SldPanel
-from sas.sasview.Calculators.SldPanel import neutronSldAlgorithm, xraySldAlgorithm
-from sas.sasview.Utilities.GuiUtils import FormulaValidator
+from sas.sasview.Calculators.SldPanel import neutronSldAlgorithm
 
 class SldAlgorithmTest:
     """ Test the periodictable wrapper """

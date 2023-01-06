@@ -59,7 +59,7 @@ def find_plugin_models_mod():
     """
     Modification to sas.sascalc.fit.models.find_plugin_models().
     Instead of searching for user's plugin directory, the path is set at:
-    'sas/qtgui/Perspectives/Fitting/plugin_models'
+    'sas/sasview/Perspectives/Fitting/plugin_models'
     Modified to test handling of plugin models.
     """
     plugins_dir = [
@@ -658,7 +658,7 @@ class FittingWidgetTest:
         assert widget._poly_model.item(0, 1).isEnabled()
 
         # good file
-        # TODO: this depends on the working directory being src/sas/qtgui,
+        # TODO: this depends on the working directory being src/sas/sasview,
         # TODO: which isn't convenient if you want to run this test suite
         # TODO: individually
         filename = os.path.join("UnitTesting", "testdata.txt")

@@ -263,7 +263,7 @@ class FittingPerspectiveTest:
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     # Generates a RuntimeError:
-    # src/sas/qtgui/Perspectives/Fitting/ConstraintWidget.py:240: RuntimeError
+    # src/sas/sasview/Perspectives/Fitting/ConstraintWidget.py:240: RuntimeError
     # wrapped C/C++ object of type FittingWidget has been deleted
     # A previous tab, 'FitPage3', is still receiving signals but
     # appears to have been garbage collected
