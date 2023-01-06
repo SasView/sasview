@@ -2,10 +2,11 @@ import logging
 
 from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 
 from sas.system import config
 
+ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
 logger = logging.getLogger(__name__)
 
 
@@ -40,6 +41,8 @@ class PreferencesWidget(QWidget):
         self.name: str = name
         # All parameter names used in this panel
         self.config_params: List[str] = []
+        # A mapping of parameter names to messages displayed when prompting for a restart
+        self.restart_params: Dict[str, str] = {}
         if build_gui:
             # Create generic layout
             self.verticalLayout = QVBoxLayout()
@@ -57,10 +60,11 @@ class PreferencesWidget(QWidget):
             setattr(config, param, default)
         self.restoreGUIValuesFromConfig()
 
-    def _stageChange(self, key: str, value: Union[str, bool, float, int, List]):
+    def _stageChange(self, key: str, value: ConfigType):
         """ All inputs should call this method when attempting to change config values. """
         if self.parent is not None and hasattr(self.parent, 'stageSingleChange'):
-            self.parent.stageSingleChange(key, value)
+            message = self.restart_params.get(key, None)
+            self.parent.stageSingleChange(key, value, message)
 
     def restoreGUIValuesFromConfig(self):
         """A generic method that blocks all signalling, and restores the GUI values from the config file.
