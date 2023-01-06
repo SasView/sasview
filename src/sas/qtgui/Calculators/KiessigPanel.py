@@ -27,13 +27,9 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
 
         # signals
         self.helpButton.clicked.connect(self.onHelp)
-        # self.computeButton.setVisible(False)
         self.closeButton.clicked.connect(self.onClose)
         self.deltaq_in.textChanged.connect(self.onCompute)
         self.deltaq_in.setText("0.05")
-
-        # Set focus away from Close
-        # self.computeButton.setFocus()
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
