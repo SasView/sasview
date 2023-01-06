@@ -187,8 +187,8 @@ def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model
     Actually appends to model, if model and view params are not None.
     Always returns list of lists of QStandardItems.
 
-    parameters_original: list of parameters before any tagging on their IDs, e.g. for product model (so that those are
-    the display names; see below)
+    parameters_original: list of parameters before any tagging on their IDs,
+    e.g. for product model (so that those are the display names; see below)
     """
     if is2D:
         params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
@@ -196,8 +196,9 @@ def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model
         params = parameters.iq_parameters
 
     if parameters_original:
-        # 'parameters_original' contains the parameters as they are to be DISPLAYED, while 'parameters'
-        # contains the parameters as they were renamed; this is for handling name collisions in product model.
+        # 'parameters_original' contains the parameters as they are to be DISPLAYED,
+        # while 'parameters' contains the parameters as they were renamed;
+        # this is for handling name collisions in product model.
         # The 'real name' of the parameter will be stored in the item's user data.
         if is2D:
             params_orig = [p for p in parameters_original.kernel_parameters if p.type != 'magnetic']
@@ -711,7 +712,6 @@ def getRelativeError(data, is2d, flag=None):
 
     return weight
 
-
 def calcWeightIncrease(weights, ratios, flag=False):
     """ Calculate the weights to be passed to bumps in order to ensure
         that each data set contributes to the total residual with a
@@ -768,7 +768,6 @@ def calcWeightIncrease(weights, ratios, flag=False):
 
     return weight_increase
 
-
 def updateKernelWithResults(kernel, results):
     """
     Takes model kernel and applies results dict to its parameters,
@@ -782,7 +781,6 @@ def updateKernelWithResults(kernel, results):
         local_kernel.setParam(parameter, results[parameter][0])
 
     return local_kernel
-
 
 def getStandardParam(model=None):
     """
@@ -966,9 +964,15 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
     """
     Simple lookup for polydispersity for the given param name
     """
+    # First, check if this is a polydisperse parameter directly
+    if '.width' in param_name:
+        return True
+
     parameters = kernel_params.form_volume_parameters
     if is2D:
         parameters += kernel_params.orientation_parameters
+
+    # Next, check if the parameter is included in para.polydisperse
     has_poly = False
     for param in parameters:
         if param.name==param_name and param.polydisperse:
