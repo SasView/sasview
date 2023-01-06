@@ -198,6 +198,9 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
             <property name="autoFillBackground">
              <bool>true</bool>
             </property>
@@ -227,6 +230,9 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
             <property name="frame">
              <bool>true</bool>
             </property>
@@ -250,6 +256,9 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
             <property name="frame">
              <bool>true</bool>
             </property>
@@ -272,6 +281,9 @@
            <widget class="QLineEdit" name="txtSpecSurfErr">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -310,6 +322,9 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
             <property name="toolTip">
              <string>Total invariant [Q*], including extrapolated regions.</string>
             </property>
@@ -335,6 +350,9 @@
            <widget class="QLineEdit" name="txtInvariantTotErr">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
             </property>
             <property name="frame">
              <bool>true</bool>
