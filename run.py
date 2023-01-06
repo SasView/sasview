@@ -81,11 +81,6 @@ def prepare():
     except ImportError:
         addpath(joinpath(root, '..', 'bumps'))
 
-    try:
-        import sasdata
-    except ImportError:
-        addpath(joinpath(root, '..', 'sasdata'))
-
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
 
