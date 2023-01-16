@@ -119,6 +119,45 @@ build_qt = any(c in sys.argv for c in build_commands)
 if build_qt:
     _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
 
+#
+# Build the package_dir, packages, and package_data objects
+#
+
+def package_search(rel_directory = ["src"], package = []):
+    """ Search for packages to include """
+    search_directory = os.path.join(*rel_directory)
+
+    for d in os.listdir(search_directory):
+        full_dir = os.path.join(search_directory, d)
+        if os.path.isdir(full_dir) and not d.startswith("__"):
+            this_package = package + [d]
+            if len(this_package) > 0:
+                if os.path.exists(os.path.join(full_dir, "__init__.py")):
+                    print("*", full_dir)
+                    name = ".".join(this_package)
+                    directory = os.path.join(*(rel_directory + [d]))
+
+                    package_dir[name] = directory
+                    packages.append(name)
+
+                else:
+                    if not len(os.listdir(full_dir)) > 0:
+                        print(" ", full_dir)
+            package_search(rel_directory + [d], package + [d])
+
+package_search()
+
+new_package_dir = package_dir
+
+print("Search done")
+
+
+package_dir = {}
+package_data = {}
+packages = []
+ext_modules = []
+
+
 # sas module
 package_dir["sas"] = os.path.join("src", "sas")
 packages.append("sas")
@@ -291,6 +330,27 @@ package_data['sas.qtgui'] = ['images/*',
                              'UI/res/*',
                              ]
 packages.append("sas.qtgui")
+
+
+#
+# Compare
+#
+
+for key in package_dir:
+    if key not in new_package_dir:
+        print("Missing from new:", key, ":", package_dir[key])
+
+for key in new_package_dir:
+    if key not in package_dir:
+        print("Missing from old:", key, ":", new_package_dir[key])
+
+for key in package_dir:
+    if key in new_package_dir:
+        if package_dir[key] != new_package_dir[key]:
+            print("Different:", key, ":", package_dir[key], "vs", new_package_dir[key])
+
+
+
 
 
 required = [
