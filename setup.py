@@ -204,6 +204,9 @@ packages.append("sas.qtgui.Utilities.Preferences.UI")
 package_dir["sas.qtgui.Utilities.OrientationViewer"] = os.path.join(
     "src", "sas", "qtgui", "Utilities", "OrientationViewer")
 packages.append("sas.qtgui.Utilities.OrientationViewer")
+package_dir["sas.qtgui.Utilities.OrientationViewer.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities", "OrientationViewer", "UI")
+packages.append("sas.qtgui.Utilities.OrientationViewer.UI")
 
 
 package_dir["sas.qtgui.Calculators"] = os.path.join(
