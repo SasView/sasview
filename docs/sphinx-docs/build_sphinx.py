@@ -8,6 +8,7 @@ http://sphinx-doc.org/invocation.html
 from __future__ import print_function
 
 import subprocess
+from subprocess import CalledProcessError
 import os
 from os.path import join as joinpath, abspath, dirname, isdir, exists, relpath
 import sys
@@ -176,25 +177,36 @@ def apidoc():
     # Clean directory before generating a new version.
     #_remove_dir(SASVIEW_API_TARGET)
 
-    subprocess.check_call([
-        "sphinx-apidoc",
-        "-o", SASVIEW_API_TARGET, # Output dir.
-        "-d", "8", # Max depth of TOC.
-        "-H", "SasView", # Package header
-        SASVIEW_BUILD,
-        # omit the following documents from the API documentation
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py")
-    ])
+    try:
+        subprocess.check_output([
+            "sphinx-apidoc",
+            "-o", SASVIEW_API_TARGET, # Output dir.
+            "-d", "8", # Max depth of TOC.
+            "-H", "SasView", # Package header
+            SASVIEW_BUILD,
+            # omit the following documents from the API documentation
+            joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py")
+        ])
 
-    subprocess.check_call([
-        "sphinx-apidoc",
-        "-o", SASMODELS_API_TARGET, # Output dir.
-        "-d", "8", # Max depth of TOC.
-        "-H", "sasmodels", # Package header
-        SASMODELS_BUILD,
-        # omit the following documents from the API documentation
-        joinpath(SASMODELS_BUILD, "sasmodels", "models"),
-    ])
+    except CalledProcessError as e:
+        print(e.output)
+        raise e
+
+    try:
+        subprocess.check_output([
+            "sphinx-apidoc",
+            "-o", SASMODELS_API_TARGET, # Output dir.
+            "-d", "8", # Max depth of TOC.
+            "-H", "sasmodels", # Package header
+            SASMODELS_BUILD,
+            # omit the following documents from the API documentation
+            joinpath(SASMODELS_BUILD, "sasmodels", "models"),
+        ])
+
+    except CalledProcessError as e:
+        print(e.output)
+        raise e
+
 
 def build_pdf():
     """
