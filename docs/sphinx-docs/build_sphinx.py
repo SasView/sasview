@@ -183,10 +183,7 @@ def apidoc():
         "-H", "SasView", # Package header
         SASVIEW_BUILD,
         # omit the following documents from the API documentation
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "GUITests.py"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py"),
-        joinpath(SASVIEW_BUILD, "sas", "sasview", "welcome_panel.py"),
-        joinpath(SASVIEW_BUILD, "sas", "sasview", "wxcruft.py"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py")
     ])
 
     subprocess.check_call([
@@ -213,9 +210,11 @@ def build_pdf():
     ])
 
     LATEXDIR = joinpath(SPHINX_BUILD, "latex")
-    #TODO: Does it need to be done so many time?
+
     def pdflatex():
         subprocess.call(["pdflatex", "SasView.tex"], cwd=LATEXDIR)
+
+    # Note: pdflatex requires multiple passes to resolve cross-references correctly
     pdflatex()
     pdflatex()
     pdflatex()
