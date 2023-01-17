@@ -191,7 +191,6 @@ def apidoc():
 
     except CalledProcessError as e:
         print(e.output)
-        traceback.print_exception(e)
         raise e
 
     try:
@@ -207,7 +206,6 @@ def apidoc():
 
     except CalledProcessError as e:
         print(e.output)
-        traceback.print_exception(e)
         raise e
 
 
