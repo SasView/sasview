@@ -240,6 +240,19 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>txtMinRange</tabstop>
+  <tabstop>txtMaxRange</tabstop>
+  <tabstop>txtNpts</tabstop>
+  <tabstop>chkLogData</tabstop>
+  <tabstop>txtNptsFit</tabstop>
+  <tabstop>rbWeighting1</tabstop>
+  <tabstop>rbWeighting2</tabstop>
+  <tabstop>rbWeighting3</tabstop>
+  <tabstop>rbWeighting4</tabstop>
+  <tabstop>cmdReset</tabstop>
+  <tabstop>cmdMaskEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
