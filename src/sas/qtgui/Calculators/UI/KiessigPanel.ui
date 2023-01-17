@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>365</width>
-    <height>197</height>
+    <width>392</width>
+    <height>209</height>
    </rect>
   </property>
   <property name="focusPolicy">
@@ -146,18 +146,14 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QPushButton" name="computeButton">
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Compute the thickness or diameter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>Compute</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>deltaq_in</tabstop>
+  <tabstop>lengthscale_out</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>helpButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

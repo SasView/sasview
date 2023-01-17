@@ -511,6 +511,24 @@ angles</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cbFileNames</tabstop>
+  <tabstop>tabFitting</tabstop>
+  <tabstop>cbCategory</tabstop>
+  <tabstop>cbModel</tabstop>
+  <tabstop>cbStructureFactor</tabstop>
+  <tabstop>lstParams</tabstop>
+  <tabstop>chkPolydispersity</tabstop>
+  <tabstop>chk2DView</tabstop>
+  <tabstop>chkMagnetism</tabstop>
+  <tabstop>chkChainFit</tabstop>
+  <tabstop>lstPoly</tabstop>
+  <tabstop>lstMagnetic</tabstop>
+  <tabstop>cmdMagneticDisplay</tabstop>
+  <tabstop>cmdPlot</tabstop>
+  <tabstop>cmdFit</tabstop>
+  <tabstop>cmdHelp</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
