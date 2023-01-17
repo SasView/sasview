@@ -205,7 +205,7 @@ jobs:
         if: ${{ matrix.docs }}
         run: |
           cd docs/sphinx-docs/
-          python build_sphinx.py || true
+          python build_sphinx.py
 
       ### Build the installer (if enabled)
 
