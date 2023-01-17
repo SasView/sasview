@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import subprocess
 from subprocess import CalledProcessError
+import traceback
 import os
 from os.path import join as joinpath, abspath, dirname, isdir, exists, relpath
 import sys
@@ -190,6 +191,7 @@ def apidoc():
 
     except CalledProcessError as e:
         print(e.output)
+        traceback.print_exception(e)
         raise e
 
     try:
@@ -205,6 +207,7 @@ def apidoc():
 
     except CalledProcessError as e:
         print(e.output)
+        traceback.print_exception(e)
         raise e
 
 
