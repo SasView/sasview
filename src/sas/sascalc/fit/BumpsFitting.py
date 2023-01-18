@@ -373,6 +373,7 @@ def run_bumps(problem, handler, curr_thread):
             return True
         return False
 
+    errors = []
     fitclass, options = get_fitter()
     steps = options.get('steps', 0)
     if steps == 0:
@@ -388,16 +389,18 @@ def run_bumps(problem, handler, curr_thread):
         ]
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
                                   abort_test=abort_test, **options)
+    clipped = fitdriver.clip()
+    if clipped:
+        errors.append(f"The initial value for {clipped} was outside the fitting range and was coerced.")
     omp_threads = int(os.environ.get('OMP_NUM_THREADS', '0'))
     mapper = MPMapper if omp_threads == 1 else SerialMapper
     fitdriver.mapper = mapper.start_mapper(problem, None)
     #import time; T0 = time.time()
     try:
         best, fbest = fitdriver.fit()
-        errors = []
     except Exception as exc:
         best, fbest = None, np.NaN
-        errors = [str(exc), traceback.format_exc()]
+        errors.extend([str(exc), traceback.format_exc()])
     finally:
         mapper.stop_mapper(fitdriver.mapper)
 
