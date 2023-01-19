@@ -11,7 +11,7 @@ PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
 # Debugging stuff
 
-for filename in os.path.listdir("../docs/sphinx-docs"):
+for filename in os.listdir("../docs/sphinx-docs"):
     print(os.path.join("../docs/sphinx-docs", filename))
 
 
