@@ -41,7 +41,7 @@ def get_custom_config():
     global _CUSTOM_CONFIG
     if not _CUSTOM_CONFIG:
         from ._config import setup_custom_config
-        _CUSTOM_CONFIG = setup_custom_config(get_app_dir(), get_user_dir())
+        _CUSTOM_CONFIG = setup_custom_config(get_user_dir())
     return _CUSTOM_CONFIG
 
 
