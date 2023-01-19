@@ -21,6 +21,7 @@ datas = [
 ]
 #TODO: Hopefully we can get away from version specific packages
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
+datas.append((os.path.join(PYTHON_PACKAGES, 'pyopengl'), 'pyopengl'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
 
