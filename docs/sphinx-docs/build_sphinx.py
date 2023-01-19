@@ -5,7 +5,12 @@ Functions for building sphinx docs.
 For more information on the invocation of sphinx see:
 http://sphinx-doc.org/invocation.html
 """
-from __future__ import print_function
+def gahhhhhh(*args):
+    print(*args)
+    print(*args, file=sys.stderr)
+
+gahhhhhh("First thing")
+
 
 import subprocess
 import os
@@ -19,10 +24,6 @@ from glob import glob
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from distutils.spawn import find_executable
-
-def gahhhhhh(*args):
-    print(*args)
-    print(*args, file=sys.stderr)
 
 from shutil import copy
 from os import listdir
