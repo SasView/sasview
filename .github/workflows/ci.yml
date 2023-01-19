@@ -89,7 +89,7 @@ jobs:
           python -m pip install tinycc h5py pyparsing html5lib reportlab==3.6.6 pybind11 appdirs
           python -m pip install six numba mako ipython qtconsole xhtml2pdf pylint debugpy
           python -m pip install qt5reactor periodictable uncertainties dominate importlib_resources
-          python -m pip install html2text superqt pyopengl
+          python -m pip install html2text superqt pyopengl  pyopengl_accelerate
 
       - name: Install PyQt (Windows + Linux)
         if: ${{ !startsWith(matrix.os, 'macos') }}

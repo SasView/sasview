@@ -36,3 +36,4 @@ html2text
 jsonschema
 superqt
 pyopengl
+pyopengl_accelerate
