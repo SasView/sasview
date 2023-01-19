@@ -1474,6 +1474,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.page_parameters:
             self.updatePageWithParameters(self.page_parameters, warn_user=False)
 
+        # set focus so it doesn't move up
+        self.cbModel.setFocus()
+
     def onSelectBatchFilename(self, data_index):
         """
         Update the logic based on the selected file in batch fitting
