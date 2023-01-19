@@ -354,7 +354,6 @@ if build_qt:
 
 
 
-
 required = [
     'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',
     'lxml', 'h5py',
@@ -377,6 +376,7 @@ setup(
     license="PSF",
     keywords="small-angle x-ray and neutron scattering analysis",
     download_url="https://github.com/SasView/sasview.git",
+    packages=find_packages(where='src'),
     package_dir = {"": "src"},
     # package_dir=package_dir,
     # packages=packages,
@@ -384,6 +384,7 @@ setup(
     ext_modules=ext_modules,
     install_requires=required,
     zip_safe=False,
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             "sasview=sas.qtgui.MainWindow.MainWindow:run_sasview",
