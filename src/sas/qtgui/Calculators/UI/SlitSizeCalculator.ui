@@ -182,6 +182,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>data_file</tabstop>
+  <tabstop>browseButton</tabstop>
+  <tabstop>slit_length_out</tabstop>
+  <tabstop>unit_out</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>helpButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
