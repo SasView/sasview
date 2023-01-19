@@ -5,6 +5,7 @@ Functions for building sphinx docs.
 For more information on the invocation of sphinx see:
 http://sphinx-doc.org/invocation.html
 """
+import sys
 def gahhhhhh(*args):
     print(*args)
     print(*args, file=sys.stderr)
@@ -15,7 +16,6 @@ gahhhhhh("First thing")
 import subprocess
 import os
 from os.path import join as joinpath, abspath, dirname, isdir, exists, relpath
-import sys
 import fnmatch
 import shutil
 import imp
