@@ -55,7 +55,7 @@ points in the low-q range.
 The equation used is:
 
 .. math::
-    I(q) = A e^{Bq^2}
+    I(q) = e^{A + Bq^2}
 
 Where the parameter :math:`B` is related to the effective radius-of-gyration of 
 a spherical object having the same small-angle scattering in this region.
