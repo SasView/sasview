@@ -164,6 +164,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>chkEnable</tabstop>
+  <tabstop>txtSearch</tabstop>
+  <tabstop>lstCategory</tabstop>
+  <tabstop>cmdModify</tabstop>
+  <tabstop>cmdReset</tabstop>
+  <tabstop>cmdOK</tabstop>
+  <tabstop>cmdHelp</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
