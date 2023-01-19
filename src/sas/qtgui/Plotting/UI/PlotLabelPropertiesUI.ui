@@ -217,6 +217,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cbFont</tabstop>
+  <tabstop>cbWeight</tabstop>
+  <tabstop>cbColor</tabstop>
+  <tabstop>cmdCustom</tabstop>
+  <tabstop>cbSize</tabstop>
+  <tabstop>txtLegend</tabstop>
+  <tabstop>chkTicks</tabstop>
+  <tabstop>cbFont_y</tabstop>
+  <tabstop>cbWeight_y</tabstop>
+  <tabstop>cbColor_y</tabstop>
+  <tabstop>cmdCustom_y</tabstop>
+  <tabstop>cbSize_y</tabstop>
+  <tabstop>txtLegend_y</tabstop>
+  <tabstop>chkTicks_y</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

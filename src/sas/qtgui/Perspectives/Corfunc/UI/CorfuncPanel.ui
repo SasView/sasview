@@ -985,6 +985,35 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>txtFilename</tabstop>
+  <tabstop>txtLowerQMin</tabstop>
+  <tabstop>txtLowerQMax</tabstop>
+  <tabstop>txtUpperQMin</tabstop>
+  <tabstop>txtUpperQMax</tabstop>
+  <tabstop>cmdCalculateBg</tabstop>
+  <tabstop>txtBackground</tabstop>
+  <tabstop>txtGuinierA</tabstop>
+  <tabstop>txtGuinierB</tabstop>
+  <tabstop>txtPorodK</tabstop>
+  <tabstop>txtPorodSigma</tabstop>
+  <tabstop>cmdExtrapolate</tabstop>
+  <tabstop>cmdSaveExtrapolation</tabstop>
+  <tabstop>cmdTransform</tabstop>
+  <tabstop>cmdSave</tabstop>
+  <tabstop>txtAvgHardBlock</tabstop>
+  <tabstop>txtAvgSoftBlock</tabstop>
+  <tabstop>txtAvgIntThick</tabstop>
+  <tabstop>txtAvgCoreThick</tabstop>
+  <tabstop>txtPolyRyan</tabstop>
+  <tabstop>txtPolyStribeck</tabstop>
+  <tabstop>txtLongPeriod</tabstop>
+  <tabstop>txtLocalCrystal</tabstop>
+  <tabstop>cmdExtract</tabstop>
+  <tabstop>cmdHelp</tabstop>
+  <tabstop>tabWidget</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

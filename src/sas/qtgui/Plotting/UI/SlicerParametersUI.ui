@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>362</width>
-    <height>427</height>
+    <width>395</width>
+    <height>458</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -331,6 +331,21 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>lstParams</tabstop>
+  <tabstop>cbSlicer</tabstop>
+  <tabstop>cmdApply</tabstop>
+  <tabstop>cmdClose</tabstop>
+  <tabstop>cmdHelp</tabstop>
+  <tabstop>lstPlots</tabstop>
+  <tabstop>cbSave1DPlots</tabstop>
+  <tabstop>txtLocation</tabstop>
+  <tabstop>cmdFiles</tabstop>
+  <tabstop>cbSaveExt</tabstop>
+  <tabstop>txtExtension</tabstop>
+  <tabstop>cbFitOptions</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
