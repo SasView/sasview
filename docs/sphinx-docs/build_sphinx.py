@@ -6,17 +6,11 @@ For more information on the invocation of sphinx see:
 http://sphinx-doc.org/invocation.html
 """
 import sys
-def gahhhhhh(*args):
-    print(*args)
-    print(*args, file=sys.stderr)
-
-gahhhhhh("First thing")
 
 
 import subprocess
 import os
 from os.path import join as joinpath, abspath, dirname, isdir, exists, relpath
-import fnmatch
 import shutil
 import imp
 
@@ -27,8 +21,6 @@ from distutils.spawn import find_executable
 
 from shutil import copy
 from os import listdir
-
-gahhhhhh("After imports")
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
@@ -71,13 +63,10 @@ BUMPS_SOURCE = joinpath(BUMPS_DOCS, "guide")
 BUMPS_TARGET = joinpath(SPHINX_PERSPECTIVES, "Fitting")
 
 
-gahhhhhh("Before run")
-
 run = imp.load_source('run', joinpath(SASVIEW_ROOT, 'run.py'))
 run.prepare()
 
 
-gahhhhhh("After run")
 
 def inplace_change(filename, old_string, new_string):
 # Thanks to http://stackoverflow.com/questions/4128144/replace-string-within-file-contents
@@ -102,7 +91,7 @@ def clean():
     """
     Clean the sphinx build directory.
     """
-    gahhhhhh("=== Cleaning Sphinx Build ===")
+    print("=== Cleaning Sphinx Build ===")
     _remove_dir(SASVIEW_DOC_TARGET)
     _remove_dir(SPHINX_BUILD)
     _remove_dir(SPHINX_SOURCE)
@@ -303,5 +292,4 @@ def rebuild():
     print("=== Done ===")
 
 if __name__ == "__main__":
-    gahhhhhh("Calling rebuild")
     rebuild()
