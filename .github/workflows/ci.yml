@@ -204,7 +204,7 @@ jobs:
       - name: Build sasview docs
         if: ${{ matrix.docs }}
         run: |
-          mkdir build/lib
+          mkdir -p build/lib
           cd docs/sphinx-docs/
           python build_sphinx.py || true
 

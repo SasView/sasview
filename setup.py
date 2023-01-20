@@ -377,7 +377,7 @@ setup(
 
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    
+
     ext_modules=ext_modules,
     install_requires=required,
     zip_safe=False,
