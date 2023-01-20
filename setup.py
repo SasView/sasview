@@ -12,7 +12,7 @@ import subprocess
 import shutil
 import sys
 
-from setuptools import setup, Command
+from setuptools import setup, Command, find_packages
 
 # Manage version number ######################################
 version_file = os.path.join("src", "sas", "system", "version.py")
@@ -364,8 +364,6 @@ if os.name == 'nt':
 else:
     # 'pil' is now called 'pillow'
     required.extend(['pillow'])
-
-# Set up SasView
 setup(
     name="sasview",
     version=VERSION,
@@ -376,10 +374,10 @@ setup(
     license="PSF",
     keywords="small-angle x-ray and neutron scattering analysis",
     download_url="https://github.com/SasView/sasview.git",
-    package_dir = {"sas": "src/sas", "docs": "docs" },
-    # package_dir=package_dir,
-    # packages=packages,
-    # package_data=package_data,
+
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
+    
     ext_modules=ext_modules,
     install_requires=required,
     zip_safe=False,
@@ -391,3 +389,5 @@ setup(
     },
     cmdclass={'docs': BuildSphinxCommand},
 )
+
+# Set up SasView
