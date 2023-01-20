@@ -1,6 +1,8 @@
-. preferences_help.rst
+.. preferences_help.rst
+
 .. J Krzywon wrote initial draft August 2022
 .. Last Updated: J Krzywon, October 2022
+
 .. _Preferences:
 
 Preferences
