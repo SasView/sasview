@@ -204,8 +204,7 @@ jobs:
       - name: Build sasview docs
         if: ${{ matrix.docs }}
         run: |
-          pwd
-          # cd docs/sphinx-docs/
+          cd docs/sphinx-docs/
           python build_sphinx.py || true
 
       ### Build the installer (if enabled)
