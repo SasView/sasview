@@ -69,23 +69,28 @@ run.prepare()
 
 
 def inplace_change(filename, old_string, new_string):
-# Thanks to http://stackoverflow.com/questions/4128144/replace-string-within-file-contents
-        s=open(filename).read()
-        if old_string in s:
-                print('Changing "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
-                s=s.replace(old_string, new_string)
-                f=open(filename, 'w')
-                f.write(s)
-                f.flush()
-                f.close()
-        else:
-                print('No occurrences of "{old_string}" found in {filename}.'.format(**locals()))
+
+    with open(filename, 'r') as f:
+        s = f.read()
+
+    if old_string in s:
+
+        print('Changing "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
+
+        s = s.replace(old_string, new_string)
+        with open(filename, 'w') as f:
+            f.write(s)
+
+    else:
+        print('No occurrences of "{old_string}" found in {filename}.'.format(**locals()))
+
 
 def _remove_dir(dir_path):
     """Removes the given directory."""
     if isdir(dir_path):
         print("Removing \"%s\"... " % dir_path)
         shutil.rmtree(dir_path)
+
 
 def clean():
     """
@@ -96,12 +101,14 @@ def clean():
     _remove_dir(SPHINX_BUILD)
     _remove_dir(SPHINX_SOURCE)
 
+
 def setup_source_temp():
     """
     Copy the source toctrees to new folder for assembling the sphinx-docs
     """
     print("=== Copying Source toctrees ===")
     shutil.copytree(SASVIEW_DOCS, SPHINX_SOURCE)
+
 
 def retrieve_user_docs():
     """
@@ -168,6 +175,7 @@ The documentation will not include the optimizer selection section.
 Checkout the bumps source tree and rebuild the docs.
 """ % BUMPS_DOCS)
 
+
 def apidoc():
     """
     Runs sphinx-apidoc to generate .rst files from the docstrings in .py files
@@ -197,6 +205,7 @@ def apidoc():
         # omit the following documents from the API documentation
         joinpath(SASMODELS_BUILD, "sasmodels", "models"),
     ])
+
 
 def build_pdf():
     """
@@ -229,6 +238,7 @@ def build_pdf():
     target = joinpath(SASVIEW_DOC_TARGET, "SasView.pdf")
     shutil.copyfile(source, target)
 
+
 def build():
     """
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
@@ -248,46 +258,16 @@ def build():
     html = joinpath(SPHINX_BUILD, "html")
     copy_tree(html, SASVIEW_DOC_TARGET)
 
-def fetch_katex(version, destination="_static"):
-    from zipfile import ZipFile
-    import urllib2
-    url = "https://github.com/Khan/KaTeX/releases/download/%s/katex.zip" % version
-    cache_path = "katex_%s.zip" % version
-    if not exists(cache_path):
-        try:
-            fd_in = urllib2.urlopen(url)
-            with open(cache_path, "wb") as fd_out:
-                fd_out.write(fd_in.read())
-        finally:
-            fd_in.close()
-    with ZipFile(cache_path) as zip:
-        zip.extractall(destination)
-
-def convert_katex():
-    print("=== Preprocess HTML, converting latex to html ===")
-    subprocess.call(["node", "convertKaTex.js", SASVIEW_DOC_TARGET])
-
-def convert_mathjax():
-    print("=== Preprocess HTML, converting latex to html ===")
-    subprocess.call(["node", "convertMathJax.js", SASVIEW_DOC_TARGET])
-
-def fetch_mathjax():
-    subprocess.call(["npm", "install", "mathjax-node-page"])
-    # TODO: copy fonts from node_modules/mathjax/fonts/HTML-CSS/Tex into static
 
 def rebuild():
     clean()
     setup_source_temp()
     retrieve_user_docs()
     retrieve_bumps_docs()
-    #fetch_katex(version=KATEX_VERSION, destination=KATEX_PARENT)
-    #fetch_mathjax()
     apidoc()
     build()
     if find_executable('latex'):
         build_pdf()
-    #convert_katex()
-    #convert_mathjax()
 
     print("=== Done ===")
 
