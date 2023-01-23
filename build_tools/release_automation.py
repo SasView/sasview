@@ -14,9 +14,9 @@ zenodo_url = "https://zenodo.org"
 #Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
     'metadata': {
-    'title': 'SasView version 5.0.5',
-    'description': '5.0.5 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.5',
+    'title': 'SasView version 5.0.6',
+    'description': '5.0.6 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.6',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
         {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
@@ -49,6 +49,7 @@ sasview_data = {
         {'name': 'Alina, Gervaise','affiliation': 'University of Tennessee Knoxville'},
         {'name': 'Attala, Ziggy', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Bakker, Jurrian','affiliation': 'Technical Unviersity Delft'},
+        {'name': 'Beaucage, Peter','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2147-0728'},
         {'name': 'Bouwman, Wim','affiliation': 'Technical Univeristy Deflt' },
         {'name': 'Bourne, Robert', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-5978-4714'},
@@ -63,8 +64,9 @@ sasview_data = {
         {'name': 'Jackson, Andrew','affiliation': 'European Spallation Source ERIC', 'orcid': '0000-0002-6296-0336'},
         {'name': 'King, Stephen','affiliation': 'STFC - Rutherford Appleton Laboratory', 'orcid': '0000-0003-3386-9151'},
         {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology'},
-        {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology'},
+        {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2380-4090'},
         {'name': 'Maranville, Brian', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-6105-8789'},
+        {'name': 'Martinez, Nicolas','affiliation': 'Institut Laue-Langevin'},
         {'name': 'Murphy, Ryan', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-4080-7525'},
         {'name': 'Nielsen, Torben','affiliation': 'European Spallation Source ERIC'},
         {'name': "O'Driscoll, Lewis",'affiliation': 'STFC - Rutherford Appleton Laboratory'},
@@ -74,7 +76,8 @@ sasview_data = {
         {'name': 'Rozyczko, Piotr','affiliation': 'European Spallation Source ERIC', 'orcid' : '0000-0002-2359-1013' },
         {'name': 'Snow, Tim','affiliation': 'Diamond Light Source','orcid': '0000-0001-7146-6885'},
         {'name': 'Washington, Adam','affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Wolf, Caitlyn','affiliation': 'National Institute of Standards and Technology'}
+        {'name': 'Wilkins, Lucas','affiliation': 'STFC - Rutherford Appleton Laboratory'},
+        {'name': 'Wolf, Caitlyn','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2956-7049'}
         ],
     'grants': [{'id': '10.13039/501100000780::654000'}],
     'license': 'BSD-3-Clause',
