@@ -2008,6 +2008,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             logger.error(msg)
             return
 
+        if results.mesg:
+            logger.warning(results.mesg)
+
         param_list = results.param_list # ['radius', 'radius.width']
         param_values = results.pvec     # array([ 0.36221662,  0.0146783 ])
         param_stderr = results.stderr   # array([ 1.71293015,  1.71294233])
