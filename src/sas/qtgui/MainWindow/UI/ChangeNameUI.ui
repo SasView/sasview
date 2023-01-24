@@ -122,6 +122,18 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>rbExisting</tabstop>
+  <tabstop>txtCurrentName</tabstop>
+  <tabstop>rbDataName</tabstop>
+  <tabstop>txtDataName</tabstop>
+  <tabstop>rbFileName</tabstop>
+  <tabstop>txtFileName</tabstop>
+  <tabstop>rbNew</tabstop>
+  <tabstop>txtNewCategory</tabstop>
+  <tabstop>cmdOK</tabstop>
+  <tabstop>cmdCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
