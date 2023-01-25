@@ -37,7 +37,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         super(PreferencesPanel, self).__init__(parent)
         self.setupUi(self)
         self._staged_changes = {}
-        self._staged_requiring_restart = []
+        self._staged_requiring_restart = set()
         self.parent = parent
         self.setWindowTitle("Preferences")
         # Add predefined widgets to window
@@ -88,8 +88,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         """ Preferences widgets should call this method when changing a variable to prevent direct configuration
         changes"""
         self._staged_changes[key] = value
-        if config_restart_message and config_restart_message not in self._staged_requiring_restart:
-            self._staged_requiring_restart.append(config_restart_message)
+        self._staged_requiring_restart.add(config_restart_message)
 
     def _okClicked(self):
         """ Action triggered when the OK button is clicked"""
@@ -98,6 +97,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def _saveStagedChanges(self):
         """ When OK or Apply are clicked, all staged changes should be applied to the config. """
+        for i in range(self.stackedWidget.count()):
+            self.stackedWidget.widget(i).applyNonConfigValues()
         for k, v in self._staged_changes.items():
             setattr(config, k, v)
         if any(self._staged_requiring_restart):
@@ -109,7 +110,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             if msgBox.exec() == QMessageBox.Yes:
                 self.parent.guiManager.quitApplication()
                 os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
-        self._staged_requiring_restart = []
+        self._staged_requiring_restart = set()
         self._staged_changes = {}
 
     def _cancelStaging(self):
