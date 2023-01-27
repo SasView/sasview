@@ -542,13 +542,17 @@ def residualsData1D(reference_data, current_data, weights):
             pass
 
     residuals.x = current_data.x[index][0]
-    residuals.dy = numpy.ones(len(residuals.y))
+    residuals.dy = None
     residuals.dx = None
     residuals.dxl = None
     residuals.dxw = None
     residuals.ytransform = 'y'
+    if reference_data.isSesans:
+        residuals.xtransform = 'x'
+        residuals.xaxis('\\rm{z} ', 'A')
     # For latter scale changes
-    residuals.xaxis('\\rm{Q} ', 'A^{-1}')
+    else:
+        residuals.xaxis('\\rm{Q} ', 'A^{-1}')
     residuals.yaxis('\\rm{Residuals} ', 'normalized')
 
     return residuals
@@ -572,7 +576,7 @@ def residualsData2D(reference_data, current_data, weight):
     residuals.qx_data = current_data.qx_data
     residuals.qy_data = current_data.qy_data
     residuals.q_data = current_data.q_data
-    residuals.err_data = numpy.ones(len(residuals.data))
+    residuals.err_data = None
     residuals.xmin = min(residuals.qx_data)
     residuals.xmax = max(residuals.qx_data)
     residuals.ymin = min(residuals.qy_data)
@@ -604,7 +608,6 @@ def plotResiduals(reference_data, current_data, weights):
     res_name = reference_data.name if reference_data.name else reference_data.filename
     residuals.name = "Residuals for " + str(theory_name) + "[" + res_name + "]"
     residuals.title = residuals.name
-    residuals.ytransform = 'y'
 
     # when 2 data have the same id override the 1 st plotted
     # include the last part if keeping charts for separate models is required
@@ -632,6 +635,8 @@ def plotPolydispersities(model):
         # similar to FittingLogic._create1DPlot() but different data/axes
         data1d = Data1D(x=xarr, y=yarr)
         xunit = model.details[name][0]
+        data1d.xtransform = 'x'
+        data1d.ytransform = 'y'
         data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
         data1d.yaxis(r'\rm{probability}', 'normalized')
         data1d.scale = 'linear'

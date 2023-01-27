@@ -31,7 +31,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.qmax = max(self.data.xmax, self.data.xmin,
                         self.data.ymax, self.data.ymin)
         # Number of points on the plot
-        self.nbins = 30
+        self.nbins = 100
         # If True, I(|Q|) will be return, otherwise,
         # negative q-values are allowed
         self.fold = True
@@ -494,7 +494,14 @@ class BoxInteractorX(BoxInteractor):
         Validate input from user.
         Values get checked at apply time.
         """
-        return True
+        isValid = True
+
+        if param_name == 'nbins':
+            # Can't be 0
+            if param_value < 1:
+                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                isValid = False
+        return isValid
 
 
 class BoxInteractorY(BoxInteractor):
@@ -518,4 +525,11 @@ class BoxInteractorY(BoxInteractor):
         Validate input from user
         Values get checked at apply time.
         """
-        return True
+        isValid = True
+
+        if param_name == 'nbins':
+            # Can't be 0
+            if param_value < 1:
+                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                isValid = False
+        return isValid

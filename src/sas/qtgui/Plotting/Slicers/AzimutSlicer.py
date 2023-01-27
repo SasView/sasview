@@ -22,7 +22,7 @@ class SectorInteractor(BaseInteractor):
         self.connect = self.base.connect
 
         # # Number of points on the plot
-        self.nbins = 20
+        self.nbins = 100
         theta1 = 2 * np.pi / 3
         theta2 = -2 * np.pi / 3
 
