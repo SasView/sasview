@@ -281,7 +281,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py `pwd`
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py
           python  ../../build_tools/code_sign_osx.py
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
           hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
