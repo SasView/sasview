@@ -9,6 +9,12 @@ import sysconfig
 block_cipher = None
 PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
+# Debugging stuff
+
+for filename in os.listdir("../docs/sphinx-docs"):
+    print(os.path.join("../docs/sphinx-docs", filename))
+
+
 datas = [
     ('../src/sas/qtgui/images', 'images'),
     ('../src/sas/sasview/media', 'media'),
