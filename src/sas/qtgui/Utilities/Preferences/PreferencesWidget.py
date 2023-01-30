@@ -2,10 +2,11 @@ import logging
 
 from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 
 from sas.system import config
 
+ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
 logger = logging.getLogger(__name__)
 
 
@@ -33,21 +34,24 @@ class PreferencesWidget(QWidget):
     """A helper class that bundles all values needed to add a new widget to the preferences panel
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, build_gui=True):
         super(PreferencesWidget, self).__init__()
         # Keep parent as None until widget is added to preferences panel, then this will become th
         self.parent = None
         self.name: str = name
         # All parameter names used in this panel
         self.config_params: List[str] = []
-        # Create generic layout
-        self.verticalLayout = QVBoxLayout()
-        self.setLayout(self.verticalLayout)
-        # Child class generates GUI elements
-        self._addAllWidgets()
-        # Push all elements to the top of the window
-        self.verticalLayout.addStretch()
-        self.adjustSize()
+        # A mapping of parameter names to messages displayed when prompting for a restart
+        self.restart_params: Dict[str, str] = {}
+        if build_gui:
+            # Create generic layout
+            self.verticalLayout = QVBoxLayout()
+            self.setLayout(self.verticalLayout)
+            # Child class generates GUI elements
+            self._addAllWidgets()
+            # Push all elements to the top of the window
+            self.verticalLayout.addStretch()
+            self.adjustSize()
 
     def restoreDefaults(self):
         """Generic method to restore all default values for the widget. """
@@ -56,10 +60,11 @@ class PreferencesWidget(QWidget):
             setattr(config, param, default)
         self.restoreGUIValuesFromConfig()
 
-    def _stageChange(self, key: str, value: Union[str, bool, float, int, List]):
+    def _stageChange(self, key: str, value: ConfigType):
         """ All inputs should call this method when attempting to change config values. """
         if self.parent is not None and hasattr(self.parent, 'stageSingleChange'):
-            self.parent.stageSingleChange(key, value)
+            message = self.restart_params.get(key, None)
+            self.parent.stageSingleChange(key, value, message)
 
     def restoreGUIValuesFromConfig(self):
         """A generic method that blocks all signalling, and restores the GUI values from the config file.
@@ -75,6 +80,11 @@ class PreferencesWidget(QWidget):
     def _toggleBlockAllSignaling(self, toggle: bool):
         """A pseudo-abstract class that children should override. Toggles signalling for all elements. """
         raise NotImplementedError(f"{self.name} has not implemented _toggleBlockAllSignalling.")
+
+    def applyNonConfigValues(self):
+        """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
+        pass
+
 
     #############################################################
     # GUI Helper methods for widgets that don't have a UI element

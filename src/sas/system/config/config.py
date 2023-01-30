@@ -195,6 +195,10 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # sets the maximum number of characters per Fitting plot legend entry.
         self.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH = 30
+
+        # Default fitting optimizer
+        self.FITTING_DEFAULT_OPTIMIZER = 'lm'
+
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files

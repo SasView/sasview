@@ -1474,6 +1474,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.page_parameters:
             self.updatePageWithParameters(self.page_parameters, warn_user=False)
 
+        # set focus so it doesn't move up
+        self.cbModel.setFocus()
+
     def onSelectBatchFilename(self, data_index):
         """
         Update the logic based on the selected file in batch fitting
@@ -2004,6 +2007,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             msg += results.mesg
             logger.error(msg)
             return
+
+        if results.mesg:
+            logger.warning(results.mesg)
 
         param_list = results.param_list # ['radius', 'radius.width']
         param_values = results.pvec     # array([ 0.36221662,  0.0146783 ])

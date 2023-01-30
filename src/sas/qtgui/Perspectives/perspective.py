@@ -5,6 +5,7 @@ from PyQt5.QtGui import QStandardItem
 from PyQt5 import QtCore
 
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
 
 class PerspectiveMeta(type(QtCore.QObject), ABCMeta):
@@ -133,6 +134,15 @@ class Perspective(object, metaclass=PerspectiveMeta):
     def supports_fitting_menu(self) -> bool:
         """ Should the fitting menu be shown when using this perspective (unless its Fitting, probably not)"""
         return False
+
+    #
+    # Preferences registration
+    #
+
+    @property
+    def preferences(self) -> Optional[List[PreferencesWidget]]:
+        """ Return a list of widgets that should be added to the preferences panel. """
+        return []
 
     #
     # Copy and paste functionality

@@ -299,6 +299,9 @@ p, li { white-space: pre-wrap; }
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -336,6 +339,9 @@ p, li { white-space: pre-wrap; }
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -358,6 +364,9 @@ p, li { white-space: pre-wrap; }
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -389,6 +398,9 @@ p, li { white-space: pre-wrap; }
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -411,6 +423,9 @@ p, li { white-space: pre-wrap; }
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -442,6 +457,9 @@ p, li { white-space: pre-wrap; }
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -464,6 +482,9 @@ p, li { white-space: pre-wrap; }
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -494,6 +515,9 @@ p, li { white-space: pre-wrap; }
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -783,6 +807,36 @@ p, li { white-space: pre-wrap; }
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>dataList</tabstop>
+  <tabstop>removeButton</tabstop>
+  <tabstop>noOfTermsInput</tabstop>
+  <tabstop>noOfTermsSuggestionButton</tabstop>
+  <tabstop>regularizationConstantInput</tabstop>
+  <tabstop>regConstantSuggestionButton</tabstop>
+  <tabstop>maxDistanceInput</tabstop>
+  <tabstop>explorerButton</tabstop>
+  <tabstop>rgValue</tabstop>
+  <tabstop>chiDofValue</tabstop>
+  <tabstop>iQ0Value</tabstop>
+  <tabstop>oscillationValue</tabstop>
+  <tabstop>backgroundValue</tabstop>
+  <tabstop>posFractionValue</tabstop>
+  <tabstop>computationTimeValue</tabstop>
+  <tabstop>sigmaPosFractionValue</tabstop>
+  <tabstop>calculateThisButton</tabstop>
+  <tabstop>calculateAllButton</tabstop>
+  <tabstop>stopButton</tabstop>
+  <tabstop>helpButton</tabstop>
+  <tabstop>PrTabWidget</tabstop>
+  <tabstop>backgroundInput</tabstop>
+  <tabstop>estimateBgd</tabstop>
+  <tabstop>manualBgd</tabstop>
+  <tabstop>minQInput</tabstop>
+  <tabstop>maxQInput</tabstop>
+  <tabstop>slitHeightInput</tabstop>
+  <tabstop>slitWidthInput</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
