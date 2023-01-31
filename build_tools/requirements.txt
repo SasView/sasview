@@ -24,7 +24,8 @@ qt5reactor
 periodictable 
 uncertainties
 matplotlib~=3.5.2
-PyQt5
+PyQt5; platform_system != "Darwin"
+PyQt5==5.15.6; platform_system == "Darwin"
 lxml
 pytools 
 cffi
