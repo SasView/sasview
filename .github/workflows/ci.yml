@@ -233,17 +233,6 @@ jobs:
             installers/dist/sasview-pyinstaller-dist.tar.gz
           if-no-files-found: ignore
 
-      - name: Publish installer package
-        if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
-          path: |
-            installers/dist/setupSasView.exe
-            installers/dist/SasView5.dmg
-            installers/dist/sasview5.tar.gz
-          if-no-files-found: error
-
       - name: Sign executable and create dmg (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         env:
@@ -263,6 +252,18 @@ jobs:
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
           hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
           codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
+          
+      - name: Publish installer package
+        if: ${{ matrix.installer }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            installers/dist/setupSasView.exe
+            installers/dist/SasView5.dmg
+            installers/dist/sasview5.tar.gz
+          if-no-files-found: error
+
 
   #     - name: Notarize Release Build (OSX)
   #       if: ${{ env.RELEASE == 'true' && matrix.installer && startsWith(matrix.os, 'macos') }}
