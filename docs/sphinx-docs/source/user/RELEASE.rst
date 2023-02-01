@@ -16,17 +16,29 @@ Features
 New in Version 5.0.6
 --------------------
 This is a small bug release which fixes some issues reported in earlier versions
-of 5.0.x.
+of 5.0.x. Of particular note, the failure to start when installing on a new
+system due to issues finding the config file has been fixed and the startup
+speed has been improved. Also the paracryatline models, which have been labelled
+as "under review" since 2018, have been corrected (bcc and fcc) and the documentation
+completely reworked (bcc, fcc, and sc).  Otherwise plots now properly support custom
+names in the legend, the LM optimizer failure on GPUs or when the starting value
+is outside the min/max range has been fixed, a problem with intermittent blanking
+of plots has been fixed, a number of defaults have been changed to be more reasonable
+and a number of issues in the documentation have been corrected and/or updated.
+
+This version of SasView is built with Sasmodels 1.0.7 and Bumps master.
+
+Pull Request Changes
+^^^^^^^^^^^^^^^^^^^^
 
 * Update corfunc documentation @lucas-Wilkins `[#2047] <https://github.com/SasView/sasview/pull/2047/>`_
-* Update web links from http to https @smk78 `[#2087] <https://github.com/SasView/sasview/pull/2087/>`_
-and `[#2265] <https://github.com/SasView/sasview/pull/2265/>`_
-* Fix problem with use of Data Operation Tool preventing project saving @rozyczko `[#2099]<https://github.com/SasView/sasview/pull/2099/>`_
-* Update contributor list @wpetrzebowski `[#2114]<https://github.com/SasView/sasview/pull/2114>`_
-* Fix update to numpy verion breaking P(R) analysis @lucas-wilkins `[#2178]<https://github.com/SasView/sasview/pull/2178/>`_
-* Fix label rendering problems due to incorrect escape sequences @llimeht `[#2217]<https://github.com/SasView/sasview/pull/2217/>`_
+* Update web links from http to https @smk78 `[#2087] <https://github.com/SasView/sasview/pull/2087/>`_ and `[#2265] <https://github.com/SasView/sasview/pull/2265/>`_
+* Fix problem with use of Data Operation Tool preventing project saving @rozyczko `[#2099] <https://github.com/SasView/sasview/pull/2099/>`_
+* Update contributor list @wpetrzebowski `[#2114] <https://github.com/SasView/sasview/pull/2114>`_
+* Fix update to numpy verion breaking P(R) analysis @lucas-wilkins `[#2178] <https://github.com/SasView/sasview/pull/2178/>`_
+* Fix label rendering problems due to incorrect escape sequences @llimeht `[#2217] <https://github.com/SasView/sasview/pull/2217/>`_
 * Add persistent legend visibility toggle @pbeaucage `[#2266] <https://github.com/SasView/sasview/pull/2266/>`_
-* Fix problem with losing minimize/restore/close buttons when maximizing fit window @rozyczko `[#2273]<https://github.com/SasView/sasview/pull/2273/>`_
+* Fix problem with losing minimize/restore/close buttons when maximizing fit window @rozyczko `[#2273] <https://github.com/SasView/sasview/pull/2273/>`_
 * Tweaks to improve startup speed @rozyczko `[#2275] <https://github.com/SasView/sasview/pull/2275/>`_
 * Fix Sphinx some of the warnings during build process @smk78 `[#2288] <https://github.com/SasView/sasview/pull/2288/>`_
 * Properly support custom names in plot legend @pbeaucage `[#2293] <https://github.com/SasView/sasview/pull/2293/>`_
@@ -41,12 +53,12 @@ and `[#2265] <https://github.com/SasView/sasview/pull/2265/>`_
 * Provide more reasonable defaults (number of points in curves, log vs linear scale, residuals don't have error bars) @butlerpd `[#2354] <https://github.com/SasView/sasview/pull/2354/>`_
 * Add more informative error message to invariant calculator @wpetrzebowski `[#2357] <https://github.com/SasView/sasview/pull/2357/>`_
 * Update optimizer help documentation @smk78 `[#2359] <https://github.com/SasView/sasview/pull/2359/>`_
-* Fix plot legend not updating on custom change @rozyczko `[#2362] https://github.com/SasView/sasview/pull/2362/>`_
+* Fix plot legend not updating on custom change @rozyczko `[#2362] <https://github.com/SasView/sasview/pull/2362/>`_
 * Cleanup (close) the bumps/DREAM results panel when associate data is removed from sasview @krzywon `[#2365] <https://github.com/SasView/sasview/pull/2365/>`_
 * Fix for failure to find custom_config preventing sasview from starting @krzywon `[#2407] <https://github.com/SasView/sasview/pull/2407/>`_
 * Fix error being thrown when the initial guess it outside the min/max range for the LM optimizer @krzywon `[#2422] <https://github.com/SasView/sasview/pull/2422/>`_
 * Fix problem with LM optimizer failing when GPUs are turned on by updating to the latest bumps version
-* Fix modelw with complex amplitudes not compiling on the fly @pkienzle `[#511] <https://github.com/SasView/sasmodels/pull/511/>`_
+* Fix models with complex amplitudes not compiling on the fly @pkienzle `[#511] <https://github.com/SasView/sasmodels/pull/511/>`_
 * Fix error in core shell Ellipsoid documentation @pkienzle `[#512] <https://github.com/SasView/sasmodels/pull/512/>`_
 * Fix to allow multiple scattering script to run @wpetrzebowski `[#521] <https://github.com/SasView/sasmodels/pull/521/>`_
 * Update marketplace url to https @smk78 `[#522] <https://github.com/SasView/sasmodels/pull/522/>`_
