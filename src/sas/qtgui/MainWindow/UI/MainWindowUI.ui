@@ -40,6 +40,8 @@
     <addaction name="actionSave"/>
     <addaction name="actionSave_Analysis"/>
     <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -605,6 +607,15 @@
   <action name="actionModel_Marketplace">
    <property name="text">
     <string>Model Marketplace</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/res/settings.png</normaloff>:/res/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Preferences...</string>
    </property>
   </action>
  </widget>

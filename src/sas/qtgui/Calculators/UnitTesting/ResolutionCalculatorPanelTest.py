@@ -2,12 +2,19 @@ import sys
 import time
 import numpy
 import logging
-import unittest
+
+import pytest
+
+# CRUFT: this shouldn't be needed in the test but makes the difference
+# between passing tests and failing tests. Remove this and figure out how
+# to fix the resolution calculator widget itself?
+import matplotlib as mpl
+mpl.use("Qt5Agg")
+
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from unittest.mock import MagicMock
 
 from twisted.internet import threads
 
@@ -19,263 +26,254 @@ BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
 BG_COLOR_WARNING = 'background-color: rgb(244, 217, 164);'
 
+class ResolutionCalculatorPanelTest:
+    """Test the ResolutionCalculatorPanel"""
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
-
-
-class ResolutionCalculatorPanelTest(unittest.TestCase):
-    """Test the ResolutionCalculator"""
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        """Create/Destroy the ResolutionCalculatorPanel"""
         class dummy_manager(object):
-            communicator = Communicate()
-        """Create the ResolutionCalculator"""
-        self.widget = ResolutionCalculatorPanel(dummy_manager())
+            def communicator(widget):
+                return Communicate()
 
-        # self.widget.onCompute = MagicMock()
+        w = ResolutionCalculatorPanel(dummy_manager())
 
-    def tearDown(self):
-        """Destroy the ResolutionCalculator"""
-        if self.widget.plotter is not None:
-            self.widget.plotter.close()
-        self.widget.close()
-        self.widget = None
+        yield w
 
-    def testDefaults(self):
+        w.close()
+        w = None
+
+    def testDefaults(self, widget):
         """Test the GUI in its default state"""
 
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertEqual(self.widget.windowTitle(), "Q Resolution Estimator")
+        assert isinstance(widget, QtWidgets.QDialog)
+        assert widget.windowTitle() == "Q Resolution Estimator"
         # size
-        self.assertEqual(self.widget.size().height(), 540)
-        self.assertEqual(self.widget.size().width(), 876)
+        assert widget.size().height() == 540
+        assert widget.size().width() == 876
 
         # visibility
-        self.assertFalse(self.widget.lblSpectrum.isVisible())
-        self.assertFalse(self.widget.cbCustomSpectrum.isVisible())
+        assert not widget.lblSpectrum.isVisible()
+        assert not widget.cbCustomSpectrum.isVisible()
 
         # content of line edits
-        self.assertEqual(self.widget.txtDetectorPixSize.text(), '0.5, 0.5')
-        self.assertEqual(self.widget.txtDetectorSize.text(), '128, 128')
-        self.assertEqual(self.widget.txtSample2DetectorDistance.text(), '1000')
-        self.assertEqual(self.widget.txtSampleApertureSize.text(), '1.27')
-        self.assertEqual(self.widget.txtSampleOffset.text(), '0')
-        self.assertEqual(self.widget.txtSource2SampleDistance.text(), '1627')
-        self.assertEqual(self.widget.txtSourceApertureSize.text(), '3.81')
-        self.assertEqual(self.widget.txtWavelength.text(), '6.0')
-        self.assertEqual(self.widget.txtWavelengthSpread.text(), '0.125')
+        assert widget.txtDetectorPixSize.text() == '0.5, 0.5'
+        assert widget.txtDetectorSize.text() == '128, 128'
+        assert widget.txtSample2DetectorDistance.text() == '1000'
+        assert widget.txtSampleApertureSize.text() == '1.27'
+        assert widget.txtSampleOffset.text() == '0'
+        assert widget.txtSource2SampleDistance.text() == '1627'
+        assert widget.txtSourceApertureSize.text() == '3.81'
+        assert widget.txtWavelength.text() == '6.0'
+        assert widget.txtWavelengthSpread.text() == '0.125'
 
-        self.assertEqual(self.widget.txtQx.text(), '0.0')
-        self.assertEqual(self.widget.txtQy.text(), '0.0')
+        assert widget.txtQx.text() == '0.0'
+        assert widget.txtQy.text() == '0.0'
 
-        self.assertEqual(self.widget.txt1DSigma.text(), '0.0008289')
-        self.assertEqual(self.widget.txtSigma_lamd.text(), '3.168e-05')
-        self.assertEqual(self.widget.txtSigma_x.text(), '0.0008288')
-        self.assertEqual(self.widget.txtSigma_x.text(), '0.0008288')
+        assert widget.txt1DSigma.text() == '0.0008289'
+        assert widget.txtSigma_lamd.text() == '3.168e-05'
+        assert widget.txtSigma_x.text() == '0.0008288'
+        assert widget.txtSigma_x.text() == '0.0008288'
 
         # items of comboboxes
-        self.assertFalse(self.widget.cbCustomSpectrum.isEditable())
-        self.assertEqual(self.widget.cbCustomSpectrum.currentText(), 'Flat')
-        self.assertEqual(self.widget.cbCustomSpectrum.currentIndex(), 0)
-        self.assertListEqual([self.widget.cbCustomSpectrum.itemText(i) for i in
-                              range(self.widget.cbCustomSpectrum.count())],
-                             ['Flat', 'Add New'])
+        assert not widget.cbCustomSpectrum.isEditable()
+        assert widget.cbCustomSpectrum.currentText() == 'Flat'
+        assert widget.cbCustomSpectrum.currentIndex() == 0
+        assert [widget.cbCustomSpectrum.itemText(i) for i in
+                                range(widget.cbCustomSpectrum.count())] == \
+                                ['Flat', 'Add New']
 
-        self.assertFalse(self.widget.cbSource.isEditable())
-        self.assertEqual(self.widget.cbSource.count(), 6)
-        self.assertEqual(self.widget.cbSource.currentText(), 'Neutron')
-        self.assertListEqual([self.widget.cbSource.itemText(i) for i in
-                              range(self.widget.cbSource.count())],
-                             ['Alpha', 'Deutron', 'Neutron', 'Photon',
-                              'Proton', 'Triton'])
+        assert not widget.cbSource.isEditable()
+        assert widget.cbSource.count() == 6
+        assert widget.cbSource.currentText() == 'Neutron'
+        assert [widget.cbSource.itemText(i) for i in
+                                range(widget.cbSource.count())] == \
+                                ['Alpha', 'Deutron', 'Neutron', 'Photon',
+                                'Proton', 'Triton']
 
-        self.assertFalse(self.widget.cbWaveColor.isEditable())
-        self.assertEqual(self.widget.cbWaveColor.count(), 2)
-        self.assertEqual(self.widget.cbWaveColor.currentText(), 'Monochromatic')
-        self.assertListEqual([self.widget.cbWaveColor.itemText(i) for i in
-                              range(self.widget.cbWaveColor.count())],
-                             ['Monochromatic', 'TOF'])
+        assert not widget.cbWaveColor.isEditable()
+        assert widget.cbWaveColor.count() == 2
+        assert widget.cbWaveColor.currentText() == 'Monochromatic'
+        assert [widget.cbWaveColor.itemText(i) for i in
+                                range(widget.cbWaveColor.count())] == \
+                                ['Monochromatic', 'TOF']
 
         # read only text edits
-        self.assertTrue(self.widget.txtSigma_x.isReadOnly())
-        self.assertTrue(self.widget.txtSigma_y.isReadOnly())
-        self.assertTrue(self.widget.txtSigma_lamd.isReadOnly())
-        self.assertTrue(self.widget.txt1DSigma.isReadOnly())
+        assert widget.txtSigma_x.isReadOnly()
+        assert widget.txtSigma_y.isReadOnly()
+        assert widget.txtSigma_lamd.isReadOnly()
+        assert widget.txt1DSigma.isReadOnly()
 
         # tooltips
-        self.assertEqual(self.widget.cbSource.toolTip(),
-                         "Source Selection: "
-                         "Affect on the gravitational contribution.")
-        self.widget.cbCustomSpectrum.toolTip(), \
+        assert widget.cbSource.toolTip() == \
+                            "Source Selection: " \
+                            "Affect on the gravitational contribution."
+        widget.cbCustomSpectrum.toolTip(), \
         "Wavelength Spectrum: Intensity vs. wavelength."
-        # print self.widget.txtDetectorPixSize.toolTip()
-        self.assertEqual(self.widget.txtDetectorPixSize.toolTip(),
-                         "Detector Pixel Size.")
-        self.assertEqual(self.widget.txtDetectorSize.toolTip(),
-                         "Number of Pixels on Detector.")
-        self.assertEqual(self.widget.txtSample2DetectorDistance.toolTip(),
-                         "Sample Aperture to Detector Distance.")
-        self.assertEqual(self.widget.txtSampleApertureSize.toolTip(),
-                         "Sample Aperture Size.")
-        self.assertEqual(self.widget.txtSampleOffset.toolTip(),
-                         "Sample Offset.")
-        self.assertEqual(self.widget.txtSource2SampleDistance.toolTip(),
-                         "Source to Sample Aperture Distance.")
-        self.assertEqual(self.widget.txtSourceApertureSize.toolTip(),
-                         "Source Aperture Size.")
-        self.assertEqual(self.widget.txtWavelength.toolTip(),
-                         "Wavelength of the Neutrons.")
-        self.assertEqual(self.widget.txtWavelengthSpread.toolTip(),
-                         "Wavelength Spread of Neutrons.")
-        self.assertEqual(self.widget.txtQx.toolTip(), "Type the Qx value.")
-        self.assertEqual(self.widget.txtQy.toolTip(), "Type the Qy value.")
-        self.assertEqual(self.widget.txt1DSigma.toolTip(),
-                         "Resolution in 1-dimension (for 1D data).")
-        self.assertEqual(self.widget.txtSigma_lamd.toolTip(),
-                         "The wavelength contribution in the radial direction."
-                         " Note: The phi component is always zero.")
-        self.assertEqual(self.widget.txtSigma_x.toolTip(),
-                         "The x component of the geometric resolution, "
-                         "excluding sigma_lamda.")
-        self.assertEqual(self.widget.txtSigma_y.toolTip(),
-                         "The y component of the geometric resolution, "
-                         "excluding sigma_lamda.")
+        # print widget.txtDetectorPixSize.toolTip()
+        assert widget.txtDetectorPixSize.toolTip() == \
+                            "Detector Pixel Size."
+        assert widget.txtDetectorSize.toolTip() == \
+                            "Number of Pixels on Detector."
+        assert widget.txtSample2DetectorDistance.toolTip() == \
+                            "Sample Aperture to Detector Distance."
+        assert widget.txtSampleApertureSize.toolTip() == \
+                            "Sample Aperture Size."
+        assert widget.txtSampleOffset.toolTip() == \
+                            "Sample Offset."
+        assert widget.txtSource2SampleDistance.toolTip() == \
+                            "Source to Sample Aperture Distance."
+        assert widget.txtSourceApertureSize.toolTip() == \
+                            "Source Aperture Size."
+        assert widget.txtWavelength.toolTip() == \
+                            "Wavelength of the Neutrons."
+        assert widget.txtWavelengthSpread.toolTip() == \
+                            "Wavelength Spread of Neutrons."
+        assert widget.txtQx.toolTip() == "Type the Qx value."
+        assert widget.txtQy.toolTip() == "Type the Qy value."
+        assert widget.txt1DSigma.toolTip() == \
+                            "Resolution in 1-dimension (for 1D data)."
+        assert widget.txtSigma_lamd.toolTip() == \
+                            "The wavelength contribution in the radial direction." \
+                            " Note: The phi component is always zero."
+        assert widget.txtSigma_x.toolTip() == \
+                            "The x component of the geometric resolution, " \
+                            "excluding sigma_lamda."
+        assert widget.txtSigma_y.toolTip() == \
+                            "The y component of the geometric resolution, " \
+                            "excluding sigma_lamda."
 
-    def testFormatNumber(self):
-        self.assertEqual(self.widget.formatNumber('  7.123456  '), '7.123')
+    def testFormatNumber(self, widget):
+        assert widget.formatNumber('  7.123456  ') == '7.123'
 
-    def testCheckWavelength(self):
+    def testCheckWavelength(self, widget):
         """ Test validator for Wavelength text edit"""
-        self.widget.txtWavelength.clear()
+        widget.txtWavelength.clear()
         # Enter invalid input for Monochromatic spectrum
         # check that background becomes red and Compute button is disabled
-        QTest.keyClicks(self.widget.txtWavelength, 'vcv ')
-        QTest.keyClick(self.widget.txtWavelength, QtCore.Qt.Key_Return)
-        self.assertIn(BG_COLOR_ERR, self.widget.txtWavelength.styleSheet())
-        self.assertFalse(self.widget.cmdCompute.isEnabled())
+        QTest.keyClicks(widget.txtWavelength, 'vcv ')
+        QTest.keyClick(widget.txtWavelength, QtCore.Qt.Key_Return)
+        assert BG_COLOR_ERR in widget.txtWavelength.styleSheet()
+        assert not widget.cmdCompute.isEnabled()
 
         # Enter invalid input for TOF spectrum
         # check that background becomes red and Compute button is disabled
-        self.widget.cbWaveColor.setCurrentIndex(1)
+        widget.cbWaveColor.setCurrentIndex(1)
 
-        self.widget.txtWavelength.clear()
-        QTest.keyClicks(self.widget.txtWavelength, '4')
-        QTest.keyClick(self.widget.txtWavelength, QtCore.Qt.Key_Return)
-        self.assertIn(BG_COLOR_ERR, self.widget.txtWavelength.styleSheet())
-        self.assertFalse(self.widget.cmdCompute.isEnabled())
+        widget.txtWavelength.clear()
+        QTest.keyClicks(widget.txtWavelength, '4')
+        QTest.keyClick(widget.txtWavelength, QtCore.Qt.Key_Return)
+        assert BG_COLOR_ERR in widget.txtWavelength.styleSheet()
+        assert not widget.cmdCompute.isEnabled()
 
-    def testCheckWavelengthSpread(self):
+    def testCheckWavelengthSpread(self, widget):
         """ Test validator for WavelengthSpread """
-        self.widget.txtWavelengthSpread.clear()
-        QTest.keyClicks(self.widget.txtWavelengthSpread, '0.12; 1.3')
-        QTest.keyClick(self.widget.txtWavelengthSpread, QtCore.Qt.Key_Return)
-        self.assertIn(BG_COLOR_ERR,
-                      self.widget.txtWavelengthSpread.styleSheet())
+        widget.txtWavelengthSpread.clear()
+        QTest.keyClicks(widget.txtWavelengthSpread, '0.12; 1.3')
+        QTest.keyClick(widget.txtWavelengthSpread, QtCore.Qt.Key_Return)
+        assert BG_COLOR_ERR in \
+                        widget.txtWavelengthSpread.styleSheet()
 
-    def testCheckPixels(self):
+    def testCheckPixels(self, widget):
         """ Test validator for pixel size and number """
-        self.widget.txtDetectorPixSize.clear()
-        QTest.keyClicks(self.widget.txtDetectorPixSize, '0.12; 1.3')
-        QTest.keyClick(self.widget.txtDetectorPixSize, QtCore.Qt.Key_Return)
-        self.assertIn(BG_COLOR_ERR,
-                      self.widget.txtDetectorPixSize.styleSheet())
+        widget.txtDetectorPixSize.clear()
+        QTest.keyClicks(widget.txtDetectorPixSize, '0.12; 1.3')
+        QTest.keyClick(widget.txtDetectorPixSize, QtCore.Qt.Key_Return)
+        assert BG_COLOR_ERR in \
+                        widget.txtDetectorPixSize.styleSheet()
 
-        self.widget.txtDetectorSize.clear()
-        QTest.keyClicks(self.widget.txtDetectorSize, '0.12')
-        QTest.keyClick(self.widget.txtDetectorSize, QtCore.Qt.Key_Return)
-        self.assertIn(BG_COLOR_ERR,
-                      self.widget.txtDetectorSize.styleSheet())
+        widget.txtDetectorSize.clear()
+        QTest.keyClicks(widget.txtDetectorSize, '0.12')
+        QTest.keyClick(widget.txtDetectorSize, QtCore.Qt.Key_Return)
+        assert BG_COLOR_ERR in \
+                        widget.txtDetectorSize.styleSheet()
 
-    def testCheckQx_y(self):
+    def testCheckQx_y(self, widget):
         """ Test validator for qx and qy inputs """
-        self.widget.txtQx.clear()
-        QTest.keyClicks(self.widget.txtQx, '0.12; 1.3')
-        QTest.keyClick(self.widget.txtQx, QtCore.Qt.Key_Return)
-        self.assertIn(BG_COLOR_ERR,
-                      self.widget.txtQx.styleSheet())
+        widget.txtQx.clear()
+        QTest.keyClicks(widget.txtQx, '0.12; 1.3')
+        QTest.keyClick(widget.txtQx, QtCore.Qt.Key_Return)
+        assert BG_COLOR_ERR in \
+                        widget.txtQx.styleSheet()
         # put back default value
-        self.widget.txtQx.setText('0.0')
+        widget.txtQx.setText('0.0')
 
-        self.widget.txtQy.clear()
-        QTest.keyClicks(self.widget.txtQy, '0.12, a')
-        QTest.keyClick(self.widget.txtQy, QtCore.Qt.Key_Return)
-        self.assertIn(BG_COLOR_ERR, self.widget.txtQy.styleSheet())
+        widget.txtQy.clear()
+        QTest.keyClicks(widget.txtQy, '0.12, a')
+        QTest.keyClick(widget.txtQy, QtCore.Qt.Key_Return)
+        assert BG_COLOR_ERR in widget.txtQy.styleSheet()
         # put back default value
-        self.widget.txtQy.setText('0.0')
+        widget.txtQy.setText('0.0')
 
-    def testOnSelectWaveColor(self):
+    def testOnSelectWaveColor(self, widget):
         """ Test change of layout if type of source is TOF """
         # choose TOF
-        AllItems = [self.widget.cbWaveColor.itemText(i)
-                    for i in range(self.widget.cbWaveColor.count())]
-        self.widget.cbWaveColor.setCurrentIndex(AllItems.index('TOF'))
+        AllItems = [widget.cbWaveColor.itemText(i)
+                    for i in range(widget.cbWaveColor.count())]
+        widget.cbWaveColor.setCurrentIndex(AllItems.index('TOF'))
 
         # call function
-        self.widget.onSelectWaveColor()
-        self.widget.show()
+        widget.onSelectWaveColor()
+        widget.show()
 
         # check that TOF is selected
-        self.assertTrue(self.widget.cbWaveColor.currentText(), 'TOF')
+        assert widget.cbWaveColor.currentText(), 'TOF'
 
         # check modifications of Wavelength text edit: min - max
-        self.assertEqual(self.widget.txtWavelength.text(), '6.0 - 12.0')
-        self.assertEqual(self.widget.txtWavelengthSpread.text(), '0.125 - 0.125')
+        assert widget.txtWavelength.text() == '6.0 - 12.0'
+        assert widget.txtWavelengthSpread.text() == '0.125 - 0.125'
 
         # check that Spectrum label and cbCustomSpectrum are visible
-        self.assertTrue(self.widget.lblSpectrum.isVisible())
-        self.assertTrue(self.widget.cbCustomSpectrum.isVisible())
+        assert widget.lblSpectrum.isVisible()
+        assert widget.cbCustomSpectrum.isVisible()
 
-    def testOnSelectCustomSpectrum(self):
+    def testOnSelectCustomSpectrum(self, widget, mocker):
         """ Test Custom Spectrum: load file if 'Add New' """
-        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=("",""))
-        self.widget.cbCustomSpectrum.setCurrentIndex(1)
+        mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=("",""))
+        widget.cbCustomSpectrum.setCurrentIndex(1)
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtWidgets.QFileDialog.getOpenFileName.called)
+        assert QtWidgets.QFileDialog.getOpenFileName.called
         QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
-    def testHelp(self):
+    def testHelp(self, widget, mocker):
         """ Assure help file is shown """
         # this should not rise
-        self.widget.manager = QtWidgets.QWidget()
-        self.widget.manager.showHelp = MagicMock()
-        self.widget.onHelp()
-        self.assertTrue(self.widget.manager.showHelp.called_once())
-        args = self.widget.manager.showHelp.call_args
-        self.assertIn('resolution_calculator_help.html', args[0][0])
+        widget.manager = QtWidgets.QWidget()
+        mocker.patch.object(widget.manager, 'showHelp', create=True)
+        widget.onHelp()
+        assert widget.manager.showHelp.called_once()
+        args = widget.manager.showHelp.call_args
+        assert 'resolution_calculator_help.html' in args[0][0]
 
-    def testOnReset(self):
+    def testOnReset(self, widget):
         """ Test onReset function"""
         # modify gui
-        self.widget.txtQx.setText('33.0')
-        self.widget.cbSource.setCurrentIndex(0)
+        widget.txtQx.setText('33.0')
+        widget.cbSource.setCurrentIndex(0)
 
         # check that GUI has been modified
-        self.assertNotEqual(self.widget.cbSource.currentText(), 'Neutron')
+        assert widget.cbSource.currentText() != 'Neutron'
         # apply reset
-        QTest.mouseClick(self.widget.cmdReset, Qt.LeftButton)
+        QTest.mouseClick(widget.cmdReset, Qt.LeftButton)
         # check that we get back to the initial state
-        self.assertEqual(self.widget.txtQx.text(), '0.0')
-        self.assertEqual(self.widget.cbSource.currentText(), 'Neutron')
+        assert widget.txtQx.text() == '0.0'
+        assert widget.cbSource.currentText() == 'Neutron'
 
-    def testOnClose(self):
+    def testOnClose(self, widget):
         """ test Closing window """
-        closeButton = self.widget.cmdClose
+        closeButton = widget.cmdClose
         QTest.mouseClick(closeButton, Qt.LeftButton)
 
-    def testOnCompute(self):
+    def testOnCompute(self, widget, mocker):
         """ """
-        threads.deferToThread = MagicMock()
-        self.widget.onCompute()
+        mocker.patch.object(threads, 'deferToThread')
+        widget.onCompute()
 
         # thread called
-        self.assertTrue(threads.deferToThread.called)
-        self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'map_wrapper')
+        assert threads.deferToThread.called
+        assert threads.deferToThread.call_args_list[0][0][0].__name__ == 'map_wrapper'
 
         # the Compute button changed caption and got disabled
-        self.assertEqual(self.widget.cmdCompute.text(), 'Wait...')
-        self.assertFalse(self.widget.cmdCompute.isEnabled())
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert widget.cmdCompute.text() == 'Wait...'
+        assert not widget.cmdCompute.isEnabled()

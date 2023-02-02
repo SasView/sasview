@@ -1,7 +1,7 @@
 class Constraint(object):
     """
     Internal representation of a single parameter constraint
-    Currently just a data structure, might get expaned with more functionality,
+    Currently just a data structure, might get expanded with more functionality,
     hence made into a class.
     """
     def __init__(self, parent=None, param=None, value=0.0,
@@ -14,6 +14,7 @@ class Constraint(object):
         self._min = min
         self._max = max
         self._operator = operator
+        self._model = None
         self.validate = True
         self.active = True
 
@@ -81,3 +82,11 @@ class Constraint(object):
     def operator(self, val):
         self._operator = val
 
+    @property
+    def model(self):
+        # model this constraint originates from
+        return self._model
+
+    @model.setter
+    def model(self, val):
+        self._model = val

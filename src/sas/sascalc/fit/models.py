@@ -17,7 +17,7 @@ from six import reraise
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
-from sas import get_user_dir
+from sas.system.user import get_user_dir
 
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
@@ -47,7 +47,7 @@ def _check_plugin(model, name):
     Do some checking before model adding plugins in the list
 
     :param model: class model to add into the plugin list
-    :param name:name of the module plugin
+    :param name: name of the module plugin
 
     :return model: model if valid model or None if not valid
 

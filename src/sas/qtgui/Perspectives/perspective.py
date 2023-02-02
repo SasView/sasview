@@ -5,6 +5,7 @@ from PyQt5.QtGui import QStandardItem
 from PyQt5 import QtCore
 
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
 
 class PerspectiveMeta(type(QtCore.QObject), ABCMeta):
@@ -76,13 +77,13 @@ class Perspective(object, metaclass=PerspectiveMeta):
 
     def isSerializable(self) -> bool:
         """ Can this perspective be serialised - default is no"""
-        return False # TODO: Refactor to serializable property
+        return False
 
     def serialiseAll(self) -> dict:
         raise NotImplementedError(f"{self.name} perspective is not serializable")
 
     @abstractmethod
-    def updateFromParameters(self, params: dict): # TODO: Pythonic name
+    def updateFromParameters(self, params: dict):
         """ Update the perspective using a dictionary of parameters
         e.g. those loaded via open project or open analysis menu items"""
         pass
@@ -99,8 +100,13 @@ class Perspective(object, metaclass=PerspectiveMeta):
 
 
     #
-    # Other shared functionality
+    # Reports
     #
+
+    @property
+    def supports_reports(self) -> bool:
+        """ Does this perspective have a report functionality (currently used by menus and toolbar)"""
+        return False
 
     def getReport(self) -> Optional[ReportData]: # TODO: Refactor to just report, or report_html
         """ A string containing the HTML to be shown in the report"""
@@ -117,6 +123,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
         pass # TODO: refactor to closable property
 
     def isClosable(self) -> bool:
+        """ Flag that determines whether this perspective can be closed"""
         return False # TODO: refactor to closable property
 
     #
@@ -124,10 +131,71 @@ class Perspective(object, metaclass=PerspectiveMeta):
     #
 
     @property
-    def supports_reports(self) -> bool:
+    def supports_fitting_menu(self) -> bool:
+        """ Should the fitting menu be shown when using this perspective (unless its Fitting, probably not)"""
+        return False
+
+    #
+    # Preferences registration
+    #
+
+    @property
+    def preferences(self) -> Optional[List[PreferencesWidget]]:
+        """ Return a list of widgets that should be added to the preferences panel. """
+        return []
+
+    #
+    # Copy and paste functionality
+    #
+
+    @property
+    def supports_copy(self) -> bool:
+        """ Does this perspective support copy functionality? """
         return False
 
     @property
-    def supports_fitting_menu(self) -> bool:
+    def supports_copy_excel(self) -> bool:
+        """ Does this perspective support copy functionality? """
         return False
+
+    @property
+    def supports_copy_latex(self) -> bool:
+        """ Does this perspective support copy functionality? """
+        return False
+
+    @property
+    def supports_paste(self) -> bool:
+        """ Does this perspective allow pasting?"""
+        return False
+
+    def clipboard_copy(self):
+        """ Called by copy menu item"""
+        pass
+
+    def clipboard_paste(self):
+        """ Called by paste menu item"""
+        pass
+
+    def excel_clipboard_copy(self):
+        """ Called by copy excel menu item"""
+        pass
+
+    def latex_clipboard_copy(self):
+        """ Called by copy latex menu item"""
+        pass
+
+    #
+    # Loading and saving of parameters
+    #
+
+    @property
+    def supports_save_parameters(self) -> bool:
+        """ Can this perspective save its parameters to a file"""
+        return False
+
+    def save_parameters(self):
+        """ Save parameters to a file"""
+        pass
+
+
 

@@ -43,11 +43,20 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; OnlyBelowVersion: 6.1; Check: not IsAdminInstallMode
 
+[Code]
+{ If there is a command-line parameter "skiplicense=true", don't display license page }
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := False
+  if PageId = wpLicense then
+    if ExpandConstant('{param:skiplicense|false}') = 'true' then
+      Result := True;
+end;
+
 [Files]
 Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\sasview\plugin_models\*";	DestDir: "{%USERPROFILE}\.sasview\plugin_models";	Flags: recursesubdirs createallsubdirs
-Source: "dist\sasview\custom_config.py";	DestDir: "{%USERPROFILE}\.sasview\config";	Flags: recursesubdirs createallsubdirs
+Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
 
 [Icons]
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon

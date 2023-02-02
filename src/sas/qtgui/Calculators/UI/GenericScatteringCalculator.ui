@@ -36,7 +36,7 @@
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_12">
-   <item row="0" column="0" rowspan="1" colspan="2">
+   <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox_Datafile">
      <property name="font">
       <font>
@@ -69,7 +69,7 @@
         <item row="0" column="1">
          <widget class="QCheckBox" name="checkboxNucData">
           <property name="text">
-           <string></string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -151,7 +151,7 @@
         <item row="1" column="1">
          <widget class="QCheckBox" name="checkboxMagData">
           <property name="text">
-           <string></string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -920,7 +920,6 @@ Not editable.</string>
      <zorder>groupBox_5</zorder>
      <zorder>groupBox_6</zorder>
      <zorder>groupBox_Stepsize</zorder>
-     <zorder>verticalSpacer_2</zorder>
     </widget>
    </item>
    <item row="1" column="2">
@@ -962,7 +961,7 @@ Not editable.</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_6">
       <item row="0" column="0">
-       <layout class="QGridLayout" name="gridLayout_InputParam" rowstretch="0,0,0,0,0,0,0,0" rowminimumheight="0,0,0,0,0,0,0,0">
+       <layout class="QGridLayout" name="gridLayout_InputParam" rowstretch="0,0,0,0,0,0,0,0,0" rowminimumheight="0,0,0,0,0,0,0,0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetMinimumSize</enum>
         </property>
@@ -1522,159 +1521,159 @@ Number of Qbins &amp;isin; [2, 1000].</string>
          <string>Environment Coordinates (uvw)</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_14">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblEnvYaw">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The yaw angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Yaw</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="txtEnvYaw">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The yaw angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lblEnvYawUnit">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblEnvPitch">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pitch angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Pitch</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="txtEnvPitch">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pitch angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="lblEnvPitchUnit">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lblEnvRoll">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The roll angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Roll</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="txtEnvRoll">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The roll angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="lblEnvRollUnit">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="lblEnvYaw">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The yaw angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Yaw</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="txtEnvYaw">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>18</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The yaw angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="lblEnvYawUnit">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lblEnvPitch">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pitch angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Pitch</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="txtEnvPitch">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>18</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pitch angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="lblEnvPitchUnit">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="lblEnvRoll">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The roll angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Roll</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="txtEnvRoll">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>18</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The roll angle of the environment coordinates from the beamline coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLabel" name="lblEnvRollUnit">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -1690,159 +1689,159 @@ Number of Qbins &amp;isin; [2, 1000].</string>
          <string>Sample Coordinates (xyz)</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_14">
-          <item row="0" column="0">
-           <widget class="QLabel" name="lblSampleYaw">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The yaw angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Yaw</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="txtSampleYaw">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The yaw angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lblSampleYawUnit">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblSamplePitch">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pitch angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Pitch</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="txtSamplePitch">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pitch angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="lblSamplePitchUnit">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lblSampleRoll">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The roll angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Roll</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="txtSampleRoll">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The roll angle of the sample coordinates from the enivronment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>0.0</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="lblSampleRollUnit">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="lblSampleYaw">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The yaw angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Yaw</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="txtSampleYaw">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>18</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The yaw angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="lblSampleYawUnit">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lblSamplePitch">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pitch angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Pitch</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="txtSamplePitch">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>18</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pitch angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="lblSamplePitchUnit">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="lblSampleRoll">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The roll angle of the sample coordinates from the environment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Roll</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="txtSampleRoll">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>18</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The roll angle of the sample coordinates from the enivronment coordinates.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLabel" name="lblSampleRollUnit">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;o&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -1850,8 +1849,7 @@ Number of Qbins &amp;isin; [2, 1000].</string>
     </widget>
    </item>
    <item row="2" column="5" rowspan="5" colspan="8">
-    <layout class="QHBoxLayout" name="coordDisplay">
-    </layout>
+    <layout class="QHBoxLayout" name="coordDisplay"/>
    </item>
    <item row="3" column="6">
     <spacer name="horizontalSpacer_4">
@@ -2046,34 +2044,78 @@ Number of Qbins &amp;isin; [2, 1000].</string>
    </item>
    <item row="7" column="5">
     <widget class="QLabel" name="lblVerifyError">
-      <property name="font">
-        <font>
-        <weight>50</weight>
-        <bold>false</bold>
-        </font>
-      </property>
-      <property name="toolTip">
-        <string>Verification Error</string>
-      </property>
-      <property name="text">
-        <string></string>
-      </property>
-      <property name="wordWrap">
-        <bool>true</bool>
-      </property>
-      <property name="alignment">
-        <enum>Qt::AlignHCenter</enum>
-      </property>
-      <property name="minimumSize">
-        <size>
-        <width>0</width>
-        <height>30</height>
-        </size>
-      </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Verification Error</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>checkboxNucData</tabstop>
+  <tabstop>txtNucData</tabstop>
+  <tabstop>checkboxMagData</tabstop>
+  <tabstop>txtMagData</tabstop>
+  <tabstop>cbShape</tabstop>
+  <tabstop>cmdNucLoad</tabstop>
+  <tabstop>cmdMagLoad</tabstop>
+  <tabstop>cmdDraw</tabstop>
+  <tabstop>txtUpFracIn</tabstop>
+  <tabstop>txtUpFracOut</tabstop>
+  <tabstop>txtUpTheta</tabstop>
+  <tabstop>txtUpPhi</tabstop>
+  <tabstop>txtBackground</tabstop>
+  <tabstop>txtScale</tabstop>
+  <tabstop>txtSolventSLD</tabstop>
+  <tabstop>txtTotalVolume</tabstop>
+  <tabstop>txtNoQBins</tabstop>
+  <tabstop>txtQxMax</tabstop>
+  <tabstop>cbOptionsCalc</tabstop>
+  <tabstop>txtNoPixels</tabstop>
+  <tabstop>txtMx</tabstop>
+  <tabstop>txtMy</tabstop>
+  <tabstop>txtMz</tabstop>
+  <tabstop>txtNucl</tabstop>
+  <tabstop>cmdDrawpoints</tabstop>
+  <tabstop>cmdSave</tabstop>
+  <tabstop>txtXnodes</tabstop>
+  <tabstop>txtYnodes</tabstop>
+  <tabstop>txtZnodes</tabstop>
+  <tabstop>txtXstepsize</tabstop>
+  <tabstop>txtYstepsize</tabstop>
+  <tabstop>txtZstepsize</tabstop>
+  <tabstop>txtEnvYaw</tabstop>
+  <tabstop>txtEnvPitch</tabstop>
+  <tabstop>txtEnvRoll</tabstop>
+  <tabstop>txtSampleYaw</tabstop>
+  <tabstop>txtSamplePitch</tabstop>
+  <tabstop>txtSampleRoll</tabstop>
+  <tabstop>cmdCompute</tabstop>
+  <tabstop>cmdReset</tabstop>
+  <tabstop>cmdClose</tabstop>
+  <tabstop>cmdHelp</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

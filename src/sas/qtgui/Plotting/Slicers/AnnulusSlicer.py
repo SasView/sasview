@@ -28,7 +28,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         self.connect = self.base.connect
 
         # Number of points on the plot
-        self.nbins = 36
+        self.nbins = 100
         # Cursor position of Rings (Left(-1) or Right(1))
         self.xmaxd = self.data.xmax
         self.xmind = self.data.xmin
@@ -102,11 +102,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
                    numpy.fabs(self.outer_circle.get_radius()))
         rmax = max(numpy.fabs(self.inner_circle.get_radius()),
                    numpy.fabs(self.outer_circle.get_radius()))
-        # If the user does not specify the numbers of points to plot
-        # the default number will be nbins= 36
-        if nbins is None:
-            self.nbins = 36
-        else:
+        if nbins is not None:
             self.nbins = nbins
         # Create the data1D Q average of data2D
         sect = Ring(r_min=rmin, r_max=rmax, nbins=self.nbins)

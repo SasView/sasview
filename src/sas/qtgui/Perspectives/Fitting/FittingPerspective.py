@@ -73,25 +73,19 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.fittingStartedSignal.connect(self.onFittingStarted)
         self.fittingStoppedSignal.connect(self.onFittingStopped)
 
-        self.communicate.copyFitParamsSignal.connect(self.onParamCopy)
-        self.communicate.pasteFitParamsSignal.connect(self.onParamPaste)
-        self.communicate.copyExcelFitParamsSignal.connect(self.onExcelCopy)
-        self.communicate.copyLatexFitParamsSignal.connect(self.onLatexCopy)
-        self.communicate.SaveFitParamsSignal.connect(self.onParamSave)
-
         # Perspective window not allowed to close by default
         self._allow_close = False
 
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
-        self.fit_options_widget = FittingOptions(self, config=self.fit_options)
+        self.fit_options_widget = FittingOptions(config=self.fit_options)
         self.fit_options.selected_id = fitters.MPFit.id
 
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
 
         # GPU Options
-        self.gpu_options_widget = GPUOptions(self)
+        self.gpu_options_widget = GPUOptions()
 
         self.updateWindowTitle()
 
@@ -119,17 +113,25 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         self._allow_close = value
 
-    def onParamCopy(self):
-        self.currentTab.onCopyToClipboard("")
+    def clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy()
 
-    def onParamPaste(self):
-        self.currentTab.onParameterPaste()
+    def clipboard_paste(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_paste()
 
-    def onExcelCopy(self):
-        self.currentTab.onCopyToClipboard("Excel")
+    def excel_clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy_excel()
 
-    def onLatexCopy(self):
-        self.currentTab.onCopyToClipboard("Latex")
+    def latex_clipboard_copy(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.clipboard_copy_latex()
+
+    def save_parameters(self):
+        if self.currentFittingWidget is not None:
+            self.currentFittingWidget.save_parameters()
 
     def serializeAll(self):
         return self.serializeAllFitpage()
@@ -178,6 +180,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 state[i] = {'fit_params': [line_dict]}
         return state
 
+    @property
+    def preferences(self):
+        return [self.fit_options_widget, self.gpu_options_widget]
+
     def currentTabDataId(self):
         """
         Returns the data ID of the current tab
@@ -215,12 +221,11 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                     constraint.param = constraint_param[1]
                     constraint.value_ex = constraint_param[2]
                     constraint.validate = constraint_param[3]
+                    model_key = tab.getModelKey(constraint)
                     tab.addConstraintToRow(constraint=constraint,
                                            row=tab.getRowFromName(
-                                               constraint_param[1]))
-
-    def onParamSave(self):
-        self.currentTab.onCopyToClipboard("Save")
+                                               constraint_param[1]),
+                                           model_key=model_key)
 
     def closeEvent(self, event):
         """
@@ -536,9 +541,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         constraints = []
         for tab in self.getFitTabs():
             tab_name = tab.modelName()
-            tab_constraints = tab.getConstraintsForModel()
-            constraints.extend((tab_name + "." + par, expr)
-                               for par, expr in tab_constraints)
+            tab_constraints = tab.getConstraintsForAllModels()
+            constraints.extend((tab_name + "." + par, expr) for par, expr in tab_constraints)
+
         return constraints
 
     def getSymbolDictForConstraints(self):
@@ -586,3 +591,18 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
     def supports_fitting_menu(self) -> bool:
         return True
 
+    @property
+    def supports_copy(self) -> bool:
+        return True
+
+    @property
+    def supports_copy_excel(self) -> bool:
+        return True
+
+    @property
+    def supports_copy_latex(self) -> bool:
+        return True
+
+    @property
+    def supports_paste(self) -> bool:
+        return True

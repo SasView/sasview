@@ -1,7 +1,9 @@
 numpy 
 scipy==1.7.3 
 docutils 
-pytest<6 
+pytest
+pytest_qt
+pytest-mock
 unittest-xml-reporting
 tinycc 
 h5py 
@@ -20,10 +22,10 @@ xhtml2pdf
 pylint
 qt5reactor 
 periodictable 
-uncertainties 
-debugpy
-matplotlib==3.4.3
-PyQt5
+uncertainties
+matplotlib~=3.5.2
+PyQt5; platform_system != "Darwin"
+PyQt5==5.15.6; platform_system == "Darwin"
 lxml
 pytools 
 cffi
@@ -32,3 +34,7 @@ html5lib
 importlib-resources
 bumps
 html2text
+jsonschema
+superqt
+pyopengl
+pyopengl_accelerate

@@ -211,6 +211,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>btnSingle</tabstop>
+  <tabstop>btnBatch</tabstop>
+  <tabstop>chkWeight</tabstop>
+  <tabstop>chkChain</tabstop>
+  <tabstop>cbCases</tabstop>
+  <tabstop>cmdAdd</tabstop>
+  <tabstop>tblConstraints</tabstop>
+  <tabstop>cmdFit</tabstop>
+  <tabstop>cmdHelp</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

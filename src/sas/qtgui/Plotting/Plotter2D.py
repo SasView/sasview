@@ -52,6 +52,7 @@ class Plotter2DWidget(PlotterBase):
         self.vmin = None
         self.vmax = None
         self.im = None
+        self.cb = None
 
         self.manager = manager
 
@@ -523,6 +524,7 @@ class Plotter2DWidget(PlotterBase):
                                 extent=(self.xmin, self.xmax,
                                         self.ymin, self.ymax))
 
+            # color bar for the plot
             cbax = self.figure.add_axes([0.88, 0.2, 0.02, 0.7])
 
             # Current labels for axes
@@ -533,20 +535,23 @@ class Plotter2DWidget(PlotterBase):
             if not self.quickplot:
                 self.ax.set_title(label=self._title)
 
+            # remove color bar in case we have it on screen
+            if self.cb is not None:
+                self.cb.remove()
             if cbax is None:
                 self.ax.set_frame_on(False)
-                cb = self.figure.colorbar(self.im, shrink=0.8, aspect=20)
+                self.cb = self.figure.colorbar(self.im, shrink=0.8, aspect=20)
             else:
-                cb = self.figure.colorbar(self.im, cax=cbax)
+                self.cb = self.figure.colorbar(self.im, cax=cbax)
 
-            cb.update_bruteforce(self.im)
-            cb.set_label('$' + self.scale + '$')
+            self.cb.update_normal(self.im)
+            self.cb.set_label('$' + self.scale + '$')
 
-            self.vmin = cb.vmin
-            self.vmax = cb.vmax
+            self.vmin = self.cb.vmin
+            self.vmax = self.cb.vmax
 
             if show_colorbar is False:
-                cb.remove()
+                self.cb.remove()
 
         else:
             # clear the previous 2D from memory

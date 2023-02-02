@@ -7,7 +7,7 @@ import numpy
 import math
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
+from sas import config
 
 class Calc2D(CalcThread):
     """
@@ -108,7 +108,7 @@ class Calc2D(CalcThread):
             weight = self.weight, update_chisqr = self.update_chisqr,
             source = self.source)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             return res
         else:
             self.completefn(res)
@@ -171,10 +171,20 @@ class Calc1D(CalcThread):
         unsmeared_error = None
         ##smearer the ouput of the plot
         if self.smearer is not None:
-            first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
-                                                             self.qmax)
-            mask = self.data.x[first_bin:last_bin+1]
-            unsmeared_output = numpy.zeros((len(self.data.x)))
+            if self.data.isSesans:
+                # For SESANS, data.x, qmin and qmax, and therefore get_bin_range are in real space, and
+                # the Hankel transform from q space to real space is set up as a resolution function, i.e.,
+                # the "unsmeared" data is in q space and the "smeared" data is in real space.
+                # Therefore, q_calc needs to be used here to calculate the unsmeared_out rather than data.x.
+                mask = self.smearer.resolution.q_calc
+                first_bin = 0
+                last_bin = len(mask)
+                unsmeared_output = numpy.zeros((len(mask)))
+            else:
+                first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
+                                                                 self.qmax)
+                mask = self.data.x[first_bin:last_bin+1]
+                unsmeared_output = numpy.zeros((len(self.data.x)))
 
             return_data = self.model.calculate_Iq(mask)
             if isinstance(return_data, tuple):
@@ -183,11 +193,11 @@ class Calc1D(CalcThread):
                 return_data, intermediate_results = return_data
             unsmeared_output[first_bin:last_bin+1] = return_data
             output = self.smearer(unsmeared_output, first_bin, last_bin)
-
             # Rescale data to unsmeared model
             # Check that the arrays are compatible. If we only have a model but no data,
             # the length of data.y will be zero.
-            if isinstance(self.data.y, numpy.ndarray) and output.shape == self.data.y.shape:
+            # does not apply to SESANS where Hankel was implemented as resolution function
+            if isinstance(self.data.y, numpy.ndarray) and output.shape == self.data.y.shape and not self.data.isSesans:
                 unsmeared_data = numpy.zeros((len(self.data.x)))
                 unsmeared_error = numpy.zeros((len(self.data.x)))
                 unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
@@ -253,7 +263,7 @@ class Calc1D(CalcThread):
                 intermediate_results = {}
 
         elapsed = time.time() - self.starttime
-
+  
         res = dict(x = self.data.x[index], y = output[index],
             page_id = self.page_id, state = self.state, weight = self.weight,
             fid = self.fid, toggle_mode_on = self.toggle_mode_on,
@@ -263,7 +273,7 @@ class Calc1D(CalcThread):
             unsmeared_data = unsmeared_data, unsmeared_error = unsmeared_error,
             intermediate_results = intermediate_results)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             return res
         else:
             self.completefn(res)

@@ -18,7 +18,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
-from sas.sasview import __version__ as SASVIEW_VERSION
+from sas.system.version import __version__ as SASVIEW_VERSION
 from sasmodels import __version__ as SASMODELS_VERSION
 
 # TODO: Integrate with other reports

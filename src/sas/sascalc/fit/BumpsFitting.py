@@ -23,7 +23,7 @@ except ImportError:
     fitters.FIT_DEFAULT = 'lm'
     def get_fitter():
         fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
-        return fitopts.fitclass, fitopts.options.copy()
+        return fitopts.fitclass, fitopts.options.clipboard_copy()
 
 
 from bumps.mapper import SerialMapper, MPMapper
@@ -38,26 +38,19 @@ from sas.sascalc.fit.expression import compile_constraints
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
         remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
-        # Depending on the time remaining, either display the expected
-        # time of completion, or the amount of time remaining.  Use precision
-        # appropriate for the duration.
-        if remaining_time >= 1800:
-            completion_time = datetime.now() + timedelta(seconds=remaining_time)
-            if remaining_time >= 36000:
-                time = completion_time.strftime('%Y-%m-%d %H:%M')
-            else:
-                time = completion_time.strftime('%H:%M')
+        if remaining_time < 60:
+            delta_time = f"{remaining_time}s"
+        elif remaining_time < 3600:
+            delta_time = f"{remaining_time // 60}m {remaining_time % 60}s"
+        elif remaining_time < 24 * 3600:
+            delta_time = f"{remaining_time // 3600}h {remaining_time % 3600 // 60}m"
         else:
-            if remaining_time >= 3600:
-                time = '%dh %dm'%(remaining_time//3600, (remaining_time%3600)//60)
-            elif remaining_time >= 60:
-                time = '%dm %ds'%(remaining_time//60, remaining_time%60)
-            else:
-                time = '%ds'%remaining_time
-        chisq = "%.3g"%(2*history.value[0]/dof)
-        step = "%d of %d"%(history.step[0], max_step)
-        header = "=== Steps: %s  chisq: %s  ETA: %s\n"%(step, chisq, time)
-        parameters = ["%15s: %-10.3g%s"%(k,v,("\n" if i%3==2 else " | "))
+            delta_time = f"{remaining_time // (24 * 3600)}d {remaining_time % (24 * 3600) // 3600}h"
+        finish_time = (datetime.now() + timedelta(seconds=remaining_time)).strftime('%Y-%m-%d %H:%M')
+        chisq = 2*history.value[0]/dof
+        header = f"=== Steps: {history.step[0]} of {int(max_step)}  chisq: {chisq:.3g}"
+        header += f" ETA: {finish_time} ({delta_time} from now)\n"
+        parameters = [(f"{k:20s}:{v:10.3g}" + ("\n" if i%3==2 else " | "))
                       for i, (k, v) in enumerate(zip(pars, history.point[0]))]
         self.msg = "".join([header]+parameters)
 
@@ -289,6 +282,7 @@ class BumpsFit(FitEngine):
         values, errs, cov = result['value'], result['stderr'], result[
             'covariance']
         assert values is not None and errs is not None
+        assert len(values) == cov.shape[0] == cov.shape[1]
 
         # Propagate uncertainty through the parameter expressions
         # We are going to abuse bumps a little here and stuff uncertainty
@@ -304,23 +298,23 @@ class BumpsFit(FitEngine):
                 param.value = uncertainties.ufloat(val, err)
         else:
             try:
-                uncertainties.correlated_values(values, cov)
-            except:
-                # No convergance 
-                for param, val, err in zip(varying, values, errs):
-                    # Convert all varying parameters to uncertainties objects
-                    param.value = uncertainties.ufloat(val, err)
-            else:
                 # Use the covariance matrix to calculate error in the parameter
                 fitted = uncertainties.correlated_values(values, cov)
                 for param, val in zip(varying, fitted):
                     param.value = val
+            except Exception:
+                # No convergence. Convert all varying parameters to uncertainties objects
+                for param, val, err in zip(varying, values, errs):
+                    param.value = uncertainties.ufloat(val, err)
 
         # Propagate correlated uncertainty through constraints.
         problem.setp_hook()
 
-        # collect the results
+        # Collect the results
         all_results = []
+
+        # Check if uncertainty is missing for any parameter
+        uncertainty_warning = False
 
         for fitting_module in problem.models:
             fitness = fitting_module.fitness
@@ -338,68 +332,30 @@ class BumpsFit(FitEngine):
             if result['uncertainty'] is not None:
                 fitting_result.uncertainty_state = result['uncertainty']
 
-            if fitting_result.success:
-                pvec = list()
-                stderr = list()
-                for p in pars:
-                    # If p is already defined as an uncertainties object it is not constrained based on another
-                    # parameter
-                    if isinstance(p.value, uncertainties.core.Variable) or \
-                            isinstance(p.value, uncertainties.core.AffineScalarFunc):
-                        # value.n returns value p
-                        pvec.append(p.value.n)
-                        # value.n returns error in p
-                        stderr.append(p.value.s)
-                    # p constrained based on another parameter
-                    else:
-                        # Details of p
-                        param_model, param_name = p.name.split(".")[0], p.name.split(".")[1]
-                        # Constraints applied on p, list comprehension most efficient method, will always return a
-                        # list with 1 entry
-                        constraints = [model.constraints for model in models if model.name == param_model][0]
-                        # Parameters p is constrained on.
-                        reference_params = [v for v in varying if str(v.name) in str(constraints[param_name])]
-                        err_exp = str(constraints[param_name])
-                        # Convert string entries into variable names within the code.
-                        for i, index in enumerate(reference_params):
-                            err_exp = err_exp.replace(reference_params[index].name, f"reference_params[{index}].value")
-                        try:
-                            # Evaluate a string containing constraints as if it where a line of code
-                            pvec.append(eval(err_exp).n)
-                            stderr.append(eval(err_exp).s)
-                        except NameError as e:
-                            pvec.append(p.value)
-                            stderr.append(0)
-                            # Get model causing error
-                            name_error = e.args[0].split()[1].strip("'")
-                            # Safety net if following code does not work
-                            error_param = name_error
-                            # Get parameter causing error
-                            constraints_sections = constraints[param_name].split(".")
-                            for i in range(len(constraints_sections)):
-                                if name_error in constraints_sections[i]:
-                                    error_param = f"{name_error}.{constraints_sections[i+1]}"
-                            logging.error(f"Constraints ordered incorrectly. Attempting to constrain {p}, based on "
-                                          f"{error_param}, however {error_param} is not defined itself. This is "
-                                          f"because {error_param} is also constrained.\n"
-                                          f"The fitting will continue, but {name_error} will be incorrect.")
-                            logging.error(e)
-                        except Exception as e:
-                            logging.error(e)
-                            pvec.append(p.value)
-                            stderr.append(0)
+            fitting_result.pvec = np.array([getattr(p.value, 'n', p.value) for p in pars])
+            fitting_result.stderr = np.array([getattr(p.value, 's', 0) for p in pars])
+            DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
+            fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
 
-                fitting_result.pvec = (np.array(pvec))
-                fitting_result.stderr = (np.array(stderr))
-                DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
-                fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
-            else:
-                fitting_result.pvec = np.asarray([p.value for p in pars])
-                fitting_result.stderr = np.NaN * np.ones(len(pars))
+            # Warn user about any parameter that is not an uncertainty object
+            miss_uncertainty = [p for p in pars if not isinstance(p.value,
+                              (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))]
+            if miss_uncertainty:
+                uncertainty_warning = True
+                for p in miss_uncertainty:
+                    logging.warn(p.name + " uncertainty could not be calculated.")
+
+           # TODO: Let the GUI decided how to handle success/failure.
+            if not fitting_result.success:
+                fitting_result.stderr[:] = np.NaN
                 fitting_result.fitness = np.NaN
 
             all_results.append(fitting_result)
+
         all_results[0].mesg = result['errors']
+
+        if uncertainty_warning:
+            logging.warn("Consider checking related constraint definitions and status of parameters used there.")
 
         if q is not None:
             q.put(all_results)
@@ -417,6 +373,7 @@ def run_bumps(problem, handler, curr_thread):
             return True
         return False
 
+    errors = []
     fitclass, options = get_fitter()
     steps = options.get('steps', 0)
     if steps == 0:
@@ -432,16 +389,18 @@ def run_bumps(problem, handler, curr_thread):
         ]
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
                                   abort_test=abort_test, **options)
+    clipped = fitdriver.clip()
+    if clipped:
+        errors.append(f"The initial value for {clipped} was outside the fitting range and was coerced.")
     omp_threads = int(os.environ.get('OMP_NUM_THREADS', '0'))
     mapper = MPMapper if omp_threads == 1 else SerialMapper
     fitdriver.mapper = mapper.start_mapper(problem, None)
     #import time; T0 = time.time()
     try:
         best, fbest = fitdriver.fit()
-        errors = []
     except Exception as exc:
         best, fbest = None, np.NaN
-        errors = [str(exc), traceback.format_exc()]
+        errors.extend([str(exc), traceback.format_exc()])
     finally:
         mapper.stop_mapper(fitdriver.mapper)
 
