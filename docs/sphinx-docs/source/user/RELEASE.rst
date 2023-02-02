@@ -15,16 +15,17 @@ Features
 
 New in Version 5.0.6
 --------------------
-This is a small bug release which fixes some issues reported in earlier versions
-of 5.0.x. Of particular note, the failure to start when installing on a new
-system due to issues finding the config file has been fixed and the startup
-speed has been improved. Also the paracryatline models, which have been labelled
-as "under review" since 2018, have been corrected (bcc and fcc) and the documentation
-completely reworked (bcc, fcc, and sc).  Otherwise plots now properly support custom
-names in the legend, the LM optimizer failure on GPUs or when the starting value
-is outside the min/max range has been fixed, a problem with intermittent blanking
-of plots has been fixed, a number of defaults have been changed to be more reasonable
-and a number of issues in the documentation have been corrected and/or updated.
+This is a point release which fixes a number of issues reported in earlier versions
+of 5.0.x. Of particular note, the failure of the program to start when installing on
+a new system due to issues finding the config file has been fixed. The speed with
+which the program starts up has also been improved. The paracrystalline models, which
+have been labelled as "under review" since 2018, have been checked and corrected (bcc
+and fcc) and the documentation completely reworked (bcc, fcc, and sc).  Elsewhere,
+plots now properly support custom data names in the legend, the LM optimizer failing
+to run on GPUs or when the starting value of a parameter is outside the min/max range
+has been fixed, a problem with the intermittent blanking of plots has also been fixed,
+a number of defaults have been changed to be more reasonable, and a number of other
+issues in the documentation have been corrected and/or updated.
 
 This version of SasView is built with Sasmodels 1.0.7 and Bumps master.
 
