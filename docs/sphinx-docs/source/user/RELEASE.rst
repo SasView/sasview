@@ -74,6 +74,13 @@ Build System Changes
 ^^^^^^^^^^^^^^^^^^^^
 * Fix Sphinx some of the warnings during build process @smk78 `[#2288] <https://github.com/SasView/sasview/pull/2288/>`_
 
+New Models
+^^^^^^^^^^
+The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.5 was released:
+
+* Pringle-Schmidt Helices (documentation update)
+* Lamellar Slab Partition Constant
+
 Known Issues
 ^^^^^^^^^^^^
 All the known bugs/feature requests can be found in the issues on github.
