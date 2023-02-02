@@ -31,6 +31,7 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
 
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
@@ -651,7 +652,7 @@ class GuiManager:
         #self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
         # orientation viewer set to invisible SASVIEW-1132
-        self._workspace.actionOrientation_Viewer.setVisible(False)
+        self._workspace.actionOrientation_Viewer.setVisible(True)
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
@@ -731,6 +732,7 @@ class GuiManager:
         
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
+
 
     #============ FILE =================
     def actionLoadData(self):
@@ -1022,11 +1024,7 @@ class GuiManager:
         """
         Make sasmodels orientation & jitter viewer available
         """
-        from sasmodels.jitter import run as orientation_run
-        try:
-            orientation_run()
-        except Exception as ex:
-            logging.error(str(ex))
+        show_orientation_viewer()
 
     def actionImage_Viewer(self):
         """

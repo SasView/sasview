@@ -49,6 +49,6 @@ class AddTextTest:
         # Call the method
         widget.onColorChange(None)
         # Check that the text field got the new color info for text
-        assert widget.textEdit.palette().color(QtGui.QPalette.Text) == new_color
+        assert widget.textEdit.palette().vertex_coloring(QtGui.QPalette.Text) == new_color
         # ... and the hex value of this color is correct
         assert widget.color() == "#ff0000"

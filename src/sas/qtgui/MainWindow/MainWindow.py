@@ -81,6 +81,9 @@ def run_sasview():
     app = QApplication([])
 
 
+    app.setAttribute(Qt.AA_ShareOpenGLContexts)
+
+
     #Initialize logger
     from sas.system.log import SetupLogger
     SetupLogger(__name__).config_development()
@@ -105,6 +108,10 @@ def run_sasview():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     # Main must have reference to the splash screen, so making it explicit
+
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app.setStyleSheet("* {font-size: 11pt;}")
+
     splash = SplashScreen()
     splash.show()
 
