@@ -193,7 +193,11 @@ def apidoc():
         "-H", "SasView", # Package header
         SASVIEW_BUILD,
         # omit the following documents from the API documentation
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py")
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "UnitTesting"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "Utilities", "UnitTesting"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "MainWindow", "UnitTesting"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "Plotting", "UnitTesting"),
+
     ])
 
     subprocess.check_call([
