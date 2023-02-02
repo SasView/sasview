@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>26</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -81,9 +81,10 @@
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
-     <string>Tool</string>
+     <string>Tools</string>
     </property>
     <addaction name="actionData_Operation"/>
+    <addaction name="actionFile_Converter"/>
     <addaction name="separator"/>
     <addaction name="actionSLD_Calculator"/>
     <addaction name="actionDensity_Volume_Calculator"/>
@@ -92,10 +93,10 @@
     <addaction name="actionSAS_Resolution_Estimator"/>
     <addaction name="actionGeneric_Scattering_Calculator"/>
     <addaction name="separator"/>
-    <addaction name="actionPython_Shell_Editor"/>
-    <addaction name="actionOrientation_Viewer"/>
     <addaction name="actionImage_Viewer"/>
-    <addaction name="actionFile_Converter"/>
+    <addaction name="actionOrientation_Viewer"/>
+    <addaction name="separator"/>
+    <addaction name="actionPython_Shell_Editor"/>
    </widget>
    <widget class="QMenu" name="menuFitting">
     <property name="title">
