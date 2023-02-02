@@ -57,14 +57,14 @@ Pull Request Changes
 * Fix to allow multiple scattering script to run @wpotrzebowski `[#521] <https://github.com/SasView/sasmodels/pull/521/>`_
 * Fix error in core shell Ellipsoid documentation @pkienzle `[#512] <https://github.com/SasView/sasmodels/pull/512/>`_
 * Fix models with complex amplitudes not compiling on the fly @pkienzle `[#511] <https://github.com/SasView/sasmodels/pull/511/>`_
+* Correct paracrystal model error and rework documentation @butlerpd `[#545] <https://github.com/SasView/sasmodels/pull/545>`_
 
 Documentation Changes
 ^^^^^^^^^^^^^^^^^^^^^
 * Update optimizer help documentation @smk78 `[#2359] <https://github.com/SasView/sasview/pull/2359/>`_
 * Update contributor list @wpotrzebowski `[#2114] <https://github.com/SasView/sasview/pull/2114>`_
 * Update web links from http to https @smk78 `[#2087] <https://github.com/SasView/sasview/pull/2087/>`_ and `[#2265] <https://github.com/SasView/sasview/pull/2265/>`_
-* Update corfunc documentation @lucas-Wilkins `[#2047] <https://github.com/SasView/sasview/pull/2047/>`_
-* Correct paracrystal model error and rework documentation @butlerpd `[#545] <https://github.com/SasView/sasmodels/pull/545>`_
+* Update corfunc documentation @lucas-wilkins `[#2047] <https://github.com/SasView/sasview/pull/2047/>`_
 * Update gel_fit model documentation and fix formating @smk78 `[#541] <https://github.com/SasView/sasmodels/pull/541/>`_
 * Correct and update cylinder model documentation @butlerpd `[#539] <https://github.com/SasView/sasmodels/pull/539>`_
 * Restructuring and cross-linking of sasmodels docs @smk78 `[#534] <https://github.com/SasView/sasmodels/pull/534/>`_
