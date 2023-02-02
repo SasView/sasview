@@ -31,6 +31,7 @@ class SetupLogger(object):
             logging.captureWarnings(True)
             logger = logging.getLogger(self.name)
         logging.getLogger('matplotlib').setLevel(logging.WARN)
+        logging.getLogger('numba').setLevel(logging.WARN)
         return logger
 
     def config_development(self):
@@ -42,6 +43,7 @@ class SetupLogger(object):
         logging.captureWarnings(True)
         self._disable_debug_from_config()
         logging.getLogger('matplotlib').setLevel(logging.WARN)
+        logging.getLogger('numba').setLevel(logging.WARN)
         return logger
 
     def _disable_debug_from_config(self):
