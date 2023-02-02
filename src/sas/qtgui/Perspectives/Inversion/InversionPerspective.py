@@ -9,23 +9,25 @@ from PySide6 import QtGui, QtCore, QtWidgets
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # pr inversion GUI elements
-from .InversionWidget import InversionWidget
+from .InversionUtils import WIDGETS
+from .UI.TabbedInversionUI import Ui_PrInversion
+from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 
-
 from sas.sascalc.pr.invertor import Invertor
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
+from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget, DICT_KEYS, NUMBER_OF_TERMS, REGULARIZATION
 
 
+from sasdata.dataloader import Data2D
 
 logger = logging.getLogger(__name__)
 
-
-class InversionWindow(QtWidgets.QTabWidget):
+class InversionWindow(QtWidgets.QTabWidget, Perspective):
     """
     The main window for the P(r) Inversion perspective.
     This is the main window where the tabs for each of the widgets are shown
@@ -45,6 +47,10 @@ class InversionWindow(QtWidgets.QTabWidget):
 
 
 
+    @property
+    def title(self):
+        return "P(r) Inversion"
+
     def __init__(self, parent=None):
 
         super(InversionWindow, self).__init__()
@@ -63,9 +69,6 @@ class InversionWindow(QtWidgets.QTabWidget):
         self.tabs = []
         self.setTabsClosable(True)
 
-
-        self.supports_reports = True
-        self.supports_fitting_menu= False
 
         # The window should not close
         self._allowClose = False
@@ -179,8 +182,24 @@ class InversionWindow(QtWidgets.QTabWidget):
             state[data_id] = {'pr_params': tab_data}
         return state
 
+
+    def updateFromParameters(self, params: dict):
+        """ Update the perspective using a dictionary of parameters
+        e.g. those loaded via open project or open analysis menu items"""
+        raise NotImplementedError("Update from parameters not implemented yet.")
+
+
     ######################################################################
     # Base Perspective Class Definitions
+
+
+    @property
+    def supports_reports(self):
+        return True
+        
+    @property
+    def supports_fitting(self):
+        return False
 
     def communicator(self):
         return self.communicate
