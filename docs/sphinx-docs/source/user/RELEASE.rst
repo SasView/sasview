@@ -56,8 +56,8 @@ Pull Request Changes
 * Fix rare race condition causing errors @bmaranville `[#537] <https://github.com/SasView/sasmodels/pull/537/>`_
 * Fix to allow multiple scattering script to run @wpotrzebowski `[#521] <https://github.com/SasView/sasmodels/pull/521/>`_
 * Fix error in core shell Ellipsoid documentation @pkienzle `[#512] <https://github.com/SasView/sasmodels/pull/512/>`_
-* Fix problem with LM optimizer failing when GPUs are turned on by updating to the latest bumps version `[#518] <https://github.com/SasView/sasmodels/issues/518/>`_
 * Fix models with complex amplitudes not compiling on the fly @pkienzle `[#511] <https://github.com/SasView/sasmodels/pull/511/>`_
+* Fix problem with LM optimizer failing when GPUs are turned on by updating to the latest bumps version `[issue #518] <https://github.com/SasView/sasmodels/issues/518/>`_
 
 Documentation Changes
 ^^^^^^^^^^^^^^^^^^^^^
