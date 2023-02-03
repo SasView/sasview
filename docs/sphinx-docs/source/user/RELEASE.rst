@@ -52,12 +52,12 @@ Pull Request Changes
 * Fix label rendering problems due to incorrect escape sequences @llimeht `[#2217] <https://github.com/SasView/sasview/pull/2217/>`_
 * Fix update to numpy verion breaking P(R) analysis @lucas-wilkins `[#2178] <https://github.com/SasView/sasview/pull/2178/>`_
 * Fix problem with use of Data Operation Tool preventing project saving @rozyczko `[#2099] <https://github.com/SasView/sasview/pull/2099/>`_
-* Fix problem with LM optimizer failing when GPUs are turned on by updating to the latest bumps version
+* Correct paracrystal model error and rework documentation @butlerpd `[#545] <https://github.com/SasView/sasmodels/pull/545>`_
 * Fix rare race condition causing errors @bmaranville `[#537] <https://github.com/SasView/sasmodels/pull/537/>`_
 * Fix to allow multiple scattering script to run @wpotrzebowski `[#521] <https://github.com/SasView/sasmodels/pull/521/>`_
 * Fix error in core shell Ellipsoid documentation @pkienzle `[#512] <https://github.com/SasView/sasmodels/pull/512/>`_
+* Fix problem with LM optimizer failing when GPUs are turned on by updating to the latest bumps version `[#518] <https://github.com/SasView/sasmodels/issues/518/>`_
 * Fix models with complex amplitudes not compiling on the fly @pkienzle `[#511] <https://github.com/SasView/sasmodels/pull/511/>`_
-* Correct paracrystal model error and rework documentation @butlerpd `[#545] <https://github.com/SasView/sasmodels/pull/545>`_
 
 Documentation Changes
 ^^^^^^^^^^^^^^^^^^^^^
