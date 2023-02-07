@@ -1,16 +1,15 @@
 import sys
-import unittest
 import platform
-from unittest.mock import MagicMock
+
+import pytest
+
+import matplotlib as mpl
+mpl.use("Qt5Agg")
 
 from PyQt5 import QtGui, QtWidgets, QtPrintSupport
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
-####### TEMP
-import path_prepare
-#######
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
@@ -20,119 +19,116 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 # Tested module
 import sas.qtgui.Plotting.PlotterBase as PlotterBase
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class PlotterBaseTest(unittest.TestCase):
+class PlotterBaseTest:
     '''Test the Plotter base class'''
-    def setUp(self):
-        '''create'''
-        class dummy_manager(object):
+
+    @pytest.fixture(autouse=True)
+    def plotter(self, qapp):
+        '''Create/Destroy the AboutBox'''
+        class dummy_manager:
             def communicator(self):
                 return Communicate()
             def perspective(self):
                 return MyPerspective()
 
         #PlotterBase.PlotterBase.contextMenuQuickPlot = MagicMock()
-        self.plotter = PlotterBase.PlotterBase(None, manager=dummy_manager(), quickplot=True)
+        p = PlotterBase.PlotterBase(None, manager=dummy_manager(), quickplot=True)
         self.isWindows = platform.system=="Windows"
 
-    def tearDown(self):
-        '''destroy'''
-        self.plotter = None
-        self.plotter_qp = None
+        yield p
 
-    def testDefaults(self):
+    def testDefaults(self, plotter):
         """ default method variables values """
-        self.assertIsInstance(self.plotter, QtWidgets.QWidget)
-        self.assertIsInstance(self.plotter.canvas, FigureCanvas)
-        self.assertIsInstance(self.plotter.properties, ScaleProperties)
+        assert isinstance(plotter, QtWidgets.QWidget)
+        assert isinstance(plotter.canvas, FigureCanvas)
+        assert isinstance(plotter.properties, ScaleProperties)
 
-        self.assertEqual(self.plotter._data, [])
-        self.assertEqual(self.plotter._xscale, 'log')
-        self.assertEqual(self.plotter._yscale, 'log')
-        self.assertEqual(self.plotter.scale, 'linear')
-        self.assertFalse(self.plotter.grid_on)
-        self.assertEqual(self.plotter.x_label, 'log10(x)')
-        self.assertEqual(self.plotter.y_label, 'log10(y)')
+        assert plotter._data == []
+        assert plotter._xscale == 'log'
+        assert plotter._yscale == 'log'
+        assert plotter.scale == 'linear'
+        assert not plotter.grid_on
+        assert plotter.x_label == 'log10(x)'
+        assert plotter.y_label == 'log10(y)'
 
-    def testData(self):
+    def testData(self, plotter):
         ''' Test the pure virtual method '''
-        with self.assertRaises(NotImplementedError):
-            self.plotter.data=[]
+        with pytest.raises(NotImplementedError):
+            plotter.data=[]
 
-    def testContextMenu(self):
+    def testContextMenu(self, plotter):
         ''' Test the default context menu '''
-        with self.assertRaises(NotImplementedError):
-            self.plotter.createContextMenu()
+        with pytest.raises(NotImplementedError):
+            plotter.createContextMenu()
 
-    def testClean(self):
+    def testClean(self, plotter, mocker):
         ''' test the graph cleanup '''
-        self.plotter.figure.delaxes = MagicMock()
-        self.plotter.clean()
-        self.assertTrue(self.plotter.figure.delaxes.called)
+        mocker.patch.object(plotter.figure, 'delaxes')
+        plotter.clean()
+        assert plotter.figure.delaxes.called
 
-    def testPlot(self):
+    def testPlot(self, plotter):
         ''' test the pure virtual method '''
-        with self.assertRaises(NotImplementedError):
-            self.plotter.plot()
+        with pytest.raises(NotImplementedError):
+            plotter.plot()
 
-    def notestOnCloseEvent(self):
+    def notestOnCloseEvent(self, plotter, mocker):
         ''' test the plotter close behaviour '''
-        PlotHelper.deletePlot = MagicMock()
-        self.plotter.closeEvent(None)
-        self.assertTrue(PlotHelper.deletePlot.called)
+        mocker.patch.object(PlotHelper, 'deletePlot')
+        plotter.closeEvent(None)
+        assert PlotHelper.deletePlot.called
 
-    def notestOnImagePrint(self):
+    def notestOnImagePrint(self, plotter, mocker):
         ''' test the workspace print '''
-        QtGui.QPainter.end = MagicMock()
-        QtWidgets.QLabel.render = MagicMock()
+        mocker.patch.object(QtGui.QPainter, 'end')
+        mocker.patch.object(QtWidgets.QLabel, 'render')
 
         # First, let's cancel printing
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
-        self.plotter.onImagePrint()
-        self.assertFalse(QtGui.QPainter.end.called)
-        self.assertFalse(QtWidgets.QLabel.render.called)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
+        plotter.onImagePrint()
+        assert not QtGui.QPainter.end.called
+        assert not QtWidgets.QLabel.render.called
 
         # Let's print now
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
-        self.plotter.onImagePrint()
-        self.assertTrue(QtGui.QPainter.end.called)
-        self.assertTrue(QtWidgets.QLabel.render.called)
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
+        plotter.onImagePrint()
+        assert QtGui.QPainter.end.called
+        assert QtWidgets.QLabel.render.called
 
-    def testOnClipboardCopy(self):
+    def testOnClipboardCopy(self, plotter, mocker):
         ''' test the workspace screen copy '''
-        QtGui.QClipboard.setPixmap = MagicMock()
-        self.plotter.onClipboardCopy()
-        self.assertTrue(QtGui.QClipboard.setPixmap.called)
+        mocker.patch.object(QtGui.QClipboard, 'setPixmap')
+        plotter.onClipboardCopy()
+        assert QtGui.QClipboard.setPixmap.called
 
-    def testOnGridToggle(self):
+    def testOnGridToggle(self, plotter, mocker):
         ''' test toggling the grid lines '''
         # Check the toggle
-        orig_toggle = self.plotter.grid_on
+        orig_toggle = plotter.grid_on
         
-        FigureCanvas.draw_idle = MagicMock()
-        self.plotter.onGridToggle()
+        mocker.patch.object(FigureCanvas, 'draw_idle')
+        plotter.onGridToggle()
 
-        self.assertTrue(FigureCanvas.draw_idle.called)
-        self.assertTrue(self.plotter.grid_on != orig_toggle)
+        assert FigureCanvas.draw_idle.called
+        assert plotter.grid_on != orig_toggle
 
-    def testDefaultContextMenu(self):
+    def testDefaultContextMenu(self, plotter, mocker):
         """ Test the right click default menu """
 
-        self.plotter.defaultContextMenu()
+        plotter.defaultContextMenu()
 
-        actions = self.plotter.contextMenu.actions()
-        self.assertEqual(len(actions), 4)
+        actions = plotter.contextMenu.actions()
+        assert len(actions) == 4
 
         # Trigger Print Image and make sure the method is called
-        self.assertEqual(actions[1].text(), "Print Image")
-        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
+        assert actions[1].text() == "Print Image"
+        mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
-        self.assertTrue(QtPrintSupport.QPrintDialog.exec_.called)
+        assert QtPrintSupport.QPrintDialog.exec_.called
 
         # Trigger Copy to Clipboard and make sure the method is called
-        self.assertEqual(actions[2].text(), "Copy to Clipboard")
+        assert actions[2].text() == "Copy to Clipboard"
 
         # Spy on cliboard's dataChanged() signal
         if not self.isWindows:
@@ -144,55 +140,51 @@ class PlotterBaseTest(unittest.TestCase):
         actions[2].trigger()
         QtWidgets.qApp.processEvents()
         # Make sure clipboard got updated.
-        self.assertTrue(self.clipboard_called)
+        assert self.clipboard_called
 
         # Trigger toggle navigation bar and make sure the method is called
-        #self.assertEqual(actions[4].text(), "Toggle Navigation Menu")
-        #isShown = self.plotter.toolbar.isVisible()
-        #self.assertTrue(isShow)
+        #assert actions[4].text() == "Toggle Navigation Menu"
+        #isShown = plotter.toolbar.isVisible()
+        #assert isShown
         #actions[4].trigger()
-        #isShown = self.plotter.toolbar.isVisible()
-        #self.assertFalse(isShow)
+        #isShown = plotter.toolbar.isVisible()
+        #assert not isShown
         #actions[4].trigger()
-        #isShown = self.plotter.toolbar.isVisible()
-        #self.assertTrue(isShow)
+        #isShown = plotter.toolbar.isVisible()
+        #assert isShown
 
 
-    def testOnWindowsTitle(self):
+    def testOnWindowsTitle(self, plotter, mocker):
         """ Test changing the plot title"""
         # Mock the modal dialog's response
-        QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
-        self.plotter.show()
+        mocker.patch.object(QtWidgets.QDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
+        plotter.show()
         # Assure the original title is none
-        self.assertEqual(self.plotter.windowTitle(), "")
-        self.plotter.manager.communicator = MagicMock()
+        assert plotter.windowTitle() == ""
+        mocker.patch.object(plotter.manager, 'communicator')
 
-        WindowTitle.title = MagicMock(return_value="I am a new title")
+        mocker.patch.object(WindowTitle, 'title', return_value="I am a new title")
         # Change the title
-        self.plotter.onWindowsTitle()
+        plotter.onWindowsTitle()
 
-        self.assertEqual(self.plotter.windowTitle(), "I am a new title")
+        assert plotter.windowTitle() == "I am a new title"
 
-    def testOnMplMouseDown(self):
+    def testOnMplMouseDown(self, plotter):
         """ Test what happens on mouse click down in chart """
         pass
 
-    def testOnMplMouseUp(self):
+    def testOnMplMouseUp(self, plotter):
         """ Test what happens on mouse release in chart """
         pass
 
-    def testOnMplMouseMotion(self):
+    def testOnMplMouseMotion(self, plotter):
         """ Test what happens on mouse move in chart """
         pass
 
-    def testOnMplPick(self):
+    def testOnMplPick(self, plotter):
         """ Test what happens on mouse pick in chart """
         pass
 
-    def testOnMplWheel(self):
+    def testOnMplWheel(self, plotter):
         """ Test what happens on mouse pick in chart """
         pass
-
-
-if __name__ == "__main__":
-    unittest.main()

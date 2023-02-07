@@ -115,6 +115,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
+        self.cbgraph_2.editTextChanged.connect(self.enableGraphCombo)
+        self.cbgraph_2.currentIndexChanged.connect(self.enableGraphCombo)
+
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtCore.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
@@ -693,6 +696,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 # Delete corresponding open plots
                 self.closePlotsForItem(item)
+                # Close result panel if results represent the deleted data item
+                # Results panel only stores Data1D/Data2D object
+                #   => QStandardItems must still exist for direct comparison
+                self.closeResultPanelOnDelete(GuiUtils.dataFromItem(item))
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -937,9 +944,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Modify the name of the current plot
         """
         old_name, current_name = name_tuple
-        ind = self.cbgraph.findText(old_name)
-        self.cbgraph.setCurrentIndex(ind)
-        self.cbgraph.setItemText(ind, current_name)
+        graph = self.cbgraph
+        if self.current_view == self.freezeView:
+            graph = self.cbgraph_2
+        ind = graph.findText(old_name)
+        graph.setCurrentIndex(ind)
+        graph.setItemText(ind, current_name)
 
     def add_data(self, data_list):
         """
@@ -969,12 +979,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Modify Graph combo box on graph add/delete
         """
-        orig_text = self.cbgraph.currentText()
-        self.cbgraph.clear()
-        self.cbgraph.insertItems(0, graph_list)
-        ind = self.cbgraph.findText(orig_text)
+        graph = self.cbgraph
+        if self.current_view == self.freezeView:
+            graph = self.cbgraph_2
+        orig_text = graph.currentText()
+        graph.clear()
+        graph.insertItems(0, graph_list)
+        ind = graph.findText(orig_text)
         if ind > 0:
-            self.cbgraph.setCurrentIndex(ind)
+            graph.setCurrentIndex(ind)
 
     def updatePerspectiveCombo(self, index):
         """
@@ -1214,11 +1227,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # new plot data; check which tab is currently active
         if self.current_view == self.treeView:
             new_plots = GuiUtils.plotsFromCheckedItems(self.model)
+            graph = self.cbgraph
         else:
             new_plots = GuiUtils.plotsFromCheckedItems(self.theory_model)
+            graph = self.cbgraph_2
 
         # old plot data
-        plot_id = str(self.cbgraph.currentText())
+        plot_id = str(graph.currentText())
         try:
             assert plot_id in PlotHelper.currentPlotIds(), "No such plot: %s" % (plot_id)
         except:
@@ -1307,12 +1322,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_error = False
         error_message = ""
         number_of_files = len(path)
-        self.communicator.progressBarUpdateSignal.emit(0.0)
+        self.communicator.progressBarUpdateSignal.emit(0)
 
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
-            extension_list = config.PLUGIN_STATE_EXTENSIONS
+            extension_list = config.PLUGIN_STATE_EXTENSIONS.copy()
             if config.APPLICATION_STATE_EXTENSION is not None:
                 extension_list.append(config.APPLICATION_STATE_EXTENSION)
 
@@ -1893,6 +1908,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         logging.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
 
         pass  # debugger anchor
+
+    def closeResultPanelOnDelete(self, data):
+        """
+        Given a data1d/2d object, close the fitting results panel if currently populated with the data
+        """
+        # data - Single data1d/2d object to be deleted
+        self.parent.results_panel.onDataDeleted(data)
 
     def onAnalysisUpdate(self, new_perspective_name: str):
         """

@@ -187,8 +187,8 @@ def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model
     Actually appends to model, if model and view params are not None.
     Always returns list of lists of QStandardItems.
 
-    parameters_original: list of parameters before any tagging on their IDs, e.g. for product model (so that those are
-    the display names; see below)
+    parameters_original: list of parameters before any tagging on their IDs,
+    e.g. for product model (so that those are the display names; see below)
     """
     if is2D:
         params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
@@ -196,8 +196,9 @@ def addSimpleParametersToModel(parameters, is2D, parameters_original=None, model
         params = parameters.iq_parameters
 
     if parameters_original:
-        # 'parameters_original' contains the parameters as they are to be DISPLAYED, while 'parameters'
-        # contains the parameters as they were renamed; this is for handling name collisions in product model.
+        # 'parameters_original' contains the parameters as they are to be DISPLAYED,
+        # while 'parameters' contains the parameters as they were renamed;
+        # this is for handling name collisions in product model.
         # The 'real name' of the parameter will be stored in the item's user data.
         if is2D:
             params_orig = [p for p in parameters_original.kernel_parameters if p.type != 'magnetic']
@@ -493,7 +494,7 @@ def residualsData1D(reference_data, current_data, weights):
     weight = None
 
     # 1d theory from model_thread is only in the range of index
-    if current_data.dy is None or current_data.dy == []:
+    if current_data.dy is None or not len(current_data.dy):
         dy = numpy.ones(len(current_data.y))
     else:
         #dy = weight if weight is not None else numpy.ones(len(current_data.y))
@@ -542,13 +543,17 @@ def residualsData1D(reference_data, current_data, weights):
             pass
 
     residuals.x = current_data.x[index][0]
-    residuals.dy = numpy.ones(len(residuals.y))
+    residuals.dy = None
     residuals.dx = None
     residuals.dxl = None
     residuals.dxw = None
     residuals.ytransform = 'y'
+    if reference_data.isSesans:
+        residuals.xtransform = 'x'
+        residuals.xaxis('\\rm{z} ', 'A')
     # For latter scale changes
-    residuals.xaxis('\\rm{Q} ', 'A^{-1}')
+    else:
+        residuals.xaxis('\\rm{Q} ', 'A^{-1}')
     residuals.yaxis('\\rm{Residuals} ', 'normalized')
 
     return residuals
@@ -572,7 +577,7 @@ def residualsData2D(reference_data, current_data, weight):
     residuals.qx_data = current_data.qx_data
     residuals.qy_data = current_data.qy_data
     residuals.q_data = current_data.q_data
-    residuals.err_data = numpy.ones(len(residuals.data))
+    residuals.err_data = None
     residuals.xmin = min(residuals.qx_data)
     residuals.xmax = max(residuals.qx_data)
     residuals.ymin = min(residuals.qy_data)
@@ -604,7 +609,6 @@ def plotResiduals(reference_data, current_data, weights):
     res_name = reference_data.name if reference_data.name else reference_data.filename
     residuals.name = "Residuals for " + str(theory_name) + "[" + res_name + "]"
     residuals.title = residuals.name
-    residuals.ytransform = 'y'
 
     # when 2 data have the same id override the 1 st plotted
     # include the last part if keeping charts for separate models is required
@@ -632,6 +636,8 @@ def plotPolydispersities(model):
         # similar to FittingLogic._create1DPlot() but different data/axes
         data1d = Data1D(x=xarr, y=yarr)
         xunit = model.details[name][0]
+        data1d.xtransform = 'x'
+        data1d.ytransform = 'y'
         data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
         data1d.yaxis(r'\rm{probability}', 'normalized')
         data1d.scale = 'linear'
@@ -706,7 +712,6 @@ def getRelativeError(data, is2d, flag=None):
 
     return weight
 
-
 def calcWeightIncrease(weights, ratios, flag=False):
     """ Calculate the weights to be passed to bumps in order to ensure
         that each data set contributes to the total residual with a
@@ -763,7 +768,6 @@ def calcWeightIncrease(weights, ratios, flag=False):
 
     return weight_increase
 
-
 def updateKernelWithResults(kernel, results):
     """
     Takes model kernel and applies results dict to its parameters,
@@ -777,7 +781,6 @@ def updateKernelWithResults(kernel, results):
         local_kernel.setParam(parameter, results[parameter][0])
 
     return local_kernel
-
 
 def getStandardParam(model=None):
     """
@@ -961,9 +964,15 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
     """
     Simple lookup for polydispersity for the given param name
     """
+    # First, check if this is a polydisperse parameter directly
+    if '.width' in param_name:
+        return True
+
     parameters = kernel_params.form_volume_parameters
     if is2D:
         parameters += kernel_params.orientation_parameters
+
+    # Next, check if the parameter is included in para.polydisperse
     has_poly = False
     for param in parameters:
         if param.name==param_name and param.polydisperse:

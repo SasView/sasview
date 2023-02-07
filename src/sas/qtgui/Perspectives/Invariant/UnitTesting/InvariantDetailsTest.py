@@ -1,4 +1,5 @@
-import unittest
+import pytest
+
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
@@ -7,116 +8,112 @@ from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
 
 from sas.qtgui.Utilities.GuiUtils import *
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
 
-class InvariantDetailsTest(unittest.TestCase):
+class InvariantDetailsTest:
     """Test the Invariant Perspective Window"""
-    def setUp(self):
-        """Create the Invariant Details window"""
 
-        self.widget = DetailsDialog(None)
-        self.widget._model = QtGui.QStandardItemModel()
-        self.widget._model.setItem(WIDGETS.W_INVARIANT, QtGui.QStandardItem(str(10.)))
-        self.widget._model.setItem(WIDGETS.W_INVARIANT_ERR, QtGui.QStandardItem(str(0.1)))
-        self.widget._model.setItem(WIDGETS.W_ENABLE_LOWQ, QtGui.QStandardItem('true'))
-        self.widget._model.setItem(WIDGETS.D_LOW_QSTAR, QtGui.QStandardItem(str(9.)))
-        self.widget._model.setItem(WIDGETS.D_LOW_QSTAR_ERR, QtGui.QStandardItem(str(0.03)))
-        self.widget._model.setItem(WIDGETS.D_DATA_QSTAR, QtGui.QStandardItem(str(10.)))
-        self.widget._model.setItem(WIDGETS.D_DATA_QSTAR_ERR, QtGui.QStandardItem(str(0.1)))
-        self.widget._model.setItem(WIDGETS.D_HIGH_QSTAR, QtGui.QStandardItem(str(1.)))
-        self.widget._model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, QtGui.QStandardItem(str(0.01)))
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the Invariant Details window'''
+
+        w = DetailsDialog(None)
+        w._model = QtGui.QStandardItemModel()
+        w._model.setItem(WIDGETS.W_INVARIANT, QtGui.QStandardItem(str(10.)))
+        w._model.setItem(WIDGETS.W_INVARIANT_ERR, QtGui.QStandardItem(str(0.1)))
+        w._model.setItem(WIDGETS.W_ENABLE_LOWQ, QtGui.QStandardItem('true'))
+        w._model.setItem(WIDGETS.D_LOW_QSTAR, QtGui.QStandardItem(str(9.)))
+        w._model.setItem(WIDGETS.D_LOW_QSTAR_ERR, QtGui.QStandardItem(str(0.03)))
+        w._model.setItem(WIDGETS.D_DATA_QSTAR, QtGui.QStandardItem(str(10.)))
+        w._model.setItem(WIDGETS.D_DATA_QSTAR_ERR, QtGui.QStandardItem(str(0.1)))
+        w._model.setItem(WIDGETS.D_HIGH_QSTAR, QtGui.QStandardItem(str(1.)))
+        w._model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, QtGui.QStandardItem(str(0.01)))
 
         # High-Q
-        self.widget._model.setItem(WIDGETS.W_ENABLE_HIGHQ, QtGui.QStandardItem('false'))
+        w._model.setItem(WIDGETS.W_ENABLE_HIGHQ, QtGui.QStandardItem('false'))
 
-    def tearDown(self):
+        yield w
+
         """Destroy the Invariant Details window """
-        self.widget.close()
-        self.widget = None
+        w.close()
 
-    def testDefaults(self):
+    def testDefaults(self, widget):
         """Test the GUI in its default state"""
 
-        self.widget.qstar_total = None
-        self.widget.qhigh = None
-        self.widget.qlow = None
+        widget.qstar_total = None
+        widget.qhigh = None
+        widget.qlow = None
 
-        self.widget.progress_low_qstar = 0.0
-        self.widget.progress_high_qstar = 0.0
-        self.widget.progress_qstar = 100.0
+        widget.progress_low_qstar = 0.0
+        widget.progress_high_qstar = 0.0
+        widget.progress_qstar = 100.0
 
-        self.widget.warning_msg = "No Details on calculations available...\n"
+        widget.warning_msg = "No Details on calculations available...\n"
 
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
+        assert isinstance(widget, QtWidgets.QDialog)
 
-        self.assertEqual(self.widget.progressBarLowQ.minimum(), 0)
-        self.assertEqual(self.widget.progressBarLowQ.maximum(), 100)
-        self.assertEqual(self.widget.progressBarData.minimum(), 0)
-        self.assertEqual(self.widget.progressBarData.maximum(), 100)
-        self.assertEqual(self.widget.progressBarHighQ.minimum(), 0)
-        self.assertEqual(self.widget.progressBarHighQ.maximum(), 100)
+        assert widget.progressBarLowQ.minimum() == 0
+        assert widget.progressBarLowQ.maximum() == 100
+        assert widget.progressBarData.minimum() == 0
+        assert widget.progressBarData.maximum() == 100
+        assert widget.progressBarHighQ.minimum() == 0
+        assert widget.progressBarHighQ.maximum() == 100
 
 
         # Tooltips
-        self.assertEqual(self.widget.txtQData.toolTip(), "Invariant in the data set's Q range.")
-        self.assertEqual(self.widget.txtQDataErr.toolTip(), "Uncertainty on the invariant from data's range.")
-        self.assertEqual(self.widget.txtQLowQ.toolTip(), "Extrapolated invariant from low-Q range.")
-        self.assertEqual(self.widget.txtQLowQErr.toolTip(), "Uncertainty on the invariant from low-Q range.")
-        self.assertEqual(self.widget.txtQHighQ.toolTip(), "Extrapolated invariant from high-Q range.")
-        self.assertEqual(self.widget.txtQHighQErr.toolTip(), "Uncertainty on the invariant from high-Q range.")
+        assert widget.txtQData.toolTip() == "Invariant in the data set's Q range."
+        assert widget.txtQDataErr.toolTip() == "Uncertainty on the invariant from data's range."
+        assert widget.txtQLowQ.toolTip() == "Extrapolated invariant from low-Q range."
+        assert widget.txtQLowQErr.toolTip() == "Uncertainty on the invariant from low-Q range."
+        assert widget.txtQHighQ.toolTip() == "Extrapolated invariant from high-Q range."
+        assert widget.txtQHighQErr.toolTip() == "Uncertainty on the invariant from high-Q range."
 
-    def testOnOK(self):
+    def testOnOK(self, widget):
         """ Test closing dialog"""
-        okButton = self.widget.cmdOK
+        okButton = widget.cmdOK
         QTest.mouseClick(okButton, Qt.LeftButton)
 
-    def testShowDialog(self):
+    def testShowDialog(self, widget):
         """ """
-        self.widget.showDialog()
+        widget.showDialog()
         # Low Q true
-        self.assertEqual(self.widget.qlow, 9.0)
-        self.assertEqual(self.widget.txtQLowQ.text(), '9.0')
-        self.assertEqual(self.widget.progress_low_qstar, 90.0)
-        self.assertEqual(self.widget.qstar_total, 10.0)
-        self.assertEqual(self.widget.txtQData.text(), '10.0')
-        self.assertEqual(self.widget.txtQDataErr.text(), '0.1')
+        assert widget.qlow == 9.0
+        assert widget.txtQLowQ.text() == '9.0'
+        assert widget.progress_low_qstar == 90.0
+        assert widget.qstar_total == 10.0
+        assert widget.txtQData.text() == '10.0'
+        assert widget.txtQDataErr.text() == '0.1'
 
         # High Q false
-        self.assertEqual(self.widget.txtQHighQ.text(), '')
-        self.assertEqual(self.widget.txtQHighQErr.text(), '')
-        self.assertEqual(self.widget.progress_high_qstar, 0.0)
+        assert widget.txtQHighQ.text() == ''
+        assert widget.txtQHighQErr.text() == ''
+        assert widget.progress_high_qstar == 0.0
 
         # Progressbars
-        self.assertEqual(self.widget.progressBarLowQ.value(), self.widget.progress_low_qstar)
-        self.assertEqual(self.widget.progressBarLowQ.value(), self.widget.progress_low_qstar)
-        self.assertEqual(self.widget.progressBarHighQ.value(), self.widget.progress_high_qstar)
+        assert widget.progressBarLowQ.value() == widget.progress_low_qstar
+        assert widget.progressBarLowQ.value() == widget.progress_low_qstar
+        assert widget.progressBarHighQ.value() == widget.progress_high_qstar
 
-    def testCheckValues(self):
+    def testCheckValues(self, widget):
         """ """
-        self.widget.qstart_total = None
-        self.assertEqual(self.widget.checkValues(), "Invariant not calculated.\n")
+        widget.qstart_total = None
+        assert widget.checkValues() == "Invariant not calculated.\n"
 
-        self.widget.qstar_total = 0
-        return_string = self.widget.checkValues()
-        self.assertIn("Invariant is zero.", return_string)
-        self.assertIn("The calculations are likely to be unreliable!", return_string)
+        widget.qstar_total = 0
+        return_string = widget.checkValues()
+        assert "Invariant is zero." in return_string
+        assert "The calculations are likely to be unreliable!" in return_string
 
-        self.widget.qstar_total = 10
-        self.assertIn("No Warnings to report", self.widget.checkValues())
+        widget.qstar_total = 10
+        assert "No Warnings to report" in widget.checkValues()
 
-        self.widget.progress_qstar = 0
-        self.widget.progress_low_qstar = 10
-        return_string = self.widget.checkValues()
-        self.assertIn('Extrapolated contribution at Low Q is higher than 5% of the invariant.', return_string)
-        self.assertIn('The sum of all extrapolated contributions is higher than 5% of the invariant.', return_string)
+        widget.progress_qstar = 0
+        widget.progress_low_qstar = 10
+        return_string = widget.checkValues()
+        assert 'Extrapolated contribution at Low Q is higher than 5% of the invariant.' in return_string
+        assert 'The sum of all extrapolated contributions is higher than 5% of the invariant.' in return_string
 
-        self.widget.progress_low_qstar = -1
-        self.assertEqual(self.widget.checkValues(), "Extrapolated contribution at Low Q < 0.\n")
-
-
-if __name__ == "__main__":
-    unittest.main()
+        widget.progress_low_qstar = -1
+        assert widget.checkValues() == "Extrapolated contribution at Low Q < 0.\n"

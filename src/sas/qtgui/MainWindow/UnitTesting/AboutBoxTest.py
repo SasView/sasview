@@ -1,106 +1,96 @@
-import sys
-import unittest
 import webbrowser
+import pytest
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtTest import QTest
 from PyQt5 import QtCore
-from unittest.mock import MagicMock
 
 import sas.sasview
 import sas.system.version
-from sas import config
 from sas.system import web, legal
 
 # Local
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
-
-class AboutBoxTest(unittest.TestCase):
+class AboutBoxTest:
     '''Test the AboutBox'''
-    def setUp(self):
-        '''Create the AboutBox'''
-        self.widget = AboutBox(None)
 
-    def tearDown(self):
-        '''Destroy the AboutBox'''
-        self.widget.close()
-        self.widget = None
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the AboutBox'''
+        w = AboutBox(None)
+        yield w
+        w.close()
 
-    def testDefaults(self):
+    def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtWidgets.QWidget)
-        self.assertEqual(self.widget.windowTitle(), "About")
-        self.assertEqual(self.widget.cmdOK.text(), "OK")
+        assert isinstance(widget, QtWidgets.QWidget)
+        assert widget.windowTitle() == "About"
+        assert widget.cmdOK.text() == "OK"
 
-        self.assertIn("SasView", self.widget.label_2.text())
+        assert "SasView" in widget.label_2.text()
         # Link buttons pixmaps don't contain image filenames, so can't check this.
-        # self.assertEqual(self.widget.cmdLinkUT.icon().name(), "utlogo.gif")
+        # assert widget.cmdLinkUT.icon().name() == "utlogo.gif"
 
 
-    def testVersion(self):
+    def testVersion(self, widget):
         """
         Assure the version number is as expected
         """
-        version = self.widget.lblVersion
-        self.assertIsInstance(version, QtWidgets.QLabel)
-        self.assertEqual(str(version.text()), str(sas.system.version.__version__))
+        version = widget.lblVersion
+        assert isinstance(version, QtWidgets.QLabel)
+        assert str(version.text()) == str(sas.system.version.__version__)
 
-    def testAbout(self):
+    def testAbout(self, widget):
         """
         Assure the about label is filled properly
         """
-        about = self.widget.lblAbout
-        self.assertIsInstance(about, QtWidgets.QLabel)
+        about = widget.lblAbout
+        assert isinstance(about, QtWidgets.QLabel)
         # License
-        self.assertIn(str(legal.copyright), about.text())
+        assert str(legal.copyright) in about.text()
         # URLs
-        self.assertIn(str(web.homepage_url), about.text())
-        self.assertIn(str(config.download_url), about.text())
-        self.assertIn(str(config.help_email), about.text())
+        assert str(web.homepage_url) in about.text()
+        assert str(web.download_url) in about.text()
+        assert str(web.help_email) in about.text()
 
         # Are links enabled?
-        self.assertTrue(about.openExternalLinks())
+        assert about.openExternalLinks()
 
-    def testAddActions(self):
+    def testAddActions(self, widget, mocker):
         """
         Assure link buttons are set up correctly
         """
-        webbrowser.open = MagicMock()
+        mocker.patch.object(webbrowser, 'open')
         all_hosts = [
-                config.nist_url,
-                config.umd_url,
-                config.sns_url,
-                config.nsf_url,
-                config.isis_url,
-                config.ess_url,
-                config.ill_url,
-                config.ansto_url,
-                config.inst_url,
-                config.delft_url,
-                config.bam_url,
-                config.diamond_url]
+                web.nist_url,
+                web.umd_url,
+                web.sns_url,
+                web.nsf_url,
+                web.isis_url,
+                web.ess_url,
+                web.ill_url,
+                web.ansto_url,
+                web.inst_url,
+                web.delft_url,
+                web.bam_url,
+                web.diamond_url]
 
         # Press the buttons
-        buttonList = self.widget.findChildren(QtWidgets.QPushButton)
+        buttonList = widget.findChildren(QtWidgets.QPushButton)
         for button in buttonList:
             QTest.mouseClick(button, QtCore.Qt.LeftButton)
             #open_link = webbrowser.open.call_args
             args, _ = webbrowser.open.call_args
             # args[0] contains the actual argument sent to open()
-            self.assertIn(args[0], all_hosts)
+            assert args[0] in all_hosts
 
         # The above test also greedily catches the OK button,
         # so let's test it separately.
         # Show the widget
-        self.widget.show()
-        self.assertTrue(self.widget.isVisible())
+        widget.show()
+        assert widget.isVisible()
         # Click on the OK button
-        QTest.mouseClick(self.widget.cmdOK, QtCore.Qt.LeftButton)
+        QTest.mouseClick(widget.cmdOK, QtCore.Qt.LeftButton)
         # assure the widget is no longer seen
-        self.assertFalse(self.widget.isVisible())
-
-if __name__ == "__main__":
-    unittest.main()
+        assert not widget.isVisible()

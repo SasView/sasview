@@ -1,6 +1,7 @@
 r""" Configuration class - stores configuration information for SasView
 
 
+..
                   _____  ________      _______ _
                  |  __ \|  ____\ \    / / ____| |
                  | |  | | |__   \ \  / / (___ | |
@@ -9,12 +10,13 @@ r""" Configuration class - stores configuration information for SasView
                  |_____/|______|   \/  |_____/(_)
 
 
- _____  ______          _____       _______ _    _ _____  _____ _
- |  __ \|  ____|   /\   |  __ \     |__   __| |  | |_   _|/ ____| |
- | |__) | |__     /  \  | |  | |       | |  | |__| | | | | (___ | |
- |  _  /|  __|   / /\ \ | |  | |       | |  |  __  | | |  \___ \| |
- | | \ \| |____ / ____ \| |__| |       | |  | |  | |_| |_ ____) |_|
- |_|  \_\______/_/    \_\_____/        |_|  |_|  |_|_____|_____/(_)
+..
+   _____  ______          _____       _______ _    _ _____  _____ _
+   |  __ \|  ____|   /\   |  __ \     |__   __| |  | |_   _|/ ____| |
+   | |__) | |__     /  \  | |  | |       | |  | |__| | | | | (___ | |
+   |  _  /|  __|   / /\ \ | |  | |       | |  |  __  | | |  \___ \| |
+   | | \ \| |____ / ____ \| |__| |       | |  | |  | |_| |_ ____) |_|
+   |_|  \_\______/_/    \_\_____/        |_|  |_|  |_|_____|_____/(_)
 
 
 
@@ -26,8 +28,9 @@ Configs
 =======
 
 Configs are a nightmare from the perspective of code maintainability. There are
-three main reasons for this
-  1) They have a tendency to accumulate junk because people don't realise that a
+three main reasons for this:
+
+  1) They have a tendency to accumulate junk because people dont realise that a
      config item is no longer needed
   2) It's hard to trace the usages and types because values are loaded at runtime
   3) Maintaining synchrony between config files and config usages is difficult, as
@@ -73,9 +76,10 @@ Things that do belong:
   4) Very little else
 
 Things that don't belong, but were previously in the config:
+
   1) dynamic content, i.e. values that are modified programmatically,
-    this includes variables that are defined in terms of other variables,
-    but otherwise don't change
+     this includes variables that are defined in terms of other variables,
+     but otherwise don't change
   2) Paths to resources within sasview (use importlib.resources instead)
   3) Blocks of data that won't be modified by the user and used primarily
      by single class - e.g. the text for a message
@@ -175,6 +179,25 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
+
+        self.SHOW_EXIT_MESSAGE = True
+
+        # Window scaling values
+        self.QT_SCALE_FACTOR = 1.0
+        self.QT_AUTO_SCREEN_SCALE_FACTOR = False
+
+        # If True, use an ugly but more robust legend plotting method in Fitting that results in full-
+        # width legends.
+        self.FITTING_PLOT_FULL_WIDTH_LEGENDS = False
+
+        # If True, truncates names in Fitting plot legends such that each name is maximum one line.
+        self.FITTING_PLOT_LEGEND_TRUNCATE = False
+
+        # sets the maximum number of characters per Fitting plot legend entry.
+        self.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH = 30
+
+        # Default fitting optimizer
+        self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
         # Default style sheet name
         self.STYLE_SHEET = 'sasview.css'

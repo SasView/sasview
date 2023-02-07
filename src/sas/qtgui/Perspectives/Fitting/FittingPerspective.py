@@ -78,14 +78,14 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
-        self.fit_options_widget = FittingOptions(self, config=self.fit_options)
+        self.fit_options_widget = FittingOptions(config=self.fit_options)
         self.fit_options.selected_id = fitters.MPFit.id
 
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
 
         # GPU Options
-        self.gpu_options_widget = GPUOptions(self)
+        self.gpu_options_widget = GPUOptions()
 
         self.updateWindowTitle()
 
@@ -180,6 +180,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 state[i] = {'fit_params': [line_dict]}
         return state
 
+    @property
+    def preferences(self):
+        return [self.fit_options_widget, self.gpu_options_widget]
+
     def currentTabDataId(self):
         """
         Returns the data ID of the current tab
@@ -217,9 +221,11 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                     constraint.param = constraint_param[1]
                     constraint.value_ex = constraint_param[2]
                     constraint.validate = constraint_param[3]
+                    model_key = tab.getModelKey(constraint)
                     tab.addConstraintToRow(constraint=constraint,
                                            row=tab.getRowFromName(
-                                               constraint_param[1]))
+                                               constraint_param[1]),
+                                           model_key=model_key)
 
     def closeEvent(self, event):
         """
@@ -535,9 +541,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         constraints = []
         for tab in self.getFitTabs():
             tab_name = tab.modelName()
-            tab_constraints = tab.getConstraintsForModel()
-            constraints.extend((tab_name + "." + par, expr)
-                               for par, expr in tab_constraints)
+            tab_constraints = tab.getConstraintsForAllModels()
+            constraints.extend((tab_name + "." + par, expr) for par, expr in tab_constraints)
+
         return constraints
 
     def getSymbolDictForConstraints(self):

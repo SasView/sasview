@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>632</width>
+    <width>800</width>
     <height>576</height>
    </rect>
   </property>
@@ -42,6 +42,9 @@
     <widget class="QLabel" name="lblAbout">
      <property name="text">
       <string>TextLabel</string>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
      </property>
     </widget>
    </item>
@@ -354,7 +357,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This work originally developed as part of the DANSE project funded by the NSF under grant DMR-0520547, and currently maintained by UTK, NIST, UMD, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.&lt;/p&gt;&lt;p&gt;SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).&lt;/p&gt;&lt;p&gt;A list of individual contributors can be found at: http://www.sasview.org/contact.html&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This work originally developed as part of the DANSE project funded by the NSF under grant DMR-0520547, and currently maintained by UTK, NIST, UMD, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.&lt;/p&gt;&lt;p&gt;SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
@@ -363,6 +366,20 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cmdLinkUT</tabstop>
+  <tabstop>cmdLinkUMD</tabstop>
+  <tabstop>cmdLinkNIST</tabstop>
+  <tabstop>cmdLinkESS</tabstop>
+  <tabstop>cmdLinkISIS</tabstop>
+  <tabstop>cmdLinkDELFT</tabstop>
+  <tabstop>cmdLinkILL</tabstop>
+  <tabstop>cmdLinkANSTO</tabstop>
+  <tabstop>cmdLinkDIAMOND</tabstop>
+  <tabstop>cmdLinkBAM</tabstop>
+  <tabstop>cmdLinkSNS</tabstop>
+  <tabstop>cmdOK</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

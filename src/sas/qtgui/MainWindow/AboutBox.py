@@ -1,15 +1,12 @@
 import functools
+import os
+
 from PyQt5 import QtWidgets, QtCore
 
 import sas.sasview
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.system.version
-from sas.qtgui.UI import images_rc
-from sas.qtgui.UI import main_resources_rc
-
 from sas.system import web, legal
-from sas import config
-
 from .UI.AboutUI import Ui_AboutUI
 
 class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
@@ -33,6 +30,9 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
 
         self.lblVersion.setText(str(version))
 
+        dir_path = os.path.split(sas.__file__)[0]
+        installation_path = os.path.split(dir_path)[0]
+
         about_text = f"""
         <html>
             <head/>
@@ -43,7 +43,11 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
                 <p>
                     <a href="{web.homepage_url}">{web.homepage_url}</a>
                 </p>
-                <br/>
+                <p>
+                    Installation path: {installation_path}
+                </p>                
+                <p>A list of individual contributors can be found at: 
+                <a href="{web.homepage_url}/people">{web.homepage_url}/people</a></p>
                 <p>
                     Comments? Bugs? Requests?
                     <br/>

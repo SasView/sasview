@@ -3,7 +3,6 @@ import sys
 import re
 import logging
 import traceback
-from xhtml2pdf import pisa
 from typing import Optional
 
 from PyQt5 import QtWidgets, QtCore
@@ -80,7 +79,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         else:
             location = self.save_location
         # Use a sensible filename default
-        default_name = os.path.join(location, 'report.pdf')
+        default_name = os.path.join(str(location), 'report.pdf')
 
         kwargs = {
             'parent'   : self,
@@ -142,6 +141,8 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         : data: html string
         : filename: name of file to be saved
         """
+        # import moved from top due to cost
+        from xhtml2pdf import pisa
         try:
             # open output file for writing (truncated binary)
             with open(filename, "w+b") as resultFile:

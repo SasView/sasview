@@ -12,9 +12,10 @@ from PyQt5.QtWidgets import QMdiArea
 from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_SasView
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
@@ -35,7 +36,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.screen_width = screen_resolution.width()
         self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
-
+        QTimer.singleShot(100, self.showMaximized)
         # Temporary solution for problem with menubar on Mac
         if sys.platform == "darwin":  # Mac
             self.menubar.setNativeMenuBar(False)
@@ -67,8 +68,21 @@ def SplashScreen():
     splashScreen = QSplashScreen(pixmap)
     return splashScreen
 
+def get_highdpi_scaling():
+    return 1.0
+
 def run_sasview():
+
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+    os.environ["QT_SCALE_FACTOR"] = f"{config.QT_SCALE_FACTOR}"
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1" if config.QT_AUTO_SCREEN_SCALE_FACTOR else "0"
+
+
     app = QApplication([])
+
+
+    app.setAttribute(Qt.AA_ShareOpenGLContexts)
+
 
     #Initialize logger
     from sas.system.log import SetupLogger
@@ -94,9 +108,13 @@ def run_sasview():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     # Main must have reference to the splash screen, so making it explicit
+
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app.setStyleSheet("* {font-size: 11pt;}")
+
     splash = SplashScreen()
     splash.show()
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+
     # Main application style.
     app.setStyleSheet(style.style_sheet.read())
 
@@ -117,13 +135,16 @@ def run_sasview():
 
     # Show the main SV window
     mainwindow = MainSasViewWindow(screen_resolution)
-    mainwindow.showMaximized()
 
     # no more splash screen
     splash.finish(mainwindow)
 
     # Time for the welcome window
     mainwindow.guiManager.showWelcomeMessage()
+
+    timer = QTimer()
+    timer.timeout.connect(lambda: None)
+    timer.start(100)
 
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()
