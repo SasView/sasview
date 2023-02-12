@@ -36,6 +36,7 @@ from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
+from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
 
 from sas.qtgui.MainWindow.DataManager import DataManager
 
@@ -449,6 +450,7 @@ class GuiManager(object):
 
         # Exit if yes
         if reply == QMessageBox.Yes:
+
             # save the paths etc.
             self.saveCustomConfig()
             reactor.callFromThread(reactor.stop)
@@ -476,6 +478,18 @@ class GuiManager(object):
             self.processVersion(version_info)
         except ValueError as ex:
             logging.info("Failed to connect to www.sasview.org:", ex)
+
+    def log_installed_packages(self):
+        """
+        Log version number of locally installed python packages
+        """
+        PackageGatherer().log_installed_modules()
+
+    def log_imported_packages(self):
+        """
+        Log version number of python packages imported in this instance of SasView.
+        """
+        PackageGatherer().log_imported_packages()
 
     def processVersion(self, version_info):
         """
@@ -637,7 +651,7 @@ class GuiManager(object):
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
-
+        
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
 

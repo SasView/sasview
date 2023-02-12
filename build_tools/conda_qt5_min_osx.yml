@@ -40,7 +40,7 @@ dependencies:
  - service_identity
  - twisted
  - zope
- - scipy
+ - scipy=1.2.0
  - hdf5
  - ipykernel=4.9.0
  - jupyter

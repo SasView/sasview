@@ -154,9 +154,9 @@ class NTermEstimator(object):
 #For testing
 def load(path):
     # Read the data from the data file
-    data_x = np.zeros(0)
-    data_y = np.zeros(0)
-    data_err = np.zeros(0)
+    data_x = []
+    data_y = []
+    data_err = []
     scale = None
     min_err = 0.0
     if path is not None:
@@ -178,12 +178,14 @@ def load(path):
                     err = scale * math.sqrt(test_y) + min_err
                     #err = 0
 
-                data_x = np.append(data_x, test_x)
-                data_y = np.append(data_y, test_y)
-                data_err = np.append(data_err, err)
+                data_x.append(test_x)
+                data_y.append(test_y)
+                data_err.append(err)
             except Exception as exc:
                 logger.error(exc)
-
+    data_x = np.reshape(data_x, (len(data_x),))
+    data_y = np.reshape(data_y, (len(data_y),))
+    data_err = np.reshape(data_err, (len(data_err),))
     return data_x, data_y, data_err
 
 

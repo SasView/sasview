@@ -28,6 +28,7 @@ class LinearFitTest(unittest.TestCase):
                            dx=[0.1, 0.2, 0.3],
                            dy=[0.1, 0.2, 0.3])
         plotter = Plotter.Plotter(None, quickplot=True)
+        plotter.plot(self.data)
         self.widget = LinearFit(parent=plotter, data=self.data, xlabel="log10(x^2)", ylabel="log10(y)")
 
     def tearDown(self):

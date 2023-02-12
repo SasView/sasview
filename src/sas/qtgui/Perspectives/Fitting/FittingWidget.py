@@ -635,7 +635,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if obj in [self.lstParams, self.lstPoly, self.lstMagnetic]:
             if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
                 self.onKey(event)
-        return True
+                return True
+        return False
 
     def modelName(self):
         """
@@ -1335,9 +1336,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.cbCategory.currentText() != CATEGORY_CUSTOM: return
 
         current_text = self.cbModel.currentText()
-        self.cbModel.blockSignals(True)
         self.cbModel.clear()
-        self.cbModel.blockSignals(False)
         self.enableModelCombo()
         self.disableStructureCombo()
         # Retrieve the list of models
@@ -1477,7 +1476,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.blockSignals(True)
         self.cbModel.addItem(MODEL_DEFAULT)
-        self.cbModel.addItems(sorted([model for (model, _) in model_list]))
+        self.cbModel.addItems(sorted([model for (model, _) in model_list if model != 'rpa']))
         self.cbModel.blockSignals(False)
 
     def onPolyModelChange(self, top, bottom):
@@ -2317,6 +2316,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             plugin_list.append([name, True])
         if plugin_list:
             self.master_category_dict[CATEGORY_CUSTOM] = plugin_list
+        # Adding plugins classified as structure factor to 'CATEGORY_STRUCTURE' list
+        if CATEGORY_STRUCTURE in self.master_category_dict:
+            plugin_structure_list = [
+                [name, True] for name, plug in self.custom_models.items()
+                if plug.is_structure_factor
+                and [name, True] not in self.master_category_dict[CATEGORY_STRUCTURE]
+            ]
+            if plugin_structure_list:
+                self.master_category_dict[CATEGORY_STRUCTURE].extend(plugin_structure_list)
 
     def regenerateModelDict(self):
         """
@@ -2964,10 +2972,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fitted_data.show_q_range_sliders = True
         # Suppress the GUI update until the move is finished to limit model calculations
         fitted_data.slider_update_on_move = False
-        fitted_data.slider_high_q_input = self.options_widget.txtMaxRange
-        fitted_data.slider_high_q_setter = self.options_widget.updateMaxQ
-        fitted_data.slider_low_q_input = self.options_widget.txtMinRange
-        fitted_data.slider_low_q_setter = self.options_widget.updateMinQ
+        fitted_data.slider_tab_name = self.modelName()
+        fitted_data.slider_perspective_name = 'Fitting'
+        fitted_data.slider_high_q_input = ['options_widget', 'txtMaxRange']
+        fitted_data.slider_high_q_setter = ['options_widget', 'updateMaxQ']
+        fitted_data.slider_low_q_input = ['options_widget', 'txtMinRange']
+        fitted_data.slider_low_q_setter = ['options_widget', 'updateMinQ']
 
         self.model_data = fitted_data
         new_plots = [fitted_data]
@@ -3056,7 +3066,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         # ensure the model does not recompute when updating the value
         self._model_model.blockSignals(True)
-        self._model_model.item(ER_row, 1).setText(str(ER_value))
+        self._model_model.item(ER_row, 1).setText(GuiUtils.formatNumber(ER_value, high=True))
         self._model_model.blockSignals(False)
         # ensure the view is updated immediately
         self._model_model.layoutChanged.emit()
@@ -3902,7 +3912,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             }
             file_path = save_dialog.getSaveFileName(**kwargs)
             filename = file_path[0]
-
+            if not filename:
+                return
             if file_path[1] == 'Text (*.txt)':
                 Type_output = Text_output
                 filename = '.'.join((filename, 'txt'))

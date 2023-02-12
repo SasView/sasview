@@ -368,7 +368,7 @@ class PlotterTest(unittest.TestCase):
     def testOnFitDisplay(self):
         """ Test the fit line display on the chart """
         self.assertIsInstance(self.plotter.fit_result, Data1D)
-        self.assertEqual(self.plotter.fit_result.symbol, 13)
+        self.assertEqual(self.plotter.fit_result.symbol, 17)
         self.assertEqual(self.plotter.fit_result.name, "Fit")
 
         # fudge some init data
