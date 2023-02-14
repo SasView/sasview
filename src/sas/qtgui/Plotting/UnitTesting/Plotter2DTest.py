@@ -12,9 +12,7 @@ from PyQt5 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from mpl_toolkits.mplot3d import Axes3D
 
-from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
@@ -36,46 +34,39 @@ class Plotter2DTest:
 
         p = Plotter2D.Plotter2D(parent=dummy_manager(), quickplot=True)
 
-        self.data = Data2D(image=[0.1]*4,
-                           qx_data=[1.0, 2.0, 3.0, 4.0],
-                           qy_data=[10.0, 11.0, 12.0, 13.0],
-                           dqx_data=[0.1, 0.2, 0.3, 0.4],
-                           dqy_data=[0.1, 0.2, 0.3, 0.4],
-                           q_data=[1,2,3,4],
-                           xmin=-1.0, xmax=5.0,
-                           ymin=-1.0, ymax=15.0,
-                           zmin=-1.0, zmax=20.0)
+        data = Data2D(image=[[0.1]*4]*4,
+                      qx_data=[[1.0, 2.0, 3.0, 4.0]]*4,
+                      qy_data=[[10.0, 11.0, 12.0, 13.0]]*4,
+                      dqx_data=[[0.1, 0.2, 0.3, 0.4]]*4,
+                      dqy_data=[[0.1, 0.2, 0.3, 0.4]]*4,
+                      q_data=[[1, 2, 3, 4]]*4,
+                      xmin=1.0, xmax=5.0,
+                      ymin=1.0, ymax=15.0,
+                      zmin=1.0, zmax=20.0,
+                      )
 
-        self.data.title="Test data"
-        self.data.id = 1
-        self.data.ndim = 1
-        self.isWindows = platform.system=="Windows"
+        data.title = "Test data"
+        data.id = 1
+        data.ndim = 2
+
+        p.data = data
 
         yield p
 
         '''destroy'''
         p.figure.clf()
 
-    @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testDataProperty(self, plotter):
         """ Adding data """
-        plotter.data = self.data
-
-        assert plotter.data0 == self.data
-        assert plotter._title == self.data.title
+        assert plotter._title == "Test data"
         assert plotter.xLabel == "$\\rm{Q_{x}}(A^{-1})$"
         assert plotter.yLabel == "$\\rm{Q_{y}}(A^{-1})$"
 
-    @pytest.mark.skip(reason="2022-09 already broken")
     def testPlot(self, plotter, mocker):
         """ Look at the plotting """
-        plotter.data = self.data
-        plotter.show()
-        mocker.patch.object(FigureCanvas, 'draw_idle')
-
+        mocker.patch.object(plotter, 'plot')
         plotter.plot()
-
-        assert FigureCanvas.draw_idle.called
+        assert plotter.plot.called_once()
 
     @pytest.mark.skip(reason="2022-09 already broken")
     def testCalculateDepth(self, plotter):
@@ -121,6 +112,27 @@ class Plotter2DTest:
         plotter.onToggleScale(None)
 
         assert FigureCanvas.draw_idle.called
+
+    def testOnToggleMaskedPoints(self, plotter, mocker):
+        """ Respond to the masked data event by replotting """
+        assert not plotter._show_masked_data
+        plotter.data = Data2D(image=[[0.1]*4]*4,
+                              qx_data=[[1.0, 2.0, 3.0, 4.0]]*4,
+                              qy_data=[[10.0, 11.0, 12.0, 13.0]]*4,
+                              dqx_data=[[0.1, 0.2, 0.3, 0.4]]*4,
+                              dqy_data=[[0.1, 0.2, 0.3, 0.4]]*4,
+                              q_data=[[1, 2, 3, 4]]*4,
+                              mask=[[1, 1, 1, 0]]*4,
+                              xmin=-1.0, xmax=5.0,
+                              ymin=-1.0, ymax=15.0,
+                              zmin=-1.0, zmax=20.0,
+                              )
+        assert len(plotter._masked_data[0].data) == 4*3
+
+        mocker.patch.object(plotter, 'plot')
+        plotter.onToggleMaskedData(None)
+        assert plotter._show_masked_data
+        assert plotter.plot.called_once()
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnBoxSum(self, plotter, mocker):
@@ -173,7 +185,7 @@ class Plotter2DTest:
         assert FigureCanvas.draw_idle.called
 
         # Spy on cliboard's dataChanged() signal
-        if not self.isWindows:
+        if not platform.system == "Windows":
             return
         self.clipboard_called = False
         def done():

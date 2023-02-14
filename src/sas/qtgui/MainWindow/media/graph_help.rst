@@ -173,6 +173,16 @@ From the *Graph Menu* (see Invoking_the_graph_menu_) select *Toggle Linear/Log
 Scale* to switch between a linear to log intensity scale. The type of scale
 selected is written alongside the colour scale.
 
+Toggling masked data
+^^^^^^^^^^^^^^^^^^^^
+
+This menu option is only available with 2D data.
+
+From the *Graph Menu* (see Invoking_the_graph_menu_) select *Toggle Masked Data*
+to switch between displaying masked data points and not displaying masked data points.
+This is useful for slicing masked data sets, especially if multiple detector panels
+are displayed simultaneously and overlap one another.
+
 2D color maps
 ^^^^^^^^^^^^^
 
