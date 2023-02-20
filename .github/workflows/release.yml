@@ -192,14 +192,6 @@ jobs:
         codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
         hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
         codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
-
-    - name: Publish installer package (OSX)
-      if: ${{ matrix.os == 'macos-latest' }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
-        path: installers/dist/SasView5.dmg
-        if-no-files-found: error
           
     - name: Notarize Release Build (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
@@ -209,9 +201,18 @@ jobs:
         primary-bundle-id: "org.sasview.SasView5"
         appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
         appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+        verbose: True
 
     - name: Staple Release Build (OSX)
       if: ${{ matrix.os == 'macos-latest' }}
       uses: devbotsxyz/xcode-staple@v1
       with:
         product-path: "installers/dist/SasView5.dmg"
+        
+    - name: Publish installer package (OSX)
+      if: ${{ matrix.os == 'macos-latest' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.sha }}
+        path: installers/dist/SasView5.dmg
+        if-no-files-found: error
