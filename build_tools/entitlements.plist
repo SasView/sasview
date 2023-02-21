@@ -11,5 +11,8 @@
 		<!-- Read-write access to files the user has selected using an Open or Save dialog -->
 		<key>com.apple.security.files.user-selected.read-write</key>
 		<true/>
+		<!-- Temporary exception to access users home directory -->
+		<key>ccom.apple.security.temporary-exception.files.home-relative-path.read-write</key>
+		<true/>
 	</dict>
 </plist>
