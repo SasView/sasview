@@ -5,7 +5,6 @@ import os
 import sys
 
 from sas.system.version import __version__
-from sas.system import config
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMdiArea
@@ -74,45 +73,14 @@ def get_highdpi_scaling():
 
 def run_sasview():
 
-    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
-    os.environ["QT_SCALE_FACTOR"] = f"{config.QT_SCALE_FACTOR}"
-    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1" if config.QT_AUTO_SCREEN_SCALE_FACTOR else "0"
-
-
-    app = QApplication([])
-
-
-    app.setAttribute(Qt.AA_ShareOpenGLContexts)
-
-
-    #Initialize logger
-    from sas.system.log import SetupLogger
-    SetupLogger(__name__).config_development()
-
-    # initialize sasmodels settings
-    from sas.system.user import get_user_dir
-    if "SAS_DLL_PATH" not in os.environ:
-        os.environ["SAS_DLL_PATH"] = os.path.join(
-            get_user_dir(), "compiled_models")
-
-    # Set open cl config from environment variable, if it is set
-
-    if env.sas_opencl is not None:
-        logging.getLogger(__name__).info("Getting OpenCL settings from environment variables")
-        config.SAS_OPENCL = env.sas_opencl
-    else:
-        logging.getLogger(__name__).info("Getting OpenCL settings from config")
-        env.sas_opencl = config.SAS_OPENCL
-
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     # Note: Qt environment variables are initialized in sas.system.lib.setup_qt_env
-    app = QApplication([])
-
     # Main must have reference to the splash screen, so making it explicit
-
+    app = QApplication([])
+    app.setAttribute(Qt.AA_ShareOpenGLContexts)
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
     app.setStyleSheet("* {font-size: 11pt;}")
 
