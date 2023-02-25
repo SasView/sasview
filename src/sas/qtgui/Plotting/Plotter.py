@@ -227,6 +227,12 @@ class PlotterWidget(PlotterBase):
         if data.show_yzero:
             ax.axhline(color='black', linewidth=1)
 
+        # Display +/- 3 sigma and +/- 1 sigma lines for residual plots
+        if data.plot_role == data.ROLE_RESIDUAL:
+            ax.axhline(y=3, color='red', linestyle='-')
+            ax.axhline(y=-3, color='red', linestyle='-')
+            ax.axhline(y=1, color='gray', linestyle='--')
+            ax.axhline(y=-1, color='gray', linestyle='--')
         # Update the list of data sets (plots) in chart
         self.plot_dict[data.name] = data
 
