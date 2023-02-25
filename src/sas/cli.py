@@ -102,8 +102,8 @@ def main(logging="production"):
     from sas.system import lib
     from sas.system import console
 
-    # I/O redirection for the windows console. Need to do this early.
-    console.setup_console()
+    ## I/O redirection for the windows console. Need to do this early.
+    #console.setup_console()
 
     # Eventually argument processing might affect logger or config, so do it first
     cli = parse_cli(sys.argv)
