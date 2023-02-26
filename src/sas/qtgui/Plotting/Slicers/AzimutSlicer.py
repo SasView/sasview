@@ -22,7 +22,7 @@ class SectorInteractor(BaseInteractor):
         self.connect = self.base.connect
 
         # # Number of points on the plot
-        self.nbins = 20
+        self.nbins = 100
         theta1 = 2 * np.pi / 3
         theta2 = -2 * np.pi / 3
 
@@ -244,7 +244,7 @@ class SectorInteractorQ(SectorInteractor):
     def _post_data(self):
         """
         """
-        from sas.sascalc.dataloader.manipulations import SectorQ
+        from sasdata.data_util.manipulations import SectorQ
         self.post_data(SectorQ)
 
 
@@ -261,6 +261,6 @@ class SectorInteractorPhi(SectorInteractor):
     def _post_data(self):
         """
         """
-        from sas.sascalc.dataloader.manipulations import SectorPhi
+        from sasdata.data_util.manipulations import SectorPhi
         self.post_data(SectorPhi)
 

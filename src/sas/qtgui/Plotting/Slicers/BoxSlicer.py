@@ -43,7 +43,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.center_y = (self.data.ymin + self.data.ymax) /2
 
         # Number of points on the plot
-        self.nbins = 30
+        self.nbins = 100
         # If True, I(|Q|) will be return, otherwise,
         # negative q-values are allowed
         # Should this be set to True??
@@ -761,7 +761,7 @@ class BoxInteractorX(BoxInteractor):
         """
         Post data creating by averaging in Qx direction
         """
-        from sas.sascalc.dataloader.manipulations import SlabX
+        from sasdata.data_util.manipulations import SlabX
         self.post_data(SlabX, direction="X")
 
     def validate(self, param_name, param_value):
@@ -769,7 +769,14 @@ class BoxInteractorX(BoxInteractor):
         Validate input from user.
         Values get checked at apply time.
         """
-        return True
+        isValid = True
+
+        if param_name == 'nbins':
+            # Can't be 0
+            if param_value < 1:
+                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                isValid = False
+        return isValid
 
 
 class BoxInteractorY(BoxInteractor):
@@ -785,7 +792,7 @@ class BoxInteractorY(BoxInteractor):
         """
         Post data creating by averaging in Qy direction
         """
-        from sas.sascalc.dataloader.manipulations import SlabY
+        from sasdata.data_util.manipulations import SlabY
         self.post_data(SlabY, direction="Y")
 
     def validate(self, param_name, param_value):
@@ -793,4 +800,11 @@ class BoxInteractorY(BoxInteractor):
         Validate input from user.
         Values get checked at apply time.
         """
-        return True
+        isValid = True
+
+        if param_name == 'nbins':
+            # Can't be 0
+            if param_value < 1:
+                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                isValid = False
+        return isValid

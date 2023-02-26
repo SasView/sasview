@@ -9,7 +9,6 @@ import timeit
 
 import numpy as np
 
-from . import calc
 logger = logging.getLogger(__name__)
 
 
@@ -50,6 +49,7 @@ class Pinvertor(object):
         :param pars: input parameters.
         :return: residuals - list of residuals.
         """
+        from . import calc
         pars = np.float64(pars)
 
         residuals = []
@@ -66,6 +66,7 @@ class Pinvertor(object):
         :param pars: input parameters.
         :return: residuals - list of residuals.
         """
+        from . import calc
         pars = np.float64(pars)
 
         residuals = []
@@ -329,6 +330,7 @@ class Pinvertor(object):
 
         :return: I(q)
         """
+        from . import calc
         q = np.float64(q)
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
@@ -336,7 +338,7 @@ class Pinvertor(object):
 
         iq_val = calc.iq(pars, self.d_max, q)
         if iq_val.shape[0] == 1:
-            return np.asscalar(iq_val)
+            return iq_val[0]
         return iq_val
 
     def get_iq_smeared(self, pars, q):
@@ -349,6 +351,7 @@ class Pinvertor(object):
 
         :return: I(q), either scalar or vector depending on q.
         """
+        from . import calc
         q = np.float64(q)
         q = np.atleast_1d(q)
         pars = np.float64(pars)
@@ -358,7 +361,7 @@ class Pinvertor(object):
         iq_val = calc.iq_smeared(pars, q, self.d_max, self.slit_height, self.slit_width, npts)
         #If q was a scalar
         if iq_val.shape[0] == 1:
-            return np.asscalar(iq_val)
+            return iq_val[0]
         return iq_val
 
     def pr(self, pars, r):
@@ -370,6 +373,7 @@ class Pinvertor(object):
 
         :return: P(r)
         """
+        from . import calc
         r = np.float64(r)
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
@@ -377,7 +381,7 @@ class Pinvertor(object):
         pr_val = calc.pr(pars, self.d_max, r)
         if len(pr_val) == 1:
             #scalar
-            return np.asscalar(pr_val)
+            return pr_val[0]
         return pr_val
 
     def get_pr_err(self, pars, pars_err, r):
@@ -390,7 +394,7 @@ class Pinvertor(object):
 
         :return: (P(r), dP(r))
         """
-
+        from . import calc
         pars = np.atleast_1d(np.float64(pars))
         r = np.atleast_1d(np.float64(r))
 
@@ -421,6 +425,7 @@ class Pinvertor(object):
 
         :return: nth Fourier transformed base function, evaluated at q.
         """
+        from . import calc
         d_max = np.float64(d_max)
         n = int(n)
         q = np.float64(q)
@@ -429,7 +434,7 @@ class Pinvertor(object):
 
         if ortho_val.shape[0] == 1:
             #If the q input was scalar.
-            return np.asscalar(ortho_val)
+            return ortho_val[0]
         return ortho_val
 
     def oscillations(self, pars):
@@ -441,6 +446,7 @@ class Pinvertor(object):
         :param pars: c-parameters.
         :return: oscillation figure of merit.
         """
+        from . import calc
         nslice = 100
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
@@ -459,6 +465,7 @@ class Pinvertor(object):
         :param pars: c-parameters.
         :return: number of P(r) peaks.
         """
+        from . import calc
         nslice = 100
         pars = np.float64(pars)
         count = calc.npeaks(pars, self.d_max, nslice)
@@ -473,6 +480,7 @@ class Pinvertor(object):
         :param pars: c-parameters.
         :return: fraction of P(r) that is positive.
         """
+        from . import calc
         nslice = 100
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
@@ -490,6 +498,7 @@ class Pinvertor(object):
 
         :return: fraction of P(r) that is positive.
         """
+        from . import calc
         nslice = 51
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
@@ -505,6 +514,7 @@ class Pinvertor(object):
         :param pars: c-parameters.
         :return: Rg.
         """
+        from . import calc
         nslice = 101
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
@@ -519,6 +529,7 @@ class Pinvertor(object):
         :param pars: c-parameters.
         :return: I(q=0)
         """
+        from . import calc
         nslice = 101
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
@@ -550,6 +561,7 @@ class Pinvertor(object):
 
         :return: 0
         """
+        from . import calc
         nfunc = int(nfunc)
         nr = int(nr)
         a_obj = np.zeros([self.npoints + nr, nfunc])

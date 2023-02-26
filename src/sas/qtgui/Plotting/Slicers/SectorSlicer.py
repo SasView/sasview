@@ -34,7 +34,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
                          numpy.fabs(self.data.ymin)), 2)
         self.qmax = numpy.sqrt(x + y)
         # Number of points on the plot
-        self.nbins = 20
+        self.nbins = 100
         # Angle of the middle line
         self.theta2 = numpy.pi / 3
         # Absolute value of the Angle between the middle line and any side line
@@ -128,12 +128,12 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         if data is None:
             return
         # Averaging
-        from sas.sascalc.dataloader.manipulations import SectorQ
+        from sasdata.data_util.manipulations import SectorQ
         radius = self.qmax
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
         if nbins is None:
-            nbins = 20
+            nbins = self.nbins
         sect = SectorQ(r_min=0.0, r_max=radius,
                        phi_min=phimin + numpy.pi,
                        phi_max=phimax + numpy.pi, nbins=nbins)

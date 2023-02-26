@@ -10,7 +10,7 @@ import time
 import numpy as np
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
-from sas.sascalc.dataloader.data_info import Data1D
+from sasdata.dataloader.data_info import Data1D
 
 
 def find(filename):
@@ -82,14 +82,13 @@ class TestCalculator(unittest.TestCase):
         self.assertAlmostEqual(transform1.y[0], 1)
         self.assertAlmostEqual(transform1.y[-1], 0, 5)
 
-    def transform_callback(self, transforms):
-        self.transformation = transforms
+    def transform_callback(self, transformed_data):
+        self.transformation = transformed_data
 
     def extract_params(self):
         params = self.calculator.extract_parameters(self.transformation[0])
-        self.assertIsNotNone(params)
-        self.assertEqual(len(params), 6)
-        self.assertLess(abs(params['max']-75), 2.5) # L_p ~= 75
+
+        self.assertLess(abs(params.long_period-75), 2.5) # L_p ~= 75
 
     def check_transforms(self):
         gamma1, gamma3, idf = self.transformation
@@ -111,7 +110,7 @@ class TestCalculator(unittest.TestCase):
             try:
                 test()
             except Exception as e:
-                raise
+                raise e
                 self.fail("{} failed ({}: {})".format(test, type(e), e))
 
 

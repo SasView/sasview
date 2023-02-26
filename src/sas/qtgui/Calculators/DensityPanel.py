@@ -127,6 +127,8 @@ class DensityPanel(QtWidgets.QDialog):
             molarDensity = molarMass / molarVolume
             molarDensity = formatNumber(molarDensity, high=True)
             self.model.item(MODEL.MASS_DENSITY).setText(str(molarDensity))
+            # be sure to store the new value in the model
+            self.model.item(MODEL.MOLAR_VOLUME).setText(current_text)
 
         except (ArithmeticError, ValueError):
             self.model.item(MODEL.MASS_DENSITY).setText("")
@@ -139,6 +141,8 @@ class DensityPanel(QtWidgets.QDialog):
             molarVolume = molarMass / molarDensity
             molarVolume = formatNumber(molarVolume, high=True)
             self.model.item(MODEL.MOLAR_VOLUME).setText(str(molarVolume))
+            # be sure to store the new value in the model
+            self.model.item(MODEL.MASS_DENSITY).setText(current_text)
 
         except (ArithmeticError, ValueError):
             self.model.item(MODEL.MOLAR_VOLUME).setText("")

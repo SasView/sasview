@@ -13,16 +13,16 @@
   <property name="windowTitle">
    <string>Constrained and Simultaneous Fit</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_3">
+  <layout class="QGridLayout" name="gridLayout_4">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Source choice for simultaneous fitting</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2">
+     <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
          <widget class="QRadioButton" name="btnSingle">
           <property name="text">
            <string>Single fits</string>
@@ -32,29 +32,36 @@
           </property>
          </widget>
         </item>
-        <item>
+        <item row="0" column="1">
          <widget class="QRadioButton" name="btnBatch">
           <property name="text">
            <string>Batch fits</string>
           </property>
          </widget>
         </item>
-        <item>
+        <item row="0" column="2">
+         <widget class="QCheckBox" name="chkWeight">
+          <property name="text">
+           <string>Modify weighting</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
          <widget class="QCheckBox" name="chkChain">
           <property name="text">
            <string>Chained fit</string>
           </property>
          </widget>
         </item>
-        <item>
+        <item row="0" column="4">
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>18</width>
-            <height>17</height>
+            <width>160</width>
+            <height>13</height>
            </size>
           </property>
          </spacer>
@@ -204,6 +211,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>btnSingle</tabstop>
+  <tabstop>btnBatch</tabstop>
+  <tabstop>chkWeight</tabstop>
+  <tabstop>chkChain</tabstop>
+  <tabstop>cbCases</tabstop>
+  <tabstop>cmdAdd</tabstop>
+  <tabstop>tblConstraints</tabstop>
+  <tabstop>cmdFit</tabstop>
+  <tabstop>cmdHelp</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

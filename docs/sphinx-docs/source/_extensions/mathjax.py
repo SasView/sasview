@@ -106,7 +106,6 @@ def setup(app):
     app.add_config_value('mathjax_path',
                          'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?'
                          'config=TeX-MML-AM_CHTML',
-                         #'config=TeX-AMS-MML_HTMLorMML',
                          False)
     app.add_config_value('mathjax_css', None, 'html')
     app.add_config_value('mathjax_use_katex', False, 'html')

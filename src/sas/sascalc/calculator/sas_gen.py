@@ -15,8 +15,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
 
-from .geni import Iq, Iqxy
-
 if sys.version_info[0] < 3:
     def decode(s):
         return s
@@ -179,6 +177,7 @@ class GenSAS(object):
         :Param y: array of y-values
         :return: function value
         """
+        from .geni import Iq, Iqxy
         # transform position data from sample to beamline coords
         x, y, z = self.transform_positions()
         sld = self.data_sldn - self.params['solvent_SLD']
@@ -1890,7 +1889,7 @@ def realspace_Iq(self, qx, qy):
         if is_magnetic:
             I_out = calc_Iq_magnetic(
                 qx, qy, rho, rho_m, points, volume,
-                up_frac_i=in_spin, up_frac_f=out_spin, up_angle=s_theta, up_phi=s_phi,
+                up_frac_i=in_spin, up_frac_f=out_spin, up_theta=s_theta, up_phi=s_phi,
                 )
         else:
             I_out = calc_Iqxy(qx, qy, rho, points, volume=volume, dtype='d')
@@ -2107,12 +2106,12 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
         rho, rho_m, points = shape.sample_magnetic(sampling_density)
         rho, rho_m = rho*1e-6, rho_m*1e-6
         mx, my, mz = rho_m
-        up_i, up_f, up_angle, up_phi = shape.spin
+        up_i, up_f, up_theta, up_phi = shape.spin
     else:
         rho, points = shape.sample(sampling_density)
         rho = rho*1e-6
         mx = my = mz = None
-        up_i, up_f, up_angle, up_phi = 0.5, 0.5, 90.0, 0.0
+        up_i, up_f, up_theta, up_phi = 0.5, 0.5, 90.0, 0.0
     points = realspace.apply_view(points, view)
     volume = shape.volume / len(points)
     #print("shape, pixel volume", shape.volume, shape.volume/len(points))
@@ -2127,7 +2126,7 @@ def demo_shape(shape='ellip', samples=2000, nq=100, view=(60, 30, 0),
     model.params['background'] = 1e-2
     model.params['Up_frac_in'] = up_i
     model.params['Up_frac_out'] = up_f
-    model.params['Up_theta'] = up_angle
+    model.params['Up_theta'] = up_theta
     model.params['Up_phi'] = up_phi
     if use_2d or shape.is_magnetic:
         q = np.linspace(-qmax, qmax, nq)
@@ -2163,7 +2162,7 @@ def demo():
         # Shape + qrange + magnetism (only for ellip).
         #shape='ellip', rab=125, rc=50, qmax=0.1,
         #shape='ellip', rab=25, rc=50, qmax=0.1,
-        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_angle=35, up_phi=35,
+        shape='ellip', rab=125, rc=50, qmax=0.05, rho_m=5, theta_m=20, phi_m=30, up_i=1, up_f=0, up_theta=35, up_phi=35,
 
         # 1D or 2D curve (ignored for magnetism).
         #use_2d=False,

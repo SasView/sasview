@@ -5,7 +5,6 @@ import re
 from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
@@ -20,6 +19,9 @@ from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
+from sas import config
+
+logger = logging.getLogger(__name__)
 
 class DnDTableWidget(QtWidgets.QTableWidget):
     def __init__(self, *args, **kwargs):
@@ -122,6 +124,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tab_id = self.page_id
         # fitpage order in the widget
         self._row_order = []
+        self.weighting_ratios = {}
 
         # Set the table widget into layout
         self.tblTabList = DnDTableWidget(self)
@@ -129,6 +132,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Are we chain fitting?
         self.is_chain_fitting = False
+
+        # Are we modifying weight
+        self.is_weight_modified = False
 
         # Is the fit job running?
         self.is_running = False
@@ -166,11 +172,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.label.setVisible(False)
         self.cbCases.setVisible(False)
 
-        labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
+        self.sim_fit_labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
         # tab widget - headers
-        self.editable_tab_columns = [labels.index('Mnemonic')]
-        self.tblTabList.setColumnCount(len(labels))
-        self.tblTabList.setHorizontalHeaderLabels(labels)
+        self.editable_tab_columns = [self.sim_fit_labels.index('Mnemonic')]
+
+        if self.is_weight_modified:
+            self.sim_fit_labels.append('Weighting')
+            self.editable_tab_columns.append(self.sim_fit_labels.index('Weighting'))
+
+        self.tblTabList.setColumnCount(len(self.sim_fit_labels))
+        self.tblTabList.setHorizontalHeaderLabels(self.sim_fit_labels)
         self.tblTabList.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
 
         self.tblTabList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -179,7 +190,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Single Fit is the default, so disable chainfit
         self.chkChain.setVisible(False)
 
-        # disabled constraint 
+        # disabled constraint
         labels = ['Constraint']
         self.tblConstraints.setColumnCount(len(labels))
         self.tblConstraints.setHorizontalHeaderLabels(labels)
@@ -203,6 +214,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdAdd.clicked.connect(self.showMultiConstraint)
         self.chkChain.toggled.connect(self.onChainFit)
+        self.chkWeight.toggled.connect(self.onWeightModify)
 
         # QTableWidgets
         self.tblTabList.cellChanged.connect(self.onTabCellEdit)
@@ -243,6 +255,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         source = self.sender().objectName()
         self.currentType = "BatchPage" if source == "btnBatch" else "FitPage"
         self.chkChain.setVisible(source=="btnBatch")
+        self.chkWeight.setVisible(source!="btnBatch")
         self.initializeFitList()
 
     def onSpecialCaseChange(self, index):
@@ -262,6 +275,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to selecting the Chain Fit checkbox
         """
         self.is_chain_fitting = is_checked
+
+    def onWeightModify(self, is_checked):
+        """
+        Respond to selecting the Modify weighting checkbox
+        """
+        self.is_weight_modified = is_checked
+        self.initializeWidgets()
+        self.initializeFitList()
 
     def onFit(self):
         """
@@ -285,10 +306,27 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         fitter.fitter_id = self.page_id
 
         # prepare fitting problems for each tab
-        #
         page_ids = []
         fitter_id = 0
         sim_fitter_list=[fitter]
+
+        # Determine weights for each data-set
+        # Need to determine if it is best to use (1/sigma) or (1/relative_error) for this
+        weights = {}
+        for tab in tabs_to_fit:
+            tab_object = ObjectLibrary.getObject(tab)
+            #weight = FittingUtilities.getWeight(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
+            weight = FittingUtilities.getRelativeError(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
+            weights[tab] = weight
+
+        # Calc increase factor for the errors in each dataset
+        weight_increase_dict = FittingUtilities.calcWeightIncrease(weights,
+                                                                   self.weighting_ratios,
+                                                                   self.is_weight_modified)
+        logger.info("Simultaneous fit - Data set weights: ")
+        for item in weight_increase_dict.items():
+            logger.info(item)
+
         # Prepare the fitter object
         try:
             for tab in tabs_to_fit:
@@ -297,24 +335,21 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 if tab_object is None:
                     # No such tab!
                     return
-                sim_fitter_list, fitter_id = \
-                    tab_object.prepareFitters(fitter=sim_fitter_list[0], fit_id=fitter_id)
+                weight_increase = weight_increase_dict[tab]
+                sim_fitter_list, fitter_id = tab_object.prepareFitters(fitter=sim_fitter_list[0], fit_id=fitter_id,
+                                                                       weight_increase=weight_increase)
                 page_ids.append([tab_object.page_id])
         except ValueError:
             # No parameters selected in one of the tabs
             no_params_msg = "Fitting cannot be performed.\n" +\
                             "Not all tabs chosen for fitting have parameters selected for fitting."
-            QtWidgets.QMessageBox.warning(self,
-                                          'Warning',
-                                           no_params_msg,
-                                           QtWidgets.QMessageBox.Ok)
-
+            QtWidgets.QMessageBox.warning(self, 'Warning', no_params_msg, QtWidgets.QMessageBox.Ok)
             return
 
         # Create the fitting thread, based on the fitter
         completefn = self.onBatchFitComplete if self.currentType=='BatchPage' else self.onFitComplete
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             handler = None
             updater = None
         else:
@@ -331,15 +366,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # new fit thread object
         self.calc_fit = FitThread(handler=handler,
-                             fn=sim_fitter_list,
-                             batch_inputs=batch_inputs,
-                             batch_outputs=batch_outputs,
-                             page_id=page_ids,
-                             updatefn=updater,
-                             completefn=completefn,
-                             reset_flag=self.is_chain_fitting)
+                                  fn=sim_fitter_list,
+                                  batch_inputs=batch_inputs,
+                                  batch_outputs=batch_outputs,
+                                  page_id=page_ids,
+                                  updatefn=updater,
+                                  completefn=completefn,
+                                  reset_flag=self.is_chain_fitting)
 
-        if LocalConfig.USING_TWISTED:
+        if config.USING_TWISTED:
             # start the trhrhread with twisted
             self.calc_fit = threads.deferToThread(self.calc_fit.compute)
             self.calc_fit.addCallback(completefn)
@@ -365,11 +400,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         help_location = tree_location + helpfile
 
         # OMG, really? Crawling up the object hierarchy...
+        #
+        # It's the top level that needs to do the show help.
+        # Perhaps better to address directly, but it does need to
+        # be that object. I don't like that the type is hidden. :LW
         self.parent.parent.showHelp(help_location)
 
     def onTabCellEdit(self, row, column):
         """
-        Respond to check/uncheck and to modify the model moniker actions
+        Respond to check/uncheck and to modify the model moniker and weighting actions
         """
         # If this "Edit" is just a response from moving rows around,
         # update the tab order and leave
@@ -379,72 +418,102 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 self._row_order.append(self.tblTabList.item(i,0).data(0))
             return
 
+        if column not in self.editable_tab_columns:
+            return
+
         item = self.tblTabList.item(row, column)
-        if column == 0:
+
+        if column == self.sim_fit_labels.index('FitPage'):
             # Update the tabs for fitting list
             tab_name = item.text()
             self.tabs_for_fitting[tab_name] = (item.checkState() == QtCore.Qt.Checked)
             # Enable fitting only when there are models to fit
             self.cmdFit.setEnabled(any(self.tabs_for_fitting.values()))
-
-        if column not in self.editable_tab_columns:
             return
-        new_moniker = item.data(0)
 
-        # The new name should be validated on the fly, with QValidator
-        # but let's just assure it post-factum
-        is_good_moniker = self.validateMoniker(new_moniker)
-        if not is_good_moniker:
+        elif column == self.sim_fit_labels.index('Mnemonic'):
+            new_moniker = item.data(0)
+            # The new name should be validated on the fly, with QValidator
+            # but let's just assure it post-factum
+            is_good_moniker = self.validateMoniker(new_moniker)
+            if not is_good_moniker:
+                self.tblTabList.blockSignals(True)
+                item.setBackground(QtCore.Qt.red)
+                self.tblTabList.blockSignals(False)
+                self.cmdFit.setEnabled(False)
+                if new_moniker == "":
+                    msg = "Please use a non-empty name."
+                else:
+                    msg = "Please use a unique name."
+                self.parent.communicate.statusBarUpdateSignal.emit(msg)
+                item.setToolTip(msg)
+                return
+
             self.tblTabList.blockSignals(True)
-            item.setBackground(QtCore.Qt.red)
+            item.setBackground(QtCore.Qt.white)
             self.tblTabList.blockSignals(False)
-            self.cmdFit.setEnabled(False)
-            if new_moniker == "":
-                msg = "Please use a non-empty name."
-            else:
-                msg = "Please use a unique name."
+            self.cmdFit.setEnabled(True)
+            item.setToolTip("")
+            msg = "Fitpage name changed to {}.".format(new_moniker)
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
-            item.setToolTip(msg)
-            return
-        self.tblTabList.blockSignals(True)
-        item.setBackground(QtCore.Qt.white)
-        self.tblTabList.blockSignals(False)
-        self.cmdFit.setEnabled(True)
-        item.setToolTip("")
-        msg = "Fitpage name changed to {}.".format(new_moniker)
-        self.parent.communicate.statusBarUpdateSignal.emit(msg)
 
-        if not self.current_cell:
-            return
-        # Remember the value
-        if self.current_cell not in self.available_tabs:
-            return
-        temp_tab = self.available_tabs[self.current_cell]
-        # Remove the key from the dictionaries
-        self.available_tabs.pop(self.current_cell, None)
-        # Change the model name
-        model = temp_tab.kernel_module
-        model.name = new_moniker
-        # Replace constraint name
-        temp_tab.replaceConstraintName(self.current_cell, new_moniker)
-        # Replace constraint name in the remaining tabs
-        for tab in self.available_tabs.values():
-            tab.replaceConstraintName(self.current_cell, new_moniker)
+            if not self.current_cell:
+                return
+            # Remember the value
+            if self.current_cell not in self.available_tabs:
+                return
+            temp_tab = self.available_tabs[self.current_cell]
+            # Remove the key from the dictionaries
+            self.available_tabs.pop(self.current_cell, None)
+            # Change the model name
+            model = temp_tab.kernel_module
+            model.name = new_moniker
+            # Replace constraint name
+            temp_tab.replaceConstraintName(self.current_cell, new_moniker)
+            # Replace constraint name in the remaining tabs
+            for tab in self.available_tabs.values():
+                tab.replaceConstraintName(self.current_cell, new_moniker)
+
+        elif column == self.sim_fit_labels.index('Weighting'):
+            new_weighting = item.data(0)
+
+            # Check input
+            try:
+                float(new_weighting)
+            except ValueError:
+                # Unacceptable input
+                self.tblTabList.blockSignals(True)
+                item.setBackground(QtCore.Qt.red)
+                self.tblTabList.blockSignals(False)
+                self.cmdFit.setEnabled(False)
+                msg = "Weighting must be a numerical value (integer or float)."
+                self.parent.communicate.statusBarUpdateSignal.emit(msg)
+                item.setToolTip(msg)
+                return
+
+            # Update value if acceptable input
+            self.tblTabList.blockSignals(True)
+            item.setBackground(QtCore.Qt.white)
+            self.tblTabList.blockSignals(False)
+            self.cmdFit.setEnabled(True)
+            fit_page_column = self.sim_fit_labels.index('FitPage')
+            self.weighting_ratios[self.tblTabList.item(row, fit_page_column).data(0)] = new_weighting
+
         # Reinitialize the display
         self.initializeFitList()
 
     def onConstraintChange(self, row, column):
         """
-        Modify the constraint when the user edits the constraint list. If the
-        user changes the constrained parameter, the constraint is erased and a
-        new one is created.
-        Checking is performed on the constrained entered by the user, showing
-        message box warning him the constraint is not valid and cancelling
-        his changes by reloading the view. View is reloaded
-        when the user is finished for consistency.
+        Modify the constraint when the user edits the constraint list.
+        If the user changes the constrained parameter, the constraint is erased
+        and a new one is created.
+        Checking is performed on the constrained entered by the user.
+        In case of an error during checking, a warning message box is shown
+        and the constraint is cancelled by reloading the view.
+        View is also reloaded when the user is finished for consistency.
         """
         item = self.tblConstraints.item(row, column)
-        # extract information from the constraint object
+        # Extract information from the constraint object
         constraint = self.available_constraints[row]
         model = constraint.value_ex[:constraint.value_ex.index(".")]
         param = constraint.param
@@ -464,6 +533,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 QtWidgets.QMessageBox.Ok)
             self.initializeFitList()
             return
+
         # Then check if the parameter is correctly defined with colons
         # separating model and parameter name
         lhs, rhs = re.split(" *= *", item.data(0).strip(), 1)
@@ -481,7 +551,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # We can parse the string
         new_param = lhs.split(":", 1)[1].strip()
         new_model = lhs.split(":", 1)[0].strip()
-        # Check that the symbol is known so we dont get an unknown tab
+        # Check that the symbol is known so we don't get an unknown tab
         # All the conditional statements could be grouped in one or
         # alternatively we could check with expression.py, but we would still
         # need to do some checks to parse the string
@@ -501,6 +571,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         new_function = rhs
         new_tab = self.available_tabs[new_model]
+        model_key = tab.getModelKeyFromName(param)
         # Make sure we are dealing with fit tabs
         assert isinstance(tab, FittingWidget)
         assert isinstance(new_tab, FittingWidget)
@@ -509,8 +580,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Apply the new constraint
             constraint = Constraint(param=new_param, func=new_function,
                                     value_ex=new_model + "." + new_param)
+            model_key = tab.getModelKeyFromName(new_param)
             new_tab.addConstraintToRow(constraint=constraint,
-                                       row=tab.getRowFromName(new_param))
+                                       row=tab.getRowFromName(new_param), model_key=model_key)
             # If the constraint is valid and we are changing model or
             # parameter, delete the old constraint
             if (self.constraint_accepted and new_model != model or
@@ -529,9 +601,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             font.setItalic(True)
             brush = QtGui.QBrush(QtGui.QColor('blue'))
             tab.modifyViewOnRow(tab.getRowFromName(new_param), font=font,
-                                brush=brush)
+                                brush=brush, model_key=model_key)
         else:
-            tab.modifyViewOnRow(tab.getRowFromName(new_param))
+            tab.modifyViewOnRow(tab.getRowFromName(new_param), model_key=model_key)
         # reload the view so the user gets a consistent feedback on the
         # constraints
         self.initializeFitList()
@@ -826,7 +898,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             moniker = constraint[:constraint.index(':')]
             param = constraint[constraint.index(':')+1:constraint.index('=')].strip()
             tab = self.available_tabs[moniker]
-            tab.deleteConstraintOnParameter(param)
+            model_key = tab.getModelKeyFromName(param)
+            tab.deleteConstraintOnParameter(param, model_key=model_key)
 
         # Constraints removed - refresh the table widget
         self.initializeFitList()
@@ -839,14 +912,17 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
         return item
 
-    def updateFitLine(self, tab):
+    def updateFitLine(self, tab, model_key="standard"):
         """
         Update a single line of the table widget with tab info
         """
         fit_page = ObjectLibrary.getObject(tab)
         model = fit_page.kernel_module
+
         if model is None:
+            logging.warning("No model selected")
             return
+
         tab_name = tab
         model_name = model.id
         moniker = model.name
@@ -873,23 +949,39 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.setItem(pos, 2, self.uneditableItem(model_filename))
         # Moniker is editable, so no option change
         item = QtWidgets.QTableWidgetItem(moniker)
+        # Weighting is editable, so no option change
         self.tblTabList.setItem(pos, 3, item)
+        # Initial definition
+        if tab_name not in self.weighting_ratios.keys():
+            self.weighting_ratios[tab_name] = "1.0"
+        item = QtWidgets.QTableWidgetItem(self.weighting_ratios[tab_name])
+        self.tblTabList.setItem(pos, 4, item)
         self.tblTabList.blockSignals(False)
 
         # Check if any constraints present in tab
-        active_constraint_names = fit_page.getComplexConstraintsForModel()
-        constraint_names = fit_page.getFullConstraintNameListForModel()
-        constraints = fit_page.getConstraintObjectsForModel()
+        constraint_names = fit_page.getComplexConstraintsForAllModels()
+        constraints = fit_page.getConstraintObjectsForAllModels()
+
+        active_constraint_names = []
+        constraint_names = []
+        constraints = []
+        for model_key in fit_page.model_dict.keys():
+            active_constraint_names += fit_page.getComplexConstraintsForModel(model_key=model_key)
+            constraint_names += fit_page.getFullConstraintNameListForModel(model_key=model_key)
+            constraints += fit_page.getConstraintObjectsForModel(model_key=model_key)
+
         if not constraints:
             return
+
         self.tblConstraints.setEnabled(True)
         self.tblConstraints.blockSignals(True)
         for constraint, constraint_name in zip(constraints, constraint_names):
-            # Ignore constraints that have no *func* attribute defined
-            if constraint.func is None:
+            if not constraint_name and len(constraint_name) < 2:
+                continue
+            if constraint_name[0] is None or constraint_name[1] is None:
                 continue
             # Create the text for widget item
-            label = moniker + ":"+ constraint_name[0] + " = " + constraint_name[1]
+            label = moniker + ":" + constraint_name[0] + " = " + constraint_name[1]
             pos = self.tblConstraints.rowCount()
             self.available_constraints[pos] = constraint
 
@@ -908,7 +1000,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.tblConstraints.setItem(pos, 0, item)
         self.tblConstraints.blockSignals(False)
 
-    def initializeFitList(self):
+    def initializeFitList(self, row=0, model_key="standard"):
         """
         Fill the list of model/data sets for fitting/constraining
         """
@@ -947,7 +1039,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self._row_order = tabs
 
         for tab in tabs:
-            self.updateFitLine(tab)
+            self.updateFitLine(tab, model_key=model_key)
             self.updateSignalsFromTab(tab)
             # We have at least 1 fit page, allow fitting
             self.cmdFit.setEnabled(True)
@@ -1014,14 +1106,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Find the constrained parameter row
         constrained_row = constrained_tab.getRowFromName(constraint.param)
+        model_key = constrained_tab.getModelKeyFromName(constraint.param)
 
         # Update the tab
-        constrained_tab.addConstraintToRow(constraint, constrained_row)
+        constrained_tab.addConstraintToRow(constraint, constrained_row, model_key=model_key)
         if not self.constraint_accepted:
             return
 
         # Select this parameter for adjusting/fitting
-        constrained_tab.changeCheckboxStatus(constrained_row, True)
+        # constrained_tab.selectCheckbox(constrained_row, model=model)
 
     def showMultiConstraint(self):
         """
@@ -1141,4 +1234,5 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 # deactivate the constraint
                 tab = self.parent.getTabByName(name[:name.index(":")])
                 row = tab.getRowFromName(name[name.index(":") + 1:])
-                tab.getConstraintForRow(row).active = False
+                model_key = tab.getModelKey(constraint)
+                tab.getConstraintForRow(row, model_key=model_key).active = False

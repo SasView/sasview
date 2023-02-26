@@ -13,7 +13,7 @@ from PyQt5 import QtWidgets
 from twisted.internet import threads
 
 # SASCALC
-from sas.sascalc.dataloader.loader import Loader
+from sasdata.dataloader.loader import Loader
 
 # QTGUI
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -30,10 +30,7 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MainWindow.NameChanger import ChangeName
 
 import sas.qtgui.Perspectives as Perspectives
-
-DEFAULT_PERSPECTIVE = "Fitting"
-ANALYSIS_TYPES = ['Fitting (*.fitv)', 'Inversion (*.pr)', 'Invariant (*.inv)',
-                  'Corfunc (*.crf)', 'All Files (*.*)']
+from sas import config
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +54,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Read in default locations
         self.default_save_location = None
-        self.default_load_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.default_load_location = config.DEFAULT_OPEN_FOLDER
         self.default_project_location = None
 
         self.manager = manager if manager is not None else DataManager()
@@ -117,6 +114,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
+
+        self.cbgraph_2.editTextChanged.connect(self.enableGraphCombo)
+        self.cbgraph_2.currentIndexChanged.connect(self.enableGraphCombo)
 
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtCore.QSortFilterProxyModel(self)
@@ -183,8 +183,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Enables/disables "Assign Plot" elements
         """
-        self.cbgraph.setEnabled(len(PlotHelper.currentPlots()) > 0)
-        self.cmdAppend.setEnabled(len(PlotHelper.currentPlots()) > 0)
+        self.cbgraph.setEnabled(len(PlotHelper.currentPlotIds()) > 0)
+        self.cmdAppend.setEnabled(len(PlotHelper.currentPlotIds()) > 0)
 
     def initPerspectives(self):
         """
@@ -196,7 +196,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.cbFitting.addItems(available_perspectives)
         self.cbFitting.currentIndexChanged.connect(self.updatePerspectiveCombo)
         # Set the index so we see the default (Fitting)
-        self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(config.DEFAULT_PERSPECTIVE))
 
     def _perspective(self):
         """
@@ -290,7 +290,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Called when the "Open Analysis" menu item chosen.
         """
-        file_filter = ';;'.join(ANALYSIS_TYPES)
+        file_filter = ';;'.join(config.ANALYSIS_TYPES + ['All Files (*.*)'])
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Analysis',
@@ -506,7 +506,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     logging.error("Project load failed with " + str(ex))
                     return
         cs_keys = []
-        visible_perspective = DEFAULT_PERSPECTIVE
+        visible_perspective = config.DEFAULT_PERSPECTIVE
         for key, value in all_data.items():
             if key == 'is_batch':
                 self.chkBatch.setChecked(value == 'True')
@@ -527,7 +527,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.updatePerspectiveWithProperties(key, value)
         # Set to fitting perspective and load in Batch and C&S Pages
         self.cbFitting.setCurrentIndex(
-            self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+            self.cbFitting.findText(config.DEFAULT_PERSPECTIVE))
         # See if there are any batch pages defined and create them, if so
         self.updateWithBatchPages(all_data)
         # Get the constraint dict and apply it
@@ -581,7 +581,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             items = self.updateModelFromData(data_dict)
 
         if 'fit_params' in value:
-            self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
+            self.cbFitting.setCurrentIndex(self.cbFitting.findText(config.DEFAULT_PERSPECTIVE))
             params = value['fit_params']
             # Make the perspective read the rest of the read data
             if not isinstance(params, list):
@@ -633,8 +633,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # add the main index
             if not value: continue
             new_data = value[0]
-            from sas.sascalc.dataloader.data_info import Data1D as old_data1d
-            from sas.sascalc.dataloader.data_info import Data2D as old_data2d
+            from sasdata.dataloader.data_info import Data1D as old_data1d
+            from sasdata.dataloader.data_info import Data2D as old_data2d
             if isinstance(new_data, (old_data1d, old_data2d)):
                 new_data = self.manager.create_gui_data(value[0], new_data.name)
             if hasattr(value[0], 'id'):
@@ -669,7 +669,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete selected rows from the model
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will delete the checked data sets and all the dependents." +\
+        delete_msg = "This operation will remove the checked data from the data explorer." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
@@ -696,6 +696,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 # Delete corresponding open plots
                 self.closePlotsForItem(item)
+                # Close result panel if results represent the deleted data item
+                # Results panel only stores Data1D/Data2D object
+                #   => QStandardItems must still exist for direct comparison
+                self.closeResultPanelOnDelete(GuiUtils.dataFromItem(item))
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -712,7 +716,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete selected rows from the theory model
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will delete the checked data sets and all the dependents." +\
+        delete_msg = "This operation remove the checked data sets and their dependents from the data explorer." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
@@ -785,7 +789,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
-            logging.error(msg)
+            logging.error(ex, exc_info=True)
             msg = str(ex)
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
@@ -940,9 +944,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Modify the name of the current plot
         """
         old_name, current_name = name_tuple
-        ind = self.cbgraph.findText(old_name)
-        self.cbgraph.setCurrentIndex(ind)
-        self.cbgraph.setItemText(ind, current_name)
+        graph = self.cbgraph
+        if self.current_view == self.freezeView:
+            graph = self.cbgraph_2
+        ind = graph.findText(old_name)
+        graph.setCurrentIndex(ind)
+        graph.setItemText(ind, current_name)
 
     def add_data(self, data_list):
         """
@@ -956,7 +963,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         deleted graphs
         """
         graph2, delete = graphs
-        graph_list = PlotHelper.currentPlots()
+        graph_list = PlotHelper.currentPlotIds()
         self.updateGraphCombo(graph_list)
 
         if not self.active_plots:
@@ -972,22 +979,35 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Modify Graph combo box on graph add/delete
         """
-        orig_text = self.cbgraph.currentText()
-        self.cbgraph.clear()
-        self.cbgraph.insertItems(0, graph_list)
-        ind = self.cbgraph.findText(orig_text)
+        graph = self.cbgraph
+        if self.current_view == self.freezeView:
+            graph = self.cbgraph_2
+        orig_text = graph.currentText()
+        graph.clear()
+        graph.insertItems(0, graph_list)
+        ind = graph.findText(orig_text)
         if ind > 0:
-            self.cbgraph.setCurrentIndex(ind)
+            graph.setCurrentIndex(ind)
 
     def updatePerspectiveCombo(self, index):
         """
         Notify the gui manager about the new perspective chosen.
         """
+
+        # Notify via communicator
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
-        self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
-        # Deactivate and uncheck the swap data option if the current perspective does not allow it
-        self.chkSwap.setEnabled(self.parent.perspective().allowSwap())
-        if not self.parent.perspective().allowSwap():
+
+        # Set checkboxes
+        current_perspective = self.parent.perspective()
+
+        allow_batch = False if current_perspective is None else current_perspective.allowBatch()
+        allow_swap = False if current_perspective is None else current_perspective.allowSwap()
+
+        self.chkBatch.setEnabled(allow_batch)
+        self.chkSwap.setEnabled(allow_swap)
+
+        # Using this conditional prevents the checkbox for going into the "neither checked nor unchecked" state
+        if not allow_swap:
             self.chkSwap.setCheckState(False)
 
     def itemFromDisplayName(self, name):
@@ -1207,13 +1227,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # new plot data; check which tab is currently active
         if self.current_view == self.treeView:
             new_plots = GuiUtils.plotsFromCheckedItems(self.model)
+            graph = self.cbgraph
         else:
             new_plots = GuiUtils.plotsFromCheckedItems(self.theory_model)
+            graph = self.cbgraph_2
 
         # old plot data
-        plot_id = str(self.cbgraph.currentText())
+        plot_id = str(graph.currentText())
         try:
-            assert plot_id in PlotHelper.currentPlots(), "No such plot: %s" % (plot_id)
+            assert plot_id in PlotHelper.currentPlotIds(), "No such plot: %s" % (plot_id)
         except:
             return
 
@@ -1300,12 +1322,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_error = False
         error_message = ""
         number_of_files = len(path)
-        self.communicator.progressBarUpdateSignal.emit(0.0)
+        self.communicator.progressBarUpdateSignal.emit(0)
 
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
-            if extension.lower() in GuiUtils.EXTENSIONS:
+            extension_list = config.PLUGIN_STATE_EXTENSIONS.copy()
+            if config.APPLICATION_STATE_EXTENSION is not None:
+                extension_list.append(config.APPLICATION_STATE_EXTENSION)
+
+            if extension.lower() in extension_list:
                 any_error = True
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)
@@ -1324,7 +1350,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 output_objects = self.loader.load(p_file)
 
                 for item in output_objects:
-                    # cast sascalc.dataloader.data_info.Data1D into
+                    # cast sasdata.dataloader.data_info.Data1D into
                     # sasgui.guiframe.dataFitting.Data1D
                     # TODO : Fix it
                     new_data = self.manager.create_gui_data(item, p_file)
@@ -1768,8 +1794,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete the current item
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will delete the selected data sets " +\
-                     "and all the dependents." +\
+        delete_msg = "This operation will remove the selected data sets " +\
+                     "and all the dependents from the data explorer." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
@@ -1828,7 +1854,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Close all currently displayed plots
         """
 
-        for plot_id in PlotHelper.currentPlots():
+        for plot_id in PlotHelper.currentPlotIds():
             try:
                 plotter = PlotHelper.plotById(plot_id)
                 plotter.close()
@@ -1841,7 +1867,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Minimize all currently displayed plots
         """
-        for plot_id in PlotHelper.currentPlots():
+        for plot_id in PlotHelper.currentPlotIds():
             plotter = PlotHelper.plotById(plot_id)
             plotter.showMinimized()
 
@@ -1853,7 +1879,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # {} -> 'Graph1' : HashableStandardItem()
         current_plot_items = {}
-        for plot_name in PlotHelper.currentPlots():
+        for plot_name in PlotHelper.currentPlotIds():
             current_plot_items[plot_name] = PlotHelper.plotById(plot_name).item
 
         # item and its hashable children
@@ -1883,15 +1909,24 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         pass  # debugger anchor
 
-    def onAnalysisUpdate(self, new_perspective=""):
+    def closeResultPanelOnDelete(self, data):
+        """
+        Given a data1d/2d object, close the fitting results panel if currently populated with the data
+        """
+        # data - Single data1d/2d object to be deleted
+        self.parent.results_panel.onDataDeleted(data)
+
+    def onAnalysisUpdate(self, new_perspective_name: str):
         """
         Update the perspective combo index based on passed string
         """
-        assert new_perspective in Perspectives.PERSPECTIVES.keys()
+        assert new_perspective_name in Perspectives.PERSPECTIVES.keys()
+
         self.cbFitting.blockSignals(True)
-        self.cbFitting.setCurrentIndex(self.cbFitting.findText(new_perspective))
+        index = self.cbFitting.findText(new_perspective_name)
+        self.cbFitting.setCurrentIndex(index)
         self.cbFitting.blockSignals(False)
-        pass
+
 
     def loadComplete(self, output):
         """

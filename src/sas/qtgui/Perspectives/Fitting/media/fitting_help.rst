@@ -833,6 +833,59 @@ Many constraints can be entered for a single fit.
 The results of the model-fitting will be returned to each of the individual
 *FitPage*'s. Also see :ref:`Assessing_Fit_Quality`.
 
+Simultaneous Fits with a Modified Weighting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When simultaneously fitting different data sets, the degree of influence that each
+of them has on the final fit is defined by their statistical weight, i.e. mainly
+the number of points and their uncertainty in each data set.
+The SasView fitting engine tries to minimize the total $\chi^2$, where the difference
+between the data and the model for each data point is added quadratically using a
+weight that by default is inversely proportional to the y axis error. As a consequence,
+datasets with more points and smaller errors will exert a greater influence on
+the fit. While the weighting scheme can be modified in the *Fit Options* tab,
+even setting the weighting to None (i.e. all data points from all data sets have
+the same weight, equal to 1) will not solve the potential issue of having disparate
+number of data points in different sets. In this case, if one data set has much
+more (less) points than the remaining data sets, it will have a much larger (smaller)
+influence in the global fit.
+
+This is especially true for data gathered using different methods with different
+associated errors. For example attempting to fit SANS and SAXS data often leads to the
+SAXS data dominating the fit. The *Modify Weighting* option provides a way of getting
+around this issue by allowing the user to multiply the individual weights by a global
+factor that can be adjusted for each data set.
+
+Checking the *Modify Weighting* box reveals a fifth column in the source choice
+dialog called Weighting. This is depicted in the screenshot below.
+
+.. image:: weighting_scheme_default.png
+
+The pre-filled option in the weighting column is 1.0, and only numerical inputs
+(integer or floating point numbers) are allowed. It is important to understand
+that when the *Modify Weighting* box is checked, **the weights of each data set
+will be modified, even when all the weights in the weighting column are equal
+to 1.** Actually, when all the user weights are equal to 1, SasView will try to
+calculate appropriate weights in order to ensure that all the data sets have
+approximately a similar influence in the total fit. This is done by estimating the
+statistical weight of each data set *j* as $W_j = \sum_i^{N_j} (1/e_i)^2$, where at present
+$e_i$ is the relative error of point *i*, i.e. $e_i = \sigma_i / |I_i|$, and then
+the weight to apply to each data set is computed as $Min(W_j)/W_j$. Thus, the weight of the
+initially "lighter" set remains equal to 1, while the remaining sets will be scaled down by
+a factor < 1. Then the user weighting factors multiply this scaling factor, giving the
+final weight for each data set that will be sent to the fitting engine. The final weights
+used in the simultaneous fit are given in the *Log Explorer* window and can provide a useful
+indication of how much each data set has been "modified" with respect to the original data.
+
+**Warning:** This option gives the user the flexibility to play with the data sets, in order
+to drive the global fit in a desired direction. It can be useful when a particular set contains
+important information to determine one or several model parameters, but it is ignored in the
+global fit because of statistical issues. However, ideally this option should never be needed,
+as difficulties when trying to fit simultaneously several sets are often an indication of
+other problems such as systematic errors, inadequate error/resolution estimation, etc.
+Therefore, users are advised to be extremely careful when using this option and to
+carefully check any result obtained using modified weights.
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. _Batch_Fit_Mode:
@@ -1110,6 +1163,9 @@ Note that SESANS data is not subject to an incoherent background signal in the
 way that normal SANS data is. For this reason the *background* parameter in
 any model being used to fit SESANS data should be fixed at zero.
 
+The procedure just described supersedes the original procedure using the
+command line interpreter, see :ref:`sesans_fitting`.
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 29Oct2021
+.. note::  This help document was last changed by Steve King, 26Oct2022

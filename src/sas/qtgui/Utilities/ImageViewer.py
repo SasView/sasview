@@ -10,12 +10,12 @@ import matplotlib.image as mpimg
 
 from PyQt5 import QtWidgets
 
-from sas.sascalc.dataloader.manipulations import reader2D_converter
+from sasdata.data_util.manipulations import reader2D_converter
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.sascalc.dataloader.data_info import Detector
+from sasdata.dataloader.data_info import Detector
 
 # Local UI
 from sas.qtgui.Utilities.UI.ImageViewerUI import Ui_ImageViewerUI

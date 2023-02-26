@@ -30,9 +30,9 @@ from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plottables import Plottable
-from sas.sascalc.dataloader.data_info import Sample, Source, Vector
-from sas.sascalc.dataloader.data_info import Detector, Process, TransmissionSpectrum
-from sas.sascalc.dataloader.data_info import Aperture, Collimation
+from sasdata.dataloader.data_info import Sample, Source, Vector
+from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
+from sasdata.dataloader.data_info import Aperture, Collimation
 from sas.qtgui.Plotting.Plottables import View
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
@@ -44,10 +44,10 @@ from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
-from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
+import sas
+from sas import config
 
-from sas.qtgui.Utilities import CustomDir
+from sasdata.dataloader.loader import Loader
 
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
         HELP_DIRECTORY_LOCATION = "doc"
@@ -66,156 +66,23 @@ theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 logger = logging.getLogger(__name__)
 
 
-def get_app_dir():
+def get_sensible_default_open_directory():
     """
-        The application directory is the one where the default custom_config.py
-        file resides.
-
-        :returns: app_path - the path to the applicatin directory
+        :returns: app_path - the path to the application directory
     """
     # First, try the directory of the executable we are running
     app_path = sys.path[0]
     if os.path.isfile(app_path):
-        app_path = os.path.dirname(app_path)
-    if os.path.isfile(os.path.join(app_path, "custom_config.py")):
-        app_path = os.path.abspath(app_path)
-        #logging.info("Using application path: %s", app_path)
-        return app_path
+        return os.path.dirname(app_path)
 
-    # Next, try the current working directory
-    if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
-        #logging.info("Using application path: %s", os.getcwd())
-        return os.path.abspath(os.getcwd())
-
-    # Finally, try the directory of the sasview module
-    # TODO: gui_manager will have to know about sasview until we
-    # clean all these module variables and put them into a config class
-    # that can be passed by sasview.py.
-    # logging.info(sys.executable)
-    # logging.info(str(sys.argv))
-    from sas import sasview as sasview
-    app_path = os.path.dirname(sasview.__file__)
-    # logging.info("Using application path: %s", app_path)
-    return app_path
-
-def get_user_directory():
-    """
-        Returns the user's home directory
-    """
-    userdir = os.path.join(os.path.expanduser("~"), ".sasview")
-    if not os.path.isdir(userdir):
-        os.makedirs(userdir)
-    return userdir
-
-def _find_local_config(confg_file, path):
-    """
-        Find configuration file for the current application
-    """
-    config_module = None
-    fObj = None
-    try:
-        fObj, path_config, descr = imp.find_module(confg_file, [path])
-        config_module = imp.load_module(confg_file, fObj, path_config, descr)
-    except ImportError:
-        pass
-    except ValueError:
-        print("Value error")
-        pass
-    finally:
-        if fObj is not None:
-            fObj.close()
-    return config_module
+    # if this fails, use try the directory of the sasview module
+    return os.path.dirname(sas.__file__)
 
 
-# Get APP folder
-PATH_APP = get_app_dir()
-DATAPATH = PATH_APP
-# Read in the local config, which can either be with the main
-# application or in the installation directory
-config = _find_local_config('local_config', PATH_APP)
+# custom open_path
+if config.DEFAULT_OPEN_FOLDER == "" or not os.path.isdir(config.DEFAULT_OPEN_FOLDER):
+    config.DEFAULT_OPEN_FOLDER = get_sensible_default_open_directory()
 
-if config is None:
-    config = _find_local_config('local_config', os.getcwd())
-else:
-    pass
-
-c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
-custom_config = _find_local_config('custom_config', c_conf_dir)
-if custom_config is None:
-    custom_config = _find_local_config('custom_config', os.getcwd())
-    if custom_config is None:
-        msgConfig = "Custom_config file was not imported"
-logging.info("Custom config path: %s", custom_config)
-
-#read some constants from config
-APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
-APPLICATION_NAME = config.__appname__
-SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
-WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
-SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
-SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
-SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-if not WELCOME_PANEL_ON:
-    WELCOME_PANEL_SHOW = False
-else:
-    WELCOME_PANEL_SHOW = True
-try:
-    DATALOADER_SHOW = custom_config.DATALOADER_SHOW
-    TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
-    FIXED_PANEL = custom_config.FIXED_PANEL
-    if WELCOME_PANEL_ON:
-        WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
-    PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = custom_config.CONTROL_WIDTH
-    CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
-    DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
-    CLEANUP_PLOT = custom_config.CLEANUP_PLOT
-    SAS_OPENCL = custom_config.SAS_OPENCL
-    # custom open_path
-    open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder is not None and os.path.isdir(open_folder):
-        DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
-    else:
-        DEFAULT_OPEN_FOLDER = PATH_APP
-except AttributeError:
-    DATALOADER_SHOW = True
-    TOOLBAR_SHOW = True
-    FIXED_PANEL = True
-    WELCOME_PANEL_SHOW = False
-    PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = -1
-    CONTROL_HEIGHT = -1
-    DEFAULT_PERSPECTIVE = None
-    CLEANUP_PLOT = False
-    DEFAULT_OPEN_FOLDER = PATH_APP
-    SAS_OPENCL = config.SAS_OPENCL
-
-#DEFAULT_STYLE = config.DEFAULT_STYLE
-
-PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
-OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
-VIEW_MENU = config.VIEW_MENU
-EDIT_MENU = config.EDIT_MENU
-extension_list = []
-if APPLICATION_STATE_EXTENSION is not None:
-    extension_list.append(APPLICATION_STATE_EXTENSION)
-EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
-try:
-    PLUGINS_WLIST = '|'.join(config.PLUGINS_WLIST)
-except AttributeError:
-    PLUGINS_WLIST = ''
-APPLICATION_WLIST = config.APPLICATION_WLIST
-IS_WIN = True
-IS_LINUX = False
-CLOSE_SHOW = True
-TIME_FACTOR = 2
-NOT_SO_GRAPH_LIST = ["BoxSum"]
 
 
 class Communicate(QtCore.QObject):
@@ -783,11 +650,11 @@ def onTXTSave(data, path):
     reader = None
     append_format = len(path.split(".")) == 1
     if isinstance(data, Data1D):
-        from sas.sascalc.dataloader.readers.ascii_reader import Reader as ASCIIReader
+        from sasdata.dataloader.readers.ascii_reader import Reader as ASCIIReader
         path += ".txt" if append_format else ""
         reader = ASCIIReader()
     elif isinstance(data, Data2D):
-        from sas.sascalc.dataloader.readers.red2d_reader import Reader as Red2DReader
+        from sasdata.dataloader.readers.red2d_reader import Reader as Red2DReader
         path += ".dat" if append_format else ""
         reader = Red2DReader()
     if reader:
@@ -947,7 +814,7 @@ def xyTransform(data, xLabel="", yLabel=""):
         xLabel = "%s^{4}(%s)" % (xname, xunits)
     if xLabel == "ln(x)":
         data.transformX(DataTransform.toLogX, DataTransform.errToLogX)
-        xLabel = "\ln{(%s)}(%s)" % (xname, xunits)
+        xLabel = r"\ln{(%s)}(%s)" % (xname, xunits)
     if xLabel == "log10(x)":
         data.transformX(DataTransform.toX_pos, DataTransform.errToX_pos)
         xscale = 'log'
@@ -961,7 +828,7 @@ def xyTransform(data, xLabel="", yLabel=""):
     # Y
     if yLabel == "ln(y)":
         data.transformY(DataTransform.toLogX, DataTransform.errToLogX)
-        yLabel = "\ln{(%s)}(%s)" % (yname, yunits)
+        yLabel = r"\ln{(%s)}(%s)" % (yname, yunits)
     if yLabel == "y":
         data.transformY(DataTransform.toX, DataTransform.errToX)
         yLabel = "%s(%s)" % (yname, yunits)
@@ -980,31 +847,31 @@ def xyTransform(data, xLabel="", yLabel=""):
     if yLabel == "y*x^(2)":
         data.transformY(DataTransform.toYX2, DataTransform.errToYX2)
         xunits = convertUnit(2, xunits)
-        yLabel = "%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "y*x^(4)":
         data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
         xunits = convertUnit(4, xunits)
-        yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "1/sqrt(y)":
         data.transformY(DataTransform.toOneOverSqrtX, DataTransform.errOneOverSqrtX)
         yunits = convertUnit(-0.5, yunits)
-        yLabel = "1/\sqrt{%s}(%s)" % (yname, yunits)
+        yLabel = r"1/\sqrt{%s}(%s)" % (yname, yunits)
     if yLabel == "ln(y*x)":
         data.transformY(DataTransform.toLogXY, DataTransform.errToLogXY)
-        yLabel = "\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "ln(y*x^(2))":
         data.transformY(DataTransform.toLogYX2, DataTransform.errToLogYX2)
         xunits = convertUnit(2, xunits)
-        yLabel = "\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "ln(y*x^(4))":
         data.transformY(DataTransform.toLogYX4, DataTransform.errToLogYX4)
         xunits = convertUnit(4, xunits)
-        yLabel = "\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "log10(y*x^(4))":
         data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
         xunits = convertUnit(4, xunits)
         yscale = 'log'
-        yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
 
     # Perform the transformation of data in data1d->View
     data.transformView()
@@ -1052,33 +919,45 @@ def formatValue(value):
             value = str(formatNumber(value, True))
         return value
 
+# TODO: This is currently case sensitive
 def replaceHTMLwithUTF8(html):
     """
     Replace some important HTML-encoded characters
     with their UTF-8 equivalents
     """
     # Angstrom
-    html_out = html.replace("&#x212B;", "Å")
+    html = html.replace("&#x212B;", "Å")  # Hex
+    html = html.replace("&#8491;", "Å")   # Dec
+
     # infinity
-    html_out = html_out.replace("&#x221e;", "∞")
+    html = html.replace("&#x221e;", "∞") # Hex
+    html = html.replace("&#8734;", "∞")  # Dec
+
     # +/-
-    html_out = html_out.replace("&#177;", "±")
+    html = html.replace("&#b1;", "±")   # Hex
+    html = html.replace("&#177;", "±")   # Dec
 
-    return html_out
+    return html
 
+# TODO: This is currently case sensitive
 def replaceHTMLwithASCII(html):
     """
     Replace some important HTML-encoded characters
     with their ASCII equivalents
     """
-    # Angstrom
-    html_out = html.replace("&#x212B;", "Ang")
-    # infinity
-    html_out = html_out.replace("&#x221e;", "inf")
-    # +/-
-    html_out = html_out.replace("&#177;", "+/-")
 
-    return html_out
+    html = html.replace("&#x212B;", "Ang")  # Hex
+    html = html.replace("&#8491;", "Ang")  # Dec
+
+    # infinity
+    html = html.replace("&#x221e;", "inf")  # Hex
+    html = html.replace("&#8734;", "inf")  # Dec
+
+    # +/-
+    html = html.replace("&#xb1;", "+/-")  # Hex
+    html = html.replace("&#177;", "+/-")  # Dec
+
+    return html
 
 def convertUnitToUTF8(unit):
     """
@@ -1430,7 +1309,7 @@ def readProjectFromSVS(filepath):
     """
     Read old SVS file and convert to the project dictionary
     """
-    from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+    from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
     from sas.sascalc.fit.pagestate import Reader
 
     loader = Loader()
