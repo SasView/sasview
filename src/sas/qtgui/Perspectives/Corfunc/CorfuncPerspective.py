@@ -274,14 +274,21 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         extrap = self.extrap
         background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
+        q_range = self.data.x[0], self.data.x[-1]
 
         def updatefn(msg):
             """Report progress of transformation."""
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-        def completefn(transformed_data: Tuple[Data1D, Data1D, Data1D]):
+        def completefn(transform_result: Tuple[Data1D, Data1D, Data1D]):
             """Extract the values from the transforms and plot"""
-            self.trigger.emit(TransformedData(*transformed_data)) # TODO: Make this return more structured data earlier
+            td = TransformedData(
+                gamma_1=transform_result[0],
+                gamma_3=transform_result[1],
+                idf=transform_result[2],
+                q_range=q_range)
+
+            self.trigger.emit(td) # TODO: Make this return more structured data earlier
 
         self._update_calculator()
         self._calculator.compute_transform(extrap, method, background,
@@ -310,9 +317,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if self.transformed_data is None:
             return
 
-        params = self._calculator.extract_parameters(self.transformed_data[0])
+        extracted = self._calculator.extract_parameters(self.transformed_data)
 
-        if params is not None:
+        if extracted is not None:
+
+            params, supp = extracted
+
+            self._real_space_plot.supplementary = supp
 
             self.model.itemChanged.disconnect(self.model_changed)
 

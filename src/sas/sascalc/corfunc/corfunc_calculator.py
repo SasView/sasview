@@ -7,6 +7,7 @@ from scipy.interpolate import interp1d
 from scipy.signal import argrelextrema
 from numpy.linalg import lstsq
 
+from sas.qtgui.Perspectives.Corfunc.util import TransformedData
 from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters
 
 from sasdata.dataloader.data_info import Data1D
@@ -16,6 +17,16 @@ from sas.sascalc.corfunc.smoothing import SmoothJoin
 
 from dataclasses import dataclass
 from typing import Optional, Tuple
+
+@dataclass
+class SupplementaryParameters:
+    tangent_point_x: float
+    tangent_point_y: float
+    tangent_gradient: float
+    first_minimum_x: float
+    first_minimum_y: float
+    x_range: Tuple[float, float]
+    y_range: Tuple[float, float]
 
 @dataclass
 class ExtractedParameters:
@@ -168,15 +179,18 @@ class CorfuncCalculator:
         if self._transform_thread.isrunning():
             self._transform_thread.stop()
 
-    def extract_parameters(self, transformed_data) -> Optional[ExtractedParameters]:
+    def extract_parameters(self, transformed_data: TransformedData) -> Optional[Tuple[ExtractedParameters, SupplementaryParameters]]:
         """
         Extract the interesting measurements from a correlation function
 
-        :param transformed_data: Fourier transformation of the extrapolated data
+        :param transformed_data: TransformedData object
         """
+
+        gamma_1 = transformed_data.gamma_1  # 1D transform
+
         # Calculate indexes of maxima and minima
-        x = transformed_data.x
-        y = transformed_data.y
+        x = gamma_1.x
+        y = gamma_1.y
         maxs = argrelextrema(y, np.greater)[0]
         mins = argrelextrema(y, np.less)[0]
 
@@ -188,34 +202,37 @@ class CorfuncCalculator:
 
         ddy = (y[:-2]+y[2:]-2*y[1:-1])/(x[2:]-x[:-2])**2  # 2nd derivative of y
         dy = (y[2:]-y[:-2])/(x[2:]-x[:-2])  # 1st derivative of y
+
         # Find where the second derivative goes to zero
-        zeros = argrelextrema(np.abs(ddy), np.less)[0]
-        # locate the first inflection point
-        linear_point = zeros[0]
+        inflection_points = argrelextrema(np.abs(ddy), np.less)[0]
+
+        inflection_point_index = inflection_points[0]
 
         # Try to calculate slope around linear_point using 80 data points
-        lower = linear_point - 40
-        upper = linear_point + 40
+        inflection_region_lower = inflection_point_index - 40
+        inflection_region_upper = inflection_point_index + 40
 
         # If too few data points to the left, use linear_point*2 data points
-        if lower < 0:
-            lower = 0
-            upper = linear_point * 2
-        # If too few to right, use 2*(dy.size - linear_point) data points
-        elif upper > len(dy):
-            upper = len(dy)
-            width = len(dy) - linear_point
-            lower = 2*linear_point - dy.size
+        if inflection_region_lower < 0:
+            inflection_region_lower = 0
+            inflection_region_upper = inflection_point_index * 2
 
-        m = np.mean(dy[lower:upper])  # Linear slope
-        b = y[1:-1][linear_point]-m*x[1:-1][linear_point]  # Linear intercept
+        # If too few to right, use 2*(dy.size - linear_point) data points
+        elif inflection_region_upper > len(dy):
+            inflection_region_upper = len(dy)
+            width = len(dy) - inflection_point_index
+            inflection_region_lower = 2*inflection_point_index - dy.size
+
+        # Slope at inflection point calculated by mean over inflection region
+        inflection_point_tangent_slope = np.mean(dy[inflection_region_lower:inflection_region_upper])  # Linear slope
+        inflection_point_tangent_intercept = y[1:-1][inflection_point_index]-inflection_point_tangent_slope*x[1:-1][inflection_point_index]  # Linear intercept
 
         long_period = x[maxs[0]]
-        hard_block_thickness = (gamma_min - b) / m  # Hard block thickness
+        hard_block_thickness = (gamma_min - inflection_point_tangent_intercept) / inflection_point_tangent_slope  # Hard block thickness
         soft_block_thickness = long_period - hard_block_thickness
 
         # Find the data points where the graph is linear to within 1%
-        mask = np.where(np.abs((y-(m*x+b))/y) < 0.01)[0]
+        mask = np.where(np.abs((y-(inflection_point_tangent_slope*x+inflection_point_tangent_intercept))/y) < 0.01)[0]
         if len(mask) == 0:  # Return garbage for bad fits
             return None
 
@@ -229,7 +246,18 @@ class CorfuncCalculator:
         polydispersity_ryan = np.abs(gamma_min / gamma_max)  # Normalized depth of minimum
         polydispersity_stribeck = np.abs(local_crystallinity / ((local_crystallinity - 1) * gamma_max))  # Normalized depth of minimum
 
-        return ExtractedParameters(
+
+        supplementary_parameters = SupplementaryParameters(
+            tangent_point_x=x[inflection_point_index],
+            tangent_point_y=y[inflection_point_index],
+            tangent_gradient=float(inflection_point_tangent_slope),
+            first_minimum_x=0.0,
+            first_minimum_y=0.0,
+            x_range=(1/transformed_data.q_range[1], 1/transformed_data.q_range[0]),
+            y_range=(np.min(y), np.max(y))
+        )
+
+        extracted_parameters = ExtractedParameters(
                     long_period,
                     interface_thickness,
                     hard_block_thickness,
@@ -238,6 +266,8 @@ class CorfuncCalculator:
                     polydispersity_ryan,
                     polydispersity_stribeck,
                     local_crystallinity)
+
+        return extracted_parameters, supplementary_parameters
 
 
     def _porod(self, q, K, sigma, bg):
