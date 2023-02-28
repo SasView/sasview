@@ -45,41 +45,14 @@ class RealSpaceCanvas(CorfuncCanvas):
             print("Drawing tangent line")
             print(self.supplementary)
 
-            #
-            # Draw tangent line
-            #
-            if self.supplementary.tangent_gradient > 0:
-                x_low = max([
-                    self.supplementary.x_range[0],
-                    self.supplementary.y_range[0]/self.supplementary.tangent_gradient])
-
-                x_high = min([
-                    self.supplementary.x_range[1],
-                    self.supplementary.y_range[1]/self.supplementary.tangent_gradient])
-
-            elif self.supplementary.tangent_gradient < 0:
-                x_low = max([
-                    self.supplementary.x_range[0],
-                    self.supplementary.y_range[1] / self.supplementary.tangent_gradient])
-
-                x_high = min([
-                    self.supplementary.x_range[1],
-                    self.supplementary.y_range[0] / self.supplementary.tangent_gradient])
-            else:
-                x_low = self.supplementary.x_range[0]
-                x_high = self.supplementary.x_range[1]
-
-            line = LineThroughPoints(
-                [ self.supplementary.tangent_point_x,
-                  self.supplementary.tangent_point_y],
-                [ self.supplementary.tangent_point_x + 1,
-                  self.supplementary.tangent_point_y + self.supplementary.tangent_gradient])
-
-            y_start = line(x_low)
-            y_end = line(x_high)
-
-            print([x_low, x_high], [y_start, y_end])
-            self.axes.plot([x_low, x_high], [y_start, y_end])
+            self.axes.axline(
+                (self.supplementary.tangent_point_x,
+                 self.supplementary.tangent_point_y),
+                slope=self.supplementary.tangent_gradient,
+                color='k',
+                linestyle='--',
+                # transform=self.axes.transAxes,
+            )
 
             self.axes.scatter(
                 [self.supplementary.tangent_point_x],

@@ -216,7 +216,9 @@ class CorfuncCalculator:
             np.argwhere(
                 np.logical_xor(
                     above_zero[1:],
-                    above_zero[:-1]))
+                    above_zero[:-1]))[:, 0]
+
+        print(zero_crossings)
 
         inflection_point_index = zero_crossings[0] + 1 # +1 for ignoring DC, left side of crossing, not right
 
@@ -234,6 +236,9 @@ class CorfuncCalculator:
             inflection_region_upper = len(dy)
             width = len(dy) - inflection_point_index
             inflection_region_lower = 2*inflection_point_index - dy.size
+
+        print(inflection_region_lower, inflection_region_upper)
+        print(type(inflection_region_lower), type(inflection_region_upper))
 
         # Slope at inflection point calculated by mean over inflection region
         inflection_point_tangent_slope = np.mean(dy[inflection_region_lower:inflection_region_upper])  # Linear slope
