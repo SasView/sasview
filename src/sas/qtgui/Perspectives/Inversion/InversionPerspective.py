@@ -654,7 +654,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                                            pr.get_pos_err(out, cov))))
         if self.prPlot is not None:
             title = self.prPlot.name
-            self.prPlot.plot_role = DataRole.ROLE_RESIDUAL
+            self.prPlot.plot_role = DataRole.ROLE_STAND_ALONE_LINEAR
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
             self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
         if self.dataPlot is not None:
