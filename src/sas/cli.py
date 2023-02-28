@@ -102,8 +102,14 @@ def main(logging="production"):
     from sas.system import lib
     from sas.system import console
 
-    ## I/O redirection for the windows console. Need to do this early.
-    #console.setup_console()
+    # I/O redirection for the windows console. Need to do this early so that
+    # output will be displayed on the console. Presently not working for
+    # for production (it always opens the console even if it is not needed)
+    # so require "sasview con ..." to open the console. Not an infamous
+    # "temporary fix" I hope...
+    if len(sys.argv) > 1 and sys.argv[1] == "con":
+        console.setup_console()
+        sys.argv = [sys.argv[0], *sys.argv[1:]]
 
     # Eventually argument processing might affect logger or config, so do it first
     cli = parse_cli(sys.argv)
