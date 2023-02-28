@@ -81,6 +81,10 @@ class RealSpaceCanvas(CorfuncCanvas):
             print([x_low, x_high], [y_start, y_end])
             self.axes.plot([x_low, x_high], [y_start, y_end])
 
+            self.axes.scatter(
+                [self.supplementary.tangent_point_x],
+                [self.supplementary.tangent_point_y])
+
         if self.data is not None and len(self.data) == 2:
             data1, data3 = self.data[0], self.data[1]
             self.axes.plot(data1.x, data1.y, label="1D Correlation")

@@ -187,6 +187,7 @@ class CorfuncCalculator:
         """
 
         gamma_1 = transformed_data.gamma_1  # 1D transform
+        idf = transformed_data.idf
 
         # Calculate indexes of maxima and minima
         x = gamma_1.x
@@ -200,13 +201,24 @@ class CorfuncCalculator:
 
         gamma_min = y[mins[0]]  # The value at the first minimum
 
-        ddy = (y[:-2]+y[2:]-2*y[1:-1])/(x[2:]-x[:-2])**2  # 2nd derivative of y
+
+
         dy = (y[2:]-y[:-2])/(x[2:]-x[:-2])  # 1st derivative of y
 
-        # Find where the second derivative goes to zero
-        inflection_points = argrelextrema(np.abs(ddy), np.less)[0]
 
-        inflection_point_index = inflection_points[0]
+        # Find where the second derivative goes to zero
+        #  * the IDF is the second derivative of gamma_1
+        #  * ... but has a large DC component that needs to be ignored
+
+        above_zero = idf.y[1:] > 0
+
+        zero_crossings = \
+            np.argwhere(
+                np.logical_xor(
+                    above_zero[1:],
+                    above_zero[:-1]))
+
+        inflection_point_index = zero_crossings[0] + 1 # +1 for ignoring DC, left side of crossing, not right
 
         # Try to calculate slope around linear_point using 80 data points
         inflection_region_lower = inflection_point_index - 40
