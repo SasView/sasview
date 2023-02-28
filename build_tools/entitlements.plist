@@ -8,5 +8,8 @@
 		<!-- Disable Library Validation Entitlement -->
 		<key>com.apple.security.cs.disable-library-validation</key>
 		<true/>
+		<!-- Read-write access to files the user has selected using an Open or Save dialog -->
+		<key>com.apple.security.files.user-selected.read-write</key>
+		<true/>
 	</dict>
 </plist>
