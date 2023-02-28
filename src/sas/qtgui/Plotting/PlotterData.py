@@ -4,6 +4,8 @@ Adapters for fitting module
 import copy
 import numpy
 import math
+from enum import Enum
+
 from sasdata.data_util.uncertainty import Uncertainty
 
 from sas.qtgui.Plotting.Plottables import PlottableData1D
@@ -13,13 +15,23 @@ from sasdata.dataloader.data_info import Data1D as LoadData1D
 from sasdata.dataloader.data_info import Data2D as LoadData2D
 
 
+class DataRole(Enum):
+    """Labels to apply to different plot types."""
+    # Data is for imported data
+    ROLE_DATA = 0
+    # Default is for fits of the imported data
+    ROLE_DEFAULT = 1
+    # Deletable is for orphaned plots
+    ROLE_DELETABLE = 2
+    # Residual is for stand-alone residual plots
+    ROLE_RESIDUAL = 3
+    # Stand alone is for plots that should be plotted alone, but wth no specific application
+    ROLE_STAND_ALONE = 4
+
+
 class Data1D(PlottableData1D, LoadData1D):
     """
     """
-    ROLE_DATA=0
-    ROLE_DEFAULT=1
-    ROLE_DELETABLE=2
-    ROLE_RESIDUAL=3
     def __init__(self, x=None, y=None, dx=None, dy=None):
         """
         """
