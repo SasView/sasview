@@ -1132,7 +1132,6 @@ class DataExplorerTest:
         assert len(PlotHelper.currentPlotIds()) == 0
         assert len(form.plot_widgets) == 0
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testPlotsFromMultipleData1D(self, form):
         """
         Tests interplay between plotting 1D datasets and plotting
@@ -1165,7 +1164,7 @@ class DataExplorerTest:
 
         # redoing plots from the same tab
         # data -> must be shown
-        assert not form.isPlotShown(data1)
+        assert form.isPlotShown(data1)
 
         # model and residuals are already shown
         assert form.isPlotShown(data2)
