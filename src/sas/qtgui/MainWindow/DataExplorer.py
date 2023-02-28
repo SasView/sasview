@@ -21,6 +21,7 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterData import DataRole
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
@@ -1043,7 +1044,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     or name in plot.name
                     or name == plot.filename):
                 # Residuals get their own plot
-                if plot.plot_role == Data1D.ROLE_RESIDUAL:
+                if plot.plot_role == DataRole.ROLE_RESIDUAL:
                     plot.yscale = 'linear'
                     self.plotData([(item, plot)])
                 else:
@@ -1091,10 +1092,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
 
-            if (role == Data1D.ROLE_RESIDUAL and shown) or role == Data1D.ROLE_DELETABLE:
+            if (role == DataRole.ROLE_RESIDUAL and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if separate plot already shown or to be deleted
                 continue
-            elif role == Data1D.ROLE_RESIDUAL:
+            elif role == DataRole.ROLE_RESIDUAL:
                 # Residual plots should always be separate
                 plot_to_show.yscale='linear'
                 self.plotData([(plot_item, plot_to_show)])
@@ -1128,7 +1129,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if not hasattr(plot, 'name'):
             return False
         ids_vals = [val.data[0].name for val in self.active_plots.values()]
-                    #if val.data[0].plot_role != Data1D.ROLE_DATA]
+                    #if val.data[0].plot_role != DataRole.ROLE_DATA]
 
         return plot.name in ids_vals
 
@@ -1271,13 +1272,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_id = data.name
         if data_id in ids_keys:
             # We have data, let's replace data that needs replacing
-            if data.plot_role != Data1D.ROLE_DATA:
+            if data.plot_role != DataRole.ROLE_DATA:
                 self.active_plots[data_id].replacePlot(data_id, data)
                 # restore minimized window, if applicable
                 self.active_plots[data_id].showNormal()
             return True
         #elif data_id in ids_vals:
-        #    if data.plot_role != Data1D.ROLE_DATA:
+        #    if data.plot_role != DataRole.ROLE_DATA:
         #        list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
         #        self.active_plots[data_id].showNormal()
         #    return True
