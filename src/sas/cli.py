@@ -62,6 +62,8 @@ def parse_cli(argv):
         help="Execute command")
     parser.add_argument("-i", "--interactive", action='store_true',
         help="Start interactive interpreter after running command")
+    parser.add_argument("-o", "--console", action='store_true',
+        help="Open console to display output (windows only)")
     parser.add_argument("-q", "--quiet", action='store_true',
         help="Don't print banner when entering interactive mode")
     parser.add_argument("args", nargs="*",
@@ -107,9 +109,8 @@ def main(logging="production"):
     # for production (it always opens the console even if it is not needed)
     # so require "sasview con ..." to open the console. Not an infamous
     # "temporary fix" I hope...
-    if len(sys.argv) > 1 and sys.argv[1] == "con":
+    if "-i" in sys.argv[1:] or "-o" in sys.argv[1:]:
         console.setup_console()
-        sys.argv = [sys.argv[0], *sys.argv[1:]]
 
     # Eventually argument processing might affect logger or config, so do it first
     cli = parse_cli(sys.argv)
