@@ -42,9 +42,6 @@ class RealSpaceCanvas(CorfuncCanvas):
 
         if self.supplementary is not None:
 
-            print("Drawing tangent line")
-            print(self.supplementary)
-
             self.axes.axline(
                 (self.supplementary.tangent_point_x,
                  self.supplementary.tangent_point_y),
