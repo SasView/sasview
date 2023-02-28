@@ -1044,8 +1044,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     or name in plot.name
                     or name == plot.filename):
                 # Residuals get their own plot
-                if plot.plot_role == DataRole.ROLE_RESIDUAL:
+                if plot.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE_LINEAR]:
                     plot.yscale = 'linear'
+                    self.plotData([(item, plot)])
+                elif plot.plot_role in [DataRole.ROLE_STAND_ALONE_LOG]:
+                    plot.yscale = 'log'
                     self.plotData([(item, plot)])
                 else:
                     new_plots.append((item, plot))
@@ -1091,13 +1094,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE_LINEAR, DataRole.ROLE_STAND_ALONE_LOG]
+            stand_alone_linear_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE_LINEAR]
+            stand_alone_log_types = [DataRole.ROLE_STAND_ALONE_LOG]
 
-            if (role == DataRole.ROLE_RESIDUAL and shown) or role == DataRole.ROLE_DELETABLE:
+            if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if separate plot already shown or to be deleted
                 continue
-            elif role == DataRole.ROLE_RESIDUAL:
-                # Residual plots should always be separate
-                plot_to_show.yscale='linear'
+            elif role in stand_alone_linear_types:
+                # Stand-alone linear and residual plots should always be separate
+                plot_to_show.yscale = 'linear'
+                self.plotData([(plot_item, plot_to_show)])
+            elif role in stand_alone_log_types:
+                # Stand-alone log plots should always be separate
+                plot_to_show.yscale = 'log'
                 self.plotData([(plot_item, plot_to_show)])
             elif append:
                 # Assume all other plots sent together should be on the same chart if a previous plot exists
