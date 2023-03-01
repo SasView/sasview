@@ -25,10 +25,8 @@ class DataRole(Enum):
     ROLE_DELETABLE = 2
     # Residual is for stand-alone residual plots
     ROLE_RESIDUAL = 3
-    # Stand alone linear is for plots that should be plotted separately on a linear scale
-    ROLE_STAND_ALONE_LINEAR = 4
-    # Stand alone log is for plots that should be plotted separately on a logarithmic scale
-    ROLE_STAND_ALONE_LOG = 5
+    # Stand alone is for plots that should be plotted separately
+    ROLE_STAND_ALONE = 4
 
 
 class Data1D(PlottableData1D, LoadData1D):
