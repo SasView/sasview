@@ -316,7 +316,7 @@ class CorfuncCalculator:
         # better fitting curve
         data = interp1d(q, iq)
         s1 = SmoothJoin(data,
-                        lambda x: self._porod(x, k, sigma, bg), self.upperq[0], q[-1])
+                        lambda x: self._porod(x, k, sigma, bg), self.upperq[0], self.upperq[1])
 
         mask = np.logical_and(q < self.lowerq, 0 < q)
 
