@@ -1094,11 +1094,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
-                # Nothing to do if separate plot already shown or to be deleted
+                # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
             elif role in stand_alone_types:
-                # Stand-alone linear and residual plots should always be separate
-                plot_to_show.yscale = 'linear'
+                # Stand-alone plots should always be separate
                 self.plotData([(plot_item, plot_to_show)])
             elif append:
                 # Assume all other plots sent together should be on the same chart if a previous plot exists
