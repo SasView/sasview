@@ -2,7 +2,6 @@ from typing import Optional
 from sas.sascalc.corfunc.corfunc_calculator import SupplementaryParameters
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
-from sas.qtgui.Perspectives.Corfunc.util import LineThroughPoints
 
 
 class RealSpaceCanvas(CorfuncCanvas):
