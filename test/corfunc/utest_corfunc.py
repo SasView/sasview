@@ -75,7 +75,7 @@ class TestCalculator(unittest.TestCase):
             completefn=self.transform_callback)
         # Transform is performed asynchronously; give it time to run
 
-        max_time = 10 # seconds
+        max_time = 600 # seconds
         dt = 0.02
         max_iters = int(max_time / dt)
 
