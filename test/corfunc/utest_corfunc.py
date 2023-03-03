@@ -1,7 +1,6 @@
 """
 Unit Tests for CorfuncCalculator class
 """
-from __future__ import division, print_function
 
 import os.path
 import unittest
