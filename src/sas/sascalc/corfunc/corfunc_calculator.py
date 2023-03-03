@@ -1,6 +1,12 @@
 """
 This module implements corfunc
 """
+
+
+from typing import Optional, Tuple
+from dataclasses import dataclass
+from enum import Enum
+
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.interpolate import interp1d
@@ -15,18 +21,23 @@ from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
-from dataclasses import dataclass
-from typing import Optional, Tuple
+
 
 @dataclass
 class SupplementaryParameters:
-    tangent_point_x: float
-    tangent_point_y: float
+    tangent_point_z: float
+    tangent_point_gamma: float
     tangent_gradient: float
-    first_minimum_x: float
-    first_minimum_y: float
-    x_range: Tuple[float, float]
-    y_range: Tuple[float, float]
+    first_minimum_z: float
+    first_minimum_gamma: float
+    first_maximum_z: float
+    first_maximum_gamma: float
+    hard_block_z: float
+    hard_block_gamma: float
+    interface_z: float
+    core_z: float
+    z_range: Tuple[float, float]
+    gamma_range: Tuple[float, float]
 
 @dataclass
 class ExtractedParameters:
@@ -40,6 +51,19 @@ class ExtractedParameters:
     local_crystallinity: float
 
 
+class EntryListEnum(Enum):
+
+    @classmethod
+    def options(cls) -> str:
+        return ", ".join([c.value for c in cls])
+
+class TangentMethod(EntryListEnum):
+    INFLECTION = 'inflection'
+    HALF_MIN = 'half-min'
+
+class LongPeriodMethod(EntryListEnum):
+    MAX = 'max'
+    DOUBLE_MIN = 'double-min'
 
 class CorfuncCalculator:
 
@@ -179,31 +203,45 @@ class CorfuncCalculator:
         if self._transform_thread.isrunning():
             self._transform_thread.stop()
 
-    def extract_parameters(self, transformed_data: TransformedData) -> Optional[Tuple[ExtractedParameters, SupplementaryParameters]]:
+    def extract_parameters(self,
+                           transformed_data: TransformedData,
+                           tangent_method: Optional[TangentMethod]=None,
+                           long_period_method: Optional[LongPeriodMethod]=None
+                           ) -> Optional[Tuple[ExtractedParameters, SupplementaryParameters]]:
         """
         Extract the interesting measurements from a correlation function
 
         :param transformed_data: TransformedData object
+        :param tangent_method: Optional string that selects the method used to calculate the point where the
+                               tangent is measured, either 'inflection' to use the first inflection point,
+                               or 'half-min' to use the point half way between zero and minimum.
+                               Default of None will automatically select based on the existence of an inflection
+                               point before the first minimum.
+        :param long_period_method: Optional string that selects the method used for determining the long period,
+                                 either 'max' to use the maximum, or 'double-min' to use 2x the minimum,
+                                 Default of None will do it automatically based on the existence of a maximum.
+
         """
 
         gamma_1 = transformed_data.gamma_1  # 1D transform
         idf = transformed_data.idf
 
         # Calculate indexes of maxima and minima
-        x = gamma_1.x
-        y = gamma_1.y
-        maxs = argrelextrema(y, np.greater)[0]
-        mins = argrelextrema(y, np.less)[0]
+        z = gamma_1.x
+        gamma = gamma_1.y
+        gamma_fun = interp1d(z, gamma)
+
+        maxs = argrelextrema(gamma, np.greater)[0]
+        mins = argrelextrema(gamma, np.less)[0]
 
         # If there are no maxima, return None
         if len(maxs) == 0:
             return None
 
-        gamma_min = y[mins[0]]  # The value at the first minimum
+        gamma_min = gamma[mins[0]]  # The value at the first minimum
+        z_at_min = z[mins[0]]
 
-
-
-        dy = (y[2:]-y[:-2])/(x[2:]-x[:-2])  # 1st derivative of y
+        dgamma_dz = (gamma[2:]-gamma[:-2])/(z[2:]-z[:-2])  # 1st derivative of y
 
 
         # Find where the second derivative goes to zero
@@ -220,53 +258,92 @@ class CorfuncCalculator:
 
         inflection_point_index = zero_crossings[0] + 1 # +1 for ignoring DC, left side of crossing, not right
 
+        #
+        # Work out the tangent index based on the method specified
+        #
+
+        if tangent_method is None:
+            if inflection_point_index < mins[0]:
+                tangent_method = TangentMethod.INFLECTION
+            else:
+                tangent_method = TangentMethod.HALF_MIN
+
+        if tangent_method == TangentMethod.INFLECTION:
+            tangent_index = inflection_point_index
+        elif tangent_method == TangentMethod.HALF_MIN:
+            tangent_index = mins[0] // 2
+        else:
+            raise ValueError(f"Unknown tangent calculation method: '{tangent_method}', options are {TangentMethod.options}")
+
+        #
+        # Work out the long period index based on the method specified
+        #
+
+        if long_period_method is None:
+            if len(maxs) > 0:
+                long_period_method = LongPeriodMethod.MAX
+            else:
+                long_period_method = LongPeriodMethod.DOUBLE_MIN
+
+        if long_period_method == LongPeriodMethod.MAX:
+            long_period = z[maxs[0]]
+        elif long_period_method == LongPeriodMethod.DOUBLE_MIN:
+            long_period = z_at_min * 2
+        else:
+            raise ValueError(f"Unknown long period calculation method: '{long_period_method}', options are {LongPeriodMethod.options}")
+
         # Try to calculate slope around linear_point using 80 data points
-        inflection_region_lower = inflection_point_index - 40
-        inflection_region_upper = inflection_point_index + 40
+        tangent_region_lower = tangent_index - 40
+        tangent_region_upper = tangent_index + 40
 
         # If too few data points to the left, use linear_point*2 data points
-        if inflection_region_lower < 0:
-            inflection_region_lower = 0
-            inflection_region_upper = inflection_point_index * 2
+        if tangent_region_lower < 0:
+            tangent_region_lower = 0
+            tangent_region_upper = inflection_point_index * 2
 
         # If too few to right, use 2*(dy.size - linear_point) data points
-        elif inflection_region_upper > len(dy):
-            inflection_region_upper = len(dy)
-            width = len(dy) - inflection_point_index
-            inflection_region_lower = 2*inflection_point_index - dy.size
+        elif tangent_region_upper > len(dgamma_dz):
+            tangent_region_upper = len(dgamma_dz)
+            tangent_region_lower = 2*inflection_point_index - dgamma_dz.size
 
         # Slope at inflection point calculated by mean over inflection region
-        inflection_point_tangent_slope = np.mean(dy[inflection_region_lower:inflection_region_upper])  # Linear slope
-        inflection_point_tangent_intercept = y[1:-1][inflection_point_index]-inflection_point_tangent_slope*x[1:-1][inflection_point_index]  # Linear intercept
+        tangent_slope = np.mean(dgamma_dz[tangent_region_lower:tangent_region_upper])  # Linear slope
+        tangent_intercept = gamma[1:-1][tangent_index]-tangent_slope*z[1:-1][tangent_index]  # Linear intercept
 
-        long_period = x[maxs[0]]
-        hard_block_thickness = (gamma_min - inflection_point_tangent_intercept) / inflection_point_tangent_slope  # Hard block thickness
+        hard_block_thickness = (gamma_min - tangent_intercept) / tangent_slope  # Hard block thickness
         soft_block_thickness = long_period - hard_block_thickness
 
         # Find the data points where the graph is linear to within 1%
-        mask = np.where(np.abs((y-(inflection_point_tangent_slope*x+inflection_point_tangent_intercept))/y) < 0.01)[0]
+        mask = np.where(np.abs((gamma-(tangent_slope*z+tangent_intercept))/gamma) < 0.01)[0]
+
         if len(mask) == 0:  # Return garbage for bad fits
             return None
 
-        interface_thickness = x[mask[0]]  # Beginning of Linear Section
-        core_thickness = x[mask[-1]]  # End of Linear Section
+        interface_thickness = z[mask[0]]  # Beginning of Linear Section
+        core_thickness = z[mask[-1]]  # End of Linear Section
 
         local_crystallinity = hard_block_thickness / long_period
 
-        gamma_max = y[mask[-1]]
+        gamma_max = gamma[mask[-1]]
 
         polydispersity_ryan = np.abs(gamma_min / gamma_max)  # Normalized depth of minimum
         polydispersity_stribeck = np.abs(local_crystallinity / ((local_crystallinity - 1) * gamma_max))  # Normalized depth of minimum
 
 
         supplementary_parameters = SupplementaryParameters(
-            tangent_point_x=x[inflection_point_index],
-            tangent_point_y=y[inflection_point_index],
-            tangent_gradient=float(inflection_point_tangent_slope),
-            first_minimum_x=0.0,
-            first_minimum_y=0.0,
-            x_range=(1/transformed_data.q_range[1], 1/transformed_data.q_range[0]),
-            y_range=(np.min(y), np.max(y))
+            tangent_point_z=z[tangent_index],
+            tangent_point_gamma=gamma[tangent_index],
+            tangent_gradient=float(tangent_slope),
+            first_minimum_z=z_at_min,
+            first_minimum_gamma=gamma_min,
+            first_maximum_z=long_period,
+            first_maximum_gamma=gamma_fun(long_period),
+            hard_block_z=hard_block_thickness,
+            hard_block_gamma=gamma_min,
+            interface_z=interface_thickness,
+            core_z=core_thickness,
+            z_range=(1 / transformed_data.q_range[1], 1 / transformed_data.q_range[0]),
+            gamma_range=(np.min(gamma), np.max(gamma))
         )
 
         extracted_parameters = ExtractedParameters(

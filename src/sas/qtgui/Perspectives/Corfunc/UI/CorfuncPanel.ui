@@ -496,23 +496,26 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout">
                <item>
-                <widget class="QRadioButton" name="tangentInflection">
+                <widget class="QRadioButton" name="radTangentInflection">
                  <property name="text">
                   <string>Use Inflection Point</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="tangentMidpoint">
+                <widget class="QRadioButton" name="radTangentMidpoint">
                  <property name="text">
                   <string>Use Halfway Point</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="tangentAuto">
+                <widget class="QRadioButton" name="radTangentAuto">
                  <property name="text">
                   <string>Automatic</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -526,23 +529,26 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_8">
                <item>
-                <widget class="QRadioButton" name="longPeriodMax">
+                <widget class="QRadioButton" name="radLongPeriodMax">
                  <property name="text">
                   <string>Use Maximum</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="longPeriodDouble">
+                <widget class="QRadioButton" name="radLongPeriodDouble">
                  <property name="text">
                   <string>Use 2x Minimum</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="longPeriodAuto">
+                <widget class="QRadioButton" name="radLongPeriodAuto">
                  <property name="text">
                   <string>Automatic</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -635,7 +641,11 @@
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QLineEdit" name="txtPolyRyan"/>
+                  <widget class="QLineEdit" name="txtPolyRyan">
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="2">
                   <widget class="QLineEdit" name="txtAvgHardBlock">
@@ -650,6 +660,9 @@
                      <width>20</width>
                      <height>20</height>
                     </size>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -670,7 +683,11 @@
                   </widget>
                  </item>
                  <item row="2" column="4">
-                  <widget class="QLineEdit" name="txtPolyStribeck"/>
+                  <widget class="QLineEdit" name="txtPolyStribeck">
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="1">
                   <widget class="QLabel" name="label_16">
@@ -745,6 +762,9 @@
                      <width>20</width>
                      <height>20</height>
                     </size>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -822,6 +842,9 @@
                      <height>20</height>
                     </size>
                    </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item row="1" column="4">
@@ -837,6 +860,9 @@
                      <width>20</width>
                      <height>20</height>
                     </size>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -883,6 +909,9 @@
                      <height>20</height>
                     </size>
                    </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
@@ -920,6 +949,9 @@
                      <width>150</width>
                      <height>20</height>
                     </size>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -1009,7 +1041,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -1032,6 +1064,16 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Extraction Diagram</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_420">
+       <item>
+        <layout class="QVBoxLayout" name="diagramLayout"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_4">
       <attribute name="title">
        <string>IDF</string>
       </attribute>
