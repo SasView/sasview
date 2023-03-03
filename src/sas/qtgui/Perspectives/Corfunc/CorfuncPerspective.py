@@ -24,19 +24,18 @@ from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.ExtractionCanvas import ExtractionCanvas
 from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
-from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.qtgui.Utilities.Reports import ReportBase
 from sas.qtgui.Plotting.PlotterData import Data1D
 
-from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator, TangentMethod, LongPeriodMethod
-# pylint: enable=import-error, no-name-in-module
+from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
+from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
+from sas.sascalc.corfunc.calculation_data import TransformedData,  TangentMethod, LongPeriodMethod
 
-# local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .util import WIDGETS, safe_float, TransformedData
+from .util import WIDGETS, safe_float
 from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from ..perspective import Perspective
 
