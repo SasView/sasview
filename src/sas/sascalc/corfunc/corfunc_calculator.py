@@ -159,7 +159,9 @@ class CorfuncCalculator:
         self._transform_thread.queue()
 
     def transform_isrunning(self):
-        if self._transform_thread is None: return False
+        if self._transform_thread is None:
+            return False
+
         return self._transform_thread.isrunning()
 
     def stop_transform(self):
