@@ -30,11 +30,13 @@ sasview -V
 
     -i, --interactive. *Enter an interactive session after command/module/script.*
 
+    -o, --console. *Open a console to show command output. (Windows only)*
+
     -q, --quiet. *Suppress startup messages on interactive console.*
 
-Note: On Windows any console output gets written to NUL by default. If
-output is not appearing then try redirecting to a file using for example
-*sasview ... > output.txt*.
+Note: On Windows any console output is ignored by default. You can either
+open a console to show the output with the *-o* flag or redirect output to
+a file using something like *sasview ... > output.txt*.
 """
 import sys
 
