@@ -344,6 +344,7 @@ class _Slab(object):
 
         # Get data
         data = data2D.data[np.isfinite(data2D.data)]
+        err_data = None
         if data2D.err_data is not None:
             err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
@@ -508,6 +509,7 @@ class Boxsum(object):
             raise RuntimeError(msg)
         # Get data
         data = data2D.data[np.isfinite(data2D.data)]
+        err_data = None
         if data2D.err_data is not None:
             err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
@@ -739,6 +741,7 @@ class Ring(object):
         # Get data
         data = data2D.data[np.isfinite(data2D.data)]
         q_data = data2D.q_data[np.isfinite(data2D.data)]
+        err_data = None
         if data2D.err_data is not None:
             err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
@@ -845,6 +848,7 @@ class _Sector(object):
         # Get the all data & info
         data = data2D.data[np.isfinite(data2D.data)]
         q_data = data2D.q_data[np.isfinite(data2D.data)]
+        err_data = None
         if data2D.err_data is not None:
             err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
