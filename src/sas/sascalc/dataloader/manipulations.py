@@ -935,7 +935,7 @@ class _Sector(object):
             # Get the total y
             y[i_bin] += data_n
             x[i_bin] += q_value
-            if err_data[n] is None or err_data[n] == 0.0:
+            if err_data is None or err_data[n] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 y_err[i_bin] += data_n
