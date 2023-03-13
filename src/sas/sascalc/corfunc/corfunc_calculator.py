@@ -62,7 +62,24 @@ class CorfuncCalculator:
         self._guinier: Fittable[GuinierData] = Fittable()
 
         # Derived quantities
-        self._background_subtracted = Optional[np.ndarray]
+        self._background_subtracted: Optional[np.ndarray] = None
+        self._extrapolation_function: Optional[SmoothJoin] = None
+        self._extrapolation_data: Optional[Data1D] = None
+        self._transformed_data: Optional[TransformedData] = None
+        self._lamellar_parameters: Optional[LamellarParameters] = None
+        self._supplementary_parameters: Optional[SupplementaryParameters] = None
+
+    def reset_calculated_values(self):
+
+        """ Resets the calculated values, but does not clear the data or reset the user specified parameters """
+
+        # Fitted parameters
+        self._background.clear()
+        self._porod.clear()
+        self._guinier.clear()
+
+        # Derived quantities
+        self._background_subtracted: Optional[np.ndarray] = None
         self._extrapolation_function: Optional[SmoothJoin] = None
         self._extrapolation_data: Optional[Data1D] = None
         self._transformed_data: Optional[TransformedData] = None

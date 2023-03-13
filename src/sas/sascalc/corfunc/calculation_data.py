@@ -14,6 +14,9 @@ class Fittable(Generic[T]):
         self.data: Optional[T] = data
         self.allow_fit: bool = allow_fit
 
+    def clear(self):
+        self.data = None
+
 @dataclass
 class TransformedData:
     """ Container for the data that is returned by the corfunc transform method"""

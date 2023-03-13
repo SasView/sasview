@@ -174,14 +174,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def set_long_period_method(self, value: Optional[LongPeriodMethod]) -> Callable[[bool], None]:
         """ Function to set the long period method"""
         def setter_function(state: bool):
-            self.long_period_method = value
+            self._calculator.long_period_method = value
 
         return setter_function
 
     def set_tangent_method(self, value: Optional[TangentMethod]) -> Callable[[bool], None]:
         """ Function to set the tangent method"""
         def setter_function(state: bool):
-            self.tangent_method = value
+            self._calculator.tangent_method = value
 
         return setter_function
 
@@ -239,11 +239,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.updateFromParameters({})
         self.set_text_enable(False)
 
+        self._calculator.reset_calculated_values()
+
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
+
         if not self.mapper:
             return
+
         self.mapper.toFirst()
+
+        self._calculator.reset_calculated_values()
         self.slider.extrapolation_parameters = self.extrapolation_parmameters
         self._q_space_plot.draw_data()
 
@@ -253,7 +259,18 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._calculator.background = \
             float(self.model.item(WIDGETS.W_BACKGROUND).text())
 
-    def extrapolate(self):
+
+        self._update_calculator()
+        try:
+            background = self._calculator.compute_background()
+            temp = QtGui.QStandardItem("{:.4g}".format(background))
+            self.model.setItem(WIDGETS.W_BACKGROUND, temp)
+        except (LinAlgError, ValueError):
+            message = "These is not enough data in the fitting range. "\
+                      "Try decreasing the upper Q or increasing the cutoff Q"
+            QtWidgets.QMessageBox.warning(self, "Calculation Error",
+                                      message)
+
         """Extend the experiemntal data with guinier and porod curves."""
         self._update_calculator()
         self.model.itemChanged.disconnect(self.model_changed)
@@ -289,13 +306,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.tabWidget.setCurrentIndex(0)
 
-
-    def transform(self):
-        """Calculate the real space version of the extrapolation."""
-        #method = self.model.item(W.W_TRANSFORM).text().lower()
-
-        method = "fourier"
-
         extrap = self.extrap
         background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
         q_range = self.data.x[0], self.data.x[-1]
@@ -319,10 +329,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                                                completefn, updatefn)
 
 
-
-
-    def finish_transform(self, data: TransformedData):
-
         self.transformed_data = data
 
         self._real_space_plot.data = data.gamma_1, data.gamma_3
@@ -336,8 +342,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdSave.setEnabled(True)
 
         self.tabWidget.setCurrentIndex(1)
-
-    def extract(self):
 
         if self.transformed_data is None:
             return
@@ -399,19 +403,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.mapper.addMapping(self.txtFilename, WIDGETS.W_FILENAME)
 
         self.mapper.toFirst()
-
-    def calculate_background(self):
-        """Find a good estimate of the background value."""
-        self._update_calculator()
-        try:
-            background = self._calculator.compute_background()
-            temp = QtGui.QStandardItem("{:.4g}".format(background))
-            self.model.setItem(WIDGETS.W_BACKGROUND, temp)
-        except (LinAlgError, ValueError):
-            message = "These is not enough data in the fitting range. "\
-                      "Try decreasing the upper Q or increasing the cutoff Q"
-            QtWidgets.QMessageBox.warning(self, "Calculation Error",
-                                      message)
 
 
     # pylint: disable=invalid-name
@@ -815,6 +806,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         return self._q_space_plot.fig
 
     @property
+    def extraction_figure(self):
+        return self._extraction_plot.fig
+
+    @property
     def idf_figure(self):
         return self._idf_plot.fig
 
@@ -843,6 +838,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         report.add_table_dict(fancy_parameters, ("Parameter", "Value"))
         report.add_plot(self.q_space_figure)
         report.add_plot(self.real_space_figure)
+        report.add_plot(self.extraction_figure)
         report.add_plot(self.idf_figure)
 
         return report.report_data
