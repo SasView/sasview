@@ -37,7 +37,9 @@ class CorfuncCalculator:
 
     def __init__(self,
                  data: Optional[Data1D] = None,
-                 extraction_parameters: Optional[SettableExtrapolationParameters] = None):
+                 extraction_parameters: Optional[SettableExtrapolationParameters] = None,
+                 long_period_method: Optional[LongPeriodMethod] = None,
+                 tangent_method: Optional[TangentMethod] = None):
 
         """
         Back-end for corfunc calculations
@@ -51,8 +53,8 @@ class CorfuncCalculator:
 
         # Input parameters
         self._extrapolation_parameters: Optional[SettableExtrapolationParameters] = extraction_parameters
-        self.tangent_method: Optional[TangentMethod] = None
-        self.long_period_method: Optional[LongPeriodMethod] = None
+        self.tangent_method: Optional[TangentMethod] = tangent_method
+        self.long_period_method: Optional[LongPeriodMethod] = long_period_method
 
         # Fittable parameters
         self._background: Fittable[float] = Fittable()
@@ -109,6 +111,37 @@ class CorfuncCalculator:
     @property
     def q_range(self) -> Tuple[float, float]:
         return self.data.x[0], self.data.x[-1]
+    @property
+    def background(self):
+        if self._background.data is None:
+            return None
+
+        return self._background.data
+
+    @property
+    def guinier(self):
+        if self._guinier.data is None:
+            return None
+
+        return self._guinier.data
+
+    @property
+    def porod(self):
+        if self._porod.data is None:
+            return None
+
+        return self._porod.data
+    @property
+    def transformed(self):
+        return self._transformed_data
+
+    @property
+    def lamellar_parameters(self) -> LamellarParameters:
+        return self._lamellar_parameters
+
+    @property
+    def supplementary_parameters(self) -> SupplementaryParameters:
+        return self._supplementary_parameters
 
 
     #
@@ -212,7 +245,7 @@ class CorfuncCalculator:
             q = self.data.x
             mask = np.logical_and(q < self._extrapolation_parameters.point_1, 0 < q)
 
-            g = CorfuncCalculator.fit_guinier(q, self._background_subtracted[mask])
+            g = CorfuncCalculator.fit_guinier(q[mask], self._background_subtracted[mask])
 
             self._guinier.data = GuinierData(A=g[0], B=g[1])
 
@@ -485,7 +518,7 @@ class CorfuncCalculator:
     @staticmethod
     def guinier_function(A, B, background):
         def fun(q):
-            return np.exp(A*q*q + B) + background
+            return np.exp(A + B*q*q) + background
 
         return fun
 
@@ -507,7 +540,7 @@ class CorfuncCalculator:
     @staticmethod
     def fit_guinier(q, I):
         """Fit the Guinier region of the curve using linear least squares"""
-        A = np.vstack([q**2, np.ones(q.shape)]).T
+        A = np.vstack([np.ones(q.shape), q**2]).T
 
         return np.linalg.lstsq(A, np.log(I))[0]
 
@@ -521,3 +554,39 @@ class CorfuncCalculator:
 
         k, sigma, bg = fitp
         return k, sigma, bg
+
+
+def extract_lamellar_parameters(
+        data: Data1D,
+        guinier_to_data_transition_right: float,
+        data_to_porod_transition_left: float,
+        data_to_porod_transition_right: float,
+        long_period_method: Optional[LongPeriodMethod]=None,
+        tangent_method: Optional[TangentMethod]=None):
+
+    """
+    Extract lamellar parameters from data using the corfunc calculator
+
+    :param data: Data1D object containing QSpace data
+    :param guinier_to_data_transition_right: Q value at which to end the extrapolation from Guiner to data
+    :param data_to_porod_transition_left: Q value at which to begin the extrapolation from data to Porod
+    :param data_to_porod_transition_right: Q value at which to end the extrapolation from data to Porod
+    :param long_period_method: LongPeriodMethod enum value specifying how to calculate the long period (None autodetects)
+    :param tangent_method: TangentMethod enum value specifying how to calculate the long period (None autodetects)
+
+    :returns: LamellarParameters object with calculated lamellar parameters
+    """
+
+    parameters = SettableExtrapolationParameters(
+        guinier_to_data_transition_right,
+        data_to_porod_transition_left,
+        data_to_porod_transition_right)
+
+    calculator = CorfuncCalculator(
+                    data, parameters,
+                    long_period_method=long_period_method,
+                    tangent_method=tangent_method)
+
+    calculator.run()
+
+    return calculator.lamellar_parameters
