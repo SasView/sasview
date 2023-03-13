@@ -20,7 +20,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
     -x to +x as a function of Q_y
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base, axes, item=None, color='black',  direction=None,zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
         # Class initialization
@@ -30,23 +30,24 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # connecting artist
         self.connect = self.base.connect
         # which direction is the preferred interaction direction
-        self.direction = None
+        self.direction = direction
         # determine x y  values
-        self.xmin = -1 * 0.5 * min(numpy.fabs(self.data.xmax),
-                                   numpy.fabs(self.data.xmin))
-        self.ymin = -1 * 0.5 * min(numpy.fabs(self.data.xmax),
-                                   numpy.fabs(self.data.xmin))
-        self.xmax = 0.5 * min(numpy.fabs(self.data.xmax),
-                              numpy.fabs(self.data.xmin))
-        self.ymax = 0.5 * min(numpy.fabs(self.data.xmax),
-                              numpy.fabs(self.data.xmin))
+        if self.direction == "Y":
+            self.xwidth = 0.1 * (self.data.xmax - self.data.xmin) / 2
+            self.ywidth = 1.0 * (self.data.ymax - self.data.ymin) / 2
+            # when reach qmax reset the graph
+            self.qmax = max(numpy.fabs(self.data.ymax), numpy.fabs(self.data.ymin))
+        else:
+            self.xwidth = 1.0 * (self.data.xmax - self.data.xmin) / 2
+            self.ywidth = 0.1 * (self.data.ymax - self.data.ymin) / 2
+            # when reach qmax reset the graph
+            self.qmax = max(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
 
-        # when reach qmax reset the graph
-        self.qmax = max(self.data.xmax, self.data.xmin,
-                        self.data.ymax, self.data.ymin)
+        self.width_min = 0.005 * (self.data.xmax - self.data.xmin)
+        self.height_min = 0.005 * (self.data.ymax - self.data.ymin)
 
         # center of the box
-        # puts the center of box at the middle of the q-range (??)
+        # puts the center of box at the middle of the data q-range
 
         self.center_x = (self.data.xmin + self.data.xmax) /2
         self.center_y = (self.data.ymin + self.data.ymax) /2
@@ -67,8 +68,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                                      self.axes,
                                                      color='blue',
                                                      zorder=zorder,
-                                                     y=self.ymax,
-                                                     x=self.xmax,
+                                                     y=self.ywidth,
+                                                     x=self.xwidth,
                                                      center_x=self.center_x,
                                                      center_y=self.center_y)
         self.horizontal_lines.qmax = self.qmax
@@ -77,8 +78,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                                  self.axes,
                                                  color='black',
                                                  zorder=zorder,
-                                                 y=self.ymax,
-                                                 x=self.xmax,
+                                                 y=self.ywidth,
+                                                 x=self.xwidth,
                                                  center_x=self.center_x,
                                                  center_y=self.center_y)
         self.vertical_lines.qmax = self.qmax
@@ -227,7 +228,12 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot.interactive = True
         new_plot.detector = self.data.detector
         # # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{Q}", "A^{-1}")
+        if self.direction == "X":
+            new_plot.xaxis("\\rm{Q_x}", "A^{-1}")
+        elif self.direction == "Y":
+            new_plot.xaxis("\\rm{Q_y}", "A^{-1}")
+        else:
+            new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
         data = self.data
@@ -282,8 +288,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         """
         params = {}
-        params["x_max"] = numpy.fabs(self.vertical_lines.x1)
-        params["y_max"] = numpy.fabs(self.horizontal_lines.y1)
+        params["x_width"] = numpy.fabs(self.vertical_lines.x1)
+        params["y_width"] = numpy.fabs(self.horizontal_lines.y1)
         params["nbins"] = self.nbins
         params["center_x"] = self.center.x
         params["center_y"] = self.center.y
@@ -298,8 +304,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         :param params: a dictionary containing name of slicer parameters and
             values the user assigned to the slicer.
         """
-        x_max = float(numpy.fabs(params["x_max"]))
-        y_max = float(numpy.fabs(params["y_max"]))
+        x_width = float(numpy.fabs(params["x_width"]))
+        y_width = float(numpy.fabs(params["y_width"]))
         self.nbins = params["nbins"]
         self.fold = params["fold"]
         self.center_x = params["center_x"]
@@ -307,9 +313,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         self.center.update(center_x=self.center_x, center_y=self.center_y)
         self.horizontal_lines.update(center=self.center,
-                                     width=x_max, height=y_max)
+                                     width=x_width, height=y_width)
         self.vertical_lines.update(center=self.center,
-                                   width=x_max, height=y_max)
+                                   width=x_width, height=y_width)
         # compute the new error and sum given values of params
         self._post_data()
 
@@ -769,7 +775,7 @@ class BoxInteractorX(BoxInteractor):
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3):
-        BoxInteractor.__init__(self, base, axes, item=item, color=color)
+        BoxInteractor.__init__(self, base, axes, item=item, direction="X",color=color)
         self.base = base
         super()._post_data()
 
@@ -803,7 +809,7 @@ class BoxInteractorY(BoxInteractor):
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3):
-        BoxInteractor.__init__(self, base, axes, item=item, color=color)
+        BoxInteractor.__init__(self, base, axes, item=item, direction="Y", color=color)
         self.base = base
         super()._post_data()
 
