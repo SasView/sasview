@@ -315,8 +315,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.trigger.emit(td) # TODO: Make this return more structured data earlier
 
         self._update_calculator()
-        self._calculator.compute_transform(extrap, method, background,
-                                           completefn, updatefn)
+        self._calculator._calculate_transforms(extrap, method, background,
+                                               completefn, updatefn)
 
 
 

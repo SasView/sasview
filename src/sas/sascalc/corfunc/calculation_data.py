@@ -5,28 +5,25 @@ from sasdata.dataloader.data_info import Data1D
 from enum import Enum
 from dataclasses import dataclass
 
-class CorfuncData:
-    """ Base class for data in corfunc"""
 
-T = TypeVar("T", bound=CorfuncData)
+T = TypeVar("T")
 
 class Fittable(Generic[T]):
     """ Container for parameters that can be fitted by the corfunc perspective"""
-    def __init__(self, data: T, allow_fit: bool):
-        self.data = data
-        self.allow_fit = allow_fit
+    def __init__(self, data: Optional[T] = None, allow_fit: bool = True):
+        self.data: Optional[T] = data
+        self.allow_fit: bool = allow_fit
 
 @dataclass
-class TransformedData(CorfuncData):
+class TransformedData:
     """ Container for the data that is returned by the corfunc transform method"""
     gamma_1: Data1D
     gamma_3: Data1D
     idf: Data1D
-    q_range: Tuple[float, float]
 
 
 @dataclass
-class SupplementaryParameters(CorfuncData):
+class SupplementaryParameters:
     """ Parameters used for drawing the diagram """
     tangent_point_z: float
     tangent_point_gamma: float
@@ -43,7 +40,7 @@ class SupplementaryParameters(CorfuncData):
     gamma_range: Tuple[float, float]
 
 @dataclass
-class ExtractedParameters(CorfuncData):
+class LamellarParameters:
     """ Lamellar parameters"""
     long_period: float
     interface_thickness: float
@@ -55,13 +52,13 @@ class ExtractedParameters(CorfuncData):
     local_crystallinity: float
 
 @dataclass
-class GuinierData(CorfuncData):
+class GuinierData:
     """ Parameters for a Guinier model """
     A: float
     B: float
 
 @dataclass
-class PorodData(CorfuncData):
+class PorodData:
     """ Parameters for a Porod model """
     K: float
     sigma: float
@@ -87,7 +84,15 @@ class LongPeriodMethod(EntryListEnum):
 
 
 @dataclass
-class ExtrapolationParameters(CorfuncData):
+class SettableExtrapolationParameters:
+    """ Extrapolation parameters that can be set by the user"""
+    point_1: float
+    point_2: float
+    point_3: float
+
+
+@dataclass
+class ExtrapolationParameters:
     """ Represents the parameters defining extrapolation"""
     data_q_min: float
     point_1: float
@@ -96,7 +101,7 @@ class ExtrapolationParameters(CorfuncData):
     data_q_max: float
 
 @dataclass
-class ExtrapolationInteractionState(CorfuncData):
+class ExtrapolationInteractionState:
     """ Represents the state of the slider used to control extrapolation parameters
 
     Contains extrapolation parameters along with the representation of the hover state.

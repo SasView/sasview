@@ -71,8 +71,8 @@ class TestCalculator(unittest.TestCase):
 
     def transform(self):
 
-        self.calculator.compute_transform(self.extrapolation, 'fourier',
-            completefn=self.transform_callback)
+        self.calculator._calculate_transforms(self.extrapolation, 'fourier',
+                                              completefn=self.transform_callback)
         # Transform is performed asynchronously; give it time to run
 
         max_time = 600 # seconds
