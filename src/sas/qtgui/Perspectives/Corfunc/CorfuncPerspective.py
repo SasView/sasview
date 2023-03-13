@@ -129,11 +129,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""
-        self.cmdExtrapolate.clicked.connect(self.extrapolate)
-        self.cmdExtrapolate.setEnabled(False)
-
-        self.cmdTransform.clicked.connect(self.transform)
-        self.cmdTransform.setEnabled(False)
 
         self.cmdExtract.clicked.connect(self.extract)
         self.cmdExtract.setEnabled(False)
@@ -143,9 +138,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
         self.cmdSaveExtrapolation.setEnabled(False)
-
-        self.cmdCalculateBg.clicked.connect(self.calculate_background)
-        self.cmdCalculateBg.setEnabled(False)
 
         self.cmdHelp.clicked.connect(self.showHelp)
 
