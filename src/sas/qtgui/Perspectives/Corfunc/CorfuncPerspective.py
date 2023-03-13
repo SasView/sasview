@@ -663,6 +663,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # If data has a "bad" value we want to indicate this
         # The only good values can be interpreted as non-negative floats
 
+        sdlfhasodjkfhasdlf THIS SHOULD NOW ONLY BE TRIGGERED WHEN THE MAIN CALCULATION IS CALLED
+
+
         is_bad = True
 
         try:
