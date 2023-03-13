@@ -17,9 +17,9 @@ from sas.sascalc.corfunc.calculation_data import (TransformedData,
                                                   ExtractedParameters,
                                                   SupplementaryParameters,
                                                   TangentMethod,
-                                                  LongPeriodMethod)
+                                                  LongPeriodMethod,
+                                                  ExtrapolationParameters)
 
-from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters
 
 from sasdata.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread

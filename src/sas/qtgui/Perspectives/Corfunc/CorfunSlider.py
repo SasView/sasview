@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFontMetrics
 
-from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
+from sas.sascalc.corfunc.calculation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 class CorfuncSlider(QtWidgets.QWidget):
     """ Slider that allows the selection of the different Q-ranges involved in interpolation,

@@ -31,8 +31,10 @@ from sas.qtgui.Utilities.Reports import ReportBase
 from sas.qtgui.Plotting.PlotterData import Data1D
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
-from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
-from sas.sascalc.corfunc.calculation_data import TransformedData,  TangentMethod, LongPeriodMethod
+
+from sas.sascalc.corfunc.calculation_data import (
+    TransformedData,  TangentMethod, LongPeriodMethod,
+    ExtrapolationParameters, ExtrapolationInteractionState)
 
 from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .util import WIDGETS, safe_float

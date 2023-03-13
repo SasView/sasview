@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.sascalc.corfunc.extrapolation_data import ExtrapolationInteractionState
+from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState
 
 
 class QSpaceCanvas(CorfuncCanvas):
