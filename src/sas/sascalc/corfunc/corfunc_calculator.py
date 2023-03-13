@@ -203,6 +203,9 @@ class CorfuncCalculator:
         if len(maxs) == 0:
             return None
 
+        max_values = gamma[maxs]
+        largest_max = np.argmax(max_values)
+
         gamma_min = gamma[mins[0]]  # The value at the first minimum
         z_at_min = z[mins[0]]
 
@@ -251,7 +254,7 @@ class CorfuncCalculator:
                 long_period_method = LongPeriodMethod.DOUBLE_MIN
 
         if long_period_method == LongPeriodMethod.MAX:
-            long_period = z[maxs[0]]
+            long_period = z[maxs[largest_max]]
         elif long_period_method == LongPeriodMethod.DOUBLE_MIN:
             long_period = z_at_min * 2
         else:
@@ -294,7 +297,6 @@ class CorfuncCalculator:
         polydispersity_ryan = np.abs(gamma_min / gamma_max)  # Normalized depth of minimum
         polydispersity_stribeck = np.abs(local_crystallinity / ((local_crystallinity - 1) * gamma_max))  # Normalized depth of minimum
 
-
         supplementary_parameters = SupplementaryParameters(
             tangent_point_z=z[tangent_index],
             tangent_point_gamma=gamma[tangent_index],
@@ -308,18 +310,17 @@ class CorfuncCalculator:
             interface_z=interface_thickness,
             core_z=core_thickness,
             z_range=(1 / transformed_data.q_range[1], 1 / transformed_data.q_range[0]),
-            gamma_range=(np.min(gamma), np.max(gamma))
-        )
+            gamma_range=(np.min(gamma), np.max(gamma)))
 
         extracted_parameters = ExtractedParameters(
-                    long_period,
-                    interface_thickness,
-                    hard_block_thickness,
-                    soft_block_thickness,
-                    core_thickness,
-                    polydispersity_ryan,
-                    polydispersity_stribeck,
-                    local_crystallinity)
+            long_period=long_period,
+            interface_thickness=interface_thickness,
+            hard_block_thickness=hard_block_thickness,
+            soft_block_thickness=soft_block_thickness,
+            core_thickness=core_thickness,
+            polydispersity_ryan=polydispersity_ryan,
+            polydispersity_stribeck=polydispersity_stribeck,
+            local_crystallinity=local_crystallinity)
 
         return extracted_parameters, supplementary_parameters
 
