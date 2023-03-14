@@ -19,8 +19,7 @@ import sys
 import os
 from os.path import abspath, dirname, realpath, join as joinpath
 from contextlib import contextmanager
-
-PLUGIN_MODEL_DIR = 'plugin_models'
+from importlib import import_module
 
 def addpath(path):
     """
@@ -35,7 +34,6 @@ def addpath(path):
     os.environ['PYTHONPATH'] = PYTHONPATH
     sys.path.insert(0, path)
 
-
 @contextmanager
 def cd(path):
     """
@@ -46,62 +44,45 @@ def cd(path):
     yield
     os.chdir(old_dir)
 
-def setup_sasmodels():
-    """
-    Prepare sasmodels for running within sasview.
-    """
-    # Set SAS_MODELPATH so sasmodels can find our custom models
-
-    from sas.system.user import get_user_dir
-    plugin_dir = os.path.join(get_user_dir(), PLUGIN_MODEL_DIR)
-    os.environ['SAS_MODELPATH'] = plugin_dir
-
 def prepare():
     # Don't create *.pyc files
     sys.dont_write_bytecode = True
 
-    # find the directories for the source and build
-    from distutils.util import get_platform
+    # Turn numpy warnings into errors
+    #import numpy; numpy.seterr(all='raise')
+
+    # Find the directories for the source and build
     root = abspath(dirname(realpath(__file__)))
 
-    platform = '%s-%s' % (get_platform(), sys.version[:3])
-    build_path = joinpath(root, 'build', 'lib.' + platform)
-
-    # Notify the help menu that the Sphinx documentation is in a different
-    # place than it otherwise would be.
-    os.environ['SASVIEW_DOC_PATH'] = joinpath(build_path, "doc")
-
-    try:
-        import periodictable
-    except ImportError:
-        addpath(joinpath(root, '..', 'periodictable'))
-
-    try:
-        import bumps
-    except ImportError:
-        addpath(joinpath(root, '..', 'bumps'))
+    # TODO: Do we prioritize the sibling repo or the installed package?
+    # TODO: Can we use sasview/run.py from a distributed sasview.exe?
+    # Put supporting packages on the path if they are not already available.
+    for sibling in ('periodictable', 'bumps', 'sasdata', 'sasmodels'):
+        try:
+            import_module(sibling)
+        except:
+            addpath(joinpath(root, '..', sibling))
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
 
-    # sasmodels on the path
-    addpath(joinpath(root, '../sasmodels/'))
+    # == no more C sources so no need to build project to run it ==
+    # Leave this snippet around in case we add a compile step later.
+    #from distutils.util import get_platform
+    #platform = '%s-%s' % (get_platform(), sys.version[:3])
+    #build_path = joinpath(root, 'build', 'lib.' + platform)
+    ## Build project if the build directory does not already exist.
+    #if not os.path.exists(build_path):
+    #    import subprocess
+    #    with cd(root):
+    #        subprocess.call((sys.executable, "setup.py", "build"), shell=False)
 
-
+    # Notify the help menu that the Sphinx documentation is in a different
+    # place than it otherwise would be.
+    docpath = joinpath(root, 'docs', 'sphinx-docs', '_build', 'html')
+    os.environ['SASVIEW_DOC_PATH'] = docpath
 
 if __name__ == "__main__":
-    # Need to add absolute path before actual prepare call,
-    # so logging can be done during initialization process too
-    root = abspath(dirname(realpath(sys.argv[0])))
-
-    addpath(joinpath(root, 'src'))
     prepare()
-
-    # Run the UI conversion tool when executed from script.  This has to
-    # happen after prepare() so that sas.qtgui is on the path.
-    import sas.qtgui.convertUI
-    setup_sasmodels()
-
-    from sas.qtgui.MainWindow.MainWindow import run_sasview
-    run_sasview()
-    #logger.debug("Ending SASVIEW in debug mode.")
+    import sas.cli
+    sys.exit(sas.cli.main(logging="development"))
