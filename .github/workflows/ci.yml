@@ -307,7 +307,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
           name: "nightly-build"
-          tag: ${{ env.BRANCH_NAME }}
+          tag: "nightly-build"
 
 
   test-installer:
