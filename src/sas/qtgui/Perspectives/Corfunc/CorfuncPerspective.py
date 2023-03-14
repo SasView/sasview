@@ -149,7 +149,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.cmdExtract.clicked.connect(self._run)
         self.cmdExtract.setEnabled(False)
 
-        self.cmdSave.clicked.connect(self.on_save)
+        self.cmdSave.clicked.connect(self.on_save_transformed)
         self.cmdSave.setEnabled(False)
 
         self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
@@ -299,8 +299,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             calculator.background = safe_float(self.txtBackground.text())
 
         if not calculator.fit_guinier:
-            guinier = GuinierData(A = safe_float(self.txtGuinierA.text()),
-                                  B = safe_float(self.txtGuinierB.text()))
+            guinier = GuinierData(A=safe_float(self.txtGuinierA.text()),
+                                  B=safe_float(self.txtGuinierB.text()))
 
             calculator.guinier = guinier
 
@@ -638,7 +638,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """ Slider is being moved about"""
         self._q_space_plot.update_lines(state)
 
-    def on_save(self):
+    def on_save_transformed(self):
         """
         Save corfunc state into a file
         """
@@ -646,6 +646,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if self._calculator is None:
             logging.error("Save transformed: No calculation present")
             return
+
+        transformed = self._calculator.transformed
+        if transformed is None:
+            logging.error("Save transformed: No transformed data present")
+            return
+
 
         f_name = QtWidgets.QFileDialog.getSaveFileName(
             caption="Save As",
@@ -659,7 +665,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             f_name += ".csv"
 
 
-        transformed = self._calculator.transformed
+
+
         with open(f_name, "w") as outfile:
             outfile.write("X,1D,3D,IDF\n")
             np.savetxt(outfile,
@@ -679,12 +686,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             logging.error("Save extrapolation: No calculation present")
             return
 
-        q = self.data.x
-        if self._calculator.extrapolation_curve is not None:
-            window = SaveExtrapolatedPopup(q, self.extrapolation_curve)
+        if self._calculator.extrapolation_function is not None:
+            q = self.data.x
+            window = SaveExtrapolatedPopup(q, self._calculator.extrapolation_function)
             window.exec_()
         else:
-            raise RuntimeError("Inconsistent state: save extrapolation called without extrapolation")
+            logging.error("Save extrapolation: No extrapolation function present")
 
 
 
