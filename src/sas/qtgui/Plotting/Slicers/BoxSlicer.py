@@ -205,12 +205,12 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         self._post_data()
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
-        self.horizontal_lines.restore()
-        self.vertical_lines.restore()
+        self.horizontal_lines.restore(ev)
+        self.vertical_lines.restore(ev)
 
     def move(self, x, y, ev):
         """
@@ -350,7 +350,7 @@ class HorizontalLines(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
@@ -457,7 +457,7 @@ class VerticalLines(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
