@@ -275,15 +275,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.mapper.toFirst()
 
-        if self._calculator is not None:
-            self._calculator.reset_calculated_values()
-
         self.slider.extrapolation_parameters = self.extrapolation_parmameters
         self._q_space_plot.draw_data()
 
     def _run(self):
 
         # Set up calculator
+
+        self.cmdExtract.setText("Calculating...")
 
         calculator = CorfuncCalculator(
             data=self.data,
@@ -330,13 +329,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             transformed = calculator.transformed
             lamellar = calculator.lamellar_parameters
             supplementary = calculator.supplementary_parameters
-
-            print(background)
-            print(guinier)
-            print(porod)
-            print(transformed)
-            print(lamellar)
-            print(supplementary)
 
             # Set plots
             self._q_space_plot.extrap = extrapolated
@@ -386,6 +378,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.set_background_warning()
 
 
+        self.cmdExtract.setText("Go")
 
 
     def setup_mapper(self):
