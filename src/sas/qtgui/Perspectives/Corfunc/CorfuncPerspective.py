@@ -19,7 +19,7 @@ from PyQt5 import QtGui, QtWidgets
 # sas-global
 # pylint: disable=import-error, no-name-in-module
 
-from sas.qtgui.Perspectives.Corfunc.CorfunSlider import CorfuncSlider
+from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.ExtractionCanvas import ExtractionCanvas
@@ -30,10 +30,11 @@ from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.qtgui.Utilities.Reports import ReportBase
 from sas.qtgui.Plotting.PlotterData import Data1D
 
-from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
+from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator, CalculationError
 
 from sas.sascalc.corfunc.calculation_data import (
     TransformedData,  TangentMethod, LongPeriodMethod,
+    GuinierData, PorodData,
     ExtrapolationParameters, ExtrapolationInteractionState)
 
 from .UI.CorfuncPanel import Ui_CorfuncDialog
@@ -68,17 +69,18 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model = QtGui.QStandardItemModel(self)
         self.communicate = self.parent.communicator()
         self.communicate.dataDeletedSignal.connect(self.removeData)
-        self._calculator = CorfuncCalculator()
+
         self._allow_close = False
         self._model_item: Optional[QStandardItem] = None
+
         self.data: Optional[Data1D] = None
         self.extrap: Optional[Data1D] = None
         self.has_data = False
-        self.txtLowerQMin.setText("0.0")
-        self.txtLowerQMin.setEnabled(False)
-        self.extrapolation_curve = None
-        self.long_period_method: Optional[LongPeriodMethod] = None
-        self.tangent_method: Optional[TangentMethod] = None
+
+        self._long_period_method: Optional[LongPeriodMethod] = None
+        self._tangent_method: Optional[TangentMethod] = None
+
+        self._calculator: Optional[CorfuncCalculator] = None
 
         # Add slider widget
         self.slider = CorfuncSlider()
@@ -117,7 +119,19 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Set up the mapper
         self.setup_mapper()
 
-    def set_background_warning(self, show_warning: bool = True):
+    def set_background_warning(self):
+        if (self._calculator is None or
+            self._calculator.background is None or
+            self._calculator.min_extrapolated is None):
+
+            show_warning = False
+
+        elif self._calculator.background > self._calculator.min_extrapolated:
+            show_warning = True
+
+        else:
+            show_warning = False
+
         if show_warning:
             self.txtBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
         else:
@@ -132,7 +146,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""
 
-        self.cmdExtract.clicked.connect(self.extract)
+        self.cmdExtract.clicked.connect(self._run)
         self.cmdExtract.setEnabled(False)
 
         self.cmdSave.clicked.connect(self.on_save)
@@ -166,9 +180,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
         self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
 
-        self.trigger.connect(self.finish_transform)
-        self.txtBackground.textChanged.connect(self.on_background_text_changed)
-
         # Validators for other text fields
         self.txtBackground.setValidator(QDoubleValidator())
         self.txtGuinierA.setValidator(QDoubleValidator())
@@ -184,14 +195,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def set_long_period_method(self, value: Optional[LongPeriodMethod]) -> Callable[[bool], None]:
         """ Function to set the long period method"""
         def setter_function(state: bool):
-            self._calculator.long_period_method = value
+            self._long_period_method = value
 
         return setter_function
 
     def set_tangent_method(self, value: Optional[TangentMethod]) -> Callable[[bool], None]:
         """ Function to set the tangent method"""
         def setter_function(state: bool):
-            self._calculator.tangent_method = value
+            self._tangent_method = value
 
         return setter_function
 
@@ -237,6 +248,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._q_space_plot.extrap = None
 
         self._real_space_plot.data = None
+        self._extraction_plot.data = None
+        self._extraction_plot.supplementary = None
         self._idf_plot.data = None
 
         self.slider.setEnabled(False)
@@ -249,7 +262,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.updateFromParameters({})
         self.set_text_enable(False)
 
-        self._calculator.reset_calculated_values()
+        if self._calculator is not None:
+            self._calculator.reset_calculated_values()
+
+        self.set_background_warning()
 
     def model_changed(self, _):
         """Actions to perform when the data is updated"""
@@ -259,129 +275,117 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.mapper.toFirst()
 
-        self._calculator.reset_calculated_values()
+        if self._calculator is not None:
+            self._calculator.reset_calculated_values()
+
         self.slider.extrapolation_parameters = self.extrapolation_parmameters
         self._q_space_plot.draw_data()
 
-    def _update_calculator(self):
-        self._calculator.extrapolation_parameters = self.extrapolation_parmameters
+    def _run(self):
 
-        self._calculator.background = \
-            float(self.model.item(WIDGETS.W_BACKGROUND).text())
+        # Set up calculator
 
+        calculator = CorfuncCalculator(
+            data=self.data,
+            extrapolation_parameters=self.extrapolation_parmameters,
+            tangent_method=self._tangent_method,
+            long_period_method=self._long_period_method)
 
-        self._update_calculator()
+        calculator.fit_background = self.fitBackground.isChecked()
+        calculator.fit_guinier = self.fitGuinier.isChecked()
+        calculator.fit_porod = self.fitPorod.isChecked()
+
+        if not calculator.fit_background:
+            calculator.background = safe_float(self.txtBackground.text())
+
+        if not calculator.fit_guinier:
+            guinier = GuinierData(A = safe_float(self.txtGuinierA.text()),
+                                  B = safe_float(self.txtGuinierB.text()))
+
+            calculator.guinier = guinier
+
+        if not calculator.fit_porod:
+            porod = PorodData(K=safe_float(self.txtPorodK.text()),
+                              sigma=safe_float(self.txtPorodSigma.text()))
+
+            calculator.porod = porod
+
+        # Run calculation
+
         try:
-            background = self._calculator.compute_background()
-            temp = QtGui.QStandardItem("{:.4g}".format(background))
-            self.model.setItem(WIDGETS.W_BACKGROUND, temp)
-        except (LinAlgError, ValueError):
-            message = "These is not enough data in the fitting range. "\
-                      "Try decreasing the upper Q or increasing the cutoff Q"
-            QtWidgets.QMessageBox.warning(self, "Calculation Error",
-                                      message)
 
-        """Extend the experiemntal data with guinier and porod curves."""
-        self._update_calculator()
-        self.model.itemChanged.disconnect(self.model_changed)
-        try:
-            params, extrapolation, self.extrapolation_curve = self._calculator.compute_extrapolation()
-        except (LinAlgError, ValueError):
-            message = "These is not enough data in the fitting range. "\
-                      "Try decreasing the upper Q, increasing the "\
-                      "cutoff Q, or increasing the lower Q."
-            QtWidgets.QMessageBox.warning(self, "Calculation Error",
-                                      message)
-            self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem(""))
-            self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem(""))
-            self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem(""))
-            self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem(""))
-            self._q_space_plot.extrap = None
-            self.model_changed(None)
-            return
-        finally:
-            self.model.itemChanged.connect(self.model_changed)
+            try:
+                calculator.run()
+            except CalculationError as e:
+                logging.error("CorfuncCalculator could not complete. " + e.msg)
 
-        self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
-        self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
-        self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
-        self.model.setItem(WIDGETS.W_PORODSIGMA,
-                           QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
+            self._calculator = calculator
 
-        self.extrap = extrapolation
-        self._q_space_plot.extrap = extrapolation
-        self.model_changed(None)
-        self.cmdTransform.setEnabled(True)
-        self.cmdSaveExtrapolation.setEnabled(True)
+            # Get data from the plots
 
-        self.tabWidget.setCurrentIndex(0)
+            background = calculator.background
+            guinier = calculator.guinier
+            porod = calculator.porod
+            extrapolated = calculator.extrapolated
+            transformed = calculator.transformed
+            lamellar = calculator.lamellar_parameters
+            supplementary = calculator.supplementary_parameters
 
-        extrap = self.extrap
-        background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
-        q_range = self.data.x[0], self.data.x[-1]
+            print(background)
+            print(guinier)
+            print(porod)
+            print(transformed)
+            print(lamellar)
+            print(supplementary)
 
-        def updatefn(msg):
-            """Report progress of transformation."""
-            self.communicate.statusBarUpdateSignal.emit(msg)
+            # Set plots
+            self._q_space_plot.extrap = extrapolated
+            self._real_space_plot.data = transformed.gamma_1, transformed.gamma_3
+            self._extraction_plot.data = transformed.gamma_1
+            self._extraction_plot.supplementary = supplementary
+            self._idf_plot.data = transformed.idf
 
-        def completefn(transform_result: Tuple[Data1D, Data1D, Data1D]):
-            """Extract the values from the transforms and plot"""
-            td = TransformedData(
-                gamma_1=transform_result[0],
-                gamma_3=transform_result[1],
-                idf=transform_result[2],
-                q_range=q_range)
+            # Set GUI values
 
-            self.trigger.emit(td) # TODO: Make this return more structured data earlier
+            # Background
+            if background is not None:
+                self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem("{:.5g}".format(background)))
+                self.set_background_warning()
 
-        self._update_calculator()
-        self._calculator._calculate_transforms(extrap, method, background,
-                                               completefn, updatefn)
+            # Interpolation
+            if guinier is not None:
+                self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem("{:.5g}".format(guinier.A)))
+                self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem("{:.5g}".format(guinier.B)))
+            if porod is not None:
+                self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem("{:.5g}".format(porod.K)))
+                self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem("{:.5g}".format(porod.sigma)))
+
+            # Lamellar
+            if lamellar is not None:
+                self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(lamellar.core_thickness)))
+                self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(lamellar.interface_thickness)))
+                self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(lamellar.hard_block_thickness)))
+                self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(lamellar.soft_block_thickness)))
+                self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(lamellar.local_crystallinity)))
+                self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem("{:.3g}".format(lamellar.polydispersity_ryan)))
+                self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(lamellar.polydispersity_stribeck)))
+                self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(lamellar.long_period)))
 
 
-        self.transformed_data = data
-
-        self._real_space_plot.data = data.gamma_1, data.gamma_3
-        self._extraction_plot.data = data.gamma_1
-
-        # self.update_real_space_plot(transforms)
-
-        self._idf_plot.data = data.idf
-
-        self.cmdExtract.setEnabled(True)
-        self.cmdSave.setEnabled(True)
-
-        self.tabWidget.setCurrentIndex(1)
-
-        if self.transformed_data is None:
-            return
-
-        extracted = self._calculator.extract_parameters(
-            transformed_data=self.transformed_data,
-            long_period_method=self.long_period_method,
-            tangent_method=self.tangent_method)
-
-        if extracted is not None:
-
-            params, supp = extracted
-
-            self._extraction_plot.supplementary = supp
-
-            self.model.itemChanged.disconnect(self.model_changed)
-
-            self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params.core_thickness)))
-            self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params.interface_thickness)))
-            self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params.hard_block_thickness)))
-            self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(params.soft_block_thickness)))
-            self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params.local_crystallinity)))
-            self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem("{:.3g}".format(params.polydispersity_ryan)))
-            self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(params.polydispersity_stribeck)))
-            self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params.long_period)))
-
-            self.model.itemChanged.connect(self.model_changed)
-            self.model_changed(None)
+            self.cmdSave.setEnabled(True)
+            self.cmdSaveExtrapolation.setEnabled(True)
 
             self.tabWidget.setCurrentIndex(2)
+
+
+
+        except ValueError as e:
+            logging.error(repr(e))
+            self.cmdSave.setEnabled(False)
+            self.cmdSaveExtrapolation.setEnabled(False)
+            self.set_background_warning()
+
+
 
 
     def setup_mapper(self):
@@ -468,9 +472,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         data = GuiUtils.dataFromItem(model_item)
         self.data = data
         self._model_item = model_item
-        self._calculator.set_data(data)
-        self.cmdCalculateBg.setEnabled(True)
-        self.cmdExtrapolate.setEnabled(True)
 
         self.model.itemChanged.disconnect(self.model_changed)
 
@@ -494,6 +495,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         log_data_min = math.log(min(self.data.x))
         log_data_max = math.log(max(self.data.x))
 
+        self.cmdExtract.setEnabled(True)
+
         def fractional_position(f):
             return math.exp(f*log_data_max + (1-f)*log_data_min)
 
@@ -512,7 +515,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.slider.setEnabled(True)
 
         self.model_changed(None)
-        self.cmdTransform.setEnabled(False)
         self._path = data.name
         self.model.setItem(WIDGETS.W_FILENAME, QtGui.QStandardItem(self._path))
 
@@ -523,6 +525,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.has_data = True
 
         self.tabWidget.setCurrentIndex(0)
+        self.set_background_warning()
 
 
     def setClosable(self, value=True):
@@ -639,58 +642,50 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
         Save corfunc state into a file
         """
+
+        if self._calculator is None:
+            logging.error("Save transformed: No calculation present")
+            return
+
         f_name = QtWidgets.QFileDialog.getSaveFileName(
             caption="Save As",
             filter="Comma Separated Values (*.csv)",
             parent=None)[0]
+
         if not f_name:
             return
+
         if "." not in f_name:
             f_name += ".csv"
 
 
+        transformed = self._calculator.transformed
         with open(f_name, "w") as outfile:
             outfile.write("X,1D,3D,IDF\n")
             np.savetxt(outfile,
                        np.vstack([(
-                           self.transformed_data.gamma_1.x,
-                           self.transformed_data.gamma_1.y,
-                           self.transformed_data.gamma_3.y,
-                           self.transformed_data.idf.y)]).T,
+                           transformed.gamma_1.x,
+                           transformed.gamma_1.y,
+                           transformed.gamma_3.y,
+                           transformed.idf.y)]).T,
                        delimiter=",")
-    # pylint: enable=invalid-name
 
     def on_save_extrapolation(self):
+
+        if self.data is None:
+            logging.error("Save extrapolation: No data present")
+
+        if self._calculator is None:
+            logging.error("Save extrapolation: No calculation present")
+            return
+
         q = self.data.x
-        if self.extrapolation_curve is not None:
+        if self._calculator.extrapolation_curve is not None:
             window = SaveExtrapolatedPopup(q, self.extrapolation_curve)
             window.exec_()
         else:
             raise RuntimeError("Inconsistent state: save extrapolation called without extrapolation")
 
-    def on_background_text_changed(self, data):
-        """ Background value number changed"""
-        # If data has a "bad" value we want to indicate this
-        # The only good values can be interpreted as non-negative floats
-
-
-        is_bad = True
-
-        try:
-            value = float(data)
-            if self.data is not None:
-                min = np.min(self.data.y)
-                if value <= min:
-                    is_bad = False
-                else:
-                    logging.warning(f"Background value results in negative intensities ({value} > {min})")
-            else:
-                is_bad = False
-
-        except ValueError:
-            pass
-
-        self.set_background_warning(is_bad)
 
 
 
@@ -798,15 +793,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             WIDGETS.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
         self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem(
             params.get('background', '0')))
-        self.cmdCalculateBg.setEnabled(params.get('background', '0') != '0')
         self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
-        self.cmdExtrapolate.setEnabled(params.get('guinier_a', '0.0') != '0.0')
-        self.cmdTransform.setEnabled(params.get('long_period', '0') != '0')
         self.cmdExtract.setEnabled(params.get('long_period', '0') != '0')
-        if params.get('guinier_a', '0.0') != '0.0':
-            self.extrapolate()
-        if params.get('long_period', '0') != '0':
-            self.transform()
 
     @property
     def real_space_figure(self):

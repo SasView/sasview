@@ -3,7 +3,7 @@ This module implements corfunc
 """
 
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Callable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -32,12 +32,17 @@ from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
 
+class CalculationError(Exception):
+    """ Error doing calculation"""
+    def __init__(self, msg: str):
+        self.msg = msg
+        super().__init__(msg)
 
 class CorfuncCalculator:
 
     def __init__(self,
                  data: Optional[Data1D] = None,
-                 extraction_parameters: Optional[SettableExtrapolationParameters] = None,
+                 extrapolation_parameters: Optional[SettableExtrapolationParameters] = None,
                  long_period_method: Optional[LongPeriodMethod] = None,
                  tangent_method: Optional[TangentMethod] = None):
 
@@ -45,14 +50,14 @@ class CorfuncCalculator:
         Back-end for corfunc calculations
 
         :param data: Input data (Data1D)
-        :param extraction_parameters: SettableExtrapolationParameters object containing the q values use to extrapolate
+        :param extrapolation_parameters: SettableExtrapolationParameters object containing the q values use to extrapolate
         """
 
         # Input data
         self._data = data
 
         # Input parameters
-        self._extrapolation_parameters: Optional[SettableExtrapolationParameters] = extraction_parameters
+        self._extrapolation_parameters: Optional[SettableExtrapolationParameters] = extrapolation_parameters
         self.tangent_method: Optional[TangentMethod] = tangent_method
         self.long_period_method: Optional[LongPeriodMethod] = long_period_method
 
@@ -85,6 +90,8 @@ class CorfuncCalculator:
         self._transformed_data: Optional[TransformedData] = None
         self._lamellar_parameters: Optional[LamellarParameters] = None
         self._supplementary_parameters: Optional[SupplementaryParameters] = None
+
+
 
     #
     # Getters and setters
@@ -130,24 +137,37 @@ class CorfuncCalculator:
         return self.data.x[0], self.data.x[-1]
     @property
     def background(self):
-        if self._background.data is None:
+        if self._background is None:
             return None
 
         return self._background.data
 
+    @background.setter
+    def background(self, value: Optional[float]):
+        self._background.data = value
+
     @property
     def guinier(self):
-        if self._guinier.data is None:
+        if self._guinier is None:
             return None
 
         return self._guinier.data
 
+    @guinier.setter
+    def guinier(self, value: Optional[GuinierData]):
+        self._guinier.data = value
+
     @property
     def porod(self):
-        if self._porod.data is None:
+        if self._porod is None:
             return None
 
         return self._porod.data
+
+    @porod.setter
+    def porod(self, value: Optional[PorodData]):
+        self._porod.data = value
+
     @property
     def transformed(self):
         return self._transformed_data
@@ -157,9 +177,47 @@ class CorfuncCalculator:
         return self._lamellar_parameters
 
     @property
-    def supplementary_parameters(self) -> SupplementaryParameters:
+    def supplementary_parameters(self) -> Optional[SupplementaryParameters]:
         return self._supplementary_parameters
 
+    @property
+    def extrapolation_function(self) -> Optional[Callable]:
+        return self._extrapolation_function
+
+    @property
+    def min_extrapolated(self) -> Optional[float]:
+        if self._extrapolation_data is None:
+            return None
+        else:
+            return np.min(self._extrapolation_data.y)
+
+    @property
+    def fit_background(self):
+        return self._background.allow_fit
+
+    @fit_background.setter
+    def fit_background(self, value: bool):
+        self._background.allow_fit = value
+
+    @property
+    def fit_guinier(self):
+        return self._guinier.allow_fit
+
+    @fit_guinier.setter
+    def fit_guinier(self, value: bool):
+        self._guinier.allow_fit = value
+
+    @property
+    def fit_porod(self):
+        return self._porod.allow_fit
+
+    @fit_porod.setter
+    def fit_porod(self, value: bool):
+        self._porod.allow_fit = value
+
+    @property
+    def extrapolated(self):
+        return self._extrapolation_data
 
     #
     # Calculation Steps
@@ -175,7 +233,7 @@ class CorfuncCalculator:
         self._calculate_extrapolation_function()
         self._calculate_extrapolation_data()
         self._calculate_transforms()
-        self._calulate_parameters()
+        self._calculate_parameters()
 
 
     def _calculate_background(self):
@@ -377,7 +435,7 @@ class CorfuncCalculator:
         self._transformed_data = TransformedData(transform1d, transform3d, idf)
 
 
-    def _calulate_parameters(self):
+    def _calculate_parameters(self):
         """
         Extract the interesting measurements from a correlation function
         """
@@ -395,7 +453,7 @@ class CorfuncCalculator:
 
         # If there are no maxima, return None
         if len(maxs) == 0:
-            return None
+            raise CalculationError("No maxima found in data")
 
         max_values = gamma[maxs]
         largest_max = np.argmax(max_values)
@@ -483,7 +541,7 @@ class CorfuncCalculator:
         mask = np.where(np.abs((gamma-(tangent_slope*z+tangent_intercept))/gamma) < 0.01)[0]
 
         if len(mask) == 0:  # Return garbage for bad fits
-            return None
+            raise CalculationError("No tangent values found")
 
         interface_thickness = z[mask[0]]  # Beginning of Linear Section
         core_thickness = z[mask[-1]]  # End of Linear Section
