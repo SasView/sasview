@@ -18,3 +18,4 @@ class ExtrapolationInteractionState(NamedTuple):
     extrapolation_parameters: ExtrapolationParameters
     working_line_id: Optional[int] = None
     dragging_line_position: Optional[float] = None
+
