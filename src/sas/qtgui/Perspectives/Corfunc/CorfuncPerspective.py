@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 # global
-from PyQt5.QtGui import QStandardItem
+from PyQt5.QtGui import QStandardItem, QDoubleValidator
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 from numpy.linalg.linalg import LinAlgError
@@ -148,6 +148,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_changed_1)
         self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_changed_2)
         self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.txtLowerQMax.setValidator(QDoubleValidator(bottom=0))
+        self.txtUpperQMin.setValidator(QDoubleValidator(bottom=0))
+        self.txtUpperQMax.setValidator(QDoubleValidator(bottom=0))
         self.set_text_enable(False)
 
         # Calculation Options
@@ -165,6 +168,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.trigger.connect(self.finish_transform)
         self.txtBackground.textChanged.connect(self.on_background_text_changed)
+
+        # Validators for other text fields
+        self.txtBackground.setValidator(QDoubleValidator())
+        self.txtGuinierA.setValidator(QDoubleValidator())
+        self.txtGuinierB.setValidator(QDoubleValidator())
+        self.txtPorodK.setValidator(QDoubleValidator())
+        self.txtPorodSigma.setValidator(QDoubleValidator())
 
     def set_text_enable(self, state: bool):
         self.txtLowerQMax.setEnabled(state)
@@ -662,8 +672,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """ Background value number changed"""
         # If data has a "bad" value we want to indicate this
         # The only good values can be interpreted as non-negative floats
-
-        sdlfhasodjkfhasdlf THIS SHOULD NOW ONLY BE TRIGGERED WHEN THE MAIN CALCULATION IS CALLED
 
 
         is_bad = True
