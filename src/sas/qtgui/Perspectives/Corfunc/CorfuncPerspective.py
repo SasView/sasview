@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from numpy.linalg.linalg import LinAlgError
 
 
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Callable
 
 import logging
 
@@ -22,8 +22,8 @@ from PyQt5 import QtGui, QtWidgets
 from sas.qtgui.Perspectives.Corfunc.CorfunSlider import CorfuncSlider
 from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
+from sas.qtgui.Perspectives.Corfunc.ExtractionCanvas import ExtractionCanvas
 from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
-from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
@@ -31,11 +31,11 @@ from sas.qtgui.Utilities.Reports import ReportBase
 from sas.qtgui.Plotting.PlotterData import Data1D
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
-# pylint: enable=import-error, no-name-in-module
+from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters, ExtrapolationInteractionState
+from sas.sascalc.corfunc.calculation_data import TransformedData,  TangentMethod, LongPeriodMethod
 
-# local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
-from .util import WIDGETS, safe_float, TransformedData
+from .util import WIDGETS, safe_float
 from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from ..perspective import Perspective
 
@@ -75,6 +75,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMin.setText("0.0")
         self.txtLowerQMin.setEnabled(False)
         self.extrapolation_curve = None
+        self.long_period_method: Optional[LongPeriodMethod] = None
+        self.tangent_method: Optional[TangentMethod] = None
 
         # Add slider widget
         self.slider = CorfuncSlider()
@@ -88,6 +90,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._real_space_plot = RealSpaceCanvas(self)
         self.realSpaceLayout.insertWidget(0, self._real_space_plot)
         self.realSpaceLayout.insertWidget(1, NavigationToolbar2QT(self._real_space_plot, self))
+
+        self._extraction_plot = ExtractionCanvas(self)
+        self.diagramLayout.insertWidget(0, self._extraction_plot)
+        self.diagramLayout.insertWidget(1, NavigationToolbar2QT(self._extraction_plot, self))
 
         self._idf_plot = IDFCanvas(self)
         self.idfLayout.insertWidget(0, self._idf_plot)
@@ -150,6 +156,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
         self.set_text_enable(False)
 
+        # Calculation Options
+        self.radTangentAuto.clicked.connect(self.set_tangent_method(None))
+        self.radTangentInflection.clicked.connect(self.set_tangent_method(TangentMethod.INFLECTION))
+        self.radTangentMidpoint.clicked.connect(self.set_tangent_method(TangentMethod.HALF_MIN))
+
+        self.radLongPeriodAuto.clicked.connect(self.set_long_period_method(None))
+        self.radLongPeriodMax.clicked.connect(self.set_long_period_method(LongPeriodMethod.MAX))
+        self.radLongPeriodDouble.clicked.connect(self.set_long_period_method(LongPeriodMethod.DOUBLE_MIN))
+
+        # Slider values
         self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
         self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
 
@@ -160,6 +176,20 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMax.setEnabled(state)
         self.txtUpperQMin.setEnabled(state)
         self.txtUpperQMax.setEnabled(state)
+
+    def set_long_period_method(self, value: Optional[LongPeriodMethod]) -> Callable[[bool], None]:
+        """ Function to set the long period method"""
+        def setter_function(state: bool):
+            self.long_period_method = value
+
+        return setter_function
+
+    def set_tangent_method(self, value: Optional[TangentMethod]) -> Callable[[bool], None]:
+        """ Function to set the tangent method"""
+        def setter_function(state: bool):
+            self.tangent_method = value
+
+        return setter_function
 
     def setup_model(self):
         """Populate the model with default data."""
@@ -274,14 +304,21 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         extrap = self.extrap
         background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
+        q_range = self.data.x[0], self.data.x[-1]
 
         def updatefn(msg):
             """Report progress of transformation."""
             self.communicate.statusBarUpdateSignal.emit(msg)
 
-        def completefn(transformed_data: Tuple[Data1D, Data1D, Data1D]):
+        def completefn(transform_result: Tuple[Data1D, Data1D, Data1D]):
             """Extract the values from the transforms and plot"""
-            self.trigger.emit(TransformedData(*transformed_data)) # TODO: Make this return more structured data earlier
+            td = TransformedData(
+                gamma_1=transform_result[0],
+                gamma_3=transform_result[1],
+                idf=transform_result[2],
+                q_range=q_range)
+
+            self.trigger.emit(td) # TODO: Make this return more structured data earlier
 
         self._update_calculator()
         self._calculator.compute_transform(extrap, method, background,
@@ -295,6 +332,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.transformed_data = data
 
         self._real_space_plot.data = data.gamma_1, data.gamma_3
+        self._extraction_plot.data = data.gamma_1
 
         # self.update_real_space_plot(transforms)
 
@@ -310,9 +348,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         if self.transformed_data is None:
             return
 
-        params = self._calculator.extract_parameters(self.transformed_data[0])
+        extracted = self._calculator.extract_parameters(
+            transformed_data=self.transformed_data,
+            long_period_method=self.long_period_method,
+            tangent_method=self.tangent_method)
 
-        if params is not None:
+        if extracted is not None:
+
+            params, supp = extracted
+
+            self._extraction_plot.supplementary = supp
 
             self.model.itemChanged.disconnect(self.model_changed)
 
@@ -327,6 +372,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
             self.model.itemChanged.connect(self.model_changed)
             self.model_changed(None)
+
+            self.tabWidget.setCurrentIndex(2)
 
 
     def setup_mapper(self):

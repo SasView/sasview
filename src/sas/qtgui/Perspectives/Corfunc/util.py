@@ -1,5 +1,3 @@
-from typing import NamedTuple
-from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import enum
 
 WIDGETS = enum( 'W_QMIN',
@@ -28,8 +26,3 @@ def safe_float(x: str):
     except:
         return 0.0
 
-
-class TransformedData(NamedTuple):
-    gamma_1: Data1D
-    gamma_3: Data1D
-    idf: Data1D
