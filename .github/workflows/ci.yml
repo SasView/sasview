@@ -295,17 +295,18 @@ jobs:
         shell: bash
         run: echo "BRANCH_NAME=$GITHUB_HEAD_REF" >> $GITHUB_ENV
 
+      #TODO: This will be separate cronjob. Just testing
       - name: Upload installer to GitHub releases
-        if: ${{ env.RELEASE == 'true' && matrix.installer }}
+        if: ${{ matrix.installer }}
         uses: ncipollo/release-action@v1
         with:
-          draft: true
+          draft: false
           prerelease: true
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
-          name: ${{ env.BRANCH_NAME }}
+          name: "nightly-build"
           tag: ${{ env.BRANCH_NAME }}
 
 
