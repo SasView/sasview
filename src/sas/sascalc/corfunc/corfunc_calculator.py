@@ -197,6 +197,7 @@ class CorfuncCalculator:
 
     @fit_background.setter
     def fit_background(self, value: bool):
+        print("Setting Background fit")
         self._background.allow_fit = value
 
     @property
@@ -205,6 +206,7 @@ class CorfuncCalculator:
 
     @fit_guinier.setter
     def fit_guinier(self, value: bool):
+        print("Setting Guinier fit")
         self._guinier.allow_fit = value
 
     @property
@@ -213,6 +215,7 @@ class CorfuncCalculator:
 
     @fit_porod.setter
     def fit_porod(self, value: bool):
+        print("Setting Porod fit")
         self._porod.allow_fit = value
 
     @property
@@ -259,7 +262,7 @@ class CorfuncCalculator:
             point_3 = self._extrapolation_parameters.point_3
             mask = np.logical_and(q > point_2, q < point_3)
 
-            _, _, background = CorfuncCalculator.fit_porod(q[mask], self._data.y[mask])
+            _, _, background = CorfuncCalculator.calculate_porod_parameters(q[mask], self._data.y[mask])
 
             self._background.data = background
 
@@ -297,7 +300,7 @@ class CorfuncCalculator:
 
             # Returns an array where the 1st and 2nd elements are the values of k
             # and sigma for the best-fit Porod function
-            K, sigma, _ = CorfuncCalculator.fit_porod(q[mask], self.data.y[mask])
+            K, sigma, _ = CorfuncCalculator.calculate_porod_parameters(q[mask], self.data.y[mask])
 
             self._porod.data = PorodData(K=K, sigma=sigma)
 
@@ -323,7 +326,7 @@ class CorfuncCalculator:
             q = self.data.x
             mask = np.logical_and(q < self._extrapolation_parameters.point_1, 0 < q)
 
-            g = CorfuncCalculator.fit_guinier(q[mask], self._background_subtracted[mask])
+            g = CorfuncCalculator.calculate_guinier_parameters(q[mask], self._background_subtracted[mask])
 
             self._guinier.data = GuinierData(A=g[0], B=g[1])
 
@@ -616,14 +619,14 @@ class CorfuncCalculator:
         return I * q * q
 
     @staticmethod
-    def fit_guinier(q, I):
+    def calculate_guinier_parameters(q, I):
         """Fit the Guinier region of the curve using linear least squares"""
         A = np.vstack([np.ones(q.shape), q**2]).T
 
         return np.linalg.lstsq(A, np.log(I))[0]
 
     @staticmethod
-    def fit_porod(q, I):
+    def calculate_porod_parameters(q, I):
         """Fit the Porod region of the curve"""
         fitp = scipy.optimize.curve_fit(
             CorfuncCalculator.porod_fitting_function_expected, q,

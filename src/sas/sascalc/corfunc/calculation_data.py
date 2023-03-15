@@ -17,6 +17,9 @@ class Fittable(Generic[T]):
     def clear(self):
         self.data = None
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.data}, {self.allow_fit})"
+
 @dataclass
 class TransformedData:
     """ Container for the data that is returned by the corfunc transform method"""

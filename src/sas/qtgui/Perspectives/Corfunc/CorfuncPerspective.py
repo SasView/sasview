@@ -300,6 +300,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         calculator.fit_guinier = self.fitGuinier.isChecked()
         calculator.fit_porod = self.fitPorod.isChecked()
 
+
         if not calculator.fit_background:
             calculator.background = safe_float(self.txtBackground.text())
 
