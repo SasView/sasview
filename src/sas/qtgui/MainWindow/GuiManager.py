@@ -919,14 +919,6 @@ class GuiManager(object):
         """
         Display the Jupyter console as a docked widget.
         """
-        # reset stdout/stderr
-        if sys.stdout is None:
-            logging.warning(f"sys.stdout is None")
-            logging.warning(str(sys.__stdout__))
-            logging.warning(str(sys.__stderr__))
-            sys.stdout = sys.__stdout__
-            sys.stderr = sys.__stderr__
-
         # Import moved here for startup performance reasons
         from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
         terminal = IPythonWidget()
