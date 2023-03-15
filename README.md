@@ -5,5 +5,3 @@ This project was initiated by the NSF funded DANSE project, DMR-0520547, SANS su
 This project receives funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 654000
 
 [SasView website](http://www.sasview.org)
-
-[![Travis-CI Build Status](https://travis-ci.org/SasView/sasview.svg?branch=master)](https://travis-ci.org/SasView/sasview)
