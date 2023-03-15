@@ -30,6 +30,4 @@ Fitting Documentation
 
    Computations with a GPU <gpu_setup>
 
-   Scripting Interface to sasmodels <scripting>
-
    References <refs>
