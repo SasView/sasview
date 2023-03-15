@@ -81,6 +81,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._tangent_method: Optional[TangentMethod] = None
 
         self._calculator: Optional[CorfuncCalculator] = None
+        self._running = False
 
         # Add slider widget
         self.slider = CorfuncSlider()
@@ -280,9 +281,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def _run(self):
 
-        # Set up calculator
+        if self._running:
+            return
 
+        self._running = True
         self.cmdExtract.setText("Calculating...")
+        self.cmdExtract.repaint()
+
+        # Set up calculator
 
         calculator = CorfuncCalculator(
             data=self.data,
@@ -309,12 +315,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
             calculator.porod = porod
 
-        # Run calculation
-
         try:
 
             try:
+
                 calculator.run()
+
             except CalculationError as e:
                 logging.error("CorfuncCalculator could not complete. " + e.msg)
 
@@ -363,13 +369,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                 self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(lamellar.polydispersity_stribeck)))
                 self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(lamellar.long_period)))
 
-
             self.cmdSave.setEnabled(True)
             self.cmdSaveExtrapolation.setEnabled(True)
-
-            self.tabWidget.setCurrentIndex(2)
-
-
 
         except ValueError as e:
             logging.error(repr(e))
@@ -377,8 +378,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.cmdSaveExtrapolation.setEnabled(False)
             self.set_background_warning()
 
-
         self.cmdExtract.setText("Go")
+        self.cmdExtract.repaint()
+
+        self._running = False
 
 
     def setup_mapper(self):

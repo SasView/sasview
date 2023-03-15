@@ -236,6 +236,9 @@ class CorfuncCalculator:
         self._calculate_parameters()
 
 
+
+    # Calculation components
+
     def _calculate_background(self):
         """
         Compute the background level from the Porod region of the data,

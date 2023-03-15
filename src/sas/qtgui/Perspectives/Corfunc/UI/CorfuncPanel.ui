@@ -427,6 +427,18 @@
                  </item>
                  <item>
                   <widget class="QPushButton" name="cmdExtract">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>120</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="toolTip">
                     <string>Extract model parameters from the real space transformed curve.</string>
                    </property>
