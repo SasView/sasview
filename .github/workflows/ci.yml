@@ -306,6 +306,7 @@ jobs:
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "installers/dist/SasView5.dmg, installers/dist/setupSasView.exe, installers/dist/sasview5.tar.gz"
+          body: "Nightly build of main SasView branch"
           name: "nightly-build"
           tag: "nightly-build"
 
