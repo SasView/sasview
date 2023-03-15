@@ -106,7 +106,7 @@ jobs:
         git clone --depth=1 --branch=release_1.0.7 https://github.com/SasView/sasmodels.git ../sasmodels
         git clone --branch=master https://github.com/bumps/bumps.git ../bumps
         cd ../bumps
-        git checkout ccc150c60d5cf5f4e16a45a8dfd67c3db1f8c581
+        git checkout b339e9e1e7e01047816a6f6d6dd67cb97c7227b5
         cd ../sasview
 
     - name: Build and install sasmodels
