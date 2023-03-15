@@ -923,7 +923,7 @@ class GuiManager(object):
         if sys.stdout is None:
             logging.warning(f"sys.stdout is None")
             logging.warning(str(sys.__stdout__))
-            logging.warning(str(sys.__stderr__)
+            logging.warning(str(sys.__stderr__))
             sys.stdout = sys.__stdout__
             sys.stderr = sys.__stderr__
 
