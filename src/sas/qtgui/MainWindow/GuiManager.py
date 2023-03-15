@@ -919,6 +919,10 @@ class GuiManager(object):
         """
         Display the Jupyter console as a docked widget.
         """
+        # show stdout 
+        std_out = str(sys.stdout)
+        logging.warning(f" *** actionPython_Shell_Editor  sys.stdout = {std_out} *******")
+        sys.stdout = self._workspace.console
         # Import moved here for startup performance reasons
         from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
         terminal = IPythonWidget()
