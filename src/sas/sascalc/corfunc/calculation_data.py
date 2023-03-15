@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, TypeVar, Generic
+from typing import Tuple, Optional, TypeVar, Generic, NamedTuple
 
 from sasdata.dataloader.data_info import Data1D
 
@@ -97,8 +97,8 @@ class SettableExtrapolationParameters:
     point_3: float
 
 
-@dataclass
-class ExtrapolationParameters:
+
+class ExtrapolationParameters(NamedTuple):
     """ Represents the parameters defining extrapolation"""
     data_q_min: float
     point_1: float
