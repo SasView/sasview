@@ -197,7 +197,6 @@ class CorfuncCalculator:
 
     @fit_background.setter
     def fit_background(self, value: bool):
-        print("Setting Background fit")
         self._background.allow_fit = value
 
     @property
@@ -206,7 +205,6 @@ class CorfuncCalculator:
 
     @fit_guinier.setter
     def fit_guinier(self, value: bool):
-        print("Setting Guinier fit")
         self._guinier.allow_fit = value
 
     @property
@@ -215,7 +213,6 @@ class CorfuncCalculator:
 
     @fit_porod.setter
     def fit_porod(self, value: bool):
-        print("Setting Porod fit")
         self._porod.allow_fit = value
 
     @property
