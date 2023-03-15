@@ -21,7 +21,7 @@ jobs:
     - uses: actions/download-artifact@v3
 
     - name: Display structure of downloaded files
-        run: ls -R
+      run: ls -R
 
 #TODO: Check what is the structure of downloaded files and update
 #    - name: Upload installer to GitHub releases
