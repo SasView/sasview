@@ -111,7 +111,7 @@ class ArcInteractor(BaseInteractor):
 
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """

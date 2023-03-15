@@ -189,12 +189,12 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         """
         self._post_data(self.nbins)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
-        self.inner_circle.restore()
-        self.outer_circle.restore()
+        self.inner_circle.restore(ev)
+        self.outer_circle.restore(ev)
 
     def move(self, x, y, ev):
         """
@@ -340,7 +340,7 @@ class RingInteractor(BaseInteractor):
         """
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
