@@ -20,8 +20,11 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/download-artifact@v3
 
-    - name: Show label
-      run: ls -R
+    - name: List lables in PR
+      run: |
+        echo "Labels in PR"
+        echo ${{ github.event.label.name }}
+        echo ${{ github.event.pull_request.labels.*.name }}
 
 #TODO: Check what is the structure of downloaded files and update
 #    - name: Upload installer to GitHub releases

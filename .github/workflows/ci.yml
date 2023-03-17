@@ -67,12 +67,6 @@ jobs:
             **/ci.yml
             **/requirements*.txt
 
-      - name: List lables in PR
-          run: |
-            echo "Labels in PR"
-            echo ${{ github.event.label.name }}
-            echo ${{ github.event.pull_request.labels.*.name }}
-
       ### Installation of build-dependencies
 
       - name: Install X11 libraries (Linux)
