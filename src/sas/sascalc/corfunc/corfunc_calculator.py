@@ -3,23 +3,28 @@ This module implements corfunc
 """
 
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Callable
 from dataclasses import dataclass
 from enum import Enum
 
 import numpy as np
-from scipy.optimize import curve_fit
+import scipy.optimize
 from scipy.interpolate import interp1d
 from scipy.signal import argrelextrema
-from numpy.linalg import lstsq
+from scipy.fftpack import dct
+from scipy.integrate import trapz, cumtrapz
 
 from sas.sascalc.corfunc.calculation_data import (TransformedData,
-                                                  ExtractedParameters,
+                                                  LamellarParameters,
                                                   SupplementaryParameters,
                                                   TangentMethod,
-                                                  LongPeriodMethod)
+                                                  LongPeriodMethod,
+                                                  ExtrapolationParameters,
+                                                  SettableExtrapolationParameters,
+                                                  Fittable,
+                                                  PorodData,
+                                                  GuinierData)
 
-from sas.sascalc.corfunc.extrapolation_data import ExtrapolationParameters
 
 from sasdata.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread
@@ -27,169 +32,419 @@ from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
 
+class CalculationError(Exception):
+    """ Error doing calculation"""
+    def __init__(self, msg: str):
+        self.msg = msg
+        super().__init__(msg)
 
 class CorfuncCalculator:
 
     def __init__(self,
-                 data: Optional[Data1D]=None,
-                 lowerq: Optional[float]=None,
-                 upperq: Optional[Tuple[float, float]]=None,
-                 scale: float=1.0):
-        """
-        Initialize the class.
+                 data: Optional[Data1D] = None,
+                 extrapolation_parameters: Optional[SettableExtrapolationParameters] = None,
+                 long_period_method: Optional[LongPeriodMethod] = None,
+                 tangent_method: Optional[TangentMethod] = None):
 
-        :param data: Data of the type DataLoader.Data1D
-        :param lowerq: The Q value to use as the boundary for
-            Guinier extrapolation
-        :param upperq: A tuple of the form (lower, upper).
-            Values between lower and upper will be used for Porod extrapolation
-        :param scale: Scaling factor for I(q)
         """
-        self._data = None
-        self.set_data(data, scale)
-        self.lowerq = lowerq
-        self.upperq = upperq
-        self.background = self.compute_background()
-        self._transform_thread = None
+        Back-end for corfunc calculations
+
+        :param data: Input data (Data1D)
+        :param extrapolation_parameters: SettableExtrapolationParameters object containing the q values use to extrapolate
+        """
+
+        # Input data
+        self._data = data
+
+        # Input parameters
+        self._extrapolation_parameters: Optional[SettableExtrapolationParameters] = extrapolation_parameters
+        self.tangent_method: Optional[TangentMethod] = tangent_method
+        self.long_period_method: Optional[LongPeriodMethod] = long_period_method
+
+        # Fittable parameters
+        self._background: Fittable[float] = Fittable()
+        self._porod: Fittable[PorodData] = Fittable()
+        self._guinier: Fittable[GuinierData] = Fittable()
+
+        # Derived quantities
+        self._background_subtracted: Optional[np.ndarray] = None
+        self._extrapolation_function: Optional[SmoothJoin] = None
+        self._extrapolation_data: Optional[Data1D] = None
+        self._transformed_data: Optional[TransformedData] = None
+        self._lamellar_parameters: Optional[LamellarParameters] = None
+        self._supplementary_parameters: Optional[SupplementaryParameters] = None
+
+    def reset_calculated_values(self):
+
+        """ Resets the calculated values, but does not clear the data or reset the user specified parameters """
+
+        # Fitted parameters
+        self._background.clear()
+        self._porod.clear()
+        self._guinier.clear()
+
+        # Derived quantities
+        self._background_subtracted: Optional[np.ndarray] = None
+        self._extrapolation_function: Optional[SmoothJoin] = None
+        self._extrapolation_data: Optional[Data1D] = None
+        self._transformed_data: Optional[TransformedData] = None
+        self._lamellar_parameters: Optional[LamellarParameters] = None
+        self._supplementary_parameters: Optional[SupplementaryParameters] = None
+
+
+
+    #
+    # Getters and setters
+    #
 
     @property
     def extrapolation_parameters(self) -> Optional[ExtrapolationParameters]:
-        if self._data is None or self.lowerq is None or self.upperq is None:
+        if self._data is None or self._extrapolation_parameters is None:
             return None
         else:
             return ExtrapolationParameters(
                 min(self._data.x),
-                self.lowerq,
-                self.upperq[0],
-                self.upperq[1],
+                self._extrapolation_parameters.point_1,
+                self._extrapolation_parameters.point_2,
+                self._extrapolation_parameters.point_3,
                 max(self._data.x))
 
     @extrapolation_parameters.setter
     def extrapolation_parameters(self, extrap: ExtrapolationParameters):
-        self.lowerq = extrap.point_1
-        self.upperq = (extrap.point_2, extrap.point_3)
+        self._extrapolation_parameters = SettableExtrapolationParameters(
+            extrap.point_1,
+            extrap.point_2,
+            extrap.point_3)
 
 
-    def set_data(self, data: Optional[Data1D], scale: float=1):
-        """
-        Prepares the data for analysis
+    @property
+    def data(self) -> Optional[Data1D]:
+        return self._data
 
-        :return: new_data = data * scale - background
-        """
+    @data.setter
+    def data(self, data: Optional[Data1D]):
         if data is None:
             return
+
         # Only process data of the class Data1D
         if not issubclass(data.__class__, Data1D):
             raise ValueError("Correlation function cannot be computed with 2D data.")
 
-        # Prepare the data
-        new_data = Data1D(x=data.x, y=data.y)
-        new_data *= scale
+        self._data = data
 
-        # Ensure the errors are set correctly
-        if new_data.dy is None or len(new_data.x) != len(new_data.dy) or \
-            (min(new_data.dy) == 0 and max(new_data.dy) == 0):
-            new_data.dy = np.ones(len(new_data.x))
+    @property
+    def q_range(self) -> Tuple[float, float]:
+        return self.data.x[0], self.data.x[-1]
+    @property
+    def background(self):
+        if self._background is None:
+            return None
 
-        self._data = new_data
+        return self._background.data
 
-    def compute_background(self, upperq=None):
-        """
-        Compute the background level from the Porod region of the data
-        """
-        if self._data is None: return 0
-        elif upperq is None and self.upperq is not None: upperq = self.upperq
-        elif upperq is None and self.upperq is None: return 0
-        q = self._data.x
-        mask = np.logical_and(q > upperq[0], q < upperq[1])
-        _, _, bg = self._fit_porod(q[mask], self._data.y[mask])
+    @background.setter
+    def background(self, value: Optional[float]):
+        self._background.data = value
 
-        return bg
+    @property
+    def guinier(self):
+        if self._guinier is None:
+            return None
 
-    def compute_extrapolation(self):
-        """
-        Extrapolate and interpolate scattering data
+        return self._guinier.data
 
-        :return: The extrapolated data
-        """
-        q = self._data.x
-        iq = self._data.y
+    @guinier.setter
+    def guinier(self, value: Optional[GuinierData]):
+        self._guinier.data = value
 
-        params, s2 = self._fit_data(q, iq)
-        # Extrapolate to 100*Qmax in experimental data
-        qs = np.arange(0, q[-1]*100, (q[1]-q[0]))
-        iqs = s2(qs)
+    @property
+    def porod(self):
+        if self._porod is None:
+            return None
 
-        extrapolation = Data1D(qs, iqs)
+        return self._porod.data
 
-        return params, extrapolation, s2
+    @porod.setter
+    def porod(self, value: Optional[PorodData]):
+        self._porod.data = value
 
-    def compute_transform(self, extrapolation, trans_type, background=None,
-        completefn=None, updatefn=None):
-        """
-        Transform an extrapolated scattering curve into a correlation function.
+    @property
+    def transformed(self):
+        return self._transformed_data
 
-        :param extrapolation: The extrapolated data
-        :param background: The background value (if not provided, previously
-            calculated value will be used)
-        :param extrap_fn: A callable function representing the extraoplated data
-        :param completefn: The function to call when the transform calculation
-            is complete
-        :param updatefn: The function to call to update the GUI with the status
-            of the transform calculation
-        :return: The transformed data
-        """
-        if self._transform_thread is not None:
-            if self._transform_thread.isrunning(): return
+    @property
+    def lamellar_parameters(self) -> LamellarParameters:
+        return self._lamellar_parameters
 
-        if background is None: background = self.background
+    @property
+    def supplementary_parameters(self) -> Optional[SupplementaryParameters]:
+        return self._supplementary_parameters
 
-        if trans_type == 'fourier':
-            self._transform_thread = FourierThread(self._data, extrapolation,
-                                                   background, completefn=completefn,
-                                                   updatefn=updatefn)
-        elif trans_type == 'hilbert':
-            self._transform_thread = HilbertThread(self._data, extrapolation,
-                                                   background, completefn=completefn, updatefn=updatefn)
+    @property
+    def extrapolation_function(self) -> Optional[Callable]:
+        return self._extrapolation_function
+
+    @property
+    def min_extrapolated(self) -> Optional[float]:
+        if self._extrapolation_data is None:
+            return None
         else:
-            err = ("Incorrect transform type supplied, must be 'fourier'",
-                " or 'hilbert'")
-            raise ValueError(err)
+            return np.min(self._extrapolation_data.y)
 
-        self._transform_thread.queue()
+    @property
+    def fit_background(self):
+        return self._background.allow_fit
 
-    def transform_isrunning(self):
-        if self._transform_thread is None:
-            return False
+    @fit_background.setter
+    def fit_background(self, value: bool):
+        self._background.allow_fit = value
 
-        return self._transform_thread.isrunning()
+    @property
+    def fit_guinier(self):
+        return self._guinier.allow_fit
 
-    def stop_transform(self):
-        if self._transform_thread.isrunning():
-            self._transform_thread.stop()
+    @fit_guinier.setter
+    def fit_guinier(self, value: bool):
+        self._guinier.allow_fit = value
 
-    def extract_parameters(self,
-                           transformed_data: TransformedData,
-                           tangent_method: Optional[TangentMethod]=None,
-                           long_period_method: Optional[LongPeriodMethod]=None
-                           ) -> Optional[Tuple[ExtractedParameters, SupplementaryParameters]]:
+    @property
+    def fit_porod(self):
+        return self._porod.allow_fit
+
+    @fit_porod.setter
+    def fit_porod(self, value: bool):
+        self._porod.allow_fit = value
+
+    @property
+    def extrapolated(self):
+        return self._extrapolation_data
+
+    #
+    # Calculation Steps
+    #
+
+
+    def run(self):
+        """ Execute the calculation"""
+        self._calculate_background()
+        self._calculate_background_subtracted()
+        self._calculate_porod_parameters()
+        self._calculate_guinier_parameters()
+        self._calculate_extrapolation_function()
+        self._calculate_extrapolation_data()
+        self._calculate_transforms()
+        self._calculate_parameters()
+
+
+
+    # Calculation components
+
+    def _calculate_background(self):
+        """
+        Compute the background level from the Porod region of the data,
+        only do this if background fitting is allowed
+        """
+        if self._data is None:
+            raise ValueError("Data not set")
+
+        if self._extrapolation_parameters is None:
+            raise ValueError("Extrapolation settings not specified")
+
+        if self._background.allow_fit:
+
+            q = self._data.x
+
+            # Fit the last section only
+            point_2 = self._extrapolation_parameters.point_2
+            point_3 = self._extrapolation_parameters.point_3
+            mask = np.logical_and(q > point_2, q < point_3)
+
+            _, _, background = CorfuncCalculator.calculate_porod_parameters(q[mask], self._data.y[mask])
+
+            self._background.data = background
+
+    def _calculate_background_subtracted(self):
+        """ Calculate the data with the background removed"""
+
+        if self._data is None:
+            raise ValueError("Data not set")
+
+        if self._background.data is None:
+            raise ValueError("Background value not set")
+
+        self._background_subtracted = self._data.y - self._background.data
+
+
+    def _calculate_porod_parameters(self):
+        """
+        Calculate the Porod parameters
+        """
+
+        if self._data is None:
+            raise ValueError("Data not set")
+
+        if self._extrapolation_parameters is None:
+            raise ValueError("Extrapolation settings not specified")
+
+        if self._porod.allow_fit:
+            # Fit the last section only
+
+            q = self.data.x
+
+            point_2 = self._extrapolation_parameters.point_2
+            point_3 = self._extrapolation_parameters.point_3
+            mask = np.logical_and(q > point_2, q < point_3)
+
+            # Returns an array where the 1st and 2nd elements are the values of k
+            # and sigma for the best-fit Porod function
+            K, sigma, _ = CorfuncCalculator.calculate_porod_parameters(q[mask], self.data.y[mask])
+
+            self._porod.data = PorodData(K=K, sigma=sigma)
+
+
+
+    def _calculate_guinier_parameters(self):
+        # Smooths between the best-fit porod function and the data to produce a
+        # better fitting curve
+        # Returns parameters for the best-fit Guinier function
+
+
+        if self._data is None:
+            raise ValueError("Data not set")
+
+        if self._extrapolation_parameters is None:
+            raise ValueError("Extrapolation settings not specified")
+
+        if self._background_subtracted is None:
+            raise ValueError("Backgroundless data not set")
+
+        if self._guinier.allow_fit:
+
+            q = self.data.x
+            mask = np.logical_and(q < self._extrapolation_parameters.point_1, 0 < q)
+
+            g = CorfuncCalculator.calculate_guinier_parameters(q[mask], self._background_subtracted[mask])
+
+            self._guinier.data = GuinierData(A=g[0], B=g[1])
+
+    def _calculate_extrapolation_function(self):
+
+        if self.data is None:
+            raise ValueError("Data not set")
+
+        if self._background.data is None:
+            raise ValueError("Background is not set")
+
+        if self._porod.data is None:
+            raise ValueError("Porod parameters not set")
+
+        if self._guinier.data is None:
+            raise ValueError("Guinier parameters not set")
+
+        data_function = interp1d(self.data.x, self.data.y) # Note that this still has background values
+
+        # Smooth between data and Porod
+        s1 = SmoothJoin(
+                data_function,
+                CorfuncCalculator.porod_function(
+                    self._porod.data.K,
+                    self._porod.data.sigma,
+                    self._background.data),
+                self._extrapolation_parameters.point_2,
+                self._extrapolation_parameters.point_3)
+
+        # Smooth between the previous function and Guinier
+        s2 = SmoothJoin(
+                CorfuncCalculator.guinier_function(
+                    self._guinier.data.A,
+                    self._guinier.data.B,
+                    self._background.data),
+                s1,
+                self.data.x[0],
+                self._extrapolation_parameters.point_1)
+
+        self._extrapolation_function = s2
+
+        # params = {'A': g[1], 'B': g[0], 'K': k, 'sigma': sigma}
+
+
+
+    def _calculate_extrapolation_data(self):
+        """ Numerically evaluate the extrapolation curve """
+
+        if self.data is None:
+            raise ValueError("Data not set")
+
+        if self._extrapolation_function is None:
+            raise ValueError("Extrapolation function not set")
+
+        q = self.data.x
+
+        extrapolated_q = np.arange(0, q[-1]*100, (q[1]-q[0]))
+        extrapolated_I = self._extrapolation_function(extrapolated_q)
+
+        self._extrapolation_data = Data1D(extrapolated_q, extrapolated_I)
+
+    def _calculate_transforms(self):
+
+        """ Calculate the transforms """
+
+        if self.data is None:
+            raise ValueError("Data not set")
+
+        if self._background.data is None:
+            raise ValueError("Background not set")
+
+        if self._extrapolation_data is None:
+            raise ValueError("Extrapolation data not set")
+
+
+        qs = self._extrapolation_data.x
+        iqs = self._extrapolation_data.y
+        q = self.data.x
+        background = self._background.data
+
+        xs = np.pi * np.arange(len(qs), dtype=np.float32) / (q[1] - q[0]) / len(qs)
+
+        # 1D Correlation Function
+        gamma1 = dct((iqs - background) * (qs ** 2))
+        Q = np.max(gamma1)
+        gamma1 /= Q
+
+        # 3D Correlation Function
+        # gamma3(R) = 1/R int_{0}^{R} gamma1(x) dx
+        # numerical approximation for increasing R using the trapezium rule
+        # Note: SasView 4.x series limited the range to xs <= 1000.0
+
+        gamma3 = cumtrapz(gamma1, xs) / xs[1:]
+        gamma3 = np.hstack((1.0, gamma3))  # gamma3(0) is defined as 1
+
+        # Interface Distribution function
+        idf = dct(-qs ** 4 * (iqs - background))
+
+        # Manually calculate IDF(0.0), since scipy DCT tends to give us a
+        # very large negative value.
+
+        #    IDF(x) = int_0^inf q^4 * I(q) * cos(q*x) * dq
+        # => IDF(0) = int_0^inf q^4 * I(q) * dq
+
+        idf[0] = trapz(-qs ** 4 * (iqs - background), qs)
+        idf /= Q  # Normalise using scattering invariant
+
+        transform1d = Data1D(xs, gamma1)
+        transform3d = Data1D(xs, gamma3)
+        idf = Data1D(xs, idf)
+
+        self._transformed_data = TransformedData(transform1d, transform3d, idf)
+
+
+    def _calculate_parameters(self):
         """
         Extract the interesting measurements from a correlation function
-
-        :param transformed_data: TransformedData object
-        :param tangent_method: Optional string that selects the method used to calculate the point where the
-                               tangent is measured, either 'inflection' to use the first inflection point,
-                               or 'half-min' to use the point half way between zero and minimum.
-                               Default of None will automatically select based on the existence of an inflection
-                               point before the first minimum.
-        :param long_period_method: Optional string that selects the method used for determining the long period,
-                                 either 'max' to use the maximum, or 'double-min' to use 2x the minimum,
-                                 Default of None will do it automatically based on the existence of a maximum.
-
         """
 
-        gamma_1 = transformed_data.gamma_1  # 1D transform
-        idf = transformed_data.idf
+        gamma_1 = self._transformed_data.gamma_1  # 1D transform
+        idf = self._transformed_data.idf
 
         # Calculate indexes of maxima and minima
         z = gamma_1.x
@@ -201,7 +456,10 @@ class CorfuncCalculator:
 
         # If there are no maxima, return None
         if len(maxs) == 0:
-            return None
+            raise CalculationError("No maxima found in data")
+
+        max_values = gamma[maxs]
+        largest_max = np.argmax(max_values)
 
         gamma_min = gamma[mins[0]]  # The value at the first minimum
         z_at_min = z[mins[0]]
@@ -227,6 +485,8 @@ class CorfuncCalculator:
         # Work out the tangent index based on the method specified
         #
 
+        tangent_method = self.tangent_method
+
         if tangent_method is None:
             if inflection_point_index < mins[0]:
                 tangent_method = TangentMethod.INFLECTION
@@ -244,6 +504,8 @@ class CorfuncCalculator:
         # Work out the long period index based on the method specified
         #
 
+        long_period_method = self.long_period_method
+
         if long_period_method is None:
             if len(maxs) > 0:
                 long_period_method = LongPeriodMethod.MAX
@@ -251,7 +513,7 @@ class CorfuncCalculator:
                 long_period_method = LongPeriodMethod.DOUBLE_MIN
 
         if long_period_method == LongPeriodMethod.MAX:
-            long_period = z[maxs[0]]
+            long_period = z[maxs[largest_max]]
         elif long_period_method == LongPeriodMethod.DOUBLE_MIN:
             long_period = z_at_min * 2
         else:
@@ -282,7 +544,7 @@ class CorfuncCalculator:
         mask = np.where(np.abs((gamma-(tangent_slope*z+tangent_intercept))/gamma) < 0.01)[0]
 
         if len(mask) == 0:  # Return garbage for bad fits
-            return None
+            raise CalculationError("No tangent values found")
 
         interface_thickness = z[mask[0]]  # Beginning of Linear Section
         core_thickness = z[mask[-1]]  # End of Linear Section
@@ -294,8 +556,7 @@ class CorfuncCalculator:
         polydispersity_ryan = np.abs(gamma_min / gamma_max)  # Normalized depth of minimum
         polydispersity_stribeck = np.abs(local_crystallinity / ((local_crystallinity - 1) * gamma_max))  # Normalized depth of minimum
 
-
-        supplementary_parameters = SupplementaryParameters(
+        self._supplementary_parameters = SupplementaryParameters(
             tangent_point_z=z[tangent_index],
             tangent_point_gamma=gamma[tangent_index],
             tangent_gradient=float(tangent_slope),
@@ -307,68 +568,103 @@ class CorfuncCalculator:
             hard_block_gamma=gamma_min,
             interface_z=interface_thickness,
             core_z=core_thickness,
-            z_range=(1 / transformed_data.q_range[1], 1 / transformed_data.q_range[0]),
-            gamma_range=(np.min(gamma), np.max(gamma))
-        )
+            z_range=(1 / self.data.x[-1], 1 / self.data.x[0]),
+            gamma_range=(np.min(gamma), np.max(gamma)))
 
-        extracted_parameters = ExtractedParameters(
-                    long_period,
-                    interface_thickness,
-                    hard_block_thickness,
-                    soft_block_thickness,
-                    core_thickness,
-                    polydispersity_ryan,
-                    polydispersity_stribeck,
-                    local_crystallinity)
-
-        return extracted_parameters, supplementary_parameters
+        self._lamellar_parameters = LamellarParameters(
+            long_period=long_period,
+            interface_thickness=interface_thickness,
+            hard_block_thickness=hard_block_thickness,
+            soft_block_thickness=soft_block_thickness,
+            core_thickness=core_thickness,
+            polydispersity_ryan=polydispersity_ryan,
+            polydispersity_stribeck=polydispersity_stribeck,
+            local_crystallinity=local_crystallinity)
 
 
-    def _porod(self, q, K, sigma, bg):
+    #
+    # Utility functions / Static methods
+    #
+
+    @staticmethod
+    def porod_function(K, sigma, background):
+        def fun(q):
+            return CorfuncCalculator.porod_fitting_function(q, K, sigma, background)
+
+        return fun
+
+    @staticmethod
+    def guinier_function(A, B, background):
+        def fun(q):
+            return np.exp(A + B*q*q) + background
+
+        return fun
+
+    @staticmethod
+    def porod_fitting_function(q, K, sigma, background):
         """Equation for the Porod region of the data"""
-        return bg + (K*q**(-4))*np.exp(-q**2*sigma**2)
+        return background + (K * q ** (-4)) * np.exp(-q ** 2 * sigma ** 2)
 
-    def _fit_guinier(self, q, iq):
-        """Fit the Guinier region of the curve"""
-        A = np.vstack([q**2, np.ones(q.shape)]).T
-        # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
-        rcond = np.finfo(float).eps * max(A.shape)
-        return lstsq(A, np.log(iq), rcond=rcond)
+    @staticmethod
+    def porod_fitting_function_expected(q, K, sigma, background):
+        """ Expected value function used for fitting Porod region (has a q^2 weighting)"""
+        return CorfuncCalculator.porod_fitting_function(q, K, sigma, background) * (q * q)
 
-    def _fit_porod(self, q, iq):
+    @staticmethod
+    def porod_fitting_function_observed(q, I):
+        """ Observed value function used for fitting Porod region"""
+        return I * q * q
+
+    @staticmethod
+    def calculate_guinier_parameters(q, I):
+        """Fit the Guinier region of the curve using linear least squares"""
+        A = np.vstack([np.ones(q.shape), q**2]).T
+
+        return np.linalg.lstsq(A, np.log(I))[0]
+
+    @staticmethod
+    def calculate_porod_parameters(q, I):
         """Fit the Porod region of the curve"""
-        fitp = curve_fit(lambda q, k, sig, bg: self._porod(q, k, sig, bg)*q**2,
-                         q, iq*q**2, bounds=([-np.inf, 0, -np.inf], [np.inf, np.inf, np.inf]))[0]
+        fitp = scipy.optimize.curve_fit(
+            CorfuncCalculator.porod_fitting_function_expected, q,
+            CorfuncCalculator.porod_fitting_function_observed(q, I),
+            bounds=([-np.inf, 0, -np.inf], [np.inf, np.inf, np.inf]))[0]
+
         k, sigma, bg = fitp
         return k, sigma, bg
 
-    def _fit_data(self, q, iq):
-        """
-        Given a data set, extrapolate out to large q with Porod and
-        to q=0 with Guinier
-        """
-        mask = np.logical_and(q > self.upperq[0], q < self.upperq[1])
 
-        # Returns an array where the 1st and 2nd elements are the values of k
-        # and sigma for the best-fit Porod function
-        k, sigma, _ = self._fit_porod(q[mask], iq[mask])
-        bg = self.background
+def extract_lamellar_parameters(
+        data: Data1D,
+        guinier_to_data_transition_right: float,
+        data_to_porod_transition_left: float,
+        data_to_porod_transition_right: float,
+        long_period_method: Optional[LongPeriodMethod]=None,
+        tangent_method: Optional[TangentMethod]=None):
 
-        # Smooths between the best-fit porod function and the data to produce a
-        # better fitting curve
-        data = interp1d(q, iq)
-        s1 = SmoothJoin(data,
-                        lambda x: self._porod(x, k, sigma, bg), self.upperq[0], self.upperq[1])
+    """
+    Extract lamellar parameters from data using the corfunc calculator
 
-        mask = np.logical_and(q < self.lowerq, 0 < q)
+    :param data: Data1D object containing QSpace data
+    :param guinier_to_data_transition_right: Q value at which to end the extrapolation from Guiner to data
+    :param data_to_porod_transition_left: Q value at which to begin the extrapolation from data to Porod
+    :param data_to_porod_transition_right: Q value at which to end the extrapolation from data to Porod
+    :param long_period_method: LongPeriodMethod enum value specifying how to calculate the long period (None autodetects)
+    :param tangent_method: TangentMethod enum value specifying how to calculate the long period (None autodetects)
 
-        # Returns parameters for the best-fit Guinier function
-        g = self._fit_guinier(q[mask], iq[mask])[0]
+    :returns: LamellarParameters object with calculated lamellar parameters
+    """
 
-        # Smooths between the best-fit Guinier function and the Porod curve
-        s2 = SmoothJoin((lambda x: (np.exp(g[1] + g[0] * x ** 2))), s1, q[0],
-                        self.lowerq)
+    parameters = SettableExtrapolationParameters(
+        guinier_to_data_transition_right,
+        data_to_porod_transition_left,
+        data_to_porod_transition_right)
 
-        params = {'A': g[1], 'B': g[0], 'K': k, 'sigma': sigma}
+    calculator = CorfuncCalculator(
+                    data, parameters,
+                    long_period_method=long_period_method,
+                    tangent_method=tangent_method)
 
-        return params, s2
+    calculator.run()
+
+    return calculator.lamellar_parameters
