@@ -22,8 +22,9 @@ jobs:
 
     - name: List lables in PR
       run: |
-      x=${{ toJson(github.event.pull_request.labels.*.name) }}
-      echo $x
+        echo "Labels in PR"
+        x=${{ toJson(github.event.pull_request.labels.*.name) }}
+        echo $x
 
 
 #TODO: Check what is the structure of downloaded files and update
