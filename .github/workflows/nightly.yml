@@ -23,6 +23,8 @@ jobs:
     - name: List lables in PR
       run: |
         echo "Labels in PR"
+        y = ${{ github.event.label.name }}
+        echo $y
         x=${{ toJson(github.event.pull_request.labels.*.name) }}
         echo $x
 
