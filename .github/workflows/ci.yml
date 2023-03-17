@@ -54,7 +54,6 @@ jobs:
       - name: Configuration of this job
         run: |
           echo '${{ toJson(matrix) }}'
-          echo '${{ github.event.label.name }}' 
 
       - name: Obtain SasView source from git
         uses: actions/checkout@v3
@@ -67,6 +66,12 @@ jobs:
           cache-dependency-path: |
             **/ci.yml
             **/requirements*.txt
+
+      - name: List lables in PR
+          run: |
+            echo "Labels in PR"
+            echo ${{ github.event.label.name }}
+            echo ${{ github.event.pull_request.labels.*.name }}
 
       ### Installation of build-dependencies
 
