@@ -21,9 +21,10 @@ jobs:
     - uses: actions/download-artifact@v3
 
     - name: List lables in PR
-      if: contains(github.event.pull_request.labels.*.name, 'nightly-build')
       run: |
-        echo "Nightly build"
+      x=${{ toJson(github.event.pull_request.labels.*.name) }}
+      echo $x
+
 
 #TODO: Check what is the structure of downloaded files and update
 #    - name: Upload installer to GitHub releases
