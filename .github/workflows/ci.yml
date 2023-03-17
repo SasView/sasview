@@ -297,7 +297,7 @@ jobs:
 
       #TODO: This will be separate cronjob. Just testing
       - name: Upload installer to GitHub releases
-        if: ${{ matrix.installer }}
+        if: ${{ github.event.label.name=='nightly-build' && matrix.installer }}
         uses: ncipollo/release-action@v1
         with:
           draft: false
