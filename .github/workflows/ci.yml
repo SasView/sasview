@@ -297,7 +297,7 @@ jobs:
 
       #TODO: To be reviewed if we need this action
       - name: Upload installer to GitHub releases
-        if: ${{ env.RELEASE == 'true'' && matrix.installer }}
+        if: ${{ env.RELEASE == 'true' && matrix.installer }}
         uses: ncipollo/release-action@v1
         with:
           draft: true
@@ -310,7 +310,7 @@ jobs:
           tag: ${{ env.BRANCH_NAME }}
 
       - name: Upload Nightly Build Installer to GitHub releases
-        if: ${{ contains(github.event.pull_request.labels.*.name, 'nightly-build') && github.event.label.name=='nightly-build' && matrix.installer }}
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'nightly-build') && matrix.installer }}
         uses: ncipollo/release-action@v1
         with:
           draft: false
