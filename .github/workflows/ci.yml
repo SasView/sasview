@@ -309,8 +309,8 @@ jobs:
           name: ${{ env.BRANCH_NAME }}
           tag: ${{ env.BRANCH_NAME }}
 
-      - name: Upload installer to GitHub releases
-        if: ${{ github.event.label.name=='nightly-build' && matrix.installer }}
+      - name: Upload Nightly Build Installer to GitHub releases
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'nightly-build') && github.event.label.name=='nightly-build' && matrix.installer }}
         uses: ncipollo/release-action@v1
         with:
           draft: false
