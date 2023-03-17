@@ -23,9 +23,9 @@ jobs:
     - name: List lables in PR
       run: |
         echo "Labels in PR"
-        echo ${{ github.event.label.name }}
+        # echo ${{ github.event.label.name }}
         if: contains(github.event.pull_request.labels.*.name, 'nightly-build')
-          echo "Nightly build"
+        run: echo "Nightly build"
 
 #TODO: Check what is the structure of downloaded files and update
 #    - name: Upload installer to GitHub releases
