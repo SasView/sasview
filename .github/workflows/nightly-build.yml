@@ -1,0 +1,38 @@
+name: Nightly Build
+on:
+  #schedule:
+  #  - cron: '20 2 * * *'
+  [push]
+
+jobs:
+  runs-on: ubuntu-latest
+
+  #Reuse ci.yml workflow on main branch and upload artifacts to release page
+  reuse_main_ci:
+    uses: ./.github/workflows/ci.yml
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Retrieve saved artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: SasView-Installers
+        path: |
+            installers/dist/setupSasView.exe
+            installers/dist/SasView5.dmg
+            installers/dist/sasview5.tar.gz
+
+    - name: Upload Nightly Build Installer to GitHub releases
+      uses: ncipollo/release-action@v1
+      with:
+        draft: false
+        prerelease: true
+        allowUpdates: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "installers/dist/SasView5.dmg, installers/dist/setupSasView.exe, installers/dist/sasview5.tar.gz"
+        body: "Nightly build of main SasView branch"
+        name: "nightly-build"
+        tag: "nightly-build"
