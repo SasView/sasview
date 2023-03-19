@@ -11,31 +11,31 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   upload_nighly_builds:
-  runs-on: ubuntu-latest
-  needs: reuse_main_ci
+    runs-on: ubuntu-latest
+    needs: reuse_main_ci
 
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Retrieve saved artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: SasView-Installers
-        path: |
-            installers/dist/setupSasView.exe
-            installers/dist/SasView5.dmg
-            installers/dist/sasview5.tar.gz
+      - name: Retrieve saved artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: SasView-Installers
+          path: |
+              installers/dist/setupSasView.exe
+              installers/dist/SasView5.dmg
+              installers/dist/sasview5.tar.gz
 
-    - name: Upload Nightly Build Installer to GitHub releases
-      uses: ncipollo/release-action@v1
-      with:
-        draft: false
-        prerelease: true
-        allowUpdates: true
-        replacesArtifacts: true
-        token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: "installers/dist/SasView5.dmg, installers/dist/setupSasView.exe, installers/dist/sasview5.tar.gz"
-        body: "Nightly build of main SasView branch"
-        name: "nightly-build"
-        tag: "nightly-build"
+      - name: Upload Nightly Build Installer to GitHub releases
+        uses: ncipollo/release-action@v1
+        with:
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "installers/dist/SasView5.dmg, installers/dist/setupSasView.exe, installers/dist/sasview5.tar.gz"
+          body: "Nightly build of main SasView branch"
+          name: "nightly-build"
+          tag: "nightly-build"
