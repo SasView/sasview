@@ -1,8 +1,11 @@
 name: Nightly Build
+
 on:
-  #schedule:
-  #  - cron: '20 2 * * *'
-  [push]
+  #push:
+  #  branches:
+  #    - 'main'
+  push:
+  workflow_dispatch:
 
 jobs:
 
