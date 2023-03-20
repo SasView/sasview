@@ -54,6 +54,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
                                         zorder=zorder, r=self.qmax,
                                         phi=self.phi, theta2=self.theta2)
         self.left_line.qmax = self.qmax
+        self.fold = True
         # draw the sector
         self.update()
         self._post_data()
@@ -138,6 +139,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
                        phi_min=phimin + numpy.pi,
                        phi_max=phimax + numpy.pi, nbins=nbins)
 
+        sect.fold = self.fold
         sector = sect(self.data)
         # Create 1D data resulting from average
 
@@ -238,6 +240,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         params["Phi [deg]"] = self.main_line.theta * 180 / numpy.pi
         params["Delta_Phi [deg]"] = numpy.fabs(self.left_line.phi * 180 / numpy.pi)
         params["nbins"] = self.nbins
+        params["fold"] = self.fold
         return params
 
     def setParams(self, params):
@@ -257,6 +260,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             params["Delta_Phi [deg]"] = MIN_PHI
 
         self.nbins = int(params["nbins"])
+        self.fold =params["fold"]
         self.main_line.theta = main
         # Reset the slicer parameters
         self.main_line.update()
