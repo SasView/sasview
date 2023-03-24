@@ -117,6 +117,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.contextMenu = QtWidgets.QMenu(self)
         self.toolbar = NavigationToolbar(self.canvas, self)
         cid = self.canvas.mpl_connect('resize_event', self.onResize)
+        self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.canvas.customContextMenuRequested.connect(self.showContextMenu)
 
         layout.addWidget(self.toolbar)
         if not quickplot:
@@ -265,17 +267,25 @@ class PlotterBase(QtWidgets.QWidget):
         """
         pass
 
-    def contextMenuEvent(self, event):
-        """
-        Display the context menu
-        """
+    def showContextMenu(self, point):
         if not self.quickplot:
             self.createContextMenu()
         else:
             self.createContextMenuQuick()
+        # show the context menu at the specified point
+        self.contextMenu.exec_(self.mapToGlobal(point))
 
-        event_pos = event.pos()
-        self.contextMenu.exec_(self.canvas.mapToGlobal(event_pos))
+    # def contextMenuEvent(self, event):
+    #     """
+    #     Display the context menu
+    #     """
+    #     if not self.quickplot:
+    #         self.createContextMenu()
+    #     else:
+    #         self.createContextMenuQuick()
+
+    #     event_pos = event.pos()
+    #     self.contextMenu.exec_(self.canvas.mapToGlobal(event_pos))
 
     def onMplMouseUp(self, event):
         """

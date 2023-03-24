@@ -1,4 +1,4 @@
-from PySide6.QtCore import QRegExp
+from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
 
 def format(color, style=''):
@@ -79,8 +79,8 @@ class PythonHighlighter (QSyntaxHighlighter):
         # Multi-line strings (expression, flag, style)
         # FIXME: The triple-quotes in these two lines will mess up the
         # syntax highlighting from this point onward
-        self.tri_single = (QRegExp("'''"), 1, STYLES['string2'])
-        self.tri_double = (QRegExp('"""'), 2, STYLES['string2'])
+        self.tri_single = (QRegularExpression("'''"), 1, STYLES['string2'])
+        self.tri_double = (QRegularExpression('"""'), 2, STYLES['string2'])
 
         rules = []
 
@@ -122,7 +122,7 @@ class PythonHighlighter (QSyntaxHighlighter):
             rules.append((r'//[^\n]*', 0, STYLES['comment']),)
 
         # Build a QRegExp for each pattern
-        self.rules = [(QRegExp(pat), index, fmt)
+        self.rules = [(QRegularExpression(pat), index, fmt)
             for (pat, index, fmt) in rules]
 
 

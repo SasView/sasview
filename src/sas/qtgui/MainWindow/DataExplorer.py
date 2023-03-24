@@ -124,7 +124,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_model.itemChanged.connect(self.onFileListChanged)
 
         # Don't show "empty" rows with data objects
-        self.data_proxy.setFilterRegExp(r"[^()]")
+        self.data_proxy.filterRegularExpression = "[^()]" 
 
         # Create a window to allow the display name to change
         self.nameChangeBox = ChangeName(self)
@@ -137,7 +137,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_proxy.setSourceModel(self.theory_model)
 
         # Don't show "empty" rows with data objects
-        self.theory_proxy.setFilterRegExp(r"[^()]")
+        self.theory_proxy.filterRegularExpression = "[^()]"
 
         # Theory model view
         self.freezeView.setModel(self.theory_proxy)
@@ -1276,15 +1276,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         wlist = self.getWlist()
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Choose files',
-            'filter'    : wlist,
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog |
-                          QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
-            'directory' : self.default_load_location
-        }
-        paths = QtWidgets.QFileDialog.getOpenFileNames(**kwargs)[0]
+        parent = self
+        caption = 'Choose files'
+        directory = self.default_load_location
+        filter = wlist
+        options = QtWidgets.QFileDialog.DontUseNativeDialog | QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
+        paths = QtWidgets.QFileDialog.getOpenFileNames(parent, caption, directory, filter, options=options)[0]
+
         if not paths:
             return
 

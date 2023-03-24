@@ -63,9 +63,9 @@ class DensityPanel(QtWidgets.QDialog):
         # set validators
         #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
 
-        rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.ui.editMolarVolume.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMolarVolume))
-        self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
+        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        self.ui.editMolarVolume.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMolarVolume))
+        self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
 
         # signals
         self.ui.editMolarVolume.textEdited.connect(functools.partial(self.setMode, MODES.VOLUME_TO_DENSITY))

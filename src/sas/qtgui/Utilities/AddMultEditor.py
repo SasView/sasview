@@ -84,8 +84,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.plugin_dir = models.find_plugins_dir()
 
         # Validators
-        rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")
-        txt_validator = QtGui.QRegExpValidator(rx)
+        rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
+        txt_validator = QtGui.QRegularExpressionValidator(rx)
         self.txtName.setValidator(txt_validator)
 
     def setupModels(self):

@@ -67,9 +67,9 @@ return y
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
         # Validators
-        rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")
+        rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
 
-        txt_validator = QtGui.QRegExpValidator(rx)
+        txt_validator = QtGui.QRegularExpressionValidator(rx)
         self.txtName.setValidator(txt_validator)
         # Weird import location - workaround for a bug in Sphinx choking on
         # importing QSyntaxHighlighter

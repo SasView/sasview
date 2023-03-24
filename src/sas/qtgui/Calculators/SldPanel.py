@@ -123,10 +123,10 @@ class SldPanel(QtWidgets.QDialog):
         # No need for recalculate
         self.ui.recalculateButton.setVisible(False)
 
-        rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
-        self.ui.editNeutronWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editNeutronWavelength))
-        self.ui.editXrayWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editXrayWavelength))
+        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
+        self.ui.editNeutronWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editNeutronWavelength))
+        self.ui.editXrayWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editXrayWavelength))
 
         # signals
         self.ui.helpButton.clicked.connect(self.displayHelp)

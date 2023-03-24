@@ -22,8 +22,8 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
         self.manager = parent
         self.thickness = KiessigThicknessCalculator()
 
-        rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.deltaq_in.setValidator(QtGui.QRegExpValidator(rx, self.deltaq_in))
+        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        self.deltaq_in.setValidator(QtGui.QRegularExpressionValidator(rx, self.deltaq_in))
 
         # signals
         self.helpButton.clicked.connect(self.onHelp)

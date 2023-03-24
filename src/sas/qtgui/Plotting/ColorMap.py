@@ -51,10 +51,10 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         # Initialize validators on amplitude textboxes
         validator_min = DoubleValidator(self.txtMinAmplitude)
-        validator_min.setNotation(0)
+        validator_min.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.txtMinAmplitude.setValidator(validator_min)
         validator_max = DoubleValidator(self.txtMaxAmplitude)
-        validator_max.setNotation(0)
+        validator_max.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.txtMaxAmplitude.setValidator(validator_max)
 
         # Set the initial amplitudes
