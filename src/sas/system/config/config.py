@@ -80,7 +80,7 @@ Things that don't belong, but were previously in the config:
 
   1) dynamic content, i.e. values that are modified programmatically,
      this includes variables that are defined in terms of other variables,
-     but otherwise dont change
+     but otherwise don't change
   2) Paths to resources within sasview (use importlib.resources instead)
   3) Blocks of data that wont be modified by the user and used primarily
      by single class - e.g. the text for a message
@@ -181,6 +181,24 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Time out for updating sasview
         self.UPDATE_TIMEOUT = 2
 
+        self.SHOW_EXIT_MESSAGE = True
+        
+        # Window scaling values
+        self.QT_SCALE_FACTOR = 1.0
+        self.QT_AUTO_SCREEN_SCALE_FACTOR = False
+
+        # If True, use an ugly but more robust legend plotting method in Fitting that results in full-
+        # width legends.
+        self.FITTING_PLOT_FULL_WIDTH_LEGENDS = False
+        
+        # If True, truncates names in Fitting plot legends such that each name is maximum one line.
+        self.FITTING_PLOT_LEGEND_TRUNCATE = False
+
+        # sets the maximum number of characters per Fitting plot legend entry.
+        self.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH = 30
+
+        # Default fitting optimizer
+        self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
         #
         # Lock the class down, this is necessary both for

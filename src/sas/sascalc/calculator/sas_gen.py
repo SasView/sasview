@@ -15,7 +15,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
 
-
 if sys.version_info[0] < 3:
     def decode(s):
         return s

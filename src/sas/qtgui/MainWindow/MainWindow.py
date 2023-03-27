@@ -2,8 +2,7 @@ import logging
 import os
 import sys
 
-from sas import config
-from sas.system import env, version
+from sas.system.version import __version__
 
 from PySide6.QtWidgets import QMainWindow
 from PySide6.QtWidgets import QMdiArea
@@ -13,7 +12,10 @@ from PySide6.QtGui import QPixmap, QGuiApplication, QCursor
 from PySide6.QtCore import Qt, QTimer
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_SasView
+
+logger = logging.getLogger(__name__)
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
@@ -23,7 +25,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         self.setupUi(self)
 
         # Add the version number to window title
-        self.setWindowTitle(f"SasView {version.__version__}")
+        self.setWindowTitle(f"SasView {__version__}")
         # define workspace for dialogs.
         self.workspace = QMdiArea(self)
         # some perspectives are fixed size.
@@ -43,10 +45,8 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         try:
            self.guiManager = GuiManager(self)
         except Exception as ex:
-           import logging
-
-           logging.error("Application failed with: "+str(ex))
-           raise ex
+            logger.error("Application failed with: "+str(ex))
+            raise ex
 
     def closeEvent(self, event):
         if self.guiManager.quitApplication():
@@ -66,36 +66,25 @@ def SplashScreen():
     splashScreen = QSplashScreen(pixmap)
     return splashScreen
 
+def get_highdpi_scaling():
+    return 1.0
+
 def run_sasview():
-    app = QApplication([])
-
-    # Initialize logger
-    from sas.system.log import SetupLogger
-    SetupLogger(__name__).config_development()
-
-    # initialize sasmodels settings
-    from sas.system.user import get_user_dir
-    if "SAS_DLL_PATH" not in os.environ:
-        os.environ["SAS_DLL_PATH"] = os.path.join(
-            get_user_dir(), "compiled_models")
-
-    # Set open cl config from environment variable, if it is set
-
-    if env.sas_opencl is not None:
-        logging.getLogger(__name__).info("Getting OpenCL settings from environment variables")
-        config.SAS_OPENCL = env.sas_opencl
-    else:
-        logging.getLogger(__name__).info("Getting OpenCL settings from config")
-        env.sas_opencl = config.SAS_OPENCL
 
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+    # Note: Qt environment variables are initialized in sas.system.lib.setup_qt_env
     # Main must have reference to the splash screen, so making it explicit
+    app = QApplication([])
+    app.setAttribute(Qt.AA_ShareOpenGLContexts)
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    app.setStyleSheet("* {font-size: 11pt;}")
+
     splash = SplashScreen()
     splash.show()
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
+
     # Main application style.
     #app.setStyle('Fusion')
 
@@ -125,6 +114,10 @@ def run_sasview():
 
     # Time for the welcome window
     mainwindow.guiManager.showWelcomeMessage()
+
+    timer = QTimer()
+    timer.timeout.connect(lambda: None)
+    timer.start(100)
 
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()

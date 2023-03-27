@@ -475,6 +475,7 @@ class Plotter3DTest:
         assert plotter.graph_title, 'test'
         assert not plotter.data.has_conect
 
+    @pytest.mark.skip(reason="setting the mocker on FigureCanvas causes exceptions on Windows")
     def testShowNoPlot(self, plotter, mocker):
         mocker.patch.object(FigureCanvas, 'draw_idle')
         mocker.patch.object(FigureCanvas, 'draw')
@@ -482,6 +483,7 @@ class Plotter3DTest:
         assert not FigureCanvas.draw_idle.called
         assert not FigureCanvas.draw.called
 
+    @pytest.mark.skip(reason="setting the mocker on FigureCanvas causes exceptions on Windows")
     def testShow3DPlot(self, plotter, data, mocker):
         mocker.patch.object(FigureCanvas, 'draw')
         mocker.patch.object(Axes3D, 'plot')

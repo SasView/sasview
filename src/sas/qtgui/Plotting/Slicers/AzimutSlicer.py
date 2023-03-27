@@ -22,7 +22,7 @@ class SectorInteractor(BaseInteractor):
         self.connect = self.base.connect
 
         # # Number of points on the plot
-        self.nbins = 20
+        self.nbins = 100
         theta1 = 2 * np.pi / 3
         theta2 = -2 * np.pi / 3
 
@@ -169,14 +169,14 @@ class SectorInteractor(BaseInteractor):
         #TODO: why is this empty?
         pass
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
-        self.inner_circle.restore()
-        self.outer_circle.restore()
-        self.right_edge.restore()
-        self.left_edge.restore()
+        self.inner_circle.restore(ev)
+        self.outer_circle.restore(ev)
+        self.right_edge.restore(ev)
+        self.left_edge.restore(ev)
 
     def move(self, x, y, ev):
         """

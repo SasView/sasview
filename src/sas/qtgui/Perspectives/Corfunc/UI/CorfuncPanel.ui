@@ -43,7 +43,7 @@
         <x>0</x>
         <y>0</y>
         <width>581</width>
-        <height>863</height>
+        <height>871</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -103,9 +103,141 @@
                </sizepolicy>
               </property>
               <property name="title">
-               <string>I(q) data source</string>
+               <string>Input</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_6">
+               <item row="4" column="0">
+                <widget class="QFrame" name="frame_5">
+                 <layout class="QGridLayout" name="gridLayout_7">
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_20">
+                    <property name="text">
+                     <string>Tangent Method:  </string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_18">
+                    <property name="text">
+                     <string>Fitting:  </string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_21">
+                    <property name="text">
+                     <string>Long Period Method:  </string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QRadioButton" name="radTangentInflection">
+                    <property name="text">
+                     <string>Use Inflection Point</string>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">buttonGroup_2</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QCheckBox" name="fitPorod">
+                    <property name="text">
+                     <string>Fit Porod</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QCheckBox" name="fitBackground">
+                    <property name="text">
+                     <string>Fit Background</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QRadioButton" name="radTangentMidpoint">
+                    <property name="text">
+                     <string>Use Halfway Point</string>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">buttonGroup_2</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item row="2" column="3">
+                   <widget class="QRadioButton" name="radLongPeriodAuto">
+                    <property name="text">
+                     <string>Automatic</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">buttonGroup</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QRadioButton" name="radTangentAuto">
+                    <property name="text">
+                     <string>Automatic</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">buttonGroup_2</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item row="2" column="2">
+                   <widget class="QRadioButton" name="radLongPeriodDouble">
+                    <property name="text">
+                     <string>Use 2x Minimum</string>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">buttonGroup</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QCheckBox" name="fitGuinier">
+                    <property name="text">
+                     <string>Fit Guinier</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QRadioButton" name="radLongPeriodMax">
+                    <property name="text">
+                     <string>Use Maximum</string>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">buttonGroup</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
                <item row="0" column="0">
                 <layout class="QHBoxLayout" name="horizontalLayout_4">
                  <item>
@@ -136,75 +268,19 @@
                  </item>
                 </layout>
                </item>
-               <item row="1" column="0">
+               <item row="2" column="0">
                 <layout class="QGridLayout" name="gridLayout">
                  <property name="bottomMargin">
                   <number>0</number>
                  </property>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="lblTotalQMin">
-                   <property name="text">
-                    <string>Guinier Start:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="txtLowerQMin">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="4">
-                  <widget class="QLabel" name="lblTotalQUnits">
+                 <item row="0" column="6">
+                  <widget class="QLabel" name="lblTotalQUnits_2">
                    <property name="text">
                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="2">
-                  <widget class="QLabel" name="lblTotalQMax">
-                   <property name="text">
-                    <string>Guinier End:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="3">
-                  <widget class="QLineEdit" name="txtLowerQMax">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="lblTotalQMin_2">
-                   <property name="text">
-                    <string>Porod Start:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
                   <widget class="QLineEdit" name="txtUpperQMin">
                    <property name="enabled">
                     <bool>true</bool>
@@ -217,7 +293,17 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="2">
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="lblTotalQMin_2">
+                   <property name="text">
+                    <string>Porod Start:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="4">
                   <widget class="QLabel" name="lblTotalQMax_2">
                    <property name="text">
                     <string>Porod End:</string>
@@ -227,7 +313,7 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="3">
+                 <item row="0" column="5">
                   <widget class="QLineEdit" name="txtUpperQMax">
                    <property name="enabled">
                     <bool>true</bool>
@@ -240,16 +326,90 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="4">
-                  <widget class="QLabel" name="lblTotalQUnits_2">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="lblTotalQMax">
                    <property name="text">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    <string>Guinier End:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="txtLowerQMax">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </item>
-               <item row="2" column="0">
+               <item row="5" column="0">
+                <layout class="QHBoxLayout" name="horizontalLayout_7">
+                 <property name="topMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>10</number>
+                 </property>
+                 <item>
+                  <spacer name="horizontalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="cmdExtract">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>120</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Extract model parameters from the real space transformed curve.</string>
+                   </property>
+                   <property name="text">
+                    <string>Go</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_3">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item row="1" column="0">
                 <layout class="QHBoxLayout" name="sliderLayout">
                  <property name="leftMargin">
                   <number>5</number>
@@ -276,34 +436,20 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_5">
+             <widget class="QGroupBox" name="groupBox_4">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="title">
-               <string>Background</string>
+               <string>Extrapolation Parameters</string>
               </property>
-              <layout class="QGridLayout" name="gridLayout_7">
-               <item row="0" column="0">
-                <layout class="QHBoxLayout" name="horizontalLayout_6">
-                 <item>
-                  <widget class="QPushButton" name="cmdCalculateBg">
-                   <property name="text">
-                    <string>Calculate</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label">
-                   <property name="text">
-                    <string>Background:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
+              <layout class="QVBoxLayout" name="backgroundLayout">
+               <item>
+                <layout class="QGridLayout" name="gridLayout_4">
+                 <item row="0" column="1">
                   <widget class="QLineEdit" name="txtBackground">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -313,178 +459,120 @@
                    </property>
                   </widget>
                  </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="groupBox_4">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="title">
-               <string>Extrapolation parameters</string>
-              </property>
-              <layout class="QGridLayout" name="gridLayout_2">
-               <item row="2" column="1">
-                <widget class="QPushButton" name="cmdSaveExtrapolation">
-                 <property name="toolTip">
-                  <string>Save the extrapolated data (non-transformed)</string>
-                 </property>
-                 <property name="text">
-                  <string>Save Extrapolated</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0" colspan="2">
-                <layout class="QGridLayout" name="gridLayout_5">
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item row="0" column="3">
-                  <widget class="QLabel" name="label_7">
-                   <property name="text">
-                    <string>     B:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="4">
-                  <widget class="QLineEdit" name="txtGuinierB">
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_8">
+                  <widget class="QLabel" name="label">
                    <property name="text">
-                    <string>Guinier</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    <string>Background:</string>
                    </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QLineEdit" name="txtGuinierA">
-                   <property name="readOnly">
-                    <bool>true</bool>
+                  <spacer name="horizontalSpacer_4">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
                    </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="label_6">
-                   <property name="text">
-                    <string>A:</string>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
                    </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_9">
-                   <property name="text">
-                    <string>Porod</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLabel" name="label_10">
-                   <property name="text">
-                    <string>K:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="2">
-                  <widget class="QLineEdit" name="txtPorodK">
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="3">
-                  <widget class="QLabel" name="label_11">
-                   <property name="text">
-                    <string>σ:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="4">
-                  <widget class="QLineEdit" name="txtPorodSigma">
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
+                  </spacer>
                  </item>
                 </layout>
                </item>
-               <item row="2" column="0">
-                <widget class="QPushButton" name="cmdExtrapolate">
-                 <property name="toolTip">
-                  <string>Find the Guinier and Porod extrapolations of the data as Q → 0 and Q → ∞</string>
-                 </property>
-                 <property name="text">
-                  <string>Extrapolate</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="groupBox_2">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="title">
-               <string>Transform</string>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
-                <widget class="QPushButton" name="cmdTransform">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="toolTip">
-                  <string>Calculate the real space correlation that matches the scattering data.</string>
-                 </property>
-                 <property name="text">
-                  <string>Transform</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="cmdSave">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="toolTip">
-                  <string>Export the calculated real space correlation function to a file.</string>
-                 </property>
-                 <property name="text">
-                  <string>Save Transformed</string>
-                 </property>
-                </widget>
+                <layout class="QGridLayout" name="gridLayout_2">
+                 <item row="5" column="0" colspan="2">
+                  <layout class="QGridLayout" name="gridLayout_5">
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item row="3" column="4">
+                    <widget class="QLineEdit" name="txtGuinierB">
+                     <property name="readOnly">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_8">
+                     <property name="text">
+                      <string>Guinier</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="3">
+                    <widget class="QLabel" name="label_7">
+                     <property name="text">
+                      <string>     B:</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="1">
+                    <widget class="QLabel" name="label_10">
+                     <property name="text">
+                      <string>K:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="2">
+                    <widget class="QLineEdit" name="txtPorodK">
+                     <property name="readOnly">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <widget class="QLabel" name="label_6">
+                     <property name="text">
+                      <string>A:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="2">
+                    <widget class="QLineEdit" name="txtGuinierA">
+                     <property name="readOnly">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="0">
+                    <widget class="QLabel" name="label_9">
+                     <property name="text">
+                      <string>Porod</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="4">
+                    <widget class="QLineEdit" name="txtPorodSigma">
+                     <property name="readOnly">
+                      <bool>false</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="3">
+                    <widget class="QLabel" name="label_11">
+                     <property name="text">
+                      <string>σ:</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
                </item>
               </layout>
              </widget>
@@ -501,7 +589,7 @@
                <string>Lamellar Parameters</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_3">
-               <item row="0" column="0">
+               <item row="1" column="0">
                 <layout class="QGridLayout" name="gridLayout_8">
                  <property name="sizeConstraint">
                   <enum>QLayout::SetDefaultConstraint</enum>
@@ -529,7 +617,11 @@
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QLineEdit" name="txtPolyRyan"/>
+                  <widget class="QLineEdit" name="txtPolyRyan">
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="2">
                   <widget class="QLineEdit" name="txtAvgHardBlock">
@@ -544,6 +636,9 @@
                      <width>20</width>
                      <height>20</height>
                     </size>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -564,7 +659,11 @@
                   </widget>
                  </item>
                  <item row="2" column="4">
-                  <widget class="QLineEdit" name="txtPolyStribeck"/>
+                  <widget class="QLineEdit" name="txtPolyStribeck">
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="1">
                   <widget class="QLabel" name="label_16">
@@ -581,7 +680,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Hard Block:</string>
+                    <string>    Hard Block:</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -619,7 +718,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Soft Block:</string>
+                    <string>         Soft Block:</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -639,6 +738,9 @@
                      <width>20</width>
                      <height>20</height>
                     </size>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -716,6 +818,9 @@
                      <height>20</height>
                     </size>
                    </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item row="1" column="4">
@@ -732,57 +837,14 @@
                      <height>20</height>
                     </size>
                    </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                 </layout>
                </item>
-               <item row="3" column="0">
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
-                 <property name="topMargin">
-                  <number>10</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>10</number>
-                 </property>
-                 <item>
-                  <spacer name="horizontalSpacer_2">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="cmdExtract">
-                   <property name="toolTip">
-                    <string>Extract model parameters from the real space transformed curve.</string>
-                   </property>
-                   <property name="text">
-                    <string>Extract Parameters</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <spacer name="horizontalSpacer_3">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                </layout>
-               </item>
-               <item row="1" column="0">
+               <item row="2" column="0">
                 <layout class="QGridLayout" name="gridLayout_9">
                  <property name="bottomMargin">
                   <number>0</number>
@@ -823,6 +885,9 @@
                      <height>20</height>
                     </size>
                    </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
@@ -861,9 +926,53 @@
                      <height>20</height>
                     </size>
                    </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                 </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="title">
+               <string>Export</string>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QPushButton" name="cmdSaveExtrapolation">
+                 <property name="toolTip">
+                  <string>Save the extrapolated data (non-transformed)</string>
+                 </property>
+                 <property name="text">
+                  <string>Export Extrapolated</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="cmdSave">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>Export the calculated real space correlation function to a file.</string>
+                 </property>
+                 <property name="text">
+                  <string>Export Transformed</string>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -949,7 +1058,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -973,6 +1082,16 @@
      </widget>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
+       <string>Extraction Diagram</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_420">
+       <item>
+        <layout class="QVBoxLayout" name="diagramLayout"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
        <string>IDF</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -985,6 +1104,32 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>txtFilename</tabstop>
+  <tabstop>txtUpperQMin</tabstop>
+  <tabstop>txtUpperQMax</tabstop>
+  <tabstop>txtGuinierA</tabstop>
+  <tabstop>txtGuinierB</tabstop>
+  <tabstop>txtPorodK</tabstop>
+  <tabstop>txtPorodSigma</tabstop>
+  <tabstop>cmdSave</tabstop>
+  <tabstop>txtAvgHardBlock</tabstop>
+  <tabstop>txtAvgSoftBlock</tabstop>
+  <tabstop>txtAvgIntThick</tabstop>
+  <tabstop>txtAvgCoreThick</tabstop>
+  <tabstop>txtPolyRyan</tabstop>
+  <tabstop>txtPolyStribeck</tabstop>
+  <tabstop>txtLongPeriod</tabstop>
+  <tabstop>txtLocalCrystal</tabstop>
+  <tabstop>cmdExtract</tabstop>
+  <tabstop>cmdHelp</tabstop>
+  <tabstop>tabWidget</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

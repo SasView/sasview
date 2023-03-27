@@ -25,13 +25,9 @@ Fitting Documentation
    Information on the SasView Optimisers <optimizer>
 
    Conversion of SANS to SESANS for Fitting <sesans/sans_to_sesans>
-   
-   Fitting SESANS using the Old GUI <sesans/sesans_fitting.rst>
 
    Writing a Plugin Model <plugin>
 
    Computations with a GPU <gpu_setup>
-
-   Scripting Interface to sasmodels <scripting>
 
    References <refs>

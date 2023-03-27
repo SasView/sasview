@@ -11,7 +11,7 @@ from twisted.internet import reactor
 
 # sas-global
 from sas.sascalc.invariant import invariant
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
@@ -266,7 +266,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Send the modified model item to DE for keeping in the model
         plots = [self._model_item]
         if self.high_extrapolation_plot:
-            self.high_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
+            self.high_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
             self.high_extrapolation_plot.symbol = "Line"
             self.high_extrapolation_plot.show_errors = False
             self.high_extrapolation_plot.show_q_range_sliders = True
@@ -280,7 +280,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                                              self.high_extrapolation_plot.title)
             plots.append(self.high_extrapolation_plot)
         if self.low_extrapolation_plot:
-            self.low_extrapolation_plot.plot_role = Data1D.ROLE_DEFAULT
+            self.low_extrapolation_plot.plot_role = DataRole.ROLE_DEFAULT
             self.low_extrapolation_plot.symbol = "Line"
             self.low_extrapolation_plot.show_errors = False
             self.low_extrapolation_plot.show_q_range_sliders = True

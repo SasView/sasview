@@ -13,6 +13,84 @@ Release Notes
 Features
 ========
 
+New in Version 5.0.6
+--------------------
+This is a point release which fixes a number of issues reported in earlier versions
+of 5.0.x. Of particular note, the failure of the program to start when installing on
+a new system due to issues finding the config file has been fixed. The speed with
+which the program starts up has also been improved. The paracrystalline models, which
+have been labelled as "under review" since 2018, have been checked and corrected (bcc
+and fcc) and the documentation completely reworked (bcc, fcc, and sc).  Elsewhere,
+plots now properly support custom data names in the legend, the LM optimizer failing
+to run on GPUs or when the starting value of a parameter is outside the min/max range
+has been fixed, a problem with the intermittent blanking of plots has also been fixed,
+a number of defaults have been changed to be more reasonable, and a number of other
+issues in the documentation have been corrected and/or updated.
+
+This version of SasView is built with Sasmodels 1.0.7 and Bumps master.
+
+Pull Request Changes
+^^^^^^^^^^^^^^^^^^^^
+* Fix error being thrown when the initial guess it outside the min/max range for the LM optimizer @krzywon `[#2422] <https://github.com/SasView/sasview/pull/2422/>`_
+* Fix for failure to find custom_config preventing sasview from starting @krzywon `[#2407] <https://github.com/SasView/sasview/pull/2407/>`_
+* Cleanup (close) the bumps/DREAM results panel when associate data is removed from sasview @krzywon `[#2365] <https://github.com/SasView/sasview/pull/2365/>`_
+* Fix plot legend not updating on custom change @rozyczko `[#2362] <https://github.com/SasView/sasview/pull/2362/>`_
+* Add more informative error message to invariant calculator @wpotrzebowski `[#2357] <https://github.com/SasView/sasview/pull/2357/>`_
+* Provide more reasonable defaults (number of points in curves, log vs linear scale, residuals don't have error bars) @butlerpd `[#2354] <https://github.com/SasView/sasview/pull/2354/>`_
+* Make sesans residual plots show in real space rather than q space @caitwolf `[#2338] <https://github.com/SasView/sasview/pull/2338/>`_
+* Fix rare bug that switches slit width and length in the gui @caitwolf `[#2336] <https://github.com/SasView/sasview/pull/2336>`_
+* Fix binning bug in implementation of sesans @caitwolf `[#2331] <https://github.com/SasView/sasview/pull/2331/>`_
+* Fix problem of a second plot showing up when loading certain data files @pbeaucage `[#2329] <https://github.com/SasView/sasview/pull/2329>`_
+* Fix to chaging parameters in FitPage not updating plots. Was most obvious for sesans. @caitwolf `[#2318] <https://github.com/SasView/sasview/pull/2318/>`_
+* Fix problem with SlD calculator tool buttons sometimes being squashed hiding the button label @rozyczko `[#2302] <https://github.com/SasView/sasview/pull/2302>`_
+* Fix problem with intermittent plot blanking @pbeaucage `[#2300] <https://github.com/SasView/sasview/pull/2300/>`_
+* Fix problem with appending graphs when using theory data @rozyczko `[#2298] <https://github.com/SasView/sasview/pull/2298/>`_
+* Properly support custom names in plot legend @pbeaucage `[#2293] <https://github.com/SasView/sasview/pull/2293/>`_
+* Tweaks to improve startup speed @rozyczko `[#2275] <https://github.com/SasView/sasview/pull/2275/>`_
+* Fix problem with losing minimize/restore/close buttons when maximizing fit window @rozyczko `[#2273] <https://github.com/SasView/sasview/pull/2273/>`_
+* Add persistent legend visibility toggle @pbeaucage `[#2266] <https://github.com/SasView/sasview/pull/2266/>`_
+* Fix label rendering problems due to incorrect escape sequences @llimeht `[#2217] <https://github.com/SasView/sasview/pull/2217/>`_
+* Fix update to numpy verion breaking P(R) analysis @lucas-wilkins `[#2178] <https://github.com/SasView/sasview/pull/2178/>`_
+* Fix problem with use of Data Operation Tool preventing project saving @rozyczko `[#2099] <https://github.com/SasView/sasview/pull/2099/>`_
+* Correct paracrystal model error and rework documentation @butlerpd `[#545] <https://github.com/SasView/sasmodels/pull/545>`_
+* Fix rare race condition causing errors @bmaranville `[#537] <https://github.com/SasView/sasmodels/pull/537/>`_
+* Fix to allow multiple scattering script to run @wpotrzebowski `[#521] <https://github.com/SasView/sasmodels/pull/521/>`_
+* Fix error in core shell Ellipsoid documentation @pkienzle `[#512] <https://github.com/SasView/sasmodels/pull/512/>`_
+* Fix models with complex amplitudes not compiling on the fly @pkienzle `[#511] <https://github.com/SasView/sasmodels/pull/511/>`_
+* Fix problem with LM optimizer failing when GPUs are turned on by updating to the latest bumps version `[issue #518] <https://github.com/SasView/sasmodels/issues/518/>`_
+
+Documentation Changes
+^^^^^^^^^^^^^^^^^^^^^
+* Update optimizer help documentation @smk78 `[#2359] <https://github.com/SasView/sasview/pull/2359/>`_
+* Update contributor list @wpotrzebowski `[#2114] <https://github.com/SasView/sasview/pull/2114>`_
+* Update web links from http to https @smk78 `[#2087] <https://github.com/SasView/sasview/pull/2087/>`_ and `[#2265] <https://github.com/SasView/sasview/pull/2265/>`_
+* Update corfunc documentation @lucas-wilkins `[#2047] <https://github.com/SasView/sasview/pull/2047/>`_
+* Update gel_fit model documentation and fix formating @smk78 `[#541] <https://github.com/SasView/sasmodels/pull/541/>`_
+* Correct and update cylinder model documentation @butlerpd `[#539] <https://github.com/SasView/sasmodels/pull/539>`_
+* Restructuring and cross-linking of sasmodels docs @smk78 `[#534] <https://github.com/SasView/sasmodels/pull/534/>`_
+* Update marketplace url to https @smk78 `[#522] <https://github.com/SasView/sasmodels/pull/522/>`_
+
+Build System Changes
+^^^^^^^^^^^^^^^^^^^^
+* Fix Sphinx some of the warnings during build process @smk78 `[#2288] <https://github.com/SasView/sasview/pull/2288/>`_
+
+New Models
+^^^^^^^^^^
+The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.5 was released:
+
+* Pringle-Schmidt Helices (documentation update)
+* Lamellar Slab Partition Constant
+
+Known Issues
+^^^^^^^^^^^^
+All the known bugs/feature requests can be found in the issues on github.
+Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
+
+`[sasview] <https://github.com/SasView/sasview/milestones>`_
+
+`[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
+
+
 New in Version 5.0.5
 --------------------
 This is a point release which fixes some issues reported in earlier versions

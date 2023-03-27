@@ -27,8 +27,7 @@ from PySide6 import QtWidgets
 from periodictable import formula as Formula
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.ConvertUnits import convertUnit
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Plotting.Plottables import Plottable
 from sasdata.dataloader.data_info import Sample, Source, Vector
 from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
@@ -240,7 +239,7 @@ def deleteRedundantPlots(item, new_plots):
         if (plot_data.id is not None) and \
             (plot_data.id not in ids) and \
             (plot_data.name not in names) and \
-            (plot_data.plot_role == Data1D.ROLE_DELETABLE):
+            (plot_data.plot_role == DataRole.ROLE_DELETABLE):
             items_to_delete.append(plot_item)
 
     for plot_item in items_to_delete:

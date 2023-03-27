@@ -12,12 +12,18 @@ Working with SasView
 
    Plotting Data/Models <qtgui/MainWindow/graph_help>
 
-   Test Data <sasview/test/testdata_help>
+   Test Data <example_data/testdata_help>
 
    Tutorials <tutorial>
 
    Writing a Plugin Model <qtgui/Perspectives/Fitting/plugin>
 
+   Scripting Interface to Sasmodels <qtgui/Perspectives/Fitting/scripting>
+
+   Command Line Interpreter Syntax <qtgui/Perspectives/Fitting/cli>
+
    Environment Variables <environment>
 
-   Model marketplace <marketplace>
+   Model Marketplace <marketplace>
+
+   Preferences <qtgui/MainWindow/preferences_help.rst>

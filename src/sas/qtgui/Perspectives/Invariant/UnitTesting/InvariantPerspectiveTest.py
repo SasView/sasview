@@ -453,6 +453,9 @@ class InvariantPerspectiveTest:
         assert not widget.txtNptsLowQ.isReadOnly()
         assert not widget.txtNptsHighQ.isReadOnly()
 
+        assert widget.txtTotalQMin.isReadOnly()
+        assert widget.txtTotalQMax.isReadOnly()
+
         # content of line edits
         assert widget.txtName.text() == 'data'
         assert widget.txtTotalQMin.text() == '0.009'

@@ -11,7 +11,7 @@ from PySide6 import QtCore
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.MainWindow.MainWindow import SplashScreen
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
-
+from sas.qtgui.Utilities.HidableDialog import HidableDialog, ShowAgainResult
 
 class MainWindowTest:
     """Test the Main Window GUI"""
@@ -98,7 +98,8 @@ class MainWindowTest:
         """
         # Must mask sys.exit, otherwise the whole testing process stops.
         mocker.patch.object(sys, 'exit')
-        mocker.patch.object(QtWidgets.QMessageBox, 'question', return_value=QtWidgets.QMessageBox.Yes)
+        # mocker.patch.object(QtWidgets.QMessageBox, 'question', return_value=QtWidgets.QMessageBox.Yes)
+        mocker.patch.object(HidableDialog, 'exec', return_value=1)
 
         # Open, then close the main window
         screen_resolution = QtCore.QRect(0, 0, 640, 480)
@@ -106,4 +107,4 @@ class MainWindowTest:
         tmp_main.close()
 
         # See that the MessageBox method got called
-        assert QtWidgets.QMessageBox.question.called
+        assert HidableDialog.exec.called_once()

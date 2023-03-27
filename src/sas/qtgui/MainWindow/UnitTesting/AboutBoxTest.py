@@ -9,7 +9,6 @@ from unittest.mock import MagicMock
 
 import sas.sasview
 import sas.system.version
-from sas import config
 from sas.system import web, legal
 
 # Local

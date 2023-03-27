@@ -236,13 +236,13 @@ class BoxSumCalculator(BaseInteractor):
         # compute error an d sum of data's pixel
         self.postData()
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
-        self.horizontal_lines.restore()
-        self.vertical_lines.restore()
-        self.center.restore()
+        self.horizontal_lines.restore(ev)
+        self.vertical_lines.restore(ev)
+        self.center.restore(ev)
 
     def getParams(self):
         """
@@ -377,7 +377,7 @@ class PointInteractor(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
@@ -538,7 +538,7 @@ class VerticalDoubleLine(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
@@ -700,7 +700,7 @@ class HorizontalDoubleLine(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """

@@ -21,6 +21,7 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterData import DataRole
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
@@ -114,6 +115,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
+
+        self.cbgraph_2.editTextChanged.connect(self.enableGraphCombo)
+        self.cbgraph_2.currentIndexChanged.connect(self.enableGraphCombo)
 
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtCore.QSortFilterProxyModel(self)
@@ -693,6 +697,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 # Delete corresponding open plots
                 self.closePlotsForItem(item)
+                # Close result panel if results represent the deleted data item
+                # Results panel only stores Data1D/Data2D object
+                #   => QStandardItems must still exist for direct comparison
+                self.closeResultPanelOnDelete(GuiUtils.dataFromItem(item))
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -937,9 +945,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Modify the name of the current plot
         """
         old_name, current_name = name_tuple
-        ind = self.cbgraph.findText(old_name)
-        self.cbgraph.setCurrentIndex(ind)
-        self.cbgraph.setItemText(ind, current_name)
+        graph = self.cbgraph
+        if self.current_view == self.freezeView:
+            graph = self.cbgraph_2
+        ind = graph.findText(old_name)
+        graph.setCurrentIndex(ind)
+        graph.setItemText(ind, current_name)
 
     def add_data(self, data_list):
         """
@@ -969,12 +980,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Modify Graph combo box on graph add/delete
         """
-        orig_text = self.cbgraph.currentText()
-        self.cbgraph.clear()
-        self.cbgraph.insertItems(0, graph_list)
-        ind = self.cbgraph.findText(orig_text)
+        graph = self.cbgraph
+        if self.current_view == self.freezeView:
+            graph = self.cbgraph_2
+        orig_text = graph.currentText()
+        graph.clear()
+        graph.insertItems(0, graph_list)
+        ind = graph.findText(orig_text)
         if ind > 0:
-            self.cbgraph.setCurrentIndex(ind)
+            graph.setCurrentIndex(ind)
 
     def updatePerspectiveCombo(self, index):
         """
@@ -1030,7 +1044,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     or name in plot.name
                     or name == plot.filename):
                 # Residuals get their own plot
-                if plot.plot_role == Data1D.ROLE_RESIDUAL:
+                if plot.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]:
                     plot.yscale = 'linear'
                     self.plotData([(item, plot)])
                 else:
@@ -1077,13 +1091,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]
 
-            if (role == Data1D.ROLE_RESIDUAL and shown) or role == Data1D.ROLE_DELETABLE:
-                # Nothing to do if separate plot already shown or to be deleted
+            if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
+                # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
-            elif role == Data1D.ROLE_RESIDUAL:
-                # Residual plots should always be separate
-                plot_to_show.yscale='linear'
+            elif role in stand_alone_types:
+                # Stand-alone plots should always be separate
                 self.plotData([(plot_item, plot_to_show)])
             elif append:
                 # Assume all other plots sent together should be on the same chart if a previous plot exists
@@ -1115,7 +1129,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if not hasattr(plot, 'name'):
             return False
         ids_vals = [val.data[0].name for val in self.active_plots.values()]
-                    #if val.data[0].plot_role != Data1D.ROLE_DATA]
+                    #if val.data[0].plot_role != DataRole.ROLE_DATA]
 
         return plot.name in ids_vals
 
@@ -1214,11 +1228,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # new plot data; check which tab is currently active
         if self.current_view == self.treeView:
             new_plots = GuiUtils.plotsFromCheckedItems(self.model)
+            graph = self.cbgraph
         else:
             new_plots = GuiUtils.plotsFromCheckedItems(self.theory_model)
+            graph = self.cbgraph_2
 
         # old plot data
-        plot_id = str(self.cbgraph.currentText())
+        plot_id = str(graph.currentText())
         try:
             assert plot_id in PlotHelper.currentPlotIds(), "No such plot: %s" % (plot_id)
         except:
@@ -1256,13 +1272,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_id = data.name
         if data_id in ids_keys:
             # We have data, let's replace data that needs replacing
-            if data.plot_role != Data1D.ROLE_DATA:
+            if data.plot_role != DataRole.ROLE_DATA:
                 self.active_plots[data_id].replacePlot(data_id, data)
                 # restore minimized window, if applicable
                 self.active_plots[data_id].showNormal()
             return True
         #elif data_id in ids_vals:
-        #    if data.plot_role != Data1D.ROLE_DATA:
+        #    if data.plot_role != DataRole.ROLE_DATA:
         #        list(self.active_plots.values())[ids_vals.index(data_id)].replacePlot(data_id, data)
         #        self.active_plots[data_id].showNormal()
         #    return True
@@ -1310,7 +1326,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
-            extension_list = config.PLUGIN_STATE_EXTENSIONS
+            extension_list = config.PLUGIN_STATE_EXTENSIONS.copy()
             if config.APPLICATION_STATE_EXTENSION is not None:
                 extension_list.append(config.APPLICATION_STATE_EXTENSION)
 
@@ -1891,6 +1907,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         logging.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
 
         pass  # debugger anchor
+
+    def closeResultPanelOnDelete(self, data):
+        """
+        Given a data1d/2d object, close the fitting results panel if currently populated with the data
+        """
+        # data - Single data1d/2d object to be deleted
+        self.parent.results_panel.onDataDeleted(data)
 
     def onAnalysisUpdate(self, new_perspective_name: str):
         """

@@ -142,6 +142,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>rbWings</tabstop>
+  <tabstop>rbCircularDisk</tabstop>
+  <tabstop>rbRectangularDisk</tabstop>
+  <tabstop>rbDoubleWingWindow</tabstop>
+  <tabstop>rbCircularWindow</tabstop>
+  <tabstop>rbRectangularWindow</tabstop>
+  <tabstop>cmdAdd</tabstop>
+  <tabstop>cmdReset</tabstop>
+  <tabstop>cmdClear</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

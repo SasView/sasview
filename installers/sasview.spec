@@ -4,10 +4,10 @@ import sys
 from pathlib import Path
 import warnings
 import platform
-import sys
+import sysconfig
 
 block_cipher = None
-PYTHON_LOC = sys.exec_prefix
+PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
 datas = [
     ('../src/sas/qtgui/images', 'images'),
@@ -15,14 +15,14 @@ datas = [
     ('../src/sas/example_data', 'example_data'),
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
-    ('../src/sas/system/log.ini', '.'),
+    ('../src/sas/system/log.ini', 'sas/system/'),
     ('../../sasmodels/sasmodels','sasmodels'),
     ('../docs/sphinx-docs/build/html','doc')
 ]
 #TODO: Hopefully we can get away from version specific packages
-if platform.system() == 'Darwin':
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','jedi'),'jedi'))
-    datas.append((os.path.join(PYTHON_LOC,'lib','python3.8', 'site-packages','zmq'),'.'))
+datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
+datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
+datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
 
 def add_data(data):
     for component in data:
@@ -62,6 +62,13 @@ hiddenimports = [
     'xmlrpc.server',
     'uncertainties',
 ]
+
+if platform.system() == 'Windows':
+    # Need win32 to run sasview from the command line.
+    hiddenimports.extend([
+        'win32',
+        'win32.win32console',
+    ])
 
 a = Analysis(
     ['sasview.py'],

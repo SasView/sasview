@@ -34,7 +34,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
                          numpy.fabs(self.data.ymin)), 2)
         self.qmax = numpy.sqrt(x + y)
         # Number of points on the plot
-        self.nbins = 20
+        self.nbins = 100
         # Angle of the middle line
         self.theta2 = numpy.pi / 3
         # Absolute value of the Angle between the middle line and any side line
@@ -133,7 +133,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
         if nbins is None:
-            nbins = 20
+            nbins = self.nbins
         sect = SectorQ(r_min=0.0, r_max=radius,
                        phi_min=phimin + numpy.pi,
                        phi_max=phimax + numpy.pi, nbins=nbins)
@@ -206,13 +206,13 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         # Post parameters
         self._post_data(self.nbins)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
-        self.main_line.restore()
-        self.left_line.restore()
-        self.right_line.restore()
+        self.main_line.restore(ev)
+        self.left_line.restore(ev)
+        self.right_line.restore(ev)
 
     def move(self, x, y, ev):
         """
@@ -394,7 +394,7 @@ class SideInteractor(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
@@ -408,38 +408,38 @@ class SideInteractor(BaseInteractor):
         self.has_move = True
         if not self.left_moving:
             if  self.theta2 - self.theta <= 0 and self.theta2 > 0:
-                self.restore()
+                self.restore(ev)
                 return
             elif self.theta2 < 0 and self.theta < 0 and \
                 self.theta - self.theta2 >= 0:
-                self.restore()
+                self.restore(ev)
                 return
             elif  self.theta2 < 0 and self.theta > 0 and \
                 (self.theta2 + 2 * numpy.pi - self.theta) >= numpy.pi / 2:
-                self.restore()
+                self.restore(ev)
                 return
             elif  self.theta2 < 0 and self.theta < 0 and \
                 (self.theta2 - self.theta) >= numpy.pi / 2:
-                self.restore()
+                self.restore(ev)
                 return
             elif self.theta2 > 0 and (self.theta2 - self.theta >= numpy.pi / 2 or \
                 (self.theta2 - self.theta >= numpy.pi / 2)):
-                self.restore()
+                self.restore(ev)
                 return
         else:
             if  self.theta < 0 and (self.theta + numpy.pi * 2 - self.theta2) <= 0:
-                self.restore()
+                self.restore(ev)
                 return
             elif self.theta2 < 0 and (self.theta - self.theta2) <= 0:
-                self.restore()
+                self.restore(ev)
                 return
             elif  self.theta > 0 and self.theta - self.theta2 <= 0:
-                self.restore()
+                self.restore(ev)
                 return
             elif self.theta - self.theta2 >= numpy.pi / 2 or  \
                 ((self.theta + numpy.pi * 2 - self.theta2) >= numpy.pi / 2 and \
                  self.theta < 0 and self.theta2 > 0):
-                self.restore()
+                self.restore(ev)
                 return
 
         self.phi = numpy.fabs(self.theta2 - self.theta)
@@ -537,7 +537,7 @@ class LineInteractor(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """

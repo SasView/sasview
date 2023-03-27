@@ -3,13 +3,13 @@ from PySide6 import QtWidgets
 
 import functools
 import copy
-import sys
 import matplotlib as mpl
 import numpy as np
+import textwrap
 from matplotlib.font_manager import FontProperties
 from packaging import version
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.Binder import BindArtist
@@ -24,29 +24,7 @@ from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelPropertyHolder
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
-def _legendResize(width, parent):
-    """
-    resize factor for the legend, based on total canvas width
-    """
-    # The factor 4.0 was chosen to look similar in size/ratio to what we had in 4.x
-    if parent is None or parent.parent is None or parent.parent.manager is None \
-        or parent.parent.manager.parent is None or parent.parent.manager.parent._parent is None:
-        return None
-    if not hasattr(parent.parent, "manager"):
-        return None
-
-    screen_width = parent.parent.manager.parent._parent.screen_width
-    screen_height = parent.parent.manager.parent._parent.screen_height
-    screen_factor = screen_width * screen_height
-
-    if sys.platform == 'win32':
-        factor = 4
-        denomintor = 100
-        scale_factor = width/denomintor + factor
-    else:
-        #Function inferred based on tests for several resolutions
-        scale_factor = (3e-6*screen_factor + 1)*width/640
-    return scale_factor
+from sas import config
 
 class PlotterWidget(PlotterBase):
     """
@@ -89,6 +67,9 @@ class PlotterWidget(PlotterBase):
         self.toolbar._actions['zoom'].triggered.connect(self._zoom)
 
         self.legendVisible = True
+
+        if parent is not None:
+            parent.geometry()
 
     @property
     def data(self):
@@ -161,6 +142,7 @@ class PlotterWidget(PlotterBase):
         ax = self.ax
         x = data.view.x
         y = data.view.y
+        label = data.name # was self._title
 
         # Marker symbol. Passed marker is one of matplotlib.markers characters
         # Alternatively, picked up from Data1D as an int index of PlotUtilities.SHAPES dict
@@ -204,22 +186,22 @@ class PlotterWidget(PlotterBase):
         l_width = markersize * 0.4
         if marker == '-' or marker == '--':
             line = self.ax.plot(x, y, color=color, lw=l_width, marker='',
-                             linestyle=marker, label=self._title, zorder=10)[0]
+                             linestyle=marker, label=label, zorder=10)[0]
 
         elif marker == 'vline':
             y_min = min(y)*9.0/10.0 if min(y) < 0 else 0.0
             line = self.ax.vlines(x=x, ymin=y_min, ymax=y, color=color,
-                            linestyle='-', label=self._title, lw=l_width, zorder=1)
+                            linestyle='-', label=label, lw=l_width, zorder=1)
 
         elif marker == 'step':
             line = self.ax.step(x, y, color=color, marker='', linestyle='-',
-                                label=self._title, lw=l_width, zorder=1)[0]
+                                label=label, lw=l_width, zorder=1)[0]
 
         else:
             # plot data with/without errorbars
             if hide_error:
                 line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
-                        linestyle='', label=self._title, picker=True)
+                        linestyle='', label=label, picker=True)
             else:
                 dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
@@ -236,7 +218,7 @@ class PlotterWidget(PlotterBase):
                             markersize=markersize,
                             lolims=False, uplims=False,
                             xlolims=False, xuplims=False,
-                            label=self._title,
+                            label=label,
                             zorder=1,
                             picker=True)
 
@@ -244,6 +226,12 @@ class PlotterWidget(PlotterBase):
         if data.show_yzero:
             ax.axhline(color='black', linewidth=1)
 
+        # Display +/- 3 sigma and +/- 1 sigma lines for residual plots
+        if data.plot_role == DataRole.ROLE_RESIDUAL:
+            ax.axhline(y=3, color='red', linestyle='-')
+            ax.axhline(y=-3, color='red', linestyle='-')
+            ax.axhline(y=1, color='gray', linestyle='--')
+            ax.axhline(y=-1, color='gray', linestyle='--')
         # Update the list of data sets (plots) in chart
         self.plot_dict[data.name] = data
 
@@ -251,14 +239,28 @@ class PlotterWidget(PlotterBase):
 
         # Now add the legend with some customizations.
         if self.showLegend:
-            width=_legendResize(self.canvas.size().width(), self.parent)
-            if width is not None:
-                self.legend = ax.legend(loc='upper right', shadow=True, prop={'size':width})
+            max_legend_width = config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH
+            handles, labels = ax.get_legend_handles_labels()
+            newhandles = []
+            newlabels = []
+            for h,l in zip(handles,labels):
+                    if config.FITTING_PLOT_LEGEND_TRUNCATE:
+                        if len(l)> config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH:
+                            half_legend_width = math.floor(max_legend_width/2)
+                            newlabels.append(f'{l[0:half_legend_width-3]} .. {l[-half_legend_width+3:]}')
+                        else:
+                            newlabels.append(l)
+                    else:
+                        newlabels.append(textwrap.fill(l,max_legend_width))
+                    newhandles.append(h)
+
+            if config.FITTING_PLOT_FULL_WIDTH_LEGENDS:
+                self.legend = ax.legend(newhandles,newlabels,loc='best', mode='expand')
             else:
-                self.legend = ax.legend(loc='upper right', shadow=True)
-            if self.legend:
-                self.legend.set_picker(True)
+                self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
+            self.legend.set_picker(True)
             self.legend.set_visible(self.legendVisible)
+            
         # Current labels for axes
         if self.yLabel and not is_fit:
             ax.set_ylabel(self.yLabel)
@@ -299,16 +301,6 @@ class PlotterWidget(PlotterBase):
         # refresh canvas
         self.canvas.draw_idle()
 
-    def onResize(self, event):
-        """
-        Resize the legend window/font on canvas resize
-        """
-        if not self.showLegend or not self.legendVisible:
-            return
-        width = _legendResize(event.width, self.parent)
-        # resize the legend to follow the canvas width.
-        if width is not None:
-            self.legend.prop.set_size(width)
 
     def createContextMenu(self):
         """
@@ -579,7 +571,6 @@ class PlotterWidget(PlotterBase):
         Resets the chart X and Y ranges to their original values
         """
         # Clear graph and plot everything again
-        mpl.pyplot.cla()
         self.ax.cla()
         self.setRange = None
         for ids in self.plot_dict:
@@ -656,7 +647,6 @@ class PlotterWidget(PlotterBase):
         xl = self.ax.xaxis.label.get_text()
         yl = self.ax.yaxis.label.get_text()
 
-        mpl.pyplot.cla()
         self.ax.cla()
 
         # Recreate Artist bindings after plot clear
@@ -697,7 +687,7 @@ class PlotterWidget(PlotterBase):
         marker = selected_plot.symbol
         marker_size = selected_plot.markersize
         # plot name
-        legend = selected_plot.title
+        legend = selected_plot.name
         plotPropertiesWidget = PlotProperties(self,
                                 color=color,
                                 marker=marker,
@@ -708,7 +698,7 @@ class PlotterWidget(PlotterBase):
             selected_plot.markersize = plotPropertiesWidget.markersize()
             selected_plot.custom_color = plotPropertiesWidget.color()
             selected_plot.symbol = plotPropertiesWidget.marker()
-            selected_plot.title = plotPropertiesWidget.legend()
+            selected_plot.name = plotPropertiesWidget.legend()
             # Redraw the plot
             self.replacePlot(id, selected_plot)
 
@@ -726,7 +716,6 @@ class PlotterWidget(PlotterBase):
         self.plot_dict = {}
 
         # Clean the canvas
-        mpl.pyplot.cla()
         self.ax.cla()
 
         # Recreate the plots but reverse the error flag for the current

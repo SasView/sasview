@@ -47,6 +47,9 @@
          <height>21</height>
         </size>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
       </widget>
      </item>
      <item row="0" column="2">
@@ -76,6 +79,9 @@
          <width>61</width>
          <height>21</height>
         </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
        </property>
        <property name="styleSheet">
         <string notr="true"/>
@@ -135,6 +141,9 @@
          <height>21</height>
         </size>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
       </widget>
      </item>
      <item row="3" column="2">
@@ -164,6 +173,9 @@
          <width>61</width>
          <height>21</height>
         </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
        </property>
       </widget>
      </item>
@@ -199,6 +211,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
