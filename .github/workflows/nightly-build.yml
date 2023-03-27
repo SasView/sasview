@@ -38,20 +38,20 @@ jobs:
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-          run: |
-                echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
-                security create-keychain -p DloaAcYP build.keychain
-                security default-keychain -s build.keychain
-                security unlock-keychain -p DloaAcYP build.keychain
-                security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-                security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
+        run: |
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p DloaAcYP build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p DloaAcYP build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
-                cd installers/dist
-                python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
-                python  ../../build_tools/code_sign_osx.py
-                codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
-                hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
-                codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
+          cd installers/dist
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
+          python  ../../build_tools/code_sign_osx.py
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
+          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
+          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
 #      - name: Notarize Release Build (OSX)
 #        uses: devbotsxyz/xcode-notarize@v1
