@@ -60,6 +60,8 @@ hiddenimports = [
     'reportlab.graphics.barcode.fourstate',
     'xmlrpc',
     'xmlrpc.server',
+    'debugpy',
+    'debugpy._vendored',
     'uncertainties',
 ]
 

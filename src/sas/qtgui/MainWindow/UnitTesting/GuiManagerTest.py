@@ -8,7 +8,6 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 from PySide6.QtTest import QTest
 from PySide6 import QtCore
-from unittest.mock import MagicMock
 
 # Local
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow

@@ -32,7 +32,7 @@ three main reasons for this:
 
   1) They have a tendency to accumulate junk because people dont realise that a
      config item is no longer needed
-  2) Its hard to trace the usages and types because values are loaded at runtime
+  2) It's hard to trace the usages and types because values are loaded at runtime
   3) Maintaining synchrony between config files and config usages is difficult, as
      it is the users that have control over the config files.
 
@@ -82,7 +82,7 @@ Things that don't belong, but were previously in the config:
      this includes variables that are defined in terms of other variables,
      but otherwise don't change
   2) Paths to resources within sasview (use importlib.resources instead)
-  3) Blocks of data that wont be modified by the user and used primarily
+  3) Blocks of data that won't be modified by the user and used primarily
      by single class - e.g. the text for a message
   4) Large blocks of text in general
 

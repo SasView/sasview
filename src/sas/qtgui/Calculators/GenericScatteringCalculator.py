@@ -158,8 +158,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # validators
         # scale, volume and background must be positive
         validat_regex_pos = QtCore.QRegularExpression(r'^[+]?([.]\d+|\d+([.]\d+)?)$')
-        # in Qt6, the above is incorrect and should be:
-
 
         self.txtScale.setValidator(QtGui.QRegularExpressionValidator(validat_regex_pos,
                                                           self.txtScale))
@@ -372,16 +370,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.gui_text_changed(target)
         elif target in self.coord_windows:
             if event.type() == QtCore.QEvent.MouseButtonPress:
-                self.mouse_x = event.x()
-                self.mouse_y = event.y()
+                mEvent = QtGui.QMouseEvent(event)
+                self.mouse_x = mEvent.x()
+                self.mouse_y = mEvent.y()
                 self.mouse_down = True
             elif event.type() == QtCore.QEvent.MouseButtonRelease:
                 self.mouse_down = False
             elif event.type() == QtCore.QEvent.MouseMove and self.mouse_down:
-                self.view_azim = (self.view_azim - event.x() + self.mouse_x) % 360
-                self.view_elev = min(max(self.view_elev + event.y() - self.mouse_y, -90), 90)
-                self.mouse_x = event.x()
-                self.mouse_y = event.y()
+                mEvent = QtGui.QMouseEvent(event)
+                self.view_azim = (self.view_azim - mEvent.x() + self.mouse_x) % 360
+                self.view_elev = min(max(self.view_elev + mEvent.y() - self.mouse_y, -90), 90)
+                self.mouse_x = mEvent.x()
+                self.mouse_y = mEvent.y()
                 for axes in self.coord_axes:
                     axes.view_init(elev=self.view_elev, azim=self.view_azim)
                     axes.figure.canvas.draw()

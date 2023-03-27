@@ -8,8 +8,6 @@ from PySide6 import QtGui, QtWidgets
 from PySide6 import QtCore
 from PySide6.QtTest import QTest
 from PySide6.QtCore import Qt
-from unittest.mock import MagicMock
-
 
 # CRUFT: this shouldn't be needed in the test but makes the difference
 # between passing tests and failing tests. Remove this and figure out how

@@ -5,7 +5,6 @@ import pytest
 from PySide6 import QtGui, QtWidgets
 from PySide6.QtTest import QTest
 from PySide6 import QtCore
-from unittest.mock import MagicMock
 
 import sas.sasview
 import sas.system.version

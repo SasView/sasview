@@ -6,8 +6,6 @@ import pytest
 from PySide6 import QtGui, QtWidgets
 from PySide6.QtTest import QTest
 from PySide6.QtCore import Qt
-from unittest.mock import MagicMock
-
 
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sasdata.dataloader.loader import Loader

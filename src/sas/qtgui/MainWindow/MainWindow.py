@@ -43,7 +43,7 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         # Create the gui manager
         from .GuiManager import GuiManager
         try:
-           self.guiManager = GuiManager(self)
+            self.guiManager = GuiManager(self)
         except Exception as ex:
             logger.error("Application failed with: "+str(ex))
             raise ex

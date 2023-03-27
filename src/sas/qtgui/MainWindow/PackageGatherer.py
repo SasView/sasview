@@ -118,8 +118,10 @@ class PackageGatherer:
 
             # Modules that require specific methods to get the version number
             if "PySide6" in module_name:
+                import PySide6
                 try:
-                    from PySide6.QtCore import PYQT_VERSION_STR
+                    PYQT_VERSION_STR = PySide6.__version__
+
                 except Exception as e:
                     # Unable to access PySide6
                     err_version_dict[module_name] = f"Unknown: {e} when attempting to get PySide6 version"
@@ -127,7 +129,7 @@ class PackageGatherer:
                 else:
                     package_versions_dict["PyQt"] = PYQT_VERSION_STR
                 try:
-                    from PySide6.QtCore import QT_VERSION_STR
+                    QT_VERSION_STR = PySide6.QtCore.__version__
                 except Exception as e:
                     # Unable to access Qt
                     err_version_dict[module_name] = f"Unknown: {e} when attempting to get Qt version"
