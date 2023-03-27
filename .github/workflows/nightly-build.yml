@@ -29,6 +29,44 @@ jobs:
               installers/dist/SasView5.dmg
               installers/dist/sasview5.tar.gz
 
+#      - name: Rename artifacts
+#        run: |
+#          mv installers/dist/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
+#          mv installers/dist/SasView5.dmg  SasView-nightly-MacOSX.dmg
+#          mv installers/dist/sasview5.tar.gz SasView-nightly-Linux.tar.gz
+      - name: Sign executable and create dmg (OSX)
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          run: |
+                echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+                security create-keychain -p DloaAcYP build.keychain
+                security default-keychain -s build.keychain
+                security unlock-keychain -p DloaAcYP build.keychain
+                security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+                security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
+
+                cd installers/dist
+                python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
+                python  ../../build_tools/code_sign_osx.py
+                codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
+                hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
+                codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
+
+#      - name: Notarize Release Build (OSX)
+#        uses: devbotsxyz/xcode-notarize@v1
+#        with:
+#          product-path: "installers/dist/SasView5.dmg"
+#          primary-bundle-id: "org.sasview.SasView5"
+#          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+#          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+#
+#      - name: Staple Release Build (OSX)
+#        if: ${{ startsWith(matrix.os, 'macos') }}
+#        uses: devbotsxyz/xcode-staple@v1
+#        with:
+#          product-path: "installers/dist/SasView5.dmg"
+
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
         with:
