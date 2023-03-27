@@ -1,8 +1,10 @@
 name: CI
 
 on:
-  [push, pull_request, workflow_call]
-
+  #Temporaily disabling push and pull_request
+  #[push, pull_request, workflow_call]
+  workflow_call:
+    
 defaults:
   run:
     shell: bash
