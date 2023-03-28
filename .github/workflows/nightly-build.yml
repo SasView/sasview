@@ -14,7 +14,9 @@ jobs:
 
   upload_nighly_builds:
     runs-on: macos-latest
-    python-version: [3.8]
+    strategy:
+      matrix:
+        python-version: [ "3.8"]
     needs: reuse_main_ci
 
     steps:
