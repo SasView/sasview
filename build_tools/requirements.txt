@@ -35,6 +35,8 @@ html2text
 jsonschema
 pywin32; platform_system == "Windows"
 PySide6==6.4.3
+twisted
+zope
 superqt
 pyopengl
 pyopengl_accelerate
