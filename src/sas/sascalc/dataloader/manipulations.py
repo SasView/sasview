@@ -344,7 +344,9 @@ class _Slab(object):
 
         # Get data
         data = data2D.data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
+        err_data = None
+        if data2D.err_data is not None:
+            err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
         mask_data = data2D.mask[np.isfinite(data2D.data)]
@@ -507,7 +509,9 @@ class Boxsum(object):
             raise RuntimeError(msg)
         # Get data
         data = data2D.data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
+        err_data = None
+        if data2D.err_data is not None:
+            err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
         mask_data = data2D.mask[np.isfinite(data2D.data)]
@@ -602,7 +606,9 @@ class CircularAverage(object):
         # Get data W/ finite values
         data = data2D.data[np.isfinite(data2D.data)]
         q_data = data2D.q_data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
+        err_data = None
+        if data2D.err_data is not None:
+            err_data = data2D.err_data[np.isfinite(data2D.data)]
         mask_data = data2D.mask[np.isfinite(data2D.data)]
 
         dq_data = None
@@ -735,7 +741,9 @@ class Ring(object):
         # Get data
         data = data2D.data[np.isfinite(data2D.data)]
         q_data = data2D.q_data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
+        err_data = None
+        if data2D.err_data is not None:
+            err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
         mask_data = data2D.mask[np.isfinite(data2D.data)]
@@ -840,7 +848,9 @@ class _Sector(object):
         # Get the all data & info
         data = data2D.data[np.isfinite(data2D.data)]
         q_data = data2D.q_data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
+        err_data = None
+        if data2D.err_data is not None:
+            err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
         mask_data = data2D.mask[np.isfinite(data2D.data)]
@@ -925,7 +935,7 @@ class _Sector(object):
             # Get the total y
             y[i_bin] += data_n
             x[i_bin] += q_value
-            if err_data[n] is None or err_data[n] == 0.0:
+            if err_data is None or err_data[n] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 y_err[i_bin] += data_n
