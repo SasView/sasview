@@ -66,6 +66,12 @@ class PreferencesWidget(QWidget):
             message = self.restart_params.get(key, None)
             self.parent.stageSingleChange(key, value, message)
 
+    def _unStageChange(self, key: str):
+        """ A private class method to unstage a single configuration change. Typically when the value is not valid. """
+        if self.parent is not None and hasattr(self.parent, 'unStageSingleChange'):
+            message = self.restart_params.get(key, None)
+            self.parent.unStageSingleChange(key, message)
+
     def restoreGUIValuesFromConfig(self):
         """A generic method that blocks all signalling, and restores the GUI values from the config file.
         Called when staging is cancelled or defaults should be restored."""

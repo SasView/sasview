@@ -90,6 +90,11 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self._staged_changes[key] = value
         self._staged_requiring_restart.add(config_restart_message)
 
+    def unStageSingleChange(self, key: str, config_restart_message: Optional[str] = ""):
+        """Preferences widgets should call this method when removing an invalid value from the staged changes."""
+        self._staged_changes.pop(key, None)
+        self._staged_requiring_restart.discard(config_restart_message)
+
     def _okClicked(self):
         """ Action triggered when the OK button is clicked"""
         self._saveStagedChanges()
