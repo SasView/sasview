@@ -150,8 +150,11 @@ class PreferencesWidget(QWidget):
 
     def _validate_input_and_stage(self, edit: QLineEdit, key: str):
         """A generic method to validate values entered into QLineEdit inputs. If the value is acceptable, it is staged,
-        otherwise, the input background color is changed to yellow. An invalid input will make the background yellow
-        and any previous changes will be unstaged until the value is corrected.
+        otherwise, the input background color is changed to yellow and any previous changes will be unstaged until the
+        value is corrected.
+        :param edit: The QLineEdit input that is being validated.
+        :param key: The string representation of the key the QLineEdit value is stored as in the configuration system.
+        :return: None
         """
         edit.setStyleSheet("background-color: white")
         validator = edit.validator()
