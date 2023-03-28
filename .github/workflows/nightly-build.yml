@@ -34,15 +34,18 @@ jobs:
         run: ls -R
         working-directory: installers/dist
 
-#      - name: Rename artifacts
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      #      - name: Rename artifacts
 #        run: |
 #          mv installers/dist/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
 #          mv installers/dist/SasView5.dmg  SasView-nightly-MacOSX.dmg
 #          mv installers/dist/sasview5.tar.gz SasView-nightly-Linux.tar.gz
 
       - name: Sign executable and create dmg (OSX)
-        with:
-          python-version: ${{ matrix.python-version }}
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
