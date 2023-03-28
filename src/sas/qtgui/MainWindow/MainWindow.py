@@ -94,9 +94,9 @@ def run_sasview():
 
     # DO NOT move the following import to the top!
     # (unless you know what you're doing)
-    import qt5reactor
+    from sas.qtgui.Utilities import ReactorCore
     # Using the Qt5 reactor wrapper from https://github.com/ghtdak/qtreactor
-    qt5reactor.install()
+    ReactorCore.install()
 
     # DO NOT move the following import to the top!
     from twisted.internet import reactor

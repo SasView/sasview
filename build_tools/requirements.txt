@@ -21,7 +21,6 @@ ipython
 qtconsole 
 xhtml2pdf 
 pylint
-qt5reactor 
 periodictable 
 uncertainties 
 matplotlib~=3.5.2
