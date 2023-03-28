@@ -1,6 +1,6 @@
 import logging
 
-from PyQt5.QtGui import QIntValidator, QDoubleValidator
+from PyQt5.QtGui import QIntValidator, QDoubleValidator, QValidator
 from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
 from typing import Optional, List, Union, Dict
 
@@ -147,6 +147,28 @@ class PreferencesWidget(QWidget):
         int_box = self.addTextInput(title, str(default_number))
         int_box.setValidator(QIntValidator())
         return int_box
+
+    def _validate_input_and_stage(self, edit: QLineEdit, key: str):
+        """A generic method to validate values entered into QLineEdit inputs. If the value is acceptable, it is staged,
+        otherwise, the input background color is changed to yellow. An invalid input will make the background yellow
+        and any previous changes will be unstaged until the value is corrected.
+        """
+        edit.setStyleSheet("background-color: white")
+        validator = edit.validator()
+        text = edit.text()
+        (state, val, pos) = validator.validate(text, 0) if validator else (0, 0, 0)
+        if state == QValidator.Acceptable:
+            if isinstance(validator, QIntValidator):
+                self._stageChange(key, int(text))
+            elif isinstance(validator, QDoubleValidator):
+                self._stageChange(key, float(text))
+            else:
+                self._stageChange(key, text)
+        elif not validator:
+            self._stageChange(key, text)
+        else:
+            edit.setStyleSheet("background-color: yellow")
+            self._unStageChange(key)
 
     def addFloatInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
         """Similar to the text input creator, this creates a text input with an float validator assigned to it.
