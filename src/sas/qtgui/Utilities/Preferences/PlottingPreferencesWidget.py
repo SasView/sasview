@@ -25,7 +25,7 @@ class PlottingPreferencesWidget(PreferencesWidget):
             title="Legend entry line length",
             default_number=config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH)
         self.legendLineLength.textChanged.connect(
-            lambda: self._stageChange('FITTING_PLOT_LEGEND_MAX_LINE_LENGTH', int(self.legendLineLength.text())))
+            lambda: self._validate_input_and_stage(self.legendLineLength, 'FITTING_PLOT_LEGEND_MAX_LINE_LENGTH'))
 
     def _toggleBlockAllSignaling(self, toggle):
         self.legendFullWidth.blockSignals(toggle)

@@ -15,7 +15,7 @@ class DisplayPreferencesWidget(PreferencesWidget):
             title="QT Screen Scale Factor",
             default_number=config.QT_SCALE_FACTOR)
         self.qtScaleFactor.textChanged.connect(
-            lambda: self._stageChange('QT_SCALE_FACTOR', float(self.qtScaleFactor.text())))
+            lambda: self._validate_input_and_stage(self.qtScaleFactor, 'QT_SCALE_FACTOR'))
         self.autoScaling = self.addCheckBox(
             title="Enable Automatic Scaling",
             checked=config.QT_AUTO_SCREEN_SCALE_FACTOR)
