@@ -13,10 +13,12 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   upload_nighly_builds:
-    runs-on: macos-latest
+
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [ "3.8"]
+        os: [ macos-latest]
+        python-version: [ 3.8 ]
     needs: reuse_main_ci
 
     steps:
