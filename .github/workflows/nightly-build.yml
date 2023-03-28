@@ -13,22 +13,22 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   upload_nighly_builds:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: reuse_main_ci
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Retrieve saved artifacts
         uses: actions/download-artifact@v3
         with:
-          name: SasView-Installers
-          path: |
-              installers/dist/setupSasView.exe
-              installers/dist/SasView5.dmg
-              installers/dist/sasview5.tar.gz
+          path: installers/dist
 
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: installers/dist
+        
 #      - name: Rename artifacts
 #        run: |
 #          mv installers/dist/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
