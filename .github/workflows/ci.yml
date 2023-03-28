@@ -267,7 +267,7 @@ jobs:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
-            installers/dist/SasView5.dmg
+            installers/dist/SasView5.app
             installers/dist/sasview5.tar.gz
           if-no-files-found: error
 

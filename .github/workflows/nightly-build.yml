@@ -14,6 +14,7 @@ jobs:
 
   upload_nighly_builds:
     runs-on: macos-latest
+    python-version: [3.8]
     needs: reuse_main_ci
 
     steps:
@@ -28,7 +29,7 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: installers/dist
-        
+
 #      - name: Rename artifacts
 #        run: |
 #          mv installers/dist/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
@@ -46,7 +47,7 @@ jobs:
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
-          cd installers/dist
+          cd installers/dist/SasView-Installer-macos-latest-*
           python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
           python  ../../build_tools/code_sign_osx.py
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
@@ -75,7 +76,7 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/SasView5.dmg, installers/dist/setupSasView.exe, installers/dist/sasview5.tar.gz"
+          artifacts: "installers/dist/SasView-Installer-macos-latest-*/SasView5.dmg, installers/dist/setupSasView.exe, installers/dist/sasview5.tar.gz"
           body: "Nightly build of main SasView branch"
           name: "nightly-build"
           tag: "nightly-build"
