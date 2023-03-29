@@ -58,10 +58,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
           cd installers/dist/SasView-Installer-macos-*
-          #python ../../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
-          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
+          codesign --verify --options=runtime --entitlements ../../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
 #      - name: Notarize Release Build (OSX)
 #        uses: devbotsxyz/xcode-notarize@v1
