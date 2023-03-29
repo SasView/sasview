@@ -58,7 +58,7 @@ jobs:
       - name: Notarize Release Build (OSX)
         uses: devbotsxyz/xcode-notarize@v1
         with:
-          product-path: "installers/dist/SasView5.dmg"
+          product-path: "installers/dist/SasView-Installer-macos-*/SasView5.dmg"
           primary-bundle-id: "org.sasview.SasView5"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
@@ -67,7 +67,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'macos') }}
         uses: devbotsxyz/xcode-staple@v1
         with:
-          product-path: "installers/dist/SasView5.dmg"
+          product-path: "installers/dist/SasView-Installer-macos-*/SasView5.dmg"
 
       - name: Rename artifacts
         run: |
