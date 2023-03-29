@@ -39,11 +39,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-#      - name: Rename artifacts
-#        run: |
-#          mv installers/dist/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
-#          mv installers/dist/SasView5.dmg  SasView-nightly-MacOSX.dmg
-#          mv installers/dist/sasview5.tar.gz SasView-nightly-Linux.tar.gz
 
       - name: Sign executable and create dmg (OSX)
         env:
@@ -60,19 +55,25 @@ jobs:
           cd installers/dist/SasView-Installer-macos-*
           codesign --verify --options=runtime --entitlements ../../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
-#      - name: Notarize Release Build (OSX)
-#        uses: devbotsxyz/xcode-notarize@v1
-#        with:
-#          product-path: "installers/dist/SasView5.dmg"
-#          primary-bundle-id: "org.sasview.SasView5"
-#          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-#          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-#
-#      - name: Staple Release Build (OSX)
-#        if: ${{ startsWith(matrix.os, 'macos') }}
-#        uses: devbotsxyz/xcode-staple@v1
-#        with:
-#          product-path: "installers/dist/SasView5.dmg"
+      - name: Notarize Release Build (OSX)
+        uses: devbotsxyz/xcode-notarize@v1
+        with:
+          product-path: "installers/dist/SasView5.dmg"
+          primary-bundle-id: "org.sasview.SasView5"
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+
+      - name: Staple Release Build (OSX)
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        uses: devbotsxyz/xcode-staple@v1
+        with:
+          product-path: "installers/dist/SasView5.dmg"
+
+      - name: Rename artifacts
+        run: |
+          mv installers/dist/SasView-Installer-windows-*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
+          mv installers/dist/SasView-Installer-macos-*/SasView5.dmg  installers/dist/SasView-nightly-MacOSX.dmg
+          mv installers/dist/SasView-Installer-ubuntu-*/sasview5.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
 
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
@@ -82,7 +83,7 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/SasView-Installer-macos-*/SasView5/SasView5.dmg, installers/dist/SasView-Installer-windows-*/setupSasView.exe, installers/dist/SasView-Installer-ubuntu-*/sasview5.tar.gz"
+          artifacts: "installers/dist/setupSasView-nightly-Win64.exe, installers/dist/SasView-nightly-MacOSX.dmg, installers/dist/SasView-nightly-Linux.tar.gz"
           body: "Nightly build of main SasView branch"
           name: "nightly-build"
           tag: "nightly-build"
