@@ -240,6 +240,12 @@ jobs:
             installers/dist/sasview-pyinstaller-dist.tar.gz
           if-no-files-found: ignore
 
+      - name: Fix qt folders (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        run: |
+          cd installers/dist
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
+
 #      - name: Sign executable and create dmg (OSX)
 #        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
 #        env:
