@@ -306,14 +306,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Called when the "Save Project" menu item chosen.
         """
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Save Project',
-            'filter'    : 'Project (*.json)',
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.default_project_location
-        }
-        name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        parent = self
+        caption = 'Save Project'
+        filter = 'Project (*.json)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = self.default_project_location
+        name_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", options)
         filename = name_tuple[0]
         if not filename:
             return
@@ -332,14 +330,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         default_name = "Analysis"+str(tab_id)+"."+str(extension)
 
         wildcard = "{0} files (*.{0})".format(extension)
-        kwargs = {
-            'caption'   : 'Save As',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : None,
-        }
+        caption = 'Save As'
+        directory = default_name
+        filter = wildcard
+        parent = None
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", QtWidgets.QFileDialog.DontUseNativeDialog)
         filename = filename_tuple[0]
         return filename
 

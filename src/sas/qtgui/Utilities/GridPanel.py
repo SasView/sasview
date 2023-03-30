@@ -258,14 +258,12 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         default_name = "Batch_Fitting_"+time_str+".csv"
 
         wildcard = "CSV files (*.csv);;"
-        kwargs = {
-            'caption'   : 'Save As',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : None,
-        }
+        caption =  'Save As'
+        directory =  default_name
+        filter =  wildcard
+        parent =  None
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter)
         filename = filename_tuple[0]
 
         # User cancelled.

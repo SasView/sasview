@@ -1368,13 +1368,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Save data as .sld file"""
         path = os.path.dirname(str(self.datafile))
         default_name = os.path.join(path, 'sld_file')
-        kwargs = {
-            'parent': self,
-            'directory': default_name,
-            'filter': 'SLD file (*.sld)',
-            'options': QtWidgets.QFileDialog.DontUseNativeDialog}
+        parent = self
+        directory =  default_name
+        filter = 'SLD file (*.sld)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, 'Save SLD file', directory, filter, "", options=options)
         filename = filename_tuple[0]
         if filename:
             try:

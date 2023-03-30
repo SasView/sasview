@@ -4171,13 +4171,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         save_dialog = QtWidgets.QFileDialog()
         save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-        kwargs = {
-            'parent': self,
-            'caption': 'Save Project',
-            'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
-            'options': QtWidgets.QFileDialog.DontUseNativeDialog
-        }
-        file_path = save_dialog.getSaveFileName(**kwargs)
+        parent = self
+        caption = 'Save Project'
+        filter = 'Text (*.txt);;Excel (*.xls);;Latex (*.log)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
+        file_path = save_dialog.getSaveFileName(parent, caption, "", filter, "", options)
         filename = file_path[0]
 
         if not filename:

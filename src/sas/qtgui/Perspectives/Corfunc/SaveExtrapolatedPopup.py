@@ -92,9 +92,11 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
         Save data to a file
         """
         filename = QFileDialog.getSaveFileName(
-            caption="Save As",
-            filter="Comma separated values (*.csv)",
-            parent=None)[0]
+            None,
+            "Save As",
+            "",
+            "Comma separated values (*.csv)",
+            "")[0]
 
         if not filename:
             return

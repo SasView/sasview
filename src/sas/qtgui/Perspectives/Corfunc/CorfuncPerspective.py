@@ -649,11 +649,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             logging.error("Save transformed: No transformed data present")
             return
 
+        caption = "Save As"
+        filter="Comma Separated Values (*.csv)"
+        parent = None
 
         f_name = QtWidgets.QFileDialog.getSaveFileName(
-            caption="Save As",
-            filter="Comma Separated Values (*.csv)",
-            parent=None)[0]
+            parent, caption, "", filter, ""
+            )[0]
 
         if not f_name:
             return
