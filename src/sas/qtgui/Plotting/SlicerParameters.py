@@ -138,7 +138,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 continue
             if str(item) in current_plots.keys():
                 # redo the list
-                checked = current_plots[item]
+                checked = QtCore.Qt.Checked if current_plots[item] else QtCore.Qt.Unchecked
             else:
                 # create a new list
                 checked = QtCore.Qt.Checked if (self.parent.data[0].name == item) else QtCore.Qt.Unchecked
