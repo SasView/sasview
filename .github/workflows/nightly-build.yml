@@ -39,7 +39,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-
       - name: Sign executable and create dmg (OSX)
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
@@ -55,25 +54,26 @@ jobs:
           cd installers/dist/SasView-Installer-macos-*
           codesign --verify --options=runtime --entitlements ../../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
-      - name: Notarize Release Build (OSX)
-        uses: devbotsxyz/xcode-notarize@v1
-        with:
-          product-path: "installers/dist/SasView-Installer-macos-*/SasView5.dmg"
-          primary-bundle-id: "org.sasview.SasView5"
-          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-
-      - name: Staple Release Build (OSX)
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        uses: devbotsxyz/xcode-staple@v1
-        with:
-          product-path: "installers/dist/SasView-Installer-macos-*/SasView5.dmg"
-
       - name: Rename artifacts
         run: |
           mv installers/dist/SasView-Installer-windows-*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
           mv installers/dist/SasView-Installer-macos-*/SasView5.dmg  installers/dist/SasView-nightly-MacOSX.dmg
           mv installers/dist/SasView-Installer-ubuntu-*/sasview5.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
+
+      - name: Notarize Release Build (OSX)
+        uses: GuillaumeFalourd/xcode-notarize@v1
+        with:
+          product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
+          primary-bundle-id: "org.sasview.SasView5"
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+          verbose: True
+
+      - name: Staple Release Build (OSX)
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        uses: devbotsxyz/xcode-staple@v1
+        with:
+          product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
 
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
