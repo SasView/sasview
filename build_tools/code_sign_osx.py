@@ -9,7 +9,7 @@ import itertools
 so_list = glob.glob("SasView5.app/Contents/MacOS/**/*.so", recursive=True)
 dylib_list = glob.glob("SasView5.app/Contents/MacOS/**/*.dylib", recursive=True)
 dylib_list_resources = glob.glob(
-    "SasView5.app/Contents/Resources/.dylibs/*.dylib", recursive=True
+    "SasView5.app/Contents/Resources/**/*.dylib", recursive=True
 )
 
 sign_command = ['codesign', '--timestamp', '--options=runtime', '--verify', '--verbose=4', '--force',
