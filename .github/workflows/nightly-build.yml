@@ -11,6 +11,9 @@ jobs:
   #Reuse ci.yml workflow on main branch and upload artifacts to release page
   reuse_main_ci:
     uses: ./.github/workflows/ci.yml
+    secrets:
+      MACOS_CERTIFICATE = ${{ secrets:MACOS_CERTIFICATE }}
+      MACOS_CERTIFICATE_PWD = ${{ secrets:MACOS_CERTIFICATE_PWD }}
 
   upload_nighly_builds:
 
