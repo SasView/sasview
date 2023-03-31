@@ -688,7 +688,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                 self.dataList.removeItem(index)
         # Last file removed
         self.dataDeleted = False
-        if self._dataList.count() == 0:
+        # if self._dataList.count() == 0:
+        if len(self._dataList) == 0:
             self.prPlot = None
             self.dataPlot = None
             self.logic.data = None

@@ -228,13 +228,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Choose a directory',
-            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.default_load_location
-        }
-        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+        parent = self
+        caption = 'Choose a directory'
+        options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = self.default_load_location
+        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, "", options)
 
         if folder is None:
             return
@@ -282,8 +280,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.default_project_location = os.path.dirname(filename)
             # Delete all data and initialize all perspectives
             self.deleteAllItems()
-            self.cbFitting.disconnect()
+            self.cbFitting.blockSignals(True)
             self.parent.loadAllPerspectives()
+            self.cbFitting.blockSignals(False)
             self.initPerspectives()
             self.readProject(filename)
 
@@ -395,8 +394,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if data is None: continue
             # Now, all plots under this item
             name = data.name
-            is_checked = item.checkState()
-            properties['checked'] = is_checked
+            is_checked_bool = item.checkState() == QtCore.Qt.Checked
+            properties['checked'] = is_checked_bool
             # save underlying theories
             other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
@@ -416,8 +415,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if data.id != id: continue
                 # We found the dataset - save it.
                 name = data.name
-                is_checked = item.checkState()
-                properties['checked'] = is_checked
+                is_checked_bool = item.checkState() == QtCore.Qt.Checked
+                properties['checked'] = is_checked_bool
                 other_datas = GuiUtils.plotsFromDisplayName(name, model)
                 # skip the main plot
                 other_datas = list(other_datas.values())[1:]
@@ -642,7 +641,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             properties = value[1]
             is_checked = properties['checked']
             new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.name)
-            new_item.setChecked(is_checked)
+            new_item.setCheckState(QtCore.Qt.Checked if is_checked else QtCore.Qt.Unchecked)
             items.append(new_item)
             model = self.theory_model
             if new_data.is_data:
