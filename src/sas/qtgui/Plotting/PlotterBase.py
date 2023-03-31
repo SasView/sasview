@@ -275,18 +275,6 @@ class PlotterBase(QtWidgets.QWidget):
         # show the context menu at the specified point
         self.contextMenu.exec_(self.mapToGlobal(point))
 
-    # def contextMenuEvent(self, event):
-    #     """
-    #     Display the context menu
-    #     """
-    #     if not self.quickplot:
-    #         self.createContextMenu()
-    #     else:
-    #         self.createContextMenuQuick()
-
-    #     event_pos = event.pos()
-    #     self.contextMenu.exec_(self.canvas.mapToGlobal(event_pos))
-
     def onMplMouseUp(self, event):
         """
         Mouse button up callback
