@@ -39,3 +39,4 @@ pywin32; platform_system == "Windows"
 superqt
 pyopengl
 pyopengl_accelerate
+requests
