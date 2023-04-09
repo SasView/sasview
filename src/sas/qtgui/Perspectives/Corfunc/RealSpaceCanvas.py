@@ -1,9 +1,16 @@
+from typing import Optional
+from sas.sascalc.corfunc.corfunc_calculator import SupplementaryParameters
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
 
 
 class RealSpaceCanvas(CorfuncCanvas):
     """ Canvas for displaying real space representation"""
+
+    def __init__(self, parent, width=5, height=4, dpi=100):
+        super().__init__(parent, width, height, dpi)
+        self._supplementary: Optional[SupplementaryParameters] = None
+
 
     def draw_data(self):
         """
@@ -27,6 +34,7 @@ class RealSpaceCanvas(CorfuncCanvas):
             data1, data3 = self.data[0], self.data[1]
             self.axes.plot(data1.x, data1.y, label="1D Correlation")
             self.axes.plot(data3.x, data3.y, label="3D Correlation")
+
             self.axes.set_xlim(0, max(data1.x) / 4)
             self.legend = self.axes.legend()
 

@@ -172,7 +172,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         x_max = self.horizontal_lines.x1
         y_min = self.vertical_lines.y2
         y_max = self.vertical_lines.y1
-        
+
         if nbins is not None:
             self.nbins = nbins
         if self.averager is None:
@@ -256,13 +256,13 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         self._post_data()
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
-        self.horizontal_lines.restore()
-        self.vertical_lines.restore()
-        self.center.restore()
+        self.horizontal_lines.restore(ev)
+        self.vertical_lines.restore(ev)
+        self.center.restore(ev)
 
     def move(self, x, y, ev):
         """
@@ -400,7 +400,7 @@ class PointInteractor(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
@@ -561,7 +561,7 @@ class VerticalDoubleLine(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
