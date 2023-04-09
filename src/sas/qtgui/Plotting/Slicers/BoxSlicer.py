@@ -170,8 +170,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         x_min = self.horizontal_lines.x2
         x_max = self.horizontal_lines.x1
+        self.xwidth = numpy.fabs(x_max - x_min)/2
         y_min = self.vertical_lines.y2
         y_max = self.vertical_lines.y1
+        self.ywidth = numpy.fabs(y_max - y_min)/2
 
         if nbins is not None:
             self.nbins = nbins
@@ -281,8 +283,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         """
         params = {}
-        params["x_width"] = numpy.fabs(self.vertical_lines.x1)
-        params["y_width"] = numpy.fabs(self.horizontal_lines.y1)
+        params["x_width"] = self.xwidth
+        params["y_width"] = self.ywidth
         params["nbins"] = self.nbins
         params["center_x"] = self.center.x
         params["center_y"] = self.center.y
@@ -297,8 +299,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         :param params: a dictionary containing name of slicer parameters and
             values the user assigned to the slicer.
         """
-        x_width = float(numpy.fabs(params["x_width"]))
-        y_width = float(numpy.fabs(params["y_width"]))
+        self.xwidth = float(numpy.fabs(params["x_width"]))
+        self.ywidth = float(numpy.fabs(params["y_width"]))
         self.nbins = params["nbins"]
         self.fold = params["fold"]
         self.center_x = params["center_x"]
@@ -306,9 +308,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         self.center.update(center_x=self.center_x, center_y=self.center_y)
         self.horizontal_lines.update(center=self.center,
-                                     width=x_width, height=y_width)
+                                     width=self.xwidth, height=self.ywidth)
         self.vertical_lines.update(center=self.center,
-                                   width=x_width, height=y_width)
+                                   width=self.xwidth, height=self.ywidth)
         # compute the new error and sum given values of params
         self._post_data()
 
