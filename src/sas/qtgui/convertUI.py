@@ -1,4 +1,7 @@
 # Convert all .ui files in all subdirectories of the current script
+
+# Usage: python convert.py [-f]
+#  Arguments: -f -> Force the UI elements to be rebuilt, even if they exist
 import os
 import sys
 
@@ -48,13 +51,17 @@ def file_in_newer(file_in, file_out):
     # simple comparison of modification time
     return in_stat.st_mtime >= out_stat.st_mtime
 
+
+args = sys.argv
+force_recreate = '-f' in args
+
 # look for .ui files
 for root, dirs, files in os.walk("."):
     for file in files:
         if file.endswith(".ui"):
             file_in = os.path.join(root, file)
             file_out = os.path.splitext(file_in)[0]+'.py'
-            if file_in_newer(file_in, file_out):
+            if force_recreate or file_in_newer(file_in, file_out):
                 print("Generating " + file_out + " ...")
                 pyuic(file_in, file_out)
 
@@ -67,7 +74,7 @@ out_file = 'main_resources_rc.py'
 in_file = os.path.join(ui_root, rc_file)
 out_file = os.path.join(ui_root, out_file)
 
-if file_in_newer(in_file, out_file):
+if force_recreate or file_in_newer(in_file, out_file):
     print("Generating " + out_file + " ...")
     pyrrc(in_file, out_file)
 
@@ -80,7 +87,7 @@ out_file = 'images_rc.py'
 in_file = os.path.join(images_root, rc_file)
 out_file = os.path.join(ui_root, out_file)
 
-if file_in_newer(in_file, out_file):
+if force_recreate or file_in_newer(in_file, out_file):
     print("Generating " + out_file + " ...")
     pyrrc(in_file, out_file)
 
