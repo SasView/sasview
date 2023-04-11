@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
-    def __init__(self, screen_resolution, parent=None):
+    def __init__(self, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
 
         self.setupUi(self)
@@ -32,8 +32,6 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         # the two scrollbars will help managing the workspace.
         self.workspace.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.workspace.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        #self.screen_width = screen_resolution.width()
-        #self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
         QTimer.singleShot(100, self.showMaximized)
         # Temporary solution for problem with menubar on Mac
@@ -101,13 +99,8 @@ def run_sasview():
     # DO NOT move the following import to the top!
     from twisted.internet import reactor
 
-    screen = QGuiApplication.screenAt(QCursor.pos())
-    screen_resolution = screen.geometry().center()
-
-    # screen_resolution = app.primaryScreen().screenGeometry()
-
     # Show the main SV window
-    mainwindow = MainSasViewWindow(screen_resolution)
+    mainwindow = MainSasViewWindow()
 
     # no more splash screen
     splash.finish(mainwindow)
