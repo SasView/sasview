@@ -5,7 +5,6 @@
 import os
 import sys
 
-
 def run(main, name, *args):
     saved_argv = sys.argv
     sys.argv = [name, *args]
@@ -20,7 +19,6 @@ def run(main, name, *args):
         pass
     return 0
 
-
 def pyrrc(in_file, out_file):
     """
     Run the qt resource compiler
@@ -28,14 +26,12 @@ def pyrrc(in_file, out_file):
     from PyQt5.pyrcc_main import main
     run(main, "pyrcc", in_file, "-o", out_file)
 
-
 def pyuic(in_file, out_file):
     """
     Run the qt UI compiler
     """
     from PyQt5.uic.pyuic import main
     run(main, "pyuic", "-o", out_file, in_file)
-
 
 def file_in_newer(file_in, file_out):
     """
@@ -59,31 +55,39 @@ def file_in_newer(file_in, file_out):
 args = sys.argv
 force_recreate = '-f' in args
 
-# Files that don't meet the default behavior of generating a python file with the same base name in the same directory
-#  - /same/path/to/<filename>.ui -> /same/path/to/<filename>.py using the pyuic() method
-oddity_dict = {
-    # Format: {'filename': {'f_name': 'new_filename', 'root': '/new/path/to/<f_name>.py', 'method': callable}}
-    'main_resources.qrc':
-        {
-            'f_name': 'main_resources_rc',
-            'root': '.\\UI\\',
-            'method': pyrrc,
-        },
-    'images.qrc':
-        {
-            'f_name': 'images_rc',
-            'root': '.\\UI\\',
-            'method': pyrrc,
-        },
-}
-
-# look for .ui and .qrc files and generate .py files in their required location
+# look for .ui files
 for root, dirs, files in os.walk("."):
     for file in files:
-        if file.endswith(".ui") or file.endswith('.qrc'):
-            file_dict = oddity_dict.get(file, {'f_name': file, 'root': root, 'method': pyuic})
+        if file.endswith(".ui"):
             file_in = os.path.join(root, file)
-            file_out = os.path.join(file_dict['root'], os.path.splitext(file_dict['f_name'])[0]+'.py')
+            file_out = os.path.splitext(file_in)[0]+'.py'
             if force_recreate or file_in_newer(file_in, file_out):
                 print("Generating " + file_out + " ...")
-                file_dict['method'](file_in, file_out)
+                pyuic(file_in, file_out)
+
+# RC file in UI directory
+execute_root = os.path.split(sys.modules[__name__].__file__)[0]
+ui_root = os.path.join(execute_root, 'UI')
+rc_file = 'main_resources.qrc'
+out_file = 'main_resources_rc.py'
+
+in_file = os.path.join(ui_root, rc_file)
+out_file = os.path.join(ui_root, out_file)
+
+if force_recreate or file_in_newer(in_file, out_file):
+    print("Generating " + out_file + " ...")
+    pyrrc(in_file, out_file)
+
+# Images
+images_root = os.path.join(execute_root, 'images')
+out_root = os.path.join(execute_root, 'UI')
+rc_file = 'images.qrc'
+out_file = 'images_rc.py'
+
+in_file = os.path.join(images_root, rc_file)
+out_file = os.path.join(ui_root, out_file)
+
+if force_recreate or file_in_newer(in_file, out_file):
+    print("Generating " + out_file + " ...")
+    pyrrc(in_file, out_file)
+
