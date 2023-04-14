@@ -52,19 +52,15 @@ def file_in_newer(file_in, file_out):
     # simple comparison of modification time
     return in_stat.st_mtime >= out_stat.st_mtime
 
-def main():
-    """ Entry point for running as a script """
 
-    args = sys.argv
-    force_recreate = '-f' in args
-
+def rebuild_new_ui(force=False):
     # look for .ui files
     for root, dirs, files in os.walk("."):
         for file in files:
             if file.endswith(".ui"):
                 file_in = os.path.join(root, file)
-                file_out = os.path.splitext(file_in)[0]+'.py'
-                if force_recreate or file_in_newer(file_in, file_out):
+                file_out = os.path.splitext(file_in)[0] + '.py'
+                if force or file_in_newer(file_in, file_out):
                     print("Generating " + file_out + " ...")
                     pyuic(file_in, file_out)
 
@@ -77,7 +73,7 @@ def main():
     in_file = os.path.join(ui_root, rc_file)
     out_file = os.path.join(ui_root, out_file)
 
-    if force_recreate or file_in_newer(in_file, out_file):
+    if force or file_in_newer(in_file, out_file):
         print("Generating " + out_file + " ...")
         pyrrc(in_file, out_file)
 
@@ -90,9 +86,18 @@ def main():
     in_file = os.path.join(images_root, rc_file)
     out_file = os.path.join(ui_root, out_file)
 
-    if force_recreate or file_in_newer(in_file, out_file):
+    if force or file_in_newer(in_file, out_file):
         print("Generating " + out_file + " ...")
         pyrrc(in_file, out_file)
+
+
+def main():
+    """ Entry point for running as a script """
+
+    args = sys.argv
+    force_recreate = '-f' in args
+
+    rebuild_new_ui(force_recreate)
 
 
 if __name__ == "__main__":
