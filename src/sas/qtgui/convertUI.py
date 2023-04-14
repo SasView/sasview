@@ -5,11 +5,12 @@
 import os
 import sys
 
-def run(main, name, *args):
+def run_compiler(compiler_main, name, *args):
+    """ Wrapper to run a compiler, either pyrrc or pyuic"""
     saved_argv = sys.argv
     sys.argv = [name, *args]
     try:
-        main()
+        compiler_main()
     except SystemExit as exc:
         if exc.code != 0:
             raise RuntimeError(f"\"{name} {' '.join(args)}\" exited with {exc.code}")
@@ -24,14 +25,14 @@ def pyrrc(in_file, out_file):
     Run the qt resource compiler
     """
     from PyQt5.pyrcc_main import main
-    run(main, "pyrcc", in_file, "-o", out_file)
+    run_compiler(main, "pyrcc", in_file, "-o", out_file)
 
 def pyuic(in_file, out_file):
     """
     Run the qt UI compiler
     """
     from PyQt5.uic.pyuic import main
-    run(main, "pyuic", "-o", out_file, in_file)
+    run_compiler(main, "pyuic", "-o", out_file, in_file)
 
 def file_in_newer(file_in, file_out):
     """
@@ -52,6 +53,7 @@ def file_in_newer(file_in, file_out):
     return in_stat.st_mtime >= out_stat.st_mtime
 
 def main():
+    """ Entry point for running as a script """
 
     args = sys.argv
     force_recreate = '-f' in args
