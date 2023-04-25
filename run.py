@@ -83,6 +83,11 @@ def prepare():
     os.environ['SASVIEW_DOC_PATH'] = docpath
 
 if __name__ == "__main__":
+
+    from sas.qtgui.convertUI import rebuild_new_ui
+    rebuild_new_ui()
+
     prepare()
+
     import sas.cli
     sys.exit(sas.cli.main(logging="development"))
