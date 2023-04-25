@@ -36,8 +36,8 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         self.maps = sorted(m for m in self.all_maps if not m.endswith("_r"))
         self.rmaps = sorted(set(self.all_maps) - set(self.maps))
 
-        self.vmin = self.vmin_orig = vmin
-        self.vmax = self.vmax_orig = vmax
+        self.vmin = self.vmin_orig = int(vmin)
+        self.vmax = self.vmax_orig = int(vmax)
 
         # Initialize detector labels
         self.initDetectorData()
@@ -166,11 +166,11 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         self.slider_label.setText("Drag the sliders to adjust color range.")
 
         def set_vmin(value):
-            self.vmin = value
+            self.vmin = int(value)
             self.txtMinAmplitude.setText(str(value))
             self.updateMap()
         def set_vmax(value):
-            self.vmax = value
+            self.vmax = int(value)
             self.txtMaxAmplitude.setText(str(value))
             self.updateMap()
 

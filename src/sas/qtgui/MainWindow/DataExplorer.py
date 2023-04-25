@@ -1909,9 +1909,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Update the perspective combo index based on passed string
         """
-        assert new_perspective in Perspectives.PERSPECTIVES.keys()
+        assert new_perspective_name in Perspectives.PERSPECTIVES.keys()
         self.cbFitting.blockSignals(True)
-        self.cbFitting.setCurrentIndex(self.cbFitting.findText(new_perspective))
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(new_perspective_name))
         self.cbFitting.blockSignals(False)
         pass
 

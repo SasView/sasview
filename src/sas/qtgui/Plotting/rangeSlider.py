@@ -287,5 +287,5 @@ class RangeSlider(QtWidgets.QSlider):
             slider_max = gr.bottom() - handle_length/2 + 1
             
         return self.minimum() + style.sliderValueFromPosition(0, self.maximum()-self.minimum(),
-                                            pos-slider_min, slider_max - slider_min,
+                                            int(pos-slider_min), int(slider_max - slider_min),
                                             opt.upsideDown)
