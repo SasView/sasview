@@ -1,7 +1,7 @@
 import pytest
 
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import Qt
+from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt
 
 from sas.qtgui.Perspectives.Invariant.InvariantDetails import DetailsDialog
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS

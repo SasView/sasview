@@ -1,7 +1,7 @@
 import logging
 
-from PyQt5.QtGui import QIntValidator, QDoubleValidator, QValidator
-from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
+from PySide6.QtGui import QIntValidator, QDoubleValidator, QValidator
+from PySide6.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
 from typing import Optional, List, Union, Dict
 
 from sas.system import config

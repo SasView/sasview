@@ -1,7 +1,7 @@
 from typing import NamedTuple
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import pyqtSignal
+from PySide6 import QtWidgets
+from PySide6.QtCore import Signal
 
 
 
@@ -22,8 +22,8 @@ class OrientationViewierController(QtWidgets.QDialog, Ui_OrientationViewierContr
 
     """ Widget that controls the orientation viewer"""
 
-    sliderSet = pyqtSignal(Orientation, name='sliderSet')
-    sliderMoved = pyqtSignal(Orientation, name='sliderMoved')
+    sliderSet = Signal(Orientation, name='sliderSet')
+    sliderMoved = Signal(Orientation, name='sliderMoved')
 
     def __init__(self, parent=None):
         super().__init__()

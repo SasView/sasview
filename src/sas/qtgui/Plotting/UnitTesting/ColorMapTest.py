@@ -1,13 +1,12 @@
 import sys
 import numpy
 
+from PySide6 import QtGui, QtWidgets
 import pytest
 
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-from PyQt5 import QtGui, QtWidgets
-import matplotlib as mpl
 
 from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Plotting.Plotter2D as Plotter2D

@@ -8,9 +8,9 @@ import timeit
 
 from scipy.spatial.transform import Rotation
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -38,9 +38,9 @@ _Q1D_MIN = 0.001
 
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
-    trigger_plot_3d = QtCore.pyqtSignal()
-    calculationFinishedSignal = QtCore.pyqtSignal()
-    loadingFinishedSignal = QtCore.pyqtSignal(list, bool)
+    trigger_plot_3d = QtCore.Signal()
+    calculationFinishedSignal = QtCore.Signal()
+    loadingFinishedSignal = QtCore.Signal(list, bool)
 
     # class constants for textbox background colours
     TEXTBOX_DEFAULT_STYLESTRING = 'background-color: rgb(255, 255, 255);'
@@ -157,76 +157,77 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # validators
         # scale, volume and background must be positive
-        validat_regex_pos = QtCore.QRegExp(r'^[+]?([.]\d+|\d+([.]\d+)?)$')
-        self.txtScale.setValidator(QtGui.QRegExpValidator(validat_regex_pos,
+        validat_regex_pos = QtCore.QRegularExpression(r'^[+]?([.]\d+|\d+([.]\d+)?)$')
+
+        self.txtScale.setValidator(QtGui.QRegularExpressionValidator(validat_regex_pos,
                                                           self.txtScale))
-        self.txtBackground.setValidator(QtGui.QRegExpValidator(
+        self.txtBackground.setValidator(QtGui.QRegularExpressionValidator(
             validat_regex_pos, self.txtBackground))
-        self.txtTotalVolume.setValidator(QtGui.QRegExpValidator(
+        self.txtTotalVolume.setValidator(QtGui.QRegularExpressionValidator(
             validat_regex_pos, self.txtTotalVolume))
 
         # fraction of spin up between 0 and 1
-        validat_regexbetween0_1 = QtCore.QRegExp(r'^(0(\.\d*)*|1(\.0+)?)$')
+        validat_regexbetween0_1 = QtCore.QRegularExpression(r'^(0(\.\d*)*|1(\.0+)?)$')
         self.txtUpFracIn.setValidator(
-            QtGui.QRegExpValidator(validat_regexbetween0_1, self.txtUpFracIn))
+            QtGui.QRegularExpressionValidator(validat_regexbetween0_1, self.txtUpFracIn))
         self.txtUpFracOut.setValidator(
-            QtGui.QRegExpValidator(validat_regexbetween0_1, self.txtUpFracOut))
+            QtGui.QRegularExpressionValidator(validat_regexbetween0_1, self.txtUpFracOut))
 
         # angles, SLD must be float values
-        validat_regex_float = QtCore.QRegExp(r'^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$')
+        validat_regex_float = QtCore.QRegularExpression(r'^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$')
         self.txtUpTheta.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtUpTheta))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtUpTheta))
         self.txtUpPhi.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtUpPhi))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtUpPhi))
 
         self.txtSolventSLD.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtSolventSLD))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSolventSLD))
         self.txtNucl.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtNucl))        
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtNucl))        
 
         self.txtMx.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtMx))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtMx))
         self.txtMy.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtMy))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtMy))
         self.txtMz.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtMz))                
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtMz))                
 
         self.txtXstepsize.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtXstepsize))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtXstepsize))
         self.txtYstepsize.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtYstepsize))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtYstepsize))
         self.txtZstepsize.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtZstepsize))  
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtZstepsize))  
 
         self.txtEnvYaw.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvYaw))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtEnvYaw))
         self.txtEnvPitch.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvPitch))   
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtEnvPitch))   
         self.txtEnvRoll.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtEnvRoll)) 
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtEnvRoll)) 
         self.txtSampleYaw.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtSampleYaw))
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleYaw))
         self.txtSamplePitch.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtSamplePitch))   
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSamplePitch))   
         self.txtSampleRoll.setValidator(
-            QtGui.QRegExpValidator(validat_regex_float, self.txtSampleRoll))   
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleRoll))   
 
         # 0 < Qmax <= 1000
-        validat_regex_q = QtCore.QRegExp(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
-        self.txtQxMax.setValidator(QtGui.QRegExpValidator(validat_regex_q,
+        validat_regex_q = QtCore.QRegularExpression(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
+        self.txtQxMax.setValidator(QtGui.QRegularExpressionValidator(validat_regex_q,
                                                           self.txtQxMax))
 
         # 2 <= Qbin and nodes integers < 1000
-        validat_regex_int = QtCore.QRegExp(r'^[2-9]|[1-9]\d{1,2}$')
-        self.txtNoQBins.setValidator(QtGui.QRegExpValidator(validat_regex_int,
+        validat_regex_int = QtCore.QRegularExpression(r'^[2-9]|[1-9]\d{1,2}$')
+        self.txtNoQBins.setValidator(QtGui.QRegularExpressionValidator(validat_regex_int,
                                                             self.txtNoQBins))
 
         self.txtXnodes.setValidator(
-            QtGui.QRegExpValidator(validat_regex_int, self.txtXnodes))
+            QtGui.QRegularExpressionValidator(validat_regex_int, self.txtXnodes))
         self.txtYnodes.setValidator(
-            QtGui.QRegExpValidator(validat_regex_int, self.txtYnodes))
+            QtGui.QRegularExpressionValidator(validat_regex_int, self.txtYnodes))
         self.txtZnodes.setValidator(
-            QtGui.QRegExpValidator(validat_regex_int, self.txtZnodes))         
+            QtGui.QRegularExpressionValidator(validat_regex_int, self.txtZnodes))         
 
         # plots - 3D in real space
         self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
@@ -1367,13 +1368,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Save data as .sld file"""
         path = os.path.dirname(str(self.datafile))
         default_name = os.path.join(path, 'sld_file')
-        kwargs = {
-            'parent': self,
-            'directory': default_name,
-            'filter': 'SLD file (*.sld)',
-            'options': QtWidgets.QFileDialog.DontUseNativeDialog}
+        parent = self
+        directory =  default_name
+        filter = 'SLD file (*.sld)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, 'Save SLD file', directory, filter, "", options=options)
         filename = filename_tuple[0]
         if filename:
             try:

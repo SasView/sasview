@@ -21,7 +21,6 @@ from scipy import optimize
 
 import os
 import os.path
-import unittest
 import math
 import numpy
 

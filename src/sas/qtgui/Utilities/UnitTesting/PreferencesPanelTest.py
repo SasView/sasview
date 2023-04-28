@@ -1,23 +1,9 @@
+import os
 import pytest
 from PySide6.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox
 
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
-from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
-
-
-class DummyPrefWidget(PreferencesWidget):
-    def __init__(self, name):
-        super(DummyPrefWidget, self).__init__(name)
-
-    def _restoreFromConfig(self):
-        pass
-
-    def _toggleBlockAllSignaling(self):
-        pass
-
-    def _addAllWidgets(self):
-        pass
+from sas.qtgui.Utilities.PreferencesPanel import *
 
 
 class PreferencesPanelTest:
@@ -47,7 +33,7 @@ class PreferencesPanelTest:
     def testDefaults(self, widget):
         """Test the freshly-opened panel with no changes made"""
         assert widget.stackedWidget.count() == widget.listWidget.count()
-        assert widget.listWidget.currentRow() == widget.stackedWidget.currentIndex()
+        assert -1 == widget.stackedWidget.currentIndex()
 
     def testPreferencesInteractions(self, widget):
         """Test the base interactions in window behavior"""
@@ -59,7 +45,7 @@ class PreferencesPanelTest:
     def testPreferencesExtensibility(self, widget):
         """Test ability to add and remove items from the listWidget and stackedWidget"""
         # Create fake PreferencesWidget, add to stacked widget, and add item to list widget
-        new_widget = DummyPrefWidget("Fake Widget")
+        new_widget = PreferencesWidget("Fake Widget")
         starting_size = widget.stackedWidget.count()
         widget.addWidget(new_widget)
         # Ensure stacked widget and list widget have the same number of elements
@@ -70,23 +56,20 @@ class PreferencesPanelTest:
         assert widget.stackedWidget.currentIndex() == widget.listWidget.currentRow()
 
     def testHelp(self, widget, mocker):
-        mocker.patch.object(widget, 'close')
+        mocker.patch.object(widget, 'onClick')
         widget.buttonBox.buttons()[0].click()
-        assert widget.close.called_once()
+        assert widget.onClick.called_once()
 
     def testPreferencesWidget(self, widget, mocker):
         mocker.patch.object(widget, 'checked', create=True)
         mocker.patch.object(widget, 'combo', create=True)
         mocker.patch.object(widget, 'textified', create=True)
         mocker.patch.object(widget, 'resetPref', create=True)
-        mocker.patch.object(widget, '_validate_input_and_stage', create=True)
 
-        pref = DummyPrefWidget("Dummy Widget")
-        text_input = pref.addTextInput("blah")
-        text_input.textChanged.connect(
-            lambda: pref._validate_input_and_stage(text_input, "blah"))
-        pref.addCheckBox("ho hum")
-        pref.addComboBox("combo", ["a", "b", "c"], "a")
+        pref = PreferencesWidget("Dummy Widget", widget.resetPref)
+        pref.addTextInput("blah", widget.textified)
+        pref.addCheckBox("ho hum", widget.checked)
+        pref.addComboBox("combo", ["a", "b", "c"], widget.combo, "a")
 
         widget.addWidget(pref)
 
@@ -102,6 +85,6 @@ class PreferencesPanelTest:
                 child.setChecked(not child.checkState())
 
         assert widget.textified.called_once()
-        assert widget._validate_input_and_stage.called_once()
         assert widget.combo.called_once()
         assert widget.checked.called_once()
+

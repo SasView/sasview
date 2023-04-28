@@ -7,9 +7,9 @@ import traceback
 
 from typing import Optional, Dict
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QLocale
+from PySide6.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import Qt, QLocale
 
 import matplotlib as mpl
 
@@ -171,6 +171,7 @@ class GuiManager:
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
+        self.preferences = PreferencesPanel(self._parent)
 
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
@@ -423,16 +424,18 @@ class GuiManager:
         #
         # Selection on perspective choice menu
         #
-        if isinstance(new_perspective, FittingWindow):
+        # checking `isinstance`` fails in PySide6 with
+        # AttributeError: type object 'FittingWindow' has no attribute '_abc_impl'
+        if type(new_perspective) == FittingWindow:
             self.checkAnalysisOption(self._workspace.actionFitting)
 
-        elif isinstance(new_perspective, InvariantWindow):
+        elif type(new_perspective) == InvariantWindow:
             self.checkAnalysisOption(self._workspace.actionInvariant)
 
-        elif isinstance(new_perspective, InversionWindow):
+        elif type(new_perspective) == InversionWindow:
             self.checkAnalysisOption(self._workspace.actionInversion)
 
-        elif isinstance(new_perspective, CorfuncWindow):
+        elif type(new_perspective) == CorfuncWindow:
             self.checkAnalysisOption(self._workspace.actionCorfunc)
 
 

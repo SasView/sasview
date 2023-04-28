@@ -2,8 +2,8 @@ import logging
 import os
 import sys
 
-from PyQt5.QtWidgets import QDialog, QWidget, QDialogButtonBox, QMessageBox
-from PyQt5.QtCore import Qt
+from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QMessageBox
+from PySide6.QtCore import Qt
 from typing import Optional, Callable, Dict, Any, Union, List
 
 from sas.system import config

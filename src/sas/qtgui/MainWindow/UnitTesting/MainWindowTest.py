@@ -2,10 +2,10 @@ import sys
 
 import pytest
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtGui import *
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+from PySide6 import QtGui, QtWidgets
+from PySide6.QtGui import *
+from PySide6.QtTest import QTest
+from PySide6 import QtCore
 
 # Local
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow

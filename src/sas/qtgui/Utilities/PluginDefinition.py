@@ -1,6 +1,6 @@
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.Utilities.UI.PluginDefinitionUI import Ui_PluginDefinition
 from sas.qtgui.Utilities import GuiUtils
@@ -18,7 +18,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     This is a simple series of widgets allowing for specifying
     model form and parameters.
     """
-    modelModified = QtCore.pyqtSignal()
+    modelModified = QtCore.Signal()
     def __init__(self, parent=None):
         super(PluginDefinition, self).__init__(parent)
         self.setupUi(self)
@@ -67,9 +67,9 @@ return y
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
         # Validators
-        rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")
+        rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
 
-        txt_validator = QtGui.QRegExpValidator(rx)
+        txt_validator = QtGui.QRegularExpressionValidator(rx)
         self.txtName.setValidator(txt_validator)
         # Weird import location - workaround for a bug in Sphinx choking on
         # importing QSyntaxHighlighter
