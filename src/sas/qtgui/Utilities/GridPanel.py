@@ -4,7 +4,7 @@ import time
 import logging
 import webbrowser
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PySide6 import QtCore, QtWidgets, QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -17,7 +17,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
-    windowClosedSignal = QtCore.pyqtSignal()
+    windowClosedSignal = QtCore.Signal()
     def __init__(self, parent = None, output_data=None):
 
         super(BatchOutputPanel, self).__init__(parent._parent)
@@ -258,14 +258,12 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         default_name = "Batch_Fitting_"+time_str+".csv"
 
         wildcard = "CSV files (*.csv);;"
-        kwargs = {
-            'caption'   : 'Save As',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : None,
-        }
+        caption =  'Save As'
+        directory =  default_name
+        filter =  wildcard
+        parent =  None
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter)
         filename = filename_tuple[0]
 
         # User cancelled.

@@ -6,9 +6,9 @@ import os
 import functools
 import logging
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -29,7 +29,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     Interaction between the QTableView and the underlying model,
     passed from a slicer instance.
     """
-    closeWidgetSignal = QtCore.pyqtSignal()
+    closeWidgetSignal = QtCore.Signal()
 
     def __init__(self, parent=None,
                  model=None,
@@ -138,7 +138,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 continue
             if str(item) in current_plots.keys():
                 # redo the list
-                checked = current_plots[item]
+                checked = QtCore.Qt.Checked if current_plots[item] else QtCore.Qt.Unchecked
             else:
                 # create a new list
                 checked = QtCore.Qt.Checked if (self.parent.data[0].name == item) else QtCore.Qt.Unchecked
@@ -212,13 +212,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Open save file location dialog
         """
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Save files to:',
-            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.save_location
-        }
-        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+        parent = self
+        caption = 'Save files to:'
+        options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = self.save_location
+        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, "", options)
 
         if folder is None:
             return
@@ -473,7 +471,7 @@ class PositiveDoubleEditor(QtWidgets.QLineEdit):
 
 
 class EditDelegate(QtWidgets.QStyledItemDelegate):
-    refocus_signal = QtCore.pyqtSignal(int, int)
+    refocus_signal = QtCore.Signal(int, int)
 
     def __init__(self, parent=None, validate_method=None):
         super(EditDelegate, self).__init__(parent)

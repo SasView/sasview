@@ -1,5 +1,5 @@
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.PlotUtilities import COLORS, SHAPES
 from sas.qtgui.Plotting.UI.PlotPropertiesUI import Ui_PlotPropertiesUI

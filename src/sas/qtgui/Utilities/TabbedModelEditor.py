@@ -7,7 +7,7 @@ import datetime
 import logging
 import traceback
 
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from sas.sascalc.fit import models
 

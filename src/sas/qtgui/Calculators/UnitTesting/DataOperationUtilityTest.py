@@ -4,13 +4,12 @@ import numpy
 import logging
 import webbrowser
 
-import pytest
+from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore
+from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtCore
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import Qt
-from unittest.mock import patch
+import pytest
 
 from twisted.internet import threads
 

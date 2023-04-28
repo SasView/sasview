@@ -24,15 +24,18 @@ def pyrrc(in_file, out_file):
     """
     Run the qt resource compiler
     """
-    from PyQt5.pyrcc_main import main
-    run_compiler(main, "pyrcc", in_file, "-o", out_file)
+    run_line = f"PySide6-rcc {in_file} -o {out_file}"
+    os.system(run_line)
+
 
 def pyuic(in_file, out_file):
     """
     Run the qt UI compiler
     """
-    from PyQt5.uic.pyuic import main
-    run_compiler(main, "pyuic", "-o", out_file, in_file)
+    in_file2 = os.path.abspath(in_file)
+    out_file2 = os.path.abspath(out_file)
+    run_line = "PySide6-uic " + in_file2 + " -o " + out_file2
+    os.system(run_line)
 
 def file_in_newer(file_in, file_out):
     """

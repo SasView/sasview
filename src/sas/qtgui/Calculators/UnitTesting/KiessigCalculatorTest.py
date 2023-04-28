@@ -1,10 +1,10 @@
 import sys
 
 import pytest
+from PySide6 import QtGui, QtWidgets
+from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import Qt
 
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 
