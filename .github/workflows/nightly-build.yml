@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - nightly*
 
 jobs:
 
@@ -63,12 +64,18 @@ jobs:
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
         with:
-          draft: false
+          draft: true
           prerelease: true
           allowUpdates: true
           replacesArtifacts: true
+          removeArtifacts: true
+          commit: ${{ github.sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/setupSasView-nightly-Win64.exe, installers/dist/SasView-nightly-MacOSX.dmg, installers/dist/SasView-nightly-Linux.tar.gz"
+          artifacts: "installers/dist/setupSasView-nightly-Win64.exe,
+                      installers/dist/SasView-nightly-MacOSX.dmg,
+                      installers/dist/SasView-nightly-Linux.tar.gz,
+                      installers/dist/nightly-build.zip,
+                      installers/dist/nightly-build.tar.gz"
           body: "Nightly build of main SasView branch"
-          name: "nightly-build"
-          tag: "nightly-build"
+          name: "nightly-build-test"
+          tag: "nightly-build-test"
