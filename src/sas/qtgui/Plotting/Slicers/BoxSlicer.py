@@ -57,6 +57,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # of averaging data2D
         self.update()
         self._post_data()
+        self.draw()
         self.setModelFromParams()
 
     def update_and_post(self):
@@ -65,6 +66,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         self.update()
         self._post_data()
+        self.draw()
 
     def set_layer(self, n):
         """
@@ -195,7 +197,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         if self.update_model:
             self.setModelFromParams()
-        self.draw()
 
     def moveend(self, ev):
         """
@@ -251,6 +252,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
         self.post_data(nbins=None)
+        self.draw()
 
     def draw(self):
         """
@@ -363,7 +365,8 @@ class HorizontalLines(BaseInteractor):
         """
         self.y = y
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
 
 class VerticalLines(BaseInteractor):
@@ -470,7 +473,8 @@ class VerticalLines(BaseInteractor):
         """
         self.has_move = True
         self.x = x
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
 
 class BoxInteractorX(BoxInteractor):

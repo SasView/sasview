@@ -140,7 +140,6 @@ class BaseInteractor(object):
             self.move(ev.xdata, ev.ydata, ev)
         else:
             self.restore(ev)
-        self.base.update()
         return True
 
     def onKey(self, ev):
