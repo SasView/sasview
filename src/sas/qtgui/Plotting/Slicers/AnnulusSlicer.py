@@ -48,6 +48,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         self.outer_circle.qmax = self.qmax * 1.2
         self.update()
         self._post_data()
+        self.draw()
 
         self.setModelFromParams()
 
@@ -148,7 +149,6 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
 
         if self.update_model:
             self.setModelFromParams()
-        self.draw()
 
     def validate(self, param_name, param_value):
         """
@@ -188,6 +188,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         Redraw the plot with new parameters.
         """
         self._post_data(self.nbins)
+        self.draw()
 
     def restore(self, ev):
         """
@@ -232,6 +233,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
         # Post the data given the nbins entered by the user
         self._post_data(self.nbins)
+        self.draw()
 
     def draw(self):
         """
@@ -353,7 +355,8 @@ class RingInteractor(BaseInteractor):
         """
         self._inner_mouse_x = x
         self._inner_mouse_y = y
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def set_cursor(self, x, y):
         """

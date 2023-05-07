@@ -226,7 +226,6 @@ class BoxSumCalculator(BaseInteractor):
         self.total, self.totalerror, self.points = boxtotal(self.data)
         if self.update_model:
             self.setModelFromParams()
-        self.draw()
 
     def moveend(self, ev):
         """
@@ -391,7 +390,8 @@ class PointInteractor(BaseInteractor):
         self.x = x
         self.y = y
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -558,7 +558,8 @@ class VerticalDoubleLine(BaseInteractor):
         self.x2 = self.center_x - delta
         self.half_width = numpy.fabs(self.x1 - self.x2) / 2
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -720,7 +721,8 @@ class HorizontalDoubleLine(BaseInteractor):
         self.y2 = self.center_y - delta
         self.half_height = numpy.fabs(self.y1) - self.center_y
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """

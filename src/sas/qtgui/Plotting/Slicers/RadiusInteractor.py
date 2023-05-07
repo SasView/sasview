@@ -100,7 +100,8 @@ class RadiusInteractor(BaseInteractor):
         """
         self.theta = np.arctan2(y, x)
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def set_cursor(self, r_min, r_max, theta):
         """

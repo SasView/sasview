@@ -51,6 +51,7 @@ class SectorInteractor(BaseInteractor):
                                           arc2=self.outer_circle,
                                           theta=theta2)
         self.update()
+        self.draw()
         self._post_data()
 
     def set_layer(self, n):

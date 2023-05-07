@@ -57,6 +57,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         # draw the sector
         self.update()
         self._post_data()
+        self.draw()
         self.setModelFromParams()
 
     def set_layer(self, n):
@@ -178,7 +179,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
 
         if self.update_model:
             self.setModelFromParams()
-        self.draw()
 
     def validate(self, param_name, param_value):
         """
@@ -266,6 +266,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
                               mline=self.main_line, side=True)
         # Post the new corresponding data
         self._post_data(nbins=self.nbins)
+        self.draw()
 
     def draw(self):
         """
@@ -445,7 +446,8 @@ class SideInteractor(BaseInteractor):
         self.phi = numpy.fabs(self.theta2 - self.theta)
         if self.phi > numpy.pi:
             self.phi = 2 * numpy.pi - numpy.fabs(self.theta2 - self.theta)
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def set_cursor(self, x, y):
         self.move(x, y, None)
@@ -549,7 +551,8 @@ class LineInteractor(BaseInteractor):
         """
         self.theta = numpy.arctan2(y, x)
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def set_cursor(self, x, y):
         self.move(x, y, None)
