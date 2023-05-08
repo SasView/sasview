@@ -8,9 +8,9 @@ from sas.qtgui.Plotting.Slicers.Arc import ArcInteractor
 from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
-class SectorInteractor(BaseInteractor):
+class WedgeInteractor(BaseInteractor):
     """
-    This SectorInteractor is a cross between the SectorInteractor defined in
+    This WedgeInteractor is a cross between the SectorInteractor defined in
     SectorSicer.py and the AnnulusInteractor. It plots a data1D average of a
     wedge area defined in a Data2D object. The data1D averaging itself is
     performed in sasdata by manipulations.py.
@@ -245,7 +245,7 @@ class SectorInteractor(BaseInteractor):
         """
         self.base.draw()
 
-class SectorInteractorQ(SectorInteractor):
+class SectorInteractorQ(WedgeInteractor):
     """
     Average in Q direction. The data for all phi at a constant Q are
     averaged together to provide a 1D array in Q (to be plotted as a function
@@ -254,7 +254,7 @@ class SectorInteractorQ(SectorInteractor):
     def __init__(self, base, axes, color='black', zorder=3):
         """
         """
-        SectorInteractor.__init__(self, base, axes, color=color)
+        WedgeInteractor.__init__(self, base, axes, color=color)
         self.base = base
         self._post_data()
 
@@ -265,7 +265,7 @@ class SectorInteractorQ(SectorInteractor):
         self.post_data(SectorQ)
 
 
-class SectorInteractorPhi(SectorInteractor):
+class SectorInteractorPhi(WedgeInteractor):
     """
     Average in phi direction. The data for all Q at a constant phi are
     averaged together to provide a 1D array in phi (to be plotted as a function
@@ -274,7 +274,7 @@ class SectorInteractorPhi(SectorInteractor):
     def __init__(self, base, axes, color='black', zorder=3):
         """
         """
-        SectorInteractor.__init__(self, base, axes, color=color)
+        WedgeInteractor.__init__(self, base, axes, color=color)
         self.base = base
         self._post_data()
 
