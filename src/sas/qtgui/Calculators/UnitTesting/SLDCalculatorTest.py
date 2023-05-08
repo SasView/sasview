@@ -2,10 +2,12 @@ import sys
 import webbrowser
 
 import pytest
+from PySide6 import QtGui, QtWidgets
+from PySide6.QtTest import QTest
+from PySide6 import QtCore
+from unittest.mock import MagicMock
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+
 # Local
 #from sas.qtgui.Calculators.SldPanel import SldResult
 from sas.qtgui.Calculators.SldPanel import SldPanel

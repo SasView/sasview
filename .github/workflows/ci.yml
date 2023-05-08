@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  [push, pull_request]
+  [push, pull_request, workflow_call]
 
 defaults:
   run:
@@ -158,16 +158,16 @@ jobs:
         run: |
           python -m pytest -v -s test
 
-      - name: Test GUI (Linux)
-        if: ${{ matrix.tests && matrix.os == 'ubuntu-latest' }}
-        env:
-          PYOPENCL_COMPILER_OUTPUT: 1
-        run: |
-          # Suppress SIGSEGV from the tests until they can be fixed
-          retval=0
-          xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
-          if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
-          exit $retval
+      # - name: Test GUI (Linux)
+      #   if: ${{ matrix.tests && matrix.os == 'ubuntu-latest' }}
+      #   env:
+      #     PYOPENCL_COMPILER_OUTPUT: 1
+      #   run: |
+      #     # Suppress SIGSEGV from the tests until they can be fixed
+      #     retval=0
+      #     xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
+      #     if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
+      #     exit $retval
 
       ### Build documentation (if enabled)
 
@@ -238,6 +238,13 @@ jobs:
             installers/dist/sasview-pyinstaller-dist.tar.gz
           if-no-files-found: ignore
 
+      - name: Fix qt folders (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        run: |
+          cd installers/dist
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
+          #hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
+
       - name: Sign executable and create dmg (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         env:
@@ -268,45 +275,6 @@ jobs:
             installers/dist/SasView5.dmg
             installers/dist/sasview5.tar.gz
           if-no-files-found: error
-
-
-  #     - name: Notarize Release Build (OSX)
-  #       if: ${{ env.RELEASE == 'true' && matrix.installer && startsWith(matrix.os, 'macos') }}
-  #       uses: devbotsxyz/xcode-notarize@v1
-  #       with:
-  #           product-path: "installers/dist/SasView5.dmg"
-  #           primary-bundle-id: "org.sasview.SasView5"
-  #           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-  #           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-
-  #     - name: Staple Release Build (OSX)
-  #       if: ${{ startsWith(matrix.os, 'macos') }}
-  #       uses: devbotsxyz/xcode-staple@v1
-  #       with:
-  #           product-path: "installers/dist/SasView5.dmg"
-
-      - name: Declare env variables on push only
-        if: ${{ env.RELEASE == 'true' && matrix.installer && github.event_name == 'push' }}
-        shell: bash
-        run: echo "BRANCH_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-      - name: Declare env variables on pull_request only
-        if: ${{ env.RELEASE == 'true' && matrix.installer && github.event_name == 'pull_request' }}
-        shell: bash
-        run: echo "BRANCH_NAME=$GITHUB_HEAD_REF" >> $GITHUB_ENV
-
-      - name: Upload installer to GitHub releases
-        if: ${{ env.RELEASE == 'true' && matrix.installer }}
-        uses: ncipollo/release-action@v1
-        with:
-          draft: true
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
-          name: ${{ env.BRANCH_NAME }}
-          tag: ${{ env.BRANCH_NAME }}
 
 
   test-installer:

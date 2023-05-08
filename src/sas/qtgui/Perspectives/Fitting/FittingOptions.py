@@ -4,9 +4,9 @@ import os
 import types
 import webbrowser
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -37,7 +37,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
         >>> settings = [('steps', 1000), ('starts', 1), ('radius', 0.15), ('xtol', 1e-6), ('ftol', 1e-8)]
     """
-    fit_option_changed = QtCore.pyqtSignal(str)
+    fit_option_changed = QtCore.Signal(str)
     name = "Fit Optimizers"
 
     def __init__(self, config=None):

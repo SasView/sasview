@@ -1,18 +1,20 @@
 import sys
 import numpy
 import platform
-
 import pytest
 
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-from PyQt5 import QtGui, QtWidgets, QtPrintSupport
-from PyQt5 import QtCore
+from PySide6 import QtGui, QtWidgets, QtPrintSupport
+from PySide6 import QtCore
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from mpl_toolkits.mplot3d import Axes3D
 
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D

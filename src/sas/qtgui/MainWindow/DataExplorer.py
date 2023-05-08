@@ -6,9 +6,9 @@ import time
 import logging
 import copy
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from twisted.internet import threads
 
@@ -128,7 +128,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_model.itemChanged.connect(self.onFileListChanged)
 
         # Don't show "empty" rows with data objects
-        self.data_proxy.setFilterRegExp(r"[^()]")
+        self.data_proxy.filterRegularExpression = "[^()]" 
 
         # Create a window to allow the display name to change
         self.nameChangeBox = ChangeName(self)
@@ -141,7 +141,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_proxy.setSourceModel(self.theory_model)
 
         # Don't show "empty" rows with data objects
-        self.theory_proxy.setFilterRegExp(r"[^()]")
+        self.theory_proxy.filterRegularExpression = "[^()]"
 
         # Theory model view
         self.freezeView.setModel(self.theory_proxy)
@@ -228,13 +228,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Choose a directory',
-            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.default_load_location
-        }
-        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+        parent = self
+        caption = 'Choose a directory'
+        options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = self.default_load_location
+        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, "", options)
 
         if folder is None:
             return
@@ -282,8 +280,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.default_project_location = os.path.dirname(filename)
             # Delete all data and initialize all perspectives
             self.deleteAllItems()
-            self.cbFitting.disconnect()
+            self.cbFitting.blockSignals(True)
             self.parent.loadAllPerspectives()
+            self.cbFitting.blockSignals(False)
             self.initPerspectives()
             self.readProject(filename)
 
@@ -306,14 +305,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Called when the "Save Project" menu item chosen.
         """
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Save Project',
-            'filter'    : 'Project (*.json)',
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.default_project_location
-        }
-        name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        parent = self
+        caption = 'Save Project'
+        filter = 'Project (*.json)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = self.default_project_location
+        name_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", options)
         filename = name_tuple[0]
         if not filename:
             return
@@ -332,14 +329,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         default_name = "Analysis"+str(tab_id)+"."+str(extension)
 
         wildcard = "{0} files (*.{0})".format(extension)
-        kwargs = {
-            'caption'   : 'Save As',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : None,
-        }
+        caption = 'Save As'
+        directory = default_name
+        filter = wildcard
+        parent = None
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", QtWidgets.QFileDialog.DontUseNativeDialog)
         filename = filename_tuple[0]
         return filename
 
@@ -399,8 +394,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if data is None: continue
             # Now, all plots under this item
             name = data.name
-            is_checked = item.checkState()
-            properties['checked'] = is_checked
+            is_checked_bool = item.checkState() == QtCore.Qt.Checked
+            properties['checked'] = is_checked_bool
             # save underlying theories
             other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
@@ -420,8 +415,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if data.id != id: continue
                 # We found the dataset - save it.
                 name = data.name
-                is_checked = item.checkState()
-                properties['checked'] = is_checked
+                is_checked_bool = item.checkState() == QtCore.Qt.Checked
+                properties['checked'] = is_checked_bool
                 other_datas = GuiUtils.plotsFromDisplayName(name, model)
                 # skip the main plot
                 other_datas = list(other_datas.values())[1:]
@@ -646,7 +641,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             properties = value[1]
             is_checked = properties['checked']
             new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.name)
-            new_item.setCheckState(is_checked)
+            new_item.setCheckState(QtCore.Qt.Checked if is_checked else QtCore.Qt.Unchecked)
             items.append(new_item)
             model = self.theory_model
             if new_data.is_data:
@@ -1009,7 +1004,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Using this conditional prevents the checkbox for going into the "neither checked nor unchecked" state
         if not allow_swap:
-            self.chkSwap.setCheckState(False)
+            self.chkSwap.setChecked(False)
 
     def itemFromDisplayName(self, name):
         """
@@ -1292,15 +1287,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         wlist = self.getWlist()
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Choose files',
-            'filter'    : wlist,
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog |
-                          QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
-            'directory' : self.default_load_location
-        }
-        paths = QtWidgets.QFileDialog.getOpenFileNames(**kwargs)[0]
+        parent = self
+        caption = 'Choose files'
+        directory = self.default_load_location
+        filter = wlist
+        options = QtWidgets.QFileDialog.DontUseNativeDialog | QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
+        paths = QtWidgets.QFileDialog.getOpenFileNames(parent, caption, directory, filter, options=options)[0]
+
         if not paths:
             return
 

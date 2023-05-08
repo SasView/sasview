@@ -69,6 +69,7 @@ What Belongs in a Config
 ========================
 
 Things that do belong:
+
   1) Program settings that are configurable by users through the GUI
   2) Program settings that have no GUI editor, but that some advanced users
      might want to set manually with a text editor

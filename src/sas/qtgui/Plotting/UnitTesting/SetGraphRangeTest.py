@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from PyQt5 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 # Local
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange

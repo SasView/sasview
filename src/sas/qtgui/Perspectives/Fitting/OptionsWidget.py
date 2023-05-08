@@ -2,9 +2,9 @@
 Widget/logic for smearing data.
 """
 import numpy as np
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -32,7 +32,7 @@ class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
             widget.stateChanged.connect(lambda: delegate.commitData.emit(widget))
 
 class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
-    plot_signal = QtCore.pyqtSignal()
+    plot_signal = QtCore.Signal()
     QMIN_DEFAULT = 0.0005
     QMAX_DEFAULT = 0.5
     NPTS_DEFAULT = 150

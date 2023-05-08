@@ -1,11 +1,9 @@
 import sys
 import webbrowser
 
-import pytest
-
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+from PySide6 import QtGui, QtWidgets
+from PySide6.QtTest import QTest
+from PySide6 import QtCore
 
 # Local
 from sas.qtgui.Calculators.DensityPanel import DensityPanel, MODEL

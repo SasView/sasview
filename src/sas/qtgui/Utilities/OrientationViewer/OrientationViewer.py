@@ -3,9 +3,9 @@ from typing import Optional, List
 import numpy as np
 from scipy.special import erfinv
 
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QSizePolicy
-from PyQt5.QtCore import Qt
+from PySide6 import QtWidgets
+from PySide6.QtWidgets import QSizePolicy
+from PySide6.QtCore import Qt
 
 from sasmodels.core import load_model_info, build_model
 from sasmodels.data import empty_data2D

@@ -5,8 +5,8 @@ from xhtml2pdf import pisa
 
 import pytest
 
-from PyQt5 import QtWidgets, QtPrintSupport
-from PyQt5.QtTest import QTest
+from PySide6 import QtWidgets, QtPrintSupport
+from PySide6.QtTest import QTest
 
 # set up import paths
 
