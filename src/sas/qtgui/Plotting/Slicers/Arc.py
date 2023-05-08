@@ -1,13 +1,15 @@
-"""
-    Arc slicer for 2D data
-"""
 import numpy as np
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 class ArcInteractor(BaseInteractor):
     """
-    Select an annulus through a 2D plot
+     Draw an arc on a data2D plot between radial points (centered at [0,0]) at
+     angles theta1 and theta2.
+
+     param r: radius from (0,0) of the arc on a data2D plot
+     param theta1: angle from x-axis of right end of arc
+     param theta2: angle from x-axis of left end of arc
     """
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
                  theta1=np.pi / 8, theta2=np.pi / 4):

@@ -8,10 +8,13 @@ from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 class AnnulusInteractor(BaseInteractor, SlicerModel):
     """
-    Select an annulus through a 2D plot.
-    This interactor is used to average 2D data  with the region
-    defined by 2 radius.
-    this class is defined by 2 Ringinterators.
+    AnnulusInteractor plots a data1D average of an annulus area defined in a
+    Data2D object. The data1D averaging itself is performed in sasdata by
+    manipulations.py
+
+    This class uses the RingInteractor classe to define two rings of radius
+    r1 and r2 (Q1 and Q2). All Q points at a constant angle phi from the x-axis
+    are averaged together to provide a 1D array in phi from 0 to 180 degrees.
     """
     def __init__(self, base, axes, item=None, color='black', zorder=3):
 
@@ -243,13 +246,13 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
 
 class RingInteractor(BaseInteractor):
     """
-     Draw a ring Given a radius
+     Draw a ring on a data2D plot centered at (0,0) given a radius
     """
     def __init__(self, base, axes, color='black', zorder=5, r=1.0, sign=1):
         """
         :param: the color of the line that defined the ring
         :param r: the radius of the ring
-        :param sign: the direction of motion the the marker
+        :param sign: the direction of motion the marker
 
         """
         BaseInteractor.__init__(self, base, axes, color=color)

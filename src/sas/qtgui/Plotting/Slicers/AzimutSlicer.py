@@ -10,7 +10,20 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 class SectorInteractor(BaseInteractor):
     """
-    Select an annulus through a 2D plot
+    This SectorInteractor is a cross between the SectorInteractor defined in
+    SectorSicer.py and the AnnulusInteractor. It plots a data1D average of a
+    wedge area defined in a Data2D object. The data1D averaging itself is
+    performed in sasdata by manipulations.py.
+
+    This class uses two other classes, ArcInteractor (in Arc.py) and
+    RadiusInteractor (in RadiusInteractor.py), to define a wedge area contained
+    between two radial lines running through (0,0) defining the left and right
+    edges of the wedge (similar to the sector), and two rings at Q1 and Q2
+    (similar to the annulus). This class is itself subclassed by
+    SectorInteractorPhi and SectorInteractorQ which define the direction of the
+    averaging. SectorInteractorPhi averages all Q points at constant Phi ( as
+    for the AnnulusSlicer) and SectorInteractorQ averages all phi points at
+    constant Q (as for the SectorSlicer).
     """
     def __init__(self, base, axes, color='black', zorder=3):
         """
@@ -234,6 +247,9 @@ class SectorInteractor(BaseInteractor):
 
 class SectorInteractorQ(SectorInteractor):
     """
+    Average in Q direction. The data for all phi at a constant Q are
+    averaged together to provide a 1D array in Q (to be plotted as a function
+     of Q)
     """
     def __init__(self, base, axes, color='black', zorder=3):
         """
@@ -251,6 +267,9 @@ class SectorInteractorQ(SectorInteractor):
 
 class SectorInteractorPhi(SectorInteractor):
     """
+    Average in phi direction. The data for all Q at a constant phi are
+    averaged together to provide a 1D array in phi (to be plotted as a function
+     of phi)
     """
     def __init__(self, base, axes, color='black', zorder=3):
         """

@@ -1,6 +1,3 @@
-"""
-    Sector interactor
-"""
 import numpy
 import logging
 
@@ -13,7 +10,21 @@ MIN_PHI = 0.05
 
 class SectorInteractor(BaseInteractor, SlicerModel):
     """
-    Draw a sector slicer.Allow to performQ averaging on data 2D
+    SectorInteractor plots a data1D average of a sector area defined in a
+    Data2D object. The data1D averaging itself is performed in sasdata by
+    manipulations.py. Sectors all go through a single point as (0,0).
+
+    This class uses two other classes, LineInteractor and SideInteractor, to
+    define a sector centered around a main line defined by LineInteractor
+    which goes through 0,0 at some user settable angle theta from 0. The
+    sector itself is defined by the right and left sidelines, both of which
+    also go through (0,0), and set by SideInteractor from -phi to +phi around
+    the center line defined by the main line. All points at a constant Q from
+    -phi to +phi are averaged together to provide a 1D array in Q (to be
+    plotted as a function of Q).
+
+        ..TODO: the 2 subclasses here are the same as used by the BoxSum. These
+            should probably be abstracted out.
     """
     def __init__(self, base, axes, item=None, color='black', zorder=3):
 
@@ -277,7 +288,10 @@ class SectorInteractor(BaseInteractor, SlicerModel):
 
 class SideInteractor(BaseInteractor):
     """
-    Draw an oblique line
+    Draws a line though 0,0 on a data2D plot with reference to a center line.
+    This is used to define both a left and right line which are always updated
+    together as they must remain symmetric at some phi value around the main
+    line (at -phi and +phi).
 
     :param phi: the phase between the middle line and one side line
     :param theta2: the angle between the middle line and x- axis
@@ -466,7 +480,11 @@ class SideInteractor(BaseInteractor):
 
 class LineInteractor(BaseInteractor):
     """
-    Select an annulus through a 2D plot
+    Draws a line though 0,0 on a data2D plot. This is used to define the
+    centerline around with other lines can be drawn to define a region of
+    interest (such as a sector).
+
+    :param theta: the angle between the middle line and x- axis
     """
     def __init__(self, base, axes, color='black',
                  zorder=5, r=1.0, theta=numpy.pi / 4):
