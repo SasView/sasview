@@ -8,8 +8,16 @@ from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 class BoxInteractor(BaseInteractor, SlicerModel):
     """
-    BoxInteractor define a rectangle that return data1D average of Data2D
-    in a rectangle area defined by -x, x ,y, -y
+    BoxInteractor plots a data1D average of a rectangular area defined in
+    a Data2D object. The data1D averaging itself is performed in sasdata
+    by manipulations.py
+
+    This class uses two other classes, HorizontalLines and VerticalLines,
+    to define the rectangle area: -x, x ,y, -y. It is subclassed by
+    BoxInteractorX and BoxInteracgtorY which define the direction of the
+    average. BoxInteractorX averages all the points from -y to +y as a
+    function of Q_x and BoxInteractorY averages all the points from
+    -x to +x as a function of Q_y
     """
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -115,7 +123,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
     def post_data(self, new_slab=None, nbins=None, direction=None):
         """
-        post data averaging in Qx or Qy given new_slab type
+        post 1D data averaging in Qx or Qy given new_slab type
 
         :param new_slab: slicer that determine with direction to average
         :param nbins: the number of points plotted when averaging
@@ -256,6 +264,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
     def draw(self):
         """
+        Draws the Canvas using the canvas.draw from the calling class
+        that instatiated this object.
         """
         self.base.draw()
 
@@ -263,7 +273,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 class HorizontalLines(BaseInteractor):
     """
     Draw 2 Horizontal lines centered on (0,0) that can move
-    on the x- direction and in opposite direction
+    on the x direction. The two lines move symmetrically (in opposite
+    directions). It also defines the x and -x position of a box.
     """
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
         """
@@ -371,7 +382,9 @@ class HorizontalLines(BaseInteractor):
 
 class VerticalLines(BaseInteractor):
     """
-    Select an annulus through a 2D plot
+    Draw 2 vertical lines centered on (0,0) that can move
+    on the y direction. The two lines move symmetrically (in opposite
+    directions). It also defines the y and -y position of a box.
     """
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
         """
@@ -479,7 +492,9 @@ class VerticalLines(BaseInteractor):
 
 class BoxInteractorX(BoxInteractor):
     """
-    Average in Qx direction
+    Average in Qx direction. The data for all Qy at a constant Qx are
+    averaged together to provide a 1D array in Qx (to be plotted as a function
+     of Qx)
     """
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color)
@@ -510,7 +525,9 @@ class BoxInteractorX(BoxInteractor):
 
 class BoxInteractorY(BoxInteractor):
     """
-    Average in Qy direction
+    Average in Qy direction. The data for all Qx at a constant Qy are
+    averaged together to provide a 1D array in Qy (to be plotted as a function
+     of Qy)
     """
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color)

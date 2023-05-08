@@ -4,7 +4,15 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 class RadiusInteractor(BaseInteractor):
     """
-    Select an annulus through a 2D plot
+     Draw a radial line (centered at [0,0]) at an angle theta from the x-axis
+     on a data2D plot from r1 to r2 defined by two arcs (arc1 and arc2). Used
+     for example to define a wedge area on the plot.
+
+     param theta: angle of the radial line from the x-axis
+     param arc1: inner arc of radius r1 used to define the starting point of
+                the radial line
+     param arc2: outer arc of radius r2 used to define the ending point of
+                the radial line
     """
     def __init__(self, base, axes, color='black', zorder=5, arc1=None,
                  arc2=None, theta=np.pi / 8):
