@@ -14,6 +14,7 @@ import sys
 
 from setuptools import setup, Command, find_packages
 
+
 # Manage version number
 version_file = os.path.join("src", "sas", "system", "version.py")
 with open(version_file) as fid:
@@ -80,6 +81,9 @@ build_commands = [
     'install', 'build', 'build_py', 'bdist', 'bdist_egg', 'bdist_rpm',
     'bdist_wheel', 'develop', 'test'
 ]
+
+print(sys.argv)
+
 # determine if this run requires building of Qt GUI ui->py
 build_qt = any(c in sys.argv for c in build_commands)
 force_rebuild = "-f" if 'rebuild_ui' in sys.argv or 'clean' in sys.argv else ""
