@@ -11,7 +11,7 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 class WedgeInteractor(BaseInteractor):
     """
     This WedgeInteractor is a cross between the SectorInteractor defined in
-    SectorSicer.py and the AnnulusInteractor. It plots a data1D average of a
+    SectorSlicer.py and the AnnulusInteractor. It plots a data1D average of a
     wedge area defined in a Data2D object. The data1D averaging itself is
     performed in sasdata by manipulations.py.
 

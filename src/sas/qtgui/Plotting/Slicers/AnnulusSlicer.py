@@ -12,7 +12,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
     Data2D object. The data1D averaging itself is performed in sasdata by
     manipulations.py
 
-    This class uses the RingInteractor classe to define two rings of radius
+    This class uses the RingInteractor class to define two rings of radius
     r1 and r2 (Q1 and Q2). All Q points at a constant angle phi from the x-axis
     are averaged together to provide a 1D array in phi from 0 to 180 degrees.
     """
