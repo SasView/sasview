@@ -36,7 +36,7 @@ def process_text(input_text: str):
     new_locals = {}
     new_globals = {}
 
-    exec(input_text, new_globals, new_locals)
+    exec(input_text, new_globals, new_locals) # TODO: provide access to solvent SLD somehow
     # print(ev)
     # print(new_globals)
     # print(new_locals)
