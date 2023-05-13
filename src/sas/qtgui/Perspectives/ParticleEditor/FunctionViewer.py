@@ -223,10 +223,13 @@ def main():
 
         return out
 
+    def pseudo_orbital(r, theta, phi):
+        return np.exp(-6*r)*r*np.abs(np.cos(2*theta))
+
     app = QtWidgets.QApplication([])
     viewer = FunctionViewer()
     viewer.setCoordinateMapping(spherical_converter)
-    viewer.setFunction(micelle)
+    viewer.setFunction(pseudo_orbital)
 
     viewer.show()
     app.exec_()
