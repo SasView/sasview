@@ -50,6 +50,8 @@ class FunctionViewer(QtWidgets.QWidget):
         self.phi = 0.0
         self.normal_offset = 0.0
 
+        self._graphics_viewer_offset = 5
+
         self.densityViewer = QtWidgets.QGraphicsView()
 
         self.densityScene = QtWidgets.QGraphicsScene()
@@ -57,6 +59,8 @@ class FunctionViewer(QtWidgets.QWidget):
 
         pixmap = QtGui.QPixmap(self._size_px, self._size_px)
         self.densityPixmapItem = self.densityScene.addPixmap(pixmap)
+        self.densityViewer.setFixedWidth(self._size_px + self._graphics_viewer_offset)
+        self.densityViewer.setFixedHeight(self._size_px + self._graphics_viewer_offset)
 
         self.sliceViewer = QtWidgets.QGraphicsView()
 
@@ -65,6 +69,8 @@ class FunctionViewer(QtWidgets.QWidget):
 
         pixmap = QtGui.QPixmap(self._size_px, self._size_px)
         self.slicePixmapItem = self.sliceScene.addPixmap(pixmap)
+        self.sliceViewer.setFixedWidth(self._size_px + self._graphics_viewer_offset)
+        self.sliceViewer.setFixedHeight(self._size_px + self._graphics_viewer_offset)
 
         self.theta_slider = QtWidgets.QSlider(Qt.Horizontal)
         self.theta_slider.setRange(0, 180)
@@ -81,14 +87,27 @@ class FunctionViewer(QtWidgets.QWidget):
         self.depth_slider.setTickInterval(10)
         self.depth_slider.valueChanged.connect(self.onDepthChanged)
 
+        projection_label = QtWidgets.QLabel("Projection")
+        projection_label.setAlignment(Qt.AlignCenter)
+
+        slice_label = QtWidgets.QLabel("Slice")
+        slice_label.setAlignment(Qt.AlignCenter)
+
+        spacer = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+
         layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(projection_label)
         layout.addWidget(self.densityViewer)
         layout.addWidget(self.theta_slider)
         layout.addWidget(self.phi_slider)
+        layout.addWidget(slice_label)
         layout.addWidget(self.sliceViewer)
         layout.addWidget(self.depth_slider)
+        layout.addItem(spacer)
 
         self.setLayout(layout)
+
+        self.setFixedWidth(self._size_px + 20) # Perhaps a better way of keeping the viewer width small?
 
 
     def setRadius(self):

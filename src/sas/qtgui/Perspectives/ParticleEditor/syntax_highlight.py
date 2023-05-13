@@ -185,7 +185,6 @@ class PythonHighlighter(QSyntaxHighlighter):
 
             if state == in_state:
                 # Comment end
-                print("Close")
 
                 state = -1
                 index = match.capturedStart()
@@ -198,7 +197,6 @@ class PythonHighlighter(QSyntaxHighlighter):
 
             elif state == -1:
                 # Comment start
-                print("Open")
 
                 state = in_state
                 start_index = match.capturedStart()
