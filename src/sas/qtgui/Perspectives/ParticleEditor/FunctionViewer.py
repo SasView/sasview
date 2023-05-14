@@ -7,26 +7,27 @@ from PySide6.QtCore import Qt
 from sas.qtgui.Perspectives.ParticleEditor.LabelledSlider import LabelledSlider
 from sas.qtgui.Perspectives.ParticleEditor.SLDMagnetismOption import SLDMagnetismOption
 from sas.qtgui.Perspectives.ParticleEditor.ViewerButtons import AxisButtons, PlaneButtons
+from sas.qtgui.Perspectives.ParticleEditor.RadiusSelection import RadiusSelection
 
-def rotation_matrix(theta: float, phi: float):
+def rotation_matrix(alpha: float, beta: float):
 
-    st = np.sin(theta)
-    ct = np.cos(theta)
-    sp = np.sin(phi)
-    cp = np.cos(phi)
+    sa = np.sin(alpha)
+    ca = np.cos(alpha)
+    sb = np.sin(beta)
+    cb = np.cos(beta)
 
     xz = np.array([
-            [ ct, 0, -st],
+            [ ca, 0, -sa],
             [  0, 1,   0],
-            [ st, 0,  ct]])
+            [ sa, 0,  ca]])
 
     yz = np.array([
             [1,  0,   0 ],
-            [0,  cp, -sp],
-            [0,  sp,  cp]])
+            [0,  cb, -sb],
+            [0,  sb,  cb]])
 
     return np.dot(xz, yz)
-def cross_section_coordinates(radius: float, theta: float, phi: float, plane_distance: float, n_points: int):
+def cross_section_coordinates(radius: float, alpha: float, beta: float, plane_distance: float, n_points: int):
 
     xy_values = np.linspace(-radius, radius, n_points)
 
@@ -38,7 +39,7 @@ def cross_section_coordinates(radius: float, theta: float, phi: float, plane_dis
 
     xyz = np.vstack((x, y, z))
 
-    r = rotation_matrix(theta, phi)
+    r = rotation_matrix(alpha, beta)
 
     return np.dot(r, xyz).T
 
@@ -57,10 +58,10 @@ def draw_line_in_place(im, x0, y0, dx, dy, channel):
         im[y, x, channel] = 255
 def cube_function(x, y, z):
 
-    inside = np.logical_and(np.abs(x) <= 0.5,
+    inside = np.logical_and(np.abs(x) <= 5,
                    np.logical_and(
-                       np.abs(y) <= 0.5,
-                       np.abs(z) <= 0.5 ))
+                       np.abs(y) <= 5,
+                       np.abs(z) <= 5 ))
     #
     # print(cube_function)
     # print(np.any(inside), np.any(np.logical_not(inside)))
@@ -84,8 +85,8 @@ class FunctionViewer(QtWidgets.QWidget):
         # self.function = lambda x,y,z: x
         self.coordinate_mapping = lambda x,y,z: (x,y,z)
 
-        self.theta = 0.0
-        self.phi = np.pi
+        self.alpha = 0.0
+        self.beta = np.pi
         self.normal_offset = 0.0
         self.mag_theta = 0.0
         self.mag_phi = 0.0
@@ -96,8 +97,7 @@ class FunctionViewer(QtWidgets.QWidget):
         # Qt Setup
         #
 
-        density_label = QtWidgets.QLabel("Projection")
-        density_label.setAlignment(Qt.AlignCenter)
+        # Density
 
         self.densityViewer = QtWidgets.QGraphicsView()
 
@@ -111,8 +111,7 @@ class FunctionViewer(QtWidgets.QWidget):
         self.densityViewer.setFixedHeight(self._size_px + self._graphics_viewer_offset)
         self.densityViewer.setCursor(Qt.OpenHandCursor)
 
-        slice_label = QtWidgets.QLabel("Slice")
-        slice_label.setAlignment(Qt.AlignCenter)
+        # Slice
 
         self.sliceViewer = QtWidgets.QGraphicsView()
 
@@ -125,25 +124,22 @@ class FunctionViewer(QtWidgets.QWidget):
         self.sliceViewer.setFixedWidth(self._size_px + self._graphics_viewer_offset)
         self.sliceViewer.setFixedHeight(self._size_px + self._graphics_viewer_offset)
         self.sliceViewer.setCursor(Qt.OpenHandCursor)
-        #
-        # self.theta_slider = LabelledSlider("θ", -180, 180, 0)
-        # self.theta_slider.valueChanged.connect(self.onThetaChanged)
-        #
-        # self.phi_slider = LabelledSlider("φ", 0, 180, 0)
-        # self.phi_slider.valueChanged.connect(self.onPhiChanged)
-        #
-        # self.psi_slider = LabelledSlider("ψ", 0, 180, 0)
-        # self.psi_slider.valueChanged.connect(self.onPsiChanged)
+
+        # General control
+
+        self.radius_control = RadiusSelection("View Size")
+        self.radius_control.radiusField.valueChanged.connect(self.onRadiusChanged)
 
         self.plane_buttons = PlaneButtons(self.setAngles)
 
         self.depth_slider = LabelledSlider("Depth", -100, 100, 0, name_width=35, value_width=35, value_units="%")
         self.depth_slider.valueChanged.connect(self.onDepthChanged)
 
+        # Magnetism controls
+
         self.sld_magnetism_option = SLDMagnetismOption()
         self.sld_magnetism_option.sldOption.clicked.connect(self.onDisplayTypeSelected)
         self.sld_magnetism_option.magnetismOption.clicked.connect(self.onDisplayTypeSelected)
-
 
         self.mag_theta_slider = LabelledSlider("θ", -180, 180, 0)
         self.mag_theta_slider.valueChanged.connect(self.onMagThetaChanged)
@@ -162,19 +158,15 @@ class FunctionViewer(QtWidgets.QWidget):
         magLayout.addWidget(self.mag_phi_slider)
         magLayout.addWidget(self.mag_buttons)
 
+        # Main layout
 
         spacer = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-
-
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(density_label)
+
         layout.addWidget(self.densityViewer)
-        # layout.addWidget(self.theta_slider)
-        # layout.addWidget(self.phi_slider)
-        # layout.addWidget(self.psi_slider)
-        layout.addWidget(slice_label)
-        layout.addWidget(self.sliceViewer)
         layout.addWidget(self.plane_buttons)
+        layout.addWidget(self.radius_control)
+        layout.addWidget(self.sliceViewer)
         layout.addWidget(self.depth_slider)
         layout.addItem(spacer)
         layout.addWidget(self.sld_magnetism_option)
@@ -191,7 +183,9 @@ class FunctionViewer(QtWidgets.QWidget):
         self.lastMouseX = 0
         self.lastMouseY = 0
         self.dThetadX = 0.01
-        self.dPhidY = 0.01
+        self.dPhidY = -0.01
+
+        self.radius = self.radius_control.radius()
 
         # Show images
         self.updateImage()
@@ -217,11 +211,11 @@ class FunctionViewer(QtWidgets.QWidget):
                 dx = x - self.lastMouseX
                 dy = y - self.lastMouseY
 
-                self.theta += self.dThetadX * dx
-                self.phi += self.dPhidY * dy
+                self.alpha += self.dThetadX * dx
+                self.beta += self.dPhidY * dy
 
-                self.theta %= 2*np.pi
-                self.phi %= 2*np.pi
+                self.alpha %= 2 * np.pi
+                self.beta %= 2 * np.pi
 
                 self.lastMouseX = x
                 self.lastMouseY = y
@@ -233,11 +227,9 @@ class FunctionViewer(QtWidgets.QWidget):
         super().eventFilter(source, event)
 
 
-    def setRadius(self):
-        pass
-
-    def setSizePx(self, size):
-        pass
+    def onRadiusChanged(self):
+        self.radius = self.radius_control.radius()
+        self.updateImage()
 
     def setFunction(self, fun):
 
@@ -276,9 +268,9 @@ class FunctionViewer(QtWidgets.QWidget):
         self.updateImage()
 
     def setAngles(self, theta_deg, phi_deg):
-        
-        self.theta = np.pi * theta_deg / 180
-        self.phi = np.pi * (phi_deg + 180) / 180
+
+        self.alpha = np.pi * theta_deg / 180
+        self.beta = np.pi * (phi_deg + 180) / 180
 
         self.updateImage()
 
@@ -288,7 +280,7 @@ class FunctionViewer(QtWidgets.QWidget):
 
         bg_values = None
         for depth in np.linspace(-self.radius, self.radius, self.n_draw_layers+2)[1:-1]:
-            sampling = cross_section_coordinates(self.radius, self.theta, self.phi, depth, self.layer_size)
+            sampling = cross_section_coordinates(self.radius, self.alpha, self.beta, depth, self.layer_size)
             a, b, c = self.coordinate_mapping(sampling[:, 0], sampling[:, 1], sampling[:, 2])
 
             values = self.function(a, b, c)  # TODO: Need to handle parameters properly
@@ -329,7 +321,7 @@ class FunctionViewer(QtWidgets.QWidget):
 
         # Cross section
 
-        sampling = cross_section_coordinates(self.radius, self.theta, self.phi, self.normal_offset, self._size_px)
+        sampling = cross_section_coordinates(self.radius, self.alpha, self.beta, self.normal_offset, self._size_px)
         a,b,c = self.coordinate_mapping(sampling[:, 0], sampling[:, 1], sampling[:, 2])
 
         values = self.function(a,b,c) # TODO: Need to handle parameters properly
@@ -367,7 +359,7 @@ class FunctionViewer(QtWidgets.QWidget):
         pass
 
     def drawAxes(self, im):
-        vectors = 20*rotation_matrix(self.theta, self.phi)
+        vectors = 20*rotation_matrix(self.alpha, self.beta)
 
         y = self._size_px - 30
         x = 30
