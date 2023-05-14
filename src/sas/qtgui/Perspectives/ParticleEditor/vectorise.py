@@ -5,7 +5,6 @@ import numpy as np
 test_n = 7
 
 def vectorise_sld(fun: Callable,
-                  error_callback: Callable[[str], None],
                   warning_callback: Callable[[str], None],
                   *args, **kwargs):
     """ Check whether an SLD function can handle numpy arrays properly,
@@ -19,13 +18,10 @@ def vectorise_sld(fun: Callable,
     try:
         output = fun(input_values, input_values, input_values, *args, **kwargs)
 
-
         if not isinstance(output, np.ndarray):
-            error_callback("SLD function does not return array for array inputs")
             return None
 
         elif output.shape != (test_n,):
-            error_callback("SLD function returns wrong shape array")
             return None
 
         else:
@@ -52,13 +48,13 @@ def vectorise_sld(fun: Callable,
                 return vectorised
 
             except:
-                error_callback(traceback.format_exc())
+                pass
 
         else:
-            error_callback(traceback.format_exc())
+            pass
 
     except Exception:
-        error_callback(traceback.format_exc())
+        pass
 
 def vectorise_magnetism(fun: Callable, warning_callback: Callable[[str], None], *args, **kwargs):
     """ Check whether a magnetism function can handle numpy arrays properly,

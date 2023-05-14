@@ -1,3 +1,5 @@
+from typing import Optional, Callable
+
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt
 
@@ -8,6 +10,9 @@ from sas.qtgui.Perspectives.ParticleEditor.CodeToolBar import CodeToolBar
 
 from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWindow
 
+from sas.qtgui.Perspectives.ParticleEditor.function_processor import process_code, FunctionDefinitionFailed
+from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
+
 import sas.qtgui.Perspectives.ParticleEditor.UI.icons_rc
 class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
     def __init__(self, parent=None):
@@ -16,6 +21,12 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.setupUi(self)
         self.setWindowTitle("Placeholder title")
         self.parent = parent
+
+        # Variables
+
+        self.currentFunction: Optional[Callable] = None
+        self.currentCoordinateMapping: Optional[Callable] = None
+
 
         #
         # First Tab
@@ -114,13 +125,45 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         print("Save clicked")
 
     def onBuild(self):
-        pass
+        # Get the text from the window
+        code = self.pythonViewer.toPlainText()
+
+        self.outputViewer.reset()
+
+        try:
+            function, xyz_converter, extra_parameter_names, extra_parameter_defs = \
+                process_code(code,
+                             text_callback=self.codeText,
+                             warning_callback=self.codeError,
+                             error_callback=self.codeError)
+
+            if function is None:
+                return
+
+            self.functionViewer.setFunction(function, xyz_converter)
+
+            self.currentFunction = function
+            self.currentCoordinateMapping = xyz_converter
+
+            self.codeText("Success!")
+
+        except FunctionDefinitionFailed as e:
+            self.codeError(e.args[0])
 
     def onScatter(self):
         pass
 
     def onFit(self):
         pass
+
+    def codeError(self, text):
+        self.outputViewer.addError(text)
+
+    def codeText(self, text):
+        self.outputViewer.addText(text)
+
+    def codeWarning(self, text):
+        self.outputViewer.addWarning(text)
 
 def main():
     """ Demo/testing window"""

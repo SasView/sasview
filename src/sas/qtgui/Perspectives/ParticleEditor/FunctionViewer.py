@@ -232,14 +232,12 @@ class FunctionViewer(QtWidgets.QWidget):
         self.radius = self.radius_control.radius()
         self.updateImage()
 
-    def setFunction(self, fun):
+    def setFunction(self, fun, coordinate_mapping):
 
         self.function = fun
+        self.coordinate_mapping = coordinate_mapping
 
         self.updateImage()
-
-    def setCoordinateMapping(self, fun):
-        self.coordinate_mapping = fun
 
     def onDisplayTypeSelected(self):
         if self.sld_magnetism_option.magnetismOption.isChecked():
@@ -404,8 +402,7 @@ def main():
 
     app = QtWidgets.QApplication([])
     viewer = FunctionViewer()
-    viewer.setCoordinateMapping(spherical_converter)
-    viewer.setFunction(pseudo_orbital)
+    viewer.setFunction(pseudo_orbital, spherical_converter)
 
     viewer.show()
     app.exec_()

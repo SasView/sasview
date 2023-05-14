@@ -5,7 +5,7 @@ from PySide6.QtGui import QFont
 from sas.qtgui.Perspectives.ParticleEditor.syntax_highlight import PythonHighlighter
 from sas.system.version import __version__ as version
 
-initial_text = f"<p><b>Particle Designer Log - SasView {version}</b></p>"
+initial_text = f"<p><b>Particle Editor Log - SasView {version}</b></p>"
 
 class OutputViewer(QtWidgets.QTextEdit):
     """ Python text editor window"""
@@ -30,11 +30,25 @@ class OutputViewer(QtWidgets.QTextEdit):
 
         return
 
+    def _htmlise(self, text):
+        return "<br>".join(text.split("\n"))
+
+    def appendAndMove(self, text):
+        self.append(text)
+        scrollbar = self.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
+
+    def reset(self):
+        self.setText(initial_text)
+
     def addError(self, text):
-        pass
+        self.appendAndMove(f'<span style="color:Tomato;"><b>{self._htmlise(text)}</b></span>')
 
     def addText(self, text):
-        pass
+        self.appendAndMove(f'<span style="color:Black;">{self._htmlise(text)}</span>')
+
+    def addWarning(self, text):
+        self.appendAndMove(f'<span style="color:Orange;"><b>{self._htmlise(text)}</b></span>')
 
 
 

@@ -62,18 +62,22 @@ def process_code(input_text: str,
 
     """
 
-    new_locals = {"np": np, "solvent_sld": solvent_sld}
-    new_globals = {}
+    new_locals = {}
+    new_globals = {"np": np, "solvent_sld": solvent_sld}
 
     stdout_output = StringIO()
     with redirect_stdout(stdout_output):
         try:
             exec(input_text, new_globals, new_locals) # TODO: provide access to solvent SLD somehow
+
+            text_callback(stdout_output.getvalue())
+
         except Exception:
+
+            text_callback(stdout_output.getvalue())
             error_callback(traceback.format_exc())
 
-    text_callback(stdout_output.getvalue())
-
+            return None, None, None, None
     # print(ev)
     # print(new_globals)
     # print(new_locals)
@@ -118,7 +122,7 @@ def process_code(input_text: str,
 
     remaining_parameter_names = [x[0] for x in params[3:]]
 
-    return sld_function, converter, remaining_parameter_names
+    return sld_function, converter, remaining_parameter_names, params[3:]
 
 def main():
 
