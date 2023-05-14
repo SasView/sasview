@@ -128,7 +128,7 @@ class FunctionViewer(QtWidgets.QWidget):
 
         # General control
 
-        self.radius_control = RadiusSelection("View Size")
+        self.radius_control = RadiusSelection("View Radius")
         self.radius_control.radiusField.valueChanged.connect(self.onRadiusChanged)
 
         self.plane_buttons = PlaneButtons(self.setAngles)
@@ -191,7 +191,7 @@ class FunctionViewer(QtWidgets.QWidget):
         # Show images
         self.updateImage()
     def eventFilter(self, source, event):
-
+        """ Event filter intercept, grabs mouse drags on the images"""
 
         if event.type() == QtCore.QEvent.MouseButtonPress:
 
@@ -229,17 +229,20 @@ class FunctionViewer(QtWidgets.QWidget):
 
 
     def onRadiusChanged(self):
+        """ Draw radius changed """
         self.radius = self.radius_control.radius()
         self.updateImage()
 
-    def setFunction(self, fun, coordinate_mapping):
-
+    def setSLDFunction(self, fun, coordinate_mapping):
+        """ Set the function to be plotted """
         self.function = fun
         self.coordinate_mapping = coordinate_mapping
 
         self.updateImage()
 
     def onDisplayTypeSelected(self):
+        """ Switch between SLD and magnetism view """
+
         if self.sld_magnetism_option.magnetismOption.isChecked():
             print("Magnetic view selected")
         if self.sld_magnetism_option.sldOption.isChecked():
@@ -253,29 +256,32 @@ class FunctionViewer(QtWidgets.QWidget):
     #     self.updateImage()
 
     def onMagThetaChanged(self):
+        """ Magnetic field theta angle changed """
+
         self.mag_theta = np.pi*float(self.mag_theta_slider.value())/180
         self.updateImage(mag_only=True)
     def onMagPhiChanged(self):
+        """ Magnetic field phi angle changed """
         self.mag_phi = np.pi * float(self.mag_phi_slider.value()) / 180
         self.updateImage(mag_only=True)
 
-    def onPsiChanged(self):
-        self.psi = np.pi * float(self.psi_slider.value()) / 180
-        self.updateImage()
     def onDepthChanged(self):
+        """ Callback for cross section depth slider """
         self.normal_offset = self.radius * float(self.depth_slider.value()) / 100
         self.updateImage()
 
-    def setAngles(self, theta_deg, phi_deg):
-
-        self.alpha = np.pi * theta_deg / 180
-        self.beta = np.pi * (phi_deg + 180) / 180
+    def setAngles(self, alpha_deg, beta_deg):
+        """ Set the viewer angles """
+        self.alpha = np.pi * alpha_deg / 180
+        self.beta = np.pi * (beta_deg + 180) / 180
 
         self.updateImage()
 
     def updateImage(self, mag_only=True):
 
-        # Draw image
+        """ Update the images in the viewer"""
+
+        # Draw density plot
 
         bg_values = None
         for depth in np.linspace(-self.radius, self.radius, self.n_draw_layers+2)[1:-1]:
@@ -309,8 +315,6 @@ class FunctionViewer(QtWidgets.QWidget):
         self.drawScale(image)
         self.drawAxes(image)
 
-        # image = np.ascontiguousarray(np.flip(image, 0)) # Y is upside down
-
         height, width, channels = image.shape
         bytes_per_line = channels * width
         qimage = QtGui.QImage(image.data, width, height, bytes_per_line, QtGui.QImage.Format_RGB888)
@@ -318,7 +322,7 @@ class FunctionViewer(QtWidgets.QWidget):
         self.densityPixmapItem.setPixmap(pixmap)
 
 
-        # Cross section
+        # Cross section image
 
         sampling = cross_section_coordinates(self.radius, self.alpha, self.beta, self.normal_offset, self._size_px)
         a,b,c = self.coordinate_mapping(sampling[:, 0], sampling[:, 1], sampling[:, 2])
@@ -344,8 +348,6 @@ class FunctionViewer(QtWidgets.QWidget):
         self.drawScale(image)
         self.drawAxes(image)
 
-        # image = np.ascontiguousarray(np.flip(image, 0)) # Y is upside down
-
         height, width, channels = image.shape
         bytes_per_line = channels * width
         qimage = QtGui.QImage(image.data, width, height, bytes_per_line, QtGui.QImage.Format_RGB888)
@@ -355,9 +357,11 @@ class FunctionViewer(QtWidgets.QWidget):
 
 
     def drawScale(self, im):
+        """ Draw a scalebar """
         pass
 
     def drawAxes(self, im):
+        """ Draw a small xyz axis on an image"""
         vectors = 20*rotation_matrix(self.alpha, self.beta)
 
         y = self._size_px - 30
@@ -402,7 +406,7 @@ def main():
 
     app = QtWidgets.QApplication([])
     viewer = FunctionViewer()
-    viewer.setFunction(pseudo_orbital, spherical_converter)
+    viewer.setSLDFunction(pseudo_orbital, spherical_converter)
 
     viewer.show()
     app.exec_()

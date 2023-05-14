@@ -13,9 +13,9 @@ should probably define a simple function
 """
 
 def sld(x,y,z):
-    """ A cube with side length 1 """
+    """ A cube with 100Ang side length"""
     
-    inside = (np.abs(x) < 0.5) & (np.abs(y) < 0.5) & (np.abs(z) < 0.5)
+    inside = (np.abs(x) < 50) & (np.abs(y) < 50) & (np.abs(z) < 50)
     
     out = np.zeros_like(x)
     

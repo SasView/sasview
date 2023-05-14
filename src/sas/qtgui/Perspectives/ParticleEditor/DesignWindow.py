@@ -1,5 +1,7 @@
 from typing import Optional, Callable
 
+from datetime import datetime
+
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt
 
@@ -137,15 +139,20 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
                              warning_callback=self.codeError,
                              error_callback=self.codeError)
 
-            if function is None:
+            maybe_vectorised = vectorise_sld(function, warning_callback=self.codeWarning) # TODO: Deal with args
+
+            if maybe_vectorised is None:
                 return
 
-            self.functionViewer.setFunction(function, xyz_converter)
+            self.functionViewer.setSLDFunction(maybe_vectorised, xyz_converter)
 
-            self.currentFunction = function
+
+            self.currentFunction = maybe_vectorised
             self.currentCoordinateMapping = xyz_converter
 
-            self.codeText("Success!")
+            now = datetime.now()
+            current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+            self.codeText(f"Built Successfully at {current_time}")
 
         except FunctionDefinitionFailed as e:
             self.codeError(e.args[0])

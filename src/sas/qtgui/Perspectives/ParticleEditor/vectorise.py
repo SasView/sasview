@@ -1,5 +1,5 @@
 import traceback
-from typing import Callable
+from typing import List, Union, Callable
 import numpy as np
 
 test_n = 7
@@ -34,6 +34,7 @@ def vectorise_sld(fun: Callable,
             try:
                 fun(0, 0, 0, *args, **kwargs)
 
+
                 def vectorised(x,y,z,*args,**kwargs):
                     out = np.zeros_like(x)
                     for i, (xi,yi,zi) in enumerate(zip(x,y,z)):
@@ -41,7 +42,7 @@ def vectorise_sld(fun: Callable,
                     return out
 
                 warning_callback("The specified SLD function does not handle vector values of coordinates, "
-                                 "a vectorised version has been created, but is probably much slower than "
+                                 "a vectorised version has been created, but is probably **much** slower than "
                                  "one that uses numpy (np.) functions. See the vectorisation example for "
                                  "more details.")
 
