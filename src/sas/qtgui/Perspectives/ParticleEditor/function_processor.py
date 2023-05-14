@@ -1,5 +1,11 @@
-import inspect
 from typing import Callable
+
+from io import StringIO
+
+import inspect
+from contextlib import redirect_stdout
+import traceback
+
 import numpy as np
 
 class FunctionDefinitionFailed(Exception):
@@ -16,10 +22,18 @@ parameter_sets = [["x", "y", "z"], ["r", "theta", "phi"]]
 
 
 def cartesian_converter(x,y,z):
+    """ Converter from calculation coordinates to function definition
+
+     For functions specified in cartesian coordinates
+     """
     return x,y,z
 
 
 def spherical_converter(x,y,z):
+    """ Converter from calculation coordinates to function definition
+
+     For functions specified in spherical coordinates
+     """
     r = np.sqrt(x**2 + y**2 + z**2)
     theta = np.arccos(z/r)
     phi = np.sign(y)*np.arccos(x / np.sqrt(x**2 + y**2))
@@ -28,15 +42,38 @@ def spherical_converter(x,y,z):
 
 parameter_converters = [cartesian_converter, spherical_converter]
 
+def default_callback(string: str):
+    """ Just for default"""
+    print(string)
+
+
+
 #
 # Main processor
 #
 
-def process_text(input_text: str):
-    new_locals = {}
+def process_code(input_text: str,
+                 solvent_sld: float = 0.0,
+                 text_callback: Callable[[str], None] = default_callback,
+                 warning_callback: Callable[[str], None] = default_callback,
+                 error_callback: Callable[[str], None] = default_callback):
+
+    """ Process the code for generating functions that specify sld/magnetism
+
+    """
+
+    new_locals = {"np": np, "solvent_sld": solvent_sld}
     new_globals = {}
 
-    exec(input_text, new_globals, new_locals) # TODO: provide access to solvent SLD somehow
+    stdout_output = StringIO()
+    with redirect_stdout(stdout_output):
+        try:
+            exec(input_text, new_globals, new_locals) # TODO: provide access to solvent SLD somehow
+        except Exception:
+            error_callback(traceback.format_exc())
+
+    text_callback(stdout_output.getvalue())
+
     # print(ev)
     # print(new_globals)
     # print(new_locals)
@@ -83,60 +120,64 @@ def process_text(input_text: str):
 
     return sld_function, converter, remaining_parameter_names
 
-test_text_valid_sld_xyz = """
+def main():
 
-print("test print string")
-
-def sld(x,y,z,p1,p2,p3):
-    print(x,y,z)
-
-"""
-
-test_text_valid_sld_radial = """
-def sld(r,theta,phi,p1,p2,p3):
-    print(x,y,z)
-
-"""
-
-
-test_text_invalid_start_sld = """
-def sld(theta,phi,p1,p2,p3):
-    print(x,y,z)
-
-"""
-
-test_text_invalid_rest_sld = """
-def sld(r,p1,p2,p3):
-    print(x,y,z)
-
-"""
-
-test_sld_class = """
-
-class SLD:
-    def __call__(self,x,y,z):
+    test_text_valid_sld_xyz = """
+    
+    print("test print string")
+    
+    def sld(x,y,z,p1,p2,p3):
         print(x,y,z)
+    
+    """
 
-sld = SLD()
-
-"""
-
-test_bad_class = """
-
-class SLD:
-    def __call__(self,x,y,q):
+    test_text_valid_sld_radial = """
+    def sld(r,theta,phi,p1,p2,p3):
         print(x,y,z)
-
-sld = SLD()
-
-"""
+    
+    """
 
 
-x = process_text(test_text_valid_sld_xyz)
-# x = process_text(test_text_valid_sld_radial)
-# x = process_text(test_text_invalid_start_sld)
-# x = process_text(test_text_invalid_rest_sld)
-# x = process_text(test_bad_class)
+    test_text_invalid_start_sld = """
+    def sld(theta,phi,p1,p2,p3):
+        print(x,y,z)
+    
+    """
 
-print(x)
+    test_text_invalid_rest_sld = """
+    def sld(r,p1,p2,p3):
+        print(x,y,z)
+    
+    """
 
+    test_sld_class = """
+    
+    class SLD:
+        def __call__(self,x,y,z):
+            print(x,y,z)
+    
+    sld = SLD()
+    
+    """
+
+    test_bad_class = """
+    
+    class SLD:
+        def __call__(self,x,y,q):
+            print(x,y,z)
+    
+    sld = SLD()
+    
+    """
+
+
+    x = process_code(test_text_valid_sld_xyz)
+    # x = process_text(test_text_valid_sld_radial)
+    # x = process_text(test_text_invalid_start_sld)
+    # x = process_text(test_text_invalid_rest_sld)
+    # x = process_text(test_bad_class)
+
+    print(x)
+
+if __name__ == "__main__":
+    main()

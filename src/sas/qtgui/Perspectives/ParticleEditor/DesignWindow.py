@@ -29,6 +29,12 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.outputViewer = OutputViewer()
         self.codeToolBar = CodeToolBar()
 
+        self.codeToolBar.saveButton.clicked.connect(self.onSave)
+        self.codeToolBar.loadButton.clicked.connect(self.onLoad)
+        self.codeToolBar.buildButton.clicked.connect(self.onBuild)
+        self.codeToolBar.scatterButton.clicked.connect(self.onScatter)
+
+        self.solvent_sld = 0.0
 
 
         topSection = QtWidgets.QVBoxLayout()
@@ -46,13 +52,17 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         splitter.setStretchFactor(1, 1)
         hbox.addWidget(splitter)
 
+        # Function viewer
         self.functionViewer = FunctionViewer()
-        hbox.addWidget(self.functionViewer)
+        self.functionViewer.radius_control.radiusField.valueChanged.connect(self.onRadiusChanged)
 
+        # A components
+        hbox.addWidget(self.functionViewer)
         self.definitionTab.setLayout(hbox)
 
+
         #
-        # Second Tab
+        # Ensemble tab
         #
 
         # Populate combo boxes
@@ -62,25 +72,46 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         self.structureFactorCombo.addItem("None") # TODO: Structure Factor Options
 
+        self.solventSLDBox.valueChanged.connect(self.onSolventSLDBoxChanged)
+
+
+        #
+        # Calculation Tab
+        #
+
         self.methodCombo.addItem("Monte Carlo")
         self.methodCombo.addItem("Grid")
+
+
 
         # Populate tables
 
         # Columns should be name, value, min, max, fit, [remove]
         self.parametersTable.setHorizontalHeaderLabels(["Name", "Value", "Min", "Max", "Fit", ""])
+        self.parametersTable.horizontalHeader().setStretchLastSection(True)
+
         self.structureFactorParametersTable.setHorizontalHeaderLabels(["Name", "Value", "Min", "Max", "Fit", ""])
+        self.structureFactorParametersTable.horizontalHeader().setStretchLastSection(True)
 
         self.tabWidget.setAutoFillBackground(True)
 
         self.tabWidget.setStyleSheet("#tabWidget {background-color:red;}")
 
+    def onRadiusChanged(self):
+        if self.radiusFromParticleTab.isChecked():
+            self.sampleRadius.setText("%.4g"%self.functionViewer.radius_control.radius())
+
+    def onSolventSLDBoxChanged(self):
+        sld = float(self.solventSLDBox.value())
+        self.solvent_sld = sld
+        # self.functionViewer.solvent_sld = sld # TODO: Think more about where to put this variable
+        self.functionViewer.updateImage()
 
     def onLoad(self):
-        pass
+        print("Load clicked")
 
     def onSave(self):
-        pass
+        print("Save clicked")
 
     def onBuild(self):
         pass

@@ -93,6 +93,7 @@ class FunctionViewer(QtWidgets.QWidget):
 
         self._graphics_viewer_offset = 5
 
+
         #
         # Qt Setup
         #
