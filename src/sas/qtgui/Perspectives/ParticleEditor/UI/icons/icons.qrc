@@ -4,5 +4,6 @@
     <file>upload-icon.png</file>
     <file>save-icon.png</file>
     <file>hammer-icon.png</file>
+    <file>scatter-icon.png</file>
   </qresource>
 </RCC>

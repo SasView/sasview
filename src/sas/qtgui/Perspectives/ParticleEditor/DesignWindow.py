@@ -1,10 +1,14 @@
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt
 
 from sas.qtgui.Perspectives.ParticleEditor.FunctionViewer import FunctionViewer
 from sas.qtgui.Perspectives.ParticleEditor.PythonViewer import PythonViewer
 from sas.qtgui.Perspectives.ParticleEditor.OutputViewer import OutputViewer
+from sas.qtgui.Perspectives.ParticleEditor.CodeToolBar import CodeToolBar
+
 from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWindow
+
+import sas.qtgui.Perspectives.ParticleEditor.UI.icons_rc
 class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
     def __init__(self, parent=None):
         super().__init__()
@@ -21,11 +25,22 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         splitter = QtWidgets.QSplitter(Qt.Vertical)
 
-
         self.pythonViewer = PythonViewer()
         self.outputViewer = OutputViewer()
+        self.codeToolBar = CodeToolBar()
 
-        splitter.addWidget(self.pythonViewer)
+
+
+        topSection = QtWidgets.QVBoxLayout()
+        topSection.addWidget(self.pythonViewer)
+        topSection.addWidget(self.codeToolBar)
+        topSection.setContentsMargins(0,0,0,5)
+
+        topWidget = QtWidgets.QWidget()
+        topWidget.setLayout(topSection)
+
+
+        splitter.addWidget(topWidget)
         splitter.addWidget(self.outputViewer)
         splitter.setStretchFactor(0, 3)
         splitter.setStretchFactor(1, 1)
@@ -61,8 +76,20 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.tabWidget.setStyleSheet("#tabWidget {background-color:red;}")
 
 
+    def onLoad(self):
+        pass
 
+    def onSave(self):
+        pass
 
+    def onBuild(self):
+        pass
+
+    def onScatter(self):
+        pass
+
+    def onFit(self):
+        pass
 
 def main():
     """ Demo/testing window"""

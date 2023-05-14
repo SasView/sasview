@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>280</width>
-    <height>30</height>
+    <width>460</width>
+    <height>20</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,25 +15,21 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="QPushButton" name="loadButton">
      <property name="text">
       <string>Load</string>
-     </property>
-     <property name="icon">
-      <iconset resource="icons/icons.qrc">
-       <normaloff>:/particle_editor/upload-icon.png</normaloff>:/particle_editor/upload-icon.png</iconset>
      </property>
     </widget>
    </item>
@@ -41,10 +37,6 @@
     <widget class="QPushButton" name="saveButton">
      <property name="text">
       <string>Save</string>
-     </property>
-     <property name="icon">
-      <iconset resource="icons/icons.qrc">
-       <normaloff>:/particle_editor/download-icon.png</normaloff>:/particle_editor/download-icon.png</iconset>
      </property>
     </widget>
    </item>
@@ -66,16 +58,17 @@
      <property name="text">
       <string>Build</string>
      </property>
-     <property name="icon">
-      <iconset resource="icons/icons.qrc">
-       <normaloff>:/particle_editor/hammer-icon.png</normaloff>:/particle_editor/hammer-icon.png</iconset>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="scatterButton">
+     <property name="text">
+      <string>Scatter</string>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="icons/icons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
