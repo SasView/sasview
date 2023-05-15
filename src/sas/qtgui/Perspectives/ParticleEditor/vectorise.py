@@ -4,8 +4,19 @@ import numpy as np
 
 test_n = 7
 
+def clean_traceback(trace: str):
+    """ Tracebacks from vectorise contain potentially confusing information from the
+    vectorisation infrastructure. Clean it up and replace empty filename with something else"""
+
+
+    parts = trace.split('File "<string>"')[1:]
+
+    return "".join(["Input data" + part for part in parts])
+
+
 def vectorise_sld(fun: Callable,
                   warning_callback: Callable[[str], None],
+                  error_callback: Callable[[str], None],
                   *args, **kwargs):
     """ Check whether an SLD function can handle numpy arrays properly,
     if not, create a wrapper that that can"""
@@ -49,13 +60,13 @@ def vectorise_sld(fun: Callable,
                 return vectorised
 
             except:
-                pass
+                error_callback("Function raises error when executed:\n"+clean_traceback(traceback.format_exc()))
 
         else:
-            pass
+            error_callback("Function raises error when executed:\n"+clean_traceback(traceback.format_exc()))
 
     except Exception:
-        pass
+        error_callback("Function raises error when executed:\n"+clean_traceback(traceback.format_exc()))
 
 def vectorise_magnetism(fun: Callable, warning_callback: Callable[[str], None], *args, **kwargs):
     """ Check whether a magnetism function can handle numpy arrays properly,
