@@ -109,11 +109,15 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.randomSeed.textChanged.connect(self.updateSpatialSampling)
         self.fixRandomSeed.clicked.connect(self.updateSpatialSampling)
 
+        self.nSamplePoints.valueChanged.connect(self.onTimeEstimateParametersChanged)
+
         # Q sampling changed
         self.useLogQ.clicked.connect(self.updateQSampling)
         self.qMinBox.textChanged.connect(self.updateQSampling)
         self.qMaxBox.textChanged.connect(self.updateQSampling)
         self.qSamplesBox.valueChanged.connect(self.updateQSampling)
+
+        self.qSamplesBox.valueChanged.connect(self.onTimeEstimateParametersChanged)
 
         #
         # Output Tab
@@ -145,7 +149,8 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.qSampling: QSample = self._qSampling()
 
         self.last_calculation_time: Optional[float] = None
-        self.last_calculation_n: int = 0
+        self.last_calculation_n_r: int = 0
+        self.last_calculation_n_q: int = 0
 
         self.sld_function: Optional[np.ndarray] = None
         self.sld_coordinate_mapping: Optional[np.ndarray] = None
@@ -162,7 +167,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         # self.functionViewer.solvent_sld = sld # TODO: Think more about where to put this variable
         self.functionViewer.updateImage()
 
-    def onSampleCountChanged(self):
+    def onTimeEstimateParametersChanged(self):
         """ Called when the number of samples changes """
 
 
@@ -171,9 +176,9 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         # sample points (the sld calculation is the limiting factor)
 
         if self.last_calculation_time is not None:
-            time_per_sample = self.last_calculation_time / self.last_calculation_n
+            time_per_sample = self.last_calculation_time / (self.last_calculation_n_r * self.last_calculation_n_q)
 
-            est_time = time_per_sample * int(self.nSamplePoints.value())
+            est_time = time_per_sample * int(self.nSamplePoints.value()) * int(self.qSamplesBox.value())
 
             self.timeEstimateLabel.setText(f"Estimated Time: {format_time_estimate(est_time)}")
 
@@ -192,6 +197,8 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.outputViewer.reset()
 
         try:
+            # TODO: Make solvent SLD available (process code_takes it as a parameter currently)
+
             # Evaluate code
             function, xyz_converter, extra_parameter_names, extra_parameter_defs = \
                 process_code(code,
@@ -239,11 +246,17 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
             calc = self._scatteringCalculation()
             try:
                 scattering_result = calculate_scattering(calc)
-                self.last_calculation_time = scattering_result.calculation_time
-                self.last_calculation_n = scattering_result.spatial_sampling_method._calculate_n_actual()
 
+                # Time estimates
+                self.last_calculation_time = scattering_result.calculation_time
+                self.last_calculation_n_r = scattering_result.spatial_sampling_method._calculate_n_actual()
+                self.last_calculation_n_q = scattering_result.q_sampling_method.n_points
+                self.onTimeEstimateParametersChanged()
+
+                # Output info
                 self.codeText("Scattering calculation complete after %g seconds."%scattering_result.calculation_time)
 
+                # Plot
                 self.outputCanvas.data = scattering_result
                 self.tabWidget.setCurrentIndex(5) # Move to output tab if complete
 

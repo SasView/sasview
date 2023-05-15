@@ -8,6 +8,8 @@ import traceback
 
 import numpy as np
 
+from sas.qtgui.Perspectives.ParticleEditor.helper_functions import rect, step
+
 class FunctionDefinitionFailed(Exception):
     def __init__(self, *args):
         super()
@@ -63,7 +65,7 @@ def process_code(input_text: str,
     """
 
     new_locals = {}
-    new_globals = {"np": np, "solvent_sld": solvent_sld}
+    new_globals = {"np": np, "solvent_sld": solvent_sld, "step": step, "rect": rect}
 
     stdout_output = StringIO()
     with redirect_stdout(stdout_output):

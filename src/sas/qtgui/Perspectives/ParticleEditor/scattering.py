@@ -36,6 +36,7 @@ class ScatteringCalculation:
     magnetism_function_from_cartesian: Optional[CoordinateTransform]
     magnetism_function_parameters: Optional[Dict[str, float]]
     magnetism_vector: Optional[np.ndarray]
+    sample_chunk_size_hint: int = 100_000
 
 
 @dataclass
@@ -57,22 +58,27 @@ def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput
         if calculation.output_type == OutputType.SLD_2D:
             raise NotImplementedError("2D scattering not implemented yet")
 
-        # input samples
-        q = calculation.q_sampling_method()
-        x, y, z = calculation.spatial_sampling_method()
+        f = None
+        for x, y, z in calculation.spatial_sampling_method(calculation.sample_chunk_size_hint):
 
-        # evaluate sld
-        input_coordinates = calculation.sld_function_from_cartesian(x,y,z)
-        sld = calculation.sld_function(*input_coordinates, **calculation.sld_function_parameters)
-        sld -= calculation.solvent_sld
+            # input samples
+            q = calculation.q_sampling_method()
 
-        # Do the integration
-        r = np.sqrt(x**2 + y**2 + z**2)
-        qr = np.outer(q, r)
+            # evaluate sld
+            input_coordinates = calculation.sld_function_from_cartesian(x,y,z)
+            sld = calculation.sld_function(*input_coordinates, **calculation.sld_function_parameters)
+            sld -= calculation.solvent_sld
 
-        intensity = np.sum(np.sin(qr) / qr, axis=1)**2
+            # Do the integration
+            r = np.sqrt(x**2 + y**2 + z**2)
+            qr = np.outer(q, r)
 
+            if f is None:
+                f = np.sum(sld * np.sin(qr) / qr, axis=1)
+            else:
+                f += np.sum(sld * np.sin(qr) / qr, axis=1)
 
+        intensity = f*f
 
     elif calculation.orientation == OrientationalDistribution.FIXED:
 

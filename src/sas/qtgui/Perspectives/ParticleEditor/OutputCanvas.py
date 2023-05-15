@@ -25,6 +25,7 @@ class OutputCanvas(FigureCanvas):
 
     @data.setter
     def data(self, scattering_output: ScatteringOutput):
+
         self._data = scattering_output
 
         q_values = scattering_output.q_sampling_method()
@@ -39,3 +40,4 @@ class OutputCanvas(FigureCanvas):
         else:
             self.axes.semilogy(q_values, i_values)
 
+        self.draw()
