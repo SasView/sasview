@@ -42,6 +42,8 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.outputViewer = OutputViewer()
         self.codeToolBar = CodeToolBar()
 
+        self.pythonViewer.build_trigger.connect(self.onBuild)
+
         self.codeToolBar.saveButton.clicked.connect(self.onSave)
         self.codeToolBar.loadButton.clicked.connect(self.onLoad)
         self.codeToolBar.buildButton.clicked.connect(self.onBuild)
@@ -92,7 +94,8 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         # Calculation Tab
         #
 
-        self.methodCombo.addItem("Monte Carlo")
+        self.methodCombo.addItem("Sphere Monte Carlo")
+        self.methodCombo.addItem("Cube Monte Carlo")
         self.methodCombo.addItem("Grid")
 
 
@@ -171,6 +174,8 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
     def codeWarning(self, text):
         self.outputViewer.addWarning(text)
+
+
 
 def main():
     """ Demo/testing window"""

@@ -55,6 +55,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="buildButton">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Build the current code&lt;/p&gt;&lt;p&gt;Shortcut: shift-Enter&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
       <string>Build</string>
      </property>

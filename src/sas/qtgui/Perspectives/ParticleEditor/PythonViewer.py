@@ -1,33 +1,19 @@
 
-from PySide6 import QtWidgets
-from PySide6.QtCore import Qt
+from PySide6 import QtWidgets, QtGui
+from PySide6.QtCore import Qt, Signal, QObject
 from PySide6.QtGui import QFont
-
 
 
 from sas.qtgui.Perspectives.ParticleEditor.syntax_highlight import PythonHighlighter
 
-default_text = '''""" Default text goes here...
- 
-should probably define a simple function
-"""
-
-def sld(x,y,z):
-    """ A cube with 100Ang side length"""
-    
-    inside = (np.abs(x) < 50) & (np.abs(y) < 50) & (np.abs(z) < 50)
-    
-    out = np.zeros_like(x)
-    
-    out[inside] = 1
-    
-    return out
-
-'''
+from sas.qtgui.Perspectives.ParticleEditor.defaults import default_text
 class PythonViewer(QtWidgets.QTextEdit):
     """ Python text editor window"""
+
+    build_trigger = Signal()
+
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__()
 
         # System independent monospace font
         f = QFont("unexistent")
@@ -40,14 +26,28 @@ class PythonViewer(QtWidgets.QTextEdit):
 
         self.setText(default_text)
 
+
     def keyPressEvent(self, e):
         """ Itercepted key press event"""
         if e.key() == Qt.Key_Tab:
+
+            if e.modifiers() == Qt.ShiftModifier:
+                # TODO: Multiline adjust, tab and shift-tab
+                pass
+
             # Swap out tabs for four spaces
             self.textCursor().insertText("    ")
             return
+
+        if e.key() == Qt.Key_Return and e.modifiers() == Qt.ShiftModifier:
+            self.build_trigger.emit()
+
         else:
             super().keyPressEvent(e)
+
+    def insertFromMimeData(self, source):
+        """ Keep own highlighting"""
+        self.insertPlainText(source.text())
 
 def main():
     """ Demo/testing window"""

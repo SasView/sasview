@@ -9,6 +9,9 @@ from sas.qtgui.Perspectives.ParticleEditor.SLDMagnetismOption import SLDMagnetis
 from sas.qtgui.Perspectives.ParticleEditor.ViewerButtons import AxisButtons, PlaneButtons
 from sas.qtgui.Perspectives.ParticleEditor.RadiusSelection import RadiusSelection
 
+from sas.qtgui.Perspectives.ParticleEditor.defaults import sld as default_sld
+from sas.qtgui.Perspectives.ParticleEditor.function_processor import spherical_converter
+
 def rotation_matrix(alpha: float, beta: float):
 
     sa = np.sin(alpha)
@@ -56,20 +59,6 @@ def draw_line_in_place(im, x0, y0, dx, dy, channel):
         x = int(x0 + i * dx / length)
         y = int(y0 + i * dy / length)
         im[y, x, channel] = 255
-def cube_function(x, y, z):
-
-    inside = np.logical_and(np.abs(x) <= 5,
-                   np.logical_and(
-                       np.abs(y) <= 5,
-                       np.abs(z) <= 5 ))
-    #
-    # print(cube_function)
-    # print(np.any(inside), np.any(np.logical_not(inside)))
-
-    out = np.zeros_like(x)
-    out[inside] = 1.0
-
-    return out
 
 
 class FunctionViewer(QtWidgets.QWidget):
@@ -81,9 +70,9 @@ class FunctionViewer(QtWidgets.QWidget):
         self.radius = 1
         self.upscale = 2
         self._size_px = self.layer_size*self.upscale
-        self.function = cube_function
+        self.function = default_sld
         # self.function = lambda x,y,z: x
-        self.coordinate_mapping = lambda x,y,z: (x,y,z)
+        self.coordinate_mapping = spherical_converter
 
         self.alpha = 0.0
         self.beta = np.pi
