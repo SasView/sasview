@@ -99,7 +99,7 @@ class RandomSampleCube(RandomSample):
     def generate(self, n):
         # Sample within a cube
 
-        xyz = np.random.random((n, 3))*2 - 1.0
+        xyz = (np.random.random((n, 3)) - 0.5)*(2*self.radius)
 
         return xyz[:,0], xyz[:,1], xyz[:,2]
 
@@ -157,8 +157,10 @@ class QSample:
 
 if __name__ == "__main__":
     print("Random Sphere Sampler")
-    sampler = RandomSampleSphere(n_points_desired=100, radius=1)
-    for x,y,z in sampler(45):
+    sampler = RandomSampleSphere(n_points_desired=10000, radius=1)
+    for x,y,z in sampler(7000):
+        r = np.sqrt(x**2+y**2+z**2)
+        print(np.max(r))
         print(len(x))
 
     print("Grid Sampler")

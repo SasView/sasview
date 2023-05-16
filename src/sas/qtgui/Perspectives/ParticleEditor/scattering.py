@@ -69,14 +69,18 @@ def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput
             sld = calculation.sld_function(*input_coordinates, **calculation.sld_function_parameters)
             sld -= calculation.solvent_sld
 
+            inds = sld != 0 # faster when there are not many points, TODO: make into a simulation option
+
             # Do the integration
-            r = np.sqrt(x**2 + y**2 + z**2)
+            r = np.sqrt(x[inds]**2 + y[inds]**2 + z[inds]**2)
             qr = np.outer(q, r)
 
+            f_chunk = np.sum(sld[inds] * np.sin(qr) / qr, axis=1)
+
             if f is None:
-                f = np.sum(sld * np.sin(qr) / qr, axis=1)
+                f = f_chunk
             else:
-                f += np.sum(sld * np.sin(qr) / qr, axis=1)
+                f += f_chunk
 
         intensity = f*f
 
