@@ -1,17 +1,18 @@
 import traceback
-from typing import Optional, Callable
+from typing import Optional
 
 from datetime import datetime
 
 import numpy as np
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
 
 from sas.qtgui.Perspectives.ParticleEditor.FunctionViewer import FunctionViewer
 from sas.qtgui.Perspectives.ParticleEditor.PythonViewer import PythonViewer
 from sas.qtgui.Perspectives.ParticleEditor.OutputViewer import OutputViewer
 from sas.qtgui.Perspectives.ParticleEditor.CodeToolBar import CodeToolBar
-from sas.qtgui.Perspectives.ParticleEditor.OutputCanvas import OutputCanvas
+from sas.qtgui.Perspectives.ParticleEditor.Plots.QCanvas import QCanvas
+from sas.qtgui.Perspectives.ParticleEditor.Plots.RCanvas import RCanvas
 
 from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWindow
 
@@ -19,13 +20,13 @@ from sas.qtgui.Perspectives.ParticleEditor.function_processor import process_cod
 from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling import (
-    SpatialSample, QSample, RandomSampleSphere, RandomSampleCube, GridSample)
+    SpatialSample, QSample, RandomSampleSphere, RandomSampleCube)
 
 from sas.qtgui.Perspectives.ParticleEditor.scattering import (
     OutputType, OrientationalDistribution, ScatteringCalculation, calculate_scattering)
 from sas.qtgui.Perspectives.ParticleEditor.util import format_time_estimate
 
-import sas.qtgui.Perspectives.ParticleEditor.UI.icons_rc
+
 class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
     def __init__(self, parent=None):
         super().__init__()
@@ -98,7 +99,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         #
         # Calculation Tab
         #
-        self.methodComboOptions = ["Sphere Monte Carlo", "Cube Monte Carlo", "Grid"]
+        self.methodComboOptions = ["Sphere Monte Carlo", "Cube Monte Carlo"]
         for option in self.methodComboOptions:
             self.methodCombo.addItem(option)
 
@@ -120,15 +121,23 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.qSamplesBox.valueChanged.connect(self.onTimeEstimateParametersChanged)
 
         #
-        # Output Tab
+        # Output Tabs
         #
 
-        self.outputCanvas = OutputCanvas()
+        self.realCanvas = RCanvas()
+
+        outputLayout = QtWidgets.QVBoxLayout()
+        outputLayout.addWidget(self.realCanvas)
+
+        self.realSpaceTab.setLayout(outputLayout)
+
+
+        self.outputCanvas = QCanvas()
 
         outputLayout = QtWidgets.QVBoxLayout()
         outputLayout.addWidget(self.outputCanvas)
 
-        self.outputTab.setLayout(outputLayout)
+        self.qSpaceTab.setLayout(outputLayout)
 
         #
         # Misc
@@ -257,6 +266,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
                 self.codeText("Scattering calculation complete after %g seconds."%scattering_result.calculation_time)
 
                 # Plot
+                self.realCanvas.data = scattering_result
                 self.outputCanvas.data = scattering_result
                 self.tabWidget.setCurrentIndex(5) # Move to output tab if complete
 
@@ -317,9 +327,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         elif sample_type == 1:
             return RandomSampleCube(radius=radius, n_points_desired=n_desired, seed=seed)
-
-        elif sample_type == 2:
-            return GridSample(radius=radius, n_points_desired=n_desired)
 
         else:
             raise ValueError("Unknown index for spatial sampling method combo")

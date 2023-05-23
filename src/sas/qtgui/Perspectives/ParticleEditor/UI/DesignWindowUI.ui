@@ -570,9 +570,14 @@
        <string>Fitting</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="outputTab">
+     <widget class="QWidget" name="realSpaceTab">
       <attribute name="title">
-       <string>Output</string>
+       <string>Real Space</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="qSpaceTab">
+      <attribute name="title">
+       <string>Q Space</string>
       </attribute>
      </widget>
     </widget>

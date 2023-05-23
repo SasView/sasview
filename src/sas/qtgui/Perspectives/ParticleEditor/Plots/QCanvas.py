@@ -5,9 +5,9 @@ from typing import Optional
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from scattering import ScatteringOutput
+from sas.qtgui.Perspectives.ParticleEditor.scattering import ScatteringOutput
 
-class OutputCanvas(FigureCanvas):
+class QCanvas(FigureCanvas):
     """ Plot window for output from scattering calculations"""
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
@@ -30,8 +30,6 @@ class OutputCanvas(FigureCanvas):
 
         q_values = scattering_output.q_sampling_method()
         i_values = scattering_output.intensity_data
-
-        print(len(q_values))
 
         self.axes.cla()
 

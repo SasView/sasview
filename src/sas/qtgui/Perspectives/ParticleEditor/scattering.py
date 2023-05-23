@@ -45,6 +45,8 @@ class ScatteringOutput:
     q_sampling_method: QSample
     spatial_sampling_method: SpatialSample
     intensity_data: np.ndarray
+    r_values: np.ndarray
+    realspace_intensity: np.ndarray
     calculation_time: float
 
 def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput:
@@ -58,49 +60,86 @@ def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput
         if calculation.output_type == OutputType.SLD_2D:
             raise NotImplementedError("2D scattering not implemented yet")
 
-        f = None
-        for x, y, z in calculation.spatial_sampling_method(calculation.sample_chunk_size_hint):
+        # Try a different method, estimate the radial distribution
+        n_r = 1000
+        n_r_upscale = 10000
+        bin_edges = np.linspace(0,2*calculation.spatial_sampling_method.radius, n_r+1)
+        bin_size = 2*calculation.spatial_sampling_method.radius / n_r
 
-            # input samples
-            q = calculation.q_sampling_method()
+        sld_total = None
+        counts = None
+
+        for (x0, y0, z0), (x1, y1, z1) in calculation.spatial_sampling_method.pairs(calculation.sample_chunk_size_hint):
 
             # evaluate sld
-            input_coordinates = calculation.sld_function_from_cartesian(x,y,z)
-            sld = calculation.sld_function(*input_coordinates, **calculation.sld_function_parameters)
-            sld -= calculation.solvent_sld
+            input_coordinates1 = calculation.sld_function_from_cartesian(x0, y0, z0)
+            input_coordinates2 = calculation.sld_function_from_cartesian(x1, y1, z1)
 
-            inds = sld != 0 # faster when there are not many points, TODO: make into a simulation option
+            sld1 = calculation.sld_function(*input_coordinates1, **calculation.sld_function_parameters)
+            sld1 -= calculation.solvent_sld
+
+            sld2 = calculation.sld_function(*input_coordinates2, **calculation.sld_function_parameters)
+            sld2 -= calculation.solvent_sld
+
+            rho = sld1*sld2
 
             # Do the integration
-            r = np.sqrt(x[inds]**2 + y[inds]**2 + z[inds]**2)
-            qr = np.outer(q, r)
+            sample_rs = np.sqrt((x1 - x0)**2 + (y1 - y0)**2 + (z1 - z0)**2)
 
-            f_chunk = np.sum(sld[inds] * np.sin(qr) / qr, axis=1)
-
-            if f is None:
-                f = f_chunk
+            if sld_total is None:
+                sld_total = np.histogram(sample_rs, bins=bin_edges, weights=rho)[0]
+                counts = np.histogram(sample_rs, bins=bin_edges)[0]
             else:
-                f += f_chunk
+                sld_total += np.histogram(sample_rs, bins=bin_edges, weights=rho)[0]
+                counts += np.histogram(sample_rs, bins=bin_edges)[0]
+
+        if counts is None or sld_total is None:
+            raise ValueError("No sample points")
+
+
+        # Remove all zero count bins
+        non_empty_bins = counts > 0
+
+        # print(np.count_nonzero(non_empty_bins))
+
+        r_small = (bin_edges[:-1] + 0.5 * bin_size)[non_empty_bins]
+        averages = sld_total[non_empty_bins] / counts[non_empty_bins]
+
+        r_large = np.arange(1, n_r_upscale + 1) * (2*calculation.spatial_sampling_method.radius / n_r_upscale)
+
+
+        # Upscale, and weight by 1/r^2
+        new_averages = np.interp(r_large, r_small, averages)
+
+        # Do transform
+        q = calculation.q_sampling_method()
+        qr = np.outer(q, r_large)
+
+        f = np.sum((new_averages*r_large*r_large) * np.sin(qr) / qr, axis=1)
+        # f = np.sum((new_averages * r_large) * np.sin(qr) / qr, axis=1)
+        # f = np.sum(new_averages * np.sin(qr) / qr, axis=1)
 
         intensity = f*f
+
+        # Calculate magnet contribution
+        # TODO: implement magnetic scattering
+
+        # Wrap up
+
+        calculation_time = time.time() - start_time
+
+        return ScatteringOutput(
+            output_type=calculation.output_type,
+            q_sampling_method=calculation.q_sampling_method,
+            spatial_sampling_method=calculation.spatial_sampling_method,
+            intensity_data=intensity,
+            calculation_time=calculation_time,
+            r_values=r_large,
+            realspace_intensity=new_averages)
+
 
     elif calculation.orientation == OrientationalDistribution.FIXED:
 
         raise NotImplementedError("Oriented particle not implemented yet")
 
 
-
-    # Calculate magnet contribution
-    # TODO: implement magnetic scattering
-
-
-    # Wrap up
-
-    calculation_time = time.time() - start_time
-
-    return ScatteringOutput(
-        output_type=calculation.output_type,
-        q_sampling_method=calculation.q_sampling_method,
-        spatial_sampling_method=calculation.spatial_sampling_method,
-        intensity_data=intensity,
-        calculation_time=calculation_time)
