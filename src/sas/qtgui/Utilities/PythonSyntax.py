@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QRegExp
-from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
+from PySide6.QtCore import QRegularExpression
+from PySide6.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
 
 def format(color, style=''):
     """Return a QTextCharFormat with the given attributes.
@@ -79,8 +79,8 @@ class PythonHighlighter (QSyntaxHighlighter):
         # Multi-line strings (expression, flag, style)
         # FIXME: The triple-quotes in these two lines will mess up the
         # syntax highlighting from this point onward
-        self.tri_single = (QRegExp("'''"), 1, STYLES['string2'])
-        self.tri_double = (QRegExp('"""'), 2, STYLES['string2'])
+        self.tri_single = (QRegularExpression("'''"), 1, STYLES['string2'])
+        self.tri_double = (QRegularExpression('"""'), 2, STYLES['string2'])
 
         rules = []
 
@@ -122,7 +122,7 @@ class PythonHighlighter (QSyntaxHighlighter):
             rules.append((r'//[^\n]*', 0, STYLES['comment']),)
 
         # Build a QRegExp for each pattern
-        self.rules = [(QRegExp(pat), index, fmt)
+        self.rules = [(QRegularExpression(pat), index, fmt)
             for (pat, index, fmt) in rules]
 
 
@@ -189,7 +189,7 @@ class PythonHighlighter (QSyntaxHighlighter):
             return False
 
 if __name__ == '__main__':
-    from PyQt5 import QtWidgets
+    from PySide6 import QtWidgets
 
     app = QtWidgets.QApplication([])
     editor = QtWidgets.QPlainTextEdit()

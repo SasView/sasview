@@ -1,7 +1,6 @@
 import functools
 import os
-
-from PyQt5 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 import sas.sasview
 import sas.qtgui.Utilities.GuiUtils as GuiUtils

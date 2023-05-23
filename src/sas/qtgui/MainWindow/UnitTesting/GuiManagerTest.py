@@ -2,13 +2,12 @@ import sys
 import subprocess
 import webbrowser
 import logging
-
 import pytest
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
+from PySide6.QtTest import QTest
+from PySide6 import QtCore
 
 # Local
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow

@@ -1,17 +1,15 @@
-# UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
-# ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
 import logging
 import os
 import sys
 
 from sas.system.version import __version__
 
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QMdiArea
-from PyQt5.QtWidgets import QSplashScreen
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt, QTimer
+from PySide6.QtWidgets import QMainWindow
+from PySide6.QtWidgets import QMdiArea
+from PySide6.QtWidgets import QSplashScreen
+from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QPixmap, QGuiApplication, QCursor
+from PySide6.QtCore import Qt, QTimer
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
@@ -21,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class MainSasViewWindow(QMainWindow, Ui_SasView):
     # Main window of the application
-    def __init__(self, screen_resolution, parent=None):
+    def __init__(self, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
 
         self.setupUi(self)
@@ -34,8 +32,6 @@ class MainSasViewWindow(QMainWindow, Ui_SasView):
         # the two scrollbars will help managing the workspace.
         self.workspace.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.workspace.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.screen_width = screen_resolution.width()
-        self.screen_height = screen_resolution.height()
         self.setCentralWidget(self.workspace)
         QTimer.singleShot(100, self.showMaximized)
         # Temporary solution for problem with menubar on Mac
@@ -96,17 +92,15 @@ def run_sasview():
 
     # DO NOT move the following import to the top!
     # (unless you know what you're doing)
-    import qt5reactor
+    from sas.qtgui.Utilities import ReactorCore
     # Using the Qt5 reactor wrapper from https://github.com/ghtdak/qtreactor
-    qt5reactor.install()
+    ReactorCore.install()
 
     # DO NOT move the following import to the top!
     from twisted.internet import reactor
 
-    screen_resolution = app.desktop().screenGeometry()
-
     # Show the main SV window
-    mainwindow = MainSasViewWindow(screen_resolution)
+    mainwindow = MainSasViewWindow()
 
     # no more splash screen
     splash.finish(mainwindow)

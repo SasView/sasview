@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib
 import matplotlib.image as mpimg
 
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 from sasdata.data_util.manipulations import reader2D_converter
 

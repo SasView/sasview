@@ -82,9 +82,12 @@ build_commands = [
 ]
 # determine if this run requires building of Qt GUI ui->py
 build_qt = any(c in sys.argv for c in build_commands)
+force_rebuild = "-f" if 'rebuild_ui' in sys.argv or 'clean' in sys.argv else ""
+if 'rebuild_ui' in sys.argv:
+    sys.argv.remove('rebuild_ui')
 
 if build_qt:
-    _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py"])
+    _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py", force_rebuild])
 
 
 # Required packages

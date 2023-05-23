@@ -1,11 +1,10 @@
 import sys
 import logging
-
 import pytest
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
 # Local
 from sas.qtgui.Utilities.SasviewLogger import QtHandler

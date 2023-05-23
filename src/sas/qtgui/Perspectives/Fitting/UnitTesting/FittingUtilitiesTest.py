@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from PyQt5 import QtGui, QtCore
+from PySide6 import QtGui, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D

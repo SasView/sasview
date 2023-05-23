@@ -1,6 +1,6 @@
 """ As close a thing as there are to tests for GL"""
 
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 from sas.qtgui.GL.scene import Scene
 from sas.qtgui.GL.color import uniform_coloring
