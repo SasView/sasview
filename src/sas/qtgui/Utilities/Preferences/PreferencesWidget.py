@@ -62,8 +62,14 @@ class PreferencesWidget(QWidget):
 
     def _stageChange(self, key: str, value: ConfigType):
         """ All inputs should call this method when attempting to change config values. """
-        if self.parent is not None and hasattr(self.parent, 'stageSingleChange'):
-            message = self.restart_params.get(key, None)
+        message = self.restart_params.get(key, None)
+        if value == getattr(config, key):
+            # Input changed back to previous value - no need to stage
+            self.parent.unStageSingleChange(key, message)
+            # Ensure key is not in invalid list when coming from invalid to valid, but unchanged state
+            self.parent.unset_invalid_input(key)
+        else:
+            # New value for input - stage
             self.parent.stageSingleChange(key, value, message)
 
     def _unStageChange(self, key: str):
