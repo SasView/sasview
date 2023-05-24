@@ -72,6 +72,10 @@ class PreferencesWidget(QWidget):
             message = self.restart_params.get(key, None)
             self.parent.unStageSingleChange(key, message)
 
+    def _setInvalid(self, key: str):
+        """Adds the input key to a set to ensure the preference panel does not try to apply invalid values"""
+        self.parent.set_invalid_input(key)
+
     def restoreGUIValuesFromConfig(self):
         """A generic method that blocks all signalling, and restores the GUI values from the config file.
         Called when staging is cancelled or defaults should be restored."""
@@ -165,6 +169,7 @@ class PreferencesWidget(QWidget):
         else:
             edit.setStyleSheet("background-color: yellow")
             self._unStageChange(key)
+            self._setInvalid(key)
 
     def addFloatInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
         """Similar to the text input creator, this creates a text input with an float validator assigned to it.
