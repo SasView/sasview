@@ -174,7 +174,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
                 continue
             if line_edit is None or not isinstance(line_edit, QtWidgets.QLineEdit):
                 continue
-            color = line_edit.palette().color(QtGui.QPalette.Background).name()
+            color = line_edit.palette().color(QtGui.QPalette.Window).name()
             if color == '#fff79a':
                 # Show a custom tooltip and return
                 tooltip = "<html><b>Please enter valid values in all fields.</html>"
