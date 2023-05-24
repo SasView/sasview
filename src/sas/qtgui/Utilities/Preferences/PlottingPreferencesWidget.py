@@ -33,6 +33,6 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.legendLineLength.blockSignals(toggle)
 
     def _restoreFromConfig(self):
-        self.legendFullWidth.setChecked(config.FITTING_PLOT_FULL_WIDTH_LEGENDS)
-        self.legendTruncate.setChecked(config.FITTING_PLOT_LEGEND_TRUNCATE)
+        self.legendFullWidth.setChecked(bool(config.FITTING_PLOT_FULL_WIDTH_LEGENDS))
+        self.legendTruncate.setChecked(bool(config.FITTING_PLOT_LEGEND_TRUNCATE))
         self.legendLineLength.setText(str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH))

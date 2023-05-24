@@ -160,14 +160,7 @@ class PreferencesWidget(QWidget):
         validator = edit.validator()
         text = edit.text()
         (state, val, pos) = validator.validate(text, 0) if validator else (0, 0, 0)
-        if state == QValidator.Acceptable:
-            if isinstance(validator, QIntValidator):
-                self._stageChange(key, int(text))
-            elif isinstance(validator, QDoubleValidator):
-                self._stageChange(key, float(text))
-            else:
-                self._stageChange(key, text)
-        elif not validator:
+        if state == QValidator.Acceptable or not validator:
             self._stageChange(key, text)
         else:
             edit.setStyleSheet("background-color: yellow")
