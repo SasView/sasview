@@ -74,9 +74,8 @@ class PreferencesWidget(QWidget):
 
     def _unStageChange(self, key: str):
         """ A private class method to unstage a single configuration change. Typically when the value is not valid. """
-        if self.parent is not None and hasattr(self.parent, 'unStageSingleChange'):
-            message = self.restart_params.get(key, None)
-            self.parent.unStageSingleChange(key, message)
+        message = self.restart_params.get(key, None)
+        self.parent.unStageSingleChange(key, message)
 
     def _setInvalid(self, key: str):
         """Adds the input key to a set to ensure the preference panel does not try to apply invalid values"""
