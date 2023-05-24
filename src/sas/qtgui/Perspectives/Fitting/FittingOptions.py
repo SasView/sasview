@@ -45,7 +45,6 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         # Use pre-built UI
         self.setupUi(self)
 
-        self.parent = None
         self.config = config
         self.config_params = ['FITTING_DEFAULT_OPTIMIZER']
 
@@ -119,7 +118,8 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
     def onDefaultAlgorithmChange(self):
         text = self.cbAlgorithmDefault.currentText()
         id = dict((new_val, new_k) for new_k, new_val in bumps.options.FIT_CONFIG.names.items()).get(text)
-        self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
+        if self.parent:
+            self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
 
     def onAlgorithmChange(self, index):
         """
