@@ -33,3 +33,10 @@ def sld(x,y,z):
 
 """ Press shift-return to build and update views
     Click scatter to show the scattering profile"""
+
+# TODO: REMOVE
+default_text = """
+
+def sld(r,theta,phi):
+    return rect(r/50)
+"""

@@ -77,14 +77,16 @@ def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput
 
             sld1 = calculation.sld_function(*input_coordinates1, **calculation.sld_function_parameters)
             sld1 -= calculation.solvent_sld
-
+            #
             sld2 = calculation.sld_function(*input_coordinates2, **calculation.sld_function_parameters)
             sld2 -= calculation.solvent_sld
 
             rho = sld1*sld2
+            # rho = sld1
 
             # Do the integration
             sample_rs = np.sqrt((x1 - x0)**2 + (y1 - y0)**2 + (z1 - z0)**2)
+            # sample_rs = np.sqrt(x0**2 + y0**2 + z0**2)
 
             if sld_total is None:
                 sld_total = np.histogram(sample_rs, bins=bin_edges, weights=rho)[0]
@@ -115,11 +117,20 @@ def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput
         q = calculation.q_sampling_method()
         qr = np.outer(q, r_large)
 
-        f = np.sum((new_averages*r_large*r_large) * np.sin(qr) / qr, axis=1)
+        # Power of q must be -1 for correct slope at low q
+
+        # f = np.sum((new_averages * (r_large * r_large)) * np.sin(qr) / qr, axis=1) # Correct for sphere with COM sampling
+        f = np.sum((new_averages * (r_large ** 3)) * np.sin(qr) / qr, axis=1) # Correct for sphere with COM sampling
+        # f = np.sum((new_averages * (r_large ** 4)) * np.sin(qr) / qr, axis=1) # Correct for sphere with COM sampling
+        # f = np.sum((new_averages*r_large*r_large) * np.sin(qr) / (qr**3), axis=1)
         # f = np.sum((new_averages * r_large) * np.sin(qr) / qr, axis=1)
         # f = np.sum(new_averages * np.sin(qr) / qr, axis=1)
+        # f = np.sum(new_averages / r_large * np.sin(qr) / qr, axis=1)
+        # f = np.sum(new_averages / (r_large**2) * np.sin(qr) / qr, axis=1)
 
-        intensity = f*f
+        intensity = f*f # Correct for sphere with COM sampling
+        # intensity = np.abs(f)
+        # intensity = f
 
         # Calculate magnet contribution
         # TODO: implement magnetic scattering
