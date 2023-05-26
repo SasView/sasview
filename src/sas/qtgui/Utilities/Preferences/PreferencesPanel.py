@@ -138,15 +138,24 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             if msgBox.exec() == QMessageBox.Yes:
                 self.parent.guiManager.quitApplication()
                 os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
-        self._staged_requiring_restart = set()
-        self._staged_changes = {}
+        self._reset_state()
 
     def _cancelStaging(self):
         """ When the Cancel button is clicked, throw away any staged changes and hide the window"""
         for i in range(self.stackedWidget.count()):
             self.stackedWidget.widget(i).restoreGUIValuesFromConfig()
-        self._staged_changes = {}
+        self._reset_state()
         self.close()
+
+    def _reset_state(self):
+        self._staged_requiring_restart = set()
+        self._staged_invalid = set()
+        self._staged_changes = {}
+        self._set_accept()
+
+    def closeEvent(self, event):
+        """Capture all window close events and ensure the window is in a base state"""
+        self._cancelStaging()
 
     def close(self):
         """Save the configuration values when the preferences window is closed"""

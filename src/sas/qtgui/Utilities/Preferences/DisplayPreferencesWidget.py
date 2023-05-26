@@ -28,4 +28,5 @@ class DisplayPreferencesWidget(PreferencesWidget):
 
     def _restoreFromConfig(self):
         self.qtScaleFactor.setText(str(config.QT_SCALE_FACTOR))
+        self.qtScaleFactor.setStyleSheet("background-color: white")
         self.autoScaling.setChecked(bool(config.QT_AUTO_SCREEN_SCALE_FACTOR))
