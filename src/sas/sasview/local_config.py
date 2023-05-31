@@ -92,7 +92,7 @@ _danse_url = "https://www.its.caltech.edu/~matsci/btf/DANSE_web_page.html"
 _inst_url = "https://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2022, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
+_copyright = "(c) 2009 - 2023, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read
