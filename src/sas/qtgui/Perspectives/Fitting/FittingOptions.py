@@ -117,9 +117,9 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
     def onDefaultAlgorithmChange(self):
         text = self.cbAlgorithmDefault.currentText()
+        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(text))
         id = dict((new_val, new_k) for new_k, new_val in bumps.options.FIT_CONFIG.names.items()).get(text)
-        if self.parent:
-            self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
+        self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
 
     def onAlgorithmChange(self, index):
         """
