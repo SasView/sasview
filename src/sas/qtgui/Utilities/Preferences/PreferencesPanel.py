@@ -37,6 +37,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         super(PreferencesPanel, self).__init__(parent)
         self.setupUi(self)
         self._staged_changes = {}
+        self._staged_non_config_changes = {}
         self._staged_requiring_restart = set()
         self._staged_invalid = set()
         self.parent = parent
@@ -90,7 +91,10 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     def stageSingleChange(self, key: str, value: ConfigType, config_restart_message: Optional[str] = ""):
         """ Preferences widgets should call this method when changing a variable to prevent direct configuration
         changes"""
-        self._staged_changes[key] = value
+        if getattr(config, key, None) is None:
+            self._staged_non_config_changes[key] = value
+        else:
+            self._staged_changes[key] = value
         self._staged_requiring_restart.add(config_restart_message)
         self.unset_invalid_input(key)
         self._set_accept()
@@ -114,7 +118,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     def _set_accept(self):
         """Enable/disable the 'Accept' and 'OK' buttons based on the current state."""
         # If any inputs aren't valid -or- if no changes are staged, disable the buttons
-        toggle = not any(self._staged_invalid) and any(self._staged_changes.keys())
+        toggle = (not any(self._staged_invalid) and any(self._staged_changes.keys())
+                  and any(self._staged_non_config_changes.keys()))
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(toggle)
         self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(toggle)
 
@@ -151,6 +156,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self._staged_requiring_restart = set()
         self._staged_invalid = set()
         self._staged_changes = {}
+        self._staged_non_config_changes = {}
         self._set_accept()
 
     def closeEvent(self, event):

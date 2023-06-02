@@ -62,7 +62,7 @@ class PreferencesWidget(QWidget):
 
     def _stageChange(self, key: str, value: ConfigType):
         """ All inputs should call this method when attempting to change config values. """
-        if str(value) == str(getattr(config, key)):
+        if str(value) == str(getattr(config, key, None)):
             # Input changed back to previous value - no need to stage
             self._unStageChange(key)
             # Ensure key is not in invalid list when coming from invalid to valid, but unchanged state
