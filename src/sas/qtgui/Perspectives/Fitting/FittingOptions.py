@@ -53,14 +53,10 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         self.cbAlgorithm.addItems(self.active_fitters)
         self.cbAlgorithmDefault.addItems(self.active_fitters)
 
-        # Handle the combo box changes
-        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
-        self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
-
         # Set the default index
         default_name = [n.name for n in fitters.FITTERS if n.id == sasview_config.FITTING_DEFAULT_OPTIMIZER][0]
         default_index = self.cbAlgorithm.findText(default_name)
-        self.cbAlgorithm.setCurrentIndex(default_index)
+        self.onAlgorithmChange(default_index)
         self.cbAlgorithmDefault.setCurrentIndex(default_index)
         # previous algorithm choice
         self.previous_index = default_index
@@ -70,6 +66,10 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
         # Set defaults
         self.current_fitter_id = getattr(sasview_config, 'FITTING_DEFAULT_OPTIMIZER', fitters.FIT_DEFAULT_ID)
+
+        # To prevent errors related to parent, connect the combo box changes once the widget is instantiated
+        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
+        self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
 
     #
     # Preference Widget required methods
@@ -119,6 +119,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         text = self.cbAlgorithmDefault.currentText()
         self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(text))
         id = dict((new_val, new_k) for new_k, new_val in bumps.options.FIT_CONFIG.names.items()).get(text)
+        print(id)
         self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
 
     def onAlgorithmChange(self, index):
