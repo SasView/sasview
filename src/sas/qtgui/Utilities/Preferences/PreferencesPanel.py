@@ -118,8 +118,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     def _set_accept(self):
         """Enable/disable the 'Accept' and 'OK' buttons based on the current state."""
         # If any inputs aren't valid -or- if no changes are staged, disable the buttons
-        toggle = (not any(self._staged_invalid) and any(self._staged_changes.keys())
-                  and any(self._staged_non_config_changes.keys()))
+        staged = any(self._staged_changes.keys()) or any(self._staged_non_config_changes.keys())
+        toggle = not any(self._staged_invalid) and staged
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(toggle)
         self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(toggle)
 
