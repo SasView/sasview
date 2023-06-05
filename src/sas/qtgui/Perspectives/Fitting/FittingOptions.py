@@ -56,7 +56,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         # Set the default index
         default_name = [n.name for n in fitters.FITTERS if n.id == sasview_config.FITTING_DEFAULT_OPTIMIZER][0]
         default_index = self.cbAlgorithm.findText(default_name)
-        self.onAlgorithmChange(default_index)
+        self._algorithm_change(default_index)
         self.cbAlgorithmDefault.setCurrentIndex(default_index)
         # previous algorithm choice
         self.previous_index = default_index
@@ -119,12 +119,16 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         text = self.cbAlgorithmDefault.currentText()
         self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(text))
         id = dict((new_val, new_k) for new_k, new_val in bumps.options.FIT_CONFIG.names.items()).get(text)
-        print(id)
         self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
 
     def onAlgorithmChange(self, index):
+        """Triggered method when the index of the combo box changes."""
+        self._algorithm_change(index)
+        self._stageChange("Fitting.activeAlgorithm", index)
+
+    def _algorithm_change(self, index):
         """
-        Change the page in response to combo box index
+        Change the page in response to combo box index. Can also be called programmatically.
         """
         # Find the algorithm ID from name
         self.current_fitter_id = \
