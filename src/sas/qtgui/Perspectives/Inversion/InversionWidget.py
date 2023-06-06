@@ -1,7 +1,10 @@
 import logging
 import numpy as np
 
+
 from PySide6 import QtGui, QtCore, QtWidgets
+
+
 
 # sas-global
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -53,6 +56,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     name = "Inversion"
     ext = "pr"  # Extension used for saving analyse
+
     estimateSignal = QtCore.Signal(tuple)
     estimateNTSignal = QtCore.Signal(tuple)
     estimateDynamicNTSignal = QtCore.Signal(tuple)
@@ -61,6 +65,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     plotUpdateSignal = QtCore.Signal(list)
     forcePlotDisplaySignal = QtCore.Signal(list)
+
 
     def __init__(self, parent=None, data=None, tab_id=1):
         super(InversionWidget, self).__init__()
