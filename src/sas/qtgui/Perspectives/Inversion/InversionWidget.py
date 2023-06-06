@@ -16,7 +16,7 @@ from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
@@ -716,12 +716,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                            pr.get_pos_err(out, cov))))
         if self.prPlot is not None:
             title = self.prPlot.name
-            self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
+            self.prPlot.plot_role = DataRole.ROLE_STAND_ALONE
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
             self.communicate.plotRequestedSignal.emit([self._data, self.prPlot], None)
         if self.dataPlot is not None:
             title = self.dataPlot.name
-            self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
+            self.dataPlot.plot_role = DataRole.ROLE_DEFAULT
             self.dataPlot.symbol = "Line"
             self.dataPlot.show_errors = False
             GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
