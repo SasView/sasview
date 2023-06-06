@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 # sas-global
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -53,14 +53,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     name = "Inversion"
     ext = "pr"  # Extension used for saving analyse
-    estimateSignal = QtCore.pyqtSignal(tuple)
-    estimateNTSignal = QtCore.pyqtSignal(tuple)
-    estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
-    estimateDynamicSignal = QtCore.pyqtSignal(tuple)
-    calculateSignal = QtCore.pyqtSignal(tuple)
+    estimateSignal = QtCore.Signal(tuple)
+    estimateNTSignal = QtCore.Signal(tuple)
+    estimateDynamicNTSignal = QtCore.Signal(tuple)
+    estimateDynamicSignal = QtCore.Signal(tuple)
+    calculateSignal = QtCore.Signal(tuple)
 
-    plotUpdateSignal = QtCore.pyqtSignal(list)
-    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
+    plotUpdateSignal = QtCore.Signal(list)
+    forcePlotDisplaySignal = QtCore.Signal(list)
 
     def __init__(self, parent=None, data=None, tab_id=1):
         super(InversionWidget, self).__init__()
