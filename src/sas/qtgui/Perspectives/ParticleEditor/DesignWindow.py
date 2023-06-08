@@ -19,8 +19,10 @@ from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWin
 from sas.qtgui.Perspectives.ParticleEditor.function_processor import process_code, FunctionDefinitionFailed
 from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
 
-from sas.qtgui.Perspectives.ParticleEditor.sampling import (
-    SpatialSample, QSample, RandomSampleSphere, RandomSampleCube)
+from sas.qtgui.Perspectives.ParticleEditor.sampling_methods import (
+    SpatialSample, RandomSampleSphere, RandomSampleCube)
+
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import QSample
 
 from sas.qtgui.Perspectives.ParticleEditor.scattering import (
     OutputType, OrientationalDistribution, ScatteringCalculation, calculate_scattering)
@@ -90,6 +92,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         self.orientationCombo.addItem("Unoriented")
         self.orientationCombo.addItem("Fixed Orientation")
+        self.orientationCombo.setCurrentIndex(0)
 
         self.structureFactorCombo.addItem("None") # TODO: Structure Factor Options
 

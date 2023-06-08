@@ -31,7 +31,8 @@ class RCanvas(FigureCanvas):
 
         self.axes.cla()
 
+        if scattering_output.r_values is not None and scattering_output.realspace_intensity is not None:
 
-        self.axes.plot(scattering_output.r_values, scattering_output.realspace_intensity)
+            self.axes.plot(scattering_output.r_values, scattering_output.realspace_intensity)
 
         self.draw()

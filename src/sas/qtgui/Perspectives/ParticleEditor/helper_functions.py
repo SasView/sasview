@@ -14,8 +14,11 @@ def step(x: np.ndarray):
     out[x < 0] = 0.0
     return out
 
+
 def rect(x: np.ndarray):
     """ Rectangle function, zero if |input| > 1, 1 otherwise"""
     out = np.zeros_like(x)
     out[np.abs(x) <= 1] = 1.0
     return out
+
+

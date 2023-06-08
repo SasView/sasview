@@ -1,26 +1,63 @@
-""" Data structures and types for describing particles """
-
-from typing import Protocol, Tuple, Optional
+from typing import Optional, Callable, Tuple, Protocol
+import numpy as np
+from enum import Enum
 from dataclasses import dataclass
 
-import numpy as np
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.sampling import SpatialSample
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import SLDFunction, MagnetismFunction, CoordinateSystemTransform
 
-# 3D vector output as lists of x,y and z components
-VectorComponents3 = Tuple[np.ndarray, np.ndarray, np.ndarray]
+class QSample:
+    """ Representation of Q Space sampling """
+    def __init__(self, start, end, n_points, is_log):
+        self.start = start
+        self.end = end
+        self.n_points = n_points
+        self.is_log = is_log
 
-class SLDFunction(Protocol):
-    """ Type of functions that can represent SLD profiles"""
-    def __call__(self, a: np.ndarray, b: np.ndarray, c: np.ndarray, **kwargs: float) -> np.ndarray: ...
+    def __repr__(self):
+        return f"QSampling({self.start}, {self.end}, n={self.n_points}, is_log={self.is_log})"
 
-class MagnetismFunction(Protocol):
-    """ Type of functions that can represent magnetism profiles"""
+    def __call__(self):
+        if self.is_log:
+            start_log = np.log(self.start)
+            end_log = np.log(self.end)
+            return np.exp(np.linspace(start_log, end_log, self.n_points))
+        else:
+            return np.linspace(self.start, self.end, self.n_points)
 
-    def __call__(self, a: np.ndarray, b: np.ndarray, c: np.ndarray, **kwargs: float) -> VectorComponents3: ...
 
-class CoordinateSystemTransform(Protocol):
-    """ Type of functions that can represent a coordinate transform"""
+class ZSample:
+    """ Sample of correlation space """
 
-    def __call__(self, a: np.ndarray, b: np.ndarray, c: np.ndarray) -> VectorComponents3: ...
+    def __init__(self, start, end, n_points):
+        self.start = start
+        self.end = end
+        self.n_points = n_points
+
+    def __repr__(self):
+        return f"QSampling({self.start}, {self.end}, n={self.n_points})"
+
+    def __call__(self):
+        return np.linspace(self.start, self.end, self.n_points)
+
+
+@dataclass
+class OutputOptions:
+    radial_distribution: Optional = None
+    radial_correlation: Optional = None
+    p_of_r: Optional = None
+    q_space: Optional[QSample] = None
+    q_space_2d: Optional[QSample] = None
+    sesans: Optional[ZSample] = None
+    sesans_2d: Optional[ZSample] = None
+
+
+class OrientationalDistribution(Enum):
+    FIXED = "Fixed"
+    UNORIENTED = "Unoriented"
+
+
+
 
 @dataclass
 class SLDDefinition:
@@ -28,14 +65,30 @@ class SLDDefinition:
     sld_function: SLDFunction
     to_cartesian_conversion: CoordinateSystemTransform
 
+
 @dataclass
 class MagnetismDefinition:
     """ Definition of the magnetism vector fields"""
     magnetism_function: MagnetismFunction
     to_cartesian_conversion: CoordinateSystemTransform
 
+
 @dataclass
-class Particle:
+class ParticleDefinition:
     """ Object containing the functions that define a particle"""
     sld: SLDDefinition
     magnetism: Optional[MagnetismDefinition]
+
+
+@dataclass
+class ScatteringCalculation:
+    """ Specification for a scattering calculation """
+    solvent_sld: float
+    output_options: OutputOptions
+    orientation: OrientationalDistribution
+    spatial_sampling_method: SpatialSample
+    particle_definition: ParticleDefinition
+    magnetism_vector: Optional[np.ndarray]
+    sample_chunk_size_hint: int = 100_000
+
+
