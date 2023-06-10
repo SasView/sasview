@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-import numpy as np
 from typing import Tuple
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
+
+
 class SpatialSample(ABC):
     """ Base class for spatial sampling methods"""
     def __init__(self, n_points_desired, radius):

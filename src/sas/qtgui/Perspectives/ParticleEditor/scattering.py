@@ -8,19 +8,8 @@ import numpy as np
 from scipy.special import jv as besselJ
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-    QSample, ZSample, OutputType, OrientationalDistribution, ScatteringCalculation)
+    QSample, OrientationalDistribution, ScatteringCalculation, ScatteringOutput)
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.sampling import SpatialSample
-
-@dataclass
-class ScatteringOutput:
-    output_type: OutputType
-    q_sampling_method: QSample
-    spatial_sampling_method: SpatialSample
-    intensity_data: np.ndarray
-    r_values: Optional[np.ndarray]
-    realspace_intensity: Optional[np.ndarray]
-    calculation_time: float
 
 def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput:
     """ Main function for calculating scattering"""
@@ -31,9 +20,6 @@ def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput
     if calculation.orientation == OrientationalDistribution.UNORIENTED:
 
         print("Unoriented")
-
-        if calculation.output_type == OutputType.SLD_2D:
-            raise NotImplementedError("2D scattering not implemented yet")
 
         # Try a different method, estimate the radial distribution
         n_r = 1000
@@ -159,9 +145,6 @@ def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput
     elif calculation.orientation == OrientationalDistribution.FIXED:
 
         print("Oriented")
-
-        if calculation.output_type == OutputType.SLD_2D:
-            raise NotImplementedError("2D scattering not implemented yet")
 
         # Try a different method, estimate the radial distribution
 

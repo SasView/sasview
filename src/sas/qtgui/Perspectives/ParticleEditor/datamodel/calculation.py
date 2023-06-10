@@ -4,7 +4,9 @@ from enum import Enum
 from dataclasses import dataclass
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.sampling import SpatialSample
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import SLDFunction, MagnetismFunction, CoordinateSystemTransform
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import (
+    SLDFunction, MagnetismFunction, CoordinateSystemTransform)
+
 
 class QSample:
     """ Representation of Q Space sampling """
@@ -57,8 +59,6 @@ class OrientationalDistribution(Enum):
     UNORIENTED = "Unoriented"
 
 
-
-
 @dataclass
 class SLDDefinition:
     """ Definition of the SLD scalar field"""
@@ -83,12 +83,25 @@ class ParticleDefinition:
 @dataclass
 class ScatteringCalculation:
     """ Specification for a scattering calculation """
-    solvent_sld: float
     output_options: OutputOptions
     orientation: OrientationalDistribution
     spatial_sampling_method: SpatialSample
     particle_definition: ParticleDefinition
     magnetism_vector: Optional[np.ndarray]
+    seed: Optional[int]
+    bounding_surface_sld_check: bool
     sample_chunk_size_hint: int = 100_000
+
+
+@dataclass
+class ScatteringOutput:
+    output_type: OutputOptions
+    q_sampling_method: QSample
+    spatial_sampling_method: SpatialSample
+    intensity_data: np.ndarray
+    r_values: Optional[np.ndarray]
+    realspace_intensity: Optional[np.ndarray]
+    calculation_time: float
+    seed_used: int
 
 

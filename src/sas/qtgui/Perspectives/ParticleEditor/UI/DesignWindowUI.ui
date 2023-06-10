@@ -20,7 +20,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="definitionTab">
       <attribute name="title">
@@ -33,28 +33,7 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="3">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="QTableWidget" name="parametersTable">
-           <property name="rowCount">
-            <number>1</number>
-           </property>
-           <property name="columnCount">
-            <number>6</number>
-           </property>
-           <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
-           <row/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-           <column/>
-          </widget>
-         </item>
-        </layout>
+        <layout class="QVBoxLayout" name="verticalLayout_4"/>
        </item>
       </layout>
      </widget>

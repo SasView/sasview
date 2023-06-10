@@ -24,8 +24,11 @@ from sas.qtgui.Perspectives.ParticleEditor.sampling_methods import (
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import QSample
 
+from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
+from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTable import ParameterTable
+
 from sas.qtgui.Perspectives.ParticleEditor.scattering import (
-    OutputType, OrientationalDistribution, ScatteringCalculation, calculate_scattering)
+    OrientationalDistribution, ScatteringCalculation, calculate_scattering)
 from sas.qtgui.Perspectives.ParticleEditor.util import format_time_estimate
 
 
@@ -82,6 +85,14 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         # A components
         hbox.addWidget(self.functionViewer)
         self.definitionTab.setLayout(hbox)
+
+        #
+        # Parameters Tab
+        #
+
+        self._parameterTableModel = ParameterTableModel()
+        self.parametersTable = ParameterTable(self._parameterTableModel)
+
 
 
         #
@@ -343,29 +354,29 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
             orientation = OrientationalDistribution.FIXED
         else:
             raise ValueError("Unknown index for orientation combo")
-
-        output_type = None
-        if self.output1D.isChecked():
-            output_type = OutputType.SLD_1D
-        elif self.output2D.isChecked():
-            output_type = OutputType.SLD_2D
-
-        if output_type is None:
-            raise ValueError("Uknown index for output type combo")
-
-        return ScatteringCalculation(
-            solvent_sld=self.solvent_sld,
-            orientation=orientation,
-            output_type=output_type,
-            spatial_sampling_method=self.spatialSampling,
-            q_sampling_method=self.qSampling,
-            sld_function=self.sld_function,
-            sld_function_from_cartesian=self.sld_coordinate_mapping,
-            sld_function_parameters={},
-            magnetism_function=None,
-            magnetism_function_from_cartesian=None,
-            magnetism_function_parameters=None,
-            magnetism_vector=None)
+        #
+        # output_type = None
+        # if self.output1D.isChecked():
+        #     output_type = OutputType.SLD_1D
+        # elif self.output2D.isChecked():
+        #     output_type = OutputType.SLD_2D
+        #
+        # if output_type is None:
+        #     raise ValueError("Uknown index for output type combo")
+        #
+        # return ScatteringCalculation(
+        #     solvent_sld=self.solvent_sld,
+        #     orientation=orientation,
+        #     output_type=output_type,
+        #     spatial_sampling_method=self.spatialSampling,
+        #     q_sampling_method=self.qSampling,
+        #     sld_function=self.sld_function,
+        #     sld_function_from_cartesian=self.sld_coordinate_mapping,
+        #     sld_function_parameters={},
+        #     magnetism_function=None,
+        #     magnetism_function_from_cartesian=None,
+        #     magnetism_function_parameters=None,
+        #     magnetism_vector=None)
 
 def main():
     """ Demo/testing window"""
