@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>994</width>
-    <height>370</height>
+    <height>484</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="definitionTab">
       <attribute name="title">
@@ -33,7 +33,7 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="3">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4"/>
+        <layout class="QVBoxLayout" name="parameterTabLayout"/>
        </item>
       </layout>
      </widget>
@@ -236,7 +236,17 @@
             <item>
              <widget class="QFrame" name="frame_3">
               <layout class="QGridLayout" name="gridLayout_2">
-               <item row="7" column="1">
+               <item row="8" column="2">
+                <widget class="QCheckBox" name="useLogQ">
+                 <property name="text">
+                  <string>Logaritmic</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="2">
                 <widget class="QSpinBox" name="qSamplesBox">
                  <property name="minimum">
                   <number>10</number>
@@ -252,14 +262,14 @@
                  </property>
                 </widget>
                </item>
-               <item row="5" column="2">
+               <item row="5" column="3">
                 <widget class="QLabel" name="label_9">
                  <property name="text">
                   <string>Ang</string>
                  </property>
                 </widget>
                </item>
-               <item row="6" column="2">
+               <item row="6" column="3">
                 <widget class="QLabel" name="label_10">
                  <property name="text">
                   <string>Ang</string>
@@ -276,14 +286,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_14">
-                 <property name="text">
-                  <string>Sample Radius</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
+               <item row="1" column="2">
                 <layout class="QHBoxLayout" name="horizontalLayout_6">
                  <item>
                   <widget class="QDoubleSpinBox" name="sampleRadius">
@@ -313,20 +316,10 @@
                  </item>
                 </layout>
                </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="label_11">
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_14">
                  <property name="text">
-                  <string>Q Max</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="1">
-                <widget class="QLineEdit" name="qMaxBox">
-                 <property name="text">
-                  <string>0.5</string>
+                  <string>Sample Radius</string>
                  </property>
                 </widget>
                </item>
@@ -340,7 +333,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="5" column="1">
+               <item row="5" column="2">
                 <widget class="QLineEdit" name="qMinBox">
                  <property name="text">
                   <string>0.0005</string>
@@ -357,30 +350,24 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
-                <widget class="QComboBox" name="methodCombo"/>
-               </item>
-               <item row="10" column="1">
-                <widget class="QLabel" name="timeEstimateLabel">
+               <item row="6" column="2">
+                <widget class="QLineEdit" name="qMaxBox">
                  <property name="text">
-                  <string/>
+                  <string>0.5</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="label_11">
+                 <property name="text">
+                  <string>Q Max</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
-               <item row="9" column="1">
-                <widget class="QCheckBox" name="useLogQ">
-                 <property name="text">
-                  <string>Logaritmic</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
+               <item row="0" column="2">
                 <layout class="QHBoxLayout" name="horizontalLayout">
                  <property name="bottomMargin">
                   <number>0</number>
@@ -404,6 +391,9 @@
                  </item>
                 </layout>
                </item>
+               <item row="2" column="2">
+                <widget class="QComboBox" name="methodCombo"/>
+               </item>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_13">
                  <property name="text">
@@ -414,17 +404,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>Sample Points</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
+               <item row="3" column="2">
                 <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
                   <widget class="QSpinBox" name="nSamplePoints">
@@ -448,7 +428,17 @@
                  </item>
                 </layout>
                </item>
-               <item row="4" column="1">
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Sample Points</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="2">
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
                  <item>
                   <widget class="QLineEdit" name="randomSeed">
@@ -466,6 +456,13 @@
                  </item>
                 </layout>
                </item>
+               <item row="9" column="0">
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>Neutron Polarisation</string>
+                 </property>
+                </widget>
+               </item>
                <item row="4" column="0">
                 <widget class="QLabel" name="label_16">
                  <property name="text">
@@ -476,14 +473,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="8" column="0">
-                <widget class="QLabel" name="label_12">
-                 <property name="text">
-                  <string>Neutron Polarisation</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="8" column="1">
+               <item row="9" column="2">
                 <layout class="QHBoxLayout" name="horizontalLayout_10">
                  <item>
                   <widget class="QLineEdit" name="lineEdit">
@@ -507,6 +497,26 @@
                   </widget>
                  </item>
                 </layout>
+               </item>
+               <item row="11" column="2">
+                <widget class="QLabel" name="timeEstimateLabel">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="10" column="2">
+                <widget class="QCheckBox" name="continuityCheck">
+                 <property name="text">
+                  <string>Check sampling boundaru for SLD continuity</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>

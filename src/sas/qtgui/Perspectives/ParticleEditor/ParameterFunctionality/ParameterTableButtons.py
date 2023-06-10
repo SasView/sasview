@@ -6,4 +6,4 @@ class ParameterTableButtons(QWidget, Ui_ParameterTableButtons):
     def __init__(self):
         super().__init__()
 
-        self.setupUi()
+        self.setupUi(self)

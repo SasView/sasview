@@ -16,6 +16,7 @@ class SpatialSample(ABC):
 
     @property
     def n_actual(self) -> int:
+        """ Actual number of sample points (this might differ from the input number of points)"""
         return self._calculate_n_actual()
 
     @abstractmethod
@@ -30,6 +31,11 @@ class SpatialSample(ABC):
     @abstractmethod
     def singles(self, size_hint: int) -> VectorComponents3:
         """ Sample points """
+
+    @abstractmethod
+    def boundingSurfaceCheckPoints(self) -> VectorComponents3:
+        """ Points that are used to check that the SLD is consistent
+        with the solvent SLD at the edge of the sampling space"""
 
     def __repr__(self):
         return "%s(n=%i,r=%g)" % (self.__class__.__name__, self._n_points_desired, self.radius)

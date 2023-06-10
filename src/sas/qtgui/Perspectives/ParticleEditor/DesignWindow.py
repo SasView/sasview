@@ -5,6 +5,7 @@ from datetime import datetime
 
 import numpy as np
 from PySide6 import QtWidgets
+from PySide6.QtWidgets import QSpacerItem, QSizePolicy
 from PySide6.QtCore import Qt
 
 from sas.qtgui.Perspectives.ParticleEditor.FunctionViewer import FunctionViewer
@@ -22,10 +23,12 @@ from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
 from sas.qtgui.Perspectives.ParticleEditor.sampling_methods import (
     SpatialSample, RandomSampleSphere, RandomSampleCube)
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import QSample
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
+    QSample, ZSample, ScatteringCalculation, OutputOptions, CalculationParameters, ParticleDefinition)
 
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTable import ParameterTable
+from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableButtons import ParameterTableButtons
 
 from sas.qtgui.Perspectives.ParticleEditor.scattering import (
     OrientationalDistribution, ScatteringCalculation, calculate_scattering)
@@ -33,6 +36,7 @@ from sas.qtgui.Perspectives.ParticleEditor.util import format_time_estimate
 
 
 class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
+    """ Main window for the particle editor"""
     def __init__(self, parent=None):
         super().__init__()
 
@@ -92,8 +96,11 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         self._parameterTableModel = ParameterTableModel()
         self.parametersTable = ParameterTable(self._parameterTableModel)
+        self.parameterTabButtons = ParameterTableButtons()
 
-
+        self.parameterTabLayout.addWidget(self.parametersTable)
+        self.parameterTabLayout.addSpacerItem(QSpacerItem(20, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.parameterTabLayout.addWidget(self.parameterTabButtons)
 
         #
         # Ensemble tab
@@ -121,7 +128,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.methodCombo.currentIndexChanged.connect(self.updateSpatialSampling)
         self.sampleRadius.valueChanged.connect(self.updateSpatialSampling)
         self.nSamplePoints.valueChanged.connect(self.updateSpatialSampling)
-        self.randomSeed.textChanged.connect(self.updateSpatialSampling)
         self.fixRandomSeed.clicked.connect(self.updateSpatialSampling)
 
         self.nSamplePoints.valueChanged.connect(self.onTimeEstimateParametersChanged)
@@ -159,17 +165,10 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         # Populate tables
 
-        # Columns should be name, value, min, max, fit, [remove]
-        self.parametersTable.setHorizontalHeaderLabels(["Name", "Value", "Min", "Max", "Fit", ""])
-        self.parametersTable.horizontalHeader().setStretchLastSection(True)
-
         self.structureFactorParametersTable.setHorizontalHeaderLabels(["Name", "Value", "Min", "Max", "Fit", ""])
         self.structureFactorParametersTable.horizontalHeader().setStretchLastSection(True)
 
         # Set up variables
-
-        self.spatialSampling: SpatialSample = self._spatialSampling()
-        self.qSampling: QSample = self._qSampling()
 
         self.last_calculation_time: Optional[float] = None
         self.last_calculation_n_r: int = 0
@@ -232,6 +231,9 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
             if function is None:
                 return False
 
+            # TODO: Magnetism
+            self.parametersTable.update_contents(function, None)
+
 
             # Vectorise if needed
             maybe_vectorised = vectorise_sld(
@@ -246,6 +248,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
             self.sld_function = maybe_vectorised
             self.sld_coordinate_mapping = xyz_converter
 
+
             now = datetime.now()
             current_time = now.strftime("%Y-%m-%d %H:%M:%S")
             self.codeText(f"Built Successfully at {current_time}")
@@ -254,6 +257,85 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         except FunctionDefinitionFailed as e:
             self.codeError(e.args[0])
             return False
+
+    def outputOptions(self) -> OutputOptions:
+        """ Get the OutputOptions object representing the desired outputs from the calculation """
+        pass
+
+
+    def orientationalDistribution(self) -> OrientationalDistribution:
+        """ Get the OrientationalDistribution object that represents the GUI selected orientational distribution"""
+        orientation_index = self.orientationCombo.currentIndex()
+
+        if orientation_index == 0:
+            orientation = OrientationalDistribution.UNORIENTED
+        elif orientation_index == 1:
+            orientation = OrientationalDistribution.FIXED
+        else:
+            raise ValueError("Unknown index for orientation combo")
+
+        return orientation
+
+    def updateSpatialSampling(self):
+        """ Update the spatial sampling object """
+        self.spatialSampling = self._spatialSampling()
+        self.sampleDetails.setText(self.spatialSampling.sampling_details())
+        # print(self.spatialSampling)
+
+    def spatialSampling(self) -> SpatialSample:
+        """ Calculate the spatial sampling object based on current gui settings"""
+        sample_type = self.methodCombo.currentIndex()
+
+        # All the methods need the radius, number of points, etc
+        radius = float(self.sampleRadius.value())
+        n_desired = int(self.nSamplePoints.value())
+        seed = int(self.randomSeed.text()) if self.fixRandomSeed.isChecked() else None
+
+        if sample_type == 0:
+            return RandomSampleSphere(radius=radius, n_points_desired=n_desired, seed=seed)
+
+        elif sample_type == 1:
+            return RandomSampleCube(radius=radius, n_points_desired=n_desired, seed=seed)
+
+        else:
+            raise ValueError("Unknown index for spatial sampling method combo")
+
+    def particleDefinition(self) -> ParticleDefinition:
+        """ Get the ParticleDefinition object that contains the SLD and magnetism functions """
+
+    def parametersForCalculation(self) -> CalculationParameters:
+        pass
+
+    def polarisationVector(self) -> np.ndarray:
+        """ Get a numpy vector representing the GUI specified polarisation vector"""
+        pass
+
+    def currentSeed(self):
+        return self.randomSeed
+
+    def scatteringCalculation(self) -> ScatteringCalculation:
+        """ Get the ScatteringCalculation object that represents the calculation that
+        is to be passed to the solver to """
+        output_options = self.outputOptions()
+        orientation = self.orientationalDistribution()
+        spatial_sampling = self.spatialSampling()
+        particle_definition = self.particleDefinition()
+        parameter_definition = self.parametersForCalculation()
+        polarisation_vector = self.polarisationVector()
+        seed = self.currentSeed()
+        bounding_surface_check = self.continuityCheck.isChecked()
+
+        return ScatteringCalculation(
+            output_options=output_options,
+            orientation=orientation,
+            spatial_sampling_method=spatial_sampling,
+            particle_definition=particle_definition,
+            parameter_settings=parameter_definition,
+            polarisation_vector=polarisation_vector,
+            seed=seed,
+            bounding_surface_sld_check=bounding_surface_check,
+            sample_chunk_size_hint=100_000
+            )
 
     def doScatter(self):
         """ Scatter functionality requested"""
@@ -312,7 +394,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.qSampling = self._qSampling()
         print(self.qSampling) # TODO: Remove
 
-    def _qSampling(self) -> QSample:
+    def qSampling(self) -> QSample:
         """ Calculate the q sampling object based on current gui settings"""
         is_log = self.useLogQ.isEnabled() and self.useLogQ.isChecked() # Only when it's an option
         min_q = float(self.qMinBox.text())
@@ -321,62 +403,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         return QSample(min_q, max_q, n_samples, is_log)
 
-    def updateSpatialSampling(self):
-        """ Update the spatial sampling object """
-        self.spatialSampling = self._spatialSampling()
-        self.sampleDetails.setText(self.spatialSampling.sampling_details())
-        # print(self.spatialSampling)
-
-    def _spatialSampling(self) -> SpatialSample:
-        """ Calculate the spatial sampling object based on current gui settings"""
-        sample_type = self.methodCombo.currentIndex()
-
-        # All the methods need the radius, number of points, etc
-        radius = float(self.sampleRadius.value())
-        n_desired = int(self.nSamplePoints.value())
-        seed = int(self.randomSeed.text()) if self.fixRandomSeed.isChecked() else None
-
-        if sample_type == 0:
-            return RandomSampleSphere(radius=radius, n_points_desired=n_desired, seed=seed)
-
-        elif sample_type == 1:
-            return RandomSampleCube(radius=radius, n_points_desired=n_desired, seed=seed)
-
-        else:
-            raise ValueError("Unknown index for spatial sampling method combo")
-
-    def _scatteringCalculation(self):
-        orientation_index = self.orientationCombo.currentIndex()
-
-        if orientation_index == 0:
-            orientation = OrientationalDistribution.UNORIENTED
-        elif orientation_index == 1:
-            orientation = OrientationalDistribution.FIXED
-        else:
-            raise ValueError("Unknown index for orientation combo")
-        #
-        # output_type = None
-        # if self.output1D.isChecked():
-        #     output_type = OutputType.SLD_1D
-        # elif self.output2D.isChecked():
-        #     output_type = OutputType.SLD_2D
-        #
-        # if output_type is None:
-        #     raise ValueError("Uknown index for output type combo")
-        #
-        # return ScatteringCalculation(
-        #     solvent_sld=self.solvent_sld,
-        #     orientation=orientation,
-        #     output_type=output_type,
-        #     spatial_sampling_method=self.spatialSampling,
-        #     q_sampling_method=self.qSampling,
-        #     sld_function=self.sld_function,
-        #     sld_function_from_cartesian=self.sld_coordinate_mapping,
-        #     sld_function_parameters={},
-        #     magnetism_function=None,
-        #     magnetism_function_from_cartesian=None,
-        #     magnetism_function_parameters=None,
-        #     magnetism_vector=None)
 
 def main():
     """ Demo/testing window"""

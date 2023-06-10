@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.sampling import SpatialSample
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import (
     SLDFunction, MagnetismFunction, CoordinateSystemTransform)
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import CalculationParameters
 
 
 class QSample:
@@ -87,7 +88,8 @@ class ScatteringCalculation:
     orientation: OrientationalDistribution
     spatial_sampling_method: SpatialSample
     particle_definition: ParticleDefinition
-    magnetism_vector: Optional[np.ndarray]
+    parameter_settings: CalculationParameters
+    polarisation_vector: Optional[np.ndarray]
     seed: Optional[int]
     bounding_surface_sld_check: bool
     sample_chunk_size_hint: int = 100_000
