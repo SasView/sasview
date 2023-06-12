@@ -20,7 +20,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="definitionTab">
       <attribute name="title">
@@ -511,7 +511,7 @@
                <item row="10" column="2">
                 <widget class="QCheckBox" name="continuityCheck">
                  <property name="text">
-                  <string>Check sampling boundaru for SLD continuity</string>
+                  <string>Check sampling boundary for SLD continuity</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>

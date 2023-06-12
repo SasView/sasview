@@ -46,16 +46,16 @@ class ZSample:
 
 @dataclass
 class OutputOptions:
-    radial_distribution: Optional = None
-    radial_correlation: Optional = None
-    p_of_r: Optional = None
+    """ Options """
+    radial_distribution: bool # Create a radial distribution function from the origin
+    realspace: bool # Return realspace data
     q_space: Optional[QSample] = None
     q_space_2d: Optional[QSample] = None
     sesans: Optional[ZSample] = None
-    sesans_2d: Optional[ZSample] = None
 
 
 class OrientationalDistribution(Enum):
+    """ Types of orientation supported """
     FIXED = "Fixed"
     UNORIENTED = "Unoriented"
 
@@ -97,12 +97,10 @@ class ScatteringCalculation:
 
 @dataclass
 class ScatteringOutput:
-    output_type: OutputOptions
-    q_sampling_method: QSample
-    spatial_sampling_method: SpatialSample
-    intensity_data: np.ndarray
-    r_values: Optional[np.ndarray]
-    realspace_intensity: Optional[np.ndarray]
+    radial_distribution: Optional[Tuple[np.ndarray, np.ndarray]]
+    q_space: Optional[Tuple[np.ndarray, np.ndarray]]
+    q_space_2d: Optional[Tuple[np.ndarray, np.ndarray]]
+    sesans: Optional[Tuple[np.ndarray, np.ndarray]]
     calculation_time: float
     seed_used: int
 
