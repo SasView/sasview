@@ -1,5 +1,6 @@
 import sys
 import webbrowser
+import pytest
 
 from PySide6 import QtGui, QtWidgets
 from PySide6.QtTest import QTest
