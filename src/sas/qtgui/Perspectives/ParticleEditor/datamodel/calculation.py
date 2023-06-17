@@ -92,15 +92,16 @@ class ScatteringCalculation:
     polarisation_vector: Optional[np.ndarray]
     seed: Optional[int]
     bounding_surface_sld_check: bool
+    bin_count = 1_000
     sample_chunk_size_hint: int = 100_000
 
 
 @dataclass
 class ScatteringOutput:
     radial_distribution: Optional[Tuple[np.ndarray, np.ndarray]]
-    q_space: Optional[Tuple[np.ndarray, np.ndarray]]
-    q_space_2d: Optional[Tuple[np.ndarray, np.ndarray]]
-    sesans: Optional[Tuple[np.ndarray, np.ndarray]]
+    q_space: Optional[Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]]
+    q_space_2d: Optional[Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]]
+    sesans: Optional[Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]]
     calculation_time: float
     seed_used: int
 
