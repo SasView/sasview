@@ -4,7 +4,9 @@ from scipy.interpolate import interp1d
 import time
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling_methods import (
-    UniformCubeSample, BiasedSampleCube, BiasedSampleSphere)
+    UniformCubeSample, UniformSphereSample,
+    RadiallyBiasedCubeSample, RadiallyBiasedSphereSample,
+    MixedCubeSample, MixedSphereSample)
 
 test_radius = 5
 sample_radius = 10
@@ -54,15 +56,23 @@ def sphere(x, y, z):
     return sld
 
 test_functions = [cube, sphere, octahedron, off_centre_cube]
+sampler_classes = [UniformCubeSample, UniformSphereSample,
+                   RadiallyBiasedCubeSample, RadiallyBiasedSphereSample,
+                   MixedCubeSample, MixedSphereSample]
+
+colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
 
 bin_edges = np.linspace(0, np.sqrt(3)*sample_radius, 201)
 bin_centre = 0.5*(bin_edges[1:] + bin_edges[:-1])
 
 for test_function in test_functions:
 
+    legends = []
+
     plt.figure("Test function " + test_function.__name__)
 
-    for sampler_cls in (UniformCubeSample, BiasedSampleSphere, BiasedSampleCube):
+    for sampler_cls, color in zip(sampler_classes, colors):
 
         print(sampler_cls.__name__)
         for repeat in range(3):
@@ -104,9 +114,15 @@ for test_function in test_functions:
                                 kind='linear', bounds_error=False, fill_value=0, assume_sorted=True)
 
 
-            plt.plot(bin_centre, f(bin_centre), label=sampler.__class__.__name__+" %i"%(repeat+1))
-            plt.legend()
+            ax = plt.plot(bin_centre, f(bin_centre), color=color)
+            if repeat == 0:
+                legends.append((ax[0], sampler.__class__.__name__))
+
 
             print("Time:", time.time() - start_time)
+
+    handles = [handle for handle, _ in legends]
+    titles = [title for _, title in legends]
+    plt.legend(handles, titles)
 
 plt.show()

@@ -21,7 +21,7 @@ from sas.qtgui.Perspectives.ParticleEditor.function_processor import process_cod
 from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling_methods import (
-    SpatialSample, BiasedSampleSphere, BiasedSampleCube)
+    SpatialSample, RadiallyBiasedSphereSample, RadiallyBiasedCubeSample)
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
     QSample, ZSample, ScatteringCalculation, OutputOptions, CalculationParameters, ParticleDefinition)
@@ -292,10 +292,10 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         seed = int(self.randomSeed.text()) if self.fixRandomSeed.isChecked() else None
 
         if sample_type == 0:
-            return BiasedSampleSphere(radius=radius, n_points_desired=n_desired, seed=seed)
+            return RadiallyBiasedSphereSample(radius=radius, n_points_desired=n_desired, seed=seed)
 
         elif sample_type == 1:
-            return BiasedSampleCube(radius=radius, n_points_desired=n_desired, seed=seed)
+            return RadiallyBiasedCubeSample(radius=radius, n_points_desired=n_desired, seed=seed)
 
         else:
             raise ValueError("Unknown index for spatial sampling method combo")
