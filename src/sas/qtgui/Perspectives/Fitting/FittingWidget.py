@@ -101,7 +101,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    constraintAddedSignal = QtCore.Signal(list)
+    constraintAddedSignal = QtCore.Signal(list, str)
     newModelSignal = QtCore.Signal()
     fittingFinishedSignal = QtCore.Signal(tuple)
     batchFittingFinishedSignal = QtCore.Signal(tuple)
@@ -923,7 +923,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Force checkbox selection when parameter is constrained and disable
         # checkbox interaction
         if not fields_enabled and model.item(row, 0).isCheckable():
-            model.item(row, 0).setCheckState(2)
+            model.item(row, 0).setCheckState(QtCore.Qt.Checked)
             model.item(row, 0).setEnabled(False)
         else:
             # Enable checkbox interaction

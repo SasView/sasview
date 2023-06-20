@@ -238,10 +238,27 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         tab_object = ObjectLibrary.getObject(tab)
 
         # Disconnect all local slots, if connected
-        if tab_object.receivers(tab_object.newModelSignal) > 0:
+        # None of the methods below seem to work with Qt6.2.4
+        # 1.
+        # if tab_object.receivers(tab_object.newModelSignal) > 0:
+        # 2.
+        # newModelSignal =QtCore.QMetaMethod.fromSignal(tab_object.newModelSignal)
+        # if tab_object.isSignalConnected(newModelSignal):
+        # 3.
+        # m_obj = tab_object.metaObject()
+        # is_connected = m_obj.isSignalConnected(m_obj.method(m_obj.indexOfSignal("newModelSignal()")))
+
+        try:
             tab_object.newModelSignal.disconnect()
-        if tab_object.receivers(tab_object.constraintAddedSignal) > 0:
+        except RuntimeError:
+            # need to pass here since no known PySide6 method of checking if signal is connected
+            # seems to work here. Need to upgrade to more recent version of PySide6 but this 
+            # currently causes other issues.
+            pass
+        try:
             tab_object.constraintAddedSignal.disconnect()
+        except RuntimeError:
+            pass
 
         # Reconnect tab signals to local slots
         tab_object.constraintAddedSignal.connect(self.initializeFitList)
@@ -1180,7 +1197,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 if model_name != model:
                     continue
                 # check/uncheck item
-                self.tblTabList.item(row,0).setCheckState(int(check_state))
+                # check_state is a string: "CheckState.Checked" or "CheckState.Unchecked"
+                if 'Unchecked' in check_state:
+                    self.tblTabList.item(row,0).setCheckState(QtCore.Qt.Unchecked)
+                else:
+                    self.tblTabList.item(row,0).setCheckState(QtCore.Qt.Checked)
 
         if not 'checked_constraints' in parameters:
             return
@@ -1230,7 +1251,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # by colon e.g `M1:scale` so no need to parse the constraint
             # string.
             if name in constraint:
-                self.tblConstraints.item(row, 0).setCheckState(0)
+                self.tblConstraints.item(row, 0).setCheckState(QtCore.Qt.Unchecked)
                 # deactivate the constraint
                 tab = self.parent.getTabByName(name[:name.index(":")])
                 row = tab.getRowFromName(name[name.index(":") + 1:])
