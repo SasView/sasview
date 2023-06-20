@@ -45,7 +45,6 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         # Use pre-built UI
         self.setupUi(self)
 
-        self.parent = None
         self.config = config
         self.config_params = ['FITTING_DEFAULT_OPTIMIZER']
 
@@ -54,14 +53,10 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         self.cbAlgorithm.addItems(self.active_fitters)
         self.cbAlgorithmDefault.addItems(self.active_fitters)
 
-        # Handle the combo box changes
-        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
-        self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
-
         # Set the default index
         default_name = [n.name for n in fitters.FITTERS if n.id == sasview_config.FITTING_DEFAULT_OPTIMIZER][0]
         default_index = self.cbAlgorithm.findText(default_name)
-        self.cbAlgorithm.setCurrentIndex(default_index)
+        self._algorithm_change(default_index)
         self.cbAlgorithmDefault.setCurrentIndex(default_index)
         # previous algorithm choice
         self.previous_index = default_index
@@ -71,6 +66,10 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
         # Set defaults
         self.current_fitter_id = getattr(sasview_config, 'FITTING_DEFAULT_OPTIMIZER', fitters.FIT_DEFAULT_ID)
+
+        # To prevent errors related to parent, connect the combo box changes once the widget is instantiated
+        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
+        self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
 
     #
     # Preference Widget required methods
@@ -118,12 +117,18 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
     def onDefaultAlgorithmChange(self):
         text = self.cbAlgorithmDefault.currentText()
+        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(text))
         id = dict((new_val, new_k) for new_k, new_val in bumps.options.FIT_CONFIG.names.items()).get(text)
         self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
 
     def onAlgorithmChange(self, index):
+        """Triggered method when the index of the combo box changes."""
+        self._algorithm_change(index)
+        self._stageChange("Fitting.activeAlgorithm", index)
+
+    def _algorithm_change(self, index):
         """
-        Change the page in response to combo box index
+        Change the page in response to combo box index. Can also be called programmatically.
         """
         # Find the algorithm ID from name
         self.current_fitter_id = \
@@ -174,7 +179,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
                 continue
             if line_edit is None or not isinstance(line_edit, QtWidgets.QLineEdit):
                 continue
-            color = line_edit.palette().color(QtGui.QPalette.Background).name()
+            color = line_edit.palette().color(QtGui.QPalette.Window).name()
             if color == '#fff79a':
                 # Show a custom tooltip and return
                 tooltip = "<html><b>Please enter valid values in all fields.</html>"

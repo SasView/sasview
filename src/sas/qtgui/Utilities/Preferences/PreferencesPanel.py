@@ -37,7 +37,9 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         super(PreferencesPanel, self).__init__(parent)
         self.setupUi(self)
         self._staged_changes = {}
+        self._staged_non_config_changes = {}
         self._staged_requiring_restart = set()
+        self._staged_invalid = set()
         self.parent = parent
         self.setWindowTitle("Preferences")
         # Add predefined widgets to window
@@ -52,6 +54,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(self._cancelStaging)
         self.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self._saveStagedChanges)
         self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(self.help)
+        self._set_accept()
 
     def addWidgets(self, widgets: Dict[str, Callable]):
         """Add a list of named widgets to the window"""
@@ -83,12 +86,42 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         widget = self.stackedWidget.currentWidget()
         if hasattr(widget, 'restoreDefaults') and callable(widget.restoreDefaults):
             widget.restoreDefaults()
+        self._set_accept()
 
     def stageSingleChange(self, key: str, value: ConfigType, config_restart_message: Optional[str] = ""):
         """ Preferences widgets should call this method when changing a variable to prevent direct configuration
         changes"""
-        self._staged_changes[key] = value
+        if getattr(config, key, None) is None:
+            self._staged_non_config_changes[key] = value
+        else:
+            self._staged_changes[key] = value
         self._staged_requiring_restart.add(config_restart_message)
+        self.unset_invalid_input(key)
+        self._set_accept()
+
+    def unStageSingleChange(self, key: str, config_restart_message: Optional[str] = ""):
+        """Preferences widgets should call this method when removing an invalid value from the staged changes."""
+        self._staged_changes.pop(key, None)
+        self._staged_requiring_restart.discard(config_restart_message)
+        self._set_accept()
+
+    def set_invalid_input(self, key: str):
+        """Widgets should call this if an input is invalid to disable the 'OK' and 'Apply' buttons."""
+        self._staged_invalid.add(key)
+        self._set_accept()
+
+    def unset_invalid_input(self, key: str):
+        """Remove the key from the invalid staged values, if necessary"""
+        self._staged_invalid.discard(key)
+        self._set_accept()
+
+    def _set_accept(self):
+        """Enable/disable the 'Accept' and 'OK' buttons based on the current state."""
+        # If any inputs aren't valid -or- if no changes are staged, disable the buttons
+        staged = any(self._staged_changes.keys()) or any(self._staged_non_config_changes.keys())
+        toggle = not any(self._staged_invalid) and staged
+        self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(toggle)
+        self.buttonBox.button(QDialogButtonBox.Apply).setEnabled(toggle)
 
     def _okClicked(self):
         """ Action triggered when the OK button is clicked"""
@@ -110,15 +143,25 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             if msgBox.exec() == QMessageBox.Yes:
                 self.parent.guiManager.quitApplication()
                 os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
-        self._staged_requiring_restart = set()
-        self._staged_changes = {}
+        self._reset_state()
 
     def _cancelStaging(self):
         """ When the Cancel button is clicked, throw away any staged changes and hide the window"""
         for i in range(self.stackedWidget.count()):
             self.stackedWidget.widget(i).restoreGUIValuesFromConfig()
-        self._staged_changes = {}
+        self._reset_state()
         self.close()
+
+    def _reset_state(self):
+        self._staged_requiring_restart = set()
+        self._staged_invalid = set()
+        self._staged_changes = {}
+        self._staged_non_config_changes = {}
+        self._set_accept()
+
+    def closeEvent(self, event):
+        """Capture all window close events and ensure the window is in a base state"""
+        self._cancelStaging()
 
     def close(self):
         """Save the configuration values when the preferences window is closed"""
