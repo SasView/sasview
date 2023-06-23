@@ -711,31 +711,31 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         has_constraints = any([self.rowHasConstraint(i, model_key=model_key) for i in rows])
         has_real_constraints = any([self.rowHasActiveConstraint(i, model_key=model_key) for i in rows])
 
-        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
         self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
-        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect = QtGui.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
         self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
-        self.actionConstrain = QtWidgets.QAction(self)
+        self.actionConstrain = QtGui.QAction(self)
         self.actionConstrain.setObjectName("actionConstrain")
         self.actionConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain "+param_string + to_string))
 
-        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint = QtGui.QAction(self)
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove constraint"))
 
-        self.actionEditConstraint = QtWidgets.QAction(self)
+        self.actionEditConstraint = QtGui.QAction(self)
         self.actionEditConstraint.setObjectName("actionEditConstrain")
         self.actionEditConstraint.setText(QtCore.QCoreApplication.translate("self", "Edit constraint"))
 
-        self.actionMultiConstrain = QtWidgets.QAction(self)
+        self.actionMultiConstrain = QtGui.QAction(self)
         self.actionMultiConstrain.setObjectName("actionMultiConstrain")
         self.actionMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain selected parameters to their current values"))
 
-        self.actionMutualMultiConstrain = QtWidgets.QAction(self)
+        self.actionMutualMultiConstrain = QtGui.QAction(self)
         self.actionMutualMultiConstrain.setObjectName("actionMutualMultiConstrain")
         self.actionMutualMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Mutual constrain of selected parameters..."))
 
