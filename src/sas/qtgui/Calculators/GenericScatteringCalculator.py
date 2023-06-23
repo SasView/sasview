@@ -904,7 +904,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
             
             #Coh b - Coherent Scattering Length(fm)
-            cohB = eval("periodictable." + str(self.nuc_sld_data.pix_symbol[i]) + ".neutron.b_c") 
+            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
 
             #Calculate the Magnitude of the Coordinate vector for the atom and the center of mass
             MagnitudeOfCoM = numpy.sqrt(numpy.power(CoM[0]-coordinates[0],2) + numpy.power(CoM[1]-coordinates[1],2) + numpy.power(CoM[2]-coordinates[2],2))
