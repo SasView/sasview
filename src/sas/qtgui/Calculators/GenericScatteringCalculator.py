@@ -5,6 +5,7 @@ import numpy
 import logging
 import time
 import timeit
+import periodictable
 
 from scipy.spatial.transform import Rotation
 
@@ -15,6 +16,8 @@ from PySide6 import QtWidgets
 from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from matplotlib import __version__ as mpl_version
+
+from periodictable import *
 
 from twisted.internet import threads
 
@@ -821,7 +824,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if self.nuc_sld_data.is_elements:
                 self.txtNoPixels.setText(str(len(self.nuc_sld_data.elements)))
             else:
-                self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
+                self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n))) 
         elif self.is_mag:
             if self.mag_sld_data.is_elements:
                 self.txtNoPixels.setText(str(len(self.mag_sld_data.elements)))
@@ -857,10 +860,63 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtZstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.zstepsize))
         # otherwise leave as set since editable by user
 
+        # update the value of the Radius of Gyration with values from the loaded data
+        if self.is_nuc:
+            if self.nuc_sld_data.is_elements:
+                self.txtROG.setText(str("N/A for Elements"))
+            else:
+                self.txtROG.setText(str(self.radius_of_gyration()))
+        elif self.is_mag:
+            self.txtROG.setText(str("N/A for magnetic data"))
+        else:
+            self.txtROG.setText(str("N/A for no data"))
+            
+
         # If nodes or stepsize changed then this may effect what values are allowed
         self.gui_text_changed(sender=self.txtNoQBins)
         self.gui_text_changed(sender=self.txtQxMax)
     
+    def radius_of_gyration(self):
+        #Calculate Center of Mass(CoM) First
+        CoMnumerator= [0.0,0.0,0.0]
+        CoMdenominator = [0.0,0.0,0.0]
+        CoM = [0.0,0.0,0.0]
+
+        for i in range(len(self.nuc_sld_data.pos_x)):
+            coordinates = [0.0,0.0,0.0]
+            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
+            
+            #Coh b - Coherent Scattering Length(fm)
+            cohB = eval("periodictable." + str(self.nuc_sld_data.pix_symbol[i]) + ".neutron.b_c") 
+
+            for i in range(3): #sets CiN
+                CoMnumerator[i] += (coordinates[i]*cohB)
+                CoMdenominator[i] += cohB
+
+        for i in range(3):
+            CoM[i] = CoMnumerator[i]/CoMdenominator[i] #center of mass
+
+        #Now Calculate RoG
+        RoGNumerator = RoGDenominator = 0.0
+
+        for i in range(len(self.nuc_sld_data.pos_x)):
+            coordinates = [0.0,0.0,0.0]
+            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
+            
+            #Coh b - Coherent Scattering Length(fm)
+            cohB = eval("periodictable." + str(self.nuc_sld_data.pix_symbol[i]) + ".neutron.b_c") 
+
+            #Calculate the Magnitude of the Coordinate vector for the atom and the center of mass
+            MagnitudeOfCoM = numpy.sqrt(numpy.power(CoM[0]-coordinates[0],2) + numpy.power(CoM[1]-coordinates[1],2) + numpy.power(CoM[2]-coordinates[2],2))
+
+            #Calculate Rate of Gyration (Squared) with the formular
+            RoGNumerator += cohB * (numpy.power(MagnitudeOfCoM,2))
+            RoGDenominator += cohB
+
+        RoG = numpy.sqrt(RoGNumerator/RoGDenominator)
+
+        return (RoG)
+
     def update_geometry_effects(self):
         """This function updates the number of pixels and total volume when the number of nodes/stepsize is changed
 
