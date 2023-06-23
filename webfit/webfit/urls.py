@@ -18,10 +18,9 @@ import logging
 
 from django.contrib import admin
 from django.apps import apps
-from django.urls import path, include
+from django.urls import path, re_path, include
+from rest_framework.reverse import reverse
 
-
-#do i need this? reservation_item_types = f'(?P<item_type>{"|".join(ReservationItemType.values())})'
 
 #base urls 
 # no urls for pluggins currently
@@ -29,11 +28,8 @@ urlpatterns = [
     #admin page
     path("admin/", admin.site.urls),
 
-    #root url (figure this out) <-move elsewhere
-	path("", include("login.urls"), name = "homepage"),
-
-    #login/authentication stuff
-    path("", include("login.urls"), name = "login"),
+    #root url
+    path("", include("user_authentication.urls"), name = "homepage + login"),
     
     #fit path
     path("analyze/", include("analyze.urls"), name = "analysis tools"),

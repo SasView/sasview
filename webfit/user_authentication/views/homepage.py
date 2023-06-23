@@ -6,3 +6,5 @@ def placeholder(request):
     return HttpResponse("Hi")
 
 #turn this file into homepage later
+
+#WHERE DOES THIS GO?

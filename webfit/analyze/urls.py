@@ -1,11 +1,14 @@
-"""a file for pathing for all analyze app pathing
-currently only fitting is created, which makes this seem redundant"""
-
 from django.urls import path, include
+from analyze.fitting.views import bumps
+
+#urls to fit
+fit_patterns = [
+    path("bumps/", bumps.run),   
+]
 
 urlpatterns = [
-    path("fit/", include("analyze.fitting.urls")),
-    #path("Inversion/", include("fittings.urls")),   <- where is this? 
-    #path("Invariant/", include("fittings.urls")),
-    #path("Corfunc/", include("fittings.urls")),
+    path("fit/", include(fit_patterns)),
+    #path("Inversion/", include()),   <- where is this in the main script? 
+    #path("Invariant/", include()),
+    #path("Corfunc/", include()),
 ]
