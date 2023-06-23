@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-# test function
-def placeholder(request):
-    return HttpResponse("Hi")
+#def bumps()
+#def
+
+def run(request):
+    return HttpResponse("test")

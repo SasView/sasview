@@ -14,22 +14,22 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import logging
+
 from django.contrib import admin
 from django.apps import apps
 from django.urls import path, include
-from rest_framework import routers
-from . import settings
 
-#REST API urls
-router = routers.DefaultRouter()
 
 #do i need this? reservation_item_types = f'(?P<item_type>{"|".join(ReservationItemType.values())})'
 
 #base urls 
 # no urls for pluggins currently
-
 urlpatterns = [
+    #admin page
     path("admin/", admin.site.urls),
-    path("fitting/", include("fitting.urls"))
+
+    #fit path
+    path("analyze/", include("analyze.urls"), name = "analysis tools"),
 ]
 
