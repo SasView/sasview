@@ -21,6 +21,9 @@ from django.apps import apps
 from django.urls import path, re_path, include
 from rest_framework.reverse import reverse
 
+#TO DO: finalize version control
+#this doesn't go here... figure out where this goes
+reverse("", request=request)
 
 #base urls 
 # no urls for pluggins currently
