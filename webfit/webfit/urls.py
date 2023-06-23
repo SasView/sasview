@@ -29,6 +29,12 @@ urlpatterns = [
     #admin page
     path("admin/", admin.site.urls),
 
+    #root url (figure this out) <-move elsewhere
+	path("", include("login.urls"), name = "homepage"),
+
+    #login/authentication stuff
+    path("", include("login.urls"), name = "login"),
+    
     #fit path
     path("analyze/", include("analyze.urls"), name = "analysis tools"),
 ]
