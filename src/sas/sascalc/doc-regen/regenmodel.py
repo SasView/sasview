@@ -78,7 +78,7 @@ except ImportError:
 # Destination directory for model docs
 #ROOT = dirname(dirname(realpath(__file__)))
 #TARGET_DIR = joinpath(ROOT, "doc", "model")
-TARGET_DIR = "../../_sources/user/models" # relative to current path
+TARGET_DIR = "../../../../docs/sphinx-docs/source-temp/user/models" # relative to current path
 
 def plot_1d(model, opts, ax):
     # type: (KernelModel, Dict[str, Any], Axes) -> None
@@ -461,7 +461,7 @@ def main():
         help="number of cpus to use in build")
     parser.add_argument("-f", "--force", action="store_true",
         help="force rebuild (serial only)")
-    parser.add_argument("-r", "--rst", default="model", metavar="path",
+    parser.add_argument("-r", "--rst", default="../../../../docs/sphinx-docs/source-temp/user/models", metavar="path",
         help="path for the rst files")
     parser.add_argument("-b", "--build", default="html", metavar="path",
         help="path for the html files (if sphinx build)")

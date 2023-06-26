@@ -20,7 +20,7 @@ else
     COPY    = cp
 endif
 
-MODELS_PY = $(wildcard ../../../sasmodels/models/[a-z]*.py)
+MODELS_PY = $(wildcard ../../../../docs/sphinx-docs/source-temp/user/models/src/[a-z]*.py)
 
 help:
 	@echo "Please use \`make <target>' where <target> is `html'"
@@ -34,9 +34,9 @@ ref/models/index.rst: regentoc.py regenmodel.py $(MODELS_PY)
 build: ref/models/index.rst
 
 html: build
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) ../models/html
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) ../../../../docs/sphinx-docs/source-temp/user/models/src
 	@echo
-	@echo "Build finished. The HTML pages are in ../models/html."
+	@echo "Build finished. The HTML pages are in ../../../../docs/sphinx-docs/source-temp/user/models/src."
 
 
 
