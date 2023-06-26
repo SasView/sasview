@@ -960,6 +960,11 @@ Not editable.</string>
        <string>Debye full avg.</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>Full avg. w/ β(Q)</string>
+      </property>
+     </item>
     </widget>
    </item>
    <item row="6" column="5">

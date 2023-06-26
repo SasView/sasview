@@ -6,6 +6,7 @@ import logging
 import time
 import timeit
 import periodictable
+import time
 
 from scipy.spatial.transform import Rotation
 
@@ -83,7 +84,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.is_avg = False
         self.is_nuc = False
         self.is_mag = False
+        self.is_beta = False
         self.data_to_plot = None
+        self.data_betaQ = None
         self.graph_num = 1      # index for name of graph
 
         # finish UI setup - install qml window
@@ -565,7 +568,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # update the averaging option fromthe button on the GUI
         # required as the button may have been previously hidden with
         # any value, and preserves this - we must update the variable to match the GUI
-        self.is_avg = (self.cbOptionsCalc.currentIndex() == 1)
+        self.is_avg = (self.cbOptionsCalc.currentIndex() in (1,2))
+        # did user request Beta(Q) calculation?
+        self.is_beta = (self.cbOptionsCalc.currentIndex() == 2)
         # If averaging then set to 0 and diable the magnetic SLD textboxes
         if self.is_avg:
             self.txtMx.setEnabled(False)
@@ -865,7 +870,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if self.nuc_sld_data.is_elements:
                 self.txtROG.setText(str("N/A for Elements"))
             else:
-                self.txtROG.setText(str(self.radius_of_gyration()))
+                self.txtROG.setText(str(round(self.radius_of_gyration(),1)) + " Å")
         elif self.is_mag:
             self.txtROG.setText(str("N/A for magnetic data"))
         else:
@@ -1061,8 +1066,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # reset all file data to its default empty state
             self.is_nuc = False
             self.is_mag = False
+            self.is_beta = False
             self.nuc_sld_data = None
             self.mag_sld_data = None
+            self.beta_data = None
             # update the gui for the no files loaded case
             self.change_data_type()
             # verify that the new enabled files are compatible
@@ -1342,6 +1349,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.cancelCalculation = False
             #self.cmdCompute.setEnabled(False)
             d = threads.deferToThread(self.complete, inputs, self._update)
+
+            # if Beta(Q) Calculation has been requested, run calculation
+            if self.is_beta:
+                time.sleep(30)
+                print("Calculating Beta(Q)...")
+                self.create_betaPlot()
+                print("done")
             # Add deferred callback for call return
             # d.addCallback(self.plot_1_2d)
             d.addCallback(self.calculateComplete)
@@ -1426,6 +1440,67 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdCompute.setEnabled(True)
         return
+    
+    def create_betaPlot(self):
+        """Carry out the compuation of beta Q using provided & calculated data
+        Returns a list of BetaQ values
+
+        """
+        
+        #Center Of Mass Calculation
+        CoM = self.centerOfMass()
+        betaQ = []
+
+        # Default values
+        xmax = self.qmax_x
+        xmin = self.qmax_x * _Q1D_MIN
+        qstep = self.npts_x
+
+        fQ = [0 for j in range(self.npts_x)]
+        currentQValue = []
+        for a in range(self.npts_x):
+            if(self.npts_x == 1):
+                currentQValue.append(xmin)
+            else: 
+                currentQValue.append(xmin + (xmax - xmin)/(self.npts_x-1)*a)
+        formFactor = self.data_to_plot
+
+        print(len(self.data_to_plot))
+
+        for a in range(self.npts_x):           
+            for b in range(len(self.data.x)):
+                #atoms
+                atomName = str(self.nuc_sld_data.pix_symbol[b])
+                #Coherent Scattering Length of Atom
+                cohB = periodictable.elements.symbol(atomName).neutron.b_c
+
+                coordinates = [float(self.nuc_sld_data.pos_x[b]),float(self.nuc_sld_data.pos_y[b]),float(self.nuc_sld_data.pos_z[b])]
+                
+                relativeCoordinate = [0.0,0.0,0.0]
+                relativeCoordinate[0] = coordinates[0] - CoM[0]
+                relativeCoordinate[1] = coordinates[1] - CoM[1]
+                relativeCoordinate[2] = coordinates[2] - CoM[2]
+
+                magnitudeRelativeCoordinate = numpy.sqrt(relativeCoordinate[0]**2 + relativeCoordinate[1]**2 + relativeCoordinate[2]**2)
+    
+                fQ[a] +=  (cohB * (numpy.sin(currentQValue[a] * magnitudeRelativeCoordinate) / (currentQValue[a] * magnitudeRelativeCoordinate)))
+            
+        
+            #Beta Q calculation
+            print('Q Value: '+ str(currentQValue[a]))
+            print('fQ Value: '+str(fQ[a]))
+            print('Form Factor Value: '+str(formFactor[a]))
+
+            betaQ.append((fQ[a] **2)/(formFactor[a]))
+        
+        print('X length:' + str(len(currentQValue)))
+        print('Y length:' + str(len(betaQ)))
+
+        scalingFactor = betaQ[0]
+        for i in range (len(betaQ)):
+            betaQ[i] = (betaQ[i]/scalingFactor)
+
+        return betaQ
 
     def onSaveFile(self):
         """Save data as .sld file"""
