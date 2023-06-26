@@ -1352,7 +1352,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
             # if Beta(Q) Calculation has been requested, run calculation
             if self.is_beta:
-                time.sleep(30)
+                time.sleep(15)
                 print("Calculating Beta(Q)...")
                 self.create_betaPlot()
                 print("done")
@@ -1449,7 +1449,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         
         #Center Of Mass Calculation
         CoM = self.centerOfMass()
-        betaQ = []
+        self.data_betaQ = []
 
         # Default values
         xmax = self.qmax_x
@@ -1484,23 +1484,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 magnitudeRelativeCoordinate = numpy.sqrt(relativeCoordinate[0]**2 + relativeCoordinate[1]**2 + relativeCoordinate[2]**2)
     
                 fQ[a] +=  (cohB * (numpy.sin(currentQValue[a] * magnitudeRelativeCoordinate) / (currentQValue[a] * magnitudeRelativeCoordinate)))
-            
-        
-            #Beta Q calculation
-            print('Q Value: '+ str(currentQValue[a]))
-            print('fQ Value: '+str(fQ[a]))
-            print('Form Factor Value: '+str(formFactor[a]))
 
-            betaQ.append((fQ[a] **2)/(formFactor[a]))
+            #Beta Q Calculation
+            self.data_betaQ.append((fQ[a] **2)/(formFactor[a]))
         
         print('X length:' + str(len(currentQValue)))
-        print('Y length:' + str(len(betaQ)))
+        print('Y length:' + str(len(self.data_betaQ)))
 
-        scalingFactor = betaQ[0]
-        for i in range (len(betaQ)):
-            betaQ[i] = (betaQ[i]/scalingFactor)
+        #Scale Beta Q to 0-1
+        scalingFactor = self.data_betaQ[0]
+        for i in range (len(self.data_betaQ)):
+            self.data_betaQ[i] = (self.data_betaQ[i]/scalingFactor)
 
-        return betaQ
+        return
 
     def onSaveFile(self):
         """Save data as .sld file"""
@@ -1573,6 +1569,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
 
             self.graph_num += 1
+            if self.is_beta:
+                print("leng x: " + str(len(self.data.x)))
+                print("leng y: " + str(len(self.data_betaQ)))
+                dataBetaQ = Data1D(x=self.data.x, y=self.data_betaQ)
+                dataBetaQ.title = "GenSAS {}  #{} BetaQ".format(self.file_name(),
+                                                    int(self.graph_num))
+            dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
+            dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
         else:
             data = Data2D(image=numpy.nan_to_num(self.data_to_plot),
                           qx_data=self.data.qx_data,
@@ -1595,6 +1599,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         new_item = GuiUtils.createModelItemWithPlot(data, name=data.title)
         self.communicator.updateModelFromPerspectiveSignal.emit(new_item)
         self.communicator.forcePlotDisplaySignal.emit([new_item, data])
+        if self.is_beta:
+            new_item = GuiUtils.createModelItemWithPlot(dataBetaQ, name=dataBetaQ.title)
+            self.communicator.updateModelFromPerspectiveSignal.emit(new_item)
+            self.communicator.forcePlotDisplaySignal.emit([new_item, dataBetaQ])
 
 class Plotter3DWidget(PlotterBase):
     """
