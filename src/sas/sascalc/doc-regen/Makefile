@@ -6,6 +6,7 @@ PYTHON          ?= python
 SPHINXOPTS       = -W --keep-going
 SPHINXBUILD      = "$(PYTHON)" -m sphinx
 PAPER           ?= letter
+BUILD_CHECK      = ../../../../.github
 PY_SRC           = ../../../../docs/sphinx-docs/source-temp/user/models/src/
 DOC_DST          = ../../../../docs/sphinx-docs/build/doctrees/
 RST_SRC          = ../../../../docs/sphinx-docs/source-temp/
