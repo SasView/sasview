@@ -19,8 +19,27 @@ import logging
 from django.contrib import admin
 from django.urls import path, re_path, include
 from rest_framework import routers, serializers
+from user_authentication.models import UserTestModel
 
 #TO DO: finalize version control
+#this doesn't go here... figure out where this goes
+class LoginSerializerV1(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = UserTestModel
+        fields = ("username", "password")
+        
+class LoginSerializerV2(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = UserTestModel
+        fields = ("username", "password")
+
+def get_version(self):
+    if self.request == "v1":
+        return LoginSerializerV1
+    #add other versions here later
+    else:
+        return LoginSerializerV2
+
 
 #base urls 
 # no urls for pluggins currently

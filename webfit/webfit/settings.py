@@ -84,10 +84,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
     ],
-    "DEFAULT_VERSIONING_CLASS": "rest_framwork.versioning.URLPATHVERSIONING",
+    "DEFAULT_VERSIONING_CLASS": "rest_framwork.versioning.QueryParameterVersioning",
     "DEFAULT_VERSION" : "v1",
-    "ALLOWED_VERSIONS" : {"v1"},
-    "VERSION_PARAM" : "version"
+    "ALLOWED_VERSIONS" : "v1",
     #version_param is default set to "version"
 }
 
