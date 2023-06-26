@@ -3,11 +3,11 @@
 # To be packaged with release
 
 PYTHON          ?= python
-SPHINXOPTS       =
+SPHINXOPTS       = -W --keep-going
 SPHINXBUILD      = "$(PYTHON)" -m sphinx
 PAPER           ?= letter
 PY_SRC           = ../../../../docs/sphinx-docs/source-temp/user/models/src/
-DOC_DST          = ../../../../docs/sphinx-docs/build/doctrees
+DOC_DST          = ../../../../docs/sphinx-docs/build/doctrees/
 RST_SRC          = ../../../../docs/sphinx-docs/source-temp/
 HTML_BUILD_DST   = ../../../../docs/sphinx-docs/build/html/
  
@@ -42,6 +42,7 @@ rst: regentoc.py regenmodel.py $(MODELS_PY)
 	"$(PYTHON)" regentoc.py $(MODELS_PY)
 
 doctree-loc: treegen.py
+# Currently does nothing--see referenced python script for details
 	"$(PYTHON)" treegen.py
 	@echo "This command is currently unused in the final build. Did you mean to call `html' or `rst'?"
 

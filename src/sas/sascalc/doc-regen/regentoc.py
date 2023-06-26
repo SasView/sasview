@@ -45,7 +45,7 @@ def _add_subcategory(category_name, parent):
 
 def _add_model(file, model_name):
     # type: (IO[str], str) -> None
-    file.write("    ../../model/%s.rst\n"%model_name)
+    file.write("    /user/models/%s.rst\n"%model_name)
 
 def _maybe_make_category(category, models, cat_files, model_toc):
     # type: (str, List[str], Dict[str, BinaryIO], BinaryIO) -> None
