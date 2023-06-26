@@ -7,26 +7,28 @@ SPHINXOPTS       =
 SPHINXBUILD      = "$(PYTHON)" -m sphinx
 PAPER           ?= letter
 PY_SRC           = ../../../../docs/sphinx-docs/source-temp/user/models/src/
-HTML_BUILD_DIR   = 
-
+DOC_DST          = ../../../../docs/sphinx-docs/build/doctrees
+RST_SRC          = ../../../../docs/sphinx-docs/source-temp/
+HTML_BUILD_DST   = ../../../../docs/sphinx-docs/build/html/
+ 
 ifdef ComSpec
-    RMDIR   = rmdir /s/q
-    CPDIR   = xcopy /q/e/i
-    MKDIR   = mkdir
-    PATHSEP = $(strip \)
-    COPY    = copy
+	RMDIR   = rmdir /s/q
+	CPDIR   = xcopy /q/e/i
+	MKDIR   = mkdir
+	PATHSEP = $(strip \)
+	COPY    = copy
 else
-    RMDIR   = rm -rf
-    CPDIR   = cp -rp
-    MKDIR   = mkdir -p
-    PATHSEP = $(strip /)
-    COPY    = cp
+	RMDIR   = rm -rf
+	CPDIR   = cp -rp
+	MKDIR   = mkdir -p
+	PATHSEP = $(strip /)
+	COPY    = cp
 endif
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_elements.papersize=a4
 PAPEROPT_letter = -D latex_elements.papersize=letter
-ALLSPHINXOPTS   = -d _build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+ALLSPHINXOPTS   = -d $(DOC_DST) $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) $(RST_SRC)
 
 MODELS_PY = $(wildcard $(PY_SRC)[a-z]*.py)
 
@@ -39,7 +41,11 @@ rst: regentoc.py regenmodel.py $(MODELS_PY)
 	"$(PYTHON)" regenmodel.py $(MODELS_PY)
 	"$(PYTHON)" regentoc.py $(MODELS_PY)
 
+doctree-loc: treegen.py
+	"$(PYTHON)" treegen.py
+	@echo "This command is currently unused in the final build. Did you mean to call `html' or `rst'?"
+
 html: rst
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) ../../../../docs/sphinx-docs/source-temp/user/models/src
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(HTML_BUILD_DST)
 	@echo
-	@echo "Build finished. The HTML pages are in ../../../../docs/sphinx-docs/source-temp/user/models/src."
+	@echo "Build finished. The HTML pages are in ../../../../docs/sphinx-docs/build/html/"
