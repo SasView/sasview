@@ -878,23 +878,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     
     def radius_of_gyration(self):
         #Calculate Center of Mass(CoM) First
-        CoMnumerator= [0.0,0.0,0.0]
-        CoMdenominator = [0.0,0.0,0.0]
-        CoM = [0.0,0.0,0.0]
-
-        for i in range(len(self.nuc_sld_data.pos_x)):
-            coordinates = [0.0,0.0,0.0]
-            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
-            
-            #Coh b - Coherent Scattering Length(fm)
-            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
-
-            for i in range(3): #sets CiN
-                CoMnumerator[i] += (coordinates[i]*cohB)
-                CoMdenominator[i] += cohB
-
-        for i in range(3):
-            CoM[i] = CoMnumerator[i]/CoMdenominator[i] #center of mass
+        CoM = self.centerOfMass()
 
         #Now Calculate RoG
         RoGNumerator = RoGDenominator = 0.0
@@ -916,6 +900,29 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         RoG = numpy.sqrt(RoGNumerator/RoGDenominator)
 
         return (RoG)
+    
+    def centerOfMass(self):
+        """Calculate Center of Mass(CoM) of provided atom"""
+        CoMnumerator= [0.0,0.0,0.0]
+        CoMdenominator = [0.0,0.0,0.0]
+        CoM = [0.0,0.0,0.0]
+
+        for i in range(len(self.nuc_sld_data.pos_x)):
+            coordinates = [0.0,0.0,0.0]
+            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
+            
+            #Coh b - Coherent Scattering Length(fm)
+            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
+
+            for i in range(3): #sets CiN
+                CoMnumerator[i] += (coordinates[i]*cohB)
+                CoMdenominator[i] += cohB
+
+        for i in range(3):
+            CoM[i] = CoMnumerator[i]/CoMdenominator[i] #center of mass
+        
+        return CoM
+        
 
     def update_geometry_effects(self):
         """This function updates the number of pixels and total volume when the number of nodes/stepsize is changed
