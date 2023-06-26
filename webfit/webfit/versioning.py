@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from rest_framework import exceptions
 from rest_framework.reverse import _reverse
-from rest_framework.settings import api_settings, rest
+from rest_framework.settings import api_settings
 
 class BaseVersioning:
     default_version = api_settings.DEFAULT_VERSION
