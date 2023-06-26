@@ -1,9 +1,9 @@
 from django.urls import path, include
-from analyze.fitting.views import bumps
+from analyze.fitting import views
 
 #urls to fit
 fit_patterns = [
-    path("bumps/", bumps.run),   
+    path("bumps/", views.run),   
 ]
 
 urlpatterns = [

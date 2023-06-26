@@ -17,13 +17,29 @@ Including another URLconf
 import logging
 
 from django.contrib import admin
-from django.apps import apps
 from django.urls import path, re_path, include
-from rest_framework.reverse import reverse
+from rest_framework import routers, serializers
+from user_authentication.models import UserTestModel
 
 #TO DO: finalize version control
 #this doesn't go here... figure out where this goes
-reverse("", request=request)
+class LoginSerializerV1(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = UserTestModel
+        fields = ("username", "password")
+        
+class LoginSerializerV2(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = UserTestModel
+        fields = ("username", "password")
+
+def get_version(self):
+    if self.request == "v1":
+        return LoginSerializerV1
+    #add other versions here later
+    else:
+        return LoginSerializerV2
+
 
 #base urls 
 # no urls for pluggins currently
@@ -32,7 +48,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     #root url
-    path("", include("user_authentication.urls"), name = "homepage + login"),
+    path("", include("user_authentication.urls"), name="homepage"),
     
     #fit path
     path("analyze/", include("analyze.urls"), name = "analysis tools"),
