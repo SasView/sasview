@@ -2,10 +2,11 @@ import sys
 from logging import getLogger
 from types import ModuleType
 
-from sasdata.data_util.registry import ExtensionRegistry
+from sas.sascalc.fit.models import ModelManagerBase
 from sasdata.dataloader.loader import Loader
 from sasdata.data_util.loader_exceptions import NoKnownLoaderException, DefaultReaderException
 
+#do i need these if we have loader exceptions^^
 from django.db import models
 from django.core.exceptions import (
     NON_FIELD_ERRORS,
@@ -54,5 +55,13 @@ class fits(models.Model):
 
     """
     import sasmodels or through models.py in fit (modelmanagerbase)<---- create choice list
-    view saswebcalc
     """
+    class sasmodels():
+        manager = ModelManagerBase()
+        model_list = manager.get_model_list
+        MODEL_CHOICES = [
+            model_list
+        ]
+
+
+#TODO: view saswebcalc later
