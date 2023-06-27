@@ -1,9 +1,7 @@
 from logging import getLogger
 from django.shortcuts import render
 from django.http import HttpResponse
-from sasdata.dataloader.loader import Loader, Registry
-
-from sas.sascalc.fit.Loader import Loader
+from sasdata.dataloader.loader import Loader
 from analyze.fitting.models import fits
 
 fit_logger = getLogger(__name__)

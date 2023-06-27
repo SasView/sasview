@@ -1,12 +1,12 @@
 import logging
-from django.urls import path, include
+from django.urls import path, re_path, include
 from analyze.fitting import views
 
 logger = logging.getLogger(__name__)
 
 #urls to fit
 fit_patterns = [
-    path("bumps/", views.run, name = "bumps"),   
+    re_path(r"^(?P<version>(v1))/bumps/$", views.run, name = "bumps"),   
 ]
 
 urlpatterns = [
