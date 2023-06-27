@@ -1,8 +1,22 @@
+from logging import getLogger
 from django.shortcuts import render
 from django.http import HttpResponse
+from sasdata.dataloader.loader import Loader, Registry
 
-#def bumps()
-#def
+from sas.sascalc.fit.Loader import Loader
+from analyze.fitting.models import fits
 
-def run(request):
-    return HttpResponse("test")
+fit_logger = getLogger(__name__)
+
+#how do i get loader to work here?
+#what exactly am i trying to load
+#should this be in models instead
+
+#LOADER
+
+
+#FIT ENGINE
+#MODELS
+#PLUS IN MODEL
+#BUMPS
+#QSMEARING
