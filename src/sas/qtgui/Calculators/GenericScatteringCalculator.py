@@ -6,7 +6,6 @@ import logging
 import time
 import timeit
 import periodictable
-import time
 
 from scipy.spatial.transform import Rotation
 
