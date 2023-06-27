@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 #urls to fit
 fit_patterns = [
-    re_path(r"^(?P<version>(v1))/bumps/$", views.run, name = "bumps"),   
+    path("bumps/", views.run, name = "bumps"),   
 ]
 
 urlpatterns = [
