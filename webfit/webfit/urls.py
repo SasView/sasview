@@ -21,6 +21,8 @@ from django.urls import path, re_path, include
 from rest_framework import routers, serializers
 from user_authentication.models import UserTestModel
 
+logger = logging.getLogger(__name__)
+
 #TO DO: finalize version control
 #this doesn't go here... figure out where this goes
 class LoginSerializerV1(serializers.HyperlinkedModelSerializer):
@@ -45,12 +47,12 @@ def get_version(self):
 # no urls for pluggins currently
 urlpatterns = [
     #admin page
-    path("admin/", admin.site.urls),
+    path("admin/", admin.site.urls, name = "admin page"),
 
     #r"^(?P<name>.+)/$
     #re_path(r"^tool_information/(?P<tool_id>\d+)/(?P<user_id>\d+)/(?P<back>back_to_start|back_to_category)/$", views.tool_information, name="kiosk_tool_information"),
     #root url
-    path("", include("user_authentication.urls"), name="homepage"),
+    path("", include("user_authentication.urls"), name="authentication tools"),
     
     #fit path
     

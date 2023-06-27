@@ -1,9 +1,10 @@
+import logging
 from django.urls import path, re_path, include
 from .views import homepage, authentication
 
-app_name = 'user_authentication'
-urlpatterns = [
-    path("", homepage.placeholder),
+logger = logging.getLogger(__name__)
 
-    re_path(r'^(?P<version>[v1]+)/login/$', authentication.placeholder_login_screen, name='login placeholder'),
+urlpatterns = [
+    path("", homepage.placeholder, name = "homepage"),
+    re_path(r"^(?P<version>(v1))/login/$", authentication.placeholder_login_screen, name="login placeholder"),
 ]
