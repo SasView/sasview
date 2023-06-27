@@ -1,6 +1,7 @@
 import sys
 from logging import getLogger
 from types import ModuleType
+from analyze.models import Base
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -33,7 +34,8 @@ models_logger = getLogger(__name__)
 
 loader = Loader()
 
-class fits(models.Model):
+
+class Fits(Base):
 
     #import
     #takes files string and turn it into DataInfo
@@ -49,6 +51,8 @@ class fits(models.Model):
     #uhhh get db for user
     """
     user = models.ForeignKey("user", on_delete=models.CASCADE)
+    save via user id (unique)
+    look at models.py in sasview -> sasmodel-marketplace
     """
 
     """create opt in feature to upload data to example pool
@@ -57,26 +61,28 @@ class fits(models.Model):
 
         1 api, takes data and creates unique Hash (algorithm and calculates unique 260 char string)
     """
-    opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
-    if opt_in == True:
+    
+    if Base.opt_in == True:
         #upload data to example data pool
         Loader.save("PUT FILE STRING HERE LATER", data)
-        #opt in to create hash for data
-        create_hash = models.BooleanField(default = False, help_text= "create unique Hash for your data")
-        if create_hash == True:
-            hash(data)
 
     import_example_data = [
-        ""
     ]
     """
     import sasmodels or through models.py in fit (modelmanagerbase)<---- create choice list
     """
-    class sasmodels():
+    class SasModels():
         manager = ModelManager()
         MODEL_CHOICES = [
             manager.get_model_list
         ]
+
+    class pluginmodels():
+        #create plug in models <- grab by url
+        online_model_url = models.CharField()
+
+    class OnlineModelImport():
+        ffff
 
 
 #TODO: view saswebcalc later
