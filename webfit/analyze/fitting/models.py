@@ -45,25 +45,37 @@ class fits(models.Model):
     saved_file_string = models.CharField(max_length=200, null = False, help_text="file name to data saved")
     Loader.save(saved_file_string, data)
 
+    #save data under user
+    #uhhh get db for user
+    """
+    user = models.ForeignKey("user", on_delete=models.CASCADE)
+    """
+
     """create opt in feature to upload data to example pool
         create option to add to open list of data
         can opt in to save data into example data pool
 
         1 api, takes data and creates unique Hash (algorithm and calculates unique 260 char string)
     """
-    opt_in = models.BooleanField(default = False)
+    opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
     if opt_in == True:
         #upload data to example data pool
         Loader.save("PUT FILE STRING HERE LATER", data)
+        #opt in to create hash for data
+        create_hash = models.BooleanField(default = False, help_text= "create unique Hash for your data")
+        if create_hash == True:
+            hash(data)
 
+    import_example_data = [
+        ""
+    ]
     """
     import sasmodels or through models.py in fit (modelmanagerbase)<---- create choice list
     """
     class sasmodels():
         manager = ModelManager()
-        model_list = manager.get_model_list
         MODEL_CHOICES = [
-            model_list
+            manager.get_model_list
         ]
 
 
