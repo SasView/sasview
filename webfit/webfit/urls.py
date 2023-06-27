@@ -35,6 +35,6 @@ urlpatterns = [
     
     #fit path
     
-    path("v1/analyze/", include("analyze.urls"), name = "analysis tools"),
+    path("<str:version>/analyze/", include("analyze.urls"), name = "analysis tools"),
 ]
 
