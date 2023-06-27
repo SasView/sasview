@@ -6,5 +6,5 @@ logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path("", homepage.placeholder, name = "homepage"),
-    re_path(r"^(?P<version>(v1))/login/$", authentication.placeholder_login_screen, name="login placeholder"),
+    path("<str:version>/login/", authentication.placeholder_login_screen, name="login placeholder"),
 ]
