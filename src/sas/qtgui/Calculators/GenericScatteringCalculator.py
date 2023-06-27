@@ -1464,8 +1464,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 currentQValue.append(xmin + (xmax - xmin)/(self.npts_x-1)*a)
         formFactor = self.data_to_plot
 
-        for a in range(self.npts_x):           
-            for b in range(len(self.data.x)):
+        for a in range(self.npts_x):
+                       
+            for b in range(len(self.nuc_sld_data.pos_x)):
                 #atoms
                 atomName = str(self.nuc_sld_data.pix_symbol[b])
                 #Coherent Scattering Length of Atom
