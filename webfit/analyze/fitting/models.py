@@ -2,7 +2,7 @@ import sys
 from logging import getLogger
 from types import ModuleType
 
-from sas.sascalc.fit.models import ModelManagerBase
+from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
 from sasdata.data_util.loader_exceptions import NoKnownLoaderException, DefaultReaderException
 
@@ -60,7 +60,7 @@ class fits(models.Model):
     import sasmodels or through models.py in fit (modelmanagerbase)<---- create choice list
     """
     class sasmodels():
-        manager = ModelManagerBase()
+        manager = ModelManager()
         model_list = manager.get_model_list
         MODEL_CHOICES = [
             model_list
