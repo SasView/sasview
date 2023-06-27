@@ -30,6 +30,10 @@ from django.core.exceptions import (
 models_logger = getLogger(__name__)
 
 class Base(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-    #find user id (auto generated)
-    opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
+    use_GPU = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
+
+
+    

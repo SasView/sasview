@@ -37,35 +37,6 @@ loader = Loader()
 
 class Fits(Base):
 
-    #import
-    #takes files string and turn it into DataInfo
-    file_string = models.CharField(max_length=200, null = False, help_text="The name for all the fit data")
-    data = Loader.load(file_string)
-
-    #export
-    #takes DataInfo and saves it into to specified file location
-    saved_file_string = models.CharField(max_length=200, null = False, help_text="file name to data saved")
-    Loader.save(saved_file_string, data)
-
-    #save data under user
-    #uhhh get db for user
-    """
-    user = models.ForeignKey("user", on_delete=models.CASCADE)
-    save via user id (unique)
-    look at models.py in sasview -> sasmodel-marketplace
-    """
-
-    """create opt in feature to upload data to example pool
-        create option to add to open list of data
-        can opt in to save data into example data pool
-
-        1 api, takes data and creates unique Hash (algorithm and calculates unique 260 char string)
-    """
-    
-    if Base.opt_in == True:
-        #upload data to example data pool
-        Loader.save("PUT FILE STRING HERE LATER", data)
-
     import_example_data = [
     ]
     """
@@ -77,12 +48,13 @@ class Fits(Base):
             manager.get_model_list
         ]
 
-    class pluginmodels():
+    class PlugInModels():
         #create plug in models <- grab by url
-        online_model_url = models.CharField()
+        online_model_url = models.CharField(max_length=100, help_text= "url link to model")
+        imported_model = loader.load(online_model_url)
+        
 
-    class OnlineModelImport():
-        ffff
+    complete = models.BooleanField(default = False, help_text= "Completion status of analysis")
 
 
 #TODO: view saswebcalc later
