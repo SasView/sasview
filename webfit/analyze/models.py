@@ -38,11 +38,13 @@ class AnalysisParameterBase(models.Model):
     name = models.CharField(max_length=100, help_text="Parameter Name")
     datatype = models.FloatField()
 
-    minimum = datatype(default = False, blank = True)
-    maximum = datatype(default = False, blank = True)
+    minimum = datatype(default = False, blank = True, help_text = "Minimum constraint")
+    maximum = datatype(default = False, blank = True, help_text = "Maximum constraint")
 
+    #constraints in parameter relative to another parameter
     constraints = [
-        ("Units", "Polydisperse", "Magnetic"),
+        #fit parameters
+        (),
     ]
 
 
@@ -57,23 +59,22 @@ class AnalysisBase(models.Model):
     
     GPU_enabled = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
 
-    #analysis requested
-    time_recieved = models.DateTimeField(auto_now_add=True)
+    time_recieved = models.DateTimeField(auto_now_add=True, help_text="analysis requested")
     #TODO fix these to actually update when initiated/ended
-    #analysis initiated
-    time_started = models.DateTimeField(auto_now=True, blank = True, required = False)
-    #analysis stopped
-    time_ended = models.DateTimeField(auto_now=True, blank = True, required = False)
+    time_started = models.DateTimeField(auto_now=True, blank = True, required = False, help_text="analysis initiated")
+    time_ended = models.DateTimeField(auto_now=True, blank = True, required = False, help_text="analysis stopped")
 
-    success = models.BooleanField(default = False)
+    success = models.BooleanField(default = False, help_text="Successful completion of analysis")
+    #list of errors
     errors = [
         "error1",
         "error2"
     ]
 
     if user.anonymous == True:
-        is_public = models.BooleanField(default = False)
+        is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
 
+    #list of analysis parameters
     parameters = [
         AnalysisParameterBase
     ]
