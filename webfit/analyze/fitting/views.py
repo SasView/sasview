@@ -2,7 +2,7 @@ from logging import getLogger
 from django.shortcuts import render
 from django.http import HttpResponse
 from sasdata.dataloader.loader import Loader
-from analyze.fitting.models import fits
+from .models import Fit
 
 fit_logger = getLogger(__name__)
 
