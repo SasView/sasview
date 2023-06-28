@@ -18,6 +18,8 @@ from matplotlib import __version__ as mpl_version
 
 from twisted.internet import threads
 
+import periodictable
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
@@ -80,7 +82,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.is_avg = False
         self.is_nuc = False
         self.is_mag = False
+        self.is_beta = False
         self.data_to_plot = None
+        self.data_betaQ = None
         self.graph_num = 1      # index for name of graph
 
         # finish UI setup - install qml window
@@ -562,7 +566,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # update the averaging option fromthe button on the GUI
         # required as the button may have been previously hidden with
         # any value, and preserves this - we must update the variable to match the GUI
-        self.is_avg = (self.cbOptionsCalc.currentIndex() == 1)
+        self.is_avg = (self.cbOptionsCalc.currentIndex() in (1,2))
+        # did user request Beta(Q) calculation?
+        self.is_beta = (self.cbOptionsCalc.currentIndex() == 2)
         # If averaging then set to 0 and diable the magnetic SLD textboxes
         if self.is_avg:
             self.txtMx.setEnabled(False)
@@ -857,10 +863,69 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtZstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.zstepsize))
         # otherwise leave as set since editable by user
 
+        # update the value of the Radius of Gyration with values from the loaded data
+        if self.is_nuc:
+            if self.nuc_sld_data.is_elements:
+                self.txtROG.setText(str("N/A for Elements"))
+            else:
+                self.txtROG.setText(self.radius_of_gyration() + " Å")
+        elif self.is_mag:
+            self.txtROG.setText(str("N/A for magnetic data"))
+        else:
+            self.txtROG.setText(str("N/A for no data"))
+            
+
         # If nodes or stepsize changed then this may effect what values are allowed
         self.gui_text_changed(sender=self.txtNoQBins)
         self.gui_text_changed(sender=self.txtQxMax)
     
+    def radius_of_gyration(self):
+        #Calculate Center of Mass(CoM) First
+        CoM = self.centerOfMass()
+
+        #Now Calculate RoG
+        RoGNumerator = RoGDenominator = 0.0
+
+        for i in range(len(self.nuc_sld_data.pos_x)):
+            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
+            
+            #Coh b - Coherent Scattering Length(fm)
+            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
+
+            #Calculate the Magnitude of the Coordinate vector for the atom and the center of mass
+            MagnitudeOfCoM = numpy.sqrt(numpy.power(CoM[0]-coordinates[0],2) + numpy.power(CoM[1]-coordinates[1],2) + numpy.power(CoM[2]-coordinates[2],2))
+
+            #Calculate Rate of Gyration (Squared) with the formular
+            RoGNumerator += cohB * (numpy.power(MagnitudeOfCoM,2))
+            RoGDenominator += cohB
+
+        #Avoid division by zero - May occur through contrast matching
+        RoG = str(round(numpy.sqrt(RoGNumerator/RoGDenominator),1)) if RoGDenominator != 0 else "NaN"
+
+        return RoG
+    
+    def centerOfMass(self):
+        """Calculate Center of Mass(CoM) of provided atom"""
+        CoMnumerator= [0.0,0.0,0.0]
+        CoMdenominator = [0.0,0.0,0.0]
+
+        for i in range(len(self.nuc_sld_data.pos_x)):
+            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
+            
+            #Coh b - Coherent Scattering Length(fm)
+            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
+
+            for j in range(3): #sets CiN
+                CoMnumerator[j] += (coordinates[j]*cohB)
+                CoMdenominator[j] += cohB
+
+        CoM = [] 
+        for i in range(3):   
+            CoM.append(CoMnumerator[i]/CoMdenominator[i] if CoMdenominator != 0 else 0) #center of mass, test for division by zero
+        
+        return CoM
+        
+
     def update_geometry_effects(self):
         """This function updates the number of pixels and total volume when the number of nodes/stepsize is changed
 
@@ -998,8 +1063,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # reset all file data to its default empty state
             self.is_nuc = False
             self.is_mag = False
+            self.is_beta = False
             self.nuc_sld_data = None
             self.mag_sld_data = None
+            self.beta_data = None
             # update the gui for the no files loaded case
             self.change_data_type()
             # verify that the new enabled files are compatible
@@ -1279,6 +1346,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.cancelCalculation = False
             #self.cmdCompute.setEnabled(False)
             d = threads.deferToThread(self.complete, inputs, self._update)
+
             # Add deferred callback for call return
             # d.addCallback(self.plot_1_2d)
             d.addCallback(self.calculateComplete)
@@ -1357,11 +1425,65 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             out = numpy.hstack(out)
             self.data_to_plot = out
             logging.info('Gen computation completed.')
+
+        # if Beta(Q) Calculation has been requested, run calculation
+        if self.is_beta:
+            self.create_betaPlot()
+        
         self.cmdCompute.setText('Compute')
         self.cmdCompute.setToolTip("<html><head/><body><p>Compute the scattering pattern and display 1D or 2D plot depending on the settings.</p></body></html>")
         self.cmdCompute.clicked.disconnect()
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdCompute.setEnabled(True)
+        return
+    
+    def create_betaPlot(self):
+        """Carry out the compuation of beta Q using provided & calculated data
+        Returns a list of BetaQ values
+
+        """
+        
+        #Center Of Mass Calculation
+        CoM = self.centerOfMass()
+        self.data_betaQ = []
+
+        # Default values
+        xmax = self.qmax_x
+        xmin = self.qmax_x * _Q1D_MIN
+        qstep = self.npts_x
+
+        currentQValue = []
+        formFactor = self.data_to_plot
+
+        for a in range(self.npts_x):  
+            fQ = 0     
+            currentQValue.append(xmin + (xmax - xmin)/(self.npts_x-1)*a)
+     
+            for b in range(len(self.nuc_sld_data.pos_x)):
+                #atoms
+                atomName = str(self.nuc_sld_data.pix_symbol[b])
+                #Coherent Scattering Length of Atom
+                cohB = periodictable.elements.symbol(atomName).neutron.b_c
+
+                x = float(self.nuc_sld_data.pos_x[b])
+                y = float(self.nuc_sld_data.pos_y[b])
+                z = float(self.nuc_sld_data.pos_z[b])
+
+                r_x = x - CoM[0]
+                r_y = y - CoM[1]
+                r_z = z - CoM[2]
+
+                magnitudeRelativeCoordinate = numpy.sqrt(r_x**2 + r_y**2 + r_z**2)
+    
+                fQ +=  (cohB * (numpy.sin(currentQValue[a] * magnitudeRelativeCoordinate) / (currentQValue[a] * magnitudeRelativeCoordinate)))
+
+            #Beta Q Calculation
+            self.data_betaQ.append((fQ**2)/(formFactor[a]))
+
+        #Scale Beta Q to 0-1
+        scalingFactor = self.data_betaQ[0]
+        self.data_betaQ = [x/scalingFactor for x in self.data_betaQ]
+
         return
 
     def onSaveFile(self):
@@ -1435,6 +1557,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
 
             self.graph_num += 1
+            if self.is_beta:
+                dataBetaQ = Data1D(x=self.data.x, y=self.data_betaQ)
+                dataBetaQ.title = "GenSAS {}  #{} BetaQ".format(self.file_name(),
+                                                    int(self.graph_num))
+                dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
+                dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
         else:
             data = Data2D(image=numpy.nan_to_num(self.data_to_plot),
                           qx_data=self.data.qx_data,
@@ -1457,6 +1585,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         new_item = GuiUtils.createModelItemWithPlot(data, name=data.title)
         self.communicator.updateModelFromPerspectiveSignal.emit(new_item)
         self.communicator.forcePlotDisplaySignal.emit([new_item, data])
+        if self.is_beta:
+            new_item = GuiUtils.createModelItemWithPlot(dataBetaQ, name=dataBetaQ.title)
+            self.communicator.updateModelFromPerspectiveSignal.emit(new_item)
+            self.communicator.forcePlotDisplaySignal.emit([new_item, dataBetaQ])
 
 class Plotter3DWidget(PlotterBase):
     """
