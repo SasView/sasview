@@ -1,6 +1,8 @@
 import sys
 from logging import getLogger
 from types import ModuleType
+from data.models import Data
+from user_authentication.models import user
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -29,11 +31,49 @@ from django.core.exceptions import (
 
 models_logger = getLogger(__name__)
 
-class Base(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    use_GPU = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
+class AnalysisParameterBase(models.Model):
+    #id... for smth
+    id = id()
+    name = models.CharField(max_length=100, help_text="Parameter Name")
+    datatype = models.FloatField()
+
+    minimum = datatype(default = False, blank = True)
+    maximum = datatype(default = False, blank = True)
+
+    constraints = [
+        ("Units", "Polydisperse", "Magnetic"),
+    ]
 
 
+class AnalysisModelBase(models.Model):
+    id = id()
+    name = models.CharField(max_length=300, help_text="name of analysis model")
+
+
+class AnalysisBase(models.Model):
+    id = id()
+    user_id = Data.user_id
     
+    GPU_enabled = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
+
+    #analysis requested
+    time_recieved = models.DateTimeField(auto_now_add=True)
+    #TODO fix these to actually update when initiated/ended
+    #analysis initiated
+    time_started = models.DateTimeField(auto_now=True, blank = True, required = False)
+    #analysis stopped
+    time_ended = models.DateTimeField(auto_now=True, blank = True, required = False)
+
+    success = models.BooleanField(default = False)
+    errors = [
+        "error1",
+        "error2"
+    ]
+
+    if user.anonymous == True:
+        is_public = models.BooleanField(default = False)
+
+    parameters = [
+        AnalysisParameterBase
+    ]

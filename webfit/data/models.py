@@ -1,6 +1,8 @@
 import sys
 from logging import getLogger
 from types import ModuleType
+import hashlib
+from analyze.models import AnalysisBase
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -8,6 +10,7 @@ from sasdata.data_util.loader_exceptions import NoKnownLoaderException, DefaultR
 
 #do i need these if we have loader exceptions^^
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.exceptions import (
     NON_FIELD_ERRORS,
     FieldDoesNotExist,
@@ -34,6 +37,12 @@ models_logger = getLogger(__name__)
 loader = Loader()
 
 class Data(models.Model):
+    #id... for smth
+    id = 0
+
+    #user id 
+    user_id = models.ForeignKey(User, default=None)
+
     #import
     #takes files string and turn it into DataInfo
     file_string = models.CharField(max_length=200, null = False, help_text="The name for all the fit data")
@@ -45,20 +54,10 @@ class Data(models.Model):
     Loader.save(saved_file_string, data)
 
     #save data under user
-    #uhhh get db for user
-    """
-    user = models.ForeignKey("user", on_delete=models.CASCADE)
-    save via user id (unique)
-    look at models.py in sasview -> sasmodel-marketplace
-    """
 
-    """create opt in feature to upload data to example pool
-        create option to add to open list of data
-        can opt in to save data into example data pool
+    #creates hash for data
 
-        1 api, takes data and creates unique Hash (algorithm and calculates unique 260 char string)
-    """
-    #find user id (auto generated)
+    #opt in to uploading to example data pool
     opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
     if opt_in == True:
         #upload data to example data pool
@@ -66,6 +65,8 @@ class Data(models.Model):
 
     import_example_data = [
     ]
+
+    analysis = 0 #models.ForeignKey(AnalysisBase.id) = []
 
 
 #TODO: view saswebcalc later
