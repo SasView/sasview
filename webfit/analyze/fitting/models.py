@@ -35,8 +35,10 @@ models_logger = getLogger(__name__)
 loader = Loader()
 
 class FitBase(AnalysisBase):
+    #imported example data
     import_example_data = [
     ]
+
     success = models.BooleanField(default = False, help_text= "Successful completion status of fit")
 
 class FitParameter(AnalysisParameterBase):
@@ -44,24 +46,28 @@ class FitParameter(AnalysisParameterBase):
 
     ]
 
-    polydisperse = models.BooleanField(default=False)
+    polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
 
-    magnetic = models.BooleanField(default=False)
+    magnetic = models.BooleanField(default=False, help_text="is this a magnetic parameter?")
 
+    #polydispersity parameters (might change to list)
     class PolydispersityParameter():
         x = 0
 
 class FitModel(AnalysisModelBase):
+    #list of default parameters
     default_parameter = [
         FitParameter
     ]
 
-    polydispersity = models.BooleanField(default=False)
+    polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
+    #list of polydispersity parameters
     polydispersity_parameters = [
         FitParameter
     ]
 
-    magnitism = models.BooleanField(default=False)
+    magnitism = models.BooleanField(default=False, help_text="Is magnitism being checked in this model?")
+    #list of magnitism parameters
     magnitic_parameters = [
         FitParameter
     ]
@@ -77,9 +83,9 @@ class FitModel(AnalysisModelBase):
     import sasmodels or through models.py in fit (modelmanagerbase)<---- create choice list
     """
     class SasModels():
-        manager = ModelManager()
+        model_manager = ModelManager()
         MODEL_CHOICES = [
-            manager.get_model_list
+            model_manager.get_model_list
         ]
 
     class PlugInModels():
