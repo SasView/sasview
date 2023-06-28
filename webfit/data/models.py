@@ -2,7 +2,6 @@ import sys
 from logging import getLogger
 from types import ModuleType
 import hashlib
-from analyze.models import AnalysisBase
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -41,17 +40,21 @@ class Data(models.Model):
     id = 0
 
     #user id 
-    user_id = models.ForeignKey(User, default=None)
+    user_id = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
 
     #import
     #takes files string and turn it into DataInfo
     file_string = models.CharField(max_length=200, null = False, help_text="The name for all the fit data")
-    data = Loader.load(file_string)
+    if file_string != False:
+        data = loader.load(file_string)
 
     #export
     #takes DataInfo and saves it into to specified file location
-    saved_file_string = models.CharField(max_length=200, null = False, help_text="file name to data saved")
-    Loader.save(saved_file_string, data)
+    do_save = models.BooleanField(default = True, help_text="Does user want to save data?")
+    if do_save == True:
+        saved_file_string = models.CharField(max_length=200, null = False, help_text="file name to data saved")
+        Try:loader.save(loader, file = saved_file_string, data = data)
+        Except:print(KeyError)
 
     #save data under user
 
@@ -61,12 +64,13 @@ class Data(models.Model):
     opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
     if opt_in == True:
         #upload data to example data pool
-        Loader.save("PUT FILE STRING HERE LATER", data)
+        #TODO loader.save(loader, file = "PUT FILE STRING HERE LATER", data = data)
+        x=1
 
     import_example_data = [
     ]
 
-    analysis = 0 #models.ForeignKey(AnalysisBase.id) = []
+    analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)
 
 
 #TODO: view saswebcalc later
