@@ -1,7 +1,7 @@
 import sys
 from logging import getLogger
 from types import ModuleType
-from analyze.models import Base
+from analyze.models import AnalysisBase, AnalysisModelBase, AnalysisParameterBase
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -34,11 +34,45 @@ models_logger = getLogger(__name__)
 
 loader = Loader()
 
-
-class Fits(Base):
-
+class FitBase(AnalysisBase):
     import_example_data = [
     ]
+    success = models.BooleanField(default = False, help_text= "Successful completion status of fit")
+
+class FitParameter(AnalysisParameterBase):
+    Units = [
+
+    ]
+
+    polydisperse = models.BooleanField(default=False)
+
+    magnetic = models.BooleanField(default=False)
+
+    class PolydispersityParameter():
+        x = 0
+
+class FitModel(AnalysisModelBase):
+    default_parameter = [
+        FitParameter
+    ]
+
+    polydispersity = models.BooleanField(default=False)
+    polydispersity_parameters = [
+        FitParameter
+    ]
+
+    magnitism = models.BooleanField(default=False)
+    magnitic_parameters = [
+        FitParameter
+    ]
+
+    Qminimum = models.FloatField(default = False, help_text="Minimum Q value for the fit")
+    Qmaximum = models.FloatField(help_text="Maximum Q value for the fit")
+    if Qmaximum is True:
+        AnalysisParameterBase.maximum = Qmaximum
+    if Qminimum is True:
+        AnalysisParameterBase.minimum = Qminimum
+
     """
     import sasmodels or through models.py in fit (modelmanagerbase)<---- create choice list
     """
@@ -53,8 +87,9 @@ class Fits(Base):
         online_model_url = models.CharField(max_length=100, help_text= "url link to model")
         imported_model = loader.load(online_model_url)
         
+    #look at models.py in sasview -> sasmodel-marketplace
 
-    complete = models.BooleanField(default = False, help_text= "Completion status of analysis")
+    
 
 
 #TODO: view saswebcalc later
