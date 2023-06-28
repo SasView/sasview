@@ -34,7 +34,7 @@ models_logger = getLogger(__name__)
 
 loader = Loader()
 
-class FitBase(AnalysisBase):
+class Fit(AnalysisBase):
     #imported example data
     import_example_data = [
     ]
