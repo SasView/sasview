@@ -5,7 +5,6 @@ import numpy
 import logging
 import time
 import timeit
-import periodictable
 
 from scipy.spatial.transform import Rotation
 
@@ -17,9 +16,9 @@ from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from matplotlib import __version__ as mpl_version
 
-from periodictable import *
-
 from twisted.internet import threads
+
+import periodictable
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.GenericReader import GenReader
@@ -828,7 +827,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if self.nuc_sld_data.is_elements:
                 self.txtNoPixels.setText(str(len(self.nuc_sld_data.elements)))
             else:
-                self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n))) 
+                self.txtNoPixels.setText(str(len(self.nuc_sld_data.sld_n)))
         elif self.is_mag:
             if self.mag_sld_data.is_elements:
                 self.txtNoPixels.setText(str(len(self.mag_sld_data.elements)))
@@ -869,7 +868,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if self.nuc_sld_data.is_elements:
                 self.txtROG.setText(str("N/A for Elements"))
             else:
-                self.txtROG.setText(str(round(self.radius_of_gyration(),1)) + " Å")
+                self.txtROG.setText(self.radius_of_gyration() + " Å")
         elif self.is_mag:
             self.txtROG.setText(str("N/A for magnetic data"))
         else:
@@ -888,7 +887,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         RoGNumerator = RoGDenominator = 0.0
 
         for i in range(len(self.nuc_sld_data.pos_x)):
-            coordinates = [0.0,0.0,0.0]
             coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
             
             #Coh b - Coherent Scattering Length(fm)
@@ -901,29 +899,29 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             RoGNumerator += cohB * (numpy.power(MagnitudeOfCoM,2))
             RoGDenominator += cohB
 
-        RoG = numpy.sqrt(RoGNumerator/RoGDenominator)
+        #Avoid division by zero - May occur through contrast matching
+        RoG = str(round(numpy.sqrt(RoGNumerator/RoGDenominator),1)) if RoGDenominator != 0 else "NaN"
 
-        return (RoG)
+        return RoG
     
     def centerOfMass(self):
         """Calculate Center of Mass(CoM) of provided atom"""
         CoMnumerator= [0.0,0.0,0.0]
         CoMdenominator = [0.0,0.0,0.0]
-        CoM = [0.0,0.0,0.0]
 
         for i in range(len(self.nuc_sld_data.pos_x)):
-            coordinates = [0.0,0.0,0.0]
             coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
             
             #Coh b - Coherent Scattering Length(fm)
             cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
 
-            for i in range(3): #sets CiN
-                CoMnumerator[i] += (coordinates[i]*cohB)
-                CoMdenominator[i] += cohB
+            for j in range(3): #sets CiN
+                CoMnumerator[j] += (coordinates[j]*cohB)
+                CoMdenominator[j] += cohB
 
-        for i in range(3):
-            CoM[i] = CoMnumerator[i]/CoMdenominator[i] #center of mass
+        CoM = [] 
+        for i in range(3):   
+            CoM.append(CoMnumerator[i]/CoMdenominator[i] if CoMdenominator != 0 else 0) #center of mass, test for division by zero
         
         return CoM
         
@@ -1454,41 +1452,37 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         xmin = self.qmax_x * _Q1D_MIN
         qstep = self.npts_x
 
-        fQ = [0 for j in range(self.npts_x)]
         currentQValue = []
-        for a in range(self.npts_x):
-            if(self.npts_x == 1):
-                currentQValue.append(xmin)
-            else: 
-                currentQValue.append(xmin + (xmax - xmin)/(self.npts_x-1)*a)
         formFactor = self.data_to_plot
 
-        for a in range(self.npts_x):
-                       
+        for a in range(self.npts_x):  
+            fQ = 0     
+            currentQValue.append(xmin + (xmax - xmin)/(self.npts_x-1)*a)
+     
             for b in range(len(self.nuc_sld_data.pos_x)):
                 #atoms
                 atomName = str(self.nuc_sld_data.pix_symbol[b])
                 #Coherent Scattering Length of Atom
                 cohB = periodictable.elements.symbol(atomName).neutron.b_c
 
-                coordinates = [float(self.nuc_sld_data.pos_x[b]),float(self.nuc_sld_data.pos_y[b]),float(self.nuc_sld_data.pos_z[b])]
-                
-                relativeCoordinate = [0.0,0.0,0.0]
-                relativeCoordinate[0] = coordinates[0] - CoM[0]
-                relativeCoordinate[1] = coordinates[1] - CoM[1]
-                relativeCoordinate[2] = coordinates[2] - CoM[2]
+                x = float(self.nuc_sld_data.pos_x[b])
+                y = float(self.nuc_sld_data.pos_y[b])
+                z = float(self.nuc_sld_data.pos_z[b])
 
-                magnitudeRelativeCoordinate = numpy.sqrt(relativeCoordinate[0]**2 + relativeCoordinate[1]**2 + relativeCoordinate[2]**2)
+                r_x = x - CoM[0]
+                r_y = y - CoM[1]
+                r_z = z - CoM[2]
+
+                magnitudeRelativeCoordinate = numpy.sqrt(r_x**2 + r_y**2 + r_z**2)
     
-                fQ[a] +=  (cohB * (numpy.sin(currentQValue[a] * magnitudeRelativeCoordinate) / (currentQValue[a] * magnitudeRelativeCoordinate)))
+                fQ +=  (cohB * (numpy.sin(currentQValue[a] * magnitudeRelativeCoordinate) / (currentQValue[a] * magnitudeRelativeCoordinate)))
 
             #Beta Q Calculation
-            self.data_betaQ.append((fQ[a] **2)/(formFactor[a]))
+            self.data_betaQ.append((fQ**2)/(formFactor[a]))
 
         #Scale Beta Q to 0-1
         scalingFactor = self.data_betaQ[0]
-        for i in range (len(self.data_betaQ)):
-            self.data_betaQ[i] = (self.data_betaQ[i]/scalingFactor)
+        self.data_betaQ = [x/scalingFactor for x in self.data_betaQ]
 
         return
 
@@ -1563,7 +1557,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
 
             self.graph_num += 1
-            if self.is_beta or self.is_beta is None:
+            if self.is_beta:
                 dataBetaQ = Data1D(x=self.data.x, y=self.data_betaQ)
                 dataBetaQ.title = "GenSAS {}  #{} BetaQ".format(self.file_name(),
                                                     int(self.graph_num))
