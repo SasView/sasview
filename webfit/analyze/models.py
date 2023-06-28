@@ -1,4 +1,5 @@
 import sys
+import uuid
 from logging import getLogger
 from types import ModuleType
 from data.models import Data
@@ -33,8 +34,7 @@ models_logger = getLogger(__name__)
 
 
 class AnalysisParameterBase(models.Model):
-    #id... for smth
-    id = id()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, help_text="Parameter Name")
     datatype = models.FloatField()
 
@@ -49,12 +49,12 @@ class AnalysisParameterBase(models.Model):
 
 
 class AnalysisModelBase(models.Model):
-    id = id()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=300, help_text="name of analysis model")
 
 
 class AnalysisBase(models.Model):
-    id = id()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_id = Data.user_id
     
     GPU_enabled = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
