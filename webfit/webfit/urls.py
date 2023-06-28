@@ -30,13 +30,15 @@ urlpatterns = [
     #admin page
     path("admin/", admin.site.urls, name = "admin page"),
 
-    #r"^(?P<name>.+)/$
-    #re_path(r"^tool_information/(?P<tool_id>\d+)/(?P<user_id>\d+)/(?P<back>back_to_start|back_to_category)/$", views.tool_information, name="kiosk_tool_information"),
+    #format:
+    # re_path(r"^(?P<version>(v1))/appname/", view/include(), name=""),
     #root url
     path("", include("user_authentication.urls"), name="authentication tools"),
+
+    #data path
+    re_path(r"^(?P<version>(v1))/data/", include("data.urls"), name = "data tools"),
     
-    #fit path
-    
+    #perspective paths
     re_path(r"^(?P<version>(v1))/analyze/", include("analyze.urls"), name = "analysis tools"),
 ]
 
