@@ -1,4 +1,5 @@
 import sys
+import uuid
 from logging import getLogger
 from types import ModuleType
 import hashlib
@@ -36,8 +37,7 @@ models_logger = getLogger(__name__)
 loader = Loader()
 
 class Data(models.Model):
-    #id... for smth
-    id = 0
+    id = models.UUIDField(primary_key=True, default = uuid.uuid4, editable=False)
 
     #user id 
     user_id = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
