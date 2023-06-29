@@ -1,30 +1,13 @@
 from rest_framework import serializers
-from data.models import (
-    Data,
-)
-from user_authentication.models import (
-    User
-)
-from analyze.models import (
-    AnalysisBase,
-    AnalysisModelBase,
-    AnalysisParameterBase,
-)
-from analyze.fitting.models import (
-    Fit,
-    FitModel,
-    FitParameter,
-)
+from data.models import Data
 
 class DataSerializers(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    user_id = serializers.ForeignKey
-    file_string = serializers.CharField(required=True, allow_blank=False, max_length=200)
-    data = serializers.BinaryField
-    saved_file_string = serializers.CharField(required=True, allow_blank=False, max_length=200)
-    opt_in = serializers.BooleanField(required=False)
-    import_example_data = serializers.ChoiceField(default = 'python')
-    analysis = serializers.ForeignKey
+    title = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    code = serializers.CharField(style={'base_template': 'textarea.html'})
+    linenos = serializers.BooleanField(required=False)
+    language = serializers.ChoiceField(choices=LANGUAGE_CHOICES, default='python')
+    style = serializers.ChoiceField(choices=STYLE_CHOICES, default='friendly')
 
     def create(self, validated_data):
         """
@@ -41,8 +24,5 @@ class DataSerializers(serializers.Serializer):
         instance.file_string = validated_data.get('file string location', instance.file_string)
         instance.data = validated_data.get('data', instance.data)
         instance.saved_file_string = validated_data.get('style', instance.style)
-        instance.opt_in = validated_data.get('opt in', instance.opt_in)
-        instance.import_example_data = validated_data.get('example data', instance.import_example_data)
-        instance.analysis = validated_data.get('analysis', instance.analysis)
         instance.save()
         return instance
