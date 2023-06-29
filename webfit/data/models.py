@@ -41,7 +41,6 @@ class Data(models.Model):
 
     #imported data
     file_string = models.CharField(max_length=200, null = False, help_text="The file string to the fit data")
-    data = models.BinaryField(default=False, blank = False, editable = False, help_text="saved data")
 
     do_save = models.BooleanField(default=True, help_text="Should this model be saved?") #later boolean to add autosave?
     saved_file = models.BooleanField(default=False, help_text="is the model saved in files?") #should this exist, or do we always override files and save

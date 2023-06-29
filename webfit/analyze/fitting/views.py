@@ -13,8 +13,7 @@ fit_logger = getLogger(__name__)
 #LOADER
 
 
-#FIT ENGINE
-#MODELS
-#PLUS IN MODEL
-#BUMPS
-#QSMEARING
+def run(request, version = None):
+    return HttpResponse("test")
+
+#takes DataInfo and saves it into to specified file location
