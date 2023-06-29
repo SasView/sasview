@@ -1199,6 +1199,9 @@
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="2" column="1">
          <widget class="QLineEdit" name="txtQxMin">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -1206,7 +1209,10 @@
            </size>
           </property>
           <property name="text">
-           <string>0.0003</string>
+           <string>-0.3</string>
+          </property>
+          <property name="readOnly">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -1312,6 +1318,9 @@ Number of Qbins &amp;isin; [2, 1000].</string>
       </item>
       <item row="1" column="0">
        <widget class="QCheckBox" name="checkboxLogSpace">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="font">
          <font>
           <bold>false</bold>
@@ -1320,8 +1329,11 @@ Number of Qbins &amp;isin; [2, 1000].</string>
         <property name="text">
          <string>Log Spacing</string>
         </property>
-        <property name="checked">
+        <property name="checkable">
          <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
        </widget>
       </item>

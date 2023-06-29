@@ -463,11 +463,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 ystepsize = float(self.txtYstepsize.text())
                 zstepsize = float(self.txtZstepsize.text())
                 value = float(str(self.txtQxMin.text()))
-                min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))                   
-                if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
-                    self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
-                else:
-                    self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))
+                if self.is_avg:        # if 2d averaging, program sets qmin so ignore warnings            
+                    if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
+                        self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    else:
+                        self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
 
 
             
@@ -594,11 +595,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
             self.txtMz.setText("0.0")
+            self.txtQxMin.setEnabled(True)
+            self.txtQxMin.setText(str(float(self.txtQxMax.text())*.001))
+            self.checkboxLogSpace.setChecked(True)
+            self.checkboxLogSpace.setEnabled(True)
         # If not averaging then re-enable the magnetic sld textboxes
         else:
             self.txtMx.setEnabled(True)
             self.txtMy.setEnabled(True)
             self.txtMz.setEnabled(True)
+            self.txtQxMin.setEnabled(False)
+            self.txtQxMin.setText(str(float(self.txtQxMax.text())*-1))
+            self.checkboxLogSpace.setChecked(False)
+            self.checkboxLogSpace.setEnabled(False)
     
     def check_for_magnetic_controls(self):
         if self.txtMx.hasAcceptableInput() and self.txtMy.hasAcceptableInput() and self.txtMz.hasAcceptableInput():
@@ -1194,7 +1203,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         qstep = self.npts_x
         x = numpy.logspace(start=math.log(xmin,10), stop=math.log(xmax,10), num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)        
         # store x and y bin centers in q space
-        print(x)
         y = numpy.ones(len(x))
         dy = numpy.zeros(len(x))
         dx = numpy.zeros(len(x))
