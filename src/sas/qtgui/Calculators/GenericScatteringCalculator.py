@@ -101,7 +101,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # code to highlight incompleted values in the GUI and prevent calculation
         # list of lineEdits to be checked
         self.lineEdits = [self.txtUpFracIn, self.txtUpFracOut, self.txtUpTheta, self.txtUpPhi, self.txtBackground,
-                            self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax,
+                            self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax, self.txtQxMin,
                             self.txtMx, self.txtMy, self.txtMz, self.txtNucl, self.txtXnodes, self.txtYnodes,
                             self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize, self.txtEnvYaw,
                             self.txtEnvPitch, self.txtEnvRoll, self.txtSampleYaw, self.txtSamplePitch, self.txtSampleRoll]
@@ -220,6 +220,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         validat_regex_q = QtCore.QRegularExpression(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
         self.txtQxMax.setValidator(QtGui.QRegularExpressionValidator(validat_regex_q,
                                                           self.txtQxMax))
+        
+         # 0 < Qmin <= 1000
+        validat_regex_q = QtCore.QRegularExpression(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
+        self.txtQxMin.setValidator(QtGui.QRegularExpressionValidator(validat_regex_q,
+                                                          self.txtQxMin))
 
         # 2 <= Qbin and nodes integers < 1000
         validat_regex_int = QtCore.QRegularExpression(r'^[2-9]|[1-9]\d{1,2}$')
@@ -448,10 +453,21 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 zstepsize = float(self.txtZstepsize.text())
                 value = float(str(self.txtQxMax.text()))
                 max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))                   
-                if value <= 0 or value > max_q:
+                if value <= 0 or value > max_q or value < float(self.txtQxMin.text()):
                     self.txtQxMax.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
                 else:
                     self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+            elif sender == self.txtQxMin:
+                xstepsize = float(self.txtXstepsize.text())
+                ystepsize = float(self.txtYstepsize.text())
+                zstepsize = float(self.txtZstepsize.text())
+                value = float(str(self.txtQxMin.text()))
+                min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))                   
+                if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
+                    self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                else:
+                    self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+
 
             
 
@@ -878,6 +894,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # If nodes or stepsize changed then this may effect what values are allowed
         self.gui_text_changed(sender=self.txtNoQBins)
         self.gui_text_changed(sender=self.txtQxMax)
+        self.gui_text_changed(sender=self.txtQxMin)
+
     
     def radius_of_gyration(self):
         #Calculate Center of Mass(CoM) First
@@ -953,6 +971,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # If nodes or stepsize changed then this may effect what values are allowed
         self.gui_text_changed(sender=self.txtNoQBins)
         self.gui_text_changed(sender=self.txtQxMax)
+        self.gui_text_changed(sender=self.txtQxMin)
+
 
     def write_new_values_from_gui(self):
         """Update parameters in model using modified inputs from GUI
@@ -1018,6 +1038,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtTotalVolume.setText("216000.0")
             self.txtNoQBins.setText("30")
             self.txtQxMax.setText("0.3")
+            self.txtQxMin.setText("0.0003")
             self.txtNoPixels.setText("1000")
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
@@ -1164,12 +1185,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         residuals.dxw = None
         """
         self.qmax_x = float(self.txtQxMax.text())
+        self.qmin_x = float(self.txtQxMin.text())
         self.npts_x = int(self.txtNoQBins.text())
         # Default values
         xmax = self.qmax_x
-        xmin = self.qmax_x * _Q1D_MIN
+        xmin = self.qmin_x
+        print("Written Min: " + str(self.txtQxMax.text()) + " Written Max" + str(self.txtQxMax.text()) )
+        print("Min: " + str(xmin) + " Max" + str(xmax) )
         qstep = self.npts_x
-        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        x = numpy.logspace(start=xmin, stop=xmax, num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)        
         # store x and y bin centers in q space
         y = numpy.ones(len(x))
         dy = numpy.zeros(len(x))
