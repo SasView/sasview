@@ -458,13 +458,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     self.txtQxMax.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
                 else:
                     self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                #if 2D scattering, program sets qmin to -qmax
+                if self.is_avg:
+                    self.txtQxMin.setText(str(-value))
             elif sender == self.txtQxMin:
                 xstepsize = float(self.txtXstepsize.text())
                 ystepsize = float(self.txtYstepsize.text())
                 zstepsize = float(self.txtZstepsize.text())
                 value = float(str(self.txtQxMin.text()))
                 min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))
-                if self.is_avg:        # if 2d averaging, program sets qmin so ignore warnings            
+                if self.is_avg:        # if 2d scattering, program sets qmin so ignore warnings            
                     if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
                         self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
                     else:
