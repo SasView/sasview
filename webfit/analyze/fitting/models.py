@@ -39,7 +39,7 @@ class Fit(AnalysisBase):
     import_example_data = [
     ]
 
-    success = models.BooleanField(default = False, help_text= "Successful completion status of fit")
+    fit_success = models.BooleanField(default = False, help_text= "Successful completion status of fit")
 
 class FitParameter(AnalysisParameterBase):
     Units = [
@@ -91,7 +91,6 @@ class FitModel(AnalysisModelBase):
     class PlugInModels():
         #create plug in models <- grab by url
         online_model_url = models.CharField(max_length=100, help_text= "url link to model")
-        imported_model = loader.load(online_model_url)
         
     #look at models.py in sasview -> sasmodel-marketplace
 
