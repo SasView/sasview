@@ -1,28 +1,60 @@
-from rest_framework import serializers
-from data.models import Data
+from copy import deepcopy
 
-class DataSerializers(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    title = serializers.CharField(required=False, allow_blank=True, max_length=100)
-    code = serializers.CharField(style={'base_template': 'textarea.html'})
-    linenos = serializers.BooleanField(required=False)
-    language = serializers.ChoiceField(choices=LANGUAGE_CHOICES, default='python')
-    style = serializers.ChoiceField(choices=STYLE_CHOICES, default='friendly')
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
+from rest_framework import serializers
+from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
+from rest_framework.utils import model_meta
+
+from data.models import (
+    Data,
+)
+from user_authentication.models import (
+    User
+)
+from analyze.models import (
+    AnalysisBase,
+    AnalysisModelBase,
+    AnalysisParameterBase,
+)
+from analyze.fitting.models import (
+    Fit,
+    FitModel,
+    FitParameter,
+)
+
+
+# Overriding validate to call model full_clean
+class ModelSerializer(serializers.ModelSerializer):
+	def validate(self, attrs):
+		attributes_data = dict(attrs)
+		ModelClass = self.Meta.model
+		instance = deepcopy(self.instance) if self.instance else ModelClass()
+		# Remove many-to-many relationships from attributes_data, so we can properly validate.
+		info = model_meta.get_field_info(ModelClass)
+		for field_name, relation_info in info.relations.items():
+			if relation_info.to_many and (field_name in attributes_data):
+				attributes_data.pop(field_name)
+		for attr, value in attributes_data.items():
+			setattr(instance, attr, value)
+		self.full_clean(instance)
+		return attrs
+
+	def full_clean(self, instance, exclude=None, validate_unique=True):
+		instance.full_clean(exclude, validate_unique)
+
+class DataSerializers(ModelSerializer):
+    class Meta:
+	    model = Data
+	    fields = "__all__"
+	    
+    def full_clean(self, instance, exclude=None, validate_unique=True):
+	    if not instance or not instance.id:
+		    exclude = []
+	    super().full_clean(instance, exclude, validate_unique)
+	    
 
     def create(self, validated_data):
-        """
-        Create and return a new `Data` instance, given the validated data.
-        """
-        return Data.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        """
-        Update and return an existing `Data` instance, given the validated data.
-        """
-        instance.id = validated_data.get('id', instance.id)
-        instance.user_id = validated_data.get('user id', instance.user_id)
-        instance.file_string = validated_data.get('file string location', instance.file_string)
-        instance.data = validated_data.get('data', instance.data)
-        instance.saved_file_string = validated_data.get('style', instance.style)
-        instance.save()
-        return instance
+		instance: User = super().create(validated_data)
+		instance.get_preferences()
+		return instance
