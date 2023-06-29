@@ -43,8 +43,8 @@ class Data(models.Model):
     file_string = models.CharField(max_length=200, null = False, help_text="The file string to the fit data")
     data = models.BinaryField(default=False, blank = False, editable = False, help_text="saved data")
 
-    do_save = models.BooleanField(default=True, help_text="Should this model be saved?")
-    saved_files = models.BooleanField(default=False, help_text="is the model saved in files?")
+    do_save = models.BooleanField(default=True, help_text="Should this model be saved?") #later boolean to add autosave?
+    saved_file = models.BooleanField(default=False, help_text="is the model saved in files?") #should this exist, or do we always override files and save
     saved_file_string = models.CharField(max_length=200, null = False, help_text="File location to save data")
 
     #creates hash for data
@@ -55,6 +55,10 @@ class Data(models.Model):
     ]
 
     analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)
+
+    errors = [
+
+    ]
 
 
 #TODO: view saswebcalc later

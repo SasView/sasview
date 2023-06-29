@@ -5,7 +5,7 @@ from logging import getLogger
 models_logger = getLogger(__name__)
 
 # Create your models here.
-class user(models.Model):
+class User(models.Model):
 
     username = models.CharField(max_length=200, help_text="Username")
     password = models.CharField(max_length=200, help_text="password")
