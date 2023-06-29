@@ -15,3 +15,5 @@ fit_logger = getLogger(__name__)
 
 def run(request, version = None):
     return HttpResponse("test")
+
+#takes DataInfo and saves it into to specified file location
