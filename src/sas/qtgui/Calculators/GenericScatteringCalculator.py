@@ -1484,16 +1484,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # Default values
         xmax = self.qmax_x
-        xmin = self.qmax_x * _Q1D_MIN
+        xmin = self.qmin_x
         qstep = self.npts_x
-
-        currentQValue = []
+        #array of Q values
+        qX = numpy.logspace(start=math.log(xmin,10), stop=math.log(xmax,10), num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)        
+        
         formFactor = self.data_to_plot
 
         for a in range(self.npts_x):  
-            fQ = 0     
-            currentQValue.append(xmin + (xmax - xmin)/(self.npts_x-1)*a)
-     
+            fQ = 0          
             for b in range(len(self.nuc_sld_data.pos_x)):
                 #atoms
                 atomName = str(self.nuc_sld_data.pix_symbol[b])
@@ -1510,7 +1509,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
                 magnitudeRelativeCoordinate = numpy.sqrt(r_x**2 + r_y**2 + r_z**2)
     
-                fQ +=  (cohB * (numpy.sin(currentQValue[a] * magnitudeRelativeCoordinate) / (currentQValue[a] * magnitudeRelativeCoordinate)))
+                fQ +=  (cohB * (numpy.sin(qX[a] * magnitudeRelativeCoordinate) / (qX[a] * magnitudeRelativeCoordinate)))
 
             #Beta Q Calculation
             self.data_betaQ.append((fQ**2)/(formFactor[a]))
