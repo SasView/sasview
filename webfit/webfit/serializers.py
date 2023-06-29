@@ -1,4 +1,11 @@
+from copy import deepcopy
+
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
+from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
+from rest_framework.utils import model_meta
+
 from data.models import (
     Data,
 )
@@ -16,33 +23,38 @@ from analyze.fitting.models import (
     FitParameter,
 )
 
-class DataSerializers(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    user_id = serializers.ForeignKey
-    file_string = serializers.CharField(required=True, allow_blank=False, max_length=200)
-    data = serializers.BinaryField
-    saved_file_string = serializers.CharField(required=True, allow_blank=False, max_length=200)
-    opt_in = serializers.BooleanField(required=False)
-    import_example_data = serializers.ChoiceField(default = 'python')
-    analysis = serializers.ForeignKey
+
+# Overriding validate to call model full_clean
+class ModelSerializer(serializers.ModelSerializer):
+	def validate(self, attrs):
+		attributes_data = dict(attrs)
+		ModelClass = self.Meta.model
+		instance = deepcopy(self.instance) if self.instance else ModelClass()
+		# Remove many-to-many relationships from attributes_data, so we can properly validate.
+		info = model_meta.get_field_info(ModelClass)
+		for field_name, relation_info in info.relations.items():
+			if relation_info.to_many and (field_name in attributes_data):
+				attributes_data.pop(field_name)
+		for attr, value in attributes_data.items():
+			setattr(instance, attr, value)
+		self.full_clean(instance)
+		return attrs
+
+	def full_clean(self, instance, exclude=None, validate_unique=True):
+		instance.full_clean(exclude, validate_unique)
+
+class DataSerializers(ModelSerializer):
+    class Meta:
+	    model = Data
+	    fields = "__all__"
+	    
+    def full_clean(self, instance, exclude=None, validate_unique=True):
+	    if not instance or not instance.id:
+		    exclude = []
+	    super().full_clean(instance, exclude, validate_unique)
+	    
 
     def create(self, validated_data):
-        """
-        Create and return a new `Data` instance, given the validated data.
-        """
-        return Data.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        """
-        Update and return an existing `Data` instance, given the validated data.
-        """
-        instance.id = validated_data.get('id', instance.id)
-        instance.user_id = validated_data.get('user id', instance.user_id)
-        instance.file_string = validated_data.get('file string location', instance.file_string)
-        instance.data = validated_data.get('data', instance.data)
-        instance.saved_file_string = validated_data.get('style', instance.style)
-        instance.opt_in = validated_data.get('opt in', instance.opt_in)
-        instance.import_example_data = validated_data.get('example data', instance.import_example_data)
-        instance.analysis = validated_data.get('analysis', instance.analysis)
-        instance.save()
-        return instance
+		instance: User = super().create(validated_data)
+		instance.get_preferences()
+		return instance

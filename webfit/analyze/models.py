@@ -3,7 +3,7 @@ import uuid
 from logging import getLogger
 from types import ModuleType
 from data.models import Data
-from user_authentication.models import user
+from user_authentication.models import User
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -50,7 +50,7 @@ class AnalysisBase(models.Model):
         "error2"
     ]
 
-    if user.anonymous == True:
+    if User.anonymous == True:
         is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
 
 class AnalysisParameterBase(models.Model):
