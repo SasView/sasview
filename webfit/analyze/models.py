@@ -40,10 +40,10 @@ class AnalysisBase(models.Model):
 
     time_recieved = models.DateTimeField(auto_now_add=True, help_text="analysis requested")
     #TODO fix these to actually update when initiated/ended
-    time_started = models.DateTimeField(auto_now=True, blank = True, required = False, help_text="analysis initiated")
-    time_ended = models.DateTimeField(auto_now=True, blank = True, required = False, help_text="analysis stopped")
+    time_started = models.DateTimeField(auto_now=True, blank = True, help_text="analysis initiated")
+    time_ended = models.DateTimeField(auto_now=True, blank = True, help_text="analysis stopped")
 
-    success = models.BooleanField(default = False, help_text="Successful completion of analysis")
+    analysis_success = models.BooleanField(default = False, help_text="Successful completion of analysis")
     #list of errors
     errors = [
         "error1",
@@ -56,11 +56,11 @@ class AnalysisBase(models.Model):
 class AnalysisParameterBase(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, help_text="Parameter Name")
-    datatype = models.FloatField()
+    """datatype = models.FloatField()
 
     minimum = datatype(default = False, blank = True, help_text = "Minimum constraint")
     maximum = datatype(default = False, blank = True, help_text = "Maximum constraint")
-
+    """
     #constraints in parameter relative to another parameter
     constraints = [
         #fit parameters
