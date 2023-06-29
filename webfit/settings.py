@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "webfit.urls"
+ROOT_URLCONF = "urls"
 
 TEMPLATES = [
     {

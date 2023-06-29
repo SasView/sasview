@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
+#from django.contrib.auth.models import Group, Permission
+#from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
 from rest_framework.utils import model_meta
@@ -45,16 +45,15 @@ class ModelSerializer(serializers.ModelSerializer):
 
 class DataSerializers(ModelSerializer):
     class Meta:
-	    model = Data
-	    fields = "__all__"
-	    
+        model = Data
+        fields = "__all__"
+
     def full_clean(self, instance, exclude=None, validate_unique=True):
-	    if not instance or not instance.id:
-		    exclude = []
-	    super().full_clean(instance, exclude, validate_unique)
-	    
+        if not instance or not instance.id:
+            exclude = ["import_example_data", "errors"]
+        super().full_clean(instance, exclude, validate_unique)
+
 
     def create(self, validated_data):
-		instance: User = super().create(validated_data)
-		instance.get_preferences()
-		return instance
+        instance: Data = super().create(validated_data)
+        return instance
