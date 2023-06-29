@@ -14,44 +14,53 @@ from .models import Data
 
 @api_view(['POST', 'PUT'])
 def import_file_string(request, file_id, version):    
-    try:
-        file = file_id
-    except Data.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
 
     #saves file_string
     if request.method == 'POST':
-        serializer = DataSerializers(data=request.data)
+        serializer = DataSerializers(file_string=file_id)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    if User.anonymous == False:
-        #saves or updates file_string
-        if request.method == 'PUT':
-            serializer = DataSerializers(imported_data, data=request.data)
+    #saves or updates file_string
+    if request.method == 'PUT':
+        if User.anonymous == False:
+            #checks to see if there is an existing file to update
+            try:
+                file = Data.objects.get(file_string=file_id)
+            except Data.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            
+
+            serializer = DataSerializers(file, file_string=file_id)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return HttpResponseForbidden()
+        #user is not logged in -> not allowed to update
+        else:
+            return HttpResponseForbidden()
     
     #data is actually loaded inside fit view
 
 @api_view(['POST', 'PUT'])
-def export_data(request, version = None):
+def export_data(request, save_file_id, version = None):
     #saves the file string to where to save data
     if request.method == 'POST':
-        where_to_save_string = Data.objects.all()
-        serializer = DataSerializers(where_to_save_string, many=True)
+        serializer = DataSerializers(save_file_string = save_file_id)
         return Response(serializer.data)
     
-    if User.anonymous == False:
-        #saves or updates file_string
-        if request.method == 'PUT':
-            serializer = DataSerializers(imported_data, data=request.data)
+    #saves or updates file_string
+    if request.method == 'PUT':
+        if User.anonymous == False:
+            #checks to see if there is an existing file to update
+            try:
+                save_file = Data.objects.get(save_file_string=save_file_id)
+            except Data.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        
+            serializer = DataSerializers(save_file, save_file_string=save_file_id)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
