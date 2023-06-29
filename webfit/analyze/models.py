@@ -32,27 +32,6 @@ from django.core.exceptions import (
 
 models_logger = getLogger(__name__)
 
-
-class AnalysisParameterBase(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=100, help_text="Parameter Name")
-    datatype = models.FloatField()
-
-    minimum = datatype(default = False, blank = True, help_text = "Minimum constraint")
-    maximum = datatype(default = False, blank = True, help_text = "Maximum constraint")
-
-    #constraints in parameter relative to another parameter
-    constraints = [
-        #fit parameters
-        (),
-    ]
-
-
-class AnalysisModelBase(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=300, help_text="name of analysis model")
-
-
 class AnalysisBase(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_id = Data.user_id
@@ -74,6 +53,24 @@ class AnalysisBase(models.Model):
     if user.anonymous == True:
         is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
 
+class AnalysisParameterBase(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, help_text="Parameter Name")
+    datatype = models.FloatField()
+
+    minimum = datatype(default = False, blank = True, help_text = "Minimum constraint")
+    maximum = datatype(default = False, blank = True, help_text = "Maximum constraint")
+
+    #constraints in parameter relative to another parameter
+    constraints = [
+        #fit parameters
+        (),
+    ]
+
+
+class AnalysisModelBase(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=300, help_text="name of analysis model")
     #list of analysis parameters
     parameters = [
         AnalysisParameterBase
