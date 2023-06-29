@@ -5,6 +5,7 @@ import numpy
 import logging
 import time
 import timeit
+import math
 
 from scipy.spatial.transform import Rotation
 
@@ -1190,11 +1191,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # Default values
         xmax = self.qmax_x
         xmin = self.qmin_x
-        print("Written Min: " + str(self.txtQxMax.text()) + " Written Max" + str(self.txtQxMax.text()) )
-        print("Min: " + str(xmin) + " Max" + str(xmax) )
         qstep = self.npts_x
-        x = numpy.logspace(start=xmin, stop=xmax, num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)        
+        x = numpy.logspace(start=math.log(xmin,10), stop=math.log(xmax,10), num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)        
         # store x and y bin centers in q space
+        print(x)
         y = numpy.ones(len(x))
         dy = numpy.zeros(len(x))
         dx = numpy.zeros(len(x))
