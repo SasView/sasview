@@ -26,11 +26,11 @@ Generates string of .py files to be passed into compiling functions
     TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(ABSOLUTE_TARGET_USER)
     return TARGETS
 
-def call_regenmodel(filepath):
+def call_regenmodel(filepath, regen_py):
     """
-    Runs regenmodel.py with all found PY_FILES
+    Runs regenmodel.py/regentoc.py with all found PY_FILES
     """
-    REGENMODEL = abspath("regenmodel.py")
+    REGENMODEL = abspath(regen_py)
     command = [
         sys.executable,
         REGENMODEL,
@@ -42,7 +42,8 @@ def main():
     TARGETS = get_main_docs()
     print(TARGETS)
     for file in TARGETS:
-        call_regenmodel(file)
+        call_regenmodel(file, "regenmodel.py")
+        call_regenmodel(file, "regentoc.py")
 
 if __name__ == "__main__":
     main()
