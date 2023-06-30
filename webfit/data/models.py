@@ -52,6 +52,14 @@ class Data(models.Model):
     example_data = [
     ]
 
+    user_data_ids = [
+
+    ]
+
+    public_file_ids = [
+        
+    ]
+
     analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)
 
     errors = [
