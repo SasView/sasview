@@ -35,8 +35,8 @@ models_logger = getLogger(__name__)
 class Data(models.Model):
     id = models.BigAutoField(primary_key=True)
 
-    #user id 
-    user_id = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
+    #username
+    username = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
 
     #imported data
     file_string = models.CharField(max_length=200, null = False, help_text="The file string to the fit data")
@@ -50,6 +50,14 @@ class Data(models.Model):
     opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
 
     example_data = [
+    ]
+
+    user_data_ids = [
+
+    ]
+
+    public_file_ids = [
+
     ]
 
     analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)

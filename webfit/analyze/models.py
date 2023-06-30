@@ -34,7 +34,7 @@ models_logger = getLogger(__name__)
 
 class AnalysisBase(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user_id = Data.user_id
+    username = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
     
     GPU_enabled = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
 
