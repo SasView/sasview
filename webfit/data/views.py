@@ -23,7 +23,7 @@ def get_data(request, version):
 
 
 @api_view(['POST', 'PUT'])
-def import_file_string(request, version):         
+def upload(request, version):         
     #saves file_string
     if request.method == 'POST':
         serializer = DataSerializers(file_string = request.file_string)
@@ -52,7 +52,7 @@ def import_file_string(request, version):
     #data is actually loaded inside fit view
 
 @api_view(['POST', 'PUT'])
-def export_data(request, version = None):
+def download(request, version = None):
     #saves the file string to where to save data
     if request.method == 'POST':
         serializer = DataSerializers(save_file_string = request.save_file_string)
