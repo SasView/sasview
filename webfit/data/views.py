@@ -13,8 +13,10 @@ from .models import Data
 
 
 @api_view(['POST', 'PUT'])
-def import_file_string(request, file_id, version, optional_parameter='opt_in'):    
+def import_file_string(request, version):    
 
+    #check login
+    
     #saves file_string
     if request.method == 'POST':
         serializer = DataSerializers(file_string=file_id)
