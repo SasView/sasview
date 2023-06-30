@@ -33,7 +33,7 @@ from django.core.exceptions import (
 models_logger = getLogger(__name__)
 
 class AnalysisBase(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.BigAutoField(primary_key=True)
     user_id = Data.user_id
     
     GPU_enabled = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
@@ -54,7 +54,7 @@ class AnalysisBase(models.Model):
         is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
 
 class AnalysisParameterBase(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100, help_text="Parameter Name")
     """datatype = models.FloatField()
 
@@ -69,7 +69,7 @@ class AnalysisParameterBase(models.Model):
 
 
 class AnalysisModelBase(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=300, help_text="name of analysis model")
     #list of analysis parameters
     parameters = [

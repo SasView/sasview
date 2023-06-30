@@ -32,9 +32,8 @@ models_logger = getLogger(__name__)
 # do we want individual dbs for each perspective?
 
 
-
 class Data(models.Model):
-    id = models.UUIDField(primary_key=True, default = uuid.uuid4, editable=False)
+    id = models.BigAutoField(primary_key=True)
 
     #user id 
     user_id = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
