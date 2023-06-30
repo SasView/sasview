@@ -1,7 +1,11 @@
 import logging
 import numpy as np
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+
+from PySide6 import QtGui, QtCore, QtWidgets
+
+# sas-global
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # pr inversion GUI elements
@@ -10,12 +14,14 @@ from .UI.TabbedInversionUI import Ui_PrInversion
 from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
+
 from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget, DICT_KEYS, NUMBER_OF_TERMS, REGULARIZATION
+
 
 from sasdata.dataloader import Data2D
 
@@ -28,16 +34,29 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
     """
 
+
     name = "Inversion"
-    ext = "pr"  # Extension used for saving analyses
-    tabsModifiedSignal = QtCore.pyqtSignal()
+
+
+
+
+    ext = "pr"
+    tabsModifiedSignal = QtCore.Signal()
+    @property
+    def title(self):
+        return "P(r) Inversion"
+
+
+
 
     @property
     def title(self):
         return "P(r) Inversion"
 
-    def __init__(self, parent=None):
+
+    def __init__(self, parent=None,data=None):
         super(InversionWindow, self).__init__()
+
 
         self.setWindowTitle("P(r) Inversion Perspective")
         self._manager = parent
@@ -57,7 +76,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         # Visible data items
         # current QStandardItem showing on the panel
-        self._data = None
+        self._data = data
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
@@ -68,8 +87,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.dataPlot = None
         # suggested nTerms
 
-        self.maxIndex = 1
-        self.tab_id = 1
+
 
         # Calculation threads used by all data items
         self.calcThread = None
@@ -94,6 +112,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 1
 
+
         # The tabs need to be closeable
         self.setTabsClosable(True)
 
@@ -114,6 +133,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # If data on tab empty - do nothing
         if index in self.tabs and not self.tabs[index].data:
             return
+        # Add a new, empy tab
+        self.addData(None)
         # Remove the previous last tab
         self.tabCloses(index)
 
@@ -144,12 +165,19 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     def serializeAll(self):
         """
         Serialize the inversion state so data can be saved
-        Inversion is not batch-ready so this will only effect a single page
-        :return: {data-id: {self.name: {inversion-state}}}
+        serialize all active inversion pages and return
+        a dictionary: {data-id: {self.name: {inversion-state}}}
         """
-        return self.serializeCurrentPage()
+        state = {}
+        for i, index in enumerate(self.tabs):  # tab_ids would need to be populated somewhere
+            state.update(self.serializeCurrentPage(index))
+        return state
 
-    def serializeCurrentPage(self, Index=None):
+    def serialiseCurrentPage(self):
+        # serialize current (active) page
+        return self.getSerializedPage(self.currentTab)
+
+    def getSerializePage(self, Index=None):
         """
         Serialize and return a dictionary of {data_id: inversion-state}
         Return original dictionary if no data
@@ -165,7 +193,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         return state
 
 
-    def updateFromParameters(self, params: dict):
+    def updateFromParameters(self, params: dict, tab_name):
         """ Update the perspective using a dictionary of parameters
         e.g. those loaded via open project or open analysis menu items"""
         raise NotImplementedError("Update from parameters not implemented yet.")
@@ -246,7 +274,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
     ######################################################################
 
-    def setData(self, data_item=None, is_batch=False):
+
+    def setData(self, data_item=None, is_batch=False, tab_index=None):
         """
         Assign new data set(s) to the P(r) perspective
         Obtain a QStandardItem object and parse it to get Data1D/2D
@@ -262,40 +291,166 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
 
+
         for data in data_item:
             logic_data = GuiUtils.dataFromItem(data)
 
-            # Tab for 2D data
-            if isinstance(logic_data, Data2D) and not is_batch:
-                data.isSliced = False
-                tab = self.addData(data=data, is2D=True)
-                tab.tab2D.setEnabled(True)
-                tab.show2DPlot()
 
-            # Tab for 1D batch
-            if is_batch and not isinstance(logic_data, Data2D):
-                # initiate a single Tab for batch
-                self.addData(data=data_item, is_batch=is_batch)
-                return
+            # If none, open a new tab.
+            tab_ids = [tab.tab_id for tab in self.tabs]
 
-            # Tab for 1D
-            if isinstance(logic_data, Data1D):
-                tab = self.addData(data=data)
-                tab.setQ()
 
-                if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
-                    tab.logic.add_errors()
+            if tab_index not in tab_ids: #do not overwrite existing tab if 
+                #tab_index is specified
+                #needs swap data, i.e. replace the data in the current tab 
+                #if tab_id already excists missing
 
-            # let the user know that the 2D data cannot be batch processed
-            if isinstance(logic_data, Data2D) and is_batch:
-                msg = "2D data cannot be batch processed using the P(r) Perspective."
-                raise AttributeError(msg)
+                # Tab for 2D data
+                if isinstance(logic_data, Data2D) and not is_batch:
+                    data.isSliced = False
+                    tab = self.addData(data=data, is2D=True, tab_index=tab_index)
+                    tab.tab2D.setEnabled(True)
+                    tab.show2DPlot()
 
-        # replace the startup tab, so it looks like data has been added to it.
-        if self.tabs[0].tab_name == "New Tab":
-            self.closeTabByIndex(0)
+                # Tab for 1D batch
+                if is_batch and not isinstance(logic_data, Data2D):
+                    # initiate a single Tab for batch
+                    self.addData(data=data_item, is_batch=is_batch, tab_index=tab_index)
+                    return
+
+                # Tab for 1D
+                if isinstance(logic_data, Data1D):
+                    tab = self.addData(data=data, tab_index=tab_index)
+                    tab.setQ()
+
+                    if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
+                        tab.logic.add_errors()
+
+
+
+
+    def setCurrentData(self, data_ref):
+        """Get the data by reference and display as necessary"""
+        if data_ref is None:
+            return
+        if not isinstance(data_ref, QtGui.QStandardItem):
+            msg = "Incorrect type passed to the P(r) Perspective"
+            raise AttributeError(msg)
+        # Data references
+        self._data = data_ref
+        self.logic.data = GuiUtils.dataFromItem(data_ref)
+        self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
+        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
+        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
+        self.performEstimate()
+
+    def updateDynamicGuiValues(self):
+        pr = self._calculator
+        alpha = self._calculator.suggested_alpha
+        self.model.setItem(WIDGETS.W_MAX_DIST,
+                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
+        self.noOfTermsSuggestionButton.setText(
+             "{:n}".format(self.nTermsSuggested))
+
+        self.enableButtons()
+
+    def updateGuiValues(self):
+        pr = self._calculator
+        out = self._calculator.out
+        cov = self._calculator.cov
+        elapsed = self._calculator.elapsed
+        alpha = self._calculator.suggested_alpha
+        self.check_q_high(pr.get_qmax())
+        self.check_q_low(pr.get_qmin())
+        self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
+                           QtGui.QStandardItem("{:.3g}".format(pr.background)))
+        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
+                           QtGui.QStandardItem("{:.3g}".format(pr.background)))
+        self.model.setItem(WIDGETS.W_COMP_TIME,
+                           QtGui.QStandardItem("{:.4g}".format(elapsed)))
+        self.model.setItem(WIDGETS.W_MAX_DIST,
+                           QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
+        self.regConstantSuggestionButton.setText("{:.2g}".format(alpha))
+
+        if isinstance(pr.chi2, np.ndarray):
+            self.model.setItem(WIDGETS.W_CHI_SQUARED,
+                               QtGui.QStandardItem("{:.3g}".format(pr.chi2[0])))
+        if out is not None:
+            self.model.setItem(WIDGETS.W_RG,
+                               QtGui.QStandardItem("{:.3g}".format(pr.rg(out))))
+            self.model.setItem(WIDGETS.W_I_ZERO,
+                               QtGui.QStandardItem(
+                                   "{:.3g}".format(pr.iq0(out))))
+            self.model.setItem(WIDGETS.W_OSCILLATION, QtGui.QStandardItem(
+                "{:.3g}".format(pr.oscillations(out))))
+            self.model.setItem(WIDGETS.W_POS_FRACTION, QtGui.QStandardItem(
+                "{:.3g}".format(pr.get_positive(out))))
+            if cov is not None:
+                self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
+                                   QtGui.QStandardItem(
+                                       "{:.3g}".format(
+                                           pr.get_pos_err(out, cov))))
+        if self.prPlot is not None:
+            title = self.prPlot.name
+            self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
+            GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
+            self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
+        if self.dataPlot is not None:
+            title = self.dataPlot.name
+            self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
+            self.dataPlot.symbol = "Line"
+            self.dataPlot.show_errors = False
+            GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
+            self.communicate.plotRequestedSignal.emit([self._data,self.dataPlot], None)
+        self.enableButtons()
+
+
+    def removeData(self, data_list=None):
+        """Remove the existing data reference from the P(r) Persepective"""
+        self.dataDeleted = True
+        self.batchResults = {}
+        if not data_list:
+            data_list = [self._data]
+        self.closeDMax()
+        for data in data_list:
+            self._dataList.pop(data, None)
+        if self.dataPlot:
+            # Reset dataplot sliders
+            self.dataPlot.slider_low_q_input = []
+            self.dataPlot.slider_high_q_input = []
+            self.dataPlot.slider_low_q_setter = []
+            self.dataPlot.slider_high_q_setter = []
+        self._data = None
+        length = self.dataList.count()
+        for index in reversed(range(length)):
+            if self.dataList.itemData(index) in data_list:
+                self.dataList.removeItem(index)
+        # Last file removed
+        self.dataDeleted = False
+        # if self._dataList.count() == 0:
+        if len(self._dataList) == 0:
+            self.prPlot = None
+            self.dataPlot = None
+            self.logic.data = None
+            self._calculator = Invertor()
+            self.closeBatchResults()
+            self.nTermsSuggested = NUMBER_OF_TERMS
+            self.noOfTermsSuggestionButton.setText("{:n}".format(
+                self.nTermsSuggested))
+            self.regConstantSuggestionButton.setText("{:-3.2g}".format(
+                REGULARIZATION))
+            # self.updateGuiValues()
+            self.setupModel()
+        else:
+            self.dataList.setCurrentIndex(0)
+            self.updateGuiValues()
+
+
+
 
     def addData(self, data=None, is_batch=False, tab_index=None, is2D=False):
+
         """
         Add a new tab for passed data
         """
@@ -309,6 +464,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab.setTabName("New Tab")
         icon = QtGui.QIcon()
+
+
+        
 
         if data is not None and not is_batch:
             tab.setTabName("New Tab")
@@ -330,6 +488,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Show the new tab
         self.setCurrentWidget(tab)
         return tab
+        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
 
     def createBatchTab(self, batchDataList):
         """

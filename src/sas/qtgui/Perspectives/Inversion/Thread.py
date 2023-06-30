@@ -8,12 +8,13 @@ class CalcPr(CalcThread):
     Compute P(r)
     """
 
-    def __init__(self, pr, nfunc=5, error_func=None, completefn=None,
+    def __init__(self, pr, nfunc=5, tab_id=None, error_func=None, completefn=None,
                  updatefn=None, yieldtime=0.01, worktime=0.01):
         """
         """
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.pr = pr
+        self.tab_id = tab_id
         self.nfunc = nfunc
         self.error_func = error_func
         self.starttime = 0
