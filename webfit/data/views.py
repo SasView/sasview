@@ -17,7 +17,7 @@ def get_data(request, version):
         public_data = get_object_or_404(Data)
         data_list = {"public_file_ids": public_data.public_file_ids}
         if request.user.is_authenticated:
-            data = get_object_or_404(Data, username=request.username)
+            data = get_object_or_404(Data, user_id=request.user_id)
             data_list += {"user_data_ids": data.user_data_ids}
             return Response(data_list)
 
