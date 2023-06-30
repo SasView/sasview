@@ -29,7 +29,7 @@ TEMPLATE = """\
 
 """
 
-MODEL_TOC_PATH = "../../../../docs/sphinx-docs/source-temp/user/qtgui/Perspectives/Fitting/models"
+MODEL_TOC_PATH = "../source-temp/user/qtgui/Perspectives/Fitting/models"
 
 def _make_category(category_name, label, title, parent=None):
     # type: (str, str, str, Optional[BinaryIO]) -> BinaryIO

@@ -28,7 +28,7 @@ Generates string of .py files to be passed into compiling functions
 
 def call_regenmodel(filepath, regen_py):
     """
-    Runs regenmodel.py/regentoc.py with all found PY_FILES
+    Runs regenmodel.py/regentoc.py (specified in parameter regen_py) with all found PY_FILES
     """
     REGENMODEL = abspath(regen_py)
     command = [
