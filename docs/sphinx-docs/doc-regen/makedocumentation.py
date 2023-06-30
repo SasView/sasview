@@ -3,7 +3,7 @@ Creates documentation from .py files
 """
 import os
 import sys
-from os.path import join, abspath, dirname
+from os.path import join, abspath, dirname, basename
 import subprocess
 
 MAIN_PY_SRC = "../source-temp/user/models/src/"
@@ -20,8 +20,14 @@ def get_py(directory):
 def get_main_docs():
     """
 Generates string of .py files to be passed into compiling functions
+Future reference: move to main() function?
     """
     TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(ABSOLUTE_TARGET_PLUGINS)
+    base_targets = [basename(string) for string in TARGETS]
+    for file in TARGETS:
+        if base_targets.count(basename(file)) >= 2:
+            TARGETS.remove(file)
+            base_targets.remove(basename(file))
     return TARGETS
 
 def call_regenmodel(filepath, regen_py):
@@ -43,7 +49,7 @@ def call_regenmodel(filepath, regen_py):
     subprocess.run(command)
 
 def generate_html():
-    # based off of syntax provided in Makefile found under /sasmodels/
+    # based off of syntax provided in Makefile found under /sasmodels/doc/
     DOCTREES = "../build/doctrees/"
     SPHINX_SOURCE = "../source-temp/"
     HTML_TARGET = "../build/html/"
@@ -65,7 +71,7 @@ def main():
     for file in TARGETS:
         #  easiest for regenmodel.py if files are passed in individually
         call_regenmodel(file, "regenmodel.py")
-    # regentoc.py requires files to be passed in bulk
+    # regentoc.py requires files to be passed in bulk or else LOTS of unexpected behavior
     call_regenmodel(TARGETS, "regentoc.py")
     generate_html()
 
