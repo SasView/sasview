@@ -7,7 +7,6 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 
 from serializers import DataSerializers
-from user_authentication.models import User
 from .models import Data
 
 
@@ -23,7 +22,11 @@ def get_data(request, version):
 
 
 @api_view(['POST', 'PUT'])
-def upload(request, version):         
+def upload(request, version):
+    if request.user.is_authenticated:
+        #checks to see if there is an existing file to update
+        file = get_object_or_404(Data, username = request.username)   
+          
     #saves file_string
     if request.method == 'POST':
         serializer = DataSerializers(file_string = request.file_string)
@@ -35,10 +38,7 @@ def upload(request, version):
     
     #saves or updates file_string
     if request.method == 'PUT':
-        if User.anonymous == False:
-            #checks to see if there is an existing file to update
-            file = get_object_or_404(Data, file_string=request.file_string)
-
+        if request.user.is_authenticated:
             serializer = DataSerializers(file, file_string=request.file_string)
             if serializer.is_valid():
                 serializer.save()
