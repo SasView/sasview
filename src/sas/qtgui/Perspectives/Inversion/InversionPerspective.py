@@ -54,7 +54,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         return "P(r) Inversion"
 
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None,data=None):
         super(InversionWindow, self).__init__()
 
 
@@ -76,7 +76,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         # Visible data items
         # current QStandardItem showing on the panel
-        self._data = None
+        self._data = data
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
@@ -87,8 +87,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.dataPlot = None
         # suggested nTerms
 
-        self.maxIndex = 1
-        self.tab_id = 1
+
 
         # Calculation threads used by all data items
         self.calcThread = None
@@ -113,6 +112,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 1
 
+
         # The tabs need to be closeable
         self.setTabsClosable(True)
 
@@ -133,6 +133,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # If data on tab empty - do nothing
         if index in self.tabs and not self.tabs[index].data:
             return
+        # Add a new, empy tab
+        self.addData(None)
         # Remove the previous last tab
         self.tabCloses(index)
 
@@ -163,12 +165,19 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     def serializeAll(self):
         """
         Serialize the inversion state so data can be saved
-        Inversion is not batch-ready so this will only effect a single page
-        :return: {data-id: {self.name: {inversion-state}}}
+        serialize all active inversion pages and return
+        a dictionary: {data-id: {self.name: {inversion-state}}}
         """
-        return self.serializeCurrentPage()
+        state = {}
+        for i, index in enumerate(self.tabs):  # tab_ids would need to be populated somewhere
+            state.update(self.serializeCurrentPage(index))
+        return state
 
-    def serializeCurrentPage(self, Index=None):
+    def serialiseCurrentPage(self):
+        # serialize current (active) page
+        return self.getSerializedPage(self.currentTab)
+
+    def getSerializePage(self, Index=None):
         """
         Serialize and return a dictionary of {data_id: inversion-state}
         Return original dictionary if no data
@@ -184,7 +193,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         return state
 
 
-    def updateFromParameters(self, params: dict):
+    def updateFromParameters(self, params: dict, tab_name):
         """ Update the perspective using a dictionary of parameters
         e.g. those loaded via open project or open analysis menu items"""
         raise NotImplementedError("Update from parameters not implemented yet.")
@@ -266,7 +275,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     ######################################################################
 
 
-    def setData(self, data_item=None, is_batch=False):
+    def setData(self, data_item=None, is_batch=False, tab_index=None):
         """
         Assign new data set(s) to the P(r) perspective
         Obtain a QStandardItem object and parse it to get Data1D/2D
@@ -286,26 +295,39 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         for data in data_item:
             logic_data = GuiUtils.dataFromItem(data)
 
-            # Tab for 2D data
-            if isinstance(logic_data, Data2D) and not is_batch:
-                data.isSliced = False
-                tab = self.addData(data=data, is2D=True)
-                tab.tab2D.setEnabled(True)
-                tab.show2DPlot()
 
-            # Tab for 1D batch
-            if is_batch and not isinstance(logic_data, Data2D):
-                # initiate a single Tab for batch
-                self.addData(data=data_item, is_batch=is_batch)
-                return
+            # If none, open a new tab.
+            tab_ids = [tab.tab_id for tab in self.tabs]
 
-            # Tab for 1D
-            if isinstance(logic_data, Data1D):
-                tab = self.addData(data=data)
-                tab.setQ()
 
-                if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
-                    tab.logic.add_errors()
+            if tab_index not in tab_ids: #do not overwrite existing tab if 
+                #tab_index is specified
+                #needs swap data, i.e. replace the data in the current tab 
+                #if tab_id already excists missing
+
+                # Tab for 2D data
+                if isinstance(logic_data, Data2D) and not is_batch:
+                    data.isSliced = False
+                    tab = self.addData(data=data, is2D=True, tab_index=tab_index)
+                    tab.tab2D.setEnabled(True)
+                    tab.show2DPlot()
+
+                # Tab for 1D batch
+                if is_batch and not isinstance(logic_data, Data2D):
+                    # initiate a single Tab for batch
+                    self.addData(data=data_item, is_batch=is_batch, tab_index=tab_index)
+                    return
+
+                # Tab for 1D
+                if isinstance(logic_data, Data1D):
+                    tab = self.addData(data=data, tab_index=tab_index)
+                    tab.setQ()
+
+                    if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
+                        tab.logic.add_errors()
+
+
+
 
     def setCurrentData(self, data_ref):
         """Get the data by reference and display as necessary"""
@@ -424,23 +446,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
 
-    def serializeAll(self):
-        """
-        Serialize the inversion state so data can be saved
-        Inversion is not batch-ready so this will only effect a single page
-        :return: {data-id: {self.name: {inversion-state}}}
-        """
-        return self.serializeCurrentPage()
-
-    def serializeCurrentPage(self):
-        # Serialize and return a dictionary of {data_id: inversion-state}
-        # Return original dictionary if no data
-        state = {}
-        if self.logic.data_is_loaded:
-            tab_data = self.getPage()
-            data_id = tab_data.pop('data_id', '')
-            state[data_id] = {'pr_params': tab_data}
-        return state
 
 
 
@@ -459,6 +464,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab.setTabName("New Tab")
         icon = QtGui.QIcon()
+
+
+        
 
         if data is not None and not is_batch:
             tab.setTabName("New Tab")
@@ -480,6 +488,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Show the new tab
         self.setCurrentWidget(tab)
         return tab
+        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
 
     def createBatchTab(self, batchDataList):
         """

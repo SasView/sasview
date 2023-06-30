@@ -70,6 +70,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def __init__(self, parent=None, data=None, tab_id=1):
         super(InversionWidget, self).__init__()
 
+        # Necessary globals
+        self.parent = parent
+
         # 2D Data globals #####################
 
         self.is2D = False  # used to determine weather its a 2D tab
@@ -771,16 +774,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
 
-    def getPage(self):
-        """
-        serializes full state of this fit page
-        """
-        # Get all parameters from page
-        param_dict = self.getState()
-        param_dict['data_name'] = str(self.logic.data.name)
-        param_dict['data_id'] = str(self.logic.data.id)
-        return param_dict
-
     def currentTabDataId(self):
         """
         Returns the data ID of the current tab
@@ -789,6 +782,17 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if self.logic.data_is_loaded:
             tab_id.append(str(self.logic.data.id))
         return tab_id
+
+    def getPage(self):
+        """
+        serializes full state of this fit page
+        """
+        # Get all parameters from page
+        param_dict = self.getState()
+        param_dict['data_name'] = str(self.logic.data.name)
+        param_dict['data_id'] = str(self.logic.data.id)
+        param_dict['tab_id'] = self.currentTabDataId()
+        return param_dict
 
     def updateFromParameters(self, params):
         """
@@ -893,7 +897,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         pr = self._calculator.clone()
         # Making sure that nfunc and alpha parameters are correctly initialized
         pr.suggested_alpha = self._calculator.alpha
-        self.calcThread = CalcPr(pr, self.getNFunc(),
+        self.calcThread = CalcPr(pr, self.getNFunc(),tab_id=[[self.tab_id]],
                                  error_func=self._threadError,
                                  completefn=self._calculateCompleted,
                                  updatefn=None)
