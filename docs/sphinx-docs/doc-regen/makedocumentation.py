@@ -31,19 +31,24 @@ def call_regenmodel(filepath, regen_py):
     Runs regenmodel.py/regentoc.py (specified in parameter regen_py) with all found PY_FILES
     """
     REGENMODEL = abspath(regen_py)
+    # Initialize command to be executed
     command = [
         sys.executable,
         REGENMODEL,
-        filepath,
     ]
+    # Append each filepath to command individually if passed in many files
+    if type(filepath) == list:
+        for string in filepath:
+            command.append(string)
+    else:
+        command.append(filepath)
     subprocess.run(command)
 
 def main():
     TARGETS = get_main_docs()
-    print(TARGETS)
     for file in TARGETS:
         call_regenmodel(file, "regenmodel.py")
-        call_regenmodel(file, "regentoc.py")
+    call_regenmodel(TARGETS, "regentoc.py")
 
 if __name__ == "__main__":
     main()

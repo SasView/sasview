@@ -63,10 +63,11 @@ def generate_toc(model_files):
     category = {} # type: Dict[str, List[str]]
     for item in model_files:
         # assume model is in sasmodels/models/name.py, and ignore the full path
+        # NOTE: No longer use shortened pathname for model because we also pull in models from .sasview/plugin_models
         model_name = basename(item)[:-3]
         if model_name.startswith('_'):
             continue
-        model_info = load_model_info(model_name)
+        model_info = load_model_info(item)
         if model_info.category is None:
             print("Missing category for", item, file=sys.stderr)
         else:
