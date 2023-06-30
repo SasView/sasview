@@ -13,7 +13,7 @@ from .models import Data
 
 
 @api_view(['POST', 'PUT'])
-def import_file_string(request, file_id, version):    
+def import_file_string(request, file_id, version, optional_parameter='opt_in'):    
 
     #saves file_string
     if request.method == 'POST':
@@ -65,6 +65,11 @@ def export_data(request, save_file_id, version = None):
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-def export_to_example_data():
-    
+        
+
+
+#do we want to automatically do this? no request
+#add this as a function that can be called by export_data?
+#how do we do this
+def export_to_example_data(data):
+    #code here to download back to sasview...

@@ -39,8 +39,6 @@ class Fit(AnalysisBase):
     import_example_data = [
     ]
 
-    fit_success = models.BooleanField(default = False, help_text= "Successful completion status of fit")
-
 class FitParameter(AnalysisParameterBase):
     Units = [
 
