@@ -34,9 +34,11 @@ class QtHandler(logging.Handler):
         self.postman = QtPostman()
 
     def emit(self, record):
-        message = self.format(record)
-        if message:
-            self.postman.messageWritten.emit((message, record))
+        record = self.format(record)
+        if record:
+            self.messageWritten.emit('%s\n'%record)
+            pass
+
 
 def setup_qt_logging():
     # Add the qt-signal logger
