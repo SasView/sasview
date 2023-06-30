@@ -57,7 +57,11 @@ class Data(models.Model):
     ]
 
     public_file_ids = [
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 78158ec23b861429bec242bbe70ab845bc32fa22
     ]
 
     analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)
