@@ -49,7 +49,7 @@ class Data(models.Model):
 
     opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
 
-    import_example_data = [
+    example_data = [
     ]
 
     analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)

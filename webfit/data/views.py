@@ -11,15 +11,48 @@ from serializers import DataSerializers
 from user_authentication.models import User
 from .models import Data
 
+serializer = DataSerializers()
 
 @api_view(['POST', 'PUT'])
-def import_file_string(request, version):    
-
-    #check login
-    
+def import_file_string(request, version):         
     #saves file_string
     if request.method == 'POST':
-        serializer = DataSerializers(file_string=file_id)
+        serializer(file_string = request.file_string)
+        if serializer.is_valid():
+            serializer.save()
+            #TODO fix so it only returns specific response, create UserViewSet
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    #saves or updates file_string
+    if request.method == 'PUT':
+        if User.anonymous == False:
+            #checks to see if there is an existing file to update
+            try:
+                file = Data.objects.get(file_string=request.file_string)
+            except Data.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            
+
+            serializer(file, file_string=request.file_string)
+            if serializer.is_valid():
+                serializer.save()
+                #TODO fix so it only returns specific response, create UserViewSet
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #user is not logged in -> not allowed to update
+        else:
+            return HttpResponseForbidden()
+    
+    #data is actually loaded inside fit view
+
+@api_view(['POST', 'PUT'])
+def export_data(request, version = None):
+    #saves the file string to where to save data
+    if request.method == 'POST':
+        serializer(save_file_string = request.save_file_string)
+        if request.opt_in == True:
+            export_to_example_data(request)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -30,12 +63,11 @@ def import_file_string(request, version):
         if User.anonymous == False:
             #checks to see if there is an existing file to update
             try:
-                file = Data.objects.get(file_string=file_id)
+                save_file = Data.objects.get(save_file_string=request.save_file_string)
             except Data.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
-            
-
-            serializer = DataSerializers(file, file_string=file_id)
+        
+            serializer(save_file, save_file_string=request.save_file_string)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
@@ -43,35 +75,14 @@ def import_file_string(request, version):
         #user is not logged in -> not allowed to update
         else:
             return HttpResponseForbidden()
-    
-    #data is actually loaded inside fit view
-
-@api_view(['POST', 'PUT'])
-def export_data(request, save_file_id, version = None):
-    #saves the file string to where to save data
-    if request.method == 'POST':
-        serializer = DataSerializers(save_file_string = save_file_id)
-        return Response(serializer.data)
-    
-    #saves or updates file_string
-    if request.method == 'PUT':
-        if User.anonymous == False:
-            #checks to see if there is an existing file to update
-            try:
-                save_file = Data.objects.get(save_file_string=save_file_id)
-            except Data.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
         
-            serializer = DataSerializers(save_file, save_file_string=save_file_id)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+#loader = Loader()
 
-
-#do we want to automatically do this? no request
-#add this as a function that can be called by export_data?
-#how do we do this
-def export_to_example_data(data):
-    #code here to download back to sasview...
+#eventually create db inside Data that holds all the example data
+def export_to_example_data(request):
+    try:
+        example_data = Data.objects.get(example_data)
+    except Data.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    serializer(example_data, loader.load(request.file_string))
