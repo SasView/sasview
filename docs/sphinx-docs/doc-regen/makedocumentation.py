@@ -4,7 +4,6 @@ Creates documentation from .py files
 import os
 import sys
 from os.path import join, abspath, dirname
-import re
 import subprocess
 
 MAIN_PY_SRC = "../source-temp/user/models/src/"
@@ -15,8 +14,7 @@ ABSOLUTE_TARGET_PLUGINS = abspath(join(dirname(__file__), PLUGIN_PY_SRC))
 def get_py(directory):
     for root, dirs, files in os.walk(directory):
         # Only include python files not starting in '_' (pycache not included)
-        regex = re.compile('[$^_][a-z]*.py$')
-        PY_FILES = [join(directory, string) for string in files if re.findall(regex, string)]
+        PY_FILES = [join(directory, string) for string in files if not string.startswith("_") and string.endswith(".py")]
         return PY_FILES
 
 def get_main_docs():
@@ -45,7 +43,7 @@ def call_regenmodel(filepath, regen_py):
     subprocess.run(command)
 
 def generate_html():
-    # smallrst2html.py should be in same parent directory as makedocumentation.py
+    # based off of syntax provided in Makefile found under /sasmodels/
     DOCTREES = "../build/doctrees/"
     SPHINX_SOURCE = "../source-temp/"
     HTML_TARGET = "../build/html/"
