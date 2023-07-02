@@ -77,6 +77,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Visible data items
         # current QStandardItem showing on the panel
         self._data = data
+        
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
@@ -169,8 +170,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         a dictionary: {data-id: {self.name: {inversion-state}}}
         """
         state = {}
-        for i, index in enumerate(self.tabs):  # tab_ids would need to be populated somewhere
-            state.update(self.serializeCurrentPage(index))
+        for index in [tab.tab_id for tab in self.tabs]:  # tab_id would need to be populated somewhere
+            print(index)
+            state.update(self.getSerializePage(index))
         return state
 
     def serialiseCurrentPage(self):
@@ -182,14 +184,16 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         Serialize and return a dictionary of {data_id: inversion-state}
         Return original dictionary if no data
         """
-        if Index is None:
-            Index = self.currentIndex()
-        tab = self.tabs[Index]
         state = {}
-        if tab.logic.data_is_loaded:
-            tab_data = tab.getPage()
-            data_id = tab_data.pop('data_id', '')
-            state[data_id] = {'pr_params': tab_data}
+        if self.has_data:
+            if Index is None:
+                Index = self.currentIndex()
+            tab = self.tabs[Index]
+        
+            if tab.logic.data_is_loaded:
+                tab_data = tab.getPage()
+                data_id = tab_data.pop('data_id', '')
+                state[data_id] = {'pr_params': tab_data}
         return state
 
 
@@ -406,47 +410,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.enableButtons()
 
 
-    def removeData(self, data_list=None):
-        """Remove the existing data reference from the P(r) Persepective"""
-        self.dataDeleted = True
-        self.batchResults = {}
-        if not data_list:
-            data_list = [self._data]
-        self.closeDMax()
-        for data in data_list:
-            self._dataList.pop(data, None)
-        if self.dataPlot:
-            # Reset dataplot sliders
-            self.dataPlot.slider_low_q_input = []
-            self.dataPlot.slider_high_q_input = []
-            self.dataPlot.slider_low_q_setter = []
-            self.dataPlot.slider_high_q_setter = []
-        self._data = None
-        length = self.dataList.count()
-        for index in reversed(range(length)):
-            if self.dataList.itemData(index) in data_list:
-                self.dataList.removeItem(index)
-        # Last file removed
-        self.dataDeleted = False
-        # if self._dataList.count() == 0:
-        if len(self._dataList) == 0:
-            self.prPlot = None
-            self.dataPlot = None
-            self.logic.data = None
-            self._calculator = Invertor()
-            self.closeBatchResults()
-            self.nTermsSuggested = NUMBER_OF_TERMS
-            self.noOfTermsSuggestionButton.setText("{:n}".format(
-                self.nTermsSuggested))
-            self.regConstantSuggestionButton.setText("{:-3.2g}".format(
-                REGULARIZATION))
-            # self.updateGuiValues()
-            self.setupModel()
-        else:
-            self.dataList.setCurrentIndex(0)
-            self.updateGuiValues()
-
-
 
 
     def addData(self, data=None, is_batch=False, tab_index=None, is2D=False):
@@ -464,6 +427,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab.setTabName("New Tab")
         icon = QtGui.QIcon()
+        
 
 
         
@@ -476,11 +440,13 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             tab.populateDataComboBox(tab.logic.data.name, data)
             tab.calculateAllButton.setVisible(False)
             tab.showResultsButton.setVisible(False)
+            self.has_data = True
 
         # Setting UP batch Mode
         if is_batch:
             tab = self.createBatchTab(batchDataList=data)
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
+            self.has_data = True
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)
