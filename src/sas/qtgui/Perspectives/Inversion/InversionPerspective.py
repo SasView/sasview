@@ -170,31 +170,37 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         a dictionary: {data-id: {self.name: {inversion-state}}}
         """
         state = {}
-        for index in [tab.tab_id for tab in self.tabs]:  # tab_id would need to be populated somewhere
-            print(index)
-            state.update(self.getSerializePage(index))
+        index = [tab.tab_id for tab in self.tabs]
+        try:          
+            for i in index:              
+                state.update(self.getSerializePage(i))
+        except TypeError:
+            pass
         return state
 
-    def serialiseCurrentPage(self):
+    def serializeCurrentPage(self):
         # serialize current (active) page
         return self.getSerializedPage(self.currentTab)
 
-    def getSerializePage(self, Index=None):
+    def getSerializePage(self, index=None):
         """
         Serialize and return a dictionary of {data_id: inversion-state}
         Return original dictionary if no data
         """
         state = {}
-        if self.has_data:
-            if Index is None:
-                Index = self.currentIndex()
-            tab = self.tabs[Index]
-        
+        if index is None:
+            index = self.currentIndex()
+        # If data on tab empty - do nothing
+        try:
+            tab = self.tabs[index]        
             if tab.logic.data_is_loaded:
                 tab_data = tab.getPage()
                 data_id = tab_data.pop('data_id', '')
                 state[data_id] = {'pr_params': tab_data}
-        return state
+            return state
+        except:
+             return
+            
 
 
     def updateFromParameters(self, params: dict, tab_name):
@@ -440,13 +446,13 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             tab.populateDataComboBox(tab.logic.data.name, data)
             tab.calculateAllButton.setVisible(False)
             tab.showResultsButton.setVisible(False)
-            self.has_data = True
+            
 
         # Setting UP batch Mode
         if is_batch:
             tab = self.createBatchTab(batchDataList=data)
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
-            self.has_data = True
+            
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)
