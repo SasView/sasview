@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 
 from serializers import DataSerializers
+from django.contrib.auth.models import User
 from .models import Data
 
 
@@ -23,7 +24,9 @@ def get_data(request, version):
 
 @api_view(['POST', 'PUT'])
 def upload(request, version):
+    return_data = {}
     if request.user.is_authenticated:
+        return_data += {"authenticated" : True}
         #checks to see if there is an existing file to update
         file = get_object_or_404(Data, username = request.username)   
           
@@ -32,19 +35,21 @@ def upload(request, version):
         serializer = DataSerializers(file_string = request.file_string)
         if serializer.is_valid():
             serializer.save()
-            #TODO fix so it only returns specific response, create UserViewSet
+            return_data += {"file_id" : thing, "warnings" : file.errors}
+            if request.user.is
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return HttpResponseBadRequest()
     
     #saves or updates file_string
     if request.method == 'PUT':
         if request.user.is_authenticated:
             serializer = DataSerializers(file, file_string=request.file_string)
             if serializer.is_valid():
+                return_data += {"file_id" : thing, "opt_in" : file.opt_in, "warnings" : file.errors}
                 serializer.save()
                 #TODO fix so it only returns specific response, create UserViewSet
                 return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return HttpResponseBadRequest()
         #user is not logged in -> not allowed to update
         else:
             return HttpResponseForbidden()
@@ -61,7 +66,7 @@ def download(request, version = None):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return HttpResponseBadRequest()
     
     #saves or updates file_string
     if request.method == 'PUT':
