@@ -13,24 +13,16 @@ from .models import Data
 
 
 @api_view(['GET'])
-def list_data(request, version = None):
+def list_data(request, db_id = None, version = None):
     if request.method == 'GET':
+        data_list = {}
         public_data = Data.objects.filter(opt_in = True)
-        data_list = {"public_file_ids": public_data.public_file_ids}
-        return Response(data_list)
-    return HttpResponseBadRequest()
-        
-
-@api_view(['GET'])
-def list_data(request, db_id, version = None):
-    if request.method == 'GET':
+        data_list += {"public_file_ids": public_data.public_file_ids}
         if request.user.is_authenticated:
             data = get_object_or_404(Data, id=db_id)
-            data_list = {"user_data_ids": data.user_data_ids}
-            return Response(data_list)
-        return HttpResponseForbidden()
+            data_list += {"user_data_ids": data.user_data_ids}
+        return Response(data_list)
     return HttpResponseBadRequest()
-
 
 @api_view(['GET'])
 def data_info(request, db_id, version = None):
@@ -94,7 +86,6 @@ def download(request, version = None):
         return Response(return_data)
     return HttpResponseBadRequest()
         
-
 
 #eventually insert data into example_data
 def export_to_example_data(request):
