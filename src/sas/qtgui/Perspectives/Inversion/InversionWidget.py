@@ -98,7 +98,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
-        self.currentTab = tab_id
+
 
         # data index for the batch set
         self.data_index = 0
