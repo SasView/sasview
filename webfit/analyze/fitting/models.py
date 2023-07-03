@@ -38,6 +38,7 @@ class Fit(AnalysisBase):
     #imported example data
     import_example_data = [
     ]
+    FitModelid = models.ForeignKey(FitModel, ID)
 
 class FitParameter(AnalysisParameterBase):
     Units = [
