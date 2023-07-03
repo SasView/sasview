@@ -50,7 +50,7 @@ class DataSerializers(ModelSerializer):
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
-            exclude = ["example_data", "errors"]
+            exclude = ["example_data", "user_file_ids", "public_file_ids", "errors"]
         super().full_clean(instance, exclude, validate_unique)
 
 

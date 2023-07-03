@@ -49,16 +49,18 @@ class Data(models.Model):
 
     opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
 
+    #holds all example data
     example_data = [
+        #file_id : actual data? (added during migration)
     ]
 
-    user_data_ids = [
-
+    user_file_ids = [
+        #should include file ids (added when?)
+        ("", "")
     ]
 
     public_file_ids = [
-
-        
+        #added using migration
     ]
 
     analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)
