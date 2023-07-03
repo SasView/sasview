@@ -95,7 +95,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.plotList = None
 
         ########################################
-
+        
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
         self.currentTab = tab_id
@@ -770,6 +770,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                 REGULARIZATION))
             self.updateGuiValues()
             self.setupModel()
+            
         else:
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
@@ -780,8 +781,17 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         tab_id = []
         if self.logic.data_is_loaded:
-            tab_id.append(str(self.logic.data.id))
+            tab_id.append(str(self.tab_id))
         return tab_id
+
+    def currentTabName(self):
+        """
+        Returns the name of the current tab
+        """
+        tab_name = []
+        if self.tab_name is not None:
+            tab_name.append(str(self.tab_name))
+        return tab_name
 
     def getPage(self):
         """
@@ -792,6 +802,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         param_dict['data_name'] = str(self.logic.data.name)
         param_dict['data_id'] = str(self.logic.data.id)
         param_dict['tab_id'] = self.currentTabDataId()
+        param_dict['tab_name'] = self.currentTabName()
         return param_dict
 
     def updateFromParameters(self, params):
