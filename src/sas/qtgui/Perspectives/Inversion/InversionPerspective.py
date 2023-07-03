@@ -180,7 +180,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
     def serializeCurrentPage(self):
         # serialize current (active) page
-        return self.getSerializedPage(self.currentTab)
+        return self.getSerializePage(self.currentIndex())
 
     def getSerializePage(self, index=None):
         """
@@ -201,7 +201,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         except:
              return
             
-
 
     def updateFromParameters(self, params: dict, tab_name):
         """ Update the perspective using a dictionary of parameters
@@ -459,8 +458,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         # Show the new tab
         self.setCurrentWidget(tab)
-        return tab
         self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
+        return tab
+        
 
     def createBatchTab(self, batchDataList):
         """
