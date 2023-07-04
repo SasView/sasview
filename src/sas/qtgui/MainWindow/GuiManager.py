@@ -171,7 +171,6 @@ class GuiManager:
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
-        self.preferences = PreferencesPanel(self._parent)
 
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)

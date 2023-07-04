@@ -118,7 +118,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Find out which items got selected and in which row
         # Select for fitting
 
-        self.actionPlotResults = QtWidgets.QAction(self)
+        self.actionPlotResults = QtGui.QAction(self)
         self.actionPlotResults.setObjectName("actionPlot")
         self.actionPlotResults.setText(QtCore.QCoreApplication.translate("self", "Plot selected fits."))
 
