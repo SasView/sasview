@@ -51,8 +51,6 @@ class Data(models.Model):
         #added using migration
     ]
 
-    analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)
-
     errors = [
 
     ]

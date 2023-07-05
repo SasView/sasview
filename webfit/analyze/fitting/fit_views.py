@@ -10,12 +10,13 @@ from rest_framework.decorators import api_view
 from sasmodels.core import load_model
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
-from bumps.fitters import fit
+from bumps import fitters
 from bumps.formatnum import format_uncertainty
 #TODO categoryinstallers should belong in SasView.Systen rather than in QTGUI
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 
 from serializers import FitSerializers
+from data.models import Data
 from .models import (
     Fit,
     FitModel,
@@ -25,14 +26,32 @@ from .models import (
 
 fit_logger = getLogger(__name__)
 
-
-@api_view(["GET"])
+@api_view(["PUT"])
 def start(request, version = None):
-    if request.method == "GET":
-        fit_data = get_object_or_404(FitModel.SasModels)
-        if not request.data["MODEL_CHOICES"] in fit_data: 
+    serializer = FitSerializers()
+    fit = get_object_or_404(Fit)
+    fit_model = get_object_or_404(FitModel)
+
+    if request.method == "PUT":
+        if request.file_id:
+            if not fit.opt_in and not request.user.is_authenticated:
+                return HttpResponseBadRequest("user isn't logged in")
+            """
+            do I even need this? I think I need this to make sure the serializer goes to the right place
+            fit(username = request.username)
+            fit_model(id = fit.fit_model_id)
+            serializer(fit)
+            (do i need a FitModelSerializers)
+            """
+            data_obj = get_object_or_404(Data, id = request.file_id)
+            loaded_data = Loader.load(data_obj.file)
+        
+        if not request.data["MODEL_CHOICES"] in fit_model: 
             return HttpResponseBadRequest("No model selected for fitting")
         
+        kernel = load_model(request.model)
+        #TODO figure out how to load parameters
+
     return HttpResponseBadRequest()
 
 
@@ -41,7 +60,7 @@ def fit_status(request, fit_id, version = None):
     fit_obj = get_object_or_404(Fit, id = fit_id)
     if request.method == "GET":
         #TODO figure out private later <- probs write in Fit model
-        if fit_id is private and not request.user.is_authenticated:
+        if not fit_obj.opt_in and not request.user.is_authenticated:
             return HttpResponseBadRequest("user isn't logged in")
         return_info = {"fit_id" : fit_id, "status" : Fit.status}
         if Fit.results:

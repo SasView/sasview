@@ -9,6 +9,7 @@ from sasdata.dataloader.loader import Loader
 from serializers import DataSerializers
 from .models import Data
 
+#TODO look through whole code to make sure serializer updates to the correct object
 
 @api_view(['GET'])
 def list_data(request, version = None):
