@@ -59,9 +59,9 @@ class FitModel(AnalysisModelBase):
         FitParameter
     ]
 
-    magnitism = models.BooleanField(default=False, help_text="Is magnitism being checked in this model?")
+    magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
     #list of magnitism parameters
-    magnitic_parameters = [
+    magnetic_parameters = [
         FitParameter
     ]
 
