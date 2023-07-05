@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 #urls to fit
 fit_patterns = [
     path("", fit_views.start, name = "starting a fit"),  
+    path("models/", fit_views.list_models, name = "lists all fit models")
 ]
 
 urlpatterns = [

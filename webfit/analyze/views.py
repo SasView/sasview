@@ -1,9 +1,8 @@
 from logging import getLogger
 
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
