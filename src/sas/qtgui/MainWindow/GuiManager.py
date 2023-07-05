@@ -117,7 +117,7 @@ class GuiManager:
 
         # Fork off logging messages to the Log Window
         handler = setup_qt_logging()
-        handler.messageWritten.connect(self.appendLog)
+        handler.postman.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
