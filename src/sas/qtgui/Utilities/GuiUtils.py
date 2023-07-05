@@ -51,7 +51,9 @@ from sasdata.dataloader.loader import Loader
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
         HELP_DIRECTORY_LOCATION = "doc"
 else:
-        HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
+        DOCS_LOCATION = "docs/sphinx-docs/"
+        HELP_DIRECTORY_LOCATION = DOCS_LOCATION + "build/html"
+        RECOMPILE_DOC_LOCATION  = DOCS_LOCATION + "doc-regen"
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 
 # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.

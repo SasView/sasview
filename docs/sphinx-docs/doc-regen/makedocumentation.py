@@ -36,7 +36,7 @@ def call_regenmodel(filepath, regen_py):
     """
     Runs regenmodel.py/regentoc.py (specified in parameter regen_py) with all found PY_FILES
     """
-    REGENMODEL = abspath(regen_py)
+    REGENMODEL = abspath(dirname(__file__)) + "/" + regen_py
     # Initialize command to be executed
     command = [
         sys.executable,
@@ -78,4 +78,6 @@ def main():
     generate_html()
 
 if __name__ == "__main__":
+    main()
+else:
     main()

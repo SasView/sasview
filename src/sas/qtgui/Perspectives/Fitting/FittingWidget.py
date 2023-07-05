@@ -116,7 +116,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         super(FittingWidget, self).__init__()
 
         # Necessary globals
-        self.parent = parent
+        self.parent  = parent
+        self.process = None    # Default empty value
 
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
@@ -1819,12 +1820,25 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # See if the help file is there
                 # This breaks encapsulation a bit, though.
                 full_path = GuiUtils.HELP_DIRECTORY_LOCATION
+                recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
                 sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
                 location = sas_path + "/" + full_path
+                regen_docs = sas_path + "/" + recompile_path + "/" + "makedocumentation.py"
                 location += "/user/models/" + self.kernel_module.id + ".html"
                 if os.path.isfile(location):
                     # We have HTML for this model - show it
                     tree_location = "/user/models/"
+                    helpfile = self.kernel_module.id + ".html"
+                else:
+                    import subprocess
+                    command = [
+                        sys.executable,
+                        regen_docs,
+                    ]
+                    subprocess.run(command)
+
+                    # self.regenerate_docs(regen_docs)
+                    # self.regenerate_docs("test.py")
                     helpfile = self.kernel_module.id + ".html"
             else:
                 helpfile = "fitting_help.html"
@@ -1837,7 +1851,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elif tab_id == 4:
             helpfile = "magnetism/magnetism.html"
         help_location = tree_location + helpfile
-
+        print(help_location)
         self.showHelp(help_location)
 
     def showHelp(self, url):
@@ -1845,6 +1859,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Calls parent's method for opening an HTML page
         """
         self.parent.showHelp(url)
+
+    def regenerate_docs(self, regen_docs):
+       if self.process is None:
+            parent = QtCore.QObject()
+            self.process = QtCore.QProcess(parent)
+            self.process.readyReadStandardOutput.connect(self.handle_stdout)
+            self.process.finished.connect(self.finish_generation)
+            self.process.start("python", [regen_docs])
+    
+    def finish_generation(self):
+        self.process = None
+        print(r"Done :)")
+    
+    def handle_stdout(self):
+        data = self.process.readAllStandardOutput()
+        stdout = bytes(data).decode("utf8")
+        print(stdout)
 
     def onDisplayMagneticAngles(self):
         """
