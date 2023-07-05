@@ -21,6 +21,7 @@ def list_data(request, db_id = None, version = None):
         return Response(data_list)
     return HttpResponseBadRequest()
 
+
 @api_view(['GET'])
 def data_info(request, db_id, version = None):
     if request.method == 'Get':
@@ -30,6 +31,7 @@ def data_info(request, db_id, version = None):
         return_data = {"info" : loader.__str__()}
         return return_data
     return HttpResponseBadRequest()
+
 
 @api_view(['POST', 'PUT'])
 def upload(request, version = None):
@@ -59,6 +61,7 @@ def upload(request, version = None):
         return Response(return_data)
     return HttpResponseBadRequest()
     #data is actually loaded inside fit view
+
 
 @api_view(['POST', 'PUT'])
 def download(request, version = None):
