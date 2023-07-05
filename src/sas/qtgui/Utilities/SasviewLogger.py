@@ -20,7 +20,7 @@ class QtHandler(logging.Handler):
     def emit(self, record):
         message = self.format(record)
         if message:
-            self.postman.messageWritten .emit(message)
+            self.postman.messageWritten.emit(message)
 
 def setup_qt_logging():
     # Define the default logger
