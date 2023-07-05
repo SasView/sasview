@@ -281,7 +281,7 @@ packages.append("sas.qtgui")
 required = [
     'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',
     'lxml', 'h5py', 'sasmodels==1.0.7', 'qt5reactor', 'twisted', 'typing-extensions>=4.5.0',
-    'pyopenssl', 'cryptography<39.0'
+    'pyopenssl', 'cryptography<39.0', 'PyQt5', 'service-identity'
 ]
 
 if os.name == 'nt':
