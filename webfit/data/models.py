@@ -36,7 +36,7 @@ class Data(models.Model):
     id = models.BigAutoField(primary_key=True)
 
     #username
-    username = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
+    username = models.ForeignKey(User.username, default=None, on_delete=models.CASCADE)
 
     #imported data
     file_string = models.CharField(max_length=200, null = False, help_text="The file string to the fit data")
