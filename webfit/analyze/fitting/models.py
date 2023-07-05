@@ -49,7 +49,7 @@ class FitParameter(AnalysisParameterBase):
 
 class FitModel(AnalysisModelBase):
     #list of default parameters
-    default_parameter = [
+    default_parameters = [
         FitParameter
     ]
 
@@ -88,11 +88,10 @@ class FitModel(AnalysisModelBase):
     #look at models.py in sasview -> sasmodel-marketplace
 
 class Fit(AnalysisBase):
-    #imported example data
-    import_example_data = [
-    ]
     fit_model_id = models.ForeignKey(FitModel.id, default = None, on_delete=models.CASCADE)
-
-
+    results = thing
+    status = [
+        "Queued", "Running", "Complete"
+    ]
 
 #TODO: view saswebcalc later

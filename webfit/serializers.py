@@ -65,7 +65,7 @@ class FitSerializers(ModelSerializer):
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
-            exclude = [""]
+            exclude = ["Units", "PolydispersityParameter", "default_parameters", "polydispersity_parameters", "magnetic_parameters", "model_manager", "MODEL_CHOICES"]
         super().full_clean(instance, exclude, validate_unique)
 
 
