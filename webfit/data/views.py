@@ -37,7 +37,7 @@ def data_info(request, db_id, version = None):
     if request.method == 'Get':
         file = get_object_or_404(Data, id = db_id)
         #TODO ^^ how to check if file_id is in user_file_ids
-        loader = Loader.load(file.file_string)
+        loader = Loader.load(file.file)
         return_data = {"info" : loader.__str__()}
         return return_data
     return HttpResponseBadRequest()
@@ -48,16 +48,16 @@ def upload(request, version = None):
     serializer = DataSerializers()
     file = get_object_or_404(Data)
           
-    #saves file_string
+    #saves file
     if request.method == 'POST':
-        serializer(file_string = request.file_string, opt_in = request.opt_in)
+        serializer(file = request.file, opt_in = request.opt_in)
     
-    #saves or updates file_string
+    #saves or updates file
     elif request.method == 'PUT':
         if request.user.is_authenticated:
             #checks to see if there is an existing file to update
             file(username = request.username)
-            serializer(file, file_string=request.file_string, opt_in = request.opt_in)
+            serializer(file, file=request.file, opt_in = request.opt_in)
         else:
             return HttpResponseForbidden()
 
@@ -66,7 +66,7 @@ def upload(request, version = None):
         if request.opt_in == True:
             export_to_example_data(request)
         else:
-            file.user_file_ids += (request.file_string.id, "idk")
+            file.user_file_ids += (request.file.id, "idk")
         return_data = {"authenticated" : request.user.is_authenticated, "file_id" : howeveryougetthefileid, "opt_in" : serializer.opt_in, "warnings" : serializer.errors}
         return Response(return_data)
     return HttpResponseBadRequest()
@@ -81,7 +81,7 @@ def download(request, version = None):
     if request.method == 'POST':
         serializer(save_file_string = request.save_file_string)
     
-    #saves or updates file_string
+    #saves or updates save_file_string
     elif request.method == 'PUT':
         if request.user.is_authenticated:
             #checks to see if there is an existing file to update
@@ -105,5 +105,5 @@ def export_to_example_data(request):
     serializer = DataSerializers()
 
     #TODO write if statements to check if the file already exists
-    file.public_file_ids += (request.file_string.id, "idk")
-    file.example_data += (loader.load(request.file_string), "uhh name later")
+    file.public_file_ids += (request.file.id, "idk")
+    file.example_data += (loader.load(request.file), "uhh name later")

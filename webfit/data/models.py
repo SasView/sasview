@@ -33,13 +33,11 @@ models_logger = getLogger(__name__)
 
 
 class Data(models.Model):
-    id = models.BigAutoField(primary_key=True)
-
     #username
     username = models.ForeignKey(User.username, default=None, on_delete=models.CASCADE)
 
     #imported data
-    file_string = models.CharField(max_length=200, null = False, help_text="The file string to the fit data")
+    file = models.FileField(null = False, help_text="This is a file")
 
     do_save = models.BooleanField(default=True, help_text="Should this model be saved?") #later boolean to add autosave?
     saved_file = models.BooleanField(default=False, help_text="is the model saved in files?") #should this exist, or do we always override files and save
