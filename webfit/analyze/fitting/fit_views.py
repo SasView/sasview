@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view
 from sas.sascalc.fit.models import ModelManager
 from sasmodels.core import load_model
 from sasdata.dataloader.loader import Loader
+from bumps import fitters
 from serializers import FitSerializers
 from .models import (
     Fit,
@@ -33,13 +34,24 @@ def start(request, version = None):
 
 @api_view(["GET"])
 def fit_status(request, fit_id, version = None):
-    return_info = {}
     fit_obj = get_object_or_404(Fit, id = fit_id)
     if request.method == "GET":
+        #figure out private later <- probs write in Fit model
         if fit_id is private and not request.user.is_authenticated:
             return HttpResponseBadRequest("user isn't logged in")
-        return_info+={"fit_id" : fit_id}
-        if fit_obj.status is "Queued"
+        return_info = {"fit_id" : fit_id, "status" : Fit.status}
+        if Fit.results:
+            return_info+={"results" : Fit.results}
+        return return_info
+    
+    return HttpResponseBadRequest()
+
+
+@api_view(["GET"])
+def list_optimizers(request, version = None)
+    if request.method == "GET":
+        return_info = {"optimizers" : [fitters]}
+        return return_info
     return HttpResponseBadRequest()
 
 
