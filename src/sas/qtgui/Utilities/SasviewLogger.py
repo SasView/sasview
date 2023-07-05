@@ -7,7 +7,7 @@ from PySide6.QtCore import QObject, Signal
 class QtPostman(QObject):
     messageWritten = Signal(str)
 
-class QtLogger(logging.Handler):
+class QtHandler(logging.Handler):
     """
     Emit python log messages through a Qt signal. Receivers can connect
     to *handler.postman.messageWritten* with a method accepting the
@@ -27,7 +27,7 @@ def setup_qt_logging():
     logger = logging.getLogger()
 
     # Add the qt-signal logger
-    handler = QtLogger()
+    handler = QtHandler()
     handler.setFormatter(logging.Formatter(
         fmt="%(asctime)s - %(levelname)s: %(message)s",
         datefmt="%H:%M:%S"
