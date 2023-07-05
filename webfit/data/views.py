@@ -42,6 +42,7 @@ def data_info(request, db_id, version = None):
         return return_data
     return HttpResponseBadRequest()
 
+
 @api_view(['POST', 'PUT'])
 def upload(request, version = None):
     serializer = DataSerializers()
@@ -70,6 +71,7 @@ def upload(request, version = None):
         return Response(return_data)
     return HttpResponseBadRequest()
     #data is actually loaded inside fit view
+
 
 @api_view(['POST', 'PUT'])
 def download(request, version = None):
