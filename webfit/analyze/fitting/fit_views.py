@@ -7,10 +7,14 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from sas.sascalc.fit.models import ModelManager
 from sasmodels.core import load_model
+from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
-from bumps import fitters
+from bumps.fitters import fit
+from bumps.formatnum import format_uncertainty
+#TODO categoryinstallers should belong in SasView.Systen rather than in QTGUI
+from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+
 from serializers import FitSerializers
 from .models import (
     Fit,
@@ -28,7 +32,7 @@ def start(request, version = None):
         fit_data = get_object_or_404(FitModel.SasModels)
         if not request.data["MODEL_CHOICES"] in fit_data: 
             return HttpResponseBadRequest("No model selected for fitting")
-    
+        
     return HttpResponseBadRequest()
 
 
@@ -36,7 +40,7 @@ def start(request, version = None):
 def fit_status(request, fit_id, version = None):
     fit_obj = get_object_or_404(Fit, id = fit_id)
     if request.method == "GET":
-        #figure out private later <- probs write in Fit model
+        #TODO figure out private later <- probs write in Fit model
         if fit_id is private and not request.user.is_authenticated:
             return HttpResponseBadRequest("user isn't logged in")
         return_info = {"fit_id" : fit_id, "status" : Fit.status}
@@ -50,7 +54,7 @@ def fit_status(request, fit_id, version = None):
 @api_view(["GET"])
 def list_optimizers(request, version = None)
     if request.method == "GET":
-        return_info = {"optimizers" : [fitters]}
+        return_info = {"optimizers" : [fitters.FIT_ACTIVE_IDS]}
         return return_info
     return HttpResponseBadRequest()
 
@@ -63,23 +67,20 @@ def list_models(request, version = None):
         if request.kind:
             unique_models["models"] += [{request.kind : ADDLATER}]
         elif request.categories:
-            with open('FINDJSONNAMELATER.json') as cat_file:
+            user_file = CategoryInstaller.get_user_file()
+            with open(user_file) as cat_file:
                 file_contents = cat_file.read()
             spec_cat = file_contents[request.categories]
             unique_models["models"] += [spec_cat]
         else:
             unique_models["models"] = [model_manager.get_model_list()]
         return unique_models
-        """ requires discussion:
+        """TODO requires discussion:
         if request.username:
             if request.user.is_authenticated:
                 user_models = 
                 listed_models += {"plugin_models": user_models}
-                """
+        """
     return HttpResponseBadRequest()
-
-
-def get_parameters(request, ):
-    kernel = load_model()
 
 #takes DataInfo and saves it into to specified file location
