@@ -88,6 +88,7 @@ class FitModel(AnalysisModelBase):
     #look at models.py in sasview -> sasmodel-marketplace
 
 class Fit(AnalysisBase):
+    id = models.BigAutoField(primary_key=True)
     #imported example data
     import_example_data = [
     ]
