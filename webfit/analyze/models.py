@@ -50,7 +50,7 @@ class AnalysisBase(models.Model):
         "error2"
     ]
 
-    if User.anonymous == True:
+    if User:
         is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
 
 class AnalysisParameterBase(models.Model):
