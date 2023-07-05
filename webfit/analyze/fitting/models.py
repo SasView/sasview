@@ -34,12 +34,6 @@ models_logger = getLogger(__name__)
 
 loader = Loader()
 
-class Fit(AnalysisBase):
-    #imported example data
-    import_example_data = [
-    ]
-    FitModelid = models.ForeignKey(FitModel, ID)
-
 class FitParameter(AnalysisParameterBase):
     Units = [
 
@@ -93,7 +87,12 @@ class FitModel(AnalysisModelBase):
         
     #look at models.py in sasview -> sasmodel-marketplace
 
-    
+class Fit(AnalysisBase):
+    #imported example data
+    import_example_data = [
+    ]
+    fit_model_id = models.ForeignKey(FitModel.id, default = None, on_delete=models.CASCADE)
+
 
 
 #TODO: view saswebcalc later
