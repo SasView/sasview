@@ -39,6 +39,7 @@ default_categories.json
 **/UI/*.py
 !**/UI/__init__.py
 config.json
+**/db.sqlite3
 
 # doc build
 /docs/sphinx-docs/build
