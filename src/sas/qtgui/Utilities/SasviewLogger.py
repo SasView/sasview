@@ -36,7 +36,7 @@ class QtHandler(logging.Handler):
     def emit(self, record):
         record = self.format(record)
         if record:
-            self.messageWritten.emit('%s\n'%record)
+            #self.messageWritten.emit('%s\n'%record)
             pass
 
 
