@@ -1,4 +1,5 @@
 import sys
+from enum import Enum
 from logging import getLogger
 from types import ModuleType
 from analyze.models import AnalysisBase, AnalysisModelBase, AnalysisParameterBase
@@ -90,8 +91,13 @@ class FitModel(AnalysisModelBase):
 class Fit(AnalysisBase):
     fit_model_id = models.ForeignKey(FitModel.id, default = None, on_delete=models.CASCADE)
     results = thing
-    status = [
-        "Queued", "Running", "Complete"
-    ]
+ 
+    class StatusChoices(models.IntegerChoices):
+
+        QUEUED = 1
+        RUNNING = 2
+        COMPLETE = 3
+
+    status = models.IntegerField(choices=StatusChoices)
 
 #TODO: view saswebcalc later
