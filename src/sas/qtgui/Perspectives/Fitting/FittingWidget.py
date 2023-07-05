@@ -1835,10 +1835,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                         sys.executable,
                         regen_docs,
                     ]
-                    subprocess.run(command)
-
-                    # self.regenerate_docs(regen_docs)
-                    # self.regenerate_docs("test.py")
+                    doc_regen_dir = os.path.dirname(regen_docs)
+                    subprocess.run(command, cwd=doc_regen_dir) # Regenerates documentation, cwd= argument makes sure that local pathnames are processed correctly
                     helpfile = self.kernel_module.id + ".html"
             else:
                 helpfile = "fitting_help.html"
@@ -1859,23 +1857,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Calls parent's method for opening an HTML page
         """
         self.parent.showHelp(url)
-
-    def regenerate_docs(self, regen_docs):
-       if self.process is None:
-            parent = QtCore.QObject()
-            self.process = QtCore.QProcess(parent)
-            self.process.readyReadStandardOutput.connect(self.handle_stdout)
-            self.process.finished.connect(self.finish_generation)
-            self.process.start("python", [regen_docs])
-    
-    def finish_generation(self):
-        self.process = None
-        print(r"Done :)")
-    
-    def handle_stdout(self):
-        data = self.process.readAllStandardOutput()
-        stdout = bytes(data).decode("utf8")
-        print(stdout)
 
     def onDisplayMagneticAngles(self):
         """

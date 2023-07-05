@@ -6,9 +6,9 @@ import sys
 from os.path import join, abspath, dirname, basename
 import subprocess
 
-MAIN_PY_SRC = "../source-temp/user/models/src/"
+MAIN_PY_SRC = abspath(dirname(__file__)) + "/../source-temp/user/models/src/"
 ABSOLUTE_TARGET_MAIN = abspath(join(dirname(__file__), MAIN_PY_SRC))
-PLUGIN_PY_SRC = "../../../../.sasview/plugin_models/"
+PLUGIN_PY_SRC = abspath(dirname(__file__)) + "/../../../../.sasview/plugin_models/"
 ABSOLUTE_TARGET_PLUGINS = abspath(join(dirname(__file__), PLUGIN_PY_SRC))
 
 def get_py(directory):

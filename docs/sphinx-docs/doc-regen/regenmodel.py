@@ -78,7 +78,8 @@ except ImportError:
 # Destination directory for model docs
 #ROOT = dirname(dirname(realpath(__file__)))
 #TARGET_DIR = joinpath(ROOT, "doc", "model")
-TARGET_DIR = "../source-temp/user/models" # relative to current path
+TARGET_DIR = os.path.abspath(dirname(__file__)) + "/../source-temp/user/models" # relative to current path
+print(TARGET_DIR)
 
 def plot_1d(model, opts, ax):
     # type: (KernelModel, Dict[str, Any], Axes) -> None
