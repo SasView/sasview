@@ -71,7 +71,7 @@ def fit_status(request, fit_id, version = None):
 
 
 @api_view(["GET"])
-def list_optimizers(request, version = None)
+def list_optimizers(request, version = None):
     if request.method == "GET":
         return_info = {"optimizers" : [fitters.FIT_ACTIVE_IDS]}
         return return_info
