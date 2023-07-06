@@ -140,6 +140,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMy.textChanged.connect(self.check_for_magnetic_controls)
         self.txtMz.textChanged.connect(self.check_for_magnetic_controls)
 
+        #check for SLD changes
+        self.txtSolventSLD.editingFinished.connect(self.update_Rg)
+
         #update coord display
         self.txtEnvYaw.textChanged.connect(self.update_coords)
         self.txtEnvPitch.textChanged.connect(self.update_coords)
@@ -862,47 +865,78 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtYstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.ystepsize))
             self.txtZstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.zstepsize))
         # otherwise leave as set since editable by user
-
-        # update the value of the Radius of Gyration with values from the loaded data
-        if self.is_nuc:
-            if self.nuc_sld_data.is_elements:
-                self.txtROG.setText(str("N/A for Elements"))
-            else:
-                self.txtROG.setText(self.radius_of_gyration() + " Å")
-        elif self.is_mag:
-            self.txtROG.setText(str("N/A for magnetic data"))
-        else:
-            self.txtROG.setText(str("N/A for no data"))
-            
+        self.update_Rg()
 
         # If nodes or stepsize changed then this may effect what values are allowed
         self.gui_text_changed(sender=self.txtNoQBins)
         self.gui_text_changed(sender=self.txtQxMax)
+        
+    def update_Rg(self):
+        # update the value of the Radius of Gyration with values from the loaded data
+        if self.is_nuc:
+            if self.nuc_sld_data.is_elements:
+                self.txtRgMass.setText(str("N/A"))
+                self.txtRG.setText(str("N/A "))                    
+                logging.info("SasView does not support computation of Radius of Gyration for elements.")
+            else:
+                threads.deferToThread(self.radius_of_gyration)          
+
+        elif self.is_mag:
+            self.txtRgMass.setText(str("N/A"))            
+            self.txtRG.setText(str("N/A"))
+            logging.info("SasView does not support computation of Radius of Gyration for Magnetic Data.")
+        else:
+            self.txtRgMass.setText(str("no data"))
+            self.txtRG.setText(str("no data"))
+            
     
     def radius_of_gyration(self):
         #Calculate Center of Mass(CoM) First
         CoM = self.centerOfMass()
 
         #Now Calculate RoG
-        RoGNumerator = RoGDenominator = 0.0
+        RGNumerator = RGDenominator = RgMassNum = RgMassDen = 0.0
 
         for i in range(len(self.nuc_sld_data.pos_x)):
             coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
+            atom = periodictable.formula(self.nuc_sld_data.pix_symbol[i])
             
-            #Coh b - Coherent Scattering Length(fm)
-            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
+            #denom - if index is 0 calculate with mass, otherwise if index is 1 use effective Coherent Scattering Length(fm) adjusted for solvent sld
+            mass = atom.mass
+            
+            #adjust for solvent sld
+            sld = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c       #fentometer
+            solvent_sld = (atom.volume() * 10**24 * float(self.txtSolventSLD.text())) * 10**5       #vol in cm^3, solventSLD in Angstrom^-2
+            
+            contrastSLD = sld - solvent_sld         #fentometer
 
             #Calculate the Magnitude of the Coordinate vector for the atom and the center of mass
             MagnitudeOfCoM = numpy.sqrt(numpy.power(CoM[0]-coordinates[0],2) + numpy.power(CoM[1]-coordinates[1],2) + numpy.power(CoM[2]-coordinates[2],2))
 
-            #Calculate Rate of Gyration (Squared) with the formular
-            RoGNumerator += cohB * (numpy.power(MagnitudeOfCoM,2))
-            RoGDenominator += cohB
+            #Calculate Rate of Gyration (Squared) with the formula
+            RgMassNum += mass * (numpy.power(MagnitudeOfCoM,2))
+            RgMassDen += mass
+            RGNumerator += contrastSLD * (numpy.power(MagnitudeOfCoM,2))
+            RGDenominator += contrastSLD
+
+        if RgMassDen <= 0: #Should never happen as there are no zero or negative mass atoms
+            rgMassValue = "NaN"
+            logging.warning("Atomic Mass is zero for all atoms in the system.")
+        else:
+            rgMassValue = (str(round(numpy.sqrt(RgMassNum/RgMassDen),1)) + " Å")
 
         #Avoid division by zero - May occur through contrast matching
-        RoG = str(round(numpy.sqrt(RoGNumerator/RoGDenominator),1)) if RoGDenominator != 0 else "NaN"
-
-        return RoG
+        if RGDenominator == 0:
+            rGValue = "NaN"
+            logging.warning("Effective Coherent Scattering Length is zero for all atoms in the system.")
+        elif (RGNumerator/RGDenominator) < 0:
+            rGValue = (str(round(numpy.sqrt(-RGNumerator/RGDenominator),1)) + " Å")
+            logging.warning("Radius of Gyration Squared is negative. R(G)^2 is assumed to be |R(G)|* R(G).")
+        else:
+            rGValue = (str(round(numpy.sqrt(RGNumerator/RGDenominator),1)) + " Å")
+        
+        self.txtRgMass.setText(rgMassValue)
+        self.txtRG.setText(rGValue)
     
     def centerOfMass(self):
         """Calculate Center of Mass(CoM) of provided atom"""
