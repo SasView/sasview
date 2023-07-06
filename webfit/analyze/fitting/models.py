@@ -37,7 +37,7 @@ loader = Loader()
 
 class FitParameter(AnalysisParameterBase):
     Units = {
-        #implement in migrations?
+        #implement default in migrations
     }
 
     polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
@@ -81,6 +81,8 @@ class FitModel(AnalysisModelBase):
         MODEL_CHOICES = [
             model_manager.get_model_list
         ]
+    #TODO FIX THIS ADD MORE
+    model = models.SMTH
 
     class PlugInModels():
         #create plug in models <- grab by url
