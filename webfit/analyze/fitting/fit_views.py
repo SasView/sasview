@@ -44,21 +44,24 @@ def start(request, version = None):
         if request.data.data_id:
             if not fit.opt_in and not request.user.is_authenticated:
                 return HttpResponseBadRequest("data isn't public and user isn't logged in")
-            data_obj = get_object_or_404(Data, id = request.data.data_id)
+            serializer(data_id = request.data.data_id)
 
         if request.data.parameters:
             fit_parameters.Units += {request.data.parameters}
 
         if request.data.opt_in:
-            fit.opt_in = request.data.opt_in
-        #TODO figure out how to load parameters
+            serializer(opt_in = fit.opt_in)
+
+        if serializer.is_valid():
+            serializer.save()
+
         start_fit()
         return {"authenticated":request.user.is_authenticated, "fit_id":fit.id, "warnings":uhhhhhhh}
     return HttpResponseBadRequest()
 
 
-def start_fit(data_obj):
-
+def start_fit():
+    
     return 0
 
 
