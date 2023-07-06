@@ -26,11 +26,11 @@ def list_data(request, db_id = None, version = None):
 
 @api_view(['GET'])
 def data_info(request, db_id, version = None):
-    if request.method == 'Get':
+    if request.method == 'GET':
         public_data = Data.objects.filter(opt_in=True)
         file = get_object_or_404(Data, id = db_id)
         #TODO check if this actually checks the id is public/properly logged in
-        if (not file in public_data) and (not request.username is file.username):
+        if not (file in public_data) and request.user.is_authenticated:
             return HttpResponseBadRequest("Database ID not public")
         file = get_object_or_404(Data, id = db_id)
         #TODO ^^ how to check if file_id is in user_file_ids
@@ -40,11 +40,12 @@ def data_info(request, db_id, version = None):
     return HttpResponseBadRequest()
 
 
+#
 @api_view(['POST', 'PUT'])
 def upload(request, version = None):
     serializer = DataSerializers()
     file = get_object_or_404(Data)
-          
+    
     #saves file
     if request.method == 'POST':
         serializer(file = request.file, opt_in = request.data.opt_in)
@@ -53,17 +54,16 @@ def upload(request, version = None):
     elif request.method == 'PUT':
         if request.user.is_authenticated:
             #checks to see if there is an existing file to update
-            file(username = request.username)
-            serializer(file, file=request.file, opt_in = request.opt_in)
+            file(username = request.data.username)
+            serializer(file, file=request.file, opt_in = request.data.opt_in)
         else:
             return HttpResponseForbidden()
 
     if serializer.is_valid():
         serializer.save()
         if request.opt_in == True:
-            export_to_example_data(request)
-        else:
-            file.user_file_ids += (request.file.id, "idk")
+            #TODO check if file obj gets updated after serializer saves
+            export_to_example_data(request, file)
         return_data = {"authenticated" : request.user.is_authenticated, "file_id" : howeveryougetthefileid, "opt_in" : serializer.opt_in, "warnings" : serializer.errors}
         return Response(return_data)
     return HttpResponseBadRequest()
@@ -82,24 +82,23 @@ def download(request, version = None):
     elif request.method == 'PUT':
         if request.user.is_authenticated:
             #checks to see if there is an existing file to update
-            save_file = get_object_or_404(Data, save_file_string=request.save_file_string)
-            serializer(save_file, save_file_string=request.save_file_string)
+            save_file = get_object_or_404(Data, username = request.username)
+            serializer(save_file, save_file_string = request.save_file_string)
         else:
             return HttpResponseForbidden()
 
     if serializer.is_valid():
         serializer.save()
-        return_data={"authenticated" : request.user.is_authenticated, "file_id" : id, "warnings" : serializer.errors}
+        #not sure if the serializer will be able to get the id
+        return_data={"authenticated" : request.user.is_authenticated, "file_id" : serializer.data.id, "warnings" : serializer.errors}
         return Response(return_data)
     return HttpResponseBadRequest()
         
 
 #eventually insert data into example_data
-def export_to_example_data(request):
+def export_to_example_data(request, file):
     loader = Loader()
-    file = get_object_or_404(Data, username = request.username) 
-    serializer = DataSerializers()
 
     #TODO write if statements to check if the file already exists
-    file.public_file_ids += (request.file.id, "idk")
-    file.example_data += (loader.load(request.file), "uhh name later")
+    file.public_file_ids += (file.id, "idk")
+    file.example_data += (file.file, "uhh name later")
