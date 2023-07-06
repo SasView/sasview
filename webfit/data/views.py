@@ -65,9 +65,9 @@ def upload(request, version = None):
     #data is actually loaded inside fit view
 
 
-@api_view(['POST', 'PUT'])
+#TODO check if I should move to fit
+@api_view(['GET'])
 def download(request, version = None):
-    return_data = {}
     serializer = DataSerializers()
     #saves the file string to where to save data
     if request.method == 'POST':
@@ -84,7 +84,7 @@ def download(request, version = None):
 
     if serializer.is_valid():
         serializer.save()
-        return_data+={"authenticated" : request.user.is_authenticated, "file_id" : howeveryougetthefileid, "warnings" : serializer.errors}
+        return_data={"authenticated" : request.user.is_authenticated, "file_id" : id, "warnings" : serializer.errors}
         return Response(return_data)
     return HttpResponseBadRequest()
         
