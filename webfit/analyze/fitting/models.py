@@ -78,9 +78,7 @@ class FitModel(AnalysisModelBase):
     """
     class SasModels():
         model_manager = ModelManager()
-        MODEL_CHOICES = [
-            model_manager.get_model_list
-        ]
+        MODEL_CHOICES = model_manager.get_model_list
     #TODO FIX THIS ADD MORE
     model = models.SMTH
 
