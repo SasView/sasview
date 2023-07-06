@@ -34,9 +34,8 @@ def data_info(request, db_id, version = None):
             return HttpResponseBadRequest("Database ID not public")
         file = get_object_or_404(Data, id = db_id)
         #TODO ^^ how to check if file_id is in user_file_ids
-        #TODO doesn't actually load file, fix this (changed file to actual file, not file string) <- possibly get rid of loader, just file
-        loader = Loader.load(file.file)
-        return_data = {"info" : loader.__str__()}
+        #TODO check if this loads the file correctly
+        return_data = {"info" : file.file.__str__()}
         return return_data
     return HttpResponseBadRequest()
 
