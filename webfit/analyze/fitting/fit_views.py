@@ -27,34 +27,38 @@ from .models import (
 fit_logger = getLogger(__name__)
 
 #start() only puts all the request data into the db, the function underneath actually runs the fit
+#TODO add authentication -> figure out how to do this without multiplying
 @api_view(["PUT"])
 def start(request, version = None):
     fit = get_object_or_404(Fit)
     fit_model = get_object_or_404(FitModel)
+    fit_parameters = get_object_or_404(FitParameter)
+    serializer = FitSerializers(fit)
 
+    #TODO reduce redundancies!!!
     if request.method == "PUT":
+        if not request.data["MODEL_CHOICES"] in fit_model: 
+            return HttpResponseBadRequest("No model selected for fitting")
+        #save model somewhere: 
+
         if request.data.data_id:
             if not fit.opt_in and not request.user.is_authenticated:
                 return HttpResponseBadRequest("data isn't public and user isn't logged in")
-            """
-            do I even need this? I think I need this to make sure the serializer goes to the right place
-            fit(username = request.username)
-            fit_model(id = fit.fit_model_id)
-            serializer(fit)
-            (do i need a FitModelSerializers)
-            """
             data_obj = get_object_or_404(Data, id = request.data.data_id)
-        
-        if not request.data["MODEL_CHOICES"] in fit_model: 
-            return HttpResponseBadRequest("No model selected for fitting")
-        
-        kernel = load_model(request.model)
-        #TODO figure out how to load parameters
 
+        if request.data.parameters:
+            fit_parameters.Units += {request.data.parameters}
+
+        if request.data.opt_in:
+            fit.opt_in = request.data.opt_in
+        #TODO figure out how to load parameters
+        start_fit()
+        return {"authenticated":request.user.is_authenticated, "fit_id":fit.id, "warnings":uhhhhhhh}
     return HttpResponseBadRequest()
 
 
-def start_fit():
+def start_fit(data_obj):
+
     return 0
 
 
