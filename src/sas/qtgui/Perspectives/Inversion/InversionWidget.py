@@ -1304,7 +1304,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         for i in range(self.noOfSlices):
             params["Phi [deg]"] = self.phi
             self.setSlicerParms()
-            slicePlot = self.plot2D.slicer.getSlice()
+            slicePlot = self.plot2D.slicer.captureSlice()
             slicePlot.title += ' φ {}'.format(self.phi)
             slicePlot.phi = self.phi
             slicePlot.startPoint = self.startPoint
