@@ -14,7 +14,7 @@ fit_patterns = [
 ]
 
 urlpatterns = [
-    path("<str: username>/", views.list_analysis, "view analysis done"),
+    path("<str: username>/<int: data_id>", views.list_analysis_done, "view analysis done"),
     
     path("fit/", include(fit_patterns), name = "fit patterns"),
     #path("Inversion/", include()),   <- where is this in the main script? 

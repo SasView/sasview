@@ -26,16 +26,16 @@ from .models import (
 
 fit_logger = getLogger(__name__)
 
+#start() only puts all the request data into the db, the function underneath actually runs the fit
 @api_view(["PUT"])
 def start(request, version = None):
-    serializer = FitSerializers()
     fit = get_object_or_404(Fit)
     fit_model = get_object_or_404(FitModel)
 
     if request.method == "PUT":
-        if request.file_id:
+        if request.data.data_id:
             if not fit.opt_in and not request.user.is_authenticated:
-                return HttpResponseBadRequest("user isn't logged in")
+                return HttpResponseBadRequest("data isn't public and user isn't logged in")
             """
             do I even need this? I think I need this to make sure the serializer goes to the right place
             fit(username = request.username)
@@ -43,8 +43,7 @@ def start(request, version = None):
             serializer(fit)
             (do i need a FitModelSerializers)
             """
-            data_obj = get_object_or_404(Data, id = request.file_id)
-            loaded_data = Loader.load(data_obj.file)
+            data_obj = get_object_or_404(Data, id = request.data.data_id)
         
         if not request.data["MODEL_CHOICES"] in fit_model: 
             return HttpResponseBadRequest("No model selected for fitting")
@@ -53,6 +52,14 @@ def start(request, version = None):
         #TODO figure out how to load parameters
 
     return HttpResponseBadRequest()
+
+
+def start_fit():
+    return 0
+
+
+def status():
+    return 0
 
 
 @api_view(["GET"])
@@ -83,13 +90,11 @@ def list_models(request, version = None):
     model_manager = ModelManager()
     if request.method == "GET":
         unique_models = {"models": []}
-        if request.kind:
-            unique_models["models"] += [{request.kind : ADDLATER}]
-        elif request.categories:
+        if request.categories:
             user_file = CategoryInstaller.get_user_file()
             with open(user_file) as cat_file:
                 file_contents = cat_file.read()
-            spec_cat = file_contents[request.categories]
+            spec_cat = file_contents[request.data.categories]
             unique_models["models"] += [spec_cat]
         else:
             unique_models["models"] = [model_manager.get_model_list()]
