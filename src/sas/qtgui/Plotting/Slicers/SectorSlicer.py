@@ -117,7 +117,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.right_line.save(ev)
         self.left_line.save(ev)
 
-    def _post_data(self, nbins=None):
+    def _post_data(self, nbins=None, show_plots=True):
         """
         compute sector averaging of data2D into data1D
         :param nbins: the number of point to plot for the average 1D data
@@ -168,17 +168,20 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "SectorQ" + self.data.name
         new_plot.is_data = True
-        item = self._item
-        if self._item.parent() is not None:
-            item = self._item.parent()
-        # GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
-        # self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        # self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+        if show_plots:
+            item = self._item
+            if self._item.parent() is not None:
+                item = self._item.parent()
+            GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+            self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+            self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
-        if self.update_model:
-            self.setModelFromParams()
-        self.draw()
+            if self.update_model:
+                self.setModelFromParams()
+            self.draw()
+        else:
+            return new_plot
 
     def validate(self, param_name, param_value):
         """
@@ -273,54 +276,9 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         """
         self.base.draw()
 
-    def getSlice(self, nbins=None):
-        """
-        """
-        data = self.data
-        # If we have no data, just return
-        if data is None:
-            return
-        # Averaging
-        from sasdata.data_util.manipulations import SectorQ
-        radius = self.qmax
-        phimin = -self.left_line.phi + self.main_line.theta
-        phimax = self.left_line.phi + self.main_line.theta
-        if nbins is None:
-            nbins = 20
-        sect = SectorQ(r_min=0.0, r_max=radius,
-                       phi_min=phimin + numpy.pi,
-                       phi_max=phimax + numpy.pi, nbins=nbins)
+    def captureSlice(self, nbins=None):
+        new_plot = self._post_data(nbins, show_plots = False)
 
-        sector = sect(self.data)
-        # Create 1D data resulting from average
-
-        if hasattr(sector, "dxl"):
-            dxl = sector.dxl
-        else:
-            dxl = None
-        if hasattr(sector, "dxw"):
-            dxw = sector.dxw
-        else:
-            dxw = None
-        new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
-        new_plot.dxl = dxl
-        new_plot.dxw = dxw
-        new_plot.name = "SectorQ" + "(" + self.data.name + ")"
-        new_plot.title = "SectorQ" + "(" + self.data.name + ")"
-        new_plot.source = self.data.source
-        new_plot.interactive = True
-        new_plot.detector = self.data.detector
-        # If the data file does not tell us what the axes are, just assume them.
-        new_plot.xaxis("\\rm{Q}", "A^{-1}")
-        new_plot.yaxis("\\rm{Intensity}", "cm^{-1}")
-        if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.data.name.count("Residuals") > 0:
-            new_plot.ytransform = 'y'
-            new_plot.yaxis("\\rm{Residuals} ", "/")
-
-        new_plot.group_id = "2daverage" + self.data.name
-        new_plot.id = "SectorQ" + self.data.name
-        new_plot.is_data = True
         return new_plot
 
 class SideInteractor(BaseInteractor):
