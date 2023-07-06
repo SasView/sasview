@@ -1832,7 +1832,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 else:
                     import subprocess
                     py_target = self.kernel_module.id + ".py"
-                    print(py_target, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                     command = [
                         sys.executable,
                         regen_docs,
