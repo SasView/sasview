@@ -50,11 +50,15 @@ def call_regenmodel(filepath, regen_py):
         command.append(filepath)
     subprocess.run(command)
 
-def generate_html():
+def generate_html(single_file=""):
     # based off of syntax provided in Makefile found under /sasmodels/doc/
     DOCTREES = "../build/doctrees/"
     SPHINX_SOURCE = "../source-temp/"
     HTML_TARGET = "../build/html/"
+    single_rst = SPHINX_SOURCE + "user/models/" + single_file.replace('.py', '.rst')
+    if single_rst.endswith("models/"):
+        # (re)sets value to empty string if nothing was entered
+        single_rst = ""
     command = [
         sys.executable,
         "-m",
@@ -65,7 +69,12 @@ def generate_html():
         "latex_elements.papersize=letter",
         SPHINX_SOURCE,
         HTML_TARGET,
+        single_rst,
     ]
+    try:
+        command.remove("")
+    except:
+        pass
     subprocess.check_call(command)
 
 def call_all_files():
@@ -77,17 +86,22 @@ def call_all_files():
     call_regenmodel(TARGETS, "regentoc.py")
 
 def call_one_file(file):
-    TARGETS = get_main_docs
-    file_call_path = [target for target in TARGETS if basename(target) is file]
-    call_regenmodel(file_call_path[0], "regenmodel.py")
+    # Below is a very awkward and ugly way to get it to pass in a valid path to regenerate reST ... EASY TODO: just append "file" to a string that has the rest of the pathname
+    TARGETS = get_main_docs()
+    target_basenames = []
+    for path in TARGETS:
+        target_basenames.append(basename(path))
+    index_of_base_target = target_basenames.index(file)
+    file_call_path = TARGETS[index_of_base_target]
+    call_regenmodel(file_call_path, "regenmodel.py") # There might be a cleaner way to do this but this approach seems to work and is fairly minimal
     call_regenmodel(TARGETS, "regentoc.py")
 
 def main():
     try:
-        call_one_file(sys.argv[1])
+        call_one_file(sys.argv[1]) # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
+        generate_html(sys.argv[1])
     except:
-        pass
-    generate_html()
+        generate_html()
 
 if __name__ == "__main__":
     main()
