@@ -1,4 +1,5 @@
 import sys
+from enum import Enum
 from logging import getLogger
 from types import ModuleType
 from analyze.models import AnalysisBase, AnalysisModelBase, AnalysisParameterBase
@@ -34,40 +35,35 @@ models_logger = getLogger(__name__)
 
 loader = Loader()
 
-class Fit(AnalysisBase):
-    #imported example data
-    import_example_data = [
-    ]
-
 class FitParameter(AnalysisParameterBase):
-    Units = [
-
-    ]
+    Units = {
+        #implement in migrations?
+    }
 
     polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
 
     magnetic = models.BooleanField(default=False, help_text="is this a magnetic parameter?")
 
     #polydispersity parameters (might change to list)
-    class PolydispersityParameter():
-        x = 0
+    polydispersity_parameter = {
+
+    }
 
 class FitModel(AnalysisModelBase):
     #list of default parameters
-    default_parameter = [
-        FitParameter
+    default_parameters = [
+        FitParameter.Units
     ]
 
     polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
     #list of polydispersity parameters
     polydispersity_parameters = [
-        FitParameter
+        FitParameter.polydispersity_parameter
     ]
 
-    magnitism = models.BooleanField(default=False, help_text="Is magnitism being checked in this model?")
+    magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
     #list of magnitism parameters
-    magnitic_parameters = [
-        FitParameter
+    magnetic_parameters = [
     ]
 
     Qminimum = models.FloatField(default = False, help_text="Minimum Q value for the fit")
@@ -92,7 +88,17 @@ class FitModel(AnalysisModelBase):
         
     #look at models.py in sasview -> sasmodel-marketplace
 
-    
+class Fit(AnalysisBase):
+    fit_model_id = models.ForeignKey(FitModel.id, default = None, on_delete=models.CASCADE)
+    results = thing
+    opt_in = models.BooleanField(default = False, help_text= "opt in to have fit be public")
+ 
+    class StatusChoices(models.IntegerChoices):
 
+        QUEUED = 1
+        RUNNING = 2
+        COMPLETE = 3
+
+    status = models.IntegerField(choices=StatusChoices)
 
 #TODO: view saswebcalc later

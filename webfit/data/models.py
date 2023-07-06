@@ -33,13 +33,11 @@ models_logger = getLogger(__name__)
 
 
 class Data(models.Model):
-    id = models.BigAutoField(primary_key=True)
-
     #username
-    username = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
+    username = models.ForeignKey(User.username, default=None, on_delete=models.CASCADE)
 
     #imported data
-    file_string = models.CharField(max_length=200, null = False, help_text="The file string to the fit data")
+    file = models.FileField(null = False, help_text="This is a file")
 
     do_save = models.BooleanField(default=True, help_text="Should this model be saved?") #later boolean to add autosave?
     saved_file = models.BooleanField(default=False, help_text="is the model saved in files?") #should this exist, or do we always override files and save
@@ -49,21 +47,9 @@ class Data(models.Model):
 
     opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
 
-    #holds all example data
-    example_data = [
-        #file_id : actual data? (added during migration)
-    ]
-
-    user_file_ids = [
-        #should include file ids (added when?)
-        ("", "")
-    ]
-
     public_file_ids = [
         #added using migration
     ]
-
-    analysis = models.ForeignKey("AnalysisBase.id", on_delete=models.CASCADE)
 
     errors = [
 
