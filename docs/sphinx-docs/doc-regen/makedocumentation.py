@@ -68,16 +68,26 @@ def generate_html():
     ]
     subprocess.check_call(command)
 
-def main():
+def call_all_files():
     TARGETS = get_main_docs()
     for file in TARGETS:
         #  easiest for regenmodel.py if files are passed in individually
         call_regenmodel(file, "regenmodel.py")
     # regentoc.py requires files to be passed in bulk or else LOTS of unexpected behavior
     call_regenmodel(TARGETS, "regentoc.py")
+
+def call_one_file(file):
+    TARGETS = get_main_docs
+    file_call_path = [target for target in TARGETS if basename(target) is file]
+    call_regenmodel(file_call_path[0], "regenmodel.py")
+    call_regenmodel(TARGETS, "regentoc.py")
+
+def main():
+    try:
+        call_one_file(sys.argv[1])
+    except:
+        pass
     generate_html()
 
 if __name__ == "__main__":
-    main()
-else:
     main()

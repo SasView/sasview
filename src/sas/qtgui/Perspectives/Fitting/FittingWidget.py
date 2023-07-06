@@ -1831,9 +1831,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     helpfile = self.kernel_module.id + ".html"
                 else:
                     import subprocess
+                    py_target = self.kernel_module.id + ".py"
+                    print(py_target, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                     command = [
                         sys.executable,
                         regen_docs,
+                        py_target,
                     ]
                     doc_regen_dir = os.path.dirname(regen_docs)
                     subprocess.run(command, cwd=doc_regen_dir, stdout=subprocess.DEVNULL) # Regenerates documentation, cwd= argument makes sure that local pathnames are processed correctly
