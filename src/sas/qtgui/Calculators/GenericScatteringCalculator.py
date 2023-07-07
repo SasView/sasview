@@ -887,8 +887,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtRG.setText(str("N/A"))
             logging.info("SasView does not support computation of Radius of Gyration for Magnetic Data.")
         else:
-            self.txtRgMass.setText(str("no data"))
-            self.txtRG.setText(str("no data"))
+            self.txtRgMass.setText(str("No Data"))
+            self.txtRG.setText(str("No Data"))
             
     
     def radius_of_gyration(self):

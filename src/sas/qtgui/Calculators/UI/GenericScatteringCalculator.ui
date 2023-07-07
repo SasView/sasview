@@ -1973,30 +1973,23 @@ Not editable.</string>
       <string>Radius of Gyration</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_18">
-      <item row="1" column="1">
+      <item row="0" column="1">
+       <widget class="QLabel" name="lblRgMass">
+        <property name="toolTip">
+         <string>Radius of Gyration, calculated with the mass of each atom.</string>
+        </property>
+        <property name="text">
+         <string>Rg - Mass</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
        <widget class="QLineEdit" name="txtRgMass">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
          <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="lblRG">
-        <property name="text">
-         <string>RG - SLD</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <layout class="QGridLayout" name="gridLayout_16"/>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="lblRgMass">
-        <property name="text">
-         <string>Rg - Mass</string>
         </property>
        </widget>
       </item>
@@ -2007,6 +2000,20 @@ Not editable.</string>
         </property>
         <property name="text">
          <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <layout class="QGridLayout" name="gridLayout_16"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="lblRG">
+        <property name="toolTip">
+         <string>Guinier Radius - Radius of Gyration based on Scattering Length Density 
+NOTE: Currently not impacted by Solvent SLD </string>
+        </property>
+        <property name="text">
+         <string>RG - SLD</string>
         </property>
        </widget>
       </item>
