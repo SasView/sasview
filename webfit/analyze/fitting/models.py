@@ -36,7 +36,7 @@ models_logger = getLogger(__name__)
 loader = Loader()
 
 class FitParameter(AnalysisParameterBase):
-    Units = models.CharField
+    Units = models.CharField(default=False, help_text = "string for what unit the parameter is")
 
     polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
 
@@ -47,12 +47,15 @@ class FitParameter(AnalysisParameterBase):
 
     }
 
-    upper_limit = float
-    lower_limit = 
+    upper_limit = models.FloatField(help_text="upper limit for parameter")
+    lower_limit = models.FloatField(help_text="lower limit for parameter")
 
 class FitModel(AnalysisModelBase):
     #list of default parameters
-    default_parameters = FitParameter.Units
+    default_parameters = {
+        #str name, float number
+        #import in migrations, override in fit_views.py
+     }
 
     polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
     #list of polydispersity parameters
