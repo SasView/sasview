@@ -1197,6 +1197,9 @@
      <layout class="QGridLayout" name="gridLayout_7">
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_3">
+        <property name="verticalSpacing">
+         <number>5</number>
+        </property>
         <item row="2" column="1">
          <widget class="QLineEdit" name="txtQxMin">
           <property name="enabled">
@@ -1218,6 +1221,9 @@
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="lblQxQyMin">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum value of Q&lt;span style=&quot; vertical-align:sub;&quot;&gt;x,y &lt;/span&gt;&lt;/p&gt;&lt;p&gt;Default Values- 2D: [-1 * QMax]; 1D: [.001 * QMax]; &lt;/p&gt;&lt;p&gt;Q&lt;span style=&quot; vertical-align:sub;&quot;&gt;x,ymin &lt;/span&gt;∈ ]0, 1000].&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Qx (Qy) Min</string>
           </property>
@@ -1325,6 +1331,9 @@ Number of Qbins &amp;isin; [2, 1000].</string>
          <font>
           <bold>false</bold>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Checking this box will use Log Spacing between the Qx Values rather than Linear spacing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string>Log Spacing</string>
