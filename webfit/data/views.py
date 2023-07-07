@@ -27,20 +27,19 @@ def list_data(request, db_id = None, version = None):
 @api_view(['GET'])
 def data_info(request, db_id, version = None):
     if request.method == 'GET':
-        public_data = Data.objects.filter(opt_in=True)
-        file = get_object_or_404(Data, id = db_id)
+        public_data = Data.objects.filter(id = db_id, opt_in=True)
         #TODO check if this actually checks the id is public/properly logged in
-        if not (file in public_data) and request.user.is_authenticated:
-            return HttpResponseBadRequest("Database ID not public")
-        file = get_object_or_404(Data, id = db_id)
-        #TODO ^^ how to check if file_id is in user_file_ids
-        #TODO check if this loads the file correctly
-        return_data = {"info" : file.file.__str__()}
-        return return_data
+        if public_data or request.user.is_authenticated:
+            file = get_object_or_404(Data, id = db_id)
+            #TODO ^^ how to check if file_id is in user_file_ids
+            #TODO check if this loads the file correctly
+            return_data = {"info" : file.file.__str__()}
+            return return_data
+        return HttpResponseBadRequest("Database ID not public")
     return HttpResponseBadRequest()
 
 
-#
+#perhaps rename data.obj from file -> data_obj as it gets confused with file.file
 @api_view(['POST', 'PUT'])
 def upload(request, version = None):
     serializer = DataSerializers()
