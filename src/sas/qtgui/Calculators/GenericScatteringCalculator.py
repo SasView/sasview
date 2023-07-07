@@ -141,7 +141,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMz.textChanged.connect(self.check_for_magnetic_controls)
 
         #check for SLD changes
-        self.txtSolventSLD.editingFinished.connect(self.update_Rg)
+        #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
+        # self.txtSolventSLD.editingFinished.connect(self.update_Rg)        
 
         #update coord display
         self.txtEnvYaw.textChanged.connect(self.update_coords)
@@ -901,14 +902,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
             atom = periodictable.formula(self.nuc_sld_data.pix_symbol[i])
             
-            #denom - if index is 0 calculate with mass, otherwise if index is 1 use effective Coherent Scattering Length(fm) adjusted for solvent sld
             mass = atom.mass
             
             #adjust for solvent sld
             sld = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c       #fentometer
-            solvent_sld = (atom.volume() * 10**24 * float(self.txtSolventSLD.text())) * 10**5       #vol in cm^3, solventSLD in Angstrom^-2
+            solvent_sld = (atom.volume() * 10**24 * float(self.txtSolventSLD.text())) * 10**5       #vol in cm^3, solventSLD in Angstrom^-2     NOTE: atom.volume() is an approximation, will not work accurately
             
-            contrastSLD = sld - solvent_sld         #fentometer
+            
+            #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
+            # contrastSLD = sld - solvent_sld         #fentometer
+            contrastSLD = sld                       #fentometer
 
             #Calculate the Magnitude of the Coordinate vector for the atom and the center of mass
             MagnitudeOfCoM = numpy.sqrt(numpy.power(CoM[0]-coordinates[0],2) + numpy.power(CoM[1]-coordinates[1],2) + numpy.power(CoM[2]-coordinates[2],2))
