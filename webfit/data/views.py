@@ -16,7 +16,7 @@ def list_data(request, db_id = None, version = None):
     if request.method == 'GET':
         data_list = {}
         public_data = Data.objects.filter(opt_in = True)
-        data_list += {"public_file_ids": public_data.public_file_ids}
+        data_list += {"public_file_ids": public_data.id}
         if request.user.is_authenticated:
             data = get_object_or_404(Data, id=db_id)
             data_list += {"user_data_ids": data.user_data_ids}
@@ -60,9 +60,6 @@ def upload(request, version = None):
 
     if serializer.is_valid():
         serializer.save()
-        if request.opt_in == True:
-            #TODO check if file obj gets updated after serializer saves
-            export_to_example_data(request, file)
         return_data = {"authenticated" : request.user.is_authenticated, "file_id" : howeveryougetthefileid, "opt_in" : serializer.opt_in, "warnings" : serializer.errors}
         return Response(return_data)
     return HttpResponseBadRequest()
@@ -93,10 +90,3 @@ def download(request, version = None):
         return Response(return_data)
     return HttpResponseBadRequest()
         
-
-#eventually insert data into example_data
-def export_to_example_data(request, file):
-    loader = Loader()
-
-    #TODO write if statements to check if the file already exists
-    file.PUBLIC_FILE_ID_CHOICES += (file.id, "idk")
