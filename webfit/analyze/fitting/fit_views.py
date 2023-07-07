@@ -7,7 +7,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from sasmodels.core import load_model
+from bumps.names import *
+from sasmodels.bumps_model import Model, Experiment
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
 from bumps import fitters
@@ -30,38 +31,49 @@ fit_logger = getLogger(__name__)
 #TODO add authentication -> figure out how to do this without multiplying
 @api_view(["PUT"])
 def start(request, version = None):
-    fit = get_object_or_404(Fit)
+    fit_base = get_object_or_404(Fit)
     fit_model = get_object_or_404(FitModel)
     fit_parameters = get_object_or_404(FitParameter)
     serializer = FitSerializers(fit)
 
-    #TODO reduce redundancies!!!
+    #TODO reduce redundancies... also check if this actually works
     if request.method == "PUT":
+        fit_base.status = 1
+
         if not request.data["MODEL_CHOICES"] in fit_model: 
             return HttpResponseBadRequest("No model selected for fitting")
         #save model somewhere: 
 
         if request.data.data_id:
-            if not fit.opt_in and not request.user.is_authenticated:
+            if not fit_base.opt_in and not request.user.is_authenticated:
                 return HttpResponseBadRequest("data isn't public and user isn't logged in")
             serializer(data_id = request.data.data_id)
 
         if request.data.parameters:
-            fit_parameters.Units += {request.data.parameters}
+            fit_parameters.Units = {request.data.parameters}
 
         if request.data.opt_in:
-            serializer(opt_in = fit.opt_in)
+            serializer(opt_in = fit_base.opt_in)
 
         if serializer.is_valid():
             serializer.save()
 
-        start_fit()
-        return {"authenticated":request.user.is_authenticated, "fit_id":fit.id, "warnings":uhhhhhhh}
+        start_fit(fit_base)
+        return {"authenticated":request.user.is_authenticated, "fit_id":fit_base.id, "warnings":uhhhhhhh}
     return HttpResponseBadRequest()
 
 
-def start_fit():
-    
+def start_fit(fit_base):
+    fit_base.status = 2
+    test_data = get_object_or_404(Data, id = fit_base.data_id).file
+    current_model = fit_base.fit_model.model
+
+    #figure out how to add other parameters (polydispersity)
+    model = Model(current_model, **fit_base.fit_model.default_parameters)
+
+    M = Experiment(data = test_data, model=model)
+    problem = FitProblem(M)
+    result = fit(problem)
     return 0
 
 

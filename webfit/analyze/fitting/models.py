@@ -51,20 +51,15 @@ class FitParameter(AnalysisParameterBase):
 
 class FitModel(AnalysisModelBase):
     #list of default parameters
-    default_parameters = [
-        FitParameter.Units
-    ]
+    default_parameters = FitParameter.Units
 
     polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
     #list of polydispersity parameters
-    polydispersity_parameters = [
-        FitParameter.polydispersity_parameter
-    ]
+    polydispersity_parameters = FitParameter.polydispersity_parameter
 
     magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
     #list of magnitism parameters
-    magnetic_parameters = [
-    ]
+    magnetic_parameters = {}
 
     Qminimum = models.FloatField(default = False, help_text="Minimum Q value for the fit")
     Qmaximum = models.FloatField(help_text="Maximum Q value for the fit")
@@ -89,7 +84,7 @@ class FitModel(AnalysisModelBase):
     #look at models.py in sasview -> sasmodel-marketplace
 
 class Fit(AnalysisBase):
-    fit_model_id = models.ForeignKey(FitModel.id, default = None, on_delete=models.CASCADE)
+    fit_model = models.ForeignKey(FitModel, default = None, on_delete=models.CASCADE)
     results = thing
     opt_in = models.BooleanField(default = False, help_text= "opt in to have fit be public")
  
