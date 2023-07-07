@@ -47,7 +47,7 @@ class Data(models.Model):
 
     opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
 
-    public_file_ids = [
+    PUBLIC_FILE_ID_CHOICES = [
         #added using migration
     ]
 

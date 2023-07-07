@@ -99,5 +99,4 @@ def export_to_example_data(request, file):
     loader = Loader()
 
     #TODO write if statements to check if the file already exists
-    file.public_file_ids += (file.id, "idk")
-    file.example_data += (file.file, "uhh name later")
+    file.PUBLIC_FILE_ID_CHOICES += (file.id, "idk")
