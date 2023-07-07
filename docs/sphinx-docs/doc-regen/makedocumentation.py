@@ -86,22 +86,28 @@ def call_all_files():
     call_regenmodel(TARGETS, "regentoc.py")
 
 def call_one_file(file):
-    # Below is a very awkward and ugly way to get it to pass in a valid path to regenerate reST ... EASY TODO: just append "file" to a string that has the rest of the pathname
     TARGETS = get_main_docs()
-    target_basenames = []
-    for path in TARGETS:
-        target_basenames.append(basename(path))
-    index_of_base_target = target_basenames.index(file)
-    file_call_path = TARGETS[index_of_base_target]
+    NORM_TARGET = join(ABSOLUTE_TARGET_MAIN, file)
+    MODEL_TARGET =  join(ABSOLUTE_TARGET_PLUGINS, file)
+    # Determines if a model's source .py file from /user/models/src/ should be used or if the file from /plugin-models/ should be used
+    if os.path.exists(NORM_TARGET) and os.path.exists(MODEL_TARGET):
+        if os.path.getmtime(NORM_TARGET) < os.path.getmtime(MODEL_TARGET):
+            file_call_path = NORM_TARGET
+        else:
+            file_call_path = MODEL_TARGET
+    elif not os.path.exists(NORM_TARGET):
+        file_call_path = MODEL_TARGET
+    else:
+        file_call_path = NORM_TARGET
     call_regenmodel(file_call_path, "regenmodel.py") # There might be a cleaner way to do this but this approach seems to work and is fairly minimal
     call_regenmodel(TARGETS, "regentoc.py")
 
 def main():
-    try:
+    # try:
         call_one_file(sys.argv[1]) # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
         generate_html(sys.argv[1])
-    except:
-        generate_html()
+    # except:
+    #     generate_html()
 
 if __name__ == "__main__":
     main()
