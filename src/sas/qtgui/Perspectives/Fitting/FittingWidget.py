@@ -1838,7 +1838,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                         py_target,
                     ]
                     doc_regen_dir = os.path.dirname(regen_docs)
-                    subprocess.run(command, cwd=doc_regen_dir, )#stdout=subprocess.DEVNULL) # Regenerates documentation, cwd= argument makes sure that local pathnames are processed correctly
+                    subprocess.run(command, cwd=doc_regen_dir, stdout=subprocess.DEVNULL) # Regenerates documentation, cwd= argument makes sure that local pathnames are processed correctly
                     tree_location = "/user/models/"
                     helpfile = self.kernel_module.id + ".html"
             else:
