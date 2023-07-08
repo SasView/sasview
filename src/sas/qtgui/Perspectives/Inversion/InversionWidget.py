@@ -24,6 +24,7 @@ from ...Plotting.Plotter import Plotter
 from ...Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from ...Plotting.Slicers.SectorSlicer import SectorInteractor
 
+TAB_2D = 2
 
 def is_float(value):
     """Converts text input values to floats. Empty strings throw ValueError"""
@@ -383,6 +384,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.noOfTermsSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.PrTabWidget.setTabEnabled(TAB_2D, self.is2D)
+
+    def toggle2DData(self, isChecked):
+        """ Enable/disable the 2D data tab """
+        self.PrTabWidget.setTabEnabled(TAB_2D, isChecked)
 
     def populateDataComboBox(self, name, data_ref):
         """
