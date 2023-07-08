@@ -175,7 +175,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             for i in index:              
                 state.update(self.getSerializePage(i))
         except TypeError:
-            pass
+            return
         return state
 
     def serializeCurrentPage(self):
@@ -318,7 +318,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                 if isinstance(logic_data, Data2D) and not is_batch:
                     data.isSliced = False
                     tab = self.addData(data=data, is2D=True, tab_index=tab_index)
-                    tab.tab2D.setEnabled(True)
                     tab.show2DPlot()
 
                 # Tab for 1D batch
