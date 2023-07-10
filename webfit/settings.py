@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "analyze",
-    "fitting",
+    "analyze.fitting",
     "user_authentication",
     "data",
 ]
