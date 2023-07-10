@@ -96,6 +96,11 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
                 return str(self.header_tooltips[section])
 
         return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
+    
+class Backend(QtCore.QObject):
+    @QtCore.Slot(str)
+    def receiveMessage(self, message):
+        print("Received message from HTML:", message)
 
 class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
