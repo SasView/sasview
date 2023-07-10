@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from bumps.names import *
+from sasmodels.core import load_model
 from sasmodels.bumps_model import Model, Experiment
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -40,6 +41,7 @@ def start(request, version = None):
     if request.method == "PUT":
         fit_base.status = 1
 
+        #try to create model for check if the modelstring is valid
         if not request.data["MODEL_CHOICES"] in fit_model: 
             return HttpResponseBadRequest("No model selected for fitting")
         #save model somewhere: 
@@ -74,7 +76,7 @@ def start_fit(fit_base):
     M = Experiment(data = test_data, model=model)
     problem = FitProblem(M)
     result = fit(problem)
-    return 0
+    return result
 
 
 def status():
