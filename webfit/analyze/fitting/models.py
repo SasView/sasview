@@ -36,9 +36,7 @@ models_logger = getLogger(__name__)
 loader = Loader()
 
 class FitParameter(AnalysisParameterBase):
-    Units = {
-        #implement default in migrations
-    }
+    Units = models.CharField
 
     polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
 
@@ -48,6 +46,9 @@ class FitParameter(AnalysisParameterBase):
     polydispersity_parameter = {
 
     }
+
+    upper_limit = float
+    lower_limit = 
 
 class FitModel(AnalysisModelBase):
     #list of default parameters
@@ -73,9 +74,9 @@ class FitModel(AnalysisModelBase):
     """
     class SasModels():
         model_manager = ModelManager()
-        MODEL_CHOICES = model_manager.get_model_list
+        MODEL_CHOICES = model_manager.get_model_dictionary
     #TODO FIX THIS ADD MORE
-    model = models.SMTH
+    model = models.CharField(max_length=256, help_text="model string")
 
     class PlugInModels():
         #create plug in models <- grab by url
