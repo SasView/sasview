@@ -15,7 +15,7 @@ from .models import Data
 def list_data(request, db_id = None, version = None):
     if request.method == 'GET':
         data_list = {}
-        public_data = Data.objects.filter(opt_in = True)
+        public_data = Data.objects.filter(is_public = True)
         data_list += {"public_file_ids": public_data.id}
         if request.user.is_authenticated:
             data = get_object_or_404(Data, id=db_id)
@@ -27,7 +27,7 @@ def list_data(request, db_id = None, version = None):
 @api_view(['GET'])
 def data_info(request, db_id, version = None):
     if request.method == 'GET':
-        public_data = Data.objects.filter(id = db_id, opt_in=True)
+        public_data = Data.objects.filter(id = db_id, is_public=True)
         #TODO check if this actually checks the id is public/properly logged in
         if public_data or request.user.is_authenticated:
             file = get_object_or_404(Data, id = db_id)
@@ -47,20 +47,21 @@ def upload(request, version = None):
     
     #saves file
     if request.method == 'POST':
-        serializer(file = request.file, opt_in = request.data.opt_in)
+        serializer(file = request.file, is_public = request.data.is_public)
     
     #saves or updates file
     elif request.method == 'PUT':
         if request.user.is_authenticated:
             #checks to see if there is an existing file to update
             file(username = request.data.username)
-            serializer(file, file=request.file, opt_in = request.data.opt_in)
+            serializer(file, file=request.file, is_public = request.data.is_public)
         else:
             return HttpResponseForbidden()
 
     if serializer.is_valid():
         serializer.save()
-        return_data = {"authenticated" : request.user.is_authenticated, "file_id" : howeveryougetthefileid, "opt_in" : serializer.opt_in, "warnings" : serializer.errors}
+        #TODO get warnings/errors later
+        return_data = {"authenticated" : request.user.is_authenticated, "file_id" : howeveryougetthefileid, "is_public" : serializer.is_public}
         return Response(return_data)
     return HttpResponseBadRequest()
     #data is actually loaded inside fit view
@@ -85,8 +86,9 @@ def download(request, version = None):
 
     if serializer.is_valid():
         serializer.save()
-        #not sure if the serializer will be able to get the id
-        return_data={"authenticated" : request.user.is_authenticated, "file_id" : serializer.data.id, "warnings" : serializer.errors}
+        #CHECK not sure if the serializer will be able to get the id
+        #TODO get warnings/errors later
+        return_data={"authenticated" : request.user.is_authenticated, "file_id" : serializer.data.id}
         return Response(return_data)
     return HttpResponseBadRequest()
         
