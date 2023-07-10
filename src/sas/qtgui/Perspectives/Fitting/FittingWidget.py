@@ -1830,15 +1830,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     tree_location = "/user/models/"
                     helpfile = self.kernel_module.id + ".html"
                 else:
-                    import subprocess
-                    py_target = self.kernel_module.id + ".py"
-                    command = [
-                        sys.executable,
-                        regen_docs,
-                        py_target,
-                    ]
-                    doc_regen_dir = os.path.dirname(regen_docs)
-                    subprocess.run(command, cwd=doc_regen_dir, stdout=subprocess.DEVNULL) # Regenerates documentation, cwd= argument makes sure that local pathnames are processed correctly
+                    self.regenerate_docs(regen_docs) # Regenerate specific documentation file
                     tree_location = "/user/models/"
                     helpfile = self.kernel_module.id + ".html"
             else:
@@ -1860,6 +1852,28 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Calls parent's method for opening an HTML page
         """
         self.parent.showHelp(url)
+
+    def regenerate_docs(self, regen_docs):
+       sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+       recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
+       if self.process is None:
+            parent = QtCore.QObject()
+            self.process = QtCore.QProcess(parent)
+            self.process.setProcessChannelMode(QtCore.QProcess.MergedChannels)  # Set process channel mode
+            self.process.readyReadStandardOutput.connect(self.handle_stdout)
+            self.process.finished.connect(self.finish_generation)
+            self.process.setWorkingDirectory(sas_path + "/" + recompile_path)  # Set the working directory
+            self.process.start("python", [regen_docs])
+            self.process.waitForFinished()  # Wait for the process to finish before proceeding
+
+    def finish_generation(self):
+        self.process = None
+        print(r"Done :)")
+
+    def handle_stdout(self):
+        data = self.process.readAllStandardOutput()
+        stdout = bytes(data).decode("utf8")
+        print(stdout)
 
     def onDisplayMagneticAngles(self):
         """
