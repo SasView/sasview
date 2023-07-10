@@ -1,27 +1,28 @@
 from django.db import migrations, models
 
+"""
+figure out how to create foreignkeys later
+('username', models.ForeignKey(default = None, on_delete=models.CASCADE, to='User'))
+('data_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.CASCADE, to='data.Data')),
+('model_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.CASCADE, to='.AnalysisModelBase'))
+"""
+
 
 class Migration(migrations.Migration):
 
     initial = True
-
-    dependencies = [
-        'Data'
-    ]
 
     operations = [
         migrations.CreateModel(
             name='AnalysisBase',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('username', models.ForeignKey(default = None, null=True, on_delete=models.CASCADE, to='core.User'))
-                ('data_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.CASCADE, to='data.Data')),
-                ('model_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.CASCADE, to='.AnalysisModelBase'))
+
                 ('gpu_requested', models.BooleanField(default = False)),
                 ('time_recieved', models.DateTimeField(auto_now_add=True)),
                 ('time_started', models.DateTimeField(auto_now=False, blank=True, null=True)),
                 ('time_complete', models.DateTimeField(auto_now=False, blank=True, null=True)),
-                ('analysis_success', models.BooleanField(defalt = False)),
+                ('analysis_success', models.BooleanField(default = False)),
                 ('is_public', models.BooleanField(default = False)),
             ],
         ),

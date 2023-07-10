@@ -75,18 +75,17 @@ class FitModel(AnalysisModelBase):
 
 class Fit(AnalysisBase):
     fit_model = models.ForeignKey(FitModel, default = None, on_delete=models.CASCADE)
-    results = models.CharField(blank=True, help_text="the string result")
+    results = models.CharField(max_length= 100, blank=True, help_text="the string result")
     results_trace = [
     ]
 
     # TODO optimizer
 
     class StatusChoices(models.IntegerChoices):
+        QUEUED = 1, "Queued"
+        RUNNING = 2, "Running"
+        COMPLETE = 3, "Complete"
 
-        QUEUED = 1
-        RUNNING = 2
-        COMPLETE = 3
-
-    status = models.IntegerField(choices=StatusChoices)
+    status = models.IntegerField(default=False, choices=StatusChoices.choices)
 
 #TODO: view saswebcalc later
