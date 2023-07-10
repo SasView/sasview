@@ -247,6 +247,8 @@ def build():
     """
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
+    copy_tree(SPHINX_SOURCE, SASVIEW_DOC_TARGET)
+    print("Something happened?...")
     print("=== Build HTML Docs from ReST Files ===")
     subprocess.check_call([
         "sphinx-build",
