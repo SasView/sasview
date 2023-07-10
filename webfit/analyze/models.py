@@ -39,7 +39,7 @@ class AnalysisParameterBase(models.Model):
 
     data_type = models.CharField(max_length=100, help_text="parameter type (int/double)")
 
-    unit = models.CharField(blank=False, help_text = "string for what unit the parameter is")
+    unit = models.CharField(max_length=100, blank=False, help_text = "string for what unit the parameter is")
 
     value_trace = [
     ]

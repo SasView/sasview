@@ -79,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "webfit.wsgi.application"
+WSGI_APPLICATION = "wsgi.application"
 
 #rest framework
 REST_FRAMEWORK = {

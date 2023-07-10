@@ -1,14 +1,10 @@
 from django.db import migrations, models
-from models import Fit
+from analyze.fitting.models import Fit
 
 
 class Migration(migrations.Migration):
 
     initial = True
-
-    dependencies = [
-        'Analysis'
-    ]
 
     operations = [
         migrations.CreateModel(
@@ -34,8 +30,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FitParameter',
             fields=[
+                ('unit', models.CharField(blank=False)),
                 ('polydisperse', models.BooleanField(default=False)),
-                ('magnetic', models.BooleanField(default=False)),
+                ('magnetic', models.BooleanField(default=False))
             ]
         ),
     ]
