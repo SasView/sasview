@@ -34,11 +34,11 @@ models_logger = getLogger(__name__)
 
 class Data(models.Model):
     #username
-    username = models.ForeignKey(User.username, default=None, on_delete=models.CASCADE)
+    current_user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
 
     #imported data
     file = models.FileField(null = False, help_text="This is a file")
-    
+
     save_file_string = models.CharField(max_length=200, null = False, help_text="File location to save data")
 
     #creates hash for data

@@ -25,12 +25,18 @@ class Migration(migrations.Migration):
             fields=[
                 ('polydispersity', models.BooleanField(default = False)),
                 ('magnetism', models.BooleanField(default=False)),
+                ('Qminimum', models.FloatField(blank = True)),
+                ('Qmaximum', models.FloatField(blank = True)),
+                ('model', models.CharField(max_length=256)),
+                ('online_model_url', models.CharField(max_length=100)),
             ],
         ),
         migrations.CreateModel(
             name='FitParameter',
             fields=[
-                ('name', models.CharField(max_length=300))
+                ('unit', models.CharField(blank=False)),
+                ('polydisperse', models.BooleanField(default=False)),
+                ('magnetic', models.BooleanField(default=False)),
             ]
         ),
     ]

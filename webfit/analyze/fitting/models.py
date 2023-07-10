@@ -36,16 +36,11 @@ models_logger = getLogger(__name__)
 loader = Loader()
 
 class FitParameter(AnalysisParameterBase):
-    Units = models.CharField(default=False, help_text = "string for what unit the parameter is")
+    unit = models.CharField(blank=False, help_text = "string for what unit the parameter is")
 
     polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
 
     magnetic = models.BooleanField(default=False, help_text="is this a magnetic parameter?")
-
-    #polydispersity parameters (might change to list)
-    polydispersity_parameter = {
-
-    }
 
 class FitModel(AnalysisModelBase):
     #list of default parameters
@@ -56,14 +51,15 @@ class FitModel(AnalysisModelBase):
 
     polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
     #list of polydispersity parameters
-    polydispersity_parameters = FitParameter.polydispersity_parameter
+    polydispersity_parameters = FitParameter.unit
 
     magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
     #list of magnitism parameters
     magnetic_parameters = {}
 
-    Qminimum = models.FloatField(default = False, help_text="Minimum Q value for the fit")
-    Qmaximum = models.FloatField(help_text="Maximum Q value for the fit")
+    Qminimum = models.FloatField(blank = True, help_text="Minimum Q value for the fit")
+    Qmaximum = models.FloatField(blank = True, help_text="Maximum Q value for the fit")
+    #TODO check if this is correct
     if Qmaximum is True:
         AnalysisParameterBase.maximum = Qmaximum
     if Qminimum is True:
@@ -87,8 +83,11 @@ class FitModel(AnalysisModelBase):
 class Fit(AnalysisBase):
     fit_model = models.ForeignKey(FitModel, default = None, on_delete=models.CASCADE)
     results = models.CharField(blank=True, help_text="the string result")
-    is_public = models.BooleanField(default = False, help_text= "opt in to have fit be public")
- 
+    results_trace = [
+    ]
+
+    # TODO optimizer
+
     class StatusChoices(models.IntegerChoices):
 
         QUEUED = 1

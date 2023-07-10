@@ -42,12 +42,8 @@ class AnalysisParameterBase(models.Model):
     upper_limit = models.FloatField(blank= True, null=True, help_text="upper limit for parameter")
     lower_limit = models.FloatField(blank= True, null=True, help_text="lower limit for parameter")
 
-    """
-    see if this is 
-    value_trace = (float)[
-        value
+    value_trace = [
     ]
-    """
 
     #constraints in parameter relative to another parameter
     #TODO fix this to hold fit parameters, see: foriegnkey?
@@ -64,7 +60,7 @@ class AnalysisModelBase(models.Model):
     }
 
 class AnalysisBase(models.Model):
-    username = models.ForeignKey(User.username, default=None, on_delete=models.CASCADE)
+    crrent_user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
     data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
     model_id = models.ForeignKey(AnalysisModelBase, default= None, on_delete=models.CASCADE)
     
