@@ -52,7 +52,7 @@ class AnalysisParameterBase(models.Model):
     #constraints in parameter relative to another parameter
     #TODO fix this to hold fit parameters, see: foriegnkey?
     constraints = {
-        "fit parameters" : (),
+        "fit parameters" : (FitParameter),
     }
 
 
@@ -65,7 +65,8 @@ class AnalysisModelBase(models.Model):
 
 class AnalysisBase(models.Model):
     username = models.ForeignKey(User.username, default=None, on_delete=models.CASCADE)
-    data_id = models.ForeignKey(Data.id, default = None, on_delete=models.CASCADE)
+    data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
+    model_id = models.ForeignKey(AnalysisModelBase, default= None, on_delete=models.CASCADE)
     
     #TODO add gpu_requested into analysis views
     gpu_requested = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
@@ -82,24 +83,3 @@ class AnalysisBase(models.Model):
 
     if User:
         is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
-
-class AnalysisParameterBase(models.Model):
-    name = models.CharField(max_length=100, help_text="Parameter Name")
-    """datatype = models.FloatField()
-
-    minimum = datatype(default = False, blank = True, help_text = "Minimum constraint")
-    maximum = datatype(default = False, blank = True, help_text = "Maximum constraint")
-    """
-    #constraints in parameter relative to another parameter
-    constraints = [
-        #fit parameters
-        (),
-    ]
-
-
-class AnalysisModelBase(models.Model):
-    name = models.CharField(max_length=300, help_text="name of analysis model")
-    #list of analysis parameters
-    parameters = [
-        AnalysisParameterBase
-    ]
