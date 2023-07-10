@@ -38,9 +38,8 @@ class AnalysisParameterBase(models.Model):
     value=models.FloatField(blank=False, help_text="the value of the parameter")
 
     data_type = models.CharField(max_length=100, help_text="parameter type (int/double)")
-    
-    upper_limit = models.FloatField(blank= True, null=True, help_text="upper limit for parameter")
-    lower_limit = models.FloatField(blank= True, null=True, help_text="lower limit for parameter")
+
+    unit = models.CharField(blank=False, help_text = "string for what unit the parameter is")
 
     value_trace = [
     ]

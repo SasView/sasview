@@ -10,5 +10,6 @@ urlpatterns = [
     path("info/<str: db_id>", views.data_info, name = "views data using file id"),
 
     path("upload/", views.upload, name = "upload data into db"),
+    path("upload/<data_id>/", views.upload, name = "update file in data"),
     path("<data_id>/download/", views.download, name = "download data from db"),
 ]

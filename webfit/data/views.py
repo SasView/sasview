@@ -42,29 +42,37 @@ def data_info(request, db_id, version = None):
 #perhaps rename data.obj from file -> data_obj as it gets confused with file.file
 #data = session_token, opt_in, filename
 #file = data_file
+
+#TODO IF WE'RE USING SESSION KEYS, HOW DO WE CONNECT THEM TO DBS??
 @api_view(['POST', 'PUT'])
-def upload(request, version = None):
+def upload(request, data_id = None, version = None):
     serializer = DataSerializers()
     
     #saves file
     if request.method == 'POST':
         serializer(file = request.file, is_public = request.data.is_public)
-        if request.user.is_authenticated:
-            serializer(current_user = request.username)
+        if request.auth_tokens:
+            #check auth_token.user == data.user
+            userr = auth_token.user
+            serializer(current_user = userr)
     
     #saves or updates file
     elif request.method == 'PUT':
-        if request.user.is_authenticated:
-            data = get_object_or_404(Data, current_user.username = request.data.username)
-            serializer(data, data=request.file, is_public = request.data.is_public)
+        #require data_id
+        if data_id == None:
+            if request.auth_tokens:
+                userr = auth_token.user
+                data = Data.objects.filter(current_user = userr, id = data_id).get()
+                serializer(data, data=request.file, is_public = request.data.is_public)
+            else:
+                return HttpResponseForbidden
         else:
-            return HttpResponseForbidden()
+            return HttpResponseBadRequest()
 
     if serializer.is_valid():
         serializer.save()
         #TODO get warnings/errors later
-        #TODO add "file_id" : ,
-        return_data = {"authenticated" : request.user.is_authenticated, "is_public" : serializer.is_public}
+        return_data = {"authenticated" : request.user.is_authenticated, "file_id" : serializer.id, "is_public" : serializer.is_public}
         return Response(return_data)
     return HttpResponseBadRequest()
     #data is actually loaded inside fit view
@@ -78,7 +86,7 @@ def download(request, data_id, version = None):
         serializer = DataSerializers(data)
         if not serializer.is_public:
             #add session key later
-            if request.session_key != session_key:
+            if request.auth_key != serializer.current_user.auth_key:
                 return HttpResponseBadRequest("data is private, must log in")
         #TODO add issues later
         return Response(serializer.file)
