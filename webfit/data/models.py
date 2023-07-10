@@ -38,15 +38,9 @@ class Data(models.Model):
 
     #imported data
     file = models.FileField(null = False, help_text="This is a file")
-
-    do_save = models.BooleanField(default=True, help_text="Should this model be saved?") #later boolean to add autosave?
-    saved_file = models.BooleanField(default=False, help_text="is the model saved in files?") #should this exist, or do we always override files and save
+    
     save_file_string = models.CharField(max_length=200, null = False, help_text="File location to save data")
 
     #creates hash for data
-
-    opt_in = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
-
-    errors = [
-
-    ]
+    if User:
+        is_public = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")

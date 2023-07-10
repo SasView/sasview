@@ -47,7 +47,7 @@ def start(request, version = None):
         #save model somewhere: 
 
         if request.data.data_id:
-            if not fit_base.opt_in and not request.user.is_authenticated:
+            if not fit_base.is_public and not request.user.is_authenticated:
                 return HttpResponseBadRequest("data isn't public and user isn't logged in")
             serializer(data_id = request.data.data_id)
 
@@ -55,7 +55,7 @@ def start(request, version = None):
             fit_parameters.Units = {request.data.parameters}
 
         if request.data.opt_in:
-            serializer(opt_in = fit_base.opt_in)
+            serializer(opt_in = fit_base.is_public)
 
         if serializer.is_valid():
             serializer.save()
@@ -88,7 +88,7 @@ def fit_status(request, fit_id, version = None):
     fit_obj = get_object_or_404(Fit, id = fit_id)
     if request.method == "GET":
         #TODO figure out private later <- probs write in Fit model
-        if not fit_obj.opt_in and not request.user.is_authenticated:
+        if not fit_obj.is_public and not request.user.is_authenticated:
             return HttpResponseBadRequest("user isn't logged in")
         return_info = {"fit_id" : fit_id, "status" : Fit.status}
         if Fit.results:

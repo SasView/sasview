@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('file', models.FileField(null = False)),
                 ('save_file_string', models.CharField(max_length=200, null = False)),
-                ('opt_in', models.BooleanField(default = False)),
+                ('is_public', models.BooleanField(default = False)),
             ],
         ),
     ]

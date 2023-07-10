@@ -47,9 +47,6 @@ class FitParameter(AnalysisParameterBase):
 
     }
 
-    upper_limit = models.FloatField(help_text="upper limit for parameter")
-    lower_limit = models.FloatField(help_text="lower limit for parameter")
-
 class FitModel(AnalysisModelBase):
     #list of default parameters
     default_parameters = {
@@ -89,8 +86,8 @@ class FitModel(AnalysisModelBase):
 
 class Fit(AnalysisBase):
     fit_model = models.ForeignKey(FitModel, default = None, on_delete=models.CASCADE)
-    results = thing
-    opt_in = models.BooleanField(default = False, help_text= "opt in to have fit be public")
+    results = models.CharField(blank=True, help_text="the string result")
+    is_public = models.BooleanField(default = False, help_text= "opt in to have fit be public")
  
     class StatusChoices(models.IntegerChoices):
 

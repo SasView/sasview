@@ -34,12 +34,23 @@ models_logger = getLogger(__name__)
 
 class AnalysisParameterBase(models.Model):
     name = models.CharField(max_length=100, help_text="Parameter Name")
-    """datatype = models.FloatField()
 
-    minimum = datatype(default = False, blank = True, help_text = "Minimum constraint")
-    maximum = datatype(default = False, blank = True, help_text = "Maximum constraint")
+    value=models.FloatField(blank=False, help_text="the value of the parameter")
+
+    data_type = models.CharField(max_length=100, help_text="parameter type (int/double)")
+    
+    upper_limit = models.FloatField(blank= True, null=True, help_text="upper limit for parameter")
+    lower_limit = models.FloatField(blank= True, null=True, help_text="lower limit for parameter")
+
     """
+    see if this is 
+    value_trace = (float)[
+        value
+    ]
+    """
+
     #constraints in parameter relative to another parameter
+    #TODO fix this to hold fit parameters, see: foriegnkey?
     constraints = {
         "fit parameters" : (FitParameter),
     }
@@ -48,28 +59,27 @@ class AnalysisParameterBase(models.Model):
 class AnalysisModelBase(models.Model):
     name = models.CharField(max_length=300, help_text="name of analysis model")
     #list of analysis parameters
-    parameters = [
-        AnalysisParameterBase
-    ]
+    parameters = {
+        models.ForeignKey(AnalysisParameterBase, default = None, on_delete=models.CASCADE)
+    }
 
 class AnalysisBase(models.Model):
     username = models.ForeignKey(User.username, default=None, on_delete=models.CASCADE)
     data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
     model_id = models.ForeignKey(AnalysisModelBase, default= None, on_delete=models.CASCADE)
     
-    GPU_enabled = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
+    #TODO add gpu_requested into analysis views
+    gpu_requested = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
+    #TODO create gpu_used
 
     time_recieved = models.DateTimeField(auto_now_add=True, help_text="analysis requested")
-    #TODO fix these to actually update when initiated/ended
-    time_started = models.DateTimeField(auto_now=True, blank = True, help_text="analysis initiated")
-    time_ended = models.DateTimeField(auto_now=True, blank = True, help_text="analysis stopped")
+    #TODO write in view to start these
+    time_started = models.DateTimeField(auto_now=False, blank = True, null=True, help_text="analysis initiated")
+    time_complete = models.DateTimeField(auto_now=False, blank = True, null=True, help_text="analysis stopped")
 
+    #write a func in analysis.views to check if fit status is complete
     analysis_success = models.BooleanField(default = False, help_text="Successful completion of analysis")
-    #list of errors
-    errors = [
-        "error1",
-        "error2"
-    ]
+    #TODO write a list of errors
 
     if User:
         is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
