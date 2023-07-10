@@ -10,12 +10,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Data',
+            name='AnalysisBase',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150)),
-                ('description', models.CharField(max_length=500)),
-                ('upload_date', models.DateTimeField(verbose_name='date published')),
+                ('data_id',),
+                (GPU_enabled)
             ],
         ),
         migrations.CreateModel(

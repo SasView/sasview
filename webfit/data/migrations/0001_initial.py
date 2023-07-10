@@ -18,8 +18,5 @@ class Migration(migrations.Migration):
                 ('save_file_string', models.CharField(max_length=200, null = False)),
                 ('opt_in', models.BooleanField(default = False)),
             ],
-            options=[
-                
-            ]
         ),
     ]

@@ -42,7 +42,7 @@ def start(request, version = None):
         fit_base.status = 1
 
         #try to create model for check if the modelstring is valid
-        if not request.data["MODEL_CHOICES"] in fit_model: 
+        if load_model(request.data.model):
             return HttpResponseBadRequest("No model selected for fitting")
         #save model somewhere: 
 
