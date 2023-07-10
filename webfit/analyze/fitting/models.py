@@ -36,8 +36,6 @@ models_logger = getLogger(__name__)
 loader = Loader()
 
 class FitParameter(AnalysisParameterBase):
-    unit = models.CharField(blank=False, help_text = "string for what unit the parameter is")
-
     polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
 
     magnetic = models.BooleanField(default=False, help_text="is this a magnetic parameter?")
@@ -51,7 +49,7 @@ class FitModel(AnalysisModelBase):
 
     polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
     #list of polydispersity parameters
-    polydispersity_parameters = FitParameter.unit
+    polydispersity_parameters = FitParameter.value
 
     magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
     #list of magnitism parameters
@@ -59,11 +57,6 @@ class FitModel(AnalysisModelBase):
 
     Qminimum = models.FloatField(blank = True, help_text="Minimum Q value for the fit")
     Qmaximum = models.FloatField(blank = True, help_text="Maximum Q value for the fit")
-    #TODO check if this is correct
-    if Qmaximum is True:
-        AnalysisParameterBase.maximum = Qmaximum
-    if Qminimum is True:
-        AnalysisParameterBase.minimum = Qminimum
 
     """
     import sasmodels or through models.py in fit (modelmanagerbase)<---- create choice list

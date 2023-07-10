@@ -37,8 +37,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=300)),
                 ('value', models.FloatField(blank=False)),
                 ('data_type', models.CharField(max_length=100)),
-                ('upper_limit', models.FloatField(blank= True, null=True)),
-                ('lower_limit', models.FloatField(blank= True, null=True))
+                ('unit', models.CharField(blank=False)),
             ]
         ),
     ]

@@ -50,7 +50,7 @@ class DataSerializers(ModelSerializer):
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
-            exclude = ["example_data", "user_file_ids", "public_file_ids", "errors"]
+            exclude = []
         super().full_clean(instance, exclude, validate_unique)
 
 
@@ -66,7 +66,7 @@ class FitSerializers(ModelSerializer):
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
-            exclude = ["Units", "PolydispersityParameter", "default_parameters", "polydispersity_parameters", "magnetic_parameters", "model_manager", "MODEL_CHOICES"]
+            exclude = ["default_parameters", "polydispersity_parameters", "magnetic_parameters", "model_manager", "MODEL_CHOICES"]
         super().full_clean(instance, exclude, validate_unique)
 
 

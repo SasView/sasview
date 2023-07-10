@@ -34,7 +34,6 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FitParameter',
             fields=[
-                ('unit', models.CharField(blank=False)),
                 ('polydisperse', models.BooleanField(default=False)),
                 ('magnetic', models.BooleanField(default=False)),
             ]
