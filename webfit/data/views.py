@@ -40,28 +40,31 @@ def data_info(request, db_id, version = None):
 
 
 #perhaps rename data.obj from file -> data_obj as it gets confused with file.file
+#data = session_token, opt_in, filename
+#file = data_file
 @api_view(['POST', 'PUT'])
 def upload(request, version = None):
     serializer = DataSerializers()
-    file = get_object_or_404(Data)
     
     #saves file
     if request.method == 'POST':
         serializer(file = request.file, is_public = request.data.is_public)
+        if request.user.is_authenticated:
+            serializer(current_user = request.username)
     
     #saves or updates file
     elif request.method == 'PUT':
         if request.user.is_authenticated:
-            #checks to see if there is an existing file to update
-            file(username = request.data.username)
-            serializer(file, file=request.file, is_public = request.data.is_public)
+            data = get_object_or_404(Data, current_user.username = request.data.username)
+            serializer(data, data=request.file, is_public = request.data.is_public)
         else:
             return HttpResponseForbidden()
 
     if serializer.is_valid():
         serializer.save()
         #TODO get warnings/errors later
-        return_data = {"authenticated" : request.user.is_authenticated, "file_id" : howeveryougetthefileid, "is_public" : serializer.is_public}
+        #TODO add "file_id" : ,
+        return_data = {"authenticated" : request.user.is_authenticated, "is_public" : serializer.is_public}
         return Response(return_data)
     return HttpResponseBadRequest()
     #data is actually loaded inside fit view
@@ -69,26 +72,15 @@ def upload(request, version = None):
 
 #TODO check if I should move to fit
 @api_view(['GET'])
-def download(request, version = None):
-    serializer = DataSerializers()
-    #saves the file string to where to save data
-    if request.method == 'POST':
-        serializer(save_file_string = request.save_file_string)
-    
-    #saves or updates save_file_string
-    elif request.method == 'PUT':
-        if request.user.is_authenticated:
-            #checks to see if there is an existing file to update
-            save_file = get_object_or_404(Data, username = request.username)
-            serializer(save_file, save_file_string = request.save_file_string)
-        else:
-            return HttpResponseForbidden()
-
-    if serializer.is_valid():
-        serializer.save()
-        #CHECK not sure if the serializer will be able to get the id
-        #TODO get warnings/errors later
-        return_data={"authenticated" : request.user.is_authenticated, "file_id" : serializer.data.id}
-        return Response(return_data)
+def download(request, data_id, version = None):
+    if request.method == 'GET':
+        data = get_object_or_404(Data, id = data_id)
+        serializer = DataSerializers(data)
+        if not serializer.is_public:
+            #add session key later
+            if request.session_key != session_key:
+                return HttpResponseBadRequest("data is private, must log in")
+        #TODO add issues later
+        return Response(serializer.file)
     return HttpResponseBadRequest()
         

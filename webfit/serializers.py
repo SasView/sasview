@@ -56,6 +56,7 @@ class DataSerializers(ModelSerializer):
 
     def create(self, validated_data):
         instance: Data = super().create(validated_data)
+        instance.current_user = serializers.RelatedField(source = 'User.username', many=True)
         return instance
     
 class FitSerializers(ModelSerializer):
