@@ -9,7 +9,7 @@ from rest_framework.utils import model_meta
 from data.models import (
     Data,
 )
-from user_authentication.models import (
+from user_app.models import (
     User
 )
 from analyze.models import (

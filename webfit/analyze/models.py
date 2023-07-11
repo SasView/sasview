@@ -3,7 +3,6 @@ import uuid
 from logging import getLogger
 from types import ModuleType
 from data.models import Data
-from user_authentication.models import User
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -11,6 +10,7 @@ from sasdata.data_util.loader_exceptions import NoKnownLoaderException, DefaultR
 
 #do i need these if we have loader exceptions^^
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.exceptions import (
     NON_FIELD_ERRORS,
     FieldDoesNotExist,
@@ -59,7 +59,7 @@ class AnalysisModelBase(models.Model):
     }
 
 class AnalysisBase(models.Model):
-    crrent_user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
+    crrent_user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE)
     data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
     model_id = models.ForeignKey(AnalysisModelBase, default= None, on_delete=models.CASCADE)
     

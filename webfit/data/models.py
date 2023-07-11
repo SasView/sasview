@@ -16,16 +16,6 @@ from django.core.exceptions import (
     ObjectDoesNotExist,
     ValidationError,
 )
-#models.CharField(max_length=100, blank=False, null=False)
-#models.CharField(max_length=200, help_text="")
-#models.ForeignKey("other model class name", on_delete=models.CASCADE) <--- used for refering to other models in other apps
-"""CHOICES= [
-   "choice",
-    (
-        ("choice1", "choice2),
-        ("group choice","2nd choice in group"),
-    ),
- ]"""
 
 models_logger = getLogger(__name__)
 
@@ -34,7 +24,7 @@ models_logger = getLogger(__name__)
 
 class Data(models.Model):
     #username
-    current_user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
+    current_user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     #imported data
     file = models.FileField(null = False, help_text="This is a file")

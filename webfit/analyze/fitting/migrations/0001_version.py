@@ -6,6 +6,12 @@ class Migration(migrations.Migration):
 
     initial = True
 
+    dependencies = [
+        ("user_app", "0001_version"),
+        ("data", "0001_version"),
+        ("analyze", "0001_version"),
+    ]
+
     operations = [
         migrations.CreateModel(
             name='Fit',

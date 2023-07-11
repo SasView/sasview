@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "analyze",
     "analyze.fitting",
-    "user_authentication",
+    "user_app",
     "data",
     "rest_framework",
     "knox",
