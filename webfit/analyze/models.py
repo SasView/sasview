@@ -3,6 +3,7 @@ import uuid
 from logging import getLogger
 from types import ModuleType
 from data.models import Data
+from user_app.models import UserProfile
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -57,7 +58,7 @@ class AnalysisModelBase(models.Model):
     parameters = models.ForeignKey(AnalysisParameterBase, default = None, on_delete=models.CASCADE)
 
 class AnalysisBase(models.Model):
-    crrent_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    current_user = models.ForeignKey(UserProfile, default = None, on_delete=models.CASCADE)
     data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
     model_id = models.ForeignKey(AnalysisModelBase, default= None, on_delete=models.CASCADE)
     

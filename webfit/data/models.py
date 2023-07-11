@@ -2,6 +2,7 @@ import sys
 import uuid
 from logging import getLogger
 import hashlib
+from user_app.models import UserProfile
 
 from sasdata.data_util.loader_exceptions import NoKnownLoaderException, DefaultReaderException
 
@@ -24,7 +25,7 @@ models_logger = getLogger(__name__)
 
 class Data(models.Model):
     #username
-    current_user = models.OneToOneField(User, on_delete=models.CASCADE)
+    current_user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     #imported data
     file = models.FileField(null = False, help_text="This is a file")
