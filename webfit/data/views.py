@@ -17,8 +17,8 @@ def list_data(request, db_id = None, version = None):
         data_list = {}
         public_data = Data.objects.filter(is_public = True)
         data_list += {"public_file_ids": public_data.id}
-        if request.user.is_authenticated:
-            data = get_object_or_404(Data, id=db_id)
+        data = get_object_or_404(Data, id=db_id)
+        if request.data.auth_token == data.current_user.auth_token:
             data_list += {"user_data_ids": data.user_data_ids}
         return Response(data_list)
     return HttpResponseBadRequest()
@@ -28,10 +28,9 @@ def list_data(request, db_id = None, version = None):
 def data_info(request, db_id, version = None):
     if request.method == 'GET':
         public_data = Data.objects.filter(id = db_id, is_public=True)
+        private_data = get_object_or_404(Data, id = db_id)
         #TODO check if this actually checks the id is public/properly logged in
-        if public_data or request.user.is_authenticated:
-            file = get_object_or_404(Data, id = db_id)
-            #TODO ^^ how to check if file_id is in user_file_ids
+        if public_data or request.auth_token == private_data.current_user.auth_token:
             #TODO check if this loads the file correctly
             return_data = {"info" : file.file.__str__()}
             return return_data
@@ -51,7 +50,7 @@ def upload(request, data_id = None, version = None):
     #saves file
     if request.method == 'POST':
         serializer(file = request.file, is_public = request.data.is_public)
-        if request.auth_tokens:
+        if request.data.auth_token:
             #check auth_token.user == data.user
             userr = auth_token.user
             serializer(current_user = userr)
@@ -60,7 +59,7 @@ def upload(request, data_id = None, version = None):
     elif request.method == 'PUT':
         #require data_id
         if data_id == None:
-            if request.auth_tokens:
+            if request.data.auth_token:
                 userr = auth_token.user
                 data = Data.objects.filter(current_user = userr, id = data_id).get()
                 serializer(data, data=request.file, is_public = request.data.is_public)
@@ -86,7 +85,7 @@ def download(request, data_id, version = None):
         serializer = DataSerializers(data)
         if not serializer.is_public:
             #add session key later
-            if request.auth_key != serializer.current_user.auth_key:
+            if request.data.auth_token != serializer.current_user.auth_token:
                 return HttpResponseBadRequest("data is private, must log in")
         #TODO add issues later
         return Response(serializer.file)
