@@ -54,12 +54,10 @@ class AnalysisParameterBase(models.Model):
 class AnalysisModelBase(models.Model):
     name = models.CharField(max_length=300, help_text="name of analysis model")
     #list of analysis parameters
-    parameters = {
-        models.ForeignKey(AnalysisParameterBase, default = None, on_delete=models.CASCADE)
-    }
+    parameters = models.ForeignKey(AnalysisParameterBase, default = None, on_delete=models.CASCADE)
 
 class AnalysisBase(models.Model):
-    crrent_user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE)
+    crrent_user = models.ForeignKey(User, on_delete=models.CASCADE)
     data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
     model_id = models.ForeignKey(AnalysisModelBase, default= None, on_delete=models.CASCADE)
     

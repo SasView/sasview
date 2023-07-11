@@ -17,12 +17,15 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('results', models.CharField(blank=True)),
                 ('is_public', models.BooleanField(default = False)),
-                ('status', models.IntegerField(choices=Fit.StatusChoices))
+                ("status", models.IntegerField(
+                    choices=[(1, "Queued"), (2, "Running"), (3, "Complete")],
+                    default=False)),
             ],
         ),
         migrations.CreateModel(
             name='FitModel',
             fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('polydispersity', models.BooleanField(default = False)),
                 ('magnetism', models.BooleanField(default=False)),
                 ('Qminimum', models.FloatField(blank = True)),
@@ -34,6 +37,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FitParameter',
             fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('unit', models.CharField(blank=False)),
                 ('polydisperse', models.BooleanField(default=False)),
                 ('magnetic', models.BooleanField(default=False))
