@@ -14,30 +14,30 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AnalysisParameterBase',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=300, help_text="Parameter Name")),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=100, help_text="Parameter Name")),
                 ('value', models.FloatField(blank=False, help_text="the value of the parameter")),
                 ('data_type', models.CharField(max_length=100, help_text="parameter type (int/double)")),
-                ('unit', models.CharField(blank=False, help_text = "string for what unit the parameter is")),
+                ('unit', models.CharField(max_length=100, blank=False, help_text = "string for what unit the parameter is")),
             ]
         ),
 
         migrations.CreateModel(
             name='AnalysisModelBase',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, help_text="name of analysis model")),
-                ('parameters', models.ForeignKey(default = None, to="analyze.analysisparameterbase", on_delete=models.CASCADE))
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=300, help_text="name of analysis model")),
+                ('parameters', models.ForeignKey(default = None, to="analyze.analysisparameterbase", on_delete=models.deletion.CASCADE))
             ],
         ),
         
         migrations.CreateModel(
             name='AnalysisBase',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('current_user', models.ForeignKey(default = None, primary_key=False, to='user_app.UserProfile', on_delete=models.CASCADE)),
-                ('data_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.CASCADE, to='data.Datafile')),
-                ('model_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.CASCADE, to='analyze.AnalysisModelBase')),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('current_user', models.ForeignKey(default = None, to='user_app.UserProfile', on_delete=models.deletion.CASCADE)),
+                ('data_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.deletion.CASCADE, to='data.data')),
+                ('model_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.deletion.CASCADE, to='analyze.AnalysisModelBase')),
                 
                 ('gpu_requested', models.BooleanField(default = False, help_text= "use GPU rather than CPU")),
                 ('time_recieved', models.DateTimeField(auto_now_add=True, help_text="analysis requested")),
