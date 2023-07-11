@@ -61,7 +61,8 @@ def start(request, version = None):
             serializer.save()
 
         start_fit(fit_base)
-        return {"authenticated":request.user.is_authenticated, "fit_id":fit_base.id, "warnings":uhhhhhhh}
+        #add "warnings": ... later
+        return {"authenticated":request.user.is_authenticated, "fit_id":fit_base.id}
     return HttpResponseBadRequest()
 
 
