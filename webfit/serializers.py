@@ -46,7 +46,7 @@ class ModelSerializer(serializers.ModelSerializer):
 class DataSerializers(ModelSerializer):
     class Meta:
         model = Data
-        fields = "__all__"
+        fields = "__all__", "current_user"
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
@@ -56,7 +56,7 @@ class DataSerializers(ModelSerializer):
 
     def create(self, validated_data):
         instance: Data = super().create(validated_data)
-        instance.current_user = serializers.RelatedField(source = 'User.username', many=True)
+        instance.current_user = serializers.RelatedField(many=True, read_only=True)
         return instance
     
 class FitSerializers(ModelSerializer):

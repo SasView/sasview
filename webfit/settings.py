@@ -24,6 +24,10 @@ from rest_framework import ISO_8601
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+#imports for knox
+from datetime import timedelta
+from rest_framework.settings import api_settings
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -49,6 +53,8 @@ INSTALLED_APPS = [
     "analyze.fitting",
     "user_authentication",
     "data",
+    "rest_framework",
+    "knox",
 ]
 
 MIDDLEWARE = [
@@ -86,11 +92,23 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.UrlPathVersioning",
     "DEFAULT_VERSION" : "v1",
     "ALLOWED_VERSIONS" : {"v1"},
     "VERSION_PARAM" : "version"
     #version_param is default set to "version"
+}
+
+# These are the default values if none are set 
+REST_KNOX = {
+    'SECURE_HASH_ALGORITHM':'cryptography.hazmat.primitives.hashes.SHA512',
+    'AUTH_TOKEN_CHARACTER_LENGTH': 64, # By default, it is set to 64 characters (this shouldn't need changing).
+    'TOKEN_TTL': timedelta(minutes=45), # The default is 10 hours i.e., timedelta(hours=10)).
+    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+    'TOKEN_LIMIT_PER_USER': None, # By default, this option is disabled and set to None -- thus no limit.
+    'AUTO_REFRESH': False, # This defines if the token expiry time is extended by TOKEN_TTL each time the token is used.
+    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
 }
 
 # List of settings that may be in string import notation.
