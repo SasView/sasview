@@ -62,7 +62,7 @@ class DataSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True, read_only=True)
+        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True)
         return instance
     
 class AnalysisBaseSerializer(ModelSerializer):
@@ -78,8 +78,8 @@ class AnalysisBaseSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True, read_only=True)
-        instance.data_id = serializers.PrimaryKeyRelatedField(queryset=Data.objects.all(), many=True, read_only=True)
+        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True)
+        instance.data_id = serializers.PrimaryKeyRelatedField(queryset=Data.objects.all(), many=True)
         return instance
     
 class AnalysisModelBaseSerializer(ModelSerializer):
@@ -95,7 +95,7 @@ class AnalysisModelBaseSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        instance.base_id = serializers.PrimaryKeyRelatedField(queryset=AnalysisBase.objects.all(), many=True, read_only=True)
+        instance.base_id = serializers.PrimaryKeyRelatedField(queryset=AnalysisBase.objects.all(), many=True)
         return instance
 
 class AnalysisParameterBaseSerializer(ModelSerializer):
@@ -111,7 +111,7 @@ class AnalysisParameterBaseSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        instance.model_id = serializers.PrimaryKeyRelatedField(queryset=AnalysisModelBase.objects.all(), many=True, read_only=True)
+        instance.model_id = serializers.PrimaryKeyRelatedField(queryset=AnalysisModelBase.objects.all(), many=True)
         return instance
 
 class FitSerializer(AnalysisBaseSerializer):
@@ -130,7 +130,7 @@ class FitModelSerializer(AnalysisModelBaseSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        instance.base_id = serializers.PrimaryKeyRelatedField(queryset=Fit.objects.all(), many=True, read_only=True)
+        instance.base_id = serializers.PrimaryKeyRelatedField(queryset=Fit.objects.all(), many=True)
         return instance
 
 class FitParameterSerializer(AnalysisParameterBaseSerializer):
@@ -142,5 +142,5 @@ class FitParameterSerializer(AnalysisParameterBaseSerializer):
 
     def create(self, validated_data):
         instance: FitParameter = super().create(validated_data)
-        instance.model_id = serializers.PrimaryKeyRelatedField(queryset=FitModel.objects.all(), many=True, read_only=True)
+        instance.model_id = serializers.PrimaryKeyRelatedField(queryset=FitModel.objects.all(), many=True)
         return instance
