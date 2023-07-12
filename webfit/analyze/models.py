@@ -33,8 +33,29 @@ from django.core.exceptions import (
 
 models_logger = getLogger(__name__)
 
+class AnalysisBase(models.Model):
+    current_user = models.ForeignKey(UserProfile, default = None, on_delete=models.CASCADE)
+    data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
+    
+    #TODO add gpu_requested into analysis views
+    gpu_requested = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
+    #TODO create gpu_used
+
+    time_recieved = models.DateTimeField(auto_now_add=True, help_text="analysis requested")
+    #TODO write in view to start these
+    time_started = models.DateTimeField(auto_now=False, blank = True, null=True, help_text="analysis initiated")
+    time_complete = models.DateTimeField(auto_now=False, blank = True, null=True, help_text="analysis stopped")
+
+    #write a func in analysis.views to check if fit status is complete
+    analysis_success = models.BooleanField(default = False, help_text="Successful completion of analysis")
+    #TODO write a list of errors
+
+    if User:
+        is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
+
 class AnalysisModelBase(models.Model):
     name = models.CharField(max_length=300, help_text="name of analysis model")
+    base_id = models.OneToOneField(AnalysisBase, default= None, on_delete=models.CASCADE)
     #list of analysis parameters
     
 class AnalysisParameterBase(models.Model):
@@ -56,24 +77,3 @@ class AnalysisParameterBase(models.Model):
     constraints = {
         "fit parameters" : (),
     }
-
-class AnalysisBase(models.Model):
-    current_user = models.ForeignKey(UserProfile, default = None, on_delete=models.CASCADE)
-    data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
-    model_id = models.OneToOneField(AnalysisModelBase, default= None, on_delete=models.CASCADE)
-    
-    #TODO add gpu_requested into analysis views
-    gpu_requested = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
-    #TODO create gpu_used
-
-    time_recieved = models.DateTimeField(auto_now_add=True, help_text="analysis requested")
-    #TODO write in view to start these
-    time_started = models.DateTimeField(auto_now=False, blank = True, null=True, help_text="analysis initiated")
-    time_complete = models.DateTimeField(auto_now=False, blank = True, null=True, help_text="analysis stopped")
-
-    #write a func in analysis.views to check if fit status is complete
-    analysis_success = models.BooleanField(default = False, help_text="Successful completion of analysis")
-    #TODO write a list of errors
-
-    if User:
-        is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")

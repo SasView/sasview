@@ -33,7 +33,19 @@ models_logger = getLogger(__name__)
 
 # do we want individual dbs for each perspective?
 
-loader = Loader()
+class Fit(AnalysisBase):
+    results = models.CharField(max_length= 100, blank=True, help_text="the string result")
+    results_trace = [
+    ]
+
+    # TODO optimizer
+
+    class StatusChoices(models.IntegerChoices):
+        QUEUED = 1, "Queued"
+        RUNNING = 2, "Running"
+        COMPLETE = 3, "Complete"
+
+    status = models.IntegerField(default=False, choices=StatusChoices.choices)
 
 class FitParameter(AnalysisParameterBase):
     polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
@@ -68,19 +80,3 @@ class FitModel(AnalysisModelBase):
         online_model_url = models.CharField(max_length=100, help_text= "url link to model")
         
     #look at models.py in sasview -> sasmodel-marketplace
-
-class Fit(AnalysisBase):
-    results = models.CharField(max_length= 100, blank=True, help_text="the string result")
-    results_trace = [
-    ]
-
-    # TODO optimizer
-
-    class StatusChoices(models.IntegerChoices):
-        QUEUED = 1, "Queued"
-        RUNNING = 2, "Running"
-        COMPLETE = 3, "Complete"
-
-    status = models.IntegerField(default=False, choices=StatusChoices.choices)
-
-#TODO: view saswebcalc later
