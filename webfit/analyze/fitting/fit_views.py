@@ -113,13 +113,12 @@ def fit_status(request, fit_id, version = None):
     fit_obj = get_object_or_404(Fit, id = fit_id)
     if request.method == "GET":
         #TODO figure out private later <- probs write in Fit model
-        if not fit_obj.is_public and not request.user.is_authenticated:
+        if not (fit_obj.is_public or request.user.is_authenticated):
             return HttpResponseBadRequest("user isn't logged in")
         return_info = {"fit_id" : fit_id, "status" : Fit.status}
         if Fit.results:
             return_info+={"results" : Fit.results}
         return return_info
-    
     return HttpResponseBadRequest()
 
 
@@ -142,8 +141,9 @@ def list_models(request, version = None):
                 file_contents = cat_file.read()
             spec_cat = file_contents[request.data.categories]
             unique_models["models"] += [spec_cat]
+        #elif: request.kind
         else:
-            unique_models["models"] = [model_manager.get_model_list()]
+            unique_models["models"] = [model_manager.get_model_dictionary()]
         return unique_models
         """TODO requires discussion:
         if request.username:
