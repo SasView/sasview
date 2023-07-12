@@ -32,8 +32,8 @@ class RealSpaceCanvas(CorfuncCanvas):
 
         if self.data is not None and len(self.data) == 2:
             data1, data3 = self.data[0], self.data[1]
-            self.axes.plot(data1.x, data1.y, label="1D Correlation")
-            self.axes.plot(data3.x, data3.y, label="3D Correlation")
+            self.axes.plot(data1.x, data1.y, label="$\Gamma_1(z)$")
+            self.axes.plot(data3.x, data3.y, label="$\Gamma_3(z)$")
 
             self.axes.set_xlim(0, max(data1.x) / 4)
             self.legend = self.axes.legend()

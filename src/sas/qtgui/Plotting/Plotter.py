@@ -3,6 +3,7 @@ from PySide6 import QtWidgets
 
 import functools
 import copy
+import math
 import matplotlib as mpl
 import numpy as np
 import textwrap
