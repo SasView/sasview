@@ -59,7 +59,7 @@ class DataSerializers(ModelSerializer):
 
     def create(self, validated_data):
         instance: Data = super().create(validated_data)
-        instance.current_user = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+        instance.current_user = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset = AnalysisModelBase.objects.all())
         return instance
     
 class AnalysisBaseSerializers(ModelSerializer):
@@ -77,7 +77,7 @@ class AnalysisBaseSerializers(ModelSerializer):
         instance: AnalysisBase = super().create(validated_data)
         instance.current_user = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
         instance.data_id = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-        instance.model_id = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+        instance.model_id = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset = AnalysisModelBase.objects.all())
         return instance
     
 class AnalysisModelBaseSerializers(ModelSerializer):
