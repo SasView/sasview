@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from sasdata.dataloader.loader import Loader
-from serializers import DataSerializers
+from serializers import DataSerializer
 from .models import Data
 
 from rest_framework.permissions import IsAuthenticated
@@ -50,7 +50,7 @@ def data_info(request, db_id, version = None):
 #TODO IF WE'RE USING SESSION KEYS, HOW DO WE CONNECT THEM TO DBS??
 @api_view(['POST', 'PUT'])
 def upload(request, data_id = None, version = None):
-    serializer = DataSerializers()
+    serializer = DataSerializer()
     
     #saves file
     if request.method == 'POST':
@@ -87,7 +87,7 @@ def upload(request, data_id = None, version = None):
 def download(request, data_id, version = None):
     if request.method == 'GET':
         data = get_object_or_404(Data, id = data_id)
-        serializer = DataSerializers(data)
+        serializer = DataSerializer(data)
         if not serializer.is_public:
             #add session key later
             if request.user.token != serializer.current_user.token:

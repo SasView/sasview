@@ -20,9 +20,9 @@ from bumps.formatnum import format_uncertainty
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 
 from serializers import (
-    FitSerializers,
-    FitParameterSerializers,
-    FitModelSerializers,
+    FitSerializer,
+    FitParameterSerializer,
+    FitModelSerializer,
 )
 from data.models import Data
 from .models import (
@@ -34,63 +34,69 @@ from .models import (
 
 fit_logger = getLogger(__name__)
 
-#start() only puts all the request data into the db, the function underneath actually runs the fit
-#TODO add authentication -> figure out how to do this without multiplying
+#start() only puts all the request data into the db, start_fit() runs calculations
 @api_view(["PUT"])
 def start(request, version = None):
-    base_serializer = FitSerializers()
+    base_serializer = FitSerializer(is_public = request.data.is_public)
+    model_serializer = FitModelSerializer(base_id = base_serializer.id)
+    parameter_serializer = FitParameterSerializer(model_id = model_serializer.id)
     
-    #TODO reduce redundancies... also check if this actually works
+    #TODO WIP not sure if this works yet
     if request.method == "PUT":
-        base_serializer.status = 1
+        #set status
 
         #try to create model for check if the modelstring is valid
+        #TODO figure out if I need a parcer here or not
         if load_model(request.data.model):
-            model_serializer = FitModelSerializers(model = request.data.model)
-        #save model somewhere:
+            model_serializer(model = request.data.model)
         else:
             return HttpResponseBadRequest("No model selected for fitting")
 
-        #ask for Qmin + Qmax
         if request.data.data_id:
-            if not fit_base.is_public:
+            if Data.objects.filter(is_public = True, id = request.data.data_id).get():
                 return HttpResponseBadRequest("data isn't public")
-            if not (request.user.is_authenticated and request.user is fit_base.data_id.current_user):
-                return HttpResponseBadRequest("data is not users")
+            if not (request.user.is_authenticated and 
+                    request.user is Data.objects.get(id=request.data.data_id).current_user):
+                return HttpResponseBadRequest("data is not user's")
+            #search online to see how to add serializers.PrimaryKeyRelatedField
             base_serializer(data_id = request.data.data_id)
 
         if request.data.parameters:
             parameters = JSONParser().parse(request.data.parameters)
-            parameter_serializer = FitParameterSerializers(data = parameters)
-            #str: name, number (int/float) <- unit 
-            #if data == "float" -> float(value)
-            #eval(f"{datatype}}({value})"
+            parameter_serializer(data = parameters)
+            #{str: name, value}
             pars = {}
             for x in parameter_serializer.data:
                 num = eval(f"{x.datatype}({x.value})")
-                #check if x.name is a valid parameter else return blah
+                #TODO check if x.name is a valid parameter else return blah
                 #pars = {x.name: num for x in parameter_serializer.data for num = eval(...)}
                 pars[x.name] += {num,}
 
-        base_serializer(is_public = request.data.is_public)
-
-        if base_serializer.is_valid() and parameter_serializer.is_valid():
+        if base_serializer.is_valid() and parameter_serializer.is_valid() and model_serializer.is_valid():
             base_serializer.save()
             parameter_serializer.save()
+            model_serializer.save()
+        else:
+            return HttpResponseBadRequest("Serializer error")
 
-        start_fit(base_serializer.data, pars, model_serializer.data)
+        start_fit(model_serializer.data.model, base_serializer.data, pars)
         #add "warnings": ... later
         return {"authenticated":request.user.is_authenticated, "fit_id":base_serializer.data.id}
     return HttpResponseBadRequest()
 
 
-def start_fit(data, params, model):
-    fit_base.status = 2
-    test_data = get_object_or_404(Data, id = fit_base.data_id).file
-    current_model = fit_base.fit_model.model
+def start_fit(model, data = None, params = None):
+    if data is None:
+        data = exampledata
+    else:
+        test_data = get_object_or_404(Data, id = data.data_id).file
+    if params is None:
+        params = get_object_or_404(FitModel).default_parameters
+
+    current_model = model
 
     #figure out how to add other parameters (polydispersity)
-    model = Model(current_model, **fit_base.fit_model.default_parameters)
+    model = Model(current_model, **params)
 
     M = Experiment(data = test_data, model=model)
     problem = FitProblem(M)
