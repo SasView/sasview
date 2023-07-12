@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbid
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from django.contrib.auth.models import User
 
 from bumps.names import *
 from sasmodels.core import load_model
@@ -17,7 +18,11 @@ from bumps.formatnum import format_uncertainty
 #TODO categoryinstallers should belong in SasView.Systen rather than in QTGUI
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 
-from serializers import FitSerializers
+from serializers import (
+    FitSerializers,
+    FitParameterSerializers,
+    FitModelSerializers,
+)
 from data.models import Data
 from .models import (
     Fit,
@@ -34,8 +39,9 @@ fit_logger = getLogger(__name__)
 def start(request, version = None):
     fit_base = get_object_or_404(Fit)
     fit_model = get_object_or_404(FitModel)
-    fit_parameters = get_object_or_404(FitParameter)
-    serializer = FitSerializers(fit)
+    fit_parameter = get_object_or_404(FitParameter)
+    base_serializer = FitSerializers(fit_base)
+    parameter_serializer = FitParameterSerializers(fit_parameter)
 
     #TODO reduce redundancies... also check if this actually works
     if request.method == "PUT":
@@ -47,12 +53,14 @@ def start(request, version = None):
         #save model somewhere: 
 
         if request.data.data_id:
-            if not fit_base.is_public and not request.user.is_authenticated:
-                return HttpResponseBadRequest("data isn't public and user isn't logged in")
-            serializer(data_id = request.data.data_id)
+            if not fit_base.is_public:
+                return HttpResponseBadRequest("data isn't public")
+            if not (request.user.is_authenticated and request.user is fit_base.data_id.current_user):
+                return HttpResponseBadRequest("data is not users")
+            base_serializer(data_id = request.data.data_id)
 
         if request.data.parameters:
-            fit_parameters.Units = {request.data.parameters}
+            fit_model.parameters = {request.data.parameters}
 
         if request.data.opt_in:
             serializer(opt_in = fit_base.is_public)
