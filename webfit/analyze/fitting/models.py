@@ -44,16 +44,12 @@ class FitModel(AnalysisModelBase):
     #list of default parameters
     default_parameters = {
         #str name, float number
-        #import in migrations, override in fit_views.py
-     }
+        #import in migrations, ignored otherwise
+    }
 
     polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
-    #list of polydispersity parameters
-    polydispersity_parameters = FitParameter.value
 
     magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
-    #list of magnitism parameters
-    magnetic_parameters = {}
 
     Qminimum = models.FloatField(blank = True, help_text="Minimum Q value for the fit")
     Qmaximum = models.FloatField(blank = True, help_text="Maximum Q value for the fit")
@@ -74,7 +70,6 @@ class FitModel(AnalysisModelBase):
     #look at models.py in sasview -> sasmodel-marketplace
 
 class Fit(AnalysisBase):
-    fit_model = models.ForeignKey(FitModel, default = None, on_delete=models.CASCADE)
     results = models.CharField(max_length= 100, blank=True, help_text="the string result")
     results_trace = [
     ]

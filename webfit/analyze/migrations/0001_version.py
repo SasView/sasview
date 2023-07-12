@@ -12,23 +12,23 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='AnalysisModelBase',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=300, help_text="name of analysis model")),
+            ],
+        ),
+
+        migrations.CreateModel(
             name='AnalysisParameterBase',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('model_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.deletion.CASCADE, to='analyze.AnalysisModelBase')),
                 ('name', models.CharField(max_length=100, help_text="Parameter Name")),
                 ('value', models.FloatField(blank=False, help_text="the value of the parameter")),
                 ('data_type', models.CharField(max_length=100, help_text="parameter type (int/double)")),
                 ('unit', models.CharField(max_length=100, blank=False, help_text = "string for what unit the parameter is")),
             ]
-        ),
-
-        migrations.CreateModel(
-            name='AnalysisModelBase',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=300, help_text="name of analysis model")),
-                ('parameters', models.ForeignKey(default = None, to="analyze.analysisparameterbase", on_delete=models.deletion.CASCADE))
-            ],
         ),
         
         migrations.CreateModel(
