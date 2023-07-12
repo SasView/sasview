@@ -33,8 +33,14 @@ from django.core.exceptions import (
 
 models_logger = getLogger(__name__)
 
+class AnalysisModelBase(models.Model):
+    name = models.CharField(max_length=300, help_text="name of analysis model")
+    #list of analysis parameters
+    
 class AnalysisParameterBase(models.Model):
     name = models.CharField(max_length=100, help_text="Parameter Name")
+
+    model_id = models.ForeignKey(AnalysisModelBase, default = None, on_delete=models.CASCADE)
 
     value=models.FloatField(blank=False, help_text="the value of the parameter")
 
@@ -51,16 +57,10 @@ class AnalysisParameterBase(models.Model):
         "fit parameters" : (),
     }
 
-
-class AnalysisModelBase(models.Model):
-    name = models.CharField(max_length=300, help_text="name of analysis model")
-    #list of analysis parameters
-    parameters = models.ForeignKey(AnalysisParameterBase, default = None, on_delete=models.CASCADE)
-
 class AnalysisBase(models.Model):
     current_user = models.ForeignKey(UserProfile, default = None, on_delete=models.CASCADE)
     data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
-    model_id = models.ForeignKey(AnalysisModelBase, default= None, on_delete=models.CASCADE)
+    model_id = models.OneToOneField(AnalysisModelBase, default= None, on_delete=models.CASCADE)
     
     #TODO add gpu_requested into analysis views
     gpu_requested = models.BooleanField(default = False, help_text= "use GPU rather than CPU")
