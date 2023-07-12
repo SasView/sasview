@@ -23,6 +23,9 @@ from analyze.fitting.models import (
     FitParameter,
 )
 
+"""    read_only=False,
+    queryset=Song.objects.all()
+"""
 
 # Overriding validate to call model full_clean
 class ModelSerializer(serializers.ModelSerializer):
@@ -46,30 +49,69 @@ class ModelSerializer(serializers.ModelSerializer):
 class DataSerializers(ModelSerializer):
     class Meta:
         model = Data
-        fields = "__all__", "current_user"
+        fields = "__all__", 
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
-            exclude = []
+            exclude = ["current_user"]
         super().full_clean(instance, exclude, validate_unique)
 
 
     def create(self, validated_data):
         instance: Data = super().create(validated_data)
-        instance.current_user = serializers.RelatedField(many=True, read_only=True)
+        instance.current_user = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
         return instance
     
-class FitSerializers(ModelSerializer):
+class AnalysisBaseSerializers(ModelSerializer):
     class Meta:
-        model = Fit
+        model = AnalysisBase
         fields = "__all__"
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
-            exclude = ["default_parameters", "polydispersity_parameters", "magnetic_parameters", "model_manager", "MODEL_CHOICES"]
+            exclude = ["current_user", "data_id", "model_id"]
         super().full_clean(instance, exclude, validate_unique)
 
 
     def create(self, validated_data):
-        instance: Data = super().create(validated_data)
+        instance: AnalysisBase = super().create(validated_data)
+        instance.current_user = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+        instance.data_id = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+        instance.model_id = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
         return instance
+    
+class AnalysisModelBaseSerializers(ModelSerializer):
+    class Meta:
+        model = AnalysisModelBase
+        fields = "__all__"
+
+class AnalysisParameterBaseSerializers(ModelSerializer):
+    class Meta:
+        model = AnalysisParameterBase
+        fields = "__all__"
+
+    def full_clean(self, instance, exclude=None, validate_unique=True):
+        if not instance or not instance.id:
+            exclude = ["model_id"]
+        super().full_clean(instance, exclude, validate_unique)
+
+
+    def create(self, validated_data):
+        instance: AnalysisModelBase = super().create(validated_data)
+        instance.model_id = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+        return instance
+
+class FitSerializers(AnalysisBaseSerializers):
+    class Meta:
+        model = Fit
+        fields = "__all__"
+
+class FitModelSerializers(AnalysisModelBaseSerializers):
+    class Meta:
+        model = FitModel
+        fields = "__all__"
+
+class FitParameterSerializers(AnalysisParameterBaseSerializers):
+    class Meta:
+        model = FitParameter
+        fields = "__all__"
