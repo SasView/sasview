@@ -6,6 +6,9 @@ from rest_framework import serializers
 from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
 from rest_framework.utils import model_meta
 
+from user_app.models import(
+     UserProfile
+)
 from data.models import (
     Data,
 )
@@ -46,7 +49,7 @@ class ModelSerializer(serializers.ModelSerializer):
 	def full_clean(self, instance, exclude=None, validate_unique=True):
 		instance.full_clean(exclude, validate_unique)
 
-class DataSerializers(ModelSerializer):
+class DataSerializer(ModelSerializer):
     class Meta:
         model = Data
         fields = "__all__", 
@@ -58,34 +61,44 @@ class DataSerializers(ModelSerializer):
 
 
     def create(self, validated_data):
-        instance: Data = super().create(validated_data)
-        instance.current_user = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+        instance: self.Meta.model = super().create(validated_data)
+        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True, read_only=True)
         return instance
     
-class AnalysisBaseSerializers(ModelSerializer):
+class AnalysisBaseSerializer(ModelSerializer):
     class Meta:
         model = AnalysisBase
         fields = "__all__"
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
-            exclude = ["current_user", "data_id", "model_id"]
+            exclude = ["current_user", "data_id"]
         super().full_clean(instance, exclude, validate_unique)
 
 
     def create(self, validated_data):
-        instance: AnalysisBase = super().create(validated_data)
-        instance.current_user = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-        instance.data_id = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-        instance.model_id = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+        instance: self.Meta.model = super().create(validated_data)
+        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True, read_only=True)
+        instance.data_id = serializers.PrimaryKeyRelatedField(queryset=Data.objects.all(), many=True, read_only=True)
         return instance
     
-class AnalysisModelBaseSerializers(ModelSerializer):
+class AnalysisModelBaseSerializer(ModelSerializer):
     class Meta:
         model = AnalysisModelBase
         fields = "__all__"
 
-class AnalysisParameterBaseSerializers(ModelSerializer):
+    def full_clean(self, instance, exclude=None, validate_unique=True):
+        if not instance or not instance.id:
+            exclude = ["base_id"]
+        super().full_clean(instance, exclude, validate_unique)
+
+
+    def create(self, validated_data):
+        instance: self.Meta.model = super().create(validated_data)
+        instance.base_id = serializers.PrimaryKeyRelatedField(queryset=AnalysisBase.objects.all(), many=True, read_only=True)
+        return instance
+
+class AnalysisParameterBaseSerializer(ModelSerializer):
     class Meta:
         model = AnalysisParameterBase
         fields = "__all__"
@@ -97,21 +110,37 @@ class AnalysisParameterBaseSerializers(ModelSerializer):
 
 
     def create(self, validated_data):
-        instance: AnalysisModelBase = super().create(validated_data)
-        instance.model_id = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+        instance: self.Meta.model = super().create(validated_data)
+        instance.model_id = serializers.PrimaryKeyRelatedField(queryset=AnalysisModelBase.objects.all(), many=True, read_only=True)
         return instance
 
-class FitSerializers(AnalysisBaseSerializers):
+class FitSerializer(AnalysisBaseSerializer):
+    analysis_base = AnalysisBaseSerializer(many = True, read_only=True)
+
     class Meta:
         model = Fit
-        fields = "__all__"
+        fields = "__all__", "analysis_base"
 
-class FitModelSerializers(AnalysisModelBaseSerializers):
+class FitModelSerializer(AnalysisModelBaseSerializer):
+    analysis_model = AnalysisModelBaseSerializer(many = True, read_only=True)
+    
     class Meta:
         model = FitModel
-        fields = "__all__"
+        fields = "__all__", "analysis_model"
 
-class FitParameterSerializers(AnalysisParameterBaseSerializers):
+    def create(self, validated_data):
+        instance: self.Meta.model = super().create(validated_data)
+        instance.base_id = serializers.PrimaryKeyRelatedField(queryset=Fit.objects.all(), many=True, read_only=True)
+        return instance
+
+class FitParameterSerializer(AnalysisParameterBaseSerializer):
+    analysis_parameter = AnalysisParameterBaseSerializer(many = True, read_only=True)
+
     class Meta:
         model = FitParameter
-        fields = "__all__"
+        fields = "__all__", "analysis_parameter"
+
+    def create(self, validated_data):
+        instance: FitParameter = super().create(validated_data)
+        instance.model_id = serializers.PrimaryKeyRelatedField(queryset=FitModel.objects.all(), many=True, read_only=True)
+        return instance
