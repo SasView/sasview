@@ -4,9 +4,10 @@ from logging import getLogger
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from django.contrib.auth.models import User
+from rest_framework.parsers import JSONParser
 
 from bumps.names import *
 from sasmodels.core import load_model
@@ -37,21 +38,20 @@ fit_logger = getLogger(__name__)
 #TODO add authentication -> figure out how to do this without multiplying
 @api_view(["PUT"])
 def start(request, version = None):
-    fit_base = get_object_or_404(Fit)
-    fit_model = get_object_or_404(FitModel)
-    fit_parameter = get_object_or_404(FitParameter)
-    base_serializer = FitSerializers(fit_base)
-    parameter_serializer = FitParameterSerializers(fit_parameter)
-
+    base_serializer = FitSerializers()
+    
     #TODO reduce redundancies... also check if this actually works
     if request.method == "PUT":
-        fit_base.status = 1
+        base_serializer.status = 1
 
         #try to create model for check if the modelstring is valid
         if load_model(request.data.model):
+            model_serializer = FitModelSerializers(model = request.data.model)
+        #save model somewhere:
+        else:
             return HttpResponseBadRequest("No model selected for fitting")
-        #save model somewhere: 
 
+        #ask for Qmin + Qmax
         if request.data.data_id:
             if not fit_base.is_public:
                 return HttpResponseBadRequest("data isn't public")
@@ -60,21 +60,31 @@ def start(request, version = None):
             base_serializer(data_id = request.data.data_id)
 
         if request.data.parameters:
-            fit_model.parameters = {request.data.parameters}
+            parameters = JSONParser().parse(request.data.parameters)
+            parameter_serializer = FitParameterSerializers(data = parameters)
+            #str: name, number (int/float) <- unit 
+            #if data == "float" -> float(value)
+            #eval(f"{datatype}}({value})"
+            pars = {}
+            for x in parameter_serializer.data:
+                num = eval(f"{x.datatype}({x.value})")
+                #check if x.name is a valid parameter else return blah
+                #pars = {x.name: num for x in parameter_serializer.data for num = eval(...)}
+                pars[x.name] += {num,}
 
-        if request.data.opt_in:
-            serializer(opt_in = fit_base.is_public)
+        base_serializer(is_public = request.data.is_public)
 
-        if serializer.is_valid():
-            serializer.save()
+        if base_serializer.is_valid() and parameter_serializer.is_valid():
+            base_serializer.save()
+            parameter_serializer.save()
 
-        start_fit(fit_base)
+        start_fit(base_serializer.data, pars, model_serializer.data)
         #add "warnings": ... later
-        return {"authenticated":request.user.is_authenticated, "fit_id":fit_base.id}
+        return {"authenticated":request.user.is_authenticated, "fit_id":base_serializer.data.id}
     return HttpResponseBadRequest()
 
 
-def start_fit(fit_base):
+def start_fit(data, params, model):
     fit_base.status = 2
     test_data = get_object_or_404(Data, id = fit_base.data_id).file
     current_model = fit_base.fit_model.model
