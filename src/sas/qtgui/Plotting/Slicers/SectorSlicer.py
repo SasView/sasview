@@ -59,14 +59,15 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.right_line = SideInteractor(self, self.axes, color='black',
                                          zorder=zorder, r=self.qmax,
                                          phi=-1 * self.phi, theta2=self.theta2)
+        self.right_line.update(right=True)
         self.right_line.qmax = self.qmax
         # Left Side line
         self.left_line = SideInteractor(self, self.axes, color='black',
                                         zorder=zorder, r=self.qmax,
                                         phi=self.phi, theta2=self.theta2)
+        self.left_line.update(left=True)
         self.left_line.qmax = self.qmax
         # draw the sector
-        self.update()
         self._post_data()
         self.draw()
         self.setModelFromParams()
@@ -101,24 +102,23 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         if self.main_line.has_move:
             self.main_line.update()
             self.right_line.update(delta=-self.left_line.phi / 2,
-                                   mline=self.main_line.theta)
+                                   mline=self.main_line.theta, right=True)
             self.left_line.update(delta=self.left_line.phi / 2,
-                                  mline=self.main_line.theta)
+                                  mline=self.main_line.theta, left=True)
         # Check if the left side has moved and update the slicer accordingly
         if self.left_line.has_move:
             self.main_line.update()
             self.left_line.update(phi=None, delta=None, mline=self.main_line,
                                   side=True, left=True)
             self.right_line.update(phi=self.left_line.phi, delta=None,
-                                   mline=self.main_line, side=True,
-                                   left=False, right=True)
+                                   mline=self.main_line, side=True, right=True)
         # Check if the right side line has moved and update the slicer accordingly
         if self.right_line.has_move:
             self.main_line.update()
             self.right_line.update(phi=None, delta=None, mline=self.main_line,
-                                   side=True, left=False, right=True)
+                                   side=True, right=True)
             self.left_line.update(phi=self.right_line.phi, delta=None,
-                                  mline=self.main_line, side=True, left=False)
+                                  mline=self.main_line, side=True, left=True)
 
     def save(self, ev):
         """
