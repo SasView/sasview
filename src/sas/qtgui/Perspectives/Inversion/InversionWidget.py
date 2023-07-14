@@ -187,17 +187,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def communicator(self):
         return self.communicate
 
-    def allowBatch(self):
-        """
-        Allows Pr Interface to accept multiple datasets for batch processing
-        """
-        return True
-
-    def allowSwap(self):
-        """
-        Tell the caller we don't accept swapping data
-        """
-        return False
 
     def setPlotable(self, value=True):
         """
@@ -408,6 +397,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem(
             self.regConstantSuggestionButton.text()))
 
+    def acceptsData(self):
+        """ Tells the caller this widget can accept new dataset """
+        return not self.logic.data_is_loaded
+
     def displayChange(self, data_index):
         """Switch to another item in the data list"""
         if isinstance(self._data, list):
@@ -426,6 +419,21 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         qmin, qmax = self.logic.computeDataRange()
         self._calculator.set_qmin(qmin)
         self._calculator.set_qmax(qmax)
+
+    def updateTab(self, data = None, is2D=False, tab_name = None):
+        self.is2D = is2D
+        self.logic.data = GuiUtils.dataFromItem(data)
+        self.setTabName(tab_name)
+        self.populateDataComboBox(tab_name, data)
+        self.calculateAllButton.setVisible(False)
+        self.showResultsButton.setVisible(False)
+        if is2D:
+            data.isSliced = False
+            self.show2DPlot()
+        else: #1D data
+            self.setQ()
+            if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
+                self.logic.add_errors()
 
     ######################################################################
     # GUI Interaction Events
