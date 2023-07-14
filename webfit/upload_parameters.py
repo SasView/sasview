@@ -32,9 +32,11 @@ directly import -> no use to go to json file then back
 created_json_parameters = open("example_data.json","w"),
 
 def _remove_all():
+    return 0
 
 def parse_all_parameters():
-    creating
+    FitModel.SasModels.MODEL_CHOICES
+    
     
 #get all parameters as list, put into json
 #make python parameter into json
