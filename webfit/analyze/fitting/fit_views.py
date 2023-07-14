@@ -72,6 +72,7 @@ def start(request, version = None):
                 #pars = {x.name: num for x in parameter_serializer.data for num = eval(...)}
                 pars[x.name] += {num,}
 
+
         if base_serializer.is_valid() and parameter_serializer.is_valid() and model_serializer.is_valid():
             base_serializer.save()
             parameter_serializer.save()
@@ -79,26 +80,28 @@ def start(request, version = None):
         else:
             return HttpResponseBadRequest("Serializer error")
 
-        start_fit(model_serializer.data.model, base_serializer.data, pars)
+        start_fit(model_serializer.data, base_serializer.data, pars, parameters)
         #add "warnings": ... later
         return {"authenticated":request.user.is_authenticated, "fit_id":base_serializer.data.id}
     return HttpResponseBadRequest()
 
 
-def start_fit(model, data = None, params = None):
-    if data is None:
-        data = exampledata
-    else:
-        test_data = get_object_or_404(Data, id = data.data_id).file
+def start_fit(model, data = None, params = None, param_limits = None):
     if params is None:
         params = get_object_or_404(FitModel).default_parameters
 
-    current_model = model
-
-    #figure out how to add other parameters (polydispersity)
+    current_model = model.model
     model = Model(current_model, **params)
+    if param_limits.radius.lower_limit or param_limits.radius.upper_limit:
+        model.radius.range(param_limits.radius.lower_limit, param_limits.radius.upper_limit)
+    if param_limits.length.lower_limit or param_limits.length.upper_limit:
+        model.length.range(param_limits.length.lower_limit, param_limits.length.upper_limitghhhh)
 
-    M = Experiment(data = test_data, model=model)
+    if data is None:
+        M = Experiment(model = model)
+    else:
+        test_data = get_object_or_404(Data, id = data.data_id).file
+        M = Experiment(data = test_data, model=model)
     problem = FitProblem(M)
     result = fit(problem)
     return result

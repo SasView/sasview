@@ -69,6 +69,10 @@ class AnalysisParameterBase(models.Model):
 
     unit = models.CharField(max_length=100, blank=False, help_text = "string for what unit the parameter is")
 
+    lower_limit = models.FloatField(blank = True, help_text="optional lower limit")
+
+    upper_limit = models.FloatField(blank = True, help_text="optional upper limit")
+
     value_trace = [
     ]
 
