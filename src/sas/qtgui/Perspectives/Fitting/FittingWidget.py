@@ -29,6 +29,7 @@ from sas.sascalc.fit import models
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Utilities.docViewWidget import docViewWindow
+from sas.qtgui.Perspectives.Fitting.pleaseWork import sample
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 
@@ -1858,8 +1859,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Calls parent's method for opening an HTML page
         """
         # self.parent.showHelp(url)
-        self.helpWindow = docViewWindow(url, parent=self.parent)
-        self.helpWindow.show()
+        he = url
+        self.aaaaahhh = sample()
+        self.aaaaahhh.show()
+        # self.helpWindow = docViewWindow()
+        # self.helpWindow.show()
 
     def regenerate_docs(self, regen_docs):
        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))

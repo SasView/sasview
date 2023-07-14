@@ -5,17 +5,16 @@ from .UI.docViewWidgetUI import Ui_docViewerWindow
 
 
 class docViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
-    def __init__(self, filepath, parent=None):
-        super(docViewWindow, self).__init__(parent._parent)
+    def __init__(self, parent=None, edit_only=False):
+        super().__init__()
         self.parent = parent
         #self.ui = Ui_docViewerWindow()
         self.setupUi(self)
         self.setWindowTitle("Documentation Viewer")
-        self.load_html(filepath)
+        self.load_html()
 
-    def load_html(self, filepath):
-        # html = abspath("../sasview/docs/sphinx-docs/build/html/index.html")
-        html = abspath(filepath)
+    def load_html(self):
+        html = abspath("../sasview/docs/sphinx-docs/build/html/index.html")
         url = QtCore.QUrl.fromLocalFile(html)
         settings = self.webEngineViewer.settings()
         # Allows QtWebEngine to access MathJax and code highlighting APIs
@@ -26,6 +25,6 @@ class docViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    win = docViewWindow()
+    win =  docViewWindow()
     win.show()
     app.exec()
