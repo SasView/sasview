@@ -582,7 +582,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
-        self.chkPolydispersity.setEnabled(True)
+        self.chkPolydispersity.setEnabled(False)
         self.chkPolydispersity.setChecked(False)
         self.chk2DView.setEnabled(True)
         self.chk2DView.setChecked(False)
