@@ -84,7 +84,7 @@ def run_sasview():
     splash.show()
 
     # Main application style.
-    #app.setStyle('Fusion')
+    # app.setStyle('Fusion')
 
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     if 'twisted.internet.reactor' in sys.modules:
