@@ -572,6 +572,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setEnabled(not self.is_mag)
             self.txtMy.setEnabled(not self.is_mag)
             self.txtMz.setEnabled(not self.is_mag)
+            self.txtQxMin.setEnabled(not self.is_mag)
+            self.checkboxLogSpace.setChecked(not self.is_mag)
+            self.checkboxLogSpace.setEnabled(not self.is_mag)
 
         
     def change_is_avg(self):
