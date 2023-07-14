@@ -57,8 +57,6 @@ class AnalysisBase(models.Model):
 class AnalysisParameterBase(models.Model):
     name = models.CharField(max_length=100, help_text="Parameter Name")
 
-    model_id = models.ForeignKey(AnalysisModelBase, default = None, on_delete=models.CASCADE)
-
     value=models.FloatField(blank=False, help_text="the value of the parameter")
 
     data_type = models.CharField(max_length=100, help_text="parameter type (int/double)")
