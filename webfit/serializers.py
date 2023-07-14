@@ -2,7 +2,7 @@ from copy import deepcopy
 
 #from django.contrib.auth.models import Group, Permission
 #from django.contrib.contenttypes.models import ContentType
-from rest_framework import serializers
+from rest_framework import serializers, validators
 from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
 from rest_framework.utils import model_meta
 
@@ -48,6 +48,42 @@ class ModelSerializer(serializers.ModelSerializer):
 
 	def full_clean(self, instance, exclude=None, validate_unique=True):
 		instance.full_clean(exclude, validate_unique)
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__", 
+
+    def full_clean(self, instance, exclude=None, validate_unique=True):
+        if not instance or not instance.id:
+            exclude = ["user"]
+        super().full_clean(instance, exclude, validate_unique)
+
+
+    def create(self, validated_data):
+        instance: self.Meta.model = super().create(validated_data)
+        return instance
+    
+class RegisterSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username", "password", "email", "first_name", "last_name") 
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "email": {
+                "required": True,
+                "allow_blank": False,
+                "validators": [
+                    validators.UniqueValidator(
+                        User.objects.all(), f"A user with that Email already exists."
+                    )
+                ],
+            },
+        }
+        
+    def create(self, validated_data):
+        instance: self.Meta.model = super().create(validated_data)
+        return instance
 
 class DataSerializer(ModelSerializer):
     class Meta:
