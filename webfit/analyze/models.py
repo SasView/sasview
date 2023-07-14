@@ -53,10 +53,6 @@ class AnalysisBase(models.Model):
     if User:
         is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
 
-class AnalysisModelBase(models.Model):
-    name = models.CharField(max_length=300, help_text="name of analysis model")
-    base_id = models.OneToOneField(AnalysisBase, default= None, on_delete=models.CASCADE)
-    #list of analysis parameters
     
 class AnalysisParameterBase(models.Model):
     name = models.CharField(max_length=100, help_text="Parameter Name")

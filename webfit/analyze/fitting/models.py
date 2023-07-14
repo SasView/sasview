@@ -47,36 +47,18 @@ class Fit(AnalysisBase):
 
     status = models.IntegerField(default=False, choices=StatusChoices.choices)
 
-class FitParameter(AnalysisParameterBase):
-    polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
-
-    magnetic = models.BooleanField(default=False, help_text="is this a magnetic parameter?")
-
-class FitModel(AnalysisModelBase):
-    #list of default parameters
-    default_parameters = {
-        #str name, float number
-        #import in migrations, ignored otherwise
-    }
+    Qminimum = models.FloatField(blank = True, help_text="Minimum Q value for the fit")
+    Qmaximum = models.FloatField(blank = True, help_text="Maximum Q value for the fit")
 
     polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
 
     magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
 
-    Qminimum = models.FloatField(blank = True, help_text="Minimum Q value for the fit")
-    Qmaximum = models.FloatField(blank = True, help_text="Maximum Q value for the fit")
-
-    """
-    import sasmodels or through models.py in fit (modelmanagerbase)<---- create choice list
-    """
-    class SasModels():
-        model_manager = ModelManager()
-        MODEL_CHOICES = model_manager.get_model_list
-
     model = models.CharField(max_length=256, help_text="model string")
+    
 
-    class PlugInModels():
-        #create plug in models <- grab by url
-        online_model_url = models.CharField(max_length=100, help_text= "url link to model")
-        
-    #look at models.py in sasview -> sasmodel-marketplace
+class FitParameter(AnalysisParameterBase):
+    polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
+
+    magnetic = models.BooleanField(default=False, help_text="is this a magnetic parameter?")
+
