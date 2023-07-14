@@ -19,6 +19,17 @@ the files aren't in json so what format should it be in?
 
 """
 
+# Points to a clone of the sasmodels repo
+EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", "../src/sas/example_data")
+
+
+"""
+TAG_PATTERN = re.compile("(:[a-zA-Z]+:)") # Matches ':tag:'
+REF_DEF_PATTERN = re.compile("(.. \[#[a-zA-Z]*\])") # Matches '.. [#RefTag]'
+REF_PATTERN = re.compile("(\\\ \[#[a-zA-Z]*\]_)") # Matches '\ #[RefTag]_'
+UNDERLINE_PATTERN = re.compile("(-{3,})") # Matches 3 or more consecutive '-'s
+"""
+
 """
 f = open("myfile.txt", "w")
 """
@@ -29,5 +40,6 @@ def parse_file_names():
     
 
 def get_file_name():
-    for x in example_data :
-        put in 
+    for x in example_data:
+
+    latex_smeared.xml

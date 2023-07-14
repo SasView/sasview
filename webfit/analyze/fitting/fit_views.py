@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 
 from bumps.names import *
-from sasmodels.core import load_model
+from sasmodels.core import load_model, ModelInfo
 from sasmodels.bumps_model import Model, Experiment
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -33,6 +33,8 @@ from .models import (
 
 
 fit_logger = getLogger(__name__)
+model_manager = ModelManager()
+MODEL_CHOICES = model_manager.get_model_list
 
 #start() only puts all the request data into the db, start_fit() runs calculations
 @api_view(["PUT"])
@@ -48,7 +50,10 @@ def start(request, version = None):
         #try to create model for check if the modelstring is valid
         #TODO figure out if I need a parcer here or not
         if load_model(request.data.model):
-            model_serializer(model = request.data.model)
+            curr_model = request.data.model
+            #would return a dictionary
+            default_parameters = ModelInfo(curr_model).parameters.defaults
+
         else:
             return HttpResponseBadRequest("No model selected for fitting")
 
@@ -71,7 +76,12 @@ def start(request, version = None):
                 #TODO check if x.name is a valid parameter else return blah
                 #pars = {x.name: num for x in parameter_serializer.data for num = eval(...)}
                 pars[x.name] += {num,}
-
+                        #check with default list
+            for key, value in default_parameters.items():
+                if key not in pars.keys():
+                    pars[key] = value[0]
+                if not zip(key, ['']) in pars[key]:
+                    pars[key] += [default_parameters[key]]
 
         if base_serializer.is_valid() and parameter_serializer.is_valid() and model_serializer.is_valid():
             base_serializer.save()
@@ -80,7 +90,7 @@ def start(request, version = None):
         else:
             return HttpResponseBadRequest("Serializer error")
 
-        start_fit(model_serializer.data, base_serializer.data, pars, parameters)
+        start_fit(curr_model, base_serializer.data, pars, parameters)
         #add "warnings": ... later
         return {"authenticated":request.user.is_authenticated, "fit_id":base_serializer.data.id}
     return HttpResponseBadRequest()
@@ -92,6 +102,7 @@ def start_fit(model, data = None, params = None, param_limits = None):
 
     current_model = model.model
     model = Model(current_model, **params)
+    #rewrite to have only one, try to write a default params
     if param_limits.radius.lower_limit or param_limits.radius.upper_limit:
         model.radius.range(param_limits.radius.lower_limit, param_limits.radius.upper_limit)
     if param_limits.length.lower_limit or param_limits.length.upper_limit:
