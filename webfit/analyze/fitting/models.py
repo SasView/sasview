@@ -71,8 +71,8 @@ class FitModel(AnalysisModelBase):
     """
     class SasModels():
         model_manager = ModelManager()
-        MODEL_CHOICES = model_manager.get_model_dictionary
-    #TODO FIX THIS ADD MORE
+        MODEL_CHOICES = model_manager.get_model_list
+
     model = models.CharField(max_length=256, help_text="model string")
 
     class PlugInModels():

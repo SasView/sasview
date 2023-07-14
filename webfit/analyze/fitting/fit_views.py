@@ -104,6 +104,7 @@ def start_fit(model, data = None, params = None, param_limits = None):
         M = Experiment(data = test_data, model=model)
     problem = FitProblem(M)
     result = fit(problem)
+    #problem.fitness.model.state() <- return this dictionary to check if fit is actually working
     return result
 
 
@@ -135,7 +136,6 @@ def list_optimizers(request, version = None):
 
 @api_view(["GET"])
 def list_models(request, version = None):
-    model_manager = ModelManager()
     if request.method == "GET":
         unique_models = {"models": []}
         if request.categories:
@@ -146,7 +146,7 @@ def list_models(request, version = None):
             unique_models["models"] += [spec_cat]
         #elif: request.kind
         else:
-            unique_models["models"] = [model_manager.get_model_dictionary()]
+            unique_models["models"] = [get_object_or_404(FitModel).SasModels.MODEL_CHOICES]
         return unique_models
         """TODO requires discussion:
         if request.username:
