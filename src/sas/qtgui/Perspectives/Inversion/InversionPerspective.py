@@ -60,7 +60,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         self.setWindowTitle("P(r) Inversion Perspective")
         self._manager = parent
-        # Needed for Batch fitting
+        # Needed for Batch inversion
         self.parent = parent
         self._parent = parent
         self.communicate = parent.communicator()
@@ -105,8 +105,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
 
-        # Batch fitting parameters
-        self.isBatch = False
+        # Batch parameters
+        self.is_batch = False
         self.batchResultsWindow = None
         self.batchResults = {}
 
@@ -129,7 +129,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     def resetTab(self, index):
         """
         Adds a new tab and removes the last tab
-        as a way of resetting the fit tabs
+        as a way of resetting the tabs
         """
         # If data on tab empty - do nothing
         if index in self.tabs and not self.tabs[index].data:
@@ -231,7 +231,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
     def allowSwap(self):
         """
-        Tell the caller we don't accept swapping data
+        Tell the caller we accept swapping data
         """
         return False
 
@@ -301,56 +301,64 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             raise AttributeError(msg)
 
 
+
+
         for data in data_item:
             logic_data = GuiUtils.dataFromItem(data)
-
-
+            is_2Ddata = isinstance(logic_data, Data2D)
+            element = data_item if is_batch else data
+            
+            # Find the first unassigned tab.
             # If none, open a new tab.
+            available_tabs = [tab.acceptsData() for tab in self.tabs]
             tab_ids = [tab.tab_id for tab in self.tabs]
+            #if tab_index is not None:
+            if tab_index not in tab_ids: 
+                self.addData(data = element, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
+            else:
+                self.setCurrentIndex(tab_index-1)                
+                self.swapData(data = element, is2D = is_2Ddata)
+            #    return
+            #if np.any(available_tabs):
+            #    first_good_tab = available_tabs.index(True)
+            #    self.tabs[first_good_tab].data = element
+            #    tab_name = str(self.tabText(first_good_tab))
+            #    self.tabs[first_good_tab].updateTab(data = element, tab_name = tab_name, is2D = is_2Ddata)                
+            #else:
+            #    self.addData(data = element, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
+                
+ 
 
 
-            if tab_index not in tab_ids: #do not overwrite existing tab if 
-                #tab_index is specified
-                #needs swap data, i.e. replace the data in the current tab 
-                #if tab_id already excists missing
+    def swapData(self, data = None, is2D = False):
+        """
+        Replace the data from the current tab
+        """
+        if not isinstance(self.currentWidget(), InversionWidget):
+            msg = "Current tab is not  an Inversion widget"
+            raise TypeError(msg)
 
-                # Tab for 2D data
-                if isinstance(logic_data, Data2D) and not is_batch:
-                    data.isSliced = False
-                    tab = self.addData(data=data, is2D=True, tab_index=tab_index)
-                    tab.show2DPlot()
-
-                # Tab for 1D batch
-                if is_batch and not isinstance(logic_data, Data2D):
-                    # initiate a single Tab for batch
-                    self.addData(data=data_item, is_batch=is_batch, tab_index=tab_index)
-                    return
-
-                # Tab for 1D
-                if isinstance(logic_data, Data1D):
-                    tab = self.addData(data=data, tab_index=tab_index)
-                    tab.setQ()
-
-                    if np.size(logic_data.dy) == 0 or np.all(logic_data.dy) == 0:
-                        tab.logic.add_errors()
-
-
-
-
-    def setCurrentData(self, data_ref):
-        """Get the data by reference and display as necessary"""
-        if data_ref is None:
-            return
-        if not isinstance(data_ref, QtGui.QStandardItem):
-            msg = "Incorrect type passed to the P(r) Perspective"
+        if not isinstance(data, QtGui.QStandardItem):
+            msg = "Incorrect type passed to the Inversion Perspective"
             raise AttributeError(msg)
-        # Data references
-        self._data = data_ref
-        self.logic.data = GuiUtils.dataFromItem(data_ref)
-        self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
-        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
-        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
-        self.performEstimate()
+
+        if self.currentTab.is_batch:
+            msg = "Data in Batch Inversion cannot be swapped"
+            raise RuntimeError(msg)
+
+        self.currentTab.data = data
+        tab_name = str(self.tabText(self.currentIndex()))
+        self.currentTab.updateTab(data = data, tab_name = tab_name, is2D = is2D)
+
+
+    @property
+    def currentTab(self): # TODO: More pythonic name
+        """
+        Returns the tab widget currently shown
+        """
+        return self.currentWidget()
+
+
 
     def updateDynamicGuiValues(self):
         pr = self._calculator
@@ -426,40 +434,34 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             tab_index = self.maxIndex
         else:
             self.maxIndex = tab_index
-
+        
         # Create tab
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab.setTabName("New Tab")
         icon = QtGui.QIcon()
-        
-
-
-        
-
-        if data is not None and not is_batch:
-            tab.setTabName("New Tab")
-            tab.is2D = is2D
-            tab.logic.data = GuiUtils.dataFromItem(data)
-            tab.setTabName(tab.logic.data.name)
-            tab.populateDataComboBox(tab.logic.data.name, data)
-            tab.calculateAllButton.setVisible(False)
-            tab.showResultsButton.setVisible(False)
-            
-
-        # Setting UP batch Mode
-        if is_batch:
+        # Setting UP batch Mode for 1D data
+        if is_batch and not is2D:
             tab = self.createBatchTab(batchDataList=data)
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
-            
+        else:        
+            if data is not None:
+                tab_name = GuiUtils.dataFromItem(data).name                
+                tab.updateTab(data = data, tab_name = tab_name, is2D = is2D)
+                
+        tab.is_batch = is_batch                
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)
 
         # Show the new tab
-        self.setCurrentWidget(tab)
         self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
-        return tab
-        
+        self.setCurrentWidget(tab)
+        # Notify listeners
+        self.tabsModifiedSignal.emit()   
+
+
+    
+
 
     def createBatchTab(self, batchDataList):
         """
@@ -468,7 +470,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         batchTab = InversionWidget(parent=self.parent, data=batchDataList)
         batchTab.setTabName("Pr Batch")
-        batchTab.isBatch = True
+        batchTab.is_batch = True
         batchTab.setPlotable(False)
         for data in batchDataList:
             batchTab.logic.data = GuiUtils.dataFromItem(data)
