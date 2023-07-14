@@ -1473,6 +1473,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.page_parameters:
             self.updatePageWithParameters(self.page_parameters, warn_user=False)
 
+        # disable polydispersity if the model does not support it
+        has_poly = self._poly_model.rowCount() != 0
+        self.chkPolydispersity.setEnabled(has_poly)
+        self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
+
         # set focus so it doesn't move up
         self.cbModel.setFocus()
 
