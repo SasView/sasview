@@ -1860,10 +1860,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # self.parent.showHelp(url)
         he = url
-        self.aaaaahhh = sample()
-        self.aaaaahhh.show()
-        # self.helpWindow = docViewWindow()
-        # self.helpWindow.show()
+        # self.aaaaahhh = sample()
+        # self.aaaaahhh.show()
+        self.helpWindow = docViewWindow()
+        self.helpWindow.show()
 
     def regenerate_docs(self, regen_docs):
        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
