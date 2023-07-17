@@ -19,9 +19,6 @@ the files aren't in json so what format should it be in?
 
 """
 
-# Points to a clone of the sasmodels repo
-EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", "../src/sas/example_data")
-
 
 """
 TAG_PATTERN = re.compile("(:[a-zA-Z]+:)") # Matches ':tag:'
@@ -36,10 +33,11 @@ f = open("myfile.txt", "w")
 
 #possibly just create 
 
-def parse_file_names():
+"""def parse_file_names():
     
 
 def get_file_name():
     for x in example_data:
 
     latex_smeared.xml
+    """

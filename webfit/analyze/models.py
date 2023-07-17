@@ -3,7 +3,6 @@ import uuid
 from logging import getLogger
 from types import ModuleType
 from data.models import Data
-from user_app.models import UserProfile
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -59,15 +58,15 @@ class AnalysisParameterBase(models.Model):
 
     name = models.CharField(max_length=100, help_text="Parameter Name")
 
-    value=models.FloatField(blank=False, help_text="the value of the parameter")
+    value=models.FloatField(blank=False, default=None, help_text="the value of the parameter")
 
     data_type = models.CharField(max_length=100, help_text="parameter type (int/double)")
 
     unit = models.CharField(max_length=100, blank=False, help_text = "string for what unit the parameter is")
 
-    lower_limit = models.FloatField(blank = True, help_text="optional lower limit")
+    lower_limit = models.FloatField(null=True, blank=True, default=None, help_text="optional lower limit")
 
-    upper_limit = models.FloatField(blank = True, help_text="optional upper limit")
+    upper_limit = models.FloatField(null=True, blank=True, default=None, help_text="optional upper limit")
 
     value_trace = [
     ]
