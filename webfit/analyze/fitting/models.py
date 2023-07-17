@@ -2,7 +2,7 @@ import sys
 from enum import Enum
 from logging import getLogger
 from types import ModuleType
-from analyze.models import AnalysisBase, AnalysisModelBase, AnalysisParameterBase
+from analyze.models import AnalysisBase, AnalysisParameterBase
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -47,15 +47,15 @@ class Fit(AnalysisBase):
 
     status = models.IntegerField(default=False, choices=StatusChoices.choices)
 
-    Qminimum = models.FloatField(blank = True, help_text="Minimum Q value for the fit")
-    Qmaximum = models.FloatField(blank = True, help_text="Maximum Q value for the fit")
+    Qminimum = models.FloatField(default = None, null=True, blank = True, help_text="Minimum Q value for the fit")
+    Qmaximum = models.FloatField(default = None, null=True, blank = True, help_text="Maximum Q value for the fit")
 
     polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
 
     magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
 
-    model = models.CharField(max_length=256, help_text="model string")
-    
+    model = models.CharField(default = None, max_length=256, help_text="model string")
+
 
 class FitParameter(AnalysisParameterBase):
     polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")

@@ -113,14 +113,6 @@ class Migration(migrations.Migration):
                         default=False,
                     ),
                 ),
-                (
-                    "fit_model",
-                    models.ForeignKey(
-                        default=None,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="fitting.fitmodel",
-                    ),
-                ),
             ],
             bases=("analyze.analysisbase",),
         ),

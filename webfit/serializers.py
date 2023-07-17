@@ -5,15 +5,10 @@ from copy import deepcopy
 from rest_framework import serializers, validators
 from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
 from rest_framework.utils import model_meta
+from django.contrib.auth.models import User
 
-from user_app.models import(
-     UserProfile
-)
 from data.models import (
     Data,
-)
-from user_app.models import (
-    User
 )
 from analyze.models import (
     AnalysisBase,

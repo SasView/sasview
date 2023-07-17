@@ -1,12 +1,11 @@
 from django.db import migrations, models
-
+from django.conf import settings
 
 class Migration(migrations.Migration):
 
     initial = True
 
     dependencies = [
-        ("user_app", "0001_version"),
         ("data", "0001_version"),
     ]
 
@@ -37,7 +36,7 @@ class Migration(migrations.Migration):
             name='AnalysisBase',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('current_user', models.ForeignKey(default = None, to='user_app.UserProfile', on_delete=models.deletion.CASCADE)),
+                ('current_user', models.ForeignKey(default = None, to=settings.AUTH_USER_MODEL, on_delete=models.deletion.CASCADE)),
                 ('data_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.deletion.CASCADE, to='data.data')),
                 ('model_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.deletion.CASCADE, to='analyze.AnalysisModelBase')),
                 
