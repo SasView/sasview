@@ -72,7 +72,9 @@ def run_sasview():
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-
+    from PySide6.QtQuick import QSGRendererInterface, QQuickWindow
+    QGuiApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+    QQuickWindow.setGraphicsApi(QSGRendererInterface.OpenGLRhi)
     # Note: Qt environment variables are initialized in sas.system.lib.setup_qt_env
     # Main must have reference to the splash screen, so making it explicit
     app = QApplication([])

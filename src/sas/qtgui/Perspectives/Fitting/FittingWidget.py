@@ -1834,11 +1834,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 location += "/user/models/" + self.kernel_module.id + ".html"
                 if os.path.isfile(location):
                     # We have HTML for this model - show it
-                    tree_location = "/user/models/"
+                    tree_location = sas_path + "/" + full_path + "/user/models/"
                     helpfile = self.kernel_module.id + ".html"
                 else:
-                    self.regenerate_docs(regen_docs) # Regenerate specific documentation file
-                    tree_location = "/user/models/"
+                    py_target = self.kernel_module.id + ".py"
+                    self.regenerate_docs(regen_docs, target=py_target) # Regenerate specific documentation file
+                    tree_location = sas_path + "/" + full_path + "/user/models/"
                     helpfile = self.kernel_module.id + ".html"
             else:
                 helpfile = "fitting_help.html"
@@ -1851,7 +1852,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elif tab_id == 4:
             helpfile = "magnetism/magnetism.html"
         help_location = tree_location + helpfile
-        print(help_location)
         self.showHelp(help_location)
 
     def showHelp(self, url):
@@ -1859,13 +1859,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Calls parent's method for opening an HTML page
         """
         # self.parent.showHelp(url)
-        he = url
-        # self.aaaaahhh = sample()
-        # self.aaaaahhh.show()
-        self.helpWindow = docViewWindow()
+        self.helpWindow = docViewWindow(parent=self.parent, source=url)
         self.helpWindow.show()
 
-    def regenerate_docs(self, regen_docs):
+    def regenerate_docs(self, regen_docs, target=None):
        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
        recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
        if self.process is None:
@@ -1875,7 +1872,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.process.readyReadStandardOutput.connect(self.handle_stdout)
             self.process.finished.connect(self.finish_generation)
             self.process.setWorkingDirectory(sas_path + "/" + recompile_path)  # Set the working directory
-            self.process.start("python", [regen_docs])
+            self.process.start("python", [regen_docs, target])
             self.process.waitForFinished()  # Wait for the process to finish before proceeding
 
     def finish_generation(self):

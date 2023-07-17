@@ -28,6 +28,7 @@ Future reference: move to main() function?
     """
     # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
     TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(ABSOLUTE_TARGET_PLUGINS)
+    print(get_py(ABSOLUTE_TARGET_PLUGINS))
     base_targets = [basename(string) for string in TARGETS]
     # Removes duplicate instances of the same file copied from plugins folder to source-temp/user/models/src/
     for file in TARGETS:
