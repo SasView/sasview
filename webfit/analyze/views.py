@@ -10,7 +10,6 @@ from sasdata.dataloader.loader import Loader
 from serializers import FitSerializer
 from .models import (
     AnalysisBase,
-    AnalysisModelBase,
     AnalysisParameterBase,
 )
 

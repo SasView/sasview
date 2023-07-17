@@ -17,12 +17,10 @@ from user_app.models import (
 )
 from analyze.models import (
     AnalysisBase,
-    AnalysisModelBase,
     AnalysisParameterBase,
 )
 from analyze.fitting.models import (
     Fit,
-    FitModel,
     FitParameter,
 )
 
@@ -98,7 +96,7 @@ class DataSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True)
+        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=True)
         return instance
     
 class AnalysisBaseSerializer(ModelSerializer):
@@ -117,22 +115,6 @@ class AnalysisBaseSerializer(ModelSerializer):
         instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True)
         instance.data_id = serializers.PrimaryKeyRelatedField(queryset=Data.objects.all(), many=True)
         return instance
-    
-class AnalysisModelBaseSerializer(ModelSerializer):
-    class Meta:
-        model = AnalysisModelBase
-        fields = "__all__"
-
-    def full_clean(self, instance, exclude=None, validate_unique=True):
-        if not instance or not instance.id:
-            exclude = ["base_id"]
-        super().full_clean(instance, exclude, validate_unique)
-
-
-    def create(self, validated_data):
-        instance: self.Meta.model = super().create(validated_data)
-        instance.base_id = serializers.PrimaryKeyRelatedField(queryset=AnalysisBase.objects.all(), many=True)
-        return instance
 
 class AnalysisParameterBaseSerializer(ModelSerializer):
     class Meta:
@@ -147,7 +129,6 @@ class AnalysisParameterBaseSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        instance.model_id = serializers.PrimaryKeyRelatedField(queryset=AnalysisModelBase.objects.all(), many=True)
         return instance
 
 class FitSerializer(AnalysisBaseSerializer):
@@ -156,18 +137,6 @@ class FitSerializer(AnalysisBaseSerializer):
     class Meta:
         model = Fit
         fields = "__all__", "analysis_base"
-
-class FitModelSerializer(AnalysisModelBaseSerializer):
-    analysis_model = AnalysisModelBaseSerializer(many = True, read_only=True)
-    
-    class Meta:
-        model = FitModel
-        fields = "__all__", "analysis_model"
-
-    def create(self, validated_data):
-        instance: self.Meta.model = super().create(validated_data)
-        instance.base_id = serializers.PrimaryKeyRelatedField(queryset=Fit.objects.all(), many=True)
-        return instance
 
 class FitParameterSerializer(AnalysisParameterBaseSerializer):
     analysis_parameter = AnalysisParameterBaseSerializer(many = True, read_only=True)
@@ -178,5 +147,4 @@ class FitParameterSerializer(AnalysisParameterBaseSerializer):
 
     def create(self, validated_data):
         instance: FitParameter = super().create(validated_data)
-        instance.model_id = serializers.PrimaryKeyRelatedField(queryset=FitModel.objects.all(), many=True)
         return instance
