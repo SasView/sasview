@@ -68,6 +68,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.left_line.update(left=True)
         self.left_line.qmax = self.qmax
         # draw the sector
+        self.update()
         self._post_data()
         self.draw()
         self.setModelFromParams()
@@ -273,8 +274,8 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.main_line.update()
         self.right_line.update(phi=phi, delta=None, mline=self.main_line,
                                side=True, right=True)
-        self.left_line.update(phi=phi, delta=None,
-                              mline=self.main_line, side=True)
+        self.left_line.update(phi=phi, delta=None, mline=self.main_line,
+                              side=True, left=True)
         # Post the new corresponding data
         self._post_data(nbins=self.nbins)
         self.draw()
