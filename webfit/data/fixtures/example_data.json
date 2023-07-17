@@ -1,0 +1,9 @@
+[
+    {
+      "model": "data.Data",
+      "fields": {
+            "file":"cyl_400_20.txt",
+            "is_public":true
+      }
+    }
+  ]
