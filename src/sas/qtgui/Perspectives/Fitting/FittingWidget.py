@@ -29,7 +29,6 @@ from sas.sascalc.fit import models
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Utilities.docViewWidget import docViewWindow
-from sas.qtgui.Perspectives.Fitting.pleaseWork import sample
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 
