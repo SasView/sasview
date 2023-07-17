@@ -34,7 +34,7 @@ from django.core.exceptions import (
 models_logger = getLogger(__name__)
 
 class AnalysisBase(models.Model):
-    current_user = models.ForeignKey(UserProfile, default = None, on_delete=models.CASCADE)
+    current_user = models.ForeignKey(User, default = None, on_delete=models.CASCADE)
     data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
     
     #TODO add gpu_requested into analysis views
@@ -55,6 +55,8 @@ class AnalysisBase(models.Model):
 
     
 class AnalysisParameterBase(models.Model):
+    base_id = models.ForeignKey(AnalysisBase, default = None, on_delete=models.CASCADE)
+
     name = models.CharField(max_length=100, help_text="Parameter Name")
 
     value=models.FloatField(blank=False, help_text="the value of the parameter")
