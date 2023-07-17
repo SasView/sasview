@@ -124,6 +124,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # checkboxes
         self.checkboxNucData.stateChanged.connect(self.change_data_type)
         self.checkboxMagData.stateChanged.connect(self.change_data_type)
+        self.checkboxLogSpace.stateChanged.connect(self.change_qValidator)
 
         self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
         self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
@@ -217,15 +218,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtSampleRoll.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleRoll))   
 
-        # 0 < Qmax <= 1000
-        validat_regex_q = QtCore.QRegularExpression(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
-        self.txtQxMax.setValidator(QtGui.QRegularExpressionValidator(validat_regex_q,
-                                                          self.txtQxMax))
-        
-         # 0 < Qmin <= 1000
-        validat_regex_q = QtCore.QRegularExpression(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
-        self.txtQxMin.setValidator(QtGui.QRegularExpressionValidator(validat_regex_q,
-                                                          self.txtQxMin))
+        # 0 <= Qmin&QMax <= 1000
+        self.txtQxMax.setValidator(QtGui.QDoubleValidator(0,1000,10,self.txtQxMax))
+        self.txtQxMin.setValidator(QtGui.QDoubleValidator(0,1000,10,self.txtQxMin))
 
         # 2 <= Qbin and nodes integers < 1000
         validat_regex_int = QtCore.QRegularExpression(r'^[2-9]|[1-9]\d{1,2}$')
@@ -461,17 +456,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 #if 2D scattering, program sets qmin to -qmax
                 if not self.is_avg:
                     self.txtQxMin.setText(str(-value))
-            elif sender == self.txtQxMin:
+            elif sender == self.txtQxMin and self.is_avg:       # if 2d scattering, program sets qmin so ignore warnings
                 xstepsize = float(self.txtXstepsize.text())
                 ystepsize = float(self.txtYstepsize.text())
                 zstepsize = float(self.txtZstepsize.text())
                 value = float(str(self.txtQxMin.text()))
                 min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))
-                if self.is_avg:        # if 2d scattering, program sets qmin so ignore warnings            
-                    if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
-                        self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
-                    else:
-                        self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
+                    self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                else:
+                    self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
 
 
             
@@ -554,6 +548,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # update the gui with new values - sets the average values from enabled files
         self.update_gui()
         self.check_for_magnetic_controls()
+
+    def change_qValidator(self):
+        if float(self.txtQxMax.text()) == 0:
+            self.txtQxMax.setText("0.3")
+        if float(self.txtQxMin.text()) == 0:
+            self.txtQxMin.setText("0.003")    
+    
+        if self.checkboxLogSpace.isChecked():
+            # 0 < Qmin&QMax <= 1000
+            self.txtQxMax.setValidator(QtGui.QDoubleValidator(1e-10,1000,10,
+                                                            self.txtQxMax))
+            self.txtQxMin.setValidator(QtGui.QDoubleValidator(1e-10,1000,10,
+                                                            self.txtQxMin))
+        else:
+            # 0 <= Qmin&QMax <= 1000
+            self.txtQxMax.setValidator(QtGui.QDoubleValidator(0,1000,10,
+                                                            self.txtQxMax))
+            self.txtQxMin.setValidator(QtGui.QDoubleValidator(0,1000,10,
+                                                            self.txtQxMin))
+
+        return
 
 
     
@@ -1054,7 +1069,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtTotalVolume.setText("216000.0")
             self.txtNoQBins.setText("30")
             self.txtQxMax.setText("0.3")
-            self.txtQxMin.setText("0.0003")
+            self.txtQxMin.setText("0.003")
             self.txtNoPixels.setText("1000")
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
@@ -1203,16 +1218,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.qmax_x = float(self.txtQxMax.text())
         self.qmin_x = float(self.txtQxMin.text())
         self.npts_x = int(self.txtNoQBins.text())
+        self.xValues = numpy.array(self.npts_x)
         # Default values
         xmax = self.qmax_x
         xmin = self.qmin_x
         qstep = self.npts_x
-        x = numpy.logspace(start=math.log(xmin,10), stop=math.log(xmax,10), num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)        
+        if self.checkboxLogSpace.isChecked():
+            self.xValues = numpy.logspace(start=math.log(xmin,10),
+                                stop=math.log(xmax,10), 
+                                num=qstep, 
+                                endpoint=True)
+        else:
+            self.xValues = numpy.linspace(start=xmin, 
+                           stop=xmax, 
+                           num=qstep, 
+                           endpoint=True)        
+        
         # store x and y bin centers in q space
-        y = numpy.ones(len(x))
-        dy = numpy.zeros(len(x))
-        dx = numpy.zeros(len(x))
-        self.data = Data1D(x=x, y=y)
+        y = numpy.ones(len(self.xValues))
+        dy = numpy.zeros(len(self.xValues))
+        dx = numpy.zeros(len(self.xValues))
+        self.data = Data1D(x=self.xValues, y=y)
         self.data.dx = dx
         self.data.dy = dy
     
@@ -1483,43 +1509,25 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         
         #Center Of Mass Calculation
         CoM = self.centerOfMass()
-        self.data_betaQ = []
+        self.data_betaQ = numpy.array([])
 
-        # Default values
-        xmax = self.qmax_x
-        xmin = self.qmin_x
-        qstep = self.npts_x
-        #array of Q values
-        qX = numpy.logspace(start=math.log(xmin,10), stop=math.log(xmax,10), num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)        
-        
+        # array of Q values
+        qX = self.xValues
+
         formFactor = self.data_to_plot
+        for a in range(self.npts_x):
+            r_x = numpy.subtract(self.nuc_sld_data.pos_x , CoM[0])
+            r_y = numpy.subtract(self.nuc_sld_data.pos_y , CoM[1])
+            r_z = numpy.subtract(self.nuc_sld_data.pos_z , CoM[2])
+            magnitudeRelativeCoordinate = numpy.sqrt(numpy.power(r_x, 2) + numpy.power(r_y, 2) + numpy.power(r_z, 2))
+            cohB = numpy.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in self.nuc_sld_data.pix_symbol])
 
-        for a in range(self.npts_x):  
-            fQ = 0          
-            for b in range(len(self.nuc_sld_data.pos_x)):
-                #atoms
-                atomName = str(self.nuc_sld_data.pix_symbol[b])
-                #Coherent Scattering Length of Atom
-                cohB = periodictable.elements.symbol(atomName).neutron.b_c
+            fQ = numpy.sum(cohB*(numpy.sum(numpy.sin(qX[a] * magnitudeRelativeCoordinate) / (qX[a] * magnitudeRelativeCoordinate))))
+            self.data_betaQ = numpy.append(self.data_betaQ,((fQ**2)/formFactor[a]))
 
-                x = float(self.nuc_sld_data.pos_x[b])
-                y = float(self.nuc_sld_data.pos_y[b])
-                z = float(self.nuc_sld_data.pos_z[b])
-
-                r_x = x - CoM[0]
-                r_y = y - CoM[1]
-                r_z = z - CoM[2]
-
-                magnitudeRelativeCoordinate = numpy.sqrt(r_x**2 + r_y**2 + r_z**2)
-    
-                fQ +=  (cohB * (numpy.sin(qX[a] * magnitudeRelativeCoordinate) / (qX[a] * magnitudeRelativeCoordinate)))
-
-            #Beta Q Calculation
-            self.data_betaQ.append((fQ**2)/(formFactor[a]))
-
-        #Scale Beta Q to 0-1
+        # Scale Beta Q to 0-1
         scalingFactor = self.data_betaQ[0]
-        self.data_betaQ = [x/scalingFactor for x in self.data_betaQ]
+        self.data_betaQ = self.data_betaQ / scalingFactor
 
         return
 
