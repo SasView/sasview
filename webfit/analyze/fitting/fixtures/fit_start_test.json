@@ -1,0 +1,32 @@
+[
+    {
+      "model": "analyze.AnalysisBase",
+      "fields": {
+        "id": 1
+      }
+    },
+    {
+        "model": "fitting.Fit",
+        "fields": {
+              "id": 1,
+              "parameters" : [
+                {
+                    "name":"radius",
+                    "datatype":"int",
+                    "value":"35"
+                },
+                {
+                    "name":"length",
+                    "datatype":"int",
+                    "value":"350"
+                },
+                {
+                    "name":"backgroud",
+                    "datatype":"float",
+                    "value":"0.0"
+                }
+            ],
+              "is_public" : true
+        }
+    }
+  ]

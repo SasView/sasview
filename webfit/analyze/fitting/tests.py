@@ -27,7 +27,8 @@ class TestStart(TestCase):
 
     fixtures = ['data/fixtures/example_data.json',]
     def can_fit_start(self):
-        start_fit("cylinder", get_object_or_404(Data, is_public = True))
+        chisq = start_fit("cylinder", get_object_or_404(Data, is_public = True))
+        self.assertEqual(chisq, "0.03(13)")
 
 class TestFitStart(TestCase):
     def setUp(self):
@@ -37,7 +38,7 @@ class TestFitStart(TestCase):
         factory.put()
 
 class TestLoader(TestCase):
-    fixtures = ['example_data.json', ]
+    fixtures = ['data/fixtures/example_data.json',]
 
     def testing_loader(self):
         test_data = get_object_or_404(Data, is_public=True)
