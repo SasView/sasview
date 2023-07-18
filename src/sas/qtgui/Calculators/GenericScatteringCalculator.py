@@ -22,9 +22,11 @@ from twisted.internet import threads
 import periodictable
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.TabbedModelEditor as TabbedModelEditor
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
 from sas.sascalc.calculator import sas_gen
+from sas.sascalc.fit import models
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.Plotter import Plotter
@@ -123,6 +125,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # checkboxes
         self.checkboxNucData.stateChanged.connect(self.change_data_type)
         self.checkboxMagData.stateChanged.connect(self.change_data_type)
+        self.checkboxPluginModel.stateChanged.connect(self.update_file_name)
 
         self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
         self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
@@ -234,6 +237,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         validat_regex_int = QtCore.QRegularExpression(r'^[2-9]|[1-9]\d{1,2}$')
         self.txtNoQBins.setValidator(QtGui.QRegularExpressionValidator(validat_regex_int,
                                                             self.txtNoQBins))
+        
+        # Plugin File Name
+        rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
+        self.txtFileName.setValidator(QtGui.QRegularExpressionValidator(rx))
 
         self.txtXnodes.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_int, self.txtXnodes))
@@ -464,17 +471,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 #if 2D scattering, program sets qmin to -qmax
                 if not self.is_avg:
                     self.txtQxMin.setText(str(-value))
-            elif sender == self.txtQxMin:
+            elif sender == self.txtQxMin and self.is_avg:
                 xstepsize = float(self.txtXstepsize.text())
                 ystepsize = float(self.txtYstepsize.text())
                 zstepsize = float(self.txtZstepsize.text())
                 value = float(str(self.txtQxMin.text()))
                 min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))
-                if self.is_avg:        # if 2d scattering, program sets qmin so ignore warnings            
-                    if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
-                        self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
-                    else:
-                        self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
+                    self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                else:
+                    self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
 
             
 
@@ -574,6 +580,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setEnabled(not self.is_mag)
             self.txtMy.setEnabled(not self.is_mag)
             self.txtMz.setEnabled(not self.is_mag)
+            self.txtQxMin.setEnabled(not self.is_mag)
+            self.checkboxLogSpace.setChecked(not self.is_mag)
+            self.checkboxLogSpace.setEnabled(not self.is_mag)
 
         
     def change_is_avg(self):
@@ -604,6 +613,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtQxMin.setText(str(float(self.txtQxMax.text())*.001))
             self.checkboxLogSpace.setChecked(True)
             self.checkboxLogSpace.setEnabled(True)
+            self.checkboxPluginModel.setEnabled(True)
         # If not averaging then re-enable the magnetic sld textboxes
         else:
             self.txtMx.setEnabled(True)
@@ -613,6 +623,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtQxMin.setText(str(float(self.txtQxMax.text())*-1))
             self.checkboxLogSpace.setChecked(False)
             self.checkboxLogSpace.setEnabled(False)
+            self.checkboxPluginModel.setEnabled(False)
+            self.checkboxPluginModel.setChecked(False)
+            self.txtFileName.setEnabled(False)
     
     def check_for_magnetic_controls(self):
         if self.txtMx.hasAcceptableInput() and self.txtMy.hasAcceptableInput() and self.txtMz.hasAcceptableInput():
@@ -1499,6 +1512,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if self.is_beta:
             self.create_betaPlot()
         
+        if self.checkboxPluginModel.isChecked():
+            self.writePlugin()
+
         self.cmdCompute.setText('Compute')
         self.cmdCompute.setToolTip("<html><head/><body><p>Compute the scattering pattern and display 1D or 2D plot depending on the settings.</p></body></html>")
         self.cmdCompute.clicked.disconnect()
@@ -1555,6 +1571,115 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         return
 
+    def update_file_name(self):
+        if self.checkboxPluginModel.isChecked():
+            self.txtFileName.setText(self.getFileName())
+            self.txtFileName.setEnabled(True)
+        else:
+            self.txtFileName.setText("")
+            self.txtFileName.setEnabled(False)
+
+
+    def writePlugin(self):
+        class dummy_manager:
+            _parent = QtWidgets.QWidget()
+            communicate = GuiUtils.Communicate()
+        tabbed_model_editor = TabbedModelEditor(parent=dummy_manager)
+        # check if file exists & assign filename
+        plugin_location = models.find_plugins_dir()
+        model = self.makeFile()
+        full_path = os.path.join(plugin_location, model['filename'])
+        if os.path.splitext(full_path)[1] != ".py":
+            full_path += ".py"
+
+        if not TabbedModelEditor.canWriteModel(tabbed_model_editor, model, full_path):
+            return
+        
+        # generate the model representation as string
+        model_str = TabbedModelEditor.generateModel(tabbed_model_editor, model, full_path)
+        TabbedModelEditor.writeFile(full_path, model_str)
+
+        # Run the model test in sasmodels
+        if not TabbedModelEditor.isModelCorrect(tabbed_model_editor, full_path):
+            return
+        
+        # Notify the user
+        msg = "Custom model "+ plugin_location, model['filename'] + " successfully created."
+        logging.info(msg)
+        
+
+    def makeFile(self):
+        parameter_dict = {}
+        model = {
+            'filename':'',
+            'overwrite':False,
+            'description':'',
+            'parameters':{},
+            'pd_parameters':{},
+            'text':''}
+        
+
+        model['filename'] = self.txtFileName.text()
+        model['description'] = 'Custom model generated by the GSC, Sasview Ver:' + sys.version
+        parameter_dict[0] = ('ProteinSLD', 0)
+        parameter_dict[1] = ('SolventSLD', 0)
+        parameter_dict[2] = ('ProteinVolume', 0)
+        model['parameters'] = parameter_dict
+
+        sld = 0
+        qValues = self.data.x.tolist()
+        normPQ = self.data_to_plot.tolist()
+        for i in range(len(self.nuc_sld_data.pos_x)):
+            sld += periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c       #fentometer
+        for i in range(len(self.data.x)):
+            normPQ[i] = normPQ[i] / sld #replace this with numpy fix thing later
+
+        model['text'] = (
+"""
+q = """ + str(qValues) + """
+normPQ = """ + str(normPQ) + """
+qIndex = -1
+for i in range(len(q)):
+    if x < q[i]:
+        qIndex = i
+        break
+if qIndex == -1:
+    qIndex = len(q)-1
+elif qIndex == 0:
+    qIndex = 1
+    
+log_x = numpy.log(x)
+log_x1 = numpy.log(q[qIndex-1])
+log_x2 = numpy.log(q[qIndex])
+
+# Perform linear interpolation on the logarithmic scale
+log_y = (log_x - log_x1) / (log_x2 - log_x1) * (normPQ[qIndex] - normPQ[qIndex-1]) + normPQ[qIndex-1]
+interpolated_value = numpy.exp(log_y)
+
+y = ((ProteinSLD*SolventSLD)**2 * (ProteinVolume) * interpolated_value)
+
+        
+return y""").lstrip().rstrip()
+
+        return model
+
+    
+
+    def getFileName(self):
+        plugin_location = models.find_plugins_dir()
+        i = 0
+        while True:
+            full_path = os.path.join(plugin_location, "custom_gsc" + str(i))
+            if os.path.splitext(full_path)[1] != ".py":
+                full_path += ".py"
+            if not os.path.exists(full_path):
+                break
+            else:
+                i += 1
+            
+        return ("custom_gsc" + str(i))
+        
+        
     def onSaveFile(self):
         """Save data as .sld file"""
         path = os.path.dirname(str(self.datafile))
