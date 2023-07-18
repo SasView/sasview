@@ -23,7 +23,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     Once the model is defined, it can be saved as a plugin.
     """
     # Signals for intertab communication plugin -> editor
-    def __init__(self, parent=None, edit_only=False):
+    def __init__(self, parent=None, edit_only=False, load=None):
         super(TabbedModelEditor, self).__init__(parent._parent)
 
         self.parent = parent
@@ -112,7 +112,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 return
         event.accept()
 
-    def onLoad(self):
+    def onLoad(self, load=None):
         """
         Loads a model plugin file
         """
@@ -122,14 +122,17 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 return
             self.is_modified = False
 
-        plugin_location = models.find_plugins_dir()
-        filename = QtWidgets.QFileDialog.getOpenFileName(
-                                        self,
-                                        'Open Plugin',
-                                        plugin_location,
-                                        'SasView Plugin Model (*.py)',
-                                        None,
-                                        QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+        if load is None:
+            plugin_location = models.find_plugins_dir()
+            filename = QtWidgets.QFileDialog.getOpenFileName(
+                                            self,
+                                            'Open Plugin',
+                                            plugin_location,
+                                            'SasView Plugin Model (*.py)',
+                                            None,
+                                            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+        else:
+            filename = str(load)
 
         # Load the file
         if not filename:
