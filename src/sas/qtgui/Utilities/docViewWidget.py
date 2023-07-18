@@ -25,10 +25,10 @@ class docViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
         Open editor window.
         """
         # Convert QUrl to pathname:
-        from re import search
-        # path = search(r"Q.*\'\)", str(self.webEngineViewer.url()))
+        from re import findall
+        path = findall(r"(?<=file:\/\/\/).+\.html", str(self.webEngineViewer.url()))
         print(str(self.webEngineViewer.url()))
-        # print(path)
+        print(path[0])
         self.editorWindow =  TabbedModelEditor(parent=self.parent, edit_only=True, load=None)
         self.editorWindow.show()
         
