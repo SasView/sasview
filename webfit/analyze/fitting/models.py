@@ -34,7 +34,7 @@ models_logger = getLogger(__name__)
 # do we want individual dbs for each perspective?
 
 class Fit(AnalysisBase):
-    results = models.CharField(max_length= 100, blank=True, help_text="the string result")
+    results = models.CharField(max_length= 100, blank=True, null = True, help_text="the string result")
     results_trace = [
     ]
 
@@ -54,7 +54,7 @@ class Fit(AnalysisBase):
 
     magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
 
-    model = models.CharField(default = None, max_length=256, help_text="model string")
+    model = models.CharField(blank=False, max_length=256, help_text="model string")
 
 
 class FitParameter(AnalysisParameterBase):

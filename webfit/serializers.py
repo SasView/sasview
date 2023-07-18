@@ -91,6 +91,7 @@ class DataSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
+        serializers.FileField
         instance.current_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=True)
         return instance
     

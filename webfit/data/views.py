@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.contrib.auth.models import User
+from django.core.files import File
+
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -8,10 +10,6 @@ from rest_framework.decorators import api_view
 from sasdata.dataloader.loader import Loader
 from serializers import DataSerializer
 from .models import Data
-
-from rest_framework.permissions import IsAuthenticated
-
-
 
 #TODO finish logger
 #TODO look through whole code to make sure serializer updates to the correct object
@@ -44,21 +42,15 @@ def data_info(request, db_id, version = None):
     return HttpResponseBadRequest()
 
 
-#perhaps rename data.obj from file -> data_obj as it gets confused with file.file
-#data = session_token, opt_in, filename
-#file = data_file
-#TODO IF WE'RE USING SESSION KEYS, HOW DO WE CONNECT THEM TO DBS??
 @api_view(['POST', 'PUT'])
 def upload(request, data_id = None, version = None):
     serializer = DataSerializer()
     
     #saves file
     if request.method == 'POST':
-        serializer(file = request.file, is_public = request.data.is_public)
+        serializer(data = request.data, file = File(open(), 'rb'))
         if request.user.is_authenticated:
-            #doesn't check user, instead sets current_user as user
-            userr = request.user
-            serializer(current_user = userr)
+            serializer(current_user = request.user)
     
     #saves or updates file
     elif request.method == 'PUT':

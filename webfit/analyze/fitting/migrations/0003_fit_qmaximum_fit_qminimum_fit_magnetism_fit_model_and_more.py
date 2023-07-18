@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='fit',
             name='model',
-            field=models.CharField(default=None, help_text='model string', max_length=256),
+            field=models.CharField(blank=False, help_text='model string', max_length=256),
         ),
         migrations.AddField(
             model_name='fit',

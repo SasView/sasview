@@ -36,8 +36,8 @@ class Migration(migrations.Migration):
             name='AnalysisBase',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('current_user', models.ForeignKey(default = None, to=settings.AUTH_USER_MODEL, on_delete=models.deletion.CASCADE)),
-                ('data_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.deletion.CASCADE, to='data.data')),
+                ('current_user', models.ForeignKey(default=None, blank=True, null=True, to=settings.AUTH_USER_MODEL, on_delete=models.deletion.CASCADE)),
+                ('data_id', models.ForeignKey(blank=True, null=True, primary_key=False, on_delete=models.deletion.CASCADE, to='data.data')),
                 ('model_id', models.ForeignKey(default = None, primary_key=False, on_delete=models.deletion.CASCADE, to='analyze.AnalysisModelBase')),
                 
                 ('gpu_requested', models.BooleanField(default = False, help_text= "use GPU rather than CPU")),

@@ -101,12 +101,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "results",
-                    models.CharField(
-                        blank=True, help_text="the string result", max_length=100
-                    ),
-                ),
-                (
                     "status",
                     models.IntegerField(
                         choices=[(1, "Queued"), (2, "Running"), (3, "Complete")],
