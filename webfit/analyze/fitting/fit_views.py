@@ -97,13 +97,26 @@ def start(request, version = None):
 
 def start_fit(model, data = None, params = None, param_limits = None):
     if params is None:
-        params = load_model_info(model).parameters.defaults
+        #TEST CODE
+        params = dict(
+            radius = 35,
+            length = 350,
+            background = 0.0,
+            scale = 1.0,
+            sld = 4.0,
+            sld_solvent = 1.0
+        )
+        #params = load_model_info(model).parameters.defaults
 
     current_model = load_model(model)
     model = Model(current_model, **params)
+    
+    #TEST CODE
     model.radius.range(1, 50)
     model.length.range(1, 500)
-    #rewrite to figure out if they can pass only one upper/lower
+
+    #TODO range code
+    #TODO rewrite to figure out if they can pass only one upper/lower
     """if params is None and param_limits is None:
         model.radius.range(Bounded.limits)
         model.length.range(Bounded.limits)
@@ -114,6 +127,8 @@ def start_fit(model, data = None, params = None, param_limits = None):
             
         if param_limits.length.lower_limit or param_limits.length.upper_limit:
             model.length.range(param_limits.length.lower_limit, param_limits.length.upper_limit)"""
+    
+    #TODO implement using Loader() instead of load_data
     loader = Loader()
     if data is None:
         f = get_object_or_404(Data, is_public = True).file
@@ -127,7 +142,7 @@ def start_fit(model, data = None, params = None, param_limits = None):
     problem = FitProblem(M)
     result = fit(problem, method='amoeba')
     #problem.fitness.model.state() <- return this dictionary to check if fit is actually working
-    return result
+    return problem.chisq_str()
 
 
 def status():
