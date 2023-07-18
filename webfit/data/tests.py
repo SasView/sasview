@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 from rest_framework.test import APIRequestFactory
 
 from .models import Data
@@ -16,7 +17,7 @@ factory = APIRequestFactory()
 class DataTest(TestCase):
     def setUp(self):
         test_user = User.objects.create(username = "testUser", email = "123@gmail.com")
-        Data.objects.create(current_user = test_user, )
+        Data.objects.create(current_user = test_user.username)
 
     def is_data_being_created(self):
         factory.post()

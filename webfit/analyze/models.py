@@ -33,8 +33,8 @@ from django.core.exceptions import (
 models_logger = getLogger(__name__)
 
 class AnalysisBase(models.Model):
-    current_user = models.ForeignKey(User, default = None, on_delete=models.CASCADE)
-    data_id = models.ForeignKey(Data, default = None, on_delete=models.CASCADE)
+    current_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    data_id = models.ForeignKey(Data, blank=True, null=True, on_delete=models.CASCADE)
     
     #TODO add gpu_requested into analysis views
     gpu_requested = models.BooleanField(default = False, help_text= "use GPU rather than CPU")

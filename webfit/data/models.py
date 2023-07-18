@@ -27,7 +27,8 @@ class Data(models.Model):
     current_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
 
     #imported data
-    file = models.FileField(null = False, help_text="This is a file")
+    #user can either import a file path or actual file
+    file = models.FileField(blank = True, null = True, help_text="This is a file")
 
     #creates hash for data
     if User:
