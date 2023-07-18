@@ -23,7 +23,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     Once the model is defined, it can be saved as a plugin.
     """
     # Signals for intertab communication plugin -> editor
-    def __init__(self, parent=None, edit_only=False, load=None):
+    def __init__(self, parent=None, edit_only=False, model=False, load_file=None):
         super(TabbedModelEditor, self).__init__(parent._parent)
 
         self.parent = parent
@@ -37,12 +37,17 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.filename = ""
         self.window_title = self.windowTitle()
         self.edit_only = edit_only
+        self.load_file = load_file
+        self.model = model
         self.is_modified = False
         self.label = None
 
         self.addWidgets()
 
         self.addSignals()
+
+        if self.load_file is not None:
+            self.onLoad(at_launch=True)
 
     def addWidgets(self):
         """
@@ -112,17 +117,24 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 return
         event.accept()
 
-    def onLoad(self, load=None):
+    def onLoad(self, at_launch=False):
         """
-        Loads a model plugin file
+        Loads a model plugin file. at_launch is value of whether to attempt a load of a file from launch of the widget or not
         """
+        print(self.load_file)
         if self.is_modified:
             saveCancelled = self.saveClose()
             if saveCancelled:
                 return
             self.is_modified = False
 
-        if load is None:
+        if at_launch:
+            if self.model is True:
+                # Find location of model .py files and load from that location
+                from sas.qtgui.Utilities.GuiUtils import PY_SOURCE, SAS_DIR
+                model_files = SAS_DIR + "/" + PY_SOURCE
+                filename = model_files + "/user/models/src/" + self.load_file + ".py"
+        else:
             plugin_location = models.find_plugins_dir()
             filename = QtWidgets.QFileDialog.getOpenFileName(
                                             self,
@@ -131,8 +143,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                                             'SasView Plugin Model (*.py)',
                                             None,
                                             QtWidgets.QFileDialog.DontUseNativeDialog)[0]
-        else:
-            filename = str(load)
 
         # Load the file
         if not filename:

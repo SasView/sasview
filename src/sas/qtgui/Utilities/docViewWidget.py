@@ -1,5 +1,5 @@
 import sys
-from os.path import abspath, dirname
+from os.path import abspath, dirname, splitext, basename
 from PySide6 import QtGui, QtWebEngineWidgets, QtCore, QtWidgets, QtWebEngineCore
 
 from .UI.docViewWidgetUI import Ui_docViewerWindow
@@ -13,7 +13,9 @@ class docViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
         self.setupUi(self)
         self.setWindowTitle("Documentation Viewer")
 
-        self.loadHtml(source=source)
+        self.source = source
+
+        self.loadHtml()
 
         self.initializeSignals()
 
@@ -26,18 +28,29 @@ class docViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
         """
         # Convert QUrl to pathname:
         from re import findall
+        # Extract path from QUrl
         path = findall(r"(?<=file:\/\/\/).+\.html", str(self.webEngineViewer.url()))
-        print(str(self.webEngineViewer.url()))
-        print(path[0])
-        self.editorWindow =  TabbedModelEditor(parent=self.parent, edit_only=True, load=None)
+        # Test to see if we're dealing with a model html file or other html file
+        if "models" in path[0]:
+            file = splitext(basename(path[0]))[0]
+            print(file)
+            self.editorWindow =  TabbedModelEditor(parent=self.parent,
+                                                   edit_only=True,
+                                                   load_file=file,
+                                                   model=True)
+        else:
+            self.editorWindow =  TabbedModelEditor(parent=self.parent,
+                                                   edit_only=True,
+                                                   load_file=file,
+                                                   model=False)
         self.editorWindow.show()
         
 
-    def loadHtml(self, source=None):
+    def loadHtml(self):
         """
         Loads the HTML file specified when this python is called from another part of the program.
         """
-        url = QtCore.QUrl.fromLocalFile(abspath(source))
+        url = QtCore.QUrl.fromLocalFile(abspath(self.source))
         settings = self.webEngineViewer.settings()
         # Allows QtWebEngine to access MathJax and code highlighting APIs
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
