@@ -867,10 +867,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtZstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.zstepsize))
         # otherwise leave as set since editable by user
         self.update_Rg()
-
-        # If nodes or stepsize changed then this may effect what values are allowed
-        self.gui_text_changed(sender=self.txtNoQBins)
-        self.gui_text_changed(sender=self.txtQxMax)
         
     def update_Rg(self):
         # update the value of the Radius of Gyration with values from the loaded data
@@ -898,29 +894,28 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         #Now Calculate RoG
         RGNumerator = RGDenominator = RgMassNum = RgMassDen = 0.0
 
-        for i in range(len(self.nuc_sld_data.pos_x)):
-            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
-            atom = periodictable.formula(self.nuc_sld_data.pix_symbol[i])
-            
-            mass = atom.mass
-            
-            #adjust for solvent sld
-            sld = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c       #fentometer
-            solvent_sld = (atom.volume() * 10**24 * float(self.txtSolventSLD.text())) * 10**5       #vol in cm^3, solventSLD in Angstrom^-2     NOTE: atom.volume() is an approximation, will not work accurately
-            
-            
-            #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
-            # contrastSLD = sld - solvent_sld         #fentometer
-            contrastSLD = sld                       #fentometer
+        pix_symbol = self.nuc_sld_data.pix_symbol
+        atoms = numpy.array([], dtype=object)
+        masses = numpy.array([])
+        slds = numpy.array([])
 
-            #Calculate the Magnitude of the Coordinate vector for the atom and the center of mass
-            MagnitudeOfCoM = numpy.sqrt(numpy.power(CoM[0]-coordinates[0],2) + numpy.power(CoM[1]-coordinates[1],2) + numpy.power(CoM[2]-coordinates[2],2))
+        coordinates = numpy.array([self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z], dtype=float).T
+        for i in range (len(pix_symbol)):
+            atoms = numpy.append(atoms , periodictable.formula(pix_symbol[i]))
+            masses = numpy.append(masses, atoms[i].mass)
+            slds = numpy.append(slds, periodictable.elements.symbol(pix_symbol[i]).neutron.b_c)
+            #solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
 
-            #Calculate Rate of Gyration (Squared) with the formula
-            RgMassNum += mass * (numpy.power(MagnitudeOfCoM,2))
-            RgMassDen += mass
-            RGNumerator += contrastSLD * (numpy.power(MagnitudeOfCoM,2))
-            RGDenominator += contrastSLD
+        #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
+        # contrastSLD = sld - solvent_sld         #fentometer
+        contrastSLDs = slds                       #fentometer
+        MagnitudesOfCoM = numpy.sqrt(numpy.sum(numpy.power(CoM - coordinates, 2), axis=1))
+
+        RgMassNum = numpy.sum(masses * numpy.power(MagnitudesOfCoM, 2))
+        RgMassDen = numpy.sum(masses)
+        RGNumerator = numpy.sum(contrastSLDs * numpy.power(MagnitudesOfCoM, 2))
+        RGDenominator = numpy.sum(contrastSLDs)
+
 
         if RgMassDen <= 0: #Should never happen as there are no zero or negative mass atoms
             rgMassValue = "NaN"
