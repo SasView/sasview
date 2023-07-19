@@ -6,9 +6,9 @@ from .UI.docViewWidgetUI import Ui_docViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 
 
-class docViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
+class DocViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
     def __init__(self, parent=None, source=None):
-        super(docViewWindow, self).__init__(parent._parent)
+        super(DocViewWindow, self).__init__(parent._parent)
         self.parent = parent
         self.setupUi(self)
         # disable the context help icon
@@ -62,6 +62,6 @@ class docViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    win =  docViewWindow()
+    win =  DocViewWindow()
     win.show()
     app.exec_()

@@ -28,7 +28,7 @@ from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
-from sas.qtgui.Utilities.docViewWidget import docViewWindow
+from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 
@@ -1866,8 +1866,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Calls 
         """
         # self.parent.showHelp(url) <-- a clue for how to get other help pages open in the future
-        self.helpWindow = docViewWindow(parent=self.parent, source=url)
-        self.helpWindow.show()
+        # WP: Added to handle OSX bundle docs
+        if url.startswith("/") or url.startswith("\\"):
+            # Checks to see if path is absolute or relative, accomodates urls from many different places
+            from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
+            location = HELP_DIRECTORY_LOCATION + url
+            if os.path.isdir(url) == False:
+                sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+                url = sas_path+"/"+location
+        try:
+            self.helpWindow = DocViewWindow(parent=self.parent, source=url)
+            self.helpWindow.show()
+        except Exception as ex:
+            logging.warning("Cannot display help. %s" % ex)
 
     def regenerateDocs(self, regen_docs, target=None):
         """
