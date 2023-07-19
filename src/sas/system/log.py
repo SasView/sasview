@@ -16,7 +16,7 @@ Module that manages the global logging
 TRACED_PACKAGES = ('sas', 'sasmodels', 'sasdata', 'bumps', 'periodictable')
 IGNORED_PACKAGES = {
     'matplotlib': 'ERROR',
-    'numba': 'ERROR',
+    'numba': 'WARN',
     'h5py': 'ERROR',
     'ipykernel': 'CRITICAL',
 }
@@ -26,7 +26,7 @@ def setup_logging(level=logging.INFO):
     logging.captureWarnings(True)
     for package in TRACED_PACKAGES:
         logging.getLogger(package).setLevel(level)
-    for package, package_level in IGNORED_PACKAGES:
+    for package, package_level in IGNORED_PACKAGES.items():
         logging.getLogger(package).setLevel(package_level)
 
     # SasView is often using the root logger to emit error messages. Until
@@ -38,7 +38,6 @@ def setup_logging(level=logging.INFO):
     # the culprits:
     #    grep -R "logg\(ing\|er\)" src | grep -v .pyc | less
     # TODO: use __name__ as the logger for all sasview log messages
-    # TODO: remove numba logger setting from sas.sascalc.calculator.geni
     logging.root.setLevel(level)
 
     # Apply the logging config after setting the defaults
