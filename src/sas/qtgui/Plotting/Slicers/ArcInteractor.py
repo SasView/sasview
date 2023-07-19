@@ -4,30 +4,39 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 class ArcInteractor(BaseInteractor):
     """
-     Draw an arc on a data2D plot between radial points (centered at [0,0]) at
-     angles theta1 and theta2.
+    Draw an arc on a data2D plot with a variable radius (centered at [0,0]).
 
-     param r: radius from (0,0) of the arc on a data2D plot
-     param theta1: angle from x-axis of right end of arc
-     param theta2: angle from x-axis of left end of arc
+    param r: radius from (0,0) of the arc on a data2D plot
+    param theta2: angle from x-axis of the central point on the arc
+    param phi: angle from the centre point on the arc to each of its edges
     """
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 theta1=np.pi / 8, theta2=np.pi / 4):
+                 theta2=np.pi / 3, phi=np.py / 4):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
+        self.color = color
         self._mouse_x = r
         self._mouse_y = 0
         self._save_x = r
         self._save_y = 0
         self.scale = 10.0
-        self.theta1 = theta1
         self.theta2 = theta2
+        self.phi = phi
         self.radius = r
+        # Define the arc's marker
+        marker_x = self.radius * np.cos(theta2 * 0.8)
+        marker_y = self.radius * np.sin(theta2 * 0.8)
+        self.marker = self.axes.plot([marker_x], [marker_y], linestyle='',
+                                     marker='s', markersize=10,
+                                     color=self.color, alpha=0.6, pickradius=5,
+                                     label='pick', zorder=zorder,
+                                     visable=True)[0]
+        # Define the arc
         [self.arc] = self.axes.plot([], [], linestyle='-', marker='', color=self.color)
         self.npts = 20
         self.has_move = False
-        self.connect_markers([self.arc])
+        self.connect_markers([self.marker, self.arc])
         self.update()
 
     def set_layer(self, n):
@@ -44,8 +53,7 @@ class ArcInteractor(BaseInteractor):
         """
         self.clear_markers()
         try:
-            for item in self.markers:
-                item.remove()
+            self.marker.remove()
             self.arc.remove()
         except:
             # Old version of matplotlib
@@ -60,39 +68,37 @@ class ArcInteractor(BaseInteractor):
                            np.power(self._mouse_y, 2))
         return radius
 
-    def update(self, theta1=None, theta2=None, nbins=None, r=None):
+    def update(self, theta2=None, phi=None, r=None, nbins=120):
         """
         Update the plotted arc
-        :param theta1: starting angle of the arc
-        :param theta2: ending angle of the arc
-        :param nbins: number of points along the arc
-        :param r: radius of the arc
+        :param theta2: angle from x-axis of the central point on the arc
+        :param phi: angle from the centre point on the arc to each of its edges
+        :param r: radius from (0,0) of the arc on a data2D plot
+        :param nbins: number of points drawn for an arc of size pi radians
         """
-        # Plot inner circle
         x = []
         y = []
-        if theta1 is not None:
-            self.theta1 = theta1
         if theta2 is not None:
             self.theta2 = theta2
-        while self.theta2 < self.theta1:
-            self.theta2 += (2 * np.pi)
-        while self.theta2 >= (self.theta1 + 2 * np.pi):
-            self.theta2 -= (2 * np.pi)
-        self.npts = int((self.theta2 - self.theta1) / (np.pi / 120))
+        if phi is not None:
+            self.phi = phi
+        self.npts = int((2 * self.phi) / (np.pi / nbins))
 
         if r is None:
-            self.radius = np.sqrt(np.power(self._mouse_x, 2) + \
-                                     np.power(self._mouse_y, 2))
+            self.radius = self.get_radius()
         else:
             self.radius = r
+        # Calculate the points on the arc, and draw them
         for i in range(self.npts):
-            phi = (self.theta2 - self.theta1) / (self.npts - 1) * i + self.theta1
-            xval = 1.0 * self.radius * np.cos(phi)
-            yval = 1.0 * self.radius * np.sin(phi)
-
+            angleval = 2 * self.phi / (self.npts - 1) * i + (self.theta2 - self.phi)
+            xval = 1.0 * self.radius * np.cos(angleval)
+            yval = 1.0 * self.radius * np.sin(angleval)
             x.append(xval)
             y.append(yval)
+
+        marker_x = self.radius * np.cos(self.theta2 - 0.2 * self.phi)
+        marker_y = self.radius * np.sin(self.theta2 - 0.2 * self.phi)
+        self.marker.set(xdata=[marker_x], ydata=[marker_y])
         self.arc.set_data(x, y)
 
     def save(self, ev):
@@ -102,7 +108,6 @@ class ArcInteractor(BaseInteractor):
         """
         self._save_x = self._mouse_x
         self._save_y = self._mouse_y
-        self.base.freeze_axes()
 
     def moveend(self, ev):
         """
@@ -121,35 +126,28 @@ class ArcInteractor(BaseInteractor):
 
     def move(self, x, y, ev):
         """
-        Process move to a new position, making sure that the move is allowed.
+        Process move to a new position
         """
         self._mouse_x = x
         self._mouse_y = y
+        self.radius = self.get_radius()
         self.has_move = True
         self.base.update()
         self.base.draw()
 
-    def set_cursor(self, radius, phi_min, phi_max, nbins):
-        """
-        """
-        self.theta1 = phi_min
-        self.theta2 = phi_max
-        self.update(nbins=nbins, r=radius)
+    # This function is effectively just a move() clone?
+    def set_cursor(self, x, y):
+        self.move(x, y, None)
+        self.update()
 
     def get_params(self):
-        """
-        """
         params = {}
         params["radius"] = self.radius
-        params["theta1"] = self.theta1
         params["theta2"] = self.theta2
+        params["phi"] = self.phi
         return params
 
     def set_params(self, params):
-        """
-        """
-        x = params["radius"]
-        phi_max = self.theta2
-        nbins = self.npts
-        self.set_cursor(x, self._mouse_y, phi_max, nbins)
-
+        r = params["radius"]
+        theta = params["theta2"]
+        self.set_cursor(r*np.cos(theta), r*np.sin(theta))
