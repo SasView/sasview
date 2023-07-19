@@ -201,6 +201,10 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # If true, disables residuals display
         self.DISABLE_RESIDUALS = False
 
+        # Polydispersity plot management
+        # If true, disables polydispersity plot display
+        self.DISABLE_POLYDISPERSITY_PLOT = False
+
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 

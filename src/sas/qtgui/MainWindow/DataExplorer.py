@@ -1086,13 +1086,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
-            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY]
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
             elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUALS:
                 # Nothing to do if residuals are not plotted
+                continue
+            elif role == DataRole.ROLE_POLYDISPERSITY and config.DISABLE_POLYDISPERSITY_PLOT:
+                # Nothing to do if polydispersity plot is not plotted
                 continue
             elif role in stand_alone_types:
                 # Stand-alone plots should always be separate
