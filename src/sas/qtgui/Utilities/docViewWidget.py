@@ -8,9 +8,11 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 
 class docViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
     def __init__(self, parent=None, source=None):
-        super(docViewWindow, self).__init__()
+        super(docViewWindow, self).__init__(parent._parent)
         self.parent = parent
         self.setupUi(self)
+        # disable the context help icon
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setWindowTitle("Documentation Viewer")
 
         self.source = source
@@ -62,4 +64,4 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     win =  docViewWindow()
     win.show()
-    app.exec()
+    app.exec_()
