@@ -1091,6 +1091,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
+            elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUALS:
+                # Nothing to do if residuals are not plotted
+                continue
             elif role in stand_alone_types:
                 # Stand-alone plots should always be separate
                 self.plotData([(plot_item, plot_to_show)])
