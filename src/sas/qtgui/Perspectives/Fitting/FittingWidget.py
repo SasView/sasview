@@ -109,6 +109,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     constraintAddedSignal = QtCore.Signal(list, str)
     newModelSignal = QtCore.Signal()
+    docsRegeneratedSignal = QtCore.Signal(str)
     fittingFinishedSignal = QtCore.Signal(tuple)
     batchFittingFinishedSignal = QtCore.Signal(tuple)
     Calc1DFinishedSignal = QtCore.Signal(dict)
@@ -639,6 +640,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
         self.fittingFinishedSignal.connect(self.fitComplete)
+        self.docsRegeneratedSignal.connect(self.showHelp, )
         self.Calc1DFinishedSignal.connect(self.complete1D)
         self.Calc2DFinishedSignal.connect(self.complete2D)
 
@@ -1816,6 +1818,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the "Fitting" section of help
         """
         tree_location = "/user/qtgui/Perspectives/Fitting/"
+        regen_in_progress = False
 
         # Actual file will depend on the current tab
         tab_id = self.tabFitting.currentIndex()
@@ -1837,9 +1840,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     helpfile = self.kernel_module.id + ".html"
                 else:
                     py_target = self.kernel_module.id + ".py"
-                    self.regenerate_docs(regen_docs, target=py_target) # Regenerate specific documentation file
                     tree_location = sas_path + "/" + full_path + "/user/models/"
                     helpfile = self.kernel_module.id + ".html"
+                    help_location = tree_location + helpfile
+                    d = threads.deferToThread(self.regenerateDocs, regen_docs, target=py_target) # Regenerate specific documentation file
+                    d.addCallback(self.docRegenComplete, help_location)
+                    regen_in_progress = True
             else:
                 helpfile = "fitting_help.html"
         elif tab_id == 1:
@@ -1851,37 +1857,36 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elif tab_id == 4:
             helpfile = "magnetism/magnetism.html"
         help_location = tree_location + helpfile
-        self.showHelp(help_location)
+        if regen_in_progress is False:
+            self.showHelp(help_location)
 
     def showHelp(self, url):
         """
-        Calls parent's method for opening an HTML page
+        Calls 
         """
-        # self.parent.showHelp(url)
+        # self.parent.showHelp(url) <-- a clue for how to get other help pages open in the future
         self.helpWindow = docViewWindow(parent=self.parent, source=url)
         self.helpWindow.show()
 
-    def regenerate_docs(self, regen_docs, target=None):
-       sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-       recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
-       if self.process is None:
-            parent = QtCore.QObject()
-            self.process = QtCore.QProcess(parent)
-            self.process.setProcessChannelMode(QtCore.QProcess.MergedChannels)  # Set process channel mode
-            self.process.readyReadStandardOutput.connect(self.handle_stdout)
-            self.process.finished.connect(self.finish_generation)
-            self.process.setWorkingDirectory(sas_path + "/" + recompile_path)  # Set the working directory
-            self.process.start("python", [regen_docs, target])
-            self.process.waitForFinished()  # Wait for the process to finish before proceeding
+    def regenerateDocs(self, regen_docs, target=None):
+        """
+        Regenerates documentation for a specific file (target) in a subprocess
+        """
+        import subprocess
+        command = [
+            sys.executable,
+            regen_docs,
+            target,
+        ]
+        doc_regen_dir = os.path.dirname(regen_docs)
+        subprocess.run(command, cwd=doc_regen_dir) # cwd parameter tells subprocess to open from a specific directory
 
-    def finish_generation(self):
-        self.process = None
-        print(r"Done :)")
-
-    def handle_stdout(self):
-        data = self.process.readAllStandardOutput()
-        stdout = bytes(data).decode("utf8")
-        print(stdout)
+    def docRegenComplete(self, d, help_location):
+        """
+        Tells Qt that regeneration of docs is done and emits signal tied to opening
+        documentation viewer window
+        """
+        self.docsRegeneratedSignal.emit(help_location)
 
     def onDisplayMagneticAngles(self):
         """
