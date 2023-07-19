@@ -1817,7 +1817,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        tree_location = "/user/qtgui/Perspectives/Fitting/"
+        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+        full_path = GuiUtils.HELP_DIRECTORY_LOCATION
+        tree_location = sas_path + "/" + full_path + "/user/qtgui/Perspectives/Fitting/"
         regen_in_progress = False
 
         # Actual file will depend on the current tab
@@ -1828,7 +1830,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
                 # See if the help file is there
                 # This breaks encapsulation a bit, though.
-                full_path = GuiUtils.HELP_DIRECTORY_LOCATION
                 recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
                 sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
                 location = sas_path + "/" + full_path
