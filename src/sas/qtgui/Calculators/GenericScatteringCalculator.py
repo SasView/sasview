@@ -6,6 +6,7 @@ import logging
 import time
 import timeit
 import math
+import datetime
 
 from scipy.spatial.transform import Rotation
 
@@ -22,9 +23,10 @@ from twisted.internet import threads
 import periodictable
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Utilities.TabbedModelEditor as TabbedModelEditor
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
+from sas.system.version import __version__
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.fit import models
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
@@ -87,6 +89,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.is_beta = False
         self.data_to_plot = None
         self.data_betaQ = None
+        self.fQ = []
         self.graph_num = 1      # index for name of graph
 
         # finish UI setup - install qml window
@@ -126,6 +129,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxNucData.stateChanged.connect(self.change_data_type)
         self.checkboxMagData.stateChanged.connect(self.change_data_type)
         self.checkboxPluginModel.stateChanged.connect(self.update_file_name)
+        self.checkboxLogSpace.stateChanged.connect(self.change_qValidator)
 
         self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
         self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
@@ -223,15 +227,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtSampleRoll.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleRoll))   
 
-        # 0 < Qmax <= 1000
-        validat_regex_q = QtCore.QRegularExpression(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
-        self.txtQxMax.setValidator(QtGui.QRegularExpressionValidator(validat_regex_q,
-                                                          self.txtQxMax))
-        
-         # 0 < Qmin <= 1000
-        validat_regex_q = QtCore.QRegularExpression(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
-        self.txtQxMin.setValidator(QtGui.QRegularExpressionValidator(validat_regex_q,
-                                                          self.txtQxMin))
+         # 0 <= Qmin&QMax <= 1000
+        self.txtQxMax.setValidator(QtGui.QDoubleValidator(0,1000,10,self.txtQxMax))
+        self.txtQxMin.setValidator(QtGui.QDoubleValidator(0,1000,10,self.txtQxMin))
         
         # 2 <= Qbin and nodes integers < 1000
         validat_regex_int = QtCore.QRegularExpression(r'^[2-9]|[1-9]\d{1,2}$')
@@ -563,7 +561,26 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.update_gui()
         self.check_for_magnetic_controls()
 
+    def change_qValidator(self):
+            if float(self.txtQxMax.text()) == 0:
+                self.txtQxMax.setText("0.3")
+            if float(self.txtQxMin.text()) == 0:
+                self.txtQxMin.setText("0.0003")    
 
+            if self.checkboxLogSpace.isChecked():
+                # 0 < Qmin&QMax <= 1000
+                self.txtQxMax.setValidator(QtGui.QDoubleValidator(1e-10,1000,10,
+                                                                self.txtQxMax))
+                self.txtQxMin.setValidator(QtGui.QDoubleValidator(1e-10,1000,10,
+                                                                self.txtQxMin))
+            else:
+                # 0 <= Qmin&QMax <= 1000
+                self.txtQxMax.setValidator(QtGui.QDoubleValidator(0,1000,10,
+                                                                self.txtQxMax))
+                self.txtQxMin.setValidator(QtGui.QDoubleValidator(0,1000,10,
+                                                                self.txtQxMin))
+
+            return
     
     def update_cbOptionsCalc_visibility(self):
         # Only allow 1D averaging if no magnetic data and not elements
@@ -908,11 +925,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # otherwise leave as set since editable by user
         self.update_Rg()
 
-        # If nodes or stepsize changed then this may effect what values are allowed
-        self.gui_text_changed(sender=self.txtNoQBins)
-        self.gui_text_changed(sender=self.txtQxMax)
-        self.gui_text_changed(sender=self.txtQxMin)
-
         
     def update_Rg(self):
         # update the value of the Radius of Gyration with values from the loaded data
@@ -940,29 +952,28 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         #Now Calculate RoG
         RGNumerator = RGDenominator = RgMassNum = RgMassDen = 0.0
 
-        for i in range(len(self.nuc_sld_data.pos_x)):
-            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
-            atom = periodictable.formula(self.nuc_sld_data.pix_symbol[i])
-            
-            mass = atom.mass
-            
-            #adjust for solvent sld
-            sld = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c       #fentometer
-            solvent_sld = (atom.volume() * 10**24 * float(self.txtSolventSLD.text())) * 10**5       #vol in cm^3, solventSLD in Angstrom^-2     NOTE: atom.volume() is an approximation, will not work accurately
-            
-            
-            #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
-            # contrastSLD = sld - solvent_sld         #fentometer
-            contrastSLD = sld                       #fentometer
+        pix_symbol = self.nuc_sld_data.pix_symbol
+        atoms = numpy.array([], dtype=object)
+        masses = numpy.array([])
+        slds = numpy.array([])
 
-            #Calculate the Magnitude of the Coordinate vector for the atom and the center of mass
-            MagnitudeOfCoM = numpy.sqrt(numpy.power(CoM[0]-coordinates[0],2) + numpy.power(CoM[1]-coordinates[1],2) + numpy.power(CoM[2]-coordinates[2],2))
+        coordinates = numpy.array([self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z], dtype=float).T
+        for i in range (len(pix_symbol)):
+            atoms = numpy.append(atoms , periodictable.formula(pix_symbol[i]))
+            masses = numpy.append(masses, atoms[i].mass)
+            slds = numpy.append(slds, periodictable.elements.symbol(pix_symbol[i]).neutron.b_c)
+            #solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
 
-            #Calculate Rate of Gyration (Squared) with the formula
-            RgMassNum += mass * (numpy.power(MagnitudeOfCoM,2))
-            RgMassDen += mass
-            RGNumerator += contrastSLD * (numpy.power(MagnitudeOfCoM,2))
-            RGDenominator += contrastSLD
+        #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
+        # contrastSLD = sld - solvent_sld         #fentometer
+        contrastSLDs = slds                       #fentometer
+        MagnitudesOfCoM = numpy.sqrt(numpy.sum(numpy.power(CoM - coordinates, 2), axis=1))
+
+        RgMassNum = numpy.sum(masses * numpy.power(MagnitudesOfCoM, 2))
+        RgMassDen = numpy.sum(masses)
+        RGNumerator = numpy.sum(contrastSLDs * numpy.power(MagnitudesOfCoM, 2))
+        RGDenominator = numpy.sum(contrastSLDs)
+
 
         if RgMassDen <= 0: #Should never happen as there are no zero or negative mass atoms
             rgMassValue = "NaN"
@@ -1247,16 +1258,26 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.qmax_x = float(self.txtQxMax.text())
         self.qmin_x = float(self.txtQxMin.text())
         self.npts_x = int(self.txtNoQBins.text())
+        self.xValues = numpy.array(self.npts_x)
         # Default values
         xmax = self.qmax_x
         xmin = self.qmin_x
         qstep = self.npts_x
-        x = numpy.logspace(start=math.log(xmin,10), stop=math.log(xmax,10), num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        if self.checkboxLogSpace.isChecked():
+            self.xValues = numpy.logspace(start=math.log(xmin,10),
+                                stop=math.log(xmax,10), 
+                                num=qstep, 
+                                endpoint=True)
+        else:
+            self.xValues = numpy.linspace(start=xmin, 
+                           stop=xmax, 
+                           num=qstep, 
+                           endpoint=True)        
         # store x and y bin centers in q space
-        y = numpy.ones(len(x))
-        dy = numpy.zeros(len(x))
-        dx = numpy.zeros(len(x))
-        self.data = Data1D(x=x, y=y)
+        y = numpy.ones(len(self.xValues))
+        dy = numpy.zeros(len(self.xValues))
+        dx = numpy.zeros(len(self.xValues))
+        self.data = Data1D(x=self.xValues, y=y)
         self.data.dx = dx
         self.data.dy = dy
     
@@ -1530,44 +1551,24 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         
         #Center Of Mass Calculation
         CoM = self.centerOfMass()
-        self.data_betaQ = []
+        self.data_betaQ = numpy.array([])
 
-        # Default values
-        xmax = self.qmax_x
-        xmin = self.qmin_x
-        qstep = self.npts_x
-
-        #array of Q values
-        qX = numpy.logspace(start=math.log(xmin,10), stop=math.log(xmax,10), num=qstep, endpoint=True) if self.checkboxLogSpace.isChecked() else numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        # array of Q values
+        qX = self.xValues
 
         formFactor = self.data_to_plot
-
-        for a in range(self.npts_x):  
-            fQ = 0     
-            for b in range(len(self.nuc_sld_data.pos_x)):
-                #atoms
-                atomName = str(self.nuc_sld_data.pix_symbol[b])
-                #Coherent Scattering Length of Atom
-                cohB = periodictable.elements.symbol(atomName).neutron.b_c
-
-                x = float(self.nuc_sld_data.pos_x[b])
-                y = float(self.nuc_sld_data.pos_y[b])
-                z = float(self.nuc_sld_data.pos_z[b])
-
-                r_x = x - CoM[0]
-                r_y = y - CoM[1]
-                r_z = z - CoM[2]
-
-                magnitudeRelativeCoordinate = numpy.sqrt(r_x**2 + r_y**2 + r_z**2)
-    
-                fQ +=  (cohB * (numpy.sin(qX[a] * magnitudeRelativeCoordinate) / (qX[a] * magnitudeRelativeCoordinate)))
-
-            #Beta Q Calculation
-            self.data_betaQ.append((fQ**2)/(formFactor[a]))
-
+        for a in range(self.npts_x):
+            r_x = numpy.subtract(self.nuc_sld_data.pos_x , CoM[0])
+            r_y = numpy.subtract(self.nuc_sld_data.pos_y , CoM[1])
+            r_z = numpy.subtract(self.nuc_sld_data.pos_z , CoM[2])
+            magnitudeRelativeCoordinate = numpy.sqrt(numpy.power(r_x, 2) + numpy.power(r_y, 2) + numpy.power(r_z, 2))
+            cohB = numpy.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in self.nuc_sld_data.pix_symbol])
+            fQ = numpy.sum(cohB*(numpy.sum(numpy.sin(qX[a] * magnitudeRelativeCoordinate) / (qX[a] * magnitudeRelativeCoordinate))))
+            self.data_betaQ = numpy.append(self.data_betaQ,((fQ**2)/formFactor[a]))
+        
         #Scale Beta Q to 0-1
         scalingFactor = self.data_betaQ[0]
-        self.data_betaQ = [x/scalingFactor for x in self.data_betaQ]
+        self.data_betaQ = self.data_betaQ / scalingFactor
 
         return
 
@@ -1592,11 +1593,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if os.path.splitext(full_path)[1] != ".py":
             full_path += ".py"
 
-        if not TabbedModelEditor.canWriteModel(tabbed_model_editor, model, full_path):
-            return
+        # Calculate F(Q)
+        qX = self.xValues
+        CoM = self.centerOfMass()
+        for a in range(self.npts_x):
+            r_x = numpy.subtract(self.nuc_sld_data.pos_x , CoM[0])
+            r_y = numpy.subtract(self.nuc_sld_data.pos_y , CoM[1])
+            r_z = numpy.subtract(self.nuc_sld_data.pos_z , CoM[2])
+            magnitudeRelativeCoordinate = numpy.sqrt(numpy.power(r_x, 2) + numpy.power(r_y, 2) + numpy.power(r_z, 2))
+            cohB = numpy.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in self.nuc_sld_data.pix_symbol])
+            fQ = numpy.sum(cohB*(numpy.sum(numpy.sin(qX[a] * magnitudeRelativeCoordinate) / (qX[a] * magnitudeRelativeCoordinate))))
+            self.fQ.append(fQ)
         
         # generate the model representation as string
-        model_str = TabbedModelEditor.generateModel(tabbed_model_editor, model, full_path)
+        model_str = self.generateModel(model, full_path)
         TabbedModelEditor.writeFile(full_path, model_str)
 
         # Run the model test in sasmodels
@@ -1616,18 +1626,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             'description':'',
             'parameters':{},
             'pd_parameters':{},
-            'text':''}
+            'text':'',
+            'fQ':''}
         
 
         model['filename'] = self.txtFileName.text()
-        model['description'] = 'Custom model generated by the GSC, Sasview Ver:' + sys.version
+        model['description'] = 'Custom model generated by the GSC, Sasview Ver: ' + \
+                       str(__version__) + ' file: ' + str(self.nuc_sld_data.filename)
         parameter_dict[0] = ('ProteinSLD', 0)
         parameter_dict[1] = ('SolventSLD', 0)
         parameter_dict[2] = ('ProteinVolume', 0)
         model['parameters'] = parameter_dict
 
         sld = 0
-        qValues = self.data.x.tolist()
         normPQ = self.data_to_plot.tolist()
         for i in range(len(self.nuc_sld_data.pos_x)):
             sld += periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c       #fentometer
@@ -1636,31 +1647,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         model['text'] = (
 """
-q = """ + str(qValues) + """
 normPQ = """ + str(normPQ) + """
-qIndex = -1
-for i in range(len(q)):
-    if x < q[i]:
-        qIndex = i
-        break
-if qIndex == -1:
-    qIndex = len(q)-1
-elif qIndex == 0:
-    qIndex = 1
-    
-log_x = numpy.log(x)
-log_x1 = numpy.log(q[qIndex-1])
-log_x2 = numpy.log(q[qIndex])
-
-# Perform linear interpolation on the logarithmic scale
-log_y = (log_x - log_x1) / (log_x2 - log_x1) * (normPQ[qIndex] - normPQ[qIndex-1]) + normPQ[qIndex-1]
-interpolated_value = numpy.exp(log_y)
-
-y = ((ProteinSLD*SolventSLD)**2 * (ProteinVolume) * interpolated_value)
+y = ((ProteinSLD*SolventSLD)**2 * (ProteinVolume) * interpolate(normPQ,x))
 
         
 return y""").lstrip().rstrip()
+        
+        model['fQ'] = (
+"""
+normPQ = """ + str(normPQ) + """
+y = ((ProteinSLD*SolventSLD)**2 * (ProteinVolume) * interpolate(normPQ,x))
 
+        
+return y"""
+        )
         return model
 
     
@@ -1678,6 +1678,111 @@ return y""").lstrip().rstrip()
                 i += 1
             
         return ("custom_gsc" + str(i))
+    
+    def generateModel(self, model, fname):
+        """
+        generate model from the current plugin state
+        """
+        name = model['filename']
+        if not name:
+            model['filename'] = fname
+            name = fname
+        desc_str = model['description']
+        param_str = TabbedModelEditor.strFromParamDict(model['parameters'])
+        pd_param_str = TabbedModelEditor.strFromParamDict(model['pd_parameters'])
+        func_str = model['text']
+        fQ_str = model['fQ']
+        model_text = CUSTOM_TEMPLATE % {
+            'name': name,
+            'title': 'User model for ' + name,
+            'description': desc_str,
+            'date': datetime.datetime.now().strftime('%YYYY-%mm-%dd'),
+        }
+
+        # Write out parameters
+        param_names = []    # to store parameter names
+        pd_params = []
+        model_text += 'parameters = [ \n'
+        model_text += '#   ["name", "units", default, [lower, upper], "type", "description"],\n'
+        if param_str:
+            for pname, pvalue, desc in TabbedModelEditor.getParamHelper(param_str):
+                param_names.append(pname)
+                model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
+        if pd_param_str:
+            for pname, pvalue, desc in TabbedModelEditor.getParamHelper(pd_param_str):
+                param_names.append(pname)
+                pd_params.append(pname)
+                model_text += "    ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n" % (pname, pvalue, desc)
+        model_text += '    ]\n'
+
+        # Write out function definition
+        model_text += 'def Iq(%s):\n' % ', '.join(['x'] + param_names)
+        model_text += '    """Absolute scattering"""\n'
+        for func_line in func_str.split('\n'):
+                model_text +='%s%s\n' % ("    ", func_line)
+        model_text +='## uncomment the following if Iq works for vector x\n'
+        model_text +='#Iq.vectorized = True\n'
+
+        # If polydisperse, create place holders for form_volume, ER and VR
+        if pd_params:
+            model_text +="\n"
+            model_text +=CUSTOM_TEMPLATE_PD % {'args': ', '.join(pd_params)}
+
+        # Create place holder for Iqxy
+        model_text +="\n"
+        model_text +='#def Iqxy(%s):\n' % ', '.join(["x", "y"] + param_names)
+        model_text +='#    """Absolute scattering of oriented particles."""\n'
+        model_text +='#    ...\n'
+        model_text +='#    return oriented_form(x, y, args)\n'
+        model_text +='## uncomment the following if Iqxy works for vector x, y\n'
+        model_text +='#Iqxy.vectorized = True\n'
+
+        # Create F(Q) Function
+        model_text +="\n"
+        model_text += 'def fQ(%s):\n' % ', '.join(['x'] + param_names)
+        model_text += '    """Absolute scattering"""\n'
+        model_text +="    import numpy\n"
+        for func_line in func_str.split('\n'):
+                model_text +='%s%s\n' % ("    ", func_line)
+        model_text +='## uncomment the following if Iq works for vector x\n'
+        model_text +='#Iq.vectorized = True\n'
+
+        #create interpolation method
+        qValues = self.data.x.tolist()
+
+        interp_str = (
+"""
+import numpy
+q = """ + str(qValues) + """
+interpY =  (yVals) 
+qIndex = -1
+for i in range(len(q)):
+    if x < q[i]:
+        qIndex = i
+        break
+if qIndex == -1:
+    qIndex = len(q)-1
+elif qIndex == 0:
+    qIndex = 1
+    
+log_x = numpy.log(x)
+log_x1 = numpy.log(q[qIndex-1])
+log_x2 = numpy.log(q[qIndex])
+
+# Perform linear interpolation on the logarithmic scale
+log_y = (log_x - log_x1) / (log_x2 - log_x1) * (interpY[qIndex] - interpY[qIndex-1]) + interpY[qIndex-1]
+interpolated_value = numpy.exp(log_y)
+        
+return interpolated_value""").lstrip().rstrip()
+        
+        model_text +="\n"
+        model_text +='def interpolate(yVals,x):\n'
+        model_text +="    import numpy\n"
+        for interp_line in interp_str.split('\n'):
+                model_text +='%s%s\n' % ("    ", interp_line)
+        
+
+        return model_text
         
         
     def onSaveFile(self):
@@ -1992,3 +2097,56 @@ class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
         Plotter3DWidget.__init__(self, manager=parent)
         self.setWindowTitle(self.graph_title)
 
+CUSTOM_TEMPLATE = '''\
+r"""
+Definition
+----------
+
+Calculates %(name)s.
+
+%(description)s
+
+References
+----------
+
+Authorship and Verification
+---------------------------
+
+* **Author:** --- **Date:** %(date)s
+* **Last Modified by:** --- **Date:** %(date)s
+* **Last Reviewed by:** --- **Date:** %(date)s
+"""
+
+from sasmodels.special import *
+from numpy import inf
+
+name = "%(name)s"
+title = "%(title)s"
+description = """%(description)s"""
+
+'''
+
+CUSTOM_TEMPLATE_PD = '''\
+def form_volume(%(args)s):
+    """
+    Volume of the particles used to compute absolute scattering intensity
+    and to weight polydisperse parameter contributions.
+    """
+    return 0.0
+
+def ER(%(args)s):
+    """
+    Effective radius of particles to be used when computing structure factors.
+
+    Input parameters are vectors ranging over the mesh of polydispersity values.
+    """
+    return 0.0
+
+def VR(%(args)s):
+    """
+    Volume ratio of particles to be used when computing structure factors.
+
+    Input parameters are vectors ranging over the mesh of polydispersity values.
+    """
+    return 1.0
+'''
