@@ -22,8 +22,8 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.PlotterData import DataRole
-from sas.qtgui.Plotting.Plotter import Plotter
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
+from sas.qtgui.Plotting.Plotter import Plotter, PlotterWidget
+from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 from sas.qtgui.MainWindow.DataManager import DataManager
@@ -1132,7 +1132,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Create a new 2D plot and add it to the workspace
         """
-        plot2D = Plotter2D(self)
+        plot2D = Plotter2DWidget(parent=self, manager=self)
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
@@ -1160,7 +1160,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 if 'new_plot' not in locals():
-                    new_plot = Plotter(self)
+                    new_plot = PlotterWidget(manager=self, parent=self)
                     new_plot.item = item
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
