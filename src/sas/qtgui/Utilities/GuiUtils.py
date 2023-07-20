@@ -537,20 +537,7 @@ def openLink(url):
 
 def showHelp(url):
     pass
-    """
-    Open a local url in the default browser
-    """
-    # location = HELP_DIRECTORY_LOCATION + url
-    # #WP: Added to handle OSX bundle docs
-    # if os.path.isdir(location) == False:
-    #     sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-    #     location = sas_path+"/"+location
-    # try:
-    #     from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
-    #     helpWindow = DocViewWindow(parent=FittingWidget, source=location)
-    #     helpWindow.show()
-    # except Exception as ex:
-    #     logging.warning("Cannot display help. %s" % ex)
+# showHelp() IS TO BE DELETED IN NEXT COMMIT
 
 def retrieveData1d(data):
     """

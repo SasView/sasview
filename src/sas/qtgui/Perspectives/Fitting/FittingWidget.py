@@ -1867,13 +1867,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # self.parent.showHelp(url) <-- a clue for how to get other help pages open in the future
         # WP: Added to handle OSX bundle docs
-        if url.startswith("/") or url.startswith("\\"):
-            # Checks to see if path is absolute or relative, accomodates urls from many different places
-            from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
-            location = HELP_DIRECTORY_LOCATION + url
-            if os.path.isdir(url) == False:
-                sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-                url = sas_path+"/"+location
         try:
             self.helpWindow = DocViewWindow(parent=self.parent, source=url)
             self.helpWindow.show()
