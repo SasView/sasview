@@ -1,5 +1,8 @@
 import sys
 import os
+from typing import Optional
+
+
 from PySide6 import QtGui, QtWebEngineWidgets, QtCore, QtWidgets, QtWebEngineCore
 
 from .UI.docViewWidgetUI import Ui_docViewerWindow
@@ -11,7 +14,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
     def __init__(self, parent=None, source=None):
-        super(DocViewWindow, self).__init__(parent._parent)
+        super(DocViewWindow, self).__init__(parent)
         self.parent = parent
         self.setupUi(self)
         # disable the context help icon

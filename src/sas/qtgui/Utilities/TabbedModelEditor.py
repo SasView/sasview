@@ -24,7 +24,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
     # Signals for intertab communication plugin -> editor
     def __init__(self, parent=None, edit_only=False, model=False, load_file=None):
-        super(TabbedModelEditor, self).__init__(parent._parent)
+        super(TabbedModelEditor, self).__init__(parent)
 
         self.parent = parent
 
