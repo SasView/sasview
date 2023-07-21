@@ -16,7 +16,7 @@ class RadiusInteractor(BaseInteractor):
                 the radial line
     """
     def __init__(self, base, axes, color='black', zorder=5, arc1=None,
-                 arc2=None, theta2=np.pi / 8, phi=np.py / 4):
+                 arc2=None, theta2=np.pi / 8, phi=np.pi / 4):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)

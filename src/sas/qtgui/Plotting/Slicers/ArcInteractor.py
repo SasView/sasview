@@ -11,7 +11,7 @@ class ArcInteractor(BaseInteractor):
     param phi: angle from the centre point on the arc to each of its edges
     """
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 theta2=np.pi / 3, phi=np.py / 4):
+                 theta2=np.pi / 3, phi=np.pi / 4):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
