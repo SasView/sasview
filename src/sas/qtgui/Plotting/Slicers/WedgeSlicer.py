@@ -10,7 +10,6 @@ from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
 
 class WedgeInteractor(BaseInteractor, SlicerModel):
-    # TODO - update this docstring, mentioning LineInteractor
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
     AnnulusInteractor. It plots a data1D average of a wedge area defined in a
@@ -274,7 +273,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         """
         self.base.draw()
 
-class SectorInteractorQ(WedgeInteractor):
+class WedgeInteractorQ(WedgeInteractor):
     """
     Average in Q direction. The data for all phi at a constant Q are
     averaged together to provide a 1D array in Q (to be plotted as a function
@@ -294,7 +293,7 @@ class SectorInteractorQ(WedgeInteractor):
         self.post_data(SectorQ)
 
 
-class SectorInteractorPhi(WedgeInteractor):
+class WedgeInteractorPhi(WedgeInteractor):
     """
     Average in phi direction. The data for all Q at a constant phi are
     averaged together to provide a 1D array in phi (to be plotted as a function
