@@ -10,9 +10,8 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 
 from bumps.names import *
-from bumps.bounds import Bounded
 from sasmodels.core import load_model, load_model_info
-from sasmodels.data import load_data
+from sasmodels.data import load_data, empty_data1D, empty_data2D, empty_sesans
 from sasmodels.bumps_model import Model, Experiment
 from sasdata.dataloader.loader import Loader
 from sas.sascalc.fit.models import ModelManager
@@ -74,22 +73,29 @@ def start(request, version = None):
                 all_param_dbs.append(get_object_or_404(FitParameter, base_id = parameter_serializer.data.base_id, name = parameter_serializer.data.name))
             #{str: name, value}
             pars = {}
+            par_limits = {}
             for x in all_param_dbs:
                 num = eval(f"{x.datatype}({x.value})")
                 #TODO check if x.name is a valid parameter else return blah
                 #pars = {x.name: num for x in parameter_serializer.data for num = eval(...)}
                 pars[x.name] = num
-                        #check with default list
+                if x.name.lower_limit:
+                    par_limits[x.name]={"lower":x.name.lower_limit}
+                if x.name.upper_limit:
+                    par_limits[x.name]={"upper":x.name.upper_limit}
+            #add in default parameters that don't exist
             for key, value in default_parameters.items():
                 if key not in pars.keys():
                     pars[key] = value
 
+        result = start_fit(curr_model, base_serializer.data, pars, par_limits)
+        base_serializer(results = result)
+        
         if base_serializer.is_valid():
             base_serializer.save()
         else:
             return HttpResponseBadRequest("Serializer error")
 
-        #start_fit(curr_model, base_serializer.data, pars, parameters)
         #add "warnings": ... later
         return {"authenticated":request.user.is_authenticated, "fit_id":base_serializer.data.id}
     return HttpResponseBadRequest()
@@ -97,52 +103,47 @@ def start(request, version = None):
 
 def start_fit(model, data = None, params = None, param_limits = None):
     if params is None:
-        #TEST CODE
-        params = dict(
-            radius = 35,
-            length = 350,
-            background = 0.0,
-            scale = 1.0,
-            sld = 4.0,
-            sld_solvent = 1.0
-        )
-        #params = load_model_info(model).parameters.defaults
+        params = load_model_info(model).parameters.defaults
 
     current_model = load_model(model)
     model = Model(current_model, **params)
+
+    """
+        parameter name: {
+            "lower": 123849,
+            "upper": 14839841414
+        }
+    """
     
-    #TEST CODE
+    """if param_limits is not None:
+        for name in param_limits.keys():
+            lower_limit = model.name.limits[0]
+            upper_limit = model.name.limits[1]
+            if param_limits[name] == "lower":
+                lower_limit = param_limits[name]["lower"]
+            if param_limits[name] == "upper":
+                upper_limit = param_limits[name]["upper"]
+            model.name.range(lower_limit, upper_limit)"""
+    
     model.radius.range(1, 50)
     model.length.range(1, 500)
 
-    #TODO range code
-    #TODO rewrite to figure out if they can pass only one upper/lower
-    """if params is None and param_limits is None:
-        model.radius.range(Bounded.limits)
-        model.length.range(Bounded.limits)
-    else:
-        if param_limits.radius.lower_limit:
-            model.radius.range(param_limits.radius.lower_limit, param_limits.radius.upper_limit)
-        if param_limits.radius.upper_limit:
-            
-        if param_limits.length.lower_limit or param_limits.length.upper_limit:
-            model.length.range(param_limits.length.lower_limit, param_limits.length.upper_limit)"""
-    
     #TODO implement using Loader() instead of load_data
-    loader = Loader()
+    #loader = Loader()
     if data is None:
-        f = get_object_or_404(Data, is_public = True).file
-        test_data = load_data(f.path)
-        M = Experiment(data = test_data, model = model)
+        #TODO needs data to run, but sasview can run without data
+        test_data = empty_data1D(np.log10(1e-4), np.log10(1), 10000)
+        M = Experiment(data = test_data, model=model)
     else:
         f = get_object_or_404(Data, id = data.id).file
         test_data = load_data(f.path)
-        test_data.dy = 0.2*test_data.y
         M = Experiment(data = test_data, model=model)
     problem = FitProblem(M)
-    result = fit(problem, method='amoeba')
+
+    #add method
+    result = fit(problem)
     #problem.fitness.model.state() <- return this dictionary to check if fit is actually working
-    return problem.chisq_str()
+    return problem.fitness.model.state()
 
 
 def status():

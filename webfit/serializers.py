@@ -108,7 +108,7 @@ class AnalysisBaseSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=UserProfile.objects.all(), many=True)
+        instance.current_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=True)
         instance.data_id = serializers.PrimaryKeyRelatedField(queryset=Data.objects.all(), many=True)
         return instance
 

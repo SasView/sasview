@@ -62,7 +62,7 @@ class AnalysisParameterBase(models.Model):
 
     data_type = models.CharField(max_length=100, help_text="parameter type (int/double)")
 
-    unit = models.CharField(max_length=100, blank=False, help_text = "string for what unit the parameter is")
+    unit = models.CharField(max_length=100, blank=True, null = True, help_text = "string for what unit the parameter is")
 
     lower_limit = models.FloatField(null=True, blank=True, default=None, help_text="optional lower limit")
 
@@ -73,6 +73,9 @@ class AnalysisParameterBase(models.Model):
 
     #constraints in parameter relative to another parameter
     #TODO fix this to hold fit parameters, see: foriegnkey?
+    """
     constraints = {
         "fit parameters" : (),
     }
+    """
+    
