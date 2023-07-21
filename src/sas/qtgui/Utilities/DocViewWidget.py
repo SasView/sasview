@@ -14,7 +14,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
     def __init__(self, parent=None, source=None):
-        super(DocViewWindow, self).__init__(parent)
+        super(DocViewWindow, self).__init__(parent._parent)
         self.parent = parent
         self.setupUi(self)
         # disable the context help icon
@@ -37,18 +37,20 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Open editor (TabbedModelEditor) window.
         """
         # Convert QUrl to pathname:
-        from re import findall
+        from re import findall, sub
         # Extract path from QUrl
         path = findall(r"(?<=file:\/\/\/).+\.html", str(self.webEngineViewer.url()))
         # Test to see if we're dealing with a model html file or other html file
         if "models" in path[0]:
-            file = os.path.splitext(os.path.basename(path[0]))[0]
-            print(file)
+            py_base_file_name = os.path.splitext(os.path.basename(path[0]))[0]
+            
             self.editorWindow =  TabbedModelEditor(parent=self.parent,
                                                    edit_only=True,
-                                                   load_file=file,
+                                                   load_file=py_base_file_name,
                                                    model=True)
         else:
+            # Remove everything before /user/ (or \user\)
+            file = sub(r"^.*?(?=[\/\\]user)", "", path[0])
             self.editorWindow =  TabbedModelEditor(parent=self.parent,
                                                    edit_only=True,
                                                    load_file=file,

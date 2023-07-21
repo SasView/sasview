@@ -354,7 +354,7 @@ class GuiManager:
         Open a local url in the default browser
         """
         try:
-            self.helpWindow = DocViewWindow(parent=self._parent, source=url)
+            self.helpWindow = DocViewWindow(parent=self, source=url)
             self.helpWindow.show()
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)

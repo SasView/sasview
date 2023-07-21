@@ -24,7 +24,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
     # Signals for intertab communication plugin -> editor
     def __init__(self, parent=None, edit_only=False, model=False, load_file=None):
-        super(TabbedModelEditor, self).__init__(parent)
+        super(TabbedModelEditor, self).__init__(parent._parent)
 
         self.parent = parent
 
@@ -129,11 +129,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.is_modified = False
 
         if at_launch:
+            from sas.qtgui.Utilities.GuiUtils import PY_SOURCE, SAS_DIR
+            py_rst_files = SAS_DIR + "/" + PY_SOURCE
             if self.model is True:
                 # Find location of model .py files and load from that location
-                from sas.qtgui.Utilities.GuiUtils import PY_SOURCE, SAS_DIR
-                model_files = SAS_DIR + "/" + PY_SOURCE
-                filename = model_files + "/user/models/src/" + self.load_file + ".py"
+                filename = py_rst_files + "/user/models/src/" + self.load_file + ".py"
+            else:
+                filename = py_rst_files + self.load_file.replace(".html", ".rst")
         else:
             plugin_location = models.find_plugins_dir()
             filename = QtWidgets.QFileDialog.getOpenFileName(
@@ -348,8 +350,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             logging.error(traceback_to_show)
 
             # Set the status bar message
+            # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
             self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
-
             # Put a thick, red border around the mini-editor
             self.tabWidget.currentWidget().txtEditor.setStyleSheet("border: 5px solid red")
             # last_lines = traceback.format_exc().split('\n')[-4:]
