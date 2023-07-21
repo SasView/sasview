@@ -68,7 +68,7 @@ class ArcInteractor(BaseInteractor):
                            np.power(self._mouse_y, 2))
         return radius
 
-    def update(self, theta2=None, phi=None, r=None, nbins=120):
+    def update(self, theta2=None, phi=None, r=None, nbins=100):
         """
         Update the plotted arc
         :param theta2: angle from x-axis of the central point on the arc
@@ -135,19 +135,18 @@ class ArcInteractor(BaseInteractor):
         self.base.update()
         self.base.draw()
 
-    # This function is effectively just a move() clone?
     def set_cursor(self, x, y):
         self.move(x, y, None)
         self.update()
 
-    def get_params(self):
-        params = {}
-        params["radius"] = self.radius
-        params["theta2"] = self.theta2
-        params["phi"] = self.phi
-        return params
+    # def get_params(self):
+    #     params = {}
+    #     params["radius"] = self.radius
+    #     params["theta2"] = self.theta2
+    #     params["phi"] = self.phi
+    #     return params
 
-    def set_params(self, params):
-        r = params["radius"]
-        theta = params["theta2"]
-        self.set_cursor(r*np.cos(theta), r*np.sin(theta))
+    # def set_params(self, params):
+    #     r = params["radius"]
+    #     theta = params["theta2"] # or = self.theta2 (?)
+    #     self.set_cursor(r*np.cos(theta), r*np.sin(theta))
