@@ -61,6 +61,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
         """
         # Ensure urls are properly processed before passing into widget
         url = self.processUrl()
+        print(url)
         settings = self.webEngineViewer.settings()
         # Allows QtWebEngine to access MathJax and code highlighting APIs
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
@@ -76,12 +77,17 @@ class DocViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
             sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
             url = sas_path+"/"+location
         # Convert path to a QUrl needed for QWebViewerEngine
-        abs_url = QtCore.QUrl.fromLocalFile(os.path.abspath(url))
+        # abs_url = QtCore.QUrl.fromUserInput(os.path.abspath(url))
+        abs_url = QtCore.QUrl()
+        abs_url.setUrl(QtCore.QUrl.fromLocalFile(url).toLocalFile())
+        # # Correct QUrl replacing '#' with ASCII encoding '%23'
+        # if "%23" in str(abs_url):
+        #     abs_url = str(abs_url).replace("%23", "#")
         return abs_url
 
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    win =  DocViewWindow()
-    win.show()
-    app.exec_()
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     win =  DocViewWindow()
+#     win.show()
+#     app.exec_()
