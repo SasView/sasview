@@ -86,10 +86,3 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         abs_url = QtCore.QUrl()
         abs_url.setUrl(QtCore.QUrl.fromLocalFile(url).toLocalFile())
         return abs_url
-
-
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     win =  DocViewWindow()
-#     win.show()
-#     app.exec_()
