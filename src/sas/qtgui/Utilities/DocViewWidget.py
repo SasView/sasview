@@ -5,11 +5,11 @@ from typing import Optional
 
 from PySide6 import QtGui, QtWebEngineWidgets, QtCore, QtWidgets, QtWebEngineCore
 
-from .UI.docViewWidgetUI import Ui_docViewerWindow
+from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 
 
-class DocViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
+class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     """
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
@@ -30,6 +30,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
 
     def initializeSignals(self):
         self.editButton.clicked.connect(self.onEdit)
+        self.closeButton.clicked.connect(self.onClose)
 
     def onEdit(self):
         """
@@ -53,8 +54,13 @@ class DocViewWindow(QtWidgets.QDialog, Ui_docViewerWindow):
                                                    load_file=file,
                                                    model=False)
         self.editorWindow.show()
-        
 
+    def onClose(self, event):
+        """
+        Close window
+        """
+        self.close()
+        
     def loadHtml(self):
         """
         Loads the HTML file specified when this python is called from another part of the program.
