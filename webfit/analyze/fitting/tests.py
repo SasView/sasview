@@ -25,17 +25,35 @@ class TestStart(TestCase):
     def setUp(self):
         User.objects.create(username="test_user", )
 
-    fixtures = ['data/fixtures/example_data.json',]
-    def can_fit_start(self):
-        chisq = start_fit("cylinder", get_object_or_404(Data, is_public = True))
-        self.assertEqual(chisq, "0.03(13)")
+
 
 class TestFitStart(TestCase):
     def setUp(self):
         User.objects.create(username="test_user", )
 
-    def is_fit_giving_correct_results(self):
-        factory.put()
+    fixtures = ['data/fixtures/example_data.json',]
+    def can_fit_start_give_correct_answer(self):
+        pars_limit = { 
+                        "radius":{
+                            "lower_limit":1,
+                            "upper_limit":50
+                        },
+                        "length":{
+                            "lower_limit":1,
+                            "upper_limit":500
+                        },
+        }
+        params = dict(
+            radius = 35,
+            length = 350,
+            background = 0.0,
+            scale = 1.0,
+            sld = 4.0,
+            sld_solvent = 1.0
+        )
+        data = Data.objects.get(is_public = True)
+        chisq = start_fit("cylinder", params=params)
+        self.assertEqual(chisq, "0.03(13)")
 
 class TestLoader(TestCase):
     fixtures = ['data/fixtures/example_data.json',]
