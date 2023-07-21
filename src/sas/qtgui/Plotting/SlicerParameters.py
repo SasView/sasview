@@ -14,6 +14,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
@@ -56,7 +58,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                           1: SectorInteractor,
                           2: AnnulusInteractor,
                           3: BoxInteractorX,
-                          4: BoxInteractorY}
+                          4: BoxInteractorY,
+                          5: WedgeInteractorQ,
+                          6: WedgeInteractorPhi}
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
