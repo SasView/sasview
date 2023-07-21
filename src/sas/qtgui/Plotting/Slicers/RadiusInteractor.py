@@ -1,4 +1,5 @@
 import numpy as np
+
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 
@@ -15,33 +16,54 @@ class RadiusInteractor(BaseInteractor):
                 the radial line
     """
     def __init__(self, base, axes, color='black', zorder=5, arc1=None,
-                 arc2=None, theta=np.pi / 8):
+                 arc2=None, theta2=np.pi / 8, phi=np.py / 4):
         """
         """
-        _BaseInteractor.__init__(self, base, axes, color=color)
+        BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
+        self.color = color
         self.r1 = arc1.get_radius()
         self.r2 = arc2.get_radius()
-        self.theta = theta
-        self.save_theta = theta
-        self.move_stop = False
-        self.theta_left = None
-        self.theta_right = None
+        self.theta2 = theta2
+        # self.save_theta2 = theta2
+        self.phi = phi
+        self.save_phi = phi
         self.arc1 = arc1
         self.arc2 = arc2
-        x1 = self.r1 * np.cos(self.theta)
-        y1 = self.r1 * np.sin(self.theta)
-        x2 = self.r2 * np.cos(self.theta)
-        y2 = self.r2 * np.sin(self.theta)
-        self.line = self.axes.plot([x1, x2], [y1, y2],
-                                   linestyle='-', marker='',
-                                   color=self.color,
-                                   visible=True)[0]
-        self.phi = theta
-        self.npts = 20
+        # Variables for the left and right radial lines
+        l_x1 = self.r1 * np.cos(self.theta2 + self.phi)
+        l_y1 = self.r1 * np.sin(self.theta2 + self.phi)
+        l_x2 = self.r2 * np.cos(self.theta2 + self.phi)
+        l_y2 = self.r2 * np.sin(self.theta2 + self.phi)
+        r_x1 = self.r1 * np.cos(self.theta2 - self.phi)
+        r_y1 = self.r1 * np.sin(self.theta2 - self.phi)
+        r_x2 = self.r2 * np.cos(self.theta2 - self.phi)
+        r_y2 = self.r2 * np.sin(self.theta2 - self.phi)
+        # Define the left and right markers
+        self.l_marker = self.axes.plot([(l_x1+l_x2)/2], [(l_y1+l_y2)/2],
+                                       linestyle='', marker='s', markersize=10,
+                                       color=self.color, alpha=0.6,
+                                       pickradius=5, label='pick',
+                                       zorder=zorder, visable=True)[0]
+        self.r_marker = self.axes.plot([(r_x1+r_x2)/2], [(r_y1+r_y2)/2],
+                                       linestyle='', marker='s', markersize=10,
+                                       color=self.color, alpha=0.6,
+                                       pickradius=5, label='pick',
+                                       zorder=zorder, visable=True)[0]
+        # Define the left and right lines
+        self.l_line = self.axes.plot([l_x1, l_x2], [l_y1, l_y2],
+                                     linestyle='-', marker='',
+                                     color=self.color, visible=True)[0]
+        self.r_line = self.axes.plot([r_x1, r_x2], [r_y1, r_y2],
+                                     linestyle='-', marker='',
+                                     color=self.color, visible=True)[0]
+        # # Flag to differentiate the left side's motion from the right's
+        # self.left_moving = False
+        # Flag to keep track of motion
         self.has_move = False
-        self.connect_markers([self.line])
+        self.connect_markers([self.l_marker, self.l_line,
+                              self.r_marker, self.r_line])
         self.update()
 
     def set_layer(self, n):
@@ -55,40 +77,51 @@ class RadiusInteractor(BaseInteractor):
         """
         self.clear_markers()
         try:
-            self.line.remove()
+            self.l_marker.remove()
+            self.l_line.remove()
+            self.r_marker.remove()
+            self.r_line.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
 
-    def get_angle(self):
-        """
-        """
-        return self.theta
+    # def get_angle(self):
+    #     """
+    #     """
+    #     return self.theta
 
-    def update(self, r1=None, r2=None, theta=None):
+    def update(self, theta2=None, phi=None):
         """
         Draw the new roughness on the graph.
         """
-        if r1 is not None:
-            self.r1 = r1
-        if r2 is not None:
-            self.r2 = r2
-        if theta is not None:
-            self.theta = theta
-        x1 = self.r1 * np.cos(self.theta)
-        y1 = self.r1 * np.sin(self.theta)
-        x2 = self.r2 * np.cos(self.theta)
-        y2 = self.r2 * np.sin(self.theta)
-        self.line.set(xdata=[x1, x2], ydata=[y1, y2])
+        # TODO - try out an 'if self.arc1.has_move:' etc
+        self.r1 = self.arc1.get_radius()
+        self.r2 = self.arc2.get_radius()
+        if theta2 is not None:
+            self.theta2 = theta2
+        if phi is not None:
+            self.phi = phi
+        l_x1 = self.r1 * np.cos(self.theta2 + self.phi)
+        l_y1 = self.r1 * np.sin(self.theta2 + self.phi)
+        l_x2 = self.r2 * np.cos(self.theta2 + self.phi)
+        l_y2 = self.r2 * np.sin(self.theta2 + self.phi)
+        r_x1 = self.r1 * np.cos(self.theta2 - self.phi)
+        r_y1 = self.r1 * np.sin(self.theta2 - self.phi)
+        r_x2 = self.r2 * np.cos(self.theta2 - self.phi)
+        r_y2 = self.r2 * np.sin(self.theta2 - self.phi)
+        self.l_marker.set(xdata=[(l_x1+l_x2)/2], ydata=[(l_y1+l_y2)/2])
+        self.l_line.set(xdata=[l_x1, l_x2], ydata=[l_y1, l_y2])
+        self.r_marker.set(xdata=[(r_x1+r_x2)/2], ydata=[(r_y1+r_y2)/2])
+        self.r_line.set(xdata=[r_x1, r_x2], ydata=[r_y1, r_y2])
 
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.save_theta = np.arctan2(ev.y, ev.x)
-        self.base.freeze_axes()
+        self.save_phi = self.phi
+        # May also need a save_theta2 variable
 
     def moveend(self, ev):
         """
@@ -100,39 +133,48 @@ class RadiusInteractor(BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self.theta = self.save_theta
+        self.phi = self.save_phi
+        # May also need a save_theta2 variable
 
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        self.theta = np.arctan2(y, x)
+        theta = np.arctan2(y, x)
+        self.phi = np.fabs(theta - self.theta2)
         self.has_move = True
         self.base.update()
         self.base.draw()
 
-    def set_cursor(self, r_min, r_max, theta):
+    def set_cursor(self, x, y):
         """
         """
-        self.theta = theta
-        self.r1 = r_min
-        self.r2 = r_max
+        self.move(x, y, None)
         self.update()
 
-    def get_params(self):
-        """
-        """
-        params = {}
-        params["radius1"] = self.r1
-        params["radius2"] = self.r2
-        params["theta"] = self.theta
-        return params
+    # def get_params(self):
+    #     """
+    #     Store a copy of values of parameters of the slicer into a dictionary.
+    #     :return params: the dictionary created
+    #     """
+    #     params = {}
+    #     params["radius1"] = self.r1
+    #     params["radius2"] = self.r2
+    #     params["theta"] = self.theta2
+    #     params["phi"] = self.phi
+    #     return params
 
-    def set_params(self, params):
-        """
-        """
-        x1 = params["radius1"]
-        x2 = params["radius2"]
-        theta = params["theta"]
-        self.set_cursor(x1, x2, theta)
+    # def set_params(self, params):
+    #     """
+    #     Receive a dictionary and reset the slicer with values contained
+    #     in the values of the dictionary.
+    #
+    #     :param params: a dictionary containing name of slicer parameters and
+    #         values the user assigned to the slicer.
+    #     """
+    #     r1 = params["radius1"]
+    #     r2 = params["radius2"]
+    #     theta = params["theta"]
+    #     phi = params["phi"]
+    #     self.set_cursor(x1, x2, theta)
 
