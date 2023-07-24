@@ -40,8 +40,6 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 # Local UI
 from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
 
-_Q1D_MIN = 0.001
-
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
     trigger_plot_3d = QtCore.Signal()
