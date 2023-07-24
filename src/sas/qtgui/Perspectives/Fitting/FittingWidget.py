@@ -639,7 +639,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
         self.fittingFinishedSignal.connect(self.fitComplete)
-        self.docsRegeneratedSignal.connect(self.showHelp, )
         self.Calc1DFinishedSignal.connect(self.complete1D)
         self.Calc2DFinishedSignal.connect(self.complete2D)
 
