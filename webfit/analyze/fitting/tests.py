@@ -32,14 +32,21 @@ class TestLists(APITestCase):
 
     def get_model_list(self):
         request = self.client.post('/v1/analyze/fit/models/')
-        self.assertEqual(request.data, {"models":['adsorbed_layer', 'barbell', 'bcc_paracrystal', 'be_polyelectrolyte', 'binary_hard_sphere', 'broad_peak', 'capped_cylinder', 'core_multi_shell', 'core_shell_bicelle', 'core_shell_bicelle_elliptical', 'core_shell_bicelle_elliptical_belt_rough', 'core_shell_cylinder', 'core_shell_ellipsoid', 'core_shell_parallelepiped', 'core_shell_sphere', 'correlation_length', 'cylinder', 'dab', 'ellipsoid', 'elliptical_cylinder', 'fcc_paracrystal', 'flexible_cylinder', 'flexible_cylinder_elliptical', 'fractal', 'fractal_core_shell', 'fuzzy_sphere', 'gauss_lorentz_gel', 'gaussian_peak', 'gel_fit', 'guinier', 'guinier_porod', 'hardsphere', 'hayter_msa', 'hollow_cylinder', 'hollow_rectangular_prism', 'hollow_rectangular_prism_thin_walls', 'lamellar', 'lamellar_hg', 'lamellar_hg_stack_caille', 'lamellar_stack_caille', 'lamellar_stack_paracrystal', 'line', 'linear_pearls', 'lorentz', 'mass_fractal', 'mass_surface_fractal', 'mono_gauss_coil', 'multilayer_vesicle', 'onion', 'parallelepiped', 'peak_lorentz', 'pearl_necklace', 'poly_gauss_coil', 'polymer_excl_volume', 'polymer_micelle', 'porod', 'power_law', 'pringle', 'raspberry', 'rectangular_prism', 'rpa', 'sc_paracrystal', 'sphere', 'spherical_sld', 'spinodal', 'squarewell', 'stacked_disks', 'star_polymer', 'stickyhardsphere', 'superball', 'surface_fractal', 'teubner_strey', 'triaxial_ellipsoid', 'two_lorentzian', 'two_power_law', 'unified_power_Rg', 'vesicle']})
+        self.assertEqual(request.data, {"all models":['adsorbed_layer', 'barbell', 'bcc_paracrystal', 'be_polyelectrolyte', 'binary_hard_sphere', 'broad_peak', 'capped_cylinder', 'core_multi_shell', 'core_shell_bicelle', 'core_shell_bicelle_elliptical', 'core_shell_bicelle_elliptical_belt_rough', 'core_shell_cylinder', 'core_shell_ellipsoid', 'core_shell_parallelepiped', 'core_shell_sphere', 'correlation_length', 'cylinder', 'dab', 'ellipsoid', 'elliptical_cylinder', 'fcc_paracrystal', 'flexible_cylinder', 'flexible_cylinder_elliptical', 'fractal', 'fractal_core_shell', 'fuzzy_sphere', 'gauss_lorentz_gel', 'gaussian_peak', 'gel_fit', 'guinier', 'guinier_porod', 'hardsphere', 'hayter_msa', 'hollow_cylinder', 'hollow_rectangular_prism', 'hollow_rectangular_prism_thin_walls', 'lamellar', 'lamellar_hg', 'lamellar_hg_stack_caille', 'lamellar_stack_caille', 'lamellar_stack_paracrystal', 'line', 'linear_pearls', 'lorentz', 'mass_fractal', 'mass_surface_fractal', 'mono_gauss_coil', 'multilayer_vesicle', 'onion', 'parallelepiped', 'peak_lorentz', 'pearl_necklace', 'poly_gauss_coil', 'polymer_excl_volume', 'polymer_micelle', 'porod', 'power_law', 'pringle', 'raspberry', 'rectangular_prism', 'rpa', 'sc_paracrystal', 'sphere', 'spherical_sld', 'spinodal', 'squarewell', 'stacked_disks', 'star_polymer', 'stickyhardsphere', 'superball', 'surface_fractal', 'teubner_strey', 'triaxial_ellipsoid', 'two_lorentzian', 'two_power_law', 'unified_power_Rg', 'vesicle']})
 
     def get_model_list_category(self):
         data = {
-            "categories":"cylinder"
+            "category":"Cylinder"
         }
         request = self.client.post('/v1/analyze/fit/models/', data, format='json')
-        self.assertEqual(request.data, {"models":""})
+        self.assertEqual(request.data, {"Cylinder models":[['barbell', True], ['capped_cylinder', True], ['core_shell_bicelle', True], ['core_shell_bicelle_elliptical', True], ['core_shell_bicelle_elliptical_belt_rough', True], ['core_shell_cylinder', True], ['cylinder', True], ['elliptical_cylinder', True], ['flexible_cylinder', True], ['flexible_cylinder_elliptical', True], ['hollow_cylinder', True], ['pearl_necklace', True], ['pringle', True], ['stacked_disks', True]]})
+
+    def get_model_list_kind(self):
+        data = {
+            "kind":"py"
+        }
+        request = self.client.post('/v1/analyze/fit/models/', data, format='json')
+        self.assertEqual(request.data, {"py models":['adsorbed_layer', 'be_polyelectrolyte', 'broad_peak', 'correlation_length', 'gauss_lorentz_gel', 'guinier_porod', 'line', 'peak_lorentz', 'poly_gauss_coil', 'polymer_excl_volume', 'porod', 'power_law', 'spinodal', 'teubner_strey', 'two_lorentzian', 'two_power_law', 'unified_power_Rg']})
 
     def get_optimizer_list(self):
         request = self.client.get('/v1/analyze/fit/optimizers/')
