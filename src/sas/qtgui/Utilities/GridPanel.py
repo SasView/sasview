@@ -19,7 +19,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
     windowClosedSignal = QtCore.Signal()
-    def __init__(self, parent = None, output_data=None):
+    def __init__(self, parent=None, output_data=None):
 
         super(BatchOutputPanel, self).__init__(parent._parent)
         self.setupUi(self)
@@ -188,7 +188,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
         try:
-            self.helpWindow = DocViewWindow(parent=None, source=url)
+            self.helpWindow = DocViewWindow(parent=self.parent, source=url)
             self.helpWindow.show()
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
