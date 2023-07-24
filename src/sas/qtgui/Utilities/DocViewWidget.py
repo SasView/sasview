@@ -43,7 +43,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Test to see if we're dealing with a model html file or other html file
         if "models" in path[0]:
             py_base_file_name = os.path.splitext(os.path.basename(path[0]))[0]
-            print(py_base_file_name, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             self.editorWindow =  TabbedModelEditor(parent=self.parent,
                                                    edit_only=True,
                                                    load_file=py_base_file_name,
