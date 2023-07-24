@@ -26,9 +26,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Necessary global
         self.source = source
 
-        self.loadHtml() #loads the html file specified in the source url to the QWebViewer
-
         self.initializeSignals() # Connect signals
+
+        self.regenerateNeeded() #loads the html file specified in the source url to the QWebViewer
 
     def initializeSignals(self):
         """
@@ -72,14 +72,41 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Close window
         """
         self.close()
+    
+    def regenerateNeeded(self):
+        """
+        Determine what processes are needed in order to display updated docs
+        """
+        # Define a lot of path variables
+        rst_path = self.findRstEquivalent()
+
+        self.loadHtml() #loads the html file specified in the source url to the QWebViewer
+    
+    def findRstEquivalent(self):
+        """
+        Returns path of equivalent Python file to a specified HTML file. If the specified HTML file is not from a model, then return the path to its RST.
+        is_python variable determines whether of not we will have to generate a RST from the python file before running it through sphinx.
+        """
+        is_python = False
+        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+        html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
+        regen_string = ""
+
+        if "models" in self.source:
+            pass
+        if "index" in self.source:
+            pass
+        else:
+            pass
         
+        return regen_string, is_python
+
     def loadHtml(self):
         """
         Loads the HTML file specified when this python is called from another part of the program.
         """
         # Ensure urls are properly processed before passing into widget
         url = self.processUrl()
-        print(url)
         settings = self.webEngineViewer.settings()
         # Allows QtWebEngine to access MathJax and code highlighting APIs
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
