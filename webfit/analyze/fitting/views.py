@@ -10,9 +10,10 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 
 from bumps.names import *
-from sasmodels.core import load_model, load_model_info
+from sasmodels.core import load_model, load_model_info, list_models
 from sasmodels.data import load_data, empty_data1D, empty_data2D, empty_sesans
 from sasmodels.bumps_model import Model, Experiment
+from sasmodels.direct_model import DirectModel
 from sasdata.dataloader.loader import Loader
 from sas.sascalc.fit.models import ModelManager
 from bumps import fitters
@@ -33,10 +34,10 @@ from .models import (
 
 fit_logger = getLogger(__name__)
 model_manager = ModelManager()
-MODEL_CHOICES = model_manager.get_model_list
+#MODEL_CHOICES = model_manager.get_model_dictionary()
 
 #start() only puts all the request data into the db, start_fit() runs calculations
-@api_view(["PUT"])
+@api_view(['PUT'])
 def start(request, version = None):
     base_serializer = FitSerializer(is_public = request.data.is_public)
     
@@ -106,42 +107,44 @@ def start_fit(model, data = None, params = None, param_limits = None):
         params = load_model_info(model).parameters.defaults
 
     current_model = load_model(model)
-    model = Model(current_model, **params)
-
-    """
-        parameter name: {
-            "lower": 123849,
-            "upper": 14839841414
-        }
-    """
-    
-    """if param_limits is not None:
-        for name in param_limits.keys():
-            lower_limit = model.name.limits[0]
-            upper_limit = model.name.limits[1]
-            if param_limits[name] == "lower":
-                lower_limit = param_limits[name]["lower"]
-            if param_limits[name] == "upper":
-                upper_limit = param_limits[name]["upper"]
-            model.name.range(lower_limit, upper_limit)"""
-    
-    model.radius.range(1, 50)
-    model.length.range(1, 500)
-
-    #TODO implement using Loader() instead of load_data
-    #loader = Loader()
     if data is None:
-        #TODO needs data to run, but sasview can run without data
+        #TODO impliment qmin/qmax
         test_data = empty_data1D(np.log10(1e-4), np.log10(1), 10000)
-        M = Experiment(data = test_data, model=model)
+        call_kernel = DirectModel(test_data, current_model, params)
+        
     else:
+        model = Model(current_model, **params)
+
+        """
+            parameter name: {
+                "lower": 123849,
+                "upper": 14839841414
+            }
+        """
+        
+        if param_limits is not None:
+            for name in param_limits.keys():
+                attr = getattr(model, name)
+                lower_limit = attr.limits[0]
+                upper_limit = attr.limits[1]
+                if param_limits[name] == "lower":
+                    lower_limit = param_limits[name]["lower"]
+                if param_limits[name] == "upper":
+                    upper_limit = param_limits[name]["upper"]
+                attr.range(lower_limit, upper_limit)
+        
+        model.radius.range(1, 50)
+        model.length.range(1, 500)
+
+        #TODO implement using Loader() instead of load_data
+        #loader = Loader()
         f = get_object_or_404(Data, id = data.id).file
         test_data = load_data(f.path)
         M = Experiment(data = test_data, model=model)
-    problem = FitProblem(M)
+        problem = FitProblem(M)
+        #add method
+        result = fit(problem)
 
-    #add method
-    result = fit(problem)
     #problem.fitness.model.state() <- return this dictionary to check if fit is actually working
     return problem.fitness.model.state()
 
@@ -150,7 +153,7 @@ def status():
     return 0
 
 
-@api_view(["GET"])
+@api_view(['GET'])
 def fit_status(request, fit_id, version = None):
     fit_obj = get_object_or_404(Fit, id = fit_id)
     if request.method == "GET":
@@ -164,7 +167,7 @@ def fit_status(request, fit_id, version = None):
     return HttpResponseBadRequest()
 
 
-@api_view(["GET"])
+@api_view(['GET'])
 def list_optimizers(request, version = None):
     if request.method == "GET":
         return_info = {"optimizers" : [fitters.FIT_ACTIVE_IDS]}
@@ -172,20 +175,25 @@ def list_optimizers(request, version = None):
     return HttpResponseBadRequest()
 
 
-@api_view(["GET"])
-def list_models(request, version = None):
-    if request.method == "GET":
-        unique_models = {"models": []}
-        if request.categories:
-            user_file = CategoryInstaller.get_user_file()
-            with open(user_file) as cat_file:
-                file_contents = cat_file.read()
-            spec_cat = file_contents[request.data.categories]
-            unique_models["models"] += [spec_cat]
-        #elif: request.kind
+@api_view(['POST'])
+def list_model(request, version = None):
+    if request.method == "POST":
+        unique_models = {}
+        if request.data:
+            if request.data.categories:
+                user_file = CategoryInstaller.get_user_file()
+                with open(user_file) as cat_file:
+                    file_contents = cat_file.read()
+                spec_cat = file_contents[request.data.categories]
+                unique_models["models"] += spec_cat
+            elif request.data.kind:
+                model_choices = list_models(request.data.kind)
+                unique_models["models"] = model_choices
         else:
-            unique_models["models"] = [MODEL_CHOICES]
-        return unique_models
+            #unique_models["models"] = MODEL_CHOICES
+            model_choices = list_models("all")
+            unique_models["models"] = model_choices
+        return Response(unique_models)
         """TODO requires discussion:
         if request.username:
             if request.user.is_authenticated:
