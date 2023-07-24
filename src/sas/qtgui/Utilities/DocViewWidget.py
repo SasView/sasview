@@ -57,7 +57,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                                                    model=False)
         self.editorWindow.show()
 
-    def onClose(self, event):
+    def onClose(self):
         """
         Close window
         """
