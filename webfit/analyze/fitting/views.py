@@ -179,20 +179,22 @@ def list_optimizers(request, version = None):
 def list_model(request, version = None):
     if request.method == "POST":
         unique_models = {}
+        #work on being able to do both
         if request.data:
-            if request.data.categories:
+            if "category" in request.data:
                 user_file = CategoryInstaller.get_user_file()
                 with open(user_file) as cat_file:
-                    file_contents = cat_file.read()
-                spec_cat = file_contents[request.data.categories]
-                unique_models["models"] += spec_cat
-            elif request.data.kind:
-                model_choices = list_models(request.data.kind)
-                unique_models["models"] = model_choices
+                    file_contents = json.load(cat_file)
+                spec_cat = file_contents.get(request.data["category"], [])
+                unique_models[request.data["category"] + " models"] = spec_cat
+            elif "kind" in request.data:
+                if list_models(request.data["kind"]):
+                    model_choices = list_models(request.data["kind"])
+                    unique_models[request.data["kind"] + " models"] = model_choices
         else:
             #unique_models["models"] = MODEL_CHOICES
             model_choices = list_models("all")
-            unique_models["models"] = model_choices
+            unique_models["all models"] = model_choices
         return Response(unique_models)
         """TODO requires discussion:
         if request.username:
