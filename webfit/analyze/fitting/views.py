@@ -39,15 +39,15 @@ model_manager = ModelManager()
 #start() only puts all the request data into the db, start_fit() runs calculations
 @api_view(['PUT'])
 def start(request, version = None):
-    base_serializer = FitSerializer(is_public = request.data.is_public)
+    base_serializer = FitSerializer(is_public = request.data["is_public"])
     
     #TODO WIP not sure if this works yet
     if request.method == "PUT":
         #set status
 
         #try to create model for check if the modelstring is valid
-        if load_model(request.data.model):
-            curr_model = request.data.model
+        if load_model(request.data["model"]):
+            curr_model = request.data["model"]
             base_serializer(model = curr_model)
             #would return a dictionary
             default_parameters = load_model_info(curr_model).parameters.defaults
@@ -55,20 +55,25 @@ def start(request, version = None):
         else:
             return HttpResponseBadRequest("No model selected for fitting")
 
-        if request.data.data_id:
-            if Data.objects.filter(is_public = True, id = request.data.data_id).get():
+        if request.data["data_id"]:
+            if Data.objects.filter(is_public = True, id = request.data["data_id"]).get():
                 return HttpResponseBadRequest("data isn't public")
             if not (request.user.is_authenticated and 
-                    request.user is Data.objects.get(id=request.data.data_id).current_user):
+                    request.user is Data.objects.get(id=request.data["data_id"]).current_user):
                 return HttpResponseBadRequest("data is not user's")
             #search online to see how to add serializers.PrimaryKeyRelatedField
-            base_serializer(data_id = request.data.data_id)
+            base_serializer(data_id = request.data["data_id"])
 
-        if request.data.parameters:
-            parameters = JSONParser().parse(request.data.parameters)
+        if request.data["parameters"]:
+            """parameters:{
+                name:{
+                    value:
+                }
+            }"""
+            parameters = JSONParser().parse(request.data["parameters"])
             all_param_dbs = []
-            for value in parameters:
-                parameter_serializer = FitParameterSerializer(base_id = base_serializer.data.id, data = value)
+            for name in parameters:
+                parameter_serializer = FitParameterSerializer(base_id = base_serializer.data.id, name = name, data = parameters[name])
                 if parameter_serializer.is_valid():
                     parameter_serializer.save()
                 all_param_dbs.append(get_object_or_404(FitParameter, base_id = parameter_serializer.data.base_id, name = parameter_serializer.data.name))
