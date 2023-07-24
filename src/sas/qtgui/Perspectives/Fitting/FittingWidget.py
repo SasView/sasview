@@ -109,7 +109,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     constraintAddedSignal = QtCore.Signal(list, str)
     newModelSignal = QtCore.Signal()
-    docsRegeneratedSignal = QtCore.Signal(str)
     fittingFinishedSignal = QtCore.Signal(tuple)
     batchFittingFinishedSignal = QtCore.Signal(tuple)
     Calc1DFinishedSignal = QtCore.Signal(dict)
@@ -1863,26 +1862,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.helpWindow.show()
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
-
-    def regenerateDocs(self, regen_docs, target=None):
-        """
-        Regenerates documentation for a specific file (target) in a subprocess
-        """
-        import subprocess
-        command = [
-            sys.executable,
-            regen_docs,
-            target,
-        ]
-        doc_regen_dir = os.path.dirname(regen_docs)
-        subprocess.run(command, cwd=doc_regen_dir) # cwd parameter tells subprocess to open from a specific directory
-
-    def docRegenComplete(self, d, help_location):
-        """
-        Tells Qt that regeneration of docs is done and emits signal tied to opening
-        documentation viewer window
-        """
-        self.docsRegeneratedSignal.emit(help_location)
 
     def onDisplayMagneticAngles(self):
         """
