@@ -31,6 +31,11 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.initializeSignals() # Connect signals
 
     def initializeSignals(self):
+        """
+        Initialize Signals 
+        """
+        self.communicate.docsRegeneratedSignal.connect(self.loadHtml)
+
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
 
@@ -118,3 +123,23 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         d = threads.deferToThread(self.regenerateDocs, regen_docs, target=py_target) # Regenerate specific documentation file
         d.addCallback(self.docRegenComplete, help_location)
         regen_in_progress = True
+    
+    def regenerateDocs(self, regen_docs, target=None):
+        """
+        Regenerates documentation for a specific file (target) in a subprocess
+        """
+        import subprocess
+        command = [
+            sys.executable,
+            regen_docs,
+            target,
+        ]
+        doc_regen_dir = os.path.dirname(regen_docs)
+        subprocess.run(command, cwd=doc_regen_dir) # cwd parameter tells subprocess to open from a specific directory
+    
+    def docRegenComplete(self, d, help_location):
+        """
+        Tells Qt that regeneration of docs is done and emits signal tied to opening
+        documentation viewer window
+        """
+        self.communicate.docsRegeneratedSignal.emit(help_location)
