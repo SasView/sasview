@@ -1,43 +1,53 @@
 import os
 import re
 import sys
+import json
 import logging
+import django
 from glob import glob
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from data.models import Data
 
-#should this be moved outside the webfit/django directory?
-#^model marketplace does this for somereason? is it so that they can import withotu worrying 
-#about django's code interfering?
+# Initialise the Django environment. This must be done before importing anything
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sasmarket.settings")
+django.setup()
 
-"""
-where does the example data get loaded inside of sasview?
-the files aren't in json so what format should it be in?
-^ ask about how the data files look like when imported (all one file or a folder?) <- reformat models to fit
+EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", "../src/sas/example_data")
 
-"""
+def parse_1D():
+    dir_1d = os.path.join(EXAMPLE_DATA_DIR, "example_data", "1d_data")
+    if not os.path.isdir(dir_1d):
+        logging.error("1D Data directory not found at: {}".format(dir_1d))
+        return
+    for file_path in glob(os.path.join(dir_1d)):
+        file_name = os.path.basename(file_path)[0]
+        file_name = "1d_data" + file_name
+        write_file(file_name)
+
+def parse_2D():
+    dir_2d = os.path.join(EXAMPLE_DATA_DIR, "example_data", "2d_data")
+    if not os.path.isdir(dir_2d):
+        logging.error("2D Data directory not found at: {}".format(dir_2d))
+        return
+    for file_path in glob(os.path.join(dir_2d)):
+        file_name = os.path.basename(file_path)[0]
+        file_name = "2d_data" + file_name
+        write_file(file_name)
 
 
-"""
-TAG_PATTERN = re.compile("(:[a-zA-Z]+:)") # Matches ':tag:'
-REF_DEF_PATTERN = re.compile("(.. \[#[a-zA-Z]*\])") # Matches '.. [#RefTag]'
-REF_PATTERN = re.compile("(\\\ \[#[a-zA-Z]*\]_)") # Matches '\ #[RefTag]_'
-UNDERLINE_PATTERN = re.compile("(-{3,})") # Matches 3 or more consecutive '-'s
-"""
-
-"""
-f = open("myfile.txt", "w")
-"""
-
-#possibly just create 
-
-"""def parse_file_names():
+def write_file(file):
+    file_content = [
+        {
+            "model": "data.Data",
+            "fields": {
+                "file" : file,
+                "is_public" : True
+            }
+        }
+    ]
+    json_obj = json.dumps(file_content, indent=4)
+    with open("/data/fixtures/{file}.js", "w") as f:
+        f.write(json_obj)
     
-
-def get_file_name():
-    for x in example_data:
-
-    latex_smeared.xml
-    """
