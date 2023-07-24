@@ -2,6 +2,7 @@
     {
       "model": "data.Data",
       "fields": {
+            "id" : "1",
             "file":"cyl_400_20.txt",
             "is_public":true
       }
