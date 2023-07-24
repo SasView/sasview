@@ -1,6 +1,6 @@
 import logging
 from django.urls import path, re_path, include
-from analyze.fitting import fit_views
+from analyze.fitting import views as fit_views
 from . import views
 
 logger = logging.getLogger(__name__)
@@ -10,7 +10,7 @@ fit_patterns = [
     path("", fit_views.start, name = "starting a fit"),  
     path("<int:fit_id>/", fit_views.fit_status, name = "get status using fit_id"),
     path("optimizers/", fit_views.list_optimizers, name = "lists all fit optimizers"),
-    path("models/", fit_views.list_models, name = "lists all fit models"),
+    path("models/", fit_views.list_model, name = "lists all fit models"),
 ]
 
 urlpatterns = [

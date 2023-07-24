@@ -55,7 +55,7 @@ def upload(request, data_id = None, version = None):
     
     #saves file
     if request.method == 'POST':
-        serializer(data = request.data, file = File(open(), 'rb'))
+        serializer(data = request.data, file = File(open(request.file), 'rb'))
         if request.user.is_authenticated:
             serializer(current_user = request.user)
     
