@@ -979,6 +979,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             rgMassValue = "NaN"
             logging.warning("Atomic Mass is zero for all atoms in the system.")
         else:
+            self.rGMass = numpy.sqrt(RgMassNum/RgMassDen)
             rgMassValue = (str(round(numpy.sqrt(RgMassNum/RgMassDen),1)) + " Å")
 
         #Avoid division by zero - May occur through contrast matching
@@ -1645,6 +1646,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         logq = "{"+logq+"}"
         fQ = "{"+fQ+"}"
         logFQSQ = "{"+logFQSQ+"}"
+        rG = self.rGMass
         model_str = (f'''
 r"""
 Example empirical model using interp.
@@ -1686,10 +1688,14 @@ form_volume(double swelling, double protein_volume)
 
 static double
 radius_effective(int mode, double swelling,double protein_volume)
-{{
-    const double radius = cbrt(protein_volume*3.0/4.0/M_PI);
-    // case 1: radius
-    return radius*swelling;
+{{  
+    switch (mode) {{
+    default:
+    case 1: // equivalent sphere
+    return (cbrt(protein_volume*3.0/4.0/M_PI))*swelling;
+    case 2: // radius of gyration
+    return {rG}*swelling;
+    }}
 }}
 
 static void 
@@ -1739,7 +1745,7 @@ Fq(double q, double *f1, double *f2, double sld, double sld_solvent, double swel
 #print(c_code)
 
 have_Fq = True
-radius_effective_modes = ['radius']
+radius_effective_modes = ["equivalent sphere", "radius of gyration"]
 ''').lstrip().rstrip()
         
         return model_str
