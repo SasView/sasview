@@ -87,6 +87,15 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             location = HELP_DIRECTORY_LOCATION + url
             sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
             url = sas_path+"/"+location
-        # Convert path to a QUrl needed for QWebViewerEngine
-        abs_url = QtCore.QUrl.fromLocalFile(url)
+
+        # Check if the URL string contains a fragment (jump link)
+        if '#' in url:
+            fragment = url.split('#', 1)[1]
+            url = url.split('#', 1)[0]
+            # Convert path to a QUrl needed for QWebViewerEngine
+            abs_url = QtCore.QUrl.fromLocalFile(url)
+            abs_url.setFragment(fragment)
+        else:
+            # Convert path to a QUrl needed for QWebViewerEngine
+            abs_url = QtCore.QUrl.fromLocalFile(url)
         return abs_url
