@@ -37,11 +37,13 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                  active_plots=None,
                  validate_method=None,
                  communicator=None):
-        super(SlicerParameters, self).__init__()
+        super(SlicerParameters, self).__init__(parent.manager)
 
         self.setupUi(self)
 
         self.parent = parent
+
+        self.manager = parent.manager
 
         self.model = model
         self.validate_method = validate_method
@@ -423,7 +425,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
         try:
-            self.helpWindow = DocViewWindow(parent=self.parent, source=url)
+            # self.manager is DataExplorer, which has set parent to GuiManager, which is the correct parent of the widget
+            self.helpWindow = DocViewWindow(parent=self.manager.parent, source=url)
             self.helpWindow.show()
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
