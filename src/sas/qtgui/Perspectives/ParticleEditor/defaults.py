@@ -24,10 +24,18 @@ nor structure factors, nor fitting, nor 2D plots.
 
 Here's a simple example: """
 
-def sld(x,y,z):
+def sld_cube(x,y,z):
     """ A cube with 100Ang side length"""
 
     return rect(0.02*x)*rect(0.02*y)*rect(0.02*z)
+
+
+def sld_sphere(r, theta, phi):
+    """ Sphere r=50Ang"""
+
+    return rect(0.02*r)
+
+sld = sld_sphere
 
 '''
 

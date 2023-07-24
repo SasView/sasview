@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Tuple, Protocol
+from typing import Optional, Callable, Tuple, Protocol, List
 import numpy as np
 from enum import Enum
 from dataclasses import dataclass
@@ -48,6 +48,7 @@ class ZSample:
 class OutputOptions:
     """ Options """
     radial_distribution: bool # Create a radial distribution function from the origin
+    sampling_distributions: bool # Return the sampling distributions used in the calculation
     realspace: bool # Return realspace data
     q_space: Optional[QSample] = None
     q_space_2d: Optional[QSample] = None
@@ -97,11 +98,34 @@ class ScatteringCalculation:
 
 
 @dataclass
+class SamplingDistribution:
+    name: str
+    bin_edges: np.ndarray
+    counts: np.ndarray
+
+@dataclass
+class QPlotData:
+    abscissa: QSample
+    ordinate: np.ndarray
+
+@dataclass
+class RealPlotData:
+    abscissa: np.ndarray
+    ordinate: np.ndarray
+
+
+@dataclass
+class QSpaceCalcDatum:
+    q_space_data: QPlotData
+    correlation_data: Optional[RealPlotData]
+
+@dataclass
 class ScatteringOutput:
     radial_distribution: Optional[Tuple[np.ndarray, np.ndarray]]
-    q_space: Optional[Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]]
-    q_space_2d: Optional[Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]]
-    sesans: Optional[Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]]
+    q_space: Optional[QSpaceCalcDatum]
+    q_space_2d: Optional[QSpaceCalcDatum]
+    sesans: Optional[RealPlotData]
+    sampling_distributions: List[SamplingDistribution]
     calculation_time: float
     seed_used: int
 

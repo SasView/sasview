@@ -5,10 +5,10 @@ from typing import Optional
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from sas.qtgui.Perspectives.ParticleEditor.scattering import ScatteringOutput
+from sas.qtgui.Perspectives.ParticleEditor.old_calculations import ScatteringOutput
 
 
-class RCanvas(FigureCanvas):
+class SamplingDistributionCanvas(FigureCanvas):
     """ Plot window for output from scattering calculations"""
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
@@ -31,8 +31,10 @@ class RCanvas(FigureCanvas):
 
         self.axes.cla()
 
-        if scattering_output.r_values is not None and scattering_output.realspace_intensity is not None:
+        for datum in self._data.sampling_distributions:
 
-            self.axes.plot(scattering_output.r_values, scattering_output.realspace_intensity)
+            self.axes.plot(datum.bin_edges, datum.counts, label=datum.name)
+
+        self.axes.legend()
 
         self.draw()

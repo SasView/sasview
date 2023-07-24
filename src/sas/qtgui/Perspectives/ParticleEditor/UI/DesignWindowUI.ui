@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>994</width>
-    <height>484</height>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,37 +71,14 @@
               </spacer>
              </item>
              <item>
-              <layout class="QGridLayout" name="gridLayout" columnstretch="1,2">
+              <layout class="QGridLayout" name="gridLayout" columnstretch="1,0">
                <property name="topMargin">
                 <number>10</number>
                </property>
                <property name="bottomMargin">
                 <number>10</number>
                </property>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label">
-                 <property name="text">
-                  <string>Solvent SLD</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
                <item row="1" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="text">
-                  <string>Orientational Distribution</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QComboBox" name="orientationCombo"/>
-               </item>
-               <item row="2" column="0">
                 <widget class="QLabel" name="label_5">
                  <property name="text">
                   <string>Structure Factor</string>
@@ -111,35 +88,21 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
+               <item row="1" column="1">
                 <widget class="QComboBox" name="structureFactorCombo"/>
                </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_2">
+                 <property name="text">
+                  <string>Orientational Distribution</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
                <item row="0" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
-                 <item>
-                  <widget class="QDoubleSpinBox" name="solventSLDBox">
-                   <property name="decimals">
-                    <number>4</number>
-                   </property>
-                   <property name="minimum">
-                    <double>-100.000000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>100.000000000000000</double>
-                   </property>
-                   <property name="singleStep">
-                    <double>0.100000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_15">
-                   <property name="text">
-                    <string>10&lt;sup&gt;-6&lt;/sup&gt;Å&lt;sup&gt;-2&lt;/sup&gt;</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
+                <widget class="QComboBox" name="orientationCombo"/>
                </item>
               </layout>
              </item>
@@ -236,17 +199,31 @@
             <item>
              <widget class="QFrame" name="frame_3">
               <layout class="QGridLayout" name="gridLayout_2">
-               <item row="8" column="2">
-                <widget class="QCheckBox" name="useLogQ">
+               <item row="10" column="3">
+                <widget class="QLabel" name="label_10">
                  <property name="text">
-                  <string>Logaritmic</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
+                  <string>Ang</string>
                  </property>
                 </widget>
                </item>
-               <item row="7" column="2">
+               <item row="10" column="0">
+                <widget class="QLabel" name="label_11">
+                 <property name="text">
+                  <string>Q Max</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="10" column="2">
+                <widget class="QLineEdit" name="qMaxBox">
+                 <property name="text">
+                  <string>0.5</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="11" column="2">
                 <widget class="QSpinBox" name="qSamplesBox">
                  <property name="minimum">
                   <number>10</number>
@@ -262,21 +239,49 @@
                  </property>
                 </widget>
                </item>
-               <item row="5" column="3">
-                <widget class="QLabel" name="label_9">
+               <item row="12" column="2">
+                <widget class="QCheckBox" name="useLogQ">
                  <property name="text">
-                  <string>Ang</string>
+                  <string>Logaritmic (applies only to 1D)</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
-               <item row="6" column="3">
-                <widget class="QLabel" name="label_10">
+               <item row="13" column="0">
+                <widget class="QLabel" name="label_12">
                  <property name="text">
-                  <string>Ang</string>
+                  <string>Neutron Polarisation</string>
                  </property>
                 </widget>
                </item>
-               <item row="7" column="0">
+               <item row="13" column="2">
+                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                 <item>
+                  <widget class="QLineEdit" name="lineEdit">
+                   <property name="text">
+                    <string>1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="lineEdit_2">
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="lineEdit_3">
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="11" column="0">
                 <widget class="QLabel" name="label_7">
                  <property name="text">
                   <string>Q Samples</string>
@@ -286,7 +291,81 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="2">
+               <item row="14" column="2">
+                <widget class="QCheckBox" name="continuityCheck">
+                 <property name="text">
+                  <string>Check sampling boundary for SLD continuity</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="15" column="2">
+                <widget class="QLabel" name="timeEstimateLabel">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Outputs</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <layout class="QHBoxLayout" name="horizontalLayout">
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QCheckBox" name="sas1DOption">
+                   <property name="text">
+                    <string>1D SAS</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="sas2DOption">
+                   <property name="text">
+                    <string>2D SAS</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="sesansOption">
+                   <property name="text">
+                    <string>SESANS</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Sample Radius</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="2">
+                <widget class="QComboBox" name="methodCombo"/>
+               </item>
+               <item row="5" column="2">
                 <layout class="QHBoxLayout" name="horizontalLayout_6">
                  <item>
                   <widget class="QDoubleSpinBox" name="sampleRadius">
@@ -316,14 +395,7 @@
                  </item>
                 </layout>
                </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_14">
-                 <property name="text">
-                  <string>Sample Radius</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
+               <item row="6" column="0">
                 <widget class="QLabel" name="label_3">
                  <property name="text">
                   <string>Sample Method</string>
@@ -333,14 +405,17 @@
                  </property>
                 </widget>
                </item>
-               <item row="5" column="2">
-                <widget class="QLineEdit" name="qMinBox">
+               <item row="8" column="0">
+                <widget class="QLabel" name="label_16">
                  <property name="text">
-                  <string>0.0005</string>
+                  <string>Random Seed</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="0">
+               <item row="9" column="0">
                 <widget class="QLabel" name="label_8">
                  <property name="text">
                   <string>Q Min</string>
@@ -350,61 +425,17 @@
                  </property>
                 </widget>
                </item>
-               <item row="6" column="2">
-                <widget class="QLineEdit" name="qMaxBox">
+               <item row="7" column="0">
+                <widget class="QLabel" name="label_4">
                  <property name="text">
-                  <string>0.5</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="label_11">
-                 <property name="text">
-                  <string>Q Max</string>
+                  <string>Sample Points</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="2">
-                <layout class="QHBoxLayout" name="horizontalLayout">
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QRadioButton" name="output1D">
-                   <property name="text">
-                    <string>1D</string>
-                   </property>
-                   <property name="checked">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="output2D">
-                   <property name="text">
-                    <string>2D</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="2" column="2">
-                <widget class="QComboBox" name="methodCombo"/>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_13">
-                 <property name="text">
-                  <string>Output Type</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="2">
+               <item row="7" column="2">
                 <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
                   <widget class="QSpinBox" name="nSamplePoints">
@@ -428,17 +459,7 @@
                  </item>
                 </layout>
                </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>Sample Points</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="2">
+               <item row="8" column="2">
                 <layout class="QHBoxLayout" name="horizontalLayout_9">
                  <item>
                   <widget class="QLineEdit" name="randomSeed">
@@ -456,65 +477,67 @@
                  </item>
                 </layout>
                </item>
-               <item row="9" column="0">
-                <widget class="QLabel" name="label_12">
+               <item row="9" column="3">
+                <widget class="QLabel" name="label_9">
                  <property name="text">
-                  <string>Neutron Polarisation</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_16">
-                 <property name="text">
-                  <string>Random Seed</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <string>Ang</string>
                  </property>
                 </widget>
                </item>
                <item row="9" column="2">
-                <layout class="QHBoxLayout" name="horizontalLayout_10">
-                 <item>
-                  <widget class="QLineEdit" name="lineEdit">
+                <widget class="QLineEdit" name="qMinBox">
+                 <property name="text">
+                  <string>0.0005</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <layout class="QGridLayout" name="gridLayout_3">
+                 <item row="1" column="0">
+                  <widget class="QCheckBox" name="includeSamplingDistribution">
                    <property name="text">
-                    <string>1</string>
+                    <string>Sampling Distribution</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <widget class="QLineEdit" name="lineEdit_2">
+                 <item row="0" column="0">
+                  <widget class="QCheckBox" name="includeRadialDistribution">
                    <property name="text">
-                    <string>0</string>
+                    <string>Radial Distribution</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <widget class="QLineEdit" name="lineEdit_3">
+                 <item row="0" column="1">
+                  <widget class="QCheckBox" name="includeCorrelations">
                    <property name="text">
-                    <string>0</string>
+                    <string>Correlations</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
                 </layout>
                </item>
-               <item row="11" column="2">
-                <widget class="QLabel" name="timeEstimateLabel">
+               <item row="1" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
-                  <string/>
+                  <string>Extra Outputs</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="10" column="2">
-                <widget class="QCheckBox" name="continuityCheck">
-                 <property name="text">
-                  <string>Check sampling boundary for SLD continuity</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -559,9 +582,19 @@
        <string>Fitting</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="realSpaceTab">
+     <widget class="QWidget" name="samplingTab">
       <attribute name="title">
-       <string>Real Space</string>
+       <string>Sampling Distribution</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="rdfTab">
+      <attribute name="title">
+       <string>RDF</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="correlationTab">
+      <attribute name="title">
+       <string>Correlations</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="qSpaceTab">

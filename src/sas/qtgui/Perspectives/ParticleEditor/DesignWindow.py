@@ -12,8 +12,11 @@ from sas.qtgui.Perspectives.ParticleEditor.FunctionViewer import FunctionViewer
 from sas.qtgui.Perspectives.ParticleEditor.PythonViewer import PythonViewer
 from sas.qtgui.Perspectives.ParticleEditor.OutputViewer import OutputViewer
 from sas.qtgui.Perspectives.ParticleEditor.CodeToolBar import CodeToolBar
+
+from sas.qtgui.Perspectives.ParticleEditor.Plots.RDFCanvas import RDFCanvas
+from sas.qtgui.Perspectives.ParticleEditor.Plots.CorrelationCanvas import CorrelationCanvas
 from sas.qtgui.Perspectives.ParticleEditor.Plots.QCanvas import QCanvas
-from sas.qtgui.Perspectives.ParticleEditor.Plots.RCanvas import RCanvas
+from sas.qtgui.Perspectives.ParticleEditor.Plots.SamplingDistributionCanvas import SamplingDistributionCanvas
 
 from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWindow
 
@@ -21,18 +24,28 @@ from sas.qtgui.Perspectives.ParticleEditor.function_processor import process_cod
 from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling_methods import (
-    SpatialSample, RadiallyBiasedSphereSample, RadiallyBiasedCubeSample)
+    SpatialSample,
+    MixedSphereSample, MixedCubeSample,
+    UniformSphereSample, UniformCubeSample
+)
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-    QSample, ZSample, ScatteringCalculation, OutputOptions, CalculationParameters, ParticleDefinition)
+    OrientationalDistribution,
+    QSample, ZSample, ScatteringCalculation, OutputOptions, CalculationParameters,
+    SLDDefinition, SLDFunction, MagnetismDefinition, ParticleDefinition, CoordinateSystemTransform, ScatteringOutput)
 
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTable import ParameterTable
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableButtons import ParameterTableButtons
 
-from sas.qtgui.Perspectives.ParticleEditor.scattering import (
-    OrientationalDistribution, ScatteringCalculation, calculate_scattering)
+from sas.qtgui.Perspectives.ParticleEditor.old_calculations import calculate_scattering
 from sas.qtgui.Perspectives.ParticleEditor.util import format_time_estimate
+
+def safe_float(text: str):
+    try:
+        return float(text)
+    except:
+        return 0.0
 
 
 class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
@@ -44,6 +57,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.setWindowTitle("Placeholder title")
         self.parent = parent
 
+        # TODO: Set validators on fields
 
         #
         # First Tab
@@ -63,9 +77,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.codeToolBar.loadButton.clicked.connect(self.onLoad)
         self.codeToolBar.buildButton.clicked.connect(self.doBuild)
         self.codeToolBar.scatterButton.clicked.connect(self.doScatter)
-
-        self.solvent_sld = 0.0
-
 
         topSection = QtWidgets.QVBoxLayout()
         topSection.addWidget(self.pythonViewer)
@@ -114,8 +125,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         self.structureFactorCombo.addItem("None") # TODO: Structure Factor Options
 
-        self.solventSLDBox.valueChanged.connect(self.onSolventSLDBoxChanged)
-
 
         #
         # Calculation Tab
@@ -125,18 +134,13 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
             self.methodCombo.addItem(option)
 
         # Spatial sampling changed
-        self.methodCombo.currentIndexChanged.connect(self.updateSpatialSampling)
-        self.sampleRadius.valueChanged.connect(self.updateSpatialSampling)
-        self.nSamplePoints.valueChanged.connect(self.updateSpatialSampling)
-        self.fixRandomSeed.clicked.connect(self.updateSpatialSampling)
-
         self.nSamplePoints.valueChanged.connect(self.onTimeEstimateParametersChanged)
 
         # Q sampling changed
-        self.useLogQ.clicked.connect(self.updateQSampling)
-        self.qMinBox.textChanged.connect(self.updateQSampling)
-        self.qMaxBox.textChanged.connect(self.updateQSampling)
-        self.qSamplesBox.valueChanged.connect(self.updateQSampling)
+        # self.useLogQ.clicked.connect(self.updateQSampling)
+        # self.qMinBox.textChanged.connect(self.updateQSampling)
+        # self.qMaxBox.textChanged.connect(self.updateQSampling)
+        # self.qSamplesBox.valueChanged.connect(self.updateQSampling)
 
         self.qSamplesBox.valueChanged.connect(self.onTimeEstimateParametersChanged)
 
@@ -144,13 +148,33 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         # Output Tabs
         #
 
-        self.realCanvas = RCanvas()
+        # Sampling Canvas
+        self.samplingCanvas = SamplingDistributionCanvas()
 
         outputLayout = QtWidgets.QVBoxLayout()
-        outputLayout.addWidget(self.realCanvas)
+        outputLayout.addWidget(self.samplingCanvas)
 
-        self.realSpaceTab.setLayout(outputLayout)
+        self.samplingTab.setLayout(outputLayout)
 
+        # RDF
+
+        self.rdfCanvas = RDFCanvas()
+
+        outputLayout = QtWidgets.QVBoxLayout()
+        outputLayout.addWidget(self.rdfCanvas)
+
+        self.rdfTab.setLayout(outputLayout)
+
+        # Corrleations
+
+        self.correlationCanvas = CorrelationCanvas()
+
+        outputLayout = QtWidgets.QVBoxLayout()
+        outputLayout.addWidget(self.correlationCanvas)
+
+        self.correlationTab.setLayout(outputLayout)
+
+        # Output
 
         self.outputCanvas = QCanvas()
 
@@ -174,20 +198,14 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.last_calculation_n_r: int = 0
         self.last_calculation_n_q: int = 0
 
-        self.sld_function: Optional[np.ndarray] = None
-        self.sld_coordinate_mapping: Optional[np.ndarray] = None
+        self.sld_function: Optional[SLDFunction] = None
+        self.sld_coordinate_mapping: Optional[CoordinateSystemTransform] = None
         self.magnetism_function: Optional[np.ndarray] = None
         self.magnetism_coordinate_mapping: Optional[np.ndarray] = None
 
     def onRadiusChanged(self):
         if self.radiusFromParticleTab.isChecked():
             self.sampleRadius.setValue(self.functionViewer.radius_control.radius())
-
-    def onSolventSLDBoxChanged(self):
-        sld = float(self.solventSLDBox.value())
-        self.solvent_sld = sld
-        # self.functionViewer.solvent_sld = sld # TODO: Think more about where to put this variable
-        self.functionViewer.updateImage()
 
     def onTimeEstimateParametersChanged(self):
         """ Called when the number of samples changes """
@@ -198,7 +216,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         # sample points (the sld calculation is the limiting factor)
 
         if self.last_calculation_time is not None:
-            time_per_sample = self.last_calculation_time / (self.last_calculation_n_r * self.last_calculation_n_q)
+            time_per_sample = self.last_calculation_time / self.last_calculation_n_r
 
             est_time = time_per_sample * int(self.nSamplePoints.value()) * int(self.qSamplesBox.value())
 
@@ -260,8 +278,18 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
     def outputOptions(self) -> OutputOptions:
         """ Get the OutputOptions object representing the desired outputs from the calculation """
-        pass
 
+        q_space = self.qSampling() if self.sas1DOption.isChecked() else None
+        q_space_2d = None
+        sesans = None
+
+        return OutputOptions(
+            radial_distribution=self.includeRadialDistribution.isChecked(),
+            sampling_distributions=self.includeSamplingDistribution.isChecked(),
+            realspace=self.includeCorrelations.isChecked(),
+            q_space=q_space,
+            q_space_2d=q_space_2d,
+            sesans=sesans)
 
     def orientationalDistribution(self) -> OrientationalDistribution:
         """ Get the OrientationalDistribution object that represents the GUI selected orientational distribution"""
@@ -276,11 +304,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         return orientation
 
-    def updateSpatialSampling(self):
-        """ Update the spatial sampling object """
-        self.spatialSampling = self._spatialSampling()
-        self.sampleDetails.setText(self.spatialSampling.sampling_details())
-        # print(self.spatialSampling)
 
     def spatialSampling(self) -> SpatialSample:
         """ Calculate the spatial sampling object based on current gui settings"""
@@ -288,27 +311,46 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         # All the methods need the radius, number of points, etc
         radius = float(self.sampleRadius.value())
-        n_desired = int(self.nSamplePoints.value())
+        n_points = int(self.nSamplePoints.value())
         seed = int(self.randomSeed.text()) if self.fixRandomSeed.isChecked() else None
 
         if sample_type == 0:
-            return RadiallyBiasedSphereSample(radius=radius, n_points_desired=n_desired, seed=seed)
+            return UniformSphereSample(radius=radius, n_points=n_points, seed=seed)
+            # return MixedSphereSample(radius=radius, n_points=n_points, seed=seed)
 
         elif sample_type == 1:
-            return RadiallyBiasedCubeSample(radius=radius, n_points_desired=n_desired, seed=seed)
+            return UniformCubeSample(radius=radius, n_points=n_points, seed=seed)
+            # return MixedCubeSample(radius=radius, n_points=n_points, seed=seed)
 
         else:
             raise ValueError("Unknown index for spatial sampling method combo")
 
+    def sldDefinition(self) -> SLDDefinition:
+
+        if self.sld_function is not None:
+
+            return SLDDefinition(
+                self.sld_function,
+                self.sld_coordinate_mapping)
+
+        else:
+            raise NotImplementedError("Careful handling of SLD Definitions not implemented yet")
+
+    def magnetismDefinition(self) -> Optional[MagnetismDefinition]:
+        return None
+
     def particleDefinition(self) -> ParticleDefinition:
         """ Get the ParticleDefinition object that contains the SLD and magnetism functions """
 
+        return ParticleDefinition(
+            self.sldDefinition(),
+            self.magnetismDefinition())
+
     def parametersForCalculation(self) -> CalculationParameters:
-        pass
+        return self._parameterTableModel.calculation_parameters()
 
     def polarisationVector(self) -> np.ndarray:
         """ Get a numpy vector representing the GUI specified polarisation vector"""
-        pass
 
     def currentSeed(self):
         return self.randomSeed
@@ -348,23 +390,19 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.codeText("Calculating scattering...")
 
         if build_success:
-            calc = self._scatteringCalculation()
+            calc = self.scatteringCalculation()
             try:
                 scattering_result = calculate_scattering(calc)
 
                 # Time estimates
                 self.last_calculation_time = scattering_result.calculation_time
-                self.last_calculation_n_r = scattering_result.spatial_sampling_method._calculate_n_actual()
-                self.last_calculation_n_q = scattering_result.q_sampling_method.n_points
+                self.last_calculation_n_r = calc.spatial_sampling_method.n_points
+
                 self.onTimeEstimateParametersChanged()
 
                 # Output info
                 self.codeText("Scattering calculation complete after %g seconds."%scattering_result.calculation_time)
-
-                # Plot
-                self.realCanvas.data = scattering_result
-                self.outputCanvas.data = scattering_result
-                self.tabWidget.setCurrentIndex(5) # Move to output tab if complete
+                self.display_calculation_result(scattering_result)
 
             except Exception:
                 self.codeError(traceback.format_exc())
@@ -373,6 +411,16 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         else:
             self.codeError("Build failed, scattering cancelled")
 
+    def display_calculation_result(self, scattering_result: ScatteringOutput):
+        """ Update graphs and select tab"""
+
+        # Plot
+        self.samplingCanvas.data = scattering_result
+        self.rdfCanvas.data = scattering_result
+        self.correlationCanvas.data = scattering_result
+        self.outputCanvas.data = scattering_result
+
+        self.tabWidget.setCurrentIndex(7)  # Move to output tab if complete
     def onFit(self):
         """ Fit functionality requested"""
         pass
@@ -388,11 +436,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
     def codeWarning(self, text):
         """ Show a warning about input code"""
         self.outputViewer.addWarning(text)
-
-    def updateQSampling(self):
-        """ Update the spatial sampling object """
-        self.qSampling = self._qSampling()
-        print(self.qSampling) # TODO: Remove
 
     def qSampling(self) -> QSample:
         """ Calculate the q sampling object based on current gui settings"""

@@ -5,8 +5,6 @@ import numpy as np
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.sampling import SpatialSample
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
 
-
-
 class RandomSample(SpatialSample):
     def __init__(self, n_points: int, radius: float, seed: Optional[int] = None):
         super().__init__(n_points, radius)

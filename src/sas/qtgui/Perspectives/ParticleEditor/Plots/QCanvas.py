@@ -5,7 +5,7 @@ from typing import Optional
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from sas.qtgui.Perspectives.ParticleEditor.scattering import ScatteringOutput
+from sas.qtgui.Perspectives.ParticleEditor.old_calculations import ScatteringOutput
 
 import numpy as np
 def spherical_form_factor(q, r):
@@ -33,25 +33,30 @@ class QCanvas(FigureCanvas):
     def data(self, scattering_output: ScatteringOutput):
 
         self._data = scattering_output
-
-        q_values = scattering_output.q_sampling_method()
-        i_values = scattering_output.intensity_data
-
         self.axes.cla()
 
-        if scattering_output.q_sampling_method.is_log:
-            self.axes.loglog(q_values, i_values)
 
-            self.axes.axvline(0.07)
-            self.axes.axvline(0.13)
-            self.axes.axvline(0.19)
-            self.axes.axvline(0.25)
-            self.axes.axvline(0.30)
+        if self._data.q_space is not None:
+            plot_data = scattering_output.q_space.q_space_data
 
-            # For comparisons: TODO: REMOVE
-            # self.axes.loglog(q_values, spherical_form_factor(q_values, 50))
-        else:
-            self.axes.semilogy(q_values, i_values)
+            q_sample = plot_data.abscissa
+            q_values = q_sample()
+            i_values = plot_data.ordinate
+
+            if q_sample.is_log:
+                self.axes.loglog(q_values, i_values)
+                #
+                # self.axes.axvline(0.07)
+                # self.axes.axvline(0.13)
+                # self.axes.axvline(0.19)
+                # self.axes.axvline(0.25)
+                # self.axes.axvline(0.30)
+
+                # For comparisons: TODO: REMOVE
+                thing = spherical_form_factor(q_values, 50)
+                self.axes.loglog(q_values, thing*np.max(i_values)/np.max(thing))
+            else:
+                self.axes.semilogy(q_values, i_values)
 
 
 
