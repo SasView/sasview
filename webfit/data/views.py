@@ -66,7 +66,7 @@ def upload(request, data_id = None, version = None):
             if request.user.is_authenticated:
                 userr = request.user
                 data = Data.objects.filter(current_user = userr, id = data_id).get()
-                serializer(data, data=request.file, is_public = request.data.is_public)
+                serializer(data, data=request.data, file = request.file)
             else:
                 return HttpResponseForbidden
         else:
