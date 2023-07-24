@@ -1820,6 +1820,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
         full_path = GuiUtils.HELP_DIRECTORY_LOCATION
         tree_location = sas_path + "/" + full_path + "/user/qtgui/Perspectives/Fitting/"
+
         regen_in_progress = False
 
         # Actual file will depend on the current tab
@@ -1830,23 +1831,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
                 # See if the help file is there
                 # This breaks encapsulation a bit, though.
-                recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
                 sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
                 location = sas_path + "/" + full_path
-                regen_docs = sas_path + "/" + recompile_path + "/" + "makedocumentation.py"
                 location += "/user/models/" + self.kernel_module.id + ".html"
                 if os.path.isfile(location):
                     # We have HTML for this model - show it
                     tree_location = sas_path + "/" + full_path + "/user/models/"
                     helpfile = self.kernel_module.id + ".html"
-                else:
-                    py_target = self.kernel_module.id + ".py"
-                    tree_location = sas_path + "/" + full_path + "/user/models/"
-                    helpfile = self.kernel_module.id + ".html"
-                    help_location = tree_location + helpfile
-                    d = threads.deferToThread(self.regenerateDocs, regen_docs, target=py_target) # Regenerate specific documentation file
-                    d.addCallback(self.docRegenComplete, help_location)
-                    regen_in_progress = True
             else:
                 helpfile = "fitting_help.html"
         elif tab_id == 1:
@@ -1867,11 +1858,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # self.parent.showHelp(url) <-- a clue for how to get other help pages open in the future
         # WP: Added to handle OSX bundle docs
-        # try:
-        self.helpWindow = DocViewWindow(source=url, parent=self.parent)
-        self.helpWindow.show()
-        # except Exception as ex:
-        #     logging.warning("Cannot display help. %s" % ex)
+        try:
+            self.helpWindow = DocViewWindow(source=url, parent=self.parent)
+            self.helpWindow.show()
+        except Exception as ex:
+            logging.warning("Cannot display help. %s" % ex)
 
     def regenerateDocs(self, regen_docs, target=None):
         """

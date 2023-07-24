@@ -4,9 +4,11 @@ from typing import Optional
 
 
 from PySide6 import QtGui, QtWebEngineWidgets, QtCore, QtWidgets, QtWebEngineCore
+from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities import GuiUtils
 
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
@@ -17,7 +19,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         super(DocViewWindow, self).__init__(parent._parent)
         self.parent = parent
         self.setupUi(self)
-        # disable the context help icon
+        # Disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setWindowTitle("Documentation Viewer")
 
@@ -99,3 +101,20 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             # Convert path to a QUrl needed for QWebViewerEngine
             abs_url = QtCore.QUrl.fromLocalFile(url)
         return abs_url
+
+    def regenerateHtml(self):
+        """
+        Regenerate the documentation for the file
+        """
+        regen_in_progress = False
+        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+        html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
+        recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
+        regen_docs = sas_path + "/" + recompile_path + "/" + "makedocumentation.py"
+        py_target = self.kernel_module.id + ".py"
+        tree_location = sas_path + "/" + html_path + "/user/models/"
+        helpfile = self.kernel_module.id + ".html"
+        help_location = tree_location + helpfile
+        d = threads.deferToThread(self.regenerateDocs, regen_docs, target=py_target) # Regenerate specific documentation file
+        d.addCallback(self.docRegenComplete, help_location)
+        regen_in_progress = True
