@@ -116,7 +116,7 @@ class GuiManager:
 
         # Fork off logging messages to the Log Window
         handler = setup_qt_logging()
-        handler.messageWritten.connect(self.appendLog)
+        handler.postman.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
@@ -171,7 +171,6 @@ class GuiManager:
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
-        self.preferences = PreferencesPanel(self._parent)
 
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
