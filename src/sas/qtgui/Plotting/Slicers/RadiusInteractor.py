@@ -16,7 +16,7 @@ class RadiusInteractor(BaseInteractor):
                 the radial line
     """
     def __init__(self, base, axes, color='black', zorder=5, arc1=None,
-                 arc2=None, theta2=np.pi / 8, phi=np.pi / 4):
+                 arc2=None, theta2=np.pi / 3, phi=np.pi / 8):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -45,12 +45,12 @@ class RadiusInteractor(BaseInteractor):
                                        linestyle='', marker='s', markersize=10,
                                        color=self.color, alpha=0.6,
                                        pickradius=5, label='pick',
-                                       zorder=zorder, visable=True)[0]
+                                       zorder=zorder, visible=True)[0]
         self.r_marker = self.axes.plot([(r_x1+r_x2)/2], [(r_y1+r_y2)/2],
                                        linestyle='', marker='s', markersize=10,
                                        color=self.color, alpha=0.6,
                                        pickradius=5, label='pick',
-                                       zorder=zorder, visable=True)[0]
+                                       zorder=zorder, visible=True)[0]
         # Define the left and right lines
         self.l_line = self.axes.plot([l_x1, l_x2], [l_y1, l_y2],
                                      linestyle='-', marker='',

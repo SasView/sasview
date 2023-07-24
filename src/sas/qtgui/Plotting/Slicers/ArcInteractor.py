@@ -11,7 +11,7 @@ class ArcInteractor(BaseInteractor):
     param phi: angle from the centre point on the arc to each of its edges
     """
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 theta2=np.pi / 3, phi=np.pi / 4):
+                 theta2=np.pi / 3, phi=np.pi / 8):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
@@ -31,7 +31,7 @@ class ArcInteractor(BaseInteractor):
                                      marker='s', markersize=10,
                                      color=self.color, alpha=0.6, pickradius=5,
                                      label='pick', zorder=zorder,
-                                     visable=True)[0]
+                                     visible=True)[0]
         # Define the arc
         [self.arc] = self.axes.plot([], [], linestyle='-', marker='', color=self.color)
         self.npts = 20
@@ -96,8 +96,8 @@ class ArcInteractor(BaseInteractor):
             x.append(xval)
             y.append(yval)
 
-        marker_x = self.radius * np.cos(self.theta2 - 0.2 * self.phi)
-        marker_y = self.radius * np.sin(self.theta2 - 0.2 * self.phi)
+        marker_x = self.radius * np.cos(self.theta2 - 0.5 * self.phi)
+        marker_y = self.radius * np.sin(self.theta2 - 0.5 * self.phi)
         self.marker.set(xdata=[marker_x], ydata=[marker_y])
         self.arc.set_data(x, y)
 

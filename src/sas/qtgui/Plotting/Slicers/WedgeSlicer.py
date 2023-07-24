@@ -37,8 +37,9 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
-        self.qmax = max(self.data.xmax, self.data.xmin,
-                        self.data.ymax, self.data.ymin)
+        xmax2 = np.power(max(self.data.xmax, np.fabs(self.data.xmin)), 2)
+        ymax2 = np.power(max(self.data.ymax, np.fabs(self.data.ymin)), 2)
+        self.qmax = np.sqrt(xmax2 + ymax2)
         self.connect = self.base.connect
 
         # # Number of points on the plot
@@ -46,7 +47,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         # Angle of the central line
         self.theta2 = np.pi / 3
         # Angle between the central line and the radial lines either side of it
-        self.phi = np.pi / 12
+        self.phi = np.pi / 8
         # reference of the current data averager
         self.averager = None
 
@@ -55,17 +56,19 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
                                        theta2=self.theta2, phi=self.phi)
         self.inner_arc.qmax = self.qmax
         self.outer_arc = ArcInteractor(self, self.axes, color='black',
-                                       zorder=zorder + 1, r=self.qmax / 1.8,
+                                       zorder=zorder + 1, r=self.qmax / 1.6,
                                        theta2=self.theta2, phi=self.phi)
-        self.outer_arc.qmax = self.qmax * 1.2
+        self.outer_arc.qmax = self.qmax * 1.2 # TODO - check with someone about this
         self.radial_lines = RadiusInteractor(self, self.axes, color='black',
                                              zorder=zorder + 1,
                                              arc1=self.inner_arc,
                                              arc2=self.outer_arc,
                                              theta2=self.theta2, phi=self.phi)
-        self.central_line = LineInteractor(self, self.axes, color='blue',
+        self.radial_lines.qmax = self.qmax
+        self.central_line = LineInteractor(self, self.axes, color='black',
                                            zorder=zorder, r=self.qmax,
                                            theta=self.theta2)
+        self.central_line.qmax = self.qmax
         self.update()
         self.draw()
         self._post_data()
@@ -96,6 +99,9 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         Respond to changes in the model by recalculating the profiles and
         resetting the widgets.
         """
+        # Update parameters
+        self.theta2 = self.central_line.theta
+        self.phi = self.radial_lines.phi
         # Update locations
         if self.inner_arc.has_move:
             self.inner_arc.update()
@@ -111,7 +117,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             self.central_line.update()
             self.inner_arc.update(theta2=self.theta2)
             self.outer_arc.update(theta2=self.theta2)
-            self.radial_lines.update()
+            self.radial_lines.update(theta2=self.theta2)
 
     def save(self, ev):
         """
@@ -148,8 +154,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         else:
             rmin = self.outer_arc.get_radius()
             rmax = self.inner_arc.get_radius()
-        phimin = self.central_line.theta2 - self.radial_lines.phi
-        phimax = self.central_line.theta2 + self.radial_lines.phi
+        phimin = self.central_line.theta - self.radial_lines.phi
+        phimax = self.central_line.theta + self.radial_lines.phi
 
         if nbins is not None:
             self.nbins = nbins
@@ -240,7 +246,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
     def set_cursor(self, x, y):
         pass
 
-    def get_params(self):
+    def getParams(self):
         """
         Store a copy of values of parameters of the slicer into a dictionary.
         :return params: the dictionary created
@@ -248,12 +254,12 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         params = {}
         params["r_min"] = self.inner_arc.get_radius()
         params["r_max"] = self.outer_arc.get_radius()
-        params["phi [deg]"] = self.central_line.theta2 * 180 / np.pi
+        params["phi [deg]"] = self.central_line.theta * 180 / np.pi
         params["delta_phi [deg]"] = self.radial_lines.phi * 180 / np.pi
         params["nbins"] = self.nbins
         return params
 
-    def set_params(self, params):
+    def setParams(self, params):
         """
         """
         r1 = params["r_min"]
@@ -279,10 +285,8 @@ class WedgeInteractorQ(WedgeInteractor):
     averaged together to provide a 1D array in Q (to be plotted as a function
      of Q)
     """
-    def __init__(self, base, axes, color='black', zorder=3):
-        """
-        """
-        WedgeInteractor.__init__(self, base, axes, color=color)
+    def __init__(self, base, axes, item=None, color='black', zorder=3):
+        WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
         self._post_data()
 
@@ -299,16 +303,12 @@ class WedgeInteractorPhi(WedgeInteractor):
     averaged together to provide a 1D array in phi (to be plotted as a function
      of phi)
     """
-    def __init__(self, base, axes, color='black', zorder=3):
-        """
-        """
-        WedgeInteractor.__init__(self, base, axes, color=color)
+    def __init__(self, base, axes, item=None, color='black', zorder=3):
+        WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
         self._post_data()
 
     def _post_data(self):
-        """
-        """
         from sasdata.data_util.manipulations import SectorPhi
         self.post_data(SectorPhi)
 
