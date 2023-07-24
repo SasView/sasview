@@ -1605,14 +1605,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.fQ = [x / scalingFactor for x in self.fQ]
         # generate the model representation as string
         model_str = self.generateModel(full_path) 
-         
-        class dummy_manager:
-            _parent = QtWidgets.QWidget()
-            communicate = GuiUtils.Communicate()
-
-        w = TabbedModelEditor(parent=dummy_manager, edit_only=True)
-
-        w.writeFile(full_path, model_str)
+        TabbedModelEditor.writeFile(full_path, model_str)
 
         self.manager.communicate.customModelDirectoryChanged.emit()
 
@@ -2062,57 +2055,3 @@ class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
         QtWidgets.QDialog.__init__(self)
         Plotter3DWidget.__init__(self, manager=parent)
         self.setWindowTitle(self.graph_title)
-
-CUSTOM_TEMPLATE = '''\
-r"""
-Definition
-----------
-
-Calculates %(name)s.
-
-%(description)s
-
-References
-----------
-
-Authorship and Verification
----------------------------
-
-* **Author:** --- **Date:** %(date)s
-* **Last Modified by:** --- **Date:** %(date)s
-* **Last Reviewed by:** --- **Date:** %(date)s
-"""
-
-from sasmodels.special import *
-from numpy import inf
-
-name = "%(name)s"
-title = "%(title)s"
-description = """%(description)s"""
-
-'''
-
-CUSTOM_TEMPLATE_PD = '''\
-def form_volume(%(args)s):
-    """
-    Volume of the particles used to compute absolute scattering intensity
-    and to weight polydisperse parameter contributions.
-    """
-    return 0.0
-
-def ER(%(args)s):
-    """
-    Effective radius of particles to be used when computing structure factors.
-
-    Input parameters are vectors ranging over the mesh of polydispersity values.
-    """
-    return 0.0
-
-def VR(%(args)s):
-    """
-    Volume ratio of particles to be used when computing structure factors.
-
-    Input parameters are vectors ranging over the mesh of polydispersity values.
-    """
-    return 1.0
-'''
