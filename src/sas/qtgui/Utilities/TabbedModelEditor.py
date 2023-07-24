@@ -128,6 +128,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 return
             self.is_modified = False
 
+        # If we are loading in a file at the launch of the editor instead of letting the user pick, we need to process the HTML location from
+        # the documentation viewer into the filepath for its corresponding RST
         if at_launch:
             from sas.qtgui.Utilities.GuiUtils import PY_SOURCE, SAS_DIR
             py_rst_files = SAS_DIR + "/" + PY_SOURCE
