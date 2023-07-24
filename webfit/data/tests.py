@@ -45,10 +45,10 @@ class DataTest(TestCase):
 
     def is_data_being_created(self):
         data = {
-            
+            "is_public":False
         }
         file = ...
-        request = self.client.post('/v1/data/upload/', file=file)
+        request = self.client.post('/v1/data/upload/', data = data, file=file)
         self.assertEqual(request.status_code, status.HTTP_201_CREATED)
 
     def does_file_upload(self):
