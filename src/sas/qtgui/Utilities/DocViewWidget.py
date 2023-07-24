@@ -34,7 +34,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         Initialize Signals 
         """
-        self.communicate.docsRegeneratedSignal.connect(self.loadHtml)
+        self.parent.communicate.docsRegeneratedSignal.connect(self.loadHtml)
 
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
@@ -142,4 +142,4 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Tells Qt that regeneration of docs is done and emits signal tied to opening
         documentation viewer window
         """
-        self.communicate.docsRegeneratedSignal.emit(help_location)
+        self.parent.communicate.docsRegeneratedSignal.emit(help_location)
