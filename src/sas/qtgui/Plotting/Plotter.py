@@ -95,7 +95,7 @@ class PlotterWidget(PlotterBase):
             self.yscale = 'linear'
         self.title(title=value.name)
 
-    def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True):
+    def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True, subplot=True):
         """
         Add a new plot of self._data to the chart.
         """
@@ -110,7 +110,23 @@ class PlotterWidget(PlotterBase):
 
         is_fit = (data.id=="fit")
 
-        if not is_fit:
+        print("\nILL DEBUGUEUR", data.plot_role)
+        import traceback
+        for line in traceback.format_stack():
+            print(line.strip())
+
+
+        # TODO: ILL INTERNS : FIX THIS
+        if config.GATHER_PLOTS_AND_RESIDUALS and data.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY] and subplot:
+            new_sub_plot = Plotter(self, self.manager.parent)
+            # No replot signals should come from the smaller plot
+            new_sub_plot.blockSignals(True)
+            new_sub_plot.contextMenu.setDisabled(False)
+            new_sub_plot.setBaseSize(self.width(), self.height())
+            new_sub_plot.plot(data,transform=transform, subplot=False) # FIXME : ILL subplot=False ?
+            self.verticalLayout.addWidget(new_sub_plot)
+            # FIXME : ILL, return ?
+        elif not is_fit: # FIXME : ILL, if or elif ?
             # make sure we have some function to operate on
             if data.xtransform is None:
                 if data.isSesans:
@@ -202,7 +218,7 @@ class PlotterWidget(PlotterBase):
             # plot data with/without errorbars
             if hide_error:
                 line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
-                        linestyle='', label=label, picker=True)
+                        linestyle='', label=label, picker=True, subplot=False) # FIXME : ILL subplot=False ?
             else:
                 dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
@@ -616,7 +632,7 @@ class PlotterWidget(PlotterBase):
         new_plot.markersize = selected_plot.markersize
         new_plot.symbol = selected_plot.symbol
         self.removePlot(id)
-        self.plot(data=new_plot)
+        self.plot(data=new_plot, subplot=False) # FIXME : ILL subplot=False ?
         # Apply user-defined plot range
         if retain_dimensions or self.setRange.rangeModified:
             x_bounds = self.setRange.xrange()
@@ -655,7 +671,7 @@ class PlotterWidget(PlotterBase):
 
         for ids in self.plot_dict:
             if ids != id:
-                self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error)
+                self.plot(data=self.plot_dict[ids], hide_error=self.plot_dict[ids].hide_error, subplot=False) #FIXME : ILL subplot=False ?
 
         # Reset the labels
         self.ax.set_xlabel(xl)
@@ -748,7 +764,6 @@ class PlotterWidget(PlotterBase):
             # This assignment will wrap the label in Latex "$"
             self.xLabel = new_xlabel
             self.yLabel = new_ylabel
-
             self.plot(data=current_plot, transform=False)
 
         pass # debug hook

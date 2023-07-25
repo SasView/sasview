@@ -49,10 +49,10 @@ class PlotterBase(QtWidgets.QWidget):
         self.txt_widget = QtWidgets.QTextEdit(None)
 
         # Set the layout and place the canvas widget in it.
-        layout = QtWidgets.QVBoxLayout()
+        self.verticalLayout = QtWidgets.QVBoxLayout()
         # FIXME setMargin -> setContentsMargins in qt5 with 4 args
         #layout.setContentsMargins(0)
-        layout.addWidget(self.canvas)
+        self.verticalLayout.addWidget(self.canvas)
 
         # 1D plotter defaults
         self.current_plot = 111
@@ -120,7 +120,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.canvas.customContextMenuRequested.connect(self.showContextMenu)
 
-        layout.addWidget(self.toolbar)
+        self.verticalLayout.addWidget(self.toolbar)
         if not quickplot:
             # Add the toolbar
             # self.toolbar.show()
@@ -130,7 +130,7 @@ class PlotterBase(QtWidgets.QWidget):
         else:
             self.toolbar.hide()
 
-        self.setLayout(layout)
+        self.setLayout(self.verticalLayout)
 
     @property
     def data(self):

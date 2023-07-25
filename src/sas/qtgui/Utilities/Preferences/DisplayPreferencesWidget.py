@@ -21,12 +21,33 @@ class DisplayPreferencesWidget(PreferencesWidget):
             checked=config.QT_AUTO_SCREEN_SCALE_FACTOR)
         self.autoScaling.clicked.connect(
             lambda: self._stageChange('QT_AUTO_SCREEN_SCALE_FACTOR', self.autoScaling.isChecked()))
+        self.disableResiduals = self.addCheckBox(
+            title="Disable Residuals Display",
+            checked=config.DISABLE_RESIDUALS)
+        self.disableResiduals.clicked.connect(
+            lambda: self._stageChange('DISABLE_RESIDUALS', self.disableResiduals.isChecked()))
+        self.disablePolydispersityPlot = self.addCheckBox(
+            title="Disable Polydispersity Plot Display",
+            checked=config.DISABLE_POLYDISPERSITY_PLOT)
+        self.disablePolydispersityPlot.clicked.connect(
+            lambda: self._stageChange('DISABLE_POLYDISPERSITY_PLOT', self.disablePolydispersityPlot.isChecked()))
+        self.gatherPlotsAndResiduals = self.addCheckBox(
+            title="Gather Residuals and Model Plots together",
+            checked=config.GATHER_PLOTS_AND_RESIDUALS)
+        self.gatherPlotsAndResiduals.clicked.connect(
+            lambda: self._stageChange('GATHER_PLOTS_AND_RESIDUALS', self.gatherPlotsAndResiduals.isChecked()))
 
     def _toggleBlockAllSignaling(self, toggle):
         self.qtScaleFactor.blockSignals(toggle)
         self.autoScaling.blockSignals(toggle)
+        self.disableResiduals.blockSignals(toggle)
+        self.disablePolydispersityPlot.blockSignals(toggle)
+        self.gatherPlotsAndResiduals.blockSignals(toggle)
 
     def _restoreFromConfig(self):
         self.qtScaleFactor.setText(str(config.QT_SCALE_FACTOR))
         self.qtScaleFactor.setStyleSheet("background-color: white")
         self.autoScaling.setChecked(bool(config.QT_AUTO_SCREEN_SCALE_FACTOR))
+        self.disableResiduals.setChecked(config.DISABLE_RESIDUALS)
+        self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)
+        self.gatherPlotsAndResiduals.setChecked(config.GATHER_PLOTS_AND_RESIDUALS)

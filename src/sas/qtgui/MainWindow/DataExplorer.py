@@ -1086,14 +1086,30 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
-            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY]
+            stand_alone_residuals = not config.DISABLE_RESIDUALS and not config.GATHER_PLOTS_AND_RESIDUALS
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
-            elif role in stand_alone_types:
-                # Stand-alone plots should always be separate
+            elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUALS:
+                # Nothing to do if residuals are not plotted
+                continue
+            elif role == DataRole.ROLE_POLYDISPERSITY and config.DISABLE_POLYDISPERSITY_PLOT:
+                # Nothing to do if polydispersity plot is not plotted
+                continue
+            elif role in stand_alone_types and stand_alone_residuals:
+                # Stand-alone plots should be plotted separately according to the configuration
                 self.plotData([(plot_item, plot_to_show)])
+            elif role in stand_alone_types:
+                # 'Stand alone' plots should be plotted below the main plot
+                plot_to_append = None
+                if main_data is not None and main_data.name in self.active_plots:
+                    plot_to_append = self.active_plots[main_data.name]
+                elif main_data is not None:
+                    self.active_plots[main_data.name] = Plotter()
+                    plot_to_append = self.active_plots[main_data.name]
+                self.appendOrUpdatePlot(self, plot_to_show, plot_to_append)
             elif append:
                 # Assume all other plots sent together should be on the same chart if a previous plot exists
                 if not plot_to_append_to:
