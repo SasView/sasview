@@ -16,6 +16,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     """
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
+    hideSignal = QtCore.Signal()
+    showSignal = QtCore.Signal()
+
     def __init__(self, parent=None, source=None):
         super(DocViewWindow, self).__init__(parent._parent)
         self.parent = parent
@@ -24,8 +27,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setWindowTitle("Documentation Viewer")
 
-        # Necessary global
+        # Necessary globals
         self.source = source
+        self.regen_in_progress = False
 
         self.initializeSignals() # Connect signals
 
@@ -39,6 +43,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
+        self.showSignal.connect(self.onShow)
+        self.hideSignal.connect(self.onHide)
 
     def onEdit(self):
         """
@@ -74,6 +80,18 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         self.close()
     
+    def onHide(self):
+        """
+        Hide window
+        """
+        self.hide()
+
+    def onShow(self):
+        """
+        Show window
+        """
+        self.show()
+    
     def regenerateNeeded(self):
         """
         Determine what processes are needed in order to display updated docs
@@ -81,8 +99,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Define a lot of path variables
         rst_path = self.findRstEquivalent()
 
-        if 
-        self.loadHtml() #loads the html file specified in the source url to the QWebViewer
+        if self.regen_in_progress is False:
+            self.loadHtml() #loads the html file specified in the source url to the QWebViewer
     
     def findRstEquivalent(self):
         """
@@ -156,17 +174,14 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         Regenerate the documentation for the file
         """
-        regen_in_progress = False
+        
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
         html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
         recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
         regen_docs = sas_path + "/" + recompile_path + "/" + "makedocumentation.py"
-        tree_location = sas_path + "/" + html_path + "/user/models/"
-        helpfile = file_name + ".html"
-        help_location = tree_location + helpfile
         d = threads.deferToThread(self.regenerateDocs, regen_docs, target=file_name) # Regenerate specific documentation file
-        d.addCallback(self.docRegenComplete, help_location)
-        regen_in_progress = True
+        d.addCallback(self.docRegenComplete, self.source)
+        self.regen_in_progress = True
     
     def regenerateDocs(self, regen_docs, target=None):
         """
@@ -187,3 +202,5 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         documentation viewer window
         """
         self.parent.communicate.docsRegeneratedSignal.emit(help_location)
+        self.show()
+        self.regen_in_progress = False
