@@ -27,6 +27,7 @@ class DataRole(Enum):
     ROLE_RESIDUAL = 3
     # Stand alone is for plots that should be plotted separately
     ROLE_STAND_ALONE = 4
+    # Polydispersity is for stand-alone polydispersity plots
     ROLE_POLYDISPERSITY = 5
 
 

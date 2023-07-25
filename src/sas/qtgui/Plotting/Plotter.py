@@ -110,10 +110,10 @@ class PlotterWidget(PlotterBase):
 
         is_fit = (data.id=="fit")
 
-        print("\nILL DEBUGUEUR", data.plot_role)
-        import traceback
-        for line in traceback.format_stack():
-            print(line.strip())
+        # print("\nILL DEBUGUEUR", data.plot_role)
+        # import traceback
+        # for line in traceback.format_stack():
+        #     print(line.strip())
 
 
         # TODO: ILL INTERNS : FIX THIS
