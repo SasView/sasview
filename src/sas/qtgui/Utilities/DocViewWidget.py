@@ -1,6 +1,7 @@
 import sys
 import os
 from typing import Optional
+import logging
 
 
 from PySide6 import QtGui, QtWebEngineWidgets, QtCore, QtWidgets, QtWebEngineCore
@@ -80,6 +81,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Define a lot of path variables
         rst_path = self.findRstEquivalent()
 
+        if 
         self.loadHtml() #loads the html file specified in the source url to the QWebViewer
     
     def findRstEquivalent(self):
@@ -90,16 +92,32 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         is_python = False
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
         html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
+        rst_py_path = GuiUtils.PY_SOURCE
         regen_string = ""
 
         if "models" in self.source:
-            pass
+            from re import search
+            model_name = os.path.basename(self.source).replace("html", "py")
+            regen_string = sas_path + "/" + rst_py_path + "/user/models/src/" + model_name
+            try:
+                # Test to see if HTML does not exist or is older than python file
+                if self.newer(regen_string, self.source):
+                    self.regenerateHtml(model_name)
+            except Exception as ex:
+                logging.warning("There may be an error with the output of the documentation window: %s" % ex)
+            # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py
+            
         if "index" in self.source:
+            # Regenerate if HTML is older than RST
             pass
         else:
+            # Regenerate if HTML is older than RST
             pass
         
         return regen_string, is_python
+    
+    def newer(self, src, html):
+        return not os.path.exists(html) or os.path.getmtime(src) > os.path.getmtime(html)
 
     def loadHtml(self):
         """
@@ -134,7 +152,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             abs_url = QtCore.QUrl.fromLocalFile(url)
         return abs_url
 
-    def regenerateHtml(self):
+    def regenerateHtml(self, file_name):
         """
         Regenerate the documentation for the file
         """
@@ -143,11 +161,10 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
         recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
         regen_docs = sas_path + "/" + recompile_path + "/" + "makedocumentation.py"
-        py_target = self.kernel_module.id + ".py"
         tree_location = sas_path + "/" + html_path + "/user/models/"
-        helpfile = self.kernel_module.id + ".html"
+        helpfile = file_name + ".html"
         help_location = tree_location + helpfile
-        d = threads.deferToThread(self.regenerateDocs, regen_docs, target=py_target) # Regenerate specific documentation file
+        d = threads.deferToThread(self.regenerateDocs, regen_docs, target=file_name) # Regenerate specific documentation file
         d.addCallback(self.docRegenComplete, help_location)
         regen_in_progress = True
     
