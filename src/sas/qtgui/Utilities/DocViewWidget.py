@@ -31,7 +31,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         self.initializeSignals() # Connect signals
 
-        self.regenerateNeeded() #loads the html file specified in the source url to the QWebViewer
+        self.regenerateIfNeeded()
 
     def initializeSignals(self):
         """
@@ -81,22 +81,13 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         self.show()
     
-    def regenerateNeeded(self):
+    def regenerateIfNeeded(self):
         """
-        Determine what processes are needed in order to display updated docs
+        Determines whether or not a file needs to be regenerated.
+        If it does, it will regenerate based off whether it is detected as SasView docs or a model.
+        The documentation window will open after the process of regeneration is completed.
+        Otherwise, simply triggers a load of the documentation window with loadHtml()
         """
-        # Define a lot of path variables
-        rst_path = self.findRstEquivalent()
-
-        if self.regen_in_progress is False:
-            self.loadHtml() #loads the html file specified in the source url to the QWebViewer
-    
-    def findRstEquivalent(self):
-        """
-        Returns path of equivalent Python file to a specified HTML file. If the specified HTML file is not from a model, then return the path to its RST.
-        is_python variable determines whether of not we will have to generate a RST from the python file before running it through sphinx.
-        """
-        is_python = False
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
         html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
         rst_py_path = GuiUtils.PY_SOURCE
@@ -128,7 +119,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             if self.newer(regen_string, html_path):
                 self.regenerateHtml(regen_string)
         
-        return regen_string, is_python
+        if self.regen_in_progress is False:
+            self.loadHtml() #loads the html file specified in the source url to the QWebViewer
     
     def newer(self, src, html):
         try:
@@ -147,9 +139,14 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessFileUrls, True)
         self.webEngineViewer.load(url)
+
+        # Show widget
         self.onShow()
 
     def processUrl(self):
+        """
+        Process path into proper QUrl for use in QWebViewer
+        """
         url = self.source
         # Check to see if path is absolute or relative, accomodating urls from many different places
         if not os.path.exists(url):
