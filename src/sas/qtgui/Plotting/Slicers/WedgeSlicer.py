@@ -37,9 +37,9 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.markers = []
         self.axes = axes
         self._item = item
-        xmax2 = np.power(max(self.data.xmax, np.fabs(self.data.xmin)), 2)
-        ymax2 = np.power(max(self.data.ymax, np.fabs(self.data.ymin)), 2)
-        self.qmax = np.sqrt(xmax2 + ymax2)
+        self.qmax = max(self.data.xmax, np.fabs(self.data.xmin),
+                        self.data.ymax, np.fabs(self.data.ymin))
+        self.dqmin = min(np.fabs(self.data.qx_data))
         self.connect = self.base.connect
 
         # # Number of points on the plot
@@ -58,17 +58,17 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.outer_arc = ArcInteractor(self, self.axes, color='black',
                                        zorder=zorder + 1, r=self.qmax / 1.6,
                                        theta2=self.theta2, phi=self.phi)
-        self.outer_arc.qmax = self.qmax * 1.2 # TODO - check with someone about this
+        self.outer_arc.qmax = self.qmax * 1.2
         self.radial_lines = RadiusInteractor(self, self.axes, color='black',
                                              zorder=zorder + 1,
                                              arc1=self.inner_arc,
                                              arc2=self.outer_arc,
                                              theta2=self.theta2, phi=self.phi)
-        self.radial_lines.qmax = self.qmax
+        self.radial_lines.qmax = self.qmax * 1.2
         self.central_line = LineInteractor(self, self.axes, color='black',
-                                           zorder=zorder, r=self.qmax,
+                                           zorder=zorder, r=self.qmax * 1.414,
                                            theta=self.theta2)
-        self.central_line.qmax = self.qmax
+        self.central_line.qmax = self.qmax * 1.414
         self.update()
         self.draw()
         self._post_data()
@@ -128,10 +128,6 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.outer_arc.save(ev)
         self.radial_lines.save(ev)
         self.central_line.save(ev)
-
-        '''
-        From here onwards we've got the old theta1 & theta2 logic
-        '''
 
     def _post_data(self):
         pass
@@ -216,9 +212,30 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         Validate input from user
         Values get checked at apply time.
         """
+        MIN_Q_DIFFERENCE = self.dqmin
+        MIN_PHI_DIFFERENCE = 0.01
         isValid = True
 
-        if param_name == 'nbins':
+        # Stitched together from other slicers. There could be a neater way.
+        if param_name == 'r_min':
+            if np.fabs(param_value - self.getParams()['r_max']) < MIN_Q_DIFFERENCE:
+                print("Inner and outer radii too close. Please adjust.")
+                isValid = False
+            elif param_value > self.qmax:
+                print("Inner radius exceeds maximum range. Please adjust.")
+                isValid = False
+        elif param_name == 'r_max':
+            if np.fabs(param_value - self.getParams()['r_min']) < MIN_Q_DIFFERENCE:
+                print("Inner and outer radii too close. Please adjust.")
+                isValid = False
+            elif param_value > self.qmax:
+                print("Outer radius exceeds maximum range. Please adjust.")
+                isValid = False
+        elif param_name == 'delta_phi [deg]':
+            if np.fabs(param_value) < MIN_PHI_DIFFERENCE:
+                print("Sector angles too close. Please adjust.")
+                isValid = False
+        elif param_name == 'nbins':
             # Can't be 0
             if param_value < 1:
                 print("Number of bins cannot be <= 0. Please adjust.")
@@ -226,6 +243,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         return isValid
 
     def moveend(self, ev): # Check if that's all I need?
+        """
+        Called after a dragging event.
+        Post the slicer new parameters and creates a new Data1D
+        corresponding to the new average
+        """
         self._post_data()
 
     def restore(self, ev):
@@ -261,6 +283,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
     def setParams(self, params):
         """
+        Receive a dictionary and reset the slicer with values contained
+        in the values of the dictionary.
+
+        :param params: a dictionary containing name of slicer parameters and
+            values the user assigned to the slicer.
         """
         r1 = params["r_min"]
         r2 = params["r_max"]
@@ -276,6 +303,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
     def draw(self):
         """
+        Draws the Canvas using the canvas.draw from the calling class
+        that instatiated this object.
         """
         self.base.draw()
 

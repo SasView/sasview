@@ -70,7 +70,7 @@ class ArcInteractor(BaseInteractor):
 
     def update(self, theta2=None, phi=None, r=None, nbins=100):
         """
-        Update the plotted arc
+        Draw the new roughness on the graph.
         :param theta2: angle from x-axis of the central point on the arc
         :param phi: angle from the centre point on the arc to each of its edges
         :param r: radius from (0,0) of the arc on a data2D plot
@@ -126,7 +126,7 @@ class ArcInteractor(BaseInteractor):
 
     def move(self, x, y, ev):
         """
-        Process move to a new position
+        Process move to a new position.
         """
         self._mouse_x = x
         self._mouse_y = y
@@ -139,14 +139,3 @@ class ArcInteractor(BaseInteractor):
         self.move(x, y, None)
         self.update()
 
-    # def get_params(self):
-    #     params = {}
-    #     params["radius"] = self.radius
-    #     params["theta2"] = self.theta2
-    #     params["phi"] = self.phi
-    #     return params
-
-    # def set_params(self, params):
-    #     r = params["radius"]
-    #     theta = params["theta2"] # or = self.theta2 (?)
-    #     self.set_cursor(r*np.cos(theta), r*np.sin(theta))

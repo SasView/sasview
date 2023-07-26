@@ -2,23 +2,21 @@ import numpy as np
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
-
 class RadiusInteractor(BaseInteractor):
     """
-     Draw a radial line (centered at [0,0]) at an angle theta from the x-axis
-     on a data2D plot from r1 to r2 defined by two arcs (arc1 and arc2). Used
-     for example to define a wedge area on the plot.
+    Draw a pair of lines radiating from a center at [0,0], between radius
+    values r1 and r2 with and average angle from the x-axis of theta2, and an
+    angular diaplacement of phi either side of this average. Used for example
+    to to define the left and right edges of the a wedge area on a plot, see
+    WedgeInteractor.
 
-     param theta: angle of the radial line from the x-axis
-     param arc1: inner arc of radius r1 used to define the starting point of
-                the radial line
-     param arc2: outer arc of radius r2 used to define the ending point of
-                the radial line
+    :param r1: radius of the inner end of the radial lines
+    :param r2: radius of the outer end of the radial lines
+    :param theta2: average angle of the lines from the x-axis
+    :param phi: angular displacement of the lines either side of theta2
     """
     def __init__(self, base, axes, color='black', zorder=5, arc1=None,
                  arc2=None, theta2=np.pi / 3, phi=np.pi / 8):
-        """
-        """
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
@@ -68,12 +66,15 @@ class RadiusInteractor(BaseInteractor):
 
     def set_layer(self, n):
         """
+        Allow adding plot to the same panel
+        :param n: the number of layer
         """
         self.layernum = n
         self.update()
 
     def clear(self):
         """
+        Clear this slicer and its markers
         """
         self.clear_markers()
         try:
@@ -86,14 +87,13 @@ class RadiusInteractor(BaseInteractor):
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
 
-    # def get_angle(self):
-    #     """
-    #     """
-    #     return self.theta
-
     def update(self, theta2=None, phi=None):
         """
         Draw the new roughness on the graph.
+        :param r1: radius of the inner end of the radial lines
+        :param r2: radius of the outer end of the radial lines
+        :param theta2: average angle of the lines from the x-axis
+        :param phi: angular displacement of the lines either side of theta2
         """
         # TODO - try out an 'if self.arc1.has_move:' etc
         self.r1 = self.arc1.get_radius()
@@ -121,10 +121,12 @@ class RadiusInteractor(BaseInteractor):
         can restore on Esc.
         """
         self.save_phi = self.phi
-        # May also need a save_theta2 variable
+        # self.save_theta2 = self.theta2
 
     def moveend(self, ev):
         """
+        Called when any dragging motion ends.
+        Redraw the plot with new parameters and set self.has_move to False.
         """
         self.has_move = False
         self.base.moveend(ev)
@@ -134,11 +136,11 @@ class RadiusInteractor(BaseInteractor):
         Restore the roughness for this layer.
         """
         self.phi = self.save_phi
-        # May also need a save_theta2 variable
+        # self.theta2 = self.save_theta2
 
     def move(self, x, y, ev):
         """
-        Process move to a new position, making sure that the move is allowed.
+        Process move to a new position.
         """
         theta = np.arctan2(y, x)
         self.phi = np.fabs(theta - self.theta2)
@@ -147,34 +149,6 @@ class RadiusInteractor(BaseInteractor):
         self.base.draw()
 
     def set_cursor(self, x, y):
-        """
-        """
         self.move(x, y, None)
         self.update()
-
-    # def get_params(self):
-    #     """
-    #     Store a copy of values of parameters of the slicer into a dictionary.
-    #     :return params: the dictionary created
-    #     """
-    #     params = {}
-    #     params["radius1"] = self.r1
-    #     params["radius2"] = self.r2
-    #     params["theta"] = self.theta2
-    #     params["phi"] = self.phi
-    #     return params
-
-    # def set_params(self, params):
-    #     """
-    #     Receive a dictionary and reset the slicer with values contained
-    #     in the values of the dictionary.
-    #
-    #     :param params: a dictionary containing name of slicer parameters and
-    #         values the user assigned to the slicer.
-    #     """
-    #     r1 = params["radius1"]
-    #     r2 = params["radius2"]
-    #     theta = params["theta"]
-    #     phi = params["phi"]
-    #     self.set_cursor(x1, x2, theta)
 
