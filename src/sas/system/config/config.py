@@ -198,7 +198,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH = 30
 
         # Residuals management
-        # If true, disables residuals display
+        # If true, disables residual plot display
         self.DISABLE_RESIDUAL_PLOT = False
 
         # Polydispersity plot management
