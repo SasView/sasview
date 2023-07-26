@@ -49,8 +49,7 @@ class AnalysisBase(models.Model):
     analysis_success = models.BooleanField(default = False, help_text="Successful completion of analysis")
     #TODO write a list of errors
 
-    if User:
-        is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
+    is_public = models.BooleanField(default = False, help_text="does the user want their data to be public")
 
     
 class AnalysisParameterBase(models.Model):

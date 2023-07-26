@@ -1,7 +1,10 @@
+import os
+
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, Http404
 from django.contrib.auth.models import User
 from django.core.files import File
+from django.core.files.storage import FileSystemStorage 
 
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -10,6 +13,7 @@ from rest_framework.decorators import api_view
 from sasdata.dataloader.loader import Loader
 from serializers import DataSerializer
 from .models import Data
+from .forms import DataForm
 
 #TODO finish logger
 #TODO look through whole code to make sure serializer updates to the correct object
@@ -36,10 +40,13 @@ def list_data(request, username = None, version = None):
 @api_view(['GET'])
 def data_info(request, db_id, version = None):
     if request.method == 'GET':
+        loader = Loader()
         public_data = get_object_or_404(Data, id = db_id)
         private_data = get_object_or_404(Data, id = db_id)
         if public_data.is_public:
-            return_data = {"info" : public_data.file.__str__()}
+            data_list= loader.load(public_data.file.path)
+            contents = [str(data) for data in data_list]
+            return_data = {public_data.file.__str__():contents}
             return Response(return_data)
         #rewrite with "user.is_authenticated"
         elif request.user.is_authenticated:
@@ -51,47 +58,58 @@ def data_info(request, db_id, version = None):
 
 @api_view(['POST', 'PUT'])
 def upload(request, data_id = None, version = None):
-    serializer = DataSerializer()
-    
     #saves file
     if request.method == 'POST':
-        serializer(data = request.data, file = File(open(request.file), 'rb'))
+        form = DataForm(request.data, request.FILES)
+        if form.is_valid():
+            form.save()
+        db = Data.objects.get(pk = form.instance.pk)
         if request.user.is_authenticated:
-            serializer(current_user = request.user)
-    
+            serializer = DataSerializer(db, data={"file_name":os.path.basename(form.instance.file.path), "current_user" : request.user.id})
+        else:
+            serializer = DataSerializer(db, data={"file_name":os.path.basename(form.instance.file.path)})
+
     #saves or updates file
     elif request.method == 'PUT':
         #require data_id
-        if data_id != None:
+        if data_id != None and request.user:
             if request.user.is_authenticated:
                 userr = request.user
-                data = Data.objects.filter(current_user = userr, id = data_id).get()
-                serializer(data, data=request.data, file = request.file)
+                db = Data.objects.filter(current_user = userr, id = data_id).get()
+                form = DataForm(request.data, request.FILES, instance=db)
+                if form.is_valid():
+                    form.save()
+                serializer = DataSerializer(db, data={"file_name":os.path.basename(form.instance.file.path), "current_user" : request.user.id})
             else:
-                return HttpResponseForbidden
+                return HttpResponseForbidden("user is not logged in")
         else:
             return HttpResponseBadRequest()
 
     if serializer.is_valid():
         serializer.save()
         #TODO get warnings/errors later
-        return_data = {"authenticated" : request.user.is_authenticated, "file_id" : serializer.id, "is_public" : serializer.is_public}
+        return_data = {"current_user":serializer.data["current_user"], "authenticated" : request.user.is_authenticated, "file_id" : db.id, "file_alternative_name":serializer.data["file_name"],"is_public" : serializer.data["is_public"]}
         return Response(return_data)
-    return HttpResponseBadRequest()
-    #data is actually loaded inside fit view
 
 
 #TODO check if I should move to fit
 @api_view(['GET'])
 def download(request, data_id, version = None):
     if request.method == 'GET':
+        storage = FileSystemStorage()
         data = get_object_or_404(Data, id = data_id)
         serializer = DataSerializer(data)
         if not serializer.is_public:
             #add session key later
-            if request.user.token != serializer.current_user.token:
+            if not request.user.is_authenticated:
                 return HttpResponseBadRequest("data is private, must log in")
         #TODO add issues later
-        return Response(serializer.file)
+        try:
+            file = storage.open(serializer.file_name, 'rb')
+        except Exception as e:
+            return HttpResponseBadRequest(str(e))
+        if file is None:
+            raise Http404("File not found.")
+        file_content = file.read()
+        return Response(file_content, content_type="application/force_download")
     return HttpResponseBadRequest()
-        

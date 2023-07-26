@@ -23,7 +23,7 @@ from django.utils.module_loading import import_string
 from rest_framework import ISO_8601
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 #imports for knox
 from datetime import timedelta
@@ -187,8 +187,9 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "src/sas/example_data/1d_data")
-MEDIA_URL = '/example_data/'
+#instead of doing this, create a create a new media_root 
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = '/media/'
 
 
 # Default primary key field type

@@ -45,7 +45,7 @@ class ModelSerializer(serializers.ModelSerializer):
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = "__all__", 
+        fields = "__all__"
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
@@ -81,7 +81,7 @@ class RegisterSerializer(ModelSerializer):
 class DataSerializer(ModelSerializer):
     class Meta:
         model = Data
-        fields = "__all__", 
+        fields = "__all__" 
 
     def full_clean(self, instance, exclude=None, validate_unique=True):
         if not instance or not instance.id:
@@ -91,7 +91,6 @@ class DataSerializer(ModelSerializer):
 
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        serializers.FileField
         instance.current_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=True)
         return instance
     
