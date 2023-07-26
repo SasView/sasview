@@ -8,6 +8,8 @@ from sasdata.data_util.loader_exceptions import NoKnownLoaderException, DefaultR
 #do i need these if we have loader exceptions^^
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.files.storage import FileSystemStorage 
+from django.utils.deconstruct import deconstructible
 from django.core.exceptions import (
     NON_FIELD_ERRORS,
     FieldDoesNotExist,
@@ -19,22 +21,21 @@ from django.core.exceptions import (
 
 models_logger = getLogger(__name__)
 
-# do we want individual dbs for each perspective?
-
-
 class Data(models.Model):
     #username
     current_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
 
-    #might need to create a file_name so that users can figure out file_name for public files (opt of course)
+    #file name
+    file_name = models.CharField(max_length=200, default = "", blank = True, null = True, help_text="File name")
 
     #imported data
     #user can either import a file path or actual file
-    file = models.FileField(blank = True, null = True, help_text="This is a file")
+    file = models.FileField(blank = False, default = None, help_text="This is a file", upload_to="uploaded_files", storage=FileSystemStorage())
 
-    #creates hash for data
-    if User:
-        is_public = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
+    #TODO creates hash for data
+
+    #is the data public?
+    is_public = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
 
     """
     date_recieved
