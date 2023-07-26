@@ -15,19 +15,17 @@ class RadiusInteractor(BaseInteractor):
     :param theta: average angle of the lines from the x-axis
     :param phi: angular displacement of the lines either side of theta
     """
-    def __init__(self, base, axes, color='black', zorder=5, arc1=None,
-                 arc2=None, theta=np.pi / 3, phi=np.pi / 8):
+    def __init__(self, base, axes, color='black', zorder=5, r1=1.0, r2=2.0,
+                 theta=np.pi / 3, phi=np.pi / 8):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
         self.color = color
-        self.r1 = arc1.get_radius()
-        self.r2 = arc2.get_radius()
+        self.r1 = r1
+        self.r2 = r2
         self.theta = theta
         self.phi = phi
         self.save_phi = phi
-        self.arc1 = arc1
-        self.arc2 = arc2
         # Variables for the left and right radial lines
         l_x1 = self.r1 * np.cos(self.theta + self.phi)
         l_y1 = self.r1 * np.sin(self.theta + self.phi)
@@ -84,7 +82,7 @@ class RadiusInteractor(BaseInteractor):
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
 
-    def update(self, theta=None, phi=None):
+    def update(self, r1=None, r2=None, theta=None, phi=None):
         """
         Draw the new roughness on the graph.
         :param r1: radius of the inner end of the radial lines
@@ -92,9 +90,10 @@ class RadiusInteractor(BaseInteractor):
         :param theta: average angle of the lines from the x-axis
         :param phi: angular displacement of the lines either side of theta
         """
-        # TODO - try out an 'if self.arc1.has_move:' etc
-        self.r1 = self.arc1.get_radius()
-        self.r2 = self.arc2.get_radius()
+        if r1 is not None:
+            self.r1 = r1
+        if r2 is not None:
+            self.r2 = r2
         if theta is not None:
             self.theta = theta
         if phi is not None:
