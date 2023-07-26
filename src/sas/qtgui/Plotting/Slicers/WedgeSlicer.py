@@ -42,10 +42,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.dqmin = min(np.fabs(self.data.qx_data))
         self.connect = self.base.connect
 
-        # # Number of points on the plot
+        # Number of points on the plot
         self.nbins = 100
         # Angle of the central line
-        self.theta2 = np.pi / 3
+        self.theta = np.pi / 3
         # Angle between the central line and the radial lines either side of it
         self.phi = np.pi / 8
         # reference of the current data averager
@@ -53,24 +53,24 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         self.inner_arc = ArcInteractor(self, self.axes, color='black',
                                        zorder=zorder, r=self.qmax / 2.0,
-                                       theta2=self.theta2, phi=self.phi)
+                                       theta=self.theta, phi=self.phi)
         self.inner_arc.qmax = self.qmax
         self.outer_arc = ArcInteractor(self, self.axes, color='black',
                                        zorder=zorder + 1, r=self.qmax / 1.6,
-                                       theta2=self.theta2, phi=self.phi)
+                                       theta=self.theta, phi=self.phi)
         self.outer_arc.qmax = self.qmax * 1.2
         self.radial_lines = RadiusInteractor(self, self.axes, color='black',
                                              zorder=zorder + 1,
                                              arc1=self.inner_arc,
                                              arc2=self.outer_arc,
-                                             theta2=self.theta2, phi=self.phi)
+                                             theta=self.theta, phi=self.phi)
         self.radial_lines.qmax = self.qmax * 1.2
         self.central_line = LineInteractor(self, self.axes, color='black',
                                            zorder=zorder, r=self.qmax * 1.414,
-                                           theta=self.theta2)
+                                           theta=self.theta)
         self.central_line.qmax = self.qmax * 1.414
         self.update()
-        self.draw()
+        self.base.draw()
         self._post_data()
         self.setModelFromParams()
 
@@ -100,9 +100,9 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         resetting the widgets.
         """
         # Update parameters
-        self.theta2 = self.central_line.theta
+        self.theta = self.central_line.theta
         self.phi = self.radial_lines.phi
-        # Update locations
+        # Update interactors
         if self.inner_arc.has_move:
             self.inner_arc.update()
             self.radial_lines.update()
@@ -115,9 +115,9 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             self.outer_arc.update(phi=self.phi)
         if  self.central_line.has_move:
             self.central_line.update()
-            self.inner_arc.update(theta2=self.theta2)
-            self.outer_arc.update(theta2=self.theta2)
-            self.radial_lines.update(theta2=self.theta2)
+            self.inner_arc.update(theta=self.theta)
+            self.outer_arc.update(theta=self.theta)
+            self.radial_lines.update(theta=self.theta)
 
     def save(self, ev):
         """
@@ -242,7 +242,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
                 isValid = False
         return isValid
 
-    def moveend(self, ev): # Check if that's all I need?
+    def moveend(self, ev):
         """
         Called after a dragging event.
         Post the slicer new parameters and creates a new Data1D
@@ -261,7 +261,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
     def move(self, x, y, ev):
         """
-        Process move to a new position, making sure that the move is allowed.
+        Process move to a new position.
         """
         pass
 
@@ -300,13 +300,6 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.radial_lines.update(theta, phi)
         self.central_line.update(theta)
         self._post_data()
-
-    def draw(self):
-        """
-        Draws the Canvas using the canvas.draw from the calling class
-        that instatiated this object.
-        """
-        self.base.draw()
 
 class WedgeInteractorQ(WedgeInteractor):
     """

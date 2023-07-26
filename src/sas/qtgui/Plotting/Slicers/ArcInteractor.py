@@ -5,13 +5,14 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 class ArcInteractor(BaseInteractor):
     """
     Draw an arc on a data2D plot with a variable radius (centered at [0,0]).
+    User interaction adjusts the parameter r
 
     param r: radius from (0,0) of the arc on a data2D plot
-    param theta2: angle from x-axis of the central point on the arc
+    param theta: angle from x-axis of the central point on the arc
     param phi: angle from the centre point on the arc to each of its edges
     """
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 theta2=np.pi / 3, phi=np.pi / 8):
+                 theta=np.pi / 3, phi=np.pi / 8):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
@@ -21,12 +22,12 @@ class ArcInteractor(BaseInteractor):
         self._save_x = r
         self._save_y = 0
         self.scale = 10.0
-        self.theta2 = theta2
+        self.theta = theta
         self.phi = phi
         self.radius = r
-        # Define the arc's marker
-        marker_x = self.radius * np.cos(theta2 * 0.8)
-        marker_y = self.radius * np.sin(theta2 * 0.8)
+        # Calculate the marker coordinates and define the marker
+        marker_x = self.radius * np.cos(theta - 0.5 * phi)
+        marker_y = self.radius * np.sin(theta - 0.5 * phi)
         self.marker = self.axes.plot([marker_x], [marker_y], linestyle='',
                                      marker='s', markersize=10,
                                      color=self.color, alpha=0.6, pickradius=5,
@@ -35,6 +36,7 @@ class ArcInteractor(BaseInteractor):
         # Define the arc
         [self.arc] = self.axes.plot([], [], linestyle='-', marker='', color=self.color)
         self.npts = 20
+        # Flag to keep track of motion
         self.has_move = False
         self.connect_markers([self.marker, self.arc])
         self.update()
@@ -68,18 +70,18 @@ class ArcInteractor(BaseInteractor):
                            np.power(self._mouse_y, 2))
         return radius
 
-    def update(self, theta2=None, phi=None, r=None, nbins=100):
+    def update(self, theta=None, phi=None, r=None, nbins=100):
         """
         Draw the new roughness on the graph.
-        :param theta2: angle from x-axis of the central point on the arc
+        :param theta: angle from x-axis of the central point on the arc
         :param phi: angle from the centre point on the arc to each of its edges
         :param r: radius from (0,0) of the arc on a data2D plot
         :param nbins: number of points drawn for an arc of size pi radians
         """
         x = []
         y = []
-        if theta2 is not None:
-            self.theta2 = theta2
+        if theta is not None:
+            self.theta = theta
         if phi is not None:
             self.phi = phi
         self.npts = int((2 * self.phi) / (np.pi / nbins))
@@ -90,14 +92,15 @@ class ArcInteractor(BaseInteractor):
             self.radius = r
         # Calculate the points on the arc, and draw them
         for i in range(self.npts):
-            angleval = 2 * self.phi / (self.npts - 1) * i + (self.theta2 - self.phi)
+            angleval = 2 * self.phi / (self.npts - 1) * i + (self.theta - self.phi)
             xval = 1.0 * self.radius * np.cos(angleval)
             yval = 1.0 * self.radius * np.sin(angleval)
             x.append(xval)
             y.append(yval)
 
-        marker_x = self.radius * np.cos(self.theta2 - 0.5 * self.phi)
-        marker_y = self.radius * np.sin(self.theta2 - 0.5 * self.phi)
+        # Calculate the new marker location, and draw that too
+        marker_x = self.radius * np.cos(self.theta - 0.5 * self.phi)
+        marker_y = self.radius * np.sin(self.theta - 0.5 * self.phi)
         self.marker.set(xdata=[marker_x], ydata=[marker_y])
         self.arc.set_data(x, y)
 

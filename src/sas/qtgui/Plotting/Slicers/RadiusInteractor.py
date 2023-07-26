@@ -5,39 +5,38 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 class RadiusInteractor(BaseInteractor):
     """
     Draw a pair of lines radiating from a center at [0,0], between radius
-    values r1 and r2 with and average angle from the x-axis of theta2, and an
+    values r1 and r2 with and average angle from the x-axis of theta, and an
     angular diaplacement of phi either side of this average. Used for example
     to to define the left and right edges of the a wedge area on a plot, see
-    WedgeInteractor.
+    WedgeInteractor. User interaction adjusts the parameter phi.
 
     :param r1: radius of the inner end of the radial lines
     :param r2: radius of the outer end of the radial lines
-    :param theta2: average angle of the lines from the x-axis
-    :param phi: angular displacement of the lines either side of theta2
+    :param theta: average angle of the lines from the x-axis
+    :param phi: angular displacement of the lines either side of theta
     """
     def __init__(self, base, axes, color='black', zorder=5, arc1=None,
-                 arc2=None, theta2=np.pi / 3, phi=np.pi / 8):
+                 arc2=None, theta=np.pi / 3, phi=np.pi / 8):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
         self.color = color
         self.r1 = arc1.get_radius()
         self.r2 = arc2.get_radius()
-        self.theta2 = theta2
-        # self.save_theta2 = theta2
+        self.theta = theta
         self.phi = phi
         self.save_phi = phi
         self.arc1 = arc1
         self.arc2 = arc2
         # Variables for the left and right radial lines
-        l_x1 = self.r1 * np.cos(self.theta2 + self.phi)
-        l_y1 = self.r1 * np.sin(self.theta2 + self.phi)
-        l_x2 = self.r2 * np.cos(self.theta2 + self.phi)
-        l_y2 = self.r2 * np.sin(self.theta2 + self.phi)
-        r_x1 = self.r1 * np.cos(self.theta2 - self.phi)
-        r_y1 = self.r1 * np.sin(self.theta2 - self.phi)
-        r_x2 = self.r2 * np.cos(self.theta2 - self.phi)
-        r_y2 = self.r2 * np.sin(self.theta2 - self.phi)
+        l_x1 = self.r1 * np.cos(self.theta + self.phi)
+        l_y1 = self.r1 * np.sin(self.theta + self.phi)
+        l_x2 = self.r2 * np.cos(self.theta + self.phi)
+        l_y2 = self.r2 * np.sin(self.theta + self.phi)
+        r_x1 = self.r1 * np.cos(self.theta - self.phi)
+        r_y1 = self.r1 * np.sin(self.theta - self.phi)
+        r_x2 = self.r2 * np.cos(self.theta - self.phi)
+        r_y2 = self.r2 * np.sin(self.theta - self.phi)
         # Define the left and right markers
         self.l_marker = self.axes.plot([(l_x1+l_x2)/2], [(l_y1+l_y2)/2],
                                        linestyle='', marker='s', markersize=10,
@@ -56,8 +55,6 @@ class RadiusInteractor(BaseInteractor):
         self.r_line = self.axes.plot([r_x1, r_x2], [r_y1, r_y2],
                                      linestyle='-', marker='',
                                      color=self.color, visible=True)[0]
-        # # Flag to differentiate the left side's motion from the right's
-        # self.left_moving = False
         # Flag to keep track of motion
         self.has_move = False
         self.connect_markers([self.l_marker, self.l_line,
@@ -87,29 +84,31 @@ class RadiusInteractor(BaseInteractor):
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
 
-    def update(self, theta2=None, phi=None):
+    def update(self, theta=None, phi=None):
         """
         Draw the new roughness on the graph.
         :param r1: radius of the inner end of the radial lines
         :param r2: radius of the outer end of the radial lines
-        :param theta2: average angle of the lines from the x-axis
-        :param phi: angular displacement of the lines either side of theta2
+        :param theta: average angle of the lines from the x-axis
+        :param phi: angular displacement of the lines either side of theta
         """
         # TODO - try out an 'if self.arc1.has_move:' etc
         self.r1 = self.arc1.get_radius()
         self.r2 = self.arc2.get_radius()
-        if theta2 is not None:
-            self.theta2 = theta2
+        if theta is not None:
+            self.theta = theta
         if phi is not None:
             self.phi = phi
-        l_x1 = self.r1 * np.cos(self.theta2 + self.phi)
-        l_y1 = self.r1 * np.sin(self.theta2 + self.phi)
-        l_x2 = self.r2 * np.cos(self.theta2 + self.phi)
-        l_y2 = self.r2 * np.sin(self.theta2 + self.phi)
-        r_x1 = self.r1 * np.cos(self.theta2 - self.phi)
-        r_y1 = self.r1 * np.sin(self.theta2 - self.phi)
-        r_x2 = self.r2 * np.cos(self.theta2 - self.phi)
-        r_y2 = self.r2 * np.sin(self.theta2 - self.phi)
+        # Variables for the left and right radial lines
+        l_x1 = self.r1 * np.cos(self.theta + self.phi)
+        l_y1 = self.r1 * np.sin(self.theta + self.phi)
+        l_x2 = self.r2 * np.cos(self.theta + self.phi)
+        l_y2 = self.r2 * np.sin(self.theta + self.phi)
+        r_x1 = self.r1 * np.cos(self.theta - self.phi)
+        r_y1 = self.r1 * np.sin(self.theta - self.phi)
+        r_x2 = self.r2 * np.cos(self.theta - self.phi)
+        r_y2 = self.r2 * np.sin(self.theta - self.phi)
+        # Draw the updated markers and lines
         self.l_marker.set(xdata=[(l_x1+l_x2)/2], ydata=[(l_y1+l_y2)/2])
         self.l_line.set(xdata=[l_x1, l_x2], ydata=[l_y1, l_y2])
         self.r_marker.set(xdata=[(r_x1+r_x2)/2], ydata=[(r_y1+r_y2)/2])
@@ -121,7 +120,6 @@ class RadiusInteractor(BaseInteractor):
         can restore on Esc.
         """
         self.save_phi = self.phi
-        # self.save_theta2 = self.theta2
 
     def moveend(self, ev):
         """
@@ -136,14 +134,13 @@ class RadiusInteractor(BaseInteractor):
         Restore the roughness for this layer.
         """
         self.phi = self.save_phi
-        # self.theta2 = self.save_theta2
 
     def move(self, x, y, ev):
         """
         Process move to a new position.
         """
-        theta = np.arctan2(y, x)
-        self.phi = np.fabs(theta - self.theta2)
+        angle = np.arctan2(y, x)
+        self.phi = np.fabs(angle - self.theta)
         self.has_move = True
         self.base.update()
         self.base.draw()
