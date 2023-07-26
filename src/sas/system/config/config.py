@@ -199,7 +199,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # Residuals management
         # If true, disables residuals display
-        self.DISABLE_RESIDUALS = False
+        self.DISABLE_RESIDUALS_PLOT = False
 
         # Polydispersity plot management
         # If true, disables polydispersity plot display
