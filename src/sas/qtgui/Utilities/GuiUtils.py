@@ -961,7 +961,48 @@ def replaceHTMLwithASCII(html):
 
     return html
 
+def rst_to_latex(s):
+    # Extract the unit and replacement parts
+    match_replace = re.match(r'(?:\.\. )?\|(.+?)\| replace:: (.+)', s)
+    match_unit = re.match(r'(?:\.\. )?\|(.+?)\| unicode:: (U\+\w+)', s)
+    unit = None
+    replacement = None
+
+    if  match_replace:
+        # replace the 'replace' section
+
+        unit, replacement = match_replace.groups()
+
+        # Convert the unit into a valid Python string condition
+        unit = unit.replace("Ang", "Å").replace("\\", "").replace(" ", "")
+
+        # Convert the replacement into the desired HTML format
+        replacement = replacement.replace("|Ang|", "Å").replace("\\ :sup:`", "<sup>").replace("`", "</sup>").replace("\\", "")
+
+    if match_unit:
+        # replace the 'unicode' section
+        unit, unicode_val = match_unit.groups()
+        # Convert the unicode value to actual character representation
+        replacement = chr(int(unicode_val[2:], 16))
+
+    return unit, replacement
+
+# RST_PROLOG conversion table
+from sasmodels.generate import RST_PROLOG
+RST_PROLOG_DICT = {}
+input_rst_strings = RST_PROLOG.splitlines()
+for line in input_rst_strings:
+    if line.startswith(".. |"):
+        key, value = rst_to_latex(line)
+        RST_PROLOG_DICT[key] = value
+
 def convertUnitToUTF8(unit):
+    if unit in RST_PROLOG_DICT:
+        return RST_PROLOG_DICT[unit]
+    else:
+        return ""
+
+def convertUnitToUTF8_old(unit):
     """
     Convert ASCII unit display into UTF-8 symbol
     """
