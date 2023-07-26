@@ -136,10 +136,14 @@ class RadiusInteractor(BaseInteractor):
 
     def move(self, x, y, ev):
         """
-        Process move to a new position.
+        Process move to a new position, making sure that the move is allowed.
         """
         angle = np.arctan2(y, x)
-        self.phi = np.fabs(angle - self.theta)
+        phi = np.fabs(angle - self.theta)
+        if phi > np.pi:
+            self.restore(ev)
+            return
+        self.phi = phi
         self.has_move = True
         self.base.update()
         self.base.draw()
