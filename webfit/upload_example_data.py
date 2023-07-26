@@ -22,9 +22,7 @@ def parse_1D():
         logging.error("1D Data directory not found at: {}".format(dir_1d))
         return
     for file_path in glob(os.path.join(dir_1d)):
-        file_name = os.path.basename(file_path)[0]
-        file_name = "1d_data" + file_name
-        write_file(file_name)
+        upload_file(file_path)
 
 def parse_2D():
     dir_2d = os.path.join(EXAMPLE_DATA_DIR, "example_data", "2d_data")
@@ -32,12 +30,10 @@ def parse_2D():
         logging.error("2D Data directory not found at: {}".format(dir_2d))
         return
     for file_path in glob(os.path.join(dir_2d)):
-        file_name = os.path.basename(file_path)[0]
-        file_name = "2d_data" + file_name
-        write_file(file_name)
+        upload_file(file_path)
 
 
-def write_file(file):
+"""def upload_file(file):
     file_content = [
         {
             "model": "data.Data",
@@ -49,5 +45,19 @@ def write_file(file):
     ]
     json_obj = json.dumps(file_content, indent=4)
     with open("/data/fixtures/{file}.js", "w") as f:
-        f.write(json_obj)
+        f.write(json_obj)"""
+
+def upload_file(file_path):
+    # Upload the file at file_path to the model
+    file_name = os.path.split(file_path)[-1]
+
+    file_obj = None
+    with open(file_path, 'rb') as file_handle:
+        file_obj = SimpleUploadedFile(file_name, file_handle.read())
+
+    if file_obj is None:
+        raise Exception("Unable to upload file: {}".format(file_path))
+    
+    data_file = Data(file_name=file_name, file=file_obj, is_public=True)
+    data_file.save()
     
