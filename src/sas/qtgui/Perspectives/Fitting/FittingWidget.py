@@ -1857,8 +1857,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # self.parent.showHelp(url) <-- a clue for how to get other help pages open in the future
         # WP: Added to handle OSX bundle docs
         try:
+            # helpWindow displays itself
             self.helpWindow = DocViewWindow(source=url, parent=self.parent)
-            self.helpWindow.show()
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
 

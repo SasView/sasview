@@ -16,8 +16,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     """
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
-    hideSignal = QtCore.Signal()
-    showSignal = QtCore.Signal()
 
     def __init__(self, parent=None, source=None):
         super(DocViewWindow, self).__init__(parent._parent)
@@ -39,12 +37,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         Initialize Signals 
         """
-        self.parent.communicate.docsRegeneratedSignal.connect(self.loadHtml)
 
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
-        self.showSignal.connect(self.onShow)
-        self.hideSignal.connect(self.onHide)
 
     def onEdit(self):
         """
@@ -79,12 +74,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Close window
         """
         self.close()
-    
-    def onHide(self):
-        """
-        Hide window
-        """
-        self.hide()
 
     def onShow(self):
         """
@@ -148,6 +137,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessFileUrls, True)
         self.webEngineViewer.load(url)
+        self.onShow()
 
     def processUrl(self):
         url = self.source
@@ -174,9 +164,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         Regenerate the documentation for the file
         """
-        
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-        html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
         recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
         regen_docs = sas_path + "/" + recompile_path + "/" + "makedocumentation.py"
         d = threads.deferToThread(self.regenerateDocs, regen_docs, target=file_name) # Regenerate specific documentation file
@@ -201,6 +189,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Tells Qt that regeneration of docs is done and emits signal tied to opening
         documentation viewer window
         """
-        self.parent.communicate.docsRegeneratedSignal.emit(help_location)
-        self.show()
+        self.onShow()
+        self.loadHtml()
         self.regen_in_progress = False
