@@ -54,7 +54,7 @@ class DataTest(TestCase):
 class TestingDatabase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testUser", password="secret", id = 2)
-        self.data = Data.objects.create(id = 1, current_user = self.user, file_name = "testing.txt", is_public = False)
+        self.data = Data.objects.create(id = 1, current_user = self.user, file_name = "another.txt", is_public = False)
         self.data.file.save("another.txt",open(r"C:\Users\tns14\Documents\another.txt"))
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
