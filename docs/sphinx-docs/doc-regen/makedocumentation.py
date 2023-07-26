@@ -55,13 +55,18 @@ def call_regenmodel(filepath, regen_py):
         command.append(filepath)
     subprocess.run(command)
 
-def generate_html(single_file=""):
-    # based off of syntax provided in Makefile found under /sasmodels/doc/
+def generate_html(single_file="", rst=False):
+    """
+    Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found under /sasmodels/doc/
+    """
     DOCTREES = "../build/doctrees/"
     SPHINX_SOURCE = "../source-temp/"
     HTML_TARGET = "../build/html/"
-    single_rst = SPHINX_SOURCE + "user/models/" + single_file.replace('.py', '.rst')
-    if single_rst.endswith("models/"):
+    if rst is False:
+        single_rst = SPHINX_SOURCE + "user/models/" + single_file.replace('.py', '.rst')
+    else:
+        single_rst = single_file
+    if single_rst.endswith("models/") or single_rst.endswith("user/"):
         # (re)sets value to empty string if nothing was entered
         single_rst = ""
     command = [
@@ -77,6 +82,7 @@ def generate_html(single_file=""):
         single_rst,
     ]
     try:
+        # Try removing empty arguments
         command.remove("")
     except:
         pass
@@ -109,8 +115,12 @@ def call_one_file(file):
 
 def main():
     try:
-        call_one_file(sys.argv[1]) # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
-        generate_html(sys.argv[1])
+        if ".rst" in sys.argv[1]:
+            # Generate only HTML if passed in file is an RST
+            generate_html(sys.argv[1], rst=True)
+        else:
+            call_one_file(sys.argv[1]) # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
+            generate_html(sys.argv[1])
     except:
         generate_html()
 

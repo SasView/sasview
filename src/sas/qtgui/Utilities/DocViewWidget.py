@@ -106,25 +106,35 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             from re import search
             model_name = os.path.basename(self.source).replace("html", "py")
             regen_string = sas_path + "/" + rst_py_path + "/user/models/src/" + model_name
-            try:
                 # Test to see if HTML does not exist or is older than python file
-                if self.newer(regen_string, self.source):
-                    self.regenerateHtml(model_name)
-            except Exception as ex:
-                logging.warning("There may be an error with the output of the documentation window: %s" % ex)
-            # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py
-            
-        if "index" in self.source:
-            # Regenerate if HTML is older than RST
-            pass
+            if self.newer(regen_string, self.source):
+                self.regenerateHtml(model_name)
+            # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
+        elif "index" in self.source:
+            # Regenerate if HTML is older than RST -- for index.html, which gets passed in differently because it is located in a different folder
+            regen_string = sas_path + "/" + rst_py_path + self.source.replace('.html', '.rst')
+            html_path = sas_path + "/" + html_path + "/" + self.source
+                # Test to see if HTML does not exist or is older than python file
+            if self.newer(regen_string, html_path):
+                self.regenerateHtml(regen_string)
         else:
             # Regenerate if HTML is older than RST
-            pass
+            from re import sub
+            # Ensure that we are only using everything after and including /user/
+            model_local_path = sub(r"^.*?(?=[\/\\]user)", "", self.source)
+            html_path = sas_path + "/" + html_path + "/" + model_local_path
+            regen_string = sas_path + "/" + rst_py_path + model_local_path.replace('.html', '.rst')
+                # Test to see if HTML does not exist or is older than python file
+            if self.newer(regen_string, html_path):
+                self.regenerateHtml(regen_string)
         
         return regen_string, is_python
     
     def newer(self, src, html):
-        return not os.path.exists(html) or os.path.getmtime(src) > os.path.getmtime(html)
+        try:
+            return not os.path.exists(html) or os.path.getmtime(src) > os.path.getmtime(html)
+        except:
+            return True
 
     def loadHtml(self):
         """
