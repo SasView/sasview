@@ -582,7 +582,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
-        self.chkPolydispersity.setEnabled(True)
+        self.chkPolydispersity.setEnabled(False)
         self.chkPolydispersity.setChecked(False)
         self.chk2DView.setEnabled(True)
         self.chk2DView.setChecked(False)
@@ -1472,6 +1472,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # paste parameters from previous state
         if self.page_parameters:
             self.updatePageWithParameters(self.page_parameters, warn_user=False)
+
+        # disable polydispersity if the model does not support it
+        has_poly = self._poly_model.rowCount() != 0
+        self.chkPolydispersity.setEnabled(has_poly)
+        self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
 
         # set focus so it doesn't move up
         self.cbModel.setFocus()
