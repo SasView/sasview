@@ -117,7 +117,7 @@ class PlotterWidget(PlotterBase):
 
 
         # TODO: ILL INTERNS : FIX THIS
-        if config.GATHER_PLOTS_AND_RESIDUALS and data.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY] and subplot:
+        if config.PLOT_RESIDUALS_BELOW_MAIN and data.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY] and subplot:
             new_sub_plot = Plotter(self, self.manager.parent)
             # No replot signals should come from the smaller plot
             new_sub_plot.blockSignals(True)

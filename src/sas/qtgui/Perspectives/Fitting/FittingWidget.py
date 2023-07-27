@@ -3239,7 +3239,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.createNewIndex(plot)
             new_plots.append(plot)
 
-        if config.GATHER_PLOTS_AND_RESIDUALS:
+        if config.PLOT_RESIDUALS_BELOW_MAIN:
             self.communicate.plotUpdateSignal.emit(new_plots)
         else:
             for plot in new_plots:
