@@ -35,6 +35,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # globals
         self.filename = ""
+        self.is_python = True
         self.window_title = self.windowTitle()
         self.edit_only = edit_only
         self.load_file = load_file
@@ -121,6 +122,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Loads a model plugin file. at_launch is value of whether to attempt a load of a file from launch of the widget or not
         """
+        self.is_python = True # By default assume the file you load is python
+
         print(self.load_file)
         if self.is_modified:
             saveCancelled = self.saveClose()
@@ -138,6 +141,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 filename = py_rst_files + "/user/models/src/" + self.load_file + ".py"
             else:
                 filename = py_rst_files + self.load_file.replace(".html", ".rst")
+                self.is_python = False
         else:
             plugin_location = models.find_plugins_dir()
             filename = QtWidgets.QFileDialog.getOpenFileName(
@@ -176,13 +180,15 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Name the tab with .py filename
         display_name = os.path.basename(filename)
         self.tabWidget.setTabText(0, display_name)
-        # Check the validity of loaded model
-        error_line = self.checkModel(plugin_text)
-        if error_line > 0:
-            # select bad line
-            cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
-            self.editor_widget.txtEditor.setTextCursor(cursor)
-            return
+
+        # Check the validity of loaded model if the model is python
+        if self.is_python is True:
+            error_line = self.checkModel(plugin_text)
+            if error_line > 0:
+                # select bad line
+                cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
+                self.editor_widget.txtEditor.setTextCursor(cursor)
+                return
 
         # In case previous model was incorrect, change the frame colours back
         self.editor_widget.txtEditor.setStyleSheet("")
@@ -420,7 +426,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         assert(filename != "")
         # Retrieve model string
         model_str = self.getModel()['text']
-        if w.is_python:
+        if w.is_python and self.is_python:
             error_line = self.checkModel(model_str)
             if error_line > 0:
                 # select bad line
