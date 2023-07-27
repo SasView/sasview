@@ -1114,13 +1114,13 @@ class GuiManager:
     def actionAdd_Custom_Model(self):
         """
         """
-        self.model_editor = TabbedModelEditor(parent=self._parent)
+        self.model_editor = TabbedModelEditor(parent=self)
         self.model_editor.show()
 
     def actionEdit_Custom_Model(self):
         """
         """
-        self.model_editor = TabbedModelEditor(parent=self._parent, edit_only=True)
+        self.model_editor = TabbedModelEditor(parent=self, edit_only=True)
         self.model_editor.show()
 
     def actionManage_Custom_Models(self):
