@@ -427,7 +427,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         try:
             # self.manager is DataExplorer, which has set parent to GuiManager, which is the correct parent of the widget
             self.helpWindow = DocViewWindow(parent=self.manager.parent, source=url)
-            self.helpWindow.show()
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
 
