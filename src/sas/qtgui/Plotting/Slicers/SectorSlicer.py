@@ -486,9 +486,11 @@ class LineInteractor(BaseInteractor):
     interest (such as a sector).
 
     :param theta: the angle between the middle line and x- axis
+    :param half_length: Defaults to False. If True, the line is drawn from the
+                        origin rather than across the whole graph.
     """
     def __init__(self, base, axes, color='black',
-                 zorder=5, r=1.0, theta=numpy.pi / 4):
+                 zorder=5, r=1.0, theta=numpy.pi / 4, half_length=False):
         BaseInteractor.__init__(self, base, axes, color=color)
 
         self.markers = []
@@ -498,11 +500,16 @@ class LineInteractor(BaseInteractor):
         self.theta = theta
         self.radius = r
         self.scale = 10.0
+        self.half_length = half_length
         # Inner circle
         x1 = self.radius * numpy.cos(self.theta)
         y1 = self.radius * numpy.sin(self.theta)
-        x2 = -1 * self.radius * numpy.cos(self.theta)
-        y2 = -1 * self.radius * numpy.sin(self.theta)
+        if not half_length:
+            x2 = -1 * self.radius * numpy.cos(self.theta)
+            y2 = -1 * self.radius * numpy.sin(self.theta)
+        else:
+            x2 = 0
+            y2 = 0
         # Inner circle marker
         self.inner_marker = self.axes.plot([x1 / 2.5], [y1 / 2.5], linestyle='',
                                            marker='s', markersize=10,
@@ -540,8 +547,12 @@ class LineInteractor(BaseInteractor):
             self.theta = theta
         x1 = self.radius * numpy.cos(self.theta)
         y1 = self.radius * numpy.sin(self.theta)
-        x2 = -1 * self.radius * numpy.cos(self.theta)
-        y2 = -1 * self.radius * numpy.sin(self.theta)
+        if not self.half_length:
+            x2 = -1 * self.radius * numpy.cos(self.theta)
+            y2 = -1 * self.radius * numpy.sin(self.theta)
+        else:
+            x2 = 0
+            y2 = 0
 
         self.inner_marker.set(xdata=[x1 / 2.5], ydata=[y1 / 2.5])
         self.line.set(xdata=[x1, x2], ydata=[y1, y2])

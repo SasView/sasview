@@ -70,7 +70,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.radial_lines.qmax = self.qmax * 1.2
         self.central_line = LineInteractor(self, self.axes, color='black',
                                            zorder=zorder, r=self.qmax * 1.414,
-                                           theta=self.theta)
+                                           theta=self.theta, half_length=True)
         self.central_line.qmax = self.qmax * 1.414
         self.update()
         self.draw()
