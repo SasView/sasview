@@ -75,6 +75,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.plugin_widget.blockSignals(True)
             # and hide the tab/widget itself
             self.tabWidget.removeTab(0)
+        
+        if self.model is not None:
+            self.cmdLoad.setText("Load file...")
 
     def addSignals(self):
         """
@@ -124,7 +127,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         self.is_python = True # By default assume the file you load is python
 
-        print(self.load_file)
         if self.is_modified:
             saveCancelled = self.saveClose()
             if saveCancelled:
@@ -177,6 +179,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.filename = filename
         display_name, _ = os.path.splitext(os.path.basename(filename))
         self.setWindowTitle(self.window_title + " - " + display_name)
+        if self.model is None:
+            self.setWindowTitle(self.window_title + " - " + display_name)
+        else:
+            self.setWindowTitle("Documentation Editor" + " - " + display_name)
         # Name the tab with .py filename
         display_name = os.path.basename(filename)
         self.tabWidget.setTabText(0, display_name)
