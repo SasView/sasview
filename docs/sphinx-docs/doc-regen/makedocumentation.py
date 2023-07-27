@@ -122,7 +122,8 @@ def main():
             call_one_file(sys.argv[1]) # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
             generate_html(sys.argv[1])
     except:
-        generate_html()
+        call_all_files() # Regenerate all RSTs
+        generate_html() # Regenerate all HTML
 
 if __name__ == "__main__":
     main()
