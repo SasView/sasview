@@ -69,6 +69,7 @@ def generate_html(single_file="", rst=False):
     if single_rst.endswith("models/") or single_rst.endswith("user/"):
         # (re)sets value to empty string if nothing was entered
         single_rst = ""
+    os.environ['SAS_NO_HIGHLIGHT'] = '1'
     command = [
         sys.executable,
         "-m",

@@ -37,7 +37,13 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               #'mathjax',  # replacement mathjax that allows a list of paths
               'dollarmath',
-              'sphinx.ext.viewcode']
+              #'sphinx.ext.viewcode',
+              ]
+
+import os
+no_highlight = os.environ.get('SAS_NO_HIGHLIGHT', '0') # Check if sphinx highlighting is disabled in this environment
+if no_highlight == '1':
+    extensions.append('sphinx.ext.viewcode')
 
 mathjax_path = (
     'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?'
