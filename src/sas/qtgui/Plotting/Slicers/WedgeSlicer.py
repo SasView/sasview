@@ -99,27 +99,25 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
     def update(self):
         """
-        Respond to changes in the model by recalculating the profiles and
-        resetting the widgets.
+        If one of the interactors has been moved, update it and the parameter
+        it controls, then update the other interactors accordingly
         """
-        # Update parameters
-        self.r1 = self.inner_arc.radius
-        self.r2 = self.outer_arc.radius
-        self.theta = self.central_line.theta
-        self.phi = self.radial_lines.phi
-        # Update interactors
         if self.inner_arc.has_move:
             self.inner_arc.update()
+            self.r1 = self.inner_arc.radius
             self.radial_lines.update(r1=self.r1)
         if self.outer_arc.has_move:
             self.outer_arc.update()
+            self.r2 = self.outer_arc.radius
             self.radial_lines.update(r2=self.r2)
         if self.radial_lines.has_move:
             self.radial_lines.update()
+            self.phi = self.radial_lines.phi
             self.inner_arc.update(phi=self.phi)
             self.outer_arc.update(phi=self.phi)
         if  self.central_line.has_move:
             self.central_line.update()
+            self.theta = self.central_line.theta
             self.inner_arc.update(theta=self.theta)
             self.outer_arc.update(theta=self.theta)
             self.radial_lines.update(theta=self.theta)
@@ -166,8 +164,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
                 raise ValueError(msg)
             self.averager = new_sector
 
-        sect = self.averager(r_min=rmin, r_max=rmax,
-                             phi_min=phimin, phi_max=phimax)
+        sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin,
+                             phi_max=phimax, nbins=self.nbins)
         sector = sect(self.data)
 
         if hasattr(sector, "dxl"):
@@ -294,17 +292,19 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         :param params: a dictionary containing name of slicer parameters and
             values the user assigned to the slicer.
         """
-        r1 = params["r_min"]
-        r2 = params["r_max"]
-        theta = params["phi [deg]"] * np.pi / 180
-        phi = params["delta_phi [deg]"] * np.pi / 180
+        self.r1 = params["r_min"]
+        self.r2 = params["r_max"]
+        self.theta = params["phi [deg]"] * np.pi / 180
+        self.phi = params["delta_phi [deg]"] * np.pi / 180
         self.nbins = int(params["nbins"])
 
-        self.inner_arc.update(theta, phi, r1, self.nbins)
-        self.outer_arc.update(theta, phi, r2, self.nbins)
-        self.radial_lines.update(theta, phi)
-        self.central_line.update(theta)
-        self._post_data()
+        self.inner_arc.update(theta=self.theta, phi=self.phi, r=self.r1)
+        self.outer_arc.update(theta=self.theta, phi=self.phi, r=self.r2)
+        self.radial_lines.update(r1=self.r1, r2=self.r2,
+                                 theta=self.theta, phi=self.phi)
+        self.central_line.update(theta=self.theta)
+        self.post_data()
+        self.draw()
 
     def draw(self):
         """

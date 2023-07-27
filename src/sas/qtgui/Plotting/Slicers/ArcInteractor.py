@@ -35,7 +35,8 @@ class ArcInteractor(BaseInteractor):
                                      visible=True)[0]
         # Define the arc
         [self.arc] = self.axes.plot([], [], linestyle='-', marker='', color=self.color)
-        self.npts = 20
+        # The number of points that make the arc line
+        self.npts = 40
         # Flag to keep track of motion
         self.has_move = False
         self.connect_markers([self.marker, self.arc])
@@ -70,13 +71,12 @@ class ArcInteractor(BaseInteractor):
                            np.power(self._mouse_y, 2))
         return radius
 
-    def update(self, theta=None, phi=None, r=None, nbins=100):
+    def update(self, theta=None, phi=None, r=None):
         """
         Draw the new roughness on the graph.
         :param theta: angle from x-axis of the central point on the arc
         :param phi: angle from the centre point on the arc to each of its edges
         :param r: radius from (0,0) of the arc on a data2D plot
-        :param nbins: number of points drawn for an arc of size pi radians
         """
         x = []
         y = []
@@ -84,11 +84,7 @@ class ArcInteractor(BaseInteractor):
             self.theta = theta
         if phi is not None:
             self.phi = phi
-        self.npts = int((2 * self.phi) / (np.pi / nbins))
-
-        if r is None:
-            self.radius = self.get_radius()
-        else:
+        if r is not None:
             self.radius = r
         # Calculate the points on the arc, and draw them
         for i in range(self.npts):

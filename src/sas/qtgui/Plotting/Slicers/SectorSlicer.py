@@ -513,7 +513,6 @@ class LineInteractor(BaseInteractor):
         self.line = self.axes.plot([x1, x2], [y1, y2],
                                    linestyle='-', marker='',
                                    color=self.color, visible=True)[0]
-        self.npts = 20
         self.has_move = False
         self.connect_markers([self.inner_marker, self.line])
         self.update()
