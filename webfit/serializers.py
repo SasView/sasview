@@ -94,14 +94,11 @@ class AnalysisParameterBaseSerializer(ModelSerializer):
         fields = "__all__"
 
 class FitSerializer(ModelSerializer):
-
     class Meta:
         model = Fit
         fields = "__all__"
 
 class FitParameterSerializer(ModelSerializer):
-
     class Meta:
         model = FitParameter
         fields = "__all__"
-        
