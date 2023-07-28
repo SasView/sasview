@@ -189,6 +189,9 @@ class Communicate(QtCore.QObject):
     # Update the masked ranges in fitting
     updateMaskedDataSignal = QtCore.Signal()
 
+    # Triggers refresh of all documentation windows
+    documentationRegeneratedSignal = QtCore.Signal()
+
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
     Adds a checkboxed row named "name" to QStandardItem

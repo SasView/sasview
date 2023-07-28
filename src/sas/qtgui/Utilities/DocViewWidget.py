@@ -40,6 +40,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
+        self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
 
     def onEdit(self):
         """
@@ -142,6 +143,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         # Show widget
         self.onShow()
+    
+    def refresh(self):
+        self.webEngineViewer.reload()
 
     def processUrl(self):
         """
@@ -198,4 +202,5 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         self.onShow()
         self.loadHtml()
+        self.parent.communicate.documentationRegeneratedSignal.emit()
         self.regen_in_progress = False

@@ -8,6 +8,7 @@ import logging
 import traceback
 
 from PySide6 import QtWidgets, QtCore, QtGui
+from twisted.internet import threads
 
 from sas.sascalc.fit import models
 
@@ -42,6 +43,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.model = model
         self.is_modified = False
         self.label = None
+        self.file_to_regenerate = ""
 
         self.addWidgets()
 
@@ -162,6 +164,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # remove c-plugin tab, if present.
         if self.tabWidget.count()>1:
             self.tabWidget.removeTab(1)
+        self.file_to_regenerate = filename
         self.loadFile(filename)
 
     def loadFile(self, filename):
@@ -455,6 +458,38 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msg = filename + " successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
+        self.regenerateDocumentation()
+    
+    def regenerateDocumentation(self):
+        """
+        Defer to subprocess the documentation regeneration process
+        """
+        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+        recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
+        regen_docs_location = sas_path + "/" + recompile_path + "/makedocumentation.py"
+        d = threads.deferToThread(self.regenerateDocsCommand, regen_docs_location) # Regenerate specific documentation file
+        d.addCallback(self.emitDocsRegenerated)
+
+    def regenerateDocsCommand(self, regen_docs_location):
+        """
+        Regenerates documentation for a specific file (target) in a subprocess
+        """
+        import subprocess
+        if "models" in self.file_to_regenerate:
+            pass_in_file = os.path.basename(self.file_to_regenerate)
+        else:
+            pass_in_file = self.file_to_regenerate
+        print(pass_in_file, "!!!!!!!!!!!!!!!!!!!!")
+        command = [
+            sys.executable,
+            regen_docs_location,
+            pass_in_file,
+        ]
+        doc_regen_dir = os.path.dirname(regen_docs_location)
+        subprocess.run(command, cwd=doc_regen_dir) # cwd parameter tells subprocess to open from a specific directory
+
+    def emitDocsRegenerated(self, d):
+        self.parent.communicate.documentationRegeneratedSignal.emit()
 
     def canWriteModel(self, model=None, full_path=""):
         """
