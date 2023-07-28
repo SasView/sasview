@@ -162,11 +162,13 @@ def start_fit(fit_db = None, par_dbs = None):
                     upper_limit = par_limits[name]["upper"]
                 
                 attr.range(lower_limit, upper_limit)
+
+        f = fit_db.data_id.file
         
         #TODO implement using Loader() instead of load_data
         """loader = Loader()
         test_data = loader.load(f.path)[0]"""
-        f = fit_db.data_id.file
+
         test_data = load_data(f.path)
         test_data.dy = 0.2*test_data.y
         M = Experiment(data = test_data, model=model)
