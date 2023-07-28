@@ -11,6 +11,8 @@ from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
     QPlotData, QSpaceCalcDatum, RealPlotData,
     SLDDefinition, MagnetismDefinition, SpatialSample, QSample, CalculationParameters)
 
+from sas.qtgui.Perspectives.ParticleEditor.sampling.chunker import NoChunks
+
 def debye(
         sld_function: SLDDefinition,
         magnetism_function: Optional[MagnetismDefinition],
@@ -18,4 +20,4 @@ def debye(
         spatial_sample: SpatialSample,
         q_sample: QSample):
 
-    for (x1, y1, z1), (x2, y2, z2) in
+    for (x1, y1, z1), (x2, y2, z2) in NoChunks(spatial_sample):
