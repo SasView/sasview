@@ -164,8 +164,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
                 raise ValueError(msg)
             self.averager = new_sector
 
-        sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin,
-                             phi_max=phimax, nbins=self.nbins)
+        # Why do I have to add pi to the angles for it to work properly?
+        sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi,
+                             phi_max=phimax + np.pi, nbins=self.nbins)
+        sect.fold = False
         sector = sect(self.data)
 
         if hasattr(sector, "dxl"):
