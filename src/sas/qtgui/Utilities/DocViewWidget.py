@@ -114,8 +114,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             from re import sub
             # Ensure that we are only using everything after and including /user/
             model_local_path = sub(r"^.*?(?=[\/\\]user)", "", self.source)
-            html_path = sas_path + "/" + html_path + "/" + model_local_path
-            regen_string = sas_path + "/" + rst_py_path + model_local_path.replace('.html', '.rst')
+            html_path = sas_path + "/" + html_path + "/" + model_local_path.split('#')[0] # Remove jump links
+            regen_string = sas_path + "/" + rst_py_path + model_local_path.replace('.html', '.rst').split('#')[0] #Remove jump links
                 # Test to see if HTML does not exist or is older than python file
             if self.newer(regen_string, html_path):
                 self.regenerateHtml(regen_string)
