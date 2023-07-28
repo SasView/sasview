@@ -475,11 +475,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Regenerates documentation for a specific file (target) in a subprocess
         """
         import subprocess
+        # Pass in file in correct format if the file is a model or a native rst
         if "models" in self.file_to_regenerate:
             pass_in_file = os.path.basename(self.file_to_regenerate)
         else:
             pass_in_file = self.file_to_regenerate
-        print(pass_in_file, "!!!!!!!!!!!!!!!!!!!!")
         command = [
             sys.executable,
             regen_docs_location,
