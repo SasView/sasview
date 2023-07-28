@@ -45,7 +45,7 @@ class Fit(AnalysisBase):
         RUNNING = 2, "Running"
         COMPLETE = 3, "Complete"
 
-    status = models.IntegerField(default=False, choices=StatusChoices.choices)
+    status = models.IntegerField(default=StatusChoices.QUEUED, choices=StatusChoices.choices)
 
     Qminimum = models.FloatField(default = None, null=True, blank = True, help_text="Minimum Q value for the fit")
     Qmaximum = models.FloatField(default = None, null=True, blank = True, help_text="Maximum Q value for the fit")
@@ -55,6 +55,8 @@ class Fit(AnalysisBase):
     magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
 
     model = models.CharField(blank=False, max_length=256, help_text="model string")
+
+    optimizer = models.CharField(blank = True, max_length=50, help_text="optimizer string")
 
 
 class FitParameter(AnalysisParameterBase):

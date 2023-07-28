@@ -11,6 +11,7 @@ fit_patterns = [
     path("<int:fit_id>/", fit_views.fit_status, name = "get status using fit_id"),
     path("optimizers/", fit_views.list_optimizers, name = "lists all fit optimizers"),
     path("models/", fit_views.list_model, name = "lists all fit models"),
+    path("status/<int:fit_id>", fit_views.status, name = "status of fit using fit db id"),
 ]
 
 urlpatterns = [

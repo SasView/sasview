@@ -1,4 +1,7 @@
 # Create your tests here.
+import shutil
+
+from django.conf import settings
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -23,12 +26,10 @@ factory = APIRequestFactory()
 
 # Create your tests here.
 class TestLists(APITestCase):
-    def setUp(self):
-        public_test_data = Data.objects.create(id = 1, file = "cyl_400_20.txt", is_public = True)
+    """def setUp(self):
         self.user = User.objects.create_user(username="testUser", password="secret", id = 2)
-        private_test_data = Data.objects.create(id = 3, current_user = self.user, file = "another.txt", is_public = False)
         self.client = APIClient()
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.user)"""
 
     #working
     def get_model_list(self):
@@ -53,19 +54,36 @@ class TestLists(APITestCase):
 
     def get_optimizer_list(self):
         request = self.client.get('/v1/analyze/fit/optimizers/')
-        self.assertEqual(request.data, {"public_file_ids":1})
+        self.assertEqual(request.data, {"optimizers": [['amoeba', 'de', 'dream', 'newton', 'scipy.leastsq', 'lm']]})
+
 
 class TestFitStart(TestCase):
     def setUp(self):
-        public_test_data = Data.objects.create(id = 1, file = "cyl_400_20.txt", is_public = True)
-        self.user = User.objects.create_user(username="testUser", password="secret", id = 2)
-        private_test_data = Data.objects.create(id = 3, current_user = self.user, file = "another.txt", is_public = False)
+        self.user = User.objects.create_user(username="testUser", password="secret", id = 1)
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
-    fixtures = ['data/fixtures/example_data.json',]
-    def can_fit_start_give_correct_answer(self):
-        pars_limit = { 
+        self.public_test_data = Data.objects.create(id = 2, file_name = "cyl_400_20.txt", is_public = True)
+        self.public_test_data.file.save("cyl_400_20.txt", open(r"../src/sas/example_data/1d_data/cyl_400_20.txt"))
+        
+        #self.private_test_data = Data.objects.create(id = 3, current_user = self.user, file_name = "another.txt", is_public = False)
+        #self.private_test_data.file.save("another.txt",open(r"C:\Users\tns14\Documents\another.txt"))
+
+        self.fit = Fit.objects.create(id = 4, current_user = self.user, data_id = self.public_test_data, model = "cylinder", optimizer = "amoeba")
+        self.radius = FitParameter.objects.create(id = 5, base_id = self.fit, name = "radius", value = 35, data_type = "int", lower_limit = 1, upper_limit = 50)
+        self.length = FitParameter.objects.create(id = 6, base_id = self.fit, name = "length", value = 350, data_type = "int", lower_limit = 1, upper_limit = 500)
+        self.background = FitParameter.objects.create(id = 7, base_id = self.fit, name = "background", value = 0.0, data_type = "float")
+        self.scale = FitParameter.objects.create(id = 8, base_id = self.fit, name = "scale", value = 1.0, data_type = "float")
+        self.sld = FitParameter.objects.create(id = 9, base_id = self.fit, name = "sld", value = 4.0, data_type = "float")
+        self.sld_solvent = FitParameter.objects.create(id = 10, base_id = self.fit, name = "sld_solvent", value = 1.0, data_type = "float")
+        self.all_params = [self.radius, self.length, self.background, self.scale, self.sld, self.sld_solvent]
+
+    def test_can_fit_start_give_correct_answer(self):
+        data = Data.objects.get(is_public = True)
+        chisq = start_fit(fit_db=self.fit, par_dbs=self.all_params)
+        self.assertEqual(chisq,"0.03(13)")
+        
+    """        pars_limit = { 
                         "radius":{
                             "lower_limit":1,
                             "upper_limit":50
@@ -74,23 +92,47 @@ class TestFitStart(TestCase):
                             "lower_limit":1,
                             "upper_limit":500
                         },
-        }
-        params = dict(
+        }"""
+    """        params = dict(
             radius = 35,
             length = 350,
             background = 0.0,
             scale = 1.0,
             sld = 4.0,
             sld_solvent = 1.0
-        )
-        data = Data.objects.get(is_public = True)
-        chisq = start_fit("cylinder", params=params)
-        self.assertEqual(chisq, "0.03(13)")
+        )"""
+
+    def test_can_fit_be_created(self):
+        data = {
+            "model":"cylinder",
+            "current_user":1,
+            "parameters":[
+                {
+                "name":"radius",
+                "value":1
+                },
+                {
+                "name":"length",
+                "value":2
+                }
+            ]
+        }
+        request = self.client.post('/v1/analyze/fit/', data=data)
+        self.assertEqual(request.data,"uh")
+
+    def tearDown(self):
+        shutil.rmtree(settings.MEDIA_ROOT)
 
 class TestLoader(TestCase):
-    fixtures = ['data/fixtures/example_data.json',]
 
     def testing_loader(self):
         test_data = get_object_or_404(Data, is_public=True)
         loader = Loader()
         loader.load(test_data.file.path)
+
+    def testing_syntax(self):
+        test_data = Data.objects.create(id = 2, is_public = True)
+        self.assertEqual("cyl_400_20.txt",test_data.current_user)
+
+    def tearDown(self):
+        shutil.rmtree(settings.MEDIA_ROOT)
