@@ -154,14 +154,10 @@ def start_fit(fit_db = None, par_dbs = None):
         if par_limits:
             for name in par_limits.keys():
                 attr = getattr(model, name)
-                lower_limit = attr.limits[0]
-                upper_limit = attr.limits[1]
-                if par_limits[name].get("lower"):
-                    lower_limit = par_limits[name]["lower"]
-                if par_limits[name].get("upper"):
-                    upper_limit = par_limits[name]["upper"]
-                
-                attr.range(lower_limit, upper_limit)
+                if par_limits[name].get("lower") or par_limits[name].get("upper"):
+                    lower_limit = par_limits[name]["lower"] if par_limits[name]["lower"] else attr.limits[0]
+                    upper_limit = par_limits[name]["upper"] if par_limits[name]["upper"] else attr.limits[1]
+                    attr.range(lower_limit, upper_limit)
         
         #TODO implement using Loader() instead of load_data
         """loader = Loader()
