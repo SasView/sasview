@@ -6,22 +6,26 @@ import logging
 import django
 from glob import glob
 
+# Initialise the Django environment. This must be done before importing anything
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+django.setup()
+print("goodbye")
+
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from data.models import Data
 
-# Initialise the Django environment. This must be done before importing anything
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sasmarket.settings")
-django.setup()
-
 EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", "../src/sas/example_data")
 
 def parse_1D():
+    print("hello")
     dir_1d = os.path.join(EXAMPLE_DATA_DIR, "example_data", "1d_data")
+    print(dir_1d)
     if not os.path.isdir(dir_1d):
         logging.error("1D Data directory not found at: {}".format(dir_1d))
         return
     for file_path in glob(os.path.join(dir_1d)):
+        print(file_path)
         upload_file(file_path)
 
 def parse_2D():
@@ -49,15 +53,11 @@ def parse_2D():
 
 def upload_file(file_path):
     # Upload the file at file_path to the model
-    file_name = os.path.split(file_path)[-1]
+    file_name = os.path.basename(file_path)
+    print(file_name)
+    data_file = Data.objects.create(is_public = True)
+    data_file.file.save(file_name, open(file_path))
+    data_file.file_name = os.path.basename(data_file.file.path)
 
-    file_obj = None
-    with open(file_path, 'rb') as file_handle:
-        file_obj = SimpleUploadedFile(file_name, file_handle.read())
-
-    if file_obj is None:
-        raise Exception("Unable to upload file: {}".format(file_path))
-    
-    data_file = Data(file_name=file_name, file=file_obj, is_public=True)
-    data_file.save()
-    
+if __name__ == '__main__':
+    parse_1D()
