@@ -56,6 +56,7 @@ Documentation for user input: User input should look like this:
     ]
 }
 """
+
 @api_view(['POST'])
 def start(request, version = None):
     if request.method == "POST":
@@ -104,15 +105,18 @@ def start(request, version = None):
                 all_param_dbs.append(get_object_or_404(FitParameter, base_id = fit_db.id, name = x["name"]))
 
         #TODO remove below code later -> scheduling fits with status
+        #start_fit connection for WORKING MODEL, NOT finalized api
         result = start_fit(fit_db, all_param_dbs)
-        base_serializer(fit_db, data = {"results": result})
-        if base_serializer.is_valid():
-            base_serializer.save()
-        else:
-            return Response(base_serializer.errors)
 
+        result_serializer = FitSerializer(fit_db, data = {"results": result}, partial=True)
+        if result_serializer.is_valid():
+            result_serializer.save()
+        else:
+            return Response(result_serializer.errors)
+        
         #add "warnings": ... later
-        return Response({"authenticated":request.user.is_authenticated, "fit_id":fit_db.id, "results":fit_db.results})
+        return Response({"authenticated":request.user.is_authenticated, "fit_id":fit_db.id, "results": result})
+
     return HttpResponseBadRequest()
 
 
@@ -169,14 +173,12 @@ def start_fit(fit_db = None, par_dbs = None):
         problem = FitProblem(M)
         if fit_db.optimizer:
             result = fit(problem, method=fit_db.optimizer)
-            return problem.chisq_str()
         else:
             result = fit(problem)
 
-    #problem.fitness.model.state() <- return this dictionary to check if fit is actually working
-    return "welp"
+    return problem.chisq_str()
 
-    #below code is in testing, used for when fit/ is scheduled with status
+    #TODO below code is in testing, used for when fit/ is scheduled with status
     """
     fit_db.status = 3
     fit_db.result = result
@@ -184,6 +186,33 @@ def start_fit(fit_db = None, par_dbs = None):
     return result <- and whatever func this returns to sets ^^
     """
 
+"""
+for x, values in request.data.get("fit").items():
+    
+
+{
+"fit": {
+1: {
+"fit_id":1
+},
+2: {
+"model":...
+},
+3: 2,
+4: {
+
+}
+}
+}
+"""
+
+"""def create_constraints(request, version=None):
+    new_param_obj = FitParameter.objects.filter(base_id = Fit.id)
+for x in new_param_obj:
+    if request.namewlfjoewiojfejf:
+        get value of new param obj
+
+def """
 
 @api_view(['GET'])
 def status(request, fit_id, version=None):
