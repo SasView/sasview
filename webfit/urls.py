@@ -33,6 +33,7 @@ urlpatterns = [
     #authentication
     path("auth/", include("user_app.urls"), name = "login/register/logout tools"),
     #re_path(r"auth/", include("knox.urls")),
+    #path('auth/', include('dj_rest_auth.urls')),
 
     #data path
     re_path(r"^(?P<version>(v1))/data/", include("data.urls"), name = "data tools"),

@@ -51,8 +51,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'django.contrib.sites',
+    "rest_framework",
+    'rest_framework.authtoken',
+    "dj_rest_auth.registration",
     "knox",
-    "rest_auth",
+    "dj_rest_auth",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -60,8 +63,9 @@ INSTALLED_APPS = [
     "analyze.fitting",
     "user_app",
     "data",
-    "rest_framework",
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
