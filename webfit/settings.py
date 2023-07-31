@@ -50,12 +50,17 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django.contrib.sites',
+    "knox",
+    "rest_auth",
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     "analyze",
     "analyze.fitting",
     "user_app",
     "data",
     "rest_framework",
-    "knox",
 ]
 
 MIDDLEWARE = [
@@ -88,12 +93,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "wsgi.application"
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
 #rest framework
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.UrlPathVersioning",
     "DEFAULT_VERSION" : "v1",
     "ALLOWED_VERSIONS" : {"v1"},
@@ -110,6 +123,14 @@ REST_KNOX = {
     'TOKEN_LIMIT_PER_USER': None, # By default, this option is disabled and set to None -- thus no limit.
     'AUTO_REFRESH': False, # This defines if the token expiry time is extended by TOKEN_TTL each time the token is used.
     'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+}
+
+REST_AUTH_TOKEN_MODEL = 'knox.models.AuthToken'
+REST_AUTH_TOKEN_CREATOR = 'project.apps.accounts.utils.create_knox_token'
+
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'project.apps.accounts.serializers.UserDetailsSerializer',
+    'TOKEN_SERIALIZER': 'project.apps.accounts.serializers.KnoxSerializer',
 }
 
 # List of settings that may be in string import notation.

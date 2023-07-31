@@ -30,10 +30,9 @@ urlpatterns = [
     #admin page
     path("admin/", admin.site.urls, name = "admin page"),
 
-    #format:
-    # re_path(r"^(?P<version>(v1))/appname/", view/include(), name=""),
-    #root url
-    re_path(r"auth/", include("knox.urls")),
+    #authentication
+    path("auth/", include("user_app.urls"), name = "login/register/logout tools"),
+    #re_path(r"auth/", include("knox.urls")),
 
     #data path
     re_path(r"^(?P<version>(v1))/data/", include("data.urls"), name = "data tools"),

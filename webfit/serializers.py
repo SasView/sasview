@@ -6,6 +6,7 @@ from rest_framework import serializers, validators
 from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
 from rest_framework.utils import model_meta
 from django.contrib.auth.models import User
+from rest_auth.serializers import UserDetailsSerializer
 
 from data.models import (
     Data,
@@ -46,37 +47,17 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
-
-    def full_clean(self, instance, exclude=None, validate_unique=True):
-        if not instance or not instance.id:
-            exclude = ["user"]
-        super().full_clean(instance, exclude, validate_unique)
-
-
-    def create(self, validated_data):
-        instance: self.Meta.model = super().create(validated_data)
-        return instance
     
-"""class RegisterSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("id", "username", "password", "email", "first_name", "last_name") 
-        extra_kwargs = {
-            "password": {"write_only": True},
-            "email": {
-                "required": True,
-                "allow_blank": False,
-                "validators": [
-                    validators.UniqueValidator(
-                        User.objects.all(), f"A user with that Email already exists."
-                    )
-                ],
-            },
-        }
+class KnoxSerializer(serializers.Serializer):
+    """
+    Serializer for Knox authentication.
+    """
+    token = serializers.CharField()
+    user = UserDetailsSerializer()
         
     def create(self, validated_data):
         instance: self.Meta.model = super().create(validated_data)
-        return instance"""
+        return instance
 
 class DataSerializer(ModelSerializer):
     class Meta:
