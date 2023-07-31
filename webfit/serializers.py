@@ -6,7 +6,7 @@ from rest_framework import serializers, validators
 from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
 from rest_framework.utils import model_meta
 from django.contrib.auth.models import User
-from rest_auth.serializers import UserDetailsSerializer
+from dj_rest_auth.serializers import UserDetailsSerializer
 
 from data.models import (
     Data,
@@ -23,6 +23,17 @@ from analyze.fitting.models import (
 """    read_only=False,
     queryset=Song.objects.all()
 """
+
+class KnoxSerializer(serializers.Serializer):
+    """
+    Serializer for Knox authentication.
+    """
+    token = serializers.SerializerMethodField()
+    user = UserDetailsSerializer()
+    
+    def get_token(self, obj):
+      return obj["token"][1]
+
 
 # Overriding validate to call model full_clean
 class ModelSerializer(serializers.ModelSerializer):
@@ -43,41 +54,36 @@ class ModelSerializer(serializers.ModelSerializer):
 	def full_clean(self, instance, exclude=None, validate_unique=True):
 		instance.full_clean(exclude, validate_unique)
 
+
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
-    
-class KnoxSerializer(serializers.Serializer):
-    """
-    Serializer for Knox authentication.
-    """
-    token = serializers.CharField()
-    user = UserDetailsSerializer()
-        
-    def create(self, validated_data):
-        instance: self.Meta.model = super().create(validated_data)
-        return instance
+
 
 class DataSerializer(ModelSerializer):
     class Meta:
         model = Data
         fields = "__all__" 
-    
+
+
 class AnalysisBaseSerializer(ModelSerializer):
     class Meta:
         model = AnalysisBase
         fields = "__all__"
+
 
 class AnalysisParameterBaseSerializer(ModelSerializer):
     class Meta:
         model = AnalysisParameterBase
         fields = "__all__"
 
+
 class FitSerializer(ModelSerializer):
     class Meta:
         model = Fit
         fields = "__all__"
+
 
 class FitParameterSerializer(ModelSerializer):
     class Meta:
