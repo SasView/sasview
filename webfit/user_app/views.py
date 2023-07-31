@@ -1,46 +1,36 @@
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.authtoken.serializers import AuthTokenSerializer
-from knox.auth import AuthToken, TokenAuthentication
-from serializers import UserSerializer, RegisterSerializer
 
-def serialize_user(user):
-    return {
-        "username": user.username,
-        "email": user.email,
-        "first_name": user.first_name,
-        "last_name": user.last_name
-    }
+from rest_auth.views import LoginView
+from rest_auth.registration.views import RegisterView
+from knox.models import AuthToken
 
-@api_view(['POST'])
-def login(request):
-    serializer = AuthTokenSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    user = serializer.validated_data['user']
-    _, token = AuthToken.objects.create(user)
-    return Response({
-        'user_data': serialize_user(user),
-        'token': token
-    })
-        
+from allauth.account.utils import complete_signup
+from allauth.account import app_settings as allauth_settings
 
-@api_view(['POST'])
-def register(request):
-    serializer = RegisterSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        user = serializer.save()
-        _, token = AuthToken.objects.create(user)
-        return Response({
-            "user_info": serialize_user(user),
-            "token": token
-        })
+from serializers import KnoxSerializer
 
 
-@api_view(['GET'])
-def get_user(request):
-    user = request.user
-    if user.is_authenticated:
-        return Response({
-            'user_data': serialize_user(user)
-        })
-    return Response({})
+class KnoxLoginView(LoginView):
+
+    def get_response(self):
+        serializer_class = self.get_response_serializer()
+
+        data = {
+            'user': self.user,
+            'token': self.token
+        }
+        serializer = serializer_class(instance=data, context={'request': self.request})
+
+        return Response(serializer.data, status=200)
+
+
+class KnoxRegisterView(RegisterView):
+
+    def get_response_data(self, user):
+        return KnoxSerializer({'user': user, 'token': self.token}).data
+
+    def perform_create(self, serializer):
+        user = serializer.save(self.request)
+        self.token = AuthToken.objects.create(user=user)
+        complete_signup(self.request._request, user, allauth_settings.EMAIL_VERIFICATION, None)
+        return user
