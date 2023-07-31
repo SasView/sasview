@@ -968,22 +968,25 @@ def rst_to_html(s):
     unit = None
     replacement = None
 
-    if  match_replace:
-        # replace the 'replace' section
-
-        unit, replacement = match_replace.groups()
-
-        # Convert the unit into a valid Python string condition
-        unit = unit.replace("Ang", "Å").replace("\\", "").replace(" ", "")
-
-        # Convert the replacement into the desired HTML format
-        replacement = replacement.replace("|Ang|", "Å").replace("\\ :sup:`", "<sup>").replace("`", "</sup>").replace("\\", "")
 
     if match_unit:
         # replace the 'unicode' section
         unit, unicode_val = match_unit.groups()
         # Convert the unicode value to actual character representation
         replacement = chr(int(unicode_val[2:], 16))
+
+    if  match_replace:
+        # replace the 'replace' section
+
+        unit, replacement = match_replace.groups()
+
+        # Convert the unit into a valid Python string condition
+        unit = unit.replace("\\", "").replace(" ", "")
+
+        # Convert the replacement into the desired HTML format
+        replacement = replacement.replace("|Ang|", "Å").replace("\\ :sup:`", "<sup>").replace("`", "</sup>").replace("\\", "")
+        replacement = replacement.replace("|cdot|", "·").replace("|deg|", "°").replace("|pm|", "±")
+
 
     return unit, replacement
 
@@ -995,49 +998,26 @@ for line in input_rst_strings:
     if line.startswith(".. |"):
         key, value = rst_to_html(line)
         RST_PROLOG_DICT[key] = value
+# add units not in RST_PROLOG
+# This section will be removed once all these units are added to sasmodels
+RST_PROLOG_DICT["1/A"] = "Å<sup>-1</sup>"
+RST_PROLOG_DICT["1/Ang"] = "Å<sup>-1</sup>"
+RST_PROLOG_DICT["1/cm"] = "cm<sup>-1</sup>"
+RST_PROLOG_DICT["1e-6/Ang^2"] = "10<sup>-6</sup>/Å<sup>2</sup>"
+RST_PROLOG_DICT["1e15/cm^3"] = "10<sup>15</sup>/cm<sup>3</sup>"
+RST_PROLOG_DICT["inf"] = "∞"
+RST_PROLOG_DICT["-inf"] = "-∞"
+
 
 def convertUnitToHTML(unit):
+    """
+    Convert ASCII unit display into HTML symbol
+    """
     if unit in RST_PROLOG_DICT:
         return RST_PROLOG_DICT[unit]
     else:
-        return unit
-
-def convertUnitToUTF8_old(unit):
-    """
-    Convert ASCII unit display into UTF-8 symbol
-    """
-    if unit == "1/A":
-        return "Å<sup>-1</sup>"
-    elif unit == "1/cm":
-        return "cm<sup>-1</sup>"
-    elif unit == "Ang":
-        return "Å"
-    elif unit == "1e-6/Ang^2":
-        return "10<sup>-6</sup>/Å<sup>2</sup>"
-    elif unit == "inf":
-        return "∞"
-    elif unit == "-inf":
-        return "-∞"
-    else:
-        return unit
-
-def convertUnitToHTML(unit):
-    """
-    Convert ASCII unit display into well rendering HTML
-    """
-    if unit == "1/A":
-        return "&#x212B;<sup>-1</sup>"
-    elif unit == "1/cm":
-        return "cm<sup>-1</sup>"
-    elif unit == "Ang":
-        return "&#x212B;"
-    elif unit == "1e-6/Ang^2":
-        return "10<sup>-6</sup>/&#x212B;<sup>2</sup>"
-    elif unit == "inf":
-        return "&#x221e;"
-    elif unit == "-inf":
-        return "-&#x221e;"
-    else:
+        if "None" in unit:
+            return ""
         return unit
 
 def parseName(name, expression):

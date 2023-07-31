@@ -507,32 +507,6 @@ class GuiUtilsTest:
         s = "&#x212B; &#x221e;      &#177;"
         assert replaceHTMLwithASCII(s) == "Ang inf      +/-"
 
-    def testConvertUnitToUTF8(self):
-        ''' test unit string replacement'''
-        s = None
-        assert convertUnitToUTF8(s) is None
-
-        s = ""
-        assert convertUnitToUTF8(s) == s
-
-        s = "aaaa"
-        assert convertUnitToUTF8(s) == s
-
-        s = "1/A"
-        assert convertUnitToUTF8(s) == "Å<sup>-1</sup>"
-
-        s = "Ang"
-        assert convertUnitToUTF8(s) == "Å"
-
-        s = "1e-6/Ang^2"
-        assert convertUnitToUTF8(s) == "10<sup>-6</sup>/Å<sup>2</sup>"
-
-        s = "inf"
-        assert convertUnitToUTF8(s) == "∞"
-
-        s = "1/cm"
-        assert convertUnitToUTF8(s) == "cm<sup>-1</sup>"
-
     def testConvertUnitToHTML(self):
         ''' test unit string replacement'''
         s = None
