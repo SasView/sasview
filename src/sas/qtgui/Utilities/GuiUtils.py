@@ -1007,6 +1007,7 @@ RST_PROLOG_DICT["1e-6/Ang^2"] = "10<sup>-6</sup>/Å<sup>2</sup>"
 RST_PROLOG_DICT["1e15/cm^3"] = "10<sup>15</sup>/cm<sup>3</sup>"
 RST_PROLOG_DICT["inf"] = "∞"
 RST_PROLOG_DICT["-inf"] = "-∞"
+RST_PROLOG_DICT["degrees"] = "°"
 
 
 def convertUnitToHTML(unit):
