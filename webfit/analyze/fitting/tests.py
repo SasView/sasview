@@ -1,5 +1,6 @@
 # Create your tests here.
 import shutil
+import json
 
 from django.conf import settings
 from django.test import TestCase
@@ -69,56 +70,65 @@ class TestFitStart(TestCase):
         #self.private_test_data = Data.objects.create(id = 3, current_user = self.user, file_name = "another.txt", is_public = False)
         #self.private_test_data.file.save("another.txt",open(r"C:\Users\tns14\Documents\another.txt"))
 
-        self.fit = Fit.objects.create(id = 4, current_user = self.user, data_id = self.public_test_data, model = "cylinder", optimizer = "amoeba")
+        """self.fit = Fit.objects.create(id = 4, current_user = self.user, data_id = self.public_test_data, model = "cylinder", optimizer = "amoeba")
         self.radius = FitParameter.objects.create(id = 5, base_id = self.fit, name = "radius", value = 35, data_type = "int", lower_limit = 1, upper_limit = 50)
         self.length = FitParameter.objects.create(id = 6, base_id = self.fit, name = "length", value = 350, data_type = "int", lower_limit = 1, upper_limit = 500)
         self.background = FitParameter.objects.create(id = 7, base_id = self.fit, name = "background", value = 0.0, data_type = "float")
         self.scale = FitParameter.objects.create(id = 8, base_id = self.fit, name = "scale", value = 1.0, data_type = "float")
         self.sld = FitParameter.objects.create(id = 9, base_id = self.fit, name = "sld", value = 4.0, data_type = "float")
         self.sld_solvent = FitParameter.objects.create(id = 10, base_id = self.fit, name = "sld_solvent", value = 1.0, data_type = "float")
-        self.all_params = [self.radius, self.length, self.background, self.scale, self.sld, self.sld_solvent]
+        self.all_params = [self.radius, self.length, self.background, self.scale, self.sld, self.sld_solvent]"""
 
     def test_can_fit_start_give_correct_answer(self):
         data = Data.objects.get(is_public = True)
         chisq = start_fit(fit_db=self.fit, par_dbs=self.all_params)
         self.assertEqual(chisq,"0.03(13)")
-        
-    """        pars_limit = { 
-                        "radius":{
-                            "lower_limit":1,
-                            "upper_limit":50
-                        },
-                        "length":{
-                            "lower_limit":1,
-                            "upper_limit":500
-                        },
-        }"""
-    """        params = dict(
-            radius = 35,
-            length = 350,
-            background = 0.0,
-            scale = 1.0,
-            sld = 4.0,
-            sld_solvent = 1.0
-        )"""
 
-    def test_can_fit_be_created(self):
+    def test_can_fit_give_right_answer(self):
         data = {
             "model":"cylinder",
-            "current_user":1,
-            "parameters":[
+            "data_id":2,
+            "optimizer":"amoeba",
+            "parameters" : 
+            [
                 {
-                "name":"radius",
-                "value":1
+                    "name":"radius",
+                    "value":35,
+                    "data_type":"int",
+                    "lower_limit":1,
+                    "upper_limit":50
                 },
                 {
-                "name":"length",
-                "value":2
+                    "name":"length",
+                    "value":350,
+                    "data_type":"int",
+                    "lower_limit":1,
+                    "upper_limit":500
+                },
+                {
+                    "name":"background",
+                    "value":0.0,
+                    "data_type":"float",
+                },
+                {
+                    "name":"scale",
+                    "value":1.0,
+                    "data_type":"float"
+                },
+                {
+                    "name":"sld",
+                    "value":4.0,
+                    "data_type":"float"
+                },
+                {
+                    "name":"sld_solvent",
+                    "value":1.0,
+                    "data_type":"float"
                 }
             ]
         }
-        request = self.client.post('/v1/analyze/fit/', data=data)
-        self.assertEqual(request.data,"uh")
+        request = self.client.post('/v1/analyze/fit/', data=json.dumps(data), content_type="application/json")
+        self.assertEqual(request.data,{'authenticated': True, 'fit_id': 1, 'results': '0.03(13)'})
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)

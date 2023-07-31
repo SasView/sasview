@@ -14,10 +14,12 @@ from data.models import (
 from analyze.models import (
     AnalysisBase,
     AnalysisParameterBase,
+    #AnalysisConstraint,
 )
 from analyze.fitting.models import (
     Fit,
     FitParameter,
+    #FitConstriant,
 )
 
 """    read_only=False,
@@ -89,3 +91,14 @@ class FitParameterSerializer(ModelSerializer):
     class Meta:
         model = FitParameter
         fields = "__all__"
+
+"""class AnalysisConstraintSerializer(ModelSerializer):
+    class Meta:
+        model = AnalysisConstraint
+        fields = "__all__"
+
+class FitConstraintSerializer(ModelSerializer):
+    class Meta:
+        model = FitConstriant
+        fields = "__all__"
+"""
