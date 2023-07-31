@@ -19,12 +19,12 @@ EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", "../src/sas/example_data")
 
 def parse_1D():
     print("hello")
-    dir_1d = os.path.join(EXAMPLE_DATA_DIR, "example_data", "1d_data")
+    dir_1d = os.path.join(EXAMPLE_DATA_DIR, "1d_data")
     print(dir_1d)
     if not os.path.isdir(dir_1d):
         logging.error("1D Data directory not found at: {}".format(dir_1d))
         return
-    for file_path in glob(os.path.join(dir_1d)):
+    for file_path in glob(os.path.join(dir_1d, "*")):
         print(file_path)
         upload_file(file_path)
 
@@ -56,7 +56,8 @@ def upload_file(file_path):
     file_name = os.path.basename(file_path)
     print(file_name)
     data_file = Data.objects.create(is_public = True)
-    data_file.file.save(file_name, open(file_path))
+    print(data_file.id)
+    data_file.file.save(file_name, open(file_path, 'rb'))
     data_file.file_name = os.path.basename(data_file.file.path)
 
 if __name__ == '__main__':
