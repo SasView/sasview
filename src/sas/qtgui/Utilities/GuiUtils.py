@@ -961,7 +961,7 @@ def replaceHTMLwithASCII(html):
 
     return html
 
-def rst_to_latex(s):
+def rst_to_html(s):
     # Extract the unit and replacement parts
     match_replace = re.match(r'(?:\.\. )?\|(.+?)\| replace:: (.+)', s)
     match_unit = re.match(r'(?:\.\. )?\|(.+?)\| unicode:: (U\+\w+)', s)
@@ -993,14 +993,14 @@ RST_PROLOG_DICT = {}
 input_rst_strings = RST_PROLOG.splitlines()
 for line in input_rst_strings:
     if line.startswith(".. |"):
-        key, value = rst_to_latex(line)
+        key, value = rst_to_html(line)
         RST_PROLOG_DICT[key] = value
 
-def convertUnitToUTF8(unit):
+def convertUnitToHTML(unit):
     if unit in RST_PROLOG_DICT:
         return RST_PROLOG_DICT[unit]
     else:
-        return ""
+        return unit
 
 def convertUnitToUTF8_old(unit):
     """
