@@ -991,7 +991,10 @@ def rst_to_html(s):
     return unit, replacement
 
 # RST_PROLOG conversion table
-from sasmodels.generate import RST_PROLOG
+try:
+    from sasmodels.generate import RST_PROLOG
+except ImportError:
+    RST_PROLOG = ""
 RST_PROLOG_DICT = {}
 input_rst_strings = RST_PROLOG.splitlines()
 for line in input_rst_strings:
