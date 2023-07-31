@@ -70,11 +70,11 @@ class AnalysisParameterBase(models.Model):
     value_trace = [
     ]
 
-    #constraints in parameter relative to another parameter
-    #TODO fix this to hold fit parameters, see: foriegnkey?
-    """
-    constraints = {
-        "fit parameters" : (),
-    }
-    """
     
+"""class AnalysisConstraint(models.Model):
+    par1 = models.ManyToManyField(AnalysisParameterBase)
+
+    par2 = models.IntegerField(AnalysisParameterBase)
+
+    constraint = models.CharField(max_length=300, blank = False, help_text="string equality defining how fit params are constrained to another fit parameter")
+"""

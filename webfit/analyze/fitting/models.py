@@ -2,7 +2,7 @@ import sys
 from enum import Enum
 from logging import getLogger
 from types import ModuleType
-from analyze.models import AnalysisBase, AnalysisParameterBase
+from analyze.models import AnalysisBase, AnalysisParameterBase #AnalysisConstraint
 
 from sas.sascalc.fit.models import ModelManager
 from sasdata.dataloader.loader import Loader
@@ -64,3 +64,4 @@ class FitParameter(AnalysisParameterBase):
 
     magnetic = models.BooleanField(default=False, help_text="is this a magnetic parameter?")
 
+#lass FitConstriant(AnalysisConstraint):
