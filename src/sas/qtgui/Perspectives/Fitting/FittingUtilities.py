@@ -643,7 +643,7 @@ def plotPolydispersities(model):
         data1d.symbol = 'Line'
         data1d.name = "{} polydispersity".format(name)
         data1d.id = data1d.name # placeholder, has to be completed later
-        data1d.plot_role = DataRole.ROLE_STAND_ALONE
+        data1d.plot_role = DataRole.ROLE_POLYDISPERSITY
         plots.append(data1d)
     return plots
 

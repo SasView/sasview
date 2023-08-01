@@ -197,6 +197,14 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # sets the maximum number of characters per Fitting plot legend entry.
         self.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH = 30
 
+        # Residuals management
+        # If true, disables residual plot display
+        self.DISABLE_RESIDUAL_PLOT = False
+
+        # Polydispersity plot management
+        # If true, disables polydispersity plot display
+        self.DISABLE_POLYDISPERSITY_PLOT = False
+
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
