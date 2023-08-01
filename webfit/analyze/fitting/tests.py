@@ -68,7 +68,7 @@ class TestFitStart(TestCase):
         self.public_test_data.file.save("cyl_400_20.txt", open(r"../src/sas/example_data/1d_data/cyl_400_20.txt"))
         
         #self.private_test_data = Data.objects.create(id = 3, current_user = self.user, file_name = "another.txt", is_public = False)
-        #self.private_test_data.file.save("another.txt",open(r"C:\Users\tns14\Documents\another.txt"))
+        #self.private_test_data.file.save("another.txt",open(r""))
 
         """self.fit = Fit.objects.create(id = 4, current_user = self.user, data_id = self.public_test_data, model = "cylinder", optimizer = "amoeba")
         self.radius = FitParameter.objects.create(id = 5, base_id = self.fit, name = "radius", value = 35, data_type = "int", lower_limit = 1, upper_limit = 50)
@@ -108,7 +108,7 @@ class TestFitStart(TestCase):
                 {
                     "name":"background",
                     "value":0.0,
-                    "data_type":"float",
+                    "data_type":"float"
                 },
                 {
                     "name":"scale",
