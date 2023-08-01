@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from data.models import Data
 
-EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", "../src/sas/example_data")
+EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", "../example_data")
 
 def parse_1D():
     dir_1d = os.path.join(EXAMPLE_DATA_DIR, "1d_data")
