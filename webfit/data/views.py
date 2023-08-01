@@ -21,16 +21,16 @@ from .forms import DataForm
 @api_view(['GET'])
 def list_data(request, username = None, version = None):
     if request.method == 'GET':
-        data_list = {}
         public_data = Data.objects.filter(is_public = True)
+        data_list = {"public_file_ids":[]}
         for x in public_data:
-            data_list["public_file_ids"] = x.id
-        #figure out how to get id of querysets individual objs
+            data_list["public_file_ids"] += [{x.id:x.file_name}]
         if username:
+            data_list += {"user_data_ids":[]}
             if username == request.user.username and request.user.is_authenticated:
                 private_data = Data.objects.filter(current_user = request.user.id)
                 for x in private_data:
-                    data_list["user_data_ids"] = x.id
+                    data_list["user_data_ids"] += [{x.id:x.file_name}]
             else:
                 return HttpResponseBadRequest("user is not logged in, or username is not same as current user")
         return Response(data_list)
@@ -41,16 +41,17 @@ def list_data(request, username = None, version = None):
 def data_info(request, db_id, version = None):
     if request.method == 'GET':
         loader = Loader()
-        public_data = get_object_or_404(Data, id = db_id)
-        private_data = get_object_or_404(Data, id = db_id)
-        if public_data.is_public:
-            data_list= loader.load(public_data.file.path)
+        data_db = get_object_or_404(Data, id = db_id)
+        if data_db.is_public:
+            data_list= loader.load(data_db.file.path)
             contents = [str(data) for data in data_list]
-            return_data = {public_data.file.__str__():contents}
+            return_data = {data_db.file_name:contents}
             return Response(return_data)
         #rewrite with "user.is_authenticated"
-        elif request.user.is_authenticated:
-            return_data = {"info" : private_data.file.__str__()}
+        elif (data_db.current_user is request.user) and request.user.is_authenticated:
+            data_list = loader.load(data_db.file.path)
+            contents = [str(data) for data in data_list]
+            return_data = {data_db.file_name:contents}
             return Response(return_data)
         return HttpResponseBadRequest("Database is either not public or wrong auth token")
     return HttpResponseBadRequest()

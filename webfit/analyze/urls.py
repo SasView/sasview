@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 #urls to fit
 fit_patterns = [
     path("", fit_views.start, name = "starting a fit"),  
+    #TODO add specific urls that return certain options
+    #path("return_.../", fit_views.start, name = "starting a fit"),    
     path("<int:fit_id>/", fit_views.fit_status, name = "get status using fit_id"),
     path("optimizers/", fit_views.list_optimizers, name = "lists all fit optimizers"),
     path("models/", fit_views.list_model, name = "lists all fit models"),
