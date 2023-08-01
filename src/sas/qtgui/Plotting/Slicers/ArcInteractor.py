@@ -17,11 +17,14 @@ class ArcInteractor(BaseInteractor):
         self.markers = []
         self.axes = axes
         self.color = color
+        # Variables for the current mouse position
         self._mouse_x = r
         self._mouse_y = 0
+        # Last known mouse position, for when the cursor moves off the plot
         self._save_x = r
         self._save_y = 0
         self.scale = 10.0
+        # Key variables for drawing the interactor element
         self.theta = theta
         self.phi = phi
         self.radius = r
@@ -62,14 +65,6 @@ class ArcInteractor(BaseInteractor):
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
-
-    def get_radius(self):
-        """
-        Return arc radius
-        """
-        radius = np.sqrt(np.power(self._mouse_x, 2) + \
-                           np.power(self._mouse_y, 2))
-        return radius
 
     def update(self, theta=None, phi=None, r=None):
         """
@@ -129,7 +124,8 @@ class ArcInteractor(BaseInteractor):
         """
         self._mouse_x = x
         self._mouse_y = y
-        self.radius = self.get_radius()
+        self.radius = np.sqrt(np.power(self._mouse_x, 2) + \
+                              np.power(self._mouse_y, 2))
         self.has_move = True
         self.base.update()
         self.base.draw()
@@ -137,4 +133,3 @@ class ArcInteractor(BaseInteractor):
     def set_cursor(self, x, y):
         self.move(x, y, None)
         self.update()
-

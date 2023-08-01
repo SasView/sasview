@@ -21,10 +21,13 @@ class RadiusInteractor(BaseInteractor):
         self.markers = []
         self.axes = axes
         self.color = color
+        # Key variables used when drawing the interactor element
         self.r1 = r1
         self.r2 = r2
         self.theta = theta
+        # Core variable altered by the user
         self.phi = phi
+        # Last known phi value for when the cursor moves off the plot
         self.save_phi = phi
         # Variables for the left and right radial lines
         l_x1 = self.r1 * np.cos(self.theta + self.phi)

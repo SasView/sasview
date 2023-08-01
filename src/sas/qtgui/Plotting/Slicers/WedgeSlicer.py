@@ -327,8 +327,6 @@ class WedgeInteractorQ(WedgeInteractor):
         self._post_data()
 
     def _post_data(self):
-        """
-        """
         from sasdata.data_util.manipulations import SectorQ
         self.post_data(SectorQ)
 
