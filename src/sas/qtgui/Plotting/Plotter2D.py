@@ -19,9 +19,10 @@ from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.BoxSum import BoxSum
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
 
-# TODO: move to sas.qtgui namespace
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
@@ -189,6 +190,10 @@ class Plotter2DWidget(PlotterBase):
         self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
         self.actionBoxAveragingY = self.contextMenu.addAction("&Box Averaging in Qy")
         self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
+        self.actionWedgeAveragingQ = self.contextMenu.addAction("&Wedge Averaging in Q")
+        self.actionWedgeAveragingQ.triggered.connect(self.onWedgeAveragingQ)
+        self.actionWedgeAveragingPhi = self.contextMenu.addAction("&Wedge Averaging in Phi")
+        self.actionWedgeAveragingPhi.triggered.connect(self.onWedgeAveragingPhi)
         # Additional items for slicer interaction
         if self.slicer:
             self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
@@ -455,6 +460,20 @@ class Plotter2DWidget(PlotterBase):
         Create a new slicer .
         """
         self.setSlicer(slicer=BoxInteractorY)
+
+    def onWedgeAveragingQ(self):
+        """
+        Perform 2D data averaging on Q
+        Create a new slicer .
+        """
+        self.setSlicer(slicer=WedgeInteractorQ)
+
+    def onWedgeAveragingPhi(self):
+        """
+        Perform 2D data averaging on Phi
+        Create a new slicer .
+        """
+        self.setSlicer(slicer=WedgeInteractorPhi)
 
     def onColorMap(self):
         """
