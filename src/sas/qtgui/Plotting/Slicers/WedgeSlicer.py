@@ -132,10 +132,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.radial_lines.save(ev)
         self.central_line.save(ev)
 
-    def _post_data(self):
-        pass
-
-    def post_data(self, new_sector=None, nbins=None):
+    def _post_data(self, new_sector=None, nbins=None):
         """
         post 1D data averagin in Q or Phi given new_sector type
 
@@ -305,7 +302,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.radial_lines.update(r1=self.r1, r2=self.r2,
                                  theta=self.theta, phi=self.phi)
         self.central_line.update(theta=self.theta)
-        self.post_data()
+        self._post_data()
         self.draw()
 
     def draw(self):
@@ -328,7 +325,7 @@ class WedgeInteractorQ(WedgeInteractor):
 
     def _post_data(self):
         from sasdata.data_util.manipulations import SectorQ
-        self.post_data(SectorQ)
+        super()._post_data(SectorQ)
 
 
 class WedgeInteractorPhi(WedgeInteractor):
@@ -344,5 +341,5 @@ class WedgeInteractorPhi(WedgeInteractor):
 
     def _post_data(self):
         from sasdata.data_util.manipulations import SectorPhi
-        self.post_data(SectorPhi)
+        super()._post_data(SectorPhi)
 

@@ -118,10 +118,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.vertical_lines.save(ev)
         self.horizontal_lines.save(ev)
 
-    def _post_data(self):
-        pass
-
-    def post_data(self, new_slab=None, nbins=None, direction=None):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
         post 1D data averaging in Qx or Qy given new_slab type
 
@@ -259,7 +256,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
-        self.post_data(nbins=None)
+        self._post_data(nbins=None)
         self.draw()
 
     def draw(self):
@@ -506,7 +503,7 @@ class BoxInteractorX(BoxInteractor):
         Post data creating by averaging in Qx direction
         """
         from sasdata.data_util.manipulations import SlabX
-        self.post_data(SlabX, direction="X")
+        super()._post_data(SlabX, direction="X")
 
     def validate(self, param_name, param_value):
         """
@@ -539,7 +536,7 @@ class BoxInteractorY(BoxInteractor):
         Post data creating by averaging in Qy direction
         """
         from sasdata.data_util.manipulations import SlabY
-        self.post_data(SlabY, direction="Y")
+        super()._post_data(SlabY, direction="Y")
 
     def validate(self, param_name, param_value):
         """
