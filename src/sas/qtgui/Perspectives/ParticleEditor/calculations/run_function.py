@@ -1,9 +1,10 @@
-""" Help functions that run SLD and magnetism functions """
+""" Helper functions that run SLD and magnetism functions """
 import numpy as np
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (SLDDefinition, MagnetismDefinition, CalculationParameters)
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
+
 
 def run_sld(sld_definition: SLDDefinition, parameters: CalculationParameters, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
     """ Evaluate the SLD function from the definition object at specified coordinates """
@@ -17,6 +18,7 @@ def run_sld(sld_definition: SLDDefinition, parameters: CalculationParameters, x:
     parameter_dict = parameters.sld_parameters.copy()
 
     return sld_function(a, b, c, **parameter_dict)
+
 
 def run_magnetism(magnetism_definition: MagnetismDefinition, parameters: CalculationParameters, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> VectorComponents3:
     """ Evaluate the magnetism function from the definition at specified coordinates """
