@@ -223,6 +223,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.smearing_widget.resetSmearer()
         # Enable/disable UI components
         self.setEnablementOnDataLoad()
+        # Reinitialize model list for constrained/simult fitting
+        self.newModelSignal.emit()
 
     def initializeGlobals(self):
         """
