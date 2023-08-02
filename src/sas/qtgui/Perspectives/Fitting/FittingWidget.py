@@ -1832,10 +1832,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
                 location = sas_path + "/" + full_path
                 location += "/user/models/" + self.kernel_module.id + ".html"
-                if os.path.isfile(location):
-                    # We have HTML for this model - show it
-                    tree_location = sas_path + "/" + full_path + "/user/models/"
-                    helpfile = self.kernel_module.id + ".html"
+                tree_location = sas_path + "/" + full_path + "/user/models/"
+                helpfile = self.kernel_module.id + ".html"
             else:
                 helpfile = "fitting_help.html"
         elif tab_id == 1:
