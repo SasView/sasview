@@ -90,6 +90,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Otherwise, simply triggers a load of the documentation window with loadHtml()
         """
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+        user_models = os.path.dirname(sas_path) + "/.sasview/plugin_models/"
         html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
         rst_py_path = GuiUtils.PY_SOURCE
         regen_string = ""
@@ -98,10 +99,18 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             from re import search
             model_name = os.path.basename(self.source).replace("html", "py")
             regen_string = sas_path + "/" + rst_py_path + "/user/models/src/" + model_name
-                # Test to see if HTML does not exist or is older than python file
-            if self.newer(regen_string, self.source):
+            user_model_name = user_models + model_name
+
+            # Test if this is a user defined model, and if its HTML does not exist or is older than python source file
+            if os.path.isfile(user_model_name):
+                if self.newer(regen_string, user_model_name):
+                    self.regenerateHtml(model_name)
+
+            # Test to see if HTML does not exist or is older than python file
+            elif self.newer(regen_string, self.source):
                 self.regenerateHtml(model_name)
             # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
+
         elif "index" in self.source:
             # Regenerate if HTML is older than RST -- for index.html, which gets passed in differently because it is located in a different folder
             regen_string = sas_path + "/" + rst_py_path + self.source.replace('.html', '.rst')
@@ -109,6 +118,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                 # Test to see if HTML does not exist or is older than python file
             if self.newer(regen_string, html_path):
                 self.regenerateHtml(regen_string)
+
         else:
             # Regenerate if HTML is older than RST
             from re import sub

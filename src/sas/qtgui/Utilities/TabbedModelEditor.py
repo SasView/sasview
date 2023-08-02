@@ -140,9 +140,15 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if at_launch:
             from sas.qtgui.Utilities.GuiUtils import PY_SOURCE, SAS_DIR
             py_rst_files = SAS_DIR + "/" + PY_SOURCE
+            user_models = os.path.dirname(os.path.abspath(os.path.dirname(sys.argv[0]))) + "/.sasview/plugin_models/"
+            user_model_name = user_models + self.load_file + ".py"
+
             if self.model is True:
                 # Find location of model .py files and load from that location
-                filename = py_rst_files + "/user/models/src/" + self.load_file + ".py"
+                if os.path.isfile(user_model_name):
+                    filename = user_model_name
+                else:
+                    filename = py_rst_files + "/user/models/src/" + self.load_file + ".py"
             else:
                 filename = py_rst_files + self.load_file.replace(".html", ".rst")
                 self.is_python = False

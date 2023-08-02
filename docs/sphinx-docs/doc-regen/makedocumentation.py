@@ -30,11 +30,20 @@ Future reference: move to main() function?
     TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(ABSOLUTE_TARGET_PLUGINS)
     print(get_py(ABSOLUTE_TARGET_PLUGINS))
     base_targets = [basename(string) for string in TARGETS]
+
     # Removes duplicate instances of the same file copied from plugins folder to source-temp/user/models/src/
+
     for file in TARGETS:
-        if base_targets.count(basename(file)) >= 2:
-            TARGETS.remove(file)
-            base_targets.remove(basename(file))
+        if ".sasview" in file:
+            TARGETS = [path for path in TARGETS if file in path and not ".sasview" in path]
+
+    print(TARGETS, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+
+    # for file in TARGETS:
+    #     if base_targets.count(basename(file)) >= 2:
+    #         TARGETS.remove(file)
+    #         base_targets.remove(basename(file))
     return TARGETS
 
 def call_regenmodel(filepath, regen_py):
