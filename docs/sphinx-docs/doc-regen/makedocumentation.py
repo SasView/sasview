@@ -32,18 +32,11 @@ Future reference: move to main() function?
     base_targets = [basename(string) for string in TARGETS]
 
     # Removes duplicate instances of the same file copied from plugins folder to source-temp/user/models/src/
-
     for file in TARGETS:
-        if ".sasview" in file:
-            TARGETS = [path for path in TARGETS if file in path and not ".sasview" in path]
+        if base_targets.count(basename(file)) >= 2:
+            TARGETS.remove(file)
+            base_targets.remove(basename(file))
 
-    print(TARGETS, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
-
-    # for file in TARGETS:
-    #     if base_targets.count(basename(file)) >= 2:
-    #         TARGETS.remove(file)
-    #         base_targets.remove(basename(file))
     return TARGETS
 
 def call_regenmodel(filepath, regen_py):
@@ -113,9 +106,9 @@ def call_one_file(file):
     # Determines if a model's source .py file from /user/models/src/ should be used or if the file from /plugin-models/ should be used
     if os.path.exists(NORM_TARGET) and os.path.exists(MODEL_TARGET):
         if os.path.getmtime(NORM_TARGET) < os.path.getmtime(MODEL_TARGET):
-            file_call_path = NORM_TARGET
-        else:
             file_call_path = MODEL_TARGET
+        else:
+            file_call_path = NORM_TARGET
     elif not os.path.exists(NORM_TARGET):
         file_call_path = MODEL_TARGET
     else:
