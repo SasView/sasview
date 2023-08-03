@@ -73,11 +73,11 @@ class ArcInteractor(BaseInteractor):
         if r is not None:
             self.radius = r
         # Calculate the points on the arc, and draw them
-        angle_factor = 2 * self.phi / (self.npts - 1)
         angle_offset = self.theta - self.phi
-        x = [self.radius * np.cos(angle_factor * i + angle_offset) for i in range(self.npts)]
-        y = [self.radius * np.sin(angle_factor * i + angle_offset) for i in range(self.npts)]
-        self.arc.set_data(x, y)
+        angle_factor = np.asarray([2 * self.phi / (self.npts - 1) * i + angle_offset for i in range(self.npts)])
+        x = self.radius * np.cos(angle_factor)
+        y = self.radius * np.sin(angle_factor)
+        self.arc.set_data(x.tolist(), y.tolist())
 
         # Calculate the new marker location, and draw that too
         marker_x = self.radius * np.cos(self.theta - 0.5 * self.phi)
