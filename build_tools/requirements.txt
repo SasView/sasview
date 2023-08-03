@@ -10,7 +10,7 @@ h5py
 sphinx
 pyparsing 
 html5lib 
-reportlab==3.6.6 
+reportlab
 pybind11 
 appdirs
 six 
@@ -22,7 +22,7 @@ xhtml2pdf
 pylint
 periodictable 
 uncertainties 
-matplotlib~=3.5.2
+matplotlib
 lxml
 pytools 
 cffi
