@@ -49,9 +49,11 @@ Documentation for user input: User input should look like this:
     "model":str
     "parameters": [
         {
-        "base_id": int
         "name":str
         "value":int/float
+        "datatype":
+        "lower":int
+        "upper":int
         }
     ]
 }
@@ -142,14 +144,21 @@ def start_fit(fit_db):
         test_data = loader.load(f.path)[0]"""
         f = fit_db.data_id.file
         test_data = load_data(f.path)
+        test_data.dy = 0.2*test_data.y
         M = Experiment(data = test_data, model=model)
         #TODO be able to do multiple experiments
         problem = FitProblem(M)
         if fit_db.optimizer:
-            result = fit(problem, method=fit_db.optimizer)
+            fitted = fit(problem, method=fit_db.optimizer)
         else:
-            result = fit(problem)
-    return result
+            fitted = fit(problem)
+        result = M.__getstate__()
+        result['_data'] = test_data.__str__()
+        result['_model'] = fit_db.model
+        result['_resolution'] = str(M.resolution.q) + ', ' + str(M.resolution.q_calc)
+        result['model'] = model.state()
+        
+    return 
 
 
 def get_parameters(fit_id):
