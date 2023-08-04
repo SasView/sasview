@@ -122,9 +122,10 @@ def start_fit(fit_db):
     pars = get_parameters(fit_db.id)[0]
     par_limits = get_parameters(fit_db.id)[1]
 
-    if not fit_db.data_id:
+    test_data = load_data(fit_db.data_id.file.path) if fit_db.data_id else empty_data1D(np.log10(1e-4), np.log10(1), 10000)
+
+    if not par_limits or test_data.y is None:
         #TODO impliment qmin/qmax
-        test_data = empty_data1D(np.log10(1e-4), np.log10(1), 10000)
         model = DirectModel(test_data, current_model)
         result = model(**pars)
     else:
@@ -140,8 +141,11 @@ def start_fit(fit_db):
         #TODO implement using Loader() instead of load_data
         """loader = Loader()
         test_data = loader.load(f.path)[0]"""
-        f = fit_db.data_id.file
-        test_data = load_data(f.path)
+        if hasattr(test_data, "err_data") and not test_data.err_data:
+            test_data.err_data = 0.2*test_data.data
+        else:
+            if test_data.dy is not None:
+                test_data.dy = 0.2*test_data.y
         M = Experiment(data = test_data, model=model)
         #TODO be able to do multiple experiments
         problem = FitProblem(M)
