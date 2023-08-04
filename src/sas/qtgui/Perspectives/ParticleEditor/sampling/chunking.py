@@ -1,3 +1,5 @@
+
+
 """
 
 Functions designed to help avoid using too much memory, chunks up the pairwise distributions
@@ -35,6 +37,8 @@ t  7             |           |           |
 
 from typing import Tuple, Sequence, Any
 
+import math
+
 from sas.qtgui.Perspectives.ParticleEditor.sampling.points import PointGenerator
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
 
@@ -70,5 +74,42 @@ class SingleChunk(Chunker):
         yield points, points
 
 
-def pairwise_chunk_iterator(left_data: Sequence[Sequence[Any]], right_data: Sequence[Sequence[Any]]) -> Tuple[Sequence[Any], Sequence[Any]]:
-    """ Generator to do chunking"""
+class InputLengthMismatch(Exception):
+    pass
+
+def sublist_lengths(data: Sequence[Sequence[Any]]) -> int:
+    """ Return the length of the """
+    iterator = iter(data)
+    len_0 = len(next(iterator))
+    if not all(len(x) == len_0 for x in iterator):
+        raise InputLengthMismatch("Input lists do not have the same length")
+
+    return len_0
+def pairwise_chunk_iterator(
+        left_data: Sequence[Sequence[Any]],
+        right_data: Sequence[Sequence[Any]],
+        chunk_size: int) -> Tuple[Sequence[Sequence[Any]], Sequence[Sequence[Any]]]:
+
+    """ Generator to do chunking as described in the module docs above"""
+
+    left_len = sublist_lengths(left_data)
+    right_len = sublist_lengths(right_data)
+
+    n_left = math.ceil(left_len / chunk_size)
+    n_right = math.ceil(right_len / chunk_size)
+
+    for i in range(n_left):
+
+        left_index_1 = i*chunk_size
+        left_index_2 = min(((i+1)*chunk_size, n_left))
+
+        left_chunk = (datum[left_index_1:left_index_2] for datum in left_data)
+
+        for j in range(n_right):
+
+            right_index_1 = j*chunk_size
+            right_index_2 = min(((i+1)*chunk_size, n_left))
+
+            right_chunk = (datum[right_index_1:right_index_2] for datum in right_data)
+
+            yield left_chunk, right_chunk
