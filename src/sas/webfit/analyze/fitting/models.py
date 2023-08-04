@@ -34,7 +34,7 @@ models_logger = getLogger(__name__)
 # do we want individual dbs for each perspective?
 
 class Fit(AnalysisBase):
-    results = models.CharField(max_length= 900, blank=True, null = True, help_text="the string result")
+    results = models.CharField(max_length= 2000, blank=True, null = True, help_text="the string result")
     results_trace = [
     ]
 

@@ -70,6 +70,8 @@ class AnalysisParameterBase(models.Model):
     value_trace = [
     ]
 
+    is_analyzed = models.BooleanField(default = False, help_text="Should this parameter be analyzed?")
+
     
 """class AnalysisConstraint(models.Model):
     par1 = models.ManyToManyField(AnalysisParameterBase)
