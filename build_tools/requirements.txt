@@ -1,6 +1,5 @@
 numpy 
 scipy==1.7.3 
-pyside2
 docutils 
 pytest
 pytest_qt
