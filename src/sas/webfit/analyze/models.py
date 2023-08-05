@@ -33,6 +33,7 @@ from django.core.exceptions import (
 models_logger = getLogger(__name__)
 
 class AnalysisBase(models.Model):
+    name = models.CharField(max_length=300, blank=True, help_text="name used for multiple fits")
     current_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     data_id = models.ForeignKey(Data, blank=True, null=True, on_delete=models.CASCADE)
     
@@ -57,9 +58,9 @@ class AnalysisParameterBase(models.Model):
 
     name = models.CharField(max_length=100, help_text="Parameter Name")
 
-    value=models.FloatField(blank=False, default=None, help_text="the value of the parameter")
+    value=models.FloatField(blank=True, null = True, default=None, help_text="the value of the parameter")
 
-    data_type = models.CharField(max_length=100, help_text="parameter type (int/double)")
+    data_type = models.CharField(max_length=100, blank = True, null = True, default = None, help_text="parameter type (int/double)")
 
     unit = models.CharField(max_length=100, blank=True, null = True, help_text = "string for what unit the parameter is")
 
@@ -70,7 +71,7 @@ class AnalysisParameterBase(models.Model):
     value_trace = [
     ]
 
-    is_analyzed = models.BooleanField(default = False, help_text="Should this parameter be analyzed?")
+    be_analyzed = models.BooleanField(default = False, help_text="Should this parameter be analyzed?")
 
     
 """class AnalysisConstraint(models.Model):
