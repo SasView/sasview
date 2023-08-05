@@ -63,9 +63,8 @@ Documentation for user input: User input should look like this:
 def start(request, version = None):
     if request.method == "POST":
         #TODO set status
-        #TODO add qmin/qmax
-        #TODO add 
-
+        #TODO add constraints
+        
         base_serializer = FitSerializer(data=request.data)
         if base_serializer.is_valid():
             base_serializer.save()
@@ -75,17 +74,13 @@ def start(request, version = None):
         fit_db = get_object_or_404(Fit, id = base_serializer.data["id"])
 
         #try to create model for check if the modelstring is valid
-        if load_model(fit_db.model):
-            pass
-        else:
+        if not load_model(fit_db.model):
             fit_db.delete()
             return HttpResponseBadRequest("No model selected for fitting")
 
         if fit_db.data_id:
-            if fit_db.data_id.is_public or (request.user.is_authenticated and 
-                    request.user is fit_db.data_id.current_user):
-                pass
-            else:
+            if not (fit_db.data_id.is_public or (request.user.is_authenticated and 
+                    request.user is fit_db.data_id.current_user)):
                 fit_db.delete()
                 return HttpResponseBadRequest("data isn't public and/or the user's")
 
@@ -105,14 +100,15 @@ def start(request, version = None):
         #start_fit connection for WORKING MODEL, NOT finalized api
         result = start_fit(fit_db)
 
-        result_serializer = FitSerializer(fit_db, data = {"results": str(result)}, partial=True)
+        result_serializer = FitSerializer(fit_db, data = {"results": str(result), "status":3}, partial=True)
         if result_serializer.is_valid():
             result_serializer.save()
         else:
             return Response(result_serializer.errors)
+        fit_db = get_object_or_404(Fit, id = result_serializer.data["id"])
         
         #add "warnings": ... later
-        return Response({"authenticated":request.user.is_authenticated, "fit_id":fit_db.id, "results": result})
+        return Response({"authenticated":request.user.is_authenticated, "fit_id":fit_db.id, "results":result})
 
     return HttpResponseBadRequest()
 
@@ -124,10 +120,8 @@ def start_fit(fit_db):
     pars = get_parameters(fit_db.id)[0]
     par_limits = get_parameters(fit_db.id)[1]
 
-    test_data = load_data(fit_db.data_id.file.path) if fit_db.data_id else empty_data1D(np.log10(1e-4), np.log10(1), 10000)
-
+    test_data = load_data(fit_db.data_id.file.path) if fit_db.data_id else empty_data1D(np.log10(fit_db.Qminimum), np.log10(fit_db.Qmaximum), 10000)
     if not par_limits or test_data.y is None:
-        #TODO impliment qmin/qmax
         model = DirectModel(test_data, current_model)
         result = model(**pars)
     else:
@@ -135,10 +129,9 @@ def start_fit(fit_db):
         if par_limits:
             for name in par_limits.keys():
                 attr = getattr(model, name)
-                if par_limits[name].get("lower") or par_limits[name].get("upper"):
-                    lower_limit = par_limits[name]["lower"] if par_limits[name]["lower"] else attr.limits[0]
-                    upper_limit = par_limits[name]["upper"] if par_limits[name]["upper"] else attr.limits[1]
-                    attr.range(lower_limit, upper_limit)
+                lower_limit = par_limits[name]["lower"] if par_limits[name]["lower"] else attr.limits[0]
+                upper_limit = par_limits[name]["upper"] if par_limits[name]["upper"] else attr.limits[1]
+                attr.range(lower_limit, upper_limit)
         
         #TODO implement using Loader() instead of load_data
         """loader = Loader()
@@ -146,8 +139,8 @@ def start_fit(fit_db):
         if hasattr(test_data, "err_data") and not test_data.err_data:
             test_data.err_data = 0.2*test_data.data
         else:
-            if test_data.dy is not None:
-                test_data.dy = 0.2*test_data.y
+            if test_data.dy is None or test_data.dy == [] or test_data.dy.all() == 0:
+                test_data.dy = np.ones(len(test_data.y))
         M = Experiment(data = test_data, model=model)
         #TODO be able to do multiple experiments
         problem = FitProblem(M)
@@ -160,29 +153,31 @@ def start_fit(fit_db):
         result['_model'] = fit_db.model
         result['_resolution'] = str(M.resolution.q) + ', ' + str(M.resolution.q_calc)
         result['model'] = model.state()
-        
-    return 
+    return result
 
 
 def get_parameters(fit_id):
+    """
+    pars: {
+    "name" : value
+    }
+    par_limits: {
+    "name_lower_limit":value,
+    "name_upper_limit":upper
+    }
+    """
     pars = {}
     par_limits = {}
     fit_db = get_object_or_404(Fit, id = fit_id)
     default_parameters = load_model_info(fit_db.model).parameters.defaults
     if fit_db.analysisparameterbase_set.all():
+        #pars = {x.name: num for x in fit_db.analysisparameterbase_set.all() for num = eval(...)}
         for x in fit_db.analysisparameterbase_set.all():
-            num = eval(f"{x.data_type}({x.value})")
-            #TODO check if x.name is a valid parameter else return blah
-            #pars = {x.name: num for x in parameter_serializer.data for num = eval(...)}
-            pars[x.name] = num
+            #TODO check if x.name is a valid parameter else return HTTPBadRequest
+            pars[x.name] = eval(f"{x.data_type}({x.value})") if x.value else default_parameters[x.name]
 
-            #TODO make it not create blank dicts for no limits
-            one_limit = {}
-            if x.lower_limit:
-                one_limit.update({"lower":x.lower_limit})
-            if x.upper_limit:
-                one_limit.update({"upper":x.upper_limit})
-            par_limits.update({x.name:one_limit})
+            if x.be_analyzed:
+                par_limits[x.name] = {"lower":x.lower_limit, "upper": x.upper_limit}
         #add in default parameters that don't exist
         for key, value in default_parameters.items():
             if key not in pars.keys():
@@ -192,11 +187,20 @@ def get_parameters(fit_id):
         pars = default_parameters
     return [pars, par_limits]
 
+"""               limits = {}
+                if x.lower_limit:
+                    limits.update({"lower":x.lower_limit})
+                if x.upper_limit:
+                    limits.update({"upper":x.upper_limit})
+                par_limits.update({x.name:limits})
+"""
+
 
 @api_view(['GET'])
 def view_results(request, fit_id, version=None):
     if request.method == 'GET':
         fit_obj = get_object_or_404(Fit, id = fit_id)
+        #results = json.loads(fit_obj.results)
         return Response({"results":fit_obj.results})
     return HttpResponseBadRequest()
 
