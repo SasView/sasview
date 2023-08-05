@@ -205,6 +205,23 @@ class Plotter2DWidget(PlotterBase):
              functools.partial(self.onSavePoints, self.data0))
         self.contextMenu.addSeparator()
 
+        self.actionCircularAverage = self.contextMenu.addAction("&Perform Circular Average")
+        self.actionCircularAverage.triggered.connect(self.onCircularAverage)
+
+        self.actionSectorView = self.contextMenu.addAction("&Sector [Q View]")
+        self.actionSectorView.triggered.connect(self.onSectorView)
+        self.actionAnnulusView = self.contextMenu.addAction("&Annulus [Phi View]")
+        self.actionAnnulusView.triggered.connect(self.onAnnulusView)
+        self.actionBoxSum = self.contextMenu.addAction("&Box Sum")
+        self.actionBoxSum.triggered.connect(self.onBoxSum)
+        self.actionBoxAveragingX = self.contextMenu.addAction("&Box Averaging in Qx")
+        self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
+        self.actionBoxAveragingY = self.contextMenu.addAction("&Box Averaging in Qy")
+        self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
+        self.actionWedgeAveragingQ = self.contextMenu.addAction("&Wedge Averaging in Q")
+        self.actionWedgeAveragingQ.triggered.connect(self.onWedgeAveragingQ)
+        self.actionWedgeAveragingPhi = self.contextMenu.addAction("&Wedge Averaging in Phi")
+        self.actionWedgeAveragingPhi.triggered.connect(self.onWedgeAveragingPhi)
         # Additional items for slicer interaction
         self.contextMenu.addSeparator()
         self.actionColorMap = self.contextMenu.addAction("&2D Color Map")

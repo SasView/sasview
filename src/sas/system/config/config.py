@@ -205,9 +205,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # If true, disables polydispersity plot display
         self.DISABLE_POLYDISPERSITY_PLOT = False
 
-        # Using Matplotlib Toolbar in Main Plotting Function
-        self.USE_MATPLOTLIB_TOOLBAR = False
-
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 

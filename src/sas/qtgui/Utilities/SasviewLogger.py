@@ -4,24 +4,8 @@ import logging
 
 from PySide6.QtCore import QObject, Signal
 
-
-class SasViewLogFormatter(logging.Formatter):
-    LOG_FORMAT = "%(asctime)s - <b{}>%(levelname)s</b>: %(message)s"
-    DATE_FORMAT = "%H:%M:%S"
-
-    LOG_COLORS = {"WARNING": "orange", "ERROR": "red", "CRITICAL": "red"}
-    def format(self, record):
-        """
-        Give extra formatting on error messages
-        """
-        level_style = ""
-        if record.levelname in self.LOG_COLORS:
-            level_style = f' style="color: {self.LOG_COLORS[record.levelname]}"'
-
-        return logging.Formatter(fmt=self.LOG_FORMAT.format(level_style), datefmt=self.DATE_FORMAT).format(record)
-
 class QtPostman(QObject):
-    messageWritten = Signal(object)
+    messageWritten = Signal(str)
 
 class QtHandler(logging.Handler):
     """
@@ -34,11 +18,9 @@ class QtHandler(logging.Handler):
         self.postman = QtPostman()
 
     def emit(self, record):
-        record = self.format(record)
-        if record:
-            #self.messageWritten.emit('%s\n'%record)
-            pass
-
+        message = self.format(record)
+        if message:
+            self.postman.messageWritten.emit(message)
 
 def setup_qt_logging():
     # Add the qt-signal logger
@@ -56,3 +38,4 @@ def setup_qt_logging():
     handler.setFormatter(SasViewLogFormatter())
     logger.addHandler(handler)
     return handler
+        
