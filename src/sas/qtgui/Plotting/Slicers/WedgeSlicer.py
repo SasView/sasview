@@ -161,7 +161,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
                 raise ValueError(msg)
             self.averager = new_sector
 
-        # Why do I have to add pi to the angles for it to work properly?
+        # Add pi to the angles before invoking sector averaging to transform angular
+        # range from python default of -pi,pi to 0,2pi suitable for manipulations
         sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi,
                              phi_max=phimax + np.pi, nbins=self.nbins)
         sect.fold = False
@@ -175,7 +176,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             dxw = sector.dxw
         else:
             dxw = None
-        new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
+        # And here subtract pi when getting angular data back from sector averaging in
+        # manipulations to get back in the -pi,pi range. Also convert from radians to
+        # degrees for nicer display.
+        new_plot = Data1D(x=(sector.x - np.pi) * 180 / np.pi, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = str(self.averager.__name__) + \
@@ -185,15 +189,15 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
         if self.averager.__name__ == 'SectorPhi':
+            # angular plots usually require a linear x scale and better with
+            # a linear y scale as well.
             new_plot.xaxis("\\rm{\phi}", "degrees")
+            new_plot.xtransform = 'x'
+            new_plot.ytransform = 'y'
         else:
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.data.name.count("Residuals") > 0:
-            new_plot.ytransform = 'y'
-            new_plot.yaxis("\\rm{Residuals} ", "/")
 
         new_plot.id = str(self.averager.__name__) + self.data.name
         new_plot.group_id = new_plot.id
