@@ -120,7 +120,9 @@ def start_fit(fit_db):
     pars = get_parameters(fit_db.id)[0]
     par_limits = get_parameters(fit_db.id)[1]
 
-    test_data = load_data(fit_db.data_id.file.path) if fit_db.data_id else empty_data1D(np.log10(fit_db.Qminimum), np.log10(fit_db.Qmaximum), 10000)
+    q_min = np.log10(fit_db.Qminimum) if fit_db.Qminimum else np.log10(0.0005/10)
+    q_max = np.log10(fit_db.Qmaximum) if fit_db.Qmaximum else np.log10(0.5/10)
+    test_data = load_data(fit_db.data_id.file.path) if fit_db.data_id else empty_data1D(q_min, q_max, 10000)
     if not par_limits or test_data.y is None:
         model = DirectModel(test_data, current_model)
         result = model(**pars)
