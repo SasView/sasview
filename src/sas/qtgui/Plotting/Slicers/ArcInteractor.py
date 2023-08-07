@@ -29,15 +29,13 @@ class ArcInteractor(BaseInteractor):
         self.phi = phi
         self.radius = r
         # Calculate the marker coordinates and define the marker
-        marker_x = self.radius * np.cos(theta - 0.5 * phi)
-        marker_y = self.radius * np.sin(theta - 0.5 * phi)
-        self.marker = self.axes.plot([marker_x], [marker_y], linestyle='',
+        self.marker = self.axes.plot([], [], linestyle='',
                                      marker='s', markersize=10,
                                      color=self.color, alpha=0.6, pickradius=5,
                                      label='pick', zorder=zorder,
                                      visible=True)[0]
         # Define the arc
-        [self.arc] = self.axes.plot([], [], linestyle='-', marker='', color=self.color)
+        self.arc = self.axes.plot([], [], linestyle='-', marker='', color=self.color)[0]
         # The number of points that make the arc line
         self.npts = 40
         # Flag to keep track of motion
@@ -58,13 +56,8 @@ class ArcInteractor(BaseInteractor):
         Clear this slicer and its markers
         """
         self.clear_markers()
-        try:
-            self.marker.remove()
-            self.arc.remove()
-        except:
-            # Old version of matplotlib
-            for item in range(len(self.axes.lines)):
-                del self.axes.lines[0]
+        self.marker.remove()
+        self.arc.remove()
 
     def update(self, theta=None, phi=None, r=None):
         """
@@ -73,8 +66,6 @@ class ArcInteractor(BaseInteractor):
         :param phi: angle from the centre point on the arc to each of its edges
         :param r: radius from (0,0) of the arc on a data2D plot
         """
-        x = []
-        y = []
         if theta is not None:
             self.theta = theta
         if phi is not None:
@@ -82,18 +73,16 @@ class ArcInteractor(BaseInteractor):
         if r is not None:
             self.radius = r
         # Calculate the points on the arc, and draw them
-        for i in range(self.npts):
-            angleval = 2 * self.phi / (self.npts - 1) * i + (self.theta - self.phi)
-            xval = 1.0 * self.radius * np.cos(angleval)
-            yval = 1.0 * self.radius * np.sin(angleval)
-            x.append(xval)
-            y.append(yval)
+        angle_offset = self.theta - self.phi
+        angle_factor = np.asarray([2 * self.phi / (self.npts - 1) * i + angle_offset for i in range(self.npts)])
+        x = self.radius * np.cos(angle_factor)
+        y = self.radius * np.sin(angle_factor)
+        self.arc.set_data(x.tolist(), y.tolist())
 
         # Calculate the new marker location, and draw that too
         marker_x = self.radius * np.cos(self.theta - 0.5 * self.phi)
         marker_y = self.radius * np.sin(self.theta - 0.5 * self.phi)
         self.marker.set(xdata=[marker_x], ydata=[marker_y])
-        self.arc.set_data(x, y)
 
     def save(self, ev):
         """
