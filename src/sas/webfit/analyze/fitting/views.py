@@ -73,7 +73,6 @@ def start(request, version = None):
         
         fit_db = get_object_or_404(Fit, id = base_serializer.data["id"])
 
-        #try to create model for check if the modelstring is valid
         if not load_model(fit_db.model):
             fit_db.delete()
             return HttpResponseBadRequest("No model selected for fitting")
@@ -96,8 +95,7 @@ def start(request, version = None):
                     parameter_serializer.save()
                 all_param_dbs.append(get_object_or_404(FitParameter, base_id = fit_db.id, name = x["name"]))
 
-        #TODO remove below code later -> scheduling fits with status
-        #start_fit connection for WORKING MODEL, NOT finalized api
+        #TODO move below data to created queuing function
         result = start_fit(fit_db)
 
         result_serializer = FitSerializer(fit_db, data = {"results": str(result), "status":3}, partial=True)
@@ -138,11 +136,12 @@ def start_fit(fit_db):
         #TODO implement using Loader() instead of load_data
         """loader = Loader()
         test_data = loader.load(f.path)[0]"""
-        if hasattr(test_data, "err_data") and not test_data.err_data:
-            test_data.err_data = 0.2*test_data.data
+        if test_data.err_data is None or test_data.err_data == []:
+            test_data.err_data = np.ones(len(test_data.data))
         else:
             if test_data.dy is None or test_data.dy == [] or test_data.dy.all() == 0:
                 test_data.dy = np.ones(len(test_data.y))
+            #self.idx = self.idx & (self.dy != 0)
         M = Experiment(data = test_data, model=model)
         #TODO be able to do multiple experiments
         problem = FitProblem(M)
