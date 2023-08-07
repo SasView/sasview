@@ -136,7 +136,8 @@ def start_fit(fit_db):
         #TODO implement using Loader() instead of load_data
         """loader = Loader()
         test_data = loader.load(f.path)[0]"""
-        if test_data.err_data is None or test_data.err_data == []:
+
+        if hasattr(test_data, "err_data") and (not test_data.err_data or test_data.err_data == []):
             test_data.err_data = np.ones(len(test_data.data))
         else:
             if test_data.dy is None or test_data.dy == [] or test_data.dy.all() == 0:
