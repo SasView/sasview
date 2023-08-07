@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='analysisparameterbase',
-            name='be_analyzed',
+            name='analyze',
             field=models.BooleanField(default=False, help_text='Should this parameter be analyzed?'),
         ),
         migrations.AlterField(

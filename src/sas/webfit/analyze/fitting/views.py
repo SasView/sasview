@@ -177,7 +177,7 @@ def get_parameters(fit_id):
             #TODO check if x.name is a valid parameter else return HTTPBadRequest
             pars[x.name] = eval(f"{x.data_type}({x.value})") if x.value else default_parameters[x.name]
 
-            if x.be_analyzed:
+            if x.analyze:
                 par_limits[x.name] = {"lower":x.lower_limit, "upper": x.upper_limit}
         #add in default parameters that don't exist
         for key, value in default_parameters.items():
