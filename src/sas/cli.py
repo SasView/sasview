@@ -68,6 +68,8 @@ def parse_cli(argv):
         help="Open console to display output (windows only)")
     parser.add_argument("-q", "--quiet", action='store_true',
         help="Don't print banner when entering interactive mode")
+    parser.add_argument("-l", "--loglevel", type=str,
+        help="Logging level (production or development for now)")
     parser.add_argument("args", nargs="*",
         help="script followed by args")
 
@@ -118,12 +120,18 @@ def main(logging="production"):
     cli = parse_cli(sys.argv)
 
     # Setup logger and sasmodels
-    if logging == "production":
+    if cli.loglevel:
+        logging = cli.loglevel
+    logging = logging.upper()
+    if logging == "PRODUCTION":
         log.production()
-    elif logging == "development":
+    elif logging == "DEVELOPMENT":
         log.development()
+    elif logging.upper() in {'DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'}:
+        log.setup_logging(logging)
     else:
         raise ValueError(f"Unknown logging mode \"{logging}\"")
+
     lib.setup_sasmodels()
     lib.setup_qt_env() # Note: does not import any gui libraries
 
