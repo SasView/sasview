@@ -117,8 +117,8 @@ def start_fit(fit_db):
     pars = get_parameters(fit_db.id)[0]
     par_limits = get_parameters(fit_db.id)[1]
 
-    q_min = np.log10(fit_db.Qminimum) if fit_db.Qminimum else np.log10(1e-4)
-    q_max = np.log10(fit_db.Qmaximum) if fit_db.Qmaximum else np.log10(1)
+    q_min = np.log10(fit_db.q_minimum) if fit_db.q_minimum else np.log10(0.0005)
+    q_max = np.log10(fit_db.q_maximum) if fit_db.q_maximum else np.log10(0.5)
     test_data = load_data(fit_db.data_id.file.path) if fit_db.data_id else empty_data1D(np.logspace(q_min, q_max, 10000))
     if not par_limits or test_data.y is None:
         model = DirectModel(test_data, current_model)
@@ -270,14 +270,13 @@ def list_model(request, version = None):
                     model_choices = list_models(request.data.get("kind"))
                     unique_models[request.data.get("kind") + " models"] = model_choices
         else:
-            #unique_models["models"] = MODEL_CHOICES
             model_choices = list_models("all")
             unique_models["all models"] = model_choices
         return Response(unique_models)
-        """TODO requires discussion:
+        '''TODO requires discussion:
         if request.username:
             if request.user.is_authenticated:
                 user_models = 
                 listed_models += {"plugin_models": user_models}
-        """
+        '''
     return HttpResponseBadRequest()
