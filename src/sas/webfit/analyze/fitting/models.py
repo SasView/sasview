@@ -3,19 +3,17 @@ from enum import Enum
 from logging import getLogger
 from types import ModuleType
 
-#do i need these if we have loader exceptions^^
 from django.db import models
 
-from analyze.models import AnalysisBase, AnalysisParameterBase
+from ..models import AnalysisBase, AnalysisParameterBase
 
 models_logger = getLogger(__name__)
 
 class Fit(AnalysisBase):
-    results = models.CharField(max_length= 1000000, blank=True, null = True, help_text="the string result")
+    results = models.CharField(max_length=1000000, blank=True, 
+                               null=True, help_text="the string result")
     results_trace = [
     ]
-
-    # TODO optimizer
 
     class StatusChoices(models.IntegerChoices):
         QUEUED = 1, "Queued"
@@ -24,19 +22,27 @@ class Fit(AnalysisBase):
 
     status = models.IntegerField(default=StatusChoices.QUEUED, choices=StatusChoices.choices)
 
-    Qminimum = models.FloatField(default = None, null=True, blank = True, help_text="Minimum Q value for the fit")
-    Qmaximum = models.FloatField(default = None, null=True, blank = True, help_text="Maximum Q value for the fit")
+    Qminimum = models.FloatField(default=None, null=True, 
+                                 blank=True, help_text="Minimum Q value for the fit")
+    Qmaximum = models.FloatField(default=None, null=True, 
+                                 blank=True, help_text="Maximum Q value for the fit")
 
-    polydispersity = models.BooleanField(default=False, help_text="Is polydispersity being checked in this model")
+    polydispersity = models.BooleanField(default=False, 
+                                         help_text="Is polydispersity being checked in this model")
 
-    magnetism = models.BooleanField(default=False, help_text="Is magnetism being checked in this model?")
+    magnetism = models.BooleanField(default=False, 
+                                    help_text="Is magnetism being checked in this model?")
 
-    model = models.CharField(blank=False, max_length=256, help_text="model string")
+    model = models.CharField(blank=False, max_length=256, 
+                             help_text="model string")
 
-    optimizer = models.CharField(blank = True, max_length=50, help_text="optimizer string")
+    optimizer = models.CharField(blank=True, max_length=50, 
+                                 help_text="optimizer string")
 
 
 class FitParameter(AnalysisParameterBase):
-    polydisperse = models.BooleanField(default=False, help_text="Is this a polydisperse parameter?")
+    polydisperse = models.BooleanField(default=False, 
+                                       help_text="Is this a polydisperse parameter?")
 
-    magnetic = models.BooleanField(default=False, help_text="is this a magnetic parameter?")
+    magnetic = models.BooleanField(default=False, 
+                                   help_text="is this a magnetic parameter?")
