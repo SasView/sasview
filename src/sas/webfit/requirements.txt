@@ -1,0 +1,7 @@
+#this requirements extends the base sasview requirements files
+#to get both you will need to run this after base requirements files
+django
+djangorestframework
+dj-rest-auth
+django-allauth
+django-rest-knox
