@@ -114,8 +114,7 @@ def start_fit(fit_db):
     #fit_db.status = 2
     current_model = load_model(fit_db.model)
 
-    pars = get_parameters(fit_db.id)[0]
-    par_limits = get_parameters(fit_db.id)[1]
+    pars, par_limits = get_parameters(fit_db.id)
 
     q_min = np.log10(fit_db.q_minimum) if fit_db.q_minimum else np.log10(0.0005)
     q_max = np.log10(fit_db.q_maximum) if fit_db.q_maximum else np.log10(0.5)
@@ -160,6 +159,7 @@ def start_fit(fit_db):
 
 
 def get_parameters(fit_id):
+    #what this returns
     """
     pars: {
     "name" : value
@@ -174,9 +174,8 @@ def get_parameters(fit_id):
     fit_db = get_object_or_404(Fit, id = fit_id)
     default_parameters = load_model_info(fit_db.model).parameters.defaults
     if fit_db.analysisparameterbase_set.all():
-        #pars = {x.name: num for x in fit_db.analysisparameterbase_set.all() for num = eval(...)}
         for x in fit_db.analysisparameterbase_set.all():
-            #TODO check if x.name is a valid parameter else return HTTPBadRequest
+            #TODO add check if x.name is a valid parameter else return HTTPBadRequest
             pars[x.name] = eval(f"{x.data_type}({x.value})") if x.value else default_parameters[x.name]
 
             if x.analyze:
@@ -185,18 +184,9 @@ def get_parameters(fit_id):
         for key, value in default_parameters.items():
             if key not in pars.keys():
                 pars[key] = value
-    #TODO check if this is necessary
     else:
         pars = default_parameters
-    return [pars, par_limits]
-
-"""               limits = {}
-                if x.lower_limit:
-                    limits.update({"lower":x.lower_limit})
-                if x.upper_limit:
-                    limits.update({"upper":x.upper_limit})
-                par_limits.update({x.name:limits})
-"""
+    return pars, par_limits
 
 
 @api_view(['GET'])
