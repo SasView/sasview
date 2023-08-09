@@ -5,6 +5,8 @@ For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 import os
 
 import numpy as np
+import periodictable
+
 
 try:
     if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
@@ -513,5 +515,110 @@ def _spin_weights(in_spin, out_spin):
         in_spin * out_spin / norm,             # uu
     )
     return weight
+
+def radius_of_gyration(nuc_sld_data):
+    #Calculate Center of Mass(CoM) First
+    CoM = centerOfMass(nuc_sld_data)
+
+    #Now Calculate RoG
+    guinier_num = guinier_den = rog_num = rog_den = 0.0
+
+    dtype = np.dtype('double')
+    x, y, z = nuc_sld_data.pos_x, nuc_sld_data.pos_y, nuc_sld_data.pos_z
+    pix_symbol = nuc_sld_data.pix_symbol
+    coordinates = np.array([x, y, z], dtype=dtype).T
+    slds, masses = np.empty(len(pix_symbol), dtype), np.empty(len(pix_symbol), dtype)
+    for i, sym in enumerate(pix_symbol):
+        atom = periodictable.elements.symbol(sym)
+        masses[i] = atom.mass
+        slds[i] = atom.neutron.b_c
+        #solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
+
+    #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
+    # contrastSLD = sld - solvent_sld         #femtometer
+    contrastSLDs = slds                       #femtometer
+    rsq = np.sum((CoM - coordinates)**2, axis=1)
+
+    rog_num = np.sum(masses * rsq)
+    rog_den = np.sum(masses)
+    guinier_num = np.sum(contrastSLDs * rsq)
+    guinier_den = np.sum(contrastSLDs)
+
+
+    if rog_den <= 0: #Should never happen as there are no zero or negative mass atoms
+        rog_mass = "NaN"
+        logging.warning("Atomic Mass is zero for all atoms in the system.")
+    else:
+        rGMass = np.sqrt(rog_num/rog_den)
+        rog_mass = (str(round(np.sqrt(rog_num/rog_den),1)) + " Å")
+
+    #Avoid division by zero - May occur through contrast matching
+    if guinier_den == 0:
+        guinier_value = "NaN"
+        logging.warning("Effective Coherent Scattering Length is zero for all atoms in the system.")
+    elif (guinier_num/guinier_den) < 0:
+        guinier_value = (str(round(np.sqrt(-guinier_num/guinier_den),1)) + " Å")
+        logging.warning("Radius of Gyration Squared is negative. R(G)^2 is assumed to be |R(G)|* R(G).")
+    else:
+        guinier_value = (str(round(np.sqrt(guinier_num/guinier_den),1)) + " Å")
+
+    return [rog_mass,guinier_value,rGMass]          #[String, String, Float], float used for plugin model
+
+    
+def centerOfMass(nuc_sld_data):
+    """Calculate Center of Mass(CoM) of provided atom"""
+    CoMnumerator= [0.0,0.0,0.0]
+    CoMdenominator = [0.0,0.0,0.0]
+
+    for i in range(len(nuc_sld_data.pos_x)):
+        coordinates = [float(nuc_sld_data.pos_x[i]),float(nuc_sld_data.pos_y[i]),float(nuc_sld_data.pos_z[i])]
+        
+        #Coh b - Coherent Scattering Length(fm)
+        cohB = periodictable.elements.symbol(nuc_sld_data.pix_symbol[i]).neutron.b_c
+
+        for j in range(3): #sets CiN
+            CoMnumerator[j] += (coordinates[j]*cohB)
+            CoMdenominator[j] += cohB
+
+    CoM = [] 
+    for i in range(3):   
+        CoM.append(CoMnumerator[i]/CoMdenominator[i] if CoMdenominator != 0 else 0) #center of mass, test for division by zero
+    
+    return CoM
+    
+def create_betaPlot(qX, nuc_sld_data, npts_x, formFactor):
+    """Carry out the compuation of beta Q using provided & calculated data
+    Returns a list of BetaQ values
+
+    """
+    fQ = FQ(qX, nuc_sld_data, npts_x)
+    
+    #Center Of Mass Calculation
+    data_betaQ = (fQ**2)/formFactor
+
+    
+    #Scale Beta Q to 0-1
+    scalingFactor = data_betaQ[0]
+    data_betaQ = data_betaQ / scalingFactor
+
+    return data_betaQ
+
+
+def FQ(qX, nuc_sld_data, npts_x):
+    fQlist = np.empty(npts_x)
+    CoM = centerOfMass(nuc_sld_data)
+    r_x = np.subtract(nuc_sld_data.pos_x , CoM[0])
+    r_y = np.subtract(nuc_sld_data.pos_y , CoM[1])
+    r_z = np.subtract(nuc_sld_data.pos_z , CoM[2])
+    magnitudeRelativeCoordinate = np.sqrt(np.power(r_x, 2) + np.power(r_y, 2) + np.power(r_z, 2))
+    cohB = np.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in nuc_sld_data.pix_symbol])
+    
+    for i in range(npts_x):
+        fQ = np.sum(cohB*(np.sin(qX[i] * magnitudeRelativeCoordinate) / (qX[i] * magnitudeRelativeCoordinate)))
+        fQlist[i] = (fQ)
+
+    fQlist = fQlist / abs(np.sum(cohB)) #normalization
+
+    return fQlist
 
 

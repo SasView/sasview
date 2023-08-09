@@ -6,7 +6,6 @@ import logging
 import time
 import timeit
 import math
-import datetime
 
 from scipy.spatial.transform import Rotation
 
@@ -29,6 +28,8 @@ from sasdata.dataloader.data_info import Detector, Source
 from sas.system.version import __version__
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.fit import models
+from sas.sascalc.calculator.geni import radius_of_gyration, create_betaPlot, FQ
+import sas.sascalc.calculator.gsc_model as gsc_model
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.Plotter import Plotter
@@ -925,14 +926,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         
     def update_Rg(self):
-        # update the value of the Radius of Gyration with values from the loaded data
+        #update RG boxes or run RG calculation
         if self.is_nuc:
             if self.nuc_sld_data.is_elements:
                 self.txtRgMass.setText(str("N/A"))
                 self.txtRG.setText(str("N/A "))                    
                 logging.info("SasView does not support computation of Radius of Gyration for elements.")
             else:
-                threads.deferToThread(self.radius_of_gyration)          
+                rgVals = radius_of_gyration(self.nuc_sld_data)  #[String, String, Float], float used for plugin model
+                self.txtRgMass.setText(rgVals[0])
+                self.txtRG.setText(rgVals[1])
+                self.rGMass = rgVals[2]                         #used in plugin model
 
         elif self.is_mag:
             self.txtRgMass.setText(str("N/A"))            
@@ -942,77 +946,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtRgMass.setText(str("No Data"))
             self.txtRG.setText(str("No Data"))
             
-    
-    def radius_of_gyration(self):
-        #Calculate Center of Mass(CoM) First
-        CoM = self.centerOfMass()
-
-        #Now Calculate RoG
-        RGNumerator = RGDenominator = RgMassNum = RgMassDen = 0.0
-
-        pix_symbol = self.nuc_sld_data.pix_symbol
-        atoms = numpy.array([], dtype=object)
-        masses = numpy.array([])
-        slds = numpy.array([])
-
-        coordinates = numpy.array([self.nuc_sld_data.pos_x, self.nuc_sld_data.pos_y, self.nuc_sld_data.pos_z], dtype=float).T
-        for i in range (len(pix_symbol)):
-            atoms = numpy.append(atoms , periodictable.formula(pix_symbol[i]))
-            masses = numpy.append(masses, atoms[i].mass)
-            slds = numpy.append(slds, periodictable.elements.symbol(pix_symbol[i]).neutron.b_c)
-            #solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
-
-        #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
-        # contrastSLD = sld - solvent_sld         #fentometer
-        contrastSLDs = slds                       #fentometer
-        MagnitudesOfCoM = numpy.sqrt(numpy.sum(numpy.power(CoM - coordinates, 2), axis=1))
-
-        RgMassNum = numpy.sum(masses * numpy.power(MagnitudesOfCoM, 2))
-        RgMassDen = numpy.sum(masses)
-        RGNumerator = numpy.sum(contrastSLDs * numpy.power(MagnitudesOfCoM, 2))
-        RGDenominator = numpy.sum(contrastSLDs)
-
-
-        if RgMassDen <= 0: #Should never happen as there are no zero or negative mass atoms
-            rgMassValue = "NaN"
-            logging.warning("Atomic Mass is zero for all atoms in the system.")
-        else:
-            self.rGMass = numpy.sqrt(RgMassNum/RgMassDen)
-            rgMassValue = (str(round(numpy.sqrt(RgMassNum/RgMassDen),1)) + " Å")
-
-        #Avoid division by zero - May occur through contrast matching
-        if RGDenominator == 0:
-            rGValue = "NaN"
-            logging.warning("Effective Coherent Scattering Length is zero for all atoms in the system.")
-        elif (RGNumerator/RGDenominator) < 0:
-            rGValue = (str(round(numpy.sqrt(-RGNumerator/RGDenominator),1)) + " Å")
-            logging.warning("Radius of Gyration Squared is negative. R(G)^2 is assumed to be |R(G)|* R(G).")
-        else:
-            rGValue = (str(round(numpy.sqrt(RGNumerator/RGDenominator),1)) + " Å")
-        
-        self.txtRgMass.setText(rgMassValue)
-        self.txtRG.setText(rGValue)
-    
-    def centerOfMass(self):
-        """Calculate Center of Mass(CoM) of provided atom"""
-        CoMnumerator= [0.0,0.0,0.0]
-        CoMdenominator = [0.0,0.0,0.0]
-
-        for i in range(len(self.nuc_sld_data.pos_x)):
-            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
-            
-            #Coh b - Coherent Scattering Length(fm)
-            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
-
-            for j in range(3): #sets CiN
-                CoMnumerator[j] += (coordinates[j]*cohB)
-                CoMdenominator[j] += cohB
-
-        CoM = [] 
-        for i in range(3):   
-            CoM.append(CoMnumerator[i]/CoMdenominator[i] if CoMdenominator != 0 else 0) #center of mass, test for division by zero
-        
-        return CoM
         
 
     def update_geometry_effects(self):
@@ -1530,10 +1463,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # if Beta(Q) Calculation has been requested, run calculation
         if self.is_beta:
-            self.create_betaPlot()
+            self.data_betaQ  = create_betaPlot(self.xValues, self.nuc_sld_data, self.npts_x, self.data_to_plot)
         
         if self.checkboxPluginModel.isChecked():
-            self.writePlugin()
+            self.fQ = FQ(self.xValues, self.nuc_sld_data, self.npts_x)
+            gsc_model.writePlugin(self)
 
         self.cmdCompute.setText('Compute')
         self.cmdCompute.setToolTip("<html><head/><body><p>Compute the scattering pattern and display 1D or 2D plot depending on the settings.</p></body></html>")
@@ -1542,34 +1476,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdCompute.setEnabled(True)
         return
     
-    def create_betaPlot(self):
-        """Carry out the compuation of beta Q using provided & calculated data
-        Returns a list of BetaQ values
-
-        """
-        
-        #Center Of Mass Calculation
-        CoM = self.centerOfMass()
-        self.data_betaQ = numpy.array([])
-
-        # array of Q values
-        qX = self.xValues
-
-        formFactor = self.data_to_plot
-        for a in range(self.npts_x):
-            r_x = numpy.subtract(self.nuc_sld_data.pos_x , CoM[0])
-            r_y = numpy.subtract(self.nuc_sld_data.pos_y , CoM[1])
-            r_z = numpy.subtract(self.nuc_sld_data.pos_z , CoM[2])
-            magnitudeRelativeCoordinate = numpy.sqrt(numpy.power(r_x, 2) + numpy.power(r_y, 2) + numpy.power(r_z, 2))
-            cohB = numpy.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in self.nuc_sld_data.pix_symbol])
-            fQ = numpy.sum(cohB*(numpy.sum(numpy.sin(qX[a] * magnitudeRelativeCoordinate) / (qX[a] * magnitudeRelativeCoordinate))))
-            self.data_betaQ = numpy.append(self.data_betaQ,((fQ**2)/formFactor[a]))
-        
-        #Scale Beta Q to 0-1
-        scalingFactor = self.data_betaQ[0]
-        self.data_betaQ = self.data_betaQ / scalingFactor
-
-        return
+    
 
     def update_file_name(self):
         if self.checkboxPluginModel.isChecked():
@@ -1578,39 +1485,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         else:
             self.txtFileName.setText("")
             self.txtFileName.setEnabled(False)
-
-
-    def writePlugin(self):
-        # check if file exists & assign filename
-        plugin_location = models.find_plugins_dir()
-        full_path = os.path.join(plugin_location, self.txtFileName.text())
-        if os.path.splitext(full_path)[1] != ".py":
-            full_path += ".py"
-
-        # Calculate F(Q)
-        qX = self.xValues
-        CoM = self.centerOfMass()
-        for a in range(self.npts_x):
-            r_x = numpy.subtract(self.nuc_sld_data.pos_x , CoM[0])
-            r_y = numpy.subtract(self.nuc_sld_data.pos_y , CoM[1])
-            r_z = numpy.subtract(self.nuc_sld_data.pos_z , CoM[2])
-            magnitudeRelativeCoordinate = numpy.sqrt(numpy.power(r_x, 2) + numpy.power(r_y, 2) + numpy.power(r_z, 2))
-            cohB = numpy.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in self.nuc_sld_data.pix_symbol])
-            fQ = numpy.sum(cohB*(numpy.sum(numpy.sin(qX[a] * magnitudeRelativeCoordinate) / (qX[a] * magnitudeRelativeCoordinate))))
-            self.fQ.append(fQ)
-        
-        scalingFactor = self.fQ[0]
-        self.fQ = [x / scalingFactor for x in self.fQ]
-        # generate the model representation as string
-        model_str = self.generateModel(full_path) 
-        TabbedModelEditor.writeFile(full_path, model_str)
-
-        self.manager.communicate.customModelDirectoryChanged.emit()
-
-        # Notify the user
-        msg = "Custom model "+ plugin_location, self.txtFileName.text() + " successfully created."
-        logging.info(msg)
-    
 
     def getFileName(self):
         plugin_location = models.find_plugins_dir()
@@ -1625,121 +1499,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 i += 1
             
         return ("custom_gsc" + str(i))
-    
-    def generateModel(self, fname):
-        """
-        generate model from the current plugin state
-        """
-        nq = len(self.xValues)
-        logq = ','.join(f'{math.log(v):.15e}' for v in self.xValues.tolist())
-        fQ = ','.join(f'{v:.15e}' for v in self.fQ)
-        logFQSQ = ','.join(f'{math.log(v **2):.15e}' for v in self.fQ)
-        logq = "{"+logq+"}"
-        fQ = "{"+fQ+"}"
-        logFQSQ = "{"+logFQSQ+"}"
-        rG = self.rGMass
-        model_str = (f'''
-r"""
-Example empirical model using interp.
-"""
-# Note: requires the pr-python-fq branch which may or may not have been merged.
-
-import numpy as np
-from numpy import inf
-from types import SimpleNamespace as dotted
-
-
-name = "{self.txtFileName.text()}"
-title = "Model precalculated from PDB file."
-description = """
-Interpolate F(q) values from an interpolation table generated for the PDB
-file {{pdbfile}}.pdb.
-"""
-#category = "shape:pdb"
-
-#   ["name", "units", default, [lower, upper], "type","description"],
-parameters = [
-    ["sld", "1e-6/Ang^2", 1, [0, inf], "sld", "Protein scattering length density"],
-    ["sld_solvent", "1e-6/Ang^2", 0, [-inf, inf], "sld", "Solvent scattering length density"],
-    ["swelling", "", 1, [0, inf], "volume", "swelling parameter changing effective radius"],
-    ["protein_volume", "Ang^3", 1, [0, inf], "volume", ""],
-]
-
-c_code =  r"""
-#define NQ {nq}
-constant double LOGQ[NQ] = {logq};
-constant double FQ[NQ] = {fQ};
-constant double LOGFQSQ[NQ] = {logFQSQ};
-
-static double
-form_volume(double swelling, double protein_volume)
-{{
-    return protein_volume;
-}}
-
-static double
-radius_effective(int mode, double swelling,double protein_volume)
-{{  
-    switch (mode) {{
-    default:
-    case 1: // equivalent sphere
-    return (cbrt(protein_volume*3.0/4.0/M_PI))*swelling;
-    case 2: // radius of gyration
-    return {rG}*swelling;
-    }}
-}}
-
-static void 
-Fq(double q, double *f1, double *f2, double sld, double sld_solvent, double swelling, double protein_volume)
-{{
-    const double logq = log(q*swelling);
-    if (logq < LOGQ[0] || logq > LOGQ[NQ-1]) {{
-        *f1 = *f2 = NAN;
-        return;
-    }}
-
-    const double contrast = (sld - sld_solvent);
-    const double scale = contrast * form_volume(swelling, protein_volume);
-
-    // binary search
-    int steps = 0;
-    const int max_steps = (int)(ceil(log((double)(NQ))/log(2.0)));
-
-    int high = NQ-1;
-    int low = 0;
-    while (low < high-1) {{
-        int mid = (high + low) / 2;
-        if (logq < LOGQ[mid]) {{
-            high = mid;
-        }} else {{
-            low = mid;
-        }}
-//printf("q: %g in [%d, %d]  (%g <= %g <= %g)\\n",q,low,high,LOGQ[low],logq,LOGQ[high]);
-        if (steps++ > max_steps) {{
-            printf("Binary search failed for q=%g\\n", q);
-            *f1 = *f2 = NAN;
-            return;
-        }}
-    }}
-    //high = low+1;
-    // linear interpolation
-    const double x1 = LOGQ[low];
-    const double x2 = LOGQ[high];
-    const double frac = (logq - x1)/(x2-x1);
-    *f1 = scale*(FQ[low]*(1-frac) + FQ[high]*frac);
-    *f2 = scale*scale*exp(LOGFQSQ[low]*(1-frac) + LOGFQSQ[high]*frac);
-//printf("scale: %g\\n", scale);
-//printf("Done with q: %g in [%d, %d]  (%g <= %g <= %g)\\n",q,low,high,x1,logq, x2);
-//printf("Frac: %g of interval [%g, %g] gives %g\\n", frac, LOGFQSQ[low],LOGFQSQ[high],LOGFQSQ[low]*(1-frac) + LOGFQSQ[high]*frac);
-}}
-"""
-#print(c_code)
-
-have_Fq = True
-radius_effective_modes = ["equivalent sphere", "radius of gyration"]
-''').lstrip().rstrip()
-        
-        return model_str
         
         
     def onSaveFile(self):
@@ -1819,6 +1578,8 @@ radius_effective_modes = ["equivalent sphere", "radius of gyration"]
                                                     int(self.graph_num))
                 dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
                 dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
+
+                self.graph_num += 1
         else:
             data = Data2D(image=numpy.nan_to_num(self.data_to_plot),
                           qx_data=self.data.qx_data,
