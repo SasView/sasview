@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from sasdata.dataloader.loader import Loader
-from serializers import FitSerializer
+
+from webfit.serializers import FitSerializer
 from .models import (
     AnalysisBase,
     AnalysisParameterBase,

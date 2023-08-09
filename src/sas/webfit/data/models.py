@@ -3,21 +3,10 @@ import uuid
 from logging import getLogger
 import hashlib
 
-from sasdata.data_util.loader_exceptions import NoKnownLoaderException, DefaultReaderException
-
-#do i need these if we have loader exceptions^^
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage 
 from django.utils.deconstruct import deconstructible
-from django.core.exceptions import (
-    NON_FIELD_ERRORS,
-    FieldDoesNotExist,
-    FieldError,
-    MultipleObjectsReturned,
-    ObjectDoesNotExist,
-    ValidationError,
-)
 
 models_logger = getLogger(__name__)
 
@@ -37,13 +26,4 @@ class Data(models.Model):
     #is the data public?
     is_public = models.BooleanField(default = False, help_text= "opt in to submit your data into example pool")
 
-    """
-    date_recieved
-
-    expiration_date = date_recieved + .... time etc
-
-    expired = models.BooleanField(default = False, help_text="is the date expired")
-    
-    if expired is True:
-        blah blah delete
-    """
+    #TODO add date,recieved, expiration_data, expired boolean, delete if expired
