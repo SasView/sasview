@@ -12,22 +12,22 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 
 from bumps.names import *
+from bumps import fitters
+from bumps.formatnum import format_uncertainty
+from sasdata.dataloader.loader import Loader
 from sasmodels.core import load_model, load_model_info, list_models
 from sasmodels.data import load_data, empty_data1D, empty_data2D, empty_sesans
 from sasmodels.bumps_model import Model, Experiment
 from sasmodels.direct_model import DirectModel
-from sasdata.dataloader.loader import Loader
 from sas.sascalc.fit.models import ModelManager
-from bumps import fitters
-from bumps.formatnum import format_uncertainty
+
 #TODO categoryinstallers should belong in SasView.Systen rather than in QTGUI
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 
-from serializers import (
+from webfit.serializers import (
     FitSerializer,
     FitParameterSerializer,
 )
-from data.models import Data
 from .models import (
     Fit,
     FitParameter,
@@ -38,7 +38,6 @@ fit_logger = getLogger(__name__)
 model_manager = ModelManager()
 #TODO add view that gets previous fit results
 #TODO finish view for get status
-#
 
 #start() only puts all the request data into the db, start_fit() runs calculations
 """
@@ -282,5 +281,3 @@ def list_model(request, version = None):
                 listed_models += {"plugin_models": user_models}
         """
     return HttpResponseBadRequest()
-
-#takes DataInfo and saves it into to specified file location

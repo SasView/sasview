@@ -2,33 +2,11 @@ import sys
 import uuid
 from logging import getLogger
 from types import ModuleType
-from data.models import Data
 
-from sas.sascalc.fit.models import ModelManager
-from sasdata.dataloader.loader import Loader
-from sasdata.data_util.loader_exceptions import NoKnownLoaderException, DefaultReaderException
-
-#do i need these if we have loader exceptions^^
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.exceptions import (
-    NON_FIELD_ERRORS,
-    FieldDoesNotExist,
-    FieldError,
-    MultipleObjectsReturned,
-    ObjectDoesNotExist,
-    ValidationError,
-)
-#models.CharField(max_length=100, blank=False, null=False)
-#models.CharField(max_length=200, help_text="")
-#models.ForeignKey("other model class name", on_delete=models.CASCADE) <--- used for refering to other models in other apps
-"""CHOICES= [
-   "choice",
-    (
-        ("choice1", "choice2),
-        ("group choice","2nd choice in group"),
-    ),
- ]"""
+
+from webfit.data.models import Data
 
 models_logger = getLogger(__name__)
 
@@ -72,12 +50,3 @@ class AnalysisParameterBase(models.Model):
     ]
 
     analyze = models.BooleanField(default = False, help_text="Should this parameter be analyzed?")
-
-    
-"""class AnalysisConstraint(models.Model):
-    par1 = models.ManyToManyField(AnalysisParameterBase)
-
-    par2 = models.IntegerField(AnalysisParameterBase)
-
-    constraint = models.CharField(max_length=300, blank = False, help_text="string equality defining how fit params are constrained to another fit parameter")
-"""
