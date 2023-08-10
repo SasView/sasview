@@ -474,6 +474,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
         regen_docs_location = sas_path + "/" + recompile_path + "/makedocumentation.py"
         d = threads.deferToThread(self.regenerateDocsCommand, regen_docs_location) # Regenerate specific documentation file
+        logging.info("Starting documentation regeneration...")
         d.addCallback(self.emitDocsRegenerated)
 
     def regenerateDocsCommand(self, regen_docs_location):
@@ -496,6 +497,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
     def emitDocsRegenerated(self, d):
         self.parent.communicate.documentationRegeneratedSignal.emit()
+        logging.info("Documentation regeneration completed.")
 
     def canWriteModel(self, model=None, full_path=""):
         """

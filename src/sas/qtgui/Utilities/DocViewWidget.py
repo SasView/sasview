@@ -185,6 +185,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         Regenerate the documentation for the file
         """
+        logging.info("Starting documentation regeneration...")
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
         recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
         regen_docs = sas_path + "/" + recompile_path + "/" + "makedocumentation.py"
@@ -213,4 +214,5 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.onShow()
         self.loadHtml()
         self.parent.communicate.documentationRegeneratedSignal.emit()
+        logging.info("Documentation regeneration completed.")
         self.regen_in_progress = False
