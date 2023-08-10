@@ -22,9 +22,9 @@ class Fit(AnalysisBase):
 
     status = models.IntegerField(default=StatusChoices.QUEUED, choices=StatusChoices.choices)
 
-    q_minimum = models.FloatField(default=None, null=True, 
+    q_minimum = models.FloatField(default=0.0005, null=True, 
                                  blank=True, help_text="Minimum Q value for the fit")
-    q_maximum = models.FloatField(default=None, null=True, 
+    q_maximum = models.FloatField(default=0.5, null=True, 
                                  blank=True, help_text="Maximum Q value for the fit")
 
     polydispersity = models.BooleanField(default=False, 
