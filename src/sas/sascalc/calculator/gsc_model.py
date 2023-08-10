@@ -9,25 +9,19 @@ from sas.sascalc.fit import models
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 
 
-def writePlugin(self):
+def writePlugin(obj):
     # check if file exists & assign filename
     plugin_location = models.find_plugins_dir()
-    full_path = os.path.join(plugin_location, self.txtFileName.text())
+    full_path = os.path.join(plugin_location, obj.txtFileName.text())
     if os.path.splitext(full_path)[1] != ".py":
         full_path += ".py"
 
     # generate the model representation as string
-    model_str = generateModel(self)
-    TabbedModelEditor.writeFile(full_path, model_str)
+    model_str = generateModel(obj)
 
-    self.manager.communicate.customModelDirectoryChanged.emit()
-
-    # Notify the user
-    msg = "Custom model " + plugin_location, self.txtFileName.text() + \
-        " successfully created."
-    logging.info(msg)
-
-def generateModel(self):
+    return [model_str , full_path, plugin_location]
+    
+def generateModel(obj):
     """
     generate model from the current plugin state
     """
@@ -41,17 +35,17 @@ def generateModel(self):
         atom = periodictable.elements.symbol(sym)
         sld += atom.neutron.b_c
     #normPQ = self.data_to_plot / (sld**2)""" 
-    normPQ = self.data_to_plot/self.data_to_plot[0]    #temporary fix
+    normPQ = obj.data_to_plot/obj.data_to_plot[0]    #temporary fix
 
 
-    nq = len(self.xValues)
-    logq = ','.join(f'{math.log(v):.15e}' for v in self.xValues.tolist())
-    fQ = ','.join(f'{v:.15e}' for v in self.fQ.tolist())
+    nq = len(obj.xValues)
+    logq = ','.join(f'{math.log(v):.15e}' for v in obj.xValues.tolist())
+    fQ = ','.join(f'{v:.15e}' for v in obj.fQ.tolist())
     logFQSQavg = ','.join(f'{math.log(v):.15e}' for v in normPQ)
     logq = "{"+logq+"}"
     fQ = "{"+fQ+"}"
     logFQSQ = "{"+logFQSQavg+"}"
-    rG = self.rGMass
+    rG = obj.rGMass
     model_str = (f'''
 r"""
 Example empirical model using interp.
@@ -63,7 +57,7 @@ from numpy import inf
 from types import SimpleNamespace as dotted
 
 
-name = "{self.txtFileName.text()}"
+name = "{obj.txtFileName.text()}"
 title = "Model precalculated from PDB file."
 description = """
 Interpolate F(q) values from an interpolation table generated for the PDB

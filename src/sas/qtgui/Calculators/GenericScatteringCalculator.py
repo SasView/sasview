@@ -561,23 +561,20 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.check_for_magnetic_controls()
 
     def change_qValidator(self):
+            #GSC default values .3 and .0003; perhaps better to use values based on RG in future.
+            #note: Fitting window defaults to .5 and .0005. Perhaps better to use those?
             if float(self.txtQxMax.text()) == 0:
                 self.txtQxMax.setText("0.3")
             if float(self.txtQxMin.text()) == 0:
                 self.txtQxMin.setText("0.0003")    
 
-            if self.checkboxLogSpace.isChecked():
+            min = 0 if not self.checkboxLogSpace.isChecked() else 1e-10
                 # 0 < Qmin&QMax <= 1000
-                self.txtQxMax.setValidator(QtGui.QDoubleValidator(1e-10,1000,10,
-                                                                self.txtQxMax))
-                self.txtQxMin.setValidator(QtGui.QDoubleValidator(1e-10,1000,10,
-                                                                self.txtQxMin))
-            else:
-                # 0 <= Qmin&QMax <= 1000
-                self.txtQxMax.setValidator(QtGui.QDoubleValidator(0,1000,10,
-                                                                self.txtQxMax))
-                self.txtQxMin.setValidator(QtGui.QDoubleValidator(0,1000,10,
-                                                                self.txtQxMin))
+            self.txtQxMax.setValidator(QtGui.QDoubleValidator(min,1000,10,
+                                                            self.txtQxMax))
+            self.txtQxMin.setValidator(QtGui.QDoubleValidator(min,1000,10,
+                                                            self.txtQxMin))
+
 
             return
     
@@ -618,28 +615,23 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # did user request Beta(Q) calculation?
         self.is_beta = (self.cbOptionsCalc.currentIndex() == 2)
         # If averaging then set to 0 and diable the magnetic SLD textboxes
-        if self.is_avg:
-            self.txtMx.setEnabled(False)
-            self.txtMy.setEnabled(False)
-            self.txtMz.setEnabled(False)
+        self.txtMx.setEnabled(not self.is_avg)
+        self.txtMy.setEnabled(not self.is_avg)
+        self.txtMz.setEnabled(not self.is_avg)
+        self.txtQxMin.setEnabled(self.is_avg)
+        self.checkboxLogSpace.setChecked(self.is_avg)
+        self.checkboxLogSpace.setEnabled(self.is_avg)
+        self.checkboxPluginModel.setEnabled(self.is_avg)
+        
+        if self.is_avg:   
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
             self.txtMz.setText("0.0")
-            self.txtQxMin.setEnabled(True)
             self.txtQxMin.setText(str(float(self.txtQxMax.text())*.001))
-            self.checkboxLogSpace.setChecked(True)
-            self.checkboxLogSpace.setEnabled(True)
-            self.checkboxPluginModel.setEnabled(True)
+            
         # If not averaging then re-enable the magnetic sld textboxes
         else:
-            self.txtMx.setEnabled(True)
-            self.txtMy.setEnabled(True)
-            self.txtMz.setEnabled(True)
-            self.txtQxMin.setEnabled(False)
             self.txtQxMin.setText(str(float(self.txtQxMax.text())*-1))
-            self.checkboxLogSpace.setChecked(False)
-            self.checkboxLogSpace.setEnabled(False)
-            self.checkboxPluginModel.setEnabled(False)
             self.checkboxPluginModel.setChecked(False)
             self.txtFileName.setEnabled(False)
     
@@ -1467,7 +1459,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         
         if self.checkboxPluginModel.isChecked():
             self.fQ = FQ(self.xValues, self.nuc_sld_data, self.npts_x)
-            gsc_model.writePlugin(self)
+            gscmodel = gsc_model.writePlugin(self)              #[0] = model, [1] = fullpath, [2] = pluginlocation
+            TabbedModelEditor.writeFile(gscmodel[1], gscmodel[0])
+            self.manager.communicate.customModelDirectoryChanged.emit()
+
+            # Notify the user
+            msg = "Custom model " + gscmodel[2], self.txtFileName.text() + \
+                " successfully created."
+            logging.info(msg)
 
         self.cmdCompute.setText('Compute')
         self.cmdCompute.setToolTip("<html><head/><body><p>Compute the scattering pattern and display 1D or 2D plot depending on the settings.</p></body></html>")
