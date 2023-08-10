@@ -236,7 +236,7 @@ def fit_info(request, fit_id, version = None):
 @api_view(['GET'])
 def list_optimizers(request, version = None):
     if request.method == "GET":
-        return_info = {"optimizers" : [fitters.FIT_ACTIVE_IDS]}
+        return_info = {"optimizers" : fitters.FIT_ACTIVE_IDS}
         return Response(return_info)
     return HttpResponseBadRequest()
 
