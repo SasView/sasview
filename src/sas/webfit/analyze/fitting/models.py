@@ -1,7 +1,4 @@
-import sys
-from enum import Enum
 from logging import getLogger
-from types import ModuleType
 
 from django.db import models
 

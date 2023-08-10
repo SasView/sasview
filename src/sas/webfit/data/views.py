@@ -2,10 +2,9 @@ import os
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, Http404
-from django.contrib.auth.models import User
-from django.core.files import File
 from django.core.files.storage import FileSystemStorage 
 
+#TODO go over to see if token is needed for is_authenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view

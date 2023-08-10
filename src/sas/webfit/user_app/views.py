@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from dj_rest_auth.views import LoginView
 from dj_rest_auth.registration.views import RegisterView
 from knox.models import AuthToken
-from django.urls import reverse
 
 from allauth.account.utils import complete_signup
 from allauth.account import app_settings as allauth_settings
