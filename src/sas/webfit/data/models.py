@@ -1,7 +1,4 @@
-import sys
-import uuid
 from logging import getLogger
-import hashlib
 
 from django.db import models
 from django.contrib.auth.models import User
