@@ -218,7 +218,8 @@ def status(request, fit_id = None, version = None):
 @api_view(['GET'])
 def view_parameters(request, fit_id, version = None):
     if request.method == "GET":
-        return Response({"parameters": get_parameters(fit_id)[0], "parameter limits": get_parameters(fit_id)[1]})
+        pars, par_limits = get_parameters(fit_id)
+        return Response({"parameters": pars, "parameter limits": par_limits})
     return HttpResponseBadRequest()
 
 
