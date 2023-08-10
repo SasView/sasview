@@ -21,6 +21,7 @@ class Data(models.Model):
 
     #imported data
     #user can either import a file path or actual file
+    #TODO upload_to should instead create a new directionry using user.id to name
     file = models.FileField(blank=False, default=None, help_text="This is a file", 
                             upload_to="uploaded_files", storage=FileSystemStorage())
 

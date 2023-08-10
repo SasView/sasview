@@ -96,7 +96,9 @@ def start(request, version = None):
 
         #TODO move below data to created queuing function
         result = start_fit(fit_db)
-
+        
+        #TODO result_serializer should actually be formatted to save result.model.state() in parameter database, 
+        #with parameter name like "name = 'fit_radius'"
         result_serializer = FitSerializer(fit_db, data = {"results": str(result), "status":3}, partial=True)
         if result_serializer.is_valid():
             result_serializer.save()
@@ -148,6 +150,7 @@ def start_fit(fit_db):
             fitted = fit(problem, method=fit_db.optimizer)
         else:
             fitted = fit(problem)
+        #TODO results to be formatted differently later
         result = M.__getstate__()
         result['_data'] = test_data.__str__()
         result['_model'] = fit_db.model
@@ -249,8 +252,9 @@ def regenerate_category_dict(cat_name):
     user_file = CategoryInstaller.get_user_file()
     with open(user_file) as cat_file:
         file_contents = json.load(cat_file)
-                spec_cat = file_contents.get(category, [])
+    #TODO format it to remove boolean
     spec_cat = file_contents.get(category, [])
+    return spec_cat
 
 
 @api_view(['GET'])
