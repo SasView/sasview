@@ -24,4 +24,6 @@ urlpatterns = [
     path("<int:fit_id>/", include(info_patterns), name = "get fit info"),
     path("optimizers/", views.list_optimizers, name = "lists all fit optimizers"),
     path("models/", views.list_model, name = "lists all fit models"),
+    path("models/<str:category>/", views.list_model, name = "lists all fit models"),
+    path("models/<str:kind>/", views.list_model, name = "lists all fit models"),
 ]

@@ -240,26 +240,32 @@ def list_optimizers(request, version = None):
         return Response(return_info)
     return HttpResponseBadRequest()
 
+#TODO strip models that are in blacklist, categoryinstaller get rid of those that are False
+#TODO implement category manager
+#TODO in fresh install categories.json is gone, fix 
+#TODO move code to share between both qtgui and webfit, move to CategoryInstaller
+#TODO CategoryInstaller should be moved to sasmodels? (as it manages models)
+def regenerate_category_dict(cat_name):
+    user_file = CategoryInstaller.get_user_file()
+    with open(user_file) as cat_file:
+        file_contents = json.load(cat_file)
+                spec_cat = file_contents.get(category, [])
+    spec_cat = file_contents.get(category, [])
 
-@api_view(['POST'])
-def list_model(request, version = None):
-    if request.method == "POST":
+
+@api_view(['GET'])
+def list_model(request, category = None, kind = None, version = None):
+    if request.method == "GET":
         unique_models = {}
         #work on being able to do both
-        if request.data:
-            if request.data.get("category") and request.data.get("kind"):
-                return HttpResponseBadRequest("Currently you cannot choose both category and kind, try again")
-            elif request.data.get("category"):
-                category = request.data.get("category").capitalize()
-                user_file = CategoryInstaller.get_user_file()
-                with open(user_file) as cat_file:
-                    file_contents = json.load(cat_file)
-                spec_cat = file_contents.get(category, [])
-                unique_models[category + " models"] = spec_cat
-            elif request.data.get("kind"):
-                if list_models(request.data.get("kind")):
-                    model_choices = list_models(request.data.get("kind"))
-                    unique_models[request.data.get("kind") + " models"] = model_choices
+
+        if category:
+            cat_name = category.capitalize()
+            unique_models[cat_name + " models"] = regenerate_category_dict(cat_name)
+        if kind:
+            if list_models(kind):
+                model_choices = list_models(kind)
+                unique_models[kind + " models"] = model_choices
         else:
             model_choices = list_models("all")
             unique_models["all models"] = model_choices
