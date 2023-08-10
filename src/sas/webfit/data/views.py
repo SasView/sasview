@@ -22,15 +22,14 @@ from .forms import DataForm
 def list_data(request, username = None, version = None):
     if request.method == 'GET':
         public_data = Data.objects.filter(is_public = True)
-        data_list = {"public_file_ids":[]}
+        data_list = {"public_file_ids":{}, "user_data_ids":{}}
         for x in public_data:
-            data_list["public_file_ids"] += [{x.id:x.file_name}]
-        if username:
-            data_list += {"user_data_ids":[]}
+            data_list["public_file_ids"][x.id] = x.file_name
+        if username: 
             if username == request.user.username and request.user.is_authenticated:
                 private_data = Data.objects.filter(current_user = request.user.id)
                 for x in private_data:
-                    data_list["user_data_ids"] += [{x.id:x.file_name}]
+                    data_list["user_data_ids"][x.id] = x.file_name
             else:
                 return HttpResponseBadRequest("user is not logged in, or username is not same as current user")
         return Response(data_list)
