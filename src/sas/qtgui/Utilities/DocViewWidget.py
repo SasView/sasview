@@ -10,7 +10,7 @@ from twisted.internet import threads
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities import GuiUtils
-
+from sas.sascalc.fit import models
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     """
@@ -90,7 +90,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Otherwise, simply triggers a load of the documentation window with loadHtml()
         """
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-        user_models = os.path.dirname(sas_path) + "/.sasview/plugin_models/"
+        user_models = models.find_plugins_dir()
         html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
         rst_py_path = GuiUtils.PY_SOURCE
         regen_string = ""
