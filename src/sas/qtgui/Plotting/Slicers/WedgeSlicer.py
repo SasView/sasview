@@ -138,6 +138,12 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         :param new_sector: slicer used for directional averaging in Q or Phi
         :param nbins: the number of point plotted when averaging
+        :TODO - Unlike other slicers, the two sector types are sufficiently
+        different that this method contains three instances of If (check class name) do x.
+        The point of post_data vs _post_data I think was to avoid this kind of thing and
+        suggests that in this case we may need a new method in the WedgeInteracgtorPhi
+        and WedgeInteracgtorQ to handle these specifics. Probably by creating the 1D plot
+        object in those top level classes along with the specifc attributes.
         """
         # Data to average
         data = self.data
@@ -176,10 +182,12 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             dxw = sector.dxw
         else:
             dxw = None
-        # And here subtract pi when getting angular data back from sector averaging in
-        # manipulations to get back in the -pi,pi range. Also convert from radians to
-        # degrees for nicer display.
-        new_plot = Data1D(x=(sector.x - np.pi) * 180 / np.pi, y=sector.y, dy=sector.dy, dx=sector.dx)
+        if self.averager.__name__ == 'SectorPhi':
+            # And here subtract pi when getting angular data back from wedge averaging in
+            # phi in manipulations to get back in the -pi,pi range. Also convert from
+            # radians to degrees for nicer display.
+            sector.x = (sector.x - np.pi) * 180 / np.pi
+        new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = str(self.averager.__name__) + \
