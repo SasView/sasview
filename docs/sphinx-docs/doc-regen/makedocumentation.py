@@ -3,14 +3,17 @@ Creates documentation from .py files
 """
 import os
 import sys
-from os.path import join, abspath, dirname, basename
 import subprocess
+
+from os.path import join, abspath, dirname, basename
+
+from sas.sascalc.fit import models
 
 FILE_ABS_SOURCE = abspath(dirname(__file__))
 MAIN_PY_SRC = FILE_ABS_SOURCE + "/../source-temp/user/models/src/"
 if os.path.exists(MAIN_PY_SRC):
     ABSOLUTE_TARGET_MAIN = abspath(join(dirname(__file__), MAIN_PY_SRC))
-    PLUGIN_PY_SRC = abspath(dirname(__file__)) + "/../../../../.sasview/plugin_models/"
+    PLUGIN_PY_SRC = models.find_plugins_dir()
     ABSOLUTE_TARGET_PLUGINS = abspath(join(dirname(__file__), PLUGIN_PY_SRC))
 else:
     pass
@@ -23,8 +26,7 @@ def get_py(directory):
 
 def get_main_docs():
     """
-Generates string of .py files to be passed into compiling functions
-Future reference: move to main() function?
+    Generates string of .py files to be passed into compiling functions
     """
     # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
     TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(ABSOLUTE_TARGET_PLUGINS)
@@ -39,6 +41,7 @@ Future reference: move to main() function?
 
     return TARGETS
 
+
 def call_regenmodel(filepath, regen_py):
     """
     Runs regenmodel.py/regentoc.py (specified in parameter regen_py) with all found PY_FILES
@@ -50,7 +53,7 @@ def call_regenmodel(filepath, regen_py):
         REGENMODEL,
     ]
     # Append each filepath to command individually if passed in many files
-    if type(filepath) == list:
+    if isinstance(filepath, list):
         for string in filepath:
             command.append(string)
     else:
