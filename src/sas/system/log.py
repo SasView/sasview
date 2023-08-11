@@ -17,6 +17,7 @@ TRACED_PACKAGES = ('sas', 'sasmodels', 'sasdata', 'bumps', 'periodictable')
 IGNORED_PACKAGES = {
     'matplotlib': 'ERROR',
     'numba': 'WARN',
+    'h5py': 'ERROR',
     'ipykernel': 'CRITICAL',
 }
 
