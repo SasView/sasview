@@ -20,17 +20,19 @@ from .forms import DataForm
 @api_view(['GET'])
 def list_data(request, username = None, version = None):
     if request.method == 'GET':
-        public_data = Data.objects.filter(is_public = True)
-        data_list = {"public_file_ids":{}, "user_data_ids":{}}
-        for x in public_data:
-            data_list["public_file_ids"][x.id] = x.file_name
         if username: 
+            data_list = {"user_data_ids":{}}
             if username == request.user.username and request.user.is_authenticated:
                 private_data = Data.objects.filter(current_user = request.user.id)
                 for x in private_data:
                     data_list["user_data_ids"][x.id] = x.file_name
             else:
                 return HttpResponseBadRequest("user is not logged in, or username is not same as current user")
+        else:    
+            public_data = Data.objects.filter(is_public = True)
+            data_list = {"public_data_ids":{}}
+            for x in public_data:
+                data_list["public_data_ids"][x.id] = x.file_name
         return Response(data_list)
     return HttpResponseBadRequest("not get method")
 
@@ -44,14 +46,14 @@ def data_info(request, db_id, version = None):
             data_list= loader.load(data_db.file.path)
             contents = [str(data) for data in data_list]
             return_data = {data_db.file_name:contents}
-            return Response(return_data)
         #rewrite with "user.is_authenticated"
-        elif (data_db.current_user is request.user) and request.user.is_authenticated:
+        elif (data_db.current_user == request.user) and request.user.is_authenticated:
             data_list = loader.load(data_db.file.path)
             contents = [str(data) for data in data_list]
             return_data = {data_db.file_name:contents}
-            return Response(return_data)
-        return HttpResponseBadRequest("Database is either not public or wrong auth token")
+        else:
+            return HttpResponseBadRequest("Database is either not public or wrong auth token")
+        return Response(return_data)
     return HttpResponseBadRequest()
 
 
@@ -63,6 +65,8 @@ def upload(request, data_id = None, version = None):
         if form.is_valid():
             form.save()
         db = Data.objects.get(pk = form.instance.pk)
+
+        #TODO should we allow anonymous users to upload data? Figure out tokens
         if request.user.is_authenticated:
             serializer = DataSerializer(db, data={"file_name":os.path.basename(form.instance.file.path), "current_user" : request.user.id})
         else:
@@ -73,12 +77,11 @@ def upload(request, data_id = None, version = None):
         #require data_id
         if data_id != None and request.user:
             if request.user.is_authenticated:
-                userr = request.user
-                db = Data.objects.filter(current_user = userr, id = data_id).get()
+                db = get_object_or_404(Data, current_user = request.user.id, id = data_id)
                 form = DataForm(request.data, request.FILES, instance=db)
                 if form.is_valid():
                     form.save()
-                serializer = DataSerializer(db, data={"file_name":os.path.basename(form.instance.file.path), "current_user" : request.user.id})
+                serializer = DataSerializer(db, data={"file_name":os.path.basename(form.instance.file.path)}, partial = True)
             else:
                 return HttpResponseForbidden("user is not logged in")
         else:
@@ -87,7 +90,7 @@ def upload(request, data_id = None, version = None):
     if serializer.is_valid():
         serializer.save()
         #TODO get warnings/errors later
-        return_data = {"current_user":serializer.data["current_user"], "authenticated" : request.user.is_authenticated, "file_id" : db.id, "file_alternative_name":serializer.data["file_name"],"is_public" : serializer.data["is_public"]}
+        return_data = {"current_user":request.user.username, "authenticated" : request.user.is_authenticated, "file_id" : db.id, "file_alternative_name":serializer.data["file_name"],"is_public" : serializer.data["is_public"]}
         return Response(return_data)
 
 
