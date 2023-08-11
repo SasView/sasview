@@ -6,7 +6,6 @@ pytest_qt
 pytest-mock
 unittest-xml-reporting
 tinycc 
-h5py 
 sphinx
 pyparsing 
 html5lib 
