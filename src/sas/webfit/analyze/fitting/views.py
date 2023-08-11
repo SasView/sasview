@@ -242,7 +242,7 @@ def regenerate_category_dict(cat_name):
     with open(user_file) as cat_file:
         file_contents = json.load(cat_file)
     #TODO format it to remove boolean
-    spec_cat = file_contents.get(category, [])
+    spec_cat = file_contents.get(cat_name, [])
     return spec_cat
 
 
