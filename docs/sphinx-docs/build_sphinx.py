@@ -261,9 +261,7 @@ def build():
 
     print("=== Copy HTML Docs to Build Directory ===")
     html = joinpath(SPHINX_BUILD, "html")
-    copy_tree(SPHINX_SOURCE, SASVIEW_DOC_TARGET)
     copy_tree(html, SASVIEW_DOC_TARGET)
-    print("Something worked...")
 
 
 def rebuild():
