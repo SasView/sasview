@@ -50,12 +50,12 @@ from sas import config
 from sasdata.dataloader.loader import Loader
 
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
-    DOCS_LOCATION = "doc"
+        HELP_DIRECTORY_LOCATION = "doc"
 else:
-    DOCS_LOCATION = "docs/sphinx-docs/"
-PY_SOURCE = DOCS_LOCATION + "source-temp"
-HELP_DIRECTORY_LOCATION = DOCS_LOCATION + "build/html"
-RECOMPILE_DOC_LOCATION  = DOCS_LOCATION + "doc-regen"
+        DOCS_LOCATION = "docs/sphinx-docs/"
+        PY_SOURCE = DOCS_LOCATION + "source-temp"
+        HELP_DIRECTORY_LOCATION = DOCS_LOCATION + "build/html"
+        RECOMPILE_DOC_LOCATION  = DOCS_LOCATION + "doc-regen"
 
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 SAS_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
