@@ -712,6 +712,7 @@ def saveAnyData(data, wildcard_dict=None):
     # Query user for filename.
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent,
                                                            caption,
+                                                           "",
                                                            filter,
                                                            "",
                                                            options)

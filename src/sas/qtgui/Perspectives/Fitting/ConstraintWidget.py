@@ -790,19 +790,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Select for fitting
         param_string = "Fit Page " if num_rows==1 else "Fit Pages "
 
-        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
         self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
-        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect = QtGui.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
         self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
-        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint = QtGui.QAction(self)
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove all constraints on selected models"))
 
-        self.actionMutualMultiConstrain = QtWidgets.QAction(self)
+        self.actionMutualMultiConstrain = QtGui.QAction(self)
         self.actionMutualMultiConstrain.setObjectName("actionMutualMultiConstrain")
         self.actionMutualMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Mutual constrain of parameters in selected models..."))
 
@@ -835,15 +835,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Select for fitting
         param_string = "constraint " if num_rows==1 else "constraints "
 
-        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
         self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
-        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect = QtGui.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
         self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
-        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint = QtGui.QAction(self)
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove "+param_string))
 
