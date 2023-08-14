@@ -75,15 +75,10 @@ class RadiusInteractor(BaseInteractor):
         Clear this slicer and its markers
         """
         self.clear_markers()
-        try:
-            self.l_marker.remove()
-            self.l_line.remove()
-            self.r_marker.remove()
-            self.r_line.remove()
-        except:
-            # Old version of matplotlib
-            for item in range(len(self.axes.lines)):
-                del self.axes.lines[0]
+        self.l_marker.remove()
+        self.l_line.remove()
+        self.r_marker.remove()
+        self.r_line.remove()
 
     def update(self, r1=None, r2=None, theta=None, phi=None):
         """
