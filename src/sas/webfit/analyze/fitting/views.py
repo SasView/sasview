@@ -246,7 +246,7 @@ def regenerate_category_dict(cat_name):
     spec_cat = file_contents.get(cat_name, [])
     content = []
     for x in spec_cat:
-        content += x[0]
+        content.append(x[0])
     return content
 
 
