@@ -4,6 +4,9 @@ import logging
 
 from PySide6.QtCore import QObject, Signal
 
+LOG_FORMAT = "%(asctime)s - %(levelname)s: %(message)s"
+DATE_FORMAT = "%H:%M:%S"
+
 class QtPostman(QObject):
     messageWritten = Signal(str)
 
@@ -35,7 +38,6 @@ def setup_qt_logging():
             return handler
 
     handler = QtHandler()
-    handler.setFormatter(SasViewLogFormatter())
+    handler.setFormatter(logging.Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
     logger.addHandler(handler)
     return handler
-        
