@@ -232,6 +232,7 @@ def list_optimizers(request, version = None):
         return Response(return_info)
     return HttpResponseBadRequest()
 
+
 #TODO strip models that are in blacklist, categoryinstaller get rid of those that are False
 #TODO implement category manager
 #TODO in fresh install categories.json is gone, fix 
@@ -243,7 +244,9 @@ def regenerate_category_dict(cat_name):
         file_contents = json.load(cat_file)
     #TODO format it to remove boolean
     spec_cat = file_contents.get(cat_name, [])
-    return spec_cat
+    for x in spec_cat:
+        content = x[0]
+    return content
 
 
 @api_view(['GET'])
@@ -255,7 +258,7 @@ def list_model(request, category = None, kind = None, version = None):
         if category:
             cat_name = category.capitalize()
             unique_models[cat_name + " models"] = regenerate_category_dict(cat_name)
-        if kind:
+        elif kind:
             if list_models(kind):
                 model_choices = list_models(kind)
                 unique_models[kind + " models"] = model_choices
