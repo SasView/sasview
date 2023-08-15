@@ -223,38 +223,41 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
     def validate(self, param_name, param_value):
         """
-        Validate input from user
+        Validate input from user.
         Values get checked at apply time.
         """
-        MIN_Q_DIFFERENCE = self.dqmin
-        MIN_PHI_DIFFERENCE = 0.01
-        isValid = True
 
-        # Stitched together from other slicers. There could be a neater way.
-        if param_name == 'r_min':
-            if np.fabs(param_value - self.getParams()['r_max']) < MIN_Q_DIFFERENCE:
-                print("Inner and outer radii too close. Please adjust.")
-                isValid = False
+        def check_radius_difference(param_name, other_radius_name, param_value):
+            if np.fabs(param_value - self.getParams()[other_radius_name]) < self.dqmin:
+                return "Inner and outer radii too close. Please adjust."
             elif param_value > self.qmax:
-                print("Inner radius exceeds maximum range. Please adjust.")
-                isValid = False
-        elif param_name == 'r_max':
-            if np.fabs(param_value - self.getParams()['r_min']) < MIN_Q_DIFFERENCE:
-                print("Inner and outer radii too close. Please adjust.")
-                isValid = False
-            elif param_value > self.qmax:
-                print("Outer radius exceeds maximum range. Please adjust.")
-                isValid = False
-        elif param_name == 'delta_phi [deg]':
-            if np.fabs(param_value) < MIN_PHI_DIFFERENCE:
-                print("Sector angles too close. Please adjust.")
-                isValid = False
-        elif param_name == 'nbins':
-            # Can't be 0
+                return f"{param_name} exceeds maximum range. Please adjust."
+            return None
+
+        def check_phi_difference(param_value):
+            if np.fabs(param_value) < 0.01:
+                return "Sector angles too close. Please adjust."
+            return None
+
+        def check_bins(param_value):
             if param_value < 1:
-                print("Number of bins cannot be <= 0. Please adjust.")
-                isValid = False
-        return isValid
+                return "Number of bins cannot be <= 0. Please adjust."
+            return None
+
+        validators = {
+            'r_min': lambda value: check_radius_difference('r_min', 'r_max', value),
+            'r_max': lambda value: check_radius_difference('r_max', 'r_min', value),
+            'delta_phi [deg]': check_phi_difference,
+            'nbins': check_bins
+        }
+
+        if param_name in validators:
+            error_message = validators[param_name](param_value)
+            if error_message:
+                print(error_message)
+                return False
+
+        return True
 
     def moveend(self, ev):
         """
