@@ -127,8 +127,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         """
         Write string to file
         """
-        with open(filename, 'w') as f:
-            f.write(string)
+        with open(filename, 'wb') as f:
+            # weird unit symbols need to be saved as UTF-8
+            f.write(bytes(string, 'utf-8'))
 
     @staticmethod
     def save_pdf(data, filename):
