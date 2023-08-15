@@ -122,6 +122,9 @@ class GuiManager:
         logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
+        #logging.debug("Debug messages are shown.")
+        #logging.warn("Warnings are shown.")
+        #logging.error("Errors are shown.")
 
         # Set up the status bar
         self.statusBarSetup()
