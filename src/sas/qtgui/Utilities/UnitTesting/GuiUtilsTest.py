@@ -507,36 +507,32 @@ class GuiUtilsTest:
         s = "&#x212B; &#x221e;      &#177;"
         assert replaceHTMLwithASCII(s) == "Ang inf      +/-"
 
-    def testConvertUnitToUTF8(self):
-        ''' test unit string replacement'''
+    def testrstToHtml(self):
+        ''' test rst to html conversion'''
         s = None
-        assert convertUnitToUTF8(s) is None
+        with pytest.raises(TypeError):
+            result = rstToHtml(s)
 
-        s = ""
-        assert convertUnitToUTF8(s) == s
+        s = ".. |Ang| unicode:: U+212B"
+        assert rstToHtml(s) == ('Ang', 'Å')
+        s = ".. |Ang^-1| replace:: |Ang|\ :sup:`-1`"
+        assert rstToHtml(s) == ('Ang^-1', 'Å<sup>-1</sup>')
+        s = ".. |1e-6Ang^-2| replace:: 10\ :sup:`-6`\ |Ang|\ :sup:`-2`"
+        assert rstToHtml(s) == ('1e-6Ang^-2', '10<sup>-6</sup> Å<sup>-2</sup>')
+        s = ".. |cm^-1| replace:: cm\ :sup:`-1`"
+        assert rstToHtml(s) == ('cm^-1', 'cm<sup>-1</sup>')
+        s = ".. |deg| unicode:: U+00B0"
+        assert rstToHtml(s) == ('deg', '°')
+        s = ".. |cdot| unicode:: U+00B7"
+        assert rstToHtml(s) == ('cdot', '·')
+        s = "bad string"
+        assert rstToHtml(s) == (None, None)
 
-        s = "aaaa"
-        assert convertUnitToUTF8(s) == s
-
-        s = "1/A"
-        assert convertUnitToUTF8(s) == "Å<sup>-1</sup>"
-
-        s = "Ang"
-        assert convertUnitToUTF8(s) == "Å"
-
-        s = "1e-6/Ang^2"
-        assert convertUnitToUTF8(s) == "10<sup>-6</sup>/Å<sup>2</sup>"
-
-        s = "inf"
-        assert convertUnitToUTF8(s) == "∞"
-
-        s = "1/cm"
-        assert convertUnitToUTF8(s) == "cm<sup>-1</sup>"
 
     def testConvertUnitToHTML(self):
         ''' test unit string replacement'''
         s = None
-        assert convertUnitToHTML(s) is None
+        assert convertUnitToHTML(s) is ""
 
         s = ""
         assert convertUnitToHTML(s) == s
@@ -545,22 +541,25 @@ class GuiUtilsTest:
         assert convertUnitToHTML(s) == s
 
         s = "1/A"
-        assert convertUnitToHTML(s) == "&#x212B;<sup>-1</sup>"
+        assert convertUnitToHTML(s) == "Å<sup>-1</sup>"
 
         s = "Ang"
-        assert convertUnitToHTML(s) == "&#x212B;"
+        assert convertUnitToHTML(s) == "Å"
 
         s = "1e-6/Ang^2"
-        assert convertUnitToHTML(s) == "10<sup>-6</sup>/&#x212B;<sup>2</sup>"
+        assert convertUnitToHTML(s) == "10<sup>-6</sup>/Å<sup>2</sup>"
 
         s = "inf"
-        assert convertUnitToHTML(s) == "&#x221e;"
+        assert convertUnitToHTML(s) == "∞"
         s = "-inf"
 
-        assert convertUnitToHTML(s) == "-&#x221e;"
+        assert convertUnitToHTML(s) == "-∞"
 
         s = "1/cm"
         assert convertUnitToHTML(s) == "cm<sup>-1</sup>"
+
+        s = "degrees"
+        assert convertUnitToHTML(s) == "°"
 
     def testParseName(self):
         '''test parse out a string from the beinning of a string'''
