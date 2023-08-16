@@ -17,7 +17,7 @@ def run_sld(sld_definition: SLDDefinition, parameters: CalculationParameters, x:
     solvent_sld = parameters.solvent_sld # Hopefully the function can see this, but TODO: take py file environment with us from editor
     parameter_dict = parameters.sld_parameters.copy()
 
-    return sld_function(a, b, c, **parameter_dict)
+    return sld_function(a, b, c, **parameter_dict) - solvent_sld
 
 
 def run_magnetism(magnetism_definition: MagnetismDefinition, parameters: CalculationParameters, x: np.ndarray, y: np.ndarray, z: np.ndarray) -> VectorComponents3:

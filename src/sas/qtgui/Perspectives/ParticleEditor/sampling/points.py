@@ -27,6 +27,8 @@ class PointGenerator(ABC):
         """ Generate points from start_index up to end_index """
 
 
+
+
 class GridPointGenerator(PointGenerator):
     """ Generate points on a grid within a cube with side length 2*radius """
     def __init__(self, radius: float, desired_points: int):
@@ -79,4 +81,23 @@ class RandomPointGenerator(PointGenerator):
 
         return xyz[:, 0], xyz[:, 1], xyz[:, 2]
 
+
+class PointGeneratorStepper:
+    """ Generate batches of step_size points from a PointGenerator instance"""
+
+    def __init__(self, point_generator: PointGenerator, step_size: int):
+        self.point_generator = point_generator
+        self.step_size = step_size
+
+    def _iterator(self):
+        n_sections, remainder = divmod(self.point_generator.n_points, self.step_size)
+
+        for i in range(n_sections):
+            yield self.point_generator.generate(i*self.step_size, (i+1)*self.step_size)
+
+        if remainder != 0:
+            yield self.point_generator.generate(n_sections*self.step_size, self.point_generator.n_points)
+
+    def __iter__(self):
+        return self._iterator()
 

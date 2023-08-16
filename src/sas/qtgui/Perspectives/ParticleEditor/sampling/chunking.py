@@ -50,7 +50,7 @@ class Chunker(ABC):
         self.point_generator = point_generator
 
     def __iter__(self):
-        return self._iterator
+        return self._iterator()
 
     @abstractmethod
     def _iterator(self) -> Tuple[VectorComponents3, VectorComponents3]:
@@ -85,6 +85,7 @@ def sublist_lengths(data: Sequence[Sequence[Any]]) -> int:
         raise InputLengthMismatch("Input lists do not have the same length")
 
     return len_0
+
 def pairwise_chunk_iterator(
         left_data: Sequence[Sequence[Any]],
         right_data: Sequence[Sequence[Any]],
@@ -95,21 +96,31 @@ def pairwise_chunk_iterator(
     left_len = sublist_lengths(left_data)
     right_len = sublist_lengths(right_data)
 
-    n_left = math.ceil(left_len / chunk_size)
-    n_right = math.ceil(right_len / chunk_size)
+    # Ceiling using divmod (because ceil on normal division isn't robust)
+    n_left, rem = divmod(left_len, chunk_size)
+    if rem > 0:
+        n_left += 1
 
+    n_right, rem = divmod(right_len, chunk_size)
+    if rem > 0:
+        n_right += 1
+
+
+    # Iterate through pairs of points
     for i in range(n_left):
 
         left_index_1 = i*chunk_size
-        left_index_2 = min(((i+1)*chunk_size, n_left))
+        left_index_2 = min(((i+1)*chunk_size, left_len))
 
-        left_chunk = (datum[left_index_1:left_index_2] for datum in left_data)
+        left_chunk = tuple(datum[left_index_1:left_index_2] for datum in left_data)
 
         for j in range(n_right):
 
             right_index_1 = j*chunk_size
-            right_index_2 = min(((i+1)*chunk_size, n_left))
+            right_index_2 = min(((j+1)*chunk_size, right_len))
 
-            right_chunk = (datum[right_index_1:right_index_2] for datum in right_data)
+            right_chunk = tuple(datum[right_index_1:right_index_2] for datum in right_data)
+
+            # print([i, left_index_1, left_index_2], [j, right_index_1, right_index_2])
 
             yield left_chunk, right_chunk
