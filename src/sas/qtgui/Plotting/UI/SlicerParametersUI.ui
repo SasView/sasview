@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>395</width>
-    <height>458</height>
+    <height>468</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -143,6 +143,16 @@
               <item>
                <property name="text">
                 <string>Box Interactor Y</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Wedge Interactor Q</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Wedge Interactor Phi</string>
                </property>
               </item>
              </widget>
