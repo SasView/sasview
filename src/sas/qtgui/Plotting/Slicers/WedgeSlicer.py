@@ -187,6 +187,18 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             # phi in manipulations to get back in the -pi,pi range. Also convert from
             # radians to degrees for nicer display.
             sector.x = (sector.x - np.pi) * 180 / np.pi
+        else:
+            # When using SectorQ, fold = False results in data with negative Q
+            # values also being plotted. This data is from the opposite side of
+            # the origin to the main ROI, and is unwanted. Here we discard it.
+            # If at some later point this is handled on the sasdata side, then
+            # this code can be deleted.
+            pos_q = [sector.x >= 0]
+            sector.x = sector.x[pos_q]
+            sector.y = sector.y[pos_q]
+            sector.dy = sector.dy[pos_q]
+            sector.dx = sector.dx[pos_q] if sector.dx is not None else None
+
         new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
