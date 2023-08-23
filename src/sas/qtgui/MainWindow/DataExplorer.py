@@ -1251,7 +1251,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     @staticmethod
     def appendOrUpdatePlot(self, data, plot):
         name = data.name
-        if isinstance(plot, Plotter2D) or name in plot.plot_dict.keys():
+        if isinstance(plot, Plotter2DWidget) or name in plot.plot_dict.keys():
             plot.replacePlot(name, data)
         else:
             plot.plot(data)

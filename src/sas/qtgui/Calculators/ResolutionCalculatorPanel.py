@@ -42,6 +42,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+        self.setFixedSize(self.minimumSizeHint())
 
         self.manager = parent
 
