@@ -54,6 +54,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+        self.setFixedSize(self.minimumSizeHint())
 
         self.manager = parent
         self.communicator = self.manager.communicator()
