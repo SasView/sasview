@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Any, List, Set
 import os
 import logging
@@ -150,8 +151,11 @@ class ConfigBase:
             raise MalformedFile("Malformed config file - no 'sasview_version' key")
 
         try:
-            parts = [int(s) for s in data["sasview_version"].split(".")]
-            if len(parts) != 3:
+            file_version = data["sasview_version"]
+            # Use the distutils strict version module regex to check if the version string is valid
+            #  ref: https://epydoc.sourceforge.net/stdlib/distutils.version.StrictVersion-class.html
+            matcher = re.compile(r'(?x)^(\d+)\.(\d+)(\.(\d+))?([ab](\d+))?$')
+            if not matcher.match(file_version):
                 raise Exception
 
         except Exception:
@@ -165,7 +169,6 @@ class ConfigBase:
 
 
         # Check major version
-        file_version = data["sasview_version"]
         file_major_version = file_version.split(".")[0]
         sasview_major_version = sas.system.version.__version__.split(".")[0]
 

@@ -22,8 +22,8 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.PlotterData import DataRole
-from sas.qtgui.Plotting.Plotter import Plotter
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
+from sas.qtgui.Plotting.Plotter import Plotter, PlotterWidget
+from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 from sas.qtgui.MainWindow.DataManager import DataManager
@@ -232,7 +232,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         caption = 'Choose a directory'
         options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
         directory = self.default_load_location
-        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, "", options)
+        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, options)
 
         if folder is None:
             return
@@ -1086,10 +1086,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
-            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY]
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
+                continue
+            elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUAL_PLOT:
+                # Nothing to do if residuals are not plotted
+                continue
+            elif role == DataRole.ROLE_POLYDISPERSITY and config.DISABLE_POLYDISPERSITY_PLOT:
+                # Nothing to do if polydispersity plot is not plotted
                 continue
             elif role in stand_alone_types:
                 # Stand-alone plots should always be separate
@@ -1132,7 +1138,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Create a new 2D plot and add it to the workspace
         """
-        plot2D = Plotter2D(self)
+        plot2D = Plotter2DWidget(parent=self, manager=self)
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
@@ -1160,7 +1166,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 if 'new_plot' not in locals():
-                    new_plot = Plotter(self)
+                    new_plot = PlotterWidget(manager=self, parent=self)
                     new_plot.item = item
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
@@ -1245,7 +1251,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     @staticmethod
     def appendOrUpdatePlot(self, data, plot):
         name = data.name
-        if isinstance(plot, Plotter2D) or name in plot.plot_dict.keys():
+        if isinstance(plot, Plotter2DWidget) or name in plot.plot_dict.keys():
             plot.replacePlot(name, data)
         else:
             plot.plot(data)

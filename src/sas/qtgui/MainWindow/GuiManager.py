@@ -116,12 +116,15 @@ class GuiManager:
 
         # Fork off logging messages to the Log Window
         handler = setup_qt_logging()
-        handler.messageWritten.connect(self.appendLog)
+        handler.postman.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
+        #logging.debug("Debug messages are shown.")
+        #logging.warn("Warnings are shown.")
+        #logging.error("Errors are shown.")
 
         # Set up the status bar
         self.statusBarSetup()
