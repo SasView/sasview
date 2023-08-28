@@ -10,7 +10,7 @@ h5py
 sphinx
 pyparsing 
 html5lib 
-reportlab==3.6.6 
+reportlab==3.6.13 
 pybind11 
 appdirs
 six 
