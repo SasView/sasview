@@ -161,6 +161,15 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             # The tab might have already been deleted previously
             pass
 
+
+    def closeTabByName(self, tab_name):
+        """
+        Given name of the tab - close it
+        """
+        for tab_index in range(len(self.tabs)):
+            if self.tabText(tab_index) == tab_name:
+                self.tabCloses(tab_index)
+        pass # debug hook
     ######################################################################
 
     def serializeAll(self):
@@ -233,7 +242,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         Tell the caller we accept swapping data
         """
-        return False
+        return True
 
     def setClosable(self, value=True):
         """
@@ -283,6 +292,13 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
     ######################################################################
 
+    def getTabName(self, is_batch=False):
+        """
+        Get the new tab name, based on the number of fitting tabs so far
+        """
+        page_name = "Pr BatchPage" if is_batch else "PrPage"
+        page_name = page_name + str(self.maxIndex)
+        return page_name
 
     def setData(self, data_item=None, is_batch=False, tab_index=None):
         """
@@ -312,20 +328,19 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             # If none, open a new tab.
             available_tabs = [tab.acceptsData() for tab in self.tabs]
             tab_ids = [tab.tab_id for tab in self.tabs]
-            #if tab_index is not None:
-            if tab_index not in tab_ids: 
-                self.addData(data = element, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
+            if tab_index is not None:
+                if tab_index not in tab_ids: 
+                    self.addData(data = element, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
+                else:
+                    self.setCurrentIndex(tab_index-1)                
+                    self.swapData(data = element, is2D = is_2Ddata)
+                    return
+            if np.any(available_tabs):
+                first_good_tab = available_tabs.index(True)
+                self.tabs[first_good_tab].data = element
+                self.tabs[first_good_tab].updateTab(data = element, is2D = is_2Ddata)                
             else:
-                self.setCurrentIndex(tab_index-1)                
-                self.swapData(data = element, is2D = is_2Ddata)
-            #    return
-            #if np.any(available_tabs):
-            #    first_good_tab = available_tabs.index(True)
-            #    self.tabs[first_good_tab].data = element
-            #    tab_name = str(self.tabText(first_good_tab))
-            #    self.tabs[first_good_tab].updateTab(data = element, tab_name = tab_name, is2D = is_2Ddata)                
-            #else:
-            #    self.addData(data = element, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
+                self.addData(data = element, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
                 
  
 
@@ -347,8 +362,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             raise RuntimeError(msg)
 
         self.currentTab.data = data
-        tab_name = str(self.tabText(self.currentIndex()))
-        self.currentTab.updateTab(data = data, tab_name = tab_name, is2D = is2D)
+        self.currentTab.updateTab(data = data, is2D = is2D)
 
 
     @property
@@ -358,7 +372,18 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         return self.currentWidget()
 
+    def currentTabDataId(self):
+        """
+        Returns the data ID of the current tab
+        """
+        tab_id = []
+        if not self.currentTab.data:
+            return tab_id
+        for item in self.currentTab.all_data:
+            data = GuiUtils.dataFromItem(item)
+            tab_id.append(data.id)
 
+        return tab_id
 
     def updateDynamicGuiValues(self):
         pr = self._calculator
@@ -437,16 +462,17 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         
         # Create tab
         tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
-        tab.setTabName("New Tab")
+        tab_name = self.getTabName(is_batch=is_batch)
+        tab.tab_name=tab_name
+        #ObjectLibrary.addObject(tab_name, tab)
         icon = QtGui.QIcon()
         # Setting UP batch Mode for 1D data
         if is_batch and not is2D:
             tab = self.createBatchTab(batchDataList=data)
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         else:        
-            if data is not None:
-                tab_name = GuiUtils.dataFromItem(data).name                
-                tab.updateTab(data = data, tab_name = tab_name, is2D = is2D)
+            if data is not None:               
+                tab.updateTab(data = data, is2D = is2D)
                 
         tab.is_batch = is_batch                
         self.addTab(tab, icon, tab.tab_name)
@@ -469,8 +495,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         essentially this makes sure a batch tab is set up so that multiple files can be computed
         """
         batchTab = InversionWidget(parent=self.parent, data=batchDataList)
-        batchTab.setTabName("Pr Batch")
         batchTab.is_batch = True
+        self.tab_name = self.getTabName(is_batch=batchTab.is_batch)
         batchTab.setPlotable(False)
         for data in batchDataList:
             batchTab.logic.data = GuiUtils.dataFromItem(data)
