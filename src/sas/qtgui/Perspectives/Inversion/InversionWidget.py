@@ -420,11 +420,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.set_qmin(qmin)
         self._calculator.set_qmax(qmax)
 
-    def updateTab(self, data = None, is2D=False, tab_name = None):
+    def updateTab(self, data = None, is2D=False):
         self.is2D = is2D
         self.logic.data = GuiUtils.dataFromItem(data)
-        self.setTabName(tab_name)
-        self.populateDataComboBox(tab_name, data)
+        self.populateDataComboBox(self.logic.data.name, data)
         self.calculateAllButton.setVisible(False)
         self.showResultsButton.setVisible(False)
         if is2D:
@@ -789,14 +788,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
 
-    def currentTabDataId(self):
-        """
-        Returns the data ID of the current tab
-        """
-        tab_id = []
-        if self.logic.data_is_loaded:
-            tab_id.append(str(self.tab_id))
-        return tab_id
+
 
     def currentTabName(self):
         """
@@ -1236,19 +1228,27 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.enableButtons()
         self.showResultsButton.setVisible(True)
 
-    def setTabName(self, name=None):
-        """set name to "New Pr Tab" if no name is set to the data set"""
-        if name is not None:
-            self.tab_name = name
-        else:
-            self.tab_name = "Untitled Pr Tab"
+    #def setTabName(self, name=None):
+    #    """set name to "New Pr Tab" if no name is set to the data set"""
+    #    if name is not None:
+    #        self.tab_name = name
+    #    else:
+    #        self.tab_name = "Untitled Pr Tab"
 
-        if self.isBatch:
-            self.tab_name = "Pr Batch"
+    #    if self.isBatch:
+    #        self.tab_name = "Pr Batch"
 
-        # if the length of the name is over 23 shorten it and add ellipsis
-        if len(self.tab_name) >= 23:
-            self.tab_name = self.tab_name[:20] + "..."
+    #    # if the length of the name is over 23 shorten it and add ellipsis
+    #    if len(self.tab_name) >= 23:
+    #        self.tab_name = self.tab_name[:20] + "..."
+
+    #def getTabName(self, is_batch=False):
+    #    """
+    #    Get the new tab name, based on the number of fitting tabs so far
+    #    """
+    #    page_name = "Pr BatchPage" if is_batch else "PrPage"
+    #    page_name = page_name + str(self.maxIndex)
+    #    return page_name
 
     def show2DPlot(self):
         """
