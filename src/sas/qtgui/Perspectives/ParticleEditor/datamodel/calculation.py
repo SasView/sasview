@@ -3,7 +3,6 @@ import numpy as np
 from enum import Enum
 from dataclasses import dataclass
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.sampling import SpatialSample
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import (
     SLDFunction, MagnetismFunction, CoordinateSystemTransform)
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import CalculationParameters

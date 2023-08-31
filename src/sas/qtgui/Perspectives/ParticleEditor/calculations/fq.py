@@ -16,7 +16,7 @@ from sas.qtgui.Perspectives.ParticleEditor.sampling.points import PointGenerator
 
 from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld, run_magnetism
 
-def calculate_fq_vectors(
+def scattering_via_fq(
         sld_definition: SLDDefinition,
         magnetism_definition: Optional[MagnetismDefinition],
         parameters: CalculationParameters,
@@ -27,6 +27,8 @@ def calculate_fq_vectors(
 
     q_magnitudes = q_sample()
 
+    fq = None
+
     for x, y, z in PointGeneratorStepper(point_generator, chunk_size):
 
         sld = run_sld(sld_definition, parameters, x, y, z)
@@ -35,5 +37,14 @@ def calculate_fq_vectors(
 
         r = np.sqrt(x*q_normal_vector[0] + y*q_normal_vector[1] + z*q_normal_vector[2])
 
-        rq = 
+        i_r_dot_q = np.multiply.outer(r, 1j*q_magnitudes)
+
+        if fq is None:
+            fq = np.sum(sld*np.exp(i_r_dot_q), axis=0)
+        else:
+            fq += np.sum(sld*np.exp(i_r_dot_q), axis=0)
+
+    return fq.real**2 + fq.imag**2 # Best way to avoid pointless square roots in np.abs
+
+
 
