@@ -298,7 +298,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         Get the new tab name, based on the number of fitting tabs so far
         """
-        page_name = "Pr BatchPage" if is_batch else "PrPage"
+        page_name = "PrBatchPage" if is_batch else "PrPage"
         page_name = page_name + str(self.maxIndex)
         return page_name
 
@@ -340,7 +340,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             if np.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
                 self.tabs[first_good_tab].data = data
-                self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata)                
+                self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata) 
+                # Notify listeners
+                self.tabsModifiedSignal.emit()  
             else:
                 self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
                 
@@ -365,6 +367,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         self.currentTab.data = data
         self.currentTab.updateTab(data = data, is2D = is2D)
+        # Notify listeners
+        self.tabsModifiedSignal.emit()  
 
 
 
@@ -471,7 +475,12 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         icon = QtGui.QIcon()
         # Setting UP batch Mode for 1D data
         if is_batch and not is2D:
-            tab = self.createBatchTab(batchDataList=data)
+            tab.setPlotable(False)
+            for element in data:
+                tab.logic.data = GuiUtils.dataFromItem(element)
+                tab.populateDataComboBox(name=tab.logic.data.name, data_ref=element)
+                tab.updateDataList(element)
+            tab.setCurrentData(data[0])
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         else:        
             if data is not None:               
@@ -489,21 +498,4 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.tabsModifiedSignal.emit()   
 
 
-    
-
-
-    def createBatchTab(self, batchDataList):
-        """
-        setup for batch tab
-        essentially this makes sure a batch tab is set up so that multiple files can be computed
-        """
-        batchTab = InversionWidget(parent=self.parent, data=batchDataList)
-        batchTab.is_batch = True
-        self.tab_name = self.getTabName(is_batch=batchTab.is_batch)
-        batchTab.setPlotable(False)
-        for data in batchDataList:
-            batchTab.logic.data = GuiUtils.dataFromItem(data)
-            batchTab.populateDataComboBox(name=batchTab.logic.data.name, data_ref=data)
-            batchTab.updateDataList(data)
-        batchTab.setCurrentData(batchDataList[0])
-        return batchTab
+   

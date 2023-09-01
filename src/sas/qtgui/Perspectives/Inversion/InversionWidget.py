@@ -241,7 +241,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.slitWidthInput.textChanged.connect(
             lambda: self._calculator.set_slit_width(is_float(self.slitWidthInput.text())))
 
-        self.model.itemChanged.connect(self.model_changed) # disabled because it causes dataList to be set to prevous item. further debuging required.
+        #self.model.itemChanged.connect(self.model_changed) # disabled because it causes dataList to be set to prevous item. further debuging required.
         self.estimateNTSignal.connect(self._estimateNTUpdate)
         self.estimateDynamicNTSignal.connect(self._estimateDynamicNTUpdate)
         self.estimateDynamicSignal.connect(self._estimateDynamicUpdate)
@@ -436,10 +436,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def updateTab(self, data = None, is2D=False):
         self.is2D = is2D
         self.logic.data = GuiUtils.dataFromItem(data)
-        self.swapDataComboBox(self.logic.data.name, data)
-        self.enableButtons()
-        self.calculateAllButton.setVisible(False)
-        self.showResultsButton.setVisible(False)
+        self.swapDataComboBox(self.logic.data.name, data)        
+
         if is2D:
             data.isSliced = False
             self.show2DPlot()
@@ -447,6 +445,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.setQ()
             if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
                 self.logic.add_errors()
+        self.updateGuiValues()
+        self.updateDynamicGuiValues()
+        self.calculateAllButton.setVisible(False)
+        self.showResultsButton.setVisible(False)
+
 
     ######################################################################
     # GUI Interaction Events
