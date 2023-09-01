@@ -241,7 +241,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.slitWidthInput.textChanged.connect(
             lambda: self._calculator.set_slit_width(is_float(self.slitWidthInput.text())))
 
-        # self.model.itemChanged.connect(self.model_changed) // disabled because it causes dataList to be set to prevous item. further debuging required.
+        self.model.itemChanged.connect(self.model_changed) # disabled because it causes dataList to be set to prevous item. further debuging required.
         self.estimateNTSignal.connect(self._estimateNTUpdate)
         self.estimateDynamicNTSignal.connect(self._estimateDynamicNTUpdate)
         self.estimateDynamicSignal.connect(self._estimateDynamicUpdate)
@@ -375,6 +375,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.noOfTermsSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.PrTabWidget.setTabEnabled(TAB_2D, self.is2D)
 
+
     def toggle2DData(self, isChecked):
         """ Enable/disable the 2D data tab """
         self.PrTabWidget.setTabEnabled(TAB_2D, isChecked)
@@ -385,6 +386,18 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         :param name: data name
         :param data_ref: QStandardItem reference for data set to be added
         """
+        self.dataList.addItem(name, data_ref)
+
+    def swapDataComboBox(self, name, data_ref):
+        """
+        Append a new name to the data combobox
+        :param name: data name
+        :param data_ref: QStandardItem reference for data set to be added
+        """
+        index = self.dataList.count()
+        # if some data already in the box
+        if index > 0: 
+            self.dataList.clear()
         self.dataList.addItem(name, data_ref)
 
     def acceptNoTerms(self):
@@ -423,7 +436,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def updateTab(self, data = None, is2D=False):
         self.is2D = is2D
         self.logic.data = GuiUtils.dataFromItem(data)
-        self.populateDataComboBox(self.logic.data.name, data)
+        self.swapDataComboBox(self.logic.data.name, data)
+        self.enableButtons()
         self.calculateAllButton.setVisible(False)
         self.showResultsButton.setVisible(False)
         if is2D:
