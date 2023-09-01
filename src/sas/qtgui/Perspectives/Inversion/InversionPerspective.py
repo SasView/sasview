@@ -55,11 +55,14 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
     def __init__(self, parent=None,data=None):
-        super(InversionWindow, self).__init__()
+        super().__init__()
 
 
         self.setWindowTitle("P(r) Inversion Perspective")
         self._manager = parent
+
+        # Max index for adding new, non-clashing tab names
+        self.maxIndex = 1
         # Needed for Batch inversion
         self.parent = parent
         self._parent = parent
@@ -110,8 +113,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.batchResultsWindow = None
         self.batchResults = {}
 
-        # Max index for adding new, non-clashing tab names
-        self.maxIndex = 1
+
 
 
         # The tabs need to be closeable
@@ -318,11 +320,11 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
 
-
-        for data in data_item:
+        items = [data_item] if is_batch else data_item
+        for data in items:
             logic_data = GuiUtils.dataFromItem(data)
             is_2Ddata = isinstance(logic_data, Data2D)
-            element = data_item if is_batch else data
+            
             
             # Find the first unassigned tab.
             # If none, open a new tab.
@@ -330,17 +332,17 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             tab_ids = [tab.tab_id for tab in self.tabs]
             if tab_index is not None:
                 if tab_index not in tab_ids: 
-                    self.addData(data = element, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
+                    self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
                 else:
                     self.setCurrentIndex(tab_index-1)                
-                    self.swapData(data = element, is2D = is_2Ddata)
+                    self.swapData(data = data, is2D = is_2Ddata)
                     return
             if np.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
-                self.tabs[first_good_tab].data = element
-                self.tabs[first_good_tab].updateTab(data = element, is2D = is_2Ddata)                
+                self.tabs[first_good_tab].data = data
+                self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata)                
             else:
-                self.addData(data = element, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
+                self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
                 
  
 
@@ -363,6 +365,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         self.currentTab.data = data
         self.currentTab.updateTab(data = data, is2D = is2D)
+
 
 
     @property
