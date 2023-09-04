@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import numpy as np
 from typing import Optional
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import ScatteringOutput
 
-import numpy as np
 def spherical_form_factor(q, r):
     rq = r * q
     f = (np.sin(rq) - rq * np.cos(rq)) / (rq ** 3)
@@ -31,12 +32,14 @@ class QCanvas(FigureCanvas):
     @data.setter
     def data(self, scattering_output: ScatteringOutput):
 
+        # print("Setting QPlot Data")
+
         self._data = scattering_output
         self.axes.cla()
 
-
         if self._data.q_space is not None:
-            plot_data = scattering_output.q_space.q_space_data
+            # print(self._data.q_space)
+            plot_data = self._data.q_space
 
             q_sample = plot_data.abscissa
             q_values = q_sample()
@@ -52,8 +55,9 @@ class QCanvas(FigureCanvas):
                 # self.axes.axvline(0.30)
 
                 # For comparisons: TODO: REMOVE
-                thing = spherical_form_factor(q_values, 50)
-                self.axes.loglog(q_values, thing*np.max(i_values)/np.max(thing))
+                # thing = spherical_form_factor(q_values, 50)
+                # self.axes.loglog(q_values, thing*np.max(i_values)/np.max(thing))
+                # It works, NICE!
             else:
                 self.axes.semilogy(q_values, i_values)
 

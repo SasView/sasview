@@ -20,7 +20,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="definitionTab">
       <attribute name="title">
@@ -209,7 +209,7 @@
                <item row="8" column="3">
                 <widget class="QLabel" name="label_10">
                  <property name="text">
-                  <string>Ang</string>
+                  <string>Ang&lt;sup&gt;-1&lt;/sup&gt;</string>
                  </property>
                 </widget>
                </item>
@@ -232,7 +232,7 @@
                <item row="10" column="2">
                 <widget class="QCheckBox" name="useLogQ">
                  <property name="text">
-                  <string>Logaritmic (applies only to 1D)</string>
+                  <string>Logaritmic</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>
@@ -436,7 +436,7 @@
                <item row="7" column="3">
                 <widget class="QLabel" name="label_9">
                  <property name="text">
-                  <string>Ang</string>
+                  <string>Ang&lt;sup&gt;-1&lt;/sup&gt;</string>
                  </property>
                 </widget>
                </item>

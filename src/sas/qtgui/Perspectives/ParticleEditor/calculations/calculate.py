@@ -1,6 +1,7 @@
 import time
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import ScatteringCalculation, ScatteringOutput
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import \
+    ScatteringCalculation, QSpaceScattering, ScatteringOutput
 from sas.qtgui.Perspectives.ParticleEditor.calculations.fq import scattering_via_fq
 from sas.qtgui.Perspectives.ParticleEditor.calculations.boundary_check import (
     check_sld_continuity_at_boundary, check_mag_zero_at_boundary)
@@ -40,8 +41,10 @@ def calculate_scattering(calculation: ScatteringCalculation) -> ScatteringOutput
         q_sample=q_dist,
         angular_distribution=angular_dist)
 
+    q_data = QSpaceScattering(q_dist, scattering)
+
     output = ScatteringOutput(
-        q_space=scattering,
+        q_space=q_data,
         calculation_time=time.time() - start_time,
         seed_used=None)
 

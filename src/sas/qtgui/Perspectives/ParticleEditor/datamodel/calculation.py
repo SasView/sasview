@@ -49,8 +49,12 @@ class SpatialDistribution(ABC):
         """ Generate points from start_index up to end_index """
 
     @abstractmethod
-    def bounding_surface_check_points(self) -> VectorComponents3:
+    def _bounding_surface_check_points(self) -> np.ndarray:
         """ Points used to check that the SLD/magnetism vector are zero outside the sample space"""
+
+    def bounding_surface_check_points(self) -> VectorComponents3:
+        pts = self._bounding_surface_check_points()
+        return pts[:, 0], pts[:, 1], pts[:, 2]
 
 class AngularDistribution(ABC):
     """ Base class for angular distributions """

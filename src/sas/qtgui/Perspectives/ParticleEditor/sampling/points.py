@@ -31,7 +31,7 @@ class BoundedByCube(SpatialDistribution):
         [-1,-1, 1],
         [-1,-1,-1],
     ], dtype=float)
-    def bounding_surface_check_points(self) -> VectorComponents3:
+    def _bounding_surface_check_points(self) -> VectorComponents3:
         return BoundedByCube._boundary_base_points * self.radius
 
 

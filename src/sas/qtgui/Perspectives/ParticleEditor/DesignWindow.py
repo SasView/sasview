@@ -179,6 +179,9 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
     def onTimeEstimateParametersChanged(self):
         """ Called when the number of samples changes """
 
+        # TODO: This needs to be updated based on the number of angular samples now
+        # Should have a n_points term
+        # Should have a n_points*n_angles
 
         # Update the estimate of time
         # Assume the amount of time is just determined by the number of
@@ -250,6 +253,13 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         """ Get the AngularDistribution object that represents the GUI selected orientational distribution"""
         return self.angularSamplingMethodSelector.generate_sampler()
 
+    def qSampling(self) -> QSample:
+        q_min = float(self.qMinBox.text()) # TODO: Use better box
+        q_max = float(self.qMaxBox.text())
+        n_q = int(self.qSamplesBox.value())
+        is_log = bool(self.useLogQ.isChecked())
+
+        return QSample(q_min, q_max, n_q, is_log)
 
     def spatialSampling(self) -> SpatialDistribution:
         """ Calculate the spatial sampling object based on current gui settings"""
@@ -261,11 +271,11 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         seed = int(self.randomSeed.text()) if self.fixRandomSeed.isChecked() else None
 
         if sample_type == 0:
-            return GridSampling(radius=radius, n_points=n_points, seed=seed)
+            return GridSampling(radius=radius, desired_points=n_points)
             # return MixedSphereSample(radius=radius, n_points=n_points, seed=seed)
 
         elif sample_type == 1:
-            return UniformCubeSampling(radius=radius, n_points=n_points, seed=seed)
+            return UniformCubeSampling(radius=radius, desired_points=n_points, seed=seed)
             # return MixedCubeSample(radius=radius, n_points=n_points, seed=seed)
 
         else:
@@ -307,6 +317,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         is to be passed to the solver"""
         angular_distribution = self.angularDistribution()
         spatial_sampling = self.spatialSampling()
+        q_sampling = self.qSampling()
         particle_definition = self.particleDefinition()
         parameter_definition = self.parametersForCalculation()
         polarisation_vector = self.polarisationVector()
@@ -314,6 +325,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         bounding_surface_check = self.continuityCheck.isChecked()
 
         return ScatteringCalculation(
+            q_sampling=q_sampling,
             angular_sampling=angular_distribution,
             spatial_sampling_method=spatial_sampling,
             particle_definition=particle_definition,
@@ -360,12 +372,9 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         """ Update graphs and select tab"""
 
         # Plot
-        self.samplingCanvas.data = scattering_result
-        self.rdfCanvas.data = scattering_result
-        self.correlationCanvas.data = scattering_result
         self.outputCanvas.data = scattering_result
 
-        self.tabWidget.setCurrentIndex(7)  # Move to output tab if complete
+        self.tabWidget.setCurrentIndex(5)  # Move to output tab if complete
     def onFit(self):
         """ Fit functionality requested"""
         pass
