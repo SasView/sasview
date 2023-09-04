@@ -536,12 +536,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopCalcThread()
         self.stopEstimationThread()
         self.stopEstimateNTThread()
+        self.updateGuiValues()
         # Show any batch calculations that successfully completed
-        if self.isBatch and self.batchResultsWindow is not None:
+        if self.isBatch and self.batchResultsWindow is not None:                    
             self.showBatchOutput()
         self.isBatch = False
         self.isCalculating = False
-        self.updateGuiValues()
+
 
     def check_q_low(self, q_value=None):
         """ Validate the low q value """
@@ -910,8 +911,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.isCalculating = False
             self.batchComplete = []
             self.calculateAllButton.setText("Calculate All")
-            self.showBatchOutput()
             self.enableButtons()
+            self.showBatchOutput()
+            
 
     def startThread(self):
         """
@@ -1177,8 +1179,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataPlot.slider_high_q_setter = ['check_q_high']
 
             # Udpate internals and GUI
-        self.updateDataList(self._data)
-        self.saveToBatchResults()
+        self.updateDataList(self._data) 
+        self.updateGuiValues()
         if self.isBatch:
             self.batchComplete.append(self.dataList.currentIndex())
             self.startNextBatchItem()
@@ -1186,6 +1188,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.isCalculating = False
         self._allowPlots = False
         self.updateGuiValues()
+        self.saveToBatchResults()
 
     def _threadError(self, error):
         """
