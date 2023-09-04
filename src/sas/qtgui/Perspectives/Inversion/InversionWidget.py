@@ -547,7 +547,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """ Validate the low q value """
         if not q_value:
             q_value = float(self.minQInput.text()) if self.minQInput.text() else '0.0'
-        q_min = min(self._calculator.x) if any(self._calculator.x) else -1 * np.inf
+        q_min = min(self._calculator.x) if any(self._calculator.x) else 0.0
         q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
         if q_value > q_max:
             # Value too high - coerce to max q
@@ -565,7 +565,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if not q_value:
             q_value = float(self.maxQInput.text()) if self.maxQInput.text() else '1.0'
         q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
-        q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else -1 * np.inf
+        q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else 0.0
         if q_value > q_max:
             # Value too high - coerce to max q
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_max)))
