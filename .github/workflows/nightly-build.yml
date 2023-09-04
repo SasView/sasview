@@ -56,7 +56,7 @@ jobs:
 
       - name: Staple Release Build (OSX)
         if: ${{ startsWith(matrix.os, 'macos') }}
-        uses: devbotsxyz/xcode-staple@v1
+        uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
 
