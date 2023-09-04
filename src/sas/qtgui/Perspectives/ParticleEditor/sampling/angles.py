@@ -11,29 +11,10 @@ are added.
 
 
 from typing import List, Tuple
-from abc import ABC, abstractmethod
 import numpy as np
 
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import AngularDistribution
 from sas.qtgui.Perspectives.ParticleEditor.sampling.geodesic import Geodesic, GeodesicDivisions
-
-
-class AngularDistribution(ABC):
-    """ Base class for angular distributions """
-
-    @staticmethod
-    @abstractmethod
-    def name() -> str:
-        """ Name of this distribution """
-
-
-    @staticmethod
-    @abstractmethod
-    def parameters() -> List[Tuple[str, str, type]]:
-        """ List of keyword arguments to constructor, names for GUI, and the type of value"""
-
-    @abstractmethod
-    def sample_points_and_weights(self) -> Tuple[np.ndarray, np.ndarray]:
-        """ Get sample q vector directions and associated weights"""
 
 
 class ZDelta(AngularDistribution):
@@ -45,6 +26,10 @@ class ZDelta(AngularDistribution):
 
     def sample_points_and_weights(self):
         return np.array([[0.0, 0.0, -1.0]]), np.array([1.0])
+
+    @property
+    def n_points(self):
+        return 1
 
     @staticmethod
     def parameters():
@@ -59,6 +44,7 @@ class Uniform(AngularDistribution):
 
     def __init__(self, geodesic_divisions: int):
         self.divisions = geodesic_divisions
+        self._n_points = Geodesic.points_for_division_amount(geodesic_divisions)
 
     @staticmethod
     def name():
@@ -66,6 +52,10 @@ class Uniform(AngularDistribution):
 
     def sample_points_and_weights(self) -> Tuple[np.ndarray, np.ndarray]:
         return Geodesic.by_divisions(self.divisions)
+
+    @property
+    def n_points(self) -> int:
+        return self._n_points
 
     @staticmethod
     def parameters() -> List[Tuple[str, str, type]]:

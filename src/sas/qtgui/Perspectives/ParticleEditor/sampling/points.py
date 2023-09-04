@@ -1,7 +1,8 @@
-from typing import Dict
+"""
 
-from abc import ABC, abstractmethod
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
+Instances of the spatial sampler
+
+"""
 
 import math
 import numpy as np
@@ -9,27 +10,32 @@ import numpy as np
 from collections import defaultdict
 
 
-class PointGenerator(ABC):
-    """ Base class for point generators """
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import SpatialDistribution
 
-    def __init__(self, radius: float, n_points: int, n_desired_points):
-        self.radius = radius
-        self.n_desired_points = n_desired_points
-        self.n_points = n_points
+class BoundedByCube(SpatialDistribution):
 
-    @property
-    def info(self):
-        """ Information to be displayed in the settings window next to the point number input """
-        return ""
+    _boundary_base_points = np.array([
+        [-1, 0, 0],
+        [ 1, 0, 0],
+        [ 0,-1, 0],
+        [ 0, 1, 0],
+        [ 0, 0,-1],
+        [ 0, 0, 1],
+        [ 1, 1, 1],
+        [ 1, 1,-1],
+        [ 1,-1, 1],
+        [ 1,-1,-1],
+        [-1, 1, 1],
+        [-1, 1,-1],
+        [-1,-1, 1],
+        [-1,-1,-1],
+    ], dtype=float)
+    def bounding_surface_check_points(self) -> VectorComponents3:
+        return BoundedByCube._boundary_base_points * self.radius
 
-    @abstractmethod
-    def generate(self, start_index: int, end_index: int) -> VectorComponents3:
-        """ Generate points from start_index up to end_index """
 
-
-
-
-class GridPointGenerator(PointGenerator):
+class Grid(BoundedByCube):
     """ Generate points on a grid within a cube with side length 2*radius """
     def __init__(self, radius: float, desired_points: int):
         self.desired_points = desired_points
@@ -40,7 +46,6 @@ class GridPointGenerator(PointGenerator):
     @property
     def info(self):
         return f"{self.n_points_per_axis}x{self.n_points_per_axis}x{self.n_points_per_axis} = {self.n_points}"
-
 
     def generate(self, start_index: int, end_index: int) -> VectorComponents3:
         point_indices = np.arange(start_index, end_index)
@@ -54,7 +59,9 @@ class GridPointGenerator(PointGenerator):
             (((y_inds + 0.5) / self.n_points_per_axis) - 0.5) * self.radius,
             (((z_inds + 0.5) / self.n_points_per_axis) - 0.5) * self.radius)
 
-class RandomPointGenerator(PointGenerator):
+
+
+class RandomCube(BoundedByCube):
     """ Generate random points in a cube with side length 2*radius"""
     def __init__(self, radius: float, desired_points: int, seed=None):
 
@@ -85,7 +92,7 @@ class RandomPointGenerator(PointGenerator):
 class PointGeneratorStepper:
     """ Generate batches of step_size points from a PointGenerator instance"""
 
-    def __init__(self, point_generator: PointGenerator, step_size: int):
+    def __init__(self, point_generator: SpatialDistribution, step_size: int):
         self.point_generator = point_generator
         self.step_size = step_size
 

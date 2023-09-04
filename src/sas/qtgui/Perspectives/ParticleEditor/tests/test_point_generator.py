@@ -2,8 +2,8 @@
 from pytest import mark
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling.points import (
-    GridPointGenerator,
-    RandomPointGenerator,
+    Grid,
+    RandomCube,
     PointGeneratorStepper)
 
 
@@ -11,7 +11,7 @@ from sas.qtgui.Perspectives.ParticleEditor.sampling.points import (
 @mark.parametrize("splits", [42, 100, 381,999])
 @mark.parametrize("npoints", [100,1000,8001])
 def test_with_grid(npoints, splits):
-    point_generator = GridPointGenerator(100, npoints)
+    point_generator = Grid(100, npoints)
     n_measured = 0
     for x, y, z in PointGeneratorStepper(point_generator, splits):
         n_measured += len(x)
@@ -21,7 +21,7 @@ def test_with_grid(npoints, splits):
 @mark.parametrize("splits", [42, 100, 381, 999])
 @mark.parametrize("npoints", [100, 1000, 8001])
 def test_with_grid(npoints, splits):
-    point_generator = RandomPointGenerator(100, npoints)
+    point_generator = RandomCube(100, npoints)
     n_measured = 0
     for x, y, z in PointGeneratorStepper(point_generator, splits):
         n_measured += len(x)

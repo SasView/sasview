@@ -3,7 +3,7 @@ import time
 import matplotlib.pyplot as plt
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import SLDDefinition, CalculationParameters, QSample
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import GridPointGenerator
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import Grid
 
 from sas.qtgui.Perspectives.ParticleEditor.calculations.debye import debye
 
@@ -30,7 +30,7 @@ calc_params = CalculationParameters(
                 sld_parameters={},
                 magnetism_parameters={})
 
-point_generator = GridPointGenerator(100, 10_000)
+point_generator = Grid(100, 10_000)
 
 q = QSample(1e-3, 1, 101, True)
 

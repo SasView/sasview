@@ -2,10 +2,13 @@ from typing import Optional, Callable, Tuple, Protocol, List
 import numpy as np
 from enum import Enum
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import (
     SLDFunction, MagnetismFunction, CoordinateSystemTransform)
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import CalculationParameters
+
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
 
 
 class QSample:
@@ -28,36 +31,49 @@ class QSample:
             return np.linspace(self.start, self.end, self.n_points)
 
 
-class ZSample:
-    """ Sample of correlation space """
+class SpatialDistribution(ABC):
+    """ Base class for point generators """
 
-    def __init__(self, start, end, n_points):
-        self.start = start
-        self.end = end
+    def __init__(self, radius: float, n_points: int, n_desired_points):
+        self.radius = radius
+        self.n_desired_points = n_desired_points
         self.n_points = n_points
 
-    def __repr__(self):
-        return f"QSampling({self.start}, {self.end}, n={self.n_points})"
+    @property
+    def info(self):
+        """ Information to be displayed in the settings window next to the point number input """
+        return ""
 
-    def __call__(self):
-        return np.linspace(self.start, self.end, self.n_points)
+    @abstractmethod
+    def generate(self, start_index: int, end_index: int) -> VectorComponents3:
+        """ Generate points from start_index up to end_index """
+
+    @abstractmethod
+    def bounding_surface_check_points(self) -> VectorComponents3:
+        """ Points used to check that the SLD/magnetism vector are zero outside the sample space"""
+
+class AngularDistribution(ABC):
+    """ Base class for angular distributions """
+
+    @property
+    @abstractmethod
+    def n_points(self) -> int:
+        """ Number of sample points """
+
+    @staticmethod
+    @abstractmethod
+    def name() -> str:
+        """ Name of this distribution """
 
 
-@dataclass
-class OutputOptions:
-    """ Options """
-    radial_distribution: bool # Create a radial distribution function from the origin
-    sampling_distributions: bool # Return the sampling distributions used in the calculation
-    realspace: bool # Return realspace data
-    q_space: Optional[QSample] = None
-    q_space_2d: Optional[QSample] = None
-    sesans: Optional[ZSample] = None
+    @staticmethod
+    @abstractmethod
+    def parameters() -> List[Tuple[str, str, type]]:
+        """ List of keyword arguments to constructor, names for GUI, and the type of value"""
 
-
-class OrientationalDistribution(Enum):
-    """ Types of orientation supported """
-    FIXED = "Fixed"
-    UNORIENTED = "Unoriented"
+    @abstractmethod
+    def sample_points_and_weights(self) -> Tuple[np.ndarray, np.ndarray]:
+        """ Get sample q vector directions and associated weights"""
 
 
 @dataclass
@@ -84,9 +100,9 @@ class ParticleDefinition:
 @dataclass
 class ScatteringCalculation:
     """ Specification for a scattering calculation """
-    output_options: OutputOptions
-    orientation: OrientationalDistribution
-    spatial_sampling_method: SpatialSample
+    q_sampling: QSample
+    angular_sampling: AngularDistribution
+    spatial_sampling_method: SpatialDistribution
     particle_definition: ParticleDefinition
     parameter_settings: CalculationParameters
     polarisation_vector: Optional[np.ndarray]
@@ -103,29 +119,20 @@ class SamplingDistribution:
     counts: np.ndarray
 
 @dataclass
-class QPlotData:
+class QSpaceScattering:
     abscissa: QSample
     ordinate: np.ndarray
 
 @dataclass
-class RealPlotData:
+class RealSpaceScattering:
     abscissa: np.ndarray
     ordinate: np.ndarray
 
 
 @dataclass
-class QSpaceCalcDatum:
-    q_space_data: QPlotData
-    correlation_data: Optional[RealPlotData]
-
-@dataclass
 class ScatteringOutput:
-    radial_distribution: Optional[Tuple[np.ndarray, np.ndarray]]
-    q_space: Optional[QSpaceCalcDatum]
-    q_space_2d: Optional[QSpaceCalcDatum]
-    sesans: Optional[RealPlotData]
-    sampling_distributions: List[SamplingDistribution]
+    q_space: Optional[QSpaceScattering]
     calculation_time: float
-    seed_used: int
+    seed_used: Optional[int]
 
 

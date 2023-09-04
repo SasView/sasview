@@ -8,11 +8,11 @@ from scipy.spatial.distance import cdist
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
     ScatteringCalculation, ScatteringOutput, OrientationalDistribution, SamplingDistribution,
-    QPlotData, QSpaceCalcDatum, RealPlotData,
+    QSpaceScattering, QSpaceCalcDatum, RealSpaceScattering,
     SLDDefinition, MagnetismDefinition, SpatialSample, QSample, CalculationParameters)
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling.chunking import SingleChunk, pairwise_chunk_iterator
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import PointGenerator
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution
 
 from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld, run_magnetism
 
@@ -20,7 +20,7 @@ def debye(
         sld_definition: SLDDefinition,
         magnetism_definition: Optional[MagnetismDefinition],
         parameters: CalculationParameters,
-        point_generator: PointGenerator,
+        point_generator: SpatialDistribution,
         q_sample: QSample,
         minor_chunk_size=1000,
         preallocate=True):

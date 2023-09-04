@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import GridPointGenerator
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import Grid
 
 
 
 fig = plt.figure("Grid plot")
 ax = fig.add_subplot(projection='3d')
 
-gen = GridPointGenerator(100, 250)
+gen = Grid(100, 250)
 
 n_total = gen.n_points
 

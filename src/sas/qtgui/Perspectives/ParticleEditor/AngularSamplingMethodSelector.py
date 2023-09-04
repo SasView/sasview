@@ -2,8 +2,9 @@ from typing import List, Tuple
 
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QComboBox, QDoubleSpinBox
 
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import AngularDistribution
 from sas.qtgui.Perspectives.ParticleEditor.sampling.geodesic import GeodesicDivisions
-from sas.qtgui.Perspectives.ParticleEditor.sampling.angles import angular_sampling_methods, AngularDistribution
+from sas.qtgui.Perspectives.ParticleEditor.sampling.angles import angular_sampling_methods
 from sas.qtgui.Perspectives.ParticleEditor.GeodesicSampleSelector import GeodesicSamplingSpinBox
 
 class ParametersForm(QWidget):

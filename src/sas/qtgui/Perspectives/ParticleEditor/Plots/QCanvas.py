@@ -5,7 +5,6 @@ from typing import Optional
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from sas.qtgui.Perspectives.ParticleEditor.old_calculations import ScatteringOutput
 
 import numpy as np
 def spherical_form_factor(q, r):

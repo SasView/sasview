@@ -8,38 +8,37 @@ from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSpacerItem, QSizePolicy
 from PySide6.QtCore import Qt
 
+from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWindow
+
 from sas.qtgui.Perspectives.ParticleEditor.FunctionViewer import FunctionViewer
 from sas.qtgui.Perspectives.ParticleEditor.PythonViewer import PythonViewer
 from sas.qtgui.Perspectives.ParticleEditor.OutputViewer import OutputViewer
 from sas.qtgui.Perspectives.ParticleEditor.CodeToolBar import CodeToolBar
 
-from sas.qtgui.Perspectives.ParticleEditor.Plots.RDFCanvas import RDFCanvas
-from sas.qtgui.Perspectives.ParticleEditor.Plots.CorrelationCanvas import CorrelationCanvas
 from sas.qtgui.Perspectives.ParticleEditor.Plots.QCanvas import QCanvas
-from sas.qtgui.Perspectives.ParticleEditor.Plots.SamplingDistributionCanvas import SamplingDistributionCanvas
 
-from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWindow
 
 from sas.qtgui.Perspectives.ParticleEditor.function_processor import process_code, FunctionDefinitionFailed
 from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
 
-from sas.qtgui.Perspectives.ParticleEditor.sampling_methods import (
-    SpatialSample,
-    MixedSphereSample, MixedCubeSample,
-    UniformSphereSample, UniformCubeSample
-)
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-    OrientationalDistribution,
-    QSample, ZSample, ScatteringCalculation, OutputOptions, CalculationParameters,
+
+    QSample, ScatteringCalculation, CalculationParameters, AngularDistribution, SpatialDistribution,
     SLDDefinition, SLDFunction, MagnetismDefinition, ParticleDefinition, CoordinateSystemTransform, ScatteringOutput)
 
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTable import ParameterTable
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableButtons import ParameterTableButtons
 
-from sas.qtgui.Perspectives.ParticleEditor.old_calculations import calculate_scattering
+from sas.qtgui.Perspectives.ParticleEditor.AngularSamplingMethodSelector import AngularSamplingMethodSelector
+
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import Grid as GridSampling
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import RandomCube as UniformCubeSampling
+
 from sas.qtgui.Perspectives.ParticleEditor.util import format_time_estimate
+
+from sas.qtgui.Perspectives.ParticleEditor.calculations.calculate import calculate_scattering
 
 def safe_float(text: str):
     try:
@@ -86,7 +85,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         topWidget = QtWidgets.QWidget()
         topWidget.setLayout(topSection)
 
-
         splitter.addWidget(topWidget)
         splitter.addWidget(self.outputViewer)
         splitter.setStretchFactor(0, 3)
@@ -117,11 +115,10 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         # Ensemble tab
         #
 
-        # Populate combo boxes
 
-        self.orientationCombo.addItem("Unoriented")
-        self.orientationCombo.addItem("Fixed Orientation")
-        self.orientationCombo.setCurrentIndex(0)
+        self.angularSamplingMethodSelector = AngularSamplingMethodSelector()
+
+        self.topLayout.addWidget(self.angularSamplingMethodSelector, 0, 1)
 
         self.structureFactorCombo.addItem("None") # TODO: Structure Factor Options
 
@@ -129,7 +126,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         #
         # Calculation Tab
         #
-        self.methodComboOptions = ["Sphere Monte Carlo", "Cube Monte Carlo"]
+        self.methodComboOptions = ["Grid", "Random"]
         for option in self.methodComboOptions:
             self.methodCombo.addItem(option)
 
@@ -147,34 +144,6 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         #
         # Output Tabs
         #
-
-        # Sampling Canvas
-        self.samplingCanvas = SamplingDistributionCanvas()
-
-        outputLayout = QtWidgets.QVBoxLayout()
-        outputLayout.addWidget(self.samplingCanvas)
-
-        self.samplingTab.setLayout(outputLayout)
-
-        # RDF
-
-        self.rdfCanvas = RDFCanvas()
-
-        outputLayout = QtWidgets.QVBoxLayout()
-        outputLayout.addWidget(self.rdfCanvas)
-
-        self.rdfTab.setLayout(outputLayout)
-
-        # Corrleations
-
-        self.correlationCanvas = CorrelationCanvas()
-
-        outputLayout = QtWidgets.QVBoxLayout()
-        outputLayout.addWidget(self.correlationCanvas)
-
-        self.correlationTab.setLayout(outputLayout)
-
-        # Output
 
         self.outputCanvas = QCanvas()
 
@@ -276,36 +245,13 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
             self.codeError(e.args[0])
             return False
 
-    def outputOptions(self) -> OutputOptions:
-        """ Get the OutputOptions object representing the desired outputs from the calculation """
 
-        q_space = self.qSampling() if self.sas1DOption.isChecked() else None
-        q_space_2d = None
-        sesans = None
-
-        return OutputOptions(
-            radial_distribution=self.includeRadialDistribution.isChecked(),
-            sampling_distributions=self.includeSamplingDistribution.isChecked(),
-            realspace=self.includeCorrelations.isChecked(),
-            q_space=q_space,
-            q_space_2d=q_space_2d,
-            sesans=sesans)
-
-    def orientationalDistribution(self) -> OrientationalDistribution:
-        """ Get the OrientationalDistribution object that represents the GUI selected orientational distribution"""
-        orientation_index = self.orientationCombo.currentIndex()
-
-        if orientation_index == 0:
-            orientation = OrientationalDistribution.UNORIENTED
-        elif orientation_index == 1:
-            orientation = OrientationalDistribution.FIXED
-        else:
-            raise ValueError("Unknown index for orientation combo")
-
-        return orientation
+    def angularDistribution(self) -> AngularDistribution:
+        """ Get the AngularDistribution object that represents the GUI selected orientational distribution"""
+        return self.angularSamplingMethodSelector.generate_sampler()
 
 
-    def spatialSampling(self) -> SpatialSample:
+    def spatialSampling(self) -> SpatialDistribution:
         """ Calculate the spatial sampling object based on current gui settings"""
         sample_type = self.methodCombo.currentIndex()
 
@@ -315,11 +261,11 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         seed = int(self.randomSeed.text()) if self.fixRandomSeed.isChecked() else None
 
         if sample_type == 0:
-            return UniformSphereSample(radius=radius, n_points=n_points, seed=seed)
+            return GridSampling(radius=radius, n_points=n_points, seed=seed)
             # return MixedSphereSample(radius=radius, n_points=n_points, seed=seed)
 
         elif sample_type == 1:
-            return UniformCubeSample(radius=radius, n_points=n_points, seed=seed)
+            return UniformCubeSampling(radius=radius, n_points=n_points, seed=seed)
             # return MixedCubeSample(radius=radius, n_points=n_points, seed=seed)
 
         else:
@@ -351,15 +297,15 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
     def polarisationVector(self) -> np.ndarray:
         """ Get a numpy vector representing the GUI specified polarisation vector"""
+        return np.array([0,0,1])
 
     def currentSeed(self):
         return self.randomSeed
 
     def scatteringCalculation(self) -> ScatteringCalculation:
         """ Get the ScatteringCalculation object that represents the calculation that
-        is to be passed to the solver to """
-        output_options = self.outputOptions()
-        orientation = self.orientationalDistribution()
+        is to be passed to the solver"""
+        angular_distribution = self.angularDistribution()
         spatial_sampling = self.spatialSampling()
         particle_definition = self.particleDefinition()
         parameter_definition = self.parametersForCalculation()
@@ -368,8 +314,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         bounding_surface_check = self.continuityCheck.isChecked()
 
         return ScatteringCalculation(
-            output_options=output_options,
-            orientation=orientation,
+            angular_sampling=angular_distribution,
             spatial_sampling_method=spatial_sampling,
             particle_definition=particle_definition,
             parameter_settings=parameter_definition,

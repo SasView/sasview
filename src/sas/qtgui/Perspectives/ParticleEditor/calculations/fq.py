@@ -7,12 +7,12 @@ from scipy.special import jv as bessel
 from scipy.spatial.distance import cdist
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-    ScatteringCalculation, ScatteringOutput, OrientationalDistribution, SamplingDistribution,
-    QPlotData, QSpaceCalcDatum, RealPlotData,
-    SLDDefinition, MagnetismDefinition, SpatialSample, QSample, CalculationParameters)
+    ScatteringCalculation, ScatteringOutput, SamplingDistribution,
+    QSpaceScattering, QSpaceCalcDatum, RealSpaceScattering,
+    SLDDefinition, MagnetismDefinition, AngularDistribution, QSample, CalculationParameters)
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling.chunking import SingleChunk, pairwise_chunk_iterator
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import PointGenerator, PointGeneratorStepper
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution, PointGeneratorStepper
 
 from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld, run_magnetism
 
@@ -20,14 +20,15 @@ def scattering_via_fq(
         sld_definition: SLDDefinition,
         magnetism_definition: Optional[MagnetismDefinition],
         parameters: CalculationParameters,
-        point_generator: PointGenerator,
+        point_generator: SpatialDistribution,
         q_sample: QSample,
-        q_normal_vector: np.ndarray,
+        angular_distribution: AngularDistribution,
         chunk_size=1_000_000) -> np.ndarray:
 
     q_magnitudes = q_sample()
 
-    fq = None
+    direction_vectors, direction_weights = angular_distribution.sample_points_and_weights()
+    fq = np.zeros((angular_distribution.n_points, q_sample.n_points))  # Dictionary for fq for all angles
 
     for x, y, z in PointGeneratorStepper(point_generator, chunk_size):
 
@@ -35,16 +36,21 @@ def scattering_via_fq(
 
         # TODO: Magnetism
 
-        r = np.sqrt(x*q_normal_vector[0] + y*q_normal_vector[1] + z*q_normal_vector[2])
+        for direction_index, direction_vector in enumerate(direction_vectors):
 
-        i_r_dot_q = np.multiply.outer(r, 1j*q_magnitudes)
+            r = np.sqrt(x*direction_vector[0] + y*direction_vector[1] + z*direction_vectors[2])
 
-        if fq is None:
-            fq = np.sum(sld*np.exp(i_r_dot_q), axis=0)
-        else:
-            fq += np.sum(sld*np.exp(i_r_dot_q), axis=0)
+            i_r_dot_q = np.multiply.outer(r, 1j*q_magnitudes)
 
-    return fq.real**2 + fq.imag**2 # Best way to avoid pointless square roots in np.abs
+            if direction_index in fq:
+                fq[direction_index, :] = np.sum(sld*np.exp(i_r_dot_q), axis=0)
+            else:
+                fq[direction_index, :] += np.sum(sld*np.exp(i_r_dot_q), axis=0)
+
+    f_squared = fq.real**2 + fq.imag**2
+    f_squared *= direction_weights
+
+    return np.sum(f_squared, axis=0)
 
 
 

@@ -39,14 +39,14 @@ from typing import Tuple, Sequence, Any
 
 import math
 
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import PointGenerator
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
 
 from abc import ABC, abstractmethod
 
 
 class Chunker(ABC):
-    def __init__(self, point_generator: PointGenerator):
+    def __init__(self, point_generator: SpatialDistribution):
         self.point_generator = point_generator
 
     def __iter__(self):
