@@ -337,7 +337,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                     self.setCurrentIndex(tab_index-1)                
                     self.swapData(data = data, is2D = is_2Ddata)
                     return
-            if np.any(available_tabs):
+            #debug Batch mode, gives none Type has no attribute name
+            if not is_batch and np.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
                 self.tabs[first_good_tab].data = data
                 self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata) 
@@ -392,67 +393,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         return tab_id
 
-    def updateDynamicGuiValues(self):
-        pr = self._calculator
-        alpha = self._calculator.suggested_alpha
-        self.model.setItem(WIDGETS.W_MAX_DIST,
-                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
-        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
-        self.noOfTermsSuggestionButton.setText(
-             "{:n}".format(self.nTermsSuggested))
-
-        self.enableButtons()
-
-    def updateGuiValues(self):
-        pr = self._calculator
-        out = self._calculator.out
-        cov = self._calculator.cov
-        elapsed = self._calculator.elapsed
-        alpha = self._calculator.suggested_alpha
-        self.check_q_high(pr.get_qmax())
-        self.check_q_low(pr.get_qmin())
-        self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
-                           QtGui.QStandardItem("{:.3g}".format(pr.background)))
-        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
-                           QtGui.QStandardItem("{:.3g}".format(pr.background)))
-        self.model.setItem(WIDGETS.W_COMP_TIME,
-                           QtGui.QStandardItem("{:.4g}".format(elapsed)))
-        self.model.setItem(WIDGETS.W_MAX_DIST,
-                           QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
-        self.regConstantSuggestionButton.setText("{:.2g}".format(alpha))
-
-        if isinstance(pr.chi2, np.ndarray):
-            self.model.setItem(WIDGETS.W_CHI_SQUARED,
-                               QtGui.QStandardItem("{:.3g}".format(pr.chi2[0])))
-        if out is not None:
-            self.model.setItem(WIDGETS.W_RG,
-                               QtGui.QStandardItem("{:.3g}".format(pr.rg(out))))
-            self.model.setItem(WIDGETS.W_I_ZERO,
-                               QtGui.QStandardItem(
-                                   "{:.3g}".format(pr.iq0(out))))
-            self.model.setItem(WIDGETS.W_OSCILLATION, QtGui.QStandardItem(
-                "{:.3g}".format(pr.oscillations(out))))
-            self.model.setItem(WIDGETS.W_POS_FRACTION, QtGui.QStandardItem(
-                "{:.3g}".format(pr.get_positive(out))))
-            if cov is not None:
-                self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
-                                   QtGui.QStandardItem(
-                                       "{:.3g}".format(
-                                           pr.get_pos_err(out, cov))))
-        if self.prPlot is not None:
-            title = self.prPlot.name
-            self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
-            GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
-            self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
-        if self.dataPlot is not None:
-            title = self.dataPlot.name
-            self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
-            self.dataPlot.symbol = "Line"
-            self.dataPlot.show_errors = False
-            GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-            self.communicate.plotRequestedSignal.emit([self._data,self.dataPlot], None)
-        self.enableButtons()
-
 
 
 
@@ -480,6 +420,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                 tab.logic.data = GuiUtils.dataFromItem(element)
                 tab.populateDataComboBox(name=tab.logic.data.name, data_ref=element)
                 tab.updateDataList(element)
+                tab.setQ()
             tab.setCurrentData(data[0])
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         else:        
