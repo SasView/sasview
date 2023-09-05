@@ -567,7 +567,7 @@ class Pinvertor(object):
         a_obj = np.zeros([self.npoints + nr, nfunc])
         b_obj = np.zeros(self.npoints + nr)
 
-        sqrt_alpha = np.sqrt(self.alpha)
+        sqrt_alpha = np.sqrt(math.fabs(self.alpha))
         pi = np.pi
         offset = (1, 0)[self.est_bck == 1]
 

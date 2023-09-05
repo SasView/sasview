@@ -135,12 +135,17 @@ class InversionLogic(object):
 
         return new_plot
 
-    def add_errors(self, sigma=0.05):
+    def add_errors(self, sigma=1.0):
         """
         Adds errors to data set is they are not available.
         Uses  $\Delta y = \sigma | y |$.
         """
-        self._data.dy = sigma * np.fabs(self._data.y)
+        if np.size(self._data.dy) == 0:
+            self._data.dy = np.sqrt(np.fabs(self._data.y))*sigma
+        elif np.any(self._data.dy) <= 0:
+            self._data.dy = np.where(self._data.dy <= 0, np.sqrt(np.fabs(self._data.y))*sigma, self._data.dy)
+
+        
 
     def computeDataRange(self):
         """
