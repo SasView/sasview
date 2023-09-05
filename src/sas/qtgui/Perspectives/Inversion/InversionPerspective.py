@@ -41,7 +41,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
     ext = "pr"
-    tabsModifiedSignal = QtCore.Signal()
+
     @property
     def title(self):
         return "P(r) Inversion"
@@ -158,7 +158,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         try:
             self.removeTab(index)
             del self.tabs[index]
-            self.tabsModifiedSignal.emit()
+
         except IndexError:
             # The tab might have already been deleted previously
             pass
@@ -342,8 +342,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                 first_good_tab = available_tabs.index(True)
                 self.tabs[first_good_tab].data = data
                 self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata) 
-                # Notify listeners
-                self.tabsModifiedSignal.emit()  
+
             else:
                 self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
                 
@@ -368,8 +367,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         self.currentTab.data = data
         self.currentTab.updateTab(data = data, is2D = is2D)
-        # Notify listeners
-        self.tabsModifiedSignal.emit()  
+
 
 
 
@@ -420,6 +418,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                 tab.logic.data = GuiUtils.dataFromItem(element)
                 tab.populateDataComboBox(name=tab.logic.data.name, data_ref=element)
                 tab.updateDataList(element)
+                tab.logic.add_errors()
                 tab.setQ()
             tab.setCurrentData(data[0])
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
@@ -435,8 +434,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Show the new tab
         self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
         self.setCurrentWidget(tab)
-        # Notify listeners
-        self.tabsModifiedSignal.emit()   
+
 
 
    

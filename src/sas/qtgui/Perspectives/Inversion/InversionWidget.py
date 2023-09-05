@@ -250,6 +250,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.maxDistanceInput.textEdited.connect(self.performEstimateDynamic)
         self.plotUpdateSignal.connect(lambda: print('Plot'))
 
+
+
     def setupMapper(self):
         # Set up the mapper.
         self.mapper.setOrientation(QtCore.Qt.Vertical)
@@ -441,12 +443,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if is2D:
             data.isSliced = False
             self.show2DPlot()
-        else: #1D data
+        else: #1D data                     
+            self.logic.add_errors()
             self.setQ()
-            if np.size(self.logic.data.dy) == 0 or np.all(self.logic.data.dy) == 0:
-                self.logic.add_errors()
-        self.updateGuiValues()
         self.updateDynamicGuiValues()
+        self.updateGuiValues()
+        self.enableButtons()
         self.calculateAllButton.setVisible(False)
         self.showResultsButton.setVisible(False)
 
@@ -457,7 +459,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def updateCalculator(self):
         """Update all p(r) params"""
         self._calculator.set_x(self.logic.data.x)
-        self._calculator.set_y(self.logic.data.y)
+        self._calculator.set_y(self.logic.data.y)        
+        self.logic.add_errors()
         self._calculator.set_err(self.logic.data.dy)
         self.set_background(self.backgroundInput.text())
 
@@ -513,6 +516,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.dmaxWindow = DmaxWindow(pr_state=self._calculator,
                                      nfunc=self.getNFunc(),
                                      parent=self)
+        #Do the inversion to get the parameters
+        self.startThread()
         self.dmaxWindow.show()
 
     def showBatchOutput(self):
@@ -698,7 +703,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
         self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
         self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
-        self.startThread()
+        
 
     def updateDynamicGuiValues(self):
         """update gui with suggested parameters"""
@@ -1179,8 +1184,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataPlot.slider_high_q_setter = ['check_q_high']
 
             # Udpate internals and GUI
-        self.updateDataList(self._data) 
-        self.updateGuiValues()
+        self.updateDataList(self._data)   
         if self.isBatch:
             self.batchComplete.append(self.dataList.currentIndex())
             self.startNextBatchItem()
@@ -1248,27 +1252,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.enableButtons()
         self.showResultsButton.setVisible(True)
 
-    #def setTabName(self, name=None):
-    #    """set name to "New Pr Tab" if no name is set to the data set"""
-    #    if name is not None:
-    #        self.tab_name = name
-    #    else:
-    #        self.tab_name = "Untitled Pr Tab"
-
-    #    if self.isBatch:
-    #        self.tab_name = "Pr Batch"
-
-    #    # if the length of the name is over 23 shorten it and add ellipsis
-    #    if len(self.tab_name) >= 23:
-    #        self.tab_name = self.tab_name[:20] + "..."
-
-    #def getTabName(self, is_batch=False):
-    #    """
-    #    Get the new tab name, based on the number of fitting tabs so far
-    #    """
-    #    page_name = "Pr BatchPage" if is_batch else "PrPage"
-    #    page_name = page_name + str(self.maxIndex)
-    #    return page_name
 
     def show2DPlot(self):
         """

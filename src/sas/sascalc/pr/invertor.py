@@ -161,6 +161,9 @@ class Invertor(Pinvertor):
             return self.set_y(value)
         elif name == 'err':
             value2 = abs(value)
+            if None in value:
+                msg = "Invertor: Data has no uncertainty. "
+                msg += "Delete that entry before proceeding"
             return self.set_err(value2)
         elif name == 'd_max':
             if value <= 0.0:
@@ -345,7 +348,7 @@ class Invertor(Pinvertor):
         res = self.residuals(out)
         chisqr = 0
         for i in range(len(res)):
-            chisqr += res[i]
+            chisqr += math.fabs(res[i])
 
         self.chi2 = chisqr
 
@@ -377,7 +380,7 @@ class Invertor(Pinvertor):
         # Compute chi^2
         res = self.pr_residuals(out)
         chisqr = 0
-        chisq = np.sum(res)
+        chisq = np.sum(math.fabs(res))
 
         self.chisqr = chisqr
 
@@ -496,7 +499,7 @@ class Invertor(Pinvertor):
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 
-        if math.fabs(self.alpha) > 0:
+        if self.alpha > 0:
             new_alpha = sum_sig / (sum_reg / self.alpha)
         else:
             new_alpha = 0.0
