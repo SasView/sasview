@@ -7,7 +7,7 @@ from PySide6 import QtWidgets
 
 from mpl_toolkits.mplot3d import Axes3D
 
-from sasdata.data_util.manipulations import CircularAverage
+from sasdata.data_util.new_manipulations import CircularAverage
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -307,10 +307,8 @@ class Plotter2DWidget(PlotterBase):
         self.ymax = max(numpy.fabs(self.data0.ymax),
                         numpy.fabs(self.data0.ymin))
         self.radius = numpy.sqrt(numpy.power(self.qmax, 2) + numpy.power(self.ymax, 2))
-        #Compute beam width
-        bin_width = (self.qmax + self.qmax) / npt
         # Create data1D circular average of data2D
-        circle = CircularAverage(r_min=0, r_max=self.radius, bin_width=bin_width)
+        circle = CircularAverage(r_min=0, r_max=self.radius, nbins=npt)
         circ = circle(self.data0)
         dxl = circ.dxl if hasattr(circ, "dxl") else None
         dxw = circ.dxw if hasattr(circ, "dxw") else None

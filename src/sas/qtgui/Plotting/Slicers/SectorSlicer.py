@@ -141,15 +141,14 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         if data is None:
             return
         # Averaging
-        from sasdata.data_util.manipulations import SectorQ
+        from sasdata.data_util.new_manipulations import SectorQ
         radius = self.qmax
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
         if nbins is None:
             nbins = self.nbins
         sect = SectorQ(r_min=0.0, r_max=radius,
-                       phi_min=phimin + numpy.pi,
-                       phi_max=phimax + numpy.pi, nbins=nbins)
+                       phi_min=phimin, phi_max=phimax, nbins=nbins)
 
         sector = sect(self.data)
         # Create 1D data resulting from average

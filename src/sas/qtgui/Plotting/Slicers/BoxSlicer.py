@@ -130,10 +130,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         if self.direction is None:
             self.direction = direction
 
-        x_min = -1 * numpy.fabs(self.vertical_lines.x)
-        x_max = numpy.fabs(self.vertical_lines.x)
-        y_min = -1 * numpy.fabs(self.horizontal_lines.y)
-        y_max = numpy.fabs(self.horizontal_lines.y)
+        qx_min = -1 * numpy.fabs(self.vertical_lines.x)
+        qx_max = numpy.fabs(self.vertical_lines.x)
+        qy_min = -1 * numpy.fabs(self.horizontal_lines.y)
+        qy_max = numpy.fabs(self.horizontal_lines.y)
 
         if nbins is not None:
             self.nbins = nbins
@@ -142,24 +142,12 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                 msg = "post data:cannot average , averager is empty"
                 raise ValueError(msg)
             self.averager = new_slab
-        if self.direction == "X":
-            if self.fold:
-                x_low = 0
-            else:
-                x_low = numpy.fabs(x_min)
-            bin_width = (x_max + x_low) / self.nbins
-        elif self.direction == "Y":
-            if self.fold:
-                y_low = 0
-            else:
-                y_low = numpy.fabs(y_min)
-            bin_width = (y_max + y_low) / self.nbins
-        else:
+        if self.direction not in ["X", "Y"]:
             msg = "post data:no Box Average direction was supplied"
             raise ValueError(msg)
         # # Average data2D given Qx or Qy
-        box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
-                            bin_width=bin_width)
+        box = self.averager(qx_min=qx_min, qx_max=qx_max, qy_min=qy_min,
+                            qy_max=qy_max, nbins=self.nbins)
         box.fold = self.fold
         boxavg = box(self.data)
         # 3 Create Data1D to plot
@@ -250,7 +238,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             values the user assigned to the slicer.
         """
         self.x = float(numpy.fabs(params["x_max"]))
-        self.y = float(numpy.fabs(params["y_max"]))
+        self.y = float(numpy.fabs(params["qy_max"]))
         self.nbins = params["nbins"]
         self.fold = params["fold"]
 
@@ -502,7 +490,7 @@ class BoxInteractorX(BoxInteractor):
         """
         Post data creating by averaging in Qx direction
         """
-        from sasdata.data_util.manipulations import SlabX
+        from sasdata.data_util.new_manipulations import SlabX
         super()._post_data(SlabX, direction="X")
 
     def validate(self, param_name, param_value):
@@ -535,7 +523,7 @@ class BoxInteractorY(BoxInteractor):
         """
         Post data creating by averaging in Qy direction
         """
-        from sasdata.data_util.manipulations import SlabY
+        from sasdata.data_util.new_manipulations import SlabY
         super()._post_data(SlabY, direction="Y")
 
     def validate(self, param_name, param_value):

@@ -4,7 +4,7 @@ from PySide6 import QtGui
 from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sasdata.data_util.manipulations import Boxavg, Boxsum
+from sasdata.data_util.new_manipulations import Boxavg, Boxsum
 
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
@@ -218,15 +218,17 @@ class BoxSumCalculator(BaseInteractor):
         contained in that region and the error on that sum
         """
         # the region of the summation
-        x_min = self.horizontal_lines.x2
-        x_max = self.horizontal_lines.x1
-        y_min = self.vertical_lines.y2
-        y_max = self.vertical_lines.y1
+        qx_min = self.horizontal_lines.x2
+        qx_max = self.horizontal_lines.x1
+        qy_min = self.vertical_lines.y2
+        qy_max = self.vertical_lines.y1
         #computation of the sum and its error
-        box = Boxavg(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+        box = Boxavg(qx_min=qx_min, qx_max=qx_max,
+                     qy_min=qy_min, qy_max=qy_max)
         self.count, self.error = box(self.data)
         # Dig out number of points summed, SMK & PDB, 04/03/2013
-        boxtotal = Boxsum(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+        boxtotal = Boxsum(qx_min=qx_min, qx_max=qx_max,
+                          qy_min=qy_min, qy_max=qy_max)
         self.total, self.totalerror, self.points = boxtotal(self.data)
         if self.update_model:
             self.setModelFromParams()

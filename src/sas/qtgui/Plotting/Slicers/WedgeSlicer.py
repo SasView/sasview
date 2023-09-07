@@ -23,10 +23,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
     edges of the wedge (similar to the sector), and two rings at Q1 and Q2
     (similar to the annulus). The wedge is centred on the line defined by
     LineInteractor, which the radial lines move symmetrically around.
-    This class is itself subclassed by SectorInteractorPhi and
-    SectorInteractorQ which define the direction of the averaging.
-    SectorInteractorPhi averages all Q points at constant Phi (as for the
-    AnnulusSlicer) and SectorInteractorQ averages all phi points at constant Q
+    This class is itself subclassed by WedgeInteractorPhi and
+    WedgeInteractorQ which define the direction of the averaging.
+    WedgeInteractorPhi averages all Q points at constant Phi (as for the
+    AnnulusSlicer) and WedgeInteractorQ averages all phi points at constant Q
     (as for the SectorSlicer).
     """
     def __init__(self, base, axes, item=None, color='black', zorder=3):
@@ -132,11 +132,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.radial_lines.save(ev)
         self.central_line.save(ev)
 
-    def _post_data(self, new_sector=None, nbins=None):
+    def _post_data(self, wedge_type=None, nbins=None):
         """
-        post 1D data averagin in Q or Phi given new_sector type
+        post 1D data averagin in Q or Phi given wedge_type type
 
-        :param new_sector: slicer used for directional averaging in Q or Phi
+        :param wedge_type: slicer used for directional averaging in Q or Phi
         :param nbins: the number of point plotted when averaging
         :TODO - Unlike other slicers, the two sector types are sufficiently
         different that this method contains three instances of If (check class name) do x.
@@ -162,32 +162,27 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         if nbins is not None:
             self.nbins = nbins
         if self.averager is None:
-            if new_sector is None:
+            if wedge_type is None:
                 msg = "post data:cannot average , averager is empty"
                 raise ValueError(msg)
-            self.averager = new_sector
+            self.averager = wedge_type
 
-        # Add pi to the angles before invoking sector averaging to transform angular
-        # range from python default of -pi,pi to 0,2pi suitable for manipulations
-        sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi,
-                             phi_max=phimax + np.pi, nbins=self.nbins)
-        sect.fold = False
-        sector = sect(self.data)
+        wedge_object = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin,
+                                     phi_max=phimax, nbins=self.nbins)
+        wedge = wedge_object(self.data)
 
-        if hasattr(sector, "dxl"):
-            dxl = sector.dxl
+        if hasattr(wedge, "dxl"):
+            dxl = wedge.dxl
         else:
             dxl = None
-        if hasattr(sector, "dxw"):
-            dxw = sector.dxw
+        if hasattr(wedge, "dxw"):
+            dxw = wedge.dxw
         else:
             dxw = None
-        if self.averager.__name__ == 'SectorPhi':
-            # And here subtract pi when getting angular data back from wedge averaging in
-            # phi in manipulations to get back in the -pi,pi range. Also convert from
-            # radians to degrees for nicer display.
-            sector.x = (sector.x - np.pi) * 180 / np.pi
-        new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
+        if self.averager.__name__ == 'WedgePhi':
+            # Convert from radians to degrees for nicer display.
+            wedge.x = wedge.x * 180 / np.pi
+        new_plot = Data1D(x=wedge.x, y=wedge.y, dy=wedge.dy, dx=wedge.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = str(self.averager.__name__) + \
@@ -196,7 +191,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot.interactive = True
         new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
-        if self.averager.__name__ == 'SectorPhi':
+        if self.averager.__name__ == 'WedgePhi':
             # angular plots usually require a linear x scale and better with
             # a linear y scale as well.
             new_plot.xaxis("\\rm{\phi}", "degrees")
@@ -339,8 +334,8 @@ class WedgeInteractorQ(WedgeInteractor):
         self._post_data()
 
     def _post_data(self):
-        from sasdata.data_util.manipulations import SectorQ
-        super()._post_data(SectorQ)
+        from sasdata.data_util.new_manipulations import WedgeQ
+        super()._post_data(WedgeQ)
 
 
 class WedgeInteractorPhi(WedgeInteractor):
@@ -355,6 +350,6 @@ class WedgeInteractorPhi(WedgeInteractor):
         self._post_data()
 
     def _post_data(self):
-        from sasdata.data_util.manipulations import SectorPhi
-        super()._post_data(SectorPhi)
+        from sasdata.data_util.new_manipulations import WedgePhi
+        super()._post_data(WedgePhi)
 

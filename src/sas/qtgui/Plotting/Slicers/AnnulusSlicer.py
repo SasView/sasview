@@ -101,7 +101,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         if data is None:
             return
 
-        from sasdata.data_util.manipulations import Ring
+        from sasdata.data_util.new_manipulations import Ring
         rmin = min(numpy.fabs(self.inner_circle.get_radius()),
                    numpy.fabs(self.outer_circle.get_radius()))
         rmax = max(numpy.fabs(self.inner_circle.get_radius()),
@@ -109,19 +109,18 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         if nbins is not None:
             self.nbins = nbins
         # Create the data1D Q average of data2D
-        sect = Ring(r_min=rmin, r_max=rmax, nbins=self.nbins)
-        sector = sect(self.data)
+        ring_object = Ring(r_min=rmin, r_max=rmax, nbins=self.nbins)
+        ring = ring_object(self.data)
 
-        if hasattr(sector, "dxl"):
-            dxl = sector.dxl
+        if hasattr(ring, "dxl"):
+            dxl = ring.dxl
         else:
             dxl = None
-        if hasattr(sector, "dxw"):
-            dxw = sector.dxw
+        if hasattr(ring, "dxw"):
+            dxw = ring.dxw
         else:
             dxw = None
-        new_plot = Data1D(x=(sector.x - numpy.pi) * 180 / numpy.pi,
-                          y=sector.y, dy=sector.dy)
+        new_plot = Data1D(x=ring.x * 180 / numpy.pi, y=ring.y, dy=ring.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = "AnnulusPhi" + "(" + self.data.name + ")"
