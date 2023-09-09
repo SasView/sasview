@@ -171,7 +171,7 @@ class OrientationViewer(QtWidgets.QWidget):
     def _set_image_data(self, orientation: Orientation):
         """ Set the data on the plot"""
 
-        data = self.scatering_data(orientation)
+        data = self.scattering_data(orientation)
 
         scaled_data = (np.log(data) - OrientationViewer.log_I_min) / OrientationViewer.log_I_range
         self.image_plane_data = np.clip(scaled_data, 0, 1)
@@ -253,7 +253,7 @@ class OrientationViewer(QtWidgets.QWidget):
 
         return (samples * x for x in is_polydisperse)
 
-    def scatering_data(self, orientation: Orientation) -> np.ndarray:
+    def scattering_data(self, orientation: Orientation) -> np.ndarray:
 
         # add the orientation parameters to the model parameters
 
