@@ -28,16 +28,17 @@ class OrientationViewer(QtWidgets.QWidget):
 
 
     # Dimensions of scattering cuboid
-    a = 0.1
-    b = 0.4
-    c = 1.0
+    a = 10
+    b = 40
+    c = 100
+
+    screen_scale = 0.01 # Angstroms to screen size
 
     arrow_size = 0.2
     arrow_color = uniform_coloring(0.9, 0.9, 0.9)
     ghost_color = uniform_coloring(0.0, 0.6, 0.2)
     cube_color = uniform_coloring(0.0, 0.8, 0.0)
 
-    cuboid_scaling = [a, b, c]
 
     n_ghosts_per_perameter = 8
     n_q_samples = 128
@@ -53,9 +54,9 @@ class OrientationViewer(QtWidgets.QWidget):
     @staticmethod
     def create_ghost():
         """ Helper function: Create a ghost cube"""
-        return Scaling(OrientationViewer.a,
-                       OrientationViewer.b,
-                       OrientationViewer.c,
+        return Scaling(OrientationViewer.a*OrientationViewer.screen_scale,
+                       OrientationViewer.b*OrientationViewer.screen_scale,
+                       OrientationViewer.c*OrientationViewer.screen_scale,
                        Cube(edge_colors=OrientationViewer.ghost_color))
 
     def __init__(self, parent=None):
@@ -130,9 +131,9 @@ class OrientationViewer(QtWidgets.QWidget):
 
 
         self.first_rotation = Rotation(0,0,0,1,
-                        Scaling(OrientationViewer.a,
-                                OrientationViewer.b,
-                                OrientationViewer.c,
+                        Scaling(OrientationViewer.a*OrientationViewer.screen_scale,
+                                OrientationViewer.b*OrientationViewer.screen_scale,
+                                OrientationViewer.c*OrientationViewer.screen_scale,
                                 Cube(
                                     edge_colors=OrientationViewer.ghost_color,
                                     colors=OrientationViewer.cube_color)),
@@ -271,9 +272,9 @@ class OrientationViewer(QtWidgets.QWidget):
             psi_pd=orientation.dpsi,
             psi_pd_type=OrientationViewer.polydispersity_distribution,
             psi_pd_n=psi_pd_n,
-            a=OrientationViewer.a,
-            b=OrientationViewer.b,
-            c=OrientationViewer.c,
+            length_a=OrientationViewer.a,
+            length_b=OrientationViewer.b,
+            length_c=OrientationViewer.c,
             background=np.exp(OrientationViewer.log_I_min))
 
         return np.reshape(data, (OrientationViewer.n_q_samples, OrientationViewer.n_q_samples))
