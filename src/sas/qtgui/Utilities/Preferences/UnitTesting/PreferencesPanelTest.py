@@ -13,7 +13,7 @@ class DummyPrefWidget(PreferencesWidget):
     def _restoreFromConfig(self):
         pass
 
-    def _toggleBlockAllSignaling(self):
+    def _toggleBlockAllSignaling(self, toggle: bool):
         pass
 
     def _addAllWidgets(self):
