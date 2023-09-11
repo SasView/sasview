@@ -57,8 +57,7 @@ class DensityPanel(QtWidgets.QDialog):
         self.ui = Ui_DensityPanel()
         self.ui.setupUi(self)
 
-        #self.setFixedSize(self.minimumSizeHint())
-        self.resize(self.minimumSizeHint())
+        self.setFixedSize(self.minimumSizeHint())
 
         # set validators
         #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
