@@ -149,12 +149,17 @@ class PreferencesWidget(QWidget):
 
     def addIntegerInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
         """Similar to the text input creator, this creates a text input with an integer validator assigned to it.
+        This adds a method called `coerce` to the QLineEdit instance that is called before sending the value to the
+        config to ensure the value type matches the expected schema type.
         :param title: The title of the text box to be added to the preferences panel.
         :param default_number: An optional value to be put within the text box as a default. Defaults to an empty string.
         :return: QLineEdit instance to allow subclasses to assign instance name
         """
+        def coerce(box: QLineEdit):
+            return int(box.text())
         int_box = self.addTextInput(title, str(default_number))
         int_box.setValidator(QIntValidator())
+        int_box.coerce = coerce
         return int_box
 
     def _validate_input_and_stage(self, edit: QLineEdit, key: str):
@@ -169,6 +174,8 @@ class PreferencesWidget(QWidget):
         validator = edit.validator()
         text = edit.text()
         (state, val, pos) = validator.validate(text, 0) if validator else (0, 0, 0)
+        # Certain inputs, added using class methods, will have a coerce method to coerce the value to the expected type
+        text = edit.coerce(edit) if hasattr(edit, 'coerce') else text
         if state == QValidator.Acceptable or not validator:
             self._stageChange(key, text)
         else:
@@ -178,12 +185,17 @@ class PreferencesWidget(QWidget):
 
     def addFloatInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
         """Similar to the text input creator, this creates a text input with an float validator assigned to it.
+        This adds a method called `coerce` to the QLineEdit instance that is called before sending the value to the
+        config to ensure the value type matches the expected schema type.
         :param title: The title of the text box to be added to the preferences panel.
         :param default_number: An optional value to be put within the text box as a default. Defaults to an empty string.
         :return: QLineEdit instance to allow subclasses to assign instance name
         """
+        def coerce(box: QLineEdit):
+            return float(box.text())
         float_box = self.addTextInput(title, str(default_number))
         float_box.setValidator(QDoubleValidator())
+        float_box.coerce = coerce
         return float_box
 
     def addCheckBox(self, title: str, checked: Optional[bool] = False) -> QCheckBox:
