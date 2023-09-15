@@ -10,6 +10,26 @@ ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
 logger = logging.getLogger(__name__)
 
 
+class PrefIntValidator(QIntValidator):
+    """Override the base validator class to return an integer value when validating."""
+    def validate(self, arg__1: str, arg__2: int) -> object:
+        state, val, pos = super().validate(arg__1, arg__2)
+        if state in [QValidator.Acceptable, QValidator.Intermediate] and val not in [None, ""]:
+            # Value is an integer value but maybe not in the expected range for the input
+            val = int(val)
+        return state, val, pos
+
+
+class PrefDoubleValidator(QDoubleValidator):
+    """Override the base validator class to return a floating point value when validated."""
+    def validate(self, arg__1: str, arg__2: int) -> object:
+        state, val, pos = super().validate(arg__1, arg__2)
+        if state in [QValidator.Acceptable, QValidator.Intermediate] and val not in [None, ""]:
+            # Value is a floating point value but maybe not in the expected range for the input
+            val = float(val)
+        return state, val, pos
+
+
 def cb_replace_all_items_with_new(cb: QComboBox, new_items: List[str], default_item: Optional[str] = None):
     """Helper method that removes existing ComboBox values, replaces them and sets a default item, if defined
     :param cb: A QComboBox object
@@ -149,17 +169,12 @@ class PreferencesWidget(QWidget):
 
     def addIntegerInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
         """Similar to the text input creator, this creates a text input with an integer validator assigned to it.
-        This adds a method called `coerce` to the QLineEdit instance that is called before sending the value to the
-        config to ensure the value type matches the expected schema type.
         :param title: The title of the text box to be added to the preferences panel.
         :param default_number: An optional value to be put within the text box as a default. Defaults to an empty string.
         :return: QLineEdit instance to allow subclasses to assign instance name
         """
-        def coerce(box: QLineEdit):
-            return int(box.text())
         int_box = self.addTextInput(title, str(default_number))
-        int_box.setValidator(QIntValidator())
-        int_box.coerce = coerce
+        int_box.setValidator(PrefIntValidator())
         return int_box
 
     def _validate_input_and_stage(self, edit: QLineEdit, key: str):
@@ -173,11 +188,10 @@ class PreferencesWidget(QWidget):
         edit.setStyleSheet("background-color: white")
         validator = edit.validator()
         text = edit.text()
-        (state, val, pos) = validator.validate(text, 0) if validator else (0, 0, 0)
+        (state, val, pos) = validator.validate(text, 0) if validator else (0, text, 0)
         # Certain inputs, added using class methods, will have a coerce method to coerce the value to the expected type
-        text = edit.coerce(edit) if hasattr(edit, 'coerce') else text
         if state == QValidator.Acceptable or not validator:
-            self._stageChange(key, text)
+            self._stageChange(key, val)
         else:
             edit.setStyleSheet("background-color: yellow")
             self._unStageChange(key)
@@ -185,17 +199,12 @@ class PreferencesWidget(QWidget):
 
     def addFloatInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
         """Similar to the text input creator, this creates a text input with an float validator assigned to it.
-        This adds a method called `coerce` to the QLineEdit instance that is called before sending the value to the
-        config to ensure the value type matches the expected schema type.
         :param title: The title of the text box to be added to the preferences panel.
         :param default_number: An optional value to be put within the text box as a default. Defaults to an empty string.
         :return: QLineEdit instance to allow subclasses to assign instance name
         """
-        def coerce(box: QLineEdit):
-            return float(box.text())
         float_box = self.addTextInput(title, str(default_number))
-        float_box.setValidator(QDoubleValidator())
-        float_box.coerce = coerce
+        float_box.setValidator(PrefDoubleValidator())
         return float_box
 
     def addCheckBox(self, title: str, checked: Optional[bool] = False) -> QCheckBox:
