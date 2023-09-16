@@ -14,7 +14,7 @@ def load_theme(theme: str = None) -> str:
     :param theme: The key value in ALL_THEMES
     :return: The loaded CSS
     """
-    if not theme or theme not in ALL_THEMES:
+    if not theme or theme not in find_available_themes():
         logger.warning(f"Invalid theme name provided: {theme}")
         theme = 'Default'
     path = get_user_theme_path(theme) if 'User:' in theme else Path(os.path.join('.', OPTIONS.get(theme)))
@@ -45,4 +45,3 @@ def find_available_themes() -> Dict:
 
 
 OPTIONS = {'Default': Path('default.css')}
-ALL_THEMES = find_available_themes()
