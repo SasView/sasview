@@ -1,8 +1,5 @@
 /* Global Properties */
-* {font-size: 9pt; font-family: Helvetica, Arial, Verdana, sans-serif}
-
-/* HTML Elements */
-h1 {font-size: 240%;}
+* {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif}
 
 /* Qt Elements */
 QLineEdit {background-color: white; color: black;}
