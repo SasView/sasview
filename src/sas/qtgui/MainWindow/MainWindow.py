@@ -79,13 +79,12 @@ def run_sasview():
     app = QApplication([])
     app.setAttribute(Qt.AA_ShareOpenGLContexts)
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app.setStyleSheet("* {font-size: 11pt;}")
 
     splash = SplashScreen()
     splash.show()
 
     # Main application style.
-    app.setStyleSheet(style.style_sheet.read())
+    app.setStyleSheet(style.css)
 
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     if 'twisted.internet.reactor' in sys.modules:
