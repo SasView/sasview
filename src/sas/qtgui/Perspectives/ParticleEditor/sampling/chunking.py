@@ -6,8 +6,6 @@ Functions designed to help avoid using too much memory, chunks up the pairwise d
 
 Something like this
 
-
-
 .                 First Point
 
 .       1   2   3 | 4   5   6 | 7   8   9 | 0

@@ -140,12 +140,15 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         :param new_sector: slicer used for directional averaging in Q or Phi
         :param nbins: the number of point plotted when averaging
-        :TODO - Unlike other slicers, the two sector types are sufficiently
-        different that this method contains three instances of If (check class name) do x.
-        The point of post_data vs _post_data I think was to avoid this kind of thing and
-        suggests that in this case we may need a new method in the WedgeInteracgtorPhi
-        and WedgeInteracgtorQ to handle these specifics. Probably by creating the 1D plot
-        object in those top level classes along with the specifc attributes.
+        
+        :TODO
+        
+        Unlike other slicers, the two sector types are sufficiently different
+        that this method contains three instances of If (check class name) do x.
+        The point of post_data vs _post_data I think was to avoid this kind of
+        thing and suggests that in this case we may need a new method in the WedgeInteracgtorPhi and WedgeInteractorQ to handle these specifics.
+        Probably by creating the 1D plot object in those top level classes along
+        with the specifc attributes.
         """
         # Data to average
         data = self.data
