@@ -1,0 +1,19 @@
+/* Global Properties */
+* {font-size: 9pt; font-family: Helvetica, Arial, Verdana, sans-serif}
+
+/* HTML Elements */
+h1 {font-size: 240%;}
+
+/* Qt Elements */
+QLineEdit {background-color: white; color: black;}
+QLineEdit:focus {background-color: #98dbcc; color: #333333}
+QLineEdit[warning=true] {background-color: yellow;}
+QLineEdit[urgent=true] {background-color: red;}
+QTableWidgetItem[italic=true] {font-style: italic}
+
+QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
+
+QToolTip {font-size: 80%;}
+
+/* Class-specific Properties */
+.monospace {font-family: 'monospace, monospace'}
