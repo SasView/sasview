@@ -209,7 +209,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
         # Default style sheet name
-        self.STYLE_SHEET = 'sasview.css'
+        self.THEME = 'Default'
 
         #
         # Lock the class down, this is necessary both for
