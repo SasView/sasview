@@ -208,6 +208,10 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
+        # What's New variables
+        self.SHOW_WHATS_NEW = True
+        self.LAST_WHATS_NEW_HIDDEN_VERSION = "0.0.0"
+
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files
