@@ -1,4 +1,4 @@
-from sas.system import config
+from sas.system import config, style
 
 from .PreferencesWidget import PreferencesWidget
 
@@ -9,11 +9,16 @@ class DisplayPreferencesWidget(PreferencesWidget):
         self.config_params = ['QT_SCALE_FACTOR',
                               'QT_AUTO_SCREEN_SCALE_FACTOR',
                               'DISABLE_RESIDUAL_PLOT',
-                              'DISABLE_POLYDISPERSITY_PLOT']
+                              'DISABLE_POLYDISPERSITY_PLOT',
+                              'THEME']
         self.restart_params = {'QT_SCALE_FACTOR': 'QT Screen Scale Factor',
-                               'QT_AUTO_SCREEN_SCALE_FACTOR': "Enable Automatic Scaling"}
+                               'QT_AUTO_SCREEN_SCALE_FACTOR': "Enable Automatic Scaling",
+                               'THEME': "Display theme"}
 
     def _addAllWidgets(self):
+        self.theme = self.addComboBox(title="Theme", params=style.get_theme_names(), default='Default')
+        self.theme.currentIndexChanged.connect(
+            lambda: self._stageChange('THEME', self.theme.currentText()))
         self.qtScaleFactor = self.addFloatInput(
             title="QT Screen Scale Factor",
             default_number=config.QT_SCALE_FACTOR)
@@ -42,6 +47,7 @@ class DisplayPreferencesWidget(PreferencesWidget):
         self.disablePolydispersityPlot.blockSignals(toggle)
 
     def _restoreFromConfig(self):
+        self.theme.setCurrentText(config.THEME)
         self.qtScaleFactor.setText(str(config.QT_SCALE_FACTOR))
         self.qtScaleFactor.setStyleSheet("background-color: white")
         self.autoScaling.setChecked(bool(config.QT_AUTO_SCREEN_SCALE_FACTOR))
