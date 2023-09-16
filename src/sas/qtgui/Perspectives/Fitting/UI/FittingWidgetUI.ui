@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
+    <width>599</width>
     <height>600</height>
    </rect>
   </property>
@@ -26,51 +26,6 @@
    <string>FittingWidget</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>File name:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QComboBox" name="cbFileNames">
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a file to set initial fit parameters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="sizeAdjustPolicy">
-          <enum>QComboBox::AdjustToContents</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="lblFilename">
-         <property name="text">
-          <string>None</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>459</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
    <item row="1" column="0">
     <widget class="QTabWidget" name="tabFitting">
      <property name="currentIndex">
@@ -352,37 +307,10 @@
        <string>Resolution</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="tabPolydispersity">
       <attribute name="title">
        <string>Polydispersity</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_10">
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>Polydispersity and Orientational Distribution</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_9">
-          <item row="0" column="0">
-           <widget class="QTableView" name="lstPoly">
-            <property name="editTriggers">
-             <set>QAbstractItemView::AllEditTriggers</set>
-            </property>
-            <property name="alternatingRowColors">
-             <bool>true</bool>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::ExtendedSelection</enum>
-            </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
      </widget>
      <widget class="QWidget" name="tab_6">
       <attribute name="title">
@@ -509,6 +437,51 @@ angles</string>
      </item>
     </layout>
    </item>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>File name:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QComboBox" name="cbFileNames">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a file to set initial fit parameters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QComboBox::AdjustToContents</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="lblFilename">
+         <property name="text">
+          <string>None</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>459</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
   </layout>
  </widget>
  <tabstops>
@@ -522,7 +495,6 @@ angles</string>
   <tabstop>chk2DView</tabstop>
   <tabstop>chkMagnetism</tabstop>
   <tabstop>chkChainFit</tabstop>
-  <tabstop>lstPoly</tabstop>
   <tabstop>lstMagnetic</tabstop>
   <tabstop>cmdMagneticDisplay</tabstop>
   <tabstop>cmdPlot</tabstop>

@@ -2,6 +2,7 @@ import copy
 
 from PySide6 import QtCore
 from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import numpy
 
@@ -34,6 +35,28 @@ poly_header_tooltips = ['Select parameter for fitting',
 
 error_tooltip = 'Error value for fitted parameter'
 header_error_caption = 'Error'
+
+class ToolTippedItemModel(QtGui.QStandardItemModel):
+    """
+    Subclass from QStandardItemModel to allow displaying tooltips in
+    QTableView model.
+    """
+    def __init__(self, parent=None):
+        QtGui.QStandardItemModel.__init__(self, parent)
+
+    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
+        """
+        Displays tooltip for each column's header
+        :param section:
+        :param orientation:
+        :param role:
+        :return:
+        """
+        if role == QtCore.Qt.ToolTipRole:
+            if orientation == QtCore.Qt.Horizontal:
+                return str(self.header_tooltips[section])
+
+        return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
 
 def replaceShellName(param_name, value):
     """
@@ -1007,4 +1030,25 @@ def checkConstraints(symtab, constraints):
         return header + errors
     else:
         return []
+
+def setTableProperties(table):
+    """
+    Setting table properties
+    """
+    # Table properties
+    table.verticalHeader().setVisible(False)
+    table.setAlternatingRowColors(True)
+    table.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+    table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+    table.resizeColumnsToContents()
+
+    # Header
+    header = table.horizontalHeader()
+    header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+    header.ResizeMode(QtWidgets.QHeaderView.Interactive)
+
+    # Qt5: the following 2 lines crash - figure out why!
+    # Resize column 0 and 7 to content
+    # header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+    # header.setSectionResizeMode(7, QtWidgets.QHeaderView.ResizeToContents)
 

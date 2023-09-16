@@ -41,6 +41,7 @@ from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
+from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
@@ -74,28 +75,6 @@ if not hasattr(SasviewModel, 'get_weights'):
     SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
-
-class ToolTippedItemModel(QtGui.QStandardItemModel):
-    """
-    Subclass from QStandardItemModel to allow displaying tooltips in
-    QTableView model.
-    """
-    def __init__(self, parent=None):
-        QtGui.QStandardItemModel.__init__(self, parent)
-
-    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
-        """
-        Displays tooltip for each column's header
-        :param section:
-        :param orientation:
-        :param role:
-        :return:
-        """
-        if role == QtCore.Qt.ToolTipRole:
-            if orientation == QtCore.Qt.Horizontal:
-                return str(self.header_tooltips[section])
-
-        return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
 
 class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
@@ -344,6 +323,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         layout.addWidget(self.smearing_widget)
         self.tabResolution.setLayout(layout)
 
+        # Polydispersity widget
+        layout = QtWidgets.QGridLayout()
+        self.polydispersity_widget = PolydispersityWidget(self)
+        layout.addWidget(self.polydispersity_widget)
+        self.tabPolydispersity.setLayout(layout)
+        self.lstPoly = self.polydispersity_widget.lstPoly
+
         # Order widget
         layout = QtWidgets.QGridLayout()
         # pass all data items to access multiple datasets
@@ -374,9 +360,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Set the main models
         # We can't use a single model here, due to restrictions on flattening
         # the model tree with subclassed QAbstractProxyModel...
-        self._model_model = ToolTippedItemModel()
-        self._poly_model = ToolTippedItemModel()
-        self._magnet_model = ToolTippedItemModel()
+        self._model_model = FittingUtilities.ToolTippedItemModel()
+        self._poly_model = self.polydispersity_widget.polyModel()
+        self._magnet_model = FittingUtilities.ToolTippedItemModel()
 
         self.model_dict["standard"] = self._model_model
         self.model_dict["poly"] = self._poly_model
@@ -440,23 +426,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lstParams.header().sectionResized.connect(self.onColumnWidthUpdate)
 
         # Poly model displayed in poly list
-        self.lstPoly.setModel(self._poly_model)
-        self.setPolyModel()
-        self.setTableProperties(self.lstPoly)
-        # Delegates for custom editing and display
-        self.lstPoly.setItemDelegate(PolyViewDelegate(self))
+        # self.polydispersity_widget.setModel(self._poly_model)
+        self.polydispersity_widget.setPolyModel(self.model_parameters)
         # Polydispersity function combo response
-        self.lstPoly.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
-        self.lstPoly.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
-
-        self.lstPoly.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        # self.lstPoly.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
+        # self.lstPoly.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
+        # self.lstPoly.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.lstPoly.customContextMenuRequested.connect(self.showModelContextMenu)
-        self.lstPoly.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+        # self.lstPoly.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
         # Magnetism model displayed in magnetism list
         self.lstMagnetic.setModel(self._magnet_model)
         self.setMagneticModel()
-        self.setTableProperties(self.lstMagnetic)
+        FittingUtilities.setTableProperties(self.lstMagnetic)
         # Delegates for custom editing and display
         self.lstMagnetic.setItemDelegate(MagnetismViewDelegate(self))
         # Initial status of the ordering tab - invisible
@@ -627,9 +609,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
         self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
         self.lstParams.installEventFilter(self)
-        self.lstPoly.installEventFilter(self)
+        # self.lstPoly.installEventFilter(self)
         self.lstMagnetic.installEventFilter(self)
-        self.lstPoly.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        #self.lstPoly.selectionModel().selectionChanged.connect(self.onSelectionChanged)
 
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
@@ -3379,27 +3361,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.enableInteractiveElements()
         # TODO: remimplement thread cancellation
         logger.error("".join(traceback.format_exception(etype, value, tb)))
-
-    def setTableProperties(self, table):
-        """
-        Setting table properties
-        """
-        # Table properties
-        table.verticalHeader().setVisible(False)
-        table.setAlternatingRowColors(True)
-        table.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-        table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        table.resizeColumnsToContents()
-
-        # Header
-        header = table.horizontalHeader()
-        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-        header.ResizeMode(QtWidgets.QHeaderView.Interactive)
-
-        # Qt5: the following 2 lines crash - figure out why!
-        # Resize column 0 and 7 to content
-        #header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        #header.setSectionResizeMode(7, QtWidgets.QHeaderView.ResizeToContents)
 
     def setPolyModel(self):
         """
