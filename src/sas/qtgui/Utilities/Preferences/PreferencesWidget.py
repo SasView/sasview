@@ -12,7 +12,13 @@ logger = logging.getLogger(__name__)
 
 class PrefIntValidator(QIntValidator):
     """Override the base validator class to return an integer value when validating."""
-    def validate(self, arg__1: str, arg__2: int) -> object:
+    def fixup(self, input: str) -> None:
+        super().fixup(input)
+        input.replace(",", "")
+
+    def validate(self, arg__1: str, arg__2: int) -> (int, int, int):
+        if "," in arg__1:
+            return QValidator.Invalid
         state, val, pos = super().validate(arg__1, arg__2)
         if state in [QValidator.Acceptable, QValidator.Intermediate] and val not in [None, ""]:
             # Value is an integer value but maybe not in the expected range for the input
@@ -22,7 +28,13 @@ class PrefIntValidator(QIntValidator):
 
 class PrefDoubleValidator(QDoubleValidator):
     """Override the base validator class to return a floating point value when validated."""
-    def validate(self, arg__1: str, arg__2: int) -> object:
+    def fixup(self, input: str) -> None:
+        super().fixup(input)
+        input.replace(",", "")
+
+    def validate(self, arg__1: str, arg__2: int) -> (int, float, int):
+        if "," in arg__1:
+            return QValidator.Invalid
         state, val, pos = super().validate(arg__1, arg__2)
         if state in [QValidator.Acceptable, QValidator.Intermediate] and val not in [None, ""]:
             # Value is a floating point value but maybe not in the expected range for the input
