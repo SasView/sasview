@@ -333,7 +333,7 @@ class WedgeInteractorQ(WedgeInteractor):
     """
     Average in Q direction. The data for all phi at a constant Q are
     averaged together to provide a 1D array in Q (to be plotted as a function
-     of Q)
+    of Q)
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3):
@@ -350,7 +350,7 @@ class WedgeInteractorPhi(WedgeInteractor):
     """
     Average in phi direction. The data for all Q at a constant phi are
     averaged together to provide a 1D array in phi (to be plotted as a function
-     of phi)
+    of phi)
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3):
