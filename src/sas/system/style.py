@@ -14,17 +14,23 @@ class StyleSheet:
     def __init__(self):
         self._available_themes = find_available_themes()
         self.theme = config.THEME
-        self.css = load_theme(self.theme)
+        self._css = load_theme(self.theme)
+
+    @property
+    def css(self) -> str:
+        self._css = load_theme(self.theme)
+        return self._css
+
+    @css.setter
+    def css(self, theme: str):
+        self.theme = theme
+        self._css = load_theme(theme)
 
     def update_theme_list(self):
         self._available_themes = find_available_themes()
 
     def get_theme_names(self) -> List[str]:
         return list(self._available_themes.keys())
-
-    def change_theme(self, theme: str):
-        self.theme = theme
-        self.css = load_theme(self.theme)
 
 
 style_sheet = StyleSheet()
