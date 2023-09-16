@@ -1,7 +1,7 @@
 import numpy as np
 
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
+from PySide6 import QtCore
+from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 
 from .UI.SaveExtrapolated import Ui_SaveExtrapolatedPanel
@@ -18,7 +18,7 @@ class UserInputInvalid(Exception):
 class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
     """ Dialogue window for saving extrapolated data"""
 
-    #trigger = QtCore.pyqtSignal(tuple)
+    #trigger = QtCore.Signal(tuple)
 
     # pylint: disable=unused-argument
     def __init__(self, input_qs: np.ndarray, interpolation_function: Callable[[np.ndarray], np.ndarray], parent=None):
@@ -92,9 +92,11 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
         Save data to a file
         """
         filename = QFileDialog.getSaveFileName(
-            caption="Save As",
-            filter="Comma separated values (*.csv)",
-            parent=None)[0]
+            None,
+            "Save As",
+            "",
+            "Comma separated values (*.csv)",
+            "")[0]
 
         if not filename:
             return

@@ -2,8 +2,8 @@ import copy
 import numpy
 import functools
 
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -19,9 +19,10 @@ from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.BoxSum import BoxSum
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
 
-# TODO: move to sas.qtgui namespace
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
@@ -53,6 +54,9 @@ class Plotter2DWidget(PlotterBase):
         self.vmax = None
         self.im = None
         self.cb = None
+        # Masking properties
+        self._show_masked_data = False  # TODO: Tie into configuration system
+        self._masked_data = []
 
         self.manager = manager
 
@@ -62,15 +66,35 @@ class Plotter2DWidget(PlotterBase):
 
     @property
     def data0(self):
-        return self._data[0]
+        return self._data[0] if not self._show_masked_data else self._masked_data[0]
 
     @data.setter
     def data(self, data=None):
         """ data setter """
+        if hasattr(data, 'mask') and not data.mask.all():
+            # Create a copy of the data set to only be used in this context
+            # Remove all masked points from the copy
+            masked_data = copy.deepcopy(data)
+            masked_data.data = masked_data.data[masked_data.mask == 1]
+            masked_data.qx_data = masked_data.qx_data[masked_data.mask == 1]
+            masked_data.qy_data = masked_data.qy_data[masked_data.mask == 1]
+            if masked_data.err_data is not None:
+                masked_data.err_data = masked_data.err_data[masked_data.mask == 1]
+            if masked_data.dqx_data is not None:
+                masked_data.dqx_data = masked_data.dqx_data[masked_data.mask == 1]
+            if masked_data.dqy_data is not None:
+                masked_data.dqy_data = masked_data.dqy_data[masked_data.mask == 1]
+            if masked_data.q_data is not None:
+                masked_data.q_data = masked_data.q_data[masked_data.mask == 1]
+            masked_data.mask = masked_data.mask[masked_data.mask == 1]
+        else:
+            masked_data = data
         if self._data:
             self._data[0] = data
+            self._masked_data[0] = masked_data
         else:
             self._data.append(data)
+            self._masked_data.append(masked_data)
         self.qx_data = data.qx_data
         self.qy_data = data.qy_data
         self.xmin = data.xmin
@@ -102,8 +126,8 @@ class Plotter2DWidget(PlotterBase):
 
         # Prepare and show the plot
         self.showPlot(data=self.data0.data,
-                      qx_data=self.qx_data,
-                      qy_data=self.qy_data,
+                      qx_data=self.data0.qx_data,
+                      qy_data=self.data0.qy_data,
                       xmin=self.xmin,
                       xmax=self.xmax,
                       ymin=self.ymin, ymax=self.ymax,
@@ -166,6 +190,10 @@ class Plotter2DWidget(PlotterBase):
         self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
         self.actionBoxAveragingY = self.contextMenu.addAction("&Box Averaging in Qy")
         self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
+        self.actionWedgeAveragingQ = self.contextMenu.addAction("&Wedge Averaging in Q")
+        self.actionWedgeAveragingQ.triggered.connect(self.onWedgeAveragingQ)
+        self.actionWedgeAveragingPhi = self.contextMenu.addAction("&Wedge Averaging in Phi")
+        self.actionWedgeAveragingPhi.triggered.connect(self.onWedgeAveragingPhi)
         # Additional items for slicer interaction
         if self.slicer:
             self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
@@ -175,6 +203,9 @@ class Plotter2DWidget(PlotterBase):
         self.contextMenu.addSeparator()
         self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
         self.actionColorMap.triggered.connect(self.onColorMap)
+        self.contextMenu.addSeparator()
+        self.actionToggleMaskedData = self.contextMenu.addAction("&Toggle Masked Data")
+        self.actionToggleMaskedData.triggered.connect(self.onToggleMaskedData)
         self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Toggle Linear/Log Scale")
         self.actionChangeScale.triggered.connect(self.onToggleScale)
@@ -197,6 +228,11 @@ class Plotter2DWidget(PlotterBase):
         self.actionChangeScale.triggered.connect(self.onToggleScale)
         if self.dimension == 2:
             self.actionToggleGrid.triggered.connect(self.onGridToggle)
+
+    def onToggleMaskedData(self, event):
+        """ Toggle the visibility of masked data points."""
+        self._show_masked_data = not self._show_masked_data
+        self.plot()
 
     def onToggleScale(self, event):
         """
@@ -425,6 +461,20 @@ class Plotter2DWidget(PlotterBase):
         """
         self.setSlicer(slicer=BoxInteractorY)
 
+    def onWedgeAveragingQ(self):
+        """
+        Perform 2D data averaging on Q
+        Create a new slicer .
+        """
+        self.setSlicer(slicer=WedgeInteractorQ)
+
+    def onWedgeAveragingPhi(self):
+        """
+        Perform 2D data averaging on Phi
+        Create a new slicer .
+        """
+        self.setSlicer(slicer=WedgeInteractorPhi)
+
     def onColorMap(self):
         """
         Display the color map dialog and modify the plot's map accordingly
@@ -625,7 +675,6 @@ class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     Plotter widget implementation
     """
     def __init__(self, parent=None, quickplot=False, dimension=2):
-        QtWidgets.QDialog.__init__(self)
         Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=dimension)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)

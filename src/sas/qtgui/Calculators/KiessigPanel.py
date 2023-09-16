@@ -1,6 +1,6 @@
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.UI import main_resources_rc
 from .UI.KiessigPanel import Ui_KiessigPanel
@@ -22,8 +22,8 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
         self.manager = parent
         self.thickness = KiessigThicknessCalculator()
 
-        rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.deltaq_in.setValidator(QtGui.QRegExpValidator(rx, self.deltaq_in))
+        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        self.deltaq_in.setValidator(QtGui.QRegularExpressionValidator(rx, self.deltaq_in))
 
         # signals
         self.helpButton.clicked.connect(self.onHelp)

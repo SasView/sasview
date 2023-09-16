@@ -65,6 +65,13 @@ hiddenimports = [
     'uncertainties',
 ]
 
+if platform.system() == 'Windows':
+    # Need win32 to run sasview from the command line.
+    hiddenimports.extend([
+        'win32',
+        'win32.win32console',
+    ])
+
 a = Analysis(
     ['sasview.py'],
     pathex=[],

@@ -11,9 +11,9 @@ from twisted.internet import threads
 import numpy as np
 import webbrowser
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sasmodels import generate
 from sasmodels import modelinfo
@@ -28,8 +28,7 @@ from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
@@ -102,13 +101,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    constraintAddedSignal = QtCore.pyqtSignal(list, str)
-    newModelSignal = QtCore.pyqtSignal()
-    fittingFinishedSignal = QtCore.pyqtSignal(tuple)
-    batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
-    Calc1DFinishedSignal = QtCore.pyqtSignal(dict)
-    Calc2DFinishedSignal = QtCore.pyqtSignal(dict)
-    keyPressedSignal = QtCore.pyqtSignal(QtCore.QEvent)
+    constraintAddedSignal = QtCore.Signal(list, str)
+    newModelSignal = QtCore.Signal()
+    fittingFinishedSignal = QtCore.Signal(tuple)
+    batchFittingFinishedSignal = QtCore.Signal(tuple)
+    Calc1DFinishedSignal = QtCore.Signal(dict)
+    Calc2DFinishedSignal = QtCore.Signal(dict)
+    keyPressedSignal = QtCore.Signal(QtCore.QEvent)
 
     MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
 
@@ -224,6 +223,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.smearing_widget.resetSmearer()
         # Enable/disable UI components
         self.setEnablementOnDataLoad()
+        # Reinitialize model list for constrained/simult fitting
+        self.newModelSignal.emit()
 
     def initializeGlobals(self):
         """
@@ -583,12 +584,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
-        self.chkPolydispersity.setEnabled(True)
-        self.chkPolydispersity.setCheckState(False)
+        self.chkPolydispersity.setEnabled(False)
+        self.chkPolydispersity.setChecked(False)
         self.chk2DView.setEnabled(True)
-        self.chk2DView.setCheckState(False)
+        self.chk2DView.setChecked(False)
         self.chkMagnetism.setEnabled(False)
-        self.chkMagnetism.setCheckState(False)
+        self.chkMagnetism.setChecked(False)
         self.chkChainFit.setEnabled(False)
         self.chkChainFit.setVisible(False)
         # Tabs
@@ -712,31 +713,31 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         has_constraints = any([self.rowHasConstraint(i, model_key=model_key) for i in rows])
         has_real_constraints = any([self.rowHasActiveConstraint(i, model_key=model_key) for i in rows])
 
-        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
         self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
-        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect = QtGui.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
         self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
-        self.actionConstrain = QtWidgets.QAction(self)
+        self.actionConstrain = QtGui.QAction(self)
         self.actionConstrain.setObjectName("actionConstrain")
         self.actionConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain "+param_string + to_string))
 
-        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint = QtGui.QAction(self)
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove constraint"))
 
-        self.actionEditConstraint = QtWidgets.QAction(self)
+        self.actionEditConstraint = QtGui.QAction(self)
         self.actionEditConstraint.setObjectName("actionEditConstrain")
         self.actionEditConstraint.setText(QtCore.QCoreApplication.translate("self", "Edit constraint"))
 
-        self.actionMultiConstrain = QtWidgets.QAction(self)
+        self.actionMultiConstrain = QtGui.QAction(self)
         self.actionMultiConstrain.setObjectName("actionMultiConstrain")
         self.actionMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain selected parameters to their current values"))
 
-        self.actionMutualMultiConstrain = QtWidgets.QAction(self)
+        self.actionMutualMultiConstrain = QtGui.QAction(self)
         self.actionMutualMultiConstrain.setObjectName("actionMutualMultiConstrain")
         self.actionMutualMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Mutual constrain of selected parameters..."))
 
@@ -924,7 +925,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Force checkbox selection when parameter is constrained and disable
         # checkbox interaction
         if not fields_enabled and model.item(row, 0).isCheckable():
-            model.item(row, 0).setCheckState(2)
+            model.item(row, 0).setCheckState(QtCore.Qt.Checked)
             model.item(row, 0).setEnabled(False)
         else:
             # Enable checkbox interaction
@@ -1473,6 +1474,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # paste parameters from previous state
         if self.page_parameters:
             self.updatePageWithParameters(self.page_parameters, warn_user=False)
+
+        # disable polydispersity if the model does not support it
+        has_poly = self._poly_model.rowCount() != 0
+        self.chkPolydispersity.setEnabled(has_poly)
+        self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
 
         # set focus so it doesn't move up
         self.cbModel.setFocus()
@@ -2451,7 +2457,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         data_shown = False
         item = None
         for item, plot in plots.items():
-            if plot.plot_role != Data1D.ROLE_DATA and fitpage_name in plot.name:
+            if plot.plot_role != DataRole.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
                 self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
         # return the last data item seen, if nothing was plotted; supposed to be just data)
@@ -3333,7 +3339,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if residuals_plot is None:
             return
         residuals_plot.id = "Residual " + residuals_plot.id
-        residuals_plot.plot_role = Data1D.ROLE_RESIDUAL
+        residuals_plot.plot_role = DataRole.ROLE_RESIDUAL
         self.createNewIndex(residuals_plot)
         return residuals_plot
 
@@ -3916,9 +3922,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Main tab info
         self.logic.data.name = fp.name
         self.data_is_loaded = fp.data_is_loaded
-        self.chkPolydispersity.setCheckState(fp.is_polydisperse)
-        self.chkMagnetism.setCheckState(fp.is_magnetic)
-        self.chk2DView.setCheckState(fp.is2D)
+        self.chkPolydispersity.setChecked(fp.is_polydisperse)
+        self.chkMagnetism.setChecked(fp.is_magnetic)
+        self.chk2DView.setChecked(fp.is2D)
 
         # Update the comboboxes
         self.cbCategory.setCurrentIndex(self.cbCategory.findText(fp.current_category))
@@ -4172,13 +4178,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         save_dialog = QtWidgets.QFileDialog()
         save_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-        kwargs = {
-            'parent': self,
-            'caption': 'Save Project',
-            'filter': 'Text (*.txt);;Excel (*.xls);;Latex (*.log)',
-            'options': QtWidgets.QFileDialog.DontUseNativeDialog
-        }
-        file_path = save_dialog.getSaveFileName(**kwargs)
+        parent = self
+        caption = 'Save Project'
+        filter = 'Text (*.txt);;Excel (*.xls);;Latex (*.log)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
+        file_path = save_dialog.getSaveFileName(parent, caption, "", filter, "", options)
         filename = file_path[0]
 
         if not filename:

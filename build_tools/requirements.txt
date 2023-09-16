@@ -1,12 +1,12 @@
-numpy 
-scipy==1.7.3 
+numpy<1.24
+scipy==1.10.0 
 docutils 
 pytest
 pytest_qt
 pytest-mock
 unittest-xml-reporting
 tinycc 
-h5py 
+h5py
 sphinx
 pyparsing 
 html5lib 
@@ -20,12 +20,9 @@ ipython
 qtconsole 
 xhtml2pdf 
 pylint
-qt5reactor 
 periodictable 
-uncertainties
+uncertainties 
 matplotlib~=3.5.2
-PyQt5; platform_system != "Darwin"
-PyQt5==5.15.6; platform_system == "Darwin"
 lxml
 pytools 
 cffi
@@ -35,6 +32,10 @@ importlib-resources
 bumps
 html2text
 jsonschema
+pywin32; platform_system == "Windows"
+PySide6==6.2.4
+twisted
+zope
 superqt
 pyopengl
 pyopengl_accelerate

@@ -3,11 +3,9 @@ Widget/logic for smearing data.
 """
 import copy
 import numpy as np
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-import logging
-logger = logging.getLogger(__name__)
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.sascalc.fit.qsmearing import smear_selection, PySmear, PySmear2D
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -53,7 +51,7 @@ DEFAULT_PINHOLE_UP=0.0
 DEFAULT_PINHOLE_DOWN=0.0
 
 class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
-    smearingChangedSignal = QtCore.pyqtSignal()
+    smearingChangedSignal = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(SmearingWidget, self).__init__()

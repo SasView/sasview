@@ -8,8 +8,8 @@ import webbrowser
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
 
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
+from PySide6 import QtWidgets
+from PySide6 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 

@@ -1,5 +1,5 @@
 import pytest
-from PyQt5.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox
+from PySide6.QtWidgets import QWidget, QLineEdit, QComboBox, QCheckBox
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
@@ -79,9 +79,12 @@ class PreferencesPanelTest:
         mocker.patch.object(widget, 'combo', create=True)
         mocker.patch.object(widget, 'textified', create=True)
         mocker.patch.object(widget, 'resetPref', create=True)
+        mocker.patch.object(widget, '_validate_input_and_stage', create=True)
 
         pref = DummyPrefWidget("Dummy Widget")
-        pref.addTextInput("blah")
+        text_input = pref.addTextInput("blah")
+        text_input.textChanged.connect(
+            lambda: pref._validate_input_and_stage(text_input, "blah"))
         pref.addCheckBox("ho hum")
         pref.addComboBox("combo", ["a", "b", "c"], "a")
 
@@ -99,5 +102,6 @@ class PreferencesPanelTest:
                 child.setChecked(not child.checkState())
 
         assert widget.textified.called_once()
+        assert widget._validate_input_and_stage.called_once()
         assert widget.combo.called_once()
         assert widget.checked.called_once()

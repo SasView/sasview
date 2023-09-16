@@ -1,7 +1,9 @@
 from typing import Optional, Tuple, List, Callable
 import numpy as np
 
-from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
+# from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
+from PySide6 import QtGui, QtCore
+from PySide6 import QtWidgets, QtOpenGL, QtOpenGLWidgets 
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -9,7 +11,7 @@ from OpenGL.GLU import *
 from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.surface import Surface
 
-class Scene(QtOpenGL.QGLWidget):
+class Scene(QtOpenGLWidgets.QOpenGLWidget):
 
 
     def __init__(self, parent=None, on_key: Callable[[int], None] = lambda x: None):

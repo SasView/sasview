@@ -3,9 +3,9 @@ from typing import Optional, List
 import numpy as np
 from scipy.special import erfinv
 
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QSizePolicy
-from PyQt5.QtCore import Qt
+from PySide6 import QtWidgets
+from PySide6.QtWidgets import QSizePolicy
+from PySide6.QtCore import Qt
 
 from sasmodels.core import load_model_info, build_model
 from sasmodels.data import empty_data2D
@@ -28,16 +28,17 @@ class OrientationViewer(QtWidgets.QWidget):
 
 
     # Dimensions of scattering cuboid
-    a = 0.1
-    b = 0.4
-    c = 1.0
+    a = 10
+    b = 40
+    c = 100
+
+    screen_scale = 0.01 # Angstroms to screen size
 
     arrow_size = 0.2
     arrow_color = uniform_coloring(0.9, 0.9, 0.9)
     ghost_color = uniform_coloring(0.0, 0.6, 0.2)
     cube_color = uniform_coloring(0.0, 0.8, 0.0)
 
-    cuboid_scaling = [a, b, c]
 
     n_ghosts_per_perameter = 8
     n_q_samples = 128
@@ -53,9 +54,9 @@ class OrientationViewer(QtWidgets.QWidget):
     @staticmethod
     def create_ghost():
         """ Helper function: Create a ghost cube"""
-        return Scaling(OrientationViewer.a,
-                       OrientationViewer.b,
-                       OrientationViewer.c,
+        return Scaling(OrientationViewer.a*OrientationViewer.screen_scale,
+                       OrientationViewer.b*OrientationViewer.screen_scale,
+                       OrientationViewer.c*OrientationViewer.screen_scale,
                        Cube(edge_colors=OrientationViewer.ghost_color))
 
     def __init__(self, parent=None):
@@ -130,9 +131,9 @@ class OrientationViewer(QtWidgets.QWidget):
 
 
         self.first_rotation = Rotation(0,0,0,1,
-                        Scaling(OrientationViewer.a,
-                                OrientationViewer.b,
-                                OrientationViewer.c,
+                        Scaling(OrientationViewer.a*OrientationViewer.screen_scale,
+                                OrientationViewer.b*OrientationViewer.screen_scale,
+                                OrientationViewer.c*OrientationViewer.screen_scale,
                                 Cube(
                                     edge_colors=OrientationViewer.ghost_color,
                                     colors=OrientationViewer.cube_color)),
@@ -170,7 +171,7 @@ class OrientationViewer(QtWidgets.QWidget):
     def _set_image_data(self, orientation: Orientation):
         """ Set the data on the plot"""
 
-        data = self.scatering_data(orientation)
+        data = self.scattering_data(orientation)
 
         scaled_data = (np.log(data) - OrientationViewer.log_I_min) / OrientationViewer.log_I_range
         self.image_plane_data = np.clip(scaled_data, 0, 1)
@@ -252,7 +253,7 @@ class OrientationViewer(QtWidgets.QWidget):
 
         return (samples * x for x in is_polydisperse)
 
-    def scatering_data(self, orientation: Orientation) -> np.ndarray:
+    def scattering_data(self, orientation: Orientation) -> np.ndarray:
 
         # add the orientation parameters to the model parameters
 
@@ -271,9 +272,9 @@ class OrientationViewer(QtWidgets.QWidget):
             psi_pd=orientation.dpsi,
             psi_pd_type=OrientationViewer.polydispersity_distribution,
             psi_pd_n=psi_pd_n,
-            a=OrientationViewer.a,
-            b=OrientationViewer.b,
-            c=OrientationViewer.c,
+            length_a=OrientationViewer.a,
+            length_b=OrientationViewer.b,
+            length_c=OrientationViewer.c,
             background=np.exp(OrientationViewer.log_I_min))
 
         return np.reshape(data, (OrientationViewer.n_q_samples, OrientationViewer.n_q_samples))

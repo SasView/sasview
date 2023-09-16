@@ -5,8 +5,8 @@ import logging
 import traceback
 from typing import Optional
 
-from PyQt5 import QtWidgets, QtCore
-from PyQt5 import QtPrintSupport
+from PySide6 import QtWidgets, QtCore
+from PySide6 import QtPrintSupport
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -81,15 +81,12 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         # Use a sensible filename default
         default_name = os.path.join(str(location), 'report.pdf')
 
-        kwargs = {
-            'parent'   : self,
-            'caption'  : 'Save Report',
-            # don't use 'directory' in order to remember the previous user choice
-            'directory': default_name,
-            'filter'   : 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)',
-            'options'  : QtWidgets.QFileDialog.DontUseNativeDialog}
-        # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        parent = self
+        caption = 'Save Project'
+        filter = 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = default_name
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", options)
         filename = filename_tuple[0]
         if not filename:
             return
@@ -130,8 +127,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         """
         Write string to file
         """
-        with open(filename, 'w') as f:
-            f.write(string)
+        with open(filename, 'wb') as f:
+            # weird unit symbols need to be saved as UTF-8
+            f.write(bytes(string, 'utf-8'))
 
     @staticmethod
     def save_pdf(data, filename):

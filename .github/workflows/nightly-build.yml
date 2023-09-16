@@ -1,0 +1,74 @@
+name: Nightly Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  #Reuse ci.yml workflow on main branch and upload artifacts to release page
+  reuse_main_ci:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  upload_nighly_builds:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ macos-latest]
+        python-version: [ 3.8 ]
+    needs: reuse_main_ci
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Retrieve saved artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: installers/dist
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: installers/dist
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Rename artifacts
+        run: |
+          mv installers/dist/SasView-Installer-windows-*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
+          mv installers/dist/SasView-Installer-macos-*/SasView5.dmg  installers/dist/SasView-nightly-MacOSX.dmg
+          mv installers/dist/SasView-Installer-ubuntu-*/sasview5.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
+
+      - name: Notarize Release Build (OSX)
+        uses: GuillaumeFalourd/xcode-notarize@v1
+        with:
+          product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
+          primary-bundle-id: "org.sasview.SasView5"
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+          verbose: True
+
+      - name: Staple Release Build (OSX)
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        uses: BoundfoxStudios/action-xcode-staple@v1
+        with:
+          product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
+
+      - name: Upload Nightly Build Installer to GitHub releases
+        uses: ncipollo/release-action@v1
+        with:
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "installers/dist/setupSasView-nightly-Win64.exe, installers/dist/SasView-nightly-MacOSX.dmg, installers/dist/SasView-nightly-Linux.tar.gz"
+          body: "Nightly build of main SasView branch"
+          name: "nightly-build"
+          tag: "nightly-build"

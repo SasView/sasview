@@ -5,7 +5,7 @@ from lxml import etree
 
 import pytest
 
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget

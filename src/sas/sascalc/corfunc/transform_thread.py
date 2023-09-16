@@ -14,7 +14,7 @@ class FourierThread(CalcThread):
 
     def check_if_cancelled(self):
         if self.isquit():
-            self.update("Fourier transform cancelled.")
+            self.update("Fourier transform cancelled.") # TODO: This doesn't fit the signature of the function being called
             self.complete(transforms=None)
             return True
         return False
@@ -34,7 +34,7 @@ class FourierThread(CalcThread):
         if self.check_if_cancelled(): return
         try:
             # ----- 1D Correlation Function -----
-            gamma1 = dct((iqs-background)*qs**2)
+            gamma1 = dct((iqs-background)*(qs**2))
             Q = gamma1.max()
             gamma1 /= Q
 
@@ -79,7 +79,7 @@ class FourierThread(CalcThread):
 
         transformed_data = (transform1, transform3, idf)
 
-        self.complete(transformed_data=transformed_data)
+        self.complete(transform_result=transformed_data)
 
 class HilbertThread(CalcThread):
     def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,

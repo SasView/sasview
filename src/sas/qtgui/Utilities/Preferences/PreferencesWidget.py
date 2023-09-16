@@ -1,7 +1,7 @@
 import logging
 
-from PyQt5.QtGui import QIntValidator, QDoubleValidator
-from PyQt5.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
+from PySide6.QtGui import QIntValidator, QDoubleValidator, QValidator
+from PySide6.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
 from typing import Optional, List, Union, Dict
 
 from sas.system import config
@@ -62,9 +62,24 @@ class PreferencesWidget(QWidget):
 
     def _stageChange(self, key: str, value: ConfigType):
         """ All inputs should call this method when attempting to change config values. """
-        if self.parent is not None and hasattr(self.parent, 'stageSingleChange'):
+        if str(value) == str(getattr(config, key, None)):
+            # Input changed back to previous value - no need to stage
+            self._unStageChange(key)
+            # Ensure key is not in invalid list when coming from invalid to valid, but unchanged state
+            self.parent.unset_invalid_input(key)
+        else:
+            # New value for input - stage
             message = self.restart_params.get(key, None)
             self.parent.stageSingleChange(key, value, message)
+
+    def _unStageChange(self, key: str):
+        """ A private class method to unstage a single configuration change. Typically when the value is not valid. """
+        message = self.restart_params.get(key, None)
+        self.parent.unStageSingleChange(key, message)
+
+    def _setInvalid(self, key: str):
+        """Adds the input key to a set to ensure the preference panel does not try to apply invalid values"""
+        self.parent.set_invalid_input(key)
 
     def restoreGUIValuesFromConfig(self):
         """A generic method that blocks all signalling, and restores the GUI values from the config file.
@@ -141,6 +156,25 @@ class PreferencesWidget(QWidget):
         int_box = self.addTextInput(title, str(default_number))
         int_box.setValidator(QIntValidator())
         return int_box
+
+    def _validate_input_and_stage(self, edit: QLineEdit, key: str):
+        """A generic method to validate values entered into QLineEdit inputs. If the value is acceptable, it is staged,
+        otherwise, the input background color is changed to yellow and any previous changes will be unstaged until the
+        value is corrected.
+        :param edit: The QLineEdit input that is being validated.
+        :param key: The string representation of the key the QLineEdit value is stored as in the configuration system.
+        :return: None
+        """
+        edit.setStyleSheet("background-color: white")
+        validator = edit.validator()
+        text = edit.text()
+        (state, val, pos) = validator.validate(text, 0) if validator else (0, 0, 0)
+        if state == QValidator.Acceptable or not validator:
+            self._stageChange(key, text)
+        else:
+            edit.setStyleSheet("background-color: yellow")
+            self._unStageChange(key)
+            self._setInvalid(key)
 
     def addFloatInput(self, title: str, default_number: Optional[int] = 0) -> QLineEdit:
         """Similar to the text input creator, this creates a text input with an float validator assigned to it.

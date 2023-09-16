@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from PyQt5 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 # Local
 from sas.qtgui.MainWindow.GuiManager import GuiManager

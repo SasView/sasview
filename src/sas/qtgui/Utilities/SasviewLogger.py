@@ -2,35 +2,42 @@ import os
 import sys
 import logging
 
-from PyQt5.QtCore import *
+from PySide6.QtCore import QObject, Signal
 
+LOG_FORMAT = "%(asctime)s - %(levelname)s: %(message)s"
+DATE_FORMAT = "%H:%M:%S"
 
-class QtHandler(QObject, logging.Handler):
+class QtPostman(QObject):
+    messageWritten = Signal(str)
+
+class QtHandler(logging.Handler):
     """
-    Version of logging handler "emitting" the message to custom stdout()
+    Emit python log messages through a Qt signal. Receivers can connect
+    to *handler.postman.messageWritten* with a method accepting the
+    formatted log entry produced by the logger.
     """
-    messageWritten = pyqtSignal(str)
-
     def __init__(self):
-        QObject.__init__(self)
         logging.Handler.__init__(self)
+        self.postman = QtPostman()
 
     def emit(self, record):
-        record = self.format(record)
-        if record:
-            self.messageWritten.emit('%s\n'%record)
-
+        message = self.format(record)
+        if message:
+            self.postman.messageWritten.emit(message)
 
 def setup_qt_logging():
-    # Define the default logger
-    logger = logging.getLogger()
-
     # Add the qt-signal logger
-    handler = QtHandler()
-    handler.setFormatter(logging.Formatter(
-        fmt="%(asctime)s - %(levelname)s: %(message)s",
-        datefmt="%H:%M:%S"
-    ))
-    logger.addHandler(handler)
+    logger = logging.root
 
+    # If a QtHandler is already defined in log.ini then use it. This allows
+    # config to override the default message formatting. We don't do this
+    # by default because we may be using sasview as a library and don't
+    # want to load Qt.
+    for handler in logger.handlers:
+        if isinstance(handler, QtHandler):
+            return handler
+
+    handler = QtHandler()
+    handler.setFormatter(logging.Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
+    logger.addHandler(handler)
     return handler

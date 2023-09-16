@@ -1,8 +1,9 @@
 """
 Allows users to change the range of the current graph
 """
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import matplotlib as mpl
 import numpy
@@ -20,7 +21,7 @@ from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
 
 class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
-    apply_signal = QtCore.pyqtSignal(tuple, str)
+    apply_signal = QtCore.Signal(tuple, str)
     def __init__(self, parent=None, cmap=None, vmin=0.0, vmax=100.0, data=None):
         super(ColorMap, self).__init__()
 
@@ -61,10 +62,10 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         # Initialize validators on amplitude textboxes
         validator_min = DoubleValidator(self.txtMinAmplitude)
-        validator_min.setNotation(0)
+        validator_min.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.txtMinAmplitude.setValidator(validator_min)
         validator_max = DoubleValidator(self.txtMaxAmplitude)
-        validator_max.setNotation(0)
+        validator_max.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.txtMaxAmplitude.setValidator(validator_max)
 
         # Set the initial amplitudes

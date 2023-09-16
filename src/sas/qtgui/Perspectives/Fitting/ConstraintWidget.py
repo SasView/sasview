@@ -6,7 +6,7 @@ from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
@@ -107,9 +107,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
     Constraints Dialog to select the desired parameter/model constraints.
     """
-    fitCompleteSignal = QtCore.pyqtSignal(tuple)
-    batchCompleteSignal = QtCore.pyqtSignal(tuple)
-    fitFailedSignal = QtCore.pyqtSignal(tuple)
+    fitCompleteSignal = QtCore.Signal(tuple)
+    batchCompleteSignal = QtCore.Signal(tuple)
+    fitFailedSignal = QtCore.Signal(tuple)
 
     def __init__(self, parent=None):
         super(ConstraintWidget, self).__init__()
@@ -238,10 +238,27 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         tab_object = ObjectLibrary.getObject(tab)
 
         # Disconnect all local slots, if connected
-        if tab_object.receivers(tab_object.newModelSignal) > 0:
+        # None of the methods below seem to work with Qt6.2.4
+        # 1.
+        # if tab_object.receivers(tab_object.newModelSignal) > 0:
+        # 2.
+        # newModelSignal =QtCore.QMetaMethod.fromSignal(tab_object.newModelSignal)
+        # if tab_object.isSignalConnected(newModelSignal):
+        # 3.
+        # m_obj = tab_object.metaObject()
+        # is_connected = m_obj.isSignalConnected(m_obj.method(m_obj.indexOfSignal("newModelSignal()")))
+
+        try:
             tab_object.newModelSignal.disconnect()
-        if tab_object.receivers(tab_object.constraintAddedSignal) > 0:
+        except RuntimeError:
+            # need to pass here since no known PySide6 method of checking if signal is connected
+            # seems to work here. Need to upgrade to more recent version of PySide6 but this 
+            # currently causes other issues.
+            pass
+        try:
             tab_object.constraintAddedSignal.disconnect()
+        except RuntimeError:
+            pass
 
         # Reconnect tab signals to local slots
         tab_object.constraintAddedSignal.connect(self.initializeFitList)
@@ -773,19 +790,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Select for fitting
         param_string = "Fit Page " if num_rows==1 else "Fit Pages "
 
-        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
         self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
-        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect = QtGui.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
         self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
-        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint = QtGui.QAction(self)
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove all constraints on selected models"))
 
-        self.actionMutualMultiConstrain = QtWidgets.QAction(self)
+        self.actionMutualMultiConstrain = QtGui.QAction(self)
         self.actionMutualMultiConstrain.setObjectName("actionMutualMultiConstrain")
         self.actionMutualMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Mutual constrain of parameters in selected models..."))
 
@@ -818,15 +835,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Select for fitting
         param_string = "constraint " if num_rows==1 else "constraints "
 
-        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
         self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
-        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect = QtGui.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
         self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
-        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint = QtGui.QAction(self)
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove "+param_string))
 
@@ -1180,7 +1197,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 if model_name != model:
                     continue
                 # check/uncheck item
-                self.tblTabList.item(row,0).setCheckState(int(check_state))
+                # check_state is a string: "CheckState.Checked" or "CheckState.Unchecked"
+                if 'Unchecked' in check_state:
+                    self.tblTabList.item(row,0).setCheckState(QtCore.Qt.Unchecked)
+                else:
+                    self.tblTabList.item(row,0).setCheckState(QtCore.Qt.Checked)
 
         if not 'checked_constraints' in parameters:
             return
@@ -1230,7 +1251,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # by colon e.g `M1:scale` so no need to parse the constraint
             # string.
             if name in constraint:
-                self.tblConstraints.item(row, 0).setCheckState(0)
+                self.tblConstraints.item(row, 0).setCheckState(QtCore.Qt.Unchecked)
                 # deactivate the constraint
                 tab = self.parent.getTabByName(name[:name.index(":")])
                 row = tab.getRowFromName(name[name.index(":") + 1:])

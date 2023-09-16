@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="particle_editor">
+    <file>download-icon.png</file>
+    <file>upload-icon.png</file>
+    <file>save-icon.png</file>
+    <file>hammer-icon.png</file>
+    <file>scatter-icon.png</file>
+  </qresource>
+</RCC>

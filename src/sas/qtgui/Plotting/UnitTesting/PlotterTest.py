@@ -7,8 +7,8 @@ import pytest
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-from PyQt5 import QtGui, QtWidgets, QtPrintSupport
-from PyQt5 import QtCore
+from PySide6 import QtGui, QtWidgets, QtPrintSupport
+from PySide6 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -162,7 +162,7 @@ class PlotterTest:
         test_text = "Smoke in cabin"
         test_font = QtGui.QFont("Arial", 16, QtGui.QFont.Bold)
         test_color = "#00FF00"
-        plotter.addText.textEdit.setText(test_text)
+        plotter.addText.codeEditor.setText(test_text)
 
         # Return the requested font parameters
         mocker.patch.object(plotter.addText, 'font', return_value=test_font)
@@ -186,7 +186,7 @@ class PlotterTest:
         # Add some text
         plotter.plot(self.data)
         test_text = "Safety instructions"
-        plotter.addText.textEdit.setText(test_text)
+        plotter.addText.codeEditor.setText(test_text)
         # Return OK from the dialog
         mocker.patch.object(plotter.addText, 'exec_', return_value=QtWidgets.QDialog.Accepted)
         # Add text to graph

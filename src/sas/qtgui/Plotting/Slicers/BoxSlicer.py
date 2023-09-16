@@ -8,9 +8,18 @@ from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 class BoxInteractor(BaseInteractor, SlicerModel):
     """
-    BoxInteractor define a rectangle that return data1D average of Data2D
-    in a rectangle area defined by -x, x ,y, -y
+    BoxInteractor plots a data1D average of a rectangular area defined in
+    a Data2D object. The data1D averaging itself is performed in sasdata
+    by manipulations.py
+
+    This class uses two other classes, HorizontalLines and VerticalLines,
+    to define the rectangle area: -x, x ,y, -y. It is subclassed by
+    BoxInteractorX and BoxInteracgtorY which define the direction of the
+    average. BoxInteractorX averages all the points from -y to +y as a
+    function of Q_x and BoxInteractorY averages all the points from
+    -x to +x as a function of Q_y
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
@@ -57,6 +66,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # of averaging data2D
         self.update()
         self._post_data()
+        self.draw()
         self.setModelFromParams()
 
     def update_and_post(self):
@@ -65,6 +75,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         self.update()
         self._post_data()
+        self.draw()
 
     def set_layer(self, n):
         """
@@ -108,12 +119,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.vertical_lines.save(ev)
         self.horizontal_lines.save(ev)
 
-    def _post_data(self):
-        pass
-
-    def post_data(self, new_slab=None, nbins=None, direction=None):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
-        post data averaging in Qx or Qy given new_slab type
+        post 1D data averaging in Qx or Qy given new_slab type
 
         :param new_slab: slicer that determine with direction to average
         :param nbins: the number of points plotted when averaging
@@ -195,7 +203,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         if self.update_model:
             self.setModelFromParams()
-        self.draw()
 
     def moveend(self, ev):
         """
@@ -205,12 +212,12 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         self._post_data()
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
-        self.horizontal_lines.restore()
-        self.vertical_lines.restore()
+        self.horizontal_lines.restore(ev)
+        self.vertical_lines.restore(ev)
 
     def move(self, x, y, ev):
         """
@@ -250,10 +257,13 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
-        self.post_data(nbins=None)
+        self._post_data()
+        self.draw()
 
     def draw(self):
         """
+        Draws the Canvas using the canvas.draw from the calling class
+        that instatiated this object.
         """
         self.base.draw()
 
@@ -261,8 +271,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 class HorizontalLines(BaseInteractor):
     """
     Draw 2 Horizontal lines centered on (0,0) that can move
-    on the x- direction and in opposite direction
+    on the x direction. The two lines move symmetrically (in opposite
+    directions). It also defines the x and -x position of a box.
     """
+
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
         """
         """
@@ -350,7 +362,7 @@ class HorizontalLines(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
@@ -363,13 +375,17 @@ class HorizontalLines(BaseInteractor):
         """
         self.y = y
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
 
 class VerticalLines(BaseInteractor):
     """
-    Select an annulus through a 2D plot
+    Draw 2 vertical lines centered on (0,0) that can move
+    on the y direction. The two lines move symmetrically (in opposite
+    directions). It also defines the y and -y position of a box.
     """
+
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
         """
         """
@@ -457,7 +473,7 @@ class VerticalLines(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
@@ -470,24 +486,28 @@ class VerticalLines(BaseInteractor):
         """
         self.has_move = True
         self.x = x
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
 
 class BoxInteractorX(BoxInteractor):
     """
-    Average in Qx direction
+    Average in Qx direction. The data for all Qy at a constant Qx are
+    averaged together to provide a 1D array in Qx (to be plotted as a function
+     of Qx)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
         Post data creating by averaging in Qx direction
         """
         from sasdata.data_util.manipulations import SlabX
-        self.post_data(SlabX, direction="X")
+        super()._post_data(SlabX, direction="X")
 
     def validate(self, param_name, param_value):
         """
@@ -506,19 +526,22 @@ class BoxInteractorX(BoxInteractor):
 
 class BoxInteractorY(BoxInteractor):
     """
-    Average in Qy direction
+    Average in Qy direction. The data for all Qx at a constant Qy are
+    averaged together to provide a 1D array in Qy (to be plotted as a function
+     of Qy)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
         Post data creating by averaging in Qy direction
         """
         from sasdata.data_util.manipulations import SlabY
-        self.post_data(SlabY, direction="Y")
+        super()._post_data(SlabY, direction="Y")
 
     def validate(self, param_name, param_value):
         """

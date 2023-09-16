@@ -1,11 +1,10 @@
 import sys
 import numpy as np
 from unittest.mock import MagicMock
-
 import pytest
 
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtTest import QTest, QSignalSpy
+from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6.QtTest import QTest, QSignalSpy
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
