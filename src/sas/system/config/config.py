@@ -209,8 +209,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
         # What's New variables
-        self.SHOW_WHATS_NEW = True
-        self.LAST_WHATS_NEW_HIDDEN_VERSION = "0.0.0"
+        self.LAST_WHATS_NEW_HIDDEN_VERSION = "5.0.6"
 
         #
         # Lock the class down, this is necessary both for

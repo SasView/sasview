@@ -11,8 +11,6 @@ from sas.system import config
 
 from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_version
 
-config.LAST_WHATS_NEW_HIDDEN_VERSION = "5.1.0"
-
 def whats_new_messages():
     """ Accumulate all files that are newer than the value in the config"""
 
@@ -100,25 +98,17 @@ class WhatsNew(QDialog):
 
     def close_me(self):
         if not self.showAgain.isChecked():
-            config.SHOW_WHATS_NEW = False
             config.LAST_WHATS_NEW_HIDDEN_VERSION = sasview_version
 
         self.close()
 
 
-def update_config():
-    """ If there are new messages, update the config to make the What's New window show """
-
-    if not whats_new_messages():
-        config.SHOW_WHATS_NEW = True
-
 
 def maybe_show_whats_new():
     global whats_new_window
     """ Show the What's New dialogue if it is wanted """
-    update_config()
 
-    if config.SHOW_WHATS_NEW:
+    if whats_new_messages():
         whats_new_window = WhatsNew()
         whats_new_window.show()
 
