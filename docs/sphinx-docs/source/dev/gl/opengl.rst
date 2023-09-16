@@ -8,6 +8,6 @@ a way of checking the rendering, and catalogue the available functions
 
 
 Class Hierarchy
-===============
+^^^^^^^^^^^^^^^
 
 TODO - data currently in PR.
