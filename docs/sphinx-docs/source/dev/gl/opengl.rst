@@ -1,5 +1,5 @@
 Open GL Subsystem
-==============
+=================
 
 The SasView openGL subsystem is quite minimal, and works in the standard way though a scenegraph
 
