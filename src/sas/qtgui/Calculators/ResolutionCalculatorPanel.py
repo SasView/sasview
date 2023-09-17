@@ -126,23 +126,23 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
          if TOF, wavelength = min - max else only one number """
         text_edit = self.txtWavelength  # self.sender()
         if text_edit.isModified():
-            text_edit.setStyleSheet(BG_WHITE)
+            GuiUtils.updateProperty(text_edit, 'urgent', 'false')
             input_string = str(text_edit.text())
             if self.cbWaveColor.currentText() != 'TOF':
                 input_wavelength = re.match('\d+\.?\d*', input_string)
                 if input_wavelength is None:
-                    text_edit.setStyleSheet(BG_RED)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                     self.cmdCompute.setEnabled(False)
                     logging.info('Wavelength has to be a number.')
                 else:
-                    text_edit.setStyleSheet(BG_WHITE)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'false')
                     self.cmdCompute.setEnabled(True)
             else:
                 interval_wavelength = re.match('^\d+\.?\d*\s*-\s*\d+\.?\d*$',
                                                input_string)
 
                 if interval_wavelength is None:
-                    text_edit.setStyleSheet(BG_RED)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                     self.cmdCompute.setEnabled(False)
                     logging.info("Wavelength's input has to be an interval: "
                                  "min - max.")
@@ -152,12 +152,12 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                         re.findall('\d+\.?\d*', interval_wavelength.group())
 
                     if float(wavelength_min) >= float(wavelength_max):
-                        text_edit.setStyleSheet(BG_RED)
+                        GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                         self.cmdCompute.setEnabled(False)
                         logging.info("Wavelength: min must be smaller than max.")
 
                     else:
-                        text_edit.setStyleSheet(BG_WHITE)
+                        GuiUtils.updateProperty(text_edit, 'urgent', 'false')
                         self.cmdCompute.setEnabled(True)
 
     def checkWavelengthSpread(self):
@@ -166,14 +166,14 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         text_edit = self.sender()
 
         if text_edit.isModified():
-            text_edit.setStyleSheet(BG_WHITE)
+            GuiUtils.updateProperty(text_edit, 'urgent', 'false')
             if self.cbWaveColor.currentText() != 'TOF':
                 pattern = '^\d+\.?\d*(|;\s*\d+)$'
                 input_string = str(text_edit.text())
                 wavelength_spread_input = re.match(pattern, input_string)
 
                 if wavelength_spread_input is None:
-                    text_edit.setStyleSheet(BG_RED)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                     self.cmdCompute.setEnabled(False)
                     logging.info('Wavelength spread has to be specified: '
                                  'single value or value; integer number of bins.')
@@ -181,7 +181,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 else:
                     split_input = wavelength_spread_input.group().split(';')
                     self.num_wave = split_input[1] if len(split_input) > 1 else 10
-                    text_edit.setStyleSheet(BG_WHITE)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'false')
                     self.cmdCompute.setEnabled(True)
             else:
                 pattern = '^\d+\.?\d*\s*-\s*\d+\.?\d*(|;\s*\d+)$'
@@ -189,7 +189,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 wavelength_spread_input = re.match(pattern, input_string)
 
                 if wavelength_spread_input is None:
-                    text_edit.setStyleSheet(BG_RED)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                     self.cmdCompute.setEnabled(False)
                     logging.info("Wavelength spread has to be specified: "
                                  "doublet separated by '-' with optional "
@@ -200,7 +200,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                     split_input = wavelength_spread_input.group().split(';')
                     self.num_wave = split_input[1] if len(
                         split_input) > 1 else 10
-                    text_edit.setStyleSheet(BG_WHITE)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'false')
                     self.cmdCompute.setEnabled(True)
 
     def checkPixels(self):
@@ -208,19 +208,19 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         text_edit = self.sender()
 
         if text_edit.isModified():
-            text_edit.setStyleSheet(BG_WHITE)
+            GuiUtils.updateProperty(text_edit, 'urgent', 'false')
             pattern = '^\d+\.?\d*,\s*\d+\.?\d*$'
             input_string = str(text_edit.text())
             pixels_input = re.match(pattern, input_string)
 
             if pixels_input is None:
-                text_edit.setStyleSheet(BG_RED)
+                GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                 self.cmdCompute.setEnabled(False)
                 logging.info('The input for the detector should contain 2 '
                              'values separated by a comma.')
 
             else:
-                text_edit.setStyleSheet(BG_WHITE)
+                GuiUtils.updateProperty(text_edit, 'urgent', 'false')
                 self.cmdCompute.setEnabled(True)
 
     def checkQx_y(self):
@@ -232,11 +232,11 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
             input_string = str(text_edit.text())
             q_input = re.match(pattern, input_string)
             if q_input is None:
-                text_edit.setStyleSheet(BG_RED)
+                GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                 self.cmdCompute.setEnabled(False)
                 logging.info('Qx and Qy should contain one or more comma-separated numbers.')
             else:
-                text_edit.setStyleSheet(BG_WHITE)
+                GuiUtils.updateProperty(text_edit, 'urgent', 'false')
                 self.cmdCompute.setEnabled(True)
                 qx = str(self.txtQx.text()).split(',')
                 qy = str(self.txtQy.text()).split(',')
@@ -250,13 +250,13 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                     self.txtQy.setText(fill_qy)
 
                 elif len(qx) != len(qy):
-                    text_edit.setStyleSheet(BG_RED)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                     self.cmdCompute.setEnabled(False)
                     logging.info(
                         'Qx and Qy should have the same number of elements.')
 
                 else:
-                    text_edit.setStyleSheet(BG_WHITE)
+                    GuiUtils.updateProperty(text_edit, 'urgent', 'false')
                     self.cmdCompute.setEnabled(True)
 
     def checkAperture(self):
@@ -264,20 +264,20 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         text_edit = self.sender()
 
         if text_edit.isModified():
-            text_edit.setStyleSheet(BG_WHITE)
+            GuiUtils.updateProperty(text_edit, 'urgent', 'false')
             input_string = str(text_edit.text())
             pattern = '^\d+\.?\d*(|,\s*\d+)$'
             aperture_input = re.match(pattern, input_string)
 
             if aperture_input is None:
-                text_edit.setStyleSheet(BG_RED)
+                GuiUtils.updateProperty(text_edit, 'urgent', 'true')
                 self.cmdCompute.setEnabled(False)
                 logging.info('A circular aperture is defined by a single '
                              'value (diameter). A rectangular aperture is '
                              'defined by 2 values separated by a comma.')
 
             else:
-                text_edit.setStyleSheet(BG_WHITE)
+                GuiUtils.updateProperty(text_edit, 'urgent', 'false')
                 self.cmdCompute.setEnabled(True)
 
     # #################################
