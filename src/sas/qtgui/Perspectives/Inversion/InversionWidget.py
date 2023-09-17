@@ -68,6 +68,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     forcePlotDisplaySignal = QtCore.Signal(list)
 
 
+
     def __init__(self, parent=None, data=None, tab_id=1):
         super(InversionWidget, self).__init__()
 
@@ -234,6 +235,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
         self.maxDistanceInput.textChanged.connect(
             lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
+
+        # Signals asking for replot
         self.maxQInput.editingFinished.connect(self.check_q_high)
         self.minQInput.editingFinished.connect(self.check_q_low)
         self.slitHeightInput.textChanged.connect(
@@ -566,6 +569,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_value)))
             self._calculator.set_qmin(q_value)
 
+
     def check_q_high(self, q_value=None):
         """ Validate the value of high q sent by the slider """
         if not q_value:
@@ -582,6 +586,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             # Valid Q - set model item
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_value)))
             self._calculator.set_qmax(q_value)
+
 
     ######################################################################
     # Response Actions
@@ -881,8 +886,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isBatch = True
         self.batchComplete = []
         self.calculateAllButton.setText("Calculating...")
-        self.enableButtons()
         self.startThread()
+
 
     def startThreadThis(self):
         """
@@ -1172,7 +1177,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
             self.prPlot.show_yzero = True
             self.prPlot.filename = self.logic.data.filename
-            self.dataPlot = self.logic.new1DPlot(out, self._calculator)
+            self.dataPlot = self.logic.new1DPlot(self.tab_id, out, self._calculator)
             self.dataPlot.filename = self.logic.data.filename
 
             self.dataPlot.show_q_range_sliders = True

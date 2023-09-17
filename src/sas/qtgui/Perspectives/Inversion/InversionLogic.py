@@ -42,7 +42,7 @@ class InversionLogic(object):
         """ accessor """
         return self.data_is_loaded
 
-    def new1DPlot(self, out, pr, q=None):
+    def new1DPlot(self, tab_id=1, out=None, pr=None, q=None):
         """
         Create a new 1D data instance based on fitting results
         """
@@ -81,7 +81,7 @@ class InversionLogic(object):
         # If we have a group ID, use it
         if 'plot_group_id' in pr.info:
             new_plot.group_id = pr.info["plot_group_id"]
-        new_plot.id = IQ_FIT_LABEL
+        new_plot.id = str(tab_id) +IQ_FIT_LABEL
 
 
         # If we have used slit smearing, plot the smeared I(q) too
