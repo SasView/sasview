@@ -15,14 +15,26 @@ def whats_new_messages():
     """ Accumulate all files that are newer than the value in the config"""
 
     out = defaultdict(list)
-    for message_dir in resources.files("sas.qtgui.Utilities.WhatsNew.messages").iterdir():
+    message_dir = resources.files("sas.qtgui.Utilities.WhatsNew.messages")
+    for message_dir in message_dir.iterdir():
         # Get short filename
+        if message_dir.is_dir():
 
-        if strictly_newer_than(message_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION):
-            if message_dir.is_dir():
+            newer = False
+
+            try:
+                newer = strictly_newer_than(message_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
+
+            except ValueError:
+                pass
+
+
+            if newer:
                 for file in message_dir.iterdir():
                     if file.name.endswith(".html"):
                         out[message_dir.name].append(file)
+
+
     return out
 
 
@@ -36,7 +48,7 @@ class WhatsNew(QDialog):
 
     """
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__()
 
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
@@ -85,6 +97,8 @@ class WhatsNew(QDialog):
 
         self.show_file()
 
+        self.setModal(True)
+
     def next_file(self):
         self.current_index += 1
         self.current_index %= self.max_index
@@ -102,6 +116,10 @@ class WhatsNew(QDialog):
 
         self.close()
 
+    def has_new_messages(self) -> bool:
+        """ Should the window be shown? """
+        return bool(self.all_messages)
+
 
 
 def maybe_show_whats_new():
@@ -112,8 +130,6 @@ def maybe_show_whats_new():
         whats_new_window = WhatsNew()
         whats_new_window.show()
 
-
-whats_new_messages()
 
 def main():
     """ Demo/testing window"""
