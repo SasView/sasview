@@ -6,7 +6,7 @@ def reduced_version(version_string: str) -> Tuple[int, int, int]:
     of the WhatsNew dialog (i.e. strip a,b suffixes etc, make into three ints"""
 
     version_string = re.sub(r"[^\.0-9]+.*", "", version_string)
-    
+
     parts = version_string.split(".")
 
     if len(parts) > 3:
