@@ -1,5 +1,5 @@
 /* Global Properties */
-* {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif; color: grey; background-color: black;}
+* {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif; color: grey; background-color: black; border-color: lightgrey;}
 
 /* Qt Elements */
 QLineEdit {background-color: white; color: black;}
@@ -8,11 +8,12 @@ QLineEdit[warning=true] {background-color: yellow;}
 QLineEdit[urgent=true] {background-color: red;}
 QTableWidgetItem[italic=true] {font-style: italic}
 
-QLabel {background-color: lightgrey}
+QTabBar::tab {background-color: black; color: lightgrey;}
+QTabBar::tab:hover, QComboBox:hover, QPushButton:hover {background-color: lightgrey}
+
 QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
 
-QPushButtun {background-color: lightgrey}
-QPushButton:hover {background-color: darkgrey}
+QPushButton {background-color: lightgrey}
 QPushButton[urgent=true] {color: red;}
 
 QToolTip {font-size: 80%; background-color: lightgrey}
