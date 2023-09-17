@@ -8,7 +8,10 @@ from sas.system import user
 
 logger = logging.getLogger()
 
-OPTIONS = {'Default': Path(os.path.join(os.path.dirname(__file__), 'default.css'))}
+OPTIONS = {
+    'Default': Path(os.path.join(os.path.dirname(__file__), 'default.css')),
+    'Dark': Path(os.path.join(os.path.dirname(__file__), 'dark.css'))
+}
 
 
 def load_theme(theme: str = None) -> str:

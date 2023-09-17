@@ -1,5 +1,5 @@
 /* Global Properties */
-* {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif}
+* {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif; color: grey; background-color: black;}
 
 /* Qt Elements */
 QLineEdit {background-color: white; color: black;}
@@ -8,12 +8,14 @@ QLineEdit[warning=true] {background-color: yellow;}
 QLineEdit[urgent=true] {background-color: red;}
 QTableWidgetItem[italic=true] {font-style: italic}
 
+QLabel {background-color: lightgrey}
 QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
 
-QPushButton {color: black;}
+QPushButtun {background-color: lightgrey}
+QPushButton:hover {background-color: darkgrey}
 QPushButton[urgent=true] {color: red;}
 
-QToolTip {font-size: 80%;}
+QToolTip {font-size: 80%; background-color: lightgrey}
 
 QProgressBar {border: 2px solid grey; border-radius: 5px; text-align: center}
 QProgressBar::chunk {background-color: #b1daf9; width: 10px; margin: 1px;}
@@ -22,7 +24,7 @@ QTextBrowser[warning=true] {border: 5px solid red; background-color: lightyellow
 QCodeEditor {font-family: 'monospace, monospace'}
 QCodeEditor[warning=true] {border: 5px solid red; background-color: lightyellow}
 
-QTreeView {paint-alternating-row-colors-for-empty-area:0;}
+QTreeView {paint-alternating-row-colors-for-empty-area:0; background-color: lightgrey}
 QTreeView::item {border: 1px; padding: 2px 1px;}
 QTreeView::item:hover {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1); border: 1px solid #bfcde4;}
 QTreeView::item:selected {border: 1px solid #567dbc;}
