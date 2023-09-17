@@ -13,4 +13,6 @@ QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
 QToolTip {font-size: 80%;}
 
 /* Class-specific Properties */
-.monospace {font-family: 'monospace, monospace'}
+QTextBrowser[warning=true] {border: 5px solid red; background-color: lightyellow}
+QCodeEditor {font-family: 'monospace, monospace'}
+QCodeEditor[warning=true] {border: 5px solid red; background-color: lightyellow}

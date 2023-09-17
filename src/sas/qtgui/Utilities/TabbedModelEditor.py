@@ -168,7 +168,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             return
 
         # In case previous model was incorrect, change the frame colours back
-        self.editor_widget.txtEditor.setStyleSheet("")
+        GuiUtils.updateProperty(self.editor_widget.txtEditor, 'warning', 'false')
         self.editor_widget.txtEditor.setToolTip("")
 
         # See if there is filename.c present
@@ -219,7 +219,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Disable the plugin editor and show that the model is changed.
         """
         self.setTabEdited(True)
-        self.plugin_widget.txtFunction.setStyleSheet("")
+        GuiUtils.updateProperty(self.plugin_widget.txtFunction, 'warning', 'false')
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
         self.is_modified = True
 
@@ -338,7 +338,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
 
             # Put a thick, red border around the mini-editor
-            self.tabWidget.currentWidget().txtEditor.setStyleSheet("border: 5px solid red")
+            GuiUtils.updateProperty(self.tabWidget.currentWidget().txtEditor, 'warning', 'true')
             # last_lines = traceback.format_exc().split('\n')[-4:]
             traceback_to_show = '\n'.join(last_lines)
             self.tabWidget.currentWidget().txtEditor.setToolTip(traceback_to_show)
@@ -381,7 +381,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Remove the file so it is not being loaded on refresh
             os.remove(full_path)
             # Put a thick, red border around the mini-editor
-            self.plugin_widget.txtFunction.setStyleSheet("border: 5px solid red")
+            GuiUtils.updateProperty(self.plugin_widget.txtFunction, 'warning', 'true')
             # Use the last line of the traceback for the tooltip
             last_lines = traceback.format_exc().split('\n')[-2:]
             traceback_to_show = '\n'.join(last_lines)
@@ -412,7 +412,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 return
 
         # change the frame colours back
-        w.txtEditor.setStyleSheet("")
+        GuiUtils.updateProperty(w.txtEditor, 'warning', 'false')
         w.txtEditor.setToolTip("")
         # Save the file
         self.writeFile(filename, model_str)

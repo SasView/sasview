@@ -34,8 +34,6 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
         from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
         self.highlight = PythonHighlighter(self.txtEditor.document(), is_python=self.is_python)
 
-        self.txtEditor.setFont(GuiUtils.getMonospaceFont())
-
     def addSignals(self):
         """
         Respond to signals in the widget
