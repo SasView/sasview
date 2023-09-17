@@ -134,9 +134,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             show_warning = False
 
         if show_warning:
-            self.txtBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
+            GuiUtils.updateProperty(self.txtBackground, 'urgent', 'true')
         else:
-            self.txtBackground.setStyleSheet("")
+            GuiUtils.updateProperty(self.txtBackground, 'urgent', 'false')
 
     def isSerializable(self):
         """
@@ -593,10 +593,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def notify_extrapolation_text_box_validity(self, params):
         """ Set the colour of the text boxes to red if they have bad parameter definitions"""
-        box_1_style = ""
-        box_2_style = ""
-        box_3_style = ""
-        red = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
+        box_1_style = "false"
+        box_2_style = "false"
+        box_3_style = "false"
+        red = "true"
 
         if params.point_1 <= params.data_q_min:
             box_1_style = red
@@ -617,9 +617,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             box_1_style = red
             box_3_style = red
 
-        self.txtLowerQMax.setStyleSheet(box_1_style)
-        self.txtUpperQMin.setStyleSheet(box_2_style)
-        self.txtUpperQMax.setStyleSheet(box_3_style)
+        GuiUtils.updateProperty(self.txtLowerQMax, 'urgent', box_1_style)
+        GuiUtils.updateProperty(self.txtUpperQMin, 'urgent', box_2_style)
+        GuiUtils.updateProperty(self.txtUpperQMax, 'urgent', box_3_style)
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         """ Slider state changed"""
