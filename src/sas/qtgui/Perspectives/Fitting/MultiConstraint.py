@@ -113,10 +113,10 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: red;}")
+            GuiUtils.updateProperty(self.txtConstraint, 'urgent', 'true')
         else:
             self.cmdOK.setEnabled(True)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: white;}")
+            GuiUtils.updateProperty(self.txtConstraint, 'urgent', 'false')
 
     def validateConstraint(self, constraint_text):
         """
