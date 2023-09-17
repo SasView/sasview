@@ -9,6 +9,7 @@ from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
 from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
 
+
 class WedgeInteractor(BaseInteractor, SlicerModel):
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
@@ -29,6 +30,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
     AnnulusSlicer) and WedgeInteractorQ averages all phi points at constant Q
     (as for the SectorSlicer).
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
 
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -115,7 +117,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             self.phi = self.radial_lines.phi
             self.inner_arc.update(phi=self.phi)
             self.outer_arc.update(phi=self.phi)
-        if  self.central_line.has_move:
+        if self.central_line.has_move:
             self.central_line.update()
             self.theta = self.central_line.theta
             self.inner_arc.update(theta=self.theta)
@@ -200,7 +202,6 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         else:
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
-
 
         new_plot.id = str(self.averager.__name__) + self.data.name
         new_plot.group_id = new_plot.id
@@ -322,18 +323,20 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         """
         self.base.draw()
 
+
 class WedgeInteractorQ(WedgeInteractor):
     """
     Average in Q direction. The data for all phi at a constant Q are
     averaged together to provide a 1D array in Q (to be plotted as a function
      of Q)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.new_manipulations import WedgeQ
         super()._post_data(WedgeQ)
 
@@ -344,12 +347,13 @@ class WedgeInteractorPhi(WedgeInteractor):
     averaged together to provide a 1D array in phi (to be plotted as a function
      of phi)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.new_manipulations import WedgePhi
         super()._post_data(WedgePhi)
 
