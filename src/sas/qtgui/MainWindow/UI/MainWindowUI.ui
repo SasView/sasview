@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -91,6 +91,7 @@
     <addaction name="actionSlit_Size_Calculator"/>
     <addaction name="actionKeissig_Calculator"/>
     <addaction name="actionSAS_Resolution_Estimator"/>
+    <addaction name="actionMuMag_Fitter"/>
     <addaction name="actionGeneric_Scattering_Calculator"/>
     <addaction name="separator"/>
     <addaction name="actionImage_Viewer"/>
@@ -617,6 +618,11 @@
    </property>
    <property name="text">
     <string>Preferences...</string>
+   </property>
+  </action>
+  <action name="actionMuMag_Fitter">
+   <property name="text">
+    <string>MuMag Fitter</string>
    </property>
   </action>
  </widget>

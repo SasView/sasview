@@ -1,7 +1,7 @@
 from sas.qtgui.Utilities.MuMagTool.UI.MuMagUI import Ui_MainWindow
 from PySide6.QtWidgets import QWidget
 from PySide6 import QtWidgets
-import MuMagLib
+from sas.qtgui.Utilities.MuMagTool import MuMagLib
 
 
 def on_press_2():

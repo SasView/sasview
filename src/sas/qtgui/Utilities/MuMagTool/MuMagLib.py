@@ -10,7 +10,7 @@ from tkinter import ttk
 import os
 import os.path
 from datetime import datetime
-from PyQt6.QtWidgets import QFileDialog
+from PySide6.QtWidgets import QFileDialog
 import string
 
 #####################################################################################################################
