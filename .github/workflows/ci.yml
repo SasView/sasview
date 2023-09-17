@@ -32,7 +32,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/checkout@v3
       - id: set-matrix
@@ -195,7 +195,7 @@ jobs:
       - name: Install utilities to build installer
         if: ${{ matrix.installer }}
         run: |
-          python -m pip install pyinstaller==5.7.0
+          python -m pip install pyinstaller
 
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
@@ -283,7 +283,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, ubuntu-20.04 ]
-        python-version: [ 3.8 ]
+        python-version: [ 3.11 ]
       fail-fast: false
 
     name: Test installer
