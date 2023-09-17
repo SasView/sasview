@@ -97,13 +97,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._allow_close = False
 
         # Modify font in order to display Angstrom symbol correctly
-        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.lblTotalQUnits.setStyleSheet(new_font)
-        self.lblSpecificSurfaceUnits.setStyleSheet(new_font)
-        self.lblInvariantTotalQUnits.setStyleSheet(new_font)
-        self.lblContrastUnits.setStyleSheet(new_font)
-        self.lblPorodCstUnits.setStyleSheet(new_font)
-        self.lblExtrapolQUnits.setStyleSheet(new_font)
+        GuiUtils.updateProperty(self.lblTotalQUnits, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblSpecificSurfaceUnits, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblInvariantTotalQUnits, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblContrastUnits, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblPorodCstUnits, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblExtrapolQUnits, 'angstrom', 'true')
 
         # To remove blue square around line edits
         self.txtBackgd.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
@@ -609,15 +608,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         try:
             int_value = int(self.sender().text())
         except ValueError:
-            self.sender().setStyleSheet(BG_RED)
+            GuiUtils.updateProperty(self.sender(), 'urgent', 'true')
             return
 
         if self._data:
             if len(self._data.x) < int_value:
-                self.sender().setStyleSheet(BG_RED)
+                GuiUtils.updateProperty(self.sender(), 'urgent', 'true')
                 logging.warning('The number of points must be smaller than {}'.format(len(self._data.x)))
             else:
-                self.sender().setStyleSheet(BG_WHITE)
+                GuiUtils.updateProperty(self.sender(), 'urgent', 'false')
                 self.allow_calculation()
 
     def modelChanged(self, item):
@@ -711,8 +710,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and (q_high_min > q_low_max)
                      and self.txtExtrapolQMax.text() and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text()
                      and self.txtNptsHighQ.text())
-        self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max and q_low_max < q_high_min else BG_WHITE)
-        self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max and q_low_max < q_high_min else BG_WHITE)
+        GuiUtils.updateProperty(self.txtExtrapolQMin, 'urgent',
+                                'true'if q_low_min >= q_low_max and q_low_max < q_high_min else 'false')
+        GuiUtils.updateProperty(self.txtExtrapolQMax, 'urgent',
+                                'true' if q_high_min >= q_high_max and q_low_max < q_high_min else 'false')
         if calculate:
             self.allow_calculation()
         else:
@@ -742,11 +743,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.model.setItem(related_widgets[index_elt], item)
         try:
             related_internal_values[index_elt] = float(self.sender().text())
-            self.sender().setStyleSheet(BG_WHITE)
+            GuiUtils.updateProperty(self.sender(), 'urgent', 'false')
             self.allow_calculation()
         except ValueError:
             # empty field, just skip
-            self.sender().setStyleSheet(BG_RED)
+            GuiUtils.updateProperty(self.sender(), 'urgent', 'true')
             self.cmdCalculate.setEnabled(False)
 
     def lowGuinierAndPowerToggle(self, toggle):
