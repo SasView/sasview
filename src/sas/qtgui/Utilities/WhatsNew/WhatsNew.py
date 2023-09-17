@@ -9,7 +9,7 @@ import importlib.resources as resources
 from sas.system import config
 
 
-from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_version
+from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_version, newest
 
 def whats_new_messages():
     """ Accumulate all files that are newer than the value in the config"""
@@ -112,7 +112,8 @@ class WhatsNew(QDialog):
 
     def close_me(self):
         if not self.showAgain.isChecked():
-            config.LAST_WHATS_NEW_HIDDEN_VERSION = sasview_version
+            # We choose the newest, for backwards compatability, i.e. we never reduce the last version
+            config.LAST_WHATS_NEW_HIDDEN_VERSION = newest(sasview_version, config.LAST_WHATS_NEW_HIDDEN_VERSION)
 
         self.close()
 
