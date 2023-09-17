@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayo
 from typing import Optional, List, Union, Dict
 
 from sas.system import config
+from sas.qtgui.Utilities import GuiUtils
 
 ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
 logger = logging.getLogger(__name__)
@@ -165,14 +166,14 @@ class PreferencesWidget(QWidget):
         :param key: The string representation of the key the QLineEdit value is stored as in the configuration system.
         :return: None
         """
-        edit.setStyleSheet("background-color: white")
+        GuiUtils.updateProperty(edit, 'warning', 'false')
         validator = edit.validator()
         text = edit.text()
         (state, val, pos) = validator.validate(text, 0) if validator else (0, 0, 0)
         if state == QValidator.Acceptable or not validator:
             self._stageChange(key, text)
         else:
-            edit.setStyleSheet("background-color: yellow")
+            GuiUtils.updateProperty(edit, 'warning', 'true')
             self._unStageChange(key)
             self._setInvalid(key)
 

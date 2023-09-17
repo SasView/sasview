@@ -1,5 +1,7 @@
 from sas.system import config, style
 
+from sas.qtgui.Utilities import GuiUtils
+
 from .PreferencesWidget import PreferencesWidget
 
 
@@ -49,7 +51,7 @@ class DisplayPreferencesWidget(PreferencesWidget):
     def _restoreFromConfig(self):
         self.theme.setCurrentText(config.THEME)
         self.qtScaleFactor.setText(str(config.QT_SCALE_FACTOR))
-        self.qtScaleFactor.setStyleSheet("background-color: white")
+        GuiUtils.updateProperty(self.qtScaleFactor, 'warning', 'false')
         self.autoScaling.setChecked(bool(config.QT_AUTO_SCREEN_SCALE_FACTOR))
         self.disableResidualPlot.setChecked(config.DISABLE_RESIDUAL_PLOT)
         self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)

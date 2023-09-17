@@ -1,5 +1,7 @@
 from sas.system import config
 
+from sas.qtgui.Utilities import GuiUtils
+
 from .PreferencesWidget import PreferencesWidget
 
 
@@ -36,4 +38,4 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.legendFullWidth.setChecked(bool(config.FITTING_PLOT_FULL_WIDTH_LEGENDS))
         self.legendTruncate.setChecked(bool(config.FITTING_PLOT_LEGEND_TRUNCATE))
         self.legendLineLength.setText(str(config.FITTING_PLOT_LEGEND_MAX_LINE_LENGTH))
-        self.legendLineLength.setStyleSheet("background-color: white")
+        GuiUtils.updateProperty(self.legendLineLength, 'warning', 'false')
