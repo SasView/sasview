@@ -10,20 +10,32 @@ ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
 logger = logging.getLogger(__name__)
 
 
-class PrefIntValidator(QIntValidator):
-    """Override the base validator class to return an integer value when validating."""
-    def fixup(self, input: str) -> None:
-        super().fixup(input)
-        input.replace(",", "")
+class PrefIntEdit(QLineEdit):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setValidator(QIntValidator())
 
-    def validate(self, arg__1: str, arg__2: int) -> (int, int, int):
-        if "," in arg__1:
-            return QValidator.Invalid
-        state, val, pos = super().validate(arg__1, arg__2)
-        if state in [QValidator.Acceptable, QValidator.Intermediate] and val not in [None, ""]:
-            # Value is an integer value but maybe not in the expected range for the input
-            val = int(val)
-        return state, val, pos
+    def text(self):
+        text = super().text()
+        try:
+            text = int(text)
+        except ValueError:
+            pass
+        return text
+
+
+class PrefFloatEdit(QLineEdit):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setValidator(PrefDoubleValidator())
+
+    def text(self):
+        text = super().text()
+        try:
+            text = float(text)
+        except ValueError:
+            pass
+        return text
 
 
 class PrefDoubleValidator(QDoubleValidator):
@@ -32,14 +44,10 @@ class PrefDoubleValidator(QDoubleValidator):
         super().fixup(input)
         input.replace(",", "")
 
-    def validate(self, arg__1: str, arg__2: int) -> (int, float, int):
-        if "," in arg__1:
+    def validate(self, arg__1: str, arg__2: int):
+        if "," in str(arg__1):
             return QValidator.Invalid
-        state, val, pos = super().validate(arg__1, arg__2)
-        if state in [QValidator.Acceptable, QValidator.Intermediate] and val not in [None, ""]:
-            # Value is a floating point value but maybe not in the expected range for the input
-            val = float(val)
-        return state, val, pos
+        return super().validate(arg__1, arg__2)
 
 
 def cb_replace_all_items_with_new(cb: QComboBox, new_items: List[str], default_item: Optional[str] = None):
@@ -185,8 +193,12 @@ class PreferencesWidget(QWidget):
         :param default_number: An optional value to be put within the text box as a default. Defaults to an empty string.
         :return: QLineEdit instance to allow subclasses to assign instance name
         """
-        int_box = self.addTextInput(title, str(default_number))
-        int_box.setValidator(PrefIntValidator())
+        layout = self._createLayoutAndTitle(title)
+        int_box = PrefIntEdit(self)
+        if default_number:
+            int_box.setText(str(default_number))
+        layout.addWidget(int_box)
+        self.verticalLayout.addLayout(layout)
         return int_box
 
     def _validate_input_and_stage(self, edit: QLineEdit, key: str):
@@ -200,10 +212,10 @@ class PreferencesWidget(QWidget):
         edit.setStyleSheet("background-color: white")
         validator = edit.validator()
         text = edit.text()
-        (state, val, pos) = validator.validate(text, 0) if validator else (0, text, 0)
+        (state, val, pos) = validator.validate(str(text), 0) if validator else (0, text, 0)
         # Certain inputs, added using class methods, will have a coerce method to coerce the value to the expected type
         if state == QValidator.Acceptable or not validator:
-            self._stageChange(key, val)
+            self._stageChange(key, text)
         else:
             edit.setStyleSheet("background-color: yellow")
             self._unStageChange(key)
@@ -215,8 +227,12 @@ class PreferencesWidget(QWidget):
         :param default_number: An optional value to be put within the text box as a default. Defaults to an empty string.
         :return: QLineEdit instance to allow subclasses to assign instance name
         """
-        float_box = self.addTextInput(title, str(default_number))
-        float_box.setValidator(PrefDoubleValidator())
+        layout = self._createLayoutAndTitle(title)
+        float_box = PrefFloatEdit(self)
+        if default_number:
+            float_box.setText(str(default_number))
+        layout.addWidget(float_box)
+        self.verticalLayout.addLayout(layout)
         return float_box
 
     def addCheckBox(self, title: str, checked: Optional[bool] = False) -> QCheckBox:
