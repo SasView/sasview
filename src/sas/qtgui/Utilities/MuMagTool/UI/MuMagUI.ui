@@ -242,6 +242,26 @@ p, li { white-space: pre-wrap; }
      <string>mu_0*H_min [mT]</string>
     </property>
    </widget>
+   <widget class="QComboBox" name="ScatteringGeometrySelect">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>20</y>
+      <width>171</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>perpendicular</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>parallel</string>
+     </property>
+    </item>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
