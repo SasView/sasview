@@ -35,7 +35,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.isActive = False
         self.logic = logic
         self.poly_params = {}
-        self.has_poly_error_column = True
+        self.has_poly_error_column = False
         self.poly_params_to_fit = []
         # Polydisp widget table default index for function combobox
         self.orig_poly_index = 4
@@ -277,22 +277,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         except IndexError:
             logger.error("Error in setting the dispersion model. Reverting to Gaussian.")
             self.disp_model = POLYDISPERSITY_MODELS['gaussian']()
-
-        # def updateFunctionCaption(row):
-        #     # Utility function for update of polydispersity function name in the main model
-        #     if not self.isCheckable(row):
-        #         return
-        #     param_name = self._model_model.item(row, 0).text()
-        #     if param_name !=  param.name:
-        #         return
-        #     # Modify the param value
-        #     self._model_model.blockSignals(True)
-        #     if self.has_error_column:
-        #         # err column changes the indexing
-        #         self._model_model.item(row, 0).child(0).child(0,5).setText(combo_string)
-        #     else:
-        #         self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
-        #     self._model_model.blockSignals(False)
 
         if combo_string == 'array':
             try:

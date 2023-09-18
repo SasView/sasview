@@ -19,7 +19,6 @@ from sasmodels import modelinfo
 from sasmodels.sasview_model import SasviewModel
 from sasmodels.sasview_model import load_standard_models
 from sasmodels.sasview_model import MultiplicationModel
-from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
@@ -43,7 +42,6 @@ from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
-from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
@@ -278,7 +276,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Error column presence in parameter display
         self.has_error_column = False
-        self.has_poly_error_column = False
         self.has_magnet_error_column = False
 
         # Enablement of comboboxes
@@ -1400,7 +1397,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
-        self.has_poly_error_column = False
 
         structure = None
         if self.cbStructureFactor.isEnabled():
@@ -1444,7 +1440,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
-        self.has_poly_error_column = False
 
         self.respondToModelStructure(model=model, structure_factor=structure)
         # recast the original parameters into the model
