@@ -16,7 +16,7 @@ from sas.qtgui.Utilities.HidableDialog import HidableDialog, ShowAgainResult
 from sas.system import config
 class MainWindowTest:
     """Test the Main Window GUI"""
-    
+
     def __init__(self):
         config.override_with_defaults() # Disable saving of test file
         config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999" # Give a very large version number
