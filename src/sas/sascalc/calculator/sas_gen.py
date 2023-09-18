@@ -1192,6 +1192,7 @@ class PDBReader(object):
         x_lines = []
         y_lines = []
         z_lines = []
+        atom_value_dict = {}
         try:
             input_f = open(path, 'rb')
             buff = decode(input_f.read())
@@ -1222,14 +1223,20 @@ class PDBReader(object):
                         pos_y.append(_pos_y)
                         pos_z.append(_pos_z)
                         try:
-                            val = nsf.neutron_sld(atom_name)[0]
-                            # sld in Ang^-2 unit
-                            val *= 1.0e-6
-                            sld_n.append(val)
-                            atom = formula(atom_name)
-                            # cm to A units
-                            vol = 1.0e+24 * atom.mass / atom.density / NA
-                            vol_pix.append(vol)
+                            if atom_name in atom_value_dict:
+                                sld_n.append(atom_value_dict[atom_name][0])
+                                vol_pix.append(atom_value_dict[atom_name][1])
+                            else:
+                                val = nsf.neutron_sld(atom_name)[0]
+                                # sld in Ang^-2 unit
+                                val *= 1.0e-6
+                                sld_n.append(val)
+                                atom = formula(atom_name)
+                                # # cm to A units
+                                vol = 1.0e+24 * atom.mass / atom.density / Na
+                                vol_pix.append(vol)
+                                atom_value_dict[atom_name] = [val, vol]
+
                         except Exception:
                             logging.warning("Warning: set the sld of %s to zero"% atom_name)
                             sld_n.append(0.0)
