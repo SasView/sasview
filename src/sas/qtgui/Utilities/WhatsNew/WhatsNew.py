@@ -28,7 +28,6 @@ def whats_new_messages():
             except ValueError:
                 pass
 
-
             if newer:
                 for file in message_dir.iterdir():
                     if file.name.endswith(".html"):
@@ -105,10 +104,13 @@ class WhatsNew(QDialog):
         self.show_file()
 
     def show_file(self):
-        filename = self.all_messages[self.current_index]
-        with open(filename, 'r') as fid:
-            data = fid.read()
-            self.browser.setText(data)
+        if len(self.all_messages) > 0:
+            filename = self.all_messages[self.current_index]
+            with open(filename, 'r') as fid:
+                data = fid.read()
+                self.browser.setText(data)
+        else:
+            self.browser.setText("<html><body><h1>You should not see this!!!</h1></body></html>")
 
     def close_me(self):
         if not self.showAgain.isChecked():
