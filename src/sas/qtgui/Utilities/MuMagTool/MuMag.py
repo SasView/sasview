@@ -7,17 +7,17 @@ from sas.qtgui.Utilities.MuMagTool import MuMagLib
 class MuMag(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__()
-
+        self.MuMagLib_obj = MuMagLib.MuMagLib()
         self.setupUi(self)
         self.ImportDataButton.clicked.connect(self.import_data_button_callback)
         self.PlotDataButton.clicked.connect(self.plot_experimental_data_button_callback)
         self.SimpleFitButton.clicked.connect(self.simple_fit_button_callback)
 
     def import_data_button_callback(self):
-        MuMagLib.import_data_button_callback_sub()
+        self.MuMagLib_obj.import_data_button_callback_sub()
 
     def plot_experimental_data_button_callback(self):
-        MuMagLib.plot_experimental_data()
+        self.MuMagLib_obj.plot_experimental_data()
 
     def simple_fit_button_callback(self):
         q_max = float(self.qMaxEdit.toPlainText())
@@ -26,8 +26,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MainWindow):
         A2 = float(self.AMaxEdit.toPlainText())
         A_N = int(self.ASamplesEdit.toPlainText())
         SANSgeometry = self.ScatteringGeometrySelect.currentText()
-
-        MuMagLib.SimpleFit_FitButtonCallback(q_max, H_min, A1, A2, A_N, SANSgeometry)
+        self.MuMagLib_obj.SimpleFit_FitButtonCallback(q_max, H_min, A1, A2, A_N, SANSgeometry)
 
 
 def main():
