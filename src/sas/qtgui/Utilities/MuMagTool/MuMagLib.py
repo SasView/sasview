@@ -13,9 +13,8 @@ from datetime import datetime
 from PySide6.QtWidgets import QFileDialog
 import string
 
-import MuMagPerpendicularGeo
 import MuMagParallelGeo
-
+import MuMagPerpendicularGeo
 
 class MuMagLib():
     def __init__(self):
