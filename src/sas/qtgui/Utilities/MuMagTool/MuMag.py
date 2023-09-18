@@ -1,10 +1,10 @@
-from sas.qtgui.Utilities.MuMagTool.UI.MuMagUI import Ui_MainWindow
+from sas.qtgui.Utilities.MuMagTool.UI.MuMagUI import Ui_MuMagTool
 from PySide6.QtWidgets import QWidget
 from PySide6 import QtWidgets
 from sas.qtgui.Utilities.MuMagTool import MuMagLib
 
 
-class MuMag(QtWidgets.QMainWindow, Ui_MainWindow):
+class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
     def __init__(self, parent=None):
         super().__init__()
         self.MuMagLib_obj = MuMagLib.MuMagLib()

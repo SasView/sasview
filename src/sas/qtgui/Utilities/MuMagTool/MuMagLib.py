@@ -17,7 +17,6 @@ import MuMagPerpendicularGeo
 import MuMagParallelGeo
 
 
-
 class MuMagLib():
     def __init__(self):
 
