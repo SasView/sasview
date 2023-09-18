@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 def LorentzianModelPAR(q, A, M_s, H_0, H_dem, a_H, l_c):
 
     # All inputs in SI-units
-
     # Micromagnetic Model
     mu_0 = 4 * np.pi * 1e-7
     H_i = H_0 - H_dem
