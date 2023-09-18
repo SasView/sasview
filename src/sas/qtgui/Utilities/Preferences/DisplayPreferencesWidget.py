@@ -18,7 +18,7 @@ class DisplayPreferencesWidget(PreferencesWidget):
                                'THEME': "Display theme"}
 
     def _addAllWidgets(self):
-        self.theme = self.addComboBox(title="Theme", params=style.get_theme_names(), default='Default')
+        self.theme = self.addComboBox(title="Theme", params=style.get_theme_names(), default=style.theme)
         self.theme.currentIndexChanged.connect(
             lambda: self._stageChange('THEME', self.theme.currentText()))
         self.qtScaleFactor = self.addFloatInput(
