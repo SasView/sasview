@@ -210,7 +210,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
                 self.config.values[self.current_fitter_id][option] = new_value
             except ValueError:
                 # Don't update bumps if widget has bad data
-                self.reject
+                return
 
         # Update the BUMPS singleton
         [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]
