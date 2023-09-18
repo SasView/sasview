@@ -608,6 +608,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
         self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
         self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
+        self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
 
         # Communicator signal
         self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
@@ -1413,7 +1414,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # disable polydispersity if the model does not support it
         has_poly = self._poly_model.rowCount() != 0
         self.chkPolydispersity.setEnabled(has_poly)
-        self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
+        # self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
 
         # set focus so it doesn't move up
         self.cbModel.setFocus()
@@ -3898,7 +3899,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             Create list of polydisperse parameters based on _poly_model
             """
-            param_list.extend(self.polydispersity_widget.gatherPolyParams())
+            param_list.extend(self.polydispersity_widget.gatherPolyParams(row))
 
         def gatherMagnetParams(row):
             """

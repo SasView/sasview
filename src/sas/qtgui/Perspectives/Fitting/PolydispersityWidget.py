@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
     cmdFitSignal = QtCore.Signal()
     updateDataSignal = QtCore.Signal()
+    iterateOverModelSignal = QtCore.Signal()
 
     def __init__(self, parent=None, logic=None):
         super(PolydispersityWidget, self).__init__()
@@ -302,7 +303,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 # Load the file
                 self.loadPolydispArray(row_index)
                 # Update main model for display
-                self.iterateOverModel(updateFunctionCaption)
+                self.iterateOverModelSignal.emit()
                 self.logic.kernel_module.set_dispersion(param.name, self.disp_model)
                 # uncheck the parameter
                 self.poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)

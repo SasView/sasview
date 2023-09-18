@@ -28,6 +28,9 @@
   <layout class="QGridLayout" name="gridLayout_5">
    <item row="1" column="0">
     <widget class="QTabWidget" name="tabFitting">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -308,6 +311,9 @@
       </attribute>
      </widget>
      <widget class="QWidget" name="tabPolydispersity">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <attribute name="title">
        <string>Polydispersity</string>
       </attribute>
