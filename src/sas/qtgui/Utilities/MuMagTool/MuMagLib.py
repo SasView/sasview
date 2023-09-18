@@ -47,8 +47,6 @@ class MuMagLib():
         self.SimpleFit_A_sigma = 0
         self.SimpleFit_SANSgeometry = 0
 
-
-
     #####################################################################################################################
     def get_directory(self):
         fname = QFileDialog.getOpenFileName()
