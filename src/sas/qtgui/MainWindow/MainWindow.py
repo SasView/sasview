@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 
-from sas.system import style
 from sas.system.version import __version__
 
 from PySide6.QtWidgets import QMainWindow
@@ -82,9 +81,6 @@ def run_sasview():
 
     splash = SplashScreen()
     splash.show()
-
-    # Main application style.
-    app.setStyleSheet(style.css)
 
     # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
     if 'twisted.internet.reactor' in sys.modules:

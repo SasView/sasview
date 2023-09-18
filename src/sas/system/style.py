@@ -18,6 +18,7 @@ class StyleSheet:
 
     @property
     def css(self) -> str:
+        self.theme = config.THEME
         self._css = load_theme(self.theme)
         return self._css
 

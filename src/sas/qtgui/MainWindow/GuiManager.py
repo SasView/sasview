@@ -72,7 +72,7 @@ from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 
 import sas
 from sas import config
-from sas.system import web
+from sas.system import web, style
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +90,9 @@ class GuiManager:
 
         # Decide on a locale
         QLocale.setDefault(QLocale('en_US'))
+
+        # Main application style.
+        self._parent.setStyleSheet(style.css)
 
         # Redefine exception hook to not explicitly crash the app.
         sys.excepthook = self.info
