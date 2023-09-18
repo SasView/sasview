@@ -197,11 +197,11 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         # see it if the parameter is multishell
         if '[' in param.name:
             # Skip empty shells
-            if self.current_shell_displayed == 0:
+            if self.logic.current_shell_displayed == 0:
                 return
             else:
                 # Create as many entries as current shells
-                for ishell in range(1, self.current_shell_displayed+1):
+                for ishell in range(1, self.logic.current_shell_displayed+1):
                     # Remove [n] and add the shell numeral
                     name = param_name[0:param_name.index('[')] + str(ishell)
                     self.addNameToPolyModel(i, name)
