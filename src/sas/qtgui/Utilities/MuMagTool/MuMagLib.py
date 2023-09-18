@@ -13,6 +13,10 @@ from datetime import datetime
 from PySide6.QtWidgets import QFileDialog
 import string
 
+import MuMagPerpendicularGeo
+import MuMagParallelGeo
+
+
 #####################################################################################################################
 def get_directory():
     fname = QFileDialog.getOpenFileName()
@@ -145,7 +149,7 @@ def plot_experimental_data():
 
 #######################################################################################################################
 
-def SimpleFit_FitButtonCallback():
+def SimpleFit_FitButtonCallback(q_max, H_min, A1, A2, A_N, SANSgeometry):
 
     global q_exp
     global I_exp
@@ -172,12 +176,12 @@ def SimpleFit_FitButtonCallback():
     global SimpleFit_SANSgeometry
 
     if np.size(q_exp) > 1:
-        q_max = float(SimpleFitqmaxEntry.get())
-        H_min = float(SimpleFitHminEntry.get())
-        A1 = float(SimpleFitA1Entry.get())
-        A2 = float(SimpleFitA2Entry.get())
-        A_N = int(SimpleFitANEntry.get())
-        SANSgeometry = SANSgeometryVariable.get()
+        #q_max = float(SimpleFitqmaxEntry.get())
+        #H_min = float(SimpleFitHminEntry.get())
+        #A1 = float(SimpleFitA1Entry.get())
+        #A2 = float(SimpleFitA2Entry.get())
+        #A_N = int(SimpleFitANEntry.get())
+        #SANSgeometry = SANSgeometryVariable.get()
 
         # search index for q_max
         q_diff = (q_exp[0, :]*1e-9 - q_max)**2
@@ -203,20 +207,20 @@ def SimpleFit_FitButtonCallback():
             A_1 = A1 * 1e-12
             A_2 = A2 * 1e-12
             A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M \
-                = SweepA_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
+                = MuMagPerpendicularGeo.SweepA_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
 
-            A_opt = OptimA_SPI_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
-            chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M = LSQ_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
+            A_opt = MuMagPerpendicularGeo.OptimA_SPI_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
+            chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M = MuMagPerpendicularGeo.LSQ_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
 
-            I_opt = SANS_Model_PERP(q, S_H_opt, S_M_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
+            I_opt = MuMagPerpendicularGeo.SANS_Model_PERP(q, S_H_opt, S_M_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
 
-            d2chi_dA2 = FDM2Ord_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
+            d2chi_dA2 = MuMagPerpendicularGeo.FDM2Ord_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
 
             N_mu = len(I_exp_red[0, :])
             N_nu = len(I_exp_red[:, 0])
             A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
 
-            PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, A_Uncertainty * 1e12)
+            MuMagPerpendicularGeo.PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, A_Uncertainty * 1e12)
 
             # Save to global Variables
             SimpleFit_q_exp = q
@@ -240,22 +244,22 @@ def SimpleFit_FitButtonCallback():
             A_1 = A1 * 1e-12
             A_2 = A2 * 1e-12
             A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H \
-                = SweepA_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
+                = MuMagParallelGeo.SweepA_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
 
-            A_opt = OptimA_SPI_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
-            chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H = LSQ_PAR(q, I_exp_red, sigma,
+            A_opt = MuMagParallelGeo.OptimA_SPI_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
+            chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H = MuMagParallelGeo.LSQ_PAR(q, I_exp_red, sigma,
                                                                                        Ms, H_0,
                                                                                        H_dem,
                                                                                        A_opt)
 
-            I_opt = SANS_Model_PAR(q, S_H_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
+            I_opt = MuMagParallelGeo.SANS_Model_PAR(q, S_H_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
 
-            d2chi_dA2 = FDM2Ord_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
+            d2chi_dA2 = MuMagParallelGeo.FDM2Ord_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
             N_mu = len(I_exp_red[0, :])
             N_nu = len(I_exp_red[:, 0])
             A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
 
-            PlotFittingResultsPAR_SimpleFit(q, A, chi_q, A_opt, chi_q_opt,
+            MuMagParallelGeo.PlotFittingResultsPAR_SimpleFit(q, A, chi_q, A_opt, chi_q_opt,
                                                        I_res_opt, S_H_opt, A_Uncertainty * 1e12)
 
             # Save to global Variables
@@ -278,6 +282,4 @@ def SimpleFit_FitButtonCallback():
     else:
         messagebox.showerror(title="Error!",
                              message="No experimental Data available! Please import experimental data!")
-
-
 

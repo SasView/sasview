@@ -11,12 +11,23 @@ class MuMag(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.ImportDataButton.clicked.connect(self.import_data_button_callback)
         self.PlotDataButton.clicked.connect(self.plot_experimental_data_button_callback)
+        self.SimpleFitButton.clicked.connect(self.simple_fit_button_callback)
 
     def import_data_button_callback(self):
         MuMagLib.import_data_button_callback_sub()
 
     def plot_experimental_data_button_callback(self):
         MuMagLib.plot_experimental_data()
+
+    def simple_fit_button_callback(self):
+        q_max = float(self.qMaxEdit.toPlainText())
+        H_min = float(self.HminEdit.toPlainText())
+        A1 = float(self.AMinEdit.toPlainText())
+        A2 = float(self.AMaxEdit.toPlainText())
+        A_N = int(self.ASamplesEdit.toPlainText())
+        SANSgeometry = self.ScatteringGeometrySelect.currentText()
+
+        MuMagLib.SimpleFit_FitButtonCallback(q_max, H_min, A1, A2, A_N, SANSgeometry)
 
 
 def main():
