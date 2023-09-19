@@ -13,7 +13,7 @@ architectures:
 
 apps:
     sasview5:
-        command: sasview-wrapper
+        command: sasview
         extensions: [gnome-3-38]
         plugs: [network, x11, pulseaudio, opengl, home, ssh-keys, removable-media, shmem]
         environment:
