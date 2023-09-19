@@ -1233,7 +1233,7 @@ class PDBReader(object):
                                 sld_n.append(val)
                                 atom = formula(atom_name)
                                 # # cm to A units
-                                vol = 1.0e+24 * atom.mass / atom.density / Na
+                                vol = 1.0e+24 * atom.mass / atom.density / NA
                                 vol_pix.append(vol)
                                 atom_value_dict[atom_name] = [val, vol]
 
