@@ -1189,15 +1189,16 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataPlot.slider_high_q_setter = ['check_q_high']
 
             # Udpate internals and GUI
-        self.updateDataList(self._data)   
+        self.updateDataList(self._data)  
+        self._allowPlots = False
+        self.updateGuiValues()
+        self.saveToBatchResults()
         if self.isBatch:
             self.batchComplete.append(self.dataList.currentIndex())
             self.startNextBatchItem()
         else:
             self.isCalculating = False
-        self._allowPlots = False
-        self.updateGuiValues()
-        self.saveToBatchResults()
+            self.enableButtons()
 
     def _threadError(self, error):
         """
