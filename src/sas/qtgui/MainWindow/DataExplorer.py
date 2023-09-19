@@ -82,12 +82,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdAppend_2.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
-
-        # add menu to cmdSendTO
-        self.createSendToMenu()
-        self.cmdSendTo.setMenu(self.send_menu)
-        self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-        # self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         self.chkSwap.setVisible(False)
 
         self.cmdFreeze.clicked.connect(self.freezeTheory)
@@ -160,14 +154,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.current_view = self.treeView
 
     def createSendToMenu(self):
-        # self.actionSend = QtGui.QAction(self)
-        # self.actionSend.setObjectName(u"actionSend")
-        # self.actionSend.setText(u"populate new page in")
         self.actionReplace = QtGui.QAction(self)
         self.actionReplace.setObjectName(u"actionReplace")
         self.actionReplace.setText(u"... replacing data in the current page")
         self.send_menu = QtWidgets.QMenu(self)
-        # self.send_menu.addAction(self.actionSend)
         self.send_menu.addAction(self.actionReplace)
 
     def closeEvent(self, event):
@@ -1025,6 +1015,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if ind > 0:
             graph.setCurrentIndex(ind)
 
+    def sendToMenu(self, hasSubmenu=False):
+        # add menu to cmdSendTO
+        if hasSubmenu:
+            self.createSendToMenu()
+            self.cmdSendTo.setMenu(self.send_menu)
+            self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
+            self.actionReplace.triggered.connect(self.onDataReplaced)
+        else:
+            self.actionReplace.triggered.disconnect(self.onDataReplaced)
+            self.cmdSendTo.setMenu(None)
+            self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
     def updatePerspectiveCombo(self, index):
         """
         Notify the gui manager about the new perspective chosen.
@@ -1040,11 +1042,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         allow_swap = False if current_perspective is None else current_perspective.allowSwap()
 
         self.chkBatch.setEnabled(allow_batch)
-        self.chkSwap.setEnabled(allow_swap)
-
-        # Using this conditional prevents the checkbox for going into the "neither checked nor unchecked" state
-        if not allow_swap:
-            self.chkSwap.setChecked(False)
+        self.sendToMenu(hasSubmenu=allow_swap)
 
     def itemFromDisplayName(self, name):
         """
@@ -1553,8 +1551,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addAction(self.actionDelete)
 
         # Define the callbacks
-        # self.actionSend.triggered.connect(self.onFileListSelected)
-        self.actionReplace.triggered.connect(self.onDataReplaced)
         self.actionSelect.triggered.connect(self.onFileListSelected)
         self.actionDeselect.triggered.connect(self.onFileListDeselected)
         self.actionChangeName.triggered.connect(self.changeName)
