@@ -792,7 +792,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataPlot.slider_low_q_setter = []
             self.dataPlot.slider_high_q_setter = []
         self._data = None
-        length = len(self.dataList)
+        length = len(data_list)
         for index in reversed(range(length)):
             if self.dataList.itemData(index) in data_list:
                 self.dataList.removeItem(index)
