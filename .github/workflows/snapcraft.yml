@@ -1,0 +1,77 @@
+name: Build Snap Image
+
+on: [push, pull_request]
+
+jobs:
+  build_snap:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: snapcore/action-build@v1
+      id: snapcraft
+    - uses: actions/upload-artifact@v3
+      with:
+        name: snap
+        path: ${{ steps.snapcraft.outputs.snap }}
+
+  install_test:
+    if: 0 == 1 # disable for now
+    runs-on: ubuntu-latest
+    needs: build_snap
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: snap
+          path: .
+      - name: Install snap
+        run: |
+            sudo snap install --dangerous *.snap
+      - name: Set up screen dependencies (Linux)
+        run: |
+          sudo apt-get -o Acquire::Retries=3 update
+          sudo apt-get -o Acquire::Retries=3 install libxcb-xinerama0
+          sudo apt-get -o Acquire::Retries=3 install libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xfixes0
+          sudo apt-get -o Acquire::Retries=3 install libpulse-mainloop-glib0
+          sudo apt-get -o Acquire::Retries=3 install libxkbcommon-x11-0
+          Xvfb :0 -screen 0 1920x1080x24 -ac &
+          echo "DISPLAY=:0" >> $GITHUB_ENV
+      - name: Run snap
+        run: |
+            snap run sasview5 &
+            sleep 60
+
+  upload_snap:
+    runs-on: ubuntu-latest
+    needs: install_test
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: snap
+          path: .
+
+      - name: Get branch names
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
+      - name: Get snap filename
+        run: |
+          echo "SNAP_FILENAME=$(ls *.snap)" >> $GITHUB_ENV
+  
+      - name: Publish Develop Branch to snapcraft beta
+        #  if: steps.branch-name.outputs.current_branch == 'develop'
+        if: steps.branch-name.outputs.current_branch == 'snapcraft' # temporarily feature branch will produce snaps
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_LOGIN }}
+        with:
+          snap: ${{ env.SNAP_FILENAME }}
+          release: beta
+          
+      - name: Publish Main Branch to snapcraft stable
+        if: steps.branch-name.outputs.current_branch == 'main'
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_LOGIN }}
+        with:
+          snap: ${{ env.SNAP_FILENAME }}
+          release: stable

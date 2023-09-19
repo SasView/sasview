@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  [push, pull_request, workflow_call]
+  [workflow_call] # temporarily restrict to workflow_call events
 
 defaults:
   run:

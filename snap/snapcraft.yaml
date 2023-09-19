@@ -1,0 +1,97 @@
+name: sasview5
+summary: Small Angle Scattering Analysis Software Package.
+description: |
+   open source, collaboratively developed software for the analysis of any small angle scattering data.
+adopt-info: build-application
+grade: stable
+confinement: strict
+base: core20
+icon: snap/gui/sv_logo.svg
+architectures:
+    - build-on: [amd64]
+
+
+apps:
+    sasview5:
+        command: sasview-wrapper
+        extensions: [gnome-3-38]
+        plugs: [network, x11, pulseaudio, opengl, home, ssh-keys, removable-media, shmem]
+        environment:
+          PYTHONPATH: $PYTHONPATH:$SNAP
+          DISABLE_WAYLAND: 1
+
+parts:
+    get-source:
+        plugin: dump
+        source: .
+
+    build-application:
+        plugin: python
+        source: .
+
+        stage-packages:
+            - python3.8-venv
+            - libfreetype6
+            - libgomp1
+            - libpng16-16
+            - libxcb-xinerama0
+            - libxkbcommon0
+            - libxcb-render0
+            - libxcb-randr0
+            - libnss3
+            - unixodbc-dev
+            - libpq-dev
+            - libxcb-icccm4
+            - libxkbcommon-x11-0
+            - libxcb-xkb1
+            - libxcb-render-util0
+            - libxcb-shape0
+            - libspeechd2
+            - libxcb-image0
+            - libxcb-keysyms1
+            - libxcb-util1
+            - libxcb-xfixes0 # To show graphs
+            - gir1.2-xapp-1.0 # Failed to load module "xapp-gtk3-module"
+            - libxcb-cursor0
+            - libpulse-mainloop-glib0
+            - libegl1-mesa
+
+        build-packages:
+            - python3.8-venv
+            - python3.8-dev
+            - git-all
+
+        override-pull: |
+            snapcraftctl pull
+            snapcraftctl set-version 6.0.0
+
+        build-environment:
+            - SNAPCRAFT_PYTHON_INTERPRETER: python3.8
+            - PATH: $SNAPCRAFT_PART_INSTALL/bin:$PATH
+            - PYTHONPATH: ''
+        override-build: |
+            # Work around a bug in snapcraft python plugin / gnome 3.38 extension
+            # https://forum.snapcraft.io/t/build-a-snap-with-any-version-of-python-i-want/10420/8
+
+            rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/python3.8/distutils
+            cp -r /usr/lib/python3.8/distutils $SNAPCRAFT_PART_INSTALL/usr/lib/python3.8/distutils
+            mkdir -p $SNAPCRAFT_PART_INSTALL/usr/include/
+            cp -r /usr/include/python3.8 $SNAPCRAFT_PART_INSTALL/usr/include/python3.8
+            mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+            ln -s /usr/bin/python3.8 $SNAPCRAFT_PART_INSTALL/bin/python3.8
+            # ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
+
+            snapcraftctl build
+
+            # Apply shebang rewrite as done by snapcraft
+            find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec \
+              sed -i                                                                                \
+                "s|^#!${SNAPCRAFT_PART_INSTALL}/bin/python3.8$|#!/usr/bin/env python3|" {} \;
+            # debug
+            # find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec head -n 1 {} \;
+
+# /dev/shm access is required for the preload library to work
+plugs:
+  shmem:
+    interface: shared-memory
+    private: true

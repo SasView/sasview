@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=SasView
+GenericName=Python application
+Comment=Small Angle Scattering Analysis Software Package.
+Exec=sasview
+Icon=${SNAP}/meta/gui/sv_logo.svg
+Terminal=false
+Type=Application
+Categories=Education;
+StartupNotify=true
