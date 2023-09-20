@@ -1,7 +1,7 @@
 
 """ Code that handles the parameter list backend """
 
-from typing import Optional, Dict
+from typing import Optional
 
 import inspect
 
@@ -31,8 +31,8 @@ class ParameterTableModel:
             self.background_parameter,
             self.scale_parameter]
 
-        self._sld_parameters: Dict[str, FunctionParameter] = {}
-        self._magnetism_parameters: Dict[str, MagnetismParameterContainer] = {}
+        self._sld_parameters: dict[str, FunctionParameter] = {}
+        self._magnetism_parameters: dict[str, MagnetismParameterContainer] = {}
 
     @property
     def sld_parameters(self):
@@ -212,7 +212,7 @@ class ParameterTableModel:
                            if self._sld_parameters[key].in_use}
 
         # Currently assume no bad linking
-        magnetic_parameters_linked: Dict[str, FunctionParameter] = \
+        magnetic_parameters_linked: dict[str, FunctionParameter] = \
             {key: self._sld_parameters[key]
                     if self._magnetism_parameters[key].linked
                     else self._magnetism_parameters[key].parameter

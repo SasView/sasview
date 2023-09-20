@@ -4,7 +4,7 @@ import sys
 
 from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QMessageBox
 from PySide6.QtCore import Qt
-from typing import Optional, Callable, Dict, Any, Union
+from typing import Optional, Callable, Any, Union
 
 from sas.system import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
@@ -21,7 +21,7 @@ from .PlottingPreferencesWidget import PlottingPreferencesWidget
 
 BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,
                "Display Settings": DisplayPreferencesWidget,
-               }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
+               }  # Type: dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
 ConfigType = Union[str, bool, float, int, list[Union[str, float, int]]]
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(self.help)
         self._set_accept()
 
-    def addWidgets(self, widgets: Dict[str, Callable]):
+    def addWidgets(self, widgets: dict[str, Callable]):
         """Add a list of named widgets to the window"""
         for name, widget in widgets.items():
             if isinstance(widget, PreferencesWidget):

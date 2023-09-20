@@ -5,7 +5,7 @@ import json
 import webbrowser
 import traceback
 
-from typing import Optional, Dict
+from typing import Optional
 
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
@@ -109,7 +109,7 @@ class GuiManager:
 
         # Currently displayed perspective
         self._current_perspective: Optional[Perspective] = None
-        self.loadedPerspectives: Dict[str, Perspective] = {}
+        self.loadedPerspectives: dict[str, Perspective] = {}
 
         # Populate the main window with stuff
         self.addWidgets()
