@@ -99,37 +99,9 @@ class MuMagLib():
                 self.sigma_exp[idx-1, :] = data[:, 2].T
 
 
-    ################################################################################################################
-    # Plot Experimental Data: Generate Figure
-    def plot_exp_data(self, q, I_exp, B_0, x_min, x_max, y_min, y_max):
-
-        fig = plt.figure()
-        fig.tight_layout()
-        ax = fig.add_subplot(1, 1, 1)
-
-        colors = pl.cm.jet(np.linspace(0, 1, len(B_0)))
-        for k in np.arange(0, len(B_0)):
-            plt.plot(q[k, :], I_exp[k, :], linestyle='-', color=colors[k], linewidth=0.5, label='B_0 = ' + str(B_0[k]) + ' T')
-            plt.plot(q[k, :], I_exp[k, :], '.', color=colors[k], linewidth=0.3, markersize=1)
-
-        box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
-        plt.xlabel('q [1/nm]')
-        plt.ylabel('I_exp')
-        plt.xlim(x_min, x_max)
-        plt.ylim(y_min, y_max)
-        plt.yscale('log')
-        plt.xscale('log')
-        plt.grid(True, which="both", linestyle='--')
-        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.show()
-
-
-
     #####################################################################################################################
     # Plot Experimental Data: Set Bounds and Call Plotting Function
-    def plot_experimental_data(self):
+    def plot_experimental_data(self, figure):
 
         if np.size(self.q_exp) > 1:
             q_exp_min = np.amin(self.q_exp)*1e-9
@@ -144,12 +116,50 @@ class MuMagLib():
             I_exp_max = np.amax(self.I_exp)
             I_exp_max = 10 ** (np.floor(np.log10(I_exp_max))) * np.ceil(I_exp_max / 10 ** (np.floor(np.log10(I_exp_max))))
 
-            self.plot_exp_data(self.q_exp*1e-9, self.I_exp, self.B_0_exp*1e-3, q_exp_min, q_exp_max, I_exp_min, I_exp_max)
+            self.plot_exp_data(figure, self.q_exp*1e-9, self.I_exp, self.B_0_exp*1e-3, q_exp_min, q_exp_max, I_exp_min, I_exp_max)
         else:
             messagebox.showerror(title="Error!", message="No experimental data available! Please import experimental data!")
 
 
-    #######################################################################################################################
+
+
+    ################################################################################################################
+    # Plot Experimental Data: Generate Figure
+    def plot_exp_data(self, figure, q, I_exp, B_0, x_min, x_max, y_min, y_max):
+
+        # figure.tight_layout()
+
+        ax = figure.subplots()
+
+        # print(ax)
+
+        # ax.cla()
+
+
+
+        colors = pl.cm.jet(np.linspace(0, 1, len(B_0)))
+        for k in np.arange(0, len(B_0)):
+            print(k)
+            ax.loglog(q[k, :], I_exp[k, :], linestyle='-', color=colors[k], linewidth=0.5, label='B_0 = ' + str(B_0[k]) + ' T')
+            ax.loglog(q[k, :], I_exp[k, :], '.', color=colors[k], linewidth=0.3, markersize=1)
+
+        figure.canvas.draw()
+
+        # box = ax.get_position()
+        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        #
+        # ax.xlabel('q [1/nm]')
+        # ax.ylabel('I_exp')
+        # ax.xlim(x_min, x_max)
+        # ax.ylim(y_min, y_max)
+        # ax.yscale('log')
+        # ax.xscale('log')
+        # ax.grid(True, which="both", linestyle='--')
+        # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+
+
+
 
 
 
