@@ -147,6 +147,8 @@ class GuiManager:
         """
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
+        # make it hidden by default
+        self.logDockWidget.setVisible(False)
         self.logDockWidget.setObjectName("LogDockWidget")
         self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
 
@@ -506,14 +508,19 @@ class GuiManager:
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
         # small hack to print errors in red and warnings in yellow
+        # `11:11:39 - INFO:` - the important bit is always element 2
+        msg_type = msg.split()[2]
         color_map = {
             'WARNING:': QColor('orange'),
             'ERROR:': QColor('red')
             }
-        # `11:11:39 - INFO:` - the important bit is always element 2
-        color = color_map.get(msg.split()[2], QColor('black'))
+
+        color = color_map.get(msg_type, QColor('black'))
         self.listWidget.setTextColor(color)
         self.listWidget.append(msg.strip())
+        # now, show the actual log if this is an error
+        if msg_type == 'ERROR:':
+            self.logDockWidget.setVisible(True)
 
     def createGuiData(self, item, p_file=None):
         """
