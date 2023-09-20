@@ -42,7 +42,7 @@ jobs:
 
   upload_snap:
     runs-on: ubuntu-latest
-    # needs: install_test
+    needs: build_snap
     steps:
       - uses: actions/download-artifact@v3
         with:
