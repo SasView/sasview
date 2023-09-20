@@ -1,4 +1,4 @@
-name: sasview5
+name: sasview
 summary: Small Angle Scattering Analysis Software Package.
 description: |
    open source, collaboratively developed software for the analysis of any small angle scattering data.
@@ -12,7 +12,7 @@ architectures:
 
 
 apps:
-    sasview5:
+    sasview:
         command: sasview
         extensions: [gnome-3-38]
         plugs: [network, x11, pulseaudio, opengl, home, ssh-keys, removable-media, shmem]

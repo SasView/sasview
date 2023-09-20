@@ -37,7 +37,7 @@ jobs:
           echo "DISPLAY=:0" >> $GITHUB_ENV
       - name: Run snap
         run: |
-            snap run sasview5 &
+            snap run sasview &
             sleep 60
 
   upload_snap:
