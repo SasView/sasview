@@ -41,7 +41,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.model = model
         self.is_modified = False
         self.label = None
-        self.file_to_regenerate = ""
+        self.builtinmodels = self.allBuiltinModels()
 
         self.addWidgets()
 
@@ -169,6 +169,16 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.tabWidget.removeTab(1)
         self.file_to_regenerate = filename
         self.loadFile(str(filename))
+
+    def allBuiltinModels(self):
+        """
+        create a list of all builtin models
+        """
+        from sas.sascalc.fit.models import ModelManager
+        from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+        model_list = ModelManager().cat_model_list()
+        model_names = [model.name for model in model_list]
+        return model_names
 
     def loadFile(self, filename):
         """
@@ -485,6 +495,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
                 # Don't accept but return
                 return False
+
+        if model['filename'].lower() in self.builtinmodels:
+            # notify the viewer
+            msg = "Built-in model with specified name already exists.\n"
+            msg += "Please specify different filename."
+            QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
+            # Don't accept but return
+            return False
         # Update model editor if plugin definition changed
         func_str = model['text']
         msg = None
