@@ -84,8 +84,9 @@ parts:
             echo "\$SNAP/bin/python3.8 \$SNAP/run.py" > $SNAPCRAFT_PART_INSTALL/sasview-wrapper
             chmod +x $SNAPCRAFT_PART_INSTALL/sasview-wrapper
 
+            ls -l
             ls -l $SNAP
-            ls -l $SNAPCRAFT_PART_INSTALL
+            ls -lR $SNAPCRAFT_PART_INSTALL
             /usr/bin/python3.8 $SNAP/SasView/setup.py
             snapcraftctl build
 
