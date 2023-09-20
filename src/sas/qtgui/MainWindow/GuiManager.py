@@ -147,11 +147,10 @@ class GuiManager:
         """
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
-        # make it hidden by default
-        self.logDockWidget.setVisible(False)
         self.logDockWidget.setObjectName("LogDockWidget")
         self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
-
+        # make it hidden by default
+        self.logDockWidget.setVisible(False)
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
