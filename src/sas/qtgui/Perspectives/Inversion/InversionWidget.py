@@ -555,7 +555,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def check_q_low(self, q_value=None):
         """ Validate the low q value """
         if not q_value:
-            q_value = float(self.minQInput.text()) if self.minQInput.text() else '0.0'
+            q_value = float(self.minQInput.text()) if self.minQInput.text() else 0.0
         q_min = min(self._calculator.x) if any(self._calculator.x) else 0.0
         q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
         if q_value > q_max:
@@ -573,7 +573,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def check_q_high(self, q_value=None):
         """ Validate the value of high q sent by the slider """
         if not q_value:
-            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else '1.0'
+            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else 1.0
         q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
         q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else 0.0
         if q_value > q_max:
@@ -1325,9 +1325,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.phi = self.startPoint
         self.deltaPhi = (180 / self.noOfSlices)
         print(self.deltaPhi)
-        self.setSlicerParms()
+        self.setSlicerParams()
 
-    def setSlicerParms(self):
+    def setSlicerParams(self):
         params = self.plot2D.slicer.getParams()
         params["Phi [deg]"] = self.phi
         params["Delta_Phi [deg]"] = self.deltaPhi
@@ -1344,7 +1344,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         for i in range(self.noOfSlices):
             params["Phi [deg]"] = self.phi
-            self.setSlicerParms()
+            self.setSlicerParams()
             slicePlot = self.plot2D.slicer.captureSlice()
             slicePlot.title += ' φ {}'.format(self.phi)
             slicePlot.phi = self.phi

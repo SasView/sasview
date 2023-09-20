@@ -69,7 +69,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.left_line.qmax = self.qmax
         # draw the sector
         self.update()
-        self._post_data()
+        self._post_data(show_plots = False)
         self.draw()
         self.setModelFromParams()
 
@@ -283,7 +283,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.left_line.update(phi=phi, delta=None, mline=self.main_line,
                               side=True, left=True)
         # Post the new corresponding data
-        self._post_data(nbins=self.nbins)
+        self._post_data(nbins=self.nbins, show_plots = False)
         self.draw()
 
     def draw(self):
@@ -391,13 +391,13 @@ class SideInteractor(BaseInteractor):
         else:
             self.phi = numpy.fabs(self.phi)
         if side:
-            self.theta = mline.alpha + self.phi
+            self.theta = mline.theta + self.phi
 
         if mline is not None:
             if delta != 0:
                 self.theta2 = mline + delta
             else:
-                self.theta2 = mline.alpha
+                self.theta2 = mline.theta
         if delta == 0:
             theta3 = self.theta + delta
         else:
