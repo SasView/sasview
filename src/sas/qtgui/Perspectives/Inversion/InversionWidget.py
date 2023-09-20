@@ -620,15 +620,31 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.set_slit_width(is_float(self.slitWidthInput.text()))
 
     def setParameters(self):
-        """ sets parameters previously saved with saveParameters """
-        self.noOfTermsInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).noOfTerms))
-        self.regularizationConstantInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).regConst))
-        self.maxDistanceInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).maxDist))
-        self.backgroundInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).background))
-        self.minQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).q_min))
-        self.maxQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).q_max))
-        self.slitHeightInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_height))
-        self.slitWidthInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_width))
+        try:
+            """ sets parameters previously saved with saveParameters """
+            self.noOfTermsInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).noOfTerms))
+            self.regularizationConstantInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).regConst))
+            self.maxDistanceInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).maxDist))
+            self.backgroundInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).background))
+            self.minQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).q_min))
+            self.maxQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).q_max))
+            self.slitHeightInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_height))
+            self.slitWidthInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_width))
+        except:
+            # Data might be removed
+            self.setDefaultParameters()
+
+    def setDefaultParameters(self):        
+        """ sets to default parameters  """
+        self.noOfTermsInput.setText(str(NUMBER_OF_TERMS))
+        self.regularizationConstantInput.setText(str(REGULARIZATION))
+        self.maxDistanceInput.setText(str(MAX_DIST))
+        self.backgroundInput.setText(str(BACKGROUND_INPUT))
+        self.minQInput.setText("")
+        self.maxQInput.setText("")
+        self.slitHeightInput.setText("")
+        self.slitWidthInput.setText("")
+
 
     def resetCalcPrams(self):
         " resets the calibration prams """
@@ -814,6 +830,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             
         else:
             self.dataList.setCurrentIndex(0)
+            self.prPlot = None
+            self.dataPlot = None
             self.updateGuiValues()
 
 
