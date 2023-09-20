@@ -96,6 +96,7 @@ if build_qt:
 
 # Required packages
 required = [
+    'PySide6', 'sasdata', 'sasmodels',
     'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing>=2.0.0',
     'lxml',
 ]
