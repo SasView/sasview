@@ -6,32 +6,30 @@ Functions designed to help avoid using too much memory, chunks up the pairwise d
 
 Something like this
 
+.                 First Point
 
-
-                 First Point
-
-       1   2   3 | 4   5   6 | 7   8   9 | 0
-   1             |           |           |
-S                |           |           |
-e  2   CHUNK 1   |  CHUNK 2  |  CHUNK 3  | CHUNK 4
-c                |           |           |
-o  3             |           |           |
-n ---------------+-----------+-----------+------------
-d  4             |           |           |
-                 |           |           |
-P  5   CHUNK 5   |  CHUNK 6  | CHUNK 7   | CHUNK 8
-o                |           |           |
-i  6             |           |           |
-n ---------------+-----------+-----------+------------
-t  7             |           |           |
-                 |           |           |
-   8   CHUNK 9   | CHUNK 10  | CHUNK 11  |  CHUNK 12
-                 |           |           |
-   9             |           |           |
-  ---------------+-----------+-----------+------------
-   0             |           |           |
-      CHUNK 13   | CHUNK 14  | CHUNK 15  |  CHUNK 16
-                 |           |           |
+.       1   2   3 | 4   5   6 | 7   8   9 | 0
+.   1             |           |           |
+.S                |           |           |
+.e  2   CHUNK 1   |  CHUNK 2  |  CHUNK 3  | CHUNK 4
+.c                |           |           |
+.o  3             |           |           |
+.n ---------------+-----------+-----------+------------
+.d  4             |           |           |
+.                 |           |           |
+.P  5   CHUNK 5   |  CHUNK 6  | CHUNK 7   | CHUNK 8
+.o                |           |           |
+.i  6             |           |           |
+.n ---------------+-----------+-----------+------------
+.t  7             |           |           |
+.                 |           |           |
+.   8   CHUNK 9   | CHUNK 10  | CHUNK 11  |  CHUNK 12
+.                 |           |           |
+.   9             |           |           |
+.  ---------------+-----------+-----------+------------
+.   0             |           |           |
+.      CHUNK 13   | CHUNK 14  | CHUNK 15  |  CHUNK 16
+.                 |           |           |
 """
 
 
