@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, TypeVar, Generic, NamedTuple
+from typing import Optional, TypeVar, Generic, NamedTuple
 
 from sasdata.dataloader.data_info import Data1D
 
@@ -42,8 +42,8 @@ class SupplementaryParameters:
     hard_block_gamma: float
     interface_z: float
     core_z: float
-    z_range: Tuple[float, float]
-    gamma_range: Tuple[float, float]
+    z_range: tuple[float, float]
+    gamma_range: tuple[float, float]
 
 @dataclass
 class LamellarParameters:

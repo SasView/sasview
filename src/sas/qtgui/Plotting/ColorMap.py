@@ -7,7 +7,7 @@ from PySide6 import QtWidgets
 
 import matplotlib as mpl
 import numpy
-from typing import Union, Tuple
+from typing import Union
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -185,7 +185,7 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
             self.txtMaxAmplitude.setText(formatNumber(value))
             self.updateMap()
 
-        def set_values(values: Tuple[Union[int,float], Union[int,float]]):
+        def set_values(values: tuple[Union[int,float], Union[int,float]]):
             v1, v2 = values
             if v1 != self.vmin:
                 set_vmin(v1)

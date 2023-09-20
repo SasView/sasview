@@ -3,7 +3,7 @@ This module implements corfunc
 """
 
 
-from typing import Optional, Tuple, Callable
+from typing import Optional, Callable
 from dataclasses import dataclass
 from enum import Enum
 
@@ -133,7 +133,7 @@ class CorfuncCalculator:
         self._data = data
 
     @property
-    def q_range(self) -> Tuple[float, float]:
+    def q_range(self) -> tuple[float, float]:
         return self.data.x[0], self.data.x[-1]
     @property
     def background(self):

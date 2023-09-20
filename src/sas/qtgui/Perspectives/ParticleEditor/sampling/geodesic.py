@@ -1,4 +1,3 @@
-from typing import Tuple
 from collections import defaultdict
 
 import numpy as np
@@ -108,7 +107,7 @@ class Geodesic():
         return int(max([1.0, np.ceil(n_ish)]))
 
     @staticmethod
-    def by_point_count(self, n_points) -> Tuple[np.ndarray, np.ndarray]:
+    def by_point_count(self, n_points) -> tuple[np.ndarray, np.ndarray]:
         """ Get point sample on a unit geodesic sphere, *at least* n_points will be returned
 
         Weights of each point are calculated by fractional spherical area of dual polyhedron, and total weight = 4pi
@@ -117,7 +116,7 @@ class Geodesic():
         return self.by_divisions(self.minimal_divisions_for_points(n_points))
 
     @staticmethod
-    def by_divisions(n_divisions) -> Tuple[np.ndarray, np.ndarray]:
+    def by_divisions(n_divisions) -> tuple[np.ndarray, np.ndarray]:
 
         """ Get point sample on a unit geodesic sphere, points are creating by dividing each
         face of an icosahedron into smaller triangles so that each edge is split into n_divisions pieces

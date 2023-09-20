@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 import math
 import numpy as np
@@ -293,7 +293,7 @@ class CorfuncSlider(QtWidgets.QWidget):
         return 0.5 * (self.transform(self._point_3) + self.width())
 
     @property
-    def line_paint_positions(self) -> Tuple[float, float, float]:
+    def line_paint_positions(self) -> tuple[float, float, float]:
         """ x coordinate of the painted lines"""
         return (self.transform(self._point_1),
                 self.transform(self._point_2),

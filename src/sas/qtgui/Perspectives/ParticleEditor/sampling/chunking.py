@@ -35,7 +35,7 @@ t  7             |           |           |
 """
 
 
-from typing import Tuple, Sequence, Any
+from typing import Sequence, Any
 
 import math
 
@@ -53,7 +53,7 @@ class Chunker(ABC):
         return self._iterator()
 
     @abstractmethod
-    def _iterator(self) -> Tuple[VectorComponents3, VectorComponents3]:
+    def _iterator(self) -> tuple[VectorComponents3, VectorComponents3]:
         """ Python generator function that yields chunks """
 
 
@@ -89,7 +89,7 @@ def sublist_lengths(data: Sequence[Sequence[Any]]) -> int:
 def pairwise_chunk_iterator(
         left_data: Sequence[Sequence[Any]],
         right_data: Sequence[Sequence[Any]],
-        chunk_size: int) -> Tuple[Sequence[Sequence[Any]], Sequence[Sequence[Any]]]:
+        chunk_size: int) -> tuple[Sequence[Sequence[Any]], Sequence[Sequence[Any]]]:
 
     """ Generator to do chunking as described in the module docs above"""
 

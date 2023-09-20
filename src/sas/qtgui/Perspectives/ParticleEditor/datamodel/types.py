@@ -1,8 +1,8 @@
-from typing import Tuple, Protocol
+from typing import Protocol
 import numpy as np
 
 # 3D vector output as numpy arrays
-VectorComponents3 = Tuple[np.ndarray, np.ndarray, np.ndarray]
+VectorComponents3 = tuple[np.ndarray, np.ndarray, np.ndarray]
 
 
 class SLDFunction(Protocol):

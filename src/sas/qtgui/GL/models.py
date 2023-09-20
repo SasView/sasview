@@ -4,7 +4,7 @@
 """
 
 
-from typing import Sequence, Tuple, Union, Optional
+from typing import Sequence, Union, Optional
 
 import numpy as np
 
@@ -13,9 +13,9 @@ from OpenGL.GL import *
 from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.color import ColorSpecification, ColorSpecificationMethod
 
-VertexData = Union[Sequence[Tuple[float, float, float]], np.ndarray]
-EdgeData = Union[Sequence[Tuple[int, int]], np.ndarray]
-TriangleMeshData = Union[Sequence[Tuple[int, int, int]], np.ndarray]
+VertexData = Union[Sequence[tuple[float, float, float]], np.ndarray]
+EdgeData = Union[Sequence[tuple[int, int]], np.ndarray]
+TriangleMeshData = Union[Sequence[tuple[int, int, int]], np.ndarray]
 
 
 class ModelBase(Renderable):
@@ -69,8 +69,8 @@ class SolidVertexModel(SolidModel):
         """
 
 
-        :vertices: Sequence[Tuple[float, float, float]], vertices of the model
-        :triangle_meshes: Sequence[Sequence[Tuple[int, int, int]]], sequence of triangle
+        :vertices: Sequence[tuple[float, float, float]], vertices of the model
+        :triangle_meshes: Sequence[Sequence[tuple[int, int, int]]], sequence of triangle
                           meshes indices making up the shape
         :colors: Optional[Union[Sequence[Color], Color]], single color for shape, or array with a colour for
                  each mesh or vertex (color_by_mesh selects which of these it is)
@@ -136,8 +136,8 @@ class WireModel(ModelBase):
 
         """ Wireframe Model
 
-        :vertices: Sequence[Tuple[float, float, float]], vertices of the model
-        :edges: Sequence[Tuple[int, int]], indices of the points making up the edges
+        :vertices: Sequence[tuple[float, float, float]], vertices of the model
+        :edges: Sequence[tuple[int, int]], indices of the points making up the edges
         :edge_colors: Optional[Union[Sequence[Color], Color]], color of the individual edges or a single color for them all
         """
 

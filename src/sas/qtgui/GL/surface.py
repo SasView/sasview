@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import logging
 import numpy as np
 
@@ -40,7 +38,7 @@ class Surface(FullModel):
                  y_values: np.ndarray,
                  z_data: np.ndarray,
                  colormap: str= ColorMap._default_colormap,
-                 c_range: Tuple[float, float] = (0, 1),
+                 c_range: tuple[float, float] = (0, 1),
                  edge_skip: int=1):
 
         """ Surface plot

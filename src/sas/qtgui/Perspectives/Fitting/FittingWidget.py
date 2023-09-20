@@ -2,7 +2,7 @@ import json
 import os
 import sys
 from collections import defaultdict
-from typing import Any, Tuple
+from typing import Any
 
 import copy
 import logging
@@ -64,7 +64,7 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 # CRUFT: remove when new release of sasmodels is available
 # https://github.com/SasView/sasview/pull/181#discussion_r218135162
 if not hasattr(SasviewModel, 'get_weights'):
-    def get_weights(self: Any, name: str) -> Tuple[np.ndarray, np.ndarray]:
+    def get_weights(self: Any, name: str) -> tuple[np.ndarray, np.ndarray]:
         """
         Returns the polydispersity distribution for parameter *name* as *value* and *weight* arrays.
         """
