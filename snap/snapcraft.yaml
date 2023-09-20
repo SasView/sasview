@@ -81,7 +81,7 @@ parts:
             ln -s /usr/bin/python3.8 $SNAPCRAFT_PART_INSTALL/bin/python3.8
             # ln -sf ../usr/lib/libsnapcraft-preload.so $SNAPCRAFT_PART_INSTALL/lib/libsnapcraft-preload.so
 
-            snapcraftctl build
+            snapcraftctl build --debug
 
             # Apply shebang rewrite as done by snapcraft
             find $SNAPCRAFT_PART_INSTALL/bin/ -maxdepth 1 -mindepth 1 -type f -executable -exec \
