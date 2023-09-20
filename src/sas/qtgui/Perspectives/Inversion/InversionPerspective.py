@@ -16,14 +16,13 @@ from .InversionLogic import InversionLogic
 # pr inversion calculation elements
 
 from sas.sascalc.pr.invertor import Invertor
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget, DICT_KEYS, NUMBER_OF_TERMS, REGULARIZATION
 
 
-from sasdata.dataloader import Data2D
 
 logger = logging.getLogger(__name__)
 
@@ -320,33 +319,36 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
 
-        items = [data_item] if is_batch else data_item
+        items = [data_item] if (is_batch and len([data_item])>1) else data_item
         for data in items:
             logic_data = GuiUtils.dataFromItem(data)
             is_2Ddata = isinstance(logic_data, Data2D)
-            
-            
-            # Find the first unassigned tab.
-            # If none, open a new tab.
-            available_tabs = [tab.acceptsData() for tab in self.tabs]
-            tab_ids = [tab.tab_id for tab in self.tabs]
-            if tab_index is not None:
-                if tab_index not in tab_ids: 
-                    self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
-                else:
-                    self.setCurrentIndex(tab_index-1)                
-                    self.swapData(data = data, is2D = is_2Ddata)
-                    return
-            #debug Batch mode, gives none Type has no attribute name
-            if not is_batch and np.any(available_tabs):
-                first_good_tab = available_tabs.index(True)
-                self.tabs[first_good_tab].data = data
-                self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata) 
+            if is_2Ddata and is_batch:
+                 msg = "2D Data cannot be inverted as Batch"
+                 raise RuntimeError(msg)
+            else:    
+                # Find the first unassigned tab.
+                # If none, open a new tab.
+                available_tabs = [tab.acceptsData() for tab in self.tabs]
+                tab_ids = [tab.tab_id for tab in self.tabs]
+                if tab_index is not None:
+                    if tab_index not in tab_ids: 
+                        self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
+                    else:
+                        self.setCurrentIndex(tab_index-1)                
+                        self.swapData(data = data, is2D = is_2Ddata)
+                        return
+                #debug Batch mode, gives none Type has no attribute name
+                if not is_batch and np.any(available_tabs):
+                    first_good_tab = available_tabs.index(True)
+                    self.tabs[first_good_tab].data = data
+                    self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata) 
 
-            else:
-                self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
-                
- 
+                else:
+                    self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
+
+
+
 
 
     def swapData(self, data = None, is2D = False):
