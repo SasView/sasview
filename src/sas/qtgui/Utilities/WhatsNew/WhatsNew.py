@@ -52,6 +52,8 @@ class WhatsNew(QDialog):
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
         self.browser = QTextBrowser()
+        self.browser.setOpenLinks(True)
+        self.browser.setOpenExternalLinks(True)
 
         # Layout stuff
         self.mainLayout = QVBoxLayout()
