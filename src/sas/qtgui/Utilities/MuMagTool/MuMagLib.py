@@ -157,7 +157,7 @@ class MuMagLib():
 
     #######################################################################################################################
 
-    def SimpleFit_FitButtonCallback(self, q_max, H_min, A1, A2, A_N, SANSgeometry):
+    def simple_fit_button_callback(self, q_max, H_min, A1, A2, A_N, SANSgeometry):
 
         if np.size(self.q_exp) > 1:
 

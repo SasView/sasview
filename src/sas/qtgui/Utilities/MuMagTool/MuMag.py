@@ -26,7 +26,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         A2 = float(self.AMaxEdit.toPlainText())
         A_N = int(self.ASamplesEdit.toPlainText())
         SANSgeometry = self.ScatteringGeometrySelect.currentText()
-        self.MuMagLib_obj.SimpleFit_FitButtonCallback(q_max, H_min, A1, A2, A_N, SANSgeometry)
+        self.MuMagLib_obj.simple_fit_button_callback(q_max, H_min, A1, A2, A_N, SANSgeometry)
 
 
 def main():
