@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Union, Dict
+from typing import Optional, Union
 
 from PySide6.QtGui import QStandardItem
 from PySide6 import QtCore
@@ -41,12 +41,12 @@ class Perspective(object, metaclass=PerspectiveMeta):
     #
 
     @abstractmethod
-    def setData(self, data_item: List[QStandardItem], is_batch: bool=False):
+    def setData(self, data_item: list[QStandardItem], is_batch: bool=False):
         """ Set the data to be processed in this perspective, called when
         the 'send data' button is pressed"""
         pass # TODO: Should we really be passing Qt objects around, rather than actual data
 
-    def removeData(self, data_list: Optional[Union[QStandardItem, List[QStandardItem]]]):
+    def removeData(self, data_list: Optional[Union[QStandardItem, list[QStandardItem]]]):
         """ Remove data from """
         raise NotImplementedError(f"Remove data not implemented in {self.name}")
 
@@ -89,7 +89,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
         pass
 
     # TODO: Use a more ordered datastructure for constraints
-    def updateFromConstraints(self, constraints: Dict[str, list]):
+    def updateFromConstraints(self, constraints: dict[str, list]):
         """
         Updates all tabs with constraints present in *constraint_dict*, where
         *constraint_dict*  keys are the fit page name, and the value is a
@@ -140,7 +140,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
     #
 
     @property
-    def preferences(self) -> Optional[List[PreferencesWidget]]:
+    def preferences(self) -> Optional[list[PreferencesWidget]]:
         """ Return a list of widgets that should be added to the preferences panel. """
         return []
 

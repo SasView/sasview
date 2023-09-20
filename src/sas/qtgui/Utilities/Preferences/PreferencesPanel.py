@@ -4,7 +4,7 @@ import sys
 
 from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QMessageBox
 from PySide6.QtCore import Qt
-from typing import Optional, Callable, Dict, Any, Union, List
+from typing import Optional, Callable, Dict, Any, Union
 
 from sas.system import config
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
@@ -22,7 +22,7 @@ from .PlottingPreferencesWidget import PlottingPreferencesWidget
 BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,
                "Display Settings": DisplayPreferencesWidget,
                }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
-ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
+ConfigType = Union[str, bool, float, int, list[Union[str, float, int]]]
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, List, Any
+from typing import Optional, Any
 import logging
 
 
@@ -189,7 +189,7 @@ def create_schema_element(name: str, value, recursion_depth: int=10) -> SchemaEl
         raise SchemaError(f"Config element is not a bool, int, float, str, or a homogeneous list thereof ({name}={value})")
 
 
-def schema_union(elements: List[SchemaElement]):
+def schema_union(elements: list[SchemaElement]):
     """ Union of an arbitrary number of Schema Elements"""
     if len(elements) == 0:
         return SchemaNonSpecified()

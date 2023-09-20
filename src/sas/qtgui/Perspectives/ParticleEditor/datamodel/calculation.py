@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Tuple, Protocol, List
+from typing import Optional, Callable, Protocol
 import numpy as np
 from enum import Enum
 from dataclasses import dataclass
@@ -72,11 +72,11 @@ class AngularDistribution(ABC):
 
     @staticmethod
     @abstractmethod
-    def parameters() -> List[Tuple[str, str, type]]:
+    def parameters() -> list[tuple[str, str, type]]:
         """ List of keyword arguments to constructor, names for GUI, and the type of value"""
 
     @abstractmethod
-    def sample_points_and_weights(self) -> Tuple[np.ndarray, np.ndarray]:
+    def sample_points_and_weights(self) -> tuple[np.ndarray, np.ndarray]:
         """ Get sample q vector directions and associated weights"""
 
 

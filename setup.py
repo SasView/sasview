@@ -6,7 +6,6 @@
     TODO: Add checks to see that all the dependencies are on the system
 """
 
-from typing import List
 import os
 import subprocess
 import shutil

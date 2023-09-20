@@ -1,4 +1,4 @@
-from typing import Optional, Union, Sequence, List, Tuple
+from typing import Optional, Union, Sequence
 
 import numpy as np
 
@@ -10,7 +10,7 @@ class Cone(FullModel):
     """ Graphics primitive: Radius 1, Height 2 cone "centred" at (0,0,0)"""
 
     @staticmethod
-    def cone_vertices(n) -> List[Tuple[float, float, float]]:
+    def cone_vertices(n) -> list[tuple[float, float, float]]:
         """ Helper function: Vertices of the cone primitive"""
         return [(0.0, 0.0, 1.0)] + [
             (np.sin(angle), np.cos(angle), -1.0)
@@ -22,17 +22,17 @@ class Cone(FullModel):
         return [(0, i+1) for i in range(n)] + [(i+1, (i+1)%n+1) for i in range(n)]
 
     @staticmethod
-    def cone_tip_triangles(n) -> List[Tuple[int, int, int]]:
+    def cone_tip_triangles(n) -> list[tuple[int, int, int]]:
         """ Helper function: Triangles in tip of the cone primitive"""
         return [(0, i + 1, (i + 1) % n + 1) for i in range(n)]
 
     @staticmethod
-    def cone_base_triangles(n) -> List[Tuple[int, int, int]]:
+    def cone_base_triangles(n) -> list[tuple[int, int, int]]:
         """ Helper function: Triangles in base the cone primitive"""
         return [((i + 1) % n + 1, i + 1, n+1) for i in range(n)]
 
     @staticmethod
-    def cone_triangles(n) -> List[List[Tuple[int, int, int]]]:
+    def cone_triangles(n) -> list[list[tuple[int, int, int]]]:
         """ Helper function: The two separate meshes for triangles of the cone primitive"""
         return [Cone.cone_base_triangles(n),
                 Cone.cone_tip_triangles(n)]

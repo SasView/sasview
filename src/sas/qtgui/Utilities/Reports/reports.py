@@ -1,4 +1,4 @@
-from typing import List, Tuple, Iterable, Any, Dict, Optional
+from typing import Iterable, Any, Optional
 
 import sys
 import os
@@ -213,12 +213,12 @@ class ReportBase:
                 img(src=f"data:image/{file_type};base64," + data64.decode("utf-8"),
                     style="width:100%")
 
-    def add_table_dict(self, d: Dict[str, Any], titles: Optional[Tuple[str, str]]=None):
+    def add_table_dict(self, d: dict[str, Any], titles: Optional[tuple[str, str]]=None):
 
         self.add_table([[key, d[key]] for key in d], titles=titles)
 
     def add_table(self,
-                  data: List[List[Any]],
+                  data: list[list[Any]],
                   titles: Optional[Iterable[str]]=None,
                   target_tag="model-parameters",
                   column_prefix="column"):

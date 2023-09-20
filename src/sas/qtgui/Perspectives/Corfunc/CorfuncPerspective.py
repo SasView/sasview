@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from numpy.linalg.linalg import LinAlgError
 
 
-from typing import Optional, List, Tuple, Callable
+from typing import Optional, Callable
 
 import logging
 
@@ -449,7 +449,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         else:
             return None
 
-    def setData(self, data_item: List[QStandardItem], is_batch=False):
+    def setData(self, data_item: list[QStandardItem], is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator

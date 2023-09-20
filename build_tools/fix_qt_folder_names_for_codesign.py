@@ -3,7 +3,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import Generator, List, Optional
+from typing import Generator, Optional
 
 from macholib.MachO import MachO
 
@@ -91,7 +91,7 @@ def move_contents_to_resources(folder: Path) -> Generator[Path, None, None]:
             yield sibbling
 
 
-def main(args: List[str]) -> int:
+def main(args: list[str]) -> int:
     """
     Fix the application to allow codesign (NXDRIVE-1301).
     Take one or more .app as arguments: "Nuxeo Drive.app".

@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QComboBox, QDoubleSpinBox
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import AngularDistribution

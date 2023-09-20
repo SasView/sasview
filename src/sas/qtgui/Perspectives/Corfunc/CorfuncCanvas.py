@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
 
-from typing import Optional, Union, List, Iterable, TYPE_CHECKING
+from typing import Optional, Union, Iterable, TYPE_CHECKING
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -31,7 +31,7 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
 
         FigureCanvas.__init__(self, self.fig)
 
-        self._data: Optional[List[Data1D]] = None
+        self._data: Optional[list[Data1D]] = None
 
     def clear(self):
         """ Remove data from plots"""
@@ -42,7 +42,7 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
         pass
 
     @property
-    def data(self) -> Optional[List[Data1D]]:
+    def data(self) -> Optional[list[Data1D]]:
         """ The data currently shown by the plots """
         return self._data
 

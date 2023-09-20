@@ -10,7 +10,6 @@ are added.
 """
 
 
-from typing import List, Tuple
 import numpy as np
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import AngularDistribution
@@ -50,7 +49,7 @@ class Uniform(AngularDistribution):
     def name():
         return "Unoriented"
 
-    def sample_points_and_weights(self) -> Tuple[np.ndarray, np.ndarray]:
+    def sample_points_and_weights(self) -> tuple[np.ndarray, np.ndarray]:
         return Geodesic.by_divisions(self.divisions)
 
     @property
@@ -58,7 +57,7 @@ class Uniform(AngularDistribution):
         return self._n_points
 
     @staticmethod
-    def parameters() -> List[Tuple[str, str, type]]:
+    def parameters() -> list[tuple[str, str, type]]:
         return [("geodesic_divisions", "Angular Samples", GeodesicDivisions)]
 
     def __repr__(self):

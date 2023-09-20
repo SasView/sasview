@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 import numpy as np
 
@@ -21,7 +20,7 @@ class SceneGraphNode(Renderable):
 
     def __init__(self, *children: Renderable):
         super().__init__()
-        self.children: List[Renderable] = list(children)
+        self.children: list[Renderable] = list(children)
         self.solid_render_enabled = True
         self.wireframe_render_enabled = True
 

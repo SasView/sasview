@@ -4,8 +4,6 @@ import datetime
 import re
 import sys
 
-from typing import List
-
 import logging
 from io import BytesIO
 import urllib.parse
@@ -163,7 +161,7 @@ class ReportPageLogic:
 
         return report
 
-    def getImages(self) -> List[PlotterBase]:
+    def getImages(self) -> list[PlotterBase]:
         """
         Create MPL figures for the current fit
         """

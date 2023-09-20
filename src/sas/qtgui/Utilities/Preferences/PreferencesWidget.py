@@ -2,15 +2,15 @@ import logging
 
 from PySide6.QtGui import QIntValidator, QDoubleValidator, QValidator
 from PySide6.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
-from typing import Optional, List, Union, Dict
+from typing import Optional, Union
 
 from sas.system import config
 
-ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
+ConfigType = Union[str, bool, float, int, list[Union[str, float, int]]]
 logger = logging.getLogger(__name__)
 
 
-def cb_replace_all_items_with_new(cb: QComboBox, new_items: List[str], default_item: Optional[str] = None):
+def cb_replace_all_items_with_new(cb: QComboBox, new_items: list[str], default_item: Optional[str] = None):
     """Helper method that removes existing ComboBox values, replaces them and sets a default item, if defined
     :param cb: A QComboBox object
     :param new_items: A list of strings that will be used to populate the QComboBox
@@ -40,9 +40,9 @@ class PreferencesWidget(QWidget):
         self.parent = None
         self.name: str = name
         # All parameter names used in this panel
-        self.config_params: List[str] = []
+        self.config_params: list[str] = []
         # A mapping of parameter names to messages displayed when prompting for a restart
-        self.restart_params: Dict[str, str] = {}
+        self.restart_params: dict[str, str] = {}
         if build_gui:
             # Create generic layout
             self.verticalLayout = QVBoxLayout()
@@ -119,7 +119,7 @@ class PreferencesWidget(QWidget):
         layout.addWidget(label)
         return layout
 
-    def addComboBox(self, title: str, params: List[Union[str, int, float]], default: Optional[str] = None) -> QComboBox:
+    def addComboBox(self, title: str, params: list[Union[str, int, float]], default: Optional[str] = None) -> QComboBox:
         """Add a title and combo box within the widget.
         :param title: The title of the combo box to be added to the preferences panel.
         :param params: A list of options to be added to the combo box.
