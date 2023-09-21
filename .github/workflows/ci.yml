@@ -275,6 +275,7 @@ jobs:
 #          staple: 'true'
 
       - name: Notarize Release Build (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: GuillaumeFalourd/xcode-notarize@v1
         with:
             product-path: "installers/dist/SasView5.dmg"
