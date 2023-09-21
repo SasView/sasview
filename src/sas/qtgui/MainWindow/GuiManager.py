@@ -149,6 +149,7 @@ class GuiManager:
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
         self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
+        self.logDockWidget.setVisible(False)
 
 
         self.listWidget = QTextBrowser()

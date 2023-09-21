@@ -583,7 +583,7 @@
   </action>
   <action name="actionHide_LogExplorer">
    <property name="text">
-    <string>Hide Log Explorer</string>
+    <string>Show Log Explorer</string>
    </property>
   </action>
   <action name="actionCategory_Manager">
