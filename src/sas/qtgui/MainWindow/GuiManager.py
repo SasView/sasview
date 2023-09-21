@@ -503,10 +503,22 @@ class GuiManager:
         """
         self.statusLabel.setText(text)
 
-    def appendLog(self, msg):
+    def appendLog(self, signal):
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
-        self.listWidget.append(msg.strip())
+        (_, record) = signal
+        LOG_COLORS = {"WARNING": "orange", "ERROR": "red", "CRITICAL": "red"}
+        level_style = ""
+        if record.levelname in LOG_COLORS:
+            level_style = f' style="color: {LOG_COLORS[record.levelname]}"'
+
+        message = f'{record.asctime} - <b{level_style}>{record.levelname}</b>: {record.message}'
+        self.listWidget.append(message.strip())
+
+        # Display log if message is error or worse
+        if record.levelno >= 30:
+            self.logDockWidget.setVisible(True)
+
 
     def createGuiData(self, item, p_file=None):
         """

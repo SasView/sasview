@@ -7,8 +7,15 @@ from PySide6.QtCore import QObject, Signal
 LOG_FORMAT = "%(asctime)s - %(levelname)s: %(message)s"
 DATE_FORMAT = "%H:%M:%S"
 
+class SasViewLogFormatter(logging.Formatter):
+    def format(self, record):
+        """
+        Give extra formatting on error messages
+        """
+        return f"MyLogger: {dir(record)}"
+
 class QtPostman(QObject):
-    messageWritten = Signal(str)
+    messageWritten = Signal(object)
 
 class QtHandler(logging.Handler):
     """
@@ -23,7 +30,7 @@ class QtHandler(logging.Handler):
     def emit(self, record):
         message = self.format(record)
         if message:
-            self.postman.messageWritten.emit(message)
+            self.postman.messageWritten.emit((message, record))
 
 def setup_qt_logging():
     # Add the qt-signal logger
