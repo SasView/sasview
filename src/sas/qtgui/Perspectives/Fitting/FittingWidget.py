@@ -2161,8 +2161,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Update the model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
-            return
 
         def updateFittedValues(row):
             # Utility function for main model update
@@ -4288,32 +4286,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             Create list of main parameters based on _model_model
             """
             param_name = str(self._model_model.item(row, 0).text())
-            current_list = self.tabToList[self.tabFitting.currentIndex()]
             model = self._model_model
             if model.item(row, 0) is None:
                 return
             # Assure this is a parameter - must contain a checkbox
             if not model.item(row, 0).isCheckable():
-                # maybe it is a combobox item (multiplicity)
-                try:
-                    index = model.index(row, 1)
-                    widget = current_list.indexWidget(index)
-                    if widget is None:
-                        return
-                    if isinstance(widget, QtWidgets.QComboBox):
-                        # find the index of the combobox
-                        current_index = widget.currentIndex()
-                        param_list.append([param_name, 'None', str(current_index)])
-                except Exception as ex:
-                    pass
-                return
-
-            param_checked = str(model.item(row, 0).checkState() == QtCore.Qt.Checked)
+                param_checked = None
+            else:
+                param_checked = str(model.item(row, 0).checkState() == QtCore.Qt.Checked)
             # Value of the parameter. In some cases this is the text of the combobox choice.
             param_value = str(model.item(row, 1).text())
             param_error = None
-            param_min = None
-            param_max = None
+            _, param_min, param_max = self.kernel_module.details.get(param_name, ('', None, None))
             column_offset = 0
             if self.has_error_column:
                 column_offset = 1
@@ -4321,7 +4305,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             try:
                 param_min = str(model.item(row, 2+column_offset).text())
                 param_max = str(model.item(row, 3+column_offset).text())
-            except:
+            except Exception:
                 pass
             # Do we have any constraints on this parameter?
             constraint = self.getConstraintForRow(row, model_key="standard")
@@ -4434,10 +4418,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.chk2DView.setChecked(line_dict['2D_params'][0]=='True')
 
         # Create the context dictionary for parameters
+        # Exclude multiplicity and number of shells params from context
+        context = {k: v for (k, v) in line_dict.items() if len(v) > 3 and k != model}
         context['model_name'] = model
-        for key, value in line_dict.items():
-            if len(value) > 2:
-                context[key] = value
 
         if warn_user and str(self.cbModel.currentText()) != str(context['model_name']):
             msg = QtWidgets.QMessageBox()
@@ -4513,20 +4496,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_name = str(self._model_model.item(row, 0).text())
             if param_name not in list(param_dict.keys()):
                 return
-            # Special case of combo box in the cell (multiplicity)
-            param_line = param_dict[param_name]
-            if len(param_line) == 1:
-                # modify the shells value
-                try:
-                    combo_index = int(param_line[0])
-                except ValueError:
-                    # quietly pass
-                    return
-                index = self._model_model.index(row, 1)
-                widget = self.lstParams.indexWidget(index)
-                if widget is not None and isinstance(widget, QtWidgets.QComboBox):
-                    #widget.setCurrentIndex(combo_index)
-                    return
             # checkbox state
             param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
             self._model_model.item(row, 0).setCheckState(param_checked)
