@@ -106,7 +106,7 @@ jobs:
 
       - name: Move examples files from sasdata into sasview
         run: |
-          mv -r ../sasdata/example_data/ src/sas/example_data/
+          mv ../sasdata/example_data/ src/sas/example_data/
 
       - name: Build and install sasdata
         run: |
