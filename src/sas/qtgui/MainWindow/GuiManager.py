@@ -149,8 +149,8 @@ class GuiManager:
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
         self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
+        # make it hidden by default
         self.logDockWidget.setVisible(False)
-
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
@@ -512,7 +512,6 @@ class GuiManager:
         # Display log if message is error or worse
         if record.levelno >= 40:
             self.logDockWidget.setVisible(True)
-
 
     def createGuiData(self, item, p_file=None):
         """
