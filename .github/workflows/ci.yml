@@ -104,6 +104,10 @@ jobs:
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
           git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
 
+      - name: Move examples files from sasdata into sasview
+        run: |
+          mv -r ../sasdata/example_data/ src/sas/example_data/
+
       - name: Build and install sasdata
         run: |
           cd ../sasdata
