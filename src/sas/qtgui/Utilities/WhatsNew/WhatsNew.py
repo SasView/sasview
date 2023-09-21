@@ -52,6 +52,8 @@ class WhatsNew(QDialog):
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
         self.browser = QTextBrowser()
+        self.browser.setOpenLinks(True)
+        self.browser.setOpenExternalLinks(True)
 
         # Layout stuff
         self.mainLayout = QVBoxLayout()
@@ -68,7 +70,9 @@ class WhatsNew(QDialog):
         self.showAgain = QCheckBox("Show on Startup")
         self.showAgain.setChecked(True)
 
+        # add a horizontal spacer
         self.buttonLayout.addWidget(self.showAgain)
+        self.buttonLayout.addSpacerItem(QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
         self.buttonLayout.addWidget(self.closeButton)
         self.buttonLayout.addWidget(self.nextButton)
 
