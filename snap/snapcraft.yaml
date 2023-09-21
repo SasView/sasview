@@ -85,7 +85,7 @@ parts:
             chmod +x $SNAPCRAFT_PART_INSTALL/sasview-wrapper
 
             ls -l
-            /usr/bin/python3.8 setup.py
+            python3.8 setup.py
             snapcraftctl build
 
             # Apply shebang rewrite as done by snapcraft
