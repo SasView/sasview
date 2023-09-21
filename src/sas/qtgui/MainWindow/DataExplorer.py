@@ -141,7 +141,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_proxy.setSourceModel(self.theory_model)
 
         # Don't show "empty" rows with data objects
-        self.theory_proxy.filterRegularExpression = "[^()]"
+        self.theory_proxy.setFilterRegularExpression(QtCore.QRegularExpression(".+"))
 
         # Theory model view
         self.freezeView.setModel(self.theory_proxy)
