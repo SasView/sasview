@@ -881,19 +881,23 @@ def formatParametersExcel(parameters: list):
     check = ""
     for parameter in parameters:
         names += parameter[0]+tab
-        # Add the error column if fitted
-        if parameter[1] == "True" and parameter[3] is not None:
-            names += parameter[0]+"_err"+tab
+        if len(parameter) > 3:
+            # Add the error column if fitted
+            if parameter[1] == "True" and parameter[3] is not None:
+                names += parameter[0]+"_err"+tab
 
-        values += parameter[2]+tab
-        check += parameter[1]+tab
-        if parameter[1] == "True" and parameter[3] is not None:
-            values += parameter[3]+tab
-        # add .npts and .nsigmas when necessary
-        if parameter[0][-6:] == ".width":
-            names += parameter[0].replace('.width', '.nsigmas') + tab
-            names += parameter[0].replace('.width', '.npts') + tab
-            values += parameter[5] + tab + parameter[4] + tab
+            values += parameter[2]+tab
+            check += str(parameter[1])+tab
+            if parameter[1] == "True" and parameter[3] is not None:
+                values += parameter[3]+tab
+            # add .npts and .nsigmas when necessary
+            if parameter[0][-6:] == ".width":
+                names += parameter[0].replace('.width', '.nsigmas') + tab
+                names += parameter[0].replace('.width', '.npts') + tab
+                values += parameter[5] + tab + parameter[4] + tab
+        else:
+            # Empty statement for debugging purposes
+            pass
 
     output_string = names + crlf + values + crlf + check
     return output_string
@@ -912,46 +916,43 @@ def formatParametersLatex(parameters: list):
     output_string += r'}\hline'
     output_string += crlf
 
+    names = ""
+    values = ""
+
     for index, parameter in enumerate(parameters):
         name = parameter[0] # Parameter name
-        output_string += name.replace('_', r'\_')  # Escape underscores
-        # Add the error column if fitted
-        if parameter[1] == "True" and parameter[3] is not None:
-            output_string += ' & '
-            output_string += parameter[0]+r'\_err'
-
-        if index < len(parameters) - 1:
-            output_string += ' & '
-
-        # add .npts and .nsigmas when necessary
-        if parameter[0][-6:] == ".width":
-            output_string += parameter[0].replace('.width', '.nsigmas') + ' & '
-            output_string += parameter[0].replace('.width', '.npts')
+        names += name.replace('_', r'\_')  # Escape underscores
+        if len(parameter) > 3:
+            values += f" {parameter[2]}"
+            # Add the error column if fitted
+            if parameter[1] == "True" and parameter[3] is not None:
+                names += f" & {parameter[0]} " + r'\_err'
+                values += f' & {parameter[3]}'
 
             if index < len(parameters) - 1:
-                output_string += ' & '
+                names += ' & '
+                values += ' & '
 
+            # add .npts and .nsigmas when necessary
+            if parameter[0][-6:] == ".width":
+                names += parameter[0].replace('.width', '.nsigmas') + ' & '
+                names += parameter[0].replace('.width', '.npts')
+                values += parameter[5] + ' & '
+                values += parameter[4]
+
+                if index < len(parameters) - 1:
+                    names += ' & '
+                    values += ' & '
+        elif len(parameter) > 2:
+            values += f' & {parameter[2]} &'
+        else:
+            values += f' & {parameter[1]} &'
+
+    output_string += names
     output_string += r'\\ \hline'
     output_string += crlf
 
-    # Construct row of values and errors
-    for index, parameter in enumerate(parameters):
-        output_string += parameter[2]
-        if parameter[1] == "True" and parameter[3] is not None:
-            output_string += ' & '
-            output_string += parameter[3]
-
-        if index < len(parameters) - 1:
-            output_string += ' & '
-
-        # add .npts and .nsigmas when necessary
-        if parameter[0][-6:] == ".width":
-            output_string += parameter[5] + ' & '
-            output_string += parameter[4]
-
-            if index < len(parameters) - 1:
-                output_string += ' & '
-
+    output_string += values
     output_string += r'\\ \hline'
     output_string += crlf
     output_string += r'\end{tabular}'
