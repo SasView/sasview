@@ -266,13 +266,22 @@ jobs:
           hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
           codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
+#      - name: Notarize Release Build (OSX)
+#        uses: cocoalibs/xcode-notarization-action@v1
+#        with:
+#          app-path: "installers/dist/SasView.dmg"
+#          apple-id: ${{ secrets.NOTARIZATION_USERNAME }}
+#          password: ${{ secrets.NOTARIZATION_PASSWORD }}
+#          staple: 'true'
+
       - name: Notarize Release Build (OSX)
-        uses: cocoalibs/xcode-notarization-action@v1
+        uses: GuillaumeFalourd/xcode-notarize@v1
         with:
-          app-path: "installers/dist/SasView.dmg"
-          apple-id: ${{ secrets.NOTARIZATION_USERNAME }}
-          password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          staple: 'true'
+            product-path: "installers/dist/SasView5.dmg"
+            primary-bundle-id: "org.sasview.SasView5"
+            appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+            appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+            verbose: True
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
