@@ -2877,7 +2877,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
             # doesn't contain multiplicity parameter
-            self.kernel_module.setParam(parameter_name, value)
+            if self.kernel_module.params.get(parameter_name, None):
+                self.kernel_module.setParam(parameter_name, value)
         elif model_column == min_column:
             # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
             self.kernel_module.details[parameter_name][1] = value
