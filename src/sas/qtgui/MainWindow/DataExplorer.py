@@ -128,7 +128,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_model.itemChanged.connect(self.onFileListChanged)
 
         # Don't show "empty" rows with data objects
-        self.data_proxy.filterRegularExpression = "[^()]" 
+        self.data_proxy.setFilterRegularExpression(QtCore.QRegularExpression(".+"))
 
         # Create a window to allow the display name to change
         self.nameChangeBox = ChangeName(self)
