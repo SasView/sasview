@@ -510,7 +510,7 @@ class GuiManager:
         self.listWidget.append(message.strip())
 
         # Display log if message is error or worse
-        if record.levelno >= 30:
+        if record.levelno >= 40:
             self.logDockWidget.setVisible(True)
 
 
