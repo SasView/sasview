@@ -31,27 +31,13 @@ class DisplayPreferencesWidget(PreferencesWidget):
             checked=config.QT_AUTO_SCREEN_SCALE_FACTOR)
         self.autoScaling.clicked.connect(
             lambda: self._stageChange('QT_AUTO_SCREEN_SCALE_FACTOR', self.autoScaling.isChecked()))
-        self.disableResidualPlot = self.addCheckBox(
-            title="Disable Residuals Display",
-            checked=config.DISABLE_RESIDUAL_PLOT)
-        self.disableResidualPlot.clicked.connect(
-            lambda: self._stageChange('DISABLE_RESIDUAL_PLOT', self.disableResidualPlot.isChecked()))
-        self.disablePolydispersityPlot = self.addCheckBox(
-            title="Disable Polydispersity Plot Display",
-            checked=config.DISABLE_POLYDISPERSITY_PLOT)
-        self.disablePolydispersityPlot.clicked.connect(
-            lambda: self._stageChange('DISABLE_POLYDISPERSITY_PLOT', self.disablePolydispersityPlot.isChecked()))
 
     def _toggleBlockAllSignaling(self, toggle):
         self.qtScaleFactor.blockSignals(toggle)
         self.autoScaling.blockSignals(toggle)
-        self.disableResidualPlot.blockSignals(toggle)
-        self.disablePolydispersityPlot.blockSignals(toggle)
 
     def _restoreFromConfig(self):
         self.theme.setCurrentText(config.THEME)
         self.qtScaleFactor.setText(str(config.QT_SCALE_FACTOR))
         GuiUtils.updateProperty(self.qtScaleFactor, 'warning', 'false')
         self.autoScaling.setChecked(bool(config.QT_AUTO_SCREEN_SCALE_FACTOR))
-        self.disableResidualPlot.setChecked(config.DISABLE_RESIDUAL_PLOT)
-        self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)

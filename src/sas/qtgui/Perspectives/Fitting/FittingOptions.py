@@ -49,23 +49,22 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         self.config_params = ['FITTING_DEFAULT_OPTIMIZER']
 
         # Fill up the algorithm combo, based on what BUMPS says is available
-        self.active_fitters = [n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS]
+        self.active_fitters = [n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS and 'least' not in n.id]
         self.cbAlgorithm.addItems(self.active_fitters)
         self.cbAlgorithmDefault.addItems(self.active_fitters)
 
         # Set the default index
-        default_name = [n.name for n in fitters.FITTERS if n.id == sasview_config.FITTING_DEFAULT_OPTIMIZER][0]
+        self.current_fitter_id = getattr(sasview_config, 'FITTING_DEFAULT_OPTIMIZER', fitters.FIT_DEFAULT_ID)
+        default_name = [n.name for n in fitters.FITTERS if n.id == self.current_fitter_id][0]
         default_index = self.cbAlgorithm.findText(default_name)
-        self._algorithm_change(default_index)
         self.cbAlgorithmDefault.setCurrentIndex(default_index)
+        self.cbAlgorithm.setCurrentIndex(default_index)
+        self._algorithm_change(default_index)
         # previous algorithm choice
         self.previous_index = default_index
 
         # Assign appropriate validators
         self.assignValidators()
-
-        # Set defaults
-        self.current_fitter_id = getattr(sasview_config, 'FITTING_DEFAULT_OPTIMIZER', fitters.FIT_DEFAULT_ID)
 
         # To prevent errors related to parent, connect the combo box changes once the widget is instantiated
         self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
@@ -78,13 +77,16 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         pass
 
     def _toggleBlockAllSignaling(self, toggle: bool):
+        self.cbAlgorithm.blockSignals(toggle)
         self.cbAlgorithmDefault.blockSignals(toggle)
 
     def _restoreFromConfig(self):
         optimizer_key = sasview_config.FITTING_DEFAULT_OPTIMIZER
         optimizer_name = bumps.options.FIT_CONFIG.names[optimizer_key]
         self.cbAlgorithmDefault.setCurrentIndex(self.cbAlgorithmDefault.findText(optimizer_name))
-        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(optimizer_name))
+        name = [n.name for n in fitters.FITTERS if n.id == self.current_fitter_id][0]
+        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(name))
+        self._algorithm_change(self.cbAlgorithm.currentIndex())
 
     def assignValidators(self):
         """
@@ -131,11 +133,11 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         Change the page in response to combo box index. Can also be called programmatically.
         """
         # Find the algorithm ID from name
-        self.current_fitter_id = \
+        fitter_id = \
             [n.id for n in fitters.FITTERS if n.name == str(self.cbAlgorithm.currentText())][0]
 
         # find the right stacked widget
-        widget_name = "self.page_"+str(self.current_fitter_id)
+        widget_name = "self.page_"+str(fitter_id)
 
         # Convert the name into widget instance
         try:
@@ -158,7 +160,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         # Select the requested widget
         self.stackedWidget.setCurrentIndex(index_for_this_id)
 
-        self.updateWidgetFromBumps(self.current_fitter_id)
+        self.updateWidgetFromBumps(fitter_id)
 
         self.assignValidators()
 
@@ -167,6 +169,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
     def applyNonConfigValues(self):
         """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
+        self.current_fitter_id = [n.id for n in fitters.FITTERS if n.name == str(self.cbAlgorithm.currentText())][0]
         options = self.config.values[self.current_fitter_id]
         for option in options.keys():
             # Find the widget name of the option
@@ -262,10 +265,12 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
             widget_name = 'self.'+attribute
             if option not in bumps.options.FIT_FIELDS:
                 return
+            control = eval(widget_name)
             if isinstance(bumps.options.FIT_FIELDS[option][1], bumps.options.ChoiceList):
-                control = eval(widget_name)
                 control.setCurrentIndex(control.findText(str(options[option])))
+                control.currentIndexChanged.connect(lambda: self._stageChange(widget_name, ""))
             else:
-                eval(widget_name).setText(str(options[option]))
+                control.setText(str(options[option]))
+                control.editingFinished.connect(lambda: self._stageChange(widget_name, ""))
 
         pass

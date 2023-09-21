@@ -231,7 +231,6 @@
   <zorder>groupBox</zorder>
   <zorder>widget</zorder>
   <zorder>groupBox_2</zorder>
-  <zorder>verticalSpacer</zorder>
  </widget>
  <tabstops>
   <tabstop>cbColorMap</tabstop>

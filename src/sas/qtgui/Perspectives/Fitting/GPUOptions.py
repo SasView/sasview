@@ -77,6 +77,10 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
     def _addAllWidgets(self):
         pass
 
+    def applyNonConfigValues(self):
+        """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
+        self.set_sas_open_cl()
+
     def add_options(self):
         """
         Populate the window with a list of OpenCL options
@@ -85,7 +89,6 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         cl_tuple = _get_clinfo()
 
         self.cl_options = {}
-
 
         for title, descr in cl_tuple:
 
@@ -96,13 +99,22 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
             self.optionsLayout.addWidget(radio_button)
 
             if title.lower() == config.SAS_OPENCL.lower():
-
                 radio_button.setChecked(True)
 
+            radio_button.toggled.connect(self._stage_sas_open_cl)
             self.cl_options[descr] = title
             self.radio_buttons.append(radio_button)
 
         self.openCLCheckBoxGroup.setMinimumWidth(self.optionsLayout.sizeHint().width()+10)
+
+    def _stage_sas_open_cl(self, checked):
+        checked = None
+        for box in self.radio_buttons:
+            if box.isChecked():
+                checked = box
+        if checked:
+            sas_open_cl = self.cl_options[str(checked.text())]
+            self._stageChange('SAS_OPENCL', sas_open_cl)
 
     def set_sas_open_cl(self):
         """
