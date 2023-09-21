@@ -165,6 +165,7 @@ class FittingLogic:
         return self._create1DPlot(tab_id, return_data['x'], return_data['y'],
                                   return_data['model'], return_data['data'])
 
+
     def new2DPlot(self, return_data):
         """
         Create a new 2D data instance based on fitting results

@@ -270,6 +270,7 @@ class Calc1D(CalcThread):
             elapsed = elapsed, index = index, model = self.model,
             data = self.data, update_chisqr = self.update_chisqr,
             source = self.source, unsmeared_output = unsmeared_output,
+            smeared = self.smearer is not None,
             unsmeared_data = unsmeared_data, unsmeared_error = unsmeared_error,
             intermediate_results = intermediate_results)
 

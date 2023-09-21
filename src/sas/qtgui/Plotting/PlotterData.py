@@ -29,6 +29,8 @@ class DataRole(Enum):
     ROLE_STAND_ALONE = 4
     # Polydispersity is for stand-alone polydispersity plot
     ROLE_POLYDISPERSITY = 5
+    # Unsmeared data plot
+    ROLE_UNSMEARED = 6
 
 
 class Data1D(PlottableData1D, LoadData1D):

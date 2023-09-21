@@ -622,6 +622,33 @@ def plotResiduals(reference_data, current_data, weights):
 
     return residuals
 
+
+def plotUnsmeared(unsmeared_data, theory_name):
+    """
+    Create Data1D/Data2D with residuals, ready for plotting
+    """
+    data_copy = copy.deepcopy(unsmeared_data)
+    # Get data: data I, theory I, and data dI in order
+
+    res_name = reference_data.name if reference_data.name else reference_data.filename
+    residuals.name = "Residuals for " + str(theory_name) + "[" + res_name + "]"
+    residuals.title = residuals.name
+
+    # when 2 data have the same id override the 1 st plotted
+    # include the last part if keeping charts for separate models is required
+    residuals.id = "res" + str(reference_data.id) # + str(theory_name)
+    # group_id specify on which panel to plot this data
+    group_id = reference_data.group_id
+    residuals.group_id = "res" + str(group_id)
+
+    # Symbol
+    residuals.symbol = 0
+    residuals.hide_error = False
+
+    return residuals
+
+
+
 def plotPolydispersities(model):
     plots = []
     if model is None:

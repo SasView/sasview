@@ -3205,6 +3205,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 if logic.data.name in fitted_data.name:
                     self.data_index = i
 
+
+
         residuals = self.calculateResiduals(fitted_data)
 
         fitted_data.show_q_range_sliders = True
@@ -3219,8 +3221,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.model_data = fitted_data
         new_plots = [fitted_data]
+
         if residuals is not None:
             new_plots.append(residuals)
+
+        # Smear plot
+        if return_data["smeared"] and not return_data["data"].isSesans:
+            self.logic.new1DPlot(return_data, self.tab_id)
+
+
 
         if self.data_is_loaded:
             # delete any plots associated with the data that were not updated
@@ -3342,6 +3351,30 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         residuals_plot.plot_role = DataRole.ROLE_RESIDUAL
         self.createNewIndex(residuals_plot)
         return residuals_plot
+
+    def calculateUnsmeared(self, fitted_data):
+        """
+        Calculate and display chart of unsmeared data.
+        Returns unsmeared data plot object.
+        """
+
+        # Create a new index for holding data
+        fitted_data.symbol = "Line"
+
+        self.createNewIndex(fitted_data)
+
+        # Plot residuals if actual data
+        if not self.data_is_loaded:
+            return
+
+        unsmeared_plot = FittingUtilities.plotResiduals(self.data, fitted_data, weights)
+        if unsmeared_plot is None:
+            return
+
+        unsmeared_plot.id = "Unsmeared " + unsmeared_plot.id
+        unsmeared_plot.plot_role = DataRole.ROLE_UNSMEARED
+        self.createNewIndex(unsmeared_plot)
+        return unsmeared_plot
 
     def onCategoriesChanged(self):
             """
