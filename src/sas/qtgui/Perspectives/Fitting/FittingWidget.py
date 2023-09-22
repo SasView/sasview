@@ -3432,12 +3432,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 for ishell in range(1, self.current_shell_displayed+1):
                     # Remove [n] and add the shell numeral
                     name = param_name[0:param_name.index('[')] + str(ishell)
-                    self.addNameToPolyModel(i, name)
+                    self.addNameToPolyModel(name)
         else:
             # Just create a simple param entry
-            self.addNameToPolyModel(i, param_name)
+            self.addNameToPolyModel(param_name)
 
-    def addNameToPolyModel(self, i, param_name):
+    def addNameToPolyModel(self, param_name):
         """
         Creates a checked row in the poly model with param_name
         """
@@ -3469,7 +3469,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.keys()])
         # Set the default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
-        ind = self._poly_model.index(i,self.lstPoly.itemDelegate().poly_function)
+        ind = self._poly_model.index(all_items-1,self.lstPoly.itemDelegate().poly_function)
         self.lstPoly.setIndexWidget(ind, func)
         func.currentIndexChanged.connect(lambda: self.onPolyComboIndexChange(str(func.currentText()), i))
 
