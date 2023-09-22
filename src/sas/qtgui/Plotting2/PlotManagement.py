@@ -149,9 +149,34 @@ class PlotRecord:
     #
 
     @staticmethod
-    def childPlots(identifier: Identifier) -> list(NotionalPlot):
-        child_identifier = PlotRecord._parent_child_links[identifier]
+    def childPlots(identifier: Identifier) -> list[NotionalPlot]:
+        child_identifiers = PlotRecord._parent_child_links[identifier]
+        return [PlotRecord._plots[child_identifier] for child_identifier in child_identifiers]
 
+    @staticmethod
+    def childSubplots(identifier: Identifier) -> list[NotionalSubplot]:
+        child_identifiers = PlotRecord._parent_child_links[identifier]
+        return [PlotRecord._subplots[child_identifier] for child_identifier in child_identifiers]
+
+    @staticmethod
+    def childAxes(identifier: Identifier) -> list[NotionalAxis]:
+        child_identifiers = PlotRecord._parent_child_links[identifier]
+        return [PlotRecord._axes[child_identifier] for child_identifier in child_identifiers]
+
+    @staticmethod
+    def childSeriesGroup(identifier: Identifier) -> list[PlotSeriesGroup]:
+        child_identifiers = PlotRecord._parent_child_links[identifier]
+        return [PlotRecord._series_groups[child_identifier] for child_identifier in child_identifiers]
+
+    @staticmethod
+    def childSeries(identifier: Identifier) -> list[PlotSeries]:
+        child_identifiers = PlotRecord._parent_child_links[identifier]
+        return [PlotRecord._series[child_identifier] for child_identifier in child_identifiers]
+
+    @staticmethod
+    def childSeriesComponent(identifier: Identifier) -> list[PlotSeriesComponent]:
+        child_identifiers = PlotRecord._parent_child_links[identifier]
+        return [PlotRecord._series_components[child_identifier] for child_identifier in child_identifiers]
 
 
     def __new__(cls, *args, **kwargs):
