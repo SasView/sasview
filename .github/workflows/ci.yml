@@ -104,6 +104,18 @@ jobs:
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
           git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
 
+      - uses: actions/checkout@v2
+      - name: Pushes to another repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: 'sascalc'
+          destination-github-username: ${{ secrets.GIT_USER_NAME }}
+          destination-repository-name: 'sasview/test-sascalc'
+          user-email: ${{ secrets.GIT_EMAIL }}
+          target-branch: master
+
       - name: Build and install sasdata
         run: |
           cd ../sasdata
