@@ -1021,9 +1021,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.createSendToMenu()
             self.cmdSendTo.setMenu(self.send_menu)
             self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-            self.actionReplace.triggered.connect(self.onDataReplaced)
         else:
-            self.actionReplace.triggered.disconnect(self.onDataReplaced)
             self.cmdSendTo.setMenu(None)
             self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.InstantPopup)
 
@@ -1561,6 +1559,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionEditMask.triggered.connect(self.showEditDataMask)
         self.actionDelete.triggered.connect(self.deleteSelectedItem)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
+        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def onCustomContextMenu(self, position):
         """
