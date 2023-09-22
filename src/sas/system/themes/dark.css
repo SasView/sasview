@@ -1,20 +1,26 @@
 /* Global Properties */
-* {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif; color: grey; background-color: black; border-color: lightgrey;}
+* {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif; color: whitesmoke; background-color: #333337; border-color: lightgrey;}
 
 /* Qt Elements */
 QLineEdit {background-color: white; color: black;}
-QLineEdit:focus {background-color: #98dbcc; color: #333333}
-QLineEdit[warning=true] {background-color: yellow;}
-QLineEdit[urgent=true] {background-color: red;}
+QLineEdit:focus {background-color: #98dbcc; color: #555555}
+QLineEdit[warning=true] {background-color: goldenrod;}
+QLineEdit[urgent=true] {background-color: darksalmon;}
+
+QCheckBox::indicator:checked {background-color: whitesmoke; color: red}
+QCheckBox::indicator:unchecked {background-color: blue; color: green}
+
 QTableWidgetItem[italic=true] {font-style: italic}
 
-QTabBar::tab {background-color: black; color: lightgrey;}
-QTabBar::tab:hover, QComboBox:hover, QPushButton:hover {background-color: lightgrey}
+QTabBar::tab {background-color: #444448; color: lightgrey;}
+QTabBar::tab:hover, QComboBox:hover, QPushButton:hover {background-color: #272728}
+QTabBar::tab:disabled {color: #272728}
 
 QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
 
-QPushButton {background-color: lightgrey}
-QPushButton[urgent=true] {color: red;}
+QPushButton {background-color: #333337; border-color: #555555; border-style: dashed; color: whitesmoke}
+QPushButton[urgent=true] {color: darksalmon;}
+
 
 QToolTip {font-size: 80%; background-color: lightgrey}
 
@@ -25,9 +31,10 @@ QTextBrowser[warning=true] {border: 5px solid red; background-color: lightyellow
 QCodeEditor {font-family: 'monospace, monospace'}
 QCodeEditor[warning=true] {border: 5px solid red; background-color: lightyellow}
 
-QTreeView {paint-alternating-row-colors-for-empty-area:0; background-color: lightgrey}
+QTreeView {paint-alternating-row-colors-for-empty-area:0; background-color: #333337}
 QTreeView::item {border: 1px; padding: 2px 1px;}
 QTreeView::item:hover {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1); border: 1px solid #bfcde4;}
 QTreeView::item:selected {border: 1px solid #567dbc;}
 QTreeView::item:selected:active{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);}
 QTreeView::item:selected:!active {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);}
+
