@@ -15,7 +15,7 @@ Tutorials
 
 :download:`Simultaneous 1D Fitting in Sasview <sasview/simultaneous_1d_fitting_in_sasview_v5.pdf>`
 
-:download:`Creating Custom Fitting Models in Sasview <sasview/creating_custom_fitting_models_in_sasview_v5_r5.pdf>`
+:download:`Creating Custom Fitting Models in Sasview <sasview/creating_custom_fitting_models_in_sasview_v5.pdf>`
 
 :download:`P(r) Inversion Analysis in Sasview <sasview/pr_inversion_analysis_in_sasview_v5.pdf>`
 
