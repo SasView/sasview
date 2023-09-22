@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ macos-latest]
-        python-version: [ 3.8 ]
+        python-version: [ 3.11 ]
     needs: reuse_main_ci
 
     steps:
@@ -40,7 +40,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Sign executable and create dmg (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
@@ -59,13 +58,15 @@ jobs:
           hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
           codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
+      #This GH action will need to be replaced soon as altool will be deprecated late 2023
       - name: Notarize Release Build (OSX)
-        uses: cocoalibs/xcode-notarization-action@v1
+        uses: GuillaumeFalourd/xcode-notarize@v1
         with:
-          app-path: "installers/dist/SasView-nightly-MacOSX.dmg"
-          apple-id: ${{ secrets.NOTARIZATION_USERNAME }}
-          password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          staple: 'true'
+            product-path: "installers/dist/SasView5.dmg"
+            primary-bundle-id: "org.sasview.SasView5"
+            appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+            appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+            verbose: True
 
       - name: Rename artifacts
         run: |
