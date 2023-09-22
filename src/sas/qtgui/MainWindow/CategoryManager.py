@@ -129,7 +129,6 @@ class Categories(object):
         return self.category_list
 
 
-
 class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
     def __init__(self, parent=None, manager=None):
         super(CategoryManager, self).__init__(parent)
@@ -192,7 +191,8 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
             empty_item.setEditable(False)
             # Add a checkbox to it
             item.setCheckable(True)
-            item.setCheckState(QtCore.Qt.Checked)
+            checked = self.categories.model_enabled_dict[model]
+            item.setCheckState(QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)
             item.setEditable(False)
             current_category = self.categories.modelToCategory()[model]
             self._category_model.appendRow([item, empty_item])
@@ -214,6 +214,7 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         # Signals from the list
         selectionModel = self.lstCategory.selectionModel()
         selectionModel.selectionChanged.connect(self.onListSelection)
+        self._category_model.itemChanged.connect(self.onListChanged)
 
 
     def onClose(self):
@@ -225,6 +226,10 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         self.communicator.updateModelCategoriesSignal.emit()
 
         self.close()
+
+    def onListChanged(self, item):
+        # remember the state of the checkbox
+        self.categories.model_enabled_dict[item.text()] = item.checkState() == QtCore.Qt.Checked
 
     def selectedModels(self):
         """
