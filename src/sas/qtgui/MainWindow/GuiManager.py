@@ -503,22 +503,14 @@ class GuiManager:
         """
         self.statusLabel.setText(text)
 
-    def appendLog(self, msg):
+    def appendLog(self, signal):
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
-        # small hack to print errors in red and warnings in yellow
-        # `11:11:39 - INFO:` - the important bit is always element 2
-        msg_type = msg.split()[2]
-        color_map = {
-            'WARNING:': QColor('orange'),
-            'ERROR:': QColor('red')
-            }
+        (message, record) = signal
+        self.listWidget.append(message.strip())
 
-        color = color_map.get(msg_type, QColor('black'))
-        self.listWidget.setTextColor(color)
-        self.listWidget.append(msg.strip())
-        # now, show the actual log if this is an error
-        if msg_type == 'ERROR:':
+        # Display log if message is error or worse
+        if record.levelno >= 40:
             self.logDockWidget.setVisible(True)
 
     def createGuiData(self, item, p_file=None):
