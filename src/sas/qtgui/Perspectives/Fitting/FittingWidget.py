@@ -3711,10 +3711,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set the cell to be non-editable
         item4.setFlags(item4.flags() ^ QtCore.Qt.ItemIsEditable)
 
-        # cell 4: SLD button
+        # cell 5: SLD button
         item5 = QtGui.QStandardItem()
-        button = QtWidgets.QPushButton()
-        button.setText("Show SLD Profile")
+        button = None
+        for p in self.kernel_module.params.keys():
+            if 'sld' in p:
+                # Only display the SLD Profile button for models with SLD parameters
+                button = QtWidgets.QPushButton()
+                button.setText("Show SLD Profile")
+                # Respond to button press
+                button.clicked.connect(self.onShowSLDProfile)
+                break
 
         self._model_model.appendRow([item1, item2, item3, item4, item5])
 
@@ -3766,8 +3773,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         ## Respond to index change
         #func.currentTextChanged.connect(self.modifyShellsInList)
 
-        # Respond to button press
-        button.clicked.connect(self.onShowSLDProfile)
 
         # Available range of shells displayed in the combobox
         func.addItems([str(i) for i in range(shell_min, shell_max+1)])
