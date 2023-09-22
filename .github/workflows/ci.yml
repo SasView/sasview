@@ -100,7 +100,7 @@ jobs:
 
       - name: Fetch sources for sibling projects
         run: |
-          git clone --depth=50 --branch=8-move-example-data https://github.com/SasView/sasdata.git ../sasdata
+          git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
           git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
 
