@@ -57,7 +57,7 @@
     </widget>
    </item>
    <item row="0" column="9" rowspan="2" colspan="2">
-    <widget class="Line" name="line">
+    <widget class="Line" name="line1">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -1791,7 +1791,7 @@ Number of Qbins &amp;isin; [2, 1000].</string>
        </widget>
       </item>
       <item row="1" column="0" colspan="4">
-       <widget class="QGroupBox" name="groupBox_7">
+       <widget class="QGroupBox" name="groupBox_8">
         <property name="font">
          <font>
           <bold>false</bold>
@@ -1800,7 +1800,7 @@ Number of Qbins &amp;isin; [2, 1000].</string>
         <property name="title">
          <string>Sample Coordinates (xyz)</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_14">
+        <layout class="QGridLayout" name="gridLayout_15">
          <item row="0" column="0">
           <widget class="QLabel" name="lblSampleYaw">
            <property name="font">
