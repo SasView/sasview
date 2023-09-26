@@ -290,6 +290,24 @@ jobs:
             installers/dist/sasview6.tar.gz
           if-no-files-found: error
 
+      - name: Rename artifacts
+        run: |
+          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
+          mv installers/dist/SasView6.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
+          mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
+
+      - name: Upload Nightly Build Installer to GitHub releases
+        uses: ncipollo/release-action@v1
+        with:
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "installers/dist/setupSasView-6.0.0-alpha-Win64.exe, installers/dist/SasView-6.0.0-alpha-MacOSX.dmg, installers/dist/SasView-6.0.0-alpha-Linux.tar.gz"
+          body: "Release 6.0.0"
+          name: "release 6.0.0"
+          tag: "release_6.0.0"
 
   test-installer:
     needs: [ build-matrix ]
