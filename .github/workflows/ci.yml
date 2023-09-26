@@ -226,13 +226,13 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         run: |
           cd installers/dist
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
+          hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
 
       - name: Build sasview installer tarball (Linux)
         if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
         run: |
           cd installers/dist
-          tar zcf sasview5.tar.gz sasview
+          tar zcf sasview6.tar.gz sasview
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
@@ -242,13 +242,6 @@ jobs:
           path: |
             installers/dist/sasview-pyinstaller-dist.tar.gz
           if-no-files-found: ignore
-
-#      - name: Fix qt folders (OSX)
-#        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-#        run: |
-#          cd installers/dist
-#          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
-#          #hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
 
       - name: Sign executable and create dmg (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
@@ -264,33 +257,18 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python  ../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
-          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
-
-      - name: Rename artifacts (widnows)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
-        run: |
-          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
-
-      - name: Rename artifacts (macos)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        run: |
-          mv installers/dist/SasView5.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
-
-      - name: Rename artifacts (ubuntu)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          mv installers/dist/sasview5.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.app
+          hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
+          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.dmg
 
       - name: Notarize Release Build (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: GuillaumeFalourd/xcode-notarize@v1
         with:
-          product-path: "installers/dist/SasView-6.0.0-alpha-MacOSX.dmg"
-          primary-bundle-id: "org.sasview.SasView5"
+          product-path: "installers/dist/SasView6.dmg"
+          primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
           verbose: True
@@ -299,20 +277,18 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
-          product-path: "installers/dist/SasView-6.0.0-alpha-MacOSX.dmg"
+          product-path: "installers/dist/SasView6.dmg"
 
-      - name: Upload Nightly Build Installer to GitHub releases
-        uses: ncipollo/release-action@v1
+      - name: Publish installer package
+        if: ${{ matrix.installer }}
+        uses: actions/upload-artifact@v3
         with:
-          draft: false
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/setupSasView-6.0.0-alpha-Win64.exe, installers/dist/SasView-6.0.0-alpha-MacOSX.dmg, installers/dist/SasView-6.0.0-alpha-Linux.tar.gz"
-          body: "Nightly build of main SasView branch"
-          name: "nightly-build"
-          tag: "nightly-build"
+          name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            installers/dist/setupSasView.exe
+            installers/dist/SasView6.dmg
+            installers/dist/sasview6.tar.gz
+          if-no-files-found: error
 
 
   test-installer:
@@ -421,7 +397,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           # $INSTALL_PATH is already the base directory
-          tar xf "$DL_PATH/sasview5.tar.gz"
+          tar xf "$DL_PATH/sasview6.tar.gz"
 
       - name: Check installation files
         run: |
