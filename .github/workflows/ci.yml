@@ -270,20 +270,20 @@ jobs:
           hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
           codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
 
-      - name: Rename artifacts
+      - name: Rename artifacts (widnows)
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
-          mv installers/dist/SasView-Installer-windows-*/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
+          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
 
-      - name: Rename artifacts
+      - name: Rename artifacts (macos)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         run: |
-          mv installers/dist/SasView-Installer-macos-*/SasView5.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
+          mv installers/dist/SasView5.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
 
-      - name: Rename artifacts
+      - name: Rename artifacts (ubuntu)
         if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
         run: |
-          mv installers/dist/SasView-Installer-ubuntu-*/sasview5.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
+          mv installers/dist/sasview5.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
 
       - name: Notarize Release Build (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
