@@ -277,8 +277,9 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
             input_to_check = str(self.txtSearch.text())
 
         # redefine the proxy model
-        self.model_proxy.filterRegularExpression = QtCore.QRegularExpression(input_to_check,
-                         QtCore.Qt.CaseInsensitive, QtCore.QRegularExpression.FixedString)
+        self.model_proxy.setFilterRegularExpression(QtCore.QRegularExpression(input_to_check,
+            QtCore.QRegularExpression.CaseInsensitiveOption |
+            QtCore.QRegularExpression.PatternOption.NoPatternOption))
 
     def onModify(self):
         """
