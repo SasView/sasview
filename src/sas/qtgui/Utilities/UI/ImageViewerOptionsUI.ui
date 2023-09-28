@@ -154,7 +154,6 @@ p, li { white-space: pre-wrap; }
   <zorder>groupBox</zorder>
   <zorder>buttonBox</zorder>
   <zorder>textBrowser</zorder>
-  <zorder>horizontalSpacer</zorder>
  </widget>
  <resources/>
  <connections>
