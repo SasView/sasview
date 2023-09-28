@@ -435,7 +435,8 @@ def calculateChi2(reference_data, current_data, weight):
 
         if index is None:
             index = numpy.ones(len(current_data.y), dtype=bool)
-        if current_data.dy is None or current_data.dy == []:
+        # if current_data.dy is None or not len(current_data.dy):
+        if current_data.dy is None or not current_data.dy.size == 0:
             dy = numpy.ones(len(current_data.y))
         else:
             dy = weight
