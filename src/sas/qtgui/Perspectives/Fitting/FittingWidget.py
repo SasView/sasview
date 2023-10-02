@@ -3471,7 +3471,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
         ind = self._poly_model.index(all_items-1,self.lstPoly.itemDelegate().poly_function)
         self.lstPoly.setIndexWidget(ind, func)
-        func.currentIndexChanged.connect(lambda: self.onPolyComboIndexChange(str(func.currentText()), i))
+        func.currentIndexChanged.connect(lambda: self.onPolyComboIndexChange(str(func.currentText()), all_items-1))
 
     def onPolyFilenameChange(self, row_index):
         """
