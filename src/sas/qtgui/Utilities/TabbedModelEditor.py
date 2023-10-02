@@ -175,7 +175,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         create a list of all builtin models
         """
         from sas.sascalc.fit.models import ModelManager
-        from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
         model_list = ModelManager().cat_model_list()
         model_names = [model.name for model in model_list]
         return model_names
@@ -496,7 +495,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 # Don't accept but return
                 return False
 
-        if model['filename'].lower() in self.builtinmodels:
+        if model['filename'].casefold() in (model.casefold() for model in self.builtinmodels):
             # notify the viewer
             msg = "Built-in model with specified name already exists.\n"
             msg += "Please specify different filename."
