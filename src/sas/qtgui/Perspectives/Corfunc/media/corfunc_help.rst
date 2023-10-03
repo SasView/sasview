@@ -35,7 +35,7 @@ Both analyses are performed in 3 stages:
 *  Extrapolation of the scattering curve to :math:`Q = 0` and toward 
    :math:`Q = \infty`
 *  Smoothed merging of the two extrapolations into the original data
-*  Fourier / Hilbert Transform of the smoothed data to give the correlation
+*  Transformation of the smoothed data to give the correlation
    function or volume fraction profile, respectively
 *  (Optional) Interpretation of Γ\ :sub:`1`\ (x) assuming the sample conforms 
    to an ideal lamellar morphology
@@ -158,15 +158,6 @@ the discrete cosine transform of:
     -q^{4} I(q)
 
 The IDF is proportional to the second derivative of Γ\ :sub:`1`\ (x).
-
-Hilbert
-.......
-	
-If "Hilbert" is selected for the transform type, the analysis will perform a
-Hilbert transform on the extrapolated data in order to calculate the Volume
-Fraction Profile.
-
-.. note:: The Hilbert transform functionality is not yet implemented in SasView.
 
 
 Interpretation
