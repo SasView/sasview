@@ -8,19 +8,22 @@ Correlation Function Analysis
 Description
 -----------
 
-In small angle scattering we measure the tendency for particles probe particles (neutrons, photons, etc)
-to transfer various amounts of momentum to a sample. The momentum is generally inferred from the change in angle
-of probe particles when scattered, with other information about the probe particles (e.g. kinetic energy)
+In small angle scattering we measure the tendency for probe particles (neutrons, photons, etc)
+to transfer various amounts of momentum to a sample. The momentum is generally inferred from the scattering angle
+of probe particles, along with other information about the probe particles (e.g. kinetic energy).
+Small angle scattering is assumed to be elastic, which allows the momentum transfer to be directly related to a wavelength, and thus
+a spatial distance. The correlation function represents the scattering intensity in terms of this spatial distance,
+rather than in terms of momentum transfer.
 
-of intensity of scattered probe particles (neutrons, photons, etc)
-and the momentum they transfer to the sample. In elastic scattering, which is assumed to
-be the case in small angle scattering, this momentum transfer can be directly related to a wavelength, and thus
-a spatial distance.
+We can interpret the correlation function in terms of the sample structure by thinking about
+pairs of points separated by a given distance. When, on average over the sample, the pair of points
+have a high scattering length density, then the correlation function has a large value. Similarly,
+when the pairs have a low scattering length density, the correlation function is low.
+More concretely: the correlation function :math:`\Gamma(x)` for distance :math:`x` is proportional to
+the pairwise product of scattering length densities for all points separated by distance :math:`x`,
+summed over all orientations and locations.
 
 
-
-
-The amount of scattering from a sample depends on the how much the
 
 A correlation function may be interpreted in terms of an imaginary rod moving
 through the structure of the material. Γ(x) is the probability that a rod of 
