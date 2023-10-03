@@ -8,13 +8,6 @@ Correlation Function Analysis
 Description
 -----------
 
-This currently performs correlation function analysis on SAXS/SANS data, 
-but in the the future is also planned to generate model-independent volume 
-fraction profiles from the SANS from adsorbed polymer/surfactant layers. 
-The two types of analyses differ in the mathematical transform that is 
-applied to the data (Fourier vs Hilbert). However, both functions are 
-returned in *real space*.
-
 A correlation function may be interpreted in terms of an imaginary rod moving
 through the structure of the material. Γ(x) is the probability that a rod of 
 length x has equal electron/neutron scattering length density at either end. 
@@ -110,14 +103,10 @@ where:
     h_i = \frac{1}{1 + \frac{(x_i-b)^2}{(x_i-a)^2}}
 
 
-Transformation
+Transformation Step
 --------------
 
-Fourier
-.......
-
-If "Fourier" is selected for the transform type, *SasView* will perform a
-discrete cosine transform on the extrapolated data in order to calculate the
+Corfunc uses a discrete cosine transform on the extrapolated data in order to calculate the
 1D correlation function as:
 
 .. math::
