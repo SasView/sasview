@@ -8,6 +8,20 @@ Correlation Function Analysis
 Description
 -----------
 
+In small angle scattering we measure the tendency for particles probe particles (neutrons, photons, etc)
+to transfer various amounts of momentum to a sample. The momentum is generally inferred from the change in angle
+of probe particles when scattered, with other information about the probe particles (e.g. kinetic energy)
+
+of intensity of scattered probe particles (neutrons, photons, etc)
+and the momentum they transfer to the sample. In elastic scattering, which is assumed to
+be the case in small angle scattering, this momentum transfer can be directly related to a wavelength, and thus
+a spatial distance.
+
+
+
+
+The amount of scattering from a sample depends on the how much the
+
 A correlation function may be interpreted in terms of an imaginary rod moving
 through the structure of the material. Γ(x) is the probability that a rod of 
 length x has equal electron/neutron scattering length density at either end. 
