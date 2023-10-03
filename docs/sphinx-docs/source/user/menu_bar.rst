@@ -54,7 +54,7 @@ The Analysis option provides access to the key functionality of *SasView*:
 - Model Fitting;
 - P(r) Inversion;
 - Invariant Analysis;
-- Correlation Function Analysis (*SasView* 4.1 and later)
+- Correlation Function Analysis
 
 See :ref:`analysis` for more information.
 
