@@ -315,6 +315,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "installers/dist/setupSasView-6.0.0-alpha-Win64.exe, installers/dist/SasView-6.0.0-alpha-MacOSX.dmg, installers/dist/SasView-6.0.0-alpha-Linux.tar.gz"
           name: "Release 6.0.0-alpha"
+          bodyFile: "build_tools/release_notes/6.0.0_notes.txt"
           tag: "v6.0.0-alpha"
 
   test-installer:
