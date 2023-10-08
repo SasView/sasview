@@ -319,7 +319,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
 
-        items = [data_item] if (is_batch and len([data_item])>1) else data_item
+        items = [data_item] if (is_batch and len(data_item)>1) else data_item
         for data in items:
             logic_data = GuiUtils.dataFromItem(data)
             is_2Ddata = isinstance(logic_data, Data2D)

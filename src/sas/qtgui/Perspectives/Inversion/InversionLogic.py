@@ -2,7 +2,7 @@ import math
 import logging
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -110,6 +110,8 @@ class InversionLogic(object):
         new_plot.hide_error = True
 
         return new_plot
+
+
 
     def newPRPlot(self, out, pr, cov=None):
         """

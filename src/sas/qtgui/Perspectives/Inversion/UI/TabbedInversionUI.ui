@@ -848,7 +848,7 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="0">
            <widget class="QLabel" name="label_31">
             <property name="text">
-             <string>Start point</string>
+             <string>Start angle</string>
             </property>
            </widget>
           </item>
@@ -867,7 +867,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLineEdit" name="startPointInput"/>
+           <widget class="QLineEdit" name="startAngleInput"/>
           </item>
          </layout>
         </widget>
