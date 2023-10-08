@@ -15,7 +15,7 @@ WIDGETS = enum( 'W_FILENAME',               #0
                 'W_MAX_DIST',               #12
                 'W_EXPLORE',                #13
                 #for 2D plots
-                'W_START_POINT',
+                'W_START_ANGLE',
                 'W_NO_OF_SLICES',
                 'W_NO_OF_QBINS',
                 # results
