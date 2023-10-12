@@ -163,8 +163,13 @@ class InversionLogic(object):
         qmin, qmax = None, None
         if isinstance(data, Data1D):
             try:
-                qmin = min(data.x)
                 qmax = max(data.x)
+                #set q values where Intensity is zero, 
+                #to qmax and exclude from minimum accepted q
+                #to avoid dodgy points around beam stop
+                usable_qrange=np.where(data.y <= 0, qmax, data.x)
+                qmin = min(usable_qrange)
+                
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename
