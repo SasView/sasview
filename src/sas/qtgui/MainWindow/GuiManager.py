@@ -69,6 +69,7 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
+from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 
 import sas
 from sas import config
@@ -134,6 +135,9 @@ class GuiManager:
                                               "_downloads",
                                               "Tutorial.pdf"))
 
+        if self.WhatsNew.has_new_messages():
+            self.actionWhatsNew()
+
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
 
@@ -145,7 +149,8 @@ class GuiManager:
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
         self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
-
+        # make it hidden by default
+        self.logDockWidget.setVisible(False)
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
@@ -199,6 +204,7 @@ class GuiManager:
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
+        self.WhatsNew = WhatsNew(self)
 
     def loadAllPerspectives(self):
         # Close any existing perspectives to prevent multiple open instances
@@ -497,10 +503,15 @@ class GuiManager:
         """
         self.statusLabel.setText(text)
 
-    def appendLog(self, msg):
+    def appendLog(self, signal):
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
-        self.listWidget.append(msg.strip())
+        (message, record) = signal
+        self.listWidget.append(message.strip())
+
+        # Display log if message is error or worse
+        if record.levelno >= 40:
+            self.logDockWidget.setVisible(True)
 
     def createGuiData(self, item, p_file=None):
         """
@@ -619,6 +630,9 @@ class GuiManager:
         self._workspace.workspace.addSubWindow(self.welcomePanel)
         self.welcomePanel.show()
 
+    def actionWhatsNew(self):
+        self.WhatsNew.show()
+
     def showWelcomeMessage(self):
         """ Show the Welcome panel, when required """
         # Assure the welcome screen is requested
@@ -734,7 +748,8 @@ class GuiManager:
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
-        
+        self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
+
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
 
