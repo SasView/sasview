@@ -41,7 +41,7 @@ BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
 
 # Default Values for 2D slicing
-START_ANGLE = 60
+START_ANGLE = 0
 NO_OF_SLICES = 6
 NO_OF_QBINS = 20
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
@@ -1271,7 +1271,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isSlicing = True
         self.enableButtons()
 
-        slicedData = self.muiltiSlicer()
+        slicedData = self.multiSlicer()
         self.isSliced = True
 
         labels = ["title", "phi", "Qbins", "DeltaPhi", "plots"]
@@ -1294,9 +1294,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             plotButton = QtWidgets.QPushButton(str(slice.phi))
             self.sliceList.setCellWidget(row, 4, plotButton)
             plotButton.clicked.connect(partial(self.show1DPlot, slice))            
-            newData = GuiUtils.createModelItemWithPlot(update_data=slice, name=str(slice.title))
-            self.populateDataComboBox(name=str(slice.title), data_ref=newData)
-            self.updateDataList(newData)
+            item = GuiUtils.createModelItemWithPlot(update_data=slice, name=str(slice.title))
+
+            self.parent.communicate.updateModelFromPerspectiveSignal.emit(item)
+
+            self.logic.data = GuiUtils.dataFromItem(item)            
+            self.populateDataComboBox(name=self.logic.data.name, data_ref=self.logic.data)
+            self.updateDataList(item)
+            self.logic.add_errors()
+            self.setQ()
 
         self.calculateAllButton.setVisible(True)
         self.plot2D.update()
@@ -1370,14 +1376,16 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.plot2D.slicer.setParams(params)
         self.plot2D.onSectorView()
 
-    def muiltiSlicer(self):
+    def multiSlicer(self):
         listOfSlices = list()
         self.plot1D.clean()
-        params = self.plot2D.slicer.getParams()
+        
         self.updateSlicerParams()
 
         for i in range(self.noOfSlices):
+            params = self.plot2D.slicer.getParams()
             params["Phi [deg]"] = self.phi
+            self.plot2D.slicer.setParams(params)
             self.setSlicerParams()
             slicePlot = self.plot2D.slicer.captureSlice()
             slicePlot.title += ' φ {}'.format(self.phi)
@@ -1391,6 +1399,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             listOfSlices.append(slicePlot)
             self.phi += self.deltaPhi
         return listOfSlices
+
 
 
 class InversionWidget2D(InversionWidget):
