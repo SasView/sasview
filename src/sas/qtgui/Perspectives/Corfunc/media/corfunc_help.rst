@@ -40,44 +40,53 @@ about the arrangement of polymer/surfactant molecules at the interface. The widt
 of the profile provides measures of the layer thickness, and the area under 
 the profile is related to the amount of material that is adsorbed.
 
-Both analyses are performed in 3 stages:
-
-*  Extrapolation of the scattering curve to :math:`Q = 0` and toward 
-   :math:`Q = \infty`
-*  Smoothed merging of the two extrapolations into the original data
-*  Transformation of the smoothed data to give the correlation
-   function or volume fraction profile, respectively
-*  (Optional) Interpretation of Γ\ :sub:`1`\ (x) assuming the sample conforms 
-   to an ideal lamellar morphology
-
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Interface
+=========
+
+The correlation function analysis is performed in **3 steps**.
+
+First, the scattering curve is **Extrapolated** to :math:`Q = 0` (Guinier) and toward
+:math:`Q = \infty` (Porod), the details of the extrapolation is controlled by
+the parameters `Guinier End`, `Porod Start` and `Porod End`, which
+are settable by entering text, or by using the `Adjust` slider.
+There is a smooth transition from the data to the extrapolation, start and end refer to
+the region over which this occurs (see below).
+Parameters for the extrapolation can manually entered in `Extrapolation Parameters` and
+SasView can be told whether to recalcuate the parameters using the `Fit Background`,
+`Fit Guinier` and `Fit Porod` checkboxes.
+
+Secondly, the data is **Transformed** to obtain the projected correlation functions.
+
+Finally, the transformed data is **Interpreted** in terms of an ideal lamellar morphology
 
 
 Extrapolation
 -------------
 
-To :math:`Q = 0`
-................
+Small Q
+.......
 
-The data are extrapolated to q = 0 by fitting a Guinier function to the data
-points in the low-q range.
-
-The equation used is:
+The data are extrapolated to q = 0 by fitting a Guinier function, defined as
 
 .. math::
     I(q) = e^{A + Bq^2}
 
-Where the parameter :math:`B` is related to the effective radius-of-gyration of 
+The natural logarithm of the parameter :math:`A` is a constant of proportionality
+and equal to the scattering intensity at :math:`Q=0`, i.e. the "total scattering".
+
+ parameter :math:`B`, in systems of dispersed particles it is related to the radius-of-gyration of 
 a spherical object having the same small-angle scattering in this region.
 	
-Note that as q tends to zero this function tends to a limiting value and is 
+*Note:* As q tends to zero this function tends to a limiting value and is 
 therefore less appropriate for use in systems where the form factor does not 
 do likewise. However, because of the transform, the correlation functions are 
 most affected by the Guinier back-extrapolation at *large* values of x where 
 the impact on any extrapolated parameters will be least significant.
 
-To :math:`Q = \infty`
-.....................
+Large Q
+.......
 
 The data are extrapolated towards q = :math:`\infty` by fitting a Porod model to
 the data points in the high-q range and then computing the extrapolation to 100 
@@ -98,8 +107,8 @@ profile at the interface between the crystalline and amorphous regions as shown 
    :align: center
 
 
-Smoothing
----------
+Merging
+.......
 
 The extrapolated data set consists of the Guinier back-extrapolation from q ~ 0
 up to the lowest q value in the original data, then the original scattering data, 
@@ -111,6 +120,8 @@ Functions :math:`f(x_i)` and :math:`g(x_i)` where :math:`x_i \in \left\{
 {x_1, x_2, ..., x_n} \right\}`, are smoothed over the range :math:`[a, b]`
 to produce :math:`y(x_i)`, by the following equations:
 
+
+
 .. math::
     y(x_i) = h_ig(x_i) + (1-h_i)f(x_i)
 
@@ -120,7 +131,7 @@ where:
     h_i = \frac{1}{1 + \frac{(x_i-b)^2}{(x_i-a)^2}}
 
 
-Transformation Step
+Transformation
 --------------
 
 Corfunc uses a discrete cosine transform on the extrapolated data in order to calculate the
