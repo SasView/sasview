@@ -64,6 +64,14 @@ def generate_html(single_file="", rst=False):
     """
     Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found under /sasmodels/doc/
     """
+    from sas.qtgui.Utilities.GuiUtils import RECOMPILE_DOC_LOCATION, SAS_DIR
+    if "doc-regen" not in SAS_DIR:
+        # Check to see if this file was opened in a subprocess with the correct working directory or not
+        cwd_directory = SAS_DIR + RECOMPILE_DOC_LOCATION
+    else:
+        # Set cwd for subprocess to be the this file's parent directory
+        cwd_directory = os.path.abspath(os.path.dirname(sys.argv[0]))
+
     DOCTREES = "../build/doctrees/"
     SPHINX_SOURCE = "../source-temp/"
     HTML_TARGET = "../build/html/"
@@ -92,7 +100,7 @@ def generate_html(single_file="", rst=False):
         command.remove("")
     except:
         pass
-    subprocess.check_call(command)
+    subprocess.check_call(command, cwd=cwd_directory)
 
 def call_all_files():
     TARGETS = get_main_docs()
