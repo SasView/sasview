@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 class Pinvertor(object):
     #q data
-    x = np.empty(0, dtype=np.float)
+    x = np.empty(0, dtype=np.float64)
     #I(q) data
-    y = np.empty(0, dtype=np.float)
+    y = np.empty(0, dtype=np.float64)
     #dI(q) data
-    err = np.empty(0, dtype=np.float)
+    err = np.empty(0, dtype=np.float64)
     #Number of q points
     npoints = 0
     #Number of I(q) points
