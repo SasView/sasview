@@ -96,7 +96,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         regen_string = ""
 
         if "models" in self.source:
-            from re import search
             model_name = os.path.basename(self.source).replace("html", "py")
             regen_string = sas_path + "/" + rst_py_path + "/user/models/src/" + model_name
             user_model_name = user_models + model_name
