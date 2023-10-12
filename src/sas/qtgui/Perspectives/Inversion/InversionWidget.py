@@ -387,9 +387,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Enable buttons when data is present, else disable them
         """
         self.calculateAllButton.setEnabled(not self.isCalculating
-                                           and self.logic.data_is_loaded)
+                                           and self.logic.data_is_loaded and not isinstance(self.logic.data, Data2D))
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
                                             and not isinstance(self.logic.data, Data2D)
+                                            and not self.isCalculating)
+        self.calculateAllButton.setVisible(not isinstance(self.logic.data, Data2D))
+        self.calculateThisButton.setVisible(not isinstance(self.logic.data, Data2D)
                                             and not self.isCalculating)
         self.showResultsButton.setEnabled(self.logic.data_is_loaded
                                           and not self.isBatch
@@ -489,6 +492,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.set_x(self.logic.data.x)
         self._calculator.set_y(self.logic.data.y)        
         self.logic.add_errors()
+        self.setQ()
         self._calculator.set_err(self.logic.data.dy)
         self.set_background(self.backgroundInput.text())
 
@@ -932,7 +936,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Batch Process all items in DropDown Menu
         """
         if not isinstance(self.logic.data, Data1D):
-            self.dataList.setCurrentIndex(1)
+            return
             
         self.isCalculating = True
         self.isBatch = True
@@ -956,8 +960,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isBatch = False
         self._allowPlots = False
         for index in range(len(self._dataList)):
-            if self.is2D and not isinstance(self.logic.data, Data1D):
-                self.batchComplete.append(index)
+
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
                 self.displayChange(index)
@@ -1280,13 +1283,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.sliceList.setEnabled(False)
         self.sliceList.setRowCount(self.noOfSlices)
         self.sliceList.setEnabled(True)
-
+        itemList = []
         for row, slice in enumerate(slicedData):
             # functool's partial function here is used to -> the slice into the showPlot function for the specified slice in the table
             # A better solution could be used here to avoid the need to import functools
             from functools import partial
-            self.plot1D.plot(slice)
-            self.plot1D.show()
+            #self.plot1D.plot(slice)
+            #self.plot1D.show()
             self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))  # sets the title
             self.sliceList.setItem(row, 1, QtWidgets.QTableWidgetItem(str(slice.phi)))  # sets the phi
             self.sliceList.setItem(row, 2, QtWidgets.QTableWidgetItem(str(slice.Qbins)))  # set Number of points on plot
@@ -1295,15 +1298,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.sliceList.setCellWidget(row, 4, plotButton)
             plotButton.clicked.connect(partial(self.show1DPlot, slice))            
             item = GuiUtils.createModelItemWithPlot(update_data=slice, name=str(slice.title))
-
+            itemList.append(item)
             self.parent.communicate.updateModelFromPerspectiveSignal.emit(item)
 
             self.logic.data = GuiUtils.dataFromItem(item)            
-            self.populateDataComboBox(name=self.logic.data.name, data_ref=self.logic.data)
-            self.updateDataList(item)
-            self.logic.add_errors()
-            self.setQ()
 
+        self.isBatch = True
+        self.sendToInversion( itemList, self.isBatch)
         self.calculateAllButton.setVisible(True)
         self.plot2D.update()
         self.sliceList.resizeColumnsToContents()
@@ -1311,9 +1312,25 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.sliceButton.setText("Slice")
         self.sliceList.show()
         self.isSlicing = False
-        self.isBatch = True
+        
         self.enableButtons()
         self.showResultsButton.setVisible(True)
+
+    def sendToInversion(self, items, isBatch):
+        """
+        Send `items` to the Inversion perspective, in either single fit or batch mode
+        """
+        # Check if perspective is correct, otherwise complain
+        if self._parent._current_perspective.name != 'Inversion':
+            msg = "Please change current perspective to Inversion."
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
+            return
+        # icky way to go up the tree
+        self._parent._current_perspective.setData(data_item=items, is_batch=isBatch)
 
 
     def show2DPlot(self):
