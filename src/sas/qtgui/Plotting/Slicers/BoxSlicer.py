@@ -494,7 +494,7 @@ class BoxInteractorX(BoxInteractor):
         """
         Post data creating by averaging in Qx direction
         """
-        from sasdata.data_util.new_manipulations import SlabX
+        from sasdata.data_util.averaging import SlabX
         super()._post_data(SlabX, direction="X")
 
     def validate(self, param_name, param_value):

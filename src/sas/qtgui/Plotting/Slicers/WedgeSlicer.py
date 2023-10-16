@@ -337,7 +337,7 @@ class WedgeInteractorQ(WedgeInteractor):
         super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
-        from sasdata.data_util.new_manipulations import WedgeQ
+        from sasdata.data_util.averaging import WedgeQ
         super()._post_data(WedgeQ)
 
 

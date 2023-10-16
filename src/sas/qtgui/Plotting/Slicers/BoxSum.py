@@ -4,7 +4,7 @@ from PySide6 import QtGui
 from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sasdata.data_util.new_manipulations import Boxavg, Boxsum
+from sasdata.data_util.averaging import Boxavg, Boxsum
 
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
