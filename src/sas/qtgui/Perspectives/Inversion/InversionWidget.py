@@ -1,6 +1,6 @@
 import logging
 import numpy as np
-
+import sys
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
@@ -8,6 +8,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 
 # sas-global
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # pr inversion GUI elements
 from .InversionUtils import WIDGETS
@@ -23,6 +24,7 @@ from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from ...Plotting.Plotter import Plotter
 from ...Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from ...Plotting.Slicers.SectorSlicer import SectorInteractor
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 TAB_2D = 2
 
@@ -93,8 +95,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # 2D Data Plot
 
-        self.plot_widget = None
-
+        self.plot_widgets = {}
+        self.active_plots = {}
         self.plotList = None
 
         ########################################
@@ -244,11 +246,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
         self.slitWidthInput.textChanged.connect(
             lambda: self._calculator.set_slit_width(is_float(self.slitWidthInput.text())))
-
-#        if self.is2D:
-#            self.noOfSlicesInput.textChanged.connect(self.show2DPlot())
-#            self.startAngleInput.textChanged.connect(self.show2DPlot())
-#            self.noOfQbinsInput.textChanged.connect(self.show2DPlot())
 
 
         #self.model.itemChanged.connect(self.model_changed) # disabled because it causes dataList to be set to prevous item. further debuging required.
@@ -465,15 +462,32 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.set_qmin(qmin)
         self._calculator.set_qmax(qmax)
 
-    def updateTab(self, data = None, is2D=False):
+    def updateTab(self, data = None, is2D=False, tab_index=None):
         self.is2D = is2D
         self.logic.data = GuiUtils.dataFromItem(data)
         self.swapDataComboBox(self.logic.data.name, data)        
 
         if is2D:
-            data.isSliced = False                     
-            #self.communicate.plotUpdateSignal.emit([data])            
-            self.show2DPlot()
+            data.isSliced = False 
+            plots = GuiUtils.plotsFromDisplayName(self.logic.data.name, data.model()) 
+            for item, plot_set in plots.items():
+                self.plot2D = Plotter2D(self, quickplot=True)
+                self.plot2D.item = item
+                self.plot2D.plot(plot_set)
+                self.addPlot(self.plot2D)
+                #self.active_plots[self.plot2D.data[0].name] = self.plot2D	
+
+
+        #if is2D:
+        #    data.isSliced = False 
+        #    plots = GuiUtils.plotsFromDisplayName(self.logic.data.name, data.model())                           
+        #    # data has not been shown - show just data
+        #    for item, plot in plots.items():
+
+
+        #        #GuiUtils.updateModelItemWithPlot(item, self.plot, new_plot.id)
+        #        self.communicate.plotRequestedSignal.emit([item, self.logic.data], self.tab_id)
+                
         else: #1D data                     
             self.logic.add_errors()
             self.setQ()
@@ -483,18 +497,34 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.calculateAllButton.setVisible(False)
         self.showResultsButton.setVisible(False)
 
-    def addDataPlot2D(self, plot_set, item):
+    def addPlot(self, new_plot):
         """
-        Create a new 2D plot and add it to the workspace
+        Helper method for plot bookkeeping
         """
-        self.plot2D = Plotter2DWidget(self, quickplot=True)
-        self.plot2D.data = self.logic.data
-        self.plot2D.plot()
-        self.plot2D.item = self.tabMain
-        self.plot2D.onSectorView()
+        # Update the global plot counter
+        title = 'Plot2D '+self.logic.data.name
+        new_plot.setWindowTitle(title)
 
-        self.plot2D.show()
-        self.enableButtons()
+        # Set the object name to satisfy the Squish object picker
+        new_plot.setObjectName(title)
+
+        # Add the plot to the workspace
+        plot_widget = self.parent.workspace().addSubWindow(new_plot)
+        if sys.platform == 'darwin':
+            workspace_height = int(float(self.parent.workspace().sizeHint().height()) / 2)
+            workspace_width = int(float(self.parent.workspace().sizeHint().width()) / 2)
+            plot_widget.resize(workspace_width, workspace_height)
+
+        # Show the plot
+        new_plot.show()
+        new_plot.canvas.draw()
+
+        # Update the plot widgets dict
+        self.plot_widgets[title] = plot_widget
+        GuiUtils.updateModelItemWithPlot(self.plot2D.item, self.plot2D, name=title)
+        #self.communicate.plotRequestedSignal.emit([item, self.logic.data], self.tab_id)
+ 
+
 
     ######################################################################
     # GUI Interaction Events
@@ -1300,8 +1330,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             # functool's partial function here is used to -> the slice into the showPlot function for the specified slice in the table
             # A better solution could be used here to avoid the need to import functools
             from functools import partial
-            #self.plot1D.plot(slice)
-            #self.plot1D.show()
+ 
             self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))  # sets the title
             self.sliceList.setItem(row, 1, QtWidgets.QTableWidgetItem(str(slice.phi)))  # sets the phi
             self.sliceList.setItem(row, 2, QtWidgets.QTableWidgetItem(str(slice.Qbins)))  # set Number of points on plot
@@ -1342,19 +1371,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._parent._current_perspective.setData(data_item=items, is_batch=isBatch)
 
 
-    def show2DPlot(self):
-        """
-        Show 2D plot representing the raw 2D data
-        """
 
-        self.plot2D = Plotter2D(self, quickplot=True)
-        self.plot2D.data = self.logic.data
-        self.plot2D.plot()
-        self.plot2D.item = self.tabMain
-        self.plot2D.onSectorView()
-
-        self.plot2D.show()
-        self.enableButtons()
 
     def show1DPlot(self, data):
         """

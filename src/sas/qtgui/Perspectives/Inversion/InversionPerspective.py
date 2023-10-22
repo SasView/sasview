@@ -336,13 +336,13 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                         self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
                     else:
                         self.setCurrentIndex(tab_index-1)                
-                        self.swapData(data = data, is2D = is_2Ddata)
+                        self.swapData(data = data, is2D = is_2Ddata,tab_index=self.currentIndex())
                         return
                 #debug Batch mode, gives none Type has no attribute name
                 if not is_batch and np.any(available_tabs):
                     first_good_tab = available_tabs.index(True)
                     self.tabs[first_good_tab].data = data
-                    self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata) 
+                    self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata, tab_index=first_good_tab) 
 
                 else:
                     self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
@@ -351,7 +351,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
 
-    def swapData(self, data = None, is2D = False):
+    def swapData(self, data = None, is2D = False,tab_index=None):
         """
         Replace the data from the current tab
         """
@@ -368,7 +368,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             raise RuntimeError(msg)
 
         self.currentTab.data = data
-        self.currentTab.updateTab(data = data, is2D = is2D)
+        self.currentTab.updateTab(data = data, is2D = is2D,tab_index= tab_index)
 
 
 
@@ -426,14 +426,14 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         else:        
             if data is not None:               
-                tab.updateTab(data = data, is2D = is2D)
+                tab.updateTab(data = data, is2D = is2D, tab_index=tab_index)
                 
         tab.is_batch = is_batch                
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)
 
-        # Show the new tab
+        # the new tab
         self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
         self.setCurrentWidget(tab)
 
