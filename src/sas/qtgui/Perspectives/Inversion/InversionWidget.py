@@ -472,7 +472,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         if is2D:
             data.isSliced = False                     
-            #self.communicate.plotUpdateSignal.emit([data])
+            #self.communicate.plotUpdateSignal.emit([data])            
             self.show2DPlot()
         else: #1D data                     
             self.logic.add_errors()
@@ -483,6 +483,18 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.calculateAllButton.setVisible(False)
         self.showResultsButton.setVisible(False)
 
+    def addDataPlot2D(self, plot_set, item):
+        """
+        Create a new 2D plot and add it to the workspace
+        """
+        self.plot2D = Plotter2DWidget(self, quickplot=True)
+        self.plot2D.data = self.logic.data
+        self.plot2D.plot()
+        self.plot2D.item = self.tabMain
+        self.plot2D.onSectorView()
+
+        self.plot2D.show()
+        self.enableButtons()
 
     ######################################################################
     # GUI Interaction Events
@@ -1277,7 +1289,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         slicedData = self.multiSlicer()
         self.isSliced = True
 
-        labels = ["title", "phi", "Qbins", "DeltaPhi", "plots"]
+        labels = ["title", "phi", "Qbins", "DeltaPhi"]
         self.sliceList.setColumnCount(len(labels))
         self.sliceList.setHorizontalHeaderLabels(labels)
         self.sliceList.setEnabled(False)
@@ -1293,10 +1305,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))  # sets the title
             self.sliceList.setItem(row, 1, QtWidgets.QTableWidgetItem(str(slice.phi)))  # sets the phi
             self.sliceList.setItem(row, 2, QtWidgets.QTableWidgetItem(str(slice.Qbins)))  # set Number of points on plot
-            self.sliceList.setItem(row, 3, QtWidgets.QTableWidgetItem(str(slice.deltaPhi)))  # set Delta phi
-            plotButton = QtWidgets.QPushButton(str(slice.phi))
-            self.sliceList.setCellWidget(row, 4, plotButton)
-            plotButton.clicked.connect(partial(self.show1DPlot, slice))            
+            self.sliceList.setItem(row, 3, QtWidgets.QTableWidgetItem(str(slice.deltaPhi)))  # set Delta phi           
             item = GuiUtils.createModelItemWithPlot(update_data=slice, name=str(slice.title))
             itemList.append(item)
             self.parent.communicate.updateModelFromPerspectiveSignal.emit(item)
@@ -1351,9 +1360,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         show a 1D plot of all of the slices
         """
-        self.plot1D.clean()
-        self.plot1D.plot(data)
-        self.plot1D.show()
+
+        self.plot1D = self.logic.new1DPlot(data, self.tab_id)
         params = self.plot2D.slicer.getParams()
         params["Phi [deg]"] = data.phi
         self.plot2D.slicer.setParams(params)
