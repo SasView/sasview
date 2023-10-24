@@ -16,12 +16,50 @@ a spatial distance. The correlation function represents the scattering intensity
 rather than in terms of momentum transfer.
 
 We can interpret the correlation function in terms of the sample structure by thinking about
-pairs of points separated by a given distance. When, on average over the sample, the pair of points
+pairs of points separated by a given displacement. When, on average over the sample, the pairs of points
 have a high scattering length density, then the correlation function has a large value. Similarly,
 when the pairs have a low scattering length density, the correlation function is low.
-More concretely: the correlation function :math:`\Gamma(x)` for distance :math:`x` is proportional to
-the pairwise product of scattering length densities for all points separated by distance :math:`x`,
-summed over all orientations and locations.
+More concretely: the correlation function :math:`\Gamma(\vec{r})` for vector :math:`\vec{r} = (x,y,z)` is proportional to
+the pairwise product of scattering length densities for all points separated by the vector :math:`(x,y,z)`
+summed over all orientations and locations. 
+Details can be found in the proceeding section.
+
+In its most general form the correlation function takes a three dimensional vector input,
+however, in the correlation function analysis tool we consider various one dimensional 
+projections, labelled :math:`\Gamma_1` and :math:`\Gamma_3` .
+This use of these projected correlation functions is motivated by the limitations of 
+the experimental data: if the input data is one dimensional
+so we can only recover at most one dimension of the correlation function.
+This said, if the system being studied has an approprate symmetry, a one dimensional, 
+projected correlation function might be enough.
+
+
+
+The :math:`\Gamma_3` projection corresponds to particles in solution 
+where one observes an average over all orientations.
+The projection in this case is 
+
+It is sometimes referred to as the three dimensional correlation function, 
+as the symmetry it assumes despite it
+being one dimensional.
+
+
+
+
+More formally
+.............
+
+More formally, the correlation function is a quantity that arrises naturally from calculating the square magnitude
+of the three dimensional fourier transform, which is proportional to the scattering amplitude
+
+.. math:: 
+    \frac{d\sigma}{d\Omega} \propto F(\vec{q}) F^*(\vec{q})
+
+where 
+
+.. math:: 
+    F(\vec{q}) = \int \rho(r) e^{\vec{r}\cdot\vec{q}} \;dx\;dy\;dz
+   
 
 
 
@@ -68,53 +106,75 @@ Extrapolation
 Small Q
 .......
 
-The data are extrapolated to q = 0 by fitting a Guinier function, defined as
+The scattering data is extrapolated to :math:`q = 0`` by fitting a Guinier function, defined as
 
 .. math::
     I(q) = e^{A + Bq^2}
 
-The natural logarithm of the parameter :math:`A` is a constant of proportionality
-and equal to the scattering intensity at :math:`Q=0`, i.e. the "total scattering".
+to data up to :math:`q` value specified by `Guinier Start`.
 
- parameter :math:`B`, in systems of dispersed particles it is related to the radius-of-gyration of 
-a spherical object having the same small-angle scattering in this region.
+This a Gaussian centred at :math:`q=0` (we only ever see the positive half).
+The natural logarithm of the parameter :math:`A` is a constant of proportionality
+equal to the scattering intensity at :math:`q=0`, i.e. the "total scattering".
+The parameter :math:`B` describes the narrowness of the Gaussian, and in systems 
+of dispersed spherical particles it is related to the radius of gyration.
 	
-*Note:* As q tends to zero this function tends to a limiting value and is 
-therefore less appropriate for use in systems where the form factor does not 
-do likewise. However, because of the transform, the correlation functions are 
-most affected by the Guinier back-extrapolation at *large* values of x where 
-the impact on any extrapolated parameters will be least significant.
+*Note:* The Guinier model makes assumptions that do not hold for all systems
+and so this approximation might be not always be inaccurate.
+If errors from the Guinier model fit occur, they will manifest as a constant offset in the correlation function,
+because low :math:`q` values correspond a to long period length in :math:`x`.
+Empirically, however, innacuracies in the Guinier region have a very low impact on the
+final analysis, and only a some of the lamellar parameters will be affected.
 
 Large Q
 .......
 
-The data are extrapolated towards q = :math:`\infty` by fitting a Porod model to
-the data points in the high-q range and then computing the extrapolation to 100 
-times the maximum q value in the experimental dataset. This should be more than 
-sufficient to ensure that on transformation any truncation artefacts introduced 
-are at such small values of x that they can be safely ignored.
-
-The equation used is:
+The data is extrapolated towards :math:`q = \infty` by fitting a Porod model, to the region 
+between `Porod Start` and `Porod End`. This model is defined by
 
 .. math::
-    I(q) = K q^{-4}e^{-q^2\sigma^2} + Bg
+    I(q) = K q^{-4} e^{-q^2\sigma^2} + I_{B}
 
-Where :math:`Bg` is the background, :math:`K` is the Porod constant, and :math:`\sigma` (which 
-must be > 0) describes the width of the electron/neutron scattering length density 
-profile at the interface between the crystalline and amorphous regions as shown below.
+Where :math:`I_B` is the background intensity, :math:`K` is the Porod constant, and :math:`\sigma` is a 
+contrast parameter which, in a two phase system, describes 
+the sharpness of the scattering length density 
+profile at the interface between phases.
 
-.. figure:: fig1.png
-   :align: center
+The model contains three components, the background intesity, the standard Porod law
+
+.. math::
+    I(q) - I_b \propto q^{-4}
+
+and the other is a contribution which is attibutable to how sharply 
+
+.. math::
+    I(q) - I_b \propto e^{-q^2\sigma^2}
+
+SasView will use this formula to extrapolate to very large :math:`q` (100 
+times the data's maximum). This assures that the transform used in the
+next stage does not contain artefacts (i.e. from treating secular data as periodic)
+  
 
 
 Merging
 .......
 
-The extrapolated data set consists of the Guinier back-extrapolation from q ~ 0
-up to the lowest q value in the original data, then the original scattering data, 
-and then the Porod tail-fit beyond this. The joins between the original data and 
-the Guinier/Porod extrapolations are smoothed using the algorithm below to try 
-and avoid the formation of truncation ripples in the transformed data:
+In the final step before transformation, the experimental and model data are merged together.
+For the Guinier model, this happens on the region between the start of the experimental data and
+the value specified by `Guinier End`. 
+For the Porod model, the merging happens between `Porod Start` and `Porod End`.
+
++----------------+-------------------+-------------------+
+| From           | To                | Data              |
++================+===================+===================+
+|| 0             || Start of data    || Guinier Model    |
+|| Start of data || *Guinier End*    || Guinier/Data mix |
+|| *Guinier End* || *Porod Start*    || Data             |
+|| *Porod Start* || *Porod End*      || Data/Porod mix   |
+|| *Porod End*   || 100x end of data || Porod model      |
++----------------+-------------------+-------------------+
+
+
 
 Functions :math:`f(x_i)` and :math:`g(x_i)` where :math:`x_i \in \left\{
 {x_1, x_2, ..., x_n} \right\}`, are smoothed over the range :math:`[a, b]`
