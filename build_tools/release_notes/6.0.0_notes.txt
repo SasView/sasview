@@ -1,0 +1,101 @@
+## New features
+- Orientation viewer
+- Corfunc refactored
+- Simultaneous fitting allows for weighting scheme
+- Preferences panel with display and plotting options (polydispersity and residuals plots can be hidden).
+- Improved label handling on plots
+- Residuals plots refactored
+- PDB reader refactored
+- Wedge slicer added
+- Sasdata package separated
+- Move to PySide6
+- Python 3.11 support
+- Required documentation (https://github.com/SasView/sasview/issues/2641)
+- Improved documentation
+- New Tutorials
+
+## Major bug fixes:
+- Handling of constraints for polydisperse parameters
+- Binning and FitPage plotting of SESANS data 
+- Fixed 1D slit-smearing function
+- Start-up speed improved
+- Magnetic SLD? 
+- Multiplicity model?
+
+## New models
+- New broad peak model
+
+## Anticipated for beta version
+- PDB-based model saved to custom model (for S(q) calculations)?
+- Batch Processing and 2D data slicing and processing for P(r)
+- Local documentation generator
+- Log explorer
+- Send To button with replacement options
+
+
+## What's Changed (This section has to be improved)
+* Fix wrong number of parameters on restore in slicer module by @butlerpd in https://github.com/SasView/sasview/pull/2462
+* Update README.md by @lucas-wilkins in https://github.com/SasView/sasview/pull/2466
+* More changes to corfunc by @lucas-wilkins in https://github.com/SasView/sasview/pull/2463
+* Modify the way perspectives are closed by @rozyczko in https://github.com/SasView/sasview/pull/2469
+* Testing nightly build by @wpotrzebowski in https://github.com/SasView/sasview/pull/2465
+* Add argument to convertUI that forces full UI rebuild by @krzywon in https://github.com/SasView/sasview/pull/2483
+* Pyside6 merge by @rozyczko in https://github.com/SasView/sasview/pull/2478
+* Remove UI conversion from run.py by @krzywon in https://github.com/SasView/sasview/pull/2511
+* Reinstate math import to Plotter.py by @krzywon in https://github.com/SasView/sasview/pull/2517
+* 2111 name changes in corfunc by @lucas-wilkins in https://github.com/SasView/sasview/pull/2485
+* Import pytest in density calculator GUI tests by @krzywon in https://github.com/SasView/sasview/pull/2523
+* 2389: Validate text/int/float inputs within the preferences panel by @krzywon in https://github.com/SasView/sasview/pull/2476
+* C&S fitting widget fixes for PySide6 by @rozyczko in https://github.com/SasView/sasview/pull/2528
+* Reparent QAction from QtWidget to QtGui (PySide6) by @rozyczko in https://github.com/SasView/sasview/pull/2532
+* Fix for save dataset error #2533 by @rozyczko in https://github.com/SasView/sasview/pull/2534
+* Rog and beta q by @smalex-z in https://github.com/SasView/sasview/pull/2535
+* Lowercase PySide6 executables for Linux compatability #2542 by @ehewins in https://github.com/SasView/sasview/pull/2543
+* 2541 nightly build artifact doesnt start on mac by @wpotrzebowski in https://github.com/SasView/sasview/pull/2544
+* Polydisperse parameter check on model load by @rozyczko in https://github.com/SasView/sasview/pull/2553
+* Log explorer fix by @smalex-z in https://github.com/SasView/sasview/pull/2545
+* Syntax highlighting in Pyside6 by @rozyczko in https://github.com/SasView/sasview/pull/2562
+* Avoid parenting mess by calling the widget directly by @rozyczko in https://github.com/SasView/sasview/pull/2559
+* Added model reload signal on data swap by @rozyczko in https://github.com/SasView/sasview/pull/2567
+* Two options to disable residuals and polydispersity distribution plots by @lozanodorian in https://github.com/SasView/sasview/pull/2558
+* 2550 wedge slicer by @ehewins in https://github.com/SasView/sasview/pull/2566
+* Post-v5.0.6 Release Update by @krzywon in https://github.com/SasView/sasview/pull/2536
+* Use a regex for version validity check rather than integer coercion by @krzywon in https://github.com/SasView/sasview/pull/2572
+* Wedge slicer minor upgrages by @ehewins in https://github.com/SasView/sasview/pull/2570
+* Strip debug messages from production version of Qt console by @pkienzle in https://github.com/SasView/sasview/pull/2557
+* unit conversion for gui is missing by @rozyczko in https://github.com/SasView/sasview/pull/2568
+* Adjusts scale and angular range in 1D plots from WedgeSlicer by @butlerpd in https://github.com/SasView/sasview/pull/2580
+* Bump scipy from 1.7.3 to 1.10.0 in /build_tools by @dependabot in https://github.com/SasView/sasview/pull/2547
+* Plot2D instances are now of `Plotter2DWidget` type. Fixes #2586 by @rozyczko in https://github.com/SasView/sasview/pull/2587
+* fix dialog sizes for some calculators. #2437 by @rozyczko in https://github.com/SasView/sasview/pull/2581
+* Fix for getting directory name by @rozyczko in https://github.com/SasView/sasview/pull/2596
+* Remove Unused Dependency: h5py by @gdrosos in https://github.com/SasView/sasview/pull/2585
+* 2577 orientation viewer doesnt work from nigthly build on mac by @lucas-wilkins in https://github.com/SasView/sasview/pull/2600
+* Fixed unmatched method signatures in Box&Wedge Interactor child classes by @ehewins in https://github.com/SasView/sasview/pull/2589
+* Particle editor by @lucas-wilkins in https://github.com/SasView/sasview/pull/2520
+* Pass the Data1D/2D object, not its `data` attribute by @rozyczko in https://github.com/SasView/sasview/pull/2592
+* Bump reportlab from 3.6.6 to 3.6.13 in /build_tools by @dependabot in https://github.com/SasView/sasview/pull/2597
+* Added 3.11, removed 3.8 by @rozyczko in https://github.com/SasView/sasview/pull/2582
+* Fix doc build errors by @smk78 in https://github.com/SasView/sasview/pull/2607
+* Doc toctree fixes by @smk78 in https://github.com/SasView/sasview/pull/2609
+* 2603: Numeric coercion in preferences by @krzywon in https://github.com/SasView/sasview/pull/2605
+* What's new dialog by @lucas-wilkins in https://github.com/SasView/sasview/pull/2608
+* created submenu for slicers being part of #2604 by @astellhorn in https://github.com/SasView/sasview/pull/2610
+* Squish squashed by @lucas-wilkins in https://github.com/SasView/sasview/pull/2616
+* Update sas_gen.py by @timsnow in https://github.com/SasView/sasview/pull/2617
+* Killed Zombie Python Test by @lucas-wilkins in https://github.com/SasView/sasview/pull/2627
+* Remove model.png by @lucas-wilkins in https://github.com/SasView/sasview/pull/2629
+* Populate whats new with last version by @smk78 in https://github.com/SasView/sasview/pull/2625
+* Fix errors while running convertUI by @krzywon in https://github.com/SasView/sasview/pull/2623
+* 2618: Fix GPU and Optimizer Preferences by @krzywon in https://github.com/SasView/sasview/pull/2622
+* Moving OSX signing to nightly by @wpotrzebowski in https://github.com/SasView/sasview/pull/2631
+* Empty lines in data explorer by @rozyczko in https://github.com/SasView/sasview/pull/2643
+
+## New Contributors
+* @smalex-z made their first contribution in https://github.com/SasView/sasview/pull/2535
+* @ehewins made their first contribution in https://github.com/SasView/sasview/pull/2543
+* @lozanodorian made their first contribution in https://github.com/SasView/sasview/pull/2558
+* @gdrosos made their first contribution in https://github.com/SasView/sasview/pull/2585
+* @astellhorn made their first contribution in https://github.com/SasView/sasview/pull/2610
+
+**Full Changelog**: https://github.com/SasView/sasview/compare/nightly-build...v6.0.0-alpha
