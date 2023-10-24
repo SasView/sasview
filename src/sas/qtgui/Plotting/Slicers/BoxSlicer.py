@@ -528,7 +528,7 @@ class BoxInteractorY(BoxInteractor):
         """
         Post data creating by averaging in Qy direction
         """
-        from sasdata.data_util.new_manipulations import SlabY
+        from sasdata.data_util.averaging import SlabY
         super()._post_data(SlabY, direction="Y")
 
     def validate(self, param_name, param_value):

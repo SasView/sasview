@@ -10,7 +10,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
     """
     AnnulusInteractor plots a data1D average of an annulus area defined in a
     Data2D object. The data1D averaging itself is performed in sasdata by
-    manipulations.py
+    averaging.py
 
     This class uses the RingInteractor class to define two rings of radius
     r1 and r2 (Q1 and Q2). All Q points at a constant angle phi from the x-axis
