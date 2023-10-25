@@ -35,18 +35,11 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
     name = "Inversion"
-
-
-
-
     ext = "pr"
 
     @property
     def title(self):
         return "P(r) Inversion"
-
-
-
 
     @property
     def title(self):
@@ -58,14 +51,12 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
         self.setWindowTitle("P(r) Inversion Perspective")
-        self._manager = parent
 
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 1
         # Needed for Batch inversion
         self.parent = parent
-        self._parent = parent
-        self.communicate = parent.communicator()
+        self.communicate = self.parent.communicate
         self.tabCloseRequested.connect(self.tabCloses)
 
         # List of active Pr Tabs
@@ -231,7 +222,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         return False
 
     def communicator(self):
-        return self.communicate
+        return self.filesWidget.communicate
+
 
     def allowBatch(self):
         """
