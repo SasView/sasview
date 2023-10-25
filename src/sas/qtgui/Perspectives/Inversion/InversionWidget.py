@@ -114,10 +114,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.setWindowTitle("P(r) Inversion Perspective")
 
         #  set parent window and connect communicator
-        self._manager = parent
-        self.parent = parent
-        self._parent = parent
-        self.communicate = self.parent.communicate
+        self.communicate = self.parent.communicator()
+        self.communicator = self.parent.communicator()
         self.communicate.dataDeletedSignal.connect(self.removeData)
         self.batchResults = {}
 
@@ -143,7 +141,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # plots of self._data
         self.prPlot = None
         self.dataPlot = None
-        self.plot2D = Plotter2DWidget(quickplot=True)
         self.plot1D = Plotter(quickplot=True)
 
         # suggested nTerms
@@ -188,8 +185,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     ######################################################################
     # Base Perspective Class Definitions
 
-    def communicator(self):
-        return self.communicate
 
 
     def setPlotable(self, value=True):
@@ -470,23 +465,19 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if is2D:
             data.isSliced = False 
             plots = GuiUtils.plotsFromDisplayName(self.logic.data.name, data.model()) 
-            for item, plot_set in plots.items():
-                self.plot2D = Plotter2D(self, quickplot=True)
+            for item, plot_set  in plots.items():
+                
+                
+                #self.plot2D.plot(plot_set)
+                
+                title = self.add2DPlot(plot_set, item)
+                
+                if item.parent() is not None:
+                    item = item.parent()
                 self.plot2D.item = item
-                self.plot2D.plot(plot_set)
-                self.addPlot(self.plot2D)
-                #self.active_plots[self.plot2D.data[0].name] = self.plot2D	
+                self.plot2D.id=self.logic.data.name                   
+                self.plot2D.onSectorView()
 
-
-        #if is2D:
-        #    data.isSliced = False 
-        #    plots = GuiUtils.plotsFromDisplayName(self.logic.data.name, data.model())                           
-        #    # data has not been shown - show just data
-        #    for item, plot in plots.items():
-
-
-        #        #GuiUtils.updateModelItemWithPlot(item, self.plot, new_plot.id)
-        #        self.communicate.plotRequestedSignal.emit([item, self.logic.data], self.tab_id)
                 
         else: #1D data                     
             self.logic.add_errors()
@@ -497,12 +488,18 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.calculateAllButton.setVisible(False)
         self.showResultsButton.setVisible(False)
 
-    def addPlot(self, new_plot):
+    def add2DPlot(self, plot_set, item):
         """
-        Helper method for plot bookkeeping
+        Create a new 2D plot
         """
-        # Update the global plot counter
-        title = 'Plot2D '+self.logic.data.name
+        self.plot2D = Plotter2DWidget(parent=self, manager=self)
+        self.plot2D.item = item
+        self.plot2D.plot(plot_set)
+        self.addPlot(self.plot2D)
+        self.active_plots[self.plot2D.data[0].name] = self.plot2D
+
+    def addPlot(self, new_plot): 
+        title = str(PlotHelper.idOfPlot(new_plot))
         new_plot.setWindowTitle(title)
 
         # Set the object name to satisfy the Squish object picker
@@ -510,10 +507,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # Add the plot to the workspace
         plot_widget = self.parent.workspace().addSubWindow(new_plot)
-        if sys.platform == 'darwin':
-            workspace_height = int(float(self.parent.workspace().sizeHint().height()) / 2)
-            workspace_width = int(float(self.parent.workspace().sizeHint().width()) / 2)
-            plot_widget.resize(workspace_width, workspace_height)
+        #if sys.platform == 'darwin':
+        workspace_height = int(float(self.parent.workspace().sizeHint().height()) / 2)
+        workspace_width = int(float(self.parent.workspace().sizeHint().width()) / 2)
+        plot_widget.resize(workspace_width, workspace_height)
 
         # Show the plot
         new_plot.show()
@@ -521,10 +518,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # Update the plot widgets dict
         self.plot_widgets[title] = plot_widget
-        GuiUtils.updateModelItemWithPlot(self.plot2D.item, self.plot2D, name=title)
-        #self.communicate.plotRequestedSignal.emit([item, self.logic.data], self.tab_id)
- 
 
+        # Update the active chart list
+        self.active_plots[new_plot.data[0].name] = new_plot
 
     ######################################################################
     # GUI Interaction Events
