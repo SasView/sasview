@@ -105,6 +105,9 @@ class GuiManager:
         # Add signal callbacks
         self.addCallbacks()
 
+        # Assure categories are present
+        self.addCategories()
+
         # Create the data manager
         # TODO: pull out all required methods from DataManager and reimplement
         self._data_manager = DataManager()
@@ -248,6 +251,21 @@ class GuiManager:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
         self.loadedPerspectives = {}
         self._current_perspective = None
+
+    @staticmethod
+    def addCategories():
+        """
+        Make sure categories.json exists and if not compile it and install in ~/.sasview
+        """
+        try:
+            from sas.sascalc.fit.models import ModelManager
+            from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+            model_list = ModelManager().cat_model_list()
+            CategoryInstaller.check_install(model_list=model_list)
+        except Exception:
+            import traceback
+            logger.error("%s: could not load SasView models")
+            logger.error(traceback.format_exc())
 
     def updatePlotItems(self, graphs):
         """
