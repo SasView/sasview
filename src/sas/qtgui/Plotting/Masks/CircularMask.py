@@ -86,7 +86,7 @@ class CircularMask(BaseInteractor):
         if data is None:
             return
         mask = data.mask
-        from sasdata.data_util.manipulations import Ringcut
+        from sasdata.data_util.averaging import Ringcut
 
         rmin = 0
         rmax = numpy.fabs(self.outer_circle.get_radius())
