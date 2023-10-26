@@ -482,7 +482,7 @@ class BoxInteractorX(BoxInteractor):
     """
     Average in Qx direction. The data for all Qy at a constant Qx are
     averaged together to provide a 1D array in Qx (to be plotted as a function
-     of Qx)
+    of Qx)
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3):
@@ -516,7 +516,7 @@ class BoxInteractorY(BoxInteractor):
     """
     Average in Qy direction. The data for all Qx at a constant Qy are
     averaged together to provide a 1D array in Qy (to be plotted as a function
-     of Qy)
+    of Qy)
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3):
