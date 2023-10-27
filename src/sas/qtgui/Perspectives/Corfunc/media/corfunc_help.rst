@@ -33,15 +33,21 @@ so we can only recover at most one dimension of the correlation function.
 This said, if the system being studied has an approprate symmetry, a one dimensional, 
 projected correlation function might be enough.
 
+The :math:`\Gamma_1` projection corresponds to a 
+
+system with planar symmetry,
+i.e. a system comprising planar layers stacked on top of each other.
+When the layers form a periodic structure, we say it is an ideal laminar structure.
 
 
 The :math:`\Gamma_3` projection corresponds to particles in solution 
 where one observes an average over all orientations.
-The projection in this case is 
+It is the same system as is described by the Debye equation, and the
+calculation used to obtain :math:`\Gamma_3` is essentially its inverse. 
+:math:`\Gamma_3` is sometimes referred to as the three dimensional correlation function, 
+despite it being being one dimensional.
 
-It is sometimes referred to as the three dimensional correlation function, 
-as the symmetry it assumes despite it
-being one dimensional.
+
 
 
 
@@ -117,14 +123,14 @@ This a Gaussian centred at :math:`q=0` (we only ever see the positive half).
 The natural logarithm of the parameter :math:`A` is a constant of proportionality
 equal to the scattering intensity at :math:`q=0`, i.e. the "total scattering".
 The parameter :math:`B` describes the narrowness of the Gaussian, and in systems 
-of dispersed spherical particles it is related to the radius of gyration.
+of dispersed spherical particles it is related to the radius of gyration :math:`R_g` by :math:`B = R_g^2 / 3`.
 	
 *Note:* The Guinier model makes assumptions that do not hold for all systems
-and so this approximation might be not always be inaccurate.
+and so this approximation might not always be accurate.
 If errors from the Guinier model fit occur, they will manifest as a constant offset in the correlation function,
 because low :math:`q` values correspond a to long period length in :math:`x`.
 Empirically, however, innacuracies in the Guinier region have a very low impact on the
-final analysis, and only a some of the lamellar parameters will be affected.
+final analysis, and only a some of the lamellar parameters will be affected at all.
 
 Large Q
 .......
@@ -140,21 +146,20 @@ contrast parameter which, in a two phase system, describes
 the sharpness of the scattering length density 
 profile at the interface between phases.
 
-The model contains three components, the background intesity, the standard Porod law
+The model contains three components, a constant background intesity, the standard Porod law
 
 .. math::
-    I(q) - I_b \propto q^{-4}
+    I(q) - I_B \propto q^{-4}
 
-and the other is a contribution which is attibutable to how sharply 
+and a contribution which is attibutable to the sharpness of the boundaries between regions
 
 .. math::
-    I(q) - I_b \propto e^{-q^2\sigma^2}
+    I(q) - I_B \propto e^{-q^2\sigma^2}
 
 SasView will use this formula to extrapolate to very large :math:`q` (100 
 times the data's maximum). This assures that the transform used in the
 next stage does not contain artefacts (i.e. from treating secular data as periodic)
   
-
 
 Merging
 .......
@@ -174,21 +179,18 @@ For the Porod model, the merging happens between `Porod Start` and `Porod End`.
 || *Porod End*   || 100x end of data || Porod model      |
 +----------------+-------------------+-------------------+
 
-
-
-Functions :math:`f(x_i)` and :math:`g(x_i)` where :math:`x_i \in \left\{
-{x_1, x_2, ..., x_n} \right\}`, are smoothed over the range :math:`[a, b]`
-to produce :math:`y(x_i)`, by the following equations:
-
-
+A smooth transition is achieved with sigmoid weighting defined as follows.
+We start with two input functions, :math:`f(x)` on the 'left' and :math:`g(x)` on the 'right', and these 
+are to be smoothed over the range :math:`[a, b]`. 
+We use :math:`y(x)` to represent the transition over :math:`[a,b]`. :math:`y(x)` is given by the following convex combination
 
 .. math::
-    y(x_i) = h_ig(x_i) + (1-h_i)f(x_i)
+    y(x) = h(x) g(x) + (1-h(x))f(x)
 
-where:
+where :math:`h(x)` is a weighing between the two, with a value of zero at :math:`a` and one at :math:`b`, defined as
 
 .. math::
-    h_i = \frac{1}{1 + \frac{(x_i-b)^2}{(x_i-a)^2}}
+    h(x) = \frac{1}{1 + \frac{(x-b)^2}{(x-a)^2}}
 
 
 Transformation
@@ -259,6 +261,12 @@ The structural parameters extracted are:
 *   Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
 *   Local Crystallinity :math:`= L_c/L_p`
 
+Options
+.......
+
+
+
+
 Volume Fraction Profile
 .......................
 
@@ -280,41 +288,6 @@ structural parameters are obtainable by other means:
    :align: center
 
 The reader is directed to the references for information on these parameters.
-
-References
-----------
-
-Correlation Function
-....................
-
-Ruland, W. *Coll. Polym. Sci.* (1977), 255, 417-427
-
-Strobl, G. R.; Schneider, M. *J. Polym. Sci.* (1980), 18, 1343-1359
-
-Koberstein, J.; Stein R. *J. Polym. Sci. Phys. Ed.* (1983), 21, 2181-2200
-
-Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 247-251
-
-Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 257-261
-
-Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 260-270
-
-Göschel, U.; Urban, G. *Polymer* (1995), 36, 3633-3639
-
-Stribeck, N. *X-Ray Scattering of Soft Matter*, Springer. Berlin (2007), 138-161
-
-:ref:`FDR` (PDF format)
-
-Volume Fraction Profile
-.......................
-
-Washington, C.; King, S. M. *J. Phys. Chem.*, (1996), 100, 7603-7609
-
-Cosgrove, T.; King, S. M.; Griffiths, P. C. *Colloid-Polymer Interactions: From Fundamentals to Practice*, Wiley. New York (1999), 193-204
-
-King, S. M.; Griffiths, P. C.; Cosgrove, T. *Applications of Neutron Scattering to Soft Condensed Matter*, Gordon & Breach. Amsterdam (2000), 77-105
-
-King, S.; Griffiths, P.; Hone, J.; Cosgrove, T. *Macromol. Symp.* (2002), 190, 33-42
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -377,3 +350,40 @@ The structure of the file is shown below.
 
 .. note::
     This help document was last changed by Steve King, 21May2020
+
+
+
+References
+----------
+
+Correlation Function
+....................
+
+Ruland, W. *Coll. Polym. Sci.* (1977), 255, 417-427
+
+Strobl, G. R.; Schneider, M. *J. Polym. Sci.* (1980), 18, 1343-1359
+
+Koberstein, J.; Stein R. *J. Polym. Sci. Phys. Ed.* (1983), 21, 2181-2200
+
+Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 247-251
+
+Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 257-261
+
+Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 260-270
+
+Göschel, U.; Urban, G. *Polymer* (1995), 36, 3633-3639
+
+Stribeck, N. *X-Ray Scattering of Soft Matter*, Springer. Berlin (2007), 138-161
+
+:ref:`FDR` (PDF format)
+
+Volume Fraction Profile
+.......................
+
+Washington, C.; King, S. M. *J. Phys. Chem.*, (1996), 100, 7603-7609
+
+Cosgrove, T.; King, S. M.; Griffiths, P. C. *Colloid-Polymer Interactions: From Fundamentals to Practice*, Wiley. New York (1999), 193-204
+
+King, S. M.; Griffiths, P. C.; Cosgrove, T. *Applications of Neutron Scattering to Soft Condensed Matter*, Gordon & Breach. Amsterdam (2000), 77-105
+
+King, S.; Griffiths, P.; Hone, J.; Cosgrove, T. *Macromol. Symp.* (2002), 190, 33-42
