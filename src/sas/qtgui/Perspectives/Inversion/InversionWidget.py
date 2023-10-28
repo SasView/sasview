@@ -166,7 +166,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.batchComplete = []
         self.isBatch = False
         self.batchResultsWindow = None
-        self._allowPlots = False
+        self._allowPlots = True
 
         # Add validators
         self.setupValidators()
@@ -621,6 +621,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.showBatchOutput()
         self.isBatch = False
         self.isCalculating = False
+        self.enableButtons()
 
 
     def check_q_low(self, q_value=None):
@@ -875,7 +876,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.prPlot = None
             self.dataPlot = None
             self.dataList.removeItem(self.dataList.currentIndex())
-            self._allowPlots = False
+            self._allowPlots = True
         if not data_list:
             data_list = [self._data]
         self.closeDMax()
@@ -982,6 +983,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             
         self.isCalculating = True
         self.isBatch = True
+        self._allowPlots = True
         self.batchComplete = []
         self.calculateAllButton.setText("Calculating...")
         self.startThread()
@@ -1000,7 +1002,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         calculate until all items are in the batchComplete list.
         """
         self.isBatch = False
-        self._allowPlots = False
+        
         for index in range(len(self._dataList)):
 
             if index not in self.batchComplete:
@@ -1288,7 +1290,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
             # Udpate internals and GUI
         self.updateDataList(self._data)  
-        self._allowPlots = False
+        self._allowPlots = True
         self.updateGuiValues()
         self.saveToBatchResults()
         if self.isBatch:
