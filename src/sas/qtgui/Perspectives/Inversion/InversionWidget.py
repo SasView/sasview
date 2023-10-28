@@ -233,6 +233,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
         self.maxDistanceInput.textChanged.connect(
             lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
+        
+        self.noOfSlicesInput.editingFinished.connect(self.updateSlicerParams)
+        self.startAngleInput.editingFinished.connect(self.updateSlicerParams)
+        self.noOfQbinsInput.editingFinished.connect(self.updateSlicerParams)
 
         # Signals asking for replot
         self.maxQInput.editingFinished.connect(self.check_q_high)
@@ -478,12 +482,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                 self.plot2D.id=self.logic.data.name 
                 self.plot2D.onSectorView()                
                 self.updateSlicerParams()
-                
-                #self.plot2D.onSectorView()
-                #
-                #self.setSlicerParams()
 
-                
         else: #1D data                     
             self.logic.add_errors()
             self.setQ()
