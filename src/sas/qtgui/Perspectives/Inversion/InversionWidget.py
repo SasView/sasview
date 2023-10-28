@@ -391,7 +391,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                           and not self.isCalculating and self.batchResultsWindow is not None)
         self.sliceButton.setVisible(not isinstance(self.logic.data, Data2D))
         self.sliceButton.setEnabled(not self.isSlicing and isinstance(self.logic.data, Data2D))
-        self.sliceButton.setVisible(self.logic.data_is_loaded and self.is2D)
+        #self.sliceButton.setVisible(self.logic.data_is_loaded and self.is2D)
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
@@ -475,8 +475,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                 if item.parent() is not None:
                     item = item.parent()
                 self.plot2D.item = item
-                self.plot2D.id=self.logic.data.name                   
-                self.plot2D.onSectorView()
+                self.plot2D.id=self.logic.data.name 
+                self.plot2D.onSectorView()                
+                self.updateSlicerParams()
+                
+                #self.plot2D.onSectorView()
+                #
+                #self.setSlicerParams()
 
                 
         else: #1D data                     
@@ -1339,23 +1344,23 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self.isBatch = True
         self.sendToInversion( itemList, self.isBatch)
-        self.calculateAllButton.setVisible(True)
+        #self.calculateAllButton.setVisible(True)
         self.plot2D.update()
         self.sliceList.resizeColumnsToContents()
         self.sliceList.resizeRowsToContents()
         self.sliceButton.setText("Slice")
-        self.sliceList.show()
+        #self.sliceList.show()
         self.isSlicing = False
         
         self.enableButtons()
-        self.showResultsButton.setVisible(True)
+        #self.showResultsButton.setVisible(True)
 
     def sendToInversion(self, items, isBatch):
         """
         Send `items` to the Inversion perspective, in either single fit or batch mode
         """
         # Check if perspective is correct, otherwise complain
-        if self._parent._current_perspective.name != 'Inversion':
+        if self.parent._current_perspective.name != 'Inversion':
             msg = "Please change current perspective to Inversion."
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
@@ -1364,7 +1369,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             _ = msgbox.exec_()
             return
         # icky way to go up the tree
-        self._parent._current_perspective.setData(data_item=items, is_batch=isBatch)
+        self.parent._current_perspective.setData(data_item=items, is_batch=isBatch)
 
 
 
@@ -1377,6 +1382,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.plot1D = self.logic.new1DPlot(data, self.tab_id)
         params = self.plot2D.slicer.getParams()
         params["Phi [deg]"] = data.phi
+        #self.plot2D.slicer.setParams(params)
         self.plot2D.slicer.setParams(params)
 
     def updateSlicerParams(self):
@@ -1400,9 +1406,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self.phi = self.startAngle
         self.deltaPhi = (180 / self.noOfSlices)
-        print(self.deltaPhi)
-        self.setSlicerParams()        
-        self.plot2D.onSectorView()
+        #print(self.deltaPhi)
+        self.setSlicerParams()   
+        self.plot2D.update()
+        #self.plot2D.onSectorView()
 
     def setSlicerParams(self):
         params = self.plot2D.slicer.getParams()
@@ -1412,7 +1419,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self.deltaPhiValue.setText(str(self.deltaPhi))
         self.plot2D.slicer.setParams(params)
-        self.plot2D.onSectorView()
+        #self.plot2D.onSectorView()
 
     def multiSlicer(self):
         listOfSlices = list()
@@ -1422,8 +1429,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         for i in range(self.noOfSlices):
             params = self.plot2D.slicer.getParams()
-            params["Phi [deg]"] = self.phi
-            self.plot2D.slicer.setParams(params)
+            params["Phi [deg]"] = self.phi            
             self.setSlicerParams()
             slicePlot = self.plot2D.slicer.captureSlice()
             slicePlot.title += ' φ {}'.format(self.phi)
