@@ -391,7 +391,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                           and not self.isCalculating and self.batchResultsWindow is not None)
         self.sliceButton.setVisible(not isinstance(self.logic.data, Data2D))
         self.sliceButton.setEnabled(not self.isSlicing and isinstance(self.logic.data, Data2D))
-        #self.sliceButton.setVisible(self.logic.data_is_loaded and self.is2D)
+        self.sliceButton.setVisible(self.logic.data_is_loaded and self.is2D)
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
@@ -1340,10 +1340,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             itemList.append(item)
             self.parent.communicate.updateModelFromPerspectiveSignal.emit(item)
 
-            self.logic.data = GuiUtils.dataFromItem(item)            
+            #self.logic.data = GuiUtils.dataFromItem(item)            
 
-        self.isBatch = True
-        self.sendToInversion( itemList, self.isBatch)
+        
+        self.sendToInversion( itemList)
         #self.calculateAllButton.setVisible(True)
         self.plot2D.update()
         self.sliceList.resizeColumnsToContents()
@@ -1355,7 +1355,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.enableButtons()
         #self.showResultsButton.setVisible(True)
 
-    def sendToInversion(self, items, isBatch):
+    def sendToInversion(self, items):
         """
         Send `items` to the Inversion perspective, in either single fit or batch mode
         """
@@ -1369,7 +1369,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             _ = msgbox.exec_()
             return
         # icky way to go up the tree
-        self.parent._current_perspective.setData(data_item=items, is_batch=isBatch)
+        self.parent._current_perspective.setData(data_item=items, is_batch=True)
 
 
 
