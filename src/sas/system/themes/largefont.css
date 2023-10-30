@@ -203,13 +203,14 @@ QScrollBar::add-line {
     background: transparent;
 }
 
-QPushButton {
+QPushButton, QToolButton {
     color: rgb(26,115,232);
     border: 1px solid rgb(218,220,224);
     padding: 4px 8px;
     border-radius: 4px;
 }
-QPushButton:hover, QPushButton:pressed, QPushButton:checked:enabled {
+QPushButton:hover, QPushButton:pressed, QPushButton:checked:enabled,
+QToolButton:hover, QToolButton:pressed, QToolButton:checked:enabled {
     color: rgb(0,0,0);
     background: rgba(26,115,232,0.3);
 }
