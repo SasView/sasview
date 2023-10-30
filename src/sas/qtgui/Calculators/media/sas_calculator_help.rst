@@ -5,7 +5,7 @@
 
 .. _SANS_Calculator_Tool:
 
-Generic SANS Calculator Tool
+Generic SAS Calculator Tool
 ============================
 
 Description
@@ -175,7 +175,7 @@ How to use the Tool
 -------------------
 Upon loading the calculator we are shown the following interface:
 
-.. figure:: gen_gui_help.png
+.. figure:: GSC_Oct282023_GUI_Index2.jpg
    :align: center
 
    ..
@@ -229,6 +229,7 @@ Inputs
           In some circumstances these textboxes will be highlighted orange, as a
           warning that with the values chosen numerical artefacts may appear due to
           the Nyquist criterion, or simulation box size.
+        * When calculating 1D data, Q values are evenly spaced in the log scale if "Log Spacing" box is checked.
 	  
 Information Panel
 ^^^^^^^^^^^^^^^^^   	  
@@ -259,12 +260,13 @@ Information Panel
        and the mousewheel used to zoom in and out.
    19) This choice appears only for grid type data and without magnetic SLD.
        This tool allows to either compute the fully oriented 2D scattering pattern,
-       or calculating the 1D orientational averaged intensity $I(Q)$ by the Debye
-       equation.
+       or calculating the 1D orientational averaged intensity $I(Q)$ by the Debye equation. One can also choose a compuation option, Debye full avg. w/ $\beta(Q)$, to calculate 1D scattering pattern together with $\beta(Q)$. $\beta(Q)$ is needed when fitting scattering patterns of concentrated solutions using the inter-particle structure factor, $S(Q)$, with the static decoupling approximation.
    20) Starts the computation of the scattering pattern.
    21) Reset GUI to the initial state.
-   
-   
+   22) If a PDB file is loaded, the radius of gyration is calculated and displayed. "Rg-MASS" is the radius of gyration based on the mass of all atoms in a molecule. "RG-SLD" is the radius of gyration based on the scattering length of all atoms.
+   23) If the option, Debye full avg. w/ $\beta(Q)$, is chosen, one has the option to check the box "Export Model". Once checked, one can input a file name in the box below. During the computation, the program then exports the calcualted normalized form factor, $P(Q)$, and $\beta(Q)$ into this file that automatically become a model in the "Plugin Models". The model name is the same as the file name given in the blox below "Export Model". Click :ref:`here <gsc_ex_customModel_data>` to see an example how to use the exported model function to fit an experimental data.
+
+  
 As an example :ref:`here <gsc_ex_default_data>` you can find a simple demonstration of
 the functionality of the Generic scattering calculator using the default
 starting values with no files loaded.
