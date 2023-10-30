@@ -322,6 +322,88 @@ QListView::right-arrow {
     margin: -2px;
 }
 
+/* QTabWidget QTabBar */
+QTabWidget::pane {
+    border: 1px solid rgb(218,220,224);
+    border-radius: 4px;
+}
+QTabBar {
+    /*
+    Not filling background color when drawBase property is true. So need to set drawBase to false.
+    Default QTabBar is no need following declaration, but QMdiArea is need.
+    */
+    qproperty-drawBase: 0;
+}
+QTabBar::close-button:hover {
+    background: rgba(0,0,0,0.20);
+    border-radius: 4px;
+}
+QTabBar::tab {
+    padding: 3px;
+    border-style: solid;
+}
+QTabBar::tab:hover,
+QTabBar::tab:selected:hover:enabled {
+    background: rgba(0,0,0,0.15);
+}
+QTabBar::tab:selected:enabled {
+    color: rgb(26,115,232);
+    background: rgba(0,0,0,0.24);
+}
+QTabBar::tab:selected:disabled,
+QTabBar::tab:only-one:selected:enabled {
+    border-color: rgb(218,220,224);
+}
+QTabBar::tab:top {
+    border-bottom-width: 2px;
+    margin: 3px 6px 0 0;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+QTabBar::tab:bottom {
+    border-top-width: 2px;
+    margin: 0 6px 3px 0;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+QTabBar::tab:left {
+    border-right-width: 2px;
+    margin: 0 0 6px 3px;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+QTabBar::tab:right {
+    border-left-width: 2px;
+    margin-bottom: 6px;
+    margin: 0 3px 6px 0;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+QTabBar::tab:top:first,
+QTabBar::tab:top:only-one,
+QTabBar::tab:bottom:first,
+QTabBar::tab:bottom:only-one {
+    margin-left: 2px;
+}
+QTabBar::tab:top:last,
+QTabBar::tab:top:only-one,
+QTabBar::tab:bottom:last,
+QTabBar::tab:bottom:only-one {
+    margin-right: 2px;
+}
+QTabBar::tab:left:first,
+QTabBar::tab:left:only-one,
+QTabBar::tab:right:first,
+QTabBar::tab:right:only-one {
+    margin-top: 2px;
+}
+QTabBar::tab:left:last,
+QTabBar::tab:left:only-one,
+QTabBar::tab:right:last,
+QTabBar::tab:right:only-one {
+    margin-bottom: 2px;
+}
+
 /* QColumnView */
 QColumnView {
     background: rgb(248,249,250);
