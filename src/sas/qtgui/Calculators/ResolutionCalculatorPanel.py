@@ -38,7 +38,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
     compute resolution in 2D
     """
     def __init__(self, parent=None):
-        super(ResolutionCalculatorPanel, self).__init__()
+        super(ResolutionCalculatorPanel, self).__init__(parent._parent if parent else None)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)

@@ -42,7 +42,7 @@ def toMolarMass(formula):
 class DensityPanel(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
-        super(DensityPanel, self).__init__()
+        super(DensityPanel, self).__init__(parent._parent if parent else None)
 
         self.mode = None
         self.manager = parent

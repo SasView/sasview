@@ -45,7 +45,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     loadingFinishedSignal = QtCore.Signal(list, bool)
 
     def __init__(self, parent=None):
-        super(GenericScatteringCalculator, self).__init__()
+        super(GenericScatteringCalculator, self).__init__(parent._parent if parent else None)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)

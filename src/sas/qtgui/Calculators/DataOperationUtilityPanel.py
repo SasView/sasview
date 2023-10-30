@@ -18,7 +18,7 @@ from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
 class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def __init__(self, parent=None):
-        super(DataOperationUtilityPanel, self).__init__()
+        super(DataOperationUtilityPanel, self).__init__(parent._parent if parent else None)
         self.setupUi(self)
         self.manager = parent
         self.communicator = self.manager.communicator()

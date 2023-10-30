@@ -22,7 +22,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
     Provides the slit length calculator GUI.
     """
     def __init__(self, parent=None):
-        super(SlitSizeCalculator, self).__init__()
+        super(SlitSizeCalculator, self).__init__(parent._parent if parent else None)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
