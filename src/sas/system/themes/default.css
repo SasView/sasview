@@ -10,7 +10,7 @@ QWidget {
     selection-background-color: rgba(26,115,232,0.5);
 }
 QWidget:disabled {
-    color: rgb(248,51,57);
+    color: rgba(77,81,87,0.4);
     selection-background-color: rgba(77,81,87,0.25);
     selection-color: rgba(77,81,87,0.4);
 }
@@ -37,7 +37,7 @@ QRadioButton {
 }
 QCheckBox:hover,
 QRadioButton:hover {
-    border-bottom: 2px solid rgb(26,115,232);
+    border-bottom: 2px solid;
 }
 
 /* QGroupBox Properties */
@@ -208,34 +208,9 @@ QPushButton {
     padding: 4px 8px;
     border-radius: 4px;
 }
-QPushButton:flat,
-QPushButton:default {
-    border: none;
-    padding: 5px 9px;
-}
-QPushButton:default {
-    color: rgb(248,249,250);
-    background: rgb(26,115,232);
-}
-QPushButton:hover {
+QPushButton:hover, QPushButton:pressed, QPushButton:checked:enabled {
+    color: rgb(0,0,0);
     background: rgba(26,115,232,0.3);
-}
-QPushButton:pressed {
-    background: rgba(26,115,232,0.3);
-}
-QPushButton:checked:enabled {
-    background: rgba(26,115,232,0.3);
-}
-QPushButton:default:hover {
-    background: rgba(26,115,232,0.1);
-}
-QPushButton:default:pressed,
-QPushButton:default:checked {
-    background: rgba(26,115,232,0.3);
-}
-QPushButton:default:disabled,
-QPushButton:default:checked:disabled {
-    background: rgba(77,81,87,0.25);
 }
 
 /* QDialogButtonBox */
