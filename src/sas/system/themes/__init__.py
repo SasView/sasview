@@ -17,16 +17,21 @@ OPTIONS = {
 
 
 def load_theme(theme: str = None) -> str:
-    """Using a theme name, load the associated CSS file.
-    :param theme: The key value in ALL_THEMES
-    :return: The loaded CSS
+    """Using a theme name, load the associated CSS file. User themes will be based off the Classic theme.
+    :param theme: The key value in OPTIONS
+    :return: The CSS string loaded from file
     """
+    css = ""
     if not theme or theme not in find_available_themes():
         logger.warning(f"Invalid theme name provided: {theme}")
         theme = 'Default'
+    # User themes should use the classic theme as a basis and build on it from there
+    if theme.startswith('User:'):
+        with open(OPTIONS.get('Classic').absolute()) as fd:
+            css += fd.read()
     path = OPTIONS.get(theme)
     with open(path.absolute()) as fd:
-        css = fd.read()
+        css += fd.read()
     return css
 
 
