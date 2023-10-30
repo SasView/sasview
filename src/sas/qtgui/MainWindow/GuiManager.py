@@ -178,8 +178,8 @@ class GuiManager:
         self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
 
         # Add other, minor widgets
-        self.ackWidget = Acknowledgements()
-        self.aboutWidget = AboutBox()
+        self.ackWidget = Acknowledgements(self._parent)
+        self.aboutWidget = AboutBox(self._parent)
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
 
         self.grid_window = None
@@ -1041,7 +1041,7 @@ class GuiManager:
         """
         Make sasmodels orientation & jitter viewer available
         """
-        show_orientation_viewer()
+        show_orientation_viewer(self._parent)
 
     def actionImage_Viewer(self):
         """

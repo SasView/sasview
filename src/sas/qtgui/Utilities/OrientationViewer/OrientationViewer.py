@@ -63,6 +63,7 @@ class OrientationViewer(QtWidgets.QWidget):
         super().__init__()
 
         self.parent = parent
+        self.setStyleSheet(self.parent.styleSheet())
 
         self.setWindowTitle("Orientation Viewer")
 
@@ -290,8 +291,8 @@ class OrientationViewer(QtWidgets.QWidget):
 
 # Code for handling multiple orientation viewers
 _orientation_viewers = []
-def show_orientation_viewer():
-    ov = OrientationViewer()
+def show_orientation_viewer(parent=None):
+    ov = OrientationViewer(parent)
     ov.show()
     ov.resize(600, 600)
 
