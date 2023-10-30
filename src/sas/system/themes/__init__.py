@@ -21,16 +21,16 @@ def load_theme(theme: str = None) -> str:
     :param theme: The key value in OPTIONS
     :return: The CSS string loaded from file
     """
+    themes = find_available_themes()
     css = ""
     if not theme or theme not in find_available_themes():
         logger.warning(f"Invalid theme name provided: {theme}")
         theme = 'Default'
     # User themes should use the classic theme as a basis and build on it from there
     if theme.startswith('User:'):
-        with open(OPTIONS.get('Classic').absolute()) as fd:
+        with open(themes.get('Classic').absolute()) as fd:
             css += fd.read()
-    path = OPTIONS.get(theme)
-    with open(path.absolute()) as fd:
+    with open(themes.get(theme).absolute()) as fd:
         css += fd.read()
     return css
 
