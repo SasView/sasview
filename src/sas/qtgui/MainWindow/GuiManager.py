@@ -152,7 +152,8 @@ class GuiManager:
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
         self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
-
+        # make it hidden by default
+        self.logDockWidget.setVisible(False)
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
@@ -505,10 +506,15 @@ class GuiManager:
         """
         self.statusLabel.setText(text)
 
-    def appendLog(self, msg):
+    def appendLog(self, signal):
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
-        self.listWidget.append(msg.strip())
+        (message, record) = signal
+        self.listWidget.append(message.strip())
+
+        # Display log if message is error or worse
+        if record.levelno >= 40:
+            self.logDockWidget.setVisible(True)
 
     def createGuiData(self, item, p_file=None):
         """
