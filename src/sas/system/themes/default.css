@@ -129,9 +129,9 @@ QToolBar > QWidget {
     background: transparent;
 }
 
-/* QmenU Preperties */
+/* Qmenu Properties */
 QMenu {
-    background: rgb1(248,249,250,0.20);
+    background: rgba(248,249,250,0.70);
     padding: 8px 0;
     border-radius: 4px;
 }
@@ -141,6 +141,7 @@ QMenu::separator {
     background: rgb(218,220,224);
 }
 QMenu::item {
+    background: transparent;
     padding: 4px 19px;
 }
 QMenu::item:selected {
