@@ -8,6 +8,7 @@ from sas.system import user
 
 logger = logging.getLogger()
 
+# The base dictionary mapping theme names to their location on disk.
 OPTIONS = {
     'Default': Path(os.path.join(os.path.dirname(__file__), 'default.css')),
     'Dark': Path(os.path.join(os.path.dirname(__file__), 'dark.css')),

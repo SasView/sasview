@@ -39,6 +39,12 @@ Display Preferences
 The display preferences modify underlying features of our GUI framework, Qt. For more information on each setting,
 please read more on the `Qt High DPI Settings <https://doc.qt.io/qt-5/highdpi.html#high-dpi-support-in-qt>`_.
 
+**Theme**: A few basic themes are available for SasView. On selection of a new theme, the window will update as a preview.
+Users can create their own themes and store them in `/.sasview/themes/` folder of their user directory. User themes will
+use the `Classic` theme as a fall back for any styles not defined in the stylesheet. SasView assumes any file in the directory
+is a stylesheet. For more information on writing Qt stylesheets, please see the
+`Qt style sheet reference <https://doc.qt.io/qt-6/stylesheet-reference.html>`_ *persistent*
+
 **QT Screen Scale Factor**: A percent scaling factor that is applied all element sizes within the GUI. A restart of
 SasView is required to take effect. *persistent*
 
