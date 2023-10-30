@@ -11,6 +11,7 @@ logger = logging.getLogger()
 OPTIONS = {
     'Default': Path(os.path.join(os.path.dirname(__file__), 'default.css')),
     'Dark': Path(os.path.join(os.path.dirname(__file__), 'dark.css')),
+    'Classic': Path(os.path.join(os.path.dirname(__file__), 'classic.css')),
     'Large Font': Path(os.path.join(os.path.dirname(__file__), 'largefont.css')),
 }
 
