@@ -402,7 +402,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Delegates for custom editing and display
         self.lstParams.setItemDelegate(ModelViewDelegate(self))
 
-        self.lstParams.setAlternatingRowColors(True)
         self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.lstParams.customContextMenuRequested.connect(self.showModelContextMenu)
         self.lstParams.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
