@@ -21,19 +21,27 @@ have a high scattering length density, then the correlation function has a large
 when the pairs have a low scattering length density, the correlation function is low.
 More concretely: the correlation function :math:`\Gamma(\vec{r})` for vector :math:`\vec{r} = (x,y,z)` is proportional to
 the pairwise product of scattering length densities for all points separated by the vector :math:`(x,y,z)`
-summed over all orientations and locations. 
-Details can be found in the proceeding section.
+summed over all orientations and locations.
 
-In its most general form the correlation function takes a three dimensional vector input,
-however, in the correlation function analysis tool we consider various one dimensional 
-projections, labelled :math:`\Gamma_1` and :math:`\Gamma_3` .
-This use of these projected correlation functions is motivated by the limitations of 
-the experimental data: if the input data is one dimensional
-so we can only recover at most one dimension of the correlation function.
-This said, if the system being studied has an approprate symmetry, a one dimensional, 
-projected correlation function might be enough.
+Another way of thinking about the correlation function is as the scattering length 
+density but with phase information removed. As scattering experiments contain
+no phase information, calculating the correlation function
+is as close as one can get to calculating the scattering length density from
+scattering data without incorporating additional information.
 
-The :math:`\Gamma_1` projection corresponds to a 
+The nature of small angle scattering further limits what spatial information
+can be recovered. Whilst in its most general form the correlation 
+function takes a three dimensional vector input, 
+small angle scattering measurements are limited to one or two dimensions,
+which in turn limits the amount of information about the correlation 
+function that can be obtained. For this reason, in the correlation function 
+analysis tool we consider various one dimensional projections of the full 
+correlation function, labelled :math:`\Gamma_1` and :math:`\Gamma_3` .
+
+ 
+
+The :math:`\Gamma_1` projection corresponds to a one dimnensional system oriented
+perpend
 
 system with planar symmetry,
 i.e. a system comprising planar layers stacked on top of each other.
@@ -52,11 +60,11 @@ despite it being being one dimensional.
 
 
 
-More formally
-.............
+More formally...
+----------------
 
 More formally, the correlation function is a quantity that arrises naturally from calculating the square magnitude
-of the three dimensional fourier transform, which is proportional to the scattering amplitude
+of the three dimensional fourier transform, which is proportional to the scattering amplitude.
 
 .. math:: 
     \frac{d\sigma}{d\Omega} \propto F(\vec{q}) F^*(\vec{q})
@@ -64,30 +72,65 @@ of the three dimensional fourier transform, which is proportional to the scatter
 where 
 
 .. math:: 
-    F(\vec{q}) = \int \rho(r) e^{\vec{r}\cdot\vec{q}} \;dx\;dy\;dz
-   
+    F(\vec{q}) = \int \rho(r) e^{i \vec{r}\cdot\vec{q}} \; dr^3
+
+where :math:`dr^3` is the volume element (:math:`dx\;dy\;dz`).
+
+
+.. figure:: commutivity.png
+   :align: center
 
 
 
-A correlation function may be interpreted in terms of an imaginary rod moving
-through the structure of the material. Γ(x) is the probability that a rod of 
-length x has equal electron/neutron scattering length density at either end. 
-Hence a frequently occurring spacing within a structure will manifest itself 
-as a peak in Γ(x). *SasView* will return both the one-dimensional ( Γ\ :sub:`1`\ (x) ) 
-and three-dimensional ( Γ\ :sub:`3`\ (x) ) correlation functions, the difference 
-being that the former is only averaged in the plane of the scattering vector.
+A couple of algebraic steps will bring us to the correlation function: first,
+as :math:`\rho` is real, and the conjugate of :math:`e^{ix}` is :math:`e^{-ix}` we
+know that the conjugate of :math:`F` is given by
 
-A volume fraction profile :math:`\Phi`\ (z) describes how the density of polymer 
-segments/surfactant molecules varies with distance, z, normal to an (assumed 
-locally flat) interface. The form of :math:`\Phi`\ (z) can provide information 
-about the arrangement of polymer/surfactant molecules at the interface. The width 
-of the profile provides measures of the layer thickness, and the area under 
-the profile is related to the amount of material that is adsorbed.
+.. math:: 
+    F^*(\vec{q}) = \int \rho(r) e^{-i \vec{r}\cdot\vec{q}} 
+
+meaning that, with some renaming of variables, we have
+
+.. math:: 
+    F(\vec{q}) F^*(\vec{q}) = \left(\int \rho(\vec{t}) e^{i \vec{t}\cdot\vec{q}} \; dt^3\right)\left( \int \rho(\vec{s}) e^{-i \vec{s}\cdot\vec{q}} \; ds^3 \right)
+
+And letting  some rearrangement becomes
+
+.. math::
+    \int\int \rho(\vec{s}) \rho(\vec{t}) e^{i (t-s)\cdot\vec{q}} \; dr^3 \; ds^3
+
+and now letting :math:`\vec{r} = \vec{t}-\vec{s}` (note this is not the same :math:`r` as before,
+ but a new variable) 
+and applying the Fourier translation theorem, we can rewrite the above as:
+
+.. math::
+    \int\int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) e^{i \vec{r}\cdot\vec{q}} \; ds^3  \; dr^3
+
+Some final reording of the integration gives 
+
+.. math::
+    \int \left[ \int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) \; ds^3 \right] \; e^{i \vec{r}\cdot\vec{q}} \; dr^3
+
+The quantity in square brackets what we call the correlation function, :math:`\gamma(\vec{r})`, so:
+
+.. math::
+    \gamma(\vec{r}) = \int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) \; ds^3
+
+and it is the quantity that is Fouier transformed (with some appropriate scaling) 
+to get the magnitude of scattering.
+This can be contrasted with the scattering length density, whose Fourier transform
+is a complex number, and which in turns requires taking a square.
+ 
+
+:math:`Gamma_1` Projection 
+..........................
+
+The 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Interface
-=========
+The Corfunc Tool
+================
 
 The correlation function analysis is performed in **3 steps**.
 
@@ -261,33 +304,6 @@ The structural parameters extracted are:
 *   Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
 *   Local Crystallinity :math:`= L_c/L_p`
 
-Options
-.......
-
-
-
-
-Volume Fraction Profile
-.......................
-
-SasView does not provide any automatic interpretation of volume fraction profiles 
-in the same way that it does for correlation functions. However, a number of 
-structural parameters are obtainable by other means:
-
-*   Surface Coverage :math:`=\theta`
-*   Anchor Separation :math:`= D`
-*   Bound Fraction :math:`= <p>`
-*   Second Moment :math:`= \sigma`
-*   Maximum Extent :math:`= \delta_{\text{h}}`
-*   Adsorbed Amount :math:`= \Gamma`
-
-.. figure:: profile1.png
-   :align: center
-
-.. figure:: profile2.png
-   :align: center
-
-The reader is directed to the references for information on these parameters.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
