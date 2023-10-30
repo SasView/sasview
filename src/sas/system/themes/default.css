@@ -1,30 +1,417 @@
 /* Global Properties */
 * {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif}
 
-/* Qt Elements */
-QLineEdit {background-color: white; color: black;}
-QLineEdit:focus {background-color: #98dbcc; color: #333333}
-QLineEdit[warning=true] {background-color: yellow;}
-QLineEdit[urgent=true] {background-color: red;}
-QTableWidgetItem[italic=true] {font-style: italic}
+/* QWidget Properties */
 
-QLabel[angstrom=true] {font-family: -apple-system, "Helvetica Neue", "Ubuntu";}
+QWidget {
+    background: rgb(248,249,250);
+    color: rgb(77,81,87);
+    selection-color: rgb(77,81,87);
+    selection-background-color: rgba(26,115,232,0.5);
+}
+QWidget:disabled {
+    color: rgb(248,51,57);
+    selection-background-color: rgba(77,81,87,0.25);
+    selection-color: rgba(77,81,87,0.4);
+}
+QWidget:focus {
+    outline: none;
+}
 
-QPushButton {color: black;}
-QPushButton[urgent=true] {color: red;}
+/* QMainWindow Properties */
+QMainWindow::separator {
+    width: 4px;
+    height: 4px;
+    background: rgb(218,220,224);
+}
+QMainWindow::separator:hover,
+QMainWindow::separator:pressed {
+    background: rgb(26,115,232);
+}
 
-QToolTip {font-size: 80%;}
+/* QCheckBox and QRadioButton Properties */
+QCheckBox,
+QRadioButton {
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+}
+QCheckBox:hover,
+QRadioButton:hover {
+    border-bottom: 2px solid rgb(26,115,232);
+}
 
+/* QGroupBox Properties */
+QGroupBox {
+    font-weight: bold;
+    margin-top: 8px;
+    padding: 2px 1px 1px 1px;
+    border-radius: 4px;
+    border: 1px solid rgb(218,220,224);
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 7px;
+    margin: 0 2px 0 3px;
+}
+QGroupBox:flat {
+    border-color: transparent;
+}
+
+/* QToolTip Properties */
+QToolTip {
+    font-size: 80%;
+    background: rgba(248,249,250,0.2);
+    color: rgb(77,81,87);
+}
+
+/* QMenuBar Properties */
+QMenuBar {
+    padding: 2px;
+    border-bottom: 1px solid rgb(218,220,224);
+    background: rgb(248,249,250);
+}
+QMenuBar::item {
+    background: transparent;
+    padding: 4px;
+}
+QMenuBar::item:selected {
+    padding: 4px;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.20);
+}
+QMenuBar::item:pressed {
+    padding: 4px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* QToolBar */
+QToolBar {
+    padding: 1px;
+    font-weight: bold;
+    spacing: 2px;
+    margin: 1px;
+    background: rgb(235,235,235);
+    /* QToolBar must override `border-style` to set the style. */
+    border-style: none;
+}
+QToolBar::separator {
+    background: rgb(218,220,224);
+}
+QToolBar::separator:horizontal {
+    width: 2px;
+    margin: 0 6px;
+}
+QToolBar::separator:vertical {
+    height: 2px;
+    margin: 6px 0;
+}
+QToolBar > QToolButton {
+    background: transparent;
+    padding: 3px;
+    border-radius: 4px;
+}
+QToolBar > QToolButton:hover,
+QToolBar > QToolButton::menu-button:hover {
+    background: rgba(0,0,0,0.15);
+}
+QToolBar > QToolButton::menu-button {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+QToolBar > QToolButton:pressed,
+QToolBar > QToolButton::menu-button:pressed:enabled,
+QToolBar > QToolButton:checked:enabled {
+    background: rgba(0,0,0,0.24);
+}
+QToolBar > QWidget {
+    background: transparent;
+}
+
+/* QmenU Preperties */
+QMenu {
+    background: rgb1(248,249,250,0.20);
+    padding: 8px 0;
+    border-radius: 4px;
+}
+QMenu::separator {
+    margin: 4px 0;
+    height: 1px;
+    background: rgb(218,220,224);
+}
+QMenu::item {
+    padding: 4px 19px;
+}
+QMenu::item:selected {
+    background: rgba(0,0,0,0.12);
+}
+QMenu::icon {
+    padding-left: 10px;
+    width: 14px;
+    height: 14px;
+}
+
+/* QScrollBar */
+QScrollBar {
+    background: rgba(0,0,0,0.40);
+    border-radius: 4px;
+}
+QScrollBar:horizontal {
+    height: 14px;
+}
+QScrollBar:vertical {
+}
+QScrollBar::handle {
+    background: rgba(0,0,0,0.40);
+    border-radius: 3px;
+}
+QScrollBar::handle:hover {
+    background: rgba(0,0,0,0.50);
+}
+QScrollBar::handle:pressed {
+    background: rgba(0,0,0,0.24);
+}
+QScrollBar::handle:disabled {
+    background: rgba(0,0,0,0.15);
+}
+QScrollBar::handle:horizontal {
+    min-width: 8px;
+    margin: 4px 14px;
+}
+QScrollBar::handle:horizontal:hover {
+    margin: 2px 14px;
+}
+QScrollBar::handle:vertical {
+    min-height: 8px;
+    margin: 14px 4px;
+}
+QScrollBar::handle:vertical:hover {
+    margin: 14px 2px;
+}
+/*
+Hide QScrollBar background.
+The `sub-page` and `add-page` are not colored by default on most OS, but are colored on Windows.
+*/
+QScrollBar::sub-page,
+QScrollBar::add-page {
+    background: transparent;
+}
+QScrollBar::sub-line,
+QScrollBar::add-line {
+    background: transparent;
+}
+
+QPushButton {
+    color: rgb(26,115,232);
+    border: 1px solid rgb(218,220,224);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+QPushButton:flat,
+QPushButton:default {
+    border: none;
+    padding: 5px 9px;
+}
+QPushButton:default {
+    color: rgb(248,249,250);
+    background: rgb(26,115,232);
+}
+QPushButton:hover {
+    background: rgba(26,115,232,0.3);
+}
+QPushButton:pressed {
+    background: rgba(26,115,232,0.3);
+}
+QPushButton:checked:enabled {
+    background: rgba(26,115,232,0.3);
+}
+QPushButton:default:hover {
+    background: rgba(26,115,232,0.1);
+}
+QPushButton:default:pressed,
+QPushButton:default:checked {
+    background: rgba(26,115,232,0.3);
+}
+QPushButton:default:disabled,
+QPushButton:default:checked:disabled {
+    background: rgba(77,81,87,0.25);
+}
+
+/* QDialogButtonBox */
+QDialogButtonBox {
+    dialogbuttonbox-buttons-have-icons: 0;
+}
+QDialogButtonBox QPushButton {
+    min-width: 65px;
+}
+
+/* QComboBox */
+QComboBox {
+    min-height: 1.5em;
+    padding: 0 8px 0 4px;
+    background: rgb(248,249,250);
+    border: 1px solid rgb(218,220,224);
+    border-radius: 4px;
+}
+QComboBox:hover, QComboBox::item:hover, QComboBox:focus, QComboBox:open {
+    border-color: rgb(26,115,232);
+}
+QComboBox::drop-down {
+    margin: 2px 2px 2px -6px;
+    border-radius: 4px;  /* This remove default style. */
+}
+QComboBox::drop-down:editable:hover {
+    background: rgba(0,0,0,0.13);
+}
+/* Setting background color of selected item when editable is false. */
+QComboBox::item:selected {
+    border: none;  /* This remove the border of indicator. */
+    background: rgba(26,115,278,0.35);
+    border-radius: 4px;
+}
+
+/* QAbstractItemView in QComboBox is NoFrame. Override default settings and show border. */
+QComboBox QListView {
+    margin: 0;
+    padding: 4px;
+    background: rgba(248,249,250,0.25);
+    border-radius: 4px;
+}
+QComboBox QListView::item {
+    border-radius: 4px;
+}
+
+/* QListView QTreeView */
+QListView {
+    padding: 1px
+}
+QListView,
+QTreeView {
+    background: rgb(248,249,250);
+}
+QListView::item:hover,
+QTreeView::item:hover,
+QTreeView::branch:hover {
+    background: rgb(218,220,224);
+}
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+    border-image: unset;
+    background: rgba(77,81,87,0.05);
+}
+QTreeView::branch:open:has-children:!has-siblings:disabled,
+QTreeView::branch:open:has-children:has-siblings:disabled  {
+    background: rgba(77,81,87,0.05);
+}
+QTreeView > QHeaderView {
+    background: rgb(248,249,250);
+}
+QTreeView > QHeaderView::section {
+    background: rgb(218,220,224);
+}
+
+/*
+Following arrow settings are for QColumnView.
+QColumnView::left-arrow and QColumnView::right-arrow are not working.
+*/
+QListView::left-arrow {
+    margin: -2px;
+}
+QListView::right-arrow {
+    margin: -2px;
+}
+
+/* QColumnView */
+QColumnView {
+    background: rgb(248,249,250);
+}
+QColumnViewGrip {
+    margin: -4px;
+    background: rgb(248,249,250);
+}
+
+/* QTableView */
+QTableView {
+    gridline-color: rgb(218,220,224);
+    background: rgba(248,249,250,0.5);
+}
+QTableView:!active {
+    background: rgba(0,0,0,0.12);
+}
+QTableView::item:alternate {
+    background: rgba(0,0,0,0.12);
+}
+QTableView::item:selected {
+    background: rgba(248,249,250,0.5);
+}
+QTableView QTableCornerButton::section {
+    margin: 0 1px 1px 0;
+    background: rgb(218,220,224);
+    border-top-left-radius: 2px;
+}
+QTableView QTableCornerButton::section:pressed {
+    background: rgba(26,115,232,0.35);
+}
+QTableView > QHeaderView {
+    background: rgba(248,249,250,0.50);
+    border-radius: 3px;
+}
+QTableView > QHeaderView::section {
+    background: rgb(218,220,224);
+}
+
+/* QLineEdit */
+QLineEdit {
+    padding: 3px 4px;
+    /* Adjust the min-height of QLineEdit to the height of the characters. */
+    min-height: 1em;
+    border: 1px solid rgb(218,220,224);
+    background: rgb(248,249,250);
+    border-radius: 4px;
+}
+QLineEdit:focus {
+    border-color: rgb(26,115,232);
+}
+
+/* QFileDialog */
+QFileDialog QFrame {
+    border: none;
+}
+
+/* Check */
+QComboBox::indicator,
+QMenu::indicator {
+    width: 18px;
+    height: 18px;
+}
+QMenu::indicator {
+    background: rgba(0,0,0,0.19);
+    margin-left: 3px;
+    border-radius: 4px;
+}
+
+/* Check indicator */
+QCheckBox,
+QRadioButton {
+    spacing: 8px;
+}
+QGroupBox::title,
+QAbstractItemView::item {
+    spacing: 6px;
+}
+QCheckBox::indicator,
+QGroupBox::indicator,
+QAbstractItemView::indicator,
+QRadioButton::indicator {
+    height: 18px;
+    width: 18px;
+}
+
+/* Styles that are not from taken PyQtDarkTheme */
 QProgressBar {border: 2px solid grey; border-radius: 5px; text-align: center}
 QProgressBar::chunk {background-color: #b1daf9; width: 10px; margin: 1px;}
 
 QTextBrowser[warning=true] {border: 5px solid red; background-color: lightyellow}
 QCodeEditor {font-family: 'monospace, monospace'}
 QCodeEditor[warning=true] {border: 5px solid red; background-color: lightyellow}
-
-QTreeView {paint-alternating-row-colors-for-empty-area:0;}
-QTreeView::item {border: 1px; padding: 2px 1px;}
-QTreeView::item:hover {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1); border: 1px solid #bfcde4;}
-QTreeView::item:selected {border: 1px solid #567dbc;}
-QTreeView::item:selected:active{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);}
-QTreeView::item:selected:!active {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);}
