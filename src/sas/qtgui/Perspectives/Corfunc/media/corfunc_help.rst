@@ -118,14 +118,28 @@ The quantity in square brackets what we call the correlation function, :math:`\g
 
 and it is the quantity that is Fouier transformed (with some appropriate scaling) 
 to get the magnitude of scattering.
-This can be contrasted with the scattering length density, whose Fourier transform
-is a complex number, and which in turns requires taking a square.
- 
 
-:math:`Gamma_1` Projection 
-..........................
 
-The 
+
+:math:`\Gamma_1` Projection 
+...........................
+
+As we have mentioned before, the correlation function contains no phase information,
+mathematically this is the same as saying (1) that its Fourier transform is purely real,
+or (2) that the correlation function is an even function.
+
+Demonstrating the evenness of the correlation function is easily done by a change of
+the variable of integration from :math:`\vec{s}` 
+to :math:`\vec{u} = \vec{s} + \vec{r}`.
+
+.. math::
+    \gamma(\vec{r}) = \int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) \; ds^3 = \int \rho(\vec{u}-\vec{r}) \rho(\vec{u}) \; du^3 = \gamma(-\vec{r})
+
+and from this we can 
+
+:math:`\Gamma_3` Projection
+...........................
+
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

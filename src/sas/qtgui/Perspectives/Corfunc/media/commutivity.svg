@@ -31,7 +31,8 @@
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     inkscape:export-bgcolor="#ffffffff" />
   <defs
      id="defs1">
     <marker
@@ -99,13 +100,16 @@
        xml:space="preserve"
        transform="scale(0.26458333)"
        id="text2"
-       style="fill:#000000;stroke-width:6.42519685;stroke-linecap:round;-inkscape-font-specification:sans-serif;font-family:sans-serif;stroke:none;fill-opacity:1;text-align:center;white-space:pre;shape-inside:url(#rect2)" />
+       style="font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;white-space:pre;shape-inside:url(#rect2);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:6.4252;stroke-linecap:round" />
     <text
        xml:space="preserve"
        style="font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.7;stroke-linecap:round"
        x="46.207108"
        y="129.27232"
-       id="text3"><tspan
+       id="text3"
+       inkscape:export-filename="commutivity.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"><tspan
          sodipodi:role="line"
          id="tspan3"
          style="stroke-width:1.7"
@@ -125,7 +129,7 @@
        xml:space="preserve"
        transform="scale(0.26458333)"
        id="text4"
-       style="fill:#000000;stroke-width:6.42519685;stroke-linecap:round;-inkscape-font-specification:sans-serif;font-family:sans-serif;stroke:none;fill-opacity:1;text-align:center;white-space:pre;shape-inside:url(#rect4)" />
+       style="font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;white-space:pre;shape-inside:url(#rect4);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:6.4252;stroke-linecap:round" />
     <text
        xml:space="preserve"
        style="font-size:3.175px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.7;stroke-linecap:round"
