@@ -36,7 +36,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         Parent here is the GUI Manager. Required for access to
         the help location and to the file loader.
         """
-        super(FileConverterWidget, self).__init__()
+        super(FileConverterWidget, self).__init__(parent._parent if parent else None)
 
 
         self.parent = parent
