@@ -38,26 +38,25 @@ function that can be obtained. For this reason, in the correlation function
 analysis tool we consider various one dimensional projections of the full 
 correlation function, labelled :math:`\Gamma_1` and :math:`\Gamma_3` .
 
- 
+The :math:`\Gamma_1` projection looks at changes in a single 
+direction perpendicular to the beam, with the other directions being averaged.
+The direction is typically selected by hand from a 2D measurement prior to analysis.
+Theoretically, the correlation function will be fully recoved as long as the system 
+being looked at is truly one dimensional and properly aligned.
+However, one must remember the constraints of a small angle scattering experiment,
+we only measure a small range of momentum transfer, and extrapolate the rest,
+as such the extrapolation steps must be appropriate for the system.
+This is in addition to the usual considerations of resultion and systematic
+measurement error.
 
-The :math:`\Gamma_1` projection corresponds to a one dimnensional system oriented
-perpend
-
-system with planar symmetry,
-i.e. a system comprising planar layers stacked on top of each other.
-When the layers form a periodic structure, we say it is an ideal laminar structure.
-
-
-The :math:`\Gamma_3` projection corresponds to particles in solution 
-where one observes an average over all orientations.
-It is the same system as is described by the Debye equation, and the
-calculation used to obtain :math:`\Gamma_3` is essentially its inverse. 
-:math:`\Gamma_3` is sometimes referred to as the three dimensional correlation function, 
-despite it being being one dimensional.
-
-
-
-
+The :math:`\Gamma_3` projection is motivated by a system of
+monodisperse, randomly oriented particles in dilute suspension, 
+such that there is no spatial correlations between particles. 
+It is the kind of system described by the Debye equation.
+Just as is the case with :math:`\Gamma_1`, as long as one truely
+has this kind of system, and with caveats about extrapolation
+and experimental constraints, one should be able to fully recover
+the correlation function.
 
 
 More formally...
@@ -99,9 +98,10 @@ And letting  some rearrangement becomes
 .. math::
     \int\int \rho(\vec{s}) \rho(\vec{t}) e^{i (t-s)\cdot\vec{q}} \; dr^3 \; ds^3
 
-and now letting :math:`\vec{r} = \vec{t}-\vec{s}` (note this is not the same :math:`r` as before,
- but a new variable) 
-and applying the Fourier translation theorem, we can rewrite the above as:
+
+and now letting :math:`\vec{r} = \vec{t} - \vec{s}` 
+and applying the Fourier translation theorem, we can rewrite the above as
+(note this is not the same :math:`\vec{r}` as before, but a new variable):
 
 .. math::
     \int\int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) e^{i \vec{r}\cdot\vec{q}} \; ds^3  \; dr^3
@@ -119,14 +119,14 @@ The quantity in square brackets what we call the correlation function, :math:`\g
 and it is the quantity that is Fouier transformed (with some appropriate scaling) 
 to get the magnitude of scattering.
 
-
-
-:math:`\Gamma_1` Projection 
-...........................
+Some useful properties of the Correlation Function
+..................................................
 
 As we have mentioned before, the correlation function contains no phase information,
 mathematically this is the same as saying (1) that its Fourier transform is purely real,
-or (2) that the correlation function is an even function.
+or (2) that the correlation function is an even function. The consequence of this is 
+that we can write the Fourier transform of the correlation function using a cosine instead
+of a complex exponential.
 
 Demonstrating the evenness of the correlation function is easily done by a change of
 the variable of integration from :math:`\vec{s}` 
@@ -135,10 +135,75 @@ to :math:`\vec{u} = \vec{s} + \vec{r}`.
 .. math::
     \gamma(\vec{r}) = \int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) \; ds^3 = \int \rho(\vec{u}-\vec{r}) \rho(\vec{u}) \; du^3 = \gamma(-\vec{r})
 
-and from this we can 
+and from this we can show that its Fourier transform is real by applying the following
+to each dimension in turn (shown here in the 1D case for even :math:`f(x)`).
+
+First, we split the integral into negative and positive :math:`x` parts:
+
+.. math::
+    \int_{-\infty}^\infty f(x) e^{i x \xi} dx = \int_{-\infty}^0 f(x) e^{i x \xi} dx + \int_{0}^\infty f(x) e^{i x \xi} dx
+
+Let :math:`u = -x` for the negative part, use the fact that :math:`f(-x)=f(x)` and
+recalculate the bounds of integration
+
+.. math:: 
+    = \int_0^\infty f(u) e^{-i u \xi} du + \int_{0}^\inf f(x) e^{i x \xi} dx
+
+Note that :math:`u` only appears within the integral, so we can rename it to :math:`x`
+and recombine it with the positive part. We can also multiply the integral by two and
+the integrand by two, giving
+
+.. math::
+    =2 \int_0^\infty f(x) \frac{e^{i x \xi} + e^{-i x \xi}{2} dx
+
+The fractional part is the complex definition of cosine. 
+Applying this definition and using the fact that :math:`f(x)` is even
+to restore the original bounds of integration we get
+
+.. math::
+    = \int_{-\infty}^{\infty} f(x) cos(x \xi) dx
+
+which shows that the Fourier transform is purely real, reflecting the
+fact that there is no phase information (which would be encoded in the imaginary part).
+
+
+:math:`\Gamma_1` Projection 
+...........................
+
+Consider the Fourier transform of the three dimensional correlation function,
+
+.. math::
+    \int\int\int \gamma(\vec{r}) e^{i \vec{r} \cdot \vec{q}} \; dx \; dy \; dz
+
+
+Now let :math:`q_z = q_y = 0`. 
+The motivation for this is (1) that during small angle of scattering :math:`q_z` 
+and so is small enough to be neglected, and (2) that we are choosing to measure 
+in one direction of the :math:`q_x q_y` plane.
+We assume, without loss of generality, to be where :math:`q_y=0`. 
+
+This gives us :math:`q \cdot r = x q_x`, and so the transform becomes
+
+.. math::
+    \int \gamma(\vec{r}) e^{i x q_x} \; dx \; dy \; dz
+
+which we can rewrite as
+
+.. math:: 
+    \int\left( \int\int \gamma(\vec{r}) \; dy\;dz\right) e^{i x q_x} \; dx
+
+the quantity in the brackets is :math:`\Gamma_1(x)`. That is to say
+
+.. math::
+    \Gamma_1(x) = \int\int \gamma(\vec{r}) \;dy\;dz
+
+If we now use the fact that :math:`\gamma(\vec{r})` is an even function,
+
 
 :math:`\Gamma_3` Projection
 ...........................
+
+The :math:`\Gamma_3` projection inverts the 
 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
