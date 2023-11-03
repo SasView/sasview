@@ -331,7 +331,7 @@ QTabBar::tab:selected:hover:enabled {
     background: rgba(255,255,255,0.15);
 }
 QTabBar::tab:selected:enabled {
-    color: rgba(255,255,255,0.6);;
+    color: rgba(255,255,255,0.6);
     background: rgba(255,255,255,0.24);
 }
 QTabBar::tab:selected:disabled,

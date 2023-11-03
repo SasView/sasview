@@ -35,9 +35,17 @@ QRadioButton {
     border-top: 2px solid transparent;
     border-bottom: 2px solid transparent;
 }
-QCheckBox:hover,
-QRadioButton:hover {
-    border-bottom: 2px solid;
+QCheckBox::indicator:enabled,
+QRadioButton::indicator:enabled {
+    height: 14px;
+    width: 14px;
+    border: 2px solid rgba(0,0,0,0.25);
+}
+QCheckBox::indicator:hover,
+QRadioButton::indicator:hover {
+    height: 14px;
+    width: 14px;
+    border: 2px solid rgb(26,115,178);
 }
 
 /* QGroupBox Properties */
@@ -324,8 +332,8 @@ QTabBar::tab:selected:hover:enabled {
     background: rgba(0,0,0,0.15);
 }
 QTabBar::tab:selected:enabled {
-    color: rgb(26,115,232);
-    background: rgba(0,0,0,0.24);
+    color: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.1);
 }
 QTabBar::tab:selected:disabled,
 QTabBar::tab:only-one:selected:enabled {
@@ -465,8 +473,16 @@ QAbstractItemView::indicator,
 QRadioButton::indicator {
     height: 18px;
     width: 18px;
+    background: rgba(245,245,245,0.6);
 }
-
+QCheckBox::indicator:checked,
+QGroupBox::indicator:checked,
+QAbstractItemView::indicator:checked,
+QRadioButton::indicator:checked {
+    height: 14px;
+    width: 14px;
+    background: rgb(26,115,178);
+}
 /* Styles that are not from taken PyQtDarkTheme */
 QProgressBar {border: 2px solid grey; border-radius: 5px; text-align: center}
 QProgressBar::chunk {background-color: #b1daf9; width: 10px; margin: 1px;}
