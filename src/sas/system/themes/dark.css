@@ -7,7 +7,7 @@ QWidget {
     background: rgb(63,64,66);
     color: rgb(228,231,235);
     selection-color: rgb(228,231,235);
-    selection-background-color: rgba(138,180,247,0.5);
+    selection-background-color: rgba(26,115,178,0.5);
 }
 QWidget:disabled {
     color: rgba(228,231,235,0.4);
@@ -26,7 +26,7 @@ QMainWindow::separator {
 }
 QMainWindow::separator:hover,
 QMainWindow::separator:pressed {
-    background: rgb(138,180,247);
+    background: rgb(26,115,178);
 }
 
 /* QCheckBox and QRadioButton Properties */
@@ -35,9 +35,17 @@ QRadioButton {
     border-top: 2px solid transparent;
     border-bottom: 2px solid transparent;
 }
-QCheckBox:hover,
-QRadioButton:hover {
-    border-bottom: 2px solid;
+QCheckBox::indicator:enabled,
+QRadioButton::indicator:enabled {
+    height: 14px;
+    width: 14px;
+    border: 2px solid rgb(0,0,0);
+}
+QCheckBox::indicator:hover,
+QRadioButton::indicator:hover {
+    height: 14px;
+    width: 14px;
+    border: 2px solid rgb(26,115,178);
 }
 
 /* QGroupBox Properties */
@@ -203,7 +211,7 @@ QScrollBar::add-line {
 }
 
 QPushButton, QToolButton {
-    color: rgb(138,180,247);
+    color: rgb(26,115,178);
     border: 1px solid rgb(42,43,66);
     padding: 4px 8px;
     border-radius: 4px;
@@ -211,7 +219,7 @@ QPushButton, QToolButton {
 QPushButton:hover, QPushButton:pressed, QPushButton:checked:enabled,
 QToolButton:hover, QToolButton:pressed, QToolButton:checked:enabled {
     color: rgb(0,0,0);
-    background: rgba(138,180,247,0.3);
+    background: rgba(26,115,178,0.3);
 }
 
 /* QDialogButtonBox */
@@ -243,7 +251,7 @@ QComboBox::drop-down:editable:hover {
 /* Setting background color of selected item when editable is false. */
 QComboBox::item:selected {
     border: none;  /* This remove the border of indicator. */
-    background: rgba(26,115,278,0.35);
+    background: rgba(26,115,178,0.35);
     border-radius: 4px;
 }
 
@@ -323,7 +331,7 @@ QTabBar::tab:selected:hover:enabled {
     background: rgba(255,255,255,0.15);
 }
 QTabBar::tab:selected:enabled {
-    color: rgb(138,180,247);
+    color: rgba(255,255,255,0.6);;
     background: rgba(255,255,255,0.24);
 }
 QTabBar::tab:selected:disabled,
@@ -409,7 +417,7 @@ QTableView QTableCornerButton::section {
     border-top-left-radius: 2px;
 }
 QTableView QTableCornerButton::section:pressed {
-    background: rgba(138,180,247,0.35);
+    background: rgba(26,115,178,0.35);
 }
 QTableView > QHeaderView {
     background: rgba(63,64,66,0.50);
@@ -429,7 +437,7 @@ QLineEdit {
     border-radius: 4px;
 }
 QLineEdit:focus {
-    border-color: rgb(138,180,247);
+    border-color: rgb(26,115,178);
 }
 
 /* QFileDialog */
@@ -464,6 +472,15 @@ QAbstractItemView::indicator,
 QRadioButton::indicator {
     height: 18px;
     width: 18px;
+    background: rgba(245,245,245,0.6);
+}
+QCheckBox::indicator:checked,
+QGroupBox::indicator:checked,
+QAbstractItemView::indicator:checked,
+QRadioButton::indicator:checked {
+    height: 14px;
+    width: 14px;
+    background: rgb(26,115,178);
 }
 
 /* Styles that are not from taken PyQtDarkTheme */
