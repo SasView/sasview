@@ -161,7 +161,7 @@ class FitData1D(Data1D):
         # Check error bar; if no error bar found, set it constant(=1)
         # TODO: Should provide an option for users to set it like percent,
         # constant, or dy data
-        if dy is None or dy == [] or dy.all() == 0:
+        if dy is None or dy.size == 0 or np.all(dy == 0):
             self.dy = np.ones(len(y))
         else:
             self.dy = np.asarray(dy).copy()
@@ -299,7 +299,7 @@ class FitData2D(Data2D):
         if qmax is None:
             self.qmax = math.sqrt(x_max * x_max + y_max * y_max)
         ## new error image for fitting purpose
-        if self.err_data is None or self.err_data == []:
+        if self.err_data is None or self.err_data.size == 0:
             self.res_err_data = np.ones(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)

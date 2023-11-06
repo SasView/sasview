@@ -82,7 +82,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdAppend_2.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
+        self.chkSwap.setVisible(False)
 
+        self.cmdFreeze.clicked.connect(self.freezeTheory)
         # Fill in the perspectives combo
         self.initPerspectives()
 
@@ -128,7 +130,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_model.itemChanged.connect(self.onFileListChanged)
 
         # Don't show "empty" rows with data objects
-        self.data_proxy.filterRegularExpression = "[^()]" 
+        self.data_proxy.setFilterRegularExpression(QtCore.QRegularExpression(".+"))
 
         # Create a window to allow the display name to change
         self.nameChangeBox = ChangeName(self)
@@ -141,7 +143,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_proxy.setSourceModel(self.theory_model)
 
         # Don't show "empty" rows with data objects
-        self.theory_proxy.filterRegularExpression = "[^()]"
+        self.theory_proxy.setFilterRegularExpression(QtCore.QRegularExpression(".+"))
 
         # Theory model view
         self.freezeView.setModel(self.theory_proxy)
@@ -150,6 +152,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Current view on model
         self.current_view = self.treeView
+
+    def createSendToMenu(self):
+        self.actionReplace = QtGui.QAction(self)
+        self.actionReplace.setObjectName(u"actionReplace")
+        self.actionReplace.setText(u"... replacing data in the current page")
+        self.send_menu = QtWidgets.QMenu(self)
+        self.send_menu.addAction(self.actionReplace)
 
     def closeEvent(self, event):
         """
@@ -232,7 +241,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         caption = 'Choose a directory'
         options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
         directory = self.default_load_location
-        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, "", options)
+        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, options)
 
         if folder is None:
             return
@@ -748,23 +757,28 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # update stored_data
         self.manager.update_stored_data(deleted_names)
 
-    def sendData(self, event=None):
+    def selectedItems(self):
         """
-        Send selected item data to the current perspective and set the relevant notifiers
+        Returns the selected items from the current view
         """
         def isItemReady(index):
             item = self.model.item(index)
             return item.isCheckable() and item.checkState() == QtCore.Qt.Checked
-
         # Figure out which rows are checked
         selected_items = [self.model.item(index)
                           for index in range(self.model.rowCount())
                           if isItemReady(index)]
+        return selected_items
 
+    def onDataReplaced(self):
+        """
+        Called when data is to be replaced in the current fitting tab.
+        """
+        selected_items = self.selectedItems()
         if len(selected_items) < 1:
             return
         #Check that you have only one box item checked when swaping data
-        if len(selected_items) > 1 and (self.chkSwap.isChecked() or not self._perspective().allowBatch()):
+        if len(selected_items) > 1 and not self._perspective().allowBatch():
             if hasattr(self._perspective(), 'name'):
                 title = self._perspective().name
             else:
@@ -776,13 +790,29 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
             return
+        try:
+            self._perspective().swapData(selected_items[0])
+        except Exception as ex:
+            msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
+            logging.error(ex, exc_info=True)
+            msg = str(ex)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
 
+    def sendData(self, event=None):
+        """
+        Send selected item data to the current perspective and set the relevant notifiers
+        """
+        selected_items = self.selectedItems()
+        if len(selected_items) < 1:
+            return
+ 
         # Notify the GuiManager about the send request
         try:
-            if self.chkSwap.isChecked():
-                self._perspective().swapData(selected_items[0])
-            else:
-                self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+            self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
             logging.error(ex, exc_info=True)
@@ -985,6 +1015,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if ind > 0:
             graph.setCurrentIndex(ind)
 
+    def sendToMenu(self, hasSubmenu=False):
+        # add menu to cmdSendTO
+        if hasSubmenu:
+            self.createSendToMenu()
+            self.cmdSendTo.setMenu(self.send_menu)
+            self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
+        else:
+            self.cmdSendTo.setMenu(None)
+            self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
     def updatePerspectiveCombo(self, index):
         """
         Notify the gui manager about the new perspective chosen.
@@ -1000,11 +1040,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         allow_swap = False if current_perspective is None else current_perspective.allowSwap()
 
         self.chkBatch.setEnabled(allow_batch)
-        self.chkSwap.setEnabled(allow_swap)
-
-        # Using this conditional prevents the checkbox for going into the "neither checked nor unchecked" state
-        if not allow_swap:
-            self.chkSwap.setChecked(False)
+        self.sendToMenu(hasSubmenu=allow_swap)
 
     def itemFromDisplayName(self, name):
         """
@@ -1251,7 +1287,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     @staticmethod
     def appendOrUpdatePlot(self, data, plot):
         name = data.name
-        if isinstance(plot, Plotter2D) or name in plot.plot_dict.keys():
+        if isinstance(plot, Plotter2DWidget) or name in plot.plot_dict.keys():
             plot.replacePlot(name, data)
         else:
             plot.plot(data)
@@ -1523,6 +1559,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionEditMask.triggered.connect(self.showEditDataMask)
         self.actionDelete.triggered.connect(self.deleteSelectedItem)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
+        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def onCustomContextMenu(self, position):
         """

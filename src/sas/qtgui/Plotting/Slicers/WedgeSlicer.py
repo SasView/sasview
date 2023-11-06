@@ -9,6 +9,7 @@ from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
 from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
 
+
 class WedgeInteractor(BaseInteractor, SlicerModel):
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
@@ -29,6 +30,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
     AnnulusSlicer) and SectorInteractorQ averages all phi points at constant Q
     (as for the SectorSlicer).
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
 
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -115,7 +117,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             self.phi = self.radial_lines.phi
             self.inner_arc.update(phi=self.phi)
             self.outer_arc.update(phi=self.phi)
-        if  self.central_line.has_move:
+        if self.central_line.has_move:
             self.central_line.update()
             self.theta = self.central_line.theta
             self.inner_arc.update(theta=self.theta)
@@ -138,6 +140,15 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         :param new_sector: slicer used for directional averaging in Q or Phi
         :param nbins: the number of point plotted when averaging
+        
+        :TODO
+        
+        Unlike other slicers, the two sector types are sufficiently different
+        that this method contains three instances of If (check class name) do x.
+        The point of post_data vs _post_data I think was to avoid this kind of
+        thing and suggests that in this case we may need a new method in the WedgeInteracgtorPhi and WedgeInteractorQ to handle these specifics.
+        Probably by creating the 1D plot object in those top level classes along
+        with the specifc attributes.
         """
         # Data to average
         data = self.data
@@ -161,7 +172,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
                 raise ValueError(msg)
             self.averager = new_sector
 
-        # Why do I have to add pi to the angles for it to work properly?
+        # Add pi to the angles before invoking sector averaging to transform angular
+        # range from python default of -pi,pi to 0,2pi suitable for manipulations
         sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi,
                              phi_max=phimax + np.pi, nbins=self.nbins)
         sect.fold = False
@@ -175,6 +187,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             dxw = sector.dxw
         else:
             dxw = None
+        if self.averager.__name__ == 'SectorPhi':
+            # And here subtract pi when getting angular data back from wedge averaging in
+            # phi in manipulations to get back in the -pi,pi range. Also convert from
+            # radians to degrees for nicer display.
+            sector.x = (sector.x - np.pi) * 180 / np.pi
         new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
@@ -185,15 +202,14 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
         if self.averager.__name__ == 'SectorPhi':
+            # angular plots usually require a linear x scale and better with
+            # a linear y scale as well.
             new_plot.xaxis("\\rm{\phi}", "degrees")
+            new_plot.xtransform = 'x'
+            new_plot.ytransform = 'y'
         else:
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
-
-        if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.data.name.count("Residuals") > 0:
-            new_plot.ytransform = 'y'
-            new_plot.yaxis("\\rm{Residuals} ", "/")
 
         new_plot.id = str(self.averager.__name__) + self.data.name
         new_plot.group_id = new_plot.id
@@ -315,18 +331,20 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         """
         self.base.draw()
 
+
 class WedgeInteractorQ(WedgeInteractor):
     """
     Average in Q direction. The data for all phi at a constant Q are
     averaged together to provide a 1D array in Q (to be plotted as a function
-     of Q)
+    of Q)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorQ
         super()._post_data(SectorQ)
 
@@ -335,14 +353,15 @@ class WedgeInteractorPhi(WedgeInteractor):
     """
     Average in phi direction. The data for all Q at a constant phi are
     averaged together to provide a 1D array in phi (to be plotted as a function
-     of phi)
+    of phi)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorPhi
         super()._post_data(SectorPhi)
 
