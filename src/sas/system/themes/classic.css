@@ -1,6 +1,3 @@
-/* Global Properties */
-* {font-size: 10pt; font-family: Helvetica, Arial, Verdana, sans-serif}
-
 /* Qt Elements */
 QLineEdit {background-color: white; color: black;}
 QLineEdit:focus {background-color: #98dbcc; color: #333333}

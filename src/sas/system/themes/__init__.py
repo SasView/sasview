@@ -13,8 +13,10 @@ OPTIONS = {
     'Default': Path(os.path.join(os.path.dirname(__file__), 'default.css')),
     'Dark': Path(os.path.join(os.path.dirname(__file__), 'dark.css')),
     'Classic': Path(os.path.join(os.path.dirname(__file__), 'classic.css')),
-    'Large Font': Path(os.path.join(os.path.dirname(__file__), 'largefont.css')),
 }
+
+# A template string for setting the font size
+FONT = "* {{font-size: {}pt; font-family: Helvetica, Arial, Verdana, sans-serif}}\n"
 
 
 def load_theme(theme: str = None) -> str:
@@ -50,3 +52,11 @@ def find_available_themes() -> Dict:
         name = f'User:{file}'
         themes[name] = Path(os.path.join(user_path, file))
     return themes
+
+
+def format_font_size(font_size: float) -> str:
+    """Formats the FONT string to include a specific size.
+
+    :param font_size: The font size, in pt units, to use.
+    :return: FONT.format(font_size)"""
+    return FONT.format(font_size)

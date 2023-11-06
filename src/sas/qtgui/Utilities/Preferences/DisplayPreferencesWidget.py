@@ -12,13 +12,17 @@ class DisplayPreferencesWidget(PreferencesWidget):
                               'QT_AUTO_SCREEN_SCALE_FACTOR',
                               'DISABLE_RESIDUAL_PLOT',
                               'DISABLE_POLYDISPERSITY_PLOT',
-                              'THEME']
+                              'THEME',
+                              'FONT_SIZE']
         self.restart_params = {'QT_SCALE_FACTOR': 'QT Screen Scale Factor',
                                'QT_AUTO_SCREEN_SCALE_FACTOR': "Enable Automatic Scaling"}
 
     def _addAllWidgets(self):
         self.theme = self.addComboBox(title="Theme", params=style.get_theme_names(), default=style.theme)
         self.theme.currentIndexChanged.connect(self._previewTheme)
+        self.font_size = self.addComboBox(title="Font Size", params=['10.0', '12.0', '14.0'],
+                                          default=str(style.font_size))
+        self.font_size.currentIndexChanged.connect(self._previewFont)
         self.qtScaleFactor = self.addFloatInput(
             title="QT Screen Scale Factor",
             default_number=config.QT_SCALE_FACTOR)
@@ -44,10 +48,19 @@ class DisplayPreferencesWidget(PreferencesWidget):
     def _previewTheme(self):
         # Store existing theme
         self._stageChange('THEME', self.theme.currentText())
+        self._set_theme()
+
+    def _previewFont(self):
+        self._stageChange('FONT_SIZE', float(self.font_size.currentText()))
+        self._set_theme()
+
+    def _set_theme(self):
         theme = config.THEME
-        style.css = self.theme.currentText()
-        # The CSS getter uses the config theme, not the set theme
+        font = config.FONT_SIZE
+        # The CSS and font_size getters uses the config values, not the set theme
         config.THEME = self.theme.currentText()
+        config.FONT_SIZE = float(self.font_size.currentText())
         self.parent.parent.setStyleSheet(style.css)
-        # Set the config theme back for easy reset
+        # Set the config theme items back for easy reset
         config.THEME = theme
+        config.FONT_SIZE = font

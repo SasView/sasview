@@ -208,8 +208,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
-        # Default style sheet name
+        # Style properties
         self.THEME = 'Default'
+        self.FONT_SIZE = 10.0
 
         # What's New variables
         self.LAST_WHATS_NEW_HIDDEN_VERSION = "5.0.0"
