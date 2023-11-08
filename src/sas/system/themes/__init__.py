@@ -14,6 +14,7 @@ OPTIONS = {
     'Dark': Path(os.path.join(os.path.dirname(__file__), 'dark.css')),
     'Classic': Path(os.path.join(os.path.dirname(__file__), 'classic.css')),
 }
+# A list of style sheets that use the base style given in the STYLE_BASE
 USES_STYLE_BASE = ['Light', 'Dark']
 
 # A template string for setting the font size
@@ -63,6 +64,8 @@ def format_font_size(font_size: float) -> str:
     return FONT.format(font_size)
 
 
+# STYLE_BASE defines the base sizes and behaviors of all widgets and interactive elements for the Light and Dark themes.
+# The styles are here, so they are not considered as a separate style sheet when looking at built-in themes.
 STYLE_BASE = """
 /* QWidget Properties */
 QWidget:focus {outline: none;}

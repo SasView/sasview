@@ -9,6 +9,14 @@ class StyleSheet:
     Class used to manage all available themes.
 
     Built-in themes are available in sas.system.themes. User themes should live in ~/.sasview/themes.
+
+    *CSS Order of operations:*
+    Each operation overrides any previous operation to allow user themes to take precedence over any built-in thematic
+    elements.
+        1. The default font size and fonts are set.
+        2. The base style sheet is set -> typically either classic.css for user themes or themes.STYLE_BASE for built-in
+        3. Color palettes are applied (Dark or Light), if applicable.
+        4. User theme elements are applied.
     """
 
     def __init__(self):
@@ -54,7 +62,7 @@ class StyleSheet:
         return list(self._available_themes.keys())
 
     def _create_full_theme(self):
-        """Private method that combines settings so users can separately set fonts and color palettes."""
+        """Private method that combines settings to allow fonts and color palettes to be set separately."""
         css = load_theme(self.theme)
         font_str = format_font_size(self.font_size)
         self._css = f"{font_str}{css}"

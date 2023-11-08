@@ -18,11 +18,13 @@ class DisplayPreferencesWidget(PreferencesWidget):
                                'QT_AUTO_SCREEN_SCALE_FACTOR': "Enable Automatic Scaling"}
 
     def _addAllWidgets(self):
+        self.addHorizontalLine()
         self.theme = self.addComboBox(title="Theme", params=style.get_theme_names(), default=style.theme)
         self.theme.currentIndexChanged.connect(self._previewTheme)
         self.font_size = self.addComboBox(title="Font Size", params=['10.0', '12.0', '14.0'],
                                           default=str(style.font_size))
         self.font_size.currentIndexChanged.connect(self._previewFont)
+        self.addHorizontalLine()
         self.qtScaleFactor = self.addFloatInput(
             title="QT Screen Scale Factor",
             default_number=config.QT_SCALE_FACTOR)

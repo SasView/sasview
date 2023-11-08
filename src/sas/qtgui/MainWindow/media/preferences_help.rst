@@ -45,6 +45,9 @@ use the `Classic` theme as a fall back for any styles not defined in the stylesh
 is a stylesheet. For more information on writing Qt stylesheets, please see the
 `Qt style sheet reference <https://doc.qt.io/qt-6/stylesheet-reference.html>`_ *persistent*
 
+**Font Size** Select the font size that will be used throughout the SasView application. Font sizes defined in User themes
+will override this setting.
+
 **QT Screen Scale Factor**: A percent scaling factor that is applied all element sizes within the GUI. A restart of
 SasView is required to take effect. *persistent*
 
