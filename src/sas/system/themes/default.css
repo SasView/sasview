@@ -44,6 +44,14 @@ QRadioButton::indicator:hover {
     width: 14px;
     border: 2px solid rgb(26,115,178);
 }
+QCheckBox::indicator:checked {
+    color: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.1);
+}
+QCheckBox:checked {
+    color: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.1);
+}
 
 /* QGroupBox Properties */
 QGroupBox {
@@ -291,12 +299,6 @@ QTreeView > QHeaderView {
 }
 QTreeView > QHeaderView::section {
     background: rgb(218,220,224);
-}
-QTreeView::item {
-    height: 1.5em;
-    width: 100%;
-    margin: 4px;
-    padding: 2px;
 }
 
 /*

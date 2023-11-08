@@ -44,6 +44,14 @@ QRadioButton::indicator:hover {
     width: 14px;
     border: 2px solid rgb(26,115,178);
 }
+QCheckBox::indicator:checked {
+    color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.24);
+}
+QCheckBox:checked {
+    color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.24);
+}
 
 /* QGroupBox Properties */
 QGroupBox {
@@ -146,6 +154,7 @@ QMenu::separator {
     background: rgb(42,43,66);
 }
 QMenu::item {
+    background: transparent;
     padding: 4px 19px;
 }
 QMenu::item:selected {
