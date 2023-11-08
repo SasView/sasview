@@ -480,10 +480,13 @@ QRadioButton::indicator:checked {
     background: rgb(26,115,178);
 }
 
-/* Styles that are not from taken PyQtDarkTheme */
 QProgressBar {border: 2px solid grey; border-radius: 5px; text-align: center}
 QProgressBar::chunk {background-color: #b1daf9; width: 10px; margin: 1px;}
-
 QTextBrowser[warning=true] {border: 5px solid red; background-color: lightyellow}
 QCodeEditor {font-family: 'monospace, monospace'}
 QCodeEditor[warning=true] {border: 5px solid red; background-color: lightyellow}
+QLabel[bold=true] {font-weight: bold;}
+QTreeView::item[base=true] {color: rgb(77,81,87); font-style: normal; font-weight: normal;}
+QTreeView::item[disabled=true] {font-style: italic;}
+QTreeView::item[constrained=true] {font-style: italic; color: blue;}
+QHeaderView {font-weight: bold}

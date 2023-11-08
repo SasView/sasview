@@ -292,6 +292,12 @@ QTreeView > QHeaderView {
 QTreeView > QHeaderView::section {
     background: rgb(218,220,224);
 }
+QTreeView::item {
+    height: 1.5em;
+    width: 100%;
+    margin: 4px;
+    padding: 2px;
+}
 
 /*
 Following arrow settings are for QColumnView.
@@ -403,14 +409,19 @@ QTableView {
 QTableView:!active {
     background: rgba(0,0,0,0.12);
 }
+QTableView::item {
+    height: 125%;
+}
 QTableView::item:alternate {
+    height: 200%;
+    margin: 4px;
     background: rgba(0,0,0,0.12);
 }
 QTableView::item:selected {
     background: rgba(248,249,250,0.5);
 }
 QTableView QTableCornerButton::section {
-    margin: 0 1px 1px 0;
+    margin: 4px;
     background: rgb(218,220,224);
     border-top-left-radius: 2px;
 }
@@ -480,10 +491,14 @@ QRadioButton::indicator:checked {
     width: 14px;
     background: rgb(26,115,178);
 }
-/* Styles that are not from taken PyQtDarkTheme */
+
 QProgressBar {border: 2px solid grey; border-radius: 5px; text-align: center}
 QProgressBar::chunk {background-color: #b1daf9; width: 10px; margin: 1px;}
-
 QTextBrowser[warning=true] {border: 5px solid red; background-color: lightyellow}
 QCodeEditor {font-family: 'monospace, monospace'}
 QCodeEditor[warning=true] {border: 5px solid red; background-color: lightyellow}
+QLabel[bold=true] {font-weight: bold;}
+QTreeView::item[base=true] {color: rgb(77,81,87); font-style: normal; font-weight: normal;}
+QTreeView::item[disabled=true] {font-style: italic;}
+QTreeView::item[constrained=true] {font-style: italic; color: blue;}
+QHeaderView {font-weight: bold}

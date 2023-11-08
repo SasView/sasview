@@ -25,3 +25,8 @@ QTreeView::item:hover {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, s
 QTreeView::item:selected {border: 1px solid #567dbc;}
 QTreeView::item:selected:active{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);}
 QTreeView::item:selected:!active {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);}
+QLabel[bold=true] {font-weight: bold;}
+QTreeView::item[base=true] {color: rgb(77,81,87); font-style: normal; font-weight: normal;}
+QTreeView::item[disabled=true] {font-style: italic;}
+QTreeView::item[constrained=true] {font-style: italic; color: blue;}
+QHeaderView {font-weight: bold}

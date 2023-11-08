@@ -350,12 +350,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         layout.addWidget(self.order_widget)
         self.tabOrder.setLayout(layout)
 
-        # Define bold font for use in various controls
-        self.boldFont = QtGui.QFont()
-        self.boldFont.setBold(True)
-
         # Set data label
-        self.label.setFont(self.boldFont)
+        GuiUtils.updateProperty(self.label, 'bold', 'true')
         self.label.setText("No data loaded")
         self.lblFilename.setText("")
 
@@ -871,23 +867,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         param_name += '.width'
         return param_name
 
-    def modifyViewOnRow(self, row, font=None, brush=None, model_key="standard"):
+    def modifyViewOnRow(self, row, font=None, model_key="standard"):
         """
         Change how the given row of the main model is shown
         """
         model = self.model_dict[model_key]
         fields_enabled = False
-        if font is None:
-            font = QtGui.QFont()
-            fields_enabled = True
-        if brush is None:
-            brush = QtGui.QBrush()
-            fields_enabled = True
         model.blockSignals(True)
         # Modify font and foreground of affected rows
         for column in range(0, model.columnCount()):
-            model.item(row, column).setForeground(brush)
-            model.item(row, column).setFont(font)
+            if font:
+                GuiUtils.updateProperty(model.item(row, column), font, 'true')
+            else:
+                GuiUtils.updateProperty(model.item(row, column), 'base', 'true')
             # Allow the user to interact or not with the fields depending on
             # whether the parameter is constrained or not
             model.item(row, column).setEditable(fields_enabled)
@@ -956,10 +948,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Set min/max to the value constrained
         self.constraintAddedSignal.emit([row], model_key)
         # Show visual hints for the constraint
-        font = QtGui.QFont()
-        font.setItalic(True)
-        brush = QtGui.QBrush(QtGui.QColor('blue'))
-        self.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
+        self.modifyViewOnRow(row, font="constrained", model_key=model_key)
         # update the main parameter list so the constrained parameter gets
         # updated when fitting
         self.checkboxSelected(model.item(row, 0), model_key=model_key)
@@ -998,10 +987,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             model.item(row, max_col).setText(str(max_v))
             self.constraintAddedSignal.emit([row], model_key)
             # Show visual hints for the constraint
-            font = QtGui.QFont()
-            font.setItalic(True)
-            brush = QtGui.QBrush(QtGui.QColor('blue'))
-            self.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
+            self.modifyViewOnRow(row, font="constrained", model_key=model_key)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
 
     def editConstraint(self):
@@ -2628,7 +2614,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # (Re)-create headers
         FittingUtilities.addHeadersToModel(self._model_model)
-        self.lstParams.header().setFont(self.boldFont)
 
     def fromModelToQModel(self, model_name):
         """
@@ -2912,19 +2897,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item_value.setEditable(editable)
 
         if editable:
-            # reset font
-            item_name.setFont(QtGui.QFont())
-            # reset colour
-            item_name.setForeground(QtGui.QBrush())
+            GuiUtils.updateProperty(item_name, 'base', 'true')
             # make checkable
             item_name.setCheckable(True)
         else:
-            # change font
-            font = QtGui.QFont()
-            font.setItalic(True)
-            item_name.setFont(font)
-            # change colour
-            item_name.setForeground(QtGui.QBrush(QtGui.QColor(50, 50, 50)))
+            GuiUtils.updateProperty(item_name, 'disabled', 'true')
             # make not checkable (and uncheck)
             item_name.setCheckState(QtCore.Qt.Unchecked)
             item_name.setCheckable(False)
@@ -4304,7 +4281,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
                 cons = (value, param, value_ex, validate, func)
 
-            param_list.append([param_name, param_checked, param_value,param_error, param_min, param_max, cons])
+            param_list.append([param_checked, param_name, param_value, param_error, param_min, param_max, cons])
 
         def gatherPolyParams(row):
             """
