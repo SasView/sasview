@@ -60,12 +60,16 @@ class BuildSphinxCommand(Command):
             if os.path.isdir(SASMODELS_DOCPATH):
                 # if available, build sasmodels docs
                 print("============= Building sasmodels model documentation ===============")
-                smdocbuild = subprocess.call([
-                    "make",
-                    "PYTHON=%s" % sys.executable,
-                    "-C", SASMODELS_DOCPATH,
-                    "html"
-                ])
+                try:
+                    smdocbuild = subprocess.call([
+                        "make",
+                        "PYTHON=%s" % sys.executable,
+                        "-C", SASMODELS_DOCPATH,
+                        "html"
+                    ])
+                except Exception as e:
+                    print(e)
+                    print("build failed, maybe you don't have make")
         else:
             # if not available warning message
             print("== !!WARNING!! sasmodels directory not found. Cannot build model docs. ==")

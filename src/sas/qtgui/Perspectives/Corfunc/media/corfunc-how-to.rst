@@ -1,3 +1,4 @@
+.. _corfunc-how-to:
 
 Usage
 -----

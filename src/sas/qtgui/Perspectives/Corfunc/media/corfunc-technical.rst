@@ -1,3 +1,4 @@
+.. _corfunc-technical:
 
 The correlation function analysis is performed in **3 steps**.
 

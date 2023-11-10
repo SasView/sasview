@@ -183,32 +183,38 @@ def apidoc():
     """
     print("=== Generate API Rest Files ===")
 
-    # Clean directory before generating a new version.
-    #_remove_dir(SASVIEW_API_TARGET)
+    try:
 
-    subprocess.check_call([
-        "sphinx-apidoc",
-        "-o", SASVIEW_API_TARGET, # Output dir.
-        "-d", "8", # Max depth of TOC.
-        "-H", "SasView", # Package header
-        SASVIEW_BUILD,
-        # omit the following documents from the API documentation
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "UnitTesting"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "Utilities", "UnitTesting"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "MainWindow", "UnitTesting"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "Plotting", "UnitTesting"),
+        # Clean directory before generating a new version.
+        #_remove_dir(SASVIEW_API_TARGET)
 
-    ])
+        subprocess.check_call([
+            "sphinx-apidoc",
+            "-o", SASVIEW_API_TARGET, # Output dir.
+            "-d", "8", # Max depth of TOC.
+            "-H", "SasView", # Package header
+            SASVIEW_BUILD,
+            # omit the following documents from the API documentation
+            joinpath(SASVIEW_BUILD, "sas", "qtgui", "UnitTesting"),
+            joinpath(SASVIEW_BUILD, "sas", "qtgui", "Utilities", "UnitTesting"),
+            joinpath(SASVIEW_BUILD, "sas", "qtgui", "MainWindow", "UnitTesting"),
+            joinpath(SASVIEW_BUILD, "sas", "qtgui", "Plotting", "UnitTesting"),
 
-    subprocess.check_call([
-        "sphinx-apidoc",
-        "-o", SASMODELS_API_TARGET, # Output dir.
-        "-d", "8", # Max depth of TOC.
-        "-H", "sasmodels", # Package header
-        SASMODELS_BUILD,
-        # omit the following documents from the API documentation
-        joinpath(SASMODELS_BUILD, "sasmodels", "models"),
-    ])
+        ])
+
+        subprocess.check_call([
+            "sphinx-apidoc",
+            "-o", SASMODELS_API_TARGET, # Output dir.
+            "-d", "8", # Max depth of TOC.
+            "-H", "sasmodels", # Package header
+            SASMODELS_BUILD,
+            # omit the following documents from the API documentation
+            joinpath(SASMODELS_BUILD, "sasmodels", "models"),
+        ])
+
+    except Exception as e:
+        print(e)
+        print("API Docs build failed")
 
 
 def build_pdf():
