@@ -1,7 +1,11 @@
 .. _corfunc-how-to:
 
-Usage
------
+How to use Corfunc
+==================
+
+Running a Calculation
+---------------------
+
 Upon sending data for correlation function analysis, it will be plotted (minus
 the background value), along with a bar indicating the *upper end of the
 low-Q range* (used for Guinier back-extrapolation), and 2 bars indicating

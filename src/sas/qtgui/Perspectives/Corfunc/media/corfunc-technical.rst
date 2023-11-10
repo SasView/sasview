@@ -1,5 +1,11 @@
 .. _corfunc-technical:
 
+Corfunc Technical Documentation
+===============================
+
+In Brief
+--------
+
 The correlation function analysis is performed in **3 steps**.
 
 First, the scattering curve is **Extrapolated** to :math:`Q = 0` (Guinier) and toward

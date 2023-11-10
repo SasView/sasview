@@ -1,8 +1,12 @@
 .. _corfunc-theory:
 
 
-Description
------------
+
+Correlation Function Theory
+===========================
+
+Overview
+--------
 
 In small angle scattering we measure the tendency for probe particles (neutrons, photons, etc)
 to transfer various amounts of momentum to a sample. The momentum is generally inferred from the scattering angle
@@ -55,8 +59,8 @@ and experimental constraints, one should be able to fully recover
 the correlation function.
 
 
-More formally...
-----------------
+Formal Description
+------------------
 
 More formally, the correlation function is a quantity that arrises naturally from calculating the square magnitude
 of the three dimensional fourier transform, which is proportional to the scattering amplitude.
