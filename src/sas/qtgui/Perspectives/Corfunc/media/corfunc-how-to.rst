@@ -23,6 +23,31 @@ This will run through the process described in the technical documentation.
 The parameters used along the way can be overriden by changing them in the appropriate text boxes,
 and whether or not they are recalculated is controlled by the check boxes.
 
+Options
+-------
+
+In addition to the checkboxes that control whether parts of the calculation are executed,
+there are options for choosing how the parameters are extracted.
+These are intended to give flexibility to users and allow for manual control in certain edge
+cases, or where there is small errors in the transformed data.
+
+Automatic selection is the most robust choice, this will choose the leftmost option
+as long as it is feasible.
+
+
+The extra options are as follows:
+
+1) There is an option to choose how the tangent slope used for calculating lamellar parameters
+such as `hard block` is calculated. Usually this is done by finding the infection point of the
+curve. However, in some datasets it is more appropriate to use the point half way between minimum
+and maximum.
+2) The second option chooses whether to use the minimum or maximum to infer the periodicity.
+The standard option is to use the maximum, but in some cases, such as where the period is
+long compared to experimental data,
+it might be necessary to use twice the minimum as a proxy.
+
+The automatic selection should be appropriate for general use.
+
 Output
 ------
 
