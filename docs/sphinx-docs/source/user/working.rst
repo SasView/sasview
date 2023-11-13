@@ -6,7 +6,7 @@ Working with SasView
 .. toctree::
    :maxdepth: 1
 
-   Data Formats <user/data/data/data_formats_help>
+   Data Formats <data/data/data_formats_help>
 
    Loading Data <qtgui/MainWindow/data_explorer_help>
 

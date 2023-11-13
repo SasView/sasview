@@ -63,8 +63,8 @@ SASDATA_DOCS = joinpath(SASDATA_ROOT, "docs")
 SASDATA_BUILD = joinpath(SASDATA_ROOT, "build", "lib")
 SASDATA_DEV_SOURCE = joinpath(SASDATA_DOCS, "source", "dev")
 SASDATA_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasdata-dev")
-SASDATA_API_SOURCE = joinpath(SASDATA_DOCS, "source", "user")
-SASDATA_API_TARGET = joinpath(SASVIEW_API_TARGET, "data")
+SASDATA_GUIDE_SOURCE = joinpath(SASDATA_DOCS, "source", "user")
+SASDATA_GUIDE_TARGET = joinpath(SPHINX_SOURCE, "user", "data")
 
 # bumps paths
 BUMPS_DOCS = joinpath(SASVIEW_ROOT, "..", "bumps", "doc")
@@ -169,7 +169,10 @@ def retrieve_sasdata_docs():
     """
     print("=== Sasdata Docs ===")
     copy_tree(SASDATA_DEV_SOURCE, SASDATA_DEV_TARGET)
-    copy_tree(SASDATA_API_SOURCE, SASDATA_API_TARGET)
+    print(SASDATA_GUIDE_TARGET)
+    print(SASDATA_GUIDE_SOURCE)
+    print(os.path.exists(SASDATA_GUIDE_SOURCE))
+    copy_tree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET)
 
 
 def retrieve_bumps_docs():
