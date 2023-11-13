@@ -169,9 +169,6 @@ def retrieve_sasdata_docs():
     """
     print("=== Sasdata Docs ===")
     copy_tree(SASDATA_DEV_SOURCE, SASDATA_DEV_TARGET)
-    print(SASDATA_GUIDE_TARGET)
-    print(SASDATA_GUIDE_SOURCE)
-    print(os.path.exists(SASDATA_GUIDE_SOURCE))
     copy_tree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET)
 
 
