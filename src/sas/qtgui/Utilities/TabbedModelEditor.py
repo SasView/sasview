@@ -39,6 +39,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.edit_only = edit_only
         self.is_modified = False
         self.label = None
+        self.builtinmodels = self.allBuiltinModels()
 
         self.addWidgets()
 
@@ -140,6 +141,15 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if self.tabWidget.count()>1:
             self.tabWidget.removeTab(1)
         self.loadFile(filename)
+
+    def allBuiltinModels(self):
+        """
+        create a list of all builtin models
+        """
+        from sas.sascalc.fit.models import ModelManager
+        model_list = ModelManager().cat_model_list()
+        model_names = [model.name for model in model_list]
+        return model_names
 
     def loadFile(self, filename):
         """
@@ -444,6 +454,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
                 # Don't accept but return
                 return False
+
+        if model['filename'].casefold() in (model.casefold() for model in self.builtinmodels):
+            # notify the viewer
+            msg = "Built-in model with specified name already exists.\n"
+            msg += "Please specify different filename."
+            QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
+            # Don't accept but return
+            return False
         # Update model editor if plugin definition changed
         func_str = model['text']
         msg = None

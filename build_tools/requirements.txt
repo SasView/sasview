@@ -26,7 +26,6 @@ lxml
 pytools 
 cffi
 dominate
-html5lib
 importlib-resources
 bumps
 html2text
