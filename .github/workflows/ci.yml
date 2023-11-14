@@ -187,8 +187,7 @@ jobs:
           make -C ../bumps/doc html || true
           mkdir -p ~/.sasmodels/compiled_models
           make -j4 -C ../sasmodels/doc html || true
-          sphinx-apidoc -o ../sasdata/docs/source/dev/generated/ -d 8 -H SasData ../sasdata/build/lib
-          sphinx-build -M html ../sasdata/docs/source/ ../sasdata/docs/build/
+          make -C ../sasdata/docs html || true
 
       - name: Build sasview docs
         if: ${{ matrix.docs }}
