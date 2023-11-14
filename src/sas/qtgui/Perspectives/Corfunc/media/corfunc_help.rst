@@ -185,7 +185,7 @@ We assume, without loss of generality, to be where :math:`q_y=0`.
 This gives us :math:`q \cdot r = x q_x`, and so the transform becomes
 
 .. math::
-    \int \gamma(\vec{r}) e^{i x q_x} \; dx \; dy \; dz
+    I(q) = \int \gamma(\vec{r}) e^{i x q_x} \; dx \; dy \; dz
 
 which we can rewrite as
 
@@ -198,6 +198,26 @@ the quantity in the brackets is :math:`\Gamma_1(x)`. That is to say
     \Gamma_1(x) = \int\int \gamma(\vec{r}) \;dy\;dz
 
 If we now use the fact that :math:`\gamma(\vec{r})` is an even function,
+we can use the result above to get
+
+.. math::
+    I(q) = \int \Gamma_1(x) \cos(qx) dx
+
+The job of Corfunc is now to invert this. The following operation does the job:
+
+.. math:: 
+    \Gamma_1(x) = \int I(q) q^2 \cos(qx) dx
+
+We can check this by showing that
+
+.. math:: 
+    f(y) = \int \left( \int f(x) \cos(qx) dx \right) q^2 \cos(qy) dq
+
+First note that we can write it (with some technical assumtions about convergence) as
+
+.. math:: 
+    f(y) = \int f(x) \int q^2 cos(qx) cos(qy) dq dx
+
 
 
 :math:`\Gamma_3` Projection
