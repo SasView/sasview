@@ -64,7 +64,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         try:
             # pylint chokes on this line with syntax-error
             # pylint: disable=syntax-error doesn't seem to help
-            document.print(printer)
+            document.print_(printer)
         except Exception as ex:
             # Printing can return various exceptions, let's catch them all
             logging.error("Print report failed with: " + str(ex))
