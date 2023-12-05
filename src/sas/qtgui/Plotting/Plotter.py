@@ -170,6 +170,9 @@ class PlotterWidget(PlotterBase):
         if color is None:
             color = data.custom_color
 
+        # grid on/off, stored on self
+        ax.grid(self.grid_on)
+
         color = PlotUtilities.getValidColor(color)
         data.custom_color = color
 
@@ -317,9 +320,11 @@ class PlotterWidget(PlotterBase):
         self.actionAddText = self.contextMenu.addAction("Add Text")
         self.actionRemoveText = self.contextMenu.addAction("Remove Text")
         self.contextMenu.addSeparator()
+        self.actionToggleGrid = self.contextMenu.addAction("Toggle Grid On/Off")
         if self.show_legend:
             self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
             self.contextMenu.addSeparator()
+        # Additional actions
         self.actionCustomizeLabel = self.contextMenu.addAction("Customize Labels")
         self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
@@ -339,6 +344,7 @@ class PlotterWidget(PlotterBase):
         self.actionRemoveText.triggered.connect(self.onRemoveText)
         self.actionChangeScale.triggered.connect(self.onScaleChange)
         self.actionSetGraphRange.triggered.connect(self.onSetGraphRange)
+        self.actionToggleGrid.triggered.connect(self.onGridToggle)
         self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
         self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
@@ -388,7 +394,7 @@ class PlotterWidget(PlotterBase):
 
             if plot.is_data:
                 self.actionHideError = plot_menu.addAction("Hide Error Bar")
-                if plot.dy is not None and plot.dy != []:
+                if plot.dy is not None and len(plot.dy)>0:
                     if plot.hide_error:
                         self.actionHideError.setText('Show Error Bar')
                 else:
