@@ -46,14 +46,14 @@ being looked at is truly one dimensional and properly aligned.
 However, one must remember the constraints of a small angle scattering experiment,
 we only measure a small range of momentum transfer, and extrapolate the rest,
 as such the extrapolation steps must be appropriate for the system.
-This is in addition to the usual considerations of resultion and systematic
+This is in addition to the usual considerations of resolution and systematic
 measurement error.
 
 The :math:`\Gamma_3` projection is motivated by a system of
 monodisperse, randomly oriented particles in dilute suspension,
 such that there is no spatial correlations between particles.
 It is the kind of system described by the Debye equation.
-Just as is the case with :math:`\Gamma_1`, as long as one truely
+Just as is the case with :math:`\Gamma_1`, as long as one truly
 has this kind of system, and with caveats about extrapolation
 and experimental constraints, one should be able to fully recover
 the correlation function.
@@ -62,8 +62,8 @@ the correlation function.
 Formal Description
 ------------------
 
-More formally, the correlation function is a quantity that arrises naturally from calculating the square magnitude
-of the three dimensional fourier transform, which is proportional to the scattering amplitude.
+More formally, the correlation function is a quantity that arises naturally from calculating the square magnitude
+of the three dimensional Fourier transform, which is proportional to the scattering amplitude.
 
 .. math::
     \frac{d\sigma}{d\Omega} \propto F(\vec{q}) F^*(\vec{q})
@@ -93,7 +93,7 @@ meaning that, with some renaming of variables, we have
 .. math::
     F(\vec{q}) F^*(\vec{q}) = \left(\int \rho(\vec{t}) e^{i \vec{t}\cdot\vec{q}} \; dt^3\right)\left( \int \rho(\vec{s}) e^{-i \vec{s}\cdot\vec{q}} \; ds^3 \right)
 
-And letting  some rearrangement becomes
+With some rearrangement this becomes
 
 .. math::
     \int\int \rho(\vec{s}) \rho(\vec{t}) e^{i (t-s)\cdot\vec{q}} \; dr^3 \; ds^3
@@ -106,18 +106,18 @@ and applying the Fourier translation theorem, we can rewrite the above as
 .. math::
     \int\int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) e^{i \vec{r}\cdot\vec{q}} \; ds^3  \; dr^3
 
-Some final reording of the integration gives
+Some final reordering of the integration gives
 
 .. math::
     \int \left[ \int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) \; ds^3 \right] \; e^{i \vec{r}\cdot\vec{q}} \; dr^3
 
-The quantity in square brackets what we call the correlation function, :math:`\gamma(\vec{r})`, so:
+The quantity in square brackets is what is called the correlation function, :math:`\gamma(\vec{r})`, so:
 
 .. math::
     \gamma(\vec{r}) = \int \rho(\vec{s}) \rho(\vec{s} + \vec{r}) \; ds^3
 
-and it is the quantity that is Fouier transformed (with some appropriate scaling)
-to get the magnitude of scattering.
+and it is the quantity that is Fourier transformed (with some appropriate scaling)
+to get the magnitude of the scattering.
 
 Some useful properties of the Correlation Function
 ..................................................
@@ -154,9 +154,9 @@ and recombine it with the positive part. We can also multiply the integral by tw
 the integrand by two, giving
 
 .. math::
-    =2 \int_0^\infty f(x) \frac{e^{i x \xi} + e^{-i x \xi}{2} dx
+    = 2 \int_0^\infty f(x) \frac{e^{i x \xi} + e^{-i x \xi}{2} dx
 
-The fractional part is the complex definition of cosine.
+The fractional part of which is the complex definition of cosine.
 Applying this definition and using the fact that :math:`f(x)` is even
 to restore the original bounds of integration we get
 
@@ -177,10 +177,10 @@ Consider the Fourier transform of the three dimensional correlation function,
 
 
 Now let :math:`q_z = q_y = 0`.
-The motivation for this is (1) that during small angle of scattering :math:`q_z`
-and so is small enough to be neglected, and (2) that we are choosing to measure
+The motivation for this is (1) that during small angle scattering :math:`q_z`
+is small enough to be neglected, and (2) that we are choosing to measure
 in one direction of the :math:`q_x q_y` plane.
-We assume, without loss of generality, to be where :math:`q_y=0`.
+We assume, without loss of generality, this to be where :math:`q_y=0`.
 
 This gives us :math:`q \cdot r = x q_x`, and so the transform becomes
 
@@ -219,18 +219,14 @@ First note that we can write it (with some technical assumtions about convergenc
     f(y) = \int f(x) \int q^2 cos(qx) cos(qy) dq dx
 
 
-
 :math:`\Gamma_3` Projection
 ...........................
 
-The :math:`\Gamma_3` projection inverts the
+[TO DO]
 
 
 References
 ----------
-
-Correlation Function
-....................
 
 Ruland, W. *Coll. Polym. Sci.* (1977), 255, 417-427
 
@@ -249,14 +245,3 @@ Göschel, U.; Urban, G. *Polymer* (1995), 36, 3633-3639
 Stribeck, N. *X-Ray Scattering of Soft Matter*, Springer. Berlin (2007), 138-161
 
 :ref:`FDR` (PDF format)
-
-Volume Fraction Profile
-.......................
-
-Washington, C.; King, S. M. *J. Phys. Chem.*, (1996), 100, 7603-7609
-
-Cosgrove, T.; King, S. M.; Griffiths, P. C. *Colloid-Polymer Interactions: From Fundamentals to Practice*, Wiley. New York (1999), 193-204
-
-King, S. M.; Griffiths, P. C.; Cosgrove, T. *Applications of Neutron Scattering to Soft Condensed Matter*, Gordon & Breach. Amsterdam (2000), 77-105
-
-King, S.; Griffiths, P.; Hone, J.; Cosgrove, T. *Macromol. Symp.* (2002), 190, 33-42
