@@ -12,13 +12,14 @@ low-Q range (used for Guinier back-extrapolation) and 2 bars indicating
 the range to be used for Porod forward-extrapolation.
 
 This information is also shown on the orange and green interactive slider on the left.
-You can drag bars on this left-hand plot, or enter values manually.
+You can drag bars on this slider (not the plot), or enter values manually.
 
 .. figure:: tutorial_data_loaded.png
    :align: center
 
 Once the Q ranges have been set, click the "Go" button to run the analysis.
-This will run through the process described in the technical documentation.
+This will run through the process described in the technical documentation using the
+default options shown above the button.
 
 The parameters used along the way can be overriden by changing them in the appropriate text boxes,
 and whether or not they are recalculated is controlled by the check boxes.
@@ -27,7 +28,7 @@ Options
 -------
 
 In addition to the checkboxes that control whether parts of the calculation are executed,
-there are options for choosing how the parameters are extracted.
+there are options for choosing how the lamellar parameters are extracted.
 These are intended to give flexibility to users and allow for manual control in certain edge
 cases, or where there is small errors in the transformed data.
 
@@ -38,10 +39,11 @@ as long as it is feasible.
 The extra options are as follows:
 
 1) There is an option to choose how the tangent slope used for calculating lamellar parameters
-such as `hard block` is calculated. Usually this is done by finding the infection point of the
-curve. However, in some datasets it is more appropriate to use the point half way between minimum
-and maximum.
-2) The second option chooses whether to use the minimum or maximum to infer the periodicity.
+such as `hard block` is calculated. Usually this is done by finding the inflection point of the
+curve. However, in some datasets it is more appropriate to use the point half way between the minimum
+and maximum values of :math:`\Gamma_1`;
+
+2) The second option chooses whether to use the first minimum or subsequent maximum to infer the periodicity.
 The standard option is to use the maximum, but in some cases, such as where the period is
 long compared to experimental data,
 it might be necessary to use twice the minimum as a proxy.
@@ -72,7 +74,7 @@ Finally, you can see the interface distribution function in the `IDF` tab
  .. figure:: tutorial_idf.png
     :align: center
 
-The export buttons allow you to produce .csv files containing either the extrapolated
+The export buttons allow you to produce CSV files containing either the extrapolated
 Q-space data, or the transformed data.
 
 The structure of the transformed data file is shown below.
@@ -80,4 +82,7 @@ The structure of the transformed data file is shown below.
  .. figure:: tutorial_export_data.png
     :align: center
 
-
+.. note:: If *Export Extrapolated* is selected a dialog box will appear in which the
+          bounds and binning of the extrapolated data can be selected. This is pre-populated
+          with the values for the experimental data; i.e. using these values would *not*
+          actually include any extrapolated data!
