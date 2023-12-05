@@ -86,3 +86,6 @@ The structure of the transformed data file is shown below.
           bounds and binning of the extrapolated data can be selected. This is pre-populated
           with the values for the experimental data; i.e. using these values would *not*
           actually include any extrapolated data!
+
+.. figure:: tutorial_extrapolate.png
+   :align: center
