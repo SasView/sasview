@@ -1,3 +1,8 @@
+from abc import ABC, abstractmethod
+
+from PySide6.QtCore import QEvent
+
+# Colours
 interface_color = 'black'
 disable_color = 'gray'
 active_color = 'red'
@@ -7,7 +12,8 @@ P_color = 'blue'
 theta_color = 'orange'
 profile_colors = [rho_color, mu_color, P_color, theta_color]
 
-class BaseInteractor(object):
+
+class BaseInteractor(ABC):
     """
     Share some functions between the interface interactor and various layer
     interactors.
@@ -24,7 +30,7 @@ class BaseInteractor(object):
 
         connect_markers(markers) - register callbacks for all markers
         clear_markers() - remove all items in self.markers
-        onHilite(ev) - enter/leave event processing
+        onHighlight(ev) - enter/leave event processing
         onLeave(ev) - enter/leave event processing
         onClick(ev) - mouse click: calls save()
         onRelease(ev) - mouse click ends: calls moveend()
@@ -45,6 +51,7 @@ class BaseInteractor(object):
         self.base = base
         self.axes = axes
         self.color = color
+
         self.clickx = None
         self.clicky = None
         self.markers = []
@@ -63,25 +70,22 @@ class BaseInteractor(object):
             self.base.connect.clear(*self.markers)
         self.markers = []
 
-    def save(self, ev):
-        """
-        """
-        pass
+    @abstractmethod
+    def save(self, ev: QEvent):
+        """ save the current state for later restore """
 
-    def restore(self, ev):
-        """
-        """
-        pass
+    @abstractmethod
+    def restore(self, ev: QEvent):
+        """ restore the old state """
 
-    def move(self, x, y, ev):
-        """
-        """
-        pass
+    @abstractmethod
+    def move(self, x, y, ev: QEvent):
+        """ move the interactor to position x,y """
 
-    def moveend(self, ev):
-        """
-        """
-        pass
+    @abstractmethod
+    def moveend(self, ev: QEvent):
+        """ end the drag event """
+
 
     def connect_markers(self, markers):
         """
@@ -90,23 +94,23 @@ class BaseInteractor(object):
 
         for h in markers:
             connect = self.base.connect
-            connect('enter', h, self.onHilite)
+            connect('enter', h, self.onHighlight)
             connect('leave', h, self.onLeave)
             connect('click', h, self.onClick)
             connect('release', h, self.onRelease)
             connect('drag', h, self.onDrag)
             connect('key', h, self.onKey)
 
-    def onHilite(self, ev):
+    def onHighlight(self, ev: QEvent):
         """
-        Hilite the artist reporting the event, indicating that it is
+        Highligh the artist reporting the event, indicating that it is
         ready to receive a click.
         """
         ev.artist.set_color(active_color)
         self.base.draw()
         return True
 
-    def onLeave(self, ev):
+    def onLeave(self, ev: QEvent):
         """
         Restore the artist to the original colour when the cursor leaves.
         """
@@ -114,22 +118,24 @@ class BaseInteractor(object):
         self.base.draw()
         return True
 
-    def onClick(self, ev):
+    def onClick(self, ev: QEvent):
         """
         Prepare to move the artist.  Calls save() to preserve the state for
         later restore().
         """
         self.clickx, self.clicky = ev.xdata, ev.ydata
         self.save(ev)
+
         return True
 
-    def onRelease(self, ev):
+    def onRelease(self, ev: QEvent):
         """
+        Mouse release
         """
         self.moveend(ev)
         return True
 
-    def onDrag(self, ev):
+    def onDrag(self, ev: QEvent):
         """
         Move the artist.  Calls move() to update the state, or restore() if
         the mouse leaves the window.
@@ -142,7 +148,7 @@ class BaseInteractor(object):
             self.restore(ev)
         return True
 
-    def onKey(self, ev):
+    def onKey(self, ev: QEvent):
         """
         Respond to keyboard events.  Arrow keys move the widget.  Escape
         restores it to the position before the last click.
@@ -180,5 +186,6 @@ class BaseInteractor(object):
         else:
             nx, ny = ax.transData.xy_tup((px + 1.0, py + 1.0))
         dx, dy = nx - x, ny - y
+
         return dx, dy
 

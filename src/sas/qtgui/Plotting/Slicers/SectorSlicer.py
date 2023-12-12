@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy
 import logging
 
@@ -359,8 +360,8 @@ class SideInteractor(BaseInteractor):
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
 
-    def update(self, phi=None, delta=None, mline=None,
-               side=False, left=False, right=False):
+    def update(self, phi: Optional[float]=None, delta: Optional[float]=None, mline: Optional[BaseInteractor]=None,
+               side: bool=False, left: bool=False, right: bool=False):
         """
         Draw oblique line
 
@@ -374,7 +375,7 @@ class SideInteractor(BaseInteractor):
             self.phi = phi
         if delta is None:
             delta = 0
-        if  right:
+        if right:
             self.phi = -1 * numpy.fabs(self.phi)
             #delta=-delta
         else:

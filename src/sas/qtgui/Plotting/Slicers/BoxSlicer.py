@@ -1,5 +1,7 @@
 import numpy
 
+from typing import Optional
+
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -119,7 +121,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.vertical_lines.save(ev)
         self.horizontal_lines.save(ev)
 
-    def _post_data(self, new_slab=None, nbins=None, direction=None):
+    def _post_data(self, new_slab: SlicerModel, nbins: Optional[int]=None, direction: Optional[str]=None):
         """
         post 1D data averaging in Qx or Qy given new_slab type
 
@@ -138,11 +140,13 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         if nbins is not None:
             self.nbins = nbins
+
         if self.averager is None:
             if new_slab is None:
                 msg = "post data:cannot average , averager is empty"
                 raise ValueError(msg)
             self.averager = new_slab
+
         if self.direction not in ["X", "Y"]:
             msg = "post data:no Box Average direction was supplied"
             raise ValueError(msg)
@@ -524,7 +528,7 @@ class BoxInteractorY(BoxInteractor):
         self.base = base
         super()._post_data()
 
-    def _post_data(self, new_slab=None, nbins=None, direction=None):
+    def _post_data(self, new_slab=None, nbins: Optional[int]=None, direction: Optional[str]=None):
         """
         Post data creating by averaging in Qy direction
         """
