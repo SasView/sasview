@@ -2,9 +2,9 @@ from PySide6 import QtGui
 from PySide6 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from abc import ABC, abstractmethod
 
-
-class SlicerModel:
+class SlicerModel(ABC):
 
     def __init__(self):
         # Model representation of local parameters
@@ -71,14 +71,14 @@ class SlicerModel:
         '''getter for the model'''
         return self._model
 
+    @abstractmethod
     def getParams(self):
-        ''' pure virtual '''
-        raise NotImplementedError("Parameter getter must be implemented in derived class.")
+        """ Returns the parameters for this model """
 
+    @abstractmethod
     def setParams(self):
-        ''' pure virtual '''
-        raise NotImplementedError("Parameter setter must be implemented in derived class.")
+        """ Sets the parameters for this model """
 
+    @abstractmethod
     def validate(self):
-        ''' pure virtual '''
-        raise NotImplementedError("Validator must be implemented in derived class.")
+        """ Check current parameters are valid """

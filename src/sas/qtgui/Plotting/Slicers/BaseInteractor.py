@@ -1,6 +1,11 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from PySide6.QtCore import QEvent
+from matplotlib.lines import Line2D
+from matplotlib.axes import Axes
+
+from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 # Colours
 interface_color = 'black'
@@ -18,13 +23,12 @@ class BaseInteractor(ABC):
     Share some functions between the interface interactor and various layer
     interactors.
 
-    Individual interactors need the following functions:
-
+    Abstract methods:
         save(ev)  - save the current state for later restore
         restore() - restore the old state
         move(x,y,ev) - move the interactor to position x,y
         moveend(ev) - end the drag event
-        update() - draw the interactors
+
 
     The following are provided by the base class:
 
@@ -45,17 +49,17 @@ class BaseInteractor(ABC):
         markers - list of handles for the interactor
 
     """
-    def __init__(self, base, axes, color='black'):
-        """
-        """
-        self.base = base
-        self.axes = axes
-        self.color = color
+    def __init__(self, base: SlicerModel, axes: Axes, color='black'):
 
-        self.clickx = None
-        self.clicky = None
-        self.markers = []
+        self.base: SlicerModel = base
+        self.axes: Axes = axes
+        self.color: str = color
 
+        self.clickx: Optional[int] = None
+        self.clicky: Optional[int] = None
+        self.markers: list[Line2D] = []
+
+        # TODO: Why?
         if isinstance(base.data, list):
             self.data = self.base.data[0]
         else:
@@ -87,7 +91,7 @@ class BaseInteractor(ABC):
         """ end the drag event """
 
 
-    def connect_markers(self, markers):
+    def connect_markers(self, markers: list[Line2D]):
         """
         Connect markers to callbacks
         """
@@ -103,7 +107,7 @@ class BaseInteractor(ABC):
 
     def onHighlight(self, ev: QEvent):
         """
-        Highligh the artist reporting the event, indicating that it is
+        Highlight the artist reporting the event, indicating that it is
         ready to receive a click.
         """
         ev.artist.set_color(active_color)
@@ -141,11 +145,14 @@ class BaseInteractor(ABC):
         the mouse leaves the window.
         """
         inside, _ = self.axes.contains(ev)
+
         if inside:
             self.clickx, self.clicky = ev.xdata, ev.ydata
             self.move(ev.xdata, ev.ydata, ev)
+
         else:
             self.restore(ev)
+
         return True
 
     def onKey(self, ev: QEvent):
@@ -157,6 +164,7 @@ class BaseInteractor(ABC):
         """
         if ev.key == 'escape':
             self.restore(ev)
+
         elif ev.key in ['up', 'down', 'right', 'left']:
             dx, dy = self.dpixel(self.clickx, self.clicky, nudge=ev.control)
             if ev.key == 'up':
@@ -167,12 +175,15 @@ class BaseInteractor(ABC):
                 self.clickx += dx
             else: self.clickx -= dx
             self.move(self.clickx, self.clicky, ev)
+
         else:
             return False
+
         self.base.update()
+
         return True
 
-    def dpixel(self, x, y, nudge=False):
+    def dpixel(self, x: float, y: float, nudge=False) -> tuple[float, float]:
         """
         Return the step size in data coordinates for a small
         step in screen coordinates.  If nudge is False (default)
@@ -180,7 +191,9 @@ class BaseInteractor(ABC):
         size is 0.2 pixels.
         """
         ax = self.axes
+
         px, py = ax.transData.inverse_xy_tup((x, y))
+
         if nudge:
             nx, ny = ax.transData.xy_tup((px + 0.2, py + 0.2))
         else:
