@@ -1,4 +1,3 @@
-import sys
 import webbrowser
 
 import pytest
@@ -15,7 +14,7 @@ from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local
-from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
+from sas.qtgui.Plotting.Slicing.SlicerParameters import SlicerParameters
 
 
 class dummy_manager:

@@ -1,7 +1,7 @@
 import numpy
 
-from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.Slicers.AnnulusSlicer import RingInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicing.Slicers import RingInteractor
 
 class CircularMask(BaseInteractor):
     """

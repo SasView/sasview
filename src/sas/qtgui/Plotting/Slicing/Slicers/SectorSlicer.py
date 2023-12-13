@@ -1,11 +1,10 @@
 from typing import Optional
 import numpy
-import logging
 
-from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
 
 MIN_PHI = 0.05
 

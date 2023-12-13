@@ -5,7 +5,7 @@ from PySide6.QtCore import QEvent
 from PySide6.QtWidgets import QLineEdit, QTextEdit
 
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
 import sas.qtgui.Utilities.ObjectLibrary as ol
 
 

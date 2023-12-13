@@ -5,7 +5,7 @@ from PySide6.QtCore import QEvent
 from matplotlib.lines import Line2D
 from matplotlib.axes import Axes
 
-from sas.qtgui.Plotting.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
 
 # Colours
 interface_color = 'black'

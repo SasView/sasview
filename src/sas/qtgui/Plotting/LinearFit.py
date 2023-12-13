@@ -3,8 +3,6 @@ Adds a linear fit plot to the chart
 """
 import re
 import numpy
-from numbers import Number
-from typing import Optional
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
@@ -14,11 +12,10 @@ from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 from sas.qtgui.Plotting import Fittings
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.LineModel import LineModel
-from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
+from sas.qtgui.Plotting.Slicing.QRangeSlider import QRangeSlider
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
-from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
 

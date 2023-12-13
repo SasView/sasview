@@ -1,13 +1,13 @@
 import numpy as np
 
-from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
-from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
-from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.ArcInteractor import ArcInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.RadiusInteractor import RadiusInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import LineInteractor
 
 
 class WedgeInteractor(BaseInteractor, SlicerModel):

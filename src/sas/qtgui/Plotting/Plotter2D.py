@@ -16,16 +16,16 @@ import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.ColorMap import ColorMap
-from sas.qtgui.Plotting.BoxSum import BoxSum
-from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
+from sas.qtgui.Plotting.Slicing.BoxSumParameterEditor import BoxSum
+from sas.qtgui.Plotting.Slicing.SlicerParameters import SlicerParameters
 
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
-from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
-from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
-from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
+from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorX
+from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorPhi
+from sas.qtgui.Plotting.Slicing.Slicers.AnnulusSlicer import AnnulusInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import SectorInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.BoxSum import BoxSumCalculator
 
 import matplotlib as mpl
 DEFAULT_CMAP = mpl.cm.jet

@@ -1,12 +1,9 @@
-import sys
-
 import pytest
 
-from PySide6 import QtGui, QtWidgets
-from PySide6 import QtCore
+from PySide6 import QtGui
 
 # Local
-from sas.qtgui.Plotting.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
 
 
 class SlicerModelTest:

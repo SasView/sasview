@@ -12,12 +12,12 @@ from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
-from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
-from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorX
+from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicing.Slicers import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicing.Slicers import WedgeInteractorPhi
+from sas.qtgui.Plotting.Slicing.Slicers import AnnulusInteractor
+from sas.qtgui.Plotting.Slicing.Slicers import SectorInteractor
 
 from sasdata.dataloader.loader import Loader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter

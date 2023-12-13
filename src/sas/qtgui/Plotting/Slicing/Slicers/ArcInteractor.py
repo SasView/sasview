@@ -1,6 +1,6 @@
 import numpy as np
 
-from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
 
 class ArcInteractor(BaseInteractor):
     """
