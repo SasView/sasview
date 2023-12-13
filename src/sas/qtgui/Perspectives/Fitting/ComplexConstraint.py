@@ -32,7 +32,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
 
         # disable the context help icon
         windowFlags = self.windowFlags()
-        self.setWindowFlags(windowFlags & ~QtCore.Qt.WindowContextHelpButtonHint)
+        # self.setWindowFlags(windowFlags & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         # Useful globals
         self.tabs = tabs
