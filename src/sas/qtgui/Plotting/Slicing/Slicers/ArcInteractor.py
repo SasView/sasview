@@ -1,8 +1,14 @@
+from typing import Optional
+
 import numpy as np
 
-from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
 
-class ArcInteractor(BaseInteractor):
+from matplotlib.axes import Axes
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
+
+from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
+
+class ArcInteractor(BaseInteractor[Plotter2D]):
     """
     Draw an arc on a data2D plot with a variable radius (centered at [0,0]).
     User interaction adjusts the parameter r
@@ -11,12 +17,13 @@ class ArcInteractor(BaseInteractor):
     param theta: angle from x-axis of the central point on the arc
     param phi: angle from the centre point on the arc to each of its edges
     """
-    def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 theta=np.pi / 3, phi=np.pi / 8):
+    def __init__(self, base: Plotter2D, axes: Axes, color='black', zorder=5, r=1.0,
+                 theta=np.pi / 3, phi=np.pi / 8, parent: Optional[BaseInteractor[Plotter2D]]=None):
+
         BaseInteractor.__init__(self, base, axes, color=color)
-        self.markers = []
-        self.axes = axes
-        self.color = color
+
+        self.parent = parent
+
         # Variables for the current mouse position
         self._mouse_x = r
         self._mouse_y = 0
@@ -41,14 +48,6 @@ class ArcInteractor(BaseInteractor):
         # Flag to keep track of motion
         self.has_move = False
         self.connect_markers([self.marker, self.arc])
-        self.update()
-
-    def set_layer(self, n):
-        """
-        Allow adding plot to the same panel
-        :param n: the number of layer
-        """
-        self.layernum = n
         self.update()
 
     def clear(self):
@@ -97,8 +96,11 @@ class ArcInteractor(BaseInteractor):
         After a dragging motion reset the flag self.has_move to False
         :param ev: event
         """
+
         self.has_move = False
-        self.base.moveend(ev)
+
+        if self.parent is not None:
+            self.parent.moveend(ev)
 
     def restore(self, ev):
         """

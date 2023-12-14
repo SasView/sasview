@@ -16,7 +16,7 @@ from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
-from sas.qtgui.Plotting.Slicing.QRangeSlider import QRangeSlider
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelProperties

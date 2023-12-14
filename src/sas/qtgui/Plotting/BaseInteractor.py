@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, TypeVar, Generic
 
 from PySide6.QtCore import QEvent
 from matplotlib.lines import Line2D
 from matplotlib.axes import Axes
 
-from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
 
 # Colours
 interface_color = 'black'
@@ -17,8 +17,9 @@ P_color = 'blue'
 theta_color = 'orange'
 profile_colors = [rho_color, mu_color, P_color, theta_color]
 
+PlotterBaseT = TypeVar('PlotterBaseT', bound=PlotterBase)
 
-class BaseInteractor(ABC):
+class BaseInteractor(ABC, Generic[PlotterBaseT]):
     """
     Share some functions between the interface interactor and various layer
     interactors.
@@ -49,9 +50,9 @@ class BaseInteractor(ABC):
         markers - list of handles for the interactor
 
     """
-    def __init__(self, base: SlicerModel, axes: Axes, color='black'):
+    def __init__(self, base: PlotterBaseT, axes: Axes, color='black'):
 
-        self.base: SlicerModel = base
+        self.base: PlotterBaseT = base
         self.axes: Axes = axes
         self.color: str = color
 

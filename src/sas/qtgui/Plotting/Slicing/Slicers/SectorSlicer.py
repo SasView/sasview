@@ -1,14 +1,19 @@
 from typing import Optional
 import numpy
 
-from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.PlotterData import Data1D
+from matplotlib.axes import Axes
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
+from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
+
 
 MIN_PHI = 0.05
 
-class SectorInteractor(BaseInteractor, SlicerModel):
+class SectorInteractor(BaseInteractor[Plotter2D], SlicerModel):
     """
     SectorInteractor plots a data1D average of a sector area defined in a
     Data2D object. The data1D averaging itself is performed in sasdata by
@@ -26,13 +31,13 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         ..TODO: the 2 subclasses here are the same as used by the BoxSum. These
             should probably be abstracted out.
     """
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
 
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
+
         # Class initialization
         self.markers = []
-        self.axes = axes
         self._item = item
 
         # Connect the plot to event
@@ -51,20 +56,22 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         # Absolute value of the Angle between the middle line and any side line
         self.phi = numpy.pi / 12
         # Middle line
-        self.main_line = LineInteractor(self, self.axes, color='blue',
+        self.main_line = LineInteractor(self.base, self.axes, color='blue',
                                         zorder=zorder, r=self.qmax,
                                         theta=self.theta2)
         self.main_line.qmax = self.qmax
         # Right Side line
-        self.right_line = SideInteractor(self, self.axes, color='black',
+        self.right_line = SideInteractor(self.base, self.axes, color='black',
                                          zorder=zorder, r=self.qmax,
-                                         phi=-1 * self.phi, theta2=self.theta2)
+                                         phi=-1 * self.phi, theta2=self.theta2, parent=self)
+
         self.right_line.update(right=True)
         self.right_line.qmax = self.qmax
+
         # Left Side line
-        self.left_line = SideInteractor(self, self.axes, color='black',
+        self.left_line = SideInteractor(self.base, self.axes, color='black',
                                         zorder=zorder, r=self.qmax,
-                                        phi=self.phi, theta2=self.theta2)
+                                        phi=self.phi, theta2=self.theta2, parent=self)
         self.left_line.update(left=True)
         self.left_line.qmax = self.qmax
         # draw the sector
@@ -297,13 +304,15 @@ class SideInteractor(BaseInteractor):
     :param theta2: the angle between the middle line and x- axis
 
     """
-    def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 phi=numpy.pi / 4, theta2=numpy.pi / 3):
+    def __init__(self, base: Plotter2D, axes: Axes, color: str='black', zorder: int=5, r=1.0,
+                 phi=numpy.pi / 4,
+                 theta2=numpy.pi / 3,
+                 parent: Optional[BaseInteractor]=None):
+
         BaseInteractor.__init__(self, base, axes, color=color)
-        # Initialize the class
-        self.markers = []
-        self.axes = axes
-        self.color = color
+
+        self.parent = parent
+
         # compute the value of the angle between the current line and
         # the x-axis
         self.save_theta = theta2 + phi
@@ -330,6 +339,7 @@ class SideInteractor(BaseInteractor):
         self.line = self.axes.plot([x1, x2], [y1, y2],
                                    linestyle='-', marker='',
                                    color=self.color, visible=True)[0]
+
         # Flag to differentiate the left line from the right line motion
         self.left_moving = False
         # Flag to define a motion
@@ -337,14 +347,6 @@ class SideInteractor(BaseInteractor):
         # connecting markers and draw the picture
         self.connect_markers([self.inner_marker, self.line])
 
-    def set_layer(self, n):
-        """
-        Allow adding plot to the same panel
-
-        :param n: the number of layer
-        """
-        self.layernum = n
-        self.update()
 
     def clear(self):
         """
@@ -407,7 +409,8 @@ class SideInteractor(BaseInteractor):
 
     def moveend(self, ev):
         self.has_move = False
-        self.base.moveend(ev)
+        if self.parent is None:
+            self.parent.moveend(ev)
 
     def restore(self, ev):
         """

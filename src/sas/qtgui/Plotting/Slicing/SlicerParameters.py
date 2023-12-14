@@ -14,10 +14,10 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorX
 from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorY
-from sas.qtgui.Plotting.Slicing.Slicers import WedgeInteractorQ
-from sas.qtgui.Plotting.Slicing.Slicers import WedgeInteractorPhi
-from sas.qtgui.Plotting.Slicing.Slicers import AnnulusInteractor
-from sas.qtgui.Plotting.Slicing.Slicers import SectorInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorPhi
+from sas.qtgui.Plotting.Slicing.Slicers.AnnulusSlicer import AnnulusInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import SectorInteractor
 
 from sasdata.dataloader.loader import Loader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter

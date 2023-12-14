@@ -3,15 +3,19 @@
 """
 import numpy as np
 
-from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.Slicing.Slicers import SideInteractor
-from sas.qtgui.Plotting.Slicing.Slicers import LineInteractor
+from matplotlib.axes import Axes
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
 
-class SectorMask(BaseInteractor):
+from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import SideInteractor
+from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import LineInteractor
+
+
+class SectorMask(BaseInteractor[Plotter2D]):
     """
     Draw a sector slicer.Allow to find the data 2D inside of the sector lines
     """
-    def __init__(self, base, axes, color='gray', zorder=3, side=False):
+    def __init__(self, base: Plotter2D, axes: Axes, color='gray', zorder=3, side=False):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)

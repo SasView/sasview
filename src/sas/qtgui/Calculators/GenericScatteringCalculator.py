@@ -25,8 +25,6 @@ from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
 from sas.sascalc.calculator import sas_gen
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
 
 from sas.qtgui.Plotting.PlotterData import Data1D

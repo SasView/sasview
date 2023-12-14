@@ -2,13 +2,17 @@ import numpy
 
 from typing import Optional
 
-from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
+from matplotlib.axes import Axes
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
+
+
+from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.SlicerRegistry import SlicerRegistry
 
-
-class BoxInteractor(BaseInteractor, SlicerModel):
+class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
     """
     BoxInteractor plots a data1D average of a rectangular area defined in
     a Data2D object. The data1D averaging itself is performed in sasdata
@@ -22,7 +26,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
     -x to +x as a function of Q_y
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
         # Class initialization
@@ -548,3 +552,5 @@ class BoxInteractorY(BoxInteractor):
                 print("Number of bins cannot be less than or equal to 0. Please adjust.")
                 isValid = False
         return isValid
+
+SlicerRegister.register()

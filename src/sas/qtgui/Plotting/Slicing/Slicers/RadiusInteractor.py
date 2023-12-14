@@ -1,6 +1,6 @@
 import numpy as np
 
-from sas.qtgui.Plotting.Slicing.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
 
 class RadiusInteractor(BaseInteractor):
     """

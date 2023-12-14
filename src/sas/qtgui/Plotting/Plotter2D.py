@@ -18,14 +18,8 @@ from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.Slicing.BoxSumParameterEditor import BoxSum
 from sas.qtgui.Plotting.Slicing.SlicerParameters import SlicerParameters
+from sas.qtgui.Plotting.Slicing.SlicerRegistry import SlicerRegistry
 
-from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorX
-from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorY
-from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorQ
-from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorPhi
-from sas.qtgui.Plotting.Slicing.Slicers.AnnulusSlicer import AnnulusInteractor
-from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import SectorInteractor
-from sas.qtgui.Plotting.Slicing.Slicers.BoxSum import BoxSumCalculator
 
 import matplotlib as mpl
 DEFAULT_CMAP = mpl.cm.jet
@@ -171,20 +165,26 @@ class Plotter2DWidget(PlotterBase):
         plot_slicer_menu=self.contextMenu.addMenu('Slicers')
         self.actionCircularAverage = plot_slicer_menu.addAction("&Perform Circular Average")
         self.actionCircularAverage.triggered.connect(self.onCircularAverage)
-        self.actionSectorView = plot_slicer_menu.addAction("&Sector [Q View]")
-        self.actionSectorView.triggered.connect(self.onSectorView)
-        self.actionAnnulusView = plot_slicer_menu.addAction("&Annulus [Phi View]")
-        self.actionAnnulusView.triggered.connect(self.onAnnulusView)
-        self.actionBoxSum = plot_slicer_menu.addAction("&Box Sum")
-        self.actionBoxSum.triggered.connect(self.onBoxSum)
-        self.actionBoxAveragingX = plot_slicer_menu.addAction("&Box Averaging in Qx")
-        self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
-        self.actionBoxAveragingY = plot_slicer_menu.addAction("&Box Averaging in Qy")
-        self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
-        self.actionWedgeAveragingQ = plot_slicer_menu.addAction("&Wedge Averaging in Q")
-        self.actionWedgeAveragingQ.triggered.connect(self.onWedgeAveragingQ)
-        self.actionWedgeAveragingPhi = plot_slicer_menu.addAction("&Wedge Averaging in Phi")
-        self.actionWedgeAveragingPhi.triggered.connect(self.onWedgeAveragingPhi)
+
+        for menu_name, slicer in SlicerRegistry.name_class_pairs():
+            action = plot_slicer_menu.addAction(menu_name)
+            this = self
+            action.tiggered.connect(lambda: this.setSlicer(slicer))
+
+        # self.actionSectorView = plot_slicer_menu.addAction("&Sector [Q View]")
+        # self.actionSectorView.triggered.connect(self.onSectorView)
+        # self.actionAnnulusView = plot_slicer_menu.addAction("&Annulus [Phi View]")
+        # self.actionAnnulusView.triggered.connect(self.onAnnulusView)
+        # self.actionBoxSum = plot_slicer_menu.addAction("&Box Sum")
+        # self.actionBoxSum.triggered.connect(self.onBoxSum)
+        # self.actionBoxAveragingX = plot_slicer_menu.addAction("&Box Averaging in Qx")
+        # self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
+        # self.actionBoxAveragingY = plot_slicer_menu.addAction("&Box Averaging in Qy")
+        # self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
+        # self.actionWedgeAveragingQ = plot_slicer_menu.addAction("&Wedge Averaging in Q")
+        # self.actionWedgeAveragingQ.triggered.connect(self.onWedgeAveragingQ)
+        # self.actionWedgeAveragingPhi = plot_slicer_menu.addAction("&Wedge Averaging in Phi")
+        # self.actionWedgeAveragingPhi.triggered.connect(self.onWedgeAveragingPhi)
 
         plot_slicer_menu.addSeparator()
 
@@ -407,18 +407,18 @@ class Plotter2DWidget(PlotterBase):
         self.param_model = self.slicer.model()
         if self.slicer_widget and reset:
             self.slicer_widget.setModel(self.param_model)
-
-    def onSectorView(self):
-        """
-        Perform sector averaging on Q and draw sector slicer
-        """
-        self.setSlicer(slicer=SectorInteractor)
-
-    def onAnnulusView(self):
-        """
-        Perform sector averaging on Phi and draw annulus slicer
-        """
-        self.setSlicer(slicer=AnnulusInteractor)
+    #
+    # def onSectorView(self):
+    #     """
+    #     Perform sector averaging on Q and draw sector slicer
+    #     """
+    #     self.setSlicer(slicer=SectorInteractor)
+    #
+    # def onAnnulusView(self):
+    #     """
+    #     Perform sector averaging on Phi and draw annulus slicer
+    #     """
+    #     self.setSlicer(slicer=AnnulusInteractor)
 
     def onBoxSum(self):
         """
@@ -451,33 +451,33 @@ class Plotter2DWidget(PlotterBase):
 
         self.boxwidget.show()
 
-    def onBoxAveragingX(self):
-        """
-        Perform 2D data averaging on Qx
-        Create a new slicer.
-        """
-        self.setSlicer(slicer=BoxInteractorX)
-
-    def onBoxAveragingY(self):
-        """
-        Perform 2D data averaging on Qy
-        Create a new slicer .
-        """
-        self.setSlicer(slicer=BoxInteractorY)
-
-    def onWedgeAveragingQ(self):
-        """
-        Perform 2D data averaging on Q
-        Create a new slicer .
-        """
-        self.setSlicer(slicer=WedgeInteractorQ)
-
-    def onWedgeAveragingPhi(self):
-        """
-        Perform 2D data averaging on Phi
-        Create a new slicer .
-        """
-        self.setSlicer(slicer=WedgeInteractorPhi)
+    # def onBoxAveragingX(self):
+    #     """
+    #     Perform 2D data averaging on Qx
+    #     Create a new slicer.
+    #     """
+    #     self.setSlicer(slicer=BoxInteractorX)
+    #
+    # def onBoxAveragingY(self):
+    #     """
+    #     Perform 2D data averaging on Qy
+    #     Create a new slicer .
+    #     """
+    #     self.setSlicer(slicer=BoxInteractorY)
+    #
+    # def onWedgeAveragingQ(self):
+    #     """
+    #     Perform 2D data averaging on Q
+    #     Create a new slicer .
+    #     """
+    #     self.setSlicer(slicer=WedgeInteractorQ)
+    #
+    # def onWedgeAveragingPhi(self):
+    #     """
+    #     Perform 2D data averaging on Phi
+    #     Create a new slicer .
+    #     """
+    #     self.setSlicer(slicer=WedgeInteractorPhi)
 
     def onColorMap(self):
         """

@@ -12,7 +12,7 @@ from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 from sas.qtgui.Plotting import Fittings
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.LineModel import LineModel
-from sas.qtgui.Plotting.Slicing.QRangeSlider import QRangeSlider
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
