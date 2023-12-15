@@ -48,7 +48,7 @@ class DensityPanel(QtWidgets.QDialog):
         self.manager = parent
         self.setupUi()
         # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+        # self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setupModel()
         self.setupMapper()
