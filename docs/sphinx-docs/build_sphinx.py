@@ -57,6 +57,15 @@ SASMODELS_GUIDE_EXCLUDE = [
     "index.rst", "install.rst", "intro.rst",
 ]
 
+# sasdata paths
+SASDATA_ROOT = joinpath(SASVIEW_ROOT, "..", "sasdata")
+SASDATA_DOCS = joinpath(SASDATA_ROOT, "docs")
+SASDATA_BUILD = joinpath(SASDATA_ROOT, "build", "lib")
+SASDATA_DEV_SOURCE = joinpath(SASDATA_DOCS, "source", "dev")
+SASDATA_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasdata-dev")
+SASDATA_GUIDE_SOURCE = joinpath(SASDATA_DOCS, "source", "user")
+SASDATA_GUIDE_TARGET = joinpath(SPHINX_SOURCE, "user", "data")
+
 # bumps paths
 BUMPS_DOCS = joinpath(SASVIEW_ROOT, "..", "bumps", "doc")
 BUMPS_SOURCE = joinpath(BUMPS_DOCS, "guide")
@@ -152,6 +161,15 @@ def retrieve_user_docs():
     catdir = joinpath(SASMODELS_GUIDE_TARGET, "models")
     for filename in os.listdir(catdir):
         inplace_change(joinpath(catdir, filename), "../../model/", "/user/models/")
+
+
+def retrieve_sasdata_docs():
+    """
+        Copies select files from the bumps documentation into fitting perspective
+    """
+    print("=== Sasdata Docs ===")
+    copy_tree(SASDATA_DEV_SOURCE, SASDATA_DEV_TARGET)
+    copy_tree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET)
 
 
 def retrieve_bumps_docs():
@@ -269,6 +287,7 @@ def rebuild():
     setup_source_temp()
     retrieve_user_docs()
     retrieve_bumps_docs()
+    retrieve_sasdata_docs()
     apidoc()
     build()
     if find_executable('latex'):
