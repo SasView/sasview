@@ -257,7 +257,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         time_str = time.strftime("%b %d %H %M of %Y", t)
         default_name = "Batch_Fitting_"+time_str+".csv"
 
-        wildcard = "CSV files (*.csv);;"
+        wildcard = "CSV files (*.csv)"
         caption =  'Save As'
         directory =  default_name
         filter =  wildcard
