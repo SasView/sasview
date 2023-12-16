@@ -30,10 +30,6 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         self.setupUi(self)
         self.setModal(True)
 
-        # disable the context help icon
-        windowFlags = self.windowFlags()
-        self.setWindowFlags(windowFlags & ~QtCore.Qt.WindowContextHelpButtonHint)
-
         self.params = params
         self.parent = parent
         # Text of the constraint
