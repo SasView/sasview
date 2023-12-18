@@ -14,6 +14,7 @@ import json
 import types
 import numpy
 from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 
@@ -50,14 +51,15 @@ from sas import config
 from sasdata.dataloader.loader import Loader
 
 if os.path.splitext(sys.argv[0])[1].lower() != ".py":
-    DOCS_LOCATION = "doc"
+    DOCS_LOCATION = Path("doc")
 else:
-    DOCS_LOCATION = "docs/sphinx-docs/"
-PY_SOURCE = DOCS_LOCATION + "source-temp"
-HELP_DIRECTORY_LOCATION = DOCS_LOCATION + "build/html"
-RECOMPILE_DOC_LOCATION = DOCS_LOCATION + "doc-regen"
+    DOCS_LOCATION = Path("docs/sphinx-docs/")
+USER_DOCS = Path("~/.sasview/docs")
+PY_SOURCE = DOCS_LOCATION / "source-temp"
+HELP_DIRECTORY_LOCATION = DOCS_LOCATION / "build/html"
+RECOMPILE_DOC_LOCATION = USER_DOCS / "edits"
 
-IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
+IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
 SAS_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
