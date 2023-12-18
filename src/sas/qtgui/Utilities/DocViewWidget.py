@@ -84,16 +84,15 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     
     def regenerateIfNeeded(self):
         """
-        Determines whether or not a file needs to be regenerated.
+        Determines whether a file needs to be regenerated.
         If it does, it will regenerate based off whether it is detected as SasView docs or a model.
         The documentation window will open after the process of regeneration is completed.
         Otherwise, simply triggers a load of the documentation window with loadHtml()
         """
         sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
         user_models = models.find_plugins_dir()
-        html_path =  GuiUtils.HELP_DIRECTORY_LOCATION
+        html_path = GuiUtils.HELP_DIRECTORY_LOCATION
         rst_py_path = GuiUtils.PY_SOURCE
-        regen_string = ""
 
         if "models" in self.source:
             model_name = os.path.basename(self.source).replace("html", "py")
