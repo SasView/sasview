@@ -19,6 +19,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
     function of Q_x and BoxInteractorY averages all the points from
     -x to +x as a function of Q_y
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
@@ -256,7 +257,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
-        self._post_data(nbins=None)
+        self._post_data()
         self.draw()
 
     def draw(self):
@@ -273,6 +274,7 @@ class HorizontalLines(BaseInteractor):
     on the x direction. The two lines move symmetrically (in opposite
     directions). It also defines the x and -x position of a box.
     """
+
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
         """
         """
@@ -383,6 +385,7 @@ class VerticalLines(BaseInteractor):
     on the y direction. The two lines move symmetrically (in opposite
     directions). It also defines the y and -y position of a box.
     """
+
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
         """
         """
@@ -491,14 +494,15 @@ class BoxInteractorX(BoxInteractor):
     """
     Average in Qx direction. The data for all Qy at a constant Qx are
     averaged together to provide a 1D array in Qx (to be plotted as a function
-     of Qx)
+    of Qx)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
         Post data creating by averaging in Qx direction
         """
@@ -524,14 +528,15 @@ class BoxInteractorY(BoxInteractor):
     """
     Average in Qy direction. The data for all Qx at a constant Qy are
     averaged together to provide a 1D array in Qy (to be plotted as a function
-     of Qy)
+    of Qy)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
         Post data creating by averaging in Qy direction
         """
