@@ -1,7 +1,7 @@
 import sys
 import os
 import logging
-
+from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
@@ -17,15 +17,15 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
 
-    def __init__(self, parent=None, source=None):
+    def __init__(self, parent=None, source: Path = None):
         super(DocViewWindow, self).__init__(parent._parent)
         self.parent = parent
         self.setupUi(self)
         self.setWindowTitle("Documentation Viewer")
 
         # Necessary globals
-        self.source = source
-        self.regen_in_progress = False
+        self.source: Path = Path(source)
+        self.regen_in_progress: bool = False
 
         self.initializeSignals()  # Connect signals
 
@@ -35,7 +35,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         Initialize Signals 
         """
-
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
         self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
@@ -89,15 +88,17 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         The documentation window will open after the process of regeneration is completed.
         Otherwise, simply triggers a load of the documentation window with loadHtml()
         """
-        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-        user_models = models.find_plugins_dir()
+        sas_path = Path(os.path.dirname(sys.argv[0]))
+        user_models = Path(models.find_plugins_dir())
         html_path = GuiUtils.HELP_DIRECTORY_LOCATION
         rst_py_path = GuiUtils.PY_SOURCE
+        base_path = self.source.parent.parts
+        url_str = "/".join(base_path)
 
-        if "models" in self.source:
-            model_name = os.path.basename(self.source).replace("html", "py")
-            regen_string = sas_path + "/" + rst_py_path + "/user/models/src/" + model_name
-            user_model_name = user_models + model_name
+        if "models" in base_path:
+            model_name = self.source.name.replace("html", "py")
+            regen_string = sas_path / rst_py_path / "user" / "models" / "src" / model_name
+            user_model_name = user_models / model_name
 
             # Test if this is a user defined model, and if its HTML does not exist or is older than python source file
             if os.path.isfile(user_model_name):
@@ -109,10 +110,10 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                 self.regenerateHtml(model_name)
             # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
 
-        elif "index" in self.source:
+        elif "index" in base_path:
             # Regenerate if HTML is older than RST -- for index.html, which gets passed in differently because it is located in a different folder
-            regen_string = sas_path + "/" + rst_py_path + self.source.replace('.html', '.rst')
-            html_path = sas_path + "/" + html_path + "/" + self.source
+            regen_string = sas_path / rst_py_path / url_str.replace('.html', '.rst')
+            html_path = sas_path / html_path / self.source
                 # Test to see if HTML does not exist or is older than python file
             if self.newer(regen_string, html_path):
                 self.regenerateHtml(regen_string)
@@ -121,9 +122,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             # Regenerate if HTML is older than RST
             from re import sub
             # Ensure that we are only using everything after and including /user/
-            model_local_path = sub(r"^.*?(?=[\/\\]user)", "", self.source)
-            html_path = sas_path + "/" + html_path + "/" + model_local_path.split('#')[0] # Remove jump links
-            regen_string = sas_path + "/" + rst_py_path + model_local_path.replace('.html', '.rst').split('#')[0] #Remove jump links
+            model_local_path = sub(r"^.*?(?=[\/\\]user)", "", url_str)
+            html_path = Path(sas_path) / html_path / model_local_path.split('#')[0]  # Remove jump links
+            regen_string = sas_path / rst_py_path / model_local_path.replace('.html', '.rst').split('#')[0] #Remove jump links
                 # Test to see if HTML does not exist or is older than python file
             if self.newer(regen_string, html_path):
                 self.regenerateHtml(regen_string)
@@ -132,7 +133,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             self.loadHtml() #loads the html file specified in the source url to the QWebViewer
 
     @staticmethod
-    def newer(self, src, html):
+    def newer(src, html):
         try:
             return not os.path.exists(html) or os.path.getmtime(src) > os.path.getmtime(html)
         except Exception:
@@ -164,14 +165,13 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Check to see if path is absolute or relative, accommodating urls from many different places
         if not os.path.exists(url):
             from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
-            location = HELP_DIRECTORY_LOCATION + url
-            sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-            url = sas_path+"/"+location
+            location = HELP_DIRECTORY_LOCATION / url
+            sas_path = Path(os.path.dirname(sys.argv[0]))
+            url = sas_path / location
 
         # Check if the URL string contains a fragment (jump link)
-        if '#' in url:
-            fragment = url.split('#', 1)[1]
-            url = url.split('#', 1)[0]
+        if '#' in url.name:
+            url, fragment = url.name.split('#', 1)
             # Convert path to a QUrl needed for QWebViewerEngine
             abs_url = QtCore.QUrl.fromLocalFile(url)
             abs_url.setFragment(fragment)
@@ -185,15 +185,15 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Regenerate the documentation for the file
         """
         logging.info("Starting documentation regeneration...")
-        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+        sas_path = Path(os.path.dirname(sys.argv[0]))
         recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
-        regen_docs = sas_path + "/" + recompile_path + "/" + "makedocumentation.py"
-        d = threads.deferToThread(self.regenerateDocs, regen_docs, target=file_name) # Regenerate specific documentation file
+        regen_docs = sas_path / recompile_path / "makedocumentation.py"
+        d = threads.deferToThread(self.regenerateDocs, regen_docs, target=file_name)
         d.addCallback(self.docRegenComplete, self.source)
         self.regen_in_progress = True
 
     @staticmethod
-    def regenerateDocs(self, regen_docs, target=None):
+    def regenerateDocs(regen_docs, target=None):
         """
         Regenerates documentation for a specific file (target) in a subprocess
         """
