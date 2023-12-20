@@ -18,7 +18,6 @@ from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
 from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 
 from sasdata.dataloader.loader import Loader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
@@ -428,11 +427,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Display generic data averaging help
         """
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
-        try:
-            # self.manager is DataExplorer, which has set parent to GuiManager, which is the correct parent of the widget
-            self.helpWindow = DocViewWindow(parent=self.manager.parent, source=url)
-        except Exception as ex:
-            logging.warning("Cannot display help. %s" % ex)
+        self.manager.parent.showHelp(url)
 
 
 class ProxyModel(QtCore.QIdentityProxyModel):

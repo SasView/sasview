@@ -9,7 +9,6 @@ from PySide6 import QtCore, QtWidgets, QtGui
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.UI.GridPanelUI import Ui_GridPanelUI
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 
 
 class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
@@ -180,19 +179,13 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         model_name = results[0][0].model.id
         self.tabWidget.setTabToolTip(self.tabWidget.count()-1, model_name)
         self.data_dict[page_name] = results
-
     
     def onHelp(self):
         """
         Open a local url in the default browser
         """
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        try:
-            self.helpWindow = DocViewWindow(parent=self.parent, source=url)
-            self.helpWindow.show()
-        except Exception as ex:
-            logging.warning("Cannot display help. %s" % ex)
-
+        self.parent.showHelp(url)
 
     def onPlot(self):
         """
@@ -502,13 +495,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         """
         Open a local url in the default browser
         """
-        location = GuiUtils.HELP_DIRECTORY_LOCATION
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        try:
-            self.helpWindow = DocViewWindow(parent=None, source=url)
-            self.helpWindow.show()
-        except Exception as ex:
-            logging.warning("Cannot display help. %s" % ex)
+        self.parent.showHelp(url)
 
     def closeEvent(self, event):
         """Tell the parent window the window closed"""

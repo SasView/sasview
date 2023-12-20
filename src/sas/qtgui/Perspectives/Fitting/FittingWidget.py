@@ -29,7 +29,6 @@ from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 
@@ -1829,7 +1828,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         tree_base = sas_path / full_path
         help_location = self.getHelpLocation(tree_base)
         if regen_in_progress is False:
-            self.showHelp(help_location)
+            self.parent.showHelp(help_location)
 
     def getHelpLocation(self, tree_base) -> Path:
         # Actual file will depend on the current tab
@@ -1854,18 +1853,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return tree_location / "magnetism/magnetism.html"
             case _:
                 return tree_location / "fitting.html"
-
-    def showHelp(self, url):
-        """
-        Calls 
-        """
-        # self.parent.showHelp(url) <-- a clue for how to get other help pages open in the future
-        # WP: Added to handle OSX bundle docs
-        try:
-            # helpWindow displays itself
-            self.helpWindow = DocViewWindow(source=url, parent=self.parent)
-        except Exception as ex:
-            logging.warning("Cannot display help. %s" % ex)
 
     def onDisplayMagneticAngles(self):
         """
