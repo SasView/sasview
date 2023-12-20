@@ -10,7 +10,9 @@ from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
-from sas.qtgui.Plotting.Slicing.SlicerRegistry import SlicerRegistry
+
+import logging
+logger = logging.getLogger("BoxSlicer")
 
 class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
     """
@@ -154,9 +156,11 @@ class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
         if self.direction not in ["X", "Y"]:
             msg = "post data:no Box Average direction was supplied"
             raise ValueError(msg)
+
         # # Average data2D given Qx or Qy
         box = self.averager(qx_min=qx_min, qx_max=qx_max, qy_min=qy_min,
                             qy_max=qy_max, nbins=self.nbins)
+
         box.fold = self.fold
         boxavg = box(self.data)
         # 3 Create Data1D to plot
@@ -264,20 +268,19 @@ class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
         self.base.draw()
 
 
-class HorizontalLines(BaseInteractor):
+class HorizontalLines(BaseInteractor[Plotter2D]):
     """
     Draw 2 Horizontal lines centered on (0,0) that can move
     on the x direction. The two lines move symmetrically (in opposite
     directions). It also defines the x and -x position of a box.
     """
 
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
+    def __init__(self, base: Plotter2D, axes: Axes, color='black', zorder=5, x=0.5, y=0.5):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)
         # Class initialization
-        self.markers = []
-        self.axes = axes
+
         # Saving the end points of two lines
         self.x = x
         self.save_x = x
@@ -375,23 +378,23 @@ class HorizontalLines(BaseInteractor):
         self.base.draw()
 
 
-class VerticalLines(BaseInteractor):
+class VerticalLines(BaseInteractor[Plotter2D]):
     """
     Draw 2 vertical lines centered on (0,0) that can move
     on the y direction. The two lines move symmetrically (in opposite
     directions). It also defines the y and -y position of a box.
     """
 
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5):
+    def __init__(self, base: Plotter2D, axes: Axes, color='black', zorder=5, x=0.5, y=0.5):
         """
         """
         BaseInteractor.__init__(self, base, axes, color=color)
-        self.markers = []
-        self.axes = axes
+
         self.x = numpy.fabs(x)
         self.save_x = self.x
         self.y = numpy.fabs(y)
         self.save_y = y
+
         # Inner circle marker
         self.inner_marker = self.axes.plot([self.x], [0], linestyle='',
                                            marker='s', markersize=10,
@@ -493,9 +496,9 @@ class BoxInteractorX(BoxInteractor):
     of Qx)
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color)
-        self.base = base
+
         super()._post_data()
 
     def _post_data(self, new_slab=None, nbins=None, direction=None):
@@ -527,10 +530,10 @@ class BoxInteractorY(BoxInteractor):
     of Qy)
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
+
         BoxInteractor.__init__(self, base, axes, item=item, color=color)
-        self.base = base
-        super()._post_data()
+
 
     def _post_data(self, new_slab=None, nbins: Optional[int]=None, direction: Optional[str]=None):
         """
@@ -544,11 +547,13 @@ class BoxInteractorY(BoxInteractor):
         Validate input from user
         Values get checked at apply time.
         """
+
         isValid = True
 
         if param_name == 'nbins':
             # Can't be 0
             if param_value < 1:
-                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                logger.error("Number of bins cannot be less than or equal to 0. Please adjust.")
                 isValid = False
+
         return isValid

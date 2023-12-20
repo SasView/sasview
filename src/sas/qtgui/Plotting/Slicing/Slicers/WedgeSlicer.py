@@ -1,6 +1,9 @@
 import numpy as np
 
+from matplotlib.axes import Axes
+
 from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -10,7 +13,7 @@ from sas.qtgui.Plotting.Slicing.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import LineInteractor
 
 
-class WedgeInteractor(BaseInteractor, SlicerModel):
+class WedgeInteractor(BaseInteractor[Plotter2D], SlicerModel):
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
     AnnulusInteractor. It plots a data1D average of a wedge area defined in a
@@ -31,13 +34,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
     (as for the SectorSlicer).
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
 
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
 
-        self.markers = []
-        self.axes = axes
         self._item = item
         self.qmax = max(self.data.xmax, np.fabs(self.data.xmin),
                         self.data.ymax, np.fabs(self.data.ymin))
@@ -334,9 +335,9 @@ class WedgeInteractorQ(WedgeInteractor):
     of Q)
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
-        self.base = base
+
         super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
@@ -351,9 +352,9 @@ class WedgeInteractorPhi(WedgeInteractor):
     of phi)
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
-        self.base = base
+
         super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
