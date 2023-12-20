@@ -12,12 +12,12 @@ from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorX
-from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorY
-from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorQ
-from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorPhi
-from sas.qtgui.Plotting.Slicing.Slicers.AnnulusSlicer import AnnulusInteractor
-from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import SectorInteractor
+# from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorX
+# from sas.qtgui.Plotting.Slicing.Slicers.BoxSlicer import BoxInteractorY
+# from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorQ
+# from sas.qtgui.Plotting.Slicing.Slicers.WedgeSlicer import WedgeInteractorPhi
+# from sas.qtgui.Plotting.Slicing.Slicers.AnnulusSlicer import AnnulusInteractor
+# from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import SectorInteractor
 
 from sasdata.dataloader.loader import Loader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
@@ -38,6 +38,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                  active_plots=None,
                  validate_method=None,
                  communicator=None):
+
         super(SlicerParameters, self).__init__()
 
         self.setupUi(self)
@@ -52,15 +53,15 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
         # Initially, Apply is disabled
         self.cmdApply.setEnabled(False)
-
-        # Mapping combobox index -> slicer module
-        self.callbacks = {0: None,
-                          1: SectorInteractor,
-                          2: AnnulusInteractor,
-                          3: BoxInteractorX,
-                          4: BoxInteractorY,
-                          5: WedgeInteractorQ,
-                          6: WedgeInteractorPhi}
+        #
+        # # Mapping combobox index -> slicer module
+        # self.callbacks = {0: None,
+        #                   1: SectorInteractor,
+        #                   2: AnnulusInteractor,
+        #                   3: BoxInteractorX,
+        #                   4: BoxInteractorY,
+        #                   5: WedgeInteractorQ,
+        #                   6: WedgeInteractorPhi}
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -169,6 +170,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.cmdApply.clicked.connect(self.onApply)
 
         # Initialize slicer combobox to the current slicer
+        # TODO: Fill this in
         current_slicer = type(self.parent.slicer)
         for index in self.callbacks:
             if self.callbacks[index] == current_slicer:
@@ -368,6 +370,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """ Model setter """
         # check if parent slicer changed
         current_slicer = type(self.parent.slicer)
+
         for index in self.callbacks:
             # must use type() for None or just imported type for ! None
             if type(self.callbacks[index]) == current_slicer or \

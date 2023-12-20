@@ -16,8 +16,8 @@ import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.ColorMap import ColorMap
-from sas.qtgui.Plotting.Slicing.BoxSumParameterEditor import BoxSum
-from sas.qtgui.Plotting.Slicing.SlicerParameters import SlicerParameters
+# from sas.qtgui.Plotting.Slicing.BoxSumParameterEditor import BoxSum
+# from sas.qtgui.Plotting.Slicing.SlicerParameters import SlicerParameters
 from sas.qtgui.Plotting.Slicing.SlicerRegistry import SlicerRegistry
 
 
@@ -168,23 +168,7 @@ class Plotter2DWidget(PlotterBase):
 
         for menu_name, slicer in SlicerRegistry.name_class_pairs():
             action = plot_slicer_menu.addAction(menu_name)
-            this = self
-            action.tiggered.connect(lambda: this.setSlicer(slicer))
-
-        # self.actionSectorView = plot_slicer_menu.addAction("&Sector [Q View]")
-        # self.actionSectorView.triggered.connect(self.onSectorView)
-        # self.actionAnnulusView = plot_slicer_menu.addAction("&Annulus [Phi View]")
-        # self.actionAnnulusView.triggered.connect(self.onAnnulusView)
-        # self.actionBoxSum = plot_slicer_menu.addAction("&Box Sum")
-        # self.actionBoxSum.triggered.connect(self.onBoxSum)
-        # self.actionBoxAveragingX = plot_slicer_menu.addAction("&Box Averaging in Qx")
-        # self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
-        # self.actionBoxAveragingY = plot_slicer_menu.addAction("&Box Averaging in Qy")
-        # self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
-        # self.actionWedgeAveragingQ = plot_slicer_menu.addAction("&Wedge Averaging in Q")
-        # self.actionWedgeAveragingQ.triggered.connect(self.onWedgeAveragingQ)
-        # self.actionWedgeAveragingPhi = plot_slicer_menu.addAction("&Wedge Averaging in Phi")
-        # self.actionWedgeAveragingPhi.triggered.connect(self.onWedgeAveragingPhi)
+            action.triggered.connect(lambda: self.setSlicer(slicer))
 
         plot_slicer_menu.addSeparator()
 
