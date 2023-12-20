@@ -539,9 +539,6 @@ def openLink(url):
         msg = "Attempt at opening an invalid URL"
         raise AttributeError(msg)
 
-def showHelp(url):
-    pass
-# showHelp() IS TO BE DELETED IN NEXT COMMIT
 
 def retrieveData1d(data):
     """
