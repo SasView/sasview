@@ -21,8 +21,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         super(DocViewWindow, self).__init__(parent._parent)
         self.parent = parent
         self.setupUi(self)
-        # Disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setWindowTitle("Documentation Viewer")
 
         # Necessary globals
