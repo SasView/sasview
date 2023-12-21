@@ -10,6 +10,7 @@ from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit import models
+from sas.sascalc.doc_regen.makedocumentation import make_documentation
 
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
@@ -185,28 +186,18 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Regenerate the documentation for the file
         """
         logging.info("Starting documentation regeneration...")
-        sas_path = Path(os.path.dirname(sys.argv[0]))
-        recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
-        regen_docs = sas_path / recompile_path / "makedocumentation.py"
-        d = threads.deferToThread(self.regenerateDocs, regen_docs, target=file_name)
+        d = threads.deferToThread(self.regenerateDocs, target=file_name)
         d.addCallback(self.docRegenComplete, self.source)
         self.regen_in_progress = True
 
     @staticmethod
-    def regenerateDocs(regen_docs, target=None):
+    def regenerateDocs(target=None):
         """
         Regenerates documentation for a specific file (target) in a subprocess
         """
-        import subprocess
-        command = [
-            sys.executable,
-            regen_docs,
-            target,
-        ]
-        doc_regen_dir = os.path.dirname(regen_docs)
-        subprocess.run(command, cwd=doc_regen_dir)  # cwd parameter tells subprocess to open from a specific directory
+        make_documentation(target)
     
-    def docRegenComplete(self, d, help_location):
+    def docRegenComplete(self):
         """
         Tells Qt that regeneration of docs is done and emits signal tied to opening
         documentation viewer window
