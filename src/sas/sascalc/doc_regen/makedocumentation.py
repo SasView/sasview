@@ -18,11 +18,13 @@ if os.path.exists(MAIN_PY_SRC):
 else:
     pass
 
+
 def get_py(directory):
     for root, dirs, files in os.walk(directory):
         # Only include python files not starting in '_' (pycache not included)
         PY_FILES = [join(directory, string) for string in files if not string.startswith("_") and string.endswith(".py")]
         return PY_FILES
+
 
 def get_main_docs():
     """
@@ -30,7 +32,6 @@ def get_main_docs():
     """
     # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
     TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(ABSOLUTE_TARGET_PLUGINS)
-    print(get_py(ABSOLUTE_TARGET_PLUGINS))
     base_targets = [basename(string) for string in TARGETS]
 
     # Removes duplicate instances of the same file copied from plugins folder to source-temp/user/models/src/
@@ -59,6 +60,7 @@ def call_regenmodel(filepath, regen_py):
     else:
         command.append(filepath)
     subprocess.run(command)
+
 
 def generate_html(single_file="", rst=False):
     """
@@ -102,6 +104,7 @@ def generate_html(single_file="", rst=False):
         pass
     subprocess.check_call(command, cwd=cwd_directory)
 
+
 def call_all_files():
     TARGETS = get_main_docs()
     for file in TARGETS:
@@ -109,6 +112,7 @@ def call_all_files():
         call_regenmodel(file, "regenmodel.py")
     # regentoc.py requires files to be passed in bulk or else LOTS of unexpected behavior
     call_regenmodel(TARGETS, "regentoc.py")
+
 
 def call_one_file(file):
     TARGETS = get_main_docs()
@@ -124,20 +128,23 @@ def call_one_file(file):
         file_call_path = MODEL_TARGET
     else:
         file_call_path = NORM_TARGET
-    call_regenmodel(file_call_path, "regenmodel.py") # There might be a cleaner way to do this but this approach seems to work and is fairly minimal
+    call_regenmodel(file_call_path, "regenmodel.py")  # There might be a cleaner way to do this but this approach seems to work and is fairly minimal
     call_regenmodel(TARGETS, "regentoc.py")
 
-def main():
+
+def make_documentation(target):
     try:
-        if ".rst" in sys.argv[1]:
+        if ".rst" in target:
             # Generate only HTML if passed in file is an RST
-            generate_html(sys.argv[1], rst=True)
+            generate_html(target, rst=True)
         else:
-            call_one_file(sys.argv[1]) # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
-            generate_html(sys.argv[1])
+            call_one_file(target)  # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
+            generate_html(target)
     except:
         call_all_files() # Regenerate all RSTs
         generate_html() # Regenerate all HTML
 
+
 if __name__ == "__main__":
-    main()
+    target = sys.argv[1]
+    make_documentation(target)
