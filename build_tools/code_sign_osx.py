@@ -54,5 +54,3 @@ for sfile in itertools.chain(so_list, dylib_list,
     sign_command.append(sfile)
     subprocess.check_call(sign_command)
     sign_command.pop()
-
-
