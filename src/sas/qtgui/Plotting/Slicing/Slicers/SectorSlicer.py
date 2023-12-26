@@ -8,12 +8,12 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.SlicerParameterWidget import SlicerParameterWidget
 
 
 MIN_PHI = 0.05
 
-class SectorInteractor(BaseInteractor[Plotter2D], SlicerModel):
+class SectorInteractor(BaseInteractor[Plotter2D], SlicerParameterWidget):
     """
     SectorInteractor plots a data1D average of a sector area defined in a
     Data2D object. The data1D averaging itself is performed in sasdata by
@@ -34,7 +34,7 @@ class SectorInteractor(BaseInteractor[Plotter2D], SlicerModel):
     def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
 
         BaseInteractor.__init__(self, base, axes, color=color)
-        SlicerModel.__init__(self)
+        SlicerParameterWidget.__init__(self)
 
         # Class initialization
         self.markers = []

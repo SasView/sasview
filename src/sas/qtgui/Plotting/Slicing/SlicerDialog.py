@@ -26,7 +26,7 @@ from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 from sas import config
 
 
-class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
+class SlicerDialog(QtWidgets.QDialog, Ui_SlicerParametersUI):
     """
     Interaction between the QTableView and the underlying model,
     passed from a slicer instance.
@@ -39,7 +39,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                  validate_method=None,
                  communicator=None):
 
-        super(SlicerParameters, self).__init__()
+        super(SlicerDialog, self).__init__()
 
         self.setupUi(self)
 
@@ -299,7 +299,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             return
         plotter.setSlicer(slicer=slicer, reset=False)
         # override slicer model
-        plotter.slicer._model = self.model
+        plotter.slicer._qt_item_model = self.model
         # force conversion model->parameters in slicer
         plotter.slicer.setParamsFromModel()
 

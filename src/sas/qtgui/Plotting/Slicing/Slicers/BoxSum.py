@@ -1,13 +1,16 @@
 import numpy
 from PySide6 import QtGui
+from matplotlib.axes import Axes
 
 from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
 from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
+
 from sasdata.data_util.averaging import Boxavg, Boxsum
 
 
-class BoxSumCalculator(BaseInteractor):
+class BoxSumInteractor(BaseInteractor[Plotter2D]):
     """
     BoxSumCalculator Class computes properties (such as sum and average of
     intensities) from a rectangular area defined in a data2D object. The actual
@@ -27,14 +30,13 @@ class BoxSumCalculator(BaseInteractor):
     @param y_max: the maximum value of the y coordinate
 
     """
-    def __init__(self, base, axes, color='black', zorder=3):
+    def __init__(self, base: Plotter2D, axes: Axes, color='black', zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
 
-        # list of Boxsmun markers
-        self.markers = []
-        self.axes = axes
+
         self._model = None
         self.update_model = False
+
         # connect the artist for the motion
         self.connect = self.base.connect
 

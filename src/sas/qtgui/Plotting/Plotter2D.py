@@ -16,7 +16,7 @@ import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.ColorMap import ColorMap
-# from sas.qtgui.Plotting.Slicing.BoxSumParameterEditor import BoxSum
+from sas.qtgui.Plotting.Slicing.BoxSumParameterEditor import BoxSum
 # from sas.qtgui.Plotting.Slicing.SlicerParameters import SlicerParameters
 from sas.qtgui.Plotting.Slicing.SlicerRegistry import SlicerRegistry
 
@@ -187,6 +187,7 @@ class Plotter2DWidget(PlotterBase):
         self.actionSavePointsAsFile = self.contextMenu.addAction("&Save Points as a File")
         self.actionSavePointsAsFile.triggered.connect(
              functools.partial(self.onSavePoints, self.data0))
+
         self.contextMenu.addSeparator()
 
         # Additional items for slicer interaction
@@ -270,9 +271,10 @@ class Plotter2DWidget(PlotterBase):
 
         self.param_model = None
         validator = None
-        if self.slicer is not None and not isinstance(self.slicer, BoxSumCalculator):
+        if self.slicer is not None and not isinstance(self.slicer, BoxSumInteractor):
             self.param_model = self.slicer.model()
             validator = self.slicer.validate
+
         # Pass the model to the Slicer Parameters widget
         self.slicer_widget = SlicerParameters(self, model=self.param_model,
                                               active_plots=self.getActivePlots(),
@@ -291,12 +293,14 @@ class Plotter2DWidget(PlotterBase):
         # Find the best number of bins
         npt = numpy.sqrt(len(self.data0.data[numpy.isfinite(self.data0.data)]))
         npt = numpy.floor(npt)
+
         # compute the maximum radius of data2D
         self.qmax = max(numpy.fabs(self.data0.xmax),
                         numpy.fabs(self.data0.xmin))
         self.ymax = max(numpy.fabs(self.data0.ymax),
                         numpy.fabs(self.data0.ymin))
         self.radius = numpy.sqrt(numpy.power(self.qmax, 2) + numpy.power(self.ymax, 2))
+
         # Create data1D circular average of data2D
         circle = CircularAverage(r_min=0, r_max=self.radius, nbins=npt)
         circ = circle(self.data0)
@@ -345,15 +349,21 @@ class Plotter2DWidget(PlotterBase):
         """
         Update circular averaging plot on Data2D change
         """
-        if not hasattr(self, '_item'): return
+
+        if not hasattr(self, '_item'):
+            return
+
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
 
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
-        if plots is None: return
+
+        if plots is None:
+            return
         ca_caption = '2daverage' + self.data0.name
+
         # See if current item plots contain 2D average plot
         has_plot = False
         for plot in plots:
@@ -411,7 +421,7 @@ class Plotter2DWidget(PlotterBase):
         """
         self.onClearSlicer()
         self.slicer_z += 1
-        self.slicer = BoxSumCalculator(self, self.ax, zorder=self.slicer_z)
+        self.slicer = BoxSumInteractor(self, self.ax, zorder=self.slicer_z)
 
         self.ax.set_ylim(self.data0.ymin, self.data0.ymax)
         self.ax.set_xlim(self.data0.xmin, self.data0.xmax)

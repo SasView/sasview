@@ -4,16 +4,16 @@ from matplotlib.axes import Axes
 
 from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.SlicerParameterWidget import SlicerParameterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from sas.qtgui.Plotting.Slicing.Slicers.ArcInteractor import ArcInteractor
-from sas.qtgui.Plotting.Slicing.Slicers.RadiusInteractor import RadiusInteractor
+from sas.qtgui.Plotting.Slicing.Interactors.ArcInteractor import ArcInteractor
+from sas.qtgui.Plotting.Slicing.Interactors.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicing.Slicers.SectorSlicer import LineInteractor
 
 
-class WedgeInteractor(BaseInteractor[Plotter2D], SlicerModel):
+class WedgeInteractor(BaseInteractor[Plotter2D], SlicerParameterWidget):
     """
     This WedgeInteractor is a cross between the SectorInteractor and the
     AnnulusInteractor. It plots a data1D average of a wedge area defined in a
@@ -37,7 +37,7 @@ class WedgeInteractor(BaseInteractor[Plotter2D], SlicerModel):
     def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
 
         BaseInteractor.__init__(self, base, axes, color=color)
-        SlicerModel.__init__(self)
+        SlicerParameterWidget.__init__(self)
 
         self._item = item
         self.qmax = max(self.data.xmax, np.fabs(self.data.xmin),
@@ -109,15 +109,18 @@ class WedgeInteractor(BaseInteractor[Plotter2D], SlicerModel):
             self.inner_arc.update()
             self.r1 = self.inner_arc.radius
             self.radial_lines.update(r1=self.r1)
+
         if self.outer_arc.has_move:
             self.outer_arc.update()
             self.r2 = self.outer_arc.radius
             self.radial_lines.update(r2=self.r2)
+
         if self.radial_lines.has_move:
             self.radial_lines.update()
             self.phi = self.radial_lines.phi
             self.inner_arc.update(phi=self.phi)
             self.outer_arc.update(phi=self.phi)
+
         if self.central_line.has_move:
             self.central_line.update()
             self.theta = self.central_line.theta

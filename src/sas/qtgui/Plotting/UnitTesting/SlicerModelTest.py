@@ -3,7 +3,7 @@ import pytest
 from PySide6 import QtGui
 
 # Local
-from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.SlicerParameterWidget import SlicerParameterWidget
 
 
 class SlicerModelTest:
@@ -12,10 +12,10 @@ class SlicerModelTest:
     @pytest.fixture(autouse=True)
     def model(self, qapp):
         '''Create/Destroy the SlicerModel'''
-        class SModel(SlicerModel):
+        class SModel(SlicerParameterWidget):
             params = {"a":1, "b":2}
             def __init__(self):
-                SlicerModel.__init__(self)
+                SlicerParameterWidget.__init__(self)
             def getParams(self):
                 return self.params
             def setParams(self, par):
@@ -26,7 +26,7 @@ class SlicerModelTest:
 
     def testBaseClass(self, qapp):
         '''Assure that SlicerModel contains pure virtuals'''
-        model = SlicerModel()
+        model = SlicerParameterWidget()
         with pytest.raises(NotImplementedError):
             model.setParams()
         with pytest.raises(NotImplementedError):

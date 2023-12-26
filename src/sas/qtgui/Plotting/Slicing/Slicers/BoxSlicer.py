@@ -9,12 +9,12 @@ from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.Slicing.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicing.SlicerParameterWidget import SlicerParameterWidget
 
 import logging
 logger = logging.getLogger("BoxSlicer")
 
-class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
+class BoxInteractor(BaseInteractor[Plotter2D], SlicerParameterWidget):
     """
     BoxInteractor plots a data1D average of a rectangular area defined in
     a Data2D object. The data1D averaging itself is performed in sasdata
@@ -30,7 +30,7 @@ class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
 
     def __init__(self, base: Plotter2D, axes: Axes, item=None, color='black', zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
-        SlicerModel.__init__(self)
+        SlicerParameterWidget.__init__(self)
         # Class initialization
         self.markers = []
         self.axes = axes
@@ -127,7 +127,7 @@ class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
         self.vertical_lines.save(ev)
         self.horizontal_lines.save(ev)
 
-    def _post_data(self, new_slab: SlicerModel, nbins: Optional[int]=None, direction: Optional[str]=None):
+    def _post_data(self, new_slab: SlicerParameterWidget, nbins: Optional[int]=None, direction: Optional[str]=None):
         """
         post 1D data averaging in Qx or Qy given new_slab type
 
@@ -175,13 +175,17 @@ class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
         new_plot = Data1D(x=boxavg.x, y=boxavg.y, dy=boxavg.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
+
         new_plot.name = str(self.averager.__name__) + \
             "(" + self.data.name + ")"
+
         new_plot.title = str(self.averager.__name__) + \
             "(" + self.data.name + ")"
+
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
+
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
@@ -268,225 +272,6 @@ class BoxInteractor(BaseInteractor[Plotter2D], SlicerModel):
         self.base.draw()
 
 
-class HorizontalLines(BaseInteractor[Plotter2D]):
-    """
-    Draw 2 Horizontal lines centered on (0,0) that can move
-    on the x direction. The two lines move symmetrically (in opposite
-    directions). It also defines the x and -x position of a box.
-    """
-
-    def __init__(self, base: Plotter2D, axes: Axes, color='black', zorder=5, x=0.5, y=0.5):
-        """
-        """
-        BaseInteractor.__init__(self, base, axes, color=color)
-        # Class initialization
-
-        # Saving the end points of two lines
-        self.x = x
-        self.save_x = x
-
-        self.y = y
-        self.save_y = y
-        # Creating a marker
-        # Inner circle marker
-        self.inner_marker = self.axes.plot([0], [self.y], linestyle='',
-                                           marker='s', markersize=10,
-                                           color=self.color, alpha=0.6,
-                                           pickradius=5, label="pick",
-                                           zorder=zorder,
-                                           visible=True)[0]
-        # Define 2 horizontal lines
-        self.top_line = self.axes.plot([self.x, -self.x], [self.y, self.y],
-                                       linestyle='-', marker='',
-                                       color=self.color, visible=True)[0]
-        self.bottom_line = self.axes.plot([self.x, -self.x], [-self.y, -self.y],
-                                          linestyle='-', marker='',
-                                          color=self.color, visible=True)[0]
-        # Flag to check the motion of the lines
-        self.has_move = False
-        # Connecting markers to mouse events and draw
-        self.connect_markers([self.top_line, self.inner_marker])
-        self.update()
-
-    def set_layer(self, n):
-        """
-        Allow adding plot to the same panel
-
-        :param n: the number of layer
-
-        """
-        self.layernum = n
-        self.update()
-
-    def clear(self):
-        """
-        Clear this slicer  and its markers
-        """
-        self.clear_markers()
-        self.inner_marker.remove()
-        self.top_line.remove()
-        self.bottom_line.remove()
-
-    def update(self, x=None, y=None):
-        """
-        Draw the new roughness on the graph.
-
-        :param x: x-coordinates to reset current class x
-        :param y: y-coordinates to reset current class y
-
-        """
-        # Reset x, y- coordinates if send as parameters
-        if x is not None:
-            self.x = numpy.sign(self.x) * numpy.fabs(x)
-        if y is not None:
-            self.y = numpy.sign(self.y) * numpy.fabs(y)
-        # Draw lines and markers
-        self.inner_marker.set(xdata=[0], ydata=[self.y])
-        self.top_line.set(xdata=[self.x, -self.x], ydata=[self.y, self.y])
-        self.bottom_line.set(xdata=[self.x, -self.x], ydata=[-self.y, -self.y])
-
-    def save(self, ev):
-        """
-        Remember the roughness for this layer and the next so that we
-        can restore on Esc.
-        """
-        self.save_x = self.x
-        self.save_y = self.y
-
-    def moveend(self, ev):
-        """
-        Called after a dragging this edge and set self.has_move to False
-        to specify the end of dragging motion
-        """
-        self.has_move = False
-        self.base.moveend(ev)
-
-    def restore(self, ev):
-        """
-        Restore the roughness for this layer.
-        """
-        self.x = self.save_x
-        self.y = self.save_y
-
-    def move(self, x, y, ev):
-        """
-        Process move to a new position, making sure that the move is allowed.
-        """
-        self.y = y
-        self.has_move = True
-        self.base.update()
-        self.base.draw()
-
-
-class VerticalLines(BaseInteractor[Plotter2D]):
-    """
-    Draw 2 vertical lines centered on (0,0) that can move
-    on the y direction. The two lines move symmetrically (in opposite
-    directions). It also defines the y and -y position of a box.
-    """
-
-    def __init__(self, base: Plotter2D, axes: Axes, color='black', zorder=5, x=0.5, y=0.5):
-        """
-        """
-        BaseInteractor.__init__(self, base, axes, color=color)
-
-        self.x = numpy.fabs(x)
-        self.save_x = self.x
-        self.y = numpy.fabs(y)
-        self.save_y = y
-
-        # Inner circle marker
-        self.inner_marker = self.axes.plot([self.x], [0], linestyle='',
-                                           marker='s', markersize=10,
-                                           color=self.color, alpha=0.6,
-                                           pickradius=5, label="pick",
-                                           zorder=zorder, visible=True)[0]
-        self.right_line = self.axes.plot([self.x, self.x],
-                                         [self.y, -self.y],
-                                         linestyle='-', marker='',
-                                         color=self.color, visible=True)[0]
-        self.left_line = self.axes.plot([-self.x, -self.x],
-                                        [self.y, -self.y],
-                                        linestyle='-', marker='',
-                                        color=self.color, visible=True)[0]
-        self.has_move = False
-        self.connect_markers([self.right_line, self.inner_marker])
-        self.update()
-
-    def validate(self, param_name, param_value):
-        """
-        Validate input from user
-        """
-        return True
-
-    def set_layer(self, n):
-        """
-        Allow adding plot to the same panel
-
-        :param n: the number of layer
-
-        """
-        self.layernum = n
-        self.update()
-
-    def clear(self):
-        """
-        Clear this slicer  and its markers
-        """
-        self.clear_markers()
-        self.inner_marker.remove()
-        self.left_line.remove()
-        self.right_line.remove()
-
-    def update(self, x=None, y=None):
-        """
-        Draw the new roughness on the graph.
-
-        :param x: x-coordinates to reset current class x
-        :param y: y-coordinates to reset current class y
-
-        """
-        # Reset x, y -coordinates if given as parameters
-        if x is not None:
-            self.x = numpy.sign(self.x) * numpy.fabs(x)
-        if y is not None:
-            self.y = numpy.sign(self.y) * numpy.fabs(y)
-        # Draw lines and markers
-        self.inner_marker.set(xdata=[self.x], ydata=[0])
-        self.left_line.set(xdata=[-self.x, -self.x], ydata=[self.y, -self.y])
-        self.right_line.set(xdata=[self.x, self.x], ydata=[self.y, -self.y])
-
-    def save(self, ev):
-        """
-        Remember the roughness for this layer and the next so that we
-        can restore on Esc.
-        """
-        self.save_x = self.x
-        self.save_y = self.y
-
-    def moveend(self, ev):
-        """
-        Called after a dragging this edge and set self.has_move to False
-        to specify the end of dragging motion
-        """
-        self.has_move = False
-        self.base.moveend(ev)
-
-    def restore(self, ev):
-        """
-        Restore the roughness for this layer.
-        """
-        self.x = self.save_x
-        self.y = self.save_y
-
-    def move(self, x, y, ev):
-        """
-        Process move to a new position, making sure that the move is allowed.
-        """
-        self.has_move = True
-        self.x = x
-        self.base.update()
-        self.base.draw()
 
 
 class BoxInteractorX(BoxInteractor):

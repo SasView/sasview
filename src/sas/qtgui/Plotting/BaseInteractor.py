@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, TypeVar, Generic
+from typing import Optional, TypeVar, Generic, Any
 
 from PySide6.QtCore import QEvent
 from matplotlib.lines import Line2D
@@ -29,6 +29,8 @@ class BaseInteractor(ABC, Generic[PlotterBaseT]):
         restore() - restore the old state
         move(x,y,ev) - move the interactor to position x,y
         moveend(ev) - end the drag event
+        setParameter(parameter_name, parameter_value) - set a parameter for this interactor
+        getParameters() - get a dictionary containing the parameters for this interactor
 
 
     The following are provided by the base class:
@@ -90,6 +92,16 @@ class BaseInteractor(ABC, Generic[PlotterBaseT]):
     @abstractmethod
     def moveend(self, ev: QEvent):
         """ end the drag event """
+    @abstractmethod
+    def setParameter(self, parameter_name: str, parameter_value: Any):
+        """ Set a parameter for the interactor """
+
+    def setParameters(self, parameters: dict[str, Any]):
+        for parameter_name in parameters:
+            self.setParameter(parameter_name, parameters[parameter_name])
+    @abstractmethod
+    def getParameters(self) -> dict[str, Any]:
+        """ Get a dictionary of the parameters for this interactor"""
 
 
     def connect_markers(self, markers: list[Line2D]):
@@ -202,4 +214,5 @@ class BaseInteractor(ABC, Generic[PlotterBaseT]):
         dx, dy = nx - x, ny - y
 
         return dx, dy
+
 

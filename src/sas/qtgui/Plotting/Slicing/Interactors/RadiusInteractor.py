@@ -1,13 +1,16 @@
 import numpy as np
 
-from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
+from matplotlib.axes import Axes
 
-class RadiusInteractor(BaseInteractor):
+from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
+
+class RadiusInteractor(BaseInteractor[Plotter2D]):
     """
     Draw a pair of lines radiating from a center at [0,0], between radius
     values r1 and r2 with and average angle from the x-axis of theta, and an
     angular diaplacement of phi either side of this average. Used for example
-    to to define the left and right edges of the a wedge area on a plot, see
+    to define the left and right edges of the a wedge area on a plot, see
     WedgeInteractor. User interaction adjusts the parameter phi.
 
     :param r1: radius of the inner end of the radial lines
@@ -15,12 +18,11 @@ class RadiusInteractor(BaseInteractor):
     :param theta: average angle of the lines from the x-axis
     :param phi: angular displacement of the lines either side of theta
     """
-    def __init__(self, base, axes, color='black', zorder=5, r1=1.0, r2=2.0,
+    def __init__(self, base: Plotter2D, axes: Axes, color='black', zorder=5, r1=1.0, r2=2.0,
                  theta=np.pi / 3, phi=np.pi / 8):
+
         BaseInteractor.__init__(self, base, axes, color=color)
-        self.markers = []
-        self.axes = axes
-        self.color = color
+
         # Key variables used when drawing the interactor element
         self.r1 = r1
         self.r2 = r2
@@ -38,12 +40,14 @@ class RadiusInteractor(BaseInteractor):
         r_y1 = self.r1 * np.sin(self.theta - self.phi)
         r_x2 = self.r2 * np.cos(self.theta - self.phi)
         r_y2 = self.r2 * np.sin(self.theta - self.phi)
+
         # Define the left and right markers
         self.l_marker = self.axes.plot([(l_x1+l_x2)/2], [(l_y1+l_y2)/2],
                                        linestyle='', marker='s', markersize=10,
                                        color=self.color, alpha=0.6,
                                        pickradius=5, label='pick',
                                        zorder=zorder, visible=True)[0]
+
         self.r_marker = self.axes.plot([(r_x1+r_x2)/2], [(r_y1+r_y2)/2],
                                        linestyle='', marker='s', markersize=10,
                                        color=self.color, alpha=0.6,
@@ -56,6 +60,7 @@ class RadiusInteractor(BaseInteractor):
         self.r_line = self.axes.plot([r_x1, r_x2], [r_y1, r_y2],
                                      linestyle='-', marker='',
                                      color=self.color, visible=True)[0]
+
         # Flag to keep track of motion
         self.has_move = False
         self.connect_markers([self.l_marker, self.l_line,

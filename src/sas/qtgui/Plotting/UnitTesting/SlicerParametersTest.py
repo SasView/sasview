@@ -14,7 +14,7 @@ from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local
-from sas.qtgui.Plotting.Slicing.SlicerParameters import SlicerParameters
+from sas.qtgui.Plotting.Slicing.SlicerDialog import SlicerDialog
 
 
 class dummy_manager:
@@ -57,9 +57,9 @@ class SlicerParametersTest:
         plotter = Plotter2D(parent=dummy_manager(), quickplot=False)
         plotter.data = data
         active_plots = {"test_plot": plotter}
-        w = SlicerParameters(model=model, parent=plotter,
-                                       active_plots=active_plots,
-                                       communicator=dummy_manager().communicate)
+        w = SlicerDialog(model=model, parent=plotter,
+                         active_plots=active_plots,
+                         communicator=dummy_manager().communicate)
         yield w
         w.close()
 
@@ -99,9 +99,9 @@ class SlicerParametersTest:
         plotter = Plotter2D(parent=dummy_manager(), quickplot=False)
         plotter.data = data
         active_plots = {"test_plot": plotter}
-        widget = SlicerParameters(model=model, parent=plotter,
-                                  active_plots=active_plots,
-                                  communicator=dummy_manager().communicate)
+        widget = SlicerDialog(model=model, parent=plotter,
+                              active_plots=active_plots,
+                              communicator=dummy_manager().communicate)
         assert widget.proxy.columnCount() == 2
         assert widget.proxy.rowCount() == 2
         assert widget.model.item(0, 0).text() == 't1'

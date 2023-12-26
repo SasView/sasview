@@ -50,7 +50,7 @@ class SlicerRegistry:
         # self.actionSectorView.triggered.connect(self.onSectorView)
         # self.actionBoxSum = plot_slicer_menu.addAction("&Box Sum")
         # self.actionBoxSum.triggered.connect(self.onBoxSum)
-        
+
 
 
         # Register slicers
