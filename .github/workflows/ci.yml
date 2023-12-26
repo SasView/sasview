@@ -251,7 +251,6 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         run: |
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
           hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
 
       - name: Publish installer package
