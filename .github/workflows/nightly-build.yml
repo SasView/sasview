@@ -42,10 +42,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Macholib
-        run: |
-          python -m pip install macholib
-
       - name: Sign executable and create dmg (OSX)
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
@@ -58,21 +54,20 @@ jobs:
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
-          hdiutil attach installers/dist/SasView-Installer-macos-*/SasView5.dmg
-          cp -rf /Volumes/SasView5/SasView5.app installers/dist
+          mv installers/dist/SasView-Installer-macos-*/SasView5.app installers/dist
+          
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
-          python  ../../build_tools/code_sign_osx.py
+          python ../../build_tools/code_sign_osx.py
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
-          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
+          hdiutil create SasView5.dmg -srcfolder SasView-nightly-MacOSX.dmg -ov -format UDZO
+          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView-nightly-MacOSX.dmg
 
       #This GH action will need to be replaced soon as altool will be deprecated late 2023
       - name: Notarize Release Build (OSX)
         uses: GuillaumeFalourd/xcode-notarize@v1
         with:
-            product-path: "installers/dist/SasView5.dmg"
-            primary-bundle-id: "org.sasview.SasView5"
+            product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
+            primary-bundle-id: "org.sasview.SasView6"
             appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
             appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
             verbose: True
@@ -80,12 +75,11 @@ jobs:
       - name: Staple Release Build (OSX)
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
-          product-path: "installers/dist/SasView5.dmg"
+          product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
 
-      - name: Rename artifacts
+      - name: Rename remaining artifacts artifacts
         run: |
           mv installers/dist/SasView-Installer-windows-*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
-          mv installers/dist/SasView-Installer-macos-*/SasView5.dmg  installers/dist/SasView-nightly-MacOSX.dmg
           mv installers/dist/SasView-Installer-ubuntu-*/sasview5.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
 
       - name: Upload Nightly Build Installer to GitHub releases

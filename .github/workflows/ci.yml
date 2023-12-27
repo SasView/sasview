@@ -243,7 +243,7 @@ jobs:
             installers/dist/sasview-pyinstaller-dist.tar.gz
           if-no-files-found: ignore
 
-      - name: Fix qt folders and create dmg (OSX)
+      - name: Fix qt folders
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
@@ -257,7 +257,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
           cd installers/dist
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
@@ -266,8 +266,8 @@ jobs:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
-            installers/dist/SasView6.dmg
-            installers/dist/sasview6.tar.gz
+            installers/dist/SasView5.app
+            installers/dist/sasview5.tar.gz
           if-no-files-found: error
 
       - name: Rename artifacts (Windows)
