@@ -226,11 +226,11 @@ jobs:
           iscc installers/installer.iss
           mv installers/Output/setupSasView.exe installers/dist
 
-      - name: Build sasview installer dmg file (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        run: |
-          cd installers/dist
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
+#      - name: Build sasview installer dmg file (OSX)
+#        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+#        run: |
+#          cd installers/dist
+#          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
 
       - name: Build sasview installer tarball (Linux)
         if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
