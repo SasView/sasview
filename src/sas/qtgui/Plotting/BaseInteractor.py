@@ -97,8 +97,10 @@ class BaseInteractor(ABC, Generic[PlotterBaseT]):
         """ Set a parameter for the interactor """
 
     def setParameters(self, parameters: dict[str, Any]):
+        """ Set the parameters for this interactor """
         for parameter_name in parameters:
             self.setParameter(parameter_name, parameters[parameter_name])
+
     @abstractmethod
     def getParameters(self) -> dict[str, Any]:
         """ Get a dictionary of the parameters for this interactor"""
