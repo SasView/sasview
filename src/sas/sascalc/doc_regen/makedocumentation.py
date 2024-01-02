@@ -6,17 +6,21 @@ import sys
 import subprocess
 
 from os.path import join, abspath, dirname, basename
+from pathlib import  Path
 
 from sas.sascalc.fit import models
+from sas.sascalc.doc_regen.regentoc import generate_toc
+from sas.system.user import get_user_dir
 
-FILE_ABS_SOURCE = abspath(dirname(__file__))
-MAIN_PY_SRC = FILE_ABS_SOURCE + "/../source-temp/user/models/src/"
-if os.path.exists(MAIN_PY_SRC):
-    ABSOLUTE_TARGET_MAIN = abspath(join(dirname(__file__), MAIN_PY_SRC))
-    PLUGIN_PY_SRC = models.find_plugins_dir()
-    ABSOLUTE_TARGET_PLUGINS = abspath(join(dirname(__file__), PLUGIN_PY_SRC))
-else:
-    pass
+USER_DIRECTORY = Path(get_user_dir())
+MAIN_DOC_SRC = USER_DIRECTORY / "doc"
+if not os.path.exists(MAIN_DOC_SRC):
+    os.mkdir(MAIN_DOC_SRC)
+MAIN_PY_SRC = USER_DIRECTORY / "doc" / "user" / "models" / "src"
+if not os.path.exists(MAIN_PY_SRC):
+    os.mkdir(MAIN_PY_SRC)
+ABSOLUTE_TARGET_MAIN = Path(MAIN_PY_SRC)
+PLUGIN_PY_SRC = Path(models.find_plugins_dir())
 
 
 def get_py(directory):
@@ -31,7 +35,7 @@ def get_main_docs():
     Generates string of .py files to be passed into compiling functions
     """
     # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
-    TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(ABSOLUTE_TARGET_PLUGINS)
+    TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(PLUGIN_PY_SRC)
     base_targets = [basename(string) for string in TARGETS]
 
     # Removes duplicate instances of the same file copied from plugins folder to source-temp/user/models/src/
@@ -71,11 +75,11 @@ def generate_html(single_file="", rst=False):
         # Check to see if this file was opened in a subprocess with the correct working directory or not
         cwd_directory = SAS_DIR + RECOMPILE_DOC_LOCATION
     else:
-        # Set cwd for subprocess to be the this file's parent directory
+        # Set cwd for subprocess to be this file's parent directory
         cwd_directory = os.path.abspath(os.path.dirname(sys.argv[0]))
 
     DOCTREES = "../build/doctrees/"
-    SPHINX_SOURCE = "../source-temp/"
+    SPHINX_SOURCE = "~/.sasview/docs/"
     HTML_TARGET = "../build/html/"
     if rst is False:
         single_rst = SPHINX_SOURCE + "user/models/" + single_file.replace('.py', '.rst')
@@ -111,13 +115,13 @@ def call_all_files():
         #  easiest for regenmodel.py if files are passed in individually
         call_regenmodel(file, "regenmodel.py")
     # regentoc.py requires files to be passed in bulk or else LOTS of unexpected behavior
-    call_regenmodel(TARGETS, "regentoc.py")
+    generate_toc(TARGETS)
 
 
 def call_one_file(file):
     TARGETS = get_main_docs()
     NORM_TARGET = join(ABSOLUTE_TARGET_MAIN, file)
-    MODEL_TARGET =  join(ABSOLUTE_TARGET_PLUGINS, file)
+    MODEL_TARGET = join(MAIN_PY_SRC, file)
     # Determines if a model's source .py file from /user/models/src/ should be used or if the file from /plugin-models/ should be used
     if os.path.exists(NORM_TARGET) and os.path.exists(MODEL_TARGET):
         if os.path.getmtime(NORM_TARGET) < os.path.getmtime(MODEL_TARGET):
@@ -129,7 +133,7 @@ def call_one_file(file):
     else:
         file_call_path = NORM_TARGET
     call_regenmodel(file_call_path, "regenmodel.py")  # There might be a cleaner way to do this but this approach seems to work and is fairly minimal
-    call_regenmodel(TARGETS, "regentoc.py")
+    generate_toc(TARGETS)
 
 
 def make_documentation(target):
