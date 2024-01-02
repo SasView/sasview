@@ -37,7 +37,6 @@ of parallelism (maybe 2-4 processes), allowing matplotlib to run in
 parallel.  More parallelism won't help, and may overwhelm the GPU if you
 have one.
 """
-from __future__ import print_function
 
 import sys
 import os
@@ -61,24 +60,24 @@ else:
 
 import numpy as np
 
-# TODO: Remove this line when genmodel is moved to the sasmodels directory.
-sys.path.insert(0, realpath(joinpath(dirname(__file__), '..')))
 from sasmodels import generate, core
 from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.data import empty_data1D, empty_data2D
 
+from makedocumentation import MAIN_DOC_SRC
+
+# TODO: Remove this line when genmodel is moved to the sasmodels directory.
+sys.path.insert(0, realpath(joinpath(dirname(__file__), '..')))
+
 try:
     from typing import Dict, Any
-    #from matplotlib.axes import Axes
     from sasmodels.kernel import KernelModel
     from sasmodels.modelinfo import ModelInfo
 except ImportError:
     pass
 
 # Destination directory for model docs
-#ROOT = dirname(dirname(realpath(__file__)))
-#TARGET_DIR = joinpath(ROOT, "doc", "model")
-TARGET_DIR = os.path.abspath(dirname(__file__)) + "/../source-temp/user/models" # relative to current path
+TARGET_DIR = MAIN_DOC_SRC / "user" / "models"
 print(TARGET_DIR)
 
 def plot_1d(model, opts, ax):
@@ -454,13 +453,13 @@ def main():
     """
     import matplotlib
     matplotlib.use('Agg')
-
+    global TARGET_DIR
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--cpus", type=int, default=-1, metavar="n",
         help="number of cpus to use in build")
     parser.add_argument("-f", "--force", action="store_true",
         help="force rebuild (serial only)")
-    parser.add_argument("-r", "--rst", default="../source-temp/user/models", metavar="path",
+    parser.add_argument("-r", "--rst", default=TARGET_DIR, metavar="path",
         help="path for the rst files")
     parser.add_argument("-b", "--build", default="html", metavar="path",
         help="path for the html files (if sphinx build)")
@@ -470,7 +469,6 @@ def main():
         help="model files ")
     args = parser.parse_args()
 
-    global TARGET_DIR
     TARGET_DIR = os.path.expanduser(args.rst)
     if not os.path.exists(TARGET_DIR) and not args.sphinx:
         print("build directory %r does not exist"%TARGET_DIR)

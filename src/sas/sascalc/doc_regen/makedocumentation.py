@@ -19,7 +19,7 @@ if not os.path.exists(MAIN_DOC_SRC):
 MAIN_PY_SRC = USER_DIRECTORY / "doc" / "user" / "models" / "src"
 if not os.path.exists(MAIN_PY_SRC):
     os.mkdir(MAIN_PY_SRC)
-ABSOLUTE_TARGET_MAIN = Path(MAIN_PY_SRC)
+ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
 PLUGIN_PY_SRC = Path(models.find_plugins_dir())
 
 
