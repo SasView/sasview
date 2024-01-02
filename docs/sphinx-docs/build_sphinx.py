@@ -19,13 +19,14 @@ from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from distutils.spawn import find_executable
 
-from shutil import copy
-from os import listdir
+from sas.system.user import get_user_dir
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
 # sphinx paths
 SPHINX_ROOT = dirname(abspath(__file__))
+USER_ROOT = get_user_dir()
+USER_DOCS = joinpath(USER_ROOT, 'doc')
 SPHINX_BUILD = joinpath(SPHINX_ROOT, "build")
 SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
 SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
@@ -266,6 +267,9 @@ def build():
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
     copy_tree(SPHINX_SOURCE, SASVIEW_DOC_TARGET)
+    if not os.path.exists(USER_DOCS):
+        os.mkdir(USER_DOCS)
+    copy_tree(SPHINX_SOURCE, USER_DOCS)
     print("=== Build HTML Docs from ReST Files ===")
     subprocess.check_call([
         "sphinx-build",
@@ -277,10 +281,10 @@ def build():
         joinpath(SPHINX_BUILD, "html")
     ])
 
+
     print("=== Copy HTML Docs to Build Directory ===")
     html = joinpath(SPHINX_BUILD, "html")
     copy_tree(html, SASVIEW_DOC_TARGET)
-
 
 def rebuild():
     clean()
