@@ -64,8 +64,6 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
 
         super(PlotLabelProperties, self).__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setFixedSize(self.minimumSizeHint())
 
