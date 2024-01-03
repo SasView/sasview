@@ -214,6 +214,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Usage/error reporting
         self.DO_USAGE_REPORT = False
         self.LAST_REPORTING_ASKED_VERSION = "5.0.0"
+        self.ASK_USAGE_REPORT = True
         self.LOCAL_REPORTING_FILENAME = ""
         self.REPORTING_SERVER = ""
         self.REPORTING_DEVELOPER_NAME = ""
