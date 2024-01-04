@@ -211,6 +211,13 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # What's New variables
         self.LAST_WHATS_NEW_HIDDEN_VERSION = "5.0.0"
 
+        # Usage/error reporting
+        self.DO_USAGE_REPORT = False
+        self.LAST_REPORTING_ASKED_VERSION = "5.0.0"
+        self.LOCAL_REPORTING_FILENAME = ""
+        self.REPORTING_SERVER = ""
+        self.REPORTING_DEVELOPER_NAME = ""
+
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files
