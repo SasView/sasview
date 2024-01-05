@@ -85,6 +85,7 @@ def generate_html(single_file="", rst=False):
     else:
         single_rst = Path(single_file)
     rst_str = str(single_rst.absolute())
+    rst_str.replace(str(MAIN_DOC_SRC), "")
     if rst_str.endswith("models/") or rst_str.endswith("user/"):
         # (re)sets value to empty string if nothing was entered
         single_rst = ""
@@ -97,7 +98,7 @@ def generate_html(single_file="", rst=False):
         DOCTREES,
         "-D",
         "latex_elements.papersize=letter",
-        USER_DOC_SRC,
+        MAIN_DOC_SRC,
         HELP_DIRECTORY_LOCATION,
         single_rst,
     ]
@@ -151,7 +152,7 @@ def make_documentation(target="."):
         else:
             call_one_file(target)  # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
             generate_html(target)
-    except:
+    except Exception as e:
         call_all_files() # Regenerate all RSTs
         generate_html() # Regenerate all HTML
 

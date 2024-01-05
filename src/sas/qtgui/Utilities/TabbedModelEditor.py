@@ -8,9 +8,11 @@ import logging
 import traceback
 
 from PySide6 import QtWidgets, QtCore, QtGui
-from twisted.internet import threads
+from pathlib import Path
 
 from sas.sascalc.fit import models
+from sas.sascalc.fit.models import find_plugins_dir
+from sas.sascalc.doc_regen.makedocumentation import generate_html
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
@@ -39,7 +41,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.is_python = True
         self.window_title = self.windowTitle()
         self.edit_only = edit_only
-        self.load_file = load_file
+        self.load_file = load_file.lstrip("//") if load_file else None
         self.model = model
         self.is_modified = False
         self.label = None
@@ -138,9 +140,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # If we are loading in a file at the launch of the editor instead of letting the user pick, we need to process the HTML location from
         # the documentation viewer into the filepath for its corresponding RST
         if at_launch:
-            from sas.qtgui.Utilities.GuiUtils import PY_SOURCE, SAS_DIR
-            py_rst_files = SAS_DIR + "/" + PY_SOURCE
-            user_models = os.path.dirname(os.path.abspath(os.path.dirname(sys.argv[0]))) + "/.sasview/plugin_models/"
+            from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
+            user_models = find_plugins_dir()
             user_model_name = user_models + self.load_file + ".py"
 
             if self.model is True:
@@ -148,9 +149,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 if os.path.isfile(user_model_name):
                     filename = user_model_name
                 else:
-                    filename = py_rst_files + "/user/models/src/" + self.load_file + ".py"
+                    filename = MAIN_DOC_SRC / "user" / "models" / "src" / self.load_file + ".py"
             else:
-                filename = py_rst_files + self.load_file.replace(".html", ".rst")
+                filename = MAIN_DOC_SRC / self.load_file.replace(".html", ".rst")
                 self.is_python = False
         else:
             plugin_location = models.find_plugins_dir()
@@ -171,7 +172,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if self.tabWidget.count()>1:
             self.tabWidget.removeTab(1)
         self.file_to_regenerate = filename
-        self.loadFile(filename)
+        self.loadFile(str(filename))
 
     def loadFile(self, filename):
         """
@@ -185,15 +186,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.editor_widget.setEnabled(True)
         self.editor_widget.blockSignals(False)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
-        self.filename = filename
-        display_name, _ = os.path.splitext(os.path.basename(filename))
-        self.setWindowTitle(self.window_title + " - " + display_name)
-        if self.model is None:
+        self.filename = Path(filename)
+        display_name = self.filename.stem
+        if not self.model:
             self.setWindowTitle(self.window_title + " - " + display_name)
         else:
             self.setWindowTitle("Documentation Editor" + " - " + display_name)
         # Name the tab with .py filename
-        display_name = os.path.basename(filename)
         self.tabWidget.setTabText(0, display_name)
 
         # Check the validity of loaded model if the model is python
@@ -210,12 +209,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.editor_widget.txtEditor.setToolTip("")
 
         # See if there is filename.c present
-        c_path = self.filename.replace(".py", ".c")
-        if not os.path.isfile(c_path): return
+        c_path = Path(str(self.filename.parent) + self.filename.name.replace(".py", ".c"))
+        if not c_path.exists() or ".rst" in c_path.name: return
         # add a tab with the same highlighting
-        display_name = os.path.basename(c_path)
+        c_display_name = c_path.name
         self.c_editor_widget = ModelEditor(self, is_python=False)
-        self.tabWidget.addTab(self.c_editor_widget, display_name)
+        self.tabWidget.addTab(self.c_editor_widget, c_display_name)
         # Read in the file and set in on the widget
         with open(c_path, 'r', encoding="utf-8") as plugin:
             self.c_editor_widget.txtEditor.setPlainText(plugin.read())
@@ -461,7 +460,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent.communicate.customModelDirectoryChanged.emit()
 
         # notify the user
-        msg = filename + " successfully saved."
+        msg = str(filename) + " successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
         self.regenerateDocumentation()
@@ -470,34 +469,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Defer to subprocess the documentation regeneration process
         """
-        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-        recompile_path = GuiUtils.RECOMPILE_DOC_LOCATION
-        regen_docs_location = sas_path + "/" + recompile_path + "/makedocumentation.py"
-        d = threads.deferToThread(self.regenerateDocsCommand, regen_docs_location) # Regenerate specific documentation file
-        logging.info("Starting documentation regeneration...")
-        d.addCallback(self.emitDocsRegenerated)
-
-    def regenerateDocsCommand(self, regen_docs_location):
-        """
-        Regenerates documentation for a specific file (target) in a subprocess
-        """
-        import subprocess
-        # Pass in file in correct format if the file is a model or a native rst
-        if "models" in self.file_to_regenerate:
-            pass_in_file = os.path.basename(self.file_to_regenerate)
-        else:
-            pass_in_file = self.file_to_regenerate
-        command = [
-            sys.executable,
-            regen_docs_location,
-            pass_in_file,
-        ]
-        doc_regen_dir = os.path.dirname(regen_docs_location)
-        subprocess.run(command, cwd=doc_regen_dir) # cwd parameter tells subprocess to open from a specific directory
-
-    def emitDocsRegenerated(self, d):
-        self.parent.communicate.documentationRegeneratedSignal.emit()
-        logging.info("Documentation regeneration completed.")
+        generate_html(self.filename, True)
 
     def canWriteModel(self, model=None, full_path=""):
         """
