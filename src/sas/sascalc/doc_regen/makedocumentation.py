@@ -78,19 +78,14 @@ def generate_html(single_file="", rst=False):
     """
     Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found under /sasmodels/doc/
     """
-    if "doc-regen" not in SAS_DIR.parent:
-        # Check to see if this file was opened in a subprocess with the correct working directory or not
-        cwd_directory = SAS_DIR / RECOMPILE_DOC_LOCATION
-    else:
-        # Set cwd for subprocess to be this file's parent directory
-        cwd_directory = Path(sys.argv[0]).parent
 
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
     if rst is False:
         single_rst = USER_DOC_SRC / "user" / "models" / single_file.replace('.py', '.rst')
     else:
-        single_rst = single_file
-    if single_rst.endswith("models/") or single_rst.endswith("user/"):
+        single_rst = Path(single_file)
+    rst_str = str(single_rst.absolute())
+    if rst_str.endswith("models/") or rst_str.endswith("user/"):
         # (re)sets value to empty string if nothing was entered
         single_rst = ""
     os.environ['SAS_NO_HIGHLIGHT'] = '1'
@@ -111,7 +106,10 @@ def generate_html(single_file="", rst=False):
         command.remove("")
     except:
         pass
-    subprocess.check_call(command, cwd=cwd_directory)
+    try:
+        subprocess.check_call(command)
+    except Exception as e:
+        print(e)
 
 
 def call_all_files():

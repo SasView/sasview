@@ -185,7 +185,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         logging.info("Starting documentation regeneration...")
         d = threads.deferToThread(self.regenerateDocs, target=file_name)
-        d.addCallback(self.docRegenComplete, self.source)
+        d.addCallback(self.docRegenComplete)
         self.regen_in_progress = True
 
     @staticmethod
@@ -195,7 +195,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         make_documentation(target)
     
-    def docRegenComplete(self):
+    def docRegenComplete(self, return_val):
         """
         Tells Qt that regeneration of docs is done and emits signal tied to opening
         documentation viewer window
