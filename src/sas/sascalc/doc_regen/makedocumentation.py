@@ -15,7 +15,7 @@ from sas.system.user import get_user_dir
 USER_DIRECTORY = Path(get_user_dir())
 USER_DOC_SRC = USER_DIRECTORY / "doc"
 MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
-MAIN_BUILD_SRC = MAIN_DOC_SRC / "build"
+MAIN_BUILD_SRC = USER_DOC_SRC / "build"
 
 if not os.path.exists(MAIN_DOC_SRC):
     os.mkdir(MAIN_DOC_SRC)

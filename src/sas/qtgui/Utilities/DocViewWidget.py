@@ -93,7 +93,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         rst_path = MAIN_DOC_SRC
         rst_py_path = MAIN_PY_SRC
         base_path = self.source.parent.parts
-        url_str = "/".join(base_path) + self.source.name
+        url_str = str(self.source)
 
         if "models" in base_path:
             model_name = self.source.name.replace("html", "py")

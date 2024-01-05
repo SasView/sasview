@@ -16,7 +16,7 @@ import matplotlib as mpl
 
 import sas.system.version
 
-mpl.use("Qt5Agg")
+#mpl.use("Qt5Agg")
 
 from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
 
@@ -364,13 +364,12 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
-        if str(MAIN_DOC_SRC.resolve()) not in url:
-            print(MAIN_DOC_SRC.absolute())
-            url_abs = MAIN_DOC_SRC / url
+        url = url.lstrip("//")
+        if str(HELP_DIRECTORY_LOCATION.resolve()) not in url:
+            url_abs = HELP_DIRECTORY_LOCATION / url
         else:
             url_abs = Path(url)
         try:
-            print(url_abs.absolute())
             # Help window shows itself
             self.helpWindow = DocViewWindow(parent=self, source=url_abs)
         except Exception as ex:
