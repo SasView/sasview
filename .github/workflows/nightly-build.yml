@@ -40,7 +40,7 @@ jobs:
       - name: Rename remaining artifacts artifacts
         run: |
           mv installers/dist/SasView-Installer-windows-*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
-          mv installers/dist/SasView-Installer-macos-*/SasView5.dmg installers/dist/SasView-nightly-MacOSX.dmg
+          mv installers/dist/SasView-Installer-macos-*/SasView6.dmg installers/dist/SasView-nightly-MacOSX.dmg
           mv installers/dist/SasView-Installer-ubuntu-*/sasview5.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
 
       - name: Notarize Release Build (OSX)

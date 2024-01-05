@@ -240,17 +240,17 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python ../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
-          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.app
+          hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
+          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.dmg
 
       - name: Build sasview installer tarball (Linux)
         if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
         run: |
           cd installers/dist
-          tar zcf sasview5.tar.gz sasview
+          tar zcf sasview6.tar.gz sasview
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
@@ -268,8 +268,8 @@ jobs:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
-            installers/dist/SasView5.dmg
-            installers/dist/sasview5.tar.gz
+            installers/dist/SasView6.dmg
+            installers/dist/sasview6.tar.gz
           if-no-files-found: error
 
 
@@ -379,7 +379,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           # $INSTALL_PATH is already the base directory
-          tar xf "$DL_PATH/sasview5.tar.gz"
+          tar xf "$DL_PATH/sasview6.tar.gz"
 
       - name: Check installation files
         run: |
