@@ -9,7 +9,6 @@ from periodictable import formula as Formula
 
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 from sas.qtgui.UI import main_resources_rc
-from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
 
 # Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel

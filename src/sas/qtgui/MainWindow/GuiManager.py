@@ -6,6 +6,7 @@ import webbrowser
 import traceback
 
 from typing import Optional, Dict
+from pathlib import Path
 
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
@@ -75,6 +76,7 @@ from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 import sas
 from sas import config
 from sas.system import web
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +134,7 @@ class GuiManager:
         self.statusBarSetup()
 
         # Current tutorial location
-        self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
+        self._tutorialLocation = os.path.abspath(os.path.join(HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
 
@@ -362,9 +364,15 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
+        if str(MAIN_DOC_SRC.resolve()) not in url:
+            print(MAIN_DOC_SRC.absolute())
+            url_abs = MAIN_DOC_SRC / url
+        else:
+            url_abs = Path(url)
         try:
+            print(url_abs.absolute())
             # Help window shows itself
-            self.helpWindow = DocViewWindow(parent=self, source=url)
+            self.helpWindow = DocViewWindow(parent=self, source=url_abs)
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
 

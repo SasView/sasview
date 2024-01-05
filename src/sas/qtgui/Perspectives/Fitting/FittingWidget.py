@@ -26,6 +26,7 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit import models
+from sas.sascalc.doc_regen.makedocumentation import IMAGES_DIRECTORY_LOCATION, HELP_DIRECTORY_LOCATION
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
@@ -370,7 +371,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Magnetic angles explained in one picture
         self.magneticAnglesWidget = QtWidgets.QWidget()
         labl = QtWidgets.QLabel(self.magneticAnglesWidget)
-        pixmap = QtGui.QPixmap(GuiUtils.IMAGES_DIRECTORY_LOCATION / 'M_angles_pic.png')
+        pixmap = QtGui.QPixmap(IMAGES_DIRECTORY_LOCATION / 'M_angles_pic.png')
         labl.setPixmap(pixmap)
         self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
 
@@ -1823,10 +1824,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the "Fitting" section of help
         """
         regen_in_progress = False
-        sas_path = Path(sys.argv[0])
-        full_path = GuiUtils.HELP_DIRECTORY_LOCATION
-        tree_base = sas_path / full_path
-        help_location = self.getHelpLocation(tree_base)
+        help_location = self.getHelpLocation(HELP_DIRECTORY_LOCATION)
         if regen_in_progress is False:
             self.parent.showHelp(help_location)
 
