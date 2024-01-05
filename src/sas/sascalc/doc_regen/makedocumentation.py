@@ -13,14 +13,22 @@ from sas.sascalc.doc_regen.regentoc import generate_toc
 from sas.system.user import get_user_dir
 
 USER_DIRECTORY = Path(get_user_dir())
-MAIN_DOC_SRC = USER_DIRECTORY / "doc"
+USER_DOC_SRC = USER_DIRECTORY / "doc"
+MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
+MAIN_BUILD_SRC = MAIN_DOC_SRC / "build"
+
 if not os.path.exists(MAIN_DOC_SRC):
     os.mkdir(MAIN_DOC_SRC)
-MAIN_PY_SRC = USER_DIRECTORY / "doc" / "user" / "models" / "src"
+MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
 if not os.path.exists(MAIN_PY_SRC):
     os.mkdir(MAIN_PY_SRC)
 ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
 PLUGIN_PY_SRC = Path(models.find_plugins_dir())
+
+HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
+RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
+IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
+SAS_DIR = Path(sys.argv[0]).parent
 
 
 def get_py(directory):
@@ -70,19 +78,16 @@ def generate_html(single_file="", rst=False):
     """
     Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found under /sasmodels/doc/
     """
-    from sas.qtgui.Utilities.GuiUtils import RECOMPILE_DOC_LOCATION, SAS_DIR
-    if "doc-regen" not in SAS_DIR:
+    if "doc-regen" not in SAS_DIR.parent:
         # Check to see if this file was opened in a subprocess with the correct working directory or not
-        cwd_directory = SAS_DIR + RECOMPILE_DOC_LOCATION
+        cwd_directory = SAS_DIR / RECOMPILE_DOC_LOCATION
     else:
         # Set cwd for subprocess to be this file's parent directory
-        cwd_directory = os.path.abspath(os.path.dirname(sys.argv[0]))
+        cwd_directory = Path(sys.argv[0]).parent
 
-    DOCTREES = "../build/doctrees/"
-    SPHINX_SOURCE = "~/.sasview/docs/"
-    HTML_TARGET = "../build/html/"
+    DOCTREES = MAIN_BUILD_SRC / "doctrees"
     if rst is False:
-        single_rst = SPHINX_SOURCE + "user/models/" + single_file.replace('.py', '.rst')
+        single_rst = USER_DOC_SRC / "user" / "models" / single_file.replace('.py', '.rst')
     else:
         single_rst = single_file
     if single_rst.endswith("models/") or single_rst.endswith("user/"):
@@ -97,8 +102,8 @@ def generate_html(single_file="", rst=False):
         DOCTREES,
         "-D",
         "latex_elements.papersize=letter",
-        SPHINX_SOURCE,
-        HTML_TARGET,
+        USER_DOC_SRC,
+        HELP_DIRECTORY_LOCATION,
         single_rst,
     ]
     try:
@@ -136,9 +141,13 @@ def call_one_file(file):
     generate_toc(TARGETS)
 
 
-def make_documentation(target):
+def make_documentation(target="."):
+    # Ensure target is a path object
+    if target:
+        target = Path(target)
     try:
-        if ".rst" in target:
+        print(f"{target.parent}/{target.name}")
+        if ".rst" in target.name:
             # Generate only HTML if passed in file is an RST
             generate_html(target, rst=True)
         else:
