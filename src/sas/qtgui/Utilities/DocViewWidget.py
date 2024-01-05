@@ -8,9 +8,8 @@ from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit import models
-from sas.sascalc.doc_regen.makedocumentation import make_documentation
+from sas.sascalc.doc_regen.makedocumentation import make_documentation, HELP_DIRECTORY_LOCATION, MAIN_PY_SRC, MAIN_DOC_SRC
 
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
@@ -89,16 +88,16 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         The documentation window will open after the process of regeneration is completed.
         Otherwise, simply triggers a load of the documentation window with loadHtml()
         """
-        sas_path = Path(os.path.dirname(sys.argv[0]))
         user_models = Path(models.find_plugins_dir())
-        html_path = GuiUtils.HELP_DIRECTORY_LOCATION
-        rst_py_path = GuiUtils.PY_SOURCE
+        html_path = HELP_DIRECTORY_LOCATION
+        rst_path = MAIN_DOC_SRC
+        rst_py_path = MAIN_PY_SRC
         base_path = self.source.parent.parts
-        url_str = "/".join(base_path)
+        url_str = "/".join(base_path) + self.source.name
 
         if "models" in base_path:
             model_name = self.source.name.replace("html", "py")
-            regen_string = sas_path / rst_py_path / "user" / "models" / "src" / model_name
+            regen_string = rst_py_path / "user" / "models" / "src" / model_name
             user_model_name = user_models / model_name
 
             # Test if this is a user defined model, and if its HTML does not exist or is older than python source file
@@ -113,8 +112,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         elif "index" in base_path:
             # Regenerate if HTML is older than RST -- for index.html, which gets passed in differently because it is located in a different folder
-            regen_string = sas_path / rst_py_path / url_str.replace('.html', '.rst')
-            html_path = sas_path / html_path / self.source
+            regen_string = rst_py_path / url_str.replace('.html', '.rst')
+            html_path = html_path / self.source
                 # Test to see if HTML does not exist or is older than python file
             if self.newer(regen_string, html_path):
                 self.regenerateHtml(regen_string)
@@ -123,9 +122,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             # Regenerate if HTML is older than RST
             from re import sub
             # Ensure that we are only using everything after and including /user/
-            model_local_path = sub(r"^.*?(?=[\/\\]user)", "", url_str)
-            html_path = Path(sas_path) / html_path / model_local_path.split('#')[0]  # Remove jump links
-            regen_string = sas_path / rst_py_path / model_local_path.replace('.html', '.rst').split('#')[0] #Remove jump links
+            model_local_path = sub(r"^.*?user", "user", url_str)
+            html_path = html_path / model_local_path.split('#')[0]  # Remove jump links
+            regen_string = rst_path / model_local_path.replace('.html', '.rst').split('#')[0] #Remove jump links
                 # Test to see if HTML does not exist or is older than python file
             if self.newer(regen_string, html_path):
                 self.regenerateHtml(regen_string)
@@ -165,7 +164,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         url = self.source
         # Check to see if path is absolute or relative, accommodating urls from many different places
         if not os.path.exists(url):
-            from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
             location = HELP_DIRECTORY_LOCATION / url
             sas_path = Path(os.path.dirname(sys.argv[0]))
             url = sas_path / location
