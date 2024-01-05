@@ -27,6 +27,8 @@ platform = '.%s-%s'%(get_platform(),sys.version[:3])
 SPHINX_ROOT = dirname(abspath(__file__))
 USER_ROOT = get_user_dir()
 USER_DOCS = joinpath(USER_ROOT, 'doc')
+USER_BUILD = joinpath(USER_DOCS, 'build')
+USER_SOURCE = joinpath(USER_DOCS, 'source-temp')
 SPHINX_BUILD = joinpath(SPHINX_ROOT, "build")
 SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
 SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
@@ -267,19 +269,25 @@ def build():
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
     copy_tree(SPHINX_SOURCE, SASVIEW_DOC_TARGET)
-    if not os.path.exists(USER_DOCS):
-        os.mkdir(USER_DOCS)
-    copy_tree(SPHINX_SOURCE, USER_DOCS)
+    for location in [USER_DOCS, USER_BUILD, USER_SOURCE]:
+        if not location:
+            os.mkdir(location)
+    copy_tree(SPHINX_SOURCE, USER_SOURCE)
     print("=== Build HTML Docs from ReST Files ===")
-    subprocess.check_call([
-        "sphinx-build",
-        "-v",
-        "-b", "html", # Builder name. TODO: accept as arg to setup.py.
-        "-d", joinpath(SPHINX_BUILD, "doctrees"),
-        "-W", "--keep-going",
-        SPHINX_SOURCE,
-        joinpath(SPHINX_BUILD, "html")
-    ])
+    try:
+        subprocess.check_call([
+            "sphinx-build",
+            "-v",
+            "-b", "html", # Builder name. TODO: accept as arg to setup.py.
+            "-d", joinpath(SPHINX_BUILD, "doctrees"),
+            "-W", "--keep-going",
+            SPHINX_SOURCE,
+            joinpath(SPHINX_BUILD, "html")
+        ])
+    except Exception as e:
+        print(e)
+        # Ensure the user directory build is created.
+        copy_tree(SPHINX_BUILD, USER_BUILD)
 
 
     print("=== Copy HTML Docs to Build Directory ===")
