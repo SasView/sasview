@@ -18,8 +18,8 @@ datas = [
     ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
     ('../src/sas/system/log.ini', 'sas/system/'),
     ('../../sasmodels/sasmodels','sasmodels'),
-    ('../doc/sphinx-docs/build','doc/build'),
-    ('../doc/sphinx-docs/source','doc/source')
+    ('../docs/sphinx-docs/build','doc/build'),
+    ('../docs/sphinx-docs/source','doc/source')
 ]
 #TODO: Hopefully we can get away from version specific packages
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
