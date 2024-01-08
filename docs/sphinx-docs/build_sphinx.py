@@ -272,7 +272,6 @@ def build():
     for location in [USER_DOCS, USER_BUILD, USER_SOURCE]:
         if not location:
             os.mkdir(location)
-    copy_tree(SPHINX_SOURCE, USER_SOURCE)
     print("=== Build HTML Docs from ReST Files ===")
     try:
         subprocess.check_call([
@@ -286,9 +285,6 @@ def build():
         ])
     except Exception as e:
         print(e)
-        # Ensure the user directory build is created.
-        copy_tree(SPHINX_BUILD, USER_BUILD)
-
 
     print("=== Copy HTML Docs to Build Directory ===")
     html = joinpath(SPHINX_BUILD, "html")
