@@ -25,10 +25,6 @@ platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
 # sphinx paths
 SPHINX_ROOT = dirname(abspath(__file__))
-USER_ROOT = get_user_dir()
-USER_DOCS = joinpath(USER_ROOT, 'doc')
-USER_BUILD = joinpath(USER_DOCS, 'build')
-USER_SOURCE = joinpath(USER_DOCS, 'source-temp')
 SPHINX_BUILD = joinpath(SPHINX_ROOT, "build")
 SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
 SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
@@ -269,9 +265,6 @@ def build():
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
     copy_tree(SPHINX_SOURCE, SASVIEW_DOC_TARGET)
-    for location in [USER_DOCS, USER_BUILD, USER_SOURCE]:
-        if not location:
-            os.mkdir(location)
     print("=== Build HTML Docs from ReST Files ===")
     try:
         subprocess.check_call([
