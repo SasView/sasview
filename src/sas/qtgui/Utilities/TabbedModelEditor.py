@@ -33,9 +33,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         self.setupUi(self)
 
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
-
         # globals
         self.filename = ""
         self.is_python = True
