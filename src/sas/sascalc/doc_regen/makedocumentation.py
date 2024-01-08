@@ -28,7 +28,6 @@ HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
 RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
 SAS_DIR = Path(sys.argv[0]).parent
-print(SAS_DIR)
 
 if not USER_DOC_BASE.exists():
     os.mkdir(USER_DOC_BASE)
@@ -103,13 +102,13 @@ def generate_html(single_file="", rst=False):
         single_rst = USER_DOC_SRC / "user" / "models" / single_file.replace('.py', '.rst')
     else:
         single_rst = Path(single_file)
-    rst_path = single_rst.parts
+    rst_path = list(single_rst.parts)
     for path in MAIN_DOC_SRC.parts:
         # Remove inital path parts from rst_path for overlap
         if path != rst_path[0]:
             break
         del(rst_path[0])
-    rst_str = "/".join(list(rst_path)) + "/" + single_rst.name
+    rst_str = "/".join(rst_path) + "/" + single_rst.name
     if rst_str.endswith("models/") or rst_str.endswith("user/"):
         # (re)sets value to empty string if nothing was entered
         single_rst = ""
