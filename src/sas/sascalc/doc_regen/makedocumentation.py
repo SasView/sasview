@@ -4,6 +4,7 @@ Creates documentation from .py files
 import os
 import sys
 import subprocess
+import shutil
 
 from os.path import join, abspath, dirname, basename
 from pathlib import  Path
@@ -15,21 +16,38 @@ from sas.system.user import get_user_dir
 
 
 USER_DIRECTORY = Path(get_user_dir())
-USER_DOC_SRC = USER_DIRECTORY / "doc" / str(__version__)
+USER_DOC_BASE = USER_DIRECTORY / "doc"
+USER_DOC_SRC = USER_DOC_BASE / str(__version__)
 MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
 MAIN_BUILD_SRC = USER_DOC_SRC / "build"
 MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
 ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
 PLUGIN_PY_SRC = Path(models.find_plugins_dir())
-# Ensure the user docs locations exist before attempting to write to them
-for path in [USER_DOC_SRC, MAIN_DOC_SRC, MAIN_BUILD_SRC, MAIN_PY_SRC]:
-    if not path.exists():
-        os.mkdir(path)
 
 HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
 RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
 SAS_DIR = Path(sys.argv[0]).parent
+print(SAS_DIR)
+
+if not USER_DOC_BASE.exists():
+    os.mkdir(USER_DOC_BASE)
+if not USER_DOC_SRC.exists():
+    os.mkdir(USER_DOC_SRC)
+
+if os.path.exists(SAS_DIR / "doc"):
+    BASE_DIR = SAS_DIR / "doc"
+else:
+    BASE_DIR = SAS_DIR / "docs" / "sphinx-docs"
+
+ORIGINAL_DOCS_SRC = BASE_DIR / "source-temp"
+ORIGINAL_DOC_BUILD = BASE_DIR / "build"
+
+# Create the user directories if necessary
+if not MAIN_DOC_SRC.exists():
+    shutil.copytree(ORIGINAL_DOCS_SRC, MAIN_DOC_SRC)
+if not MAIN_BUILD_SRC.exists():
+    shutil.copytree(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
 
 
 def get_py(directory):
