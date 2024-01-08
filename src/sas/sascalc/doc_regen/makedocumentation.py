@@ -10,20 +10,21 @@ from pathlib import  Path
 
 from sas.sascalc.fit import models
 from sas.sascalc.doc_regen.regentoc import generate_toc
+from sas.system.version import __version__
 from sas.system.user import get_user_dir
 
+
 USER_DIRECTORY = Path(get_user_dir())
-USER_DOC_SRC = USER_DIRECTORY / "doc"
+USER_DOC_SRC = USER_DIRECTORY / "doc" / str(__version__)
 MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
 MAIN_BUILD_SRC = USER_DOC_SRC / "build"
-
-if not os.path.exists(MAIN_DOC_SRC):
-    os.mkdir(MAIN_DOC_SRC)
 MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
-if not os.path.exists(MAIN_PY_SRC):
-    os.mkdir(MAIN_PY_SRC)
 ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
 PLUGIN_PY_SRC = Path(models.find_plugins_dir())
+# Ensure the user docs locations exist before attempting to write to them
+for path in [USER_DOC_SRC, MAIN_DOC_SRC, MAIN_BUILD_SRC, MAIN_PY_SRC]:
+    if not path.exists():
+        os.mkdir(path)
 
 HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
 RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
@@ -84,8 +85,13 @@ def generate_html(single_file="", rst=False):
         single_rst = USER_DOC_SRC / "user" / "models" / single_file.replace('.py', '.rst')
     else:
         single_rst = Path(single_file)
-    rst_str = str(single_rst.absolute())
-    rst_str.replace(str(MAIN_DOC_SRC), "")
+    rst_path = single_rst.parts
+    for path in MAIN_DOC_SRC.parts:
+        # Remove inital path parts from rst_path for overlap
+        if path != rst_path[0]:
+            break
+        del(rst_path[0])
+    rst_str = "/".join(list(rst_path)) + "/" + single_rst.name
     if rst_str.endswith("models/") or rst_str.endswith("user/"):
         # (re)sets value to empty string if nothing was entered
         single_rst = ""
