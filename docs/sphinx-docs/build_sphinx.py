@@ -38,6 +38,8 @@ SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
 SASVIEW_BUILD = joinpath(SASVIEW_ROOT, "build", "lib")
 SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
 SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
+SASVIEW_DOC_SOURCE = joinpath(SASVIEW_DOC_TARGET, "source-temp")
+SASVIEW_DOC_BUILD = joinpath(SASVIEW_DOC_TARGET, "build")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
 
 # sasmodels paths
@@ -264,7 +266,7 @@ def build():
     """
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
-    copy_tree(SPHINX_SOURCE, SASVIEW_DOC_TARGET)
+    copy_tree(SPHINX_SOURCE, SASVIEW_DOC_SOURCE)
     print("=== Build HTML Docs from ReST Files ===")
     try:
         subprocess.check_call([
@@ -281,7 +283,7 @@ def build():
 
     print("=== Copy HTML Docs to Build Directory ===")
     html = joinpath(SPHINX_BUILD, "html")
-    copy_tree(html, SASVIEW_DOC_TARGET)
+    copy_tree(html, SASVIEW_DOC_BUILD)
 
 def rebuild():
     clean()
