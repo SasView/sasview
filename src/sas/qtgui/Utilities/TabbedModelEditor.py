@@ -467,6 +467,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Defer to subprocess the documentation regeneration process
         """
         generate_html(self.filename, True)
+        self.parent.communicate.documentationRegeneratedSignal.emit()
 
     def canWriteModel(self, model=None, full_path=""):
         """
