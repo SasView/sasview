@@ -179,6 +179,7 @@ class Communicate(QtCore.QObject):
     updateMaskedDataSignal = QtCore.Signal()
 
     # Triggers refresh of all documentation windows
+    documentationRegenInProgressSignal = QtCore.Signal()
     documentationRegeneratedSignal = QtCore.Signal()
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
