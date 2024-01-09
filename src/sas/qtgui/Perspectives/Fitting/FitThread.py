@@ -65,6 +65,9 @@ class FitThread(CalcThread):
         """
         msg = ""
         try:
+
+
+
             fitter_size = len(self.fitter)
             list_handler = [self.handler]*fitter_size
             list_curr_thread = [self]*fitter_size

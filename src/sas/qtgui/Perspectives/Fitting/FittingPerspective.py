@@ -485,8 +485,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             if any([page_name in tab for tab in tabs_for_fitting]):
                 tab_object.disableInteractiveElements()
 
-        pass
-
     def onFittingStopped(self, tabs_for_fitting=None):
         """
         Notify tabs listed in tabs_for_fitting
@@ -512,7 +510,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         return state
 
     @property
-    def currentTab(self): # TODO: More pythonic name
+    def currentTab(self):
         """
         Returns the tab widget currently shown
         """

@@ -20,6 +20,8 @@ from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS
 
+from sas.qtgui.UsageStatistics.usage import record_usage
+
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5
 # The maximum q-value to be used when extrapolating
@@ -234,6 +236,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # modify the Calculate button to indicate background process
         self.cmdCalculate.setText("Calculating...")
         self.cmdCalculate.setEnabled(False)
+        record_usage(self.__class__.__name__)
 
         # Send the calculations to separate thread.
         d = threads.deferToThread(self.calculateThread, extrapolation)

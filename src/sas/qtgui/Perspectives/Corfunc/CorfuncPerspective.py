@@ -42,6 +42,7 @@ from .util import WIDGETS, safe_float
 from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from ..perspective import Perspective
 
+from sas.qtgui.UsageStatistics.usage import record_usage
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     """Displays the correlation function analysis of sas data."""
@@ -287,6 +288,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._running = True
         self.cmdExtract.setText("Calculating...")
         self.cmdExtract.repaint()
+
+        record_usage(self.__class__.__name__)
 
         # Set up calculator
 

@@ -19,6 +19,8 @@ from sasdata.dataloader.loader import Loader
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
+from sas.qtgui.UsageStatistics.usage import record_usage
+
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.PlotterData import DataRole
@@ -218,6 +220,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Threaded file load
         """
+
+        # Report extension of file being loaded
+        for filename in url:
+            extension = filename.split(".")[-1]
+            record_usage("file_read", additional_info={"extension": extension})
+
+        # Do the loading
         load_thread = threads.deferToThread(self.readData, url)
         load_thread.addCallback(self.loadComplete)
         load_thread.addErrback(self.loadFailed)

@@ -70,6 +70,7 @@ from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
+from sas.qtgui.UsageStatistics.usage_dialog import UsageStatisticsDialog
 
 import sas
 from sas import config
@@ -130,6 +131,14 @@ class GuiManager:
         # Set up the status bar
         self.statusBarSetup()
 
+
+        # Ask user about usage monitoring
+        if config.ASK_USAGE_REPORT:
+            usage = UsageStatisticsDialog()
+            usage.setModal(True)
+            usage.setFixedSize(600, 400)
+            usage.show()
+
         # Current tutorial location
         self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
@@ -137,6 +146,7 @@ class GuiManager:
 
         if self.WhatsNew.has_new_messages():
             self.actionWhatsNew()
+
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))

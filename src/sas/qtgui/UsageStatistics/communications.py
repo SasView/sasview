@@ -1,9 +1,27 @@
+import os
 import json
 import time
 
-from sas.system.user import uid
+import socket
+import hashlib
 
 from sas.system import config
+def uid() -> str:
+    """ Unique identifier for machine/user combination """
+    if config.REPORTING_DEVELOPER_NAME == "":
+
+        hostname = socket.gethostname()
+        username = os.getlogin()
+
+        uid = hashlib.md5((hostname+" "+username).encode()).hexdigest()
+
+        return uid
+
+    else:
+        return config.REPORTING_DEVELOPER_NAME
+
+
+
 
 def send_data(data: dict):
     """ Send usage data to the sasview server (and/or log locally)"""

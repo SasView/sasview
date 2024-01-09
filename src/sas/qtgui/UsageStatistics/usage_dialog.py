@@ -1,11 +1,14 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QTextBrowser, QPushButton, QSizePolicy, QDialog
+from PySide6.QtCore import QUrl
 import importlib.resources as resources
 
 from sas.system import config
 from sas.system.version import __version__ as version
 
+
 from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than
 
+from sas.qtgui.UsageStatistics.privacy import show_privacy_dialog
 
 class UsageStatisticsDialog(QDialog):
 
@@ -17,10 +20,11 @@ class UsageStatisticsDialog(QDialog):
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
 
-        message_text = resources.read_text("sas.qtgui.UsageStatistics", "usage_dialog_message.html")
-        webview = QTextBrowser()
-        webview.setText(message_text)
-        main_layout.addWidget(webview, stretch=1)
+        self.message_text = resources.read_text("sas.qtgui.UsageStatistics", "usage_dialog_message.html")
+        self.webview = QTextBrowser()
+        self.webview.setText(self.message_text)
+        self.webview.anchorClicked.connect(self.linkClicked)
+        main_layout.addWidget(self.webview, stretch=1)
 
 
         button_panel = QWidget()
@@ -43,10 +47,20 @@ class UsageStatisticsDialog(QDialog):
     def onSelectNo(self):
         """ Called when no button is clicked."""
         config.DO_USAGE_REPORT = False
+        self.close()
 
     def onSelectYes(self):
         """ Called when yes button is clicked."""
         config.DO_USAGE_REPORT = True
+        self.close()
+
+    def linkClicked(self, url: QUrl):
+        if url.url() == "privacy_policy":
+            show_privacy_dialog()
+            self.webview.setText(self.message_text)
+        else:
+            raise NotImplementedError("Links to other places than the privacy policy not implemented")
+
 
 _usage_dialog = None
 def show_usage_dialog():
@@ -54,7 +68,7 @@ def show_usage_dialog():
     global _usage_dialog
 
     _usage_dialog = UsageStatisticsDialog()
-    _usage_dialog.setFixedSize(600,400)
+    _usage_dialog.setFixedSize(600, 400)
     _usage_dialog.setModal(True)
     _usage_dialog.show()
 
