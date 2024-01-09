@@ -124,7 +124,7 @@ def generate_html(single_file="", rst=False):
         "latex_elements.papersize=letter",
         MAIN_DOC_SRC,
         HELP_DIRECTORY_LOCATION,
-        rst_str,
+        single_rst,
     ]
     try:
         # Try removing empty arguments
