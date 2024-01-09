@@ -36,10 +36,11 @@ if not USER_DOC_SRC.exists():
 
 if os.path.exists(SAS_DIR / "doc"):
     BASE_DIR = SAS_DIR / "doc"
+    ORIGINAL_DOCS_SRC = BASE_DIR / "source"
 else:
     BASE_DIR = SAS_DIR / "docs" / "sphinx-docs"
+    ORIGINAL_DOCS_SRC = BASE_DIR / "source-temp"
 
-ORIGINAL_DOCS_SRC = BASE_DIR / "source-temp"
 ORIGINAL_DOC_BUILD = BASE_DIR / "build"
 
 # Create the user directories if necessary
@@ -108,7 +109,7 @@ def generate_html(single_file="", rst=False):
         if path != rst_path[0]:
             break
         del(rst_path[0])
-    rst_str = "/".join(rst_path) + "/" + single_rst.name
+    rst_str = "/".join(rst_path)
     if rst_str.endswith("models/") or rst_str.endswith("user/"):
         # (re)sets value to empty string if nothing was entered
         single_rst = ""
@@ -123,7 +124,7 @@ def generate_html(single_file="", rst=False):
         "latex_elements.papersize=letter",
         MAIN_DOC_SRC,
         HELP_DIRECTORY_LOCATION,
-        single_rst,
+        rst_str,
     ]
     try:
         # Try removing empty arguments
