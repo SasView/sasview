@@ -79,7 +79,6 @@ def run_sasview():
     # Note: Qt environment variables are initialized in sas.system.lib.setup_qt_env
     # Main must have reference to the splash screen, so making it explicit
     app = QApplication([])
-    # setAttribute functions enable displaying of a QWebEngine widget in a sub-widget
     app.setAttribute(Qt.AA_ShareOpenGLContexts)
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
     app.setStyleSheet("* {font-size: 11pt;}")
