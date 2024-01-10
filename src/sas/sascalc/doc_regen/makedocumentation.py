@@ -17,8 +17,9 @@ from sas.system.user import get_user_dir
 
 USER_DIRECTORY = Path(get_user_dir())
 USER_DOC_BASE = USER_DIRECTORY / "doc"
-DOC_LOG = USER_DOC_BASE / 'output.log'
 USER_DOC_SRC = USER_DOC_BASE / str(__version__)
+USER_DOC_LOG = USER_DOC_SRC / 'log'
+DOC_LOG = USER_DOC_LOG / 'output.log'
 MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
 MAIN_BUILD_SRC = USER_DOC_SRC / "build"
 MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
@@ -34,6 +35,8 @@ if not USER_DOC_BASE.exists():
     os.mkdir(USER_DOC_BASE)
 if not USER_DOC_SRC.exists():
     os.mkdir(USER_DOC_SRC)
+if not USER_DOC_LOG.exists():
+    os.mkdir(USER_DOC_LOG)
 
 if os.path.exists(SAS_DIR / "doc"):
     BASE_DIR = SAS_DIR / "doc"
@@ -98,9 +101,10 @@ def generate_html(single_file="", rst=False):
     """
     Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found under /sasmodels/doc/
     """
-    # Remove existing log file
+    # Clear existing log file
     if DOC_LOG.exists():
-        os.remove(DOC_LOG)
+        with open(DOC_LOG, "r+") as f:
+            f.truncate(0)
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
     if rst is False:
         single_rst = USER_DOC_SRC / "user" / "models" / single_file.replace('.py', '.rst')
