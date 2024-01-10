@@ -17,6 +17,7 @@ from sas.system.user import get_user_dir
 
 USER_DIRECTORY = Path(get_user_dir())
 USER_DOC_BASE = USER_DIRECTORY / "doc"
+DOC_LOG = USER_DOC_BASE / 'output.log'
 USER_DOC_SRC = USER_DOC_BASE / str(__version__)
 MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
 MAIN_BUILD_SRC = USER_DOC_SRC / "build"
@@ -97,18 +98,15 @@ def generate_html(single_file="", rst=False):
     """
     Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found under /sasmodels/doc/
     """
-
+    # Remove existing log file
+    if DOC_LOG.exists():
+        os.remove(DOC_LOG)
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
     if rst is False:
         single_rst = USER_DOC_SRC / "user" / "models" / single_file.replace('.py', '.rst')
     else:
         single_rst = Path(single_file)
     rst_path = list(single_rst.parts)
-    for path in MAIN_DOC_SRC.parts:
-        # Remove inital path parts from rst_path for overlap
-        if path != rst_path[0]:
-            break
-        del(rst_path[0])
     rst_str = "/".join(rst_path)
     if rst_str.endswith("models/") or rst_str.endswith("user/"):
         # (re)sets value to empty string if nothing was entered
@@ -132,7 +130,8 @@ def generate_html(single_file="", rst=False):
     except:
         pass
     try:
-        subprocess.check_call(command)
+        with open(DOC_LOG, "w") as f:
+            subprocess.check_call(command, stdout=f)
     except Exception as e:
         print(e)
 
