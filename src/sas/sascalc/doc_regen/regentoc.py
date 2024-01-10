@@ -9,7 +9,7 @@ from os.path import basename, exists, join as joinpath
 from sasmodels.core import load_model_info
 
 try:
-    from typing import Optional, BinaryIO, List, Dict
+    from typing import Optional, IO, BinaryIO, List, Dict
 except ImportError:
     pass
 else:
@@ -28,34 +28,37 @@ TEMPLATE = """\
 .. toctree::
 
 """
-
 MODEL_TOC_PATH = "../source-temp/user/qtgui/Perspectives/Fitting/models"
 
-def _make_category(category_name, label, title, parent=None):
-    # type: (str, str, str, Optional[BinaryIO]) -> BinaryIO
+
+def _make_category(category_name: str, label: str, title: str, parent: Optional[BinaryIO] = None) -> IO:
+    """Generate the base ReST file for a specific model category."""
     file = open(joinpath(MODEL_TOC_PATH, category_name+".rst"), "w")
-    file.write(TEMPLATE%{'label':label, 'title':title, 'bar':'*'*len(title)})
+    file.write(TEMPLATE % {'label': label, 'title': title, 'bar': '*'*len(title)})
     if parent:
         _add_subcategory(category_name, parent)
     return file
 
-def _add_subcategory(category_name, parent):
-    # type: (str, BinaryIO) -> None
+
+def _add_subcategory(category_name: str, parent: BinaryIO):
+    """Add a subcategory to a ReST file."""
     parent.write("    %s.rst\n"%category_name)
 
-def _add_model(file, model_name):
-    # type: (IO[str], str) -> None
+
+def _add_model(file: IO[str], model_name: str):
+    """Add a model file name to an already open file."""
     file.write("    /user/models/%s.rst\n"%model_name)
 
-def _maybe_make_category(category, models, cat_files, model_toc):
-    # type: (str, List[str], Dict[str, BinaryIO], BinaryIO) -> None
+
+def _maybe_make_category(category: str, models: list[str], cat_files: dict[str, BinaryIO], model_toc: BinaryIO):
+    """Add a category to the list of categories, assuming it isn't already in the list."""
     if category not in cat_files:
         print("Unexpected category %s containing"%category, models, file=sys.stderr)
         title = category.capitalize()+" Functions"
         cat_files[category] = _make_category(category, category, title, model_toc)
 
-def generate_toc(model_files):
-    # type: (List[str]) -> None
+def generate_toc(model_files: list[str]):
+    """Generate the doc tree and ReST files from a list of model files."""
     if not model_files:
         print("gentoc needs a list of model files", file=sys.stderr)
 

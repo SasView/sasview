@@ -8,13 +8,14 @@ import shutil
 
 from os.path import join, abspath, dirname, basename
 from pathlib import  Path
+from typing import Union
 
 from sas.sascalc.fit import models
 from sas.sascalc.doc_regen.regentoc import generate_toc
 from sas.system.version import __version__
 from sas.system.user import get_user_dir
 
-
+# Path constants related to the directories and files used in documentation regeneration processes
 USER_DIRECTORY = Path(get_user_dir())
 USER_DOC_BASE = USER_DIRECTORY / "doc"
 USER_DOC_SRC = USER_DOC_BASE / str(__version__)
@@ -31,6 +32,7 @@ RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
 SAS_DIR = Path(sys.argv[0]).parent
 
+# Ensure specific sub-directories exist before continuing
 if not USER_DOC_BASE.exists():
     os.mkdir(USER_DOC_BASE)
 if not USER_DOC_SRC.exists():
@@ -38,10 +40,13 @@ if not USER_DOC_SRC.exists():
 if not USER_DOC_LOG.exists():
     os.mkdir(USER_DOC_LOG)
 
+# Find the original documentation location, depending on where the files originate from
 if os.path.exists(SAS_DIR / "doc"):
+    # This is the directory structure for the installed version of SasView (primary for times when both exist)
     BASE_DIR = SAS_DIR / "doc"
     ORIGINAL_DOCS_SRC = BASE_DIR / "source"
 else:
+    # This is the directory structure for developers
     BASE_DIR = SAS_DIR / "docs" / "sphinx-docs"
     ORIGINAL_DOCS_SRC = BASE_DIR / "source-temp"
 
@@ -54,17 +59,23 @@ if not MAIN_BUILD_SRC.exists():
     shutil.copytree(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
 
 
-def get_py(directory):
+def get_py(directory: Union[Path, os.path, str]) -> list[Union[Path, os.path, str]]:
+    """Find all python files within a directory that are meant for sphinx and return those file-paths as a list.
+
+    :param directory: A file path-like object to find all python files contained there-in.
+    :return: A list of python files found.
+    """
     for root, dirs, files in os.walk(directory):
         # Only include python files not starting in '_' (pycache not included)
         PY_FILES = [join(directory, string) for string in files if not string.startswith("_") and string.endswith(".py")]
         return PY_FILES
 
 
-def get_main_docs():
-    """
-    Generates string of .py files to be passed into compiling functions
-    """
+def get_main_docs() -> list[Union[Path, os.path, str]]:
+    """Generates a list of all .py files to be passed into compiling functions found in the main source code, as well as
+    in the user plugin model directory.
+
+    :return: A list of python files """
     # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
     TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(PLUGIN_PY_SRC)
     base_targets = [basename(string) for string in TARGETS]
@@ -78,9 +89,11 @@ def get_main_docs():
     return TARGETS
 
 
-def call_regenmodel(filepath, regen_py):
-    """
-    Runs regenmodel.py/regentoc.py (specified in parameter regen_py) with all found PY_FILES
+def call_regenmodel(filepath: Union[Path, os.path, str, list], regen_py: str):
+    """Runs regenmodel.py or regentoc.py (specified in parameter regen_py) with all found PY_FILES.
+
+    :param filepath: A file-path like object or list of file-path like objects to regenerate.
+    :param regen_py: The regeneration python file to call (regenmodel.py or regentoc.py)
     """
     REGENMODEL = abspath(dirname(__file__)) + "/" + regen_py
     # Initialize command to be executed
@@ -97,9 +110,11 @@ def call_regenmodel(filepath, regen_py):
     subprocess.run(command)
 
 
-def generate_html(single_file="", rst=False):
-    """
-    Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found under /sasmodels/doc/
+def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool = False):
+    """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
+
+    :param single_file: A file name that needs the html regenerated.
+    :param rst: Boolean to declare the rile an rst-like file.
     """
     # Clear existing log file
     if DOC_LOG.exists():
@@ -137,10 +152,12 @@ def generate_html(single_file="", rst=False):
         with open(DOC_LOG, "w") as f:
             subprocess.check_call(command, stdout=f)
     except Exception as e:
+        # Logging debug
         print(e)
 
 
 def call_all_files():
+    """A master method to regenerate all known documentation."""
     TARGETS = get_main_docs()
     for file in TARGETS:
         #  easiest for regenmodel.py if files are passed in individually
@@ -149,7 +166,11 @@ def call_all_files():
     generate_toc(TARGETS)
 
 
-def call_one_file(file):
+def call_one_file(file: Union[Path, os.path, str]):
+    """A master method to regenerate a single file that is passed to the method.
+
+    :param file: A file name that needs the html regenerated.
+    """
     TARGETS = get_main_docs()
     NORM_TARGET = join(ABSOLUTE_TARGET_MAIN, file)
     MODEL_TARGET = join(MAIN_PY_SRC, file)
@@ -167,21 +188,26 @@ def call_one_file(file):
     generate_toc(TARGETS)
 
 
-def make_documentation(target="."):
+def make_documentation(target: Union[Path, os.path, str] = "."):
+    """Similar to call_one_file, but will fall back to calling all files and regenerating everything if an error occurs.
+
+    :param target: A file name that needs the html regenerated.
+    """
     # Ensure target is a path object
     if target:
         target = Path(target)
     try:
-        print(f"{target.parent}/{target.name}")
         if ".rst" in target.name:
             # Generate only HTML if passed in file is an RST
             generate_html(target, rst=True)
         else:
-            call_one_file(target)  # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST files. Timesaving measure.
+            # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST
+            # files. Time saving measure.
+            call_one_file(target)
             generate_html(target)
     except Exception as e:
-        call_all_files() # Regenerate all RSTs
-        generate_html() # Regenerate all HTML
+        call_all_files()  # Regenerate all RSTs
+        generate_html()  # Regenerate all HTML
 
 
 if __name__ == "__main__":

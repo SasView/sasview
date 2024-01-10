@@ -47,6 +47,9 @@ import shutil
 import argparse
 import subprocess
 
+import matplotlib.axis
+import matplotlib.axes
+
 # CRUFT: python 2.7 backport of makedirs(path, exist_ok=False)
 if sys.version_info[0] >= 3:
     from os import makedirs
@@ -69,22 +72,16 @@ from makedocumentation import MAIN_DOC_SRC
 # TODO: Remove this line when genmodel is moved to the sasmodels directory.
 sys.path.insert(0, realpath(joinpath(dirname(__file__), '..')))
 
-try:
-    from typing import Dict, Any
-    from sasmodels.kernel import KernelModel
-    from sasmodels.modelinfo import ModelInfo
-except ImportError:
-    pass
+from typing import Dict, Any, Union
+from sasmodels.kernel import KernelModel
+from sasmodels.modelinfo import ModelInfo
 
 # Destination directory for model docs
 TARGET_DIR = MAIN_DOC_SRC / "user" / "models"
-print(TARGET_DIR)
 
-def plot_1d(model, opts, ax):
-    # type: (KernelModel, Dict[str, Any], Axes) -> None
-    """
-    Create a 1-D image.
-    """
+
+def plot_1d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
+    """Create a 1-D image based on the model."""
     q_min, q_max, nq = opts['q_min'], opts['q_max'], opts['nq']
     q_min = math.log10(q_min)
     q_max = math.log10(q_max)
@@ -100,11 +97,9 @@ def plot_1d(model, opts, ax):
     ax.set_yscale(opts['yscale'])
     #ax.legend(loc='best')
 
-def plot_2d(model, opts, ax):
-    # type: (KernelModel, Dict[str, Any], Axes) -> None
-    """
-    Create a 2-D image.
-    """
+
+def plot_2d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
+    """Create a 2-D image based on the model."""
     qx_max, nq2d = opts['qx_max'], opts['nq2d']
     q = np.linspace(-qx_max, qx_max, nq2d) # type: np.ndarray
     data2d = empty_data2D(q, resolution=0.0)
@@ -118,11 +113,9 @@ def plot_2d(model, opts, ax):
     ax.set_xlabel(r'$Q_x \/(\AA^{-1})$')
     ax.set_ylabel(r'$Q_y \/(\AA^{-1})$')
 
-def plot_profile_inset(model_info, ax):
-    # type: (ModelInfo, Axes) -> None
-    """
-    Plot 1D radial profile as inset plot.
-    """
+
+def plot_profile_inset(model_info: ModelInfo, ax: matplotlib.axes.Axes):
+    """Plot 1D radial profile as inset plot."""
     import matplotlib.pyplot as plt
     p = ax.get_position()
     width, height = 0.4*(p.x1-p.x0), 0.4*(p.y1-p.y0)
@@ -138,15 +131,14 @@ def plot_profile_inset(model_info, ax):
                verticalalignment="top",
                transform=inset.transAxes)
 
-def figfile(model_info):
-    # type: (ModelInfo) -> str
+
+def figfile(model_info: ModelInfo) -> str:
+    """Generates a standard file name for generated model figures based on the model info."""
     return model_info.id + '_autogenfig.png'
 
-def make_figure(model_info, opts):
-    # type: (ModelInfo, Dict[str, Any]) -> None
-    """
-    Generate the figure file to include in the docs.
-    """
+
+def make_figure(model_info: ModelInfo, opts: Dict[str, Any]):
+    """Generate the figure file to include in the docs."""
     import matplotlib.pyplot as plt
 
     print("Build model")
@@ -202,23 +194,21 @@ def make_figure(model_info, opts):
     plt.close(fig)
     #print("figure saved in",path)
 
-def newer(src, dst):
+
+def newer(src: str, dst: str) -> bool:
+    """Return a boolean whether the src file is newer than the dst file."""
     return not exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst)
 
-def copy_if_newer(src, dst):
-    # type: (str) -> str
-    """
-    Copy from *src* to *dst* if *src* is newer or *dst* doesn't exist.
-    """
+
+def copy_if_newer(src: str, dst: str):
+    """Copy from *src* to *dst* if *src* is newer or *dst* doesn't exist."""
     if newer(src, dst):
         makedirs(dirname(dst), exist_ok=True)
         shutil.copy2(src, dst)
 
-def link_sources(model_info):
-    # type: (ModelInfo) -> str
-    """
-    Add link to model sources from the doc tree.
-    """
+
+def link_sources(model_info: ModelInfo) -> str:
+    """Add link to model sources from the doc tree."""
     # List source files in order of dependency.
     sources = generate.model_sources(model_info) if model_info.source else []
     sources.append(model_info.basefile)
@@ -262,11 +252,9 @@ def link_sources(model_info):
     body += "\n" + sep.join(downloads) + "\n\n"
     return body
 
-def gen_docs(model_info, outfile):
-    # type: (ModelInfo, str) -> None
-    """
-    Generate the doc string with the figure inserted before the references.
-    """
+
+def gen_docs(model_info: ModelInfo, outfile: str):
+    """Generate the doc string with the figure inserted before the references."""
     # Load the doc string from the module definition file and store it in rst
     docstr = generate.make_doc(model_info)
 
@@ -301,9 +289,9 @@ def gen_docs(model_info, outfile):
     with open(outfile, 'w', encoding='utf-8') as fid:
         fid.write(docstr)
 
-def make_figure_cached(model_info, opts):
-    """
-    Cache sasmodels figures between independent builds.
+
+def make_figure_cached(model_info: ModelInfo, opts: dict[str, Any]):
+    """Cache sasmodels figures between independent builds.
 
     To enable caching, set *SASMODELS_BUILD_CACHE* in the environment.
     A (mostly) unique key will be created based on model source and opts.  If
@@ -346,10 +334,12 @@ def make_figure_cached(model_info, opts):
         make_figure(model_info, opts)
         copy_file(target_fig, cache_fig)
 
-def copy_file(src, dst):
-    # type: (str) -> str
-    """
-    Copy from *src* to *dst*, making the destination directory if needed.
+
+def copy_file(src: str, dst: str):
+    """Copy from *src* to *dst*, making the destination directory if needed.
+
+    :param src: The original file name to be copied.
+    :param dst: The destination to copy the file.
     """
     if not exists(dst):
         path = dirname(dst)
@@ -358,10 +348,9 @@ def copy_file(src, dst):
     elif os.path.getmtime(src) > os.path.getmtime(dst):
         shutil.copy2(src, dst)
 
-def process_model(py_file, force=False):
-    # type: (str) -> None
-    """
-    Generate doc file and image file for the given model definition file.
+
+def process_model(py_file: str, force=False) -> str:
+    """Generate doc file and image file for the given model definition file.
 
     Does nothing if the corresponding rst file is newer than *py_file*.
     Also checks the timestamp on the *genmodel.py* program (*__file__*),
@@ -369,6 +358,9 @@ def process_model(py_file, force=False):
     code.
 
     If *force* then generate the rst file regardless of time stamps.
+
+    :param py_file: The python model file that will be processed into ReST using sphinx.
+    :param force: Regardless of the ReST file age, relative to the python file, force the regeneration.
     """
     rst_file = joinpath(TARGET_DIR, basename(py_file).replace('.py', '.rst'))
     if not (force or newer(py_file, rst_file) or newer(__file__, rst_file)):
@@ -411,13 +403,15 @@ def process_model(py_file, force=False):
 
     return rst_file
 
-def run_sphinx(rst_files, output):
-    """
-    Use sphinx to build *rst_files*, storing the html in *output*.
+
+def run_sphinx(rst_files: list[str], output: list[str]):
+    """Use sphinx to build *rst_files*, storing the html in *output*.
+
+    :param rst_files: A list of ReST file names/paths to be processed into HTML.
+    :param output: A list of HTML names/paths mapping to the ReST file names.
     """
 
     print("Building index...")
-
     conf_dir = dirname(realpath(__file__))
     with open(joinpath(TARGET_DIR, 'index.rst'), 'w') as fid:
         fid.write(".. toctree::\n\n")
@@ -425,7 +419,6 @@ def run_sphinx(rst_files, output):
             fid.write("    %s\n"%basename(path))
 
     print("Running sphinx command...")
-
     command = [
         sys.executable,
         "-m", "sphinx",
@@ -433,24 +426,19 @@ def run_sphinx(rst_files, output):
         TARGET_DIR,
         output,
     ]
-
     process = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE)
 
     # Make sure we can see process output in real time
     while True:
-
         output = process.stdout.readline()
-
         if process.poll() is not None:
             break
-
         if output:
             print(output.strip())
 
+
 def main():
-    """
-    Process files listed on the command line via :func:`process_model`.
-    """
+    """Process files listed on the command line via :func:`process_model`."""
     import matplotlib
     matplotlib.use('Agg')
     global TARGET_DIR

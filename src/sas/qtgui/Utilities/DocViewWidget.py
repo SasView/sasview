@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 from pathlib import Path
+from typing import Union
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
@@ -18,6 +19,11 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     """
 
     def __init__(self, parent=None, source: Path = None):
+        """The DocViewWindow class is an HTML viewer built into SasView.
+
+        :param parent: Any Qt object with a communicator that can trigger events.
+        :param source: The Path to the html file.
+        """
         super(DocViewWindow, self).__init__(parent._parent)
         self.parent = parent
         self.setupUi(self)
@@ -32,18 +38,13 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.regenerateIfNeeded()
 
     def initializeSignals(self):
-        """
-        Initialize Signals 
-        """
+        """Initialize all external signals that will trigger events for the window."""
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
         self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
 
     def onEdit(self):
-        """
-        Open editor (TabbedModelEditor) window.
-        """
-        # Convert QUrl to pathname:
+        """Open editor (TabbedModelEditor) window."""
         from re import findall, sub
         # Extract path from QUrl
         path = findall(r"(?<=file:\/\/\/).+\.html", str(self.webEngineViewer.url()))
@@ -133,16 +134,20 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             self.loadHtml() #loads the html file specified in the source url to the QWebViewer
 
     @staticmethod
-    def newer(src, html):
+    def newer(src: Union[Path, os.path, str], html: Union[Path, os.path, str]) -> bool:
+        """Compare two files to determine if a file regeneration is required.
+
+        :param src: The ReST file that might need regeneration.
+        :param html: The HTML file built from the ReST file.
+        :return: Is the ReST file newer than the HTML file? Returned as a boolean.
+        """
         try:
             return not os.path.exists(html) or os.path.getmtime(src) > os.path.getmtime(html)
         except Exception:
             return True
 
     def loadHtml(self):
-        """
-        Loads the HTML file specified when this python is called from another part of the program.
-        """
+        """Loads the HTML file specified when this python is called from another part of the program."""
         # Ensure urls are properly processed before passing into widget
         url = self.processUrl()
         settings = self.webEngineViewer.settings()
@@ -157,9 +162,10 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     def refresh(self):
         self.webEngineViewer.reload()
 
-    def processUrl(self):
-        """
-        Process path into proper QUrl for use in QWebViewer
+    def processUrl(self) -> QtCore.QUrl:
+        """Process path into proper QUrl for use in QWebViewer.
+
+        :return: A QtCore.QUrl object built using self.source.
         """
         url = self.source
         # Check to see if path is absolute or relative, accommodating urls from many different places
@@ -179,9 +185,10 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             abs_url = QtCore.QUrl.fromLocalFile(url)
         return abs_url
 
-    def regenerateHtml(self, file_name):
-        """
-        Regenerate the documentation for the file
+    def regenerateHtml(self, file_name: Union[Path, os.path, str]):
+        """Regenerate the documentation for the file passed to the method
+
+        :param file_name: A file-path like object that needs regeneration.
         """
         logging.info("Starting documentation regeneration...")
         self.parent.communicate.documentationRegenInProgressSignal.emit()
@@ -190,16 +197,16 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.regen_in_progress = True
 
     @staticmethod
-    def regenerateDocs(target=None):
-        """
-        Regenerates documentation for a specific file (target) in a subprocess
+    def regenerateDocs(target: Union[Path, os.path, str] = None):
+        """Regenerates documentation for a specific file (target) in a subprocess
+
+        :param target: A file-path like object that needs regeneration.
         """
         make_documentation(target)
     
     def docRegenComplete(self, return_val):
-        """
-        Tells Qt that regeneration of docs is done and emits signal tied to opening
-        documentation viewer window
+        """Tells Qt that regeneration of docs is done and emits signal tied to opening documentation viewer window.
+        This method is likely called as a thread call back, but no value is used from that callback return.
         """
         self.loadHtml()
         self.parent.communicate.documentationRegeneratedSignal.emit()
