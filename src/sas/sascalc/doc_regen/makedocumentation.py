@@ -32,14 +32,6 @@ RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
 SAS_DIR = Path(sys.argv[0]).parent
 
-# Ensure specific sub-directories exist before continuing
-if not USER_DOC_BASE.exists():
-    os.mkdir(USER_DOC_BASE)
-if not USER_DOC_SRC.exists():
-    os.mkdir(USER_DOC_SRC)
-if not USER_DOC_LOG.exists():
-    os.mkdir(USER_DOC_LOG)
-
 # Find the original documentation location, depending on where the files originate from
 if os.path.exists(SAS_DIR / "doc"):
     # This is the directory structure for the installed version of SasView (primary for times when both exist)
@@ -52,11 +44,23 @@ else:
 
 ORIGINAL_DOC_BUILD = BASE_DIR / "build"
 
-# Create the user directories if necessary
-if not MAIN_DOC_SRC.exists():
-    shutil.copytree(ORIGINAL_DOCS_SRC, MAIN_DOC_SRC)
-if not MAIN_BUILD_SRC.exists():
-    shutil.copytree(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
+
+def create_user_files_if_needed():
+    """Create user documentation directories if necessary and copy built docs there."""
+    if not USER_DOC_BASE.exists():
+        os.mkdir(USER_DOC_BASE)
+    if not USER_DOC_SRC.exists():
+        os.mkdir(USER_DOC_SRC)
+    if not USER_DOC_LOG.exists():
+        os.mkdir(USER_DOC_LOG)
+    if not DOC_LOG.exists():
+        with open(DOC_LOG, "w") as f:
+            # Write an empty file to eliminate any potential future file creation conflicts
+            pass
+    if not MAIN_DOC_SRC.exists():
+        shutil.copytree(ORIGINAL_DOCS_SRC, MAIN_DOC_SRC)
+    if not MAIN_BUILD_SRC.exists():
+        shutil.copytree(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
 
 
 def get_py(directory: Union[Path, os.path, str]) -> list[Union[Path, os.path, str]]:
@@ -211,5 +215,6 @@ def make_documentation(target: Union[Path, os.path, str] = "."):
 
 
 if __name__ == "__main__":
+    create_user_files_if_needed()
     target = sys.argv[1]
     make_documentation(target)

@@ -77,7 +77,7 @@ from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 import sas
 from sas import config
 from sas.system import web
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +98,9 @@ class GuiManager:
 
         # Redefine exception hook to not explicitly crash the app.
         sys.excepthook = self.info
+
+        # Ensure the user directory has all required documentation files for future doc regen purposes
+        create_user_files_if_needed()
 
         # Add signal callbacks
         self.addCallbacks()
