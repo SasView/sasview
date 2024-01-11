@@ -7,6 +7,7 @@ sys.path.append('..')
 from os import mkdir
 from os.path import basename, exists, join as joinpath
 from sasmodels.core import load_model_info
+from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
 
 try:
     from typing import Optional, IO, BinaryIO, List, Dict
@@ -28,7 +29,7 @@ TEMPLATE = """\
 .. toctree::
 
 """
-MODEL_TOC_PATH = "../source-temp/user/qtgui/Perspectives/Fitting/models"
+MODEL_TOC_PATH = MAIN_DOC_SRC / "user/qtgui/Perspectives/Fitting/models"
 
 
 def _make_category(category_name: str, label: str, title: str, parent: Optional[BinaryIO] = None) -> IO:
