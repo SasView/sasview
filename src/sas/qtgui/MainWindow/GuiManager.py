@@ -369,8 +369,11 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
-        url = url.lstrip("//")
-        if str(HELP_DIRECTORY_LOCATION.resolve()) not in url:
+        # Remove leading forward slashes from relative paths to allow easy Path building
+        if isinstance(url, str):
+            url = url.lstrip("//")
+        url = Path(url)
+        if str(HELP_DIRECTORY_LOCATION.resolve()) not in str(url.absolute()):
             url_abs = HELP_DIRECTORY_LOCATION / url
         else:
             url_abs = Path(url)

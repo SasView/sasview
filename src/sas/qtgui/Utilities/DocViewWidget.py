@@ -98,7 +98,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         if "models" in base_path:
             model_name = self.source.name.replace("html", "py")
-            regen_string = rst_py_path / "user" / "models" / "src" / model_name
+            regen_string = rst_py_path / model_name
             user_model_name = user_models / model_name
 
             # Test if this is a user defined model, and if its HTML does not exist or is older than python source file
@@ -111,12 +111,11 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                 self.regenerateHtml(model_name)
             # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
 
-        elif "index" in base_path:
+        elif "index" in url_str:
             # Regenerate if HTML is older than RST -- for index.html, which gets passed in differently because it is located in a different folder
-            regen_string = rst_py_path / url_str.replace('.html', '.rst')
-            html_path = html_path / self.source
+            regen_string = rst_path / str(self.source.name).replace(".html", ".rst")
                 # Test to see if HTML does not exist or is older than python file
-            if self.newer(regen_string, html_path):
+            if self.newer(regen_string, self.source.absolute()):
                 self.regenerateHtml(regen_string)
 
         else:
@@ -143,7 +142,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         try:
             return not os.path.exists(html) or os.path.getmtime(src) > os.path.getmtime(html)
-        except Exception:
+        except Exception as e:
+            # Catch exception for debugging
             return True
 
     def loadHtml(self):
