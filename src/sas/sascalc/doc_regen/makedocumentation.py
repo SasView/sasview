@@ -11,7 +11,6 @@ from pathlib import  Path
 from typing import Union
 
 from sas.sascalc.fit import models
-from sas.sascalc.doc_regen.regentoc import generate_toc
 from sas.system.version import __version__
 from sas.system.user import get_user_dir
 
@@ -162,6 +161,7 @@ def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool =
 
 def call_all_files():
     """A master method to regenerate all known documentation."""
+    from sas.sascalc.doc_regen.regentoc import generate_toc
     TARGETS = get_main_docs()
     for file in TARGETS:
         #  easiest for regenmodel.py if files are passed in individually
@@ -175,6 +175,7 @@ def call_one_file(file: Union[Path, os.path, str]):
 
     :param file: A file name that needs the html regenerated.
     """
+    from sas.sascalc.doc_regen.regentoc import generate_toc
     TARGETS = get_main_docs()
     NORM_TARGET = join(ABSOLUTE_TARGET_MAIN, file)
     MODEL_TARGET = join(MAIN_PY_SRC, file)

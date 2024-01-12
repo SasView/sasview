@@ -12,7 +12,6 @@ from pathlib import Path
 
 from sas.sascalc.fit import models
 from sas.sascalc.fit.models import find_plugins_dir
-from sas.sascalc.doc_regen.makedocumentation import generate_html
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
