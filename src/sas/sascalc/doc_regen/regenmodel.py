@@ -47,19 +47,8 @@ import shutil
 import argparse
 import subprocess
 
-import matplotlib.axis
 import matplotlib.axes
-
-# CRUFT: python 2.7 backport of makedirs(path, exist_ok=False)
-if sys.version_info[0] >= 3:
-    from os import makedirs
-else:
-    def makedirs(path, exist_ok=False):
-        try:
-            os.makedirs(path)
-        except Exception:
-            if not exist_ok or not exists(path):
-                raise
+from os import makedirs
 
 import numpy as np
 
@@ -67,12 +56,9 @@ from sasmodels import generate, core
 from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.data import empty_data1D, empty_data2D
 
-from makedocumentation import MAIN_DOC_SRC
+from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
 
-# TODO: Remove this line when genmodel is moved to the sasmodels directory.
-sys.path.insert(0, realpath(joinpath(dirname(__file__), '..')))
-
-from typing import Dict, Any, Union
+from typing import Dict, Any
 from sasmodels.kernel import KernelModel
 from sasmodels.modelinfo import ModelInfo
 
@@ -95,7 +81,6 @@ def plot_1d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
     ax.set_ylabel(r'$I(Q) \/(\mathrm{cm}^{-1})$')
     ax.set_xscale(opts['xscale'])
     ax.set_yscale(opts['yscale'])
-    #ax.legend(loc='best')
 
 
 def plot_2d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
