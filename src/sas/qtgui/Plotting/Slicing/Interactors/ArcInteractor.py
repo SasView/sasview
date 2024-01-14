@@ -4,11 +4,15 @@ import numpy as np
 
 
 from matplotlib.axes import Axes
+
+from sas.qtgui.Utilities.TypedInputVariables import FloatVariable, MutableInputVariableContainer
+
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
+from sas.qtgui.Plotting.Slicing.Interactors.SlicerInteractor import SlicerInteractor
 
-from sas.qtgui.Plotting.BaseInteractor import BaseInteractor
 
-class ArcInteractor(BaseInteractor[Plotter2D]):
+
+class ArcInteractor(SlicerInteractor):
     """
     Draw an arc on a data2D plot with a variable radius (centered at [0,0]).
     User interaction adjusts the parameter r
@@ -17,24 +21,27 @@ class ArcInteractor(BaseInteractor[Plotter2D]):
     param theta: angle from x-axis of the central point on the arc
     param phi: angle from the centre point on the arc to each of its edges
     """
-    def __init__(self, base: Plotter2D, axes: Axes, color='black', zorder=5, r=1.0,
-                 theta=np.pi / 3, phi=np.pi / 8, parent: Optional[BaseInteractor[Plotter2D]]=None):
+    def __init__(self, base: Plotter2D, axes: Axes,
+                 radius: MutableInputVariableContainer[float],
+                 theta: MutableInputVariableContainer[float],
+                 phi: MutableInputVariableContainer[float],
+                 color='black', zorder: int=5):
 
-        BaseInteractor.__init__(self, base, axes, color=color)
+        # Old default parameters: radius=1.0, theta=np.pi / 3, phi=np.pi / 8):
 
-        self.parent = parent
+        super().__init__(base, axes, color=color)
 
         # Variables for the current mouse position
-        self._mouse_x = r
+        self._mouse_x = 0
         self._mouse_y = 0
-        # Last known mouse position, for when the cursor moves off the plot
-        self._save_x = r
-        self._save_y = 0
+
         self.scale = 10.0
+
         # Key variables for drawing the interactor element
         self.theta = theta
         self.phi = phi
-        self.radius = r
+        self.radius = radius
+
         # Calculate the marker coordinates and define the marker
         self.marker = self.axes.plot([], [], linestyle='',
                                      marker='s', markersize=10,
@@ -43,10 +50,11 @@ class ArcInteractor(BaseInteractor[Plotter2D]):
                                      visible=True)[0]
         # Define the arc
         self.arc = self.axes.plot([], [], linestyle='-', marker='', color=self.color)[0]
+
         # The number of points that make the arc line
-        self.npts = 40
-        # Flag to keep track of motion
-        self.has_move = False
+        self.n_draw_points = 40
+
+
         self.connect_markers([self.marker, self.arc])
         self.update()
 
@@ -54,60 +62,32 @@ class ArcInteractor(BaseInteractor[Plotter2D]):
         """
         Clear this slicer and its markers
         """
-        self.clear_markers()
-        self.marker.remove()
         self.arc.remove()
 
-    def update(self, theta=None, phi=None, r=None):
+    def update(self):
         """
-        Draw the new roughness on the graph.
-        :param theta: angle from x-axis of the central point on the arc
-        :param phi: angle from the centre point on the arc to each of its edges
-        :param r: radius from (0,0) of the arc on a data2D plot
+        Draw the new arc on the graph.
         """
-        if theta is not None:
-            self.theta = theta
-        if phi is not None:
-            self.phi = phi
-        if r is not None:
-            self.radius = r
+
+        theta = self.theta.value
+        phi = self.phi.value
+        radius = self.radius.value
+
         # Calculate the points on the arc, and draw them
-        angle_offset = self.theta - self.phi
-        angle_factor = np.asarray([2 * self.phi / (self.npts - 1) * i + angle_offset for i in range(self.npts)])
-        x = self.radius * np.cos(angle_factor)
-        y = self.radius * np.sin(angle_factor)
+        angle_offset = theta - phi
+        angle_factor = np.asarray([2 * phi / (self.n_draw_points - 1) * i + angle_offset for i in range(self.n_draw_points)])
+
+        x = radius * np.cos(angle_factor)
+        y = radius * np.sin(angle_factor)
+
         self.arc.set_data(x.tolist(), y.tolist())
 
         # Calculate the new marker location, and draw that too
-        marker_x = self.radius * np.cos(self.theta - 0.5 * self.phi)
-        marker_y = self.radius * np.sin(self.theta - 0.5 * self.phi)
+        marker_x = radius * np.cos(theta - 0.5 * phi)
+        marker_y = radius * np.sin(theta - 0.5 * phi)
         self.marker.set(xdata=[marker_x], ydata=[marker_y])
 
-    def save(self, ev):
-        """
-        Remember the roughness for this layer and the next so that we
-        can restore on Esc.
-        """
-        self._save_x = self._mouse_x
-        self._save_y = self._mouse_y
 
-    def moveend(self, ev):
-        """
-        After a dragging motion reset the flag self.has_move to False
-        :param ev: event
-        """
-
-        self.has_move = False
-
-        if self.parent is not None:
-            self.parent.moveend(ev)
-
-    def restore(self, ev):
-        """
-        Restore the roughness for this layer.
-        """
-        self._mouse_x = self._save_x
-        self._mouse_y = self._save_y
 
     def move(self, x, y, ev):
         """

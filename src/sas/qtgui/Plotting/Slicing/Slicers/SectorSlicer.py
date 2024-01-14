@@ -113,6 +113,7 @@ class SectorInteractor(BaseInteractor[Plotter2D], SlicerParameterWidget):
                                    mline=self.main_line.theta, right=True)
             self.left_line.update(delta=self.left_line.phi / 2,
                                   mline=self.main_line.theta, left=True)
+
         # Check if the left side has moved and update the slicer accordingly
         if self.left_line.has_move:
             self.main_line.update()
@@ -304,12 +305,16 @@ class SideInteractor(BaseInteractor):
     :param theta2: the angle between the middle line and x- axis
 
     """
-    def __init__(self, base: Plotter2D, axes: Axes, color: str='black', zorder: int=5, r=1.0,
+    def __init__(self, base: Plotter2D, axes: Axes,
+
+                 color: str='black',
+                 zorder: int=5, r=1.0,
+
                  phi=numpy.pi / 4,
                  theta2=numpy.pi / 3,
                  parent: Optional[BaseInteractor]=None):
 
-        BaseInteractor.__init__(self, base, axes, color=color)
+        super().__init__(base, axes, color=color)
 
         self.parent = parent
 

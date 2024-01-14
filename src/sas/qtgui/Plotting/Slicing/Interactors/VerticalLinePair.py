@@ -3,9 +3,9 @@ import numpy as np
 from matplotlib.axes import Axes
 
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.Plotting.Slicing.Interactors.MouseDragBaseInteractor import MouseDragBaseInteractor
+from sas.qtgui.Plotting.Slicing.Interactors.SlicerInteractor import SlicerInteractor
 
-class VerticalLines(MouseDragBaseInteractor):
+class VerticalLinePair(SlicerInteractor):
     """
     Draw 2 vertical lines centered on (0,0) that can move
     on the y direction. The two lines move symmetrically (in opposite
@@ -39,15 +39,9 @@ class VerticalLines(MouseDragBaseInteractor):
                                         linestyle='-', marker='',
                                         color=self.color, visible=True)[0]
 
-        self.has_move = False
         self.connect_markers([self.right_line, self.inner_marker])
         self.update()
 
-    def validate(self, param_name, param_value):
-        """
-        Validate input from user
-        """
-        return True
 
 
     def clear(self):

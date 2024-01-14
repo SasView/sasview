@@ -52,7 +52,7 @@ class BaseInteractor(ABC, Generic[PlotterBaseT]):
         markers - list of handles for the interactor
 
     """
-    def __init__(self, base: PlotterBaseT, axes: Axes, color='black'):
+    def __init__(self, base: PlotterBaseT, axes: Axes, color: str='black'):
 
         self.base: PlotterBaseT = base
         self.axes: Axes = axes
@@ -72,9 +72,12 @@ class BaseInteractor(ABC, Generic[PlotterBaseT]):
         """
         Clear old markers and interfaces.
         """
-        for h in self.markers: h.remove()
+        for h in self.markers:
+            h.remove()
+
         if self.markers:
             self.base.connect.clear(*self.markers)
+
         self.markers = []
 
     @abstractmethod
@@ -92,19 +95,6 @@ class BaseInteractor(ABC, Generic[PlotterBaseT]):
     @abstractmethod
     def moveend(self, ev: QEvent):
         """ end the drag event """
-    @abstractmethod
-    def setParameter(self, parameter_name: str, parameter_value: Any):
-        """ Set a parameter for the interactor """
-
-    def setParameters(self, parameters: dict[str, Any]):
-        """ Set the parameters for this interactor """
-        for parameter_name in parameters:
-            self.setParameter(parameter_name, parameters[parameter_name])
-
-    @abstractmethod
-    def getParameters(self) -> dict[str, Any]:
-        """ Get a dictionary of the parameters for this interactor"""
-
 
     def connect_markers(self, markers: list[Line2D]):
         """
