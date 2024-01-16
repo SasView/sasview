@@ -19,8 +19,7 @@ from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from distutils.spawn import find_executable
 
-from shutil import copy
-from os import listdir
+from sas.system.user import get_user_dir
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
@@ -39,6 +38,8 @@ SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
 SASVIEW_BUILD = joinpath(SASVIEW_ROOT, "build", "lib")
 SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
 SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
+SASVIEW_DOC_SOURCE = joinpath(SASVIEW_DOC_TARGET, "source-temp")
+SASVIEW_DOC_BUILD = joinpath(SASVIEW_DOC_TARGET, "build")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
 
 # sasmodels paths
@@ -265,21 +266,24 @@ def build():
     """
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
+    copy_tree(SPHINX_SOURCE, SASVIEW_DOC_SOURCE)
     print("=== Build HTML Docs from ReST Files ===")
-    subprocess.check_call([
-        "sphinx-build",
-        "-v",
-        "-b", "html", # Builder name. TODO: accept as arg to setup.py.
-        "-d", joinpath(SPHINX_BUILD, "doctrees"),
-        "-W", "--keep-going",
-        SPHINX_SOURCE,
-        joinpath(SPHINX_BUILD, "html")
-    ])
+    try:
+        subprocess.check_call([
+            "sphinx-build",
+            "-v",
+            "-b", "html", # Builder name. TODO: accept as arg to setup.py.
+            "-d", joinpath(SPHINX_BUILD, "doctrees"),
+            "-W", "--keep-going",
+            SPHINX_SOURCE,
+            joinpath(SPHINX_BUILD, "html")
+        ])
+    except Exception as e:
+        print(e)
 
     print("=== Copy HTML Docs to Build Directory ===")
     html = joinpath(SPHINX_BUILD, "html")
-    copy_tree(html, SASVIEW_DOC_TARGET)
-
+    copy_tree(html, SASVIEW_DOC_BUILD)
 
 def rebuild():
     clean()
