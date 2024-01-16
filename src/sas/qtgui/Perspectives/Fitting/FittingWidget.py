@@ -690,6 +690,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         rows = [s.row() for s in current_list.selectionModel().selectedRows()
                 if self.isCheckable(s.row())]
+
         menu = self.showModelDescription() if not rows else self.modelContextMenu(rows)
         try:
             menu.exec_(current_list.viewport().mapToGlobal(position))
@@ -1674,6 +1675,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbModel.blockSignals(False)
         self.enableModelCombo()
         self.disableStructureCombo()
+        self.kernel_module = None
 
         self._previous_category_index = self.cbCategory.currentIndex()
         # Retrieve the list of models
