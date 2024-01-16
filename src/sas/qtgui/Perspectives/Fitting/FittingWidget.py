@@ -1087,7 +1087,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        params = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
+        params = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
             self.deleteConstraintOnParameter(param=param, model_key=model_key)
