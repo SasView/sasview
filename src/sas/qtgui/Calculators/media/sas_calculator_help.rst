@@ -264,11 +264,13 @@ Information Panel
    20) Starts the computation of the scattering pattern.
    21) Reset GUI to the initial state.
    22) If a PDB file is loaded, the radius of gyration is calculated and displayed. "Rg-MASS" is the radius of gyration based on the mass of all atoms in a molecule. "RG-SLD" is the radius of gyration based on the scattering length of all atoms.
-   23) If the option, Debye full avg. w/ $\beta(Q)$, is chosen, one has the option to check the box "Export Model". Once checked, one can input a file name in the box below. During the computation, the program then exports the calcualted normalized form factor, $P(Q)$, and $\beta(Q)$ into this file that automatically become a model in the "Plugin Models". The model name is the same as the file name given in the blox below "Export Model". Click :ref:`here <gsc_ex_customModel_data>` to see an example how to use the exported model function to fit an experimental data.
+   23) If the option, Debye full avg. w/ $\beta(Q)$, is chosen, one has the option to check the box "Export Model". Once checked, one can input a file name in the box below. During the computation, the program then exports the calcualted normalized form factor, $P(Q)$, and $\beta(Q)$ into this file that automatically become a model in the "Plugin Models". The model name is the same as the file name given in the blox below "Export Model". 
+
+One example is given here ( Click :ref:`here <gsc_ex_customModel_data>` ) to illustrate how to calculate $P(Q)$ and $\beta(Q)$ using a PDB file of a protein. These are 1D functions after averaging over all orientiations. The program can generate a custom model function, which one can use to fit the 1D small angle scattering data. 
 
   
-As an example :ref:`here <gsc_ex_default_data>` you can find a simple demonstration of
-the functionality of the Generic scattering calculator using the default
+One other example ( Click :ref:`here <gsc_ex_default_data>` ) is a simple demonstration of
+the functionality of the Generic scattering calculator to calculate the 2D scattering pattern using the default
 starting values with no files loaded.
 
 After computation the result will appear in the
