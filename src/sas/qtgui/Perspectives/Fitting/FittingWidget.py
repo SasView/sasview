@@ -168,6 +168,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
+        self.groupBox_3.setTitle(QtCore.QCoreApplication.translate("FittingWidgetUI", u"Number-average Polydispersity and Orientational Distribution", None))
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
