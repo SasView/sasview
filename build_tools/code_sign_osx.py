@@ -20,7 +20,7 @@ pyside_libs = glob.glob(
 )
 
 sign_command = ['codesign', '--timestamp', '--options=runtime', '--verify', '--verbose=4', '--force',
-                '--sign', 'Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)']
+                '--sign', '--deep', 'Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)']
 
 
 #TODO: Check if it is necesarry to do it per file (one long list maybe enough)
