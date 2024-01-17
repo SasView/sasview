@@ -3,7 +3,7 @@ Compute scattering from a set of points.
 For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 """
 import os
-
+import logging
 import numpy as np
 
 try:
@@ -98,6 +98,7 @@ def _calc_Iq_avg(Iq, q, r, sld, vol):
         Fq = np.sum(weight * bes)
         Iq[i] = Fq**2
 
+import subprocess
 def _calc_Iq(Iq, q, coords, sld, vol, worksize=1000000):
     """
     Compute Iq as sum rho_j rho_k j0(q ||x_j - x_k||)
@@ -105,12 +106,37 @@ def _calc_Iq(Iq, q, coords, sld, vol, worksize=1000000):
     than worksize elements.
     """
     Iq[:] = 0.
-    q_pi = q/np.pi  # Precompute q/pi since np.sinc = sin(pi x)/(pi x).
     weight = sld * vol
-    batch_size = worksize // coords.shape[0]
-    for batch in range(0, len(q), batch_size):
-        _calc_Iq_batch(Iq[batch:batch+batch_size], q_pi[batch:batch+batch_size],
-                       coords, weight)
+    path = "external/sasview"
+    if (os.path.exists(path)):
+        file_c = open("tmp_coords.txt", "w")
+        file_q = open("tmp_q.txt", "w")
+        for _q in q:
+            file_q.write(str(_q)+"\n")
+        
+        for [x, y, z, w] in zip(coords[0], coords[1], coords[2], weight):
+            file_c.write(str(x) + " " + str(y) + " " + str(z) + " " + str(w) + "\n")
+
+        file_c.close()
+        file_q.close()
+
+        subprocess.call([path, "tmp_coords.txt", "tmp_q.txt", "tmp_Iq.txt"])
+        file_Iq = open("tmp_Iq.txt", "r")
+
+        # format is | q | I(q) |
+        # skip first line
+        for i, line in enumerate(file_Iq):
+            if (i == 0): continue
+            if (1e-3 < abs(q[i-1] - float(line.split()[0]))):
+                logging.error("ERROR: q values do not match")                
+            Iq[i-1] = float(line.split()[1])
+
+    else:
+        q_pi = q/np.pi  # Precompute q/pi since np.sinc = sin(pi x)/(pi x).
+        batch_size = worksize // coords.shape[0]
+        for batch in range(0, len(q), batch_size):
+            _calc_Iq_batch(Iq[batch:batch+batch_size], q_pi[batch:batch+batch_size],
+                            coords, weight)
 
 def _calc_Iq_batch(Iq, q_pi, coords, weight):
     """
@@ -121,6 +147,7 @@ def _calc_Iq_batch(Iq, q_pi, coords, weight):
     *weights* is volume*rho for each point.
     """
     for j in range(len(weight)):
+        if j % 100 == 0: logging.info(f"\tprogress: {j}/{len(weight)}")
         # Compute dx for one row of the upper triangle matrix.
         dx = coords[:, j:] - coords[:, j:j+1]
         # Find the length of each dx vector.
