@@ -1030,6 +1030,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Notify the gui manager about the new perspective chosen.
         """
 
+        # Check that a valid index has been chosen, can happen in some cases such a loading projects
+        if index < 0:
+            return
+
         # Notify via communicator
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
 
