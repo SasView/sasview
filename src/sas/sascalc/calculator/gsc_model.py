@@ -46,6 +46,7 @@ def generateModel(obj):
     fQ = "{"+fQ+"}"
     logFQSQ = "{"+logFQSQavg+"}"
     rG = obj.rGMass
+    prefactor = 1e-2
     model_str = (f'''
 r"""
 Example empirical model using interp.
@@ -78,6 +79,7 @@ c_code =  r"""
 constant double LOGQ[NQ] = {logq};
 constant double FQ[NQ] = {fQ};
 constant double LOGFQSQ[NQ] = {logFQSQ};
+constant double prefactor = {prefactor};
 
 static double
 form_volume(double swelling, double protein_volume)
@@ -107,7 +109,7 @@ Fq(double q, double *f1, double *f2, double sld, double sld_solvent, double swel
     }}
 
     const double contrast = (sld - sld_solvent);
-    const double scale = contrast * form_volume(swelling, protein_volume);
+    const double scale = prefactor * contrast * form_volume(swelling, protein_volume);
 
     // binary search
     int steps = 0;
