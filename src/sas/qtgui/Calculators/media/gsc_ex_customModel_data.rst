@@ -7,7 +7,7 @@ Example: Fit the experimental data using the calculated $P(Q)$ from a PDB file
 
 In this example, the custom model function, custom_apoferritinLong, is written by the Generic Scattering Calculator using a PDB file for apoferritin. (The apoferritin PDB in this example can be accessed at https://www.rcsb.org/structure/6z6u ) In the Generic Scattering Calculator, one should choose the option, Debye full avg. w/ $\beta(Q)$, after loading the apoferritin PDB file. (See an example picture below.) This allows a person to set the low-Q and high-Q limit and the number of data points. Then one should check the box, Export Model, and fill the blank box with the file name of the custom plugin model. In this case, we can put custom_apoferritinLong into this box. After all these, click Compute to calculate $P(Q)$ and $\beta(Q)$, and generate the file into the plugin model directory of the SasView. Once the computation is finished, the plugin model is ready to use to fit scattering data.
 
-.. figure:: gsc_ex_customModel_data_Fig1.jpg
+.. figure:: gsc_ex_customModel_data_Fig3.jpg
 
 In Fit panel, when one selects "Plugin Models" in the Categoery box, the custom model should already exsit in the SasView directroy and can be found in the drop down menu of the "Model name". This custom model, custom_apoferritinLong, returns the normalized form factor, $\tilde{P}(Q)$, and $\beta(Q)$ caculated using the PDB file. 
 (Note that $\beta(Q)$ is only used if one needs to fit the data with the inter-particle structure factor, $S(Q)$, with the static decoupling approximation.)
