@@ -360,7 +360,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         items1 = self.tabs[index1].main_params_to_fit + self.tabs[index1].poly_params_to_fit
         items2 = self.tabs[index2].main_params_to_fit + self.tabs[index2].poly_params_to_fit
         # create an empty list to store redefined constraints
-git        redefined_constraints = []
+        redefined_constraints = []
         for item in items1:
             if item not in items2: continue
             param = item
