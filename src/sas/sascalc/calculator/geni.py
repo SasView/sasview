@@ -107,7 +107,7 @@ def _calc_Iq(Iq, q, coords, sld, vol, worksize=1000000):
     """
     Iq[:] = 0.
     weight = sld * vol
-    path = "external/sasview"
+    path = "external/sasview.exe"
     if (os.path.exists(path)):
         file_c = open("tmp_coords.txt", "w")
         file_q = open("tmp_q.txt", "w")
