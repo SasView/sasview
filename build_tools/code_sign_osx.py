@@ -27,6 +27,10 @@ pyside_QtWebEngineProcess_Helpers = glob.glob(
     "SasView*.app/Contents/Resources/PySide6/Qt/lib/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess", recursive=True
 )
 
+pyside_Qtlibs = glob.glob(
+    "SasView*.app/Contents/Resources/PySide6/Qt/lib/Qt*.framework/Versions/A/Qt*", recursive=True
+)
+
 #pyside_libs = pyside_QtWebEngineCore + pyside_QtWebEngineProcess
 
 sign_command = ['codesign', '--timestamp', '--options=runtime', '--verify', '--verbose=4', '--force',
@@ -45,7 +49,8 @@ for sfile in itertools.chain(so_list, dylib_list,
                              dylib_list_resources,
                              zmq_dylib_list_resources,
                              pyside_QtWebEngineCore,
-                             pyside_QtWebEngineProcess_Helpers):
+                             pyside_QtWebEngineProcess_Helpers,
+                             pyside_Qtlibs):
     sign_command.append(sfile)
     subprocess.check_call(sign_command)
     sign_command.pop()
