@@ -29,14 +29,13 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.axes = self.fig.add_subplot(111)
 
         figure_canvas = FigureCanvas(self.fig)
-
         layout.addWidget(figure_canvas)
 
     def import_data_button_callback(self):
         self.MuMagLib_obj.import_data_button_callback_sub()
 
     def plot_experimental_data_button_callback(self):
-        self.MuMagLib_obj.plot_experimental_data(self.fig)
+        self.MuMagLib_obj.plot_experimental_data(self.fig, self.axes)
 
     def simple_fit_button_callback(self):
         q_max = float(self.qMaxEdit.toPlainText())

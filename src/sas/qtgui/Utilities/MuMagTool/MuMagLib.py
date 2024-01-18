@@ -101,7 +101,7 @@ class MuMagLib():
 
     #####################################################################################################################
     # Plot Experimental Data: Set Bounds and Call Plotting Function
-    def plot_experimental_data(self, figure):
+    def plot_experimental_data(self, figure, axes):
 
         if np.size(self.q_exp) > 1:
             q_exp_min = np.amin(self.q_exp)*1e-9
@@ -116,7 +116,7 @@ class MuMagLib():
             I_exp_max = np.amax(self.I_exp)
             I_exp_max = 10 ** (np.floor(np.log10(I_exp_max))) * np.ceil(I_exp_max / 10 ** (np.floor(np.log10(I_exp_max))))
 
-            self.plot_exp_data(figure, self.q_exp*1e-9, self.I_exp, self.B_0_exp*1e-3, q_exp_min, q_exp_max, I_exp_min, I_exp_max)
+            self.plot_exp_data(figure, axes, self.q_exp*1e-9, self.I_exp, self.B_0_exp*1e-3, q_exp_min, q_exp_max, I_exp_min, I_exp_max)
         else:
             messagebox.showerror(title="Error!", message="No experimental data available! Please import experimental data!")
 
@@ -125,23 +125,28 @@ class MuMagLib():
 
     ################################################################################################################
     # Plot Experimental Data: Generate Figure
-    def plot_exp_data(self, figure, q, I_exp, B_0, x_min, x_max, y_min, y_max):
+    def plot_exp_data(self, figure, axes, q, I_exp, B_0, x_min, x_max, y_min, y_max):
 
-        # figure.tight_layout()
-
-        ax = figure.subplots()
-
+        ax = axes
         # print(ax)
-
         # ax.cla()
-
-
 
         colors = pl.cm.jet(np.linspace(0, 1, len(B_0)))
         for k in np.arange(0, len(B_0)):
             print(k)
-            ax.loglog(q[k, :], I_exp[k, :], linestyle='-', color=colors[k], linewidth=0.5, label='B_0 = ' + str(B_0[k]) + ' T')
+            ax.loglog(q[k, :], I_exp[k, :], linestyle='-', color=colors[k], linewidth=0.5, label=r'$B_0 = ' + str(B_0[k]) + '$ T')
             ax.loglog(q[k, :], I_exp[k, :], '.', color=colors[k], linewidth=0.3, markersize=1)
+
+        ax.set_xlabel(r'$q$ [1/nm]', usetex=True)
+        ax.set_ylabel(r'$I_{\mathrm{exp}}$', usetex=True)
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+        figure.tight_layout()
+
+       # ax.yscale('log')
+       # ax.xscale('log')
+        #ax.grid(True, which="both", linestyle='--')
+        #ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), usetex=True)
 
         figure.canvas.draw()
 
