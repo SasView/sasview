@@ -56,14 +56,9 @@ def smear_selection(data, model = None):
     # This is the code that checks for SESANS data; it looks for the file loader
     # TODO: change other sanity checks to check for file loader instead of data structure?
     _found_sesans = False
-    #if data.dx is not None and data.meta_data['loader']=='SESANS':
-    if data.dx is not None and data.isSesans:
-        #if data.dx[0] > 0.0:
-        if np.size(data.dx[data.dx <= 0]) == 0:
-            _found_sesans = True
-        # if data.dx[0] <= 0.0:
-        if np.size(data.dx[data.dx <= 0]) > 0:
-            raise ValueError('one or more of your dx values are negative, please check the data file!')
+    if data.isSesans:  # data.dx data is not required in the Hankel transform for SESANS data
+        print("FOUND SESANS in QSMEARING")
+        _found_sesans = True
 
     if _found_sesans:
         # Pre-compute the Hankel matrix (H)
@@ -84,7 +79,9 @@ def smear_selection(data, model = None):
     if data.dx is not None and len(data.dx) == len(data.x):
 
         # Check that we have non-zero data
-        if data.dx[0] > 0.0:
+        if np.min(data.dx) < 0:
+            raise ValueError('one or more of your dx values are negative, please check the data file!')
+        else:
             _found_resolution = True
             #print "_found_resolution",_found_resolution
             #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]
