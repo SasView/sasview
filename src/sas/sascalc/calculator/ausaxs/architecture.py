@@ -1,31 +1,37 @@
 from enum import Enum
 
-class _arch(Enum):
+class Arch(Enum):
     NONE = 0
     SSE4 = 1
     AVX =  2
 
-class _os(Enum):
+class OS(Enum):
     WIN = 0
     LINUX = 1
     MAC = 2
     UNKNOWN = 3
 
 def determine_cpu_support():
+    """
+    Get the highest level of CPU support for SIMD instructions.
+    """
     import cpufeature
     if cpufeature.CPUFeature["AVX"]:
-        return _arch.AVX
+        return Arch.AVX
     elif cpufeature.CPUFeature["SSE4"]:
-        return _arch.SSE4
+        return Arch.SSE4
     else:
-        return _arch.NONE
+        return Arch.NONE
     
 def determine_os():
+    """
+    Get the operating system of the current machine.
+    """
     import platform
     if platform.system() == "Windows":
-        return _os.WIN
+        return OS.WIN
     elif platform.system() == "Linux":
-        return _os.LINUX
+        return OS.LINUX
     elif platform.system() == "Darwin":
-        return _os.MAC
-    return _os.UNKNOWN
+        return OS.MAC
+    return OS.UNKNOWN

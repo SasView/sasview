@@ -220,7 +220,33 @@ class sas_gen_test(unittest.TestCase):
         # only require errors <1% due to larger discretisation
         for val in np.abs(errs):
             self.assertLessEqual(val, 1e-2)
-    
+
+    def test_debye_impl(self):
+        """
+        Test that the Debye algorithm supplied by the external AUSAXS library agrees with the default implementation.
+        """
+        from sas.sascalc.calculator.ausaxs import sasview_sans_debye
+        from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye
+
+        # get all pdb files in the data folder
+        import glob
+        pdb_files = glob.glob(os.path.join(os.path.dirname(__file__), 'data/debye_test_files', '*.pdb'))
+        for pdb_file in pdb_files:
+            # load pdb file
+            f = self.pdbloader.read(pdb_file)
+            coords = np.array([f.pos_x, f.pos_y, f.pos_z]).T
+            q = np.linspace(0.001, 0.1, 100)
+            w = np.random.rand(len(w)) # random weights
+
+            analytical = sasview_sans_debye.sasview_sans_debye(q, coords, f.weight)
+            external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, f.weight)
+
+            # compare the two
+            errs = (external - analytical)/analytical
+            for val in np.abs(errs):
+                self.assertLessEqual(val, 1e-3)
+
+
     def test_calculator_elements(self):
         """
         Test that the calculator correctly calculates scattering for element type data.
