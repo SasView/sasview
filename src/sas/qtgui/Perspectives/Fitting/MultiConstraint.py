@@ -102,6 +102,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         Add visual cues when formula is incorrect
         """
+        # temporarily disable validation, as not yet fully operational
+        return
+
         # Don't validate if requested
         if not self.validate: return
 

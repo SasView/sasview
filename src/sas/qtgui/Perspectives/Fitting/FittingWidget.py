@@ -961,6 +961,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # First, get a list of constraints and symbols
         constraint_list = self.parent.perspective().getActiveConstraintList()
         symbol_dict = self.parent.perspective().getSymbolDictForConstraints()
+        if model_key == 'poly' and 'Distribution' in constraint.param:
+            constraint.param = self.polyNameToParam(constraint.param)
         constraint_list.append((self.modelName() + '.' + constraint.param,
                                 constraint.func))
         # Call the error checking function
@@ -1076,6 +1078,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         constraint.validate = mc_widget.validate
 
         # Which row is the constrained parameter in?
+        if model_key == 'poly' and 'Distribution' in constraint.param:
+            constraint.param = self.polyNameToParam(constraint.param)
         row = self.getRowFromName(constraint.param)
 
         # Create a new item and add the Constraint object as a child
@@ -1090,6 +1094,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         params = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
+            if model_key == 'poly':
+                param = self.polyNameToParam(param)
             self.deleteConstraintOnParameter(param=param, model_key=model_key)
 
     def deleteConstraintOnParameter(self, param=None, model_key="standard"):
