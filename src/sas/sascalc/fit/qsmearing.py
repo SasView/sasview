@@ -57,7 +57,6 @@ def smear_selection(data, model = None):
     # TODO: change other sanity checks to check for file loader instead of data structure?
     _found_sesans = False
     if data.isSesans:  # data.dx data is not required in the Hankel transform for SESANS data
-        print("FOUND SESANS in QSMEARING")
         _found_sesans = True
 
     if _found_sesans:
