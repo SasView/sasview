@@ -1,9 +1,5 @@
-"""
-Boxsum Class: determine 2 rectangular area to compute
-the sum of pixel of a Data.
-"""
 import numpy
-from PyQt5 import QtGui
+from PySide6 import QtGui
 
 from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
@@ -15,9 +11,17 @@ from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 class BoxSumCalculator(BaseInteractor):
     """
-    Boxsum Class: determine 2 rectangular area to compute
-    the sum of pixel of a Data.
-    Uses PointerInteractor , VerticalDoubleLine,HorizontalDoubleLine.
+    BoxSumCalculator Class computes properties (such as sum and average of
+    intensities) from a rectangular area defined in a data2D object. The actual
+    calculations are done by manipulations.py
+
+    This class uses three other classes, PointerInteractor to define the center
+    of the rectangle, and VerticalDoubleLine and HorizontalDoubleLine to define
+    the rectangle x1,x2,y1,y2.
+
+    ..TODO: the 3 classes here are the same as used by the BoxSlicer. These
+            should probably be abstracted out.
+
     @param zorder:  Artists with lower zorder values are drawn first.
     @param x_min: the minimum value of the x coordinate
     @param x_max: the maximum value of the x coordinate
@@ -226,7 +230,6 @@ class BoxSumCalculator(BaseInteractor):
         self.total, self.totalerror, self.points = boxtotal(self.data)
         if self.update_model:
             self.setModelFromParams()
-        self.draw()
 
     def moveend(self, ev):
         """
@@ -391,7 +394,8 @@ class PointInteractor(BaseInteractor):
         self.x = x
         self.y = y
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -558,7 +562,8 @@ class VerticalDoubleLine(BaseInteractor):
         self.x2 = self.center_x - delta
         self.half_width = numpy.fabs(self.x1 - self.x2) / 2
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -569,7 +574,8 @@ class VerticalDoubleLine(BaseInteractor):
 
 class HorizontalDoubleLine(BaseInteractor):
     """
-    Select an annulus through a 2D plot
+    Draw 2 horizontal lines moving in opposite direction and centered on
+    a point (PointInteractor)
     """
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
                  center_x=0.0, center_y=0.0):
@@ -720,7 +726,8 @@ class HorizontalDoubleLine(BaseInteractor):
         self.y2 = self.center_y - delta
         self.half_height = numpy.fabs(self.y1) - self.center_y
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """

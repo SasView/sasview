@@ -1,5 +1,5 @@
 Open GL Subsystem
-==============
+=================
 
 The SasView openGL subsystem is quite minimal, and works in the standard way though a scenegraph
 
@@ -8,6 +8,6 @@ a way of checking the rendering, and catalogue the available functions
 
 
 Class Hierarchy
-===============
+^^^^^^^^^^^^^^^
 
 TODO - data currently in PR.

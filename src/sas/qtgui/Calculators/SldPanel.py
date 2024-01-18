@@ -1,9 +1,9 @@
 # global
 import numpy as np
 import logging
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from periodictable import formula as Formula
 from periodictable.xsf import xray_energy, xray_sld
@@ -97,6 +97,7 @@ class SldPanel(QtWidgets.QDialog):
         self.setupUi()
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+        self.setFixedSize(self.minimumSizeHint())
 
         self.setupModel()
         self.setupMapper()
@@ -123,10 +124,10 @@ class SldPanel(QtWidgets.QDialog):
         # No need for recalculate
         self.ui.recalculateButton.setVisible(False)
 
-        rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
-        self.ui.editNeutronWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editNeutronWavelength))
-        self.ui.editXrayWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editXrayWavelength))
+        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
+        self.ui.editNeutronWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editNeutronWavelength))
+        self.ui.editXrayWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editXrayWavelength))
 
         # signals
         self.ui.helpButton.clicked.connect(self.displayHelp)

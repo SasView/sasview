@@ -4,9 +4,9 @@ import os
 import types
 import webbrowser
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -37,7 +37,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
         >>> settings = [('steps', 1000), ('starts', 1), ('radius', 0.15), ('xtol', 1e-6), ('ftol', 1e-8)]
     """
-    fit_option_changed = QtCore.pyqtSignal(str)
+    fit_option_changed = QtCore.Signal(str)
     name = "Fit Optimizers"
 
     def __init__(self, config=None):
@@ -45,32 +45,30 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         # Use pre-built UI
         self.setupUi(self)
 
-        self.parent = None
         self.config = config
         self.config_params = ['FITTING_DEFAULT_OPTIMIZER']
 
         # Fill up the algorithm combo, based on what BUMPS says is available
-        self.active_fitters = [n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS]
+        self.active_fitters = [n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS and 'least' not in n.id]
         self.cbAlgorithm.addItems(self.active_fitters)
         self.cbAlgorithmDefault.addItems(self.active_fitters)
 
-        # Handle the combo box changes
-        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
-        self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
-
         # Set the default index
-        default_name = [n.name for n in fitters.FITTERS if n.id == sasview_config.FITTING_DEFAULT_OPTIMIZER][0]
+        self.current_fitter_id = getattr(sasview_config, 'FITTING_DEFAULT_OPTIMIZER', fitters.FIT_DEFAULT_ID)
+        default_name = [n.name for n in fitters.FITTERS if n.id == self.current_fitter_id][0]
         default_index = self.cbAlgorithm.findText(default_name)
-        self.cbAlgorithm.setCurrentIndex(default_index)
         self.cbAlgorithmDefault.setCurrentIndex(default_index)
+        self.cbAlgorithm.setCurrentIndex(default_index)
+        self._algorithm_change(default_index)
         # previous algorithm choice
         self.previous_index = default_index
 
         # Assign appropriate validators
         self.assignValidators()
 
-        # Set defaults
-        self.current_fitter_id = getattr(sasview_config, 'FITTING_DEFAULT_OPTIMIZER', fitters.FIT_DEFAULT_ID)
+        # To prevent errors related to parent, connect the combo box changes once the widget is instantiated
+        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
+        self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
 
     #
     # Preference Widget required methods
@@ -79,13 +77,16 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         pass
 
     def _toggleBlockAllSignaling(self, toggle: bool):
+        self.cbAlgorithm.blockSignals(toggle)
         self.cbAlgorithmDefault.blockSignals(toggle)
 
     def _restoreFromConfig(self):
         optimizer_key = sasview_config.FITTING_DEFAULT_OPTIMIZER
         optimizer_name = bumps.options.FIT_CONFIG.names[optimizer_key]
         self.cbAlgorithmDefault.setCurrentIndex(self.cbAlgorithmDefault.findText(optimizer_name))
-        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(optimizer_name))
+        name = [n.name for n in fitters.FITTERS if n.id == self.current_fitter_id][0]
+        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(name))
+        self._algorithm_change(self.cbAlgorithm.currentIndex())
 
     def assignValidators(self):
         """
@@ -118,19 +119,25 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
     def onDefaultAlgorithmChange(self):
         text = self.cbAlgorithmDefault.currentText()
+        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(text))
         id = dict((new_val, new_k) for new_k, new_val in bumps.options.FIT_CONFIG.names.items()).get(text)
         self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
 
     def onAlgorithmChange(self, index):
+        """Triggered method when the index of the combo box changes."""
+        self._algorithm_change(index)
+        self._stageChange("Fitting.activeAlgorithm", index)
+
+    def _algorithm_change(self, index):
         """
-        Change the page in response to combo box index
+        Change the page in response to combo box index. Can also be called programmatically.
         """
         # Find the algorithm ID from name
-        self.current_fitter_id = \
+        fitter_id = \
             [n.id for n in fitters.FITTERS if n.name == str(self.cbAlgorithm.currentText())][0]
 
         # find the right stacked widget
-        widget_name = "self.page_"+str(self.current_fitter_id)
+        widget_name = "self.page_"+str(fitter_id)
 
         # Convert the name into widget instance
         try:
@@ -153,7 +160,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         # Select the requested widget
         self.stackedWidget.setCurrentIndex(index_for_this_id)
 
-        self.updateWidgetFromBumps(self.current_fitter_id)
+        self.updateWidgetFromBumps(fitter_id)
 
         self.assignValidators()
 
@@ -162,6 +169,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
     def applyNonConfigValues(self):
         """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
+        self.current_fitter_id = [n.id for n in fitters.FITTERS if n.name == str(self.cbAlgorithm.currentText())][0]
         options = self.config.values[self.current_fitter_id]
         for option in options.keys():
             # Find the widget name of the option
@@ -174,7 +182,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
                 continue
             if line_edit is None or not isinstance(line_edit, QtWidgets.QLineEdit):
                 continue
-            color = line_edit.palette().color(QtGui.QPalette.Background).name()
+            color = line_edit.palette().color(QtGui.QPalette.Window).name()
             if color == '#fff79a':
                 # Show a custom tooltip and return
                 tooltip = "<html><b>Please enter valid values in all fields.</html>"
@@ -257,10 +265,12 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
             widget_name = 'self.'+attribute
             if option not in bumps.options.FIT_FIELDS:
                 return
+            control = eval(widget_name)
             if isinstance(bumps.options.FIT_FIELDS[option][1], bumps.options.ChoiceList):
-                control = eval(widget_name)
                 control.setCurrentIndex(control.findText(str(options[option])))
+                control.currentIndexChanged.connect(lambda: self._stageChange(widget_name, ""))
             else:
-                eval(widget_name).setText(str(options[option]))
+                control.setText(str(options[option]))
+                control.editingFinished.connect(lambda: self._stageChange(widget_name, ""))
 
         pass

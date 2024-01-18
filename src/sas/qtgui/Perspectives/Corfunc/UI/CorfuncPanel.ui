@@ -1105,15 +1105,24 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>scrollArea</tabstop>
-  <tabstop>txtFilename</tabstop>
+  <tabstop>cmdExtract</tabstop>
+  <tabstop>txtLowerQMax</tabstop>
   <tabstop>txtUpperQMin</tabstop>
   <tabstop>txtUpperQMax</tabstop>
+  <tabstop>fitBackground</tabstop>
+  <tabstop>fitGuinier</tabstop>
+  <tabstop>fitPorod</tabstop>
+  <tabstop>radTangentInflection</tabstop>
+  <tabstop>radTangentMidpoint</tabstop>
+  <tabstop>radTangentAuto</tabstop>
+  <tabstop>radLongPeriodMax</tabstop>
+  <tabstop>radLongPeriodDouble</tabstop>
+  <tabstop>radLongPeriodAuto</tabstop>
+  <tabstop>txtBackground</tabstop>
   <tabstop>txtGuinierA</tabstop>
   <tabstop>txtGuinierB</tabstop>
   <tabstop>txtPorodK</tabstop>
   <tabstop>txtPorodSigma</tabstop>
-  <tabstop>cmdSave</tabstop>
   <tabstop>txtAvgHardBlock</tabstop>
   <tabstop>txtAvgSoftBlock</tabstop>
   <tabstop>txtAvgIntThick</tabstop>
@@ -1122,9 +1131,12 @@
   <tabstop>txtPolyStribeck</tabstop>
   <tabstop>txtLongPeriod</tabstop>
   <tabstop>txtLocalCrystal</tabstop>
-  <tabstop>cmdExtract</tabstop>
+  <tabstop>cmdSaveExtrapolation</tabstop>
+  <tabstop>cmdSave</tabstop>
   <tabstop>cmdHelp</tabstop>
   <tabstop>tabWidget</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>txtFilename</tabstop>
  </tabstops>
  <resources/>
  <connections/>

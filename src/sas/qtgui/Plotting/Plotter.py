@@ -1,10 +1,9 @@
-import math
-
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import functools
 import copy
+import math
 import matplotlib as mpl
 import numpy as np
 import textwrap
@@ -33,7 +32,7 @@ class PlotterWidget(PlotterBase):
     1D Plot widget for use with a QDialog
     """
     def __init__(self, parent=None, manager=None, quickplot=False):
-        super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
+        super().__init__(parent, manager=manager, quickplot=quickplot)
 
         self.parent = parent
 
@@ -70,7 +69,8 @@ class PlotterWidget(PlotterBase):
 
         self.legendVisible = True
 
-        parent.geometry()
+        if parent is not None:
+            parent.geometry()
 
     @property
     def data(self):
@@ -169,6 +169,9 @@ class PlotterWidget(PlotterBase):
         # Plot color
         if color is None:
             color = data.custom_color
+
+        # grid on/off, stored on self
+        ax.grid(self.grid_on)
 
         color = PlotUtilities.getValidColor(color)
         data.custom_color = color
@@ -317,9 +320,11 @@ class PlotterWidget(PlotterBase):
         self.actionAddText = self.contextMenu.addAction("Add Text")
         self.actionRemoveText = self.contextMenu.addAction("Remove Text")
         self.contextMenu.addSeparator()
+        self.actionToggleGrid = self.contextMenu.addAction("Toggle Grid On/Off")
         if self.show_legend:
             self.actionToggleLegend = self.contextMenu.addAction("Toggle Legend")
             self.contextMenu.addSeparator()
+        # Additional actions
         self.actionCustomizeLabel = self.contextMenu.addAction("Customize Labels")
         self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
@@ -339,6 +344,7 @@ class PlotterWidget(PlotterBase):
         self.actionRemoveText.triggered.connect(self.onRemoveText)
         self.actionChangeScale.triggered.connect(self.onScaleChange)
         self.actionSetGraphRange.triggered.connect(self.onSetGraphRange)
+        self.actionToggleGrid.triggered.connect(self.onGridToggle)
         self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
         self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
         self.actionToggleMenu.triggered.connect(self.onToggleMenu)
@@ -1014,8 +1020,7 @@ class PlotterWidget(PlotterBase):
 class Plotter(QtWidgets.QDialog, PlotterWidget):
     def __init__(self, parent=None, quickplot=False):
 
-        QtWidgets.QDialog.__init__(self)
-        PlotterWidget.__init__(self, parent=self, manager=parent, quickplot=quickplot)
+        PlotterWidget.__init__(self, parent=None, manager=parent, quickplot=quickplot)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)

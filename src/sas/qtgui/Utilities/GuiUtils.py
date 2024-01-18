@@ -20,9 +20,9 @@ import numpy as np
 warnings.simplefilter("ignore")
 import logging
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from periodictable import formula as Formula
 from sas.qtgui.Plotting import DataTransform
@@ -89,99 +89,99 @@ class Communicate(QtCore.QObject):
     Utility class for tracking of the Qt signals
     """
     # File got successfully read
-    fileReadSignal = QtCore.pyqtSignal(list)
+    fileReadSignal = QtCore.Signal(list)
 
     # Open File returns "list" of paths
-    fileDataReceivedSignal = QtCore.pyqtSignal(dict)
+    fileDataReceivedSignal = QtCore.Signal(dict)
 
     # Update Main window status bar with "str"
     # Old "StatusEvent"
-    statusBarUpdateSignal = QtCore.pyqtSignal(str)
+    statusBarUpdateSignal = QtCore.Signal(str)
 
     # Send data to the current perspective
-    updatePerspectiveWithDataSignal = QtCore.pyqtSignal(list)
+    updatePerspectiveWithDataSignal = QtCore.Signal(list)
 
     # New data in current perspective
-    updateModelFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+    updateModelFromPerspectiveSignal = QtCore.Signal(QtGui.QStandardItem)
 
     # New theory data in current perspective
-    updateTheoryFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+    updateTheoryFromPerspectiveSignal = QtCore.Signal(QtGui.QStandardItem)
 
     # Request to delete plots (in the theory view) related to a given model ID
-    deleteIntermediateTheoryPlotsSignal = QtCore.pyqtSignal(str)
+    deleteIntermediateTheoryPlotsSignal = QtCore.Signal(str)
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.pyqtSignal(list, int)
+    plotRequestedSignal = QtCore.Signal(list, int)
 
     # Plot from file names
-    plotFromNameSignal = QtCore.pyqtSignal(str)
+    plotFromNameSignal = QtCore.Signal(str)
 
     # Plot update requested from a perspective
-    plotUpdateSignal = QtCore.pyqtSignal(list)
+    plotUpdateSignal = QtCore.Signal(list)
 
     # Progress bar update value
-    progressBarUpdateSignal = QtCore.pyqtSignal(int)
+    progressBarUpdateSignal = QtCore.Signal(int)
 
     # Workspace charts added/removed
-    activeGraphsSignal = QtCore.pyqtSignal(list)
+    activeGraphsSignal = QtCore.Signal(list)
 
     # Current workspace chart's name changed
-    activeGraphName = QtCore.pyqtSignal(tuple)
+    activeGraphName = QtCore.Signal(tuple)
 
     # Current perspective changed
-    perspectiveChangedSignal = QtCore.pyqtSignal(str)
+    perspectiveChangedSignal = QtCore.Signal(str)
 
     # File/dataset got deleted
-    dataDeletedSignal = QtCore.pyqtSignal(list)
+    dataDeletedSignal = QtCore.Signal(list)
 
     # Send data to Data Operation Utility panel
-    sendDataToPanelSignal = QtCore.pyqtSignal(dict)
+    sendDataToPanelSignal = QtCore.Signal(dict)
 
     # Send result of Data Operation Utility panel to Data Explorer
-    updateModelFromDataOperationPanelSignal = QtCore.pyqtSignal(QtGui.QStandardItem, dict)
+    updateModelFromDataOperationPanelSignal = QtCore.Signal(QtGui.QStandardItem, dict)
 
     # Notify about a new custom plugin being written/deleted/modified
-    customModelDirectoryChanged = QtCore.pyqtSignal()
+    customModelDirectoryChanged = QtCore.Signal()
 
     # Notify the gui manager about new data to be added to the grid view
-    sendDataToGridSignal = QtCore.pyqtSignal(list)
+    sendDataToGridSignal = QtCore.Signal(list)
 
     # Mask Editor requested
-    maskEditorSignal = QtCore.pyqtSignal(Data2D)
+    maskEditorSignal = QtCore.Signal(Data2D)
 
     #second Mask Editor for external
-    extMaskEditorSignal = QtCore.pyqtSignal()
+    extMaskEditorSignal = QtCore.Signal()
 
     # Fitting parameter copy to clipboard
-    copyFitParamsSignal = QtCore.pyqtSignal(str)
+    copyFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Excel
-    copyExcelFitParamsSignal = QtCore.pyqtSignal(str)
+    copyExcelFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Latex
-    copyLatexFitParamsSignal = QtCore.pyqtSignal(str)
+    copyLatexFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Latex
-    SaveFitParamsSignal = QtCore.pyqtSignal(str)
+    SaveFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter paste from clipboard
-    pasteFitParamsSignal = QtCore.pyqtSignal()
+    pasteFitParamsSignal = QtCore.Signal()
 
     # Notify about new categories/models from category manager
-    updateModelCategoriesSignal = QtCore.pyqtSignal()
+    updateModelCategoriesSignal = QtCore.Signal()
 
     # Tell the data explorer to switch tabs
-    changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
+    changeDataExplorerTabSignal = QtCore.Signal(int)
 
     # Plot fitting results (FittingWidget->GuiManager)
-    resultPlotUpdateSignal = QtCore.pyqtSignal(list)
+    resultPlotUpdateSignal = QtCore.Signal(list)
 
     # show the plot as a regular in-workspace object
-    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
+    forcePlotDisplaySignal = QtCore.Signal(list)
 
     # Update the masked ranges in fitting
-    updateMaskedDataSignal = QtCore.pyqtSignal()
+    updateMaskedDataSignal = QtCore.Signal()
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
@@ -706,14 +706,17 @@ def saveAnyData(data, wildcard_dict=None):
         wildcards += f"{wildcard} (*{wildcard_dict[wildcard]});;"
     wildcards += "All files (*.*)"
 
-    kwargs = {
-        'caption'   : 'Save As',
-        'filter'    : wildcards,
-        'parent'    : None,
-        'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
-    }
+    caption = 'Save As'
+    filter = wildcards
+    parent = None
+    options = QtWidgets.QFileDialog.DontUseNativeDialog
     # Query user for filename.
-    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent,
+                                                           caption,
+                                                           "",
+                                                           filter,
+                                                           "",
+                                                           options)
     filename = filename_tuple[0]
 
     # User cancelled or did not enter a filename
@@ -958,42 +961,67 @@ def replaceHTMLwithASCII(html):
 
     return html
 
-def convertUnitToUTF8(unit):
-    """
-    Convert ASCII unit display into UTF-8 symbol
-    """
-    if unit == "1/A":
-        return "Å<sup>-1</sup>"
-    elif unit == "1/cm":
-        return "cm<sup>-1</sup>"
-    elif unit == "Ang":
-        return "Å"
-    elif unit == "1e-6/Ang^2":
-        return "10<sup>-6</sup>/Å<sup>2</sup>"
-    elif unit == "inf":
-        return "∞"
-    elif unit == "-inf":
-        return "-∞"
-    else:
-        return unit
+def rstToHtml(s):
+    # Extract the unit and replacement parts
+    match_replace = re.match(r'(?:\.\. )?\|(.+?)\| replace:: (.+)', s)
+    match_unit = re.match(r'(?:\.\. )?\|(.+?)\| unicode:: (U\+\w+)', s)
+    unit = None
+    replacement = None
+
+
+    if match_unit:
+        # replace the 'unicode' section
+        unit, unicode_val = match_unit.groups()
+        # Convert the unicode value to actual character representation
+        replacement = chr(int(unicode_val[2:], 16))
+
+    if  match_replace:
+        # replace the 'replace' section
+
+        unit, replacement = match_replace.groups()
+
+        # Convert the unit into a valid Python string condition
+        unit = unit.replace("\\", "").replace(" ", "")
+
+        # Convert the replacement into the desired HTML format
+        replacement = replacement.replace("|Ang|", "Å").replace("\\ :sup:`", "<sup>").replace("`", "</sup>").replace("\\", "")
+        replacement = replacement.replace("|cdot|", "·").replace("|deg|", "°").replace("|pm|", "±")
+
+
+    return unit, replacement
+
+# RST_PROLOG conversion table
+try:
+    from sasmodels.generate import RST_PROLOG
+except ImportError:
+    RST_PROLOG = ""
+RST_PROLOG_DICT = {}
+input_rst_strings = RST_PROLOG.splitlines()
+for line in input_rst_strings:
+    if line.startswith(".. |"):
+        key, value = rstToHtml(line)
+        RST_PROLOG_DICT[key] = value
+# add units not in RST_PROLOG
+# This section will be removed once all these units are added to sasmodels
+RST_PROLOG_DICT["1/A"] = "Å<sup>-1</sup>"
+RST_PROLOG_DICT["1/Ang"] = "Å<sup>-1</sup>"
+RST_PROLOG_DICT["1/cm"] = "cm<sup>-1</sup>"
+RST_PROLOG_DICT["1e-6/Ang^2"] = "10<sup>-6</sup>/Å<sup>2</sup>"
+RST_PROLOG_DICT["1e15/cm^3"] = "10<sup>15</sup>/cm<sup>3</sup>"
+RST_PROLOG_DICT["inf"] = "∞"
+RST_PROLOG_DICT["-inf"] = "-∞"
+RST_PROLOG_DICT["degrees"] = "°"
+
 
 def convertUnitToHTML(unit):
     """
-    Convert ASCII unit display into well rendering HTML
+    Convert ASCII unit display into HTML symbol
     """
-    if unit == "1/A":
-        return "&#x212B;<sup>-1</sup>"
-    elif unit == "1/cm":
-        return "cm<sup>-1</sup>"
-    elif unit == "Ang":
-        return "&#x212B;"
-    elif unit == "1e-6/Ang^2":
-        return "10<sup>-6</sup>/&#x212B;<sup>2</sup>"
-    elif unit == "inf":
-        return "&#x221e;"
-    elif unit == "-inf":
-        return "-&#x221e;"
+    if unit in RST_PROLOG_DICT:
+        return RST_PROLOG_DICT[unit]
     else:
+        if unit is None or "None" in unit:
+            return ""
         return unit
 
 def parseName(name, expression):
@@ -1108,7 +1136,7 @@ def saveData(fp, data):
         objects that can't otherwise be serialized need to be converted
         """
         # tuples and sets (TODO: default JSONEncoder converts tuples to lists, create custom Encoder that preserves tuples)
-        if isinstance(o, (tuple, set, np.float)):
+        if isinstance(o, (tuple, set, float)):
             content = { 'data': list(o) }
             return add_type(content, type(o))
 

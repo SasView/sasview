@@ -8,8 +8,16 @@ from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 class BoxInteractor(BaseInteractor, SlicerModel):
     """
-    BoxInteractor define a rectangle that return data1D average of Data2D
-    in a rectangle area defined by -x, x ,y, -y
+    BoxInteractor plots a data1D average of a rectangular area defined in
+    a Data2D object. The data1D averaging itself is performed in sasdata
+    by manipulations.py
+
+    This class uses two other classes, HorizontalLines and VerticalLines,
+    to define the rectangle area: -x, x ,y, -y. It is subclassed by
+    BoxInteractorX and BoxInteracgtorY which define the direction of the
+    average. BoxInteractorX averages all the points from -y to +y as a
+    function of Q_x and BoxInteractorY averages all the points from
+    -x to +x as a function of Q_y
     """
     def __init__(self, base, axes, item=None, color='black',  direction=None,zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -86,6 +94,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # of averaging data2D
         self.update()
         self._post_data()
+        self.draw()
         self.setModelFromParams()
 
     def update_and_post(self):
@@ -94,6 +103,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         self.update()
         self._post_data()
+        self.draw()
 
     def set_layer(self, n):
         """
@@ -152,12 +162,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.horizontal_lines.save(ev)
         self.center.save(ev)
 
-    def _post_data(self):
-        pass
-
-    def post_data(self, new_slab=None, nbins=None, direction=None):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
-        post data averaging in Qx or Qy given new_slab type
+        post 1D data averaging in Qx or Qy given new_slab type
 
         :param new_slab: slicer that determine with direction to average
         :param nbins: the number of points plotted when averaging
@@ -248,7 +255,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         if self.update_model:
             self.setModelFromParams()
-        self.draw()
 
     def moveend(self, ev):
         """
@@ -317,9 +323,12 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         #self.horizontal_lines.update(x=self.x, y=self.y)
         #self.vertical_lines.update(x=self.x, y=self.y)
         #self.post_data(nbins=None)
+        self.draw()
 
     def draw(self):
         """
+        Draws the Canvas using the canvas.draw from the calling class
+        that instatiated this object.
         """
         self.base.draw()
 
@@ -416,7 +425,8 @@ class PointInteractor(BaseInteractor):
         self.x = x
         self.y = y
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -583,7 +593,9 @@ class VerticalDoubleLine(BaseInteractor):
         self.x2 = self.center_x - delta
         self.half_width = numpy.fabs(self.x1 - self.x2) / 2
         self.has_move = True
-        self.base.base.update()
+        self.x = x
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -758,19 +770,22 @@ class HorizontalDoubleLine(BaseInteractor):
 
 class BoxInteractorX(BoxInteractor):
     """
-    Average in Qx direction
+    Average in Qx direction. The data for all Qy at a constant Qx are
+    averaged together to provide a 1D array in Qx (to be plotted as a function
+    of Qx)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, direction="X",color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
         Post data creating by averaging in Qx direction
         """
         from sasdata.data_util.manipulations import SlabX
-        self.post_data(SlabX, direction="X")
+        super()._post_data(SlabX, direction="X")
 
     def validate(self, param_name, param_value):
         """
@@ -789,19 +804,22 @@ class BoxInteractorX(BoxInteractor):
 
 class BoxInteractorY(BoxInteractor):
     """
-    Average in Qy direction
+    Average in Qy direction. The data for all Qx at a constant Qy are
+    averaged together to provide a 1D array in Qy (to be plotted as a function
+    of Qy)
     """
+
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, direction="Y", color=color)
         self.base = base
-        self._post_data()
+        super()._post_data()
 
-    def _post_data(self):
+    def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
         Post data creating by averaging in Qy direction
         """
         from sasdata.data_util.manipulations import SlabY
-        self.post_data(SlabY, direction="Y")
+        super()._post_data(SlabY, direction="Y")
 
     def validate(self, param_name, param_value):
         """

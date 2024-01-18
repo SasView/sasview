@@ -1,13 +1,14 @@
 import sys
 import time
 import random
-
 import pytest
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import *
+
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
+from PySide6.QtTest import QTest
+from PySide6.QtCore import *
+
 from mpl_toolkits.mplot3d import Axes3D
 
 # Local
@@ -109,7 +110,7 @@ class DataExplorerTest:
         assert form.model.columnCount() == 0
         assert isinstance(form.data_proxy, QSortFilterProxyModel)
         assert form.data_proxy.sourceModel() == form.model
-        assert "[^()]" == str(form.data_proxy.filterRegExp().pattern())
+        assert ".+" == str(form.data_proxy.filterRegExp().pattern())
         assert isinstance(form.treeView, QTreeView)
 
         # Models - theory
@@ -120,7 +121,7 @@ class DataExplorerTest:
         assert form.theory_model.columnCount() == 0
         assert isinstance(form.theory_proxy, QSortFilterProxyModel)
         assert form.theory_proxy.sourceModel() == form.theory_model
-        assert "[^()]" == str(form.theory_proxy.filterRegExp().pattern())
+        assert ".+" == str(form.theory_proxy.filterRegExp().pattern())
         assert isinstance(form.freezeView, QTreeView)
 
     def testWidgets(self, form):

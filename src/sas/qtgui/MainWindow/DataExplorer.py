@@ -6,9 +6,9 @@ import time
 import logging
 import copy
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from twisted.internet import threads
 
@@ -22,8 +22,8 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.PlotterData import DataRole
-from sas.qtgui.Plotting.Plotter import Plotter
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
+from sas.qtgui.Plotting.Plotter import Plotter, PlotterWidget
+from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 
 from sas.qtgui.MainWindow.DataManager import DataManager
@@ -82,7 +82,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdAppend_2.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
+        self.chkSwap.setVisible(False)
 
+        self.cmdFreeze.clicked.connect(self.freezeTheory)
         # Fill in the perspectives combo
         self.initPerspectives()
 
@@ -128,7 +130,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_model.itemChanged.connect(self.onFileListChanged)
 
         # Don't show "empty" rows with data objects
-        self.data_proxy.setFilterRegExp(r"[^()]")
+        self.data_proxy.setFilterRegularExpression(QtCore.QRegularExpression(".+"))
 
         # Create a window to allow the display name to change
         self.nameChangeBox = ChangeName(self)
@@ -141,7 +143,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_proxy.setSourceModel(self.theory_model)
 
         # Don't show "empty" rows with data objects
-        self.theory_proxy.setFilterRegExp(r"[^()]")
+        self.theory_proxy.setFilterRegularExpression(QtCore.QRegularExpression(".+"))
 
         # Theory model view
         self.freezeView.setModel(self.theory_proxy)
@@ -150,6 +152,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Current view on model
         self.current_view = self.treeView
+
+    def createSendToMenu(self):
+        self.actionReplace = QtGui.QAction(self)
+        self.actionReplace.setObjectName(u"actionReplace")
+        self.actionReplace.setText(u"... replacing data in the current page")
+        self.send_menu = QtWidgets.QMenu(self)
+        self.send_menu.addAction(self.actionReplace)
 
     def closeEvent(self, event):
         """
@@ -228,13 +237,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Choose a directory',
-            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.default_load_location
-        }
-        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+        parent = self
+        caption = 'Choose a directory'
+        options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = self.default_load_location
+        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, options)
 
         if folder is None:
             return
@@ -282,8 +289,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.default_project_location = os.path.dirname(filename)
             # Delete all data and initialize all perspectives
             self.deleteAllItems()
-            self.cbFitting.disconnect()
+            self.cbFitting.blockSignals(True)
             self.parent.loadAllPerspectives()
+            self.cbFitting.blockSignals(False)
             self.initPerspectives()
             self.readProject(filename)
 
@@ -306,14 +314,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Called when the "Save Project" menu item chosen.
         """
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Save Project',
-            'filter'    : 'Project (*.json)',
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.default_project_location
-        }
-        name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        parent = self
+        caption = 'Save Project'
+        filter = 'Project (*.json)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = self.default_project_location
+        name_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", options)
         filename = name_tuple[0]
         if not filename:
             return
@@ -332,14 +338,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         default_name = "Analysis"+str(tab_id)+"."+str(extension)
 
         wildcard = "{0} files (*.{0})".format(extension)
-        kwargs = {
-            'caption'   : 'Save As',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : None,
-        }
+        caption = 'Save As'
+        directory = default_name
+        filter = wildcard
+        parent = None
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", QtWidgets.QFileDialog.DontUseNativeDialog)
         filename = filename_tuple[0]
         return filename
 
@@ -399,8 +403,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if data is None: continue
             # Now, all plots under this item
             name = data.name
-            is_checked = item.checkState()
-            properties['checked'] = is_checked
+            is_checked_bool = item.checkState() == QtCore.Qt.Checked
+            properties['checked'] = is_checked_bool
             # save underlying theories
             other_datas = GuiUtils.plotsFromDisplayName(name, model)
             # skip the main plot
@@ -420,8 +424,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if data.id != id: continue
                 # We found the dataset - save it.
                 name = data.name
-                is_checked = item.checkState()
-                properties['checked'] = is_checked
+                is_checked_bool = item.checkState() == QtCore.Qt.Checked
+                properties['checked'] = is_checked_bool
                 other_datas = GuiUtils.plotsFromDisplayName(name, model)
                 # skip the main plot
                 other_datas = list(other_datas.values())[1:]
@@ -646,7 +650,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             properties = value[1]
             is_checked = properties['checked']
             new_item = GuiUtils.createModelItemWithPlot(new_data, new_data.name)
-            new_item.setCheckState(is_checked)
+            new_item.setCheckState(QtCore.Qt.Checked if is_checked else QtCore.Qt.Unchecked)
             items.append(new_item)
             model = self.theory_model
             if new_data.is_data:
@@ -753,23 +757,28 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # update stored_data
         self.manager.update_stored_data(deleted_names)
 
-    def sendData(self, event=None):
+    def selectedItems(self):
         """
-        Send selected item data to the current perspective and set the relevant notifiers
+        Returns the selected items from the current view
         """
         def isItemReady(index):
             item = self.model.item(index)
             return item.isCheckable() and item.checkState() == QtCore.Qt.Checked
-
         # Figure out which rows are checked
         selected_items = [self.model.item(index)
                           for index in range(self.model.rowCount())
                           if isItemReady(index)]
+        return selected_items
 
+    def onDataReplaced(self):
+        """
+        Called when data is to be replaced in the current fitting tab.
+        """
+        selected_items = self.selectedItems()
         if len(selected_items) < 1:
             return
         #Check that you have only one box item checked when swaping data
-        if len(selected_items) > 1 and (self.chkSwap.isChecked() or not self._perspective().allowBatch()):
+        if len(selected_items) > 1 and not self._perspective().allowBatch():
             if hasattr(self._perspective(), 'name'):
                 title = self._perspective().name
             else:
@@ -781,13 +790,29 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
             return
+        try:
+            self._perspective().swapData(selected_items[0])
+        except Exception as ex:
+            msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
+            logging.error(ex, exc_info=True)
+            msg = str(ex)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
 
+    def sendData(self, event=None):
+        """
+        Send selected item data to the current perspective and set the relevant notifiers
+        """
+        selected_items = self.selectedItems()
+        if len(selected_items) < 1:
+            return
+ 
         # Notify the GuiManager about the send request
         try:
-            if self.chkSwap.isChecked():
-                self._perspective().swapData(selected_items[0])
-            else:
-                self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
+            self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
             logging.error(ex, exc_info=True)
@@ -990,10 +1015,24 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if ind > 0:
             graph.setCurrentIndex(ind)
 
+    def sendToMenu(self, hasSubmenu=False):
+        # add menu to cmdSendTO
+        if hasSubmenu:
+            self.createSendToMenu()
+            self.cmdSendTo.setMenu(self.send_menu)
+            self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
+        else:
+            self.cmdSendTo.setMenu(None)
+            self.cmdSendTo.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+
     def updatePerspectiveCombo(self, index):
         """
         Notify the gui manager about the new perspective chosen.
         """
+
+        # Check that a valid index has been chosen, can happen in some cases such a loading projects
+        if index < 0:
+            return
 
         # Notify via communicator
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
@@ -1005,11 +1044,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         allow_swap = False if current_perspective is None else current_perspective.allowSwap()
 
         self.chkBatch.setEnabled(allow_batch)
-        self.chkSwap.setEnabled(allow_swap)
-
-        # Using this conditional prevents the checkbox for going into the "neither checked nor unchecked" state
-        if not allow_swap:
-            self.chkSwap.setCheckState(False)
+        self.sendToMenu(hasSubmenu=allow_swap)
 
     def itemFromDisplayName(self, name):
         """
@@ -1091,10 +1126,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
-            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY]
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
+                continue
+            elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUAL_PLOT:
+                # Nothing to do if residuals are not plotted
+                continue
+            elif role == DataRole.ROLE_POLYDISPERSITY and config.DISABLE_POLYDISPERSITY_PLOT:
+                # Nothing to do if polydispersity plot is not plotted
                 continue
             elif role in stand_alone_types:
                 # Stand-alone plots should always be separate
@@ -1137,7 +1178,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Create a new 2D plot and add it to the workspace
         """
-        plot2D = Plotter2D(self)
+        plot2D = Plotter2DWidget(parent=self, manager=self)
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
@@ -1165,7 +1206,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 if 'new_plot' not in locals():
-                    new_plot = Plotter(self)
+                    new_plot = PlotterWidget(manager=self, parent=self)
                     new_plot.item = item
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
@@ -1250,7 +1291,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     @staticmethod
     def appendOrUpdatePlot(self, data, plot):
         name = data.name
-        if isinstance(plot, Plotter2D) or name in plot.plot_dict.keys():
+        if isinstance(plot, Plotter2DWidget) or name in plot.plot_dict.keys():
             plot.replacePlot(name, data)
         else:
             plot.plot(data)
@@ -1292,15 +1333,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         wlist = self.getWlist()
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Choose files',
-            'filter'    : wlist,
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog |
-                          QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
-            'directory' : self.default_load_location
-        }
-        paths = QtWidgets.QFileDialog.getOpenFileNames(**kwargs)[0]
+        parent = self
+        caption = 'Choose files'
+        directory = self.default_load_location
+        filter = wlist
+        options = QtWidgets.QFileDialog.DontUseNativeDialog | QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
+        paths = QtWidgets.QFileDialog.getOpenFileNames(parent, caption, directory, filter, options=options)[0]
+
         if not paths:
             return
 
@@ -1524,6 +1563,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionEditMask.triggered.connect(self.showEditDataMask)
         self.actionDelete.triggered.connect(self.deleteSelectedItem)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
+        self.actionReplace.triggered.connect(self.onDataReplaced)
 
     def onCustomContextMenu(self, position):
         """

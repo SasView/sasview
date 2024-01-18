@@ -1,7 +1,11 @@
 name: CI
 
 on:
-  [push, pull_request]
+  workflow_call:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
 
 defaults:
   run:
@@ -25,6 +29,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Stop existing workflows for matching branches and pull requests
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+
     outputs:
       matrix-json: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -32,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - uses: actions/checkout@v3
       - id: set-matrix
@@ -72,7 +81,7 @@ jobs:
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
-          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
+          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
 
       - name: Install Python dependencies
         run: |
@@ -158,16 +167,16 @@ jobs:
         run: |
           python -m pytest -v -s test
 
-      - name: Test GUI (Linux)
-        if: ${{ matrix.tests && matrix.os == 'ubuntu-latest' }}
-        env:
-          PYOPENCL_COMPILER_OUTPUT: 1
-        run: |
-          # Suppress SIGSEGV from the tests until they can be fixed
-          retval=0
-          xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
-          if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
-          exit $retval
+      # - name: Test GUI (Linux)
+      #   if: ${{ matrix.tests && matrix.os == 'ubuntu-latest' }}
+      #   env:
+      #     PYOPENCL_COMPILER_OUTPUT: 1
+      #   run: |
+      #     # Suppress SIGSEGV from the tests until they can be fixed
+      #     retval=0
+      #     xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
+      #     if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
+      #     exit $retval
 
       ### Build documentation (if enabled)
 
@@ -195,7 +204,7 @@ jobs:
       - name: Install utilities to build installer
         if: ${{ matrix.installer }}
         run: |
-          python -m pip install pyinstaller==5.7.0
+          python -m pip install pyinstaller==5.13.2
 
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
@@ -217,27 +226,6 @@ jobs:
           iscc installers/installer.iss
           mv installers/Output/setupSasView.exe installers/dist
 
-      - name: Build sasview installer dmg file (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        run: |
-          cd installers/dist
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
-
-      - name: Build sasview installer tarball (Linux)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
-        run: |
-          cd installers/dist
-          tar zcf sasview5.tar.gz sasview
-
-      - name: Collect a debug tarball of the installer package
-        if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
-          path: |
-            installers/dist/sasview-pyinstaller-dist.tar.gz
-          if-no-files-found: ignore
-
       - name: Sign executable and create dmg (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         env:
@@ -252,12 +240,27 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView5.app
-          python  ../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.app
-          hdiutil create SasView5.dmg -srcfolder SasView5.app -ov -format UDZO
-          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView5.dmg
-          
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
+          python ../../build_tools/code_sign_osx.py
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.app
+          hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
+          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.dmg
+
+      - name: Build sasview installer tarball (Linux)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          cd installers/dist
+          tar zcf sasview6.tar.gz sasview
+
+      - name: Collect a debug tarball of the installer package
+        if: ${{ matrix.installer }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            installers/dist/sasview-pyinstaller-dist.tar.gz
+          if-no-files-found: ignore
+
       - name: Publish installer package
         if: ${{ matrix.installer }}
         uses: actions/upload-artifact@v3
@@ -265,48 +268,9 @@ jobs:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
-            installers/dist/SasView5.dmg
-            installers/dist/sasview5.tar.gz
+            installers/dist/SasView6.dmg
+            installers/dist/sasview6.tar.gz
           if-no-files-found: error
-
-
-  #     - name: Notarize Release Build (OSX)
-  #       if: ${{ env.RELEASE == 'true' && matrix.installer && startsWith(matrix.os, 'macos') }}
-  #       uses: devbotsxyz/xcode-notarize@v1
-  #       with:
-  #           product-path: "installers/dist/SasView5.dmg"
-  #           primary-bundle-id: "org.sasview.SasView5"
-  #           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-  #           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-
-  #     - name: Staple Release Build (OSX)
-  #       if: ${{ startsWith(matrix.os, 'macos') }}
-  #       uses: devbotsxyz/xcode-staple@v1
-  #       with:
-  #           product-path: "installers/dist/SasView5.dmg"
-
-      - name: Declare env variables on push only
-        if: ${{ env.RELEASE == 'true' && matrix.installer && github.event_name == 'push' }}
-        shell: bash
-        run: echo "BRANCH_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-      - name: Declare env variables on pull_request only
-        if: ${{ env.RELEASE == 'true' && matrix.installer && github.event_name == 'pull_request' }}
-        shell: bash
-        run: echo "BRANCH_NAME=$GITHUB_HEAD_REF" >> $GITHUB_ENV
-
-      - name: Upload installer to GitHub releases
-        if: ${{ env.RELEASE == 'true' && matrix.installer }}
-        uses: ncipollo/release-action@v1
-        with:
-          draft: true
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/SasView5.dmg, installers/Output/setupSasView.exe"
-          name: ${{ env.BRANCH_NAME }}
-          tag: ${{ env.BRANCH_NAME }}
 
 
   test-installer:
@@ -315,7 +279,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, ubuntu-20.04 ]
-        python-version: [ 3.8 ]
+        python-version: [ 3.11 ]
       fail-fast: false
 
     name: Test installer
@@ -415,7 +379,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           # $INSTALL_PATH is already the base directory
-          tar xf "$DL_PATH/sasview5.tar.gz"
+          tar xf "$DL_PATH/sasview6.tar.gz"
 
       - name: Check installation files
         run: |

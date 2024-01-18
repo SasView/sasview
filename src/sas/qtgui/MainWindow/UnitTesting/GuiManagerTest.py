@@ -2,13 +2,12 @@ import sys
 import subprocess
 import webbrowser
 import logging
-
 import pytest
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
+from PySide6.QtTest import QTest
+from PySide6 import QtCore
 
 # Local
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
@@ -22,9 +21,14 @@ from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities.HidableDialog import HidableDialog
 
+from sas.system import config
 
 class GuiManagerTest:
     '''Test the Main Window functionality'''
+
+    def __init__(self):
+        config.override_with_defaults() # Disable saving of test file
+        config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999" # Give a very large version number
 
     @pytest.fixture(autouse=True)
     def manager(self, qapp):
