@@ -3,6 +3,7 @@ from sas.qtgui.Plotting2.PlotManagement import PlotRecord
 
 from sas.qtgui.Plotting2.Plots.PlotSeriesGroup import PlotSeriesGroup
 from sas.qtgui.Plotting2.Plots.NotionalSubplot import NotionalSubplot
+from sas.qtgui.Plotting2.Plots.NotionalSubplot import PlotSeriesGroup
 
 
 class NotionalAxis(PlotCommon[PlotSeriesGroup, NotionalSubplot]):

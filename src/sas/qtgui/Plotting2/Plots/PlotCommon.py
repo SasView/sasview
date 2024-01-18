@@ -1,6 +1,6 @@
 from typing import Union, Generic, TypeVar
 from abc import ABC, abstractmethod
-from sas.qtgui.Plotting2.PlotManagement import PlotRecord
+from sas.qtgui.Plotting2.PlotManagement import PlotRecord, Identifier
 
 
 T = TypeVar("T")
@@ -11,10 +11,15 @@ class PlotCommon(ABC, Generic[S, T]):
         self._identifier = PlotRecord.new_identifier()
         self._base_color = None
 
+    @property
+    def identifier(self) -> Identifier:
+        """ Unique ID for this object"""
+        return self._identifier
+
     def parent(self) -> S:
         """ Get the parent object """
 
-    def children(self) -> T:
+    def children(self) -> list[T]:
         """ Get the children of this object """
 
     def set_color(self, color: Union[str, tuple[float, float, float]]):
