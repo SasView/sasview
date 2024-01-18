@@ -20,7 +20,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
     -x to +x as a function of Q_y
     """
 
-    def __init__(self, base, axes, item=None, color='black',  direction=None,zorder=3):
+    def __init__(self, base, axes, item=None, color='black', zorder=3, direction=None):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
         # Class initialization
@@ -323,7 +323,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         #self.horizontal_lines.update(x=self.x, y=self.y)
         #self.vertical_lines.update(x=self.x, y=self.y)
-        #self._post_data()
+        #self.post_data(nbins=None)
         self.draw()
 
     def draw(self):
@@ -777,7 +777,7 @@ class BoxInteractorX(BoxInteractor):
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3):
-        BoxInteractor.__init__(self, base, axes, item=item, direction="X",color=color)
+        BoxInteractor.__init__(self, base, axes, item=item, color=color, direction="X")
         self.base = base
         super()._post_data()
 
@@ -811,7 +811,7 @@ class BoxInteractorY(BoxInteractor):
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3):
-        BoxInteractor.__init__(self, base, axes, item=item, direction="Y", color=color)
+        BoxInteractor.__init__(self, base, axes, item=item, color=color, direction="Y")
         self.base = base
         super()._post_data()
 
@@ -824,7 +824,7 @@ class BoxInteractorY(BoxInteractor):
 
     def validate(self, param_name, param_value):
         """
-        Validate input from user
+        Validate input from user.
         Values get checked at apply time.
         """
         isValid = True
