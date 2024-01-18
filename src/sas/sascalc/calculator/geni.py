@@ -41,7 +41,7 @@ def Iq(q, x, y, z, sld, vol, is_avg=False):
         r = np.linalg.norm(coords, axis=0)
         I_out = _calc_Iq_avg(q, r, w)
     else:
-        from sas.sascalc.calculator.detail.ausaxs_sans_debye import evaluate_sans_debye
+        from sas.sascalc.calculator.ausaxs.ausaxs_sans_debye import evaluate_sans_debye
         I_out = evaluate_sans_debye(q, coords, w)
     return I_out * (1.0E+8/np.sum(vol))
 

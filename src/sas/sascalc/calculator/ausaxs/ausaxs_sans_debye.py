@@ -2,13 +2,13 @@ import ctypes as ct
 import numpy as np
 import logging
 
-from sas.sascalc.calculator.detail.architecture import _os, determine_os
+from sas.sascalc.calculator.ausaxs.architecture import OS, determine_os
 sys = determine_os()
-if (sys is _os.WIN):
+if (sys is OS.WIN):
     path = "external/libausaxs.dll"
-elif (sys is _os.LINUX):
+elif (sys is OS.LINUX):
     path = "external/libausaxs.so"
-elif (sys is _os.MAC):
+elif (sys is OS.MAC):
     path = "external/libausaxs.dylib"
 else:
     path = ""
@@ -34,7 +34,7 @@ except:
 def evaluate_sans_debye(q, coords, w):
     if ausaxs is None:
         logging.warning("AUSAXS external library not found, using default Debye implementation")
-        from sas.sascalc.calculator.detail.sasview_sans_debye import sasview_sans_debye
+        from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
         return sasview_sans_debye(q, coords, w)
 
     # convert numpy arrays to ctypes arrays
