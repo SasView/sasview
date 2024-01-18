@@ -41,6 +41,7 @@ have one.
 import sys
 import os
 from os.path import basename, dirname, realpath, join as joinpath, exists
+from pathlib import Path
 import math
 import re
 import shutil
@@ -56,7 +57,7 @@ from sasmodels import generate, core
 from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.data import empty_data1D, empty_data2D
 
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
+from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, DOC_LOG
 
 from typing import Dict, Any
 from sasmodels.kernel import KernelModel
@@ -347,13 +348,14 @@ def process_model(py_file: str, force=False) -> str:
     :param py_file: The python model file that will be processed into ReST using sphinx.
     :param force: Regardless of the ReST file age, relative to the python file, force the regeneration.
     """
-    rst_file = joinpath(TARGET_DIR, basename(py_file).replace('.py', '.rst'))
+    py_file = Path(py_file)
+    rst_file = TARGET_DIR / py_file.name.replace('.py', '.rst')
     if not (force or newer(py_file, rst_file) or newer(__file__, rst_file)):
         #print("skipping", rst_file)
         return rst_file
 
     # Load the model file
-    model_info = core.load_model_info(py_file)
+    model_info = core.load_model_info(str(py_file.absolute()))
     if model_info.basefile is None:
         model_info.basefile = py_file
 
@@ -411,15 +413,8 @@ def run_sphinx(rst_files: list[str], output: list[str]):
         TARGET_DIR,
         output,
     ]
-    process = subprocess.Popen(command, shell=False, stdout=subprocess.PIPE)
-
-    # Make sure we can see process output in real time
-    while True:
-        output = process.stdout.readline()
-        if process.poll() is not None:
-            break
-        if output:
-            print(output.strip())
+    with open(DOC_LOG) as f:
+        subprocess.Popen(command, shell=False, stdout=f)
 
 
 def main():
