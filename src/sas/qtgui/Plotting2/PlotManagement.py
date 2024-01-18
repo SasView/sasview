@@ -28,6 +28,7 @@ class PlotLocationConcrete:
 
 
 class PlotRecord:
+    """ Central place that keeps track of the various plot, groups, and plot components """
     _plot_groups: dict[Identifier, PlotGroup] = {}
     _plots: dict[Identifier, NotionalPlot] = {}
     _subplots: dict[Identifier, NotionalSubplot] = {}

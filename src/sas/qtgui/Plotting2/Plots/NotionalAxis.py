@@ -3,15 +3,14 @@ from sas.qtgui.Plotting2.PlotManagement import PlotRecord
 
 from sas.qtgui.Plotting2.Plots.PlotSeriesGroup import PlotSeriesGroup
 from sas.qtgui.Plotting2.Plots.NotionalSubplot import NotionalSubplot
-from sas.qtgui.Plotting2.Plots.NotionalSubplot import PlotSeriesGroup
 
 
 class NotionalAxis(PlotCommon[PlotSeriesGroup, NotionalSubplot]):
     def __init__(self):
         super().__init__()
 
-    def children(self) -> PlotSeriesGroup:
-        PlotRecord.getChildSeriesGroup(self._identifier)
+    def children(self) -> list[PlotSeriesGroup]:
+        return PlotRecord.childSeriesGroup(self.identifier)
 
     def parent(self) -> NotionalSubplot:
-        pass
+        return PlotRecord.parentSubplot(self.identifier)
