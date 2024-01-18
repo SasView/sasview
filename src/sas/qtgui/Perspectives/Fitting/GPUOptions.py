@@ -14,12 +14,13 @@ import sasmodels.kernelcl
 from sasmodels.generate import F32, F64
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
-from sas.system import env
 from sas import config
+from sas.system import lib
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -37,18 +38,19 @@ except AttributeError:
 
 logger = logging.getLogger(__name__)
 
-class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
+
+class GPUOptions(PreferencesWidget, Ui_GPUOptions):
     """
     OpenCL Dialog to select the desired OpenCL driver
     """
 
     cl_options = None
-    testingDoneSignal = QtCore.pyqtSignal(str)
-    testingFailedSignal = QtCore.pyqtSignal(str)
+    name = "GPU Options"
+    testingDoneSignal = QtCore.Signal(str)
+    testingFailedSignal = QtCore.Signal(str)
 
-    def __init__(self, parent=None):
-        super(GPUOptions, self).__init__(parent)
-        self.parent = parent
+    def __init__(self):
+        super(GPUOptions, self).__init__(self.name, False)
         self.setupUi(self)
 
         self.radio_buttons = []
@@ -64,6 +66,20 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         self.testingDoneSignal.connect(self.testCompleted)
         self.testingFailedSignal.connect(self.testFailed)
 
+    def _restoreFromConfig(self):
+        for i in reversed(range(self.optionsLayout.count())):
+            self.optionsLayout.itemAt(i).widget().setParent(None)
+        self.add_options()
+
+    def _toggleBlockAllSignaling(self, toggle: bool):
+        pass
+
+    def _addAllWidgets(self):
+        pass
+
+    def applyNonConfigValues(self):
+        """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
+        self.set_sas_open_cl()
 
     def add_options(self):
         """
@@ -74,7 +90,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
 
         self.cl_options = {}
 
-
         for title, descr in cl_tuple:
 
             # Create an item for each openCL option
@@ -84,13 +99,22 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
             self.optionsLayout.addWidget(radio_button)
 
             if title.lower() == config.SAS_OPENCL.lower():
-
                 radio_button.setChecked(True)
 
+            radio_button.toggled.connect(self._stage_sas_open_cl)
             self.cl_options[descr] = title
             self.radio_buttons.append(radio_button)
 
         self.openCLCheckBoxGroup.setMinimumWidth(self.optionsLayout.sizeHint().width()+10)
+
+    def _stage_sas_open_cl(self, checked):
+        checked = None
+        for box in self.radio_buttons:
+            if box.isChecked():
+                checked = box
+        if checked:
+            sas_open_cl = self.cl_options[str(checked.text())]
+            self._stageChange('SAS_OPENCL', sas_open_cl)
 
     def set_sas_open_cl(self):
         """
@@ -107,11 +131,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
 
         sas_open_cl = self.cl_options[str(checked.text())]
         no_opencl_msg = sas_open_cl.lower() == "none"
-        env.sas_opencl = sas_open_cl
-        config.SAS_OPENCL = sas_open_cl
+        lib.reset_sasmodels(sas_open_cl)
 
-        # CRUFT: next version of reset_environment() will return env
-        sasmodels.sasview_model.reset_environment()
         return no_opencl_msg
 
     def testButtonClicked(self):
@@ -124,8 +145,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         self.progressBar.setMaximum(number_of_tests)
         self.progressBar.setVisible(True)
         self.testButton.setEnabled(False)
-        self.okButton.setEnabled(False)
-        self.resetButton.setEnabled(False)
         no_opencl_msg = self.set_sas_open_cl()
 
         test_thread = threads.deferToThread(self.testThread, no_opencl_msg)
@@ -239,8 +258,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         """
         self.progressBar.setVisible(False)
         self.testButton.setEnabled(True)
-        self.okButton.setEnabled(True)
-        self.resetButton.setEnabled(True)
 
         logging.error(str(msg))
 
@@ -250,8 +267,6 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         """
         self.progressBar.setVisible(False)
         self.testButton.setEnabled(True)
-        self.okButton.setEnabled(True)
-        self.resetButton.setEnabled(True)
 
         GPUTestResults(self, msg)
 

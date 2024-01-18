@@ -2,19 +2,18 @@ import sys
 import time
 import numpy
 import logging
-
 import pytest
+
+from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore
+from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt
 
 # CRUFT: this shouldn't be needed in the test but makes the difference
 # between passing tests and failing tests. Remove this and figure out how
 # to fix the resolution calculator widget itself?
 import matplotlib as mpl
 mpl.use("Qt5Agg")
-
-from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtCore
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import Qt
 
 from twisted.internet import threads
 

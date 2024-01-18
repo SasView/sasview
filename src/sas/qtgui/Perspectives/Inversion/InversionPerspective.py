@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 # sas-global
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -13,7 +13,7 @@ from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
@@ -49,11 +49,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         """ Window title"""
         return "P(r) Inversion Perspective"
 
-    estimateSignal = QtCore.pyqtSignal(tuple)
-    estimateNTSignal = QtCore.pyqtSignal(tuple)
-    estimateDynamicNTSignal = QtCore.pyqtSignal(tuple)
-    estimateDynamicSignal = QtCore.pyqtSignal(tuple)
-    calculateSignal = QtCore.pyqtSignal(tuple)
+    estimateSignal = QtCore.Signal(tuple)
+    estimateNTSignal = QtCore.Signal(tuple)
+    estimateDynamicNTSignal = QtCore.Signal(tuple)
+    estimateDynamicSignal = QtCore.Signal(tuple)
+    calculateSignal = QtCore.Signal(tuple)
 
     def __init__(self, parent=None, data=None):
         super().__init__()
@@ -523,7 +523,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                 self.logic.add_errors()
             self.updateDataList(data)
             self.populateDataComboBox(self.logic.data.name, data)
-        self.dataList.setCurrentIndex(len(self.dataList) - 1)
+        self.dataList.setCurrentIndex(self.dataList.count() - 1)
         #Checking for 1D again to mitigate the case when 2D data is last on the data list
         if isinstance(self.logic.data, Data1D):
             self.setCurrentData(data)
@@ -654,12 +654,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                                            pr.get_pos_err(out, cov))))
         if self.prPlot is not None:
             title = self.prPlot.name
-            self.prPlot.plot_role = Data1D.ROLE_RESIDUAL
+            self.prPlot.plot_role = DataRole.ROLE_STAND_ALONE
             GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
             self.communicate.plotRequestedSignal.emit([self._data,self.prPlot], None)
         if self.dataPlot is not None:
             title = self.dataPlot.name
-            self.dataPlot.plot_role = Data1D.ROLE_DEFAULT
+            self.dataPlot.plot_role = DataRole.ROLE_DEFAULT
             self.dataPlot.symbol = "Line"
             self.dataPlot.show_errors = False
             GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
@@ -682,12 +682,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             self.dataPlot.slider_low_q_setter = []
             self.dataPlot.slider_high_q_setter = []
         self._data = None
-        length = len(self.dataList)
+        length = self.dataList.count()
         for index in reversed(range(length)):
             if self.dataList.itemData(index) in data_list:
                 self.dataList.removeItem(index)
         # Last file removed
         self.dataDeleted = False
+        # if self._dataList.count() == 0:
         if len(self._dataList) == 0:
             self.prPlot = None
             self.dataPlot = None
@@ -699,7 +700,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                 self.nTermsSuggested))
             self.regConstantSuggestionButton.setText("{:-3.2g}".format(
                 REGULARIZATION))
-            self.updateGuiValues()
+            # self.updateGuiValues()
             self.setupModel()
         else:
             self.dataList.setCurrentIndex(0)

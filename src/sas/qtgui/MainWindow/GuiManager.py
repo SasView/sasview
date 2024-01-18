@@ -7,9 +7,9 @@ import traceback
 
 from typing import Optional, Dict
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QLocale
+from PySide6.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import Qt, QLocale
 
 import matplotlib as mpl
 
@@ -31,6 +31,7 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
 
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
@@ -68,6 +69,7 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
+from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 
 import sas
 from sas import config
@@ -115,12 +117,15 @@ class GuiManager:
 
         # Fork off logging messages to the Log Window
         handler = setup_qt_logging()
-        handler.messageWritten.connect(self.appendLog)
+        handler.postman.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
+        #logging.debug("Debug messages are shown.")
+        #logging.warn("Warnings are shown.")
+        #logging.error("Errors are shown.")
 
         # Set up the status bar
         self.statusBarSetup()
@@ -129,6 +134,9 @@ class GuiManager:
         self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
+
+        if self.WhatsNew.has_new_messages():
+            self.actionWhatsNew()
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
@@ -141,15 +149,20 @@ class GuiManager:
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
         self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
-
+        # make it hidden by default
+        self.logDockWidget.setVisible(False)
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
         self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
-        # Preload all perspectives
+        # Preferences Panel must exist before perspectives are loaded
+        self.preferences = PreferencesPanel(self._parent)
+
+        # Load all perspectives - Preferences panel must exist
         self.loadAllPerspectives()
-        # Add FileDialog widget as docked
+
+        # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
@@ -166,7 +179,6 @@ class GuiManager:
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
-        self.preferences = PreferencesPanel(self._parent)
 
         self.grid_window = None
         self.grid_window = BatchOutputPanel(parent=self)
@@ -192,19 +204,30 @@ class GuiManager:
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
+        self.WhatsNew = WhatsNew(self)
 
     def loadAllPerspectives(self):
+        """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
         # Load all perspectives
-        loaded_dict = {}
+        loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
             try:
+                # Instantiate perspective
                 loaded_perspective = perspective(parent=self)
+
+                # Save in main dict
                 loaded_dict[name] = loaded_perspective
+
+                # Register the perspective with the prefernce object
+                self.preferences.registerPerspectivePreferences(loaded_perspective)
+
             except Exception as e:
                 logger.error(f"Unable to load {name} perspective.\n{e}")
                 logger.error(e, exc_info=True)
+
+        # attach loaded perspectives to this class
         self.loadedPerspectives = loaded_dict
 
     def closeAllPerspectives(self):
@@ -379,7 +402,7 @@ class GuiManager:
             self.loadedPerspectives[self._current_perspective.name] = self._current_perspective
 
             self._workspace.workspace.removeSubWindow(self._current_perspective)
-            self._workspace.workspace.removeSubWindow(self.subwindow)
+            self._workspace.workspace.closeActiveSubWindow()
 
         # Get new perspective - note that _current_perspective is of type Optional[Perspective],
         # but new_perspective is of type Perspective, thus call to Perspective members are safe
@@ -416,16 +439,18 @@ class GuiManager:
         #
         # Selection on perspective choice menu
         #
-        if isinstance(new_perspective, FittingWindow):
+        # checking `isinstance`` fails in PySide6 with
+        # AttributeError: type object 'FittingWindow' has no attribute '_abc_impl'
+        if type(new_perspective) == FittingWindow:
             self.checkAnalysisOption(self._workspace.actionFitting)
 
-        elif isinstance(new_perspective, InvariantWindow):
+        elif type(new_perspective) == InvariantWindow:
             self.checkAnalysisOption(self._workspace.actionInvariant)
 
-        elif isinstance(new_perspective, InversionWindow):
+        elif type(new_perspective) == InversionWindow:
             self.checkAnalysisOption(self._workspace.actionInversion)
 
-        elif isinstance(new_perspective, CorfuncWindow):
+        elif type(new_perspective) == CorfuncWindow:
             self.checkAnalysisOption(self._workspace.actionCorfunc)
 
 
@@ -485,10 +510,15 @@ class GuiManager:
         """
         self.statusLabel.setText(text)
 
-    def appendLog(self, msg):
+    def appendLog(self, signal):
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
-        self.listWidget.append(msg.strip())
+        (message, record) = signal
+        self.listWidget.append(message.strip())
+
+        # Display log if message is error or worse
+        if record.levelno >= 40:
+            self.logDockWidget.setVisible(True)
 
     def createGuiData(self, item, p_file=None):
         """
@@ -607,6 +637,9 @@ class GuiManager:
         self._workspace.workspace.addSubWindow(self.welcomePanel)
         self.welcomePanel.show()
 
+    def actionWhatsNew(self):
+        self.WhatsNew.show()
+
     def showWelcomeMessage(self):
         """ Show the Welcome panel, when required """
         # Assure the welcome screen is requested
@@ -645,7 +678,7 @@ class GuiManager:
         #self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
         # orientation viewer set to invisible SASVIEW-1132
-        self._workspace.actionOrientation_Viewer.setVisible(False)
+        self._workspace.actionOrientation_Viewer.setVisible(True)
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
@@ -722,9 +755,11 @@ class GuiManager:
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
-        
+        self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
+
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
+
 
     #============ FILE =================
     def actionLoadData(self):
@@ -1016,11 +1051,7 @@ class GuiManager:
         """
         Make sasmodels orientation & jitter viewer available
         """
-        from sasmodels.jitter import run as orientation_run
-        try:
-            orientation_run()
-        except Exception as ex:
-            logging.error(str(ex))
+        show_orientation_viewer()
 
     def actionImage_Viewer(self):
         """
@@ -1073,8 +1104,9 @@ class GuiManager:
     def actionFit_Options(self):
         """
         """
-        if getattr(self._current_perspective, "fit_options_widget"):
-            self._current_perspective.fit_options_widget.show()
+        if hasattr(self._current_perspective, "fit_options_widget"):
+            self.preferences.show()
+            self.preferences.setMenuByName(self._current_perspective.fit_options_widget.name)
         pass
 
     def actionGPU_Options(self):
@@ -1082,7 +1114,8 @@ class GuiManager:
         Load the OpenCL selection dialog if the fitting perspective is active
         """
         if hasattr(self._current_perspective, "gpu_options_widget"):
-            self._current_perspective.gpu_options_widget.show()
+            self.preferences.show()
+            self.preferences.setMenuByName(self._current_perspective.gpu_options_widget.name)
         pass
 
     def actionFit_Results(self):

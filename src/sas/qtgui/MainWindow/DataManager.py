@@ -27,7 +27,7 @@ import re
 from io import BytesIO
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
@@ -128,7 +128,7 @@ class DataManager(object):
         new_plot.path = path
         new_plot.list_group_id = []
         # Assign the plot role to data
-        new_plot.plot_role = Data1D.ROLE_DATA
+        new_plot.plot_role = DataRole.ROLE_DATA
         ##post data to plot
         # plot data
         return new_plot

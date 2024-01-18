@@ -5,9 +5,9 @@ import os
 import sys
 import logging
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.UI import main_resources_rc
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -116,7 +116,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         try:
             xdata = data.x
             ydata = data.y
-            if xdata == [] or xdata is None or ydata == [] or ydata is None:
+            if xdata.size == 0 or xdata is None or ydata.size == 0 or ydata is None:
                 msg = "The current data is empty please check x and y"
                 logging.error(msg)
                 return

@@ -1,17 +1,18 @@
 import sys
 import time
 import random
-
 import pytest
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import *
+
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
+from PySide6.QtTest import QTest
+from PySide6.QtCore import *
+
 from mpl_toolkits.mplot3d import Axes3D
 
 # Local
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sasdata.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 
@@ -109,7 +110,7 @@ class DataExplorerTest:
         assert form.model.columnCount() == 0
         assert isinstance(form.data_proxy, QSortFilterProxyModel)
         assert form.data_proxy.sourceModel() == form.model
-        assert "[^()]" == str(form.data_proxy.filterRegExp().pattern())
+        assert ".+" == str(form.data_proxy.filterRegExp().pattern())
         assert isinstance(form.treeView, QTreeView)
 
         # Models - theory
@@ -120,7 +121,7 @@ class DataExplorerTest:
         assert form.theory_model.columnCount() == 0
         assert isinstance(form.theory_proxy, QSortFilterProxyModel)
         assert form.theory_proxy.sourceModel() == form.theory_model
-        assert "[^()]" == str(form.theory_proxy.filterRegExp().pattern())
+        assert ".+" == str(form.theory_proxy.filterRegExp().pattern())
         assert isinstance(form.freezeView, QTreeView)
 
     def testWidgets(self, form):
@@ -1132,7 +1133,6 @@ class DataExplorerTest:
         assert len(PlotHelper.currentPlotIds()) == 0
         assert len(form.plot_widgets) == 0
 
-    @pytest.mark.xfail(reason="2022-09 already broken")
     def testPlotsFromMultipleData1D(self, form):
         """
         Tests interplay between plotting 1D datasets and plotting
@@ -1143,19 +1143,19 @@ class DataExplorerTest:
         plot1 = Plotter(parent=form)
         data1 = Data1D()
         data1.name = 'p1'
-        data1.plot_role = Data1D.ROLE_DATA
+        data1.plot_role = DataRole.ROLE_DATA
         plot1.data = data1
 
         plot2 = Plotter(parent=form)
         data2 = Data1D()
         data2.name = 'M2 [p1]'
-        data2.plot_role = Data1D.ROLE_DEFAULT
+        data2.plot_role = DataRole.ROLE_DEFAULT
         plot2.data = data2
 
         plot3 = Plotter(parent=form)
         data3 = Data1D()
         data3.name = 'Residuals for M2[p1]'
-        data3.plot_role = Data1D.ROLE_RESIDUAL
+        data3.plot_role = DataRole.ROLE_RESIDUAL
         plot3.data = data3
 
         # pretend we're displaying three plots
@@ -1165,7 +1165,7 @@ class DataExplorerTest:
 
         # redoing plots from the same tab
         # data -> must be shown
-        assert not form.isPlotShown(data1)
+        assert form.isPlotShown(data1)
 
         # model and residuals are already shown
         assert form.isPlotShown(data2)
@@ -1175,7 +1175,7 @@ class DataExplorerTest:
         plot4 = Plotter(parent=form)
         data4 = Data1D()
         data4.name = 'M1 [p1]'
-        data4.plot_role = Data1D.ROLE_DEFAULT
+        data4.plot_role = DataRole.ROLE_DEFAULT
         plot4.data = data1
         # same data but must show, since different model
         assert not form.isPlotShown(data4)
@@ -1190,19 +1190,19 @@ class DataExplorerTest:
         plot1 = Plotter(parent=form)
         data1 = Data2D()
         data1.name = 'p1'
-        data1.plot_role = Data1D.ROLE_DATA
+        data1.plot_role = DataRole.ROLE_DATA
         plot1.data = data1
 
         plot2 = Plotter(parent=form)
         data2 = Data2D()
         data2.name = 'M2 [p1]'
-        data2.plot_role = Data1D.ROLE_DEFAULT
+        data2.plot_role = DataRole.ROLE_DEFAULT
         plot2.data = data2
 
         plot3 = Plotter(parent=form)
         data3 = Data2D()
         data3.name = 'Residuals for M2[p1]'
-        data3.plot_role = Data1D.ROLE_RESIDUAL
+        data3.plot_role = DataRole.ROLE_RESIDUAL
         plot3.data = data3
 
         # pretend we're displaying three plots

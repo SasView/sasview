@@ -2,7 +2,7 @@ from functools import partial
 import copy
 import numpy as np
 
-from PyQt5 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data2D
 

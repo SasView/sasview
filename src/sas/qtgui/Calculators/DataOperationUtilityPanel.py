@@ -3,9 +3,9 @@ import logging
 import re
 import copy
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -369,14 +369,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def _extractData(self, key_id):
         """ Extract data from file with id contained in list of filenames """
         data_complete = self.filenames[key_id]
-        dimension = data_complete.data.__class__.__name__
-
-        if dimension in ('Data1D', 'Data2D'):
-            return copy.deepcopy(data_complete.data)
-
-        else:
-            logging.error('Error with data format')
-            return
+        return copy.deepcopy(data_complete)
 
     # ########
     # PLOTS

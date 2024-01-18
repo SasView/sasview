@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Any, List, Set
 import os
 import logging
@@ -44,9 +45,15 @@ class ConfigBase:
         self._defaults: Dict[str, SchemaElement] = {}
         self._deleted_attributes: List[str] = []
         self._bad_entries: Dict[str, Any] = {}
+        self._disable_writing = False
         self._meta_attributes = ["_locked", "_schema", "_defaults",
                                  "_deleted_attributes", "_meta_attributes",
-                                 "_bad_entries"]
+                                 "_disable_writing", "_bad_entries"]
+
+    @property
+    def defaults(self):
+        """ Expose the default values to allow resetting of defaults. No setter should ever be created for this! """
+        return self._defaults
 
     def config_filename(self, create_if_nonexistent=False):
         """Filename for saving config items"""
@@ -90,25 +97,41 @@ class ConfigBase:
         with open(self.config_filename(True), 'w') as file:
             self.save_to_file_object(file)
 
+    def override_with_defaults(self):
+        """
+        Set the config entries to defaults, and prevent saving from happening
+
+        Added with the ability to disable for testing in mind
+        """
+        self._bad_entries.clear()
+        self.update(self._defaults)
+        self._disable_writing = True
+
     def save_to_file_object(self, file):
         """ Save config file
 
         Only changed and unknown variables will be included in the saved file
         """
-        data = {}
-        for key in self._defaults:
-            old_value = self._defaults[key]
-            new_value = getattr(self, key)
-            if new_value != old_value:
-                data[key] = new_value
 
-        data.update(self._bad_entries)
+        if self._disable_writing:
+            logger.info("Config write disabled by `override_with_defaults`")
 
-        output_data = {
-            "sasview_version": sas.system.version.__version__,
-            "config_data": data}
+        else:
 
-        json.dump(output_data, file, indent=2)
+            data = {}
+            for key in self._defaults:
+                old_value = self._defaults[key]
+                new_value = getattr(self, key)
+                if new_value != old_value:
+                    data[key] = new_value
+
+            data.update(self._bad_entries)
+
+            output_data = {
+                "sasview_version": sas.system.version.__version__,
+                "config_data": data}
+
+            json.dump(output_data, file, indent=2)
 
     def load(self):
         filename = self.config_filename(False)
@@ -128,8 +151,11 @@ class ConfigBase:
             raise MalformedFile("Malformed config file - no 'sasview_version' key")
 
         try:
-            parts = [int(s) for s in data["sasview_version"].split(".")]
-            if len(parts) != 3:
+            file_version = data["sasview_version"]
+            # Use the distutils strict version module regex to check if the version string is valid
+            #  ref: https://epydoc.sourceforge.net/stdlib/distutils.version.StrictVersion-class.html
+            matcher = re.compile(r'(?x)^(\d+)\.(\d+)(\.(\d+))?([ab](\d+))?$')
+            if not matcher.match(file_version):
                 raise Exception
 
         except Exception:
@@ -143,7 +169,6 @@ class ConfigBase:
 
 
         # Check major version
-        file_version = data["sasview_version"]
         file_major_version = file_version.split(".")[0]
         sasview_major_version = sas.system.version.__version__.split(".")[0]
 
@@ -183,10 +208,38 @@ class ConfigBase:
         return schema
 
     def __setattr__(self, key, value):
-        if hasattr(self, "_locked") and self._locked:
-            if key not in self.__dict__:
-                raise ConfigLocked("New attribute attempt")
 
+        # This section deals with control variables for the config
+
+        if not hasattr(self, "_meta_attributes") or key in self._meta_attributes:
+
+            # The class is not set up at this point, don't do any checks
+            super().__setattr__(key, value)
+            return
+
+            # otherwise continue to part that handles values
+
+        # This section deals with config values themselves
+        if hasattr(self, "_locked"):
+            # Should be initialised...
+
+            if getattr(self, "_locked"):
+                # ...and locked
+
+                if key not in self.__dict__:
+                    raise ConfigLocked(f"New attribute attempt: {key} = {value}")
+
+                try:
+                    super().__setattr__(key, self._schema[key].coerce(value))
+
+                except CoercionError:
+                    raise TypeError(f"Tried to set bad value '{value}' to config entry of type '{self._schema[key]}'")
+
+                return
+
+        # Not fully initialised
         super().__setattr__(key, value)
 
-
+    def validate(self, key, value):
+        """ Check whether a value conforms to the type in the schema"""
+        return self._schema[key].validate(value)

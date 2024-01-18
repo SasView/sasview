@@ -6,7 +6,7 @@ from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
@@ -107,9 +107,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
     Constraints Dialog to select the desired parameter/model constraints.
     """
-    fitCompleteSignal = QtCore.pyqtSignal(tuple)
-    batchCompleteSignal = QtCore.pyqtSignal(tuple)
-    fitFailedSignal = QtCore.pyqtSignal(tuple)
+    fitCompleteSignal = QtCore.Signal(tuple)
+    batchCompleteSignal = QtCore.Signal(tuple)
+    fitFailedSignal = QtCore.Signal(tuple)
 
     def __init__(self, parent=None):
         super(ConstraintWidget, self).__init__()
@@ -190,7 +190,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Single Fit is the default, so disable chainfit
         self.chkChain.setVisible(False)
 
-        # disabled constraint 
+        # disabled constraint
         labels = ['Constraint']
         self.tblConstraints.setColumnCount(len(labels))
         self.tblConstraints.setHorizontalHeaderLabels(labels)
@@ -238,10 +238,27 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         tab_object = ObjectLibrary.getObject(tab)
 
         # Disconnect all local slots, if connected
-        if tab_object.receivers(tab_object.newModelSignal) > 0:
+        # None of the methods below seem to work with Qt6.2.4
+        # 1.
+        # if tab_object.receivers(tab_object.newModelSignal) > 0:
+        # 2.
+        # newModelSignal =QtCore.QMetaMethod.fromSignal(tab_object.newModelSignal)
+        # if tab_object.isSignalConnected(newModelSignal):
+        # 3.
+        # m_obj = tab_object.metaObject()
+        # is_connected = m_obj.isSignalConnected(m_obj.method(m_obj.indexOfSignal("newModelSignal()")))
+
+        try:
             tab_object.newModelSignal.disconnect()
-        if tab_object.receivers(tab_object.constraintAddedSignal) > 0:
+        except RuntimeError:
+            # need to pass here since no known PySide6 method of checking if signal is connected
+            # seems to work here. Need to upgrade to more recent version of PySide6 but this 
+            # currently causes other issues.
+            pass
+        try:
             tab_object.constraintAddedSignal.disconnect()
+        except RuntimeError:
+            pass
 
         # Reconnect tab signals to local slots
         tab_object.constraintAddedSignal.connect(self.initializeFitList)
@@ -400,6 +417,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         help_location = tree_location + helpfile
 
         # OMG, really? Crawling up the object hierarchy...
+        #
+        # It's the top level that needs to do the show help.
+        # Perhaps better to address directly, but it does need to
+        # be that object. I don't like that the type is hidden. :LW
         self.parent.parent.showHelp(help_location)
 
     def onTabCellEdit(self, row, column):
@@ -500,16 +521,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onConstraintChange(self, row, column):
         """
-        Modify the constraint when the user edits the constraint list. If the
-        user changes the constrained parameter, the constraint is erased and a
-        new one is created.
-        Checking is performed on the constrained entered by the user, showing
-        message box warning him the constraint is not valid and cancelling
-        his changes by reloading the view. View is reloaded
-        when the user is finished for consistency.
+        Modify the constraint when the user edits the constraint list.
+        If the user changes the constrained parameter, the constraint is erased
+        and a new one is created.
+        Checking is performed on the constrained entered by the user.
+        In case of an error during checking, a warning message box is shown
+        and the constraint is cancelled by reloading the view.
+        View is also reloaded when the user is finished for consistency.
         """
         item = self.tblConstraints.item(row, column)
-        # extract information from the constraint object
+        # Extract information from the constraint object
         constraint = self.available_constraints[row]
         model = constraint.value_ex[:constraint.value_ex.index(".")]
         param = constraint.param
@@ -529,6 +550,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 QtWidgets.QMessageBox.Ok)
             self.initializeFitList()
             return
+
         # Then check if the parameter is correctly defined with colons
         # separating model and parameter name
         lhs, rhs = re.split(" *= *", item.data(0).strip(), 1)
@@ -546,7 +568,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # We can parse the string
         new_param = lhs.split(":", 1)[1].strip()
         new_model = lhs.split(":", 1)[0].strip()
-        # Check that the symbol is known so we dont get an unknown tab
+        # Check that the symbol is known so we don't get an unknown tab
         # All the conditional statements could be grouped in one or
         # alternatively we could check with expression.py, but we would still
         # need to do some checks to parse the string
@@ -566,6 +588,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         new_function = rhs
         new_tab = self.available_tabs[new_model]
+        model_key = tab.getModelKeyFromName(param)
         # Make sure we are dealing with fit tabs
         assert isinstance(tab, FittingWidget)
         assert isinstance(new_tab, FittingWidget)
@@ -574,8 +597,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Apply the new constraint
             constraint = Constraint(param=new_param, func=new_function,
                                     value_ex=new_model + "." + new_param)
+            model_key = tab.getModelKeyFromName(new_param)
             new_tab.addConstraintToRow(constraint=constraint,
-                                       row=tab.getRowFromName(new_param))
+                                       row=tab.getRowFromName(new_param), model_key=model_key)
             # If the constraint is valid and we are changing model or
             # parameter, delete the old constraint
             if (self.constraint_accepted and new_model != model or
@@ -594,9 +618,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             font.setItalic(True)
             brush = QtGui.QBrush(QtGui.QColor('blue'))
             tab.modifyViewOnRow(tab.getRowFromName(new_param), font=font,
-                                brush=brush)
+                                brush=brush, model_key=model_key)
         else:
-            tab.modifyViewOnRow(tab.getRowFromName(new_param))
+            tab.modifyViewOnRow(tab.getRowFromName(new_param), model_key=model_key)
         # reload the view so the user gets a consistent feedback on the
         # constraints
         self.initializeFitList()
@@ -766,19 +790,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Select for fitting
         param_string = "Fit Page " if num_rows==1 else "Fit Pages "
 
-        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
         self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
-        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect = QtGui.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
         self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
-        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint = QtGui.QAction(self)
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove all constraints on selected models"))
 
-        self.actionMutualMultiConstrain = QtWidgets.QAction(self)
+        self.actionMutualMultiConstrain = QtGui.QAction(self)
         self.actionMutualMultiConstrain.setObjectName("actionMutualMultiConstrain")
         self.actionMutualMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Mutual constrain of parameters in selected models..."))
 
@@ -811,15 +835,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Select for fitting
         param_string = "constraint " if num_rows==1 else "constraints "
 
-        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect = QtGui.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
         self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
-        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect = QtGui.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
         self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
-        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint = QtGui.QAction(self)
         self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
         self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove "+param_string))
 
@@ -891,7 +915,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             moniker = constraint[:constraint.index(':')]
             param = constraint[constraint.index(':')+1:constraint.index('=')].strip()
             tab = self.available_tabs[moniker]
-            tab.deleteConstraintOnParameter(param)
+            model_key = tab.getModelKeyFromName(param)
+            tab.deleteConstraintOnParameter(param, model_key=model_key)
 
         # Constraints removed - refresh the table widget
         self.initializeFitList()
@@ -904,14 +929,17 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
         return item
 
-    def updateFitLine(self, tab):
+    def updateFitLine(self, tab, model_key="standard"):
         """
         Update a single line of the table widget with tab info
         """
         fit_page = ObjectLibrary.getObject(tab)
         model = fit_page.kernel_module
+
         if model is None:
+            logging.warning("No model selected")
             return
+
         tab_name = tab
         model_name = model.id
         moniker = model.name
@@ -948,19 +976,29 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.blockSignals(False)
 
         # Check if any constraints present in tab
-        active_constraint_names = fit_page.getComplexConstraintsForModel()
-        constraint_names = fit_page.getFullConstraintNameListForModel()
-        constraints = fit_page.getConstraintObjectsForModel()
+        constraint_names = fit_page.getComplexConstraintsForAllModels()
+        constraints = fit_page.getConstraintObjectsForAllModels()
+
+        active_constraint_names = []
+        constraint_names = []
+        constraints = []
+        for model_key in fit_page.model_dict.keys():
+            active_constraint_names += fit_page.getComplexConstraintsForModel(model_key=model_key)
+            constraint_names += fit_page.getFullConstraintNameListForModel(model_key=model_key)
+            constraints += fit_page.getConstraintObjectsForModel(model_key=model_key)
+
         if not constraints:
             return
+
         self.tblConstraints.setEnabled(True)
         self.tblConstraints.blockSignals(True)
         for constraint, constraint_name in zip(constraints, constraint_names):
-            # Ignore constraints that have no *func* attribute defined
-            if constraint.func is None:
+            if not constraint_name and len(constraint_name) < 2:
+                continue
+            if constraint_name[0] is None or constraint_name[1] is None:
                 continue
             # Create the text for widget item
-            label = moniker + ":"+ constraint_name[0] + " = " + constraint_name[1]
+            label = moniker + ":" + constraint_name[0] + " = " + constraint_name[1]
             pos = self.tblConstraints.rowCount()
             self.available_constraints[pos] = constraint
 
@@ -979,7 +1017,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.tblConstraints.setItem(pos, 0, item)
         self.tblConstraints.blockSignals(False)
 
-    def initializeFitList(self):
+    def initializeFitList(self, row=0, model_key="standard"):
         """
         Fill the list of model/data sets for fitting/constraining
         """
@@ -1018,7 +1056,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self._row_order = tabs
 
         for tab in tabs:
-            self.updateFitLine(tab)
+            self.updateFitLine(tab, model_key=model_key)
             self.updateSignalsFromTab(tab)
             # We have at least 1 fit page, allow fitting
             self.cmdFit.setEnabled(True)
@@ -1085,14 +1123,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Find the constrained parameter row
         constrained_row = constrained_tab.getRowFromName(constraint.param)
+        model_key = constrained_tab.getModelKeyFromName(constraint.param)
 
         # Update the tab
-        constrained_tab.addConstraintToRow(constraint, constrained_row)
+        constrained_tab.addConstraintToRow(constraint, constrained_row, model_key=model_key)
         if not self.constraint_accepted:
             return
 
         # Select this parameter for adjusting/fitting
-        constrained_tab.changeCheckboxStatus(constrained_row, True)
+        # constrained_tab.selectCheckbox(constrained_row, model=model)
 
     def showMultiConstraint(self):
         """
@@ -1158,7 +1197,11 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 if model_name != model:
                     continue
                 # check/uncheck item
-                self.tblTabList.item(row,0).setCheckState(int(check_state))
+                # check_state is a string: "CheckState.Checked" or "CheckState.Unchecked"
+                if 'Unchecked' in check_state:
+                    self.tblTabList.item(row,0).setCheckState(QtCore.Qt.Unchecked)
+                else:
+                    self.tblTabList.item(row,0).setCheckState(QtCore.Qt.Checked)
 
         if not 'checked_constraints' in parameters:
             return
@@ -1208,8 +1251,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # by colon e.g `M1:scale` so no need to parse the constraint
             # string.
             if name in constraint:
-                self.tblConstraints.item(row, 0).setCheckState(0)
+                self.tblConstraints.item(row, 0).setCheckState(QtCore.Qt.Unchecked)
                 # deactivate the constraint
                 tab = self.parent.getTabByName(name[:name.index(":")])
                 row = tab.getRowFromName(name[name.index(":") + 1:])
-                tab.getConstraintForRow(row).active = False
+                model_key = tab.getModelKey(constraint)
+                tab.getConstraintForRow(row, model_key=model_key).active = False

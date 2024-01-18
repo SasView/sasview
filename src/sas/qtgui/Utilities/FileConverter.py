@@ -7,7 +7,7 @@ import logging
 
 import numpy as np
 
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from sasdata.file_converter.ascii2d_loader import ASCII2DLoader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
@@ -294,14 +294,12 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         """
         wildcard1d = "CanSAS 1D files(*.xml);;" if self.is1D else ""
         wildcard = wildcard1d + "NXcanSAS files (*.h5)"
-        kwargs = {
-            'caption'   : 'Save As',
-            'filter'    : wildcard,
-            'parent'    : None,
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
-        }
+        caption = 'Save As'
+        filter = wildcard
+        parent = None
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, "", filter, "", options)
         filename = filename_tuple[0]
 
         # User cancelled.

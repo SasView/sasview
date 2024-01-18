@@ -5,12 +5,13 @@ import pytest
 
 from bumps import options
 
-from PyQt5 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
+from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
 class FittingOptionsTest:
     '''Test the FittingOptions dialog'''
@@ -18,15 +19,13 @@ class FittingOptionsTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         '''Create/Destroy the FittingOptions'''
-        w = FittingOptions(None, config=options.FIT_CONFIG)
+        w = FittingOptions(config=options.FIT_CONFIG)
         yield w
         w.close()
 
     def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        assert isinstance(widget, QtWidgets.QDialog)
-        # Default title
-        assert widget.windowTitle() == "Fit Algorithms"
+        assert isinstance(widget, PreferencesWidget)
 
         # The combo box
         assert isinstance(widget.cbAlgorithm, QtWidgets.QComboBox)
@@ -66,8 +65,6 @@ class FittingOptionsTest:
         ## assert not widget.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled()
         # Let's put some valid value in lineedit
         widget.steps_de.setText("1")
-        # This should enable the OK button
-        assert widget.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).isEnabled()
 
     def testOnAlgorithmChange(self, widget):
         '''Test the combo box change callback'''
@@ -105,8 +102,6 @@ class FittingOptionsTest:
         assert options.FIT_CONFIG.values['dream']['steps'] == 50.0
         assert options.FIT_CONFIG.values['dream']['init'] == 'cov'
 
-    # test disabled until pyQt5 works well
-    @pytest.mark.skip(reason="2022-09 already broken - causes test suite hang")
     def testOnHelp(self, widget, mocker):
         ''' Test help display'''
         mocker.patch.object(webbrowser, 'open')
@@ -127,7 +122,7 @@ class FittingOptionsTest:
         assert "fit-dream" in webbrowser.open.call_args[0][0]
 
         # Change the index again
-        widget.cbAlgorithm.setCurrentIndex(4)
+        widget.cbAlgorithm.setCurrentIndex(5)
         widget.onHelp()
         # Check if show() got called
         assert webbrowser.open.call_count == 3

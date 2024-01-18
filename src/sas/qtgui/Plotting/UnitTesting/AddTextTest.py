@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from PyQt5 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 # Local
 from sas.qtgui.Plotting.AddText import AddText
@@ -49,6 +49,6 @@ class AddTextTest:
         # Call the method
         widget.onColorChange(None)
         # Check that the text field got the new color info for text
-        assert widget.textEdit.palette().color(QtGui.QPalette.Text) == new_color
+        assert widget.textEdit.palette().vertex_coloring(QtGui.QPalette.Text) == new_color
         # ... and the hex value of this color is correct
         assert widget.color() == "#ff0000"

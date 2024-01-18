@@ -4,6 +4,8 @@ Adapters for fitting module
 import copy
 import numpy
 import math
+from enum import Enum
+
 from sasdata.data_util.uncertainty import Uncertainty
 
 from sas.qtgui.Plotting.Plottables import PlottableData1D
@@ -13,13 +15,25 @@ from sasdata.dataloader.data_info import Data1D as LoadData1D
 from sasdata.dataloader.data_info import Data2D as LoadData2D
 
 
+class DataRole(Enum):
+    """Labels to apply to different plot types."""
+    # Data is for imported data
+    ROLE_DATA = 0
+    # Default is for fits of the imported data
+    ROLE_DEFAULT = 1
+    # Deletable is for orphaned plots
+    ROLE_DELETABLE = 2
+    # Residual is for stand-alone residual plots
+    ROLE_RESIDUAL = 3
+    # Stand alone is for plots that should be plotted separately
+    ROLE_STAND_ALONE = 4
+    # Polydispersity is for stand-alone polydispersity plot
+    ROLE_POLYDISPERSITY = 5
+
+
 class Data1D(PlottableData1D, LoadData1D):
     """
     """
-    ROLE_DATA=0
-    ROLE_DEFAULT=1
-    ROLE_DELETABLE=2
-    ROLE_RESIDUAL=3
     def __init__(self, x=None, y=None, dx=None, dy=None):
         """
         """
@@ -43,7 +57,7 @@ class Data1D(PlottableData1D, LoadData1D):
         # 1: normal lifecycle (fit)
         # 2: deletable on model change (Q(I), S(I)...)
         # 3: separate chart on Show Plot (residuals)
-        self.plot_role = Data1D.ROLE_DEFAULT
+        self.plot_role = DataRole.ROLE_DEFAULT
         # Q-range slider definitions
         self.show_q_range_sliders = False  # Should sliders be shown?
         self.slider_update_on_move = True  # Should the gui update during the move?
@@ -209,7 +223,7 @@ class Data2D(PlottableData2D, LoadData2D):
         self.title = ""
         self.scale = None
         # Always default
-        self.plot_role = Data1D.ROLE_DEFAULT
+        self.plot_role = DataRole.ROLE_DEFAULT
         
     def copy_from_datainfo(self, data2d):
         """

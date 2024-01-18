@@ -57,7 +57,16 @@
       <string>Instrumental Parameters</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_6">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>6</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
        <number>6</number>
       </property>
       <item row="0" column="0">
@@ -699,6 +708,9 @@
        <height>415</height>
       </size>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
     </widget>
    </item>
    <item row="1" column="0">
@@ -726,7 +738,16 @@
       <string>Q Location of the Estimation</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_9">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>6</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
        <number>6</number>
       </property>
       <item row="0" column="0">
@@ -851,7 +872,16 @@
       <string>Standard Deviation of the Resolution Distribution</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>6</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
        <number>6</number>
       </property>
       <item row="0" column="0">
@@ -1214,7 +1244,6 @@
   <zorder>groupBox_3</zorder>
   <zorder>graphicsView</zorder>
   <zorder>line_4</zorder>
-  <zorder>verticalSpacer_2</zorder>
   <zorder>line</zorder>
   <zorder>line_2</zorder>
  </widget>
@@ -1231,17 +1260,17 @@
   <tabstop>txtSampleOffset</tabstop>
   <tabstop>txtDetectorSize</tabstop>
   <tabstop>txtDetectorPixSize</tabstop>
+  <tabstop>graphicsView</tabstop>
   <tabstop>txtQx</tabstop>
   <tabstop>txtQy</tabstop>
-  <tabstop>cmdCompute</tabstop>
-  <tabstop>cmdHelp</tabstop>
-  <tabstop>cmdReset</tabstop>
-  <tabstop>cmdClose</tabstop>
-  <tabstop>txtSigma_lamd</tabstop>
-  <tabstop>txtSigma_y</tabstop>
-  <tabstop>txt1DSigma</tabstop>
-  <tabstop>graphicsView</tabstop>
   <tabstop>txtSigma_x</tabstop>
+  <tabstop>txtSigma_y</tabstop>
+  <tabstop>txtSigma_lamd</tabstop>
+  <tabstop>txt1DSigma</tabstop>
+  <tabstop>cmdReset</tabstop>
+  <tabstop>cmdCompute</tabstop>
+  <tabstop>cmdClose</tabstop>
+  <tabstop>cmdHelp</tabstop>
  </tabstops>
  <resources/>
  <connections/>

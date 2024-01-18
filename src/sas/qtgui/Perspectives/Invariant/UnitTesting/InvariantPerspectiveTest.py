@@ -1,12 +1,11 @@
 import sys
 import logging
-
 import pytest
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtCore
-from PyQt5.QtTest import QTest
-from PyQt5.QtCore import Qt
+from PySide6 import QtGui, QtWidgets
+from PySide6 import QtCore
+from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt
 
 from twisted.internet import threads
 
@@ -451,6 +450,9 @@ class InvariantPerspectiveTest:
 
         assert not widget.txtNptsLowQ.isReadOnly()
         assert not widget.txtNptsHighQ.isReadOnly()
+
+        assert widget.txtTotalQMin.isReadOnly()
+        assert widget.txtTotalQMax.isReadOnly()
 
         # content of line edits
         assert widget.txtName.text() == 'data'

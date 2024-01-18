@@ -2,20 +2,25 @@ import sys
 
 import pytest
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtGui import *
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
+from PySide6 import QtGui, QtWidgets
+from PySide6.QtGui import *
+from PySide6.QtTest import QTest
+from PySide6 import QtCore
 
 # Local
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.MainWindow.MainWindow import SplashScreen
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
-from sas.qtgui.Utilities.HidableDialog import HidableDialog
+from sas.qtgui.Utilities.HidableDialog import HidableDialog, ShowAgainResult
 
-
+from sas.system import config
 class MainWindowTest:
     """Test the Main Window GUI"""
+
+    def __init__(self):
+        config.override_with_defaults() # Disable saving of test file
+        config.LAST_WHATS_NEW_HIDDEN_VERSION = "999.999.999" # Give a very large version number
+
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         '''Create/Destroy the GUI'''
@@ -99,7 +104,8 @@ class MainWindowTest:
         """
         # Must mask sys.exit, otherwise the whole testing process stops.
         mocker.patch.object(sys, 'exit')
-        mocker.patch.object(HidableDialog, 'exec', return_value=True)
+        # mocker.patch.object(QtWidgets.QMessageBox, 'question', return_value=QtWidgets.QMessageBox.Yes)
+        mocker.patch.object(HidableDialog, 'exec', return_value=1)
 
         # Open, then close the main window
         screen_resolution = QtCore.QRect(0, 0, 640, 480)
@@ -107,4 +113,4 @@ class MainWindowTest:
         tmp_main.close()
 
         # See that the MessageBox method got called
-        assert HidableDialog.exec.called
+        assert HidableDialog.exec.called_once()

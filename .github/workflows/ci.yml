@@ -1,0 +1,440 @@
+name: CI
+
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  RELEASE: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/test-v') }}
+  # The test-installer job can use an old existing image rather than the most
+  # recently built image; the 'needs' can be commented out to allow the
+  # test-installer job to run independently (and therefore faster)
+  INSTALLER_USE_OLD_IMAGE: false
+  INSTALLER_OLD_RUNID: 3204825457
+  # The test-installer job can run with the pyinstaller debug bundle
+  INSTALLER_USE_DEBUG: false
+
+jobs:
+  matrix:
+    name: Generate test matrix
+
+    #if: false    # uncomment to prevent the rest of the workflow running
+
+    runs-on: ubuntu-latest
+
+    # Stop existing workflows for matching branches and pull requests
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+
+    outputs:
+      matrix-json: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - uses: actions/checkout@v3
+      - id: set-matrix
+        run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
+
+  build-matrix:
+    needs: [matrix]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.matrix.outputs.matrix-json) }}
+
+    name: "${{ matrix.job_name }}"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Configuration of this job
+        run: |
+          echo '${{ toJson(matrix) }}'
+
+      - name: Obtain SasView source from git
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: |
+            **/ci.yml
+            **/requirements*.txt
+
+      ### Installation of build-dependencies
+
+      - name: Install X11 libraries (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install wheel setuptools
+          python -m pip install -r build_tools/requirements.txt
+
+      - name: Install pywin32 (Windows)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        run: |
+          python -m pip install pywin32
+
+      - name: Install pyopencl (Windows)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        run: |
+          python -m pip install pytools mako cffi
+          choco install opencl-intel-cpu-runtime
+          choco install innosetup
+          python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
+
+      - name: Install pyopencl (Linux + macOS)
+        if: ${{ !startsWith(matrix.os, 'windows') }}
+        run: |
+          python -m pip install pyopencl
+
+      - name: Fetch sources for sibling projects
+        run: |
+          git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
+          git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
+          git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+
+      - name: Build and install sasdata
+        run: |
+          cd ../sasdata
+          rm -rf build
+          rm -rf dist
+          python setup.py clean
+          python setup.py build
+          python -m pip install --no-deps .
+
+      - name: Build and install sasmodels
+        run: |
+          cd ../sasmodels
+          rm -rf build
+          rm -rf dist
+          python setup.py clean
+          python setup.py build
+          python -m pip install --no-deps .
+
+      - name: Build and install bumps
+        run: |
+          cd ../bumps
+          rm -rf build
+          rm -rf dist
+          python setup.py clean
+          python setup.py build
+          python -m pip install --no-deps .
+
+      ### Document the build environment
+
+      - name: Python package version list
+        run: |
+          python -m pip freeze
+
+      ### Actual building of sasview
+
+      - name: Build sasview
+        run: |
+          # SET SASVIEW GITHASH
+          githash=$( git rev-parse HEAD )
+          sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
+          # BUILD SASVIEW
+          python setup.py clean
+          python setup.py build
+          python -m pip install --no-deps .
+
+      ### Run tests (if enabled)
+
+      - name: Test with pytest
+        if: ${{ matrix.tests }}
+        env:
+          PYOPENCL_COMPILER_OUTPUT: 1
+        run: |
+          python -m pytest -v -s test
+
+      # - name: Test GUI (Linux)
+      #   if: ${{ matrix.tests && matrix.os == 'ubuntu-latest' }}
+      #   env:
+      #     PYOPENCL_COMPILER_OUTPUT: 1
+      #   run: |
+      #     # Suppress SIGSEGV from the tests until they can be fixed
+      #     retval=0
+      #     xvfb-run -a --server-args="-screen 0 1600x900x24" python -m pytest -rsx -v src/sas/qtgui/ || retval=$?
+      #     if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
+      #     exit $retval
+
+      ### Build documentation (if enabled)
+
+      - name: Install doc-building dependencies
+        if: ${{ matrix.docs }}
+        run: |
+          python -m pip install sphinx
+
+      - name: Build sasmodels and bumps docs
+        if: ${{ matrix.docs }}
+        run: |
+          make -C ../bumps/doc html || true
+          mkdir -p ~/.sasmodels/compiled_models
+          make -j4 -C ../sasmodels/doc html || true
+
+      - name: Build sasview docs
+        if: ${{ matrix.docs }}
+        run: |
+          mkdir -p build/lib
+          cd docs/sphinx-docs/
+          python build_sphinx.py || true
+
+      ### Build the installer (if enabled)
+
+      - name: Install utilities to build installer
+        if: ${{ matrix.installer }}
+        run: |
+          python -m pip install pyinstaller==5.13.2
+
+      - name: Build sasview with pyinstaller
+        if: ${{ matrix.installer }}
+        run: |
+          cd installers
+          rm -rf build/ dist/
+          mkdir -p dist
+          pyinstaller sasview.spec
+          cd dist
+          # the following builds a symlink farm in the package; it should
+          # not be necessary, but without it, there will be lots of errors
+          # about .so not found under linux.
+          command -v ldconfig >/dev/null 2>&1 && ldconfig -n sasview
+          tar zcf sasview-pyinstaller-dist.tar.gz sasview
+
+      - name: Build sasview installer with INNO (Windows)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        run: |
+          iscc installers/installer.iss
+          mv installers/Output/setupSasView.exe installers/dist
+
+      - name: Sign executable and create dmg (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+        run: |
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p DloaAcYP build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p DloaAcYP build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
+
+          cd installers/dist
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
+          python ../../build_tools/code_sign_osx.py
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.app
+          hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
+          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.dmg
+
+      - name: Build sasview installer tarball (Linux)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          cd installers/dist
+          tar zcf sasview6.tar.gz sasview
+
+      - name: Collect a debug tarball of the installer package
+        if: ${{ matrix.installer }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            installers/dist/sasview-pyinstaller-dist.tar.gz
+          if-no-files-found: ignore
+
+      - name: Publish installer package
+        if: ${{ matrix.installer }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            installers/dist/setupSasView.exe
+            installers/dist/SasView6.dmg
+            installers/dist/sasview6.tar.gz
+          if-no-files-found: error
+
+
+  test-installer:
+    needs: [ build-matrix ]
+
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-20.04 ]
+        python-version: [ 3.11 ]
+      fail-fast: false
+
+    name: Test installer
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set variables (Windows)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        run: |
+          echo "INSTALL_PATH=$PWD/sasview/" >> $GITHUB_ENV
+          echo "RUN_SASVIEW=$PWD/sasview/sasview.exe" >> $GITHUB_ENV
+
+      - name: Set variables (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          echo "INSTALL_PATH=$PWD/sasview/" >> $GITHUB_ENV
+          echo "RUN_SASVIEW=$PWD/sasview/sasview" >> $GITHUB_ENV
+
+      - name: Set variables (Windows Powershell)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        shell: powershell
+        # unfortunately we end up tripping over ourselves with paths
+        # later on and need a PS version of the install path
+        run: |
+          "INSTALL_WIN_PATH=$(Get-Location)/sasview/" >> $env:GITHUB_ENV
+
+      ### Obtain the installer, either from the previous step
+      ### or from a previous run of the workflow
+
+      - name: Retrieve installer (workflow image)
+        if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
+        uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+
+      - name: Set variables for download (workflow image)
+        if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
+        run: |
+          echo "DL_PATH=${{steps.download.outputs.download-path}}" >> $GITHUB_ENV
+
+      - name: Set variables for download (workflow image) (Windows)
+        if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' && startsWith(matrix.os, 'windows') }}
+        shell: powershell
+        run: |
+          "DL_WIN_PATH=${{steps.download.outputs.download-path}}" >> $env:GITHUB_ENV
+
+      - name: Retrieve installer (old image)
+        if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
+        id: download-old-installer
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          # Select a specific installer image based on the GitHub Actions run id
+          run_id: ${{ env.INSTALLER_OLD_RUNID }}
+          name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: downloads
+          if_no_artifact_found: fail
+
+      - name: Set variables for download (old image)
+        if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
+        run: |
+          echo "DL_PATH=$PWD/downloads" >> $GITHUB_ENV
+
+      - name: Set variables for download (old image) (Windows)
+        if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' && startsWith(matrix.os, 'windows') }}
+        shell: powershell
+        run: |
+          "DL_WIN_PATH=$(Get-Location)/downloads" >> $env:GITHUB_ENV
+
+      - name: Check downloads
+        run: |
+          echo "Sasview downloaded to: $DL_PATH"
+          find "$DL_PATH"
+
+      ### Run the installer and check that the installation looks OK
+
+      - name: Run installer (Windows)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        # The installer spawns a new process and exits immediately, meaning
+        # that the shell thinks it has finishes, tries to exit to move onto
+        # the next step in the job, and kills the child process that is
+        # trying to do the installation.
+        # Wrapping the installer in "Start-Process ... -Wait" means that
+        # this step doesn't exit until the installer has finished.
+        shell: powershell
+        run: |
+          Start-Process -FilePath "${{ env.DL_WIN_PATH }}/setupSasView.exe" -ArgumentList "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /ALLUSERS /SKIPLICENSE=true /LANG=english /NOICONS /TASKS='' /LOG=${{ env.DL_WIN_PATH }}/install.log /DIR=${{ env.INSTALL_WIN_PATH }}" -Wait
+
+      - name: Check installation log (Windows)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        run: |
+          echo "Contents of installation log '$DL_PATH/install.log':"
+          cat $DL_PATH/install.log
+
+      - name: Run installer (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          # $INSTALL_PATH is already the base directory
+          tar xf "$DL_PATH/sasview6.tar.gz"
+
+      - name: Check installation files
+        run: |
+          echo "File listing of SasView installed in '$INSTALL_PATH'"
+          find "$INSTALL_PATH"
+
+      - name: Try running the installation (Windows)
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        # If sasview has crashed on its own, then this should return an error
+        run: |
+          $RUN_SASVIEW &
+          sleep 60s
+          kill %1
+
+      - name: Install X11 libraries (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
+
+      - name: Try running the installation (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu' )}}
+        # If sasview has crashed on its own, then this should return an error
+        run: |
+          xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW &
+          sleep 60s
+          kill %1
+
+      ### Optionally attempt to work with the debug tarball from pyinstaller
+
+      - name: Retrieve installer debug tarball
+        if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
+        id: download-old-debug
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          # Select a specific installer image based on the GitHub Actions run id
+          run_id: ${{ env.INSTALLER_OLD_RUNID }}
+          name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: downloads
+          if_no_artifact_found: fail
+
+      - name: Extract debug tarball
+        if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
+        run: |
+          mkdir unpack
+          cd unpack
+          tar zxf ../downloads/sasview-pyinstaller-dist.tar.gz
+
+      - name: Check debug installation files
+        if: ${{ env.INSTALLER_USE_DEBUG == 'true' && startsWith(matrix.os, 'windows') }}
+        run: |
+          echo "File listing of SasView install bundle unpacked in 'unpack'"
+          find unpack
+
+      - name: Try running debug unpack
+        if: ${{ env.INSTALLER_USE_DEBUG == 'true' && startsWith(matrix.os, 'windows') }}
+        run: |
+          cd unpack/sasview
+          ./sasview.exe
