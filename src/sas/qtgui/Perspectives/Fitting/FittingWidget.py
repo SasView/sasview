@@ -221,27 +221,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.data_is_loaded = True
         # Reset the smearer
         self.smearing_widget.resetSmearer()
-        # if self.data.isSesans:
-        #     # update options defaults and settings for SESANS data
-        #     self.options_widget.updateQRange(1, 100000, self.options_widget.NPTS_DEFAULT)
-        #     # update the units in the 'Fitting details' box of the Fit Options tab on the Fit Panel
-        #     self.options_widget.label_13.setText("<html><head/><body><p>Å</p></body></html>")
-        #     self.options_widget.label_15.setText("<html><head/><body><p>Å</p></body></html>")
-        #     # update the smearing drop down box to indicate a Hankel Transform is being used instead of resolution
-        #     self.smearing_widget.onIndexChange(4)
-        #     # update the Weighting box of the Fit Options tab on the Fit Panel
-        #     self.options_widget.rbWeighting2.setText("Use dP Data")
-        #     self.options_widget.rbWeighting3.setText("Use |sqrt(P Data)|")
-        #     self.options_widget.rbWeighting4.setText("Use |P Data|")
-        #     # update the units in the 'Fitting details' box of the Model tab on the Fit Panel
-        #     self.label_17.setText("<html><head/><body><p>Å</p></body></html>")
-        #     self.label_19.setText("<html><head/><body><p>Å</p></body></html>")
-        #     # disable the background value upon data load
-        #     # disable background for SESANS data
-        #     background_row = self.getRowFromName("background")
-        #     if background_row is not None:
-        #         self.setParamEditableByRow(background_row, False)
-        #         self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(0.0, high=True))
+        if self.data.isSesans:
+            self.onSesansData()
+
         # Enable/disable UI components
         self.setEnablementOnDataLoad()
         # Reinitialize model list for constrained/simult fitting
@@ -548,6 +530,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.setEnabled(False)
         self.lblStructure.setEnabled(False)
         self.enabled_sfmodel = False
+
+    def enableBackgroundParameter(self, set_value=None):
+        """ Enable the background parameter. Optionally set at a specified value. """
+        background_row = self.getRowFromName("background")
+        if background_row is not None:
+            self.setParamEditableByRow(background_row, True)
+            if set_value is not None:
+                self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(set_value, high=True))
+
+    def disableBackgroundParameter(self, set_value=None):
+        """ Disable the background parameter. Optionally set at a specified value. """
+        background_row = self.getRowFromName("background")
+        if background_row is not None:
+            self.setParamEditableByRow(background_row, False)
+            if set_value is not None:
+                print('disabled set value')
+                self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(set_value, high=True))
 
     def enableStructureCombo(self):
         """ Enable the combobox """
@@ -1598,6 +1597,27 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             self.communicate.statusBarUpdateSignal.emit(update_text)
 
+    def onSesansData(self):
+        """
+        Updates the fitting widget format when SESANS data is loaded.
+        """
+        # update the units in the 'Fitting details' box of the Model tab on the Fit Panel
+        self.label_17.setText("<html><head/><body><p>Å</p></body></html>")
+        self.label_19.setText("<html><head/><body><p>Å</p></body></html>")
+        # disable the background parameter and set at 0 for sesans
+        self.disableBackgroundParameter(set_value=0.0)
+        # update options defaults and settings for SESANS data
+        self.options_widget.updateQRange(1, 100000, self.options_widget.NPTS_DEFAULT)
+        # update the units in the 'Fitting details' box of the Fit Options tab on the Fit Panel
+        self.options_widget.label_13.setText("<html><head/><body><p>Å</p></body></html>")
+        self.options_widget.label_15.setText("<html><head/><body><p>Å</p></body></html>")
+        # update the smearing drop down box to indicate a Hankel Transform is being used instead of resolution
+        self.smearing_widget.onIndexChange(1)
+        # update the Weighting box of the Fit Options tab on the Fit Panel
+        self.options_widget.rbWeighting2.setText("Use dP Data")
+        self.options_widget.rbWeighting3.setText("Use |sqrt(P Data)|")
+        self.options_widget.rbWeighting4.setText("Use |P Data|")
+
     def replaceConstraintName(self, old_name, new_name=""):
         """
         Replace names of models in defined constraints
@@ -1651,11 +1671,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.lstParams.setColumnWidth(column, width)
 
         # disable background for SESANS data
-        # if self.data_is_loaded:
-        #     if self.data.isSesans:
-        #         background_row = self.getRowFromName("background")
-        #         self.setParamEditableByRow(background_row, False)
-        #         self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(0.0, high=True))
+        # this should be forced to 0 in sasmodels but this tells the user it is enforced to 0 and disables the box
+        if self.data_is_loaded:
+            if self.data.isSesans:
+                self.disableBackgroundParameter(set_value=0)
 
         # Update plot
         self.updateData()
