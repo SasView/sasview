@@ -539,7 +539,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             'name': name,
             'title': 'User model for ' + name,
             'description': desc_str,
-            'date': datetime.datetime.now().strftime('%YYYY-%mm-%dd'),
+            'date': datetime.datetime.now().strftime('%Y-%m-%d'),
         }
 
         # Write out parameters
