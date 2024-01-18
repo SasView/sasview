@@ -784,7 +784,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # but let's check the correctness.
         assert len(selected_rows) == 2
 
-        params_list = [s.data(role=QtCore.Qt.UserRole) for s in selected_rows]
+        params_list = [s.data() for s in selected_rows]
         # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list)
         # Check if any of the parameters are polydisperse
@@ -1019,6 +1019,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             max_t = model.item(row, max_col).text()
             # Create a Constraint object
             constraint = Constraint(param=param, value=value, min=min_t, max=max_t)
+            constraint.active = False
             # Create a new item and add the Constraint object as a child
             item = QtGui.QStandardItem()
             item.setData(constraint)
@@ -1046,7 +1047,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
 
-        params_list = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
+        params_list = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         assert len(params_list) == 1
         row = current_list.selectionModel().selectedRows()[0].row()
@@ -1090,7 +1091,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        params = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
+        params = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
             self.deleteConstraintOnParameter(param=param, model_key=model_key)
