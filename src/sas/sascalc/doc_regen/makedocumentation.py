@@ -6,8 +6,8 @@ import sys
 import subprocess
 import shutil
 
-from os.path import join, abspath, dirname, basename
-from pathlib import  Path
+from os.path import join, basename
+from pathlib import Path
 from typing import Union
 
 from sas.sascalc.fit import models
@@ -92,25 +92,15 @@ def get_main_docs() -> list[Union[Path, os.path, str]]:
     return TARGETS
 
 
-def call_regenmodel(filepath: Union[Path, os.path, str, list], regen_py: str):
+def call_regenmodel(filepath: list[Union[Path, os.path, str]]):
     """Runs regenmodel.py or regentoc.py (specified in parameter regen_py) with all found PY_FILES.
 
     :param filepath: A file-path like object or list of file-path like objects to regenerate.
-    :param regen_py: The regeneration python file to call (regenmodel.py or regentoc.py)
     """
-    REGENMODEL = abspath(dirname(__file__)) + "/" + regen_py
-    # Initialize command to be executed
-    command = [
-        sys.executable,
-        REGENMODEL,
-    ]
-    # Append each filepath to command individually if passed in many files
-    if isinstance(filepath, list):
-        for string in filepath:
-            command.append(string)
-    else:
-        command.append(filepath)
-    subprocess.run(command)
+    from sas.sascalc.doc_regen.regenmodel import run_sphinx, process_model
+    filepaths = [Path(path) for path in filepath]
+    rst_files = [process_model(py_file, True) for py_file in filepaths]
+    run_sphinx(filepath, rst_files)
 
 
 def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool = False):
@@ -165,7 +155,7 @@ def call_all_files():
     TARGETS = get_main_docs()
     for file in TARGETS:
         #  easiest for regenmodel.py if files are passed in individually
-        call_regenmodel(file, "regenmodel.py")
+        call_regenmodel([file])
     # regentoc.py requires files to be passed in bulk or else LOTS of unexpected behavior
     generate_toc(TARGETS)
 
@@ -177,19 +167,17 @@ def call_one_file(file: Union[Path, os.path, str]):
     """
     from sas.sascalc.doc_regen.regentoc import generate_toc
     TARGETS = get_main_docs()
-    NORM_TARGET = join(ABSOLUTE_TARGET_MAIN, file)
-    MODEL_TARGET = join(MAIN_PY_SRC, file)
+    MODEL_TARGET = MAIN_PY_SRC / file
+    PLUGIN_TARGET = PLUGIN_PY_SRC / file
     # Determines if a model's source .py file from /user/models/src/ should be used or if the file from /plugin-models/ should be used
-    if os.path.exists(NORM_TARGET) and os.path.exists(MODEL_TARGET):
-        if os.path.getmtime(NORM_TARGET) < os.path.getmtime(MODEL_TARGET):
-            file_call_path = MODEL_TARGET
-        else:
-            file_call_path = NORM_TARGET
-    elif not os.path.exists(NORM_TARGET):
+    if os.path.exists(MODEL_TARGET) and os.path.exists(PLUGIN_TARGET):
+        # Model name collision between built-in models and plugin models: Choose the most recent
+        file_call_path = MODEL_TARGET if os.path.getmtime(PLUGIN_TARGET) < os.path.getmtime(MODEL_TARGET) else PLUGIN_TARGET
+    elif not os.path.exists(PLUGIN_TARGET):
         file_call_path = MODEL_TARGET
     else:
-        file_call_path = NORM_TARGET
-    call_regenmodel(file_call_path, "regenmodel.py")  # There might be a cleaner way to do this but this approach seems to work and is fairly minimal
+        file_call_path = PLUGIN_TARGET
+    call_regenmodel([file_call_path])
     generate_toc(TARGETS)
 
 
