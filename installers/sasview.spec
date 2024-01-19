@@ -9,10 +9,8 @@ import sysconfig
 block_cipher = None
 PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
-from .get_external_dependencies import get_external_dependencies
-get_external_dependencies()
-
 datas = [
+    ('../external', 'external'),
     ('../src/sas/qtgui/images', 'images'),
     ('../src/sas/sasview/media', 'media'),
     ('../src/sas/example_data', 'example_data'),
