@@ -84,18 +84,19 @@ build_commands = [
 print(sys.argv)
 
 # determine if this run requires building of Qt GUI ui->py
-build_qt = any(c in sys.argv for c in build_commands)
+build = any(c in sys.argv for c in build_commands)
 force_rebuild = "-f" if 'rebuild_ui' in sys.argv or 'clean' in sys.argv else ""
 if 'rebuild_ui' in sys.argv:
     sys.argv.remove('rebuild_ui')
 
-print("BUILD_QT", build_qt)
-if build_qt:
+if build:
+    # build qt
     _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py", force_rebuild])
-    # Download external dependencies
-    from build_tools.get_external_dependencies import get_external_dependencies
-    print("WE ARE HERE")
-    get_external_dependencies()
+
+    # download external dependencies
+    from build_tools.get_external_dependencies import fetch_external_dependencies
+    print("###FETCHING EXTERNAL DEPENDENCIES")
+    fetch_external_dependencies()
 
 # Required packages
 required = [
