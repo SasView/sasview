@@ -30,7 +30,7 @@ os_release_list = [
     'windows-latest',
 #    'macos-latest',
 ]
-
+ 
 # List of OS images to use for release tests
 os_test_list = os_release_list + [
     'ubuntu-latest',
