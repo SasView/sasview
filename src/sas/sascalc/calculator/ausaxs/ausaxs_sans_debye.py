@@ -31,7 +31,20 @@ try:
 except:
     ausaxs = None
 
+def ausaxs_available():
+    """
+    Check if the AUSAXS library is available.
+    """
+    return ausaxs is not None
+
 def evaluate_sans_debye(q, coords, w):
+    """
+    Compute I(q) for a set of points using Debye sums. 
+    This uses AUSAXS if available, otherwise it uses the default implementation.
+    *q* is the q values for the calculation.
+    *coords* are the sample points.
+    *w* is the weight associated with each point.
+    """
     if ausaxs is None:
         logging.warning("AUSAXS external library not found, using default Debye implementation")
         from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
@@ -42,9 +55,9 @@ def evaluate_sans_debye(q, coords, w):
     nq = ct.c_int(len(q))
     nc = ct.c_int(len(w))
     q = q.ctypes.data_as(ct.POINTER(ct.c_double))
-    x = coords[:, 0].ctypes.data_as(ct.POINTER(ct.c_double))
-    y = coords[:, 1].ctypes.data_as(ct.POINTER(ct.c_double))
-    z = coords[:, 2].ctypes.data_as(ct.POINTER(ct.c_double))
+    x = coords[0:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    y = coords[1:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    z = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
     w = w.ctypes.data_as(ct.POINTER(ct.c_double))
     status = ct.c_int()
 
@@ -54,9 +67,9 @@ def evaluate_sans_debye(q, coords, w):
     # check for errors
     if status.value != 0:
         if status.value == 1:
-            logging.error("q range is outside what is currently supported by AUSAXS")
-            raise ValueError("q range is outside what is currently supported by AUSAXS")
+            logging.error("q range is outside what is currently supported by AUSAXS. Using default Debye implementation instead.")
         elif status.value == 2:
-            logging.error("AUSAXS calculator terminated unexpectedly")
-            raise RuntimeError("AUSAXS calculator terminated unexpectedly")
+            logging.error("AUSAXS calculator terminated unexpectedly. Using default Debye implementation instead.")
+        from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
+        return sasview_sans_debye(q, coords, w)
     return np.array(Iq)

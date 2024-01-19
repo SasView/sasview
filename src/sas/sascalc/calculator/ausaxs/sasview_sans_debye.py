@@ -2,6 +2,12 @@ import numpy as np
 import logging
 
 def sasview_sans_debye(q, coords, weight, worksize=100000):
+    """
+    Compute I(q) for a set of points using the full Debye formula.
+    *q* is the q values for the calculation.
+    *coords* are the sample points.
+    *weight* is the weight associated with each point.
+    """
     Iq = np.zeros_like(q)
     q_pi = q/np.pi  # Precompute q/pi since np.sinc = sin(pi x)/(pi x).
     batch_size = worksize // coords.shape[0]
@@ -16,7 +22,7 @@ def _calc_Iq_batch(Iq, q_pi, coords, weight):
     *Iq* is accumulated within each batch, and should be initialized to zero.
     *q_pi* is q/pi, needed because np.sinc computes sin(pi x)/(pi x).
     *coords* are the sample points.
-    *weights* is volume*rho for each point.
+    *weight* is the weight associated with each point.
     """
     for j in range(len(weight)):
         if j % 100 == 0: logging.info(f"\tprogress: {j/len(weight)*100:.0f}%")
