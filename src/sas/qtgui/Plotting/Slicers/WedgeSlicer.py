@@ -212,7 +212,6 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
         new_plot.id = str(self.averager.__name__) + self.data.name
-        new_plot.group_id = new_plot.id
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
