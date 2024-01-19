@@ -39,6 +39,7 @@ def attach_hooks():
                 path = loc.joinpath("libausaxs_sse.dylib")
         else:
             path = ""
+        print("LOOKING FOR AUSAXS LIBRARY AT: ", path)
 
         try:
             # evaluate_sans_debye func
@@ -60,6 +61,7 @@ def attach_hooks():
             ausaxs_state = lib_state.FAILED
             logging.warning("Failed to hook into AUSAXS library, using default Debye implementation")
             print(e)
+            raise e
 
 def ausaxs_available():    
     """
