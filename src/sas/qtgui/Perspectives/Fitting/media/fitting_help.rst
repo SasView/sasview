@@ -1143,7 +1143,7 @@ Load the .ses file and Send to Fitting as normal.
 
 The first true indication that the data are not SANS data comes when the
 data are plotted. Instead of *Intensity* vs *Q*, the data are displayed
-as a normalised depolarisation (*P*) vs spin-echo length (*z*).
+as a normalised depolarisation (*P*) vs spin-echo length (|delta|).
 
 .. image:: fitting_sesans_2.png
 
