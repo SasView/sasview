@@ -89,10 +89,12 @@ force_rebuild = "-f" if 'rebuild_ui' in sys.argv or 'clean' in sys.argv else ""
 if 'rebuild_ui' in sys.argv:
     sys.argv.remove('rebuild_ui')
 
+print("BUILD_QT", build_qt)
 if build_qt:
     _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py", force_rebuild])
     # Download external dependencies
     from build_tools.get_external_dependencies import get_external_dependencies
+    print("WE ARE HERE")
     get_external_dependencies()
 
 # Required packages
