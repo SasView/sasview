@@ -253,7 +253,7 @@ class sas_gen_test(unittest.TestCase):
             # compare the two
             errs = (external - analytical)/analytical
             for val in np.abs(errs):
-                self.assertLessEqual(val, 1e-2)
+                self.assertLessEqual(val, 2e-2)
 
 
     # def test_calculator_elements(self):

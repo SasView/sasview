@@ -36,15 +36,6 @@ PySide6==6.4.3
 twisted
 zope
 superqt
-tinycc
-twisted
-uncertainties
-unittest-xml-reporting
-xhtml2pdf
-zope
-
-# Alphabetized list of OS-specific packages
-pywin32; platform_system == "Windows"
-
-# Alphabetized list of version-pinned packages
-PySide6==6.4.3  # Later versions do not mesh well with pyinstaller < 6.0
+pyopengl
+pyopengl_accelerate
+cpufeature
