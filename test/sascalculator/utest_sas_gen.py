@@ -219,7 +219,7 @@ class sas_gen_test(unittest.TestCase):
     #     for val in np.abs(errs):
     #         self.assertLessEqual(val, 1e-2)
 
-    def test_debye_impl_cmp(self):
+    def test_debye_impl(self):
         """
         Test that the Debye algorithm supplied by the external AUSAXS library agrees with the default implementation.
         """
