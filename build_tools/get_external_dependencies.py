@@ -37,10 +37,10 @@ def get_ausaxs():
         base_loc = "sas/sascalc/calculator/ausaxs/lib"
         for lib in libs:
             response = requests.get(url+lib)
-            with resources.as_file(base_loc) as loc:
-                with open(loc+lib, "wb") as f:
-                    f.write(response.content)
-                    print("PLACED AUSAXS LIBRARY AT: ", loc.joinpath(lib))
+#            with resources.as_file(base_loc) as loc:
+            with open(base_loc+lib, "wb") as f:
+                f.write(response.content)
+                print("PLACED AUSAXS LIBRARY AT: ", base_loc+lib)
 
 def fetch_external_dependencies(): 
     #surround with try/except to avoid breaking the build if the download fails
