@@ -44,11 +44,11 @@ For dilute solutions, it is simplified as
 .. math::
     I(Q) = \frac{scale}{V}(SLD - SLD_{solvent})^2V_{protein} \tilde{P}(Q\alpha) + background
 
-The following figure shows the comparison between one experimental apoferritin protein SANS data at a dilute sample with the calculated $I(Q)$ using this model.
+The following figure shows the comparison between one experimental apoferritin protein SANS data of a dilute sample with the calculated $I(Q)$ using this model.
 
 .. figure:: gsc_ex_customModel_data_Fig2.jpg
 
-If one needs to fit concentrated protein solutions, it needs to choose the appropriate structure factor. If a protein is anisotropic, one also needs to use the static decoupling approximation. $\beta(Q)$ will be automatially used during the fitting. However, if a protein is nearly spherical such as apoferritin, there is no need to use the static decoupling approximation.
+If one needs to fit concentrated protein solutions, an appropriate structure factor model needs to be chosen. If a protein is anisotropic, one also needs to use the static decoupling approximation. $\beta(Q)$ will be automatially used during the fitting. One fitting parameter to calculate $S(Q)$ using the models available in the SasView is the effective radius that is called radius\_effective in the SasView. One needs to choose how to correlate the effective radius with the size of a protein. Note that the effective radius is related with the interaciton between porteins, and could be different from the radius of a protein/particle. It is therefore ok, and sometimes recommended, to use unconstrained method for the "radius\_effective_mode" since there is no fitting prameter related with the protein size in this custom fitting model. If a protein is nearly spherical such as apoferritin, there is no need to use the static decoupling approximation.
 
 
 *Document History*
