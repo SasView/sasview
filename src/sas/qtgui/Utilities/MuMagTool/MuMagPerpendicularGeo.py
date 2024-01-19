@@ -232,49 +232,44 @@ def SANS_Model_PERP(q, S_H, S_M, I_res, M_s, H_0, H_dem, A):
 
 ####################################################################################################
 # Plot Fitting results of simple fit
-def PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, A_Uncertainty):
-
-    fig, axs = plt.subplots(2, 2)
+def PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, A_Uncertainty,
+                                     figure, axes1, axes2, axes3, axes4):
 
     if A_Uncertainty < 1e-4:
         A_Uncertainty = 0
 
     A_uncertainty_str = str(A_Uncertainty)
-
     A_opt_str = str(A_opt * 1e12)
-    axs[0, 0].set_title('A_opt = (' + A_opt_str[0:5] + ' +/- ' + A_uncertainty_str[0:4] + ') pJ/m')
-    axs[0, 0].plot(A * 1e12, chi_q)
-    axs[0, 0].plot(A_opt * 1e12, chi_q_opt, 'o')
-    axs[0, 0].grid()
-    axs[0, 0].set_xlim([min(A * 1e12), max(A * 1e12)])
-    axs[0, 0].set(xlabel='A [pJ/m]', ylabel='chi^2')
+    axes1.set_title('$A_{\mathrm{opt}} = (' + A_opt_str[0:5] + ' \pm ' + A_uncertainty_str[0:4] + ')$ pJ/m', usetex=True)
+    axes1.plot(A * 1e12, chi_q)
+    axes1.plot(A_opt * 1e12, chi_q_opt, 'o')
+    axes1.set_xlim([min(A * 1e12), max(A * 1e12)])
+    axes1.set_xlabel('$A$ [pJ/m]', usetex=True)
+    axes1.set_ylabel('$\chi^2$', usetex=True)
 
-    axs[0, 1].plot(q[0, :] * 1e-9, I_res_opt[0, :], label='fit')
-    axs[0, 1].set_yscale('log')
-    axs[0, 1].set_xscale('log')
-    axs[0, 1].grid()
-    axs[0, 1].set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
-    axs[0, 1].set(xlabel='q [1/nm]', ylabel='I_res')
-    axs[0, 1].legend()
+    axes2.plot(q[0, :] * 1e-9, I_res_opt[0, :], label='fit')
+    axes2.set_yscale('log')
+    axes2.set_xscale('log')
+    axes2.set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
+    axes2.set_xlabel('$q$ [1/nm]', usetex=True)
+    axes2.set_ylabel('$I_{\mathrm{res}}$', usetex=True)
 
-    axs[1, 0].plot(q[0, :] * 1e-9, S_H_opt[0, :], label='fit')
-    axs[1, 0].set_yscale('log')
-    axs[1, 0].set_xscale('log')
-    axs[1, 0].grid()
-    axs[1, 0].set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
-    axs[1, 0].set(xlabel='q [1/nm]', ylabel='S_H')
-    axs[1, 0].legend()
+    axes3.plot(q[0, :] * 1e-9, S_H_opt[0, :], label='fit')
+    axes3.set_yscale('log')
+    axes3.set_xscale('log')
+    axes3.set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
+    axes3.set_xlabel('$q$ [1/nm]', usetex=True)
+    axes3.set_ylabel('$S_H$', usetex=True)
 
-    axs[1, 1].plot(q[0, :] * 1e-9, S_M_opt[0, :], label='fit')
-    axs[1, 1].set_yscale('log')
-    axs[1, 1].set_xscale('log')
-    axs[1, 1].grid()
-    axs[1, 1].set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
-    axs[1, 1].set(xlabel='q [1/nm]', ylabel='S_M')
-    axs[1, 1].legend()
+    axes4.plot(q[0, :] * 1e-9, S_M_opt[0, :], label='fit')
+    axes4.set_yscale('log')
+    axes4.set_xscale('log')
+    axes4.set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
+    axes4.set_xlabel('$q$ [1/nm]', usetex=True)
+    axes4.set_ylabel('$S_M$', usetex=True)
 
-    plt.tight_layout()
-    plt.show()
+    figure.tight_layout()
+
 
 ####################################################################################################
 def PlotSweepFitResultPERP(q_max_mat, H_min_mat, A_opt_mat):

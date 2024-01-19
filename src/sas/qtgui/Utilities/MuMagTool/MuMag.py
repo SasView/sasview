@@ -27,26 +27,57 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         self.fig = Figure() #Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
+        self.axes.set_visible(False)
+        self.axes1 = self.fig.add_subplot(221)
+        self.axes1.set_visible(False)
+        self.axes2 = self.fig.add_subplot(222)
+        self.axes2.set_visible(False)
+        self.axes3 = self.fig.add_subplot(223)
+        self.axes3.set_visible(False)
+        self.axes4 = self.fig.add_subplot(224)
+        self.axes4.set_visible(False)
 
-        figure_canvas = FigureCanvas(self.fig)
-        layout.addWidget(figure_canvas)
+        self.figure_canvas = FigureCanvas(self.fig)
+        layout.addWidget(self.figure_canvas)
 
     def import_data_button_callback(self):
         self.MuMagLib_obj.import_data_button_callback_sub()
 
     def plot_experimental_data_button_callback(self):
+        self.axes.set_visible(True)
+        self.axes1.set_visible(False)
+        self.axes2.set_visible(False)
+        self.axes3.set_visible(False)
+        self.axes4.set_visible(False)
+        self.axes.cla()
+        self.axes1.cla()
+        self.axes2.cla()
+        self.axes3.cla()
+        self.axes4.cla()
         self.MuMagLib_obj.plot_experimental_data(self.fig, self.axes)
+        self.figure_canvas.draw()
 
     def simple_fit_button_callback(self):
+        self.axes.set_visible(False)
+        self.axes1.set_visible(True)
+        self.axes2.set_visible(True)
+        self.axes3.set_visible(True)
+        self.axes4.set_visible(True)
+        self.axes.cla()
+        self.axes1.cla()
+        self.axes2.cla()
+        self.axes3.cla()
+        self.axes4.cla()
+
         q_max = float(self.qMaxEdit.toPlainText())
         H_min = float(self.HminEdit.toPlainText())
         A1 = float(self.AMinEdit.toPlainText())
         A2 = float(self.AMaxEdit.toPlainText())
         A_N = int(self.ASamplesEdit.toPlainText())
         SANSgeometry = self.ScatteringGeometrySelect.currentText()
-        self.MuMagLib_obj.simple_fit_button_callback(q_max, H_min, A1, A2, A_N, SANSgeometry)
-
-
+        self.MuMagLib_obj.simple_fit_button_callback(q_max, H_min, A1, A2, A_N, SANSgeometry,
+                                                     self.fig, self.axes1, self.axes2, self.axes3, self.axes4)
+        self.figure_canvas.draw()
 
 def main():
     """ Show a demo of the slider """

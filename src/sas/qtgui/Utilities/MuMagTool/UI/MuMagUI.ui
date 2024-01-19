@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>703</width>
+    <width>761</width>
     <height>600</height>
    </rect>
   </property>
@@ -20,7 +20,7 @@
       <x>0</x>
       <y>0</y>
       <width>161</width>
-      <height>131</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="title">
@@ -32,7 +32,7 @@
        <x>0</x>
        <y>20</y>
        <width>161</width>
-       <height>111</height>
+       <height>101</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
@@ -50,7 +50,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="0" column="0">
        <widget class="QComboBox" name="ScatteringGeometrySelect">
         <item>
          <property name="text">
@@ -72,8 +72,8 @@
      <rect>
       <x>160</x>
       <y>0</y>
-      <width>541</width>
-      <height>131</height>
+      <width>601</width>
+      <height>121</height>
      </rect>
     </property>
     <property name="title">
@@ -84,8 +84,8 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>521</width>
-       <height>111</height>
+       <width>581</width>
+       <height>101</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
@@ -214,21 +214,21 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>130</y>
-      <width>701</width>
-      <height>431</height>
+      <y>120</y>
+      <width>761</width>
+      <height>441</height>
      </rect>
     </property>
     <property name="title">
-     <string>GroupBox</string>
+     <string>Display</string>
     </property>
     <widget class="QWidget" name="PlotDisplayPanel" native="true">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>40</y>
-       <width>501</width>
-       <height>221</height>
+       <x>0</x>
+       <y>20</y>
+       <width>761</width>
+       <height>411</height>
       </rect>
      </property>
     </widget>
@@ -239,7 +239,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>703</width>
+     <width>761</width>
      <height>22</height>
     </rect>
    </property>

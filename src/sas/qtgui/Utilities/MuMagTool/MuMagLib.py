@@ -128,6 +128,7 @@ class MuMagLib():
     def plot_exp_data(self, figure, axes, q, I_exp, B_0, x_min, x_max, y_min, y_max):
 
         ax = axes
+
         # print(ax)
         # ax.cla()
 
@@ -142,37 +143,12 @@ class MuMagLib():
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
         figure.tight_layout()
-
-       # ax.yscale('log')
-       # ax.xscale('log')
-        #ax.grid(True, which="both", linestyle='--')
         #ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), usetex=True)
-
         figure.canvas.draw()
-
-        # box = ax.get_position()
-        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-        #
-        # ax.xlabel('q [1/nm]')
-        # ax.ylabel('I_exp')
-        # ax.xlim(x_min, x_max)
-        # ax.ylim(y_min, y_max)
-        # ax.yscale('log')
-        # ax.xscale('log')
-        # ax.grid(True, which="both", linestyle='--')
-        # ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-
-
-
-
-
-
-
-
 
     #######################################################################################################################
 
-    def simple_fit_button_callback(self, q_max, H_min, A1, A2, A_N, SANSgeometry):
+    def simple_fit_button_callback(self, q_max, H_min, A1, A2, A_N, SANSgeometry, figure, axes1, axes2, axes3, axes4):
 
         if np.size(self.q_exp) > 1:
 
@@ -213,7 +189,9 @@ class MuMagLib():
                 N_nu = len(I_exp_red[:, 0])
                 A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
 
-                MuMagPerpendicularGeo.PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, A_Uncertainty * 1e12)
+                MuMagPerpendicularGeo.PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt,
+                                                                       S_H_opt, S_M_opt, A_Uncertainty * 1e12,
+                                                                       figure, axes1, axes2, axes3, axes4)
 
                 # Save to global Variables
                 self.SimpleFit_q_exp = q
@@ -253,7 +231,8 @@ class MuMagLib():
                 A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
 
                 MuMagParallelGeo.PlotFittingResultsPAR_SimpleFit(q, A, chi_q, A_opt, chi_q_opt,
-                                                           I_res_opt, S_H_opt, A_Uncertainty * 1e12)
+                                                                 I_res_opt, S_H_opt, A_Uncertainty * 1e12,
+                                                                 figure, axes1, axes2, axes3, axes4)
 
                 # Save to global Variables
                 self.SimpleFit_q_exp = q
