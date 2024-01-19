@@ -1,4 +1,4 @@
-def create_symlink_lib():
+def create_ausaxs_lib():
     """
     Create a symlink to the appropriate libausaxs shared library.
     This will either be libausaxs_avx or libausaxs_sse, depending on the CPU support.
@@ -24,9 +24,10 @@ def create_symlink_lib():
         elif _arch == architecture.Arch.SSE4:
             version = "external/libausaxs_sse.dylib"
     
+    import os
     if version is not None and os.path.exists(version):
         try:
-            import os
-            os.symlink(version, "external/libausaxs"+architecture.get_shared_lib_extension())
+            import shutil
+            shutil.copy(version, "external/libausaxs"+architecture.get_shared_lib_extension())
         except:
             return
