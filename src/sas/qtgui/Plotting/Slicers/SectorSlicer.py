@@ -180,7 +180,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.data.name
+        new_plot.group_id = "SectorQ" + self.data.name
         new_plot.id = "SectorQ" + self.data.name
         new_plot.is_data = True
         item = self._item
