@@ -28,7 +28,7 @@ def get_ausaxs():
 
 def get_external_dependencies(): 
     # surround with try/except to avoid breaking the build if the download fails
-    try:
-        get_ausaxs()
-    except:
-        return
+ #   try:
+    get_ausaxs()
+#    except:
+    return
