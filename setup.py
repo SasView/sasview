@@ -95,7 +95,6 @@ if build:
 
     # download external dependencies
     from build_tools.get_external_dependencies import fetch_external_dependencies
-    print("###FETCHING EXTERNAL DEPENDENCIES")
     fetch_external_dependencies()
 
 # Required packages
