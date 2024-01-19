@@ -1,5 +1,4 @@
 import requests
-import importlib.resources as resources
 
 from enum import Enum
 class OS(Enum):
@@ -34,7 +33,10 @@ def get_ausaxs():
         libs = ["libausaxs_avx.dylib", "libausaxs_sse.dylib"]
     if libs is not None:
 #        base_loc = resources.files("sas.sascalc.calculator.ausaxs.lib")
-        base_loc = "sas/sascalc/calculator/ausaxs/lib"
+        # we have to use a relative path since the package is not installed yet
+        base_loc = "src/sas/sascalc/calculator/ausaxs/lib"
+        import os
+        print("###CWD: ", os.getcwd())
         for lib in libs:
             response = requests.get(url+lib)
 #            with resources.as_file(base_loc) as loc:
