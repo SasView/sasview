@@ -245,7 +245,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         #new_plot. = "2daverage" + self.data.name
         new_plot.id = (self.averager.__name__) + self.data.name
-        new_plot.group_id = new_plot.id
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:

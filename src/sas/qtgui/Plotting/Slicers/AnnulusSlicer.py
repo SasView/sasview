@@ -138,7 +138,6 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "AnnulusPhi" + self.data.name
         new_plot.id = "AnnulusPhi" + self.data.name
         new_plot.is_data = True
         new_plot.xtransform = "x"

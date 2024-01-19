@@ -136,6 +136,7 @@ class Plotter2DWidget(PlotterBase):
                       update=update)
 
         self.updateCircularAverage()
+        self.updateSlicer()
 
     def calculateDepth(self):
         """
@@ -338,8 +339,7 @@ class Plotter2DWidget(PlotterBase):
         else:
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        new_plot.group_id = "2daverage" + self.data0.name
-        new_plot.id = "Circ avg " + self.data0.name
+        new_plot.id = "2daverage" + self.data0.name
         new_plot.is_data = True
 
         return new_plot
@@ -375,8 +375,8 @@ class Plotter2DWidget(PlotterBase):
         # See if current item plots contain 2D average plot
         has_plot = False
         for plot in plots:
-            if plot.group_id is None: continue
-            if ca_caption in plot.group_id: has_plot = True
+            if plot.id is None: continue
+            if ca_caption in plot.id: has_plot = True
         # return prematurely if no circular average plot found
         if not has_plot: return
 
@@ -387,6 +387,11 @@ class Plotter2DWidget(PlotterBase):
         GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
         # Show the new plot, if already visible
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
+
+    def updateSlicer(self):
+        """
+        Update slicer plot on Data2D change
+        """
 
     def setSlicer(self, slicer, reset=True):
         """
