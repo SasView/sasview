@@ -1602,15 +1602,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Updates the fitting widget format when SESANS data is loaded.
         """
         # update the units in the 'Fitting details' box of the Model tab on the Fit Panel
-        self.label_17.setText("<html><head/><body><p>Å</p></body></html>")
-        self.label_19.setText("<html><head/><body><p>Å</p></body></html>")
+        self.label_17.setText("Å")
+        self.label_19.setText("Å")
         # disable the background parameter and set at 0 for sesans
         self.disableBackgroundParameter(set_value=0.0)
         # update options defaults and settings for SESANS data
         self.options_widget.updateQRange(1, 100000, self.options_widget.NPTS_DEFAULT)
         # update the units in the 'Fitting details' box of the Fit Options tab on the Fit Panel
-        self.options_widget.label_13.setText("<html><head/><body><p>Å</p></body></html>")
-        self.options_widget.label_15.setText("<html><head/><body><p>Å</p></body></html>")
+        self.options_widget.label_13.setText("Å")
+        self.options_widget.label_15.setText("Å")
         # update the smearing drop down box to indicate a Hankel Transform is being used instead of resolution
         self.smearing_widget.onIndexChange(1)
         # update the Weighting box of the Fit Options tab on the Fit Panel
