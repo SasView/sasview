@@ -80,7 +80,7 @@ def get_main_docs() -> list[Union[Path, os.path, str]]:
 
     :return: A list of python files """
     # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
-    TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(PLUGIN_PY_SRC)
+    TARGETS = get_py(MAIN_PY_SRC) + get_py(PLUGIN_PY_SRC)
     base_targets = [basename(string) for string in TARGETS]
 
     # Removes duplicate instances of the same file copied from plugins folder to source-temp/user/models/src/
@@ -99,8 +99,9 @@ def call_regenmodel(filepath: list[Union[Path, os.path, str]]):
     """
     from sas.sascalc.doc_regen.regenmodel import run_sphinx, process_model
     filepaths = [Path(path) for path in filepath]
-    rst_files = [process_model(py_file, True) for py_file in filepaths]
-    run_sphinx(filepath, rst_files)
+    rst_files = [Path(process_model(py_file, True)) for py_file in filepaths]
+    output_path = MAIN_BUILD_SRC / "user" / "models"
+    run_sphinx(rst_files, output_path)
 
 
 def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool = False):
@@ -115,7 +116,7 @@ def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool =
             f.truncate(0)
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
     if rst is False:
-        single_rst = USER_DOC_SRC / "user" / "models" / single_file.replace('.py', '.rst')
+        single_rst = USER_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst')
     else:
         single_rst = Path(single_file)
     rst_path = list(single_rst.parts)

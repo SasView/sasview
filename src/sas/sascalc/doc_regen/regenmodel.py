@@ -391,7 +391,7 @@ def process_model(py_file: str, force=False) -> str:
     return rst_file
 
 
-def run_sphinx(rst_files: list[str], output: list[str]):
+def run_sphinx(rst_files: list[str], output: str):
     """Use sphinx to build *rst_files*, storing the html in *output*.
 
     :param rst_files: A list of ReST file names/paths to be processed into HTML.
@@ -399,7 +399,7 @@ def run_sphinx(rst_files: list[str], output: list[str]):
     """
 
     print("Building index...")
-    conf_dir = dirname(realpath(__file__))
+    conf_dir = MAIN_DOC_SRC
     with open(joinpath(TARGET_DIR, 'index.rst'), 'w') as fid:
         fid.write(".. toctree::\n\n")
         for path in rst_files:
