@@ -55,11 +55,7 @@ def smear_selection(data, model = None):
     # Look for resolution smearing data
     # This is the code that checks for SESANS data; it looks for the file loader
     # TODO: change other sanity checks to check for file loader instead of data structure?
-    _found_sesans = False
     if data.isSesans:  # data.dx data is not required in the Hankel transform for SESANS data
-        _found_sesans = True
-
-    if _found_sesans:
         # Pre-compute the Hankel matrix (H)
         SElength = Converter(data._xunit)(data.x, "A")
 
