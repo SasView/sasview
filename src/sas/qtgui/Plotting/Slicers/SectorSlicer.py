@@ -385,13 +385,13 @@ class SideInteractor(BaseInteractor):
         else:
             self.phi = numpy.fabs(self.phi)
         if side:
-            self.theta = mline.alpha + self.phi
+            self.theta = mline.theta + self.phi
 
         if mline is not None:
             if delta != 0:
                 self.theta2 = mline + delta
             else:
-                self.theta2 = mline.alpha
+                self.theta2 = mline.theta
         if delta == 0:
             theta3 = self.theta + delta
         else:
