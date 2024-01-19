@@ -12,6 +12,15 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
 from sas.sascalc.doc_regen.makedocumentation import make_documentation, HELP_DIRECTORY_LOCATION, MAIN_PY_SRC, MAIN_DOC_SRC
 
+HTML_404 = '''
+<html>
+<body>
+<p>Unable to find documentation.</p>
+<p>Developers: please build the documentation and try again.</p>
+</body>
+</html>
+'''
+
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     """
@@ -96,6 +105,12 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         base_path = self.source.parent.parts
         url_str = str(self.source)
 
+        if not MAIN_DOC_SRC.exists() and not HELP_DIRECTORY_LOCATION.exists():
+            # The user docs were never built - disable edit button and do not attempt doc regen
+            self.editButton.setEnabled(False)
+            self.load404()
+            return
+
         if "models" in base_path:
             model_name = self.source.name.replace("html", "py")
             regen_string = rst_py_path / model_name
@@ -157,6 +172,10 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.webEngineViewer.load(url)
 
         # Show widget
+        self.onShow()
+
+    def load404(self):
+        self.webEngineViewer.setHtml(HTML_404)
         self.onShow()
     
     def refresh(self):

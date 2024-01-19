@@ -56,9 +56,9 @@ def create_user_files_if_needed():
         with open(DOC_LOG, "w") as f:
             # Write an empty file to eliminate any potential future file creation conflicts
             pass
-    if not MAIN_DOC_SRC.exists():
+    if not MAIN_DOC_SRC.exists() and ORIGINAL_DOCS_SRC.exists():
         shutil.copytree(ORIGINAL_DOCS_SRC, MAIN_DOC_SRC)
-    if not MAIN_BUILD_SRC.exists():
+    if not MAIN_BUILD_SRC.exists() and ORIGINAL_DOC_BUILD.exists():
         shutil.copytree(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
 
 
