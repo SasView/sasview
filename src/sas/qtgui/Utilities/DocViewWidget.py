@@ -101,7 +101,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         user_models = Path(models.find_plugins_dir())
         html_path = HELP_DIRECTORY_LOCATION
         rst_path = MAIN_DOC_SRC
-        rst_py_path = MAIN_PY_SRC
         base_path = self.source.parent.parts
         url_str = str(self.source)
 
@@ -112,18 +111,16 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             return
 
         if "models" in base_path:
-            model_name = self.source.name.replace("html", "py")
-            regen_string = rst_py_path / model_name
-            user_model_name = user_models / model_name
+            user_model_name = user_models / self.source.name.replace("html", "py")
 
             # Test if this is a user defined model, and if its HTML does not exist or is older than python source file
             if os.path.isfile(user_model_name):
-                if self.newer(regen_string, user_model_name):
-                    self.regenerateHtml(model_name)
+                if self.newer(user_model_name, url_str):
+                    self.regenerateHtml(user_model_name)
 
             # Test to see if HTML does not exist or is older than python file
-            elif self.newer(regen_string, self.source):
-                self.regenerateHtml(model_name)
+            elif self.newer(self.source, url_str):
+                self.regenerateHtml(self.source.name)
             # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
 
         elif "index" in url_str:
@@ -156,7 +153,10 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         :return: Is the ReST file newer than the HTML file? Returned as a boolean.
         """
         try:
-            return not os.path.exists(html) or os.path.getmtime(src) > os.path.getmtime(html)
+            html_exists = os.path.exists(html)
+            rst_time = os.path.getmtime(src)
+            html_time = os.path.getmtime(html)
+            return not html_exists or rst_time > html_time
         except Exception as e:
             # Catch exception for debugging
             return True
