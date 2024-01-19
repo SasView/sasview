@@ -145,7 +145,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 if os.path.isfile(user_model_name):
                     filename = user_model_name
                 else:
-                    filename = MAIN_DOC_SRC / "user" / "models" / "src" / self.load_file + ".py"
+                    filename = MAIN_DOC_SRC / "user" / "models" / "src" / (self.load_file + ".py")
             else:
                 filename = MAIN_DOC_SRC / self.load_file.replace(".html", ".rst")
                 self.is_python = False
@@ -539,7 +539,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             'name': name,
             'title': 'User model for ' + name,
             'description': desc_str,
-            'date': datetime.datetime.now().strftime('%YYYY-%mm-%dd'),
+            'date': datetime.datetime.now().strftime('%Y-%m-%d'),
         }
 
         # Write out parameters
