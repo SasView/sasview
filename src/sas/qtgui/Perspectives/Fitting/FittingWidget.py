@@ -2,7 +2,7 @@ import json
 import os
 import sys
 from collections import defaultdict
-from typing import Any, Tuple
+from typing import Any, Tuple, Optional
 from pathlib import Path
 
 import copy
@@ -535,7 +535,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblStructure.setEnabled(False)
         self.enabled_sfmodel = False
 
-    def enableBackgroundParameter(self, set_value=None):
+    def enableBackgroundParameter(self, set_value: Optional[float] = None):
         """ Enable the background parameter. Optionally set at a specified value. """
         background_row = self.getRowFromName("background")
         if background_row is not None:
@@ -543,13 +543,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if set_value is not None:
                 self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(set_value, high=True))
 
-    def disableBackgroundParameter(self, set_value=None):
+    def disableBackgroundParameter(self, set_value: Optional[float] = None):
         """ Disable the background parameter. Optionally set at a specified value. """
         background_row = self.getRowFromName("background")
         if background_row is not None:
             self.setParamEditableByRow(background_row, False)
             if set_value is not None:
-                print('disabled set value')
                 self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(set_value, high=True))
 
     def enableStructureCombo(self):
