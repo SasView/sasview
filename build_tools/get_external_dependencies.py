@@ -39,6 +39,7 @@ def get_ausaxs():
             with resources.as_file(base_loc) as loc:
                 with open(loc.joinpath(lib), "wb") as f:
                     f.write(response.content)
+                    print("PLACED AUSAXS LIBRARY AT: ", loc.joinpath(lib))
 
 def get_external_dependencies(): 
     #surround with try/except to avoid breaking the build if the download fails
