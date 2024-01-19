@@ -20,6 +20,11 @@ def get_ausaxs():
             response = requests.get(url+lib)
             with open("external/"+lib, "wb") as f:
                 f.write(response.content)
+    print("##########################################################################")
+    print("##########################################################################")
+    print(f"downloaded ausaxs libraries to {os.getcwd()}/external")
+    print("##########################################################################")
+    print("##########################################################################")
 
 def get_external_dependencies(): 
     # surround with try/except to avoid breaking the build if the download fails
