@@ -1,41 +1,73 @@
 import ctypes as ct
 import numpy as np
 import logging
+from enum import Enum
+import importlib.resources as resources
 
-from sas.sascalc.calculator.ausaxs.architecture import OS, determine_os
-sys = determine_os()
-if (sys is OS.WIN):
-    path = "external/libausaxs.dll"
-elif (sys is OS.LINUX):
-    path = "external/libausaxs.so"
-elif (sys is OS.MAC):
-    path = "external/libausaxs.dylib"
-else:
-    path = ""
+# we need to be able to differentiate between being uninitialized and failing to load
+class lib_state(Enum):
+    UNINITIALIZED = 0
+    FAILED = 1
+    READY = 2
 
-try:
-    # evaluate_sans_debye func
-    ausaxs = ct.CDLL(path)
-    ausaxs.evaluate_sans_debye.argtypes = [
-        ct.POINTER(ct.c_double), # q vector
-        ct.POINTER(ct.c_double), # x vector
-        ct.POINTER(ct.c_double), # y vector
-        ct.POINTER(ct.c_double), # z vector
-        ct.POINTER(ct.c_double), # w vector
-        ct.c_int,                # nq (number of points in q)
-        ct.c_int,                # nc (number of points in x, y, z, w)
-        ct.c_int,                # status (0 = success, 1 = q range error, 2 = other error)
-        ct.POINTER(ct.c_double)  # Iq vector for return value
-    ]
-    ausaxs.evaluate_sans_debye.restype = None # don't expect a return value
-except:
-    ausaxs = None
+ausaxs_state = lib_state.UNINITIALIZED
+ausaxs = None
+def attach_hooks():
+    global ausaxs_state
+    global ausaxs
+    from sas.sascalc.calculator.ausaxs.architecture import OS, Arch, determine_os, determine_cpu_support
+    sys = determine_os()
+    arch = determine_cpu_support()
 
-def ausaxs_available():
+    # as_file extracts the dll if it is in a zip file and probably deletes it afterwards,
+    # so we have to do all operations on the dll inside the with statement
+    with resources.as_file(resources.files("sas.sascalc.calculator.ausaxs.lib")) as loc:
+        if (sys is OS.WIN):
+            if (arch is Arch.AVX):
+                path = loc.joinpath("libausaxs_avx.dll")
+            else:
+                path = loc.joinpath("libausaxs_sse.dll")
+        elif (sys is OS.LINUX):
+            if (arch is Arch.AVX):
+                path = loc.joinpath("libausaxs_avx.so")
+            else:
+                path = loc.joinpath("libausaxs_sse.so")
+        elif (sys is OS.MAC):
+            if (arch is Arch.AVX):
+                path = loc.joinpath("libausaxs_avx.dylib")
+            else:
+                path = loc.joinpath("libausaxs_sse.dylib")
+        else:
+            path = ""
+
+        try:
+            # evaluate_sans_debye func
+            ausaxs = ct.CDLL(path)
+            ausaxs.evaluate_sans_debye.argtypes = [
+                ct.POINTER(ct.c_double), # q vector
+                ct.POINTER(ct.c_double), # x vector
+                ct.POINTER(ct.c_double), # y vector
+                ct.POINTER(ct.c_double), # z vector
+                ct.POINTER(ct.c_double), # w vector
+                ct.c_int,                # nq (number of points in q)
+                ct.c_int,                # nc (number of points in x, y, z, w)
+                ct.c_int,                # status (0 = success, 1 = q range error, 2 = other error)
+                ct.POINTER(ct.c_double)  # Iq vector for return value
+            ]
+            ausaxs.evaluate_sans_debye.restype = None # don't expect a return value
+            ausaxs_state = lib_state.READY
+        except Exception as e:
+            ausaxs_state = lib_state.FAILED
+            logging.warning("Failed to hook into AUSAXS library, using default Debye implementation")
+            print(e)
+
+def ausaxs_available():    
     """
     Check if the AUSAXS library is available.
     """
-    return ausaxs is not None
+    if ausaxs_state is lib_state.UNINITIALIZED:
+        attach_hooks()
+    return ausaxs_state is lib_state.READY
 
 def evaluate_sans_debye(q, coords, w):
     """
@@ -45,8 +77,9 @@ def evaluate_sans_debye(q, coords, w):
     *coords* are the sample points.
     *w* is the weight associated with each point.
     """
-    if ausaxs is None:
-        logging.warning("AUSAXS external library not found, using default Debye implementation")
+    if ausaxs_state is lib_state.UNINITIALIZED:
+        attach_hooks()
+    if ausaxs_state is lib_state.FAILED:
         from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
         return sasview_sans_debye(q, coords, w)
 

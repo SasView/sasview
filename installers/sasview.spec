@@ -10,10 +10,10 @@ block_cipher = None
 PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
 datas = [
-    ('../external', 'external'),
     ('../src/sas/qtgui/images', 'images'),
     ('../src/sas/sasview/media', 'media'),
     ('../src/sas/example_data', 'example_data'),
+    ('../src/sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib'),
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
     ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
