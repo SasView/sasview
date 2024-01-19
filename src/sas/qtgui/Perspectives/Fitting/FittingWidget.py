@@ -3,6 +3,7 @@ import os
 import sys
 from collections import defaultdict
 from typing import Any, Tuple
+from pathlib import Path
 
 import copy
 import logging
@@ -25,6 +26,7 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit import models
+from sas.sascalc.doc_regen.makedocumentation import IMAGES_DIRECTORY_LOCATION, HELP_DIRECTORY_LOCATION
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
@@ -97,6 +99,7 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
 
         return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
 
+
 class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
@@ -116,7 +119,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         super(FittingWidget, self).__init__()
 
         # Necessary globals
-        self.parent = parent
+        self.parent  = parent
+        self.process = None    # Default empty value
 
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
@@ -363,7 +367,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Magnetic angles explained in one picture
         self.magneticAnglesWidget = QtWidgets.QWidget()
         labl = QtWidgets.QLabel(self.magneticAnglesWidget)
-        pixmap = QtGui.QPixmap(GuiUtils.IMAGES_DIRECTORY_LOCATION + '/M_angles_pic.png')
+        pixmap = QtGui.QPixmap(IMAGES_DIRECTORY_LOCATION / 'M_angles_pic.png')
         labl.setPixmap(pixmap)
         self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
 
@@ -1822,43 +1826,34 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        tree_location = "/user/qtgui/Perspectives/Fitting/"
+        regen_in_progress = False
+        help_location = self.getHelpLocation(HELP_DIRECTORY_LOCATION)
+        if regen_in_progress is False:
+            self.parent.showHelp(help_location)
 
+    def getHelpLocation(self, tree_base) -> Path:
         # Actual file will depend on the current tab
         tab_id = self.tabFitting.currentIndex()
-        helpfile = "fitting.html"
-        if tab_id == 0:
-            # Look at the model and if set, pull out its help page
-            if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
-                # See if the help file is there
-                # This breaks encapsulation a bit, though.
-                full_path = GuiUtils.HELP_DIRECTORY_LOCATION
-                sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-                location = sas_path + "/" + full_path
-                location += "/user/models/" + self.kernel_module.id + ".html"
-                if os.path.isfile(location):
-                    # We have HTML for this model - show it
-                    tree_location = "/user/models/"
-                    helpfile = self.kernel_module.id + ".html"
-            else:
-                helpfile = "fitting_help.html"
-        elif tab_id == 1:
-            helpfile = "residuals_help.html"
-        elif tab_id == 2:
-            helpfile = "resolution.html"
-        elif tab_id == 3:
-            helpfile = "pd/polydispersity.html"
-        elif tab_id == 4:
-            helpfile = "magnetism/magnetism.html"
-        help_location = tree_location + helpfile
+        tree_location = tree_base / "user" / "qtgui" / "Perspectives" / "Fitting"
 
-        self.showHelp(help_location)
-
-    def showHelp(self, url):
-        """
-        Calls parent's method for opening an HTML page
-        """
-        self.parent.showHelp(url)
+        match tab_id:
+            case 0:
+                # Look at the model and if set, pull out its help page
+                if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
+                    tree_location = tree_base / "user" / "models"
+                    return tree_location / f"{self.kernel_module.id}.html"
+                else:
+                    return tree_location / "fitting_help.html"
+            case 1:
+                return tree_location / "residuals_help.html"
+            case 2:
+                return tree_location / "resolution.html"
+            case 3:
+                return tree_location / "pd/polydispersity.html"
+            case 4:
+                return tree_location / "magnetism/magnetism.html"
+            case _:
+                return tree_location / "fitting.html"
 
     def onDisplayMagneticAngles(self):
         """
