@@ -242,7 +242,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def removeData(self, data_list=None):
         """Remove the existing data reference from the Invariant Persepective"""
-        if not data_list or self._model_item not in data_list:
+        if np.all(data_list) is None or self._model_item not in data_list:
             return
         # Clear data plots
         self._q_space_plot.data = None
@@ -765,6 +765,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             msg = "Corfunc.updateFromParameters expects a dictionary"
             raise TypeError(f"{msg}: {c_name} received")
         # Assign values to 'Invariant' tab inputs - use defaults if not found
+        # don't raise model_changed signal for a while
+        self.model.itemChanged.disconnect(self.model_changed)
         self.model.setItem(
             WIDGETS.W_GUINIERA, QtGui.QStandardItem(params.get('guinier_a', '0.0')))
         self.model.setItem(
@@ -799,6 +801,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             WIDGETS.W_QCUTOFF, QtGui.QStandardItem(params.get('upper_q_max', '0.22')))
         self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem(
             params.get('background', '0')))
+        # reconnect model
+        self.model.itemChanged.connect(self.model_changed)
         self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
         self.cmdExtract.setEnabled(params.get('long_period', '0') != '0')
 
