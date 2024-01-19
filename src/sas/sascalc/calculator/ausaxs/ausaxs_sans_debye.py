@@ -39,7 +39,6 @@ def attach_hooks():
                 path = loc.joinpath("libausaxs_sse.dylib")
         else:
             path = ""
-        print("LOOKING FOR AUSAXS LIBRARY AT: ", path)
 
         try:
             # evaluate_sans_debye func
