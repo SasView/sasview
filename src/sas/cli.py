@@ -134,8 +134,6 @@ def main(logging="production"):
 
     lib.setup_sasmodels()
     lib.setup_qt_env() # Note: does not import any gui libraries
-    from sas.sascalc.calculator.ausaxs import create_ausaxs_lib
-    create_ausaxs_lib()
 
     if cli.version: # -V
         import sas
