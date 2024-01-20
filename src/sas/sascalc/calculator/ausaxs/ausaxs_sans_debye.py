@@ -42,7 +42,7 @@ def attach_hooks():
 
         try:
             # evaluate_sans_debye func
-            ausaxs = ct.CDLL(path)
+            ausaxs = ct.CDLL(str(path))
             ausaxs.evaluate_sans_debye.argtypes = [
                 ct.POINTER(ct.c_double), # q vector
                 ct.POINTER(ct.c_double), # x vector
