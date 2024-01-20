@@ -207,20 +207,27 @@ class GuiManager:
         self.WhatsNew = WhatsNew(self)
 
     def loadAllPerspectives(self):
+        """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
         # Load all perspectives
-        loaded_dict = {}
+        loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
             try:
+                # Instantiate perspective
                 loaded_perspective = perspective(parent=self)
+
+                # Save in main dict
                 loaded_dict[name] = loaded_perspective
-                pref_widgets = loaded_perspective.preferences
-                for widget in pref_widgets:
-                    self.preferences.addWidget(widget)
+
+                # Register the perspective with the prefernce object
+                self.preferences.registerPerspectivePreferences(loaded_perspective)
+
             except Exception as e:
                 logger.error(f"Unable to load {name} perspective.\n{e}")
                 logger.error(e, exc_info=True)
+
+        # attach loaded perspectives to this class
         self.loadedPerspectives = loaded_dict
 
     def closeAllPerspectives(self):
