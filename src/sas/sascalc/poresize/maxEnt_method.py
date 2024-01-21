@@ -362,5 +362,6 @@ print(input)
 plt.plot(Bins,BinMag)
 plt.show()
 
-plt.loglog(results.x,results.y)
+plt.loglog(results.x,results.y,label='fit')
+plt.loglog(data_from_loader.x,data_from_loader.y,label='original')
 plt.show()
