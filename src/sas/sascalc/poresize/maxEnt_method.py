@@ -2,6 +2,7 @@ import numpy as np
 import math
 import csv
 import matplotlib.pyplot as plt
+import resolution as rst
 
 TEST_LIMIT        = 0.05                    # for convergence
 CHI_SQR_LIMIT     = 0.01                    # maximum difference in ChiSqr for a solution
@@ -27,7 +28,7 @@ def update_Gqr(data, G):
     '''
     return np.dot(G,data)
 
-def update_IqFit(image, G):
+def update_IqFit(image, G, resolution):
     '''
     opus: transform solution-space -> data-space:  [G]^tr * image
     
@@ -37,7 +38,9 @@ def update_IqFit(image, G):
     :param float[M][N] G: transformation matrix, ndarray of shape (M,N)
     :returns float[M]: calculated data, ndarray of shape (M)
     '''
-    return np.dot(G.transpose(),image)    #G.transpose().dot(image)
+    updated_fit = np.dot(G.transpose(),image)
+    updated_fit = resolution.apply(updated_fit.transpose())
+    return updated_fit    
 
 def Dist(s2, beta):
     '''measure the distance of this possible solution'''
@@ -167,7 +170,7 @@ def MaxEntMove(fSum, blank, chisq, chizer, c1, c2, s1, s2):
     chtarg = ctarg * chisq
     return w, chtarg, loop, a_new, fx, beta
 
-def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,report):
+def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,resolution,report):
     SEARCH_DIRECTIONS = 3
     CHI_SQR_LIMIT = 0.01
     n = len(first_bins)
@@ -183,7 +186,7 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,report):
     chizer, chtarg = npt*1.0, npt*1.0
     f = first_bins * 1.0
     fSum  = sum(f) 
-    z = (Iq - update_IqFit(f, Gqr)) /sigma
+    z = (Iq - update_IqFit(f, Gqr, resolution)) /sigma
     chisq = sum(z*z)
     
     for iter in range(IterMax):
@@ -206,13 +209,13 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,report):
         xi[0] = f * cgrad / cnorm
         xi[1] = f * (a * sgrad - b * cgrad)
      	
-        eta[0] = update_IqFit(xi[0], Gqr);          # image --> data
-        eta[1] = update_IqFit(xi[1], Gqr);          # image --> data
+        eta[0] = update_IqFit(xi[0], Gqr, resolution);          # image --> data
+        eta[1] = update_IqFit(xi[1], Gqr, resolution);          # image --> data
         ox = eta[1] / (sigma * sigma)
         xi[2] = update_Gqr(ox, Gqr);              # data --> image
         a = 1.0 / math.sqrt(sum(f * xi[2]*xi[2]))
         xi[2] = f * xi[2] * a
-        eta[2] = update_IqFit(xi[2], Gqr)           # image --> data
+        eta[2] = update_IqFit(xi[2], Gqr, resolution)           # image --> data
 
         # prepare the search directions for the conjugate gradient technique
         c1 = xi.dot(cgrad) / chisq                          # C_mu, SB eq. 24
@@ -254,7 +257,7 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,report):
 
         # calculate the normalized entropy
         S = sum((f/fSum) * np.log(f/fSum))      # normalized entropy, S&B eq. 1
-        z = (Iq - update_IqFit(f, Gqr)) / sigma  # standardized residuals
+        z = (Iq - update_IqFit(f, Gqr, resolution)) / sigma  # standardized residuals
         chisq = sum(z*z)                            # report this ChiSq
 
         if report:
@@ -266,9 +269,9 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,report):
         # do the hardest test first
         if (abs(chisq/chizer-1.0) < CHI_SQR_LIMIT) and  (test < TEST_LIMIT):
             print (' Convergence achieved.')
-            return chisq,f,update_IqFit(f, Gqr)     # solution FOUND returns here
+            return chisq,f,update_IqFit(f, Gqr, resolution)     # solution FOUND returns here
     print (' No convergence! Try increasing Error multiplier.')
-    return chisq,f,update_IqFit(f, Gqr)       # no solution after IterMax iterations
+    return chisq,f,update_IqFit(f, Gqr, resolution)       # no solution after IterMax iterations
         
 # main size distribution code 
 Q = np.array([])
@@ -318,8 +321,12 @@ def G_matrix(Q,Bins):
 
 Gmat = G_matrix(Q,Bins)
 
+qlength, qwidth = 0.1, 0.117
+slit1D = rst.Slit1D(Q,q_length=qlength,q_width=qwidth,q_calc=Q)
+perfect1D = rst.Perfect1D(Q)
+
 BinsBack = np.ones_like(Bins)*Sky*Scale/Contrast
-chisq,BinMag,I[Ibeg:Ifin] = MaxEnt_SB(Scale*I[Ibeg:Ifin]-Back,Scale/np.sqrt(wtFactor*wt[Ibeg:Ifin]),Gmat,BinsBack,IterMax=5000,report=True)
+chisq,BinMag,I[Ibeg:Ifin] = MaxEnt_SB(Scale*I[Ibeg:Ifin]-Back,Scale/np.sqrt(wtFactor*wt[Ibeg:Ifin]),Gmat,BinsBack,IterMax=5000,resolution=perfect1D,report=True)
 BinMag = BinMag/(2.*Dbins)
 plt.plot(Bins,BinMag)
 plt.show()
