@@ -25,7 +25,7 @@ def get_ausaxs():
     url = "https://github.com/SasView/ausaxs/releases/latest/download/"
     libs = None
     if _os == OS.WIN:
-        libs = ["libausaxs_avx.dll", "libausaxs_sse.dll", "libcurl-4.dll"]
+        libs = ["libausaxs_exe.dll", "libausaxs_exe.dll"]
     elif _os == OS.LINUX:
         libs = ["libausaxs_avx.so", "libausaxs_sse.so"]
     elif _os == OS.MAC:
