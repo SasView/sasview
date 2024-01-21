@@ -181,6 +181,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
         new_plot.id = "SectorQ" + self.data.name
+        new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:

@@ -401,6 +401,47 @@ class Plotter2DWidget(PlotterBase):
         # Clear current slicer
         if self.slicer is not None:
             self.slicer.clear()
+
+        # Clear the old slicer plots so they don't reappear later
+        if hasattr(self, '_item'):
+            item = self._item
+            if self._item.parent() is not None:
+                item = self._item.parent()
+
+            # Go through all items and see if they are a plot. The checks done here are not as thorough
+            # as GuiUtils.deleteRedundantPlots (which this takes a lot from). Will this cause problems?
+            # Primary concern is the check (plot_data.plot_role == DataRole.ROLE_DELETABLE) as I don't
+            # know what it does. The other checks seem to be related to keeping the new plots for that function
+            tempPlotsToRemove = []
+            slicer_type_id = 'Slicer' + self.data0.name
+            for itemIndex in range(item.rowCount()):
+                # GuiUtils.plotsFromModel tests if the data is of type Data1D or Data2D to determine
+                # if it is a plot, so let's try that
+                if isinstance(item.child(itemIndex).data(), (Data1D, Data2D)):
+                    # First take care of this item, then we'll take care of its children
+                    if hasattr(item.child(itemIndex).data(), 'type_id'):
+                        if slicer_type_id in item.child(itemIndex).data().type_id:
+                            # Store this plot to be removed later. Removing now
+                            # will cause the next plot to be skipped
+                            tempPlotsToRemove.append(item.child(itemIndex))
+                # It looks like the slicers are children of items that do not have data of instance Data1D or Data2D.
+                # Now do the children (1 level deep as is done in GuiUtils.plotsFromModel). Note that the slicers always
+                # seem to be the first entry (index2 == 0)
+                for itemIndex2 in range(item.child(itemIndex).rowCount()):
+                    # Repeat what we did above (these if statements could probably be combined
+                    # into one, but I'm not confident enough with how these work to say it wouldn't
+                    # have issues if combined)
+                    if isinstance(item.child(itemIndex).child(itemIndex2).data(), (Data1D, Data2D)):
+                        if hasattr(item.child(itemIndex).child(itemIndex2).data(), 'type_id'):
+                            if slicer_type_id in item.child(itemIndex).child(itemIndex2).data().type_id:
+                                # Remove the parent since each slicer seems to generate a new entry in item
+                                tempPlotsToRemove.append(item.child(itemIndex))
+            # Remove all the parent plots with matching criteria
+            for plot in tempPlotsToRemove:
+                item.removeRow(plot.row())
+            # Delete the temporary list of plots to remove
+            del tempPlotsToRemove
+
         # Create a new slicer
         self.slicer_z += 1
         self.slicer = slicer(self, self.ax, item=self._item, zorder=self.slicer_z)
