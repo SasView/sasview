@@ -90,7 +90,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                       center_x=self.center_x,
                                       center_y=self.center_y)
 
-        # draw the rectangle and plost the data 1D resulting
+        # draw the rectangle and plot the data 1D resulting
         # of averaging data2D
         self.update()
         self._post_data()
@@ -245,7 +245,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         #new_plot. = "2daverage" + self.data.name
         new_plot.id = (self.averager.__name__) + self.data.name
-        new_plot.group_id = new_plot.id
+        new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
@@ -448,7 +448,7 @@ class VerticalDoubleLine(BaseInteractor):
         # Center coordinates
         self.center_x = center_x
         self.center_y = center_y
-        # defined end points vertical lignes and their saved values
+        # defined end points vertical lines and their saved values
         self.y1 = y + self.center_y
         self.save_y1 = self.y1
 
@@ -757,7 +757,7 @@ class HorizontalDoubleLine(BaseInteractor):
         self.y2 = self.center_y - delta
         self.half_height = numpy.fabs(self.y1) - self.center_y
         self.has_move = True
-        self.base.base.update()
+        self.base.update()
 
     def setCursor(self, x, y):
         """

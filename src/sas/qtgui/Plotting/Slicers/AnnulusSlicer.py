@@ -138,8 +138,8 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "AnnulusPhi" + self.data.name
         new_plot.id = "AnnulusPhi" + self.data.name
+        new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
         new_plot.is_data = True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"

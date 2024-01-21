@@ -180,8 +180,8 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "SectorQ" + self.data.name
+        new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
@@ -385,13 +385,13 @@ class SideInteractor(BaseInteractor):
         else:
             self.phi = numpy.fabs(self.phi)
         if side:
-            self.theta = mline.alpha + self.phi
+            self.theta = mline.theta + self.phi
 
         if mline is not None:
             if delta != 0:
                 self.theta2 = mline + delta
             else:
-                self.theta2 = mline.alpha
+                self.theta2 = mline.theta
         if delta == 0:
             theta3 = self.theta + delta
         else:
