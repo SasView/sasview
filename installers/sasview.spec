@@ -25,7 +25,7 @@ datas = [
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
-datas.append((os.path.join(PYTHON_PACKAGES, 'freetype'), 'freetype'))
+#datas.append((os.path.join(PYTHON_PACKAGES, 'freetype'), 'freetype'))
 
 def add_data(data):
     for component in data:
