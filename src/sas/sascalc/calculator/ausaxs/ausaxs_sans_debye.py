@@ -49,9 +49,20 @@ def attach_hooks():
         if sys is not OS.WIN:
             try:
                 # evaluate_sans_debye func
-                ffi.cdef("void evaluate_sans_debye(double* _q, double* _x, double* _y, double* _z, double* _w, int _nq, int _nc, int* _return_status, double* _return_Iq);")
-                ffi.cdef("int debug();")
-                ausaxs = ffi.dlopen(str(path))
+                ausaxs = ct.CDLL(str(path))
+                ausaxs.evaluate_sans_debye.argtypes = [
+                    ct.POINTER(ct.c_double), # q vector
+                    ct.POINTER(ct.c_double), # x vector
+                    ct.POINTER(ct.c_double), # y vector
+                    ct.POINTER(ct.c_double), # z vector
+                    ct.POINTER(ct.c_double), # w vector
+                    ct.c_int,                # nq (number of points in q)
+                    ct.c_int,                # nc (number of points in x, y, z, w)
+                    ct.POINTER(ct.c_int),    # status (0 = success, 1 = q range error, 2 = other error)
+                    ct.POINTER(ct.c_double)  # Iq vector for return value
+                ]
+                ausaxs.evaluate_sans_debye.restype = None # don't expect a return value
+                ausaxs_state = lib_state.READY
             except Exception as e:
                 ausaxs_state = lib_state.FAILED
                 logging.warning("Failed to hook into AUSAXS library, using default Debye implementation")
@@ -110,57 +121,27 @@ def evaluate_sans_debye(q, coords, w):
             Iq[i-1] = float(line.split()[1])
         return Iq
 
-    n = len(coords[0])
-    # convert numpy arrays to cffi arrays
-    Iq = ffi.new(f"double[{len(q)}]")
-    nq = ffi.cast("int", len(q))
-    nc = ffi.cast("int", len(w))
-    q = ffi.cast("double*", q.ctypes.data)
-    x = ffi.cast("double*", coords[0:, :].ctypes.data)
-    y = ffi.cast("double*", coords[1:, :].ctypes.data)
-    z = ffi.cast("double*", coords[2:, :].ctypes.data)
-    w = ffi.cast("double*", w.ctypes.data)
-    status = ffi.new("int*", 0)
+    _Iq = (ct.c_double * len(q))()
+    _nq = ct.c_int(len(q))
+    _nc = ct.c_int(len(w))
+    _q = q.ctypes.data_as(ct.POINTER(ct.c_double))
+    _x = coords[0:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    _y = coords[1:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    _z = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    _w = w.ctypes.data_as(ct.POINTER(ct.c_double))
+    _status = ct.c_int()
 
     # do the call
-    ausaxs.evaluate_sans_debye(q, x, y, z, w, nq, nc, status, Iq)
+    # void evaluate_sans_debye(double* _q, double* _x, double* _y, double* _z, double* _w, int _nq, int _nc, int* _return_status, double* _return_Iq) {
+    ausaxs.evaluate_sans_debye(_q, _x, _y, _z, _w, _nq, _nc, ct.byref(_status), _Iq)
 
     # check for errors
-    if status[0] != 0:
-        if status[0] == 1:
+    if _status != 0:
+        if _status == 1:
             logging.error("q range is outside what is currently supported by AUSAXS. Using default Debye implementation instead.")
-        elif status[0] == 2:
+        elif _status == 2:
             logging.error("AUSAXS calculator terminated unexpectedly. Using default Debye implementation instead.")
         from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
         return sasview_sans_debye(q, coords, w)
 
-    return np.array(ffi.buffer(Iq, n*ffi.sizeof("double"))).copy()
-
-if __name__ == "__main__":
-    q = np.array([0.001, 0.002, 0.003])
-    coords = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0], [-1, 0, 1]])
-    w = np.array([1.0, 1.0, 1.0])
-    print(evaluate_sans_debye(q, coords, w))
-
-# if __name__ == "__main__":
-#     from cffi import FFI
-
-#     # Create an ffi object
-#     ffi = FFI()
-
-#     # Include the C header file content
-#     ffi.cdef("""
-#         void evaluate_sans_debye(double* _q, double* _x, double* _y, double* _z, double* _w, int _nq, int _nc, int* _return_status, double* _return_Iq);
-#     """)
-
-#     ffi.set_source("""
-#         #include "ausaxs.h"
-#     """)
-
-#     # Load your library using ffibuilder and link against it
-#     ffibuilder = ffi.verify("""
-#         #include "ausaxs.h"
-#     """)
-
-#     # Compile and link the wrapper
-#     ffibuilder.compile(verbose=True)
+    return np.array(_Iq)
