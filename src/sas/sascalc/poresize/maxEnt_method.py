@@ -2,8 +2,8 @@ import numpy as np
 import math
 import csv
 import matplotlib.pyplot as plt
-import resolution as rst
-import data_info
+from sasmodels import resolution as rst
+from sasdata.dataloader import data_info
 
 TEST_LIMIT        = 0.05                    # for convergence
 CHI_SQR_LIMIT     = 0.01                    # maximum difference in ChiSqr for a solution
