@@ -242,7 +242,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def removeData(self, data_list=None):
         """Remove the existing data reference from the Invariant Persepective"""
-        if np.all(data_list) is None or self._model_item not in data_list:
+        if not data_list or self._model_item not in data_list:
             return
         # Clear data plots
         self._q_space_plot.data = None
