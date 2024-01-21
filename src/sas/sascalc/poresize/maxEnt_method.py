@@ -359,9 +359,14 @@ chisq,Bins,BinMag,Qc,Ic = sizeDistribution(input)
 results = data_info.Data1D(x=Qc, y=Ic, dx=None, dy=None,lam=None, dlam=None, isSesans=False)
 
 print(input)
+plt.figure()
 plt.plot(Bins,BinMag)
-plt.show()
 
+plt.figure()
 plt.loglog(results.x,results.y,label='fit')
-plt.loglog(data_from_loader.x,data_from_loader.y,label='original')
+plt.errorbar(data_from_loader.x,data_from_loader.y,yerr=data_from_loader.dy,label='original')
+plt.xlabel('Q ['+results.x_unit+']')
+plt.ylabel('I(Q) ['+results.y_unit+']')
+plt.legend()
+
 plt.show()
