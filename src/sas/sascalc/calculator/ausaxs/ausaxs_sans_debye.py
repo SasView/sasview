@@ -91,7 +91,7 @@ def evaluate_sans_debye(q, coords, w):
         for _q in q:
             file_q.write(str(_q)+"\n")
 
-        for [x, y, z, w] in zip(coords[0], coords[1], coords[2], weight):
+        for [x, y, z, w] in zip(coords[0], coords[1], coords[2], w):
             file_c.write(str(x) + " " + str(y) + " " + str(z) + " " + str(w) + "\n")
 
         file_c.close()
