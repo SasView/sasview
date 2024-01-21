@@ -1894,7 +1894,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Close all currently displayed plots
         """
-
+        # results panel
+        self.parent.results_frame.setVisible(False)
+        # plots
         for plot_id in PlotHelper.currentPlotIds():
             try:
                 plotter = PlotHelper.plotById(plot_id)
