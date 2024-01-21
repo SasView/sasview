@@ -1,5 +1,6 @@
 import numpy
 import copy
+import re
 
 from typing import Optional
 
@@ -62,6 +63,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # The tabs need to be movabe
         self.setMovable(True)
 
+        # Remember the last tab closed
+        self.lastTabClosed = None
+        self.installEventFilter(self)
+
         self.communicate = self.parent.communicator()
 
         # Initialize the first tab
@@ -96,6 +101,14 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.plusButton.setToolTip("Add a new Fit Page")
         self.plusButton.clicked.connect(lambda: self.addFit(None))
 
+    def eventFilter(self, widget, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            key = event.key()
+            # check for Ctrl-T press
+            if key == QtCore.Qt.Key_T and event.modifiers() == QtCore.Qt.ControlModifier:
+                self.addClosedTab()
+                return True
+        return QtCore.QObject.eventFilter(self, widget, event)
 
     def updateWindowTitle(self):
         """
@@ -261,7 +274,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
+        self.maxIndex = self.nextAvailableTabIndex()
 
         icon = QtGui.QIcon()
         if is_batch:
@@ -269,6 +282,41 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.addTab(tab, icon, tab_name)
         # Show the new tab
         self.setCurrentWidget(tab)
+        # Notify listeners
+        self.tabsModifiedSignal.emit()
+
+    def nextAvailableTabIndex(self):
+        """
+        Returns the index of the next available tab
+        """
+        return max([tab.tab_id for tab in self.tabs], default=0) + 1
+
+    def addClosedTab(self):
+        """
+        Recover the deleted tab.
+        The tab is held in self.lastTabClosed
+        """
+        if self.lastTabClosed is None:
+            return
+        tab = self.lastTabClosed
+        icon = QtGui.QIcon()
+        tab_name = self.getTabName()
+        # assure the tab name is unique
+        new_maxIndes = self.nextAvailableTabIndex()
+        # tab_name has an integer number at the end.
+        # it is in general a multi-digit number
+        # Remove it and replace with new_maxIndes
+        tab_name = re.sub(r'\d+$', '', tab_name)
+        tab_name = tab_name + str(new_maxIndes)
+        tab.tab_id = new_maxIndes
+
+        self.addTab(tab, icon, tab_name)
+        # Update the list of tabs
+        self.tabs.append(tab)
+        # Show the new tab
+        self.setCurrentWidget(tab)
+        # lastTabClosed is no longer valid
+        self.lastTabClosed = None
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
@@ -349,10 +397,18 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         Update local bookkeeping on tab close
         """
+        # update the last-tab closed information
+        # this should be done only for regular fitting
+        if not isinstance(self.tabs[index], ConstraintWidget) and \
+              not self.tabs[index].is_batch_fitting:
+            self.lastTabClosed = self.tabs[index]
+
         # don't remove the last tab
         if len(self.tabs) <= 1:
+            # remove the tab from the tabbed group
             self.resetTab(index)
             return
+        # remove the content of the tab
         self.closeTabByIndex(index)
 
     def closeTabByName(self, tab_name):
