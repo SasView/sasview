@@ -12,6 +12,21 @@ DISTANCE_LIMIT_FACTOR = 0.1                 # limitation on df to constrain runa
 MAX_MOVE_LOOPS = 5000                       # for no solution in routine: move, 
 MOVE_PASSES       = 0.001                   # convergence test in routine: move
 
+def SphereFF(Q,Bins):
+    QR = Q[:,np.newaxis]*Bins
+    FF = (3./(QR**3))*(np.sin(QR)-(QR*np.cos(QR)))
+    return FF
+
+def SphereVol(Bins):
+    Vol = (4./3.)*np.pi*Bins**3
+    return Vol
+
+def G_matrix(Q,Bins,contrast,choice):
+    Gmat = np.array([])
+    if choice == 'Sphere':
+        Gmat = 1.e-4*(contrast*SphereVol(Bins)*SphereFF(Q,Bins)**2).transpose()
+    return Gmat
+
 class MaxEntException(Exception): 
     '''Any exception from this module'''
     pass
@@ -272,8 +287,36 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,resolution,report):
             return chisq,f,update_IqFit(f, Gqr, resolution)     # solution FOUND returns here
     print (' No convergence! Try increasing Error multiplier.')
     return chisq,f,update_IqFit(f, Gqr, resolution)       # no solution after IterMax iterations
-        
-# main size distribution code 
+
+def sizeDistribution(input):         
+    Qmin = input["Limits"][0]
+    Qmax = input["Limits"][1]
+    scale = input["Scale"]
+    minDiam = input["DiamRange"][0]
+    maxDiam = input["DiamRange"][1]
+    Nbins = input["DiamRange"][2]
+    if input["Logbin"]:
+        Bins = np.logspace(np.log10(minDiam),np.log10(maxDiam),Nbins+1,True)/2        #make radii
+    else:
+        Bins = np.linspace(minDiam,maxDiam,Nbins+1,True)/2        #make radii
+    Dbins = np.diff(Bins)
+    Bins = Bins[:-1]+Dbins/2.
+    wtFactor = input["WeightFactors"]
+    Ibeg = np.searchsorted(Q,Qmin)
+    Ifin = np.searchsorted(Q,Qmax)+1        #include last point
+    BinMag = np.zeros_like(Bins)
+    contrast = input["Contrast"]
+    Ic = np.zeros(len(I))
+    sky = input["Sky"]
+    wt = input["Weights"]
+    Back = input["Background"]
+    Gmat = G_matrix(Q,Bins,contrast,input["Model"])
+    BinsBack = np.ones_like(Bins)*sky*scale/contrast
+    chisq,BinMag,Ic[Ibeg:Ifin] = MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt[Ibeg:Ifin]),Gmat,BinsBack,IterMax=5000,resolution=perfect1D,report=True)
+    BinMag = BinMag/(2.*Dbins)
+    return chisq,Bins,BinMag,Ic[Ibeg:Ifin]
+
+# main
 Q = np.array([])
 I = np.array([])
 dI = np.array([])
@@ -286,50 +329,28 @@ with open("I_for_dist1.txt") as fp:
             I = np.append(I, float(row[1]))
             dI = np.append(dI, float(row[2]))
         except:
-            pass    
-Limits = [min(Q), max(Q)]
-Qmin = Limits[0]
-Qmax = Limits[1]
-Scale = 1
-logbin = False
-minDiam = 2
-maxDiam = 240
-Nbins = 120
-if logbin:
-    Bins = np.logspace(np.log10(minDiam),np.log10(maxDiam),Nbins+1,True)/2        #make radii
-else:
-    Bins = np.linspace(minDiam,maxDiam,Nbins+1,True)/2        #make radii
-Dbins = np.diff(Bins)
-Bins = Bins[:-1]+Dbins/2.
-wtFactor = np.ones(len(I))*2
-Ibeg = np.searchsorted(Q,Qmin)
-Ifin = np.searchsorted(Q,Qmax)+1        #include last point
-BinMag = np.zeros_like(Bins)
-Contrast = 5
-Sky = 0.0001
-#wt = np.ones(len(I))*0.5
-wt = dI
-Back = np.zeros(len(I))
-
-def G_matrix(Q,Bins):
-    Gmat = np.array([])
-    QR = Q[:,np.newaxis]*Bins
-    SphereFF = (3./(QR**3))*(np.sin(QR)-(QR*np.cos(QR)))
-    SphereVol = (4./3.)*np.pi*Bins**3
-    Gmat = 1.e-4*(Contrast*SphereVol*SphereFF**2).transpose()
-    return Gmat
-
-Gmat = G_matrix(Q,Bins)
-
-qlength, qwidth = 0.1, 0.117
-slit1D = rst.Slit1D(Q,q_length=qlength,q_width=qwidth,q_calc=Q)
+            pass
+            
+input = {}
+input["Data"] = [Q,I,dI]
+input["Limits"] = [min(Q), max(Q)]
+input["Scale"] = 1
+input["Logbin"] = False
+input["DiamRange"] = [2,240,120]
+input["WeightFactors"] = np.ones(len(I))*2
+input["Contrast"] = 5 
+input["Sky"] = 0.0001
+input["Weights"] = dI
+input["Background"] = np.zeros(len(I))
+input["Model"] = 'Sphere'
+#qlength, qwidth = 0.1, 0.117
+#slit1D = rst.Slit1D(Q,q_length=qlength,q_width=qwidth,q_calc=Q)
 perfect1D = rst.Perfect1D(Q)
+input["Resolution"] = perfect1D
+input["Sky"] = 0.0001
 
-BinsBack = np.ones_like(Bins)*Sky*Scale/Contrast
-chisq,BinMag,I[Ibeg:Ifin] = MaxEnt_SB(Scale*I[Ibeg:Ifin]-Back,Scale/np.sqrt(wtFactor*wt[Ibeg:Ifin]),Gmat,BinsBack,IterMax=5000,resolution=perfect1D,report=True)
-BinMag = BinMag/(2.*Dbins)
+chisq,Bins,BinMag,Ic = sizeDistribution(input)
+
+print(input)
 plt.plot(Bins,BinMag)
 plt.show()
-    
-     
-
