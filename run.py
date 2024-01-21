@@ -54,14 +54,19 @@ def prepare():
     # Find the directories for the source and build
     root = abspath(dirname(realpath(__file__)))
 
-    # TODO: Do we prioritize the sibling repo or the installed package?
-    # TODO: Can we use sasview/run.py from a distributed sasview.exe?
     # Put supporting packages on the path if they are not already available.
     for sibling in ('periodictable', 'bumps', 'sasdata', 'sasmodels'):
-        try:
-            import_module(sibling)
-        except:
-            addpath(joinpath(root, '..', sibling))
+        # run.py is only used by developers. The sibling directory should be the priority over installed packages.
+        #   This allows developers to modify and use separate packages simultaneously.
+        devel_path = joinpath(root, '..', sibling)
+        if os.path.exists(devel_path):
+            addpath(devel_path)
+        else:
+            try:
+                import_module(sibling)
+            except ImportError:
+                print(f"The {sibling} module is not available. Either pip install it in your environment or clone"
+                      f"the repository into a directory level with the sasview directory.")
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
