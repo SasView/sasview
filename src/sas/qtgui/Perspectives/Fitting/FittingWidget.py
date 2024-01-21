@@ -9,7 +9,6 @@ import logging
 import traceback
 from twisted.internet import threads
 import numpy as np
-import webbrowser
 
 from PySide6 import QtCore
 from PySide6 import QtGui
@@ -20,7 +19,6 @@ from sasmodels import modelinfo
 from sasmodels.sasview_model import SasviewModel
 from sasmodels.sasview_model import load_standard_models
 from sasmodels.sasview_model import MultiplicationModel
-from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
@@ -41,10 +39,10 @@ from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
+from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
+from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
-from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
-from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
@@ -74,28 +72,6 @@ if not hasattr(SasviewModel, 'get_weights'):
     SasviewModel.get_weights = get_weights
 
 logger = logging.getLogger(__name__)
-
-class ToolTippedItemModel(QtGui.QStandardItemModel):
-    """
-    Subclass from QStandardItemModel to allow displaying tooltips in
-    QTableView model.
-    """
-    def __init__(self, parent=None):
-        QtGui.QStandardItemModel.__init__(self, parent)
-
-    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
-        """
-        Displays tooltip for each column's header
-        :param section:
-        :param orientation:
-        :param role:
-        :return:
-        """
-        if role == QtCore.Qt.ToolTipRole:
-            if orientation == QtCore.Qt.Horizontal:
-                return str(self.header_tooltips[section])
-
-        return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
 
 class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
@@ -244,8 +220,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.fit_started = False
         # The current fit thread
         self.calc_fit = None
-        # Current SasModel in view
-        self.kernel_module = None
         # Current SasModel view dimension
         self.is2D = False
         # Current SasModel is multishell
@@ -284,13 +258,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # custom plugin models
         # {model.name:model}
         self.custom_models = self.customModels()
-        # Polydisp widget table default index for function combobox
-        self.orig_poly_index = 4
         # copy of current kernel model
         self.kernel_module_copy = None
 
         # dictionaries of current params
-        self.poly_params = {}
         self.magnet_params = {}
 
         # Page id for fitting
@@ -301,14 +272,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.model_data = None
         self._previous_model_index = 0
 
-        # Which shell is being currently displayed?
-        self.current_shell_displayed = 0
-        # List of all shell-unique parameters
-        self.shell_names = []
-
         # Error column presence in parameter display
         self.has_error_column = False
-        self.has_poly_error_column = False
         self.has_magnet_error_column = False
 
         # Enablement of comboboxes
@@ -347,6 +312,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         layout.addWidget(self.smearing_widget)
         self.tabResolution.setLayout(layout)
 
+        # Polydispersity widget
+        layout = QtWidgets.QGridLayout()
+        self.polydispersity_widget = PolydispersityWidget(parent=self, logic=self.logic)
+        layout.addWidget(self.polydispersity_widget)
+        self.tabPolydispersity.setLayout(layout)
+        self.lstPoly = self.polydispersity_widget.lstPoly
+
+        # magnetism widget
+        layout = QtWidgets.QGridLayout()
+        self.magnetism_widget = MagnetismWidget(parent=self, logic=self.logic)
+        layout.addWidget(self.magnetism_widget)
+        self.tabMagnetism.setLayout(layout)
+        self.lstMagnetic = self.magnetism_widget.lstMagnetic
+
         # Order widget
         layout = QtWidgets.QGridLayout()
         # pass all data items to access multiple datasets
@@ -363,13 +342,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label.setText("No data loaded")
         self.lblFilename.setText("")
 
-        # Magnetic angles explained in one picture
-        self.magneticAnglesWidget = QtWidgets.QWidget()
-        labl = QtWidgets.QLabel(self.magneticAnglesWidget)
-        pixmap = QtGui.QPixmap(GuiUtils.IMAGES_DIRECTORY_LOCATION + '/M_angles_pic.png')
-        labl.setPixmap(pixmap)
-        self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
-
     def initializeModels(self):
         """
         Set up models and views
@@ -377,9 +349,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Set the main models
         # We can't use a single model here, due to restrictions on flattening
         # the model tree with subclassed QAbstractProxyModel...
-        self._model_model = ToolTippedItemModel()
-        self._poly_model = ToolTippedItemModel()
-        self._magnet_model = ToolTippedItemModel()
+        self._model_model = FittingUtilities.ToolTippedItemModel()
+        self._poly_model = self.polydispersity_widget.poly_model
+        self._magnet_model = self.magnetism_widget._magnet_model
 
         self.model_dict["standard"] = self._model_model
         self.model_dict["poly"] = self._poly_model
@@ -390,8 +362,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lst_dict["magnet"] = self.lstMagnetic
 
         self.tabToList[0] = self.lstParams
-        self.tabToList[3] = self.lstPoly
-        self.tabToList[4] = self.lstMagnetic
+        self.tabToList[3] = self.polydispersity_widget.lstPoly
+        self.tabToList[4] = self.magnetism_widget.lstMagnetic
 
         self.tabToKey[0] = "standard"
         self.tabToKey[3] = "poly"
@@ -400,8 +372,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Param model displayed in param list
         self.lstParams.setModel(self._model_model)
         self.readCategoryInfo()
-
-        self.model_parameters = None
 
         # Delegates for custom editing and display
         self.lstParams.setItemDelegate(ModelViewDelegate(self))
@@ -443,25 +413,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lstParams.header().sectionResized.connect(self.onColumnWidthUpdate)
 
         # Poly model displayed in poly list
-        self.lstPoly.setModel(self._poly_model)
-        self.setPolyModel()
-        self.setTableProperties(self.lstPoly)
-        # Delegates for custom editing and display
-        self.lstPoly.setItemDelegate(PolyViewDelegate(self))
-        # Polydispersity function combo response
-        self.lstPoly.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
-        self.lstPoly.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
-
-        self.lstPoly.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.polydispersity_widget.setPolyModel()
         self.lstPoly.customContextMenuRequested.connect(self.showModelContextMenu)
-        self.lstPoly.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
         # Magnetism model displayed in magnetism list
-        self.lstMagnetic.setModel(self._magnet_model)
-        self.setMagneticModel()
-        self.setTableProperties(self.lstMagnetic)
-        # Delegates for custom editing and display
-        self.lstMagnetic.setItemDelegate(MagnetismViewDelegate(self))
+        self.magnetism_widget.setMagneticModel()
+
         # Initial status of the ordering tab - invisible
         self.tabFitting.removeTab(TAB_ORDERING)
 
@@ -558,11 +515,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
-        # Set sasmodel polydispersity to 0 if polydispersity is unchecked, if not use Qmodel values
-        if self._poly_model.rowCount() > 0:
-            for key, value in self.poly_params.items():
-                if key[-6:] == '.width':
-                    self.kernel_module.setParam(key, (value if isChecked else 0))
+        self.polydispersity_widget.togglePoly(isChecked)
 
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
@@ -584,7 +537,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
         # Reload the current model
-        if self.kernel_module:
+        if self.logic.kernel_module:
             self.onSelectModel()
 
     @classmethod
@@ -638,17 +591,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
         self.cmdHelp.clicked.connect(self.onHelp)
-        self.cmdMagneticDisplay.clicked.connect(self.onDisplayMagneticAngles)
 
         # Respond to change in parameters from the UI
         self._model_model.dataChanged.connect(self.onMainParamsChange)
-        self._poly_model.dataChanged.connect(self.onPolyModelChange)
-        self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
         self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
         self.lstParams.installEventFilter(self)
-        self.lstPoly.installEventFilter(self)
-        self.lstMagnetic.installEventFilter(self)
-        self.lstPoly.selectionModel().selectionChanged.connect(self.onSelectionChanged)
 
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
@@ -664,6 +611,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
+        self.polydispersity_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
+        self.polydispersity_widget.updateDataSignal.connect(lambda: self.updateData())
+        self.polydispersity_widget.iterateOverModelSignal.connect(lambda: self.iterateOverModel(self.updateFunctionCaption))
+        self.magnetism_widget.cmdFitSignal.connect(lambda: self.cmdFit.setEnabled(self.haveParamsToFit()))
+        self.magnetism_widget.updateDataSignal.connect(lambda: self.updateData())
 
         # Communicator signal
         self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
@@ -678,7 +630,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def eventFilter(self, obj, event):
         # Catch enter key presses when editing model params
-        if obj in [self.lstParams, self.lstPoly, self.lstMagnetic]:
+        if obj in [self.lstParams, self.polydispersity_widget.lstPoly, self.magnetism_widget.lstMagnetic]:
             if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
                 self.onKey(event)
                 return True
@@ -803,7 +755,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list)
         # Check if any of the parameters are polydisperse
-        if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
+        if not np.any([FittingUtilities.isParamPolydisperse(p, self.logic.model_parameters, is2D=self.is2D) for p in params_list]):
             # no parameters are pd - reset the text to not show the warning
             mc_widget.lblWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
@@ -815,7 +767,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
         # parameter should have the model name preamble
-        model_name = self.kernel_module.name
+        model_name = self.logic.kernel_module.name
         # param_used is the parameter we're using in constraining function
         param_used = mc_widget.params[1]
         # Replace param_used with model_name.param_used
@@ -841,7 +793,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if name in self.getParamNamesMain():
             return "standard"
-        elif name in self.getParamNamesPoly():
+        elif name in self.polydispersity_widget.getParamNamesPoly():
             return "poly"
         elif name in self.getParamNamesMagnet():
             return "magnet"
@@ -859,7 +811,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for row in range(model.rowCount()):
             row_name = model.item(row).text()
             if model_key == 'poly':
-                row_name = self.polyNameToParam(row_name)
+                row_name = self.polydispersity_widget.polyNameToParam(row_name)
             if row_name == name:
                 return row
         return None
@@ -869,7 +821,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Return list of all active parameters for the current model
         """
         main_model_params = self.getParamNamesMain()
-        poly_model_params = self.getParamNamesPoly()
+        poly_model_params = self.polydispersity_widget.getParamNamesPoly()
         # magnet_model_params = self.getParamNamesMagnet()
         return main_model_params  + poly_model_params # + magnet_model_params
 
@@ -882,44 +834,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                             if self.isCheckable(row, model_key="standard")]
         return main_model_params
 
-    def getParamNamesPoly(self):
-        """
-        Return list of polydisperse parameters for the current model
-        """
-        if not self.chkPolydispersity.isChecked():
-            return []
-        poly_model_params = [self.polyNameToParam(self._poly_model.item(row).text())
-                             for row in range(self._poly_model.rowCount())
-                             if self.chkPolydispersity.isChecked() and
-                             self.isCheckable(row, model_key="poly")]
-        return poly_model_params
-
     def getParamNamesMagnet(self):
         """
         Return list of magnetic parameters for the current model
         """
         if not self.chkMagnetism.isChecked():
             return []
-        magnetic_model_params = [self._magnet_model.item(row).text()
-                            for row in range(self._magnet_model.rowCount())
-                            if self.isCheckable(row, model_key="magnet")]
-        return magnetic_model_params
-
-    def polyParamToName(self, param_name):
-        """
-        Translate polydisperse parameter name into QTable representation
-        """
-        param_name = param_name.replace('.width', '')
-        param_name = 'Distribution of ' + param_name
-        return param_name
-
-    def polyNameToParam(self, param_name):
-        """
-        Translate polydisperse QTable representation into parameter name
-        """
-        param_name = param_name.replace('Distribution of ', '')
-        param_name += '.width'
-        return param_name
+        return self.magnetism_widget.getParamNamesMagnet()
 
     def modifyViewOnRow(self, row, font=None, brush=None, model_key="standard"):
         """
@@ -957,7 +878,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if constraint.param in self.getParamNamesMain():
             return "standard"
-        elif constraint.param in self.getParamNamesPoly():
+        elif constraint.param in self.polydispersity_widget.getParamNamesPoly():
             return "poly"
         elif constraint.param in self.getParamNamesMagnet():
             return "magnet"
@@ -1069,7 +990,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list, constraint=constraint)
         # Check if any of the parameters are polydisperse
-        if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
+        if not np.any([FittingUtilities.isParamPolydisperse(p, self.logic.model_parameters, is2D=self.is2D) for p in params_list]):
             # no parameters are pd - reset the text to not show the warning
             mc_widget.lblWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
@@ -1081,7 +1002,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
         # parameter should have the model name preamble
-        model_name = self.kernel_module.name
+        model_name = self.logic.kernel_module.name
         # param_used is the parameter we're using in constraining function
         param_used = mc_widget.params[1]
         # Replace param_used with model_name.param_used
@@ -1168,8 +1089,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Returns a list of all parameter names defined on the current model
         """
-        all_params = self.kernel_module._model_info.parameters.kernel_parameters
-        all_params = list(self.kernel_module.details.keys())
+        all_params = self.logic.kernel_module._model_info.parameters.kernel_parameters
+        all_params = list(self.logic.kernel_module.details.keys())
 
         # all_param_names = [param.name for param in all_params]
         # Assure scale and background are always included
@@ -1192,7 +1113,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for row in range(self.model_dict[model_key].rowCount()):
                 param_name = self.model_dict[model_key].item(row,0).text()
                 if model_key == 'poly':
-                    param_name = self.polyNameToParam(param_name)
+                    param_name = self.polydispersity_widget.polyNameToParam(param_name)
                 if param_name != param:
                     continue
                 return self.rowHasConstraint(row, model_key=model_key)
@@ -1298,7 +1219,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             model = self.model_dict[model_key]
             param_number = model.rowCount()
             if model_key == 'poly':
-                params += [(self.polyNameToParam(model.item(s, 0).text()),
+                params += [(self.polydispersity_widget.polyNameToParam(model.item(s, 0).text()),
                            model.item(s, 1).child(0).data().func)
                            for s in range(param_number) if self.rowHasActiveConstraint(s, model_key=model_key)]
             else:
@@ -1350,7 +1271,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if self.rowHasConstraint(s, model_key=model_key):
                 param_name = model.item(s, 0).text()
                 if model_key == 'poly':
-                    param_name = self.polyNameToParam(model.item(s, 0).text())
+                    param_name = self.polydispersity_widget.polyNameToParam(model.item(s, 0).text())
                 params.append((param_name, model.item(s, 1).child(0).data().func))
         return params
 
@@ -1414,7 +1335,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     # uncheck in the constraint tab
                     if constraint_tab:
                         constraint_tab.uncheckConstraint(
-                            self.kernel_module.name + ':' + cons[0])
+                            self.logic.kernel_module.name + ':' + cons[0])
                 # re-read the constraints
                 constraints = self.getComplexConstraintsForModel(model_key=model_key)
 
@@ -1425,11 +1346,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Creates a window with model description, when right-clicked in the treeview
         """
         msg = 'Model description:\n'
-        if self.kernel_module is not None:
-            if str(self.kernel_module.description).rstrip().lstrip() == '':
+        if self.logic.kernel_module is not None:
+            if str(self.logic.kernel_module.description).rstrip().lstrip() == '':
                 msg += "Sorry, no information is available for this model."
             else:
-                msg += self.kernel_module.description + '\n'
+                msg += self.logic.kernel_module.description + '\n'
         else:
             msg += "You must select a model to get information on this"
 
@@ -1445,8 +1366,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Checks if the current model has magnetic scattering implemented
         """
         has_mag_params = False
-        if self.kernel_module:
-            has_mag_params = len(self.kernel_module.magnetic_params) > 0
+        if self.logic.kernel_module:
+            has_mag_params = len(self.logic.kernel_module.magnetic_params) > 0
         return self.is2D and has_mag_params
 
     def onSelectModel(self):
@@ -1483,7 +1404,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
-        self.has_poly_error_column = False
 
         structure = None
         if self.cbStructureFactor.isEnabled():
@@ -1497,7 +1417,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # disable polydispersity if the model does not support it
         has_poly = self._poly_model.rowCount() != 0
         self.chkPolydispersity.setEnabled(has_poly)
-        self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
+        # self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
 
         # set focus so it doesn't move up
         self.cbModel.setFocus()
@@ -1527,7 +1447,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reset parameters to fit
         self.resetParametersToFit()
         self.has_error_column = False
-        self.has_poly_error_column = False
 
         self.respondToModelStructure(model=model, structure_factor=structure)
         # recast the original parameters into the model
@@ -1540,8 +1459,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Clears the list of parameters to be fitted
         """
         self.main_params_to_fit = []
-        self.poly_params_to_fit = []
-        self.magnet_params_to_fit = []
+        self.polydispersity_widget.resetParameters()
+        self.magnetism_widget.magnet_params_to_fit = []
 
     def onCustomModelChange(self):
         """
@@ -1634,7 +1553,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Check if the constraint function text contains current model name
         """
-        current_model_name = self.kernel_module.name
+        current_model_name = self.logic.kernel_module.name
         if current_model_name in constraint:
             return False
         else:
@@ -1705,7 +1624,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.enableStructureCombo()
             # set the index to 0
             self.cbStructureFactor.setCurrentIndex(0)
-            self.model_parameters = None
+            self.logic.model_parameters = None
             self._model_model.clear()
             return
 
@@ -1730,133 +1649,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbModel.addItems(sorted([model for (model, _) in model_list if model != 'rpa']))
         self.cbModel.blockSignals(False)
 
-    def onPolyModelChange(self, top, bottom):
-        """
-        Callback method for updating the main model and sasmodel
-        parameters with the GUI values in the polydispersity view
-        """
-        item = self._poly_model.itemFromIndex(top)
-        model_column = item.column()
-        model_row = item.row()
-        name_index = self._poly_model.index(model_row, 0)
-        parameter_name = str(name_index.data()) # "distribution of sld" etc.
-        parameter_name_w = self.polyNameToParam(parameter_name)
-        # Needs to retrieve also name of main parameter in order to update
-        # corresponding values in FitPage
-        parameter_name = parameter_name.rsplit()[-1]
-
-        delegate = self.lstPoly.itemDelegate()
-
-        # Extract changed value.
-        if model_column == delegate.poly_parameter:
-            # Is the parameter checked for fitting?
-            value = item.checkState()
-
-            if value == QtCore.Qt.Checked:
-                self.poly_params_to_fit.append(parameter_name_w)
-            else:
-                if parameter_name_w in self.poly_params_to_fit:
-                    self.poly_params_to_fit.remove(parameter_name_w)
-            self.cmdFit.setEnabled(self.haveParamsToFit())
-            # Update state stack
-            self.updateUndo()
-
-        elif model_column in [delegate.poly_min, delegate.poly_max]:
-            try:
-                value = GuiUtils.toDouble(item.text())
-            except TypeError:
-                # Can't be converted properly, bring back the old value and exit
-                return
-
-            current_details = self.kernel_module.details[parameter_name_w]
-            if self.has_poly_error_column:
-                # err column changes the indexing
-                current_details[model_column-2] = value
-            else:
-                current_details[model_column-1] = value
-
-        elif model_column == delegate.poly_function:
-            # name of the function - just pass
-            pass
-
-        else:
-            try:
-                value = GuiUtils.toDouble(item.text())
-            except TypeError:
-                # Can't be converted properly, bring back the old value and exit
-                return
-
-            # Update the sasmodel
-            # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
-            if model_column not in delegate.columnDict():
-                return
-            self.poly_params[parameter_name_w] = value
-            self.kernel_module.setParam(parameter_name_w, value)
-
-            # Update plot
-            self.updateData()
-
-        # update in param model
-        if model_column in [delegate.poly_pd, delegate.poly_error, delegate.poly_min, delegate.poly_max]:
-            model_key = self.getModelKeyFromName(parameter_name)
-            row = self.getRowFromName(parameter_name)
-            param_item = self.model_dict[model_key].item(row).child(0).child(0, model_column)
-            if param_item is None:
-                return
-            self._model_model.blockSignals(True)
-            param_item.setText(item.text())
-            self._model_model.blockSignals(False)
-
-    def onMagnetModelChange(self, top, bottom):
-        """
-        Callback method for updating the sasmodel magnetic parameters with the GUI values
-        """
-        item = self._magnet_model.itemFromIndex(top)
-        model_column = item.column()
-        model_row = item.row()
-        name_index = self._magnet_model.index(model_row, 0)
-        parameter_name = str(self._magnet_model.data(name_index))
-
-        if model_column == 0:
-            value = item.checkState()
-            if value == QtCore.Qt.Checked:
-                self.magnet_params_to_fit.append(parameter_name)
-            else:
-                if parameter_name in self.magnet_params_to_fit:
-                    self.magnet_params_to_fit.remove(parameter_name)
-            self.cmdFit.setEnabled(self.haveParamsToFit())
-            # Update state stack
-            self.updateUndo()
-            return
-
-        # Extract changed value
-        try:
-            value = GuiUtils.toDouble(item.text())
-        except TypeError:
-            # Unparsable field
-            return
-        delegate = self.lstMagnetic.itemDelegate()
-
-        if model_column > 1:
-            if model_column == delegate.mag_min:
-                pos = 1
-            elif model_column == delegate.mag_max:
-                pos = 2
-            elif model_column == delegate.mag_unit:
-                pos = 0
-            else:
-                raise AttributeError("Wrong column in magnetism table.")
-            # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-            self.kernel_module.details[parameter_name][pos] = value
-        else:
-            self.magnet_params[parameter_name] = value
-            #self.kernel_module.setParam(parameter_name) = value
-            # Force the chart update when actual parameters changed
-            self.recalculatePlotData()
-
-        # Update state stack
-        self.updateUndo()
-
     def onHelp(self):
         """
         Show the "Fitting" section of help
@@ -1868,17 +1660,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         helpfile = "fitting.html"
         if tab_id == 0:
             # Look at the model and if set, pull out its help page
-            if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
+            if self.logic.kernel_module is not None and hasattr(self.logic.kernel_module, 'name'):
                 # See if the help file is there
                 # This breaks encapsulation a bit, though.
                 full_path = GuiUtils.HELP_DIRECTORY_LOCATION
                 sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
                 location = sas_path + "/" + full_path
-                location += "/user/models/" + self.kernel_module.id + ".html"
+                location += "/user/models/" + self.logic.kernel_module.id + ".html"
                 if os.path.isfile(location):
                     # We have HTML for this model - show it
                     tree_location = "/user/models/"
-                    helpfile = self.kernel_module.id + ".html"
+                    helpfile = self.logic.kernel_module.id + ".html"
             else:
                 helpfile = "fitting_help.html"
         elif tab_id == 1:
@@ -1898,12 +1690,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Calls parent's method for opening an HTML page
         """
         self.parent.showHelp(url)
-
-    def onDisplayMagneticAngles(self):
-        """
-        Display a simple image showing direction of magnetic angles
-        """
-        self.magneticAnglesWidget.show()
 
     def onFit(self):
         """
@@ -1937,7 +1723,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         # keep local copy of kernel parameters, as they will change during the update
-        self.kernel_module_copy = copy.deepcopy(self.kernel_module)
+        self.logic.kernel_module_copy = copy.deepcopy(self.logic.kernel_module)
 
         # Create the fitting thread, based on the fitter
         completefn = self.batchFittingCompleted if self.is_batch_fitting else self.fittingCompleted
@@ -2030,7 +1816,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_dict = self.paramDictFromResults(res)
 
             # create local kernel_module
-            kernel_module = FittingUtilities.updateKernelWithResults(self.kernel_module, param_dict)
+            kernel_module = FittingUtilities.updateKernelWithResults(self.logic.kernel_module, param_dict)
             # pull out current data
             data = self._logic[res_index].data
 
@@ -2042,8 +1828,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.calculateQGridForModelExt(data=data, model=kernel_module, completefn=method, use_threads=False)
 
         # Restore original kernel_module, so subsequent fits on the same model don't pick up the new params
-        if self.kernel_module is not None:
-            self.kernel_module = copy.deepcopy(self.kernel_module_copy)
+        if self.logic.kernel_module is not None:
+            self.logic.kernel_module = copy.deepcopy(self.logic.kernel_module_copy)
 
     def paramDictFromResults(self, results):
         """
@@ -2117,9 +1903,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}
         self.updateModelFromList(param_dict)
 
-        self.updatePolyModelFromList(param_dict)
+        self.polydispersity_widget.updatePolyModelFromList(param_dict)
 
-        self.updateMagnetModelFromList(param_dict)
+        self.magnetism_widget.updateMagnetModelFromList(param_dict)
 
         # update charts
         self.onPlot()
@@ -2138,7 +1924,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Data going in
         data = self.logic.data
-        model = self.kernel_module
+        model = self.logic.kernel_module
         qmin = self.q_range_min
         qmax = self.q_range_max
 
@@ -2146,7 +1932,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.chkPolydispersity.isChecked():
             for p in self.poly_params_to_fit:
                 if "Distribution of" in p:
-                    params_to_fit += [self.polyNameToParam(p)]
+                    params_to_fit += [self.polydispersity_widget.polyNameToParam(p)]
                 else:
                     params_to_fit += [p]
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
@@ -2219,7 +2005,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._model_model.item(row, 1).setText(param_repr)
-            self.kernel_module.setParam(param_name, param_dict[param_name][0])
+            self.logic.kernel_module.setParam(param_name, param_dict[param_name][0])
             if self.has_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._model_model.item(row, 2).setText(error_repr)
@@ -2280,7 +2066,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.iterateOverModel(deletePolyErrorColumn)
 
         #if not self.has_error_column:
-            # create top-level error column
+        # create top-level error column
         error_column = []
         self.lstParams.itemDelegate().addErrorColumn()
         self.iterateOverModel(createErrorColumn)
@@ -2300,136 +2086,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverModel(updateFittedValues)
         self.iterateOverModel(updatePolyValues)
         self._model_model.dataChanged.connect(self.onMainParamsChange)
-
-    def iterateOverPolyModel(self, func):
-        """
-        Take func and throw it inside the poly model row loop
-        """
-        for row_i in range(self._poly_model.rowCount()):
-            func(row_i)
-
-    def updatePolyModelFromList(self, param_dict):
-        """
-        Update the polydispersity model with new parameters, create the errors column
-        """
-        assert isinstance(param_dict, dict)
-        if not dict:
-            return
-
-        def updateFittedValues(row_i):
-            # Utility function for main model update
-            # internal so can use closure for param_dict
-            if row_i >= self._poly_model.rowCount():
-                return
-            param_name = str(self._poly_model.item(row_i, 0).text()).rsplit()[-1] + '.width'
-            if param_name not in list(param_dict.keys()):
-                return
-            # modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
-            self._poly_model.item(row_i, 1).setText(param_repr)
-            self.kernel_module.setParam(param_name, param_dict[param_name][0])
-            if self.has_poly_error_column:
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                self._poly_model.item(row_i, 2).setText(error_repr)
-
-        def createErrorColumn(row_i):
-            # Utility function for error column update
-            if row_i >= self._poly_model.rowCount():
-                return
-            item = QtGui.QStandardItem()
-
-            def createItem(param_name):
-                if param_name in self.poly_params_to_fit:
-                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                else:
-                    error_repr = ""
-                item.setText(error_repr)
-
-            def poly_param():
-                return str(self._poly_model.item(row_i, 0).text()).rsplit()[-1] + '.width'
-
-            [createItem(param_name) for param_name in list(param_dict.keys()) if poly_param() == param_name]
-
-            error_column.append(item)
-
-        self.iterateOverPolyModel(updateFittedValues)
-
-        if self.has_poly_error_column:
-            self._poly_model.removeColumn(2)
-
-        self.lstPoly.itemDelegate().addErrorColumn()
-        error_column = []
-        self.iterateOverPolyModel(createErrorColumn)
-
-        # switch off reponse to model change
-        self._poly_model.insertColumn(2, error_column)
-        FittingUtilities.addErrorPolyHeadersToModel(self._poly_model)
-
-        self.has_poly_error_column = True
-
-    def iterateOverMagnetModel(self, func):
-        """
-        Take func and throw it inside the magnet model row loop
-        """
-        for row_i in range(self._magnet_model.rowCount()):
-            func(row_i)
-
-    def updateMagnetModelFromList(self, param_dict):
-        """
-        Update the magnetic model with new parameters, create the errors column
-        """
-        assert isinstance(param_dict, dict)
-        if not dict:
-            return
-        if self._magnet_model.rowCount() == 0:
-            return
-
-        def updateFittedValues(row):
-            # Utility function for main model update
-            # internal so can use closure for param_dict
-            if self._magnet_model.item(row, 0) is None:
-                return
-            param_name = str(self._magnet_model.item(row, 0).text())
-            if param_name not in list(param_dict.keys()):
-                return
-            # modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
-            self._magnet_model.item(row, 1).setText(param_repr)
-            self.kernel_module.setParam(param_name, param_dict[param_name][0])
-            if self.has_magnet_error_column:
-                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                self._magnet_model.item(row, 2).setText(error_repr)
-
-        def createErrorColumn(row):
-            # Utility function for error column update
-            item = QtGui.QStandardItem()
-            def createItem(param_name):
-                if param_name in self.magnet_params_to_fit:
-                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                else:
-                    error_repr = ""
-                item.setText(error_repr)
-            def curr_param():
-                return str(self._magnet_model.item(row, 0).text())
-
-            [createItem(param_name) for param_name in list(param_dict.keys()) if curr_param() == param_name]
-
-            error_column.append(item)
-
-        self.iterateOverMagnetModel(updateFittedValues)
-
-        if self.has_magnet_error_column:
-            self._magnet_model.removeColumn(2)
-
-        self.lstMagnetic.itemDelegate().addErrorColumn()
-        error_column = []
-        self.iterateOverMagnetModel(createErrorColumn)
-
-        # switch off reponse to model change
-        self._magnet_model.insertColumn(2, error_column)
-        FittingUtilities.addErrorHeadersToModel(self._magnet_model)
-
-        self.has_magnet_error_column = True
 
     def onPlot(self):
         """
@@ -2497,7 +2153,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Emits plotRequestedSignal for all plots found in the given model under the provided item name.
         """
-        fitpage_name = self.kernel_module.name
+        fitpage_name = self.logic.kernel_module.name
         plots = GuiUtils.plotsFromDisplayName(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False
@@ -2672,7 +2328,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model_name is None:
             if structure_factor not in (None, "None"):
                 # S(Q) on its own, treat the same as a form factor
-                self.kernel_module = None
+                self.logic.kernel_module = None
                 self.fromStructureFactorToQModel(structure_factor)
             else:
                 # No models selected
@@ -2690,18 +2346,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.fromStructureFactorToQModel(structure_factor)
 
             # Add polydispersity to the model
-            self.poly_params = {}
-            self.setPolyModel()
+            self.polydispersity_widget.setPolyModel()
             # Add magnetic parameters to the model
-            self.magnet_params = {}
-            self.setMagneticModel()
+            self.magnetism_widget.magnet_params = {}
+            self.magnetism_widget.setMagneticModel()
 
         # Now we claim the model has been loaded
         self.model_is_loaded = True
         # Change the model name to a monicker
-        self.kernel_module.name = self.modelName()
+        self.logic.kernel_module.name = self.modelName()
         # Update the smearing tab
-        self.smearing_widget.updateKernelModel(kernel_model=self.kernel_module)
+        self.smearing_widget.updateKernelModel(kernel_model=self.logic.kernel_module)
 
         # (Re)-create headers
         FittingUtilities.addHeadersToModel(self._model_model)
@@ -2736,30 +2391,30 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if hasattr(kernel_module, 'model_info'):
             # for sum/multiply models
-            self.model_parameters = kernel_module.model_info.parameters
+            self.logic.model_parameters = kernel_module.model_info.parameters
 
         elif hasattr(kernel_module, 'parameters'):
             # built-in and custom models
-            self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+            self.logic.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
         elif hasattr(kernel_module, 'model_info'):
             # for sum/multiply models
-            self.model_parameters = kernel_module.model_info.parameters
+            self.logic.model_parameters = kernel_module.model_info.parameters
 
         elif hasattr(kernel_module, 'Model') and hasattr(kernel_module.Model, "_model_info"):
             # this probably won't work if there's no model_info, but just in case
-            self.model_parameters = kernel_module.Model._model_info.parameters
+            self.logic.model_parameters = kernel_module.Model._model_info.parameters
         else:
             # no parameters - default to blank table
             msg = "No parameters found in model '{}'.".format(model_name)
             logger.warning(msg)
-            self.model_parameters = modelinfo.ParameterTable([])
+            self.logic.model_parameters = modelinfo.ParameterTable([])
 
         # Instantiate the current sasmodel
-        self.kernel_module = self.models[model_name]()
+        self.logic.kernel_module = self.models[model_name]()
 
         # Change the model name to a monicker
-        self.kernel_module.name = self.modelName()
+        self.logic.kernel_module.name = self.modelName()
 
         # Explicitly add scale and background with default values
         temp_undo_state = self.undo_supported
@@ -2768,15 +2423,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.addBackgroundToModel(self._model_model)
         self.undo_supported = temp_undo_state
 
-        self.shell_names = self.shellNamesList()
+        self.logic.shell_names = self.shellNamesList()
 
         # Add heading row
         FittingUtilities.addHeadingRowToModel(self._model_model, model_name)
 
         # Update the QModel
         FittingUtilities.addParametersToModel(
-                self.model_parameters,
-                self.kernel_module,
+                self.logic.model_parameters,
+                self.logic.kernel_module,
                 self.is2D,
                 self._model_model,
                 self.lstParams)
@@ -2791,11 +2446,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         product_params = None
         kernel_module = self.models[structure_factor]()
 
-        if self.kernel_module is None:
-            self.kernel_module = kernel_module
+        if self.logic.kernel_module is None:
+            self.logic.kernel_module = kernel_module
             # Structure factor is the only selected model; build it and show all its params
-            self.kernel_module.name = self.modelName()
-            s_params = self.kernel_module._model_info.parameters
+            self.logic.kernel_module.name = self.modelName()
+            s_params = self.logic.kernel_module._model_info.parameters
         else:
             # Assure we only have one volfraction shown
             s_params, product_params = self._volfraction_hack(kernel_module)
@@ -2833,17 +2488,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         from sasmodels.product import VOLFRAC_ID, RADIUS_ID, RADIUS_MODE_ID, STRUCTURE_MODE_ID
 
         product_params = None
-        p_kernel = self.kernel_module
+        p_kernel = self.logic.kernel_module
         # need to reset multiplicity to get the right product
         if p_kernel.is_multiplicity_model:
             p_kernel.multiplicity = p_kernel.multiplicity_info.number
 
-        self.kernel_module = MultiplicationModel(p_kernel, s_kernel)
+        self.logic.kernel_module = MultiplicationModel(p_kernel, s_kernel)
         # Modify the name to correspond to shown items
-        self.kernel_module.name = self.modelName()
+        self.logic.kernel_module.name = self.modelName()
 
         # TODO: set model layout in sasmodels
-        info = self.kernel_module._model_info
+        info = self.logic.kernel_module._model_info
         p_info = p_kernel._model_info
         s_info = s_kernel._model_info
 
@@ -2925,18 +2580,18 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
             # doesn't contain multiplicity parameter
-            self.kernel_module.setParam(parameter_name, value)
+            self.logic.kernel_module.setParam(parameter_name, value)
         elif model_column == min_column:
-            # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-            self.kernel_module.details[parameter_name][1] = value
+            # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
+            self.logic.kernel_module.details[parameter_name][1] = value
         elif model_column == max_column:
-            self.kernel_module.details[parameter_name][2] = value
+            self.logic.kernel_module.details[parameter_name][2] = value
         else:
             # don't update the chart
             return
 
-        # TODO: magnetic params in self.kernel_module.details['M0:parameter_name'] = value
-        # TODO: multishell params in self.kernel_module.details[??] = value
+        # TODO: magnetic params in self.logic.kernel_module.details['M0:parameter_name'] = value
+        # TODO: multishell params in self.logic.kernel_module.details[??] = value
 
         # handle display of effective radius parameter according to radius_effective_mode; pass ER into model if
         # necessary
@@ -3040,7 +2695,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # update the list of parameters to fit
         self.main_params_to_fit = self.checkedListFromModel("standard")
-        self.poly_params_to_fit = self.checkedListFromModel("poly")
+        self.poly_params_to_fit = self.polydispersity_widget.checkedListFromModel()
         self.magnet_params_to_fit = self.checkedListFromModel("magnet")
 
     def checkedListFromModel(self, model_key):
@@ -3053,14 +2708,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         model = self.model_dict[model_key]
 
-        if model_key == "poly":
-            return [self.polyNameToParam(str(model.item(row_index, 0).text()))
-                    for row_index in range(model.rowCount())
-                    if isChecked(row_index)]
-        else:
-            return [str(model.item(row_index, 0).text())
-                    for row_index in range(model.rowCount())
-                    if isChecked(row_index)]
+        return [str(model.item(row_index, 0).text())
+                for row_index in range(model.rowCount())
+                if isChecked(row_index)]
+
     def createNewIndex(self, fitted_data):
         """
         Create a model or theory index with passed Data1D/Data2D
@@ -3075,7 +2726,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.updateModelIndex(fitted_data)
         else:
             if not fitted_data.name:
-                name = self.nameForFittedData(self.kernel_module.id)
+                name = self.nameForFittedData(self.logic.kernel_module.id)
             else:
                 name = fitted_data.name
             fitted_data.title = name
@@ -3140,10 +2791,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if model is None: return
         if not hasattr(model, 'setParam'): return
 
-        # add polydisperse parameters if asked
-        if self.chkPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
-            for key, value in self.poly_params.items():
-                model.setParam(key, value)
+        self.polydispersity_widget.updateModel(model)
         # add magnetic params if asked
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
             for key, value in self.magnet_params.items():
@@ -3156,7 +2804,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if data is None:
             data = self.data
         if model is None:
-            model = copy.deepcopy(self.kernel_module)
+            model = copy.deepcopy(self.logic.kernel_module)
             self.updateKernelModelWithExtraParams(model)
 
         if completefn is None:
@@ -3199,7 +2847,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Prepare the fitting data object, based on current ModelModel
         """
-        if self.kernel_module is None:
+        if self.logic.kernel_module is None:
             return
         self.calculateQGridForModelExt()
 
@@ -3276,7 +2924,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             # delete theory items for the model, in order to get rid of any
             # redundant items, e.g. beta(Q), S_eff(Q)
-            self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.kernel_module.id)
+            self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.logic.kernel_module.id)
 
         self._appendPlotsPolyDisp(new_plots, return_data, fitted_data)
 
@@ -3426,258 +3074,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # TODO: remimplement thread cancellation
         logger.error("".join(traceback.format_exception(etype, value, tb)))
 
-    def setTableProperties(self, table):
-        """
-        Setting table properties
-        """
-        # Table properties
-        table.verticalHeader().setVisible(False)
-        table.setAlternatingRowColors(True)
-        table.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-        table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        table.resizeColumnsToContents()
-
-        # Header
-        header = table.horizontalHeader()
-        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-        header.ResizeMode(QtWidgets.QHeaderView.Interactive)
-
-        # Qt5: the following 2 lines crash - figure out why!
-        # Resize column 0 and 7 to content
-        #header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        #header.setSectionResizeMode(7, QtWidgets.QHeaderView.ResizeToContents)
-
-    def setPolyModel(self):
-        """
-        Set polydispersity values
-        """
-        if not self.model_parameters:
-            return
-        self._poly_model.clear()
-
-        parameters = self.model_parameters.form_volume_parameters
-        if self.is2D:
-            parameters += self.model_parameters.orientation_parameters
-
-        [self.setPolyModelParameters(i, param) for i, param in \
-            enumerate(parameters) if param.polydisperse]
-
-        FittingUtilities.addPolyHeadersToModel(self._poly_model)
-
-    def setPolyModelParameters(self, i, param):
-        """
-        Standard of multishell poly parameter driver
-        """
-        param_name = param.name
-        # see it if the parameter is multishell
-        if '[' in param.name:
-            # Skip empty shells
-            if self.current_shell_displayed == 0:
-                return
-            else:
-                # Create as many entries as current shells
-                for ishell in range(1, self.current_shell_displayed+1):
-                    # Remove [n] and add the shell numeral
-                    name = param_name[0:param_name.index('[')] + str(ishell)
-                    self.addNameToPolyModel(i, name)
-        else:
-            # Just create a simple param entry
-            self.addNameToPolyModel(i, param_name)
-
-    def addNameToPolyModel(self, i, param_name):
-        """
-        Creates a checked row in the poly model with param_name
-        """
-        # Polydisp. values from the sasmodel
-        param_wname = param_name + '.width'
-        width = self.kernel_module.getParam(param_wname)
-        npts = self.kernel_module.getParam(param_name + '.npts')
-        nsigs = self.kernel_module.getParam(param_name + '.nsigmas')
-        _, min, max = self.kernel_module.details[param_wname]
-
-        # Update local param dict
-        self.poly_params[param_wname] = width
-        self.poly_params[param_name + '.npts'] = npts
-        self.poly_params[param_name + '.nsigmas'] = nsigs
-
-        # Construct a row with polydisp. related variable.
-        # This will get added to the polydisp. model
-        # Note: last argument needs extra space padding for decent display of the control
-        checked_list = ["Distribution of " + param_name, str(width),
-                        str(min), str(max),
-                        str(npts), str(nsigs), "gaussian      ",'']
-        FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
-
-        all_items = self._poly_model.rowCount()
-        self._poly_model.item(all_items-1,0).setData(param_wname, role=QtCore.Qt.UserRole)
-
-        # All possible polydisp. functions as strings in combobox
-        func = QtWidgets.QComboBox()
-        func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.keys()])
-        # Set the default index
-        func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
-        ind = self._poly_model.index(i,self.lstPoly.itemDelegate().poly_function)
-        self.lstPoly.setIndexWidget(ind, func)
-        func.currentIndexChanged.connect(lambda: self.onPolyComboIndexChange(str(func.currentText()), i))
-
-    def onPolyFilenameChange(self, row_index):
-        """
-        Respond to filename_updated signal from the delegate
-        """
-        # For the given row, invoke the "array" combo handler
-        array_caption = 'array'
-
-        # Get the combo box reference
-        ind = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
-        widget = self.lstPoly.indexWidget(ind)
-
-        # Update the combo box so it displays "array"
-        widget.blockSignals(True)
-        widget.setCurrentIndex(self.lstPoly.itemDelegate().POLYDISPERSE_FUNCTIONS.index(array_caption))
-        widget.blockSignals(False)
-
-        # Invoke the file reader
-        self.onPolyComboIndexChange(array_caption, row_index)
-
-    def onPolyComboIndexChange(self, combo_string, row_index):
-        """
-        Modify polydisp. defaults on function choice
-        """
-        # Get npts/nsigs for current selection
-        param = self.model_parameters.form_volume_parameters[row_index]
-        file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
-        combo_box = self.lstPoly.indexWidget(file_index)
-        try:
-            self.disp_model = POLYDISPERSITY_MODELS[combo_string]()
-        except IndexError:
-            logger.error("Error in setting the dispersion model. Reverting to Gaussian.")
-            self.disp_model = POLYDISPERSITY_MODELS['gaussian']()
-
-        def updateFunctionCaption(row):
-            # Utility function for update of polydispersity function name in the main model
-            if not self.isCheckable(row):
-                return
-            param_name = self._model_model.item(row, 0).text()
-            if param_name !=  param.name:
-                return
-            # Modify the param value
-            self._model_model.blockSignals(True)
-            if self.has_error_column:
-                # err column changes the indexing
-                self._model_model.item(row, 0).child(0).child(0,5).setText(combo_string)
-            else:
-                self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
-            self._model_model.blockSignals(False)
-
-        if combo_string == 'array':
-            try:
-                # assure the combo is at the right index
-                combo_box.blockSignals(True)
-                combo_box.setCurrentIndex(combo_box.findText(combo_string))
-                combo_box.blockSignals(False)
-                # Load the file
-                self.loadPolydispArray(row_index)
-                # Update main model for display
-                self.iterateOverModel(updateFunctionCaption)
-                self.kernel_module.set_dispersion(param.name, self.disp_model)
-                # uncheck the parameter
-                self._poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
-                # disable the row
-                lo = self.lstPoly.itemDelegate().poly_parameter
-                hi = self.lstPoly.itemDelegate().poly_function
-                self._poly_model.blockSignals(True)
-                [self._poly_model.item(row_index, i).setEnabled(False) for i in range(lo, hi)]
-                self._poly_model.blockSignals(False)
-                return
-            except IOError:
-                combo_box.setCurrentIndex(self.orig_poly_index)
-                # Pass for cancel/bad read
-                pass
-        else:
-            self.kernel_module.set_dispersion(param.name, self.disp_model)
-
-        # Enable the row in case it was disabled by Array
-        self._poly_model.blockSignals(True)
-        max_range = self.lstPoly.itemDelegate().poly_filename
-        [self._poly_model.item(row_index, i).setEnabled(True) for i in range(7)]
-        file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
-        self._poly_model.setData(file_index, "")
-        self._poly_model.blockSignals(False)
-
-        npts_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_npts)
-        nsigs_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_nsigs)
-
-        npts = POLYDISPERSITY_MODELS[str(combo_string)].default['npts']
-        nsigs = POLYDISPERSITY_MODELS[str(combo_string)].default['nsigmas']
-
-        self._poly_model.setData(npts_index, npts)
-        self._poly_model.setData(nsigs_index, nsigs)
-
-        self.iterateOverModel(updateFunctionCaption)
-        if combo_box is not None:
-            self.orig_poly_index = combo_box.currentIndex()
-
-    def loadPolydispArray(self, row_index):
-        """
-        Show the load file dialog and loads requested data into state
-        """
-        datafile = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Choose a weight file", "", "All files (*.*)", None,
-            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
-
-        if not datafile:
-            logger.info("No weight data chosen.")
-            raise IOError
-
-        values = []
-        weights = []
-        def appendData(data_tuple):
-            """
-            Fish out floats from a tuple of strings
-            """
-            try:
-                values.append(float(data_tuple[0]))
-                weights.append(float(data_tuple[1]))
-            except (ValueError, IndexError):
-                # just pass through if line with bad data
-                return
-
-        with open(datafile, 'r') as column_file:
-            column_data = [line.rstrip().split() for line in column_file.readlines()]
-            [appendData(line) for line in column_data]
-
-        # If everything went well - update the sasmodel values
-        self.disp_model.set_weights(np.array(values), np.array(weights))
-        # + update the cell with filename
-        fname = os.path.basename(str(datafile))
-        fname_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
-        self._poly_model.setData(fname_index, fname)
-
     def onColumnWidthUpdate(self, index, old_size, new_size):
         """
         Simple state update of the current column widths in the  param list
         """
         self.lstParamHeaderSizes[index] = new_size
-
-    def setMagneticModel(self):
-        """
-        Set magnetism values on model
-        """
-        if not self.model_parameters:
-            return
-        self._magnet_model.clear()
-        # default initial value
-        m0 = 0.5
-        for param in self.model_parameters.call_parameters:
-            if param.type != 'magnetic': continue
-            if "M0" in param.name:
-                m0 += 0.5
-                value = m0
-            else:
-                value = param.default
-            self.addCheckedMagneticListToModel(param, value)
-
-        FittingUtilities.addHeadersToModel(self._magnet_model)
 
     def shellNamesList(self):
         """
@@ -3685,48 +3086,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         E.g. for sld[n], radius[n], n=1..3 it will return
         [sld1, sld2, sld3, radius1, radius2, radius3]
         """
-        multi_names = [p.name[:p.name.index('[')] for p in self.model_parameters.iq_parameters if '[' in p.name]
-        top_index = self.kernel_module.multiplicity_info.number
+        multi_names = [p.name[:p.name.index('[')] for p in self.logic.model_parameters.iq_parameters if '[' in p.name]
+        top_index = self.logic.kernel_module.multiplicity_info.number
         shell_names = []
         for i in range(1, top_index+1):
             for name in multi_names:
                 shell_names.append(name+str(i))
         return shell_names
 
-    def addCheckedMagneticListToModel(self, param, value):
-        """
-        Wrapper for model update with a subset of magnetic parameters
-        """
-        try:
-            basename, _ = param.name.rsplit('_', 1)
-        except ValueError:
-            basename = param.name
-        if basename in self.shell_names:
-            try:
-                shell_index = int(basename[-2:])
-            except ValueError:
-                shell_index = int(basename[-1:])
-
-            if shell_index > self.current_shell_displayed:
-                return
-
-        checked_list = [param.name,
-                        str(value),
-                        str(param.limits[0]),
-                        str(param.limits[1]),
-                        param.units]
-
-        self.magnet_params[param.name] = value
-
-        FittingUtilities.addCheckedListToModel(self._magnet_model, checked_list)
-        all_items = self._magnet_model.rowCount()
-        self._magnet_model.item(all_items-1,0).setData(param.name, role=QtCore.Qt.UserRole)
-
     def enableStructureFactorControl(self, structure_factor):
         """
         Add structure factors to the list of parameters
         """
-        if self.kernel_module.is_form_factor or structure_factor == 'None':
+        if self.logic.kernel_module.is_form_factor or structure_factor == 'None':
             self.enableStructureCombo()
         else:
             self.disableStructureCombo()
@@ -3735,7 +3107,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Add a combobox for multiple shell display
         """
-        param_name, param_length = FittingUtilities.getMultiplicity(self.model_parameters)
+        param_name, param_length = FittingUtilities.getMultiplicity(self.logic.model_parameters)
 
         if param_length == 0:
             return
@@ -3775,7 +3147,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self._n_shells_row = shell_row - 1
 
         # Get the default number of shells for the model
-        kernel_pars = self.kernel_module._model_info.parameters.kernel_parameters
+        kernel_pars = self.logic.kernel_module._model_info.parameters.kernel_parameters
         shell_par = None
         for par in kernel_pars:
             parname = par.name
@@ -3839,33 +3211,33 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # bad text on the control!
             index = 0
             logger.error("Multiplicity incorrect! Setting to 0")
-        self.kernel_module.multiplicity = index
+        self.logic.kernel_module.multiplicity = index
         if remove_rows > 1:
             self._model_model.removeRows(first_row, remove_rows)
 
         new_rows = FittingUtilities.addShellsToModel(
-                self.model_parameters,
+                self.logic.model_parameters,
                 self._model_model,
                 index,
                 first_row,
                 self.lstParams)
 
         self._num_shell_params = len(new_rows)
-        self.current_shell_displayed = index
+        self.logic.current_shell_displayed = index
 
         # Param values for existing shells were reset to default; force all changes into kernel module
         for row in new_rows:
             par = row[0].text()
             val = GuiUtils.toDouble(row[1].text())
-            self.kernel_module.setParam(par, val)
+            self.logic.kernel_module.setParam(par, val)
 
         # Change 'n' in the parameter model; also causes recalculation
         self._model_model.item(self._n_shells_row, 1).setText(str(index))
 
         # Update relevant models
-        self.setPolyModel()
+        self.polydispersity_widget.setPolyModel()
         if self.canHaveMagnetism():
-            self.setMagneticModel()
+            self.magnetism_widget.setMagneticModel()
 
     def onShowSLDProfile(self):
         """
@@ -3873,7 +3245,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # get profile data
         try:
-            x, y = self.kernel_module.getProfile()
+            x, y = self.logic.kernel_module.getProfile()
         except TypeError:
             msg = "SLD profile calculation failed."
             logging.error(msg)
@@ -4033,7 +3405,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fp.main_params_to_fit = self.main_params_to_fit
         fp.poly_params_to_fit = self.poly_params_to_fit
         fp.magnet_params_to_fit = self.magnet_params_to_fit
-        fp.kernel_module = self.kernel_module
+        fp.kernel_module = self.logic.kernel_module
 
         # Algorithm options
         # fp.algorithm = self.parent.fit_options.selected_id
@@ -4101,7 +3473,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
             magnet_params = FittingUtilities.getStandardParam(self._magnet_model)
         report_logic = ReportPageLogic(self,
-                                       kernel_module=self.kernel_module,
+                                       kernel_module=self.logic.kernel_module,
                                        data=self.data,
                                        index=index,
                                        params=params+poly_params+magnet_params)
@@ -4324,7 +3696,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         serializes current parameters
         """
         param_list = []
-        if self.kernel_module is None:
+        if self.logic.kernel_module is None:
             return param_list
 
         param_list.append(['model_name', str(self.cbModel.currentText())])
@@ -4387,27 +3759,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             Create list of polydisperse parameters based on _poly_model
             """
-            param_name = str(self._poly_model.item(row, 0).text()).split()[-1]
-            param_checked = str(self._poly_model.item(row, 0).checkState() == QtCore.Qt.Checked)
-            param_value = str(self._poly_model.item(row, 1).text())
-            param_error = None
-            column_offset = 0
-            if self.has_poly_error_column:
-                column_offset = 1
-                param_error = str(self._poly_model.item(row, 1+column_offset).text())
-            param_min   = str(self._poly_model.item(row, 2+column_offset).text())
-            param_max   = str(self._poly_model.item(row, 3+column_offset).text())
-            param_npts  = str(self._poly_model.item(row, 4+column_offset).text())
-            param_nsigs = str(self._poly_model.item(row, 5+column_offset).text())
-            param_fun   = str(self._poly_model.item(row, 6+column_offset).text()).rstrip()
-            index = self._poly_model.index(row, 6+column_offset)
-            widget = self.lstPoly.indexWidget(index)
-            if widget is not None and isinstance(widget, QtWidgets.QComboBox):
-                param_fun = widget.currentText()
-            # width
-            name = param_name+".width"
-            param_list.append([name, param_checked, param_value, param_error,
-                               param_min, param_max, param_npts, param_nsigs, param_fun])
+            param_list.extend(self.polydispersity_widget.gatherPolyParams(row))
 
         def gatherMagnetParams(row):
             """
@@ -4428,12 +3780,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.iterateOverModel(gatherParams)
         if self.chkPolydispersity.isChecked():
-            self.iterateOverPolyModel(gatherPolyParams)
+            self.polydispersity_widget.iterateOverPolyModel(gatherPolyParams)
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
             self.iterateOverMagnetModel(gatherMagnetParams)
 
-        if self.kernel_module.is_multiplicity_model:
-            param_list.append(['multiplicity', str(self.kernel_module.multiplicity)])
+        if self.logic.kernel_module.is_multiplicity_model:
+            param_list.append(['multiplicity', str(self.logic.kernel_module.multiplicity)])
 
         return param_list
 
@@ -4464,12 +3816,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if 'multiplicity' in line_dict.keys():
             multip = int(line_dict['multiplicity'][0], 0)
             # reset the model with multiplicity, so further updates are saved
-            if self.kernel_module.is_multiplicity_model:
-                self.kernel_module.multiplicity=multip
+            if self.logic.kernel_module.is_multiplicity_model:
+                self.logic.kernel_module.multiplicity=multip
                 self.updateMultiplicityCombo(multip)
 
-        if 'tab_name' in line_dict.keys() and self.kernel_module is not None:
-            self.kernel_module.name = line_dict['tab_name'][0]
+        if 'tab_name' in line_dict.keys() and self.logic.kernel_module is not None:
+            self.logic.kernel_module.name = line_dict['tab_name'][0]
         if 'polydisperse_params' in line_dict.keys():
             self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
         if 'magnetic_params' in line_dict.keys():
@@ -4532,9 +3884,25 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             pass
 
         self.updateFullModel(context)
-        self.updateFullPolyModel(context)
+        self.polydispersity_widget.updateFullPolyModel(context)
         self.updateFullMagnetModel(context)
 
+    def updateFunctionCaption(self, row):
+        # Utility function for update of polydispersity function name in the main model
+        if not self.isCheckable(row):
+            return
+        param_name = self._model_model.item(row, 0).text()
+        if param_name !=  param.name:
+            return
+        # Modify the param value
+        self._model_model.blockSignals(True)
+        if self.has_error_column:
+            # err column changes the indexing
+            self._model_model.item(row, 0).child(0).child(0,5).setText(combo_string)
+        else:
+            self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
+        self._model_model.blockSignals(False)
+        
     def updateMultiplicityCombo(self, multip):
         """
         Find and update the multiplicity combobox
@@ -4543,7 +3911,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         widget = self.lstParams.indexWidget(index)
         if widget is not None and isinstance(widget, QtWidgets.QComboBox):
             widget.setCurrentIndex(widget.findText(str(multip)))
-        self.current_shell_displayed = multip
+        self.logic.current_shell_displayed = multip
 
     def updateFullModel(self, param_dict):
         """
@@ -4608,54 +3976,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.setFocus()
 
         self.iterateOverModel(updateFittedValues)
-
-    def updateFullPolyModel(self, param_dict):
-        """
-        Update the polydispersity model with new parameters, create the errors column
-        """
-        assert isinstance(param_dict, dict)
-        if not dict:
-            return
-
-        def updateFittedValues(row):
-            # Utility function for main model update
-            # internal so can use closure for param_dict
-            if row >= self._poly_model.rowCount():
-                return
-            param_name = str(self._poly_model.item(row, 0).text()).rsplit()[-1] + '.width'
-            if param_name not in list(param_dict.keys()):
-                return
-            # checkbox state
-            param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
-            self._poly_model.item(row,0).setCheckState(param_checked)
-
-            # modify the param value
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-            self._poly_model.item(row, 1).setText(param_repr)
-
-            # Potentially the error column
-            ioffset = 0
-            joffset = 0
-            if len(param_dict[param_name])>7:
-                ioffset = 1
-            if self.has_poly_error_column:
-                joffset = 1
-            # min
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][2+ioffset], high=True)
-            self._poly_model.item(row, 2+joffset).setText(param_repr)
-            # max
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][3+ioffset], high=True)
-            self._poly_model.item(row, 3+joffset).setText(param_repr)
-            # Npts
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][4+ioffset], high=True)
-            self._poly_model.item(row, 4+joffset).setText(param_repr)
-            # Nsigs
-            param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
-            self._poly_model.item(row, 5+joffset).setText(param_repr)
-
-            self.setFocus()
-
-        self.iterateOverPolyModel(updateFittedValues)
 
     def updateFullMagnetModel(self, param_dict):
         """
@@ -4726,10 +4046,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         state.qmax = self.q_range_max
         state.npts = self.npts
 
-        p = self.model_parameters
+        p = self.logic.model_parameters
         # save checkbutton state and txtcrtl values
         state.parameters = FittingUtilities.getStandardParam(self._model_model)
-        state.orientation_params_disp = FittingUtilities.getOrientationParam(self.kernel_module)
+        state.orientation_params_disp = FittingUtilities.getOrientationParam(self.logic.kernel_module)
 
     def getSymbolDict(self):
         """
@@ -4738,9 +4058,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         sym_dict = {}
         # return an empty dict if no model has been selected
-        if self.kernel_module == None:
+        if self.logic.kernel_module == None:
             return sym_dict
-        model_name = self.kernel_module.name
+        model_name = self.logic.kernel_module.name
         for param in self.getParamNames():
             model_key = self.getModelKeyFromName(param)
             sym_dict[f"{model_name}.{param}"] = GuiUtils.toDouble(
