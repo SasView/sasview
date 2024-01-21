@@ -103,7 +103,7 @@ if platform.system() == 'Darwin':
           exclude_binaries=True,
           name='sasview',
           debug=False,
-          upx=False,
+          upx=True,
           icon=os.path.join("../src/sas/qtgui/images","ball.icns"),
           version="version.txt",
           console=False )
