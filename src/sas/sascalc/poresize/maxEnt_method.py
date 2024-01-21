@@ -3,6 +3,7 @@ import math
 import csv
 import matplotlib.pyplot as plt
 import resolution as rst
+import data_info
 
 TEST_LIMIT        = 0.05                    # for convergence
 CHI_SQR_LIMIT     = 0.01                    # maximum difference in ChiSqr for a solution
@@ -330,9 +331,13 @@ with open("I_for_dist1.txt") as fp:
             dI = np.append(dI, float(row[2]))
         except:
             pass
-            
+        
+data_from_loader = data_info.Data1D(x=Q, y=I, dx=None, dy=dI,lam=None, dlam=None, isSesans=False)
+data_from_loader.filename = "mock data"
+  
 input = {}
-input["Data"] = [Q,I,dI]
+input["Filename"] = data_from_loader.filename
+input["Data"] = [data_from_loader.x,data_from_loader.y,data_from_loader.dy]
 input["Limits"] = [min(Q), max(Q)]
 input["Scale"] = 1
 input["Logbin"] = False
