@@ -392,6 +392,27 @@ class Plotter2DWidget(PlotterBase):
         """
         Update slicer plot on Data2D change
         """
+        if not hasattr(self, '_item'): return
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
+
+        # Get all plots for current item
+        plots = GuiUtils.plotsFromModel("", item)
+        if plots is None: return
+        slicer_caption = 'Slicer' + self.data0.name
+        # See if current item plots contain slicer plot
+        has_plot = False
+        for plot in plots:
+            if not hasattr(plot, 'type_id') or plot.type_id is None: continue
+            if slicer_caption in plot.type_id: has_plot = True
+        # return prematurely if no slicer plot found
+        if not has_plot: return
+
+        # Now that we've identified the right plot, update the 2D data the slicer uses
+        self.slicer.data = self.data0
+        # Replot now that the 2D data is updated
+        self.slicer._post_data()
 
     def setSlicer(self, slicer, reset=True):
         """
