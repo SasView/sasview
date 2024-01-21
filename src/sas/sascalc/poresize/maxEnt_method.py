@@ -315,7 +315,7 @@ def sizeDistribution(input):
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
     chisq,BinMag,Ic[Ibeg:Ifin] = MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt[Ibeg:Ifin]),Gmat,BinsBack,IterMax=5000,resolution=perfect1D,report=True)
     BinMag = BinMag/(2.*Dbins)
-    return chisq,Bins,BinMag,Ic[Ibeg:Ifin]
+    return chisq,Bins,BinMag,Q[Ibeg:Ifin],Ic[Ibeg:Ifin]
 
 # main
 Q = np.array([])
@@ -354,8 +354,13 @@ perfect1D = rst.Perfect1D(Q)
 input["Resolution"] = perfect1D
 input["Sky"] = 0.0001
 
-chisq,Bins,BinMag,Ic = sizeDistribution(input)
+chisq,Bins,BinMag,Qc,Ic = sizeDistribution(input)
+
+results = data_info.Data1D(x=Qc, y=Ic, dx=None, dy=None,lam=None, dlam=None, isSesans=False)
 
 print(input)
 plt.plot(Bins,BinMag)
+plt.show()
+
+plt.loglog(results.x,results.y)
 plt.show()
