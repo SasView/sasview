@@ -3,6 +3,7 @@ import numpy as np
 import logging
 from enum import Enum
 import importlib.resources as resources
+import cffi as c
 
 # we need to be able to differentiate between being uninitialized and failing to load
 class lib_state(Enum):
@@ -42,25 +43,26 @@ def attach_hooks():
 
         try:
             # evaluate_sans_debye func
-            ausaxs = ct.CDLL(str(path))
-            ausaxs.evaluate_sans_debye.argtypes = [
-                ct.POINTER(ct.c_double), # q vector
-                ct.POINTER(ct.c_double), # x vector
-                ct.POINTER(ct.c_double), # y vector
-                ct.POINTER(ct.c_double), # z vector
-                ct.POINTER(ct.c_double), # w vector
-                ct.c_int,                # nq (number of points in q)
-                ct.c_int,                # nc (number of points in x, y, z, w)
-                ct.c_int,                # status (0 = success, 1 = q range error, 2 = other error)
-                ct.POINTER(ct.c_double)  # Iq vector for return value
-            ]
-            ausaxs.evaluate_sans_debye.restype = None # don't expect a return value
+            # ausaxs = ct.CDLL(str(path))
+            # ausaxs.evaluate_sans_debye.argtypes = [
+            #     ct.POINTER(ct.c_double), # q vector
+            #     ct.POINTER(ct.c_double), # x vector
+            #     ct.POINTER(ct.c_double), # y vector
+            #     ct.POINTER(ct.c_double), # z vector
+            #     ct.POINTER(ct.c_double), # w vector
+            #     ct.c_int,                # nq (number of points in q)
+            #     ct.c_int,                # nc (number of points in x, y, z, w)
+            #     ct.c_int,                # status (0 = success, 1 = q range error, 2 = other error)
+            #     ct.POINTER(ct.c_double)  # Iq vector for return value
+            # ]
+            # ausaxs.evaluate_sans_debye.restype = None # don't expect a return value
+            ausaxs = c.dlopen(str(path))
             ausaxs_state = lib_state.READY
+
         except Exception as e:
             ausaxs_state = lib_state.FAILED
             logging.warning("Failed to hook into AUSAXS library, using default Debye implementation")
             print(e)
-            raise e
 
 def ausaxs_available():    
     """
