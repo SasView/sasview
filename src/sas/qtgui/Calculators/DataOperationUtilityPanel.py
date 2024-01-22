@@ -148,12 +148,12 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                         overlap_op=False)
         self.updatePlot(self.graphData1, self.layoutData1, self.data1, color='#882255',
                         operation_data=True, data_op=[self.data1], color_op=["#44AA99"], overlap_op=True)
-        self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288',
-                        operation_data=True, data_op=[self.data2], color_op=['#CC6677'], overlap_op=True)
+        self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288' if isinstance(self.data2, Data1D) else '#CC6677',
+                        operation_data=True if isinstance(self.data2, Data1D) else False, data_op=[self.data2], color_op=['#CC6677'], overlap_op=True)
 
         # Add the new plot to the comboboxes
-        self.cbData1.addItem(self.output.name)
-        self.cbData2.addItem(self.output.name)
+        # self.cbData1.addItem(self.output.name)
+        # self.cbData2.addItem(self.output.name)
         if self.filenames is None:
             self.filenames = {}
         self.filenames[self.output.name] = self.output
@@ -265,7 +265,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # Enable Compute button only if Data1 defined and compatible data
             self.cmdCompute.setEnabled(self.onCheckChosenData())
             # Display value of coefficient in graphData2
-            self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288')
+            self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#CC6677')
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
             self.onCheckChosenData()
@@ -408,6 +408,22 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         graph.setLayout(layout)
 
+    def addOperationData(self, plotter, data, data_op, color_op):
+
+        for d_op, c_op in zip(data_op, color_op):
+            if isinstance(d_op, Data1D):
+                op_data = Data1D(x=d_op._operation.x, y=d_op._operation.y, dy=d_op._operation.dy, dx=None)
+                op_data.copy_from_datainfo(data1d=d_op._operation)
+                plotter.plot(data=op_data, hide_error=True, marker='.', color=c_op)
+            else:
+                op_data = Data1D(2)
+                op_data.copy_from_datainfo(data1d=data)
+                op_data.x = np.array([data.x.min(), data.x.max()])
+                op_data.y = np.array([d_op, d_op])
+                op_data.dy = np.zeros(2)
+                op_data.dx = np.zeros(2)
+                plotter.plot(data=op_data, hide_error=True, marker='-', color=c_op)
+
     def updatePlot(self, graph, layout, data, color=None, operation_data=False, data_op: Optional[list] = None, color_op: Optional[list] = None, overlap_op=True):
         """ plot data in graph after clearing its layout """
 
@@ -452,44 +468,37 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
             # put the operation data below regular data
             if operation_data is True and overlap_op is False:
-                for d_op, c_op in zip(data_op, color_op):
-                    if isinstance(d_op, Data1D):
-                        op_data = Data1D(x=d_op._operation.x, y=d_op._operation.y, dy=d_op._operation.dy, dx=None)
-                        op_data.copy_from_datainfo(data1d=d_op._operation)
-                        plotter.plot(data=op_data, hide_error=True, marker='.', color=c_op)
-                    else:
-                        op_data = Data1D(2)
-                        op_data_copy_from_datainfo(data1d=data)
-                        data.x = np.array([data.x.min(), data.x.max()])
-                        data.y = np.array([d_op[0], d_op[0]])
-                        data.dy = np.zeros(2)
-                        data.dx = np.zeros(2)
-                        plotter.plot(data=op_data, hide_error=True, marker='-', color=c_op)
+                self.addOperationData(plotter, data, data_op, color_op)
             plotter.plot(data=data, hide_error=True, marker='.', color=color)
             # put the operation data on top of regular data
-            if operation_data is True and overlap_op is False:
-                for d_op, c_op in zip(data_op, color_op):
-                    if isinstance(d_op, Data1D):
-                        op_data = Data1D(x=d_op._operation.x, y=d_op._operation.y, dy=d_op._operation.dy, dx=None)
-                        op_data.copy_from_datainfo(data1d=d_op._operation)
-                        plotter.plot(data=op_data, hide_error=True, marker='.', color=c_op)
-                    else:
-                        op_data = Data1D(2)
-                        op_data_copy_from_datainfo(data1d=data)
-                        data.x = np.array([data.x.min(), data.x.max()])
-                        data.y = np.array([d_op[0], d_op[0]])
-                        data.dy = np.zeros(2)
-                        data.dx = np.zeros(2)
-                        plotter.plot(data=op_data, hide_error=True, marker='-', color=c_op)
+            if operation_data is True and overlap_op is True:
+                self.addOperationData(plotter, data, data_op, color_op)
 
             plotter.show()
 
         elif float(data) and self.cbData2.currentText() == 'Number':
             # display value of coefficient (to be applied to Data1)
-            # in graphData2
-            layout.addWidget(self.prepareSubgraphWithData(data))
-
+            # in graphData2 as a line
+            plotter = PlotterWidget(self, quickplot=True)
+            plotter.showLegend = False
             graph.setLayout(layout)
+            layout.addWidget(plotter)
+
+            plotter.ax.tick_params(axis='x', labelsize=8)
+            plotter.ax.tick_params(axis='y', labelsize=8)
+
+            op_data = Data1D(2)
+            op_data.copy_from_datainfo(data1d=self.data1)
+            op_data.scale = 'linear'
+            op_data.x = np.array([1e-5, 1])
+            op_data.y = np.array([data, data])
+            op_data.dy = np.zeros(2)
+            op_data.dx = np.zeros(2)
+            plotter.plot(data=op_data, hide_error=True, marker='-', color=color)
+
+            plotter.show()
+
+
 
     def prepareSubgraphWithData(self, data):
         """ Create graphics view containing scene with string """
