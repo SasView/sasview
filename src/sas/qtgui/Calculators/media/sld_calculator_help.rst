@@ -2,57 +2,126 @@
 
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
+..
+    There is periodictable syntax for including density of components in the molecular formula field that does not appear to be implemented in SASview.
+..
+    For compounds, such as biomolecules, with exchangeable hydrogens, H[1] is used to denote the labile hydrogens. The reported contrast match point for the molecule takes into account the ratio of exchanged hydrogens.
+    This feature is not currently enabled in Sasview but is available on the NIST webpage.
 
 SLD Calculator Tool
 ===================
 
 Description
 -----------
+This tool calculates the neutron and x-ray scattering length densities (SLD) and some other useful scattering parameters of a wide range of materials including, molecules, solutions/mixtures, isotopic mixtures, and biomolecules.
+This SLD calculator utilizes the periodictable python package\ :sup:`1`, which is an extensible periodic table populated with values useful for neutron and x-ray experiments.
 
-The neutron scattering length density (SLD, $\beta_N$) is defined as
-
-.. math::
-
-  \beta_N = (b_{c1} + b_{c2} + ... + b_{cn}) / V_m
-
-where $b_{ci}$ is the bound coherent scattering length of ith of n atoms in a molecule
-with the molecular volume $V_m$.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-Specifying the Compound Name
+User Inputs
 ----------------------------
+**Molecular Formula** (required)
+    This field defines the material for which you are calculating the SLD. For more guidance on how to enter molecules, biomolecules, and more complex mixtures scroll down to "Specifying Materials or Mixtures in the Molecular Formula Field" section.
 
-To calculate scattering length densities enter the empirical formula of a
-compound and its mass density and click "Calculate".
+**Mass Density** |g/cm^3| (required)
+    This field defines the density of the material for which you are calculating the SLD of your material. Density uncertainty is likely the largest source of error in the SLD calculator.
 
-Entering a wavelength value is optional (a default value of 6.0 |Ang| will
-be used).
+**Neutron Wavelength** (|Ang|) (optional)
+    Wavelength is used to calculate the scattering cross-section and 1/e length. It is not required for SLD calculation. If left blank wavelength is assumed to be 6 |Ang|.
 
-TIPS!
+**X-ray Wavelength** (|Ang|) (required)
+    X-ray scattering length density is energy dependent thus wavelength is a required field for x-ray SLD calculation.
 
-*  Formula strings consist of atoms and the number of them, such as "CaCO3+6H2O".
+Calculator Output
+----------------------------
+Neutron SLD
+(|Ang^-2|)
 
-*  Groups can be separated by *'+'* or *space*, so "CaCO3 6H2O" works as well.
+X-ray SLD
+(|Ang^-2|)
 
-*  Groups can be defined using parentheses, such as "CaCO3(H2O)6".
+Neutron Incoherent Cross-section (cm\ :sup:`-1`)
 
-*  Parentheses can be nested, such as "(CaCO3(H2O)6)1".
+Neutron Absorption Cross-Section (cm\ :sup:`-1`)
 
-*  Isotopes are represented by their atomic number in *square brackets*, such
-   as "CaCO[18]3+6H2O", H[1], or H[2].
+Neutron 1/e length (cm)
 
-*  Numbers of atoms can be integer or decimal, such as "CaCO3+(3HO0.5)2".
+Specifying Materials or Mixtures in the Molecular Formula Field
+----------------------------
+**Molecular formulas** can be entered intuitively with atoms being represented by their atomic symbol. For example, let us consider calcium carbonate (CaCO\ :sub:`3`):
 
-*  The SLD of mixtures can be calculated as well. For example, for a 70-30
-   mixture of H2O/D2O write "H14O7+D6O3" or more simply "H7D3O5" (i.e. this says
-   7 hydrogens, 3 deuteriums, and 5 oxygens) and enter a mass density calculated
-   on the percentages of H2O and D2O.
+    CaCO3
 
-*  Type "C[13]6 H[2]12 O[18]6" for C(13)6H(2)12O(18)6 (6 Carbon-13 atoms, 12
-   deuterium atoms, and 6 Oxygen-18 atoms).
+**Multipart species** can be constructed by as a single molecular formula, or by separating the components with a + or a space. For example let us consider the hexahydrate of calcium carbonate, ikaite, (CaCO\ :sub:`3` |cdot| 6(H\ :sub:`2`\O)) which can be denoted as:
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+    CaCO3(H2O)6
 
-.. note::  This help document was last changed by Paul Kienzle, 05Apr2017
+    CaCO3 6H2O
+
+    CaCO3+6H2O
+
+**Isotopes** are represented as the element symbol followed by its mass number in square brackets, for example C[12] and C[13]. A special exception to this are isotopes of hydrogen which an also be represented as H = H[1], D = H[2], and T=H[3].
+
+**Isotopic Mixtures** can be entered in several ways. Take, for example a mixture of 30% H2O and 70% D2O (mole fraction). It can be entered as:
+
+    H3D7O5
+
+    H[1]3H[2]7O5
+
+    3H2O+7D2O
+
+For isotopic substitution you must also adjust the density for your mixture.
+
+**Mass Fraction** can be entered with each component of the mixture written as XX%wt "component" and each component separated with //. The mass fraction of the last component does not need to be specified as the sum of the fractions must add to 100. For example:
+
+    50%wt Co // Ti
+
+    1%wtNaCl // 50%wtD2O // H2O
+
+**Volume Fraction** can be entered in the same way by substituting %vol for %wt.
+
+    50%vol H2O // D2O
+
+These can be combined for more complicated solutions. For example, if you have a 10wt% sodium chloride in water solution and you dilute 20 mL of this solution to 100 mL with D2O this can be represented as:
+
+    20%vol (10%wt NaCl // H2O) // D2O
+
+for even more complicated solutions parenthesis can be nested, and number of atoms can be integer or decimal (eg (HO0.5)2 is equivalent to H2O).
+
+**Solution Composition with Mass and Volume** can be specified in units of mass and volume:
+
+    5g NaCl // 50 g H2O
+
+**Reminder** the solution density is the largest source of error for these calculations. Measure the solution density for an accurate result. For example:
+
+    A brine solution containing 10.44 g Al(NO\ :sub:`3`)3 |cdot| 9H\ :sub:`2`O and 27.51 g D\ :sub:`2`O was prepared for a wormlike micelle experiments. The solution density was measured with a density meter and found to be 1.22 |g/cm^3|. Using the scattering lenth density calculator we enter:
+
+    10.44g Al(NO3)3(H2O)9 // 27.5126g D2O
+    and density = 1.22 |g/cm^3|
+
+    The SLD is calculated to be 5.46e-06 (|Ang^-2|)
+
+**Biomolecules**
+
+DNA, Peptides, RNA can be described using the FASTA format.\ :sup:`2, 3` When using this format density will be estimated automatically and the SLD will be calculated for the biomolecule with all exchangeable hydrogens as H.
+Use the following codes:
+
+"aa" - amino acid sequences
+ A=Alanine, R=Arginine, L= Leucine
+
+"dna" - DNA sequences
+ A = adenosine, C = cytidine, G = guanine, T = thymidine
+
+"rna" - RNA sequences
+ U = uridine
+
+For example, the amino acid sequence for {beta}-casein can be written as:
+
+    aa:RELEELNVPGEIVESLSSSEESITRINKKIEKFQSEEQQQTEDELQDKIHPFAQTQSLVYPFPGPIPNSLPQNIPPLTQTPVVVPPFLQPEVMGVSKVKEAMAPKHKEMPFPKYPVEPFTESQSLTLTDVENLHLPLPLLQSWMHQPHQPLPPTVMFPPQSVLSLSQSKVLPVPQKAVPYPQRDMPIQAFLLYQEPVLGPVRGPFPIIV
+
+**References:**
+
+[1] Kienzle, P. A. (2008-2019). Extensible periodic table (v1.5.2). Computer Software. https://periodictable.readthedocs.io. [calculator source, web service source]
+[2] Pearson WR, Lipman DJ (April 1988). "Improved tools for biological sequence comparison". Proceedings of the National Academy of Sciences of the United States of America. 85 (8): 2444–8. doi:10.1073/pnas.85.8.2444.
+[3] https://zhanggroup.org/FASTA/  (helpful explanation)
+
+.. note::  This help document was last changed by Katie Weigandt, 01Jan2024
 
