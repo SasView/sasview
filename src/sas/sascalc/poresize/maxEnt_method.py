@@ -436,7 +436,7 @@ def sizeDistribution(input):
     res = input["Resolution"]
     Gmat = G_matrix(Q[Ibeg:Ifin],Bins,contrast,input["Model"],res)
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
-    chisq,BinMag,Ic[Ibeg:Ifin] = MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,IterMax=1000,report=True)
+    chisq,BinMag,Ic[Ibeg:Ifin] = MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,IterMax=500,report=True)
     BinMag = BinMag/(2.*Dbins)
     return chisq,Bins,Dbins,BinMag,Q[Ibeg:Ifin],Ic[Ibeg:Ifin]
 
@@ -471,10 +471,10 @@ input["Logbin"] = True
 input["DiamRange"] = [25,10000,100] 
 input["WeightFactors"] = np.ones(len(data_from_loader.y))
 input["Contrast"] = 1 
-input["Sky"] = 1e-4
+input["Sky"] = 4e-4
 #input["Weights"] = dI
-input["Weights"] = 0.1/I
-input["Background"] = np.ones(len(data_from_loader.y))*0.12
+input["Weights"] = 1/(I)
+input["Background"] = np.ones(len(data_from_loader.y))*0.120605
 input["Model"] = 'Sphere'
 perfect1D = rst.Perfect1D(data_from_loader.x) 
 qlength, qwidth = 0.117, None 
@@ -491,7 +491,7 @@ chisq,Bins,Dbins,BinMag,Qc,Ic = sizeDistribution(input)
 
 # Store results in a Data1D object (and temporarily also a separate plottable_hist object)
 I_result = data_info.Data1D(x=Qc, y=Ic, dx=None, dy=None,lam=None, dlam=None, isSesans=False)
-dist_result = plottable_hist(x=Bins, y=BinMag, dy=None, binWidth=Dbins)
+dist_result = plottable_hist(x=Bins, y=BinMag, dy=input["Weights"], binWidth=Dbins)
 dist_result._logx = True
 
 # Plot to visualize
