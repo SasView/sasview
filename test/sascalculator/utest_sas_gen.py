@@ -255,7 +255,6 @@ class sas_gen_test(unittest.TestCase):
             for val in np.abs(errs):
                 self.assertLessEqual(val, 2e-2)
 
-
     def test_calculator_elements(self):
         """
         Test that the calculator correctly calculates scattering for element type data.
