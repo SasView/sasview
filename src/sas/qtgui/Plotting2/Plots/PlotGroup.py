@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sas.qtgui.Plotting2.PlotManagement import Identifier, PlotRecord
 from sas.qtgui.Plotting2.Plots.NotionalPlot import NotionalPlot
 

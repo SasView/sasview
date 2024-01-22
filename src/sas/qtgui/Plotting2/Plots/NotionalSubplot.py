@@ -1,5 +1,7 @@
-from sas.qtgui.Plotting2.Plots.PlotCommon import PlotCommon
-from sas.qtgui.Plotting2.PlotManagement import PlotRecord
+from __future__ import annotations
+
+
+from sas.qtgui.Plotting2.PlotManagement import PlotRecord, PlotCommon
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -7,7 +9,7 @@ if TYPE_CHECKING:
     from sas.qtgui.Plotting2.Plots.NotionalPlot import NotionalPlot
 
 
-class NotionalSubplot(PlotCommon[NotionalPlot, NotionalAxis]):
+class NotionalSubplot(PlotCommon):
     def __init__(self):
         super().__init__()
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union, TypeVar, Generic
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -36,9 +38,8 @@ class PlotLocationConcrete:
     series_component: Identifier
 
 
-T = TypeVar("T")
-S = TypeVar("S")
-class PlotCommon(ABC, Generic[S, T]):
+
+class PlotCommon(ABC):
     def __init__(self):
         self._identifier = PlotRecord.new_identifier()
         self._formatting_options = FormattingOptions()
@@ -48,23 +49,28 @@ class PlotCommon(ABC, Generic[S, T]):
         """ Unique ID for this object"""
         return self._identifier
 
-    def parent(self) -> S:
+    @abstractmethod
+    def parent(self):
         """ Get the parent object """
 
-    def children(self) -> list[T]:
+    @abstractmethod
+    def children(self):
         """ Get the children of this object """
 
     def formatting_options(self):
         return self._formatting_options.override(self.parent().formatting_options)
 
 
-class PlotRoot(PlotCommon[None, NotionalPlot]):
+class PlotRoot(PlotCommon):
     def __init__(self):
         super().__init__()
 
         self.default_formatting = FormattingOptions(
             color="black",
             marker_style=None)
+
+    def parent(self) -> None:
+        return
 
     def children(self) -> list[NotionalPlot]:
         return PlotRecord.plots()
@@ -73,9 +79,10 @@ class PlotRoot(PlotCommon[None, NotionalPlot]):
         """ Get the formatting options - Overrides parent class"""
         return self.default_formatting
 
+
 class PlotRecord:
     """ Central place that keeps track of the various plot, groups, and plot components """
-    _root = PlotRoot()
+    _root = None
 
     _plots: dict[Identifier, NotionalPlot] = {}
     _subplots: dict[Identifier, NotionalSubplot] = {}
@@ -99,6 +106,13 @@ class PlotRecord:
     _current_plot_group_identifier = 0
 
     @staticmethod
+    def root():
+        if PlotRecord._root is None:
+            PlotRecord._root = PlotRoot()
+
+        return PlotRecord._root
+
+    @staticmethod
     def new_identifier():
         while PlotRecord._current_identifier in PlotRecord._identifiers:
             PlotRecord._current_identifier += 1
@@ -113,9 +127,9 @@ class PlotRecord:
         while PlotRecord._current_plot_group_identifier in PlotRecord._plot_group_identifiers:
             PlotRecord._current_plot_group_identifier += 1
 
-        PlotRecord._identifiers.add(PlotRecord._current_plot_group_identifier)
+        PlotRecord._plot_group_identifiers.add(PlotRecord._current_plot_group_identifier)
 
-        return PlotRecord._current_identifier
+        return PlotRecord._current_plot_group_identifier
 
 
     @staticmethod
@@ -180,6 +194,7 @@ class PlotRecord:
 
     @staticmethod
     def add_group(group: PlotGroup):
+        print(f"Adding group with index {group.identifier} ({group})")
         PlotRecord._plot_groups[group.identifier] = group
 
     @staticmethod
@@ -219,7 +234,7 @@ class PlotRecord:
     #
 
     @staticmethod
-    def plot_group(identifier: GroupIdentifier):
+    def plot_group(identifier: GroupIdentifier) -> PlotGroup:
         """ Get a plot group by its ID"""
         return PlotRecord._plot_groups[identifier]
 

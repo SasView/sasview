@@ -1,14 +1,16 @@
+from __future__ import annotations
+
+
 from PySide6.QtWidgets import QWidget
 
 from PySide6.QtWidgets import QVBoxLayout, QLabel
 
-from sas.qtgui.Plotting2.PlotManagement import PlotRecord
-from sas.qtgui.Plotting2.Plots.PlotCommon import PlotCommon
+from sas.qtgui.Plotting2.PlotManagement import PlotRecord, PlotCommon
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sas.qtgui.Plotting2.Plots.NotionalSubplot import NotionalSubplot
-    from sas.qtgui.Plotting2.Plots.PlotRoot import PlotRoot
+    from sas.qtgui.Plotting2.PlotManagement import PlotRoot
 
 # Prototyping stuff
 def fnumber():
@@ -35,11 +37,14 @@ class TempPlotWidget(QWidget):
 
 
 
-class NotionalPlot(PlotCommon[PlotRoot, NotionalSubplot]):
+class NotionalPlot(PlotCommon):
     def __init__(self):
         super().__init__()
 
         self.plot_name = f"Plot {number()}"
+
+        # Put this here for now, might not be the place to do it TODO: Check
+        PlotRecord.add_plot(self)
 
     def parent(self) -> PlotRoot:
         """ Get the parent plot group"""

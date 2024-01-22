@@ -1,9 +1,15 @@
-from sas.qtgui.Plotting2.Plots.PlotCommon import PlotCommon
-from sas.qtgui.Plotting2.Plots.NotionalAxis import NotionalAxis
-from sas.qtgui.Plotting2.Plots.PlotSeries import PlotSeries
-from sas.qtgui.Plotting2.PlotManagement import PlotRecord
+from __future__ import annotations
 
-class PlotSeriesGroup(PlotCommon[NotionalAxis, PlotSeries]):
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sas.qtgui.Plotting2.Plots.NotionalAxis import NotionalAxis
+    from sas.qtgui.Plotting2.Plots.PlotSeries import PlotSeries
+
+from sas.qtgui.Plotting2.PlotManagement import PlotRecord, PlotCommon
+
+
+class PlotSeriesGroup(PlotCommon):
     def __init__(self):
         super().__init__()
 

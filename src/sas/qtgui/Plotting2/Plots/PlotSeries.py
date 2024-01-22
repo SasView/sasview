@@ -1,9 +1,10 @@
-from sas.qtgui.Plotting2.Plots.PlotCommon import PlotCommon
+from __future__ import annotations
+
 from sas.qtgui.Plotting2.Plots.PlotSeriesGroup import PlotSeriesGroup
 from sas.qtgui.Plotting2.Plots.PlotSeriesComponent import PlotSeriesComponent
-from sas.qtgui.Plotting2.PlotManagement import PlotRecord
+from sas.qtgui.Plotting2.PlotManagement import PlotRecord, PlotCommon
 
-class PlotSeries(PlotCommon[PlotSeriesGroup, PlotSeriesComponent]):
+class PlotSeries(PlotCommon):
     def children(self) -> list[PlotSeriesComponent]:
         return PlotRecord.child_series_component(self.identifier)
 
