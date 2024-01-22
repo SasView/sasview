@@ -105,45 +105,40 @@ class Data1D(PlottableData1D, LoadData1D):
     def _perform_operation(self, other, operation):
         """
         """
-        # First, check the data compatibility
-        dy, dy_other = self._validity_check(other)
-        result = Data1D(x=[], y=[], dx=None, dy=None)
-        result.clone_without_data(length=len(self.x), clone=self)
-        result.copy_from_datainfo(data1d=self)
-        if self.dxw is None:
-            result.dxw = None
-        else:
-            result.dxw = numpy.zeros(len(self.x))
-        if self.dxl is None:
-            result.dxl = None
-        else:
-            result.dxl = numpy.zeros(len(self.x))
+        # Check for compatibility of the x-ranges and populate the data used for the operation
+        # interpolation will be implemented on the 'other' dataset as needed
+        self._interpolation_operation(other)
 
-        for i in range(len(self.x)):
-            result.x[i] = self.x[i]
-            if self.dx is not None and len(self.x) == len(self.dx):
-                result.dx[i] = self.dx[i]
-            if self.dxw is not None and len(self.x) == len(self.dxw):
-                result.dxw[i] = self.dxw[i]
-            if self.dxl is not None and len(self.x) == len(self.dxl):
-                result.dxl[i] = self.dxl[i]
-            
-            a = Uncertainty(self.y[i], dy[i]**2)
+        result = Data1D(x=[], y=[], dx=None, dy=None)
+        result.clone_without_data(length=self._x_op.size, clone=self)
+        result.copy_from_datainfo(data1d=self)
+
+        # result = self.clone_without_data(self._x_op.size)
+        result.x = numpy.copy(self._x_op)
+        result.y = numpy.zeros(self._x_op.size)
+        result.dy = numpy.zeros(self._x_op.size)
+        # result.y is initialized as arrays of zero with length of _x_op
+        # result.dy is initialized as arrays of zero with length of _x_op
+        result.dx = None if self._dx_op is None else numpy.copy(self._dx_op)
+        result.dxl = None if self._dxl_op is None else numpy.copy(self._dxl_op)
+        result.dxw = None if self._dxw_op is None else numpy.copy(self._dxw_op)
+        result.lam = None if self._lam_op is None else numpy.copy(self._lam_op)
+        result.dlam = None if self._dlam_op is None else numpy.copy(self._dlam_op)
+
+        for i in range(result.x.size):
+
+            a = Uncertainty(self._y_op[i], self._dy_op[i]**2)
             if isinstance(other, Data1D):
-                b = Uncertainty(other.y[i], dy_other[i]**2)
-                if other.dx is not None:
-                    result.dx[i] *= self.dx[i]
-                    result.dx[i] += (other.dx[i]**2)
-                    result.dx[i] /= 2
-                    result.dx[i] = math.sqrt(result.dx[i])
-                if result.dxl is not None and other.dxl is not None:
-                    result.dxl[i] *= self.dxl[i]
-                    result.dxl[i] += (other.dxl[i]**2)
-                    result.dxl[i] /= 2
-                    result.dxl[i] = math.sqrt(result.dxl[i])
+                b = Uncertainty(other._y_op[i], other._dy_op[i]**2)
+                if result.dx is not None and other._dx_op is not None:
+                    result.dx[i] = math.sqrt((self._dx_op[i]**2 + other._dx_op[i]**2) / 2)
+                if result.dxl is not None and other._dxl_op is not None:
+                    result.dxl[i] = math.sqrt((self._dxl_op[i]**2 + other._dxl_op[i]**2) / 2)
+                if result.dxw is not None and other._dxw_op is not None:
+                    result.dxw[i] = math.sqrt((self._dxw_op[i]**2 + other._dxw_op[i]**2) / 2)
             else:
                 b = other
-            
+
             output = operation(a, b)
             result.y[i] = output.x
             result.dy[i] = math.sqrt(math.fabs(output.variance))

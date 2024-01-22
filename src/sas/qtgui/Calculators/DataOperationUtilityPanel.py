@@ -6,6 +6,7 @@ import copy
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
+import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -148,6 +149,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.onPrepareOutputData()
             # plot result
             self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+            self.updatePlot(self.graphData1, self.layoutData1, self.data1, add_interp=True)
+            self.updatePlot(self.graphData2, self.layoutData2, self.data2, add_interp=True)
 
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)
@@ -302,13 +305,14 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 logging.error('Cannot compute data of different dimensions')
                 return False
 
-            elif self.data1.__class__.__name__ == 'Data1D'\
-                    and (len(self.data2.x) != len(self.data1.x) or
-                             not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
-                logging.error('Cannot compute 1D data of different lengths')
-                self.cbData1.setStyleSheet(BG_RED)
-                self.cbData2.setStyleSheet(BG_RED)
-                return False
+            # handling data with different q values implemented by CMW 1-21-2024
+            # elif self.data1.__class__.__name__ == 'Data1D'\
+            #         and (len(self.data2.x) != len(self.data1.x) or
+            #                  not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
+            #     logging.error('Cannot compute 1D data of different lengths')
+            #     self.cbData1.setStyleSheet(BG_RED)
+            #     self.cbData2.setStyleSheet(BG_RED)
+            #     return False
 
             elif self.data1.__class__.__name__ == 'Data2D' \
                     and (len(self.data2.qx_data) != len(self.data1.qx_data) \
@@ -387,7 +391,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         graph.setLayout(layout)
 
-    def updatePlot(self, graph, layout, data):
+    def updatePlot(self, graph, layout, data, add_interp=False):
         """ plot data in graph after clearing its layout """
 
         assert isinstance(graph, QtWidgets.QGraphicsView)
@@ -399,7 +403,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             layout.removeItem(item)
 
         layout.setContentsMargins(0, 0, 0, 0)
-
         if isinstance(data, Data2D):
             # plot 2D data
             plotter2D = Plotter2DWidget(self, quickplot=True)
@@ -431,6 +434,15 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='y', labelsize=8)
 
             plotter.plot(data=data, hide_error=True, marker='.')
+            if add_interp:
+                interp = Data1D(x=[], y=[], dx=None, dy=None)
+                interp.clone_without_data(length=data.x.size, clone=self)
+                interp.copy_from_datainfo(data1d=data)
+                interp.x = np.copy(data._x_op)
+                interp.y = np.copy(data._y_op)
+                interp.dy = np.copy(data._dy_op)
+                interp.dx = np.zeros(data._x_op.size)
+                plotter.plot(data=interp, hide_error=True, marker='.')
 
             plotter.show()
 
