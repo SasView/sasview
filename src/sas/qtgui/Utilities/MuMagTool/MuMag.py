@@ -20,6 +20,8 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.ImportDataButton.clicked.connect(self.import_data_button_callback)
         self.PlotDataButton.clicked.connect(self.plot_experimental_data_button_callback)
         self.SimpleFitButton.clicked.connect(self.simple_fit_button_callback)
+        self.CompareResultsButton.clicked.connect(self.compare_data_button_callback)
+        self.SaveResultsButton.clicked.connect(self.save_data_button_callback)
 
         # Plotting
         layout = QVBoxLayout()
@@ -58,16 +60,6 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.figure_canvas.draw()
 
     def simple_fit_button_callback(self):
-        self.axes.set_visible(False)
-        self.axes1.set_visible(True)
-        self.axes2.set_visible(True)
-        self.axes3.set_visible(True)
-        self.axes4.set_visible(True)
-        self.axes.cla()
-        self.axes1.cla()
-        self.axes2.cla()
-        self.axes3.cla()
-        self.axes4.cla()
 
         q_max = float(self.qMaxEdit.toPlainText())
         H_min = float(self.HminEdit.toPlainText())
@@ -75,9 +67,48 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         A2 = float(self.AMaxEdit.toPlainText())
         A_N = int(self.ASamplesEdit.toPlainText())
         SANSgeometry = self.ScatteringGeometrySelect.currentText()
+
+        self.axes.cla()
+        self.axes1.cla()
+        self.axes2.cla()
+        self.axes3.cla()
+        self.axes4.cla()
+        self.axes.set_visible(False)
+        if SANSgeometry == 'perpendicular':
+            self.axes1.set_visible(True)
+            self.axes2.set_visible(True)
+            self.axes3.set_visible(True)
+            self.axes4.set_visible(True)
+        elif SANSgeometry == 'parallel':
+            self.axes1.set_visible(True)
+            self.axes2.set_visible(True)
+            self.axes3.set_visible(True)
+            self.axes4.set_visible(False)
+
         self.MuMagLib_obj.simple_fit_button_callback(q_max, H_min, A1, A2, A_N, SANSgeometry,
                                                      self.fig, self.axes1, self.axes2, self.axes3, self.axes4)
         self.figure_canvas.draw()
+
+    def compare_data_button_callback(self):
+        self.axes.cla()
+        self.axes1.cla()
+        self.axes2.cla()
+        self.axes3.cla()
+        self.axes4.cla()
+        self.axes.set_visible(True)
+        self.axes1.set_visible(False)
+        self.axes2.set_visible(False)
+        self.axes3.set_visible(False)
+        self.axes4.set_visible(False)
+
+        self.MuMagLib_obj.SimpleFit_CompareButtonCallback(self.fig, self.axes)
+
+
+
+    def save_data_button_callback(self):
+        self.MuMagLib_obj.save_button_callback()
+
+
 
 def main():
     """ Show a demo of the slider """
