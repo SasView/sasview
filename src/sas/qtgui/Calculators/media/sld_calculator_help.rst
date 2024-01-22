@@ -33,23 +33,18 @@ User Inputs
 Calculator Output
 ----------------------------
 **Neutron SLD** (|Ang^-2|)
-
    A measure of the neutron scattering power of the material. A required input for most scattering models using in neutron scattering experiments.
 
 **X-ray SLD** (|Ang^-2|)
-
     A measure of the x-ray scattering power of the material.  A required input for most scattering models using in x-ray scattering experiments.
 
 **Neutron Incoherent Cross-section** (cm\ :sup:`-1`)
-
     A measure of the probability that the neutron will scatter incoherently.
 
 **Neutron Absorption Cross-Section** (cm\ :sup:`-1`)
-
     A measure of the probability that a neutron will be absorbed by the material.
 
 **Neutron 1/e length** (cm)
-
     The sample thickness required to reduce the transmission to 36.8% (1/e).
 
 Specifying Materials or Mixtures in the Molecular Formula Field
@@ -98,7 +93,7 @@ For even more complicated solutions parenthesis can be nested, and number of ato
 
     5g NaCl // 50 g H2O
 
-**Reminder** the solution density is the largest source of error for these calculations. Measure the solution density for an accurate result. For example:
+*Reminder the solution density is the largest source of error for these calculations.* Measure the solution density for an accurate result. For example:
 
     A brine solution containing 10.44 g Al(NO\ :sub:`3`)3 |cdot| 9H\ :sub:`2`O and 27.51 g D\ :sub:`2`O was prepared for a wormlike micelle experiments. The solution density was measured with a density meter and found to be 1.22 |g/cm^3|. Using the scattering lenth density calculator we enter:
 
