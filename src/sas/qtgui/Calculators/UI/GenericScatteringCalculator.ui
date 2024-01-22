@@ -206,7 +206,7 @@
        </widget>
       </item>
       <item row="1" column="0" colspan="4">
-       <widget class="QGroupBox" name="groupBox_7">
+       <widget class="QGroupBox" name="groupBox_8">
         <property name="font">
          <font>
           <bold>false</bold>
@@ -215,7 +215,7 @@
         <property name="title">
          <string>Sample Coordinates (xyz)</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_14">
+        <layout class="QGridLayout" name="gridLayout_15">
          <item row="0" column="0">
           <widget class="QLabel" name="lblSampleYaw">
            <property name="font">
@@ -1943,7 +1943,7 @@ Number of Qbins &amp;isin; [2, 1000].</string>
     </spacer>
    </item>
    <item row="0" column="11" rowspan="2" colspan="2">
-    <widget class="Line" name="line">
+    <widget class="Line" name="line1">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -2023,7 +2023,7 @@ Number of Qbins &amp;isin; [2, 1000].</string>
       <item row="1" column="1">
        <widget class="QLabel" name="lblRG">
         <property name="toolTip">
-         <string>Guinier Radius - Radius of Gyration based on Scattering Length Density 
+         <string>Guinier Radius - Radius of Gyration based on Scattering Length Density
 NOTE: Currently not impacted by Solvent SLD </string>
         </property>
         <property name="text">
@@ -2035,7 +2035,7 @@ NOTE: Currently not impacted by Solvent SLD </string>
     </widget>
    </item>
    <item row="5" column="1" rowspan="2" colspan="3">
-    <layout class="QGridLayout" name="gridLayout_15" columnstretch="0">
+    <layout class="QGridLayout" name="gridLayout_19" columnstretch="0">
      <property name="sizeConstraint">
       <enum>QLayout::SetMaximumSize</enum>
      </property>
@@ -2050,7 +2050,7 @@ NOTE: Currently not impacted by Solvent SLD </string>
        <property name="title">
         <string>Plugin Models</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_19">
+       <layout class="QGridLayout" name="gridLayout_20">
         <item row="0" column="0">
          <widget class="QCheckBox" name="checkboxPluginModel">
           <property name="text">

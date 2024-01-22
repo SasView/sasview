@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>20</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -158,6 +158,7 @@
     <addaction name="actionWelcomeWidget"/>
     <addaction name="separator"/>
     <addaction name="actionCheck_for_update"/>
+    <addaction name="actionWhat_s_New"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -582,7 +583,7 @@
   </action>
   <action name="actionHide_LogExplorer">
    <property name="text">
-    <string>Hide Log Explorer</string>
+    <string>Show Log Explorer</string>
    </property>
   </action>
   <action name="actionCategory_Manager">
@@ -617,6 +618,11 @@
    </property>
    <property name="text">
     <string>Preferences...</string>
+   </property>
+  </action>
+  <action name="actionWhat_s_New">
+   <property name="text">
+    <string>What's New</string>
    </property>
   </action>
  </widget>

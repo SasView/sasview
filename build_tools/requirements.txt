@@ -1,16 +1,15 @@
-numpy<1.24
-scipy==1.10.0 
+numpy 
+scipy
 docutils 
 pytest
 pytest_qt
 pytest-mock
 unittest-xml-reporting
 tinycc 
-h5py 
+h5py
 sphinx
 pyparsing 
 html5lib 
-reportlab==3.6.6 
 pybind11 
 appdirs
 six 
@@ -22,7 +21,7 @@ xhtml2pdf
 pylint
 periodictable 
 uncertainties 
-matplotlib~=3.5.2
+matplotlib
 lxml
 pytools 
 cffi
@@ -33,9 +32,10 @@ bumps
 html2text
 jsonschema
 pywin32; platform_system == "Windows"
-PySide6==6.2.4
+PySide6==6.4.3
 twisted
 zope
 superqt
 pyopengl
 pyopengl_accelerate
+sphinx

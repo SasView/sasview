@@ -86,8 +86,23 @@ def rebuild_new_ui(force=False):
     rc_file = 'images.qrc'
     out_file = 'images_rc.py'
 
+
     in_file = os.path.join(images_root, rc_file)
     out_file = os.path.join(ui_root, out_file)
+
+    if force or file_in_newer(in_file, out_file):
+        print("Generating " + out_file + " ...")
+        pyrrc(in_file, out_file)
+
+
+    # Icons for Particle Editor
+    images_root = os.path.join(execute_root, 'Perspectives/ParticleEditor/UI/icons')
+    out_root = os.path.join(execute_root, 'Perspectives/ParticleEditor/UI')
+    rc_file = 'icons.qrc'
+    out_file = 'icons_rc.py'
+
+    in_file = os.path.join(images_root, rc_file)
+    out_file = os.path.join(out_root, out_file)
 
     if force or file_in_newer(in_file, out_file):
         print("Generating " + out_file + " ...")
