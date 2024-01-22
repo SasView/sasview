@@ -136,6 +136,8 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
 
         self.communicator = manager.communicator()
 
+        self.manager = manager
+
         self.setWindowTitle("Category Manager")
 
         self.initializeGlobals()
@@ -205,6 +207,7 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         self.cmdOK.clicked.connect(self.onClose)
         self.cmdModify.clicked.connect(self.onModify)
         self.cmdReset.clicked.connect(self.onReset)
+        self.cmdHelp.clicked.connect(self.displayHelp)
 
         self.chkEnable.toggled.connect(self.onEnableAll)
 
@@ -262,6 +265,10 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         self.initializeModelList()
         self.setTableProperties(self.lstCategory)
         self.lstCategory.setAlternatingRowColors(True)
+
+    def displayHelp(self):
+        location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#category-manager"
+        self.manager.showHelp(location)
 
     def onEnableAll(self, isChecked):
         """
