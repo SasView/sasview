@@ -432,7 +432,7 @@ def sizeDistribution(input):
     Ic = np.zeros(len(I))
     sky = input["Sky"]
     wt = input["Weights"][Ibeg:Ifin]
-    Back = input["Background"]
+    Back = input["Background"][Ibeg:Ifin]
     res = input["Resolution"]
     Gmat = G_matrix(Q[Ibeg:Ifin],Bins,contrast,input["Model"],res)
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
@@ -474,7 +474,7 @@ input["Contrast"] = 1
 input["Sky"] = 1e-4
 #input["Weights"] = dI
 input["Weights"] = 0.1/I
-input["Background"] = np.ones(len(data_from_loader.y)-20-18)*0.12
+input["Background"] = np.ones(len(data_from_loader.y))*0.12
 input["Model"] = 'Sphere'
 perfect1D = rst.Perfect1D(data_from_loader.x) 
 qlength, qwidth = 0.117, None 
