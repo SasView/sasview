@@ -141,9 +141,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         self.output = output
 
-        self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
-        self.updatePlot(self.graphData1, self.layoutData1, self.data1, add_interp=True)
-        self.updatePlot(self.graphData2, self.layoutData2, self.data2, add_interp=True)
+        self.updatePlot(self.graphOutput, self.layoutOutput, self.output, color='#000000')
+        self.updatePlot(self.graphData1, self.layoutData1, self.data1, color='#882255', add_interp=True, color_interp='#44AA99')
+        self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288', add_interp=True, color_interp='#CC6677')
 
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)
@@ -402,7 +402,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         graph.setLayout(layout)
 
-    def updatePlot(self, graph, layout, data, add_interp=False):
+    def updatePlot(self, graph, layout, data, color=None, add_interp=False, color_interp=None):
         """ plot data in graph after clearing its layout """
 
         assert isinstance(graph, QtWidgets.QGraphicsView)
@@ -444,16 +444,11 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='x', labelsize=8)
             plotter.ax.tick_params(axis='y', labelsize=8)
 
-            plotter.plot(data=data, hide_error=True, marker='.')
+            plotter.plot(data=data, hide_error=True, marker='.', color=color)
             if add_interp:
-                interp = Data1D(x=[], y=[], dx=None, dy=None)
-                interp.clone_without_data(length=data.x.size, clone=self)
-                interp.copy_from_datainfo(data1d=data)
-                interp.x = np.copy(data._x_op)
-                interp.y = np.copy(data._y_op)
-                interp.dy = np.copy(data._dy_op)
-                interp.dx = np.zeros(data._x_op.size)
-                plotter.plot(data=interp, hide_error=True, marker='.')
+                interp = Data1D(x=data._operation.x, y=data._operation.y, dy=data._operation.dy, dx=None)
+                interp.copy_from_datainfo(data1d=data._operation)
+                plotter.plot(data=interp, hide_error=True, marker='.', color=color_interp)
 
             plotter.show()
 
