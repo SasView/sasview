@@ -436,8 +436,8 @@ class PointInteractor(BaseInteractor):
 
 class VerticalDoubleLine(BaseInteractor):
     """
-    Draw 2 vertical lines moving in opposite direction and centered on
-    a point (PointInteractor)
+    Draw 2 vertical lines that can move symmetrically in opposite directions in x and centered on
+    a point (PointInteractor). It also defines the left and right y positions of a box.
     """
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
                  center_x=0.0, center_y=0.0):
@@ -606,7 +606,8 @@ class VerticalDoubleLine(BaseInteractor):
 
 class HorizontalDoubleLine(BaseInteractor):
     """
-    Select an annulus through a 2D plot
+    Draw 2 vertical lines that can move symmetrically in opposite directions in y and centered on
+    a point (PointInteractor). It also defines the left and right x positions of a box.
     """
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
                  center_x=0.0, center_y=0.0):
