@@ -96,9 +96,11 @@ def evaluate_sans_debye(q, coords, w):
     from sas.sascalc.calculator.ausaxs.architecture import determine_os, OS
     if determine_os() is OS.WIN:
         import os
-        os.makedirs("tmp", exist_ok=True)
-        file_c = open("tmp/coords.txt", "w")
-        file_q = open("tmp/q.txt", "w")
+        from pathlib import Path
+        base_path = Path(os.getcwd())
+        os.makedirs(base_path.joinpath("tmp"), exist_ok=True)
+        file_c = open(base_path.joinpath("tmp", "coords.txt"), "w")
+        file_q = open(base_path.joinpath("tmp", "q.txt"), "w")
         for _q in q:
             file_q.write(str(_q)+"\n")
 
@@ -109,11 +111,12 @@ def evaluate_sans_debye(q, coords, w):
         file_q.close()
 
         import subprocess
-        subprocess.call([ausaxs, "tmp/coords.txt", "tmp/q.txt", "tmp/Iq.txt"])
-        file_Iq = open("tmp/Iq.txt", "r")
+        subprocess.run([ausaxs, base_path.joinpath("tmp", "coords.txt"), base_path.joinpath("tmp", "q.txt"), base_path.joinpath("tmp", "Iq.txt")])
+        file_Iq = open(base_path.joinpath("tmp", "Iq.txt"), "r")
 
         # format is | q | I(q) |
         # skip first line
+        Iq = np.zeros(len(q))
         for i, line in enumerate(file_Iq):
             if (i == 0): continue
             if (1e-3 < abs(q[i-1] - float(line.split()[0]))):
