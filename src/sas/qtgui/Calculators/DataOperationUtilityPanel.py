@@ -8,6 +8,8 @@ from PySide6 import QtGui
 from PySide6 import QtWidgets
 import numpy as np
 
+from typing import Optional
+
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -141,9 +143,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         self.output = output
 
-        self.updatePlot(self.graphOutput, self.layoutOutput, self.output, color='#000000')
-        self.updatePlot(self.graphData1, self.layoutData1, self.data1, color='#882255', add_interp=True, color_interp='#44AA99')
-        self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288', add_interp=True, color_interp='#CC6677')
+        self.updatePlot(self.graphOutput, self.layoutOutput, self.output, color='#000000',
+                        operation_data=True, data_op=[self.data1, self.data2], color_op=["#44AA99", "#CC6677"],
+                        overlap_op=False)
+        self.updatePlot(self.graphData1, self.layoutData1, self.data1, color='#882255',
+                        operation_data=True, data_op=[self.data1], color_op=["#44AA99"], overlap_op=True)
+        self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288',
+                        operation_data=True, data_op=[self.data2], color_op=['#CC6677'], overlap_op=True)
 
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)
@@ -232,7 +238,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             key_id1 = self._findId(choice_data1)
             self.data1 = self._extractData(key_id1)
             # plot Data1
-            self.updatePlot(self.graphData1, self.layoutData1, self.data1)
+            self.updatePlot(self.graphData1, self.layoutData1, self.data1, color='#882255')
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
             # Enable Compute button only if Data2 is defined and data compatible
@@ -259,7 +265,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             # Enable Compute button only if Data1 defined and compatible data
             self.cmdCompute.setEnabled(self.onCheckChosenData())
             # Display value of coefficient in graphData2
-            self.updatePlot(self.graphData2, self.layoutData2, self.data2)
+            self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288')
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
             self.onCheckChosenData()
@@ -272,7 +278,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.cmdCompute.setEnabled(self.onCheckChosenData())
 
             # plot Data2
-            self.updatePlot(self.graphData2, self.layoutData2, self.data2)
+            self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288')
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
 
@@ -296,7 +302,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             else:
                 self.txtNumber.setStyleSheet(BG_WHITE)
                 self.data2 = float(self.txtNumber.text())
-                self.updatePlot(self.graphData2, self.layoutData2, self.data2)
+                self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='#332288')
 
     def onCheckChosenData(self):
         """ check that data1 and data2 are compatible """
@@ -402,7 +408,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         graph.setLayout(layout)
 
-    def updatePlot(self, graph, layout, data, color=None, add_interp=False, color_interp=None):
+    def updatePlot(self, graph, layout, data, color=None, operation_data=False, data_op: Optional[list] = None, color_op: Optional[list] = None, overlap_op=True):
         """ plot data in graph after clearing its layout """
 
         assert isinstance(graph, QtWidgets.QGraphicsView)
@@ -444,11 +450,37 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='x', labelsize=8)
             plotter.ax.tick_params(axis='y', labelsize=8)
 
+            # put the operation data below regular data
+            if operation_data is True and overlap_op is False:
+                for d_op, c_op in zip(data_op, color_op):
+                    if isinstance(d_op, Data1D):
+                        op_data = Data1D(x=d_op._operation.x, y=d_op._operation.y, dy=d_op._operation.dy, dx=None)
+                        op_data.copy_from_datainfo(data1d=d_op._operation)
+                        plotter.plot(data=op_data, hide_error=True, marker='.', color=c_op)
+                    else:
+                        op_data = Data1D(2)
+                        op_data_copy_from_datainfo(data1d=data)
+                        data.x = np.array([data.x.min(), data.x.max()])
+                        data.y = np.array([d_op[0], d_op[0]])
+                        data.dy = np.zeros(2)
+                        data.dx = np.zeros(2)
+                        plotter.plot(data=op_data, hide_error=True, marker='-', color=c_op)
             plotter.plot(data=data, hide_error=True, marker='.', color=color)
-            if add_interp:
-                interp = Data1D(x=data._operation.x, y=data._operation.y, dy=data._operation.dy, dx=None)
-                interp.copy_from_datainfo(data1d=data._operation)
-                plotter.plot(data=interp, hide_error=True, marker='.', color=color_interp)
+            # put the operation data on top of regular data
+            if operation_data is True and overlap_op is False:
+                for d_op, c_op in zip(data_op, color_op):
+                    if isinstance(d_op, Data1D):
+                        op_data = Data1D(x=d_op._operation.x, y=d_op._operation.y, dy=d_op._operation.dy, dx=None)
+                        op_data.copy_from_datainfo(data1d=d_op._operation)
+                        plotter.plot(data=op_data, hide_error=True, marker='.', color=c_op)
+                    else:
+                        op_data = Data1D(2)
+                        op_data_copy_from_datainfo(data1d=data)
+                        data.x = np.array([data.x.min(), data.x.max()])
+                        data.y = np.array([d_op[0], d_op[0]])
+                        data.dy = np.zeros(2)
+                        data.dx = np.zeros(2)
+                        plotter.plot(data=op_data, hide_error=True, marker='-', color=c_op)
 
             plotter.show()
 
