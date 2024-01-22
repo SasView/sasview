@@ -28,9 +28,9 @@ def attach_hooks():
     with resources.as_file(resources.files("sas.sascalc.calculator.ausaxs.lib")) as loc:
         if sys is OS.WIN:
             if arch is Arch.AVX:
-                path = loc.joinpath("libausaxs_avx.exe")
+                path = loc.joinpath("sasview_avx.exe")
             else:
-                path = loc.joinpath("libausaxs_sse.exe")
+                path = loc.joinpath("sasview_sse.exe")
         elif sys is OS.LINUX:
             if arch is Arch.AVX:
                 path = loc.joinpath("libausaxs_avx.so")
