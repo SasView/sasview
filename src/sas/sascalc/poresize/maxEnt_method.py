@@ -34,7 +34,7 @@ References:
 # All SB eq. refers to equations in the J Skilling and RK Bryan; MNRAS 211 (1984) 111 - 124. paper
 # Overall idea is to maximize entropy S subject to constraint C<=C_aim, which is some Chi^2 target
 # Most comments are copied from GSASIIsasd.py
-# Currently, this code only works with spherical models and no smearing
+# Currently, this code only works with spherical models
 
 # a new plottable_hist that can be integrated into Data1D object in the future
 class plottable_hist(object):
@@ -101,7 +101,7 @@ def SphereVol(Bins):
     return Vol
 
 # Transformation matrix
-def G_matrix(Q,Bins,contrast,choice):
+def G_matrix(Q,Bins,contrast,choice,resolution):
     '''
     Defined as (form factor)^2 times volume times some scaling
     The integrand for Iq technically requires volume^2
@@ -114,6 +114,8 @@ def G_matrix(Q,Bins,contrast,choice):
     # TODO: See if we can make use of existing Sasmodels
     if choice == 'Sphere':
         Gmat = 1.e-4*(contrast*SphereVol(Bins)*SphereFF(Q,Bins)**2).transpose()
+    Gmat = resolution.apply(Gmat)
+    Gmat = Gmat.reshape((len(Bins),len(Q)))
     return Gmat
 
 class MaxEntException(Exception): 
@@ -132,29 +134,28 @@ def calculate_solution(data, G):
     
     Definition according to SB: solution = image = a set of positive numbers which are to be determined and on which entropy is defined
     
-    :param float[M] data: related to distribution, ndarray of shape (n)
-    :param float[M][N] G: transformation matrix, ndarray of shape (n,npt)
-    :returns float[N]: calculated solution, ndarray of shape (npt)
+    :param float[npt] data: related to distribution, ndarray of shape (npt)
+    :param float[n][npt] G: transformation matrix, ndarray of shape (n,npt)
+    :param obj resolution: resolution object providing information about smearing
+    :returns float[n]: calculated solution, ndarray of shape (n)
     '''
-    return np.dot(G,data)
+    solution = np.dot(G,data)
+    return solution
 
-def calculate_data(solution, G, resolution):
+def calculate_data(solution, G):
     # orginally named opus in GSASIIsasd.py (comments also mostly from original code)
-    # currently, resolution can only be a perfect1D object. Otherwise, the code may run into numerical errors
     '''
     Transform solution-space -> data-space:  [G]^tr * solution
     
     n = len(first_bins)
     npt = len(Iq) = len(Q)
     
-    :param float[N] solution: related to Iq, ndarray of shape (npt)
-    :param float[M][N] G: transformation matrix, ndarray of shape (n,npt)
-    :param obj resolution: resolution object providing information about smearing
-    :returns float[M]: calculated data, ndarray of shape (n)
+    :param float[n] solution: related to Iq, ndarray of shape (n)
+    :param float[n][npt] G: transformation matrix, ndarray of shape (n,npt)
+    :returns float[npt]: calculated data, ndarray of shape (npt)
     '''
-    updated_fit = np.dot(G.transpose(),solution)
-    updated_fit = resolution.apply(updated_fit.transpose())
-    return updated_fit    
+    data = np.dot(G.transpose(),solution)
+    return data   
 
 def Dist(s2, beta):
     '''Measure the distance of this possible solution'''
@@ -276,7 +277,7 @@ def MaxEntMove(fSum, blank, chisq, chizer, c1, c2, s1, s2):
     chtarg = ctarg * chisq
     return w, chtarg, loop, a_new, fx, beta
 
-def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,resolution,report):
+def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,report):
     '''
     Do the complete Maximum Entropy algorithm of Skilling and Bryan
     
@@ -305,13 +306,13 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,resolution,report):
     chizer, chtarg = npt*1.0, npt*1.0
     f = first_bins * 1.0                                 # starting distribution is the same as the inital distribution
     fSum  = sum(f)                                       # find the sum of the f-vector
-    z = (Iq - calculate_data(f, Gqr, resolution)) /sigma # standardized residuals
+    z = (Iq - calculate_data(f, Gqr)) /sigma             # standardized residuals
     chisq = sum(z*z)                                     # Chi^2
     
     for iter in range(IterMax):
-        ox = -2 * z / sigma                                    # gradient of chisq
+        ox = -2 * z / sigma                                    
         
-        cgrad = calculate_solution(ox, Gqr)                    # cgrad[i] = del(C)/del(f[i]), SB eq. 8
+        cgrad = calculate_solution(ox, Gqr)  # cgrad[i] = del(C)/del(f[i]), SB eq. 8
         sgrad = -np.log(f/first_bins) / (blank*math.exp (1.0)) # sgrad[i] = del(S)/del(f[i])
         snorm = math.sqrt(sum(f * sgrad*sgrad))                # entropy, SB eq. 22
         cnorm = math.sqrt(sum(f * cgrad*cgrad))                # Chi^2, SB eq. 22
@@ -328,13 +329,13 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,resolution,report):
         xi[0] = f * cgrad / cnorm
         xi[1] = f * (a * sgrad - b * cgrad)
      	
-        eta[0] = calculate_data(xi[0], Gqr, resolution);          # solution --> data
-        eta[1] = calculate_data(xi[1], Gqr, resolution);          # solution --> data
+        eta[0] = calculate_data(xi[0], Gqr);          # solution --> data
+        eta[1] = calculate_data(xi[1], Gqr);          # solution --> data
         ox = eta[1] / (sigma * sigma)
-        xi[2] = calculate_solution(ox, Gqr);                      # data --> solution
+        xi[2] = calculate_solution(ox, Gqr);          # data --> solution
         a = 1.0 / math.sqrt(sum(f * xi[2]*xi[2]))
         xi[2] = f * xi[2] * a
-        eta[2] = calculate_data(xi[2], Gqr, resolution)           # solution --> data
+        eta[2] = calculate_data(xi[2], Gqr)           # solution --> data
 
         # prepare the search directions for the conjugate gradient technique
         c1 = xi.dot(cgrad) / chisq                          # C_mu, SB eq. 24
@@ -373,7 +374,7 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,resolution,report):
 
         # calculate the normalized entropy
         S = sum((f/fSum) * np.log(f/fSum))                     # normalized entropy, S&B eq. 1
-        z = (Iq - calculate_data(f, Gqr, resolution)) / sigma  # standardized residuals
+        z = (Iq - calculate_data(f, Gqr)) / sigma              # standardized residuals
         chisq = sum(z*z)                                       # report this ChiSq
 
         if report:
@@ -385,9 +386,9 @@ def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,resolution,report):
         # do the hardest test first
         if (abs(chisq/chizer-1.0) < CHI_SQR_LIMIT) and  (test < TEST_LIMIT):
             print (' Convergence achieved.')
-            return chisq,f,calculate_data(f, Gqr, resolution)     # solution FOUND returns here
+            return chisq,f,calculate_data(f, Gqr)     # solution FOUND returns here
     print (' No convergence! Try increasing Error multiplier.')
-    return chisq,f,calculate_data(f, Gqr, resolution)             # no solution after IterMax iterations
+    return chisq,f,calculate_data(f, Gqr)             # no solution after IterMax iterations
 
 def sizeDistribution(input):
     '''
@@ -406,7 +407,8 @@ def sizeDistribution(input):
         Contrast                     | float: The difference in SLD between the two phases
         Sky                          | float: Should be small but non-zero (TODO: Check this statement)
         Weights                      | float[npt]: Provide some sort of uncertainty. Examples include dI and 1/I
-        Background                   | float[npt]: Scattering background to be subtracted. 
+        Background                   | float[npt]: Scattering background to be subtracted
+        Resolution                   | obj: resolution object
         Model                        | string: model name, currently only supports 'Sphere'
     '''         
     Qmin = input["Limits"][0]
@@ -422,18 +424,19 @@ def sizeDistribution(input):
         Bins = np.linspace(minDiam,maxDiam,Nbins+1,True)/2        #make radii
     Dbins = np.diff(Bins)
     Bins = Bins[:-1]+Dbins/2.
-    wtFactor = input["WeightFactors"]
     Ibeg = np.searchsorted(Q,Qmin)
     Ifin = np.searchsorted(Q,Qmax)+1        #include last point
+    wtFactor = input["WeightFactors"][Ibeg:Ifin]
     BinMag = np.zeros_like(Bins)
     contrast = input["Contrast"]
     Ic = np.zeros(len(I))
     sky = input["Sky"]
-    wt = input["Weights"]
+    wt = input["Weights"][Ibeg:Ifin]
     Back = input["Background"]
-    Gmat = G_matrix(Q,Bins,contrast,input["Model"])
+    res = input["Resolution"]
+    Gmat = G_matrix(Q[Ibeg:Ifin],Bins,contrast,input["Model"],res)
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
-    chisq,BinMag,Ic[Ibeg:Ifin] = MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt[Ibeg:Ifin]),Gmat,BinsBack,IterMax=5000,resolution=perfect1D,report=True)
+    chisq,BinMag,Ic[Ibeg:Ifin] = MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,IterMax=1000,report=True)
     BinMag = BinMag/(2.*Dbins)
     return chisq,Bins,Dbins,BinMag,Q[Ibeg:Ifin],Ic[Ibeg:Ifin]
 
@@ -444,19 +447,16 @@ Q = np.array([])
 I = np.array([])
 dI = np.array([])
 
-header = 7
-data = np.loadtxt("test_data/LMA70_usans",skiprows=header,delimiter=' ')
-#with open("test_data/I_for_dist1.txt") as fp:
-#    spamreader = csv.reader(fp,delimiter=' ')
-#    for a in range(0,header):
-#        next(spamreader, None)
-#    for row in spamreader:
-#        try:
-#            Q = np.append(Q, float(row[0]))
-#            I = np.append(I, float(row[1]))
-#            dI = np.append(dI, float(row[2]))
-#        except:
-#            pass
+with open("test_data/Alumina_usaxs_irena_input.csv") as fp:
+    spamreader = csv.reader(fp, delimiter=',')
+
+    for row in spamreader:
+        try:
+            Q = np.append(Q, float(row[0]))
+            I = np.append(I, float(row[1]))
+            dI = np.append(dI, float(row[2]))
+        except:
+            pass
         
 data_from_loader = data_info.Data1D(x=Q, y=I, dx=None, dy=dI,lam=None, dlam=None, isSesans=False)
 data_from_loader.filename = "mock data"
@@ -465,33 +465,41 @@ data_from_loader.filename = "mock data"
 input = {}
 input["Filename"] = data_from_loader.filename
 input["Data"] = [data_from_loader.x,data_from_loader.y]
-input["Limits"] = [min(data_from_loader.x), max(data_from_loader.x)]
+input["Limits"] = [min(data_from_loader.x[20:]), max(data_from_loader.x[:94])]
 input["Scale"] = 1
-input["Logbin"] = False
-input["DiamRange"] = [0,240,120] 
+input["Logbin"] = True
+input["DiamRange"] = [25,10000,100] 
 input["WeightFactors"] = np.ones(len(data_from_loader.y))
-input["Contrast"] = 5 
-input["Sky"] = 0.0001
-input["Weights"] = dI  # input["Weights"] = 1/I
-input["Background"] = np.zeros(len(data_from_loader.y))
+input["Contrast"] = 1 
+input["Sky"] = 1e-4
+#input["Weights"] = dI
+input["Weights"] = 0.1/I
+input["Background"] = np.ones(len(data_from_loader.y)-20-18)*0.12
 input["Model"] = 'Sphere'
-perfect1D = rst.Perfect1D(data_from_loader.x) # qlength, qwidth = 0.1, 0.117        slit1D = rst.Slit1D(Q,q_length=qlength,q_width=qwidth,q_calc=Q)
+perfect1D = rst.Perfect1D(data_from_loader.x) 
+qlength, qwidth = 0.117, None 
+slit1D = rst.Slit1D(Q,q_length=qlength,q_width=qwidth,q_calc=Q)
 input["Resolution"] = perfect1D
-input["Sky"] = 0.0001
 
 # Call the sizeDistribution function and feed in the input
 chisq,Bins,Dbins,BinMag,Qc,Ic = sizeDistribution(input)
 
 # TODO: Change the distribution back to P(r) 
-#V = SphereVol(Bins)
-#diffV = np.diff(V,prepend=[0])
-#BinMagOverV = BinMag/diffV
+# V = SphereVol(Bins)
+# diffV = np.diff(V,prepend=[0])
+# BinMagOverV = BinMag/diffV
 
 # Store results in a Data1D object (and temporarily also a separate plottable_hist object)
 I_result = data_info.Data1D(x=Qc, y=Ic, dx=None, dy=None,lam=None, dlam=None, isSesans=False)
 dist_result = plottable_hist(x=Bins, y=BinMag, dy=None, binWidth=Dbins)
+dist_result._logx = True
 
 # Plot to visualize
+#I_smeared = slit1D.apply(I)
+#plt.figure()
+#plt.loglog(Q,I_smeared)
+#plt.loglog(Q,I)
+
 plt.figure()
 plt.bar(x=dist_result.x,height=dist_result.y,width=dist_result.binWidth,label='fit_distribution')
 if dist_result._logx is True:
