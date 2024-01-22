@@ -65,8 +65,9 @@ def prepare():
             try:
                 import_module(sibling)
             except ImportError:
-                print(f"The {sibling} module is not available. Either pip install it in your environment or clone"
-                      f"the repository into a directory level with the sasview directory.")
+                raise ImportError(f"The {sibling} module is not available. Either pip install it in your environment or"
+                                  f" clone the repository into a directory level with the sasview directory.")
+
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
