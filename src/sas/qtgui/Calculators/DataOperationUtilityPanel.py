@@ -50,6 +50,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # push buttons
         self.cmdClose.clicked.connect(self.onClose)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdSave.clicked.connect(self.onSave)
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdReset.clicked.connect(self.onReset)
 
@@ -125,7 +126,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
 
     def onCompute(self):
-        """ perform calculation """
+        """ perform calculation - don't send to data explorer"""
         # set operator to be applied
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
@@ -140,6 +141,20 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         self.output = output
 
+        self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+        self.updatePlot(self.graphData1, self.layoutData1, self.data1, add_interp=True)
+        self.updatePlot(self.graphData2, self.layoutData2, self.data2, add_interp=True)
+
+        # Add the new plot to the comboboxes
+        self.cbData1.addItem(self.output.name)
+        self.cbData2.addItem(self.output.name)
+        if self.filenames is None:
+            self.filenames = {}
+        self.filenames[self.output.name] = self.output
+
+    def onSave(self):
+        """ send to data explorer """
+
         # if outputname was unused, write output result to it
         # and display plot
         if self.onCheckOutputName():
@@ -147,10 +162,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.list_data_items.append(str(self.txtOutputData.text()))
             # send result to DataExplorer
             self.onPrepareOutputData()
-            # plot result
-            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
-            self.updatePlot(self.graphData1, self.layoutData1, self.data1, add_interp=True)
-            self.updatePlot(self.graphData2, self.layoutData2, self.data2, add_interp=True)
 
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)

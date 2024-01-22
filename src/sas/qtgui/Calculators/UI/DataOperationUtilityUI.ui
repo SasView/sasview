@@ -434,10 +434,29 @@ Append(Combine): |</string>
         </size>
        </property>
        <property name="toolTip">
-        <string>Generate the Data and send to Data Explorer.</string>
+        <string>Compute data operation and preview before sending to Data Explorer.</string>
        </property>
        <property name="text">
         <string>Compute</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdSave">
+       <property name="minimumSize">
+        <size>
+         <width>75</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Send data to the Data Explorer.</string>
+       </property>
+       <property name="text">
+        <string>Save</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
