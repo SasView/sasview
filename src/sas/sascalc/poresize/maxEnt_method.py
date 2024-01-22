@@ -444,15 +444,19 @@ Q = np.array([])
 I = np.array([])
 dI = np.array([])
 
-with open("test_data/I_for_dist1.txt") as fp:
-    spamreader = csv.reader(fp, delimiter=' ')
-    for row in spamreader:
-        try:
-            Q = np.append(Q, float(row[0]))
-            I = np.append(I, float(row[1]))
-            dI = np.append(dI, float(row[2]))
-        except:
-            pass
+header = 7
+data = np.loadtxt("test_data/LMA70_usans",skiprows=header,delimiter=' ')
+#with open("test_data/I_for_dist1.txt") as fp:
+#    spamreader = csv.reader(fp,delimiter=' ')
+#    for a in range(0,header):
+#        next(spamreader, None)
+#    for row in spamreader:
+#        try:
+#            Q = np.append(Q, float(row[0]))
+#            I = np.append(I, float(row[1]))
+#            dI = np.append(dI, float(row[2]))
+#        except:
+#            pass
         
 data_from_loader = data_info.Data1D(x=Q, y=I, dx=None, dy=dI,lam=None, dlam=None, isSesans=False)
 data_from_loader.filename = "mock data"
