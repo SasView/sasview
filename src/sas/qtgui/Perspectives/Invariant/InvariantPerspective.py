@@ -44,7 +44,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     @property
     def title(self):
-        """ Perspective name """
+        """ Perspective name """ 
         return "Invariant Perspective"
 
 
@@ -57,8 +57,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # initial input params
         self._background = 0.0
         self._scale = 1.0
-        self._contrast = 8.0e-6
+        self._contrast = None
         self._porod = None
+        self._volfrac1 = None
+        self._volfrac2 = None
 
         self.parent = parent
 
@@ -202,10 +204,15 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def updateFromModel(self):
         """ Update the globals based on the data in the model """
         self._background = float(self.model.item(WIDGETS.W_BACKGROUND).text())
-        self._contrast = float(self.model.item(WIDGETS.W_CONTRAST).text())
+        if self.model.item(WIDGETS.W_CONTRAST).text() != 'None' and self.model.item(WIDGETS.W_CONTRAST).text() != '':
+            self._contrast = float(self.model.item(WIDGETS.W_CONTRAST).text())
         self._scale = float(self.model.item(WIDGETS.W_SCALE).text())
         if self.model.item(WIDGETS.W_POROD_CST).text() != 'None' and self.model.item(WIDGETS.W_POROD_CST).text() != '':
             self._porod = float(self.model.item(WIDGETS.W_POROD_CST).text())
+        if self.model.item(WIDGETS.W_VOLFRAC1).text() != 'None' and self.model.item(WIDGETS.W_VOLFRAC1).text() != '':
+            self._volfrac1 = float(self.model.item(WIDGETS.W_VOLFRAC1).text())
+        if self.model.item(WIDGETS.W_VOLFRAC2).text() != 'None' and self.model.item(WIDGETS.W_VOLFRAC2).text() != '':
+            self._volfrac1 = float(self.model.item(WIDGETS.W_VOLFRAC2).text())
 
         # Low extrapolating
         self._low_extrapolate = str(self.model.item(WIDGETS.W_ENABLE_LOWQ).text()) == 'true'
@@ -406,6 +413,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
 
         # Volume Fraction calculations
+        ## TODO : ADD check for which radio button is checked
         try:
             volume_fraction, volume_fraction_error = self._calculator.get_volume_fraction_with_error(
                 self._contrast, extrapolation=extrapolation)
@@ -416,6 +424,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             volume_fraction_error = "ERROR"
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
         reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
+    
+        # Contrast Calculation
+        ## TODO : ADD check for which radio button is checked
+        try:
+            contrast = self._calculator.get_contrast(self._volfrac1, extrapolation=extrapolation)
+        except Exception as ex:
+            calculation_failed = True
+            msg += str(ex)
+            contrast = "ERROR"
+        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_CONTRAST_OUT, contrast)
 
         # Surface Error calculations
         if self._porod:
@@ -559,7 +577,11 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtScale.textChanged.connect(self.updateFromGui)
 
         self.txtContrast.textChanged.connect(self.updateFromGui)
-
+        
+        self.txtVolFrac1.textChanged.connect(self.updateFromGui)
+        
+        self.txtVolFrac2.textChanged.connect(self.updateFromGui)
+        
         self.txtPorodCst.textChanged.connect(self.updateFromGui)
 
         self.txtPowerLowQ.textChanged.connect(self.updateFromGui)
@@ -721,16 +743,18 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     def updateFromGui(self):
         """ Update model when new user inputs """
         possible_senders = ['txtBackgd', 'txtContrast', 'txtPorodCst',
-                            'txtScale', 'txtPowerLowQ', 'txtPowerHighQ',
+                            'txtScale', 'txtVolFrac1', 'txtVolFrac2', 'txtPowerLowQ', 'txtPowerHighQ',
                             'txtNptsLowQ', 'txtNptsHighQ']
 
         related_widgets = [WIDGETS.W_BACKGROUND, WIDGETS.W_CONTRAST,
                            WIDGETS.W_POROD_CST, WIDGETS.W_SCALE,
+                           WIDGETS.W_VOLFRAC1, WIDGETS.W_VOLFRAC2,
                            WIDGETS.W_LOWQ_POWER_VALUE, WIDGETS.W_HIGHQ_POWER_VALUE,
                            WIDGETS.W_NPTS_LOWQ, WIDGETS.W_NPTS_HIGHQ]
 
         related_internal_values = [self._background, self._contrast,
                                    self._porod, self._scale,
+                                   self._volfrac1, self._volfrac2,
                                    self._low_power_value,
                                    self._high_power_value,
                                    self._low_points, self._high_points]
@@ -832,10 +856,30 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # add custom input params
         item = QtGui.QStandardItem(str(self._background))
         self.model.setItem(WIDGETS.W_BACKGROUND, item)
-        item = QtGui.QStandardItem(str(self._contrast))
+       
+        # leave line edit empty if Contrast not defined
+        if self._contrast != None:
+            item = QtGui.QStandardItem(str(self._contrast))
+        else:
+            item = QtGui.QStandardItem(str(''))
         self.model.setItem(WIDGETS.W_CONTRAST, item)
+        
         item = QtGui.QStandardItem(str(self._scale))
         self.model.setItem(WIDGETS.W_SCALE, item)
+       
+        # leave line edit empty if VolFrac1 not defined
+        if self._contrast != None:
+            item = QtGui.QStandardItem(str(self._volfrac1))
+        else:
+            item = QtGui.QStandardItem(str(''))
+        self.model.setItem(WIDGETS.W_VOLFRAC1, item)
+        # leave line edit empty if VolFrac2 not defined
+        if self._contrast != None:
+            item = QtGui.QStandardItem(str(self._volfrac2))
+        else:
+            item = QtGui.QStandardItem(str(''))
+        self.model.setItem(WIDGETS.W_VOLFRAC2, item)
+        
         # leave line edit empty if Porod constant not defined
         if self._porod != None:
             item = QtGui.QStandardItem(str(self._porod))
@@ -894,6 +938,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Porod constant
         self.mapper.addMapping(self.txtPorodCst, WIDGETS.W_POROD_CST)
+        
+        # Volume Fraction 1
+        self.mapper.addMapping(self.txtVolFrac1, WIDGETS.W_VOLFRAC1)
+        
+        # Volume Fraction 2
+        self.mapper.addMapping(self.txtVolFrac2, WIDGETS.W_VOLFRAC2)
 
         # Lowq/Highq items
         self.mapper.addMapping(self.chkLowQ, WIDGETS.W_ENABLE_LOWQ)
@@ -911,6 +961,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Output
         self.mapper.addMapping(self.txtVolFract, WIDGETS.W_VOLUME_FRACTION)
         self.mapper.addMapping(self.txtVolFractErr, WIDGETS.W_VOLUME_FRACTION_ERR)
+        self.mapper.addMapping(self.txtContrastOut, WIDGETS.W_CONTRAST_OUT)
+        self.mapper.addMapping(self.txtContrastOutErr, WIDGETS.W_CONTRAST_OUT_ERR)
         self.mapper.addMapping(self.txtSpecSurf, WIDGETS.W_SPECIFIC_SURFACE)
         self.mapper.addMapping(self.txtSpecSurfErr, WIDGETS.W_SPECIFIC_SURFACE_ERR)
         self.mapper.addMapping(self.txtInvariantTot, WIDGETS.W_INVARIANT)
@@ -1105,8 +1157,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Assign values to 'Options' tab inputs - use defaults if not found
         self.txtBackgd.setText(str(params.get('background', '0.0')))
         self.txtScale.setText(str(params.get('scale', '1.0')))
-        self.txtContrast.setText(str(params.get('contrast', '8e-06')))
-        self.txtPorodCst.setText(str(params.get('porod', '0.0')))
+        self.txtContrast.setText(str(params.get('contrast', None)))
+        self.txtPorodCst.setText(str(params.get('porod', None)))
         # Toggle extrapolation buttons to enable other inputs
         self.chkLowQ.setChecked(params.get('low_extrapolate', False))
         self.chkHighQ.setChecked(params.get('high_extrapolate', False))

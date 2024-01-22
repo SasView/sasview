@@ -940,6 +940,46 @@ class InvariantCalculator(object):
             msg = "Could not compute the volume fraction: inconsistent results"
             raise RuntimeError(msg)
 
+    def get_contrast(self, volfrac, extrapolation=None):
+        """
+        Compute contrast is deduced as follows: ::
+
+            q_star = 2*(pi*contrast)**2* volume( 1- volume)
+
+            q_star: the invariant value included extrapolation is applied
+                         unit  1/A^(3)*1/cm
+                    q_star = self.get_qstar()
+
+            contrast = sqrt(q_star/2/volume/(1-volume))/pi
+
+        :param contrast: contrast value provides by the user of type float.
+                 contrast unit is 1/A^(2)= 10^(16)cm^(2)
+        :param extrapolation: string to apply optional extrapolation
+
+        :return: contrast
+
+        :note: contrast returned as A-2
+        """
+        if volfrac is not None:
+            if volfrac <= 0.0 or volfrac >= 1.0:
+                raise ValueError("The volume fraction parameter must be between 0 and 1, excluding 0 and 1")
+
+        # Make sure Q star is up to date
+        self.get_qstar(extrapolation)
+
+        if self._qstar <= 0:
+            msg = "Invalid invariant: Invariant Q* must be greater than zero\n"
+            msg += "Please check if scale and background values are correct"
+            raise RuntimeError(msg)
+
+        # Compute contrast
+        contrast = np.sqrt(self._qstar/2.0/volfrac/(1-volfrac))/math.pi
+        if contrast > 0:
+            return contrast
+        msg = "Could not compute the contrast"
+        raise RuntimeError(msg)
+
+
     def get_qstar_with_error(self, extrapolation=None):
         """
         Compute the invariant uncertainty.
