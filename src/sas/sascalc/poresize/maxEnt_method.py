@@ -447,7 +447,7 @@ Q = np.array([])
 I = np.array([])
 dI = np.array([])
 
-with open("test_data/Alumina_usaxs_irena_input.csv") as fp:
+with open("test_data/LMA70_usans_irena_input.csv") as fp:
     spamreader = csv.reader(fp, delimiter=',')
 
     for row in spamreader:
@@ -465,21 +465,25 @@ data_from_loader.filename = "mock data"
 input = {}
 input["Filename"] = data_from_loader.filename
 input["Data"] = [data_from_loader.x,data_from_loader.y]
-input["Limits"] = [min(data_from_loader.x[20:]), max(data_from_loader.x[:94])]
+Qmin = min(data_from_loader.x)
+Qmax = max(data_from_loader.x)
+input["Limits"] = [Qmin, Qmax]
 input["Scale"] = 1
 input["Logbin"] = True
-input["DiamRange"] = [25,10000,100] 
-input["WeightFactors"] = np.ones(len(data_from_loader.y))/16
+input["DiamRange"] = [10,1e5,100] 
+input["WeightFactors"] = np.ones(len(data_from_loader.y))*100
 input["Contrast"] = 1 
-input["Sky"] = 4e-4
-input["Weights"] = 1/(dI*dI)
-#input["Weights"] = 1/(I)
+input["Sky"] = 1e-8
+#input["Weights"] = 1/(dI*dI)
+input["Weights"] = 1/(I*I)
 input["Background"] = np.ones(len(data_from_loader.y))*0.120605
 input["Model"] = 'Sphere'
 perfect1D = rst.Perfect1D(data_from_loader.x) 
 qlength, qwidth = 0.117, None 
-slit1D = rst.Slit1D(Q,q_length=qlength,q_width=qwidth,q_calc=Q)
-input["Resolution"] = perfect1D
+Ibeg = np.searchsorted(Q,Qmin)
+Ifin = np.searchsorted(Q,Qmax)+1
+slit1D = rst.Slit1D(Q[Ibeg:Ifin],q_length=qlength,q_width=qwidth,q_calc=Q[Ibeg:Ifin])
+input["Resolution"] = slit1D
 
 # Call the sizeDistribution function and feed in the input
 chisq,Bins,Dbins,BinMag,Qc,Ic = sizeDistribution(input)
