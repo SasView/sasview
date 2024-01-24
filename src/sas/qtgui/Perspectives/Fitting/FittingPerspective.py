@@ -289,7 +289,12 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         Returns the index of the next available tab
         """
-        return max([tab.tab_id for tab in self.tabs], default=0) + 1
+        max1 = max([tab.tab_id for tab in self.tabs], default=0)
+        if self.lastTabClosed is None:
+            return max1 + 1
+        max2 = self.lastTabClosed.tab_id
+        return max(max1, max2) + 1
+        # return max([tab.tab_id for tab in self.tabs], default=0) + 1
 
     def addClosedTab(self):
         """
@@ -300,16 +305,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             return
         tab = self.lastTabClosed
         icon = QtGui.QIcon()
-        tab_name = self.getTabName()
-        # assure the tab name is unique
-        new_maxIndes = self.nextAvailableTabIndex()
-        # tab_name has an integer number at the end.
-        # it is in general a multi-digit number
-        # Remove it and replace with new_maxIndes
-        tab_name = re.sub(r'\d+$', '', tab_name)
-        tab_name = tab_name + str(new_maxIndes)
-        tab.tab_id = new_maxIndes
-
+        # tab_name = self.getTabName()
+        tab_name = "FitPage" + str(tab.tab_id)
+        ObjectLibrary.addObject(tab_name, tab)
         self.addTab(tab, icon, tab_name)
         # Update the list of tabs
         self.tabs.append(tab)
@@ -630,7 +628,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         assert isinstance(name, str)
         for tab in self.tabs:
-            if tab.modelName() == name:
+            if hasattr(tab, 'modelName') and tab.modelName() == name:
                 return tab
         return None
 

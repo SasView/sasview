@@ -285,7 +285,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Returns list of tab names selected for fitting
         """
-        return [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
+        return [tab for tab in self.tabs_for_fitting if ObjectLibrary.getObject(tab) is not None]
 
     def onChainFit(self, is_checked):
         """
@@ -332,7 +332,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         weights = {}
         for tab in tabs_to_fit:
             tab_object = ObjectLibrary.getObject(tab)
-            #weight = FittingUtilities.getWeight(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
             weight = FittingUtilities.getRelativeError(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
             weights[tab] = weight
 
