@@ -27,13 +27,13 @@ jobs = []
 #   https://pyinstaller.readthedocs.io/en/stable/usage.html#making-gnu-linux-apps-forward-compatible
 os_release_list = [
     'ubuntu-20.04',
-#    'windows-latest',
+    'windows-latest',
 #    'macos-latest',
 ]
  
 # List of OS images to use for release tests
 os_test_list = os_release_list + [
-#    'ubuntu-latest',
+    'ubuntu-latest',
 ]
 
 # List of python versions to use for release builds
