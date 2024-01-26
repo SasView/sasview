@@ -119,11 +119,6 @@ def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool =
         single_rst = MAIN_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst')
     else:
         single_rst = Path(single_file)
-    rst_path = list(single_rst.parts)
-    rst_str = "/".join(rst_path)
-    if rst_str.endswith("models/") or rst_str.endswith("user/"):
-        # (re)sets value to empty string if nothing was entered
-        single_rst = ""
     os.environ['SAS_NO_HIGHLIGHT'] = '1'
     command = [
         sys.executable,
