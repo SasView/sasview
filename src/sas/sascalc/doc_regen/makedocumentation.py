@@ -116,7 +116,7 @@ def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool =
             f.truncate(0)
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
     if rst is False:
-        single_rst = USER_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst')
+        single_rst = MAIN_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst')
     else:
         single_rst = Path(single_file)
     rst_path = list(single_rst.parts)
