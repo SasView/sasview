@@ -122,7 +122,6 @@ class Data1D(PlottableData1D, LoadData1D):
         result.dlam = None if self._operation.dlam is None else numpy.copy(self._operation.dlam)
 
         for i in range(result.x.size):
-
             a = Uncertainty(self._operation.y[i], self._operation.dy[i]**2)
             if isinstance(other, Data1D):
                 b = Uncertainty(other._operation.y[i], other._operation.dy[i]**2)
@@ -134,7 +133,6 @@ class Data1D(PlottableData1D, LoadData1D):
                     result.dxw[i] = math.sqrt((self._operation.dxw[i]**2 + other._operation.dxw[i]**2) / 2)
             else:
                 b = other
-
             output = operation(a, b)
             result.y[i] = output.x
             result.dy[i] = math.sqrt(math.fabs(output.variance))

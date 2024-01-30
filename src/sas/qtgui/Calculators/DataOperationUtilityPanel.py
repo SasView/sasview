@@ -7,7 +7,6 @@ from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 import numpy as np
-
 from typing import Optional
 
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -322,15 +321,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 logging.error('Cannot compute data of different dimensions')
                 return False
 
-            # handling data with different q values implemented by CMW 1-21-2024
-            # elif self.data1.__class__.__name__ == 'Data1D'\
-            #         and (len(self.data2.x) != len(self.data1.x) or
-            #                  not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
-            #     logging.error('Cannot compute 1D data of different lengths')
-            #     self.cbData1.setStyleSheet(BG_RED)
-            #     self.cbData2.setStyleSheet(BG_RED)
-            #     return False
-
             elif self.data1.__class__.__name__ == 'Data2D' \
                     and (len(self.data2.qx_data) != len(self.data1.qx_data) \
                     or len(self.data2.qy_data) != len(self.data1.qy_data)
@@ -497,8 +487,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.plot(data=op_data, hide_error=True, marker='-', color=color)
 
             plotter.show()
-
-
 
     def prepareSubgraphWithData(self, data):
         """ Create graphics view containing scene with string """
