@@ -151,6 +151,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.updatePlot(self.graphOutput, self.layoutOutput, self.output, operation_data=True)
         self.updatePlot(self.graphData1, self.layoutData1, self.data1, operation_data=True)
         self.updatePlot(self.graphData2, self.layoutData2, self.data2, operation_data=True)
+        logging.info(f"Data operation complete.")
 
         # Add the new plot to the comboboxes
         # self.cbData1.addItem(self.output.name)
