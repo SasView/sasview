@@ -225,7 +225,7 @@ class PlotterWidget(PlotterBase):
                             capsize=2, linestyle='',
                             barsabove=False,
                             color=color,
-                            mfc=makerfacecolor,
+                            mfc=markerfacecolor,
                             mec=markeredgecolor,
                             alpha=alpha,
                             marker=marker,

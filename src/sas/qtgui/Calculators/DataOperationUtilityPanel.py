@@ -124,7 +124,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def onClose(self):
         """ Close dialog """
         self.onReset()
-
         self.cbData1.clear()
         self.cbData1.addItems(['No Data Available'])
         self.cbData2.clear()
@@ -138,6 +137,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
         output = None
+        if self.data1 is None or self.data2 is None:
+            logging.warning("Please set both Data1 and Data2 to complete operation.")
         try:
             data1 = self.data1
             data2 = self.data2
@@ -151,32 +152,26 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.updatePlot(self.graphOutput, self.layoutOutput, self.output, operation_data=True)
         self.updatePlot(self.graphData1, self.layoutData1, self.data1, operation_data=True)
         self.updatePlot(self.graphData2, self.layoutData2, self.data2, operation_data=True)
-        logging.info(f"Data operation complete.")
-
-        # Add the new plot to the comboboxes
-        # self.cbData1.addItem(self.output.name)
-        # self.cbData2.addItem(self.output.name)
-        if self.filenames is None:
-            self.filenames = {}
-        self.filenames[self.output.name] = self.output
+        logging.info("Data operation complete.")
 
     def onSave(self):
         """ send to data explorer """
-
-        # if outputname was unused, write output result to it
+        # if output name was unused, write output result to it
         # and display plot
-        if self.onCheckOutputName():
+        if self.onCheckOutputName() and self.output is not None:
             # add outputname to self.filenames
             self.list_data_items.append(str(self.txtOutputData.text()))
             # send result to DataExplorer
             self.onPrepareOutputData()
 
-        # Add the new plot to the comboboxes
-        self.cbData1.addItem(self.output.name)
-        self.cbData2.addItem(self.output.name)
-        if self.filenames is None:
-            self.filenames = {}
-        self.filenames[self.output.name] = self.output
+            # Add the new plot to the comboboxes
+            self.cbData1.addItem(self.output.name)
+            self.cbData2.addItem(self.output.name)
+            if self.filenames is None:
+                self.filenames = {}
+            self.filenames[self.output.name] = self.output
+        elif self.output is None:
+            logging.warning("No output data to save.")
 
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
@@ -195,7 +190,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def onSelectOperator(self):
         """ Change GUI when operator changed """
         self.lblOperatorApplied.setText(self.cbOperator.currentText())
-        self.newPlot(self.graphOutput, self.layoutOutput)
+        self.resetOutput()
 
     def onReset(self):
         """
@@ -203,7 +198,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         the names of loaded data
         """
         self.txtNumber.setText('1.0')
-        self.txtOutputData.setText('MyNewDataName')
+
+        # sets new default name for output data that doesn't already exist
+        self.txtOutputData.setText(self.uniqueOutputName())
 
         self.txtNumber.setEnabled(False)
         self.cmdCompute.setEnabled(False)
@@ -215,8 +212,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.data1OK = False
         self.data2OK = False
 
-        # Empty graphs
-        self.newPlot(self.graphOutput, self.layoutOutput)
+        self.resetOutput()
+        # Empty graphs and
         self.newPlot(self.graphData1, self.layoutData1)
         self.newPlot(self.graphData2, self.layoutData2)
 
@@ -241,9 +238,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.data1 = self._extractData(key_id1)
             # plot Data1
             self.updatePlot(self.graphData1, self.layoutData1, self.data1)
-            # self.updatePlot(self.graphData1, self.layoutData1, self.data1, color='tab:blue')
-            # plot default for output graph
-            self.newPlot(self.graphOutput, self.layoutOutput)
             # Enable Compute button only if Data2 is defined and data compatible
             self.cmdCompute.setEnabled(self.onCheckChosenData())
 
@@ -254,11 +248,11 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         if choice_data2 in wrong_choices:
             self.newPlot(self.graphData2, self.layoutData2)
+            self.data2 = None
             self.txtNumber.setEnabled(False)
             self.data2OK = False
             self.onCheckChosenData()
             self.cmdCompute.setEnabled(False)
-            return
 
         elif choice_data2 == 'Number':
             self.data2OK = True
@@ -269,9 +263,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.cmdCompute.setEnabled(self.onCheckChosenData())
             # Display value of coefficient in graphData2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
-            # self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='tab:purple')
-            # plot default for output graph
-            self.newPlot(self.graphOutput, self.layoutOutput)
+            self.resetOutput()
             self.onCheckChosenData()
 
         else:
@@ -283,9 +275,17 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
             # plot Data2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
-            # self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='tab:red')
-            # plot default for output graph
-            self.newPlot(self.graphOutput, self.layoutOutput)
+            self.resetOutput()
+
+        # show interpolation warning when a 1D dataset is chosen for Data2
+        if isinstance(self.data2, Data1D):
+            self.cautionStatement.setText(
+                "CAUTION: interpolation of Data2 will occur for 1D-datasets if x-axis points\n"
+                "are not close. This could introduce artifacts. Please see documentation."
+            )
+        else:
+            self.cautionStatement.setText("")
+
 
     def onInputCoefficient(self):
         """ Check input of number when a coefficient is required
@@ -364,6 +364,25 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         else:
             self.txtOutputData.setStyleSheet(BG_WHITE)
             return True
+
+    def uniqueOutputName(self):
+        """Gets the next unique output name if previous outputs have been saved with default name."""
+        output_name = "MyNewDataName1"
+        i = 1
+        while output_name in self.list_data_items:
+            i += 1
+            output_name = f"MyNewDataName{str(i)}"
+        self.txtOutputData.setText(output_name)
+        return output_name
+
+    def resetOutput(self):
+        """Resets the output data and output graph upon any change to Data1, Data2, or operator."""
+        # plot default for output graph
+        self.newPlot(self.graphOutput, self.layoutOutput)
+        # reset the output until onCompute is called
+        self.output = None
+        # sets new default name for output data that doesn't already exist
+        self.txtOutputData.setText(self.uniqueOutputName())
 
     # ########
     # Modification of inputs

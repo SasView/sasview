@@ -399,8 +399,7 @@ Append(Combine): |</string>
      <item>
       <widget class="QLabel" name="cautionStatement">
        <property name="text">
-        <string>CAUTION: interpolation of Data2 will occur for 1D-datasets if x-axis points
-        are not close. This could introduce artifacts. Please see documentation.</string>
+        <string></string>
        </property>
       </widget>
      </item>
