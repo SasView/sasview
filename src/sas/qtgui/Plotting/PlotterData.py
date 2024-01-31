@@ -106,8 +106,12 @@ class Data1D(PlottableData1D, LoadData1D):
         """
         """
         # Check for compatibility of the x-ranges and populate the data used for the operation
+        # sets up _operation for both datasets
         # interpolation will be implemented on the 'other' dataset as needed
-        self._interpolation_operation(other)
+        if self.isSesans:
+            self._interpolation_operation(other, scale='linear')
+        else:
+            self._interpolation_operation(other, scale='log')
 
         result = Data1D(x=[], y=[], dx=None, dy=None)
         result.clone_without_data(length=self._operation.x.size, clone=self)
