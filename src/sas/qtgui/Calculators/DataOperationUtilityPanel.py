@@ -7,7 +7,6 @@ from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 import numpy as np
-from typing import Optional
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -26,6 +25,7 @@ DATA1_COLOR = '#B22222'  # firebrick
 DATA2_COLOR = '#0000FF'  # blue
 TRIMMED_COLOR = '#FFFFFF'  # white
 TRIMMED_ALPHA = 0.3  # semi-transparent points trimmed for operation
+
 
 class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def __init__(self, parent=None):
@@ -130,13 +130,11 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cbData2.addItems(['No Data Available'])
         self.close()
 
-
     def onCompute(self):
         """ perform calculation - don't send to data explorer"""
         # set operator to be applied
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
-        output = None
         if self.data1 is None or self.data2 is None:
             logging.warning("Please set both Data1 and Data2 to complete operation.")
         try:
@@ -182,8 +180,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.output,
             name=name)
 
-        new_datalist_item = {name + str(time.time()):
-                                 self.output}
+        new_datalist_item = {name + str(time.time()): self.output}
         self.communicator. \
             updateModelFromDataOperationPanelSignal.emit(new_item, new_datalist_item)
 
@@ -228,7 +225,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.newPlot(self.graphData1, self.layoutData1)
             self.data1 = None
             self.data1OK = False
-            self.cmdCompute.setEnabled(False) # self.onCheckChosenData())
+            self.cmdCompute.setEnabled(False)  # self.onCheckChosenData())
             return
 
         else:
@@ -286,7 +283,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         else:
             self.cautionStatement.setText("")
 
-
     def onInputCoefficient(self):
         """ Check input of number when a coefficient is required
         for operation """
@@ -330,12 +326,12 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
             elif self.data1.__class__.__name__ == 'Data2D' \
                     and (len(self.data2.qx_data) != len(self.data1.qx_data) \
-                    or len(self.data2.qy_data) != len(self.data1.qy_data)
-                    or not all(i == j for i, j in
-                                     zip(self.data1.qx_data, self.data2.qx_data))
-                    or not all(i == j for i, j in
-                                zip(self.data1.qy_data, self.data2.qy_data))
-                         ):
+                         or len(self.data2.qy_data) != len(self.data1.qy_data)
+                         or not all(i == j for i, j in
+                                    zip(self.data1.qx_data, self.data2.qx_data))
+                         or not all(i == j for i, j in
+                                    zip(self.data1.qy_data, self.data2.qy_data))
+            ):
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
                 logging.error('Cannot compute 2D data of different lengths')
@@ -441,27 +437,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             new_operation_data.dy = np.zeros(2)
             new_operation_data.dx = np.zeros(2)
         else:
-            try:
-                new_operation_data = Data1D(x=operation_data.x, y=operation_data.y, dy=operation_data.dy, dx=None)
-                new_operation_data.copy_from_datainfo(data1d=operation_data)
-            except:
-                new_operation_data = None
-
+            new_operation_data = Data1D(x=operation_data.x, y=operation_data.y, dy=operation_data.dy, dx=None)
+            new_operation_data.copy_from_datainfo(data1d=operation_data)
         return new_operation_data
-
-        # for d_op, c_op in zip(data_op, color_op):
-        #     if isinstance(d_op, Data1D):
-        #         op_data = Data1D(x=d_op._operation.x, y=d_op._operation.y, dy=d_op._operation.dy, dx=None)
-        #         op_data.copy_from_datainfo(data1d=d_op._operation)
-        #         plotter.plot(data=op_data, hide_error=True, marker='.', color=c_op)
-        #     else:
-        #         op_data = Data1D(2)
-        #         op_data.copy_from_datainfo(data1d=data)
-        #         op_data.x = np.array([data.x.min(), data.x.max()])
-        #         op_data.y = np.array([d_op, d_op])
-        #         op_data.dy = np.zeros(2)
-        #         op_data.dx = np.zeros(2)
-        #         plotter.plot(data=op_data, hide_error=True, marker='-', color=c_op)
 
     def updatePlot(self, graph, layout, data, color=None, operation_data=False):
         """ plot data in graph after clearing its layout """
@@ -540,7 +518,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                                      hide_error=True, marker='o', color=DATA2_COLOR,
                                      markerfacecolor=None, markeredgecolor=None)
                 plotter.plot(data=data, hide_error=True, marker='o', color=color, markerfacecolor=markerfacecolor,
-                            markeredgecolor=markeredgecolor)
+                             markeredgecolor=markeredgecolor)
             else:
                 plotter.plot(data=data, hide_error=True, marker='o', color=color, markerfacecolor=markerfacecolor,
                              markeredgecolor=markeredgecolor, alpha=alpha)
