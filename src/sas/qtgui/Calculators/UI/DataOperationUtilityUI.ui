@@ -397,6 +397,14 @@ Append(Combine): |</string>
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="QLabel" name="cautionStatement">
+       <property name="text">
+        <string>CAUTION: interpolation of Data2 will occur for 1D-datasets if x-axis points
+        are not close. This could introduce artifacts. Please see documentation.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
