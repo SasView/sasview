@@ -195,9 +195,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         # Check if the URL string contains a fragment (jump link)
         if '#' in url.name:
-            url, fragment = url.name.split('#', 1)
+            url_str, fragment = str(url.absolute()).split('#', 1)
             # Convert path to a QUrl needed for QWebViewerEngine
-            abs_url = QtCore.QUrl.fromLocalFile(url)
+            abs_url = QtCore.QUrl.fromLocalFile(url_str)
             abs_url.setFragment(fragment)
         else:
             # Convert path to a QUrl needed for QWebViewerEngine
