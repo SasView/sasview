@@ -422,7 +422,7 @@ class GuiManager:
             self.loadedPerspectives[self._current_perspective.name] = self._current_perspective
 
             self._workspace.workspace.removeSubWindow(self._current_perspective)
-            self._workspace.workspace.closeActiveSubWindow()
+            self._workspace.workspace.removeSubWindow(self.subwindow)
 
         # Get new perspective - note that _current_perspective is of type Optional[Perspective],
         # but new_perspective is of type Perspective, thus call to Perspective members are safe
