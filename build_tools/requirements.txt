@@ -34,4 +34,4 @@ zope
 superqt
 pyopengl
 pyopengl_accelerate
-cpufeature
+sphinx

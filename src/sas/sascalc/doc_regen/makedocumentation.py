@@ -6,15 +6,13 @@ import sys
 import subprocess
 import shutil
 
-from os.path import join, basename
-from pathlib import Path
+from os.path import join, abspath, dirname, basename
+from pathlib import  Path
 from typing import Union
 
 from sas.sascalc.fit import models
 from sas.system.version import __version__
 from sas.system.user import get_user_dir
-
-PATH_LIKE = Union[Path, str, os.PathLike]
 
 # Path constants related to the directories and files used in documentation regeneration processes
 USER_DIRECTORY = Path(get_user_dir())
@@ -58,13 +56,13 @@ def create_user_files_if_needed():
         with open(DOC_LOG, "w") as f:
             # Write an empty file to eliminate any potential future file creation conflicts
             pass
-    if not MAIN_DOC_SRC.exists() and ORIGINAL_DOCS_SRC.exists():
+    if not MAIN_DOC_SRC.exists():
         shutil.copytree(ORIGINAL_DOCS_SRC, MAIN_DOC_SRC)
-    if not MAIN_BUILD_SRC.exists() and ORIGINAL_DOC_BUILD.exists():
+    if not MAIN_BUILD_SRC.exists():
         shutil.copytree(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
 
 
-def get_py(directory: PATH_LIKE) -> list[PATH_LIKE]:
+def get_py(directory: Union[Path, os.path, str]) -> list[Union[Path, os.path, str]]:
     """Find all python files within a directory that are meant for sphinx and return those file-paths as a list.
 
     :param directory: A file path-like object to find all python files contained there-in.
@@ -76,13 +74,13 @@ def get_py(directory: PATH_LIKE) -> list[PATH_LIKE]:
         return PY_FILES
 
 
-def get_main_docs() -> list[PATH_LIKE]:
+def get_main_docs() -> list[Union[Path, os.path, str]]:
     """Generates a list of all .py files to be passed into compiling functions found in the main source code, as well as
     in the user plugin model directory.
 
     :return: A list of python files """
     # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
-    TARGETS = get_py(MAIN_PY_SRC) + get_py(PLUGIN_PY_SRC)
+    TARGETS = get_py(ABSOLUTE_TARGET_MAIN) + get_py(PLUGIN_PY_SRC)
     base_targets = [basename(string) for string in TARGETS]
 
     # Removes duplicate instances of the same file copied from plugins folder to source-temp/user/models/src/
@@ -94,19 +92,28 @@ def get_main_docs() -> list[PATH_LIKE]:
     return TARGETS
 
 
-def call_regenmodel(filepath: list[PATH_LIKE]):
+def call_regenmodel(filepath: Union[Path, os.path, str, list], regen_py: str):
     """Runs regenmodel.py or regentoc.py (specified in parameter regen_py) with all found PY_FILES.
 
     :param filepath: A file-path like object or list of file-path like objects to regenerate.
+    :param regen_py: The regeneration python file to call (regenmodel.py or regentoc.py)
     """
-    from sas.sascalc.doc_regen.regenmodel import run_sphinx, process_model
-    filepaths = [Path(path) for path in filepath]
-    rst_files = [Path(process_model(py_file, True)) for py_file in filepaths]
-    output_path = MAIN_BUILD_SRC / "user" / "models"
-    run_sphinx(rst_files, output_path)
+    REGENMODEL = abspath(dirname(__file__)) + "/" + regen_py
+    # Initialize command to be executed
+    command = [
+        sys.executable,
+        REGENMODEL,
+    ]
+    # Append each filepath to command individually if passed in many files
+    if isinstance(filepath, list):
+        for string in filepath:
+            command.append(string)
+    else:
+        command.append(filepath)
+    subprocess.run(command)
 
 
-def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False):
+def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool = False):
     """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
 
     :param single_file: A file name that needs the html regenerated.
@@ -118,9 +125,14 @@ def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool
             f.truncate(0)
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
     if rst is False:
-        single_rst = MAIN_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst')
+        single_rst = USER_DOC_SRC / "user" / "models" / single_file.replace('.py', '.rst')
     else:
         single_rst = Path(single_file)
+    rst_path = list(single_rst.parts)
+    rst_str = "/".join(rst_path)
+    if rst_str.endswith("models/") or rst_str.endswith("user/"):
+        # (re)sets value to empty string if nothing was entered
+        single_rst = ""
     os.environ['SAS_NO_HIGHLIGHT'] = '1'
     command = [
         sys.executable,
@@ -153,33 +165,35 @@ def call_all_files():
     TARGETS = get_main_docs()
     for file in TARGETS:
         #  easiest for regenmodel.py if files are passed in individually
-        call_regenmodel([file])
+        call_regenmodel(file, "regenmodel.py")
     # regentoc.py requires files to be passed in bulk or else LOTS of unexpected behavior
     generate_toc(TARGETS)
 
 
-def call_one_file(file: PATH_LIKE):
+def call_one_file(file: Union[Path, os.path, str]):
     """A master method to regenerate a single file that is passed to the method.
 
     :param file: A file name that needs the html regenerated.
     """
     from sas.sascalc.doc_regen.regentoc import generate_toc
     TARGETS = get_main_docs()
-    MODEL_TARGET = MAIN_PY_SRC / file
-    PLUGIN_TARGET = PLUGIN_PY_SRC / file
+    NORM_TARGET = join(ABSOLUTE_TARGET_MAIN, file)
+    MODEL_TARGET = join(MAIN_PY_SRC, file)
     # Determines if a model's source .py file from /user/models/src/ should be used or if the file from /plugin-models/ should be used
-    if os.path.exists(MODEL_TARGET) and os.path.exists(PLUGIN_TARGET):
-        # Model name collision between built-in models and plugin models: Choose the most recent
-        file_call_path = MODEL_TARGET if os.path.getmtime(PLUGIN_TARGET) < os.path.getmtime(MODEL_TARGET) else PLUGIN_TARGET
-    elif not os.path.exists(PLUGIN_TARGET):
+    if os.path.exists(NORM_TARGET) and os.path.exists(MODEL_TARGET):
+        if os.path.getmtime(NORM_TARGET) < os.path.getmtime(MODEL_TARGET):
+            file_call_path = MODEL_TARGET
+        else:
+            file_call_path = NORM_TARGET
+    elif not os.path.exists(NORM_TARGET):
         file_call_path = MODEL_TARGET
     else:
-        file_call_path = PLUGIN_TARGET
-    call_regenmodel([file_call_path])
+        file_call_path = NORM_TARGET
+    call_regenmodel(file_call_path, "regenmodel.py")  # There might be a cleaner way to do this but this approach seems to work and is fairly minimal
     generate_toc(TARGETS)
 
 
-def make_documentation(target: PATH_LIKE = "."):
+def make_documentation(target: Union[Path, os.path, str] = "."):
     """Similar to call_one_file, but will fall back to calling all files and regenerating everything if an error occurs.
 
     :param target: A file name that needs the html regenerated.

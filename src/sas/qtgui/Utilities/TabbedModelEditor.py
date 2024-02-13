@@ -41,7 +41,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.model = model
         self.is_modified = False
         self.label = None
-        self.builtinmodels = self.allBuiltinModels()
+        self.file_to_regenerate = ""
 
         self.addWidgets()
 

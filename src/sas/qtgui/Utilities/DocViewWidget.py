@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 from pathlib import Path
+from typing import Union
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
@@ -9,16 +10,7 @@ from twisted.internet import threads
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
-from sas.sascalc.doc_regen.makedocumentation import make_documentation, HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE
-
-HTML_404 = '''
-<html>
-<body>
-<p>Unable to find documentation.</p>
-<p>Developers: please build the documentation and try again.</p>
-</body>
-</html>
-'''
+from sas.sascalc.doc_regen.makedocumentation import make_documentation, HELP_DIRECTORY_LOCATION, MAIN_PY_SRC, MAIN_DOC_SRC
 
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
@@ -100,26 +92,23 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         user_models = Path(models.find_plugins_dir())
         html_path = HELP_DIRECTORY_LOCATION
         rst_path = MAIN_DOC_SRC
+        rst_py_path = MAIN_PY_SRC
         base_path = self.source.parent.parts
         url_str = str(self.source)
 
-        if not MAIN_DOC_SRC.exists() and not HELP_DIRECTORY_LOCATION.exists():
-            # The user docs were never built - disable edit button and do not attempt doc regen
-            self.editButton.setEnabled(False)
-            self.load404()
-            return
-
         if "models" in base_path:
-            user_model_name = user_models / self.source.name.replace("html", "py")
+            model_name = self.source.name.replace("html", "py")
+            regen_string = rst_py_path / model_name
+            user_model_name = user_models / model_name
 
             # Test if this is a user defined model, and if its HTML does not exist or is older than python source file
             if os.path.isfile(user_model_name):
-                if self.newer(user_model_name, url_str):
-                    self.regenerateHtml(user_model_name)
+                if self.newer(regen_string, user_model_name):
+                    self.regenerateHtml(model_name)
 
             # Test to see if HTML does not exist or is older than python file
-            elif self.newer(self.source, url_str):
-                self.regenerateHtml(self.source.name)
+            elif self.newer(regen_string, self.source):
+                self.regenerateHtml(model_name)
             # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
 
         elif "index" in url_str:
@@ -144,7 +133,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             self.loadHtml() #loads the html file specified in the source url to the QWebViewer
 
     @staticmethod
-    def newer(src: PATH_LIKE, html: PATH_LIKE) -> bool:
+    def newer(src: Union[Path, os.path, str], html: Union[Path, os.path, str]) -> bool:
         """Compare two files to determine if a file regeneration is required.
 
         :param src: The ReST file that might need regeneration.
@@ -152,10 +141,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         :return: Is the ReST file newer than the HTML file? Returned as a boolean.
         """
         try:
-            html_exists = os.path.exists(html)
-            rst_time = os.path.getmtime(src)
-            html_time = os.path.getmtime(html)
-            return not html_exists or rst_time > html_time
+            return not os.path.exists(html) or os.path.getmtime(src) > os.path.getmtime(html)
         except Exception as e:
             # Catch exception for debugging
             return True
@@ -171,10 +157,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.webEngineViewer.load(url)
 
         # Show widget
-        self.onShow()
-
-    def load404(self):
-        self.webEngineViewer.setHtml(HTML_404)
         self.onShow()
     
     def refresh(self):
@@ -194,16 +176,16 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         # Check if the URL string contains a fragment (jump link)
         if '#' in url.name:
-            url_str, fragment = str(url.absolute()).split('#', 1)
+            url, fragment = url.name.split('#', 1)
             # Convert path to a QUrl needed for QWebViewerEngine
-            abs_url = QtCore.QUrl.fromLocalFile(url_str)
+            abs_url = QtCore.QUrl.fromLocalFile(url)
             abs_url.setFragment(fragment)
         else:
             # Convert path to a QUrl needed for QWebViewerEngine
             abs_url = QtCore.QUrl.fromLocalFile(url)
         return abs_url
 
-    def regenerateHtml(self, file_name: PATH_LIKE):
+    def regenerateHtml(self, file_name: Union[Path, os.path, str]):
         """Regenerate the documentation for the file passed to the method
 
         :param file_name: A file-path like object that needs regeneration.
@@ -215,7 +197,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.regen_in_progress = True
 
     @staticmethod
-    def regenerateDocs(target: PATH_LIKE = None):
+    def regenerateDocs(target: Union[Path, os.path, str] = None):
         """Regenerates documentation for a specific file (target) in a subprocess
 
         :param target: A file-path like object that needs regeneration.

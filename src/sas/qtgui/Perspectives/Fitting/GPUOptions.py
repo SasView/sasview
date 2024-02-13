@@ -54,6 +54,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.setupUi(self)
 
         self.radio_buttons = []
+
         self.add_options()
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")

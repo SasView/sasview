@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 # make sure sasmodels is on the path
 sys.path.append('..')
@@ -7,7 +9,12 @@ from os.path import basename, exists, join as joinpath
 from sasmodels.core import load_model_info
 from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
 
-from typing import Optional, IO, BinaryIO, List, Dict
+try:
+    from typing import Optional, IO, BinaryIO, List, Dict
+except ImportError:
+    pass
+else:
+    from sasmodels.modelinfo import ModelInfo
 
 TEMPLATE = """\
 ..
@@ -137,9 +144,5 @@ def generate_toc(model_files: list[str]):
         f.close()
 
 
-def main(files):
-    generate_toc(model_files=files)
-
-
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    generate_toc(sys.argv[1:])
