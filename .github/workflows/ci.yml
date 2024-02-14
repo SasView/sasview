@@ -222,19 +222,9 @@ jobs:
           iscc installers/installer.iss
           mv installers/Output/setupSasView.exe installers/dist
 
-      - name: Sign executable and create dmg (OSX)
+      - name: Build sasview installer dmg file (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
         run: |
-          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
-          security create-keychain -p DloaAcYP build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p DloaAcYP build.keychain
-          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
-
           cd installers/dist
           hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
 
