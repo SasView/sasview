@@ -2,7 +2,7 @@ import json
 import os
 import sys
 from collections import defaultdict
-from typing import Any, Tuple
+from typing import Any, Tuple, Optional
 from pathlib import Path
 
 import copy
