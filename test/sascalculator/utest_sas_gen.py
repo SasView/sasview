@@ -245,8 +245,12 @@ class sas_gen_test(unittest.TestCase):
 
             # compare the two
             errs = (external - analytical)/analytical
+            different_entries = 0
             for val in np.abs(errs):
-                self.assertLessEqual(val, 0.01)
+                self.assertLessEqual(val, 0.01, "Ensure that the error is acceptable.")
+                if val != 0:
+                    different_entries += 1
+            self.assertTrue(different_entries > len(q)*0.5, "Check that two different algorithms were actually run.")
 
         # test a larger q-range
         f = self.pdbloader.read(os.path.join(os.path.dirname(__file__), "data/debye_test_files/SASDPP4.pdb"))
