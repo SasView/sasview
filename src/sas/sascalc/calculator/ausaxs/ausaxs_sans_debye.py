@@ -101,11 +101,8 @@ def evaluate_sans_debye(q, coords, w):
     ausaxs.evaluate_sans_debye(_q, _x, _y, _z, _w, _nq, _nc, ct.byref(_status), _Iq)
 
     # check for errors
-    if _status != 0:
-        if _status == 1:
-            logging.error("q range is outside what is currently supported by AUSAXS. Using default Debye implementation instead.")
-        elif _status == 2:
-            logging.error("AUSAXS calculator terminated unexpectedly. Using default Debye implementation instead.")
+    if _status.value != 0:
+        logging.error("AUSAXS calculator terminated unexpectedly. Using default Debye implementation instead.")
         from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
         return sasview_sans_debye(q, coords, w)
 

@@ -243,17 +243,23 @@ class sas_gen_test(unittest.TestCase):
             analytical = sasview_sans_debye.sasview_sans_debye(q, coords, w)
             external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
 
-            # import matplotlib.pyplot as plt
-            # plt.plot(q, analytical, label='analytical')
-            # plt.plot(q, external, label='external')
-            # plt.loglog()
-            # plt.legend()
-            # plt.show()
-
             # compare the two
             errs = (external - analytical)/analytical
             for val in np.abs(errs):
-                self.assertLessEqual(val, 2e-2)
+                self.assertLessEqual(val, 0.01)
+
+        # test a larger q-range
+        f = self.pdbloader.read(os.path.join(os.path.dirname(__file__), "data/debye_test_files/SASDPP4.pdb"))
+        coords = np.vstack([f.pos_x, f.pos_y, f.pos_z])
+        q = np.linspace(0.1, 10, 100)
+        w = np.random.rand(coords.shape[1]) # random weights
+
+        analytical = sasview_sans_debye.sasview_sans_debye(q, coords, w)
+        external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
+
+        errs = (external - analytical)/analytical
+        for val in np.abs(errs):
+            self.assertLessEqual(val, 0.01)
 
     def test_calculator_elements(self):
         """
