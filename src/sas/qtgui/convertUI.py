@@ -25,7 +25,7 @@ def pyrrc(in_file, out_file):
     Run the qt resource compiler
     """
     run_line = ["pyside6-rcc", in_file, "-o" ,out_file]
-    subprocess.run(run_line)
+    subprocess.run(run_line, check=True)
 
 
 def pyuic(in_file, out_file):
@@ -35,7 +35,7 @@ def pyuic(in_file, out_file):
     in_file2 = os.path.abspath(in_file)
     out_file2 = os.path.abspath(out_file)
     run_line = ["pyside6-uic", in_file2 "-o", out_file2]
-    subprocess.run(run_line)
+    subprocess.run(run_line, check=True)
 
 def file_in_newer(file_in, file_out):
     """
