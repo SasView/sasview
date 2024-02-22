@@ -105,7 +105,7 @@ jobs:
 
       - name: Fetch sources for sibling projects
         run: |
-          git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
+          git clone --depth=50 --branch=release_0.9.0 https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
           git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
 
@@ -177,17 +177,13 @@ jobs:
 
       ### Build documentation (if enabled)
 
-      - name: Install doc-building dependencies
-        if: ${{ matrix.docs }}
-        run: |
-          python -m pip install sphinx
-
-      - name: Build sasmodels and bumps docs
+      - name: Build sasmodels, sasdata, and bumps docs
         if: ${{ matrix.docs }}
         run: |
           make -C ../bumps/doc html || true
           mkdir -p ~/.sasmodels/compiled_models
           make -j4 -C ../sasmodels/doc html || true
+          make -C ../sasdata/docs html || true
 
       - name: Build sasview docs
         if: ${{ matrix.docs }}
