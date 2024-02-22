@@ -6,7 +6,6 @@ import numbers
 import os
 import re
 import sys
-import imp
 import warnings
 import webbrowser
 import urllib.parse

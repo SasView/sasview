@@ -12,7 +12,7 @@ import subprocess
 import os
 from os.path import join as joinpath, abspath, dirname, isdir, exists, relpath
 import shutil
-import imp
+from importlib.machinery import SourceFileLoader
 
 from glob import glob
 from distutils.dir_util import copy_tree
@@ -63,7 +63,7 @@ BUMPS_SOURCE = joinpath(BUMPS_DOCS, "guide")
 BUMPS_TARGET = joinpath(SPHINX_PERSPECTIVES, "Fitting")
 
 
-run = imp.load_source('run', joinpath(SASVIEW_ROOT, 'run.py'))
+run = SourceFileLoader('run', joinpath(SASVIEW_ROOT, 'run.py')).load_module()
 run.prepare()
 
 
