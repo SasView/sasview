@@ -263,23 +263,6 @@ jobs:
           hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
           codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.dmg
 
-      - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        uses: lando/notarize-action@v2
-        with:
-          product-path: "installers/dist/SasView6.dmg"
-          primary-bundle-id: "org.sasview.SasView6"
-          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          appstore-connect-team-id: W2AG9MPZ43
-          verbose: True
-
-      - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        uses: BoundfoxStudios/action-xcode-staple@v1
-        with:
-          product-path: "installers/dist/SasView6.dmg"
-
       - name: Publish installer package
         if: ${{ matrix.installer }}
         uses: actions/upload-artifact@v3
@@ -290,34 +273,6 @@ jobs:
             installers/dist/SasView6.dmg
             installers/dist/sasview6.tar.gz
           if-no-files-found: error
-
-      - name: Rename artifacts (Windows)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
-        run: |
-          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
-
-      - name: Rename artifacts (MacOS)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        run: |    
-          mv installers/dist/SasView6.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
-
-      - name: Rename artifacts (Linux)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
-        run: |    
-          mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
-
-      - name: Upload Release Installer to GitHub
-        uses: ncipollo/release-action@v1
-        with:
-          draft: false
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/setupSasView-6.0.0-alpha-Win64.exe, installers/dist/SasView-6.0.0-alpha-MacOSX.dmg, installers/dist/SasView-6.0.0-alpha-Linux.tar.gz"
-          name: "Release 6.0.0-alpha"
-          bodyFile: "build_tools/release_notes/6.0.0_notes.txt"
-          tag: "v6.0.0-alpha"
 
   test-installer:
     needs: [ build-matrix ]
