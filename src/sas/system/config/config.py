@@ -182,7 +182,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.UPDATE_TIMEOUT = 2
 
         self.SHOW_EXIT_MESSAGE = True
-        
+
         # Window scaling values
         self.QT_SCALE_FACTOR = 1.0
         self.QT_AUTO_SCREEN_SCALE_FACTOR = False
@@ -190,7 +190,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # If True, use an ugly but more robust legend plotting method in Fitting that results in full-
         # width legends.
         self.FITTING_PLOT_FULL_WIDTH_LEGENDS = False
-        
+
         # If True, truncates names in Fitting plot legends such that each name is maximum one line.
         self.FITTING_PLOT_LEGEND_TRUNCATE = False
 
@@ -207,6 +207,10 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
+
+        # Style properties
+        self.THEME = 'Default'
+        self.FONT_SIZE = 10.0
 
         # What's New variables
         self.LAST_WHATS_NEW_HIDDEN_VERSION = "5.0.0"

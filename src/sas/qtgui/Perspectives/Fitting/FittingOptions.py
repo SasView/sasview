@@ -114,8 +114,8 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         sender = self.sender()
         validator = sender.validator()
         state = validator.validate(sender.text(), 0)[0]
-        color = '' if state == QtGui.QValidator.Acceptable else '#fff79a'
-        sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
+        warning = 'false' if state == QtGui.QValidator.Acceptable else 'true'
+        GuiUtils.updateProperty(sender, 'warning', warning)
 
     def onDefaultAlgorithmChange(self):
         text = self.cbAlgorithmDefault.currentText()
@@ -213,7 +213,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
                 self.config.values[self.current_fitter_id][option] = new_value
             except ValueError:
                 # Don't update bumps if widget has bad data
-                self.reject
+                return
 
         # Update the BUMPS singleton
         [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]

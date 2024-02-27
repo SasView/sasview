@@ -28,9 +28,6 @@ class AboutBox(QtWidgets.QDialog, Ui_AboutUI):
         version = sas.system.version.__version__
 
         self.lblVersion.setText(str(version))
-        lbl_font = self.font()
-        lbl_font.setPointSize(24)
-        self.lblVersion.setFont(lbl_font)
 
         dir_path = os.path.split(sas.__file__)[0]
         installation_path = os.path.split(dir_path)[0]

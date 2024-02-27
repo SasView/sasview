@@ -7,9 +7,8 @@ from PySide6 import QtGui, QtWidgets
 from .UI.InvariantDetailsUI import Ui_Dialog
 from .InvariantUtils import WIDGETS
 
-# ERROR_COLOR = wx.Colour(255, 0, 0, 128)
-# EXTRAPOLATION_COLOR = wx.Colour(169, 169, 168, 128)
-# INVARIANT_COLOR = wx.Colour(67, 208, 128, 128)
+from sas.qtgui.Utilities import GuiUtils
+
 
 class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
     """
@@ -21,24 +20,6 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         super(DetailsDialog, self).__init__(parent)
 
         self.setupUi(self)
-
-        DEFAULT_STYLE = """
-        QProgressBar{
-            border: 2px solid grey;
-            border-radius: 5px;
-            text-align: center
-        }
-
-        QProgressBar::chunk {
-            background-color: #b1daf9;
-            width: 10px;
-            margin: 1px;
-        }
-        """
-        self.progressBarLowQ.setStyleSheet(DEFAULT_STYLE)
-        self.progressBarData.setStyleSheet(DEFAULT_STYLE)
-        self.progressBarHighQ.setStyleSheet(DEFAULT_STYLE)
-
         self.progressBarLowQ.setMinimum(0)
         self.progressBarLowQ.setMaximum(100)
 
@@ -49,10 +30,9 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         self.progressBarHighQ.setMaximum(100)
 
         # Modify font in order to display Angstrom symbol correctly
-        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.lblQLowQUnits.setStyleSheet(new_font)
-        self.lblQDataUnits.setStyleSheet(new_font)
-        self.lblQHighQUnits.setStyleSheet(new_font)
+        GuiUtils.updateProperty(self.lblQLowQUnits, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblQDataUnits, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblQHighQUnits, 'angstrom', 'true')
 
         self.cmdOK.clicked.connect(self.accept)
 

@@ -73,7 +73,7 @@ from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 
 import sas
 from sas import config
-from sas.system import web
+from sas.system import web, style
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +91,9 @@ class GuiManager:
 
         # Decide on a locale
         QLocale.setDefault(QLocale('en_US'))
+
+        # Main application style.
+        self._parent.setStyleSheet(style.css)
 
         # Redefine exception hook to not explicitly crash the app.
         sys.excepthook = self.info
@@ -176,8 +179,8 @@ class GuiManager:
         self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
 
         # Add other, minor widgets
-        self.ackWidget = Acknowledgements()
-        self.aboutWidget = AboutBox()
+        self.ackWidget = Acknowledgements(self._parent)
+        self.aboutWidget = AboutBox(self._parent)
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
 
         self.grid_window = None
@@ -1051,7 +1054,7 @@ class GuiManager:
         """
         Make sasmodels orientation & jitter viewer available
         """
-        show_orientation_viewer()
+        show_orientation_viewer(self._parent)
 
     def actionImage_Viewer(self):
         """

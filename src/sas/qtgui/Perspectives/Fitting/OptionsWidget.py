@@ -97,9 +97,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.txtNptsFit.setText(str(self.npts_fit))
         self.model.blockSignals(False)
 
-        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.label_13.setStyleSheet(new_font)
-        self.label_15.setStyleSheet(new_font)
+        GuiUtils.updateProperty(self.label_13, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.label_15, 'angstrom', 'true')
 
     def initModel(self):
         """

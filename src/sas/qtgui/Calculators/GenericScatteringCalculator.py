@@ -44,13 +44,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     calculationFinishedSignal = QtCore.Signal()
     loadingFinishedSignal = QtCore.Signal(list, bool)
 
-    # class constants for textbox background colours
-    TEXTBOX_DEFAULT_STYLESTRING = 'background-color: rgb(255, 255, 255);'
-    TEXTBOX_WARNING_STYLESTRING = 'background-color: rgb(255, 226, 110);'
-    TEXTBOX_ERROR_STYLESTRING = 'background-color: rgb(255, 182, 193);'
-
     def __init__(self, parent=None):
-        super(GenericScatteringCalculator, self).__init__()
+        super(GenericScatteringCalculator, self).__init__(parent._parent if parent else None)
         self.setupUi(self)
         # disable the context help icon
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
@@ -247,17 +242,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cbShape.currentIndexChanged.connect(self.selectedshapechange)
 
         # New font to display angstrom symbol
-        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.lblUnitSolventSLD.setStyleSheet(new_font)
-        self.lblUnitVolume.setStyleSheet(new_font)
-        self.lbl5.setStyleSheet(new_font)
-        self.lblUnitMx.setStyleSheet(new_font)
-        self.lblUnitMy.setStyleSheet(new_font)
-        self.lblUnitMz.setStyleSheet(new_font)
-        self.lblUnitNucl.setStyleSheet(new_font)
-        self.lblUnitx.setStyleSheet(new_font)
-        self.lblUnity.setStyleSheet(new_font)
-        self.lblUnitz.setStyleSheet(new_font)
+        GuiUtils.updateProperty(self.lblUnitSolventSLD, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitVolume, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lbl5, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitMx, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitMy, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitMz, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitNucl, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitx, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnity, 'angstrom', 'true')
+        GuiUtils.updateProperty(self.lblUnitz, 'angstrom', 'true')
 
     def setup_display(self):
         """
@@ -418,17 +412,17 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             if senderInvalid:
                 self.invalidLineEdits.remove(sender)
             self.toggle_error_functionality()
-            sender.setStyleSheet("")
         # If the LineEdit has been corrected from an invalid value restore functionality
         elif sender.hasAcceptableInput() and senderInvalid:
             self.invalidLineEdits.remove(sender)
             self.toggle_error_functionality()
-            sender.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+            GuiUtils.updateProperty(sender, 'warning', 'false')
+            GuiUtils.updateProperty(sender, 'urgent', 'false')
         # If the LineEdit has had an invalid value stored then remove functionality
         elif (not sender.hasAcceptableInput()) and (not senderInvalid):
             self.invalidLineEdits.append(sender)
             self.toggle_error_functionality()
-            sender.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
+            GuiUtils.updateProperty(sender, 'urgent', 'true')
         # If the LineEdit is an acceptable value according to the regex apply warnings
         # This functionality was previously found in check_value()
         if not(sender in self.invalidLineEdits):
@@ -440,9 +434,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 max_step =  3*max(xnodes, ynodes, znodes) 
                     # limits qmin > maxq / nodes                 
                 if value < 2 or value > max_step:
-                    self.txtNoQBins.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    GuiUtils.updateProperty(self.txtNoQBins, 'warning', 'true')
                 else:
-                    self.txtNoQBins.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                    GuiUtils.updateProperty(self.txtNoQBins, 'warning', 'false')
+                    GuiUtils.updateProperty(self.txtNoQBins, 'urgent', 'false')
             elif sender == self.txtQxMax:
                 xstepsize = float(self.txtXstepsize.text())
                 ystepsize = float(self.txtYstepsize.text())
@@ -450,9 +445,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 value = float(str(self.txtQxMax.text()))
                 max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))                   
                 if value <= 0 or value > max_q:
-                    self.txtQxMax.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                    GuiUtils.updateProperty(self.txtQxMax, 'warning', 'true')
                 else:
-                    self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                    GuiUtils.updateProperty(self.txtQxMax, 'warning', 'false')
+                    GuiUtils.updateProperty(self.txtQxMax, 'urgent', 'false')
 
             
 

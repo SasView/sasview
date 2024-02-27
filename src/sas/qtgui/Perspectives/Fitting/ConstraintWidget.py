@@ -309,7 +309,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if self.is_running:
             self.is_running = False
             #re-enable the Fit button
-            self.cmdFit.setStyleSheet('QPushButton {color: black;}')
             self.cmdFit.setText("Fit")
             # stop the fitpages
             self.calc_fit.stop()
@@ -402,7 +401,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.calc_fit.ready(2.5)
 
         # modify the Fit button
-        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        GuiUtils.updateProperty(self.cmdFit, 'urgent', 'true')
         self.cmdFit.setText('Stop fit')
         self.parent.communicate.statusBarUpdateSignal.emit('Fitting started...')
         self.is_running = True
@@ -650,7 +649,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to the successful fit complete signal
         """
         #re-enable the Fit button
-        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+        GuiUtils.updateProperty(self.cmdFit, 'urgent', 'false')
         self.cmdFit.setText("Fit")
         self.is_running = False
 
@@ -710,7 +709,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to the successful batch fit complete signal
         """
         #re-enable the Fit button
-        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+        GuiUtils.updateProperty(self.cmdFit, 'urgent', 'false')
         self.cmdFit.setText("Fit")
         self.is_running = False
 
@@ -757,7 +756,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to fitting failure.
         """
         #re-enable the Fit button
-        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+        GuiUtils.updateProperty(self.cmdFit, 'urgent', 'false')
         self.cmdFit.setText("Fit")
         self.is_running = False
 

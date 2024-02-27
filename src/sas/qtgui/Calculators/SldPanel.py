@@ -90,7 +90,7 @@ def xraySldAlgorithm(molecular_formula, mass_density, xray_wavelength):
 class SldPanel(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
-        super(SldPanel, self).__init__()
+        super(SldPanel, self).__init__(parent._parent if parent else None)
 
         self.manager = parent
 

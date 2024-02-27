@@ -1,5 +1,7 @@
 from sas.system import config
 
+from sas.qtgui.Utilities import GuiUtils
+
 from .PreferencesWidget import PreferencesWidget
 
 
@@ -53,3 +55,4 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.legendLineLength.setStyleSheet("background-color: white")
         self.disableResidualPlot.setChecked(config.DISABLE_RESIDUAL_PLOT)
         self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)
+        GuiUtils.updateProperty(self.legendLineLength, 'warning', 'false')

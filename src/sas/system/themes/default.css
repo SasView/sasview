@@ -1,0 +1,240 @@
+/* QWidget Properties */
+
+QWidget {
+    background: rgb(248,249,250);
+    color: rgb(77,81,87);
+    selection-color: rgb(77,81,87);
+    selection-background-color: rgba(26,115,232,0.5);
+}
+QWidget:disabled {
+    color: rgba(77,81,87,0.4);
+    selection-background-color: rgba(77,81,87,0.25);
+    selection-color: rgba(77,81,87,0.4);
+}
+
+/* QMainWindow Properties */
+QMainWindow::separator {
+    background: rgb(218,220,224);
+}
+QMainWindow::separator:hover,
+QMainWindow::separator:pressed {
+    background: rgb(26,115,232);
+}
+
+/* QCheckBox and QRadioButton Properties */
+QCheckBox::indicator:enabled,
+QRadioButton::indicator:enabled {
+    border: 2px solid rgba(0,0,0,0.25);
+}
+QCheckBox::indicator:hover,
+QRadioButton::indicator:hover {
+    border: 2px solid rgb(26,115,178);
+}
+QCheckBox::indicator:checked {
+    color: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.1);
+}
+QCheckBox:checked {
+    color: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.1);
+}
+
+/* QGroupBox Properties */
+QGroupBox {
+    border: 1px solid rgb(218,220,224);
+}
+
+/* QToolTip Properties */
+QToolTip {
+    background: rgba(248,249,250,0.2);
+    color: rgb(77,81,87);
+}
+
+/* QMenuBar Properties */
+QMenuBar {
+    border-bottom: 1px solid rgb(218,220,224);
+    background: rgb(248,249,250);
+}
+QMenuBar::item:selected {
+    background: rgba(0,0,0,0.20);
+}
+
+/* QToolBar */
+QToolBar {
+    background: rgb(235,235,235);
+}
+QToolBar::separator {
+    background: rgb(218,220,224);
+}
+QToolBar > QToolButton:hover,
+QToolBar > QToolButton::menu-button:hover {
+    background: rgba(0,0,0,0.15);
+}
+QToolBar > QToolButton:pressed,
+QToolBar > QToolButton::menu-button:pressed:enabled,
+QToolBar > QToolButton:checked:enabled {
+    background: rgba(0,0,0,0.24);
+}
+
+/* Qmenu Properties */
+QMenu {
+    background: rgba(248,249,250,0.70);
+}
+QMenu::separator {
+    background: rgb(218,220,224);
+}
+QMenu::item:selected {
+    background: rgba(0,0,0,0.12);
+}
+
+/* QScrollBar */
+QScrollBar {
+    background: rgba(0,0,0,0.40);
+}
+QScrollBar::handle {
+    background: rgba(0,0,0,0.40);
+}
+QScrollBar::handle:hover {
+    background: rgba(0,0,0,0.50);
+}
+QScrollBar::handle:pressed {
+    background: rgba(0,0,0,0.24);
+}
+QScrollBar::handle:disabled {
+    background: rgba(0,0,0,0.15);
+}
+
+QPushButton, QToolButton {
+    color: rgb(26,115,232);
+    border: 1px solid rgb(218,220,224);
+}
+QPushButton:hover, QPushButton:pressed, QPushButton:checked:enabled,
+QToolButton:hover, QToolButton:pressed, QToolButton:checked:enabled {
+    color: rgb(0,0,0);
+    background: rgba(26,115,232,0.3);
+}
+
+/* QComboBox */
+QComboBox {
+    background: rgb(248,249,250);
+    border: 1px solid rgb(218,220,224);
+}
+QComboBox:hover, QComboBox::item:hover, QComboBox:focus, QComboBox:open {
+    border-color: rgb(26,115,232);
+}
+QComboBox::drop-down:editable:hover {
+    background: rgba(0,0,0,0.13);
+}
+/* Setting background color of selected item when editable is false. */
+QComboBox::item:selected {
+    background: rgba(26,115,278,0.35);
+}
+
+/* QAbstractItemView in QComboBox is NoFrame. Override default settings and show border. */
+QComboBox QListView {
+    background: rgba(248,249,250,0.25);
+}
+
+/* QListView QTreeView */
+QListView,
+QTreeView {
+    background: rgb(248,249,250);
+}
+QListView::item:hover,
+QTreeView::item:hover,
+QTreeView::branch:hover {
+    background: rgb(218,220,224);
+}
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+    border-image: unset;
+    background: rgba(77,81,87,0.05);
+}
+QTreeView::branch:open:has-children:!has-siblings:disabled,
+QTreeView::branch:open:has-children:has-siblings:disabled  {
+    background: rgba(77,81,87,0.05);
+}
+QTreeView > QHeaderView {
+    background: rgb(248,249,250);
+}
+QTreeView > QHeaderView::section {
+    background: rgb(218,220,224);
+}
+
+/* QTabWidget QTabBar */
+QTabWidget::pane {
+    border: 1px solid rgb(218,220,224);
+}
+QTabBar::close-button:hover {
+    background: rgba(0,0,0,0.20);
+}
+QTabBar::tab:hover,
+QTabBar::tab:selected:hover:enabled {
+    background: rgba(0,0,0,0.15);
+}
+QTabBar::tab:selected:enabled {
+    color: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.1);
+}
+QTabBar::tab:selected:disabled,
+QTabBar::tab:only-one:selected:enabled {
+    border-color: rgb(218,220,224);
+}
+
+/* QColumnView */
+QColumnView {
+    background: rgb(248,249,250);
+}
+QColumnViewGrip {
+    background: rgb(248,249,250);
+}
+
+/* QTableView */
+QTableView {
+    gridline-color: rgb(218,220,224);
+    background: rgba(248,249,250,0.5);
+}
+QTableView:!active {
+    background: rgba(0,0,0,0.12);
+}
+QTableView::item:alternate {
+    background: rgba(0,0,0,0.12);
+}
+QTableView::item:selected {
+    background: rgba(248,249,250,0.5);
+}
+QTableView QTableCornerButton::section {
+    background: rgb(218,220,224);
+}
+QTableView QTableCornerButton::section:pressed {
+    background: rgba(26,115,232,0.35);
+}
+QTableView > QHeaderView {
+    background: rgba(248,249,250,0.50);
+}
+QTableView > QHeaderView::section {
+    background: rgb(218,220,224);
+}
+
+/* QLineEdit */
+QLineEdit {
+    border: 1px solid rgb(218,220,224);
+    background: rgb(248,249,250);
+}
+QLineEdit:focus {
+    border-color: rgb(26,115,232);
+}
+
+/* Check indicator */
+QCheckBox::indicator,
+QGroupBox::indicator,
+QAbstractItemView::indicator,
+QRadioButton::indicator {
+    background: rgba(245,245,245,0.6);
+}
+QCheckBox::indicator:checked,
+QGroupBox::indicator:checked,
+QAbstractItemView::indicator:checked,
+QRadioButton::indicator:checked {
+    background: rgb(26,115,178);
+}
