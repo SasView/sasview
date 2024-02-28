@@ -154,7 +154,7 @@ and recombine it with the positive part. We can also multiply the integral by tw
 the integrand by two, giving
 
 .. math::
-    = 2 \int_0^\infty f(x) \frac{e^{i x \xi} + e^{-i x \xi}{2} dx
+    = 2 \int_0^\infty f(x) \frac{e^{i x \xi} + e^{-i x \xi}}{2} dx
 
 The fractional part of which is the complex definition of cosine.
 Applying this definition and using the fact that :math:`f(x)` is even
@@ -167,8 +167,8 @@ which shows that the Fourier transform is purely real, reflecting the
 fact that there is no phase information (which would be encoded in the imaginary part).
 
 
-:math:`\Gamma_1` Projection
-...........................
+The :math:`\Gamma_1` Projection
+...............................
 
 Consider the Fourier transform of the three dimensional correlation function,
 
@@ -206,23 +206,69 @@ we can use the result above to get
 The job of Corfunc is now to invert this. The following operation does the job:
 
 .. math::
-    \Gamma_1(x) = \int I(q) q^2 \cos(qx) dx
+    \Gamma_1(x) = \int I(q) \cos(qx) dx
 
 We can check this by showing that
 
 .. math::
-    f(y) = \int \left( \int f(x) \cos(qx) dx \right) q^2 \cos(qy) dq
+    f(y) = \int \left( \int f(x) \cos(qx) dx \right) \cos(qy) dq
 
-First note that we can write it (with some technical assumtions about convergence) as
+Doing this formally requires a fair bit of algebraic legwork,
+but there is an informal argument that will get us there.
+First note that we can write it as (hand-waving away the convergence issues)
 
 .. math::
-    f(y) = \int f(x) \int q^2 cos(qx) cos(qy) dq dx
+    f(y) = \int f(x) \int cos(qx) cos(qy) dq dx
+
+Then the equation corresponds to the identity function if the integral
+
+.. math::
+    \int cos(qx) cos(qy) dq
+
+is the delta function. This the case, because cosine functions form an orthogonal basis.
+When :math:`x=y` the integral is non-zero, being an
+integral of the strictly positive :math:`cos^2(qx)`.
+Conversely, when :math:`x \neq y` the integral is zero.
 
 
-:math:`\Gamma_3` Projection
-...........................
 
-[TO DO]
+
+The :math:`\Gamma_3` Projection
+...............................
+
+The :math:`\Gamma_3` projection is based on spherical symmetry.
+It's derivation is essentially that of Debye's formula
+
+
+Consider :math:`q`-vectors relative to
+
+
+To invert this, we need to use 
+
+Relationship between :math:`\Gamma_1` and :math:`\Gamma_3`
+..........................................................
+
+Internally, Corfunc calculates :math:`\Gamma_3` from :math:`\Gamma_1`.
+Let's now look at how we can get one from the other, starting with :math:`\Gamma_3`.
+
+.. math::
+   \Gamma_3 = \int I(q) frac{\sin(q x)}{q x} dq
+
+First, multiply by :math:`x`
+
+.. math::
+   x \Gamma_3 = x \int I(q) \frac{\sin(q x)}{q x} dq = \int I(q) \frac{\sin(q x)}{q} dq
+
+Now take the derivative with respect to :math:`x`
+
+.. math::
+   \frac{d}{dx} x \Gamma_3 = \frac{d}{dx} \int I(q) \frac{\sin(q x)}{q} dq = \int I(q) \cos (q x) dq = \Gamma_1
+
+In corfunc we calculate $\Gamma_3$ from $\Gamma_1$ using
+
+.. math::
+    \Gamma_1(x) = \int_0^x Gamma_3(r) / r dr
+
 
 
 References
