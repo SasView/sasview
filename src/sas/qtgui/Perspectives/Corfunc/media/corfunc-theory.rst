@@ -227,7 +227,7 @@ Then the equation corresponds to the identity function if the integral
 
 is the delta function. This the case, because cosine functions form an orthogonal basis.
 When :math:`x=y` the integral is non-zero, being an
-integral of the strictly positive :math:`cos^2(qx)`.
+integral of the always positive :math:`cos^2(qx)`.
 Conversely, when :math:`x \neq y` the integral is zero.
 
 
@@ -239,11 +239,65 @@ The :math:`\Gamma_3` Projection
 The :math:`\Gamma_3` projection is based on spherical symmetry.
 It's derivation is essentially that of Debye's formula
 
+We begin with an expression for the scattered intensity as above
 
-Consider :math:`q`-vectors relative to
+.. math::
+    I(\vec{q}) = \int_{\mathbb{R}^3} \gamma(\vec{r}) e^{i \vec{r} \cdot \vec{q}} dr^3
+
+now, we want to average this over all angles, i.e. over all :math:`q`-vectors of a given length, and we do so in a coordinate
+system relative to :math:`\vec{r}`. This is an unobvious choice of coordinate system, but it simplifies things greatly,
+as in such a coordinate system, the dot product :math:`\vec{r}\cdot\vec{q}` becomes :math:`qr \cos\theta`.
+
+For our averaging there is a total of :math:`4\pi` stradians in a sphere, giving a leading factor of :math:`1/4\pi`.
+
+.. math::
+    I(\vec{q}) = \frac{1}{4\pi}\int_{\phi=0}{\phi=2\pi}\int_{\theta=0}^{\theta=\pi}\int_{\vec{r}\in\mathbb{R}} \gamma(\vec{r}) e^{i qr \cos\theta} d\vec{r}^3 \sin(\theta) d\theta d\phi
+
+The integral is constant with with respect to :math:`\phi`, so drops out as a factor of :math:`2\pi`.
+
+.. math::
+    = \frac{1}{2}\int_{\theta=0}^{\theta=\pi}\int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) e^{i \vec{r} \cdot \vec{q}} d\vec{r}^3 \sin(\theta) d\theta
+
+and we can adjust the order of integration, noting that because of our choice of coordinate system, :math:`\gamma(\vec{r})` is
+independent of :math:`\theta`.
+
+.. math::
+    = \frac{1}{2}\int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) \int_{\theta=0}^{\theta=\pi} e^{i \vec{r} \cdot \vec{q}} \sin(\theta) d\theta d\vec{r}^3
+
+Now, we can consider the inner integral specifically, firstly by doing a substitution of :math:`u = -\cos\theta`. This
+means that :math:`du = \sin\theta d\theta`, the interval :math:`\theta\in[0,\pi]` becomes :math:`u\in[1, -1].
+
+.. math::
+    \int_{\theta=0}^{\theta=\pi} e^{i \vec{r} \cdot \vec{q}} \sin(\theta) d\theta = \int_{u=-1}^{u=1} e^{i q r u} du
+
+which is just an exponential and easily integrated
+.. math::
+    = \left[ \frac{-i e^{i q r u}}{qr} \right]_{-1}^{1} = \frac{i \left(e^{-i q r} - e^{i q r} \right) }{qr} = 2 \frac{i \sinh -iqr}{qr}
+
+which by the relationship between complex trigonometric and hyperbolic functions becomes
+
+.. math::
+    = 2 \frac{\sin qr}{qr}
+
+The leading :math:`2` will cancel the leading :math:`1/2` and the value of :math:`I(q)` can be seen to be
+
+.. math::
+    = \int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) \frac{\sin qr}{qr} d\vec{r}^3
+
+Note that this object is not dependent on the angular components of :math:`\vec{r}`, so the integral
+over :math:`\mathbb{R}^3` can be written as
+
+.. math::
+    = \int_0^\infty \int_\Omega\gamma(\vec{r})d\Omega \frac{\sin qr}{qr} dr
+
+Where :math:`\Omega` is a solid angle element. Letting :math:`\Gamma_3(r) = \int_\Omega \gamma(\vec{r}) d\Omega we have,
+finally,
+
+.. math::
+    I(q) = \int_0^\infty \Gamma_3(r) \frac{\sin qr}{qr} dr
 
 
-To invert this, we need to use 
+To invert this, we need to use
 
 Relationship between :math:`\Gamma_1` and :math:`\Gamma_3`
 ..........................................................
@@ -252,7 +306,7 @@ Internally, Corfunc calculates :math:`\Gamma_3` from :math:`\Gamma_1`.
 Let's now look at how we can get one from the other, starting with :math:`\Gamma_3`.
 
 .. math::
-   \Gamma_3 = \int I(q) frac{\sin(q x)}{q x} dq
+   \Gamma_3 = \int I(q) \frac{\sin(q x)}{q x} dq
 
 First, multiply by :math:`x`
 
@@ -264,10 +318,11 @@ Now take the derivative with respect to :math:`x`
 .. math::
    \frac{d}{dx} x \Gamma_3 = \frac{d}{dx} \int I(q) \frac{\sin(q x)}{q} dq = \int I(q) \cos (q x) dq = \Gamma_1
 
-In corfunc we calculate $\Gamma_3$ from $\Gamma_1$ using
+Which, after expressing in terms of :math:`\Gamma_1` gives us the relation we use in corfunc, for
+calculating :math:`\Gamma_3`
 
 .. math::
-    \Gamma_1(x) = \int_0^x Gamma_3(r) / r dr
+    \Gamma_3(x) = \int_0^x \Gamma_1(r) / r dr
 
 
 
