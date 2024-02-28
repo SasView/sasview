@@ -38,11 +38,13 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                  active_plots=None,
                  validate_method=None,
                  communicator=None):
-        super(SlicerParameters, self).__init__()
+        super(SlicerParameters, self).__init__(parent.manager)
 
         self.setupUi(self)
 
         self.parent = parent
+
+        self.manager = parent.manager
 
         self.model = model
         self.validate_method = validate_method
@@ -425,7 +427,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Display generic data averaging help
         """
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
-        GuiUtils.showHelp(url)
+        self.manager.parent.showHelp(url)
 
 
 class ProxyModel(QtCore.QIdentityProxyModel):

@@ -19,8 +19,7 @@ from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from distutils.spawn import find_executable
 
-from shutil import copy
-from os import listdir
+from sas.system.user import get_user_dir
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
@@ -39,6 +38,8 @@ SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
 SASVIEW_BUILD = joinpath(SASVIEW_ROOT, "build", "lib")
 SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
 SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
+SASVIEW_DOC_SOURCE = joinpath(SASVIEW_DOC_TARGET, "source-temp")
+SASVIEW_DOC_BUILD = joinpath(SASVIEW_DOC_TARGET, "build")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
 
 # sasmodels paths
@@ -56,6 +57,15 @@ SASMODELS_GUIDE_TARGET = joinpath(SPHINX_PERSPECTIVES, "Fitting")
 SASMODELS_GUIDE_EXCLUDE = [
     "index.rst", "install.rst", "intro.rst",
 ]
+
+# sasdata paths
+SASDATA_ROOT = joinpath(SASVIEW_ROOT, "..", "sasdata")
+SASDATA_DOCS = joinpath(SASDATA_ROOT, "docs")
+SASDATA_BUILD = joinpath(SASDATA_ROOT, "build", "lib")
+SASDATA_DEV_SOURCE = joinpath(SASDATA_DOCS, "source", "dev")
+SASDATA_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasdata-dev")
+SASDATA_GUIDE_SOURCE = joinpath(SASDATA_DOCS, "source", "user")
+SASDATA_GUIDE_TARGET = joinpath(SPHINX_SOURCE, "user", "data")
 
 # bumps paths
 BUMPS_DOCS = joinpath(SASVIEW_ROOT, "..", "bumps", "doc")
@@ -154,6 +164,15 @@ def retrieve_user_docs():
         inplace_change(joinpath(catdir, filename), "../../model/", "/user/models/")
 
 
+def retrieve_sasdata_docs():
+    """
+        Copies select files from the bumps documentation into fitting perspective
+    """
+    print("=== Sasdata Docs ===")
+    copy_tree(SASDATA_DEV_SOURCE, SASDATA_DEV_TARGET)
+    copy_tree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET)
+
+
 def retrieve_bumps_docs():
     """
     Copies select files from the bumps documentation into fitting perspective
@@ -247,27 +266,31 @@ def build():
     """
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
+    copy_tree(SPHINX_SOURCE, SASVIEW_DOC_SOURCE)
     print("=== Build HTML Docs from ReST Files ===")
-    subprocess.check_call([
-        "sphinx-build",
-        "-v",
-        "-b", "html", # Builder name. TODO: accept as arg to setup.py.
-        "-d", joinpath(SPHINX_BUILD, "doctrees"),
-        "-W", "--keep-going",
-        SPHINX_SOURCE,
-        joinpath(SPHINX_BUILD, "html")
-    ])
+    try:
+        subprocess.check_call([
+            "sphinx-build",
+            "-v",
+            "-b", "html", # Builder name. TODO: accept as arg to setup.py.
+            "-d", joinpath(SPHINX_BUILD, "doctrees"),
+            "-W", "--keep-going",
+            SPHINX_SOURCE,
+            joinpath(SPHINX_BUILD, "html")
+        ])
+    except Exception as e:
+        print(e)
 
     print("=== Copy HTML Docs to Build Directory ===")
     html = joinpath(SPHINX_BUILD, "html")
-    copy_tree(html, SASVIEW_DOC_TARGET)
-
+    copy_tree(html, SASVIEW_DOC_BUILD)
 
 def rebuild():
     clean()
     setup_source_temp()
     retrieve_user_docs()
     retrieve_bumps_docs()
+    retrieve_sasdata_docs()
     apidoc()
     build()
     if find_executable('latex'):
