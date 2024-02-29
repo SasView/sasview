@@ -51,7 +51,7 @@ class ReportDialogTest:
     def testOnPrint(self, widget, mocker):
         ''' Printing the report '''
         document = widget.txtBrowser.document()
-        mocker.patch.object(document, 'print')
+        mocker.patch.object(document, 'print_')
 
         # test rejected dialog
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Rejected)
@@ -60,7 +60,7 @@ class ReportDialogTest:
         widget.onPrint()
 
         # Assure printing was not done
-        assert not document.print.called
+        assert not document.print_.called
 
         # test accepted dialog
         mocker.patch.object(QtPrintSupport.QPrintDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)

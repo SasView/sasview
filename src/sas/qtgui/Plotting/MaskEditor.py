@@ -23,8 +23,6 @@ class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):
         assert isinstance(data, Data2D)
 
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.data = data
         self.parent = parent

@@ -21,9 +21,6 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         super(PluginManager, self).__init__(parent._parent)
         self.setupUi(self)
 
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
-
         self.parent = parent
         self.cmdDelete.setEnabled(False)
         self.cmdEdit.setEnabled(False)

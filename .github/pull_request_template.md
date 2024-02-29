@@ -8,13 +8,20 @@ Fixes # (issue/issues)
 
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
 
-## Review Checklist (please remove items if they don't apply):
+## Review Checklist:
 
-- [ ] Code has been reviewed
-- [ ] Functionality has been tested
-- [ ] Windows installer (GH artifact) has been tested (installed and worked) 
-- [ ] MacOSX installer (GH artifact) has been tested (installed and worked) 
-- [ ] User documentation is available and complete (if required)
-- [ ] Developers documentation is available and complete (if required)
-- [ ] The introduced changes comply with SasView license (BSD 3-Clause)
+[if using the editor, use `[x]` in place of `[ ]` to check a box]
+
+**Documentation** (check at least one)
+- [ ] There is **nothing** that needs documenting
+- [ ] Documentation changes are **in this PR**
+- [ ] There is an **issue** open for the documentation (link?)
+
+**Installers**
+- [ ] There is a chance this will affect the **installers**, if so
+  - [ ] **Windows** installer (GH artifact) has been tested (installed and worked) 
+  - [ ] **MacOSX** installer (GH artifact) has been tested (installed and worked) 
+
+**Licencing** (untick if necessary)
+- [x] The introduced changes comply with SasView license (BSD 3-Clause)
 
