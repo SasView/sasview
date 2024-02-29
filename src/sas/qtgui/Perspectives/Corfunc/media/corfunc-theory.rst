@@ -276,7 +276,7 @@ independent of :math:`\theta`.
     = \frac{1}{2}\int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) \int_{\theta=0}^{\theta=\pi} e^{i \vec{r} \cdot \vec{q}} \sin(\theta) d\theta d\vec{r}^3
 
 Now, we can consider the inner integral specifically, firstly by doing a substitution of :math:`u = -\cos\theta`. This
-means that :math:`du = \sin\theta d\theta`, the interval :math:`\theta\in[0,\pi]` becomes :math:`u\in[1, -1].
+means that :math:`du = \sin\theta d\theta`, the interval :math:`\theta\in[0,\pi]` becomes :math:`u\in[1, -1]`.
 
 .. math::
     \int_{\theta=0}^{\theta=\pi} e^{i \vec{r} \cdot \vec{q}} \sin(\theta) d\theta = \int_{u=-1}^{u=1} e^{i q r u} du
@@ -284,7 +284,7 @@ means that :math:`du = \sin\theta d\theta`, the interval :math:`\theta\in[0,\pi]
 which is just an exponential and easily integrated
 
 .. math::
-    = \left[ \frac{-i e^{i q r u}}{qr} \right]_{-1}^{1} = \frac{i \left(e^{-i q r} - e^{i q r} \right) }{qr} = 2 \frac{i \sinh -iqr}{qr}
+    = \left[ \frac{-i e^{i q r u}}{qr} \right]_{-1}^{1} = \frac{i \left(e^{-i q r} - e^{i q r} \right) }{qr} = 2 \frac{i \sinh(-iqr)}{qr}
 
 which by the relationship between complex trigonometric and hyperbolic functions becomes
 
@@ -294,7 +294,7 @@ which by the relationship between complex trigonometric and hyperbolic functions
 The leading :math:`2` will cancel the leading :math:`1/2` and the value of :math:`I(q)` can be seen to be
 
 .. math::
-    = \int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) \frac{\sin qr}{qr} d\vec{r}^3
+    I(q) = \int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) \frac{\sin qr}{qr} d\vec{r}^3
 
 Note that this object is not dependent on the angular components of :math:`\vec{r}`, so the integral
 over :math:`\mathbb{R}^3` can be written as
@@ -302,7 +302,11 @@ over :math:`\mathbb{R}^3` can be written as
 .. math::
     = \int_0^\infty \int_\Omega\gamma(\vec{r})d\Omega \frac{\sin qr}{qr} dr
 
-Where :math:`\Omega` is a solid angle element. Letting :math:`\Gamma_3(r) = \int_\Omega \gamma(\vec{r}) d\Omega we have,
+Where :math:`\Omega` is a solid angle element. Letting
+
+.. math::
+    `\Gamma_3(r) = \int_\Omega \gamma(\vec{r}) d\Omega` we have,
+
 finally,
 
 .. math::
@@ -333,7 +337,7 @@ Which, after expressing in terms of :math:`\Gamma_1` gives us the relation we us
 calculating :math:`\Gamma_3`
 
 .. math::
-    \Gamma_3(x) = \int_0^x \Gamma_1(r) / r dr
+    \Gamma_3(x) = \int_0^x \frac{\Gamma_1(r)}{r} dr
 
 
 
