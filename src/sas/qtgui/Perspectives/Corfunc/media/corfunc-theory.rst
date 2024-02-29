@@ -282,6 +282,7 @@ means that :math:`du = \sin\theta d\theta`, the interval :math:`\theta\in[0,\pi]
     \int_{\theta=0}^{\theta=\pi} e^{i \vec{r} \cdot \vec{q}} \sin(\theta) d\theta = \int_{u=-1}^{u=1} e^{i q r u} du
 
 which is just an exponential and easily integrated
+
 .. math::
     = \left[ \frac{-i e^{i q r u}}{qr} \right]_{-1}^{1} = \frac{i \left(e^{-i q r} - e^{i q r} \right) }{qr} = 2 \frac{i \sinh -iqr}{qr}
 
