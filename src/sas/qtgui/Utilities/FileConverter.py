@@ -42,10 +42,6 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.parent = parent
         self.setupUi(self)
 
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
-
-
         self.setWindowTitle("File Converter")
 
         # i,q file fields are not editable

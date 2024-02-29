@@ -688,17 +688,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Figure out which rows are checked
         ind = -1
         # Use 'while' so the row count is forced at every iteration
-        deleted_items = []
-        deleted_names = []
         while ind < self.model.rowCount():
             ind += 1
             item = self.model.item(ind)
 
             if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                # Delete these rows from the model
-                deleted_names.append(str(self.model.item(ind).text()))
-                deleted_items.append(item)
-
                 # Delete corresponding open plots
                 self.closePlotsForItem(item)
                 # Close result panel if results represent the deleted data item
@@ -706,15 +700,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 #   => QStandardItems must still exist for direct comparison
                 self.closeResultPanelOnDelete(GuiUtils.dataFromItem(item))
 
+                # Let others know we deleted data, before we delete it
+                self.communicator.dataDeletedSignal.emit([item])
+                # update stored_data
+                self.manager.update_stored_data([item])
+
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
                 ind -= 1
-
-        # Let others know we deleted data
-        self.communicator.dataDeletedSignal.emit(deleted_items)
-
-        # update stored_data
-        self.manager.update_stored_data(deleted_names)
 
     def deleteTheory(self, event):
         """
@@ -734,28 +727,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Figure out which rows are checked
         ind = -1
-
-        deleted_items = []
-        deleted_names = []
         while ind < self.theory_model.rowCount():
             ind += 1
             item = self.theory_model.item(ind)
 
             if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 # Delete these rows from the model
-                deleted_names.append(str(self.theory_model.item(ind).text()))
-                deleted_items.append(item)
                 self.closePlotsForItem(item)
+                # Let others know we deleted data
+                self.communicator.dataDeletedSignal.emit([item])
 
+                # update stored_data
+                self.manager.update_stored_data([item])
                 self.theory_model.removeRow(ind)
                 # Decrement index since we just deleted it
                 ind -= 1
-
-        # Let others know we deleted data
-        self.communicator.dataDeletedSignal.emit(deleted_items)
-
-        # update stored_data
-        self.manager.update_stored_data(deleted_names)
 
     def selectedItems(self):
         """
