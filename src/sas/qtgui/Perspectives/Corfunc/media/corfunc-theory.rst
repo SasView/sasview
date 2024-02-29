@@ -58,6 +58,17 @@ has this kind of system, and with caveats about extrapolation
 and experimental constraints, one should be able to fully recover
 the correlation function.
 
+Lorentz Correction
+------------------
+
+Lorentz corrections are often used in correlation function analysis.
+Corfunc uses a Lorentz correction of
+
+.. math::
+    I(q) = q^2 I_\text{measured}(q)
+
+In what follows, we assume that appropriate corrections have been made.
+:math:`I(q)` here is what would be called :math:`I_1(q)` in :ref:`Stribeck`.
 
 Formal Description
 ------------------
@@ -296,8 +307,7 @@ finally,
 .. math::
     I(q) = \int_0^\infty \Gamma_3(r) \frac{\sin qr}{qr} dr
 
-
-To invert this, we need to use
+In corfunc we don't invert this directly, but do so via :math:`\Gamma_1`
 
 Relationship between :math:`\Gamma_1` and :math:`\Gamma_3`
 ..........................................................
@@ -326,23 +336,32 @@ calculating :math:`\Gamma_3`
 
 
 
+
 References
 ----------
 
-Ruland, W. *Coll. Polym. Sci.* (1977), 255, 417-427
+.. [Rutland]
+    Ruland, W. *Coll. Polym. Sci.* (1977), 255, 417-427
 
-Strobl, G. R.; Schneider, M. *J. Polym. Sci.* (1980), 18, 1343-1359
+.. [Strobl]
+    Strobl, G. R.; Schneider, M. *J. Polym. Sci.* (1980), 18, 1343-1359
 
-Koberstein, J.; Stein R. *J. Polym. Sci. Phys. Ed.* (1983), 21, 2181-2200
+.. [Koberstein]
+    Koberstein, J.; Stein R. *J. Polym. Sci. Phys. Ed.* (1983), 21, 2181-2200
 
-Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 247-251
+.. [Calleja1]
+    Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 247-251
 
-Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 257-261
+.. [Calleja2]
+    Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 257-261
 
-Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 260-270
+.. [Calleja3]
+    Baltá Calleja, F. J.; Vonk, C. G. *X-ray Scattering of Synthetic Poylmers*, Elsevier. Amsterdam (1989), 260-270
 
-Göschel, U.; Urban, G. *Polymer* (1995), 36, 3633-3639
+.. [Goschel]
+    Göschel, U.; Urban, G. *Polymer* (1995), 36, 3633-3639
 
-Stribeck, N. *X-Ray Scattering of Soft Matter*, Springer. Berlin (2007), 138-161
+.. [Stribeck]
+    Stribeck, N. *X-Ray Scattering of Soft Matter*, Springer. Berlin (2007), 138-161
 
 :ref:`FDR` (PDF format)
