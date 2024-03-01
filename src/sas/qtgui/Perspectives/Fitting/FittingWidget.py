@@ -61,6 +61,10 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
+# A list of models that are known to not work with how the GUI handles models from sasmodels
+#   NOTE: These models are correct when used directly through the sasmodels package, but how qtgui handles them is wrong
+SUPPRESSED_MODELS = ['rpa']
+
 # CRUFT: remove when new release of sasmodels is available
 # https://github.com/SasView/sasview/pull/181#discussion_r218135162
 if not hasattr(SasviewModel, 'get_weights'):
@@ -1681,7 +1685,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.blockSignals(True)
         self.cbModel.addItem(MODEL_DEFAULT)
-        self.cbModel.addItems(sorted([model for (model, _) in model_list if model != 'rpa']))
+        self.cbModel.addItems(sorted([model for (model, _) in model_list if model not in SUPPRESSED_MODELS]))
         self.cbModel.blockSignals(False)
 
     def onPolyModelChange(self, top, bottom):

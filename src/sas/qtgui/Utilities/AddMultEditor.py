@@ -20,6 +20,7 @@ from sasmodels.sasview_model import load_standard_models
 from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
 
 # Local UI
 from sas.qtgui.Utilities.UI.AddMultEditorUI import Ui_AddMultEditorUI
@@ -118,7 +119,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
                 continue
             models_dict[model.name] = model
 
-        return sorted([model_name for model_name in models_dict])
+        return sorted([model_name for model_name in models_dict if model_name not in SUPPRESSED_MODELS])
 
     def setupSignals(self):
         """ Signals from various elements """
