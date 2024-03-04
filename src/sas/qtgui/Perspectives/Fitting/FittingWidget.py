@@ -64,6 +64,8 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 # A list of models that are known to not work with how the GUI handles models from sasmodels
 #   NOTE: These models are correct when used directly through the sasmodels package, but how qtgui handles them is wrong
 SUPPRESSED_MODELS = ['rpa']
+# Layered models that have integer parameters are often treated differently. Maintain a list of these models.
+LAYERED_MODELS = ['unified_power_Rg', 'core_multi_shell', 'onion', 'spherical_sld']
 
 # CRUFT: remove when new release of sasmodels is available
 # https://github.com/SasView/sasview/pull/181#discussion_r218135162
