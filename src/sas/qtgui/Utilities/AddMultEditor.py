@@ -68,13 +68,14 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         # Flag for correctness of resulting name
         self.good_name = False
 
-        self.setupSignals()
-
+        # Create base model lists
         self.list_models = self.readModels()
         self.list_standard_models = self.readModels(std_only=True)
-
-        # Fill models' comboboxes
+        # Fill models combo boxes
         self.setupModels()
+
+        # Set signals after model combo boxes are populated
+        self.setupSignals()
 
         self.setFixedSize(self.minimumSizeHint())
 
@@ -131,6 +132,10 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.onApply)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(self.close)
+
+        # Update model lists when new model selected in case one of the items selected is in LAYERED_MODELS
+        self.cbModel1.currentIndexChanged.connect(self.updateModels)
+        self.cbModel2.currentIndexChanged.connect(self.updateModels)
 
         # change displayed equation when changing operator
         self.cbOperator.currentIndexChanged.connect(self.onOperatorChange)
@@ -269,29 +274,45 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             out_f.write(output)
 
     def updateModels(self):
-        """ Update contents of comboboxes with new plugin models """
-
-        # Keep pointers to the current indices so we can show the comboboxes with
-        # original selection
-        model_1 = self.cbModel1.currentText()
-        model_2 = self.cbModel2.currentText()
-
+        """ Update contents of combo boxes with new plugin models """
+        # Supress signals to prevent infinite loop
         self.cbModel1.blockSignals(True)
-        self.cbModel1.clear()
+        self.cbModel2.blockSignals(True)
+
+        self._updateModelLists()
+
+        self.cbModel2.blockSignals(False)
         self.cbModel1.blockSignals(False)
 
-        self.cbModel2.blockSignals(True)
+    def _updateModelLists(self):
+        """Update the combo boxes for both lists of models. The models in LAYERED_MODELS can only be included a single
+        time in a plugin model. The two combo boxes could be different if a layered model is selected."""
+        # Keep pointers to the current indices, so we can show the combo boxes with original selection
+        model_1 = self.cbModel1.currentText()
+        model_2 = self.cbModel2.currentText()
+        self.cbModel1.clear()
         self.cbModel2.clear()
-        self.cbModel2.blockSignals(False)
         # Retrieve the list of models
         model_list = self.readModels(std_only=True)
-        # Populate the models comboboxes
-        self.cbModel1.addItems(model_list)
-        self.cbModel2.addItems(model_list)
+        no_layers_list = [model for model in model_list if model not in LAYERED_MODELS]
+        # Make copies of the original list to allow for list-specific changes
+        model_list_1 = no_layers_list if model_2 in LAYERED_MODELS else model_list
+        model_list_2 = no_layers_list if model_1 in LAYERED_MODELS else model_list
 
-        # Scroll back to the user chosen models
-        self.cbModel1.setCurrentIndex(self.cbModel1.findText(model_1))
-        self.cbModel2.setCurrentIndex(self.cbModel2.findText(model_2))
+        # Populate the models combo boxes
+        self.cbModel1.addItems(model_list_1)
+        self.cbModel2.addItems(model_list_2)
+
+        # Reset the model position
+        model1_index = self.cbModel1.findText(model_1)
+        model1_default = self.cbModel1.findText(CB1_DEFAULT)
+        model2_index = self.cbModel2.findText(model_2)
+        model2_default = self.cbModel2.findText(CB2_DEFAULT)
+        index1 = model1_index if model1_index >= 0 else model1_default if model1_default >= 0 else 0
+        index2 = model2_index if model2_index >= 0 else model2_default if model2_default >= 0 else 0
+
+        self.cbModel1.setCurrentIndex(index1)
+        self.cbModel2.setCurrentIndex(index2)
 
     def onHelp(self):
         """ Display related help section """
