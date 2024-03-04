@@ -20,7 +20,7 @@ from sasmodels.sasview_model import load_standard_models
 from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
+from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS, LAYERED_MODELS
 
 # Local UI
 from sas.qtgui.Utilities.UI.AddMultEditorUI import Ui_AddMultEditorUI
@@ -39,6 +39,10 @@ Model = make_model_from_info(model_info)
 # Color of backgrounds to underline valid or invalid input
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
+
+# Default model names for combo boxes
+CB1_DEFAULT = 'sphere'
+CB2_DEFAULT = 'cylinder'
 
 
 class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
@@ -95,32 +99,21 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel2.addItems(self.list_standard_models)
 
         # set the default initial value of Model1 and Model2
-        index_ini_model1 = self.cbModel1.findText('sphere', QtCore.Qt.MatchFixedString)
-
-        if index_ini_model1 >= 0:
-            self.cbModel1.setCurrentIndex(index_ini_model1)
-        else:
-            self.cbModel1.setCurrentIndex(0)
-
-        index_ini_model2 = self.cbModel2.findText('cylinder',
-                                                  QtCore.Qt.MatchFixedString)
-        if index_ini_model2 >= 0:
-            self.cbModel2.setCurrentIndex(index_ini_model2)
-        else:
-            self.cbModel2.setCurrentIndex(0)
+        index_ini_model1 = self.cbModel1.findText(CB1_DEFAULT, QtCore.Qt.MatchFixedString)
+        self.cbModel1.setCurrentIndex(index_ini_model1 if index_ini_model1 >= 0 else 0)
+        index_ini_model2 = self.cbModel2.findText(CB2_DEFAULT, QtCore.Qt.MatchFixedString)
+        self.cbModel2.setCurrentIndex(index_ini_model2 if index_ini_model2 >= 0 else 0)
 
     def readModels(self, std_only=False):
         """ Generate list of all models """
         s_models = load_standard_models()
         models_dict = {}
         for model in s_models:
-            if model.category is None:
-                continue
-            if std_only and 'custom' in model.category:
+            # Do not include uncategorized models or suppressed models
+            if model.category is None or (std_only and 'custom' in model.category) or model in SUPPRESSED_MODELS:
                 continue
             models_dict[model.name] = model
-
-        return sorted([model_name for model_name in models_dict if model_name not in SUPPRESSED_MODELS])
+        return sorted(models_dict)
 
     def setupSignals(self):
         """ Signals from various elements """
@@ -248,7 +241,6 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         msg = "Custom model "+title + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
-
 
     def write_new_model_to_file(self, fname, model1_name, model2_name, operator):
         """ Write and Save file """
