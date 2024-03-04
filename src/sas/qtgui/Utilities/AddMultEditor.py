@@ -109,6 +109,9 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         s_models = load_standard_models()
         models_dict = {}
         for model in s_models:
+            # Check if plugin model is a layered model
+            if 'custom' in model.category:
+                self._checkPlugInModels()
             # Do not include uncategorized models or suppressed models
             if model.category is None or (std_only and 'custom' in model.category) or model in SUPPRESSED_MODELS:
                 continue
@@ -232,8 +235,6 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         # Update list of models in FittingWidget and AddMultEditor
         self.parent.communicate.customModelDirectoryChanged.emit()
-        # Re-read the model list so the new model is included
-        self.list_models = self.readModels()
         self.updateModels()
 
         # Notify the user
@@ -271,6 +272,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel1.blockSignals(True)
         self.cbModel2.blockSignals(True)
 
+        # Re-read the model list so the new model is included
+        self.list_models = self.readModels()
         self._updateModelLists()
 
         self.cbModel2.blockSignals(False)
@@ -285,11 +288,10 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel1.clear()
         self.cbModel2.clear()
         # Retrieve the list of models
-        model_list = self.readModels(std_only=True)
-        no_layers_list = [model for model in model_list if model not in LAYERED_MODELS]
+        no_layers_list = [model for model in self.list_models if model not in LAYERED_MODELS]
         # Make copies of the original list to allow for list-specific changes
-        model_list_1 = no_layers_list if model_2 in LAYERED_MODELS else model_list
-        model_list_2 = no_layers_list if model_1 in LAYERED_MODELS else model_list
+        model_list_1 = no_layers_list if model_2 in LAYERED_MODELS else self.list_models
+        model_list_2 = no_layers_list if model_1 in LAYERED_MODELS else self.list_models
 
         # Populate the models combo boxes
         self.cbModel1.addItems(model_list_1)
