@@ -20,7 +20,7 @@ from sasmodels.sasview_model import load_standard_models
 from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS, LAYERED_MODELS
+from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
 
 # Local UI
 from sas.qtgui.Utilities.UI.AddMultEditorUI import Ui_AddMultEditorUI
@@ -72,6 +72,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         # Flag for correctness of resulting name
         self.good_name = False
 
+        # Create a base list of layered models that will include plugin models
+        self.layered_models = []
         # Create base model lists
         self.list_models = self.readModels()
         self.list_standard_models = self.readModels(std_only=True)
@@ -110,8 +112,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         models_dict = {}
         for model in s_models:
             # Check if plugin model is a layered model
-            if 'custom' in model.category:
-                self._checkPlugInModels()
+            self._checkIfLayered(model)
             # Do not include uncategorized models or suppressed models
             if model.category is None or (std_only and 'custom' in model.category) or model in SUPPRESSED_MODELS:
                 continue
@@ -129,7 +130,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(self.close)
 
-        # Update model lists when new model selected in case one of the items selected is in LAYERED_MODELS
+        # Update model lists when new model selected in case one of the items selected is in self.layered_models
         self.cbModel1.currentIndexChanged.connect(self.updateModels)
         self.cbModel2.currentIndexChanged.connect(self.updateModels)
 
@@ -280,7 +281,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel1.blockSignals(False)
 
     def _updateModelLists(self):
-        """Update the combo boxes for both lists of models. The models in LAYERED_MODELS can only be included a single
+        """Update the combo boxes for both lists of models. The models in layered_models can only be included a single
         time in a plugin model. The two combo boxes could be different if a layered model is selected."""
         # Keep pointers to the current indices, so we can show the combo boxes with original selection
         model_1 = self.cbModel1.currentText()
@@ -288,10 +289,10 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel1.clear()
         self.cbModel2.clear()
         # Retrieve the list of models
-        no_layers_list = [model for model in self.list_models if model not in LAYERED_MODELS]
+        no_layers_list = [model for model in self.list_models if model not in self.layered_models]
         # Make copies of the original list to allow for list-specific changes
-        model_list_1 = no_layers_list if model_2 in LAYERED_MODELS else self.list_models
-        model_list_2 = no_layers_list if model_1 in LAYERED_MODELS else self.list_models
+        model_list_1 = no_layers_list if model_2 in self.layered_models else self.list_models
+        model_list_2 = no_layers_list if model_1 in self.layered_models else self.list_models
 
         # Populate the models combo boxes
         self.cbModel1.addItems(model_list_1)
@@ -307,6 +308,11 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         self.cbModel1.setCurrentIndex(index1)
         self.cbModel2.setCurrentIndex(index2)
+
+    def _checkIfLayered(self, model):
+        """Check models for layered or conditional parameters. Add them to self.layered_models if criteria is met."""
+        if model.is_multiplicity_model:
+            self.layered_models.append(model.name)
 
     def onHelp(self):
         """ Display related help section """
