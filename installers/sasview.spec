@@ -18,13 +18,14 @@ datas = [
     ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
     ('../src/sas/system/log.ini', 'sas/system/'),
     ('../../sasmodels/sasmodels','sasmodels'),
-    ('../docs/sphinx-docs/build/html','doc')
+    ('../docs/sphinx-docs/build','doc/build'),
+    ('../docs/sphinx-docs/source-temp','doc/source')
 ]
 #TODO: Hopefully we can get away from version specific packages
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
-datas.append((os.path.join(PYTHON_PACKAGES, 'freetype'), 'freetype'))
+# datas.append((os.path.join(PYTHON_PACKAGES, 'freetype'), 'freetype'))
 
 def add_data(data):
     for component in data:

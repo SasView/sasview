@@ -4,7 +4,7 @@ import os
 import sys
 import xmlrunner
 import unittest
-import imp
+from importlib.machinery import SourceFileLoader
 from os.path import abspath, dirname, split as splitpath, join as joinpath
 
 import logging
@@ -19,7 +19,7 @@ if len(sys.argv) < 2:
     sys.exit(-1)
 
 run_py = joinpath(dirname(dirname(abspath(__file__))), 'run.py')
-run = imp.load_source('sasview_run', run_py)
+run = SourceFileLoader('sasview_run', run_py).load_module()
 run.prepare()
 
 #print("\n".join(sys.path))
@@ -31,5 +31,5 @@ print("=== testing:",sys.argv[1])
 sys.argv = [sys.argv[0]]
 os.chdir(test_path)
 sys.path.insert(0, test_path)
-test = imp.load_source('tests',test_file)
+test = SourceFileLoader('tests', test_file).load_module()
 unittest.main(test, testRunner=xmlrunner.XMLTestRunner(output='logs'))
