@@ -4510,7 +4510,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Utility function for main model update
             # internal so can use closure for param_dict
             param_name = str(self._model_model.item(row, 0).text())
-            if param_name not in list(param_dict.keys()):
+            if param_name not in list(param_dict.keys()) or row == self._n_shells_row:
+                # Skip magnetic, polydisperse (.pd), and shell parameters - they are handled elsewhere
                 return
             # checkbox state
             param_checked = QtCore.Qt.Checked if param_dict[param_name][0] == "True" else QtCore.Qt.Unchecked
