@@ -3507,7 +3507,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Modify polydisp. defaults on function choice
         """
         # Get npts/nsigs for current selection
-        param = self.model_parameters.form_volume_parameters[row_index]
+        param_name = str(self._poly_model.item(row_index, 0).text()).split()[-1]
         file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
         combo_box = self.lstPoly.indexWidget(file_index)
         try:
@@ -3520,16 +3520,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Utility function for update of polydispersity function name in the main model
             if not self.isCheckable(row):
                 return
-            param_name = self._model_model.item(row, 0).text()
-            if param_name !=  param.name:
+            par_name = self._model_model.item(row, 0).text()
+            if par_name != param_name:
                 return
             # Modify the param value
             self._model_model.blockSignals(True)
-            if self.has_error_column:
-                # err column changes the indexing
-                self._model_model.item(row, 0).child(0).child(0,5).setText(combo_string)
-            else:
-                self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
+            n = 5 if self.has_error_column else 4
+            # Add an extra safety check to be sure this parameter has the polydisperse table row
+            poly_row = self._model_model.item(row, 0).child(0)
+            if poly_row:
+                self._model_model.item(row).child(0).child(0, n).setText(combo_string)
             self._model_model.blockSignals(False)
 
         if combo_string == 'array':
@@ -3542,7 +3542,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.loadPolydispArray(row_index)
                 # Update main model for display
                 self.iterateOverModel(updateFunctionCaption)
-                self.kernel_module.set_dispersion(param.name, self.disp_model)
+                self.kernel_module.set_dispersion(param_name, self.disp_model)
                 # uncheck the parameter
                 self._poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
                 # disable the row
@@ -3557,7 +3557,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # Pass for cancel/bad read
                 pass
         else:
-            self.kernel_module.set_dispersion(param.name, self.disp_model)
+            self.kernel_module.set_dispersion(param_name, self.disp_model)
 
         # Enable the row in case it was disabled by Array
         self._poly_model.blockSignals(True)
