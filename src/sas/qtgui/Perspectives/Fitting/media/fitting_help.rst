@@ -288,30 +288,41 @@ displays the *Easy Add/Multiply Editor* dialog.
 
 .. image:: sum_model.png
 
-This option creates a custom Plugin Model of the form::
+This editor allows the creation of combined custom Plugin Models.
+Give the new model a name (which will appear in the list of plugin models on the *FitPage*)
+and brief description (to appear under the *Details* button on the *FitPage*). The model name must not contain
+spaces (use underscores to separate words if necessary) and if it is longer
+than ~25 characters the name will not display in full in the list of models.
+Now select two models, as model_1 (or p1) and model_2 (or p2), and the
+required operator, '+', '*', or '@'  between them. Finally, click the *Apply* button
+to generate and test the model.
+
+The `+` operator sums the individual I(Q) calculations and introduces a third scale factor::
 
      Plugin Model = scale_factor * {(scale_1 * model_1) +/- (scale_2 * model_2)} + background
 
-or::
+the `*` operator multiplies the individual I(Q) calculations::
 
      Plugin Model = scale_factor * (model1 * model2) + background
 
-In the *Easy Add/Multiply Editor* give the new model a name (which will appear
-in the list of plugin models on the *FitPage*) and brief description (to appear
-under the *Details* button on the *FitPage*). The model name must not contain
-spaces (use underscores to separate words if necessary) and if it is longer
-than ~25 characters the name will not display in full in the list of models.
-Now select two built-in models, as model_1 (or p1) and model_2 (or p2), and the
-required operator, '+' or '*' between them. Finally, click the *Apply* button
-to generate and test the model, and then click *Close*.
+and the `@` operator treats the combination as a form factor [F(Q)] for model_1 and a structure factor [S(Q)] for
+model_2. The scale and background for F(Q) and S(Q) are set to 1 and 0 respectively and the combined model should
+support the beta approximation::
 
-Any changes to a plugin model generated in this way only become effective
-*after* it is re-selected from the plugin models drop-down menu on the FitPage.
+    Plugin Model = scale_factor * vol_fraction * <FF> * S(Q) + background :: No beta
+    Plugin Model = scale_factor * (vol_fraction / form_volume) * (<FF> + <F>^2 * (S(Q) - 1)) + background :: beta
 
-**In SasView 4.x**, if the model is not listed you can try and force a
+**All Versions** Changes made to a plugin model are not applied to models actively in use on fit pages.
+To apply plugin model changes, re-select the model from the drop-down menu on the FitPage.
+
+**In SasView 6.x**, multiplicity models cannot be combined. If a model with any layer or conditional parameter is
+selected, similar models are removed from the other combo box.
+
+**In SasView 4.x**, if the model is not listed on a fit page you can try and force a
 recompilation of the plugins by selecting *Fitting* > *Plugin Model Operations*
-> *Load Plugin Models*. **In SasView 5.x**, you may need to restart the
-program.
+> *Load Plugin Models*. **In SasView 5.0.2 and earlier**, you may need to restart the
+program. **In SasView 5.0.3 and later**, the new model should appear in the list as soon as
+the model is saved.
 
 .. warning::
 
