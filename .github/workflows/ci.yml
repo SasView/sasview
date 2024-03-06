@@ -194,8 +194,13 @@ jobs:
 
       ### Build the installer (if enabled)
 
-      - name: Install utilities to build installer
-        if: ${{ matrix.installer }}
+      - name: Install utilities to build installer (Windows)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        run: |
+          python -m pip install pyinstaller==5.13.2
+
+      - name: Install utilities to build installer (MacOS and Ubuntu)
+        if: ${{ matrix.installer && (startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'ubuntu'))}}
         run: |
           python -m pip install pyinstaller>=6
 
