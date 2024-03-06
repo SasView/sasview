@@ -199,8 +199,13 @@ jobs:
         run: |
           python -m pip install pyinstaller==5.13.2
 
-      - name: Install utilities to build installer (MacOS and Ubuntu)
-        if: ${{ matrix.installer && (startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'ubuntu'))}}
+      - name: Install utilities to build installer (Ubuntu)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu')}}
+        run: |
+          python -m pip install pyinstaller>=6
+
+      - name: Install utilities to build installer (MacOS)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos')}}
         run: |
           python -m pip install pyinstaller>=6
 
