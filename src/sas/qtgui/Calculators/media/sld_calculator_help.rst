@@ -18,16 +18,16 @@ This SLD calculator utilizes the periodictable python package\ :sup:`1`, which i
 
 User Inputs
 ----------------------------
-**Molecular Formula** (required)
+**Molecular Formula**
     This field defines the material for which you are calculating the SLD. The section "`Specifying Materials or Mixtures in the Molecular Formula Field`_" offers further guidance on how to enter molecules, biomolecules, and more complex mixtures.
 
-**Mass Density** |g/cm^3| (required)
+**Mass Density** (|g/cm^3|)
     This field defines the density of the material for which you are calculating the SLD. Density uncertainty is likely the largest source of error in the SLD calculator.
 
-**Neutron Wavelength** (|Ang|) (optional)
+**Neutron Wavelength** (|Ang|)
     Wavelength is used to calculate the neutron scattering cross-section and 1/e length. It is required for neutron calculations and entered in units of |Ang|.
 
-**X-ray Wavelength** (|Ang|) (required)
+**X-ray Wavelength** (|Ang|)
     Wavelength is used to calculate the x-ray scattering length density. It is required for x-ray calculations and entered in units of |Ang|.
 
 Calculator Output
@@ -95,15 +95,15 @@ For even more complicated solutions, parenthesis can be nested and the number of
 
     5g NaCl // 50 mL H2O@1
 
-    mass density = 1.07 |g/cm^3|
+    mass density = 1.07(|g/cm^3|)
 
 *Reminder the solution density is the largest source of error for these calculations.* Measure the solution density for an accurate result. For example:
 
-    A brine solution containing 10.44 g Al(NO\ :sub:`3`\)\ :sub:`3`\ |cdot| 9H\ :sub:`2`\O and 27.51 g D\ :sub:`2`\O was prepared for a wormlike micelle experiments. The solution density was measured with a density meter and found to be 1.22 |g/cm^3|. Using the scattering lenth density calculator we enter:
+    A brine solution containing 10.44 g Al(NO\ :sub:`3`\)\ :sub:`3`\ |cdot| 9H\ :sub:`2`\O and 27.51 g D\ :sub:`2`\O was prepared for a wormlike micelle experiments. The solution density was measured with a density meter and found to be 1.22 (|g/cm^3|). Using the scattering lenth density calculator we enter:
 
     10.44g Al(NO3)3(H2O)9 // 27.5126g D2O
 
-    mass density = 1.22 |g/cm^3|
+    mass density = 1.22 (|g/cm^3|)
 
     The SLD is calculated to be 5.46e-06 (|Ang^-2|)
 
@@ -132,7 +132,7 @@ For example, the amino acid sequence for {beta}-casein can be written as:
 
 [1] Kienzle, P. A. (2008-2019). Extensible periodic table (v1.5.2). Computer Software. https://periodictable.readthedocs.io. [calculator source, web service source]
 
-[2] Pearson WR, Lipman DJ (April 1988). "Improved tools for biological sequence comparison". Proceedings of the National Academy of Sciences of the United States of America. 85 (8): 2444–8. doi:10.1073/pnas.85.8.2444.
+[2] Pearson WR, Lipman DJ (April 1988). "Improved tools for biological sequence comparison". Proceedings of the National Academy of Sciences of the United States of America. 85 (8): 2444-8. doi:10.1073/pnas.85.8.2444.
 
 [3] https://zhanggroup.org/FASTA/  (helpful explanation of FASTA syntax)
 
