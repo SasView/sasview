@@ -14,8 +14,6 @@ class DocRegenProgress(QtWidgets.QWidget, Ui_DocRegenProgress):
         self.setupUi(self)
         self.parent = parent
 
-        self.setWindowTitle("Documentation Regenerating")
-        self.label.setText("Regeneration In Progress")
         self.textBrowser.setText("Placeholder Text.")
         self.file_watcher = QtCore.QFileSystemWatcher()
         self.addSignals()

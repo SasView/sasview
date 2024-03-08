@@ -694,6 +694,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         rows = [s.row() for s in current_list.selectionModel().selectedRows()
                 if self.isCheckable(s.row())]
+
         menu = self.showModelDescription() if not rows else self.modelContextMenu(rows)
         try:
             menu.exec_(current_list.viewport().mapToGlobal(position))
@@ -784,7 +785,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # but let's check the correctness.
         assert len(selected_rows) == 2
 
-        params_list = [s.data(role=QtCore.Qt.UserRole) for s in selected_rows]
+        params_list = [s.data() for s in selected_rows]
         # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list)
         # Check if any of the parameters are polydisperse
@@ -965,6 +966,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # First, get a list of constraints and symbols
         constraint_list = self.parent.perspective().getActiveConstraintList()
         symbol_dict = self.parent.perspective().getSymbolDictForConstraints()
+        if model_key == 'poly' and 'Distribution' in constraint.param:
+            constraint.param = self.polyNameToParam(constraint.param)
         constraint_list.append((self.modelName() + '.' + constraint.param,
                                 constraint.func))
         # Call the error checking function
@@ -1019,6 +1022,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             max_t = model.item(row, max_col).text()
             # Create a Constraint object
             constraint = Constraint(param=param, value=value, min=min_t, max=max_t)
+            constraint.active = False
             # Create a new item and add the Constraint object as a child
             item = QtGui.QStandardItem()
             item.setData(constraint)
@@ -1046,7 +1050,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
 
-        params_list = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
+        params_list = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         assert len(params_list) == 1
         row = current_list.selectionModel().selectedRows()[0].row()
@@ -1079,6 +1083,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         constraint.validate = mc_widget.validate
 
         # Which row is the constrained parameter in?
+        if model_key == 'poly' and 'Distribution' in constraint.param:
+            constraint.param = self.polyNameToParam(constraint.param)
         row = self.getRowFromName(constraint.param)
 
         # Create a new item and add the Constraint object as a child
@@ -1090,9 +1096,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         current_list = self.tabToList[self.tabFitting.currentIndex()]
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
-        params = [s.data(role=QtCore.Qt.UserRole) for s in current_list.selectionModel().selectedRows()
+        params = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
+            if model_key == 'poly':
+                param = self.polyNameToParam(param)
             self.deleteConstraintOnParameter(param=param, model_key=model_key)
 
     def deleteConstraintOnParameter(self, param=None, model_key="standard"):
@@ -1678,6 +1686,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbModel.blockSignals(False)
         self.enableModelCombo()
         self.disableStructureCombo()
+        self.kernel_module = None
 
         self._previous_category_index = self.cbCategory.currentIndex()
         # Retrieve the list of models
@@ -1685,7 +1694,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.blockSignals(True)
         self.cbModel.addItem(MODEL_DEFAULT)
-        self.cbModel.addItems(sorted([model for (model, _) in model_list if model != 'rpa']))
+        models_to_show = [m[0] for m in model_list if m[0] != 'rpa' and m[1]]
+        self.cbModel.addItems(sorted(models_to_show))
         self.cbModel.blockSignals(False)
 
     def onPolyModelChange(self, top, bottom):

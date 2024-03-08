@@ -145,7 +145,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 if os.path.isfile(user_model_name):
                     filename = user_model_name
                 else:
-                    filename = MAIN_DOC_SRC / "user" / "models" / "src" / self.load_file + ".py"
+                    filename = MAIN_DOC_SRC / "user" / "models" / "src" / (self.load_file + ".py")
             else:
                 filename = MAIN_DOC_SRC / self.load_file.replace(".html", ".rst")
                 self.is_python = False
@@ -205,7 +205,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.editor_widget.txtEditor.setToolTip("")
 
         # See if there is filename.c present
-        c_path = Path(str(self.filename.parent) + self.filename.name.replace(".py", ".c"))
+        c_path = self.filename.parent / self.filename.name.replace(".py", ".c")
         if not c_path.exists() or ".rst" in c_path.name: return
         # add a tab with the same highlighting
         c_display_name = c_path.name
@@ -539,7 +539,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             'name': name,
             'title': 'User model for ' + name,
             'description': desc_str,
-            'date': datetime.datetime.now().strftime('%YYYY-%mm-%dd'),
+            'date': datetime.datetime.now().strftime('%Y-%m-%d'),
         }
 
         # Write out parameters

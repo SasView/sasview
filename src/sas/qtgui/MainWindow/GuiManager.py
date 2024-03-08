@@ -105,7 +105,7 @@ class GuiManager:
         # Add signal callbacks
         self.addCallbacks()
 
-        # Assure model categories are available
+        # Assure categories are present
         self.addCategories()
 
         # Create the data manager
@@ -215,20 +215,27 @@ class GuiManager:
         self.regenProgress = DocRegenProgress(self)
 
     def loadAllPerspectives(self):
+        """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
         # Load all perspectives
-        loaded_dict = {}
+        loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
             try:
+                # Instantiate perspective
                 loaded_perspective = perspective(parent=self)
+
+                # Save in main dict
                 loaded_dict[name] = loaded_perspective
-                pref_widgets = loaded_perspective.preferences
-                for widget in pref_widgets:
-                    self.preferences.addWidget(widget)
+
+                # Register the perspective with the prefernce object
+                self.preferences.registerPerspectivePreferences(loaded_perspective)
+
             except Exception as e:
                 logger.error(f"Unable to load {name} perspective.\n{e}")
                 logger.error(e, exc_info=True)
+
+        # attach loaded perspectives to this class
         self.loadedPerspectives = loaded_dict
 
     def closeAllPerspectives(self):
@@ -271,7 +278,6 @@ class GuiManager:
             self.removePlotItemsInWindowsMenu(plot)
         else:
             self.addPlotItemsInWindowsMenu(plot)
-
 
     def addPlotItemsInWindowsMenu(self, plot):
         """
@@ -415,7 +421,7 @@ class GuiManager:
             self.loadedPerspectives[self._current_perspective.name] = self._current_perspective
 
             self._workspace.workspace.removeSubWindow(self._current_perspective)
-            self._workspace.workspace.closeActiveSubWindow()
+            self._workspace.workspace.removeSubWindow(self.subwindow)
 
         # Get new perspective - note that _current_perspective is of type Optional[Perspective],
         # but new_perspective is of type Perspective, thus call to Perspective members are safe
