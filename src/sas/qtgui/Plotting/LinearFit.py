@@ -33,8 +33,6 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         super(LinearFit, self).__init__(parent)
 
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         assert(isinstance(max_range, tuple))
         assert(isinstance(fit_range, tuple))

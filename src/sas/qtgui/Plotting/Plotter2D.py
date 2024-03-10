@@ -40,7 +40,7 @@ class Plotter2DWidget(PlotterBase):
     """
     def __init__(self, parent=None, manager=None, quickplot=False, dimension=2):
         self.dimension = dimension
-        super(Plotter2DWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
+        super(Plotter2DWidget, self).__init__(manager=manager, quickplot=quickplot)
 
         self.cmap = DEFAULT_CMAP.name
         # Default scale

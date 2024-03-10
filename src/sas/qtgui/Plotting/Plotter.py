@@ -394,7 +394,7 @@ class PlotterWidget(PlotterBase):
 
             if plot.is_data:
                 self.actionHideError = plot_menu.addAction("Hide Error Bar")
-                if plot.dy is not None and len(plot.dy)!=0: # Note that plot.dy != [] breaks on MacOS
+                if plot.dy is not None and len(plot.dy)>0:
                     if plot.hide_error:
                         self.actionHideError.setText('Show Error Bar')
                 else:

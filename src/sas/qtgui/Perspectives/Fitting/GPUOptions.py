@@ -55,8 +55,6 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
 
         self.radio_buttons = []
 
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.add_options()
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")
