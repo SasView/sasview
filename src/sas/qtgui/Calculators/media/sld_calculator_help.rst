@@ -14,7 +14,7 @@ SLD Calculator Tool
 Description
 -----------
 This tool calculates the neutron and x-ray scattering length densities (SLD) and some other useful scattering parameters of a wide range of materials including molecules, solutions/mixtures, isotopic mixtures, and biomolecules.
-This SLD calculator utilizes the periodictable python package\ :sup:`1`, which is an periodic table populated with values useful for neutron and x-ray experiments.
+This SLD calculator utilizes the periodictable python package\ :sup:`1`, which is a periodic table populated with values useful for neutron and x-ray experiments.
 
 User Inputs
 ----------------------------
