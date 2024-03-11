@@ -81,11 +81,11 @@ Specifying Materials or Mixtures in the Molecular Formula Field
 
 **Volume Fraction** can be entered in the same way by substituting *%vol* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field must also be updated to specify the density of the mixture. (Note: vol% and wt% will lead to syntax errors).
 
-    50%vol H2O@1 // D2O@1.1
+    50%vol H2O@1 // D2O\@1.1
 
 These can be combined for more complicated solutions. For example, if you have a 10wt% sodium chloride in water solution and you dilute 20 mL of this solution to 100 mL with D\ :sub:`2`\O, this can be represented as:
 
-    20%vol (10%wt NaCl // H2O)@1.07 // D2O@1.11
+    20%vol (10%wt NaCl // H2O)@1.07 // D2O\@1.11
 
 For even more complicated solutions, parenthesis can be nested and the number of atoms can be integer or decimal. For example H\ :sub:`2`\O is equivalent to:
 
