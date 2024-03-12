@@ -129,13 +129,14 @@ class Categories(object):
         return self.category_list
 
 
-
 class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
     def __init__(self, parent=None, manager=None):
         super(CategoryManager, self).__init__(parent)
         self.setupUi(self)
 
         self.communicator = manager.communicator()
+
+        self.manager = manager
 
         self.setWindowTitle("Category Manager")
 
@@ -192,7 +193,8 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
             empty_item.setEditable(False)
             # Add a checkbox to it
             item.setCheckable(True)
-            item.setCheckState(QtCore.Qt.Checked)
+            checked = self.categories.model_enabled_dict[model]
+            item.setCheckState(QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)
             item.setEditable(False)
             current_category = self.categories.modelToCategory()[model]
             self._category_model.appendRow([item, empty_item])
@@ -205,6 +207,7 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         self.cmdOK.clicked.connect(self.onClose)
         self.cmdModify.clicked.connect(self.onModify)
         self.cmdReset.clicked.connect(self.onReset)
+        self.cmdHelp.clicked.connect(self.displayHelp)
 
         self.chkEnable.toggled.connect(self.onEnableAll)
 
@@ -214,6 +217,7 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         # Signals from the list
         selectionModel = self.lstCategory.selectionModel()
         selectionModel.selectionChanged.connect(self.onListSelection)
+        self._category_model.itemChanged.connect(self.onListChanged)
 
 
     def onClose(self):
@@ -225,6 +229,10 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         self.communicator.updateModelCategoriesSignal.emit()
 
         self.close()
+
+    def onListChanged(self, item):
+        # remember the state of the checkbox
+        self.categories.model_enabled_dict[item.text()] = item.checkState() == QtCore.Qt.Checked
 
     def selectedModels(self):
         """
@@ -257,6 +265,10 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
         self.initializeModelList()
         self.setTableProperties(self.lstCategory)
         self.lstCategory.setAlternatingRowColors(True)
+
+    def displayHelp(self):
+        location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#category-manager"
+        self.manager.showHelp(location)
 
     def onEnableAll(self, isChecked):
         """
