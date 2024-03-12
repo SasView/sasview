@@ -114,7 +114,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             # Check if plugin model is a layered model
             self._checkIfLayered(model)
             # Do not include uncategorized models or suppressed models
-            if model.category is None or (std_only and 'custom' in model.category) or model in SUPPRESSED_MODELS:
+            if model.category is None or (std_only and 'custom' in model.category) or model.name in SUPPRESSED_MODELS:
                 continue
             models_dict[model.name] = model
         return sorted(models_dict)
