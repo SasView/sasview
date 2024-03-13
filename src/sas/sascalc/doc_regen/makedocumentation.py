@@ -14,6 +14,8 @@ from sas.sascalc.fit import models
 from sas.system.version import __version__
 from sas.system.user import get_user_dir
 
+PATH_LIKE = Union[Path, str, os.PathLike]
+
 # Path constants related to the directories and files used in documentation regeneration processes
 USER_DIRECTORY = Path(get_user_dir())
 USER_DOC_BASE = USER_DIRECTORY / "doc"
@@ -62,7 +64,7 @@ def create_user_files_if_needed():
         shutil.copytree(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
 
 
-def get_py(directory: Union[Path, os.path, str]) -> list[Union[Path, os.path, str]]:
+def get_py(directory: PATH_LIKE) -> list[PATH_LIKE]:
     """Find all python files within a directory that are meant for sphinx and return those file-paths as a list.
 
     :param directory: A file path-like object to find all python files contained there-in.
@@ -74,7 +76,7 @@ def get_py(directory: Union[Path, os.path, str]) -> list[Union[Path, os.path, st
         return PY_FILES
 
 
-def get_main_docs() -> list[Union[Path, os.path, str]]:
+def get_main_docs() -> list[PATH_LIKE]:
     """Generates a list of all .py files to be passed into compiling functions found in the main source code, as well as
     in the user plugin model directory.
 
@@ -92,7 +94,7 @@ def get_main_docs() -> list[Union[Path, os.path, str]]:
     return TARGETS
 
 
-def call_regenmodel(filepath: list[Union[Path, os.path, str]]):
+def call_regenmodel(filepath: list[PATH_LIKE]):
     """Runs regenmodel.py or regentoc.py (specified in parameter regen_py) with all found PY_FILES.
 
     :param filepath: A file-path like object or list of file-path like objects to regenerate.
@@ -104,7 +106,7 @@ def call_regenmodel(filepath: list[Union[Path, os.path, str]]):
     run_sphinx(rst_files, output_path)
 
 
-def generate_html(single_file: Union[Path, os.path, str, list] = "", rst: bool = False):
+def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False):
     """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
 
     :param single_file: A file name that needs the html regenerated.
@@ -156,7 +158,7 @@ def call_all_files():
     generate_toc(TARGETS)
 
 
-def call_one_file(file: Union[Path, os.path, str]):
+def call_one_file(file: PATH_LIKE):
     """A master method to regenerate a single file that is passed to the method.
 
     :param file: A file name that needs the html regenerated.
@@ -177,7 +179,7 @@ def call_one_file(file: Union[Path, os.path, str]):
     generate_toc(TARGETS)
 
 
-def make_documentation(target: Union[Path, os.path, str] = "."):
+def make_documentation(target: PATH_LIKE = "."):
     """Similar to call_one_file, but will fall back to calling all files and regenerating everything if an error occurs.
 
     :param target: A file name that needs the html regenerated.
