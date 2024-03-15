@@ -1793,7 +1793,5 @@ class Plotter3DWidget(PlotterBase):
 class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
     def __init__(self, parent=None, graph_title=''):
         self.graph_title = graph_title
-        QtWidgets.QDialog.__init__(self)
         Plotter3DWidget.__init__(self, manager=parent)
         self.setWindowTitle(self.graph_title)
-
