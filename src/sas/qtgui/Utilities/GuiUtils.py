@@ -6,7 +6,6 @@ import numbers
 import os
 import re
 import sys
-import imp
 import warnings
 import webbrowser
 import urllib.parse
@@ -14,6 +13,7 @@ import json
 import types
 import numpy
 from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 
@@ -47,12 +47,6 @@ import sas
 from sas import config
 
 from sasdata.dataloader.loader import Loader
-
-if os.path.splitext(sys.argv[0])[1].lower() != ".py":
-        HELP_DIRECTORY_LOCATION = "doc"
-else:
-        HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
-IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 
 # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
 # "5 [P(Q)] modelname"
@@ -182,6 +176,10 @@ class Communicate(QtCore.QObject):
 
     # Update the masked ranges in fitting
     updateMaskedDataSignal = QtCore.Signal()
+
+    # Triggers refresh of all documentation windows
+    documentationRegenInProgressSignal = QtCore.Signal()
+    documentationRegeneratedSignal = QtCore.Signal()
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
@@ -529,19 +527,6 @@ def openLink(url):
         msg = "Attempt at opening an invalid URL"
         raise AttributeError(msg)
 
-def showHelp(url):
-    """
-    Open a local url in the default browser
-    """
-    location = HELP_DIRECTORY_LOCATION + url
-    #WP: Added to handle OSX bundle docs
-    if os.path.isdir(location) == False:
-        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-        location = sas_path+"/"+location
-    try:
-        webbrowser.open('file://' + os.path.realpath(location))
-    except webbrowser.Error as ex:
-        logging.warning("Cannot display help. %s" % ex)
 
 def retrieveData1d(data):
     """
@@ -713,6 +698,7 @@ def saveAnyData(data, wildcard_dict=None):
     # Query user for filename.
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent,
                                                            caption,
+                                                           "",
                                                            filter,
                                                            "",
                                                            options)
@@ -960,42 +946,67 @@ def replaceHTMLwithASCII(html):
 
     return html
 
-def convertUnitToUTF8(unit):
-    """
-    Convert ASCII unit display into UTF-8 symbol
-    """
-    if unit == "1/A":
-        return "Å<sup>-1</sup>"
-    elif unit == "1/cm":
-        return "cm<sup>-1</sup>"
-    elif unit == "Ang":
-        return "Å"
-    elif unit == "1e-6/Ang^2":
-        return "10<sup>-6</sup>/Å<sup>2</sup>"
-    elif unit == "inf":
-        return "∞"
-    elif unit == "-inf":
-        return "-∞"
-    else:
-        return unit
+def rstToHtml(s):
+    # Extract the unit and replacement parts
+    match_replace = re.match(r'(?:\.\. )?\|(.+?)\| replace:: (.+)', s)
+    match_unit = re.match(r'(?:\.\. )?\|(.+?)\| unicode:: (U\+\w+)', s)
+    unit = None
+    replacement = None
+
+
+    if match_unit:
+        # replace the 'unicode' section
+        unit, unicode_val = match_unit.groups()
+        # Convert the unicode value to actual character representation
+        replacement = chr(int(unicode_val[2:], 16))
+
+    if  match_replace:
+        # replace the 'replace' section
+
+        unit, replacement = match_replace.groups()
+
+        # Convert the unit into a valid Python string condition
+        unit = unit.replace("\\", "").replace(" ", "")
+
+        # Convert the replacement into the desired HTML format
+        replacement = replacement.replace("|Ang|", "Å").replace("\\ :sup:`", "<sup>").replace("`", "</sup>").replace("\\", "")
+        replacement = replacement.replace("|cdot|", "·").replace("|deg|", "°").replace("|pm|", "±")
+
+
+    return unit, replacement
+
+# RST_PROLOG conversion table
+try:
+    from sasmodels.generate import RST_PROLOG
+except ImportError:
+    RST_PROLOG = ""
+RST_PROLOG_DICT = {}
+input_rst_strings = RST_PROLOG.splitlines()
+for line in input_rst_strings:
+    if line.startswith(".. |"):
+        key, value = rstToHtml(line)
+        RST_PROLOG_DICT[key] = value
+# add units not in RST_PROLOG
+# This section will be removed once all these units are added to sasmodels
+RST_PROLOG_DICT["1/A"] = "Å<sup>-1</sup>"
+RST_PROLOG_DICT["1/Ang"] = "Å<sup>-1</sup>"
+RST_PROLOG_DICT["1/cm"] = "cm<sup>-1</sup>"
+RST_PROLOG_DICT["1e-6/Ang^2"] = "10<sup>-6</sup>/Å<sup>2</sup>"
+RST_PROLOG_DICT["1e15/cm^3"] = "10<sup>15</sup>/cm<sup>3</sup>"
+RST_PROLOG_DICT["inf"] = "∞"
+RST_PROLOG_DICT["-inf"] = "-∞"
+RST_PROLOG_DICT["degrees"] = "°"
+
 
 def convertUnitToHTML(unit):
     """
-    Convert ASCII unit display into well rendering HTML
+    Convert ASCII unit display into HTML symbol
     """
-    if unit == "1/A":
-        return "&#x212B;<sup>-1</sup>"
-    elif unit == "1/cm":
-        return "cm<sup>-1</sup>"
-    elif unit == "Ang":
-        return "&#x212B;"
-    elif unit == "1e-6/Ang^2":
-        return "10<sup>-6</sup>/&#x212B;<sup>2</sup>"
-    elif unit == "inf":
-        return "&#x221e;"
-    elif unit == "-inf":
-        return "-&#x221e;"
+    if unit in RST_PROLOG_DICT:
+        return RST_PROLOG_DICT[unit]
     else:
+        if unit is None or "None" in unit:
+            return ""
         return unit
 
 def parseName(name, expression):
@@ -1110,7 +1121,7 @@ def saveData(fp, data):
         objects that can't otherwise be serialized need to be converted
         """
         # tuples and sets (TODO: default JSONEncoder converts tuples to lists, create custom Encoder that preserves tuples)
-        if isinstance(o, (tuple, set, np.float)):
+        if isinstance(o, (tuple, set, float)):
             content = { 'data': list(o) }
             return add_type(content, type(o))
 

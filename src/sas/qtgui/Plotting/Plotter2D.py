@@ -19,9 +19,10 @@ from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.BoxSum import BoxSum
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
 
-# TODO: move to sas.qtgui namespace
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
@@ -39,7 +40,7 @@ class Plotter2DWidget(PlotterBase):
     """
     def __init__(self, parent=None, manager=None, quickplot=False, dimension=2):
         self.dimension = dimension
-        super(Plotter2DWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
+        super(Plotter2DWidget, self).__init__(manager=manager, quickplot=quickplot)
 
         self.cmap = DEFAULT_CMAP.name
         # Default scale
@@ -164,7 +165,35 @@ class Plotter2DWidget(PlotterBase):
         """
         Define common context menu and associated actions for the MPL widget
         """
+                
         self.defaultContextMenu()
+        
+        plot_slicer_menu=self.contextMenu.addMenu('Slicers')
+        self.actionCircularAverage = plot_slicer_menu.addAction("&Perform Circular Average")
+        self.actionCircularAverage.triggered.connect(self.onCircularAverage)
+        self.actionSectorView = plot_slicer_menu.addAction("&Sector [Q View]")
+        self.actionSectorView.triggered.connect(self.onSectorView)
+        self.actionAnnulusView = plot_slicer_menu.addAction("&Annulus [Phi View]")
+        self.actionAnnulusView.triggered.connect(self.onAnnulusView)
+        self.actionBoxSum = plot_slicer_menu.addAction("&Box Sum")
+        self.actionBoxSum.triggered.connect(self.onBoxSum)
+        self.actionBoxAveragingX = plot_slicer_menu.addAction("&Box Averaging in Qx")
+        self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
+        self.actionBoxAveragingY = plot_slicer_menu.addAction("&Box Averaging in Qy")
+        self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
+        self.actionWedgeAveragingQ = plot_slicer_menu.addAction("&Wedge Averaging in Q")
+        self.actionWedgeAveragingQ.triggered.connect(self.onWedgeAveragingQ)
+        self.actionWedgeAveragingPhi = plot_slicer_menu.addAction("&Wedge Averaging in Phi")
+        self.actionWedgeAveragingPhi.triggered.connect(self.onWedgeAveragingPhi)
+
+        plot_slicer_menu.addSeparator()
+
+        # Additional items for slicer interaction
+        if self.slicer:
+            plot_slicer_menu.actionClearSlicer = plot_slicer_menu.addAction("&Clear Slicer")
+            plot_slicer_menu.actionClearSlicer.triggered.connect(self.onClearSlicer)
+        plot_slicer_menu.actionEditSlicer = plot_slicer_menu.addAction("&Edit Slicer Parameters")
+        plot_slicer_menu.actionEditSlicer.triggered.connect(self.onEditSlicer)
 
         self.contextMenu.addSeparator()
         self.actionDataInfo = self.contextMenu.addAction("&DataInfo")
@@ -176,25 +205,7 @@ class Plotter2DWidget(PlotterBase):
              functools.partial(self.onSavePoints, self.data0))
         self.contextMenu.addSeparator()
 
-        self.actionCircularAverage = self.contextMenu.addAction("&Perform Circular Average")
-        self.actionCircularAverage.triggered.connect(self.onCircularAverage)
-
-        self.actionSectorView = self.contextMenu.addAction("&Sector [Q View]")
-        self.actionSectorView.triggered.connect(self.onSectorView)
-        self.actionAnnulusView = self.contextMenu.addAction("&Annulus [Phi View]")
-        self.actionAnnulusView.triggered.connect(self.onAnnulusView)
-        self.actionBoxSum = self.contextMenu.addAction("&Box Sum")
-        self.actionBoxSum.triggered.connect(self.onBoxSum)
-        self.actionBoxAveragingX = self.contextMenu.addAction("&Box Averaging in Qx")
-        self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
-        self.actionBoxAveragingY = self.contextMenu.addAction("&Box Averaging in Qy")
-        self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
         # Additional items for slicer interaction
-        if self.slicer:
-            self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
-            self.actionClearSlicer.triggered.connect(self.onClearSlicer)
-        self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
-        self.actionEditSlicer.triggered.connect(self.onEditSlicer)
         self.contextMenu.addSeparator()
         self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
         self.actionColorMap.triggered.connect(self.onColorMap)
@@ -455,6 +466,20 @@ class Plotter2DWidget(PlotterBase):
         Create a new slicer .
         """
         self.setSlicer(slicer=BoxInteractorY)
+
+    def onWedgeAveragingQ(self):
+        """
+        Perform 2D data averaging on Q
+        Create a new slicer .
+        """
+        self.setSlicer(slicer=WedgeInteractorQ)
+
+    def onWedgeAveragingPhi(self):
+        """
+        Perform 2D data averaging on Phi
+        Create a new slicer .
+        """
+        self.setSlicer(slicer=WedgeInteractorPhi)
 
     def onColorMap(self):
         """

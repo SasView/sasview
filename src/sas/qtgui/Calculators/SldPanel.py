@@ -95,8 +95,7 @@ class SldPanel(QtWidgets.QDialog):
         self.manager = parent
 
         self.setupUi()
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+        self.setFixedSize(self.minimumSizeHint())
 
         self.setupModel()
         self.setupMapper()

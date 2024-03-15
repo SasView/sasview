@@ -25,8 +25,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.setupUi(self)
         self.manager = parent
         self.communicator = self.manager.communicator()
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         # To store input datafiles
         self.filenames = None
@@ -369,14 +367,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def _extractData(self, key_id):
         """ Extract data from file with id contained in list of filenames """
         data_complete = self.filenames[key_id]
-        dimension = data_complete.data.__class__.__name__
-
-        if dimension in ('Data1D', 'Data2D'):
-            return copy.deepcopy(data_complete.data)
-
-        else:
-            logging.error('Error with data format')
-            return
+        return copy.deepcopy(data_complete)
 
     # ########
     # PLOTS

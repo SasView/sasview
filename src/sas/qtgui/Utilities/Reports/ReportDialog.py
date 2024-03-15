@@ -23,8 +23,6 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
 
         super().__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.report_data = report_data
 
@@ -64,7 +62,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         try:
             # pylint chokes on this line with syntax-error
             # pylint: disable=syntax-error doesn't seem to help
-            document.print(printer)
+            document.print_(printer)
         except Exception as ex:
             # Printing can return various exceptions, let's catch them all
             logging.error("Print report failed with: " + str(ex))
@@ -127,8 +125,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         """
         Write string to file
         """
-        with open(filename, 'w') as f:
-            f.write(string)
+        with open(filename, 'wb') as f:
+            # weird unit symbols need to be saved as UTF-8
+            f.write(bytes(string, 'utf-8'))
 
     @staticmethod
     def save_pdf(data, filename):

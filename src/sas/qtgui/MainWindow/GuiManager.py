@@ -6,6 +6,7 @@ import webbrowser
 import traceback
 
 from typing import Optional, Dict
+from pathlib import Path
 
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
@@ -15,7 +16,7 @@ import matplotlib as mpl
 
 import sas.system.version
 
-mpl.use("Qt5Agg")
+#mpl.use("Qt5Agg")
 
 from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
 
@@ -33,7 +34,10 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
+
 from sas.qtgui.Utilities.MuMagTool.MuMag import MuMag
+from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
@@ -70,10 +74,12 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
+from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 
 import sas
 from sas import config
 from sas.system import web
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +100,9 @@ class GuiManager:
 
         # Redefine exception hook to not explicitly crash the app.
         sys.excepthook = self.info
+
+        # Ensure the user directory has all required documentation files for future doc regen purposes
+        create_user_files_if_needed()
 
         # Add signal callbacks
         self.addCallbacks()
@@ -117,20 +126,26 @@ class GuiManager:
 
         # Fork off logging messages to the Log Window
         handler = setup_qt_logging()
-        handler.messageWritten.connect(self.appendLog)
+        handler.postman.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
+        #logging.debug("Debug messages are shown.")
+        #logging.warn("Warnings are shown.")
+        #logging.error("Errors are shown.")
 
         # Set up the status bar
         self.statusBarSetup()
 
         # Current tutorial location
-        self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
+        self._tutorialLocation = os.path.abspath(os.path.join(HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
+
+        if self.WhatsNew.has_new_messages():
+            self.actionWhatsNew()
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
@@ -143,7 +158,8 @@ class GuiManager:
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
         self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
-
+        # make it hidden by default
+        self.logDockWidget.setVisible(False)
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
@@ -198,22 +214,31 @@ class GuiManager:
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
+        self.WhatsNew = WhatsNew(self)
+        self.regenProgress = DocRegenProgress(self)
 
     def loadAllPerspectives(self):
+        """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
         # Load all perspectives
-        loaded_dict = {}
+        loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
             try:
+                # Instantiate perspective
                 loaded_perspective = perspective(parent=self)
+
+                # Save in main dict
                 loaded_dict[name] = loaded_perspective
-                pref_widgets = loaded_perspective.preferences
-                for widget in pref_widgets:
-                    self.preferences.addWidget(widget)
+
+                # Register the perspective with the prefernce object
+                self.preferences.registerPerspectivePreferences(loaded_perspective)
+
             except Exception as e:
                 logger.error(f"Unable to load {name} perspective.\n{e}")
                 logger.error(e, exc_info=True)
+
+        # attach loaded perspectives to this class
         self.loadedPerspectives = loaded_dict
 
     def closeAllPerspectives(self):
@@ -354,7 +379,19 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
-        GuiUtils.showHelp(url)
+        # Remove leading forward slashes from relative paths to allow easy Path building
+        if isinstance(url, str):
+            url = url.lstrip("//")
+        url = Path(url)
+        if str(HELP_DIRECTORY_LOCATION.resolve()) not in str(url.absolute()):
+            url_abs = HELP_DIRECTORY_LOCATION / url
+        else:
+            url_abs = Path(url)
+        try:
+            # Help window shows itself
+            self.helpWindow = DocViewWindow(parent=self, source=url_abs)
+        except Exception as ex:
+            logging.warning("Cannot display help. %s" % ex)
 
     def workspace(self):
         """
@@ -388,7 +425,7 @@ class GuiManager:
             self.loadedPerspectives[self._current_perspective.name] = self._current_perspective
 
             self._workspace.workspace.removeSubWindow(self._current_perspective)
-            self._workspace.workspace.closeActiveSubWindow()
+            self._workspace.workspace.removeSubWindow(self.subwindow)
 
         # Get new perspective - note that _current_perspective is of type Optional[Perspective],
         # but new_perspective is of type Perspective, thus call to Perspective members are safe
@@ -496,10 +533,15 @@ class GuiManager:
         """
         self.statusLabel.setText(text)
 
-    def appendLog(self, msg):
+    def appendLog(self, signal):
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
-        self.listWidget.append(msg.strip())
+        (message, record) = signal
+        self.listWidget.append(message.strip())
+
+        # Display log if message is error or worse
+        if record.levelno >= 40:
+            self.logDockWidget.setVisible(True)
 
     def createGuiData(self, item, p_file=None):
         """
@@ -618,6 +660,9 @@ class GuiManager:
         self._workspace.workspace.addSubWindow(self.welcomePanel)
         self.welcomePanel.show()
 
+    def actionWhatsNew(self):
+        self.WhatsNew.show()
+
     def showWelcomeMessage(self):
         """ Show the Welcome panel, when required """
         # Assure the welcome screen is requested
@@ -734,7 +779,8 @@ class GuiManager:
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
-        
+        self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
+
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
 

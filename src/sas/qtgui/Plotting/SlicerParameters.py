@@ -14,6 +14,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
@@ -36,11 +38,13 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                  active_plots=None,
                  validate_method=None,
                  communicator=None):
-        super(SlicerParameters, self).__init__()
+        super(SlicerParameters, self).__init__(parent.manager)
 
         self.setupUi(self)
 
         self.parent = parent
+
+        self.manager = parent.manager
 
         self.model = model
         self.validate_method = validate_method
@@ -56,7 +60,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                           1: SectorInteractor,
                           2: AnnulusInteractor,
                           3: BoxInteractorX,
-                          4: BoxInteractorY}
+                          4: BoxInteractorY,
+                          5: WedgeInteractorQ,
+                          6: WedgeInteractorPhi}
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -216,7 +222,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         caption = 'Save files to:'
         options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
         directory = self.save_location
-        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, "", options)
+        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, options)
 
         if folder is None:
             return
@@ -421,7 +427,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Display generic data averaging help
         """
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
-        GuiUtils.showHelp(url)
+        self.manager.parent.showHelp(url)
 
 
 class ProxyModel(QtCore.QIdentityProxyModel):

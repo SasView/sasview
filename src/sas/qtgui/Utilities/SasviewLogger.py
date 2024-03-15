@@ -2,36 +2,55 @@ import os
 import sys
 import logging
 
-from PySide6.QtCore import *
+from PySide6.QtCore import QObject, Signal
 
 
-class QtHandler(QObject, logging.Handler):
+class SasViewLogFormatter(logging.Formatter):
+    LOG_FORMAT = "%(asctime)s - <b{}>%(levelname)s</b>: %(message)s"
+    DATE_FORMAT = "%H:%M:%S"
+
+    LOG_COLORS = {"WARNING": "orange", "ERROR": "red", "CRITICAL": "red"}
+    def format(self, record):
+        """
+        Give extra formatting on error messages
+        """
+        level_style = ""
+        if record.levelname in self.LOG_COLORS:
+            level_style = f' style="color: {self.LOG_COLORS[record.levelname]}"'
+
+        return logging.Formatter(fmt=self.LOG_FORMAT.format(level_style), datefmt=self.DATE_FORMAT).format(record)
+
+class QtPostman(QObject):
+    messageWritten = Signal(object)
+
+class QtHandler(logging.Handler):
     """
-    Version of logging handler "emitting" the message to custom stdout()
+    Emit python log messages through a Qt signal. Receivers can connect
+    to *handler.postman.messageWritten* with a method accepting the
+    formatted log entry produced by the logger.
     """
-    messageWritten = Signal(str)
-
     def __init__(self):
-        QObject.__init__(self)
         logging.Handler.__init__(self)
+        self.postman = QtPostman()
 
     def emit(self, record):
-        record = self.format(record)
-        if record:
-            # self.messageWritten.emit('%s\n'%record)
-            pass
-
+        message = self.format(record)
+        if message:
+            self.postman.messageWritten.emit((message, record))
 
 def setup_qt_logging():
-    # Define the default logger
-    logger = logging.getLogger()
-
     # Add the qt-signal logger
-    handler = QtHandler()
-    handler.setFormatter(logging.Formatter(
-        fmt="%(asctime)s - %(levelname)s: %(message)s",
-        datefmt="%H:%M:%S"
-    ))
-    logger.addHandler(handler)
+    logger = logging.root
 
+    # If a QtHandler is already defined in log.ini then use it. This allows
+    # config to override the default message formatting. We don't do this
+    # by default because we may be using sasview as a library and don't
+    # want to load Qt.
+    for handler in logger.handlers:
+        if isinstance(handler, QtHandler):
+            return handler
+
+    handler = QtHandler()
+    handler.setFormatter(SasViewLogFormatter())
+    logger.addHandler(handler)
     return handler

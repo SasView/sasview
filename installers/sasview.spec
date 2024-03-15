@@ -15,14 +15,17 @@ datas = [
     ('../src/sas/example_data', 'example_data'),
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
+    ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
     ('../src/sas/system/log.ini', 'sas/system/'),
     ('../../sasmodels/sasmodels','sasmodels'),
-    ('../docs/sphinx-docs/build/html','doc')
+    ('../docs/sphinx-docs/build','doc/build'),
+    ('../docs/sphinx-docs/source-temp','doc/source')
 ]
 #TODO: Hopefully we can get away from version specific packages
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
+# datas.append((os.path.join(PYTHON_PACKAGES, 'freetype'), 'freetype'))
 
 def add_data(data):
     for component in data:
@@ -131,7 +134,7 @@ coll = COLLECT(
 
 if platform.system() == 'Darwin':
     app = BUNDLE(coll,
-        name='SasView5.app',
+        name='SasView6.app',
         icon='../src/sas/qtgui/images/ball.icns',
-        bundle_identifier='org.sasview.SasView5',
+        bundle_identifier='org.sasview.SasView6',
         info_plist={'NSHighResolutionCapable': 'True'})

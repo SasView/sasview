@@ -9,7 +9,6 @@ from periodictable import formula as Formula
 
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 from sas.qtgui.UI import main_resources_rc
-from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
 
 # Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
@@ -47,8 +46,6 @@ class DensityPanel(QtWidgets.QDialog):
         self.mode = None
         self.manager = parent
         self.setupUi()
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setupModel()
         self.setupMapper()
@@ -57,8 +54,7 @@ class DensityPanel(QtWidgets.QDialog):
         self.ui = Ui_DensityPanel()
         self.ui.setupUi(self)
 
-        #self.setFixedSize(self.minimumSizeHint())
-        self.resize(self.minimumSizeHint())
+        self.setFixedSize(self.minimumSizeHint())
 
         # set validators
         #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))

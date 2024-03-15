@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ macos-latest]
-        python-version: [ 3.8 ]
+        python-version: [ 3.11 ]
     needs: reuse_main_ci
 
     steps:
@@ -34,29 +34,24 @@ jobs:
         run: ls -R
         working-directory: installers/dist
 
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Rename artifacts
+      - name: Rename remaining artifacts artifacts
         run: |
           mv installers/dist/SasView-Installer-windows-*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
-          mv installers/dist/SasView-Installer-macos-*/SasView5.dmg  installers/dist/SasView-nightly-MacOSX.dmg
-          mv installers/dist/SasView-Installer-ubuntu-*/sasview5.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
+          mv installers/dist/SasView-Installer-macos-*/SasView6.dmg installers/dist/SasView-nightly-MacOSX.dmg
+          mv installers/dist/SasView-Installer-ubuntu-*/sasview6.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
 
       - name: Notarize Release Build (OSX)
-        uses: GuillaumeFalourd/xcode-notarize@v1
+        uses: lando/notarize-action@v2
         with:
-          product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
-          primary-bundle-id: "org.sasview.SasView5"
-          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          verbose: True
+            product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
+            primary-bundle-id: "org.sasview.SasView6"
+            appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+            appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+            appstore-connect-team-id: W2AG9MPZ43
+            verbose: True
 
       - name: Staple Release Build (OSX)
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        uses: devbotsxyz/xcode-staple@v1
+        uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: "installers/dist/SasView-nightly-MacOSX.dmg"
 

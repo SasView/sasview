@@ -24,8 +24,6 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
     def __init__(self, parent=None):
         super(SlitSizeCalculator, self).__init__()
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setWindowTitle("Slit Size Calculator")
         self._parent = parent
@@ -116,7 +114,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         try:
             xdata = data.x
             ydata = data.y
-            if xdata == [] or xdata is None or ydata == [] or ydata is None:
+            if xdata is None or len(xdata) == 0 or ydata is None or len(ydata) == 0:
                 msg = "The current data is empty please check x and y"
                 logging.error(msg)
                 return

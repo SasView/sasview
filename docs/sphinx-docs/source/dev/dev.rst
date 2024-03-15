@@ -12,6 +12,8 @@ Contents
    SasView API <sasview-api/modules>
    sasmodels overview <sasmodels-dev/index>
    sasmodels API <sasmodels-api/modules>
+   sasdata overview <sasdata-dev/dev>
+   OpenGL subsystem <gl/opengl.rst>
 
 Indices and Search
 ------------------

@@ -81,7 +81,6 @@
      <zorder>cbCategories</zorder>
      <zorder>txtNewCategory</zorder>
      <zorder>cmdAdd</zorder>
-     <zorder>horizontalSpacer_2</zorder>
      <zorder>rbNew</zorder>
      <zorder>rbExisting</zorder>
     </widget>
