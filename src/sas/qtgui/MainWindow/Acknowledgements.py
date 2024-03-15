@@ -12,8 +12,6 @@ class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
         super(Acknowledgements, self).__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.addText()
 

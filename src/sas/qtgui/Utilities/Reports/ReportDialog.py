@@ -23,8 +23,6 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
 
         super().__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.report_data = report_data
 
