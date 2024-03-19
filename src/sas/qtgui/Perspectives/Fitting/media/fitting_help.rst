@@ -1168,4 +1168,4 @@ command line interpreter, see :ref:`sesans_fitting`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 26Oct2022
+.. note::  This help document was last changed by Caitlyn Wolf, 19March2024
