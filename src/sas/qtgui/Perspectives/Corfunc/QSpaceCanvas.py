@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.sascalc.corfunc.extrapolation_data import ExtrapolationInteractionState
+from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState
 
 
 class QSpaceCanvas(CorfuncCanvas):
@@ -35,7 +35,12 @@ class QSpaceCanvas(CorfuncCanvas):
 
 
         # Set all lines black, then if there is an interactive one, make it grey
-        for line, position in zip(lines, parameters.extrapolation_parameters[1:]):
+        for line, position in zip(lines, [
+                                  parameters.extrapolation_parameters.point_1,
+                                  parameters.extrapolation_parameters.point_2,
+                                  parameters.extrapolation_parameters.point_3,
+                                  parameters.extrapolation_parameters.data_q_max]):
+
             line.set_xdata(position)
             line.set_color('k')
 

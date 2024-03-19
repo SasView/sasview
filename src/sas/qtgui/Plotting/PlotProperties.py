@@ -1,5 +1,5 @@
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.PlotUtilities import COLORS, SHAPES
 from sas.qtgui.Plotting.UI.PlotPropertiesUI import Ui_PlotPropertiesUI
@@ -14,8 +14,6 @@ class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
                  legend=""):
         super(PlotProperties, self).__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setFixedSize(self.minimumSizeHint())
 

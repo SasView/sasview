@@ -1,13 +1,13 @@
 import sys
-import unittest
-from unittest.mock import MagicMock
 
-from PyQt5 import QtGui, QtCore
+import pytest
+
+from PySide6 import QtGui, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
-from UnitTesting.TestUtils import WarningTestNotImplemented
+from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 
 from sasmodels import generate
 from sasmodels import modelinfo
@@ -17,15 +17,9 @@ from sasmodels.sasview_model import load_standard_models
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.FittingUtilities import checkConstraints
 
-class FittingUtilitiesTest(unittest.TestCase):
-    '''Test the Fitting Utilities functions'''
-    def setUp(self):
-        '''Empty'''
-        pass
 
-    def tearDown(self):
-        '''Empty'''
-        pass
+class FittingUtilitiesTest:
+    '''Test the Fitting Utilities functions'''
 
     def testReplaceShellName(self):
         """
@@ -35,11 +29,11 @@ class FittingUtilitiesTest(unittest.TestCase):
         value = "replaced"
         result = FittingUtilities.replaceShellName(param_name, value)
         
-        self.assertEqual(result, "test replaced")
+        assert result == "test replaced"
 
         # Assert!
         param_name = "no brackets"
-        with self.assertRaises(AssertionError):
+        with pytest.raises(AssertionError):
             result = FittingUtilities.replaceShellName(param_name, value)
 
         
@@ -54,7 +48,7 @@ class FittingUtilitiesTest(unittest.TestCase):
 
         params = FittingUtilities.getIterParams(barbell_parameters)
         # returns empty list
-        self.assertEqual(params, [])
+        assert params == []
 
         # Use a multi-shell parameter
         model_name = "core_multi_shell"
@@ -63,9 +57,9 @@ class FittingUtilitiesTest(unittest.TestCase):
 
         params = FittingUtilities.getIterParams(multishell_parameters)
         # returns a non-empty list
-        self.assertNotEqual(params, [])
-        self.assertIn('sld', str(params))
-        self.assertIn('thickness', str(params))
+        assert params != []
+        assert 'sld' in str(params)
+        assert 'thickness' in str(params)
 
     def testGetMultiplicity(self):
         """
@@ -78,8 +72,8 @@ class FittingUtilitiesTest(unittest.TestCase):
 
         param_name, param_length = FittingUtilities.getMultiplicity(barbell_parameters)
         # returns nothing
-        self.assertEqual(param_name, "")
-        self.assertEqual(param_length, 0)
+        assert param_name == ""
+        assert param_length == 0
 
         # Use a multi-shell parameter
         model_name = "core_multi_shell"
@@ -88,8 +82,8 @@ class FittingUtilitiesTest(unittest.TestCase):
 
         param_name, param_length = FittingUtilities.getMultiplicity(multishell_parameters)
 
-        self.assertEqual(param_name, "n")
-        self.assertEqual(param_length, 10)
+        assert param_name == "n"
+        assert param_length == 10
 
     def testAddParametersToModel(self):
         """
@@ -104,17 +98,17 @@ class FittingUtilitiesTest(unittest.TestCase):
         for model in models:
             if model.name == model_name:
                 kernel_module_o = model()
-        self.assertIsNotNone(kernel_module_o)
+        assert kernel_module_o is not None
         barbell_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
         params = FittingUtilities.addParametersToModel(barbell_parameters, kernel_module_o, True)
 
         # Test the resulting model
-        self.assertEqual(len(params), 7)
-        self.assertEqual(len(params[0]), 5)
-        self.assertTrue(params[0][0].isCheckable())
-        self.assertEqual(params[0][0].text(), "sld")
-        self.assertEqual(params[1][0].text(), "sld_solvent")
+        assert len(params) == 7
+        assert len(params[0]) == 5
+        assert params[0][0].isCheckable()
+        assert params[0][0].text() == "sld"
+        assert params[1][0].text() == "sld_solvent"
 
         # Use a multi-shell parameter to see that the method includes shell params
         model_name = "core_multi_shell"
@@ -123,17 +117,17 @@ class FittingUtilitiesTest(unittest.TestCase):
         for model in models:
             if model.name == model_name:
                 kernel_module_o = model()
-        self.assertIsNotNone(kernel_module_o)
+        assert kernel_module_o is not None
         multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
         params = FittingUtilities.addParametersToModel(multi_parameters, kernel_module_o, False)
 
         # Test the resulting model
-        self.assertEqual(len(params), 3)
-        self.assertEqual(len(params[0]), 5)
-        self.assertTrue(params[0][0].isCheckable())
-        self.assertEqual(params[0][0].text(), "sld_core")
-        self.assertEqual(params[1][0].text(), "radius")
+        assert len(params) == 3
+        assert len(params[0]) == 5
+        assert params[0][0].isCheckable()
+        assert params[0][0].text() == "sld_core"
+        assert params[1][0].text() == "radius"
 
     def testAddSimpleParametersToModel(self):
         """
@@ -147,17 +141,17 @@ class FittingUtilitiesTest(unittest.TestCase):
         for model in models:
             if model.name == model_name:
                 kernel_module_o = model()
-        self.assertIsNotNone(kernel_module_o)
+        assert kernel_module_o is not None
         multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
         params = FittingUtilities.addParametersToModel(multi_parameters, kernel_module_o, True)
 
         # Test the resulting model
-        self.assertEqual(len(params), 3)
-        self.assertEqual(len(params[0]), 5)
-        self.assertTrue(params[0][0].isCheckable())
-        self.assertEqual(params[0][0].text(), "sld_core")
-        self.assertEqual(params[1][0].text(), "radius")
+        assert len(params) == 3
+        assert len(params[0]) == 5
+        assert params[0][0].isCheckable()
+        assert params[0][0].text() == "sld_core"
+        assert params[1][0].text() == "radius"
 
     def testAddCheckedListToModel(self):
         """
@@ -169,11 +163,11 @@ class FittingUtilitiesTest(unittest.TestCase):
         FittingUtilities.addCheckedListToModel(model, params)
 
         # Check the model
-        self.assertEqual(model.rowCount(), 1)
-        self.assertTrue(model.item(0).isCheckable())
-        self.assertEqual(model.item(0, 0).text(), params[0])
-        self.assertEqual(model.item(0, 1).text(), params[1])
-        self.assertEqual(model.item(0, 2).text(), params[2])
+        assert model.rowCount() == 1
+        assert model.item(0).isCheckable()
+        assert model.item(0, 0).text() == params[0]
+        assert model.item(0, 1).text() == params[1]
+        assert model.item(0, 2).text() == params[2]
 
     def testAddShellsToModel(self):
         """
@@ -189,16 +183,16 @@ class FittingUtilitiesTest(unittest.TestCase):
         index = 2
         FittingUtilities.addShellsToModel(multi_parameters, model, index)
         # There should be index*len(multi_parameters) new rows
-        self.assertEqual(model.rowCount(), 4)
+        assert model.rowCount() == 4
 
         model = QtGui.QStandardItemModel()
         index = 5
         FittingUtilities.addShellsToModel(multi_parameters, model, index)
-        self.assertEqual(model.rowCount(), 10)
+        assert model.rowCount() == 10
         
-        self.assertEqual(model.item(1).child(0).text(), "Polydispersity")
-        self.assertEqual(model.item(1).child(0).child(0).text(), "Distribution")
-        self.assertEqual(model.item(1).child(0).child(0,1).text(), "40.0")
+        assert model.item(1).child(0).text() == "Polydispersity"
+        assert model.item(1).child(0).child(0).text() == "Distribution"
+        assert model.item(1).child(0).child(0,1).text() == "40.0"
 
     def testCalculate1DChi2(self):
         """
@@ -212,7 +206,7 @@ class FittingUtilitiesTest(unittest.TestCase):
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should be zero
-        self.assertAlmostEqual(chi, 0.0, 8)
+        assert chi == pytest.approx(0.0, abs=1e-8)
 
         # 2. far data
         current_data = Data1D(x=[0.1, 0.2], y=[200.0, 150.0])
@@ -220,13 +214,13 @@ class FittingUtilitiesTest(unittest.TestCase):
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should not be zero
-        self.assertAlmostEqual(chi, 31250.0, 8)
+        assert chi == pytest.approx(31250.0, rel=1e-8)
 
         # 3. Wrong data
         current_data = Data1D(x=[0.1, 0.2], y=[200.0, 150.0, 200.0])
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
         # Should remain unchanged
-        self.assertAlmostEqual(chi, 31250.0, 8)
+        assert chi == pytest.approx(31250.0, rel=1e-8)
 
     def testCalculate2DChi2(self):
         """
@@ -247,7 +241,7 @@ class FittingUtilitiesTest(unittest.TestCase):
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should be zero
-        self.assertAlmostEqual(chi, 0.0, 8)
+        assert chi == pytest.approx(0.0, abs=1e-8)
 
         # 2. far data
         current_data = Data2D(image=[100.0, 200.0, 300.0],
@@ -258,7 +252,7 @@ class FittingUtilitiesTest(unittest.TestCase):
         chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
         # Should not be zero
-        self.assertAlmostEqual(chi, 9607.88, 2)
+        assert chi == pytest.approx(9607.88, abs=1e-2)
 
         # 3. Wrong data
         current_data = Data2D(image=[1.0, 2.0, 3.0],
@@ -266,7 +260,7 @@ class FittingUtilitiesTest(unittest.TestCase):
                       qx_data=[0.1, 0.2],
                       qy_data=[0.1, 0.2, 0.3])
         # Should throw
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             chi = FittingUtilities.calculateChi2(reference_data, current_data, weights)
 
     def notestAddHeadersToModel(self):
@@ -278,7 +272,7 @@ class FittingUtilitiesTest(unittest.TestCase):
         # Assure we have properly named columns
         names = FittingUtilities.model_header_captions
         names_from_model = [model.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
-        self.assertEqual(names, names_from_model)
+        assert names == names_from_model
 
         # Add another model
         model2 = QtGui.QStandardItemModel()
@@ -286,7 +280,7 @@ class FittingUtilitiesTest(unittest.TestCase):
         FittingUtilities.addHeadersToModel(model2)
         # We still should have only the original names
         names_from_model2 = [model2.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
-        self.assertEqual(names, names_from_model2)
+        assert names == names_from_model2
 
     def testCheckConstraints(self):
         ''' Test the constraints checks'''
@@ -294,12 +288,9 @@ class FittingUtilitiesTest(unittest.TestCase):
         symtab = {"M1.scale": 1, "M1.background": 1}
         constraints = [("M1.scale", "M1.background")]
         errors = checkConstraints(symtab, constraints)
-        self.assertEqual(errors, [])
+        assert errors == []
 
         # Send a constraint with an error
         constraints = [("M1.foo", "M1.background")]
         errors = checkConstraints(symtab, constraints)
-        self.assertTrue(isinstance(errors, str))
-
-if __name__ == "__main__":
-    unittest.main()
+        assert isinstance(errors, str)

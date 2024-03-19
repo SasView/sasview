@@ -1,18 +1,18 @@
 """
 Allows users to change the range of the current graph
 """
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-import sas.qtgui.path_prepare
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import matplotlib as mpl
 import numpy
+from typing import Union, Tuple
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
-from .rangeSlider import RangeSlider
+from superqt import QDoubleRangeSlider
 
 DEFAULT_MAP = 'jet'
 
@@ -21,23 +21,31 @@ from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
 
 class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
-    apply_signal = QtCore.pyqtSignal(tuple, str)
+    apply_signal = QtCore.Signal(tuple, str)
     def __init__(self, parent=None, cmap=None, vmin=0.0, vmax=100.0, data=None):
         super(ColorMap, self).__init__()
 
         self.setupUi(self)
         assert(isinstance(data, Data2D))
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.data = data
         self._cmap_orig = self._cmap = cmap if cmap is not None else DEFAULT_MAP
-        self.all_maps = [m for m in mpl.cm.datad]
-        self.maps = sorted(m for m in self.all_maps if not m.endswith("_r"))
-        self.rmaps = sorted(set(self.all_maps) - set(self.maps))
 
+        self.maps = [m for m in mpl.cm.datad]
+        self.rmaps = [m + '_r' for m in self.maps]
+        self.all_maps = self.maps + self.rmaps
+
+        # see if data2d has preexisting info on vmin/vmax
+        if hasattr(self.data, 'vmin'):
+            vmin = self.data.vmin
+        if hasattr(self.data, 'vmax'):
+            vmax = self.data.vmax
         self.vmin = self.vmin_orig = vmin
         self.vmax = self.vmax_orig = vmax
+
+        # save instance-tied values
+        self.data.vmin = vmin
+        self.data.vmax = vmax
 
         # Initialize detector labels
         self.initDetectorData()
@@ -52,10 +60,10 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         # Initialize validators on amplitude textboxes
         validator_min = DoubleValidator(self.txtMinAmplitude)
-        validator_min.setNotation(0)
+        validator_min.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.txtMinAmplitude.setValidator(validator_min)
         validator_max = DoubleValidator(self.txtMaxAmplitude)
-        validator_max.setNotation(0)
+        validator_max.setNotation(QtGui.QDoubleValidator.StandardNotation)
         self.txtMaxAmplitude.setValidator(validator_max)
 
         # Set the initial amplitudes
@@ -67,7 +75,6 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
 
         # Handle combobox changes
         self.cbColorMap.currentIndexChanged.connect(self.onMapIndexChange)
-
         # Handle checkbox changes
         self.chkReverse.stateChanged.connect(self.onColorMapReversed)
 
@@ -107,8 +114,8 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         self.initMapCombobox()
         self.slider.setMinimum(self.vmin)
         self.slider.setMaximum(self.vmax)
-        self.slider.setLowValue(self.vmin)
-        self.slider.setHighValue(self.vmax)
+        self.slider.setRange(self.vmin, self.vmax)
+        self.slider.setSliderPosition([self.vmin, self.vmax])
         # Redraw the widget
         self.redrawColorBar()
         self.canvas.draw()
@@ -155,27 +162,35 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         """
         Create and display the double slider for data range mapping.
         """
-        self.slider = RangeSlider()
-        self.slider.setMinimum(self.vmin)
-        self.slider.setMaximum(self.vmax)
-        self.slider.setLowValue(self.vmin)
-        self.slider.setHighValue(self.vmax)
-        self.slider.setOrientation(QtCore.Qt.Horizontal)
+        self.slider = QDoubleRangeSlider(QtCore.Qt.Horizontal)
+
+        # see if data2d has preexisting range info
+        self.slider.setValue([self.vmin, self.vmax])
+        self.slider.setRange(self.vmin, self.vmax)
+
+        self.slider.setTickPosition(QtWidgets.QSlider.TicksAbove)
+        self.slider.setSliderPosition([self.vmin, self.vmax])
 
         self.slider_label = QtWidgets.QLabel()
         self.slider_label.setText("Drag the sliders to adjust color range.")
 
         def set_vmin(value):
             self.vmin = value
-            self.txtMinAmplitude.setText(str(value))
+            self.txtMinAmplitude.setText(formatNumber(value))
             self.updateMap()
         def set_vmax(value):
             self.vmax = value
-            self.txtMaxAmplitude.setText(str(value))
+            self.txtMaxAmplitude.setText(formatNumber(value))
             self.updateMap()
 
-        self.slider.lowValueChanged.connect(set_vmin)
-        self.slider.highValueChanged.connect(set_vmax)
+        def set_values(values: Tuple[Union[int,float], Union[int,float]]):
+            v1, v2 = values
+            if v1 != self.vmin:
+                set_vmin(v1)
+            if v2 != self.vmax:
+                set_vmax(v2)
+
+        self.slider.valueChanged.connect(set_values)
 
     def updateMap(self):
         self._norm = mpl.colors.Normalize(vmin=self.vmin, vmax=self.vmax)
@@ -264,7 +279,12 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
             max_amp = float(self.txtMaxAmplitude.text())
         except ValueError:
             pass
-
+        if min_amp >= max_amp:
+            min_amp = self.vmin
+            max_amp = self.vmax
+            self.txtMinAmplitude.setText(str(formatNumber(min_amp)))
+            self.txtMaxAmplitude.setText(str(formatNumber(max_amp)))
+            return
         self._norm = mpl.colors.Normalize(vmin=min_amp, vmax=max_amp)
         self.redrawColorBar()
         self.canvas.draw()

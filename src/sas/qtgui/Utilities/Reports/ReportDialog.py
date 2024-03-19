@@ -3,11 +3,10 @@ import sys
 import re
 import logging
 import traceback
-from xhtml2pdf import pisa
 from typing import Optional
 
-from PyQt5 import QtWidgets, QtCore
-from PyQt5 import QtPrintSupport
+from PySide6 import QtWidgets, QtCore
+from PySide6 import QtPrintSupport
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -24,8 +23,6 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
 
         super().__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.report_data = report_data
 
@@ -65,7 +62,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         try:
             # pylint chokes on this line with syntax-error
             # pylint: disable=syntax-error doesn't seem to help
-            document.print(printer)
+            document.print_(printer)
         except Exception as ex:
             # Printing can return various exceptions, let's catch them all
             logging.error("Print report failed with: " + str(ex))
@@ -80,17 +77,14 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         else:
             location = self.save_location
         # Use a sensible filename default
-        default_name = os.path.join(location, 'report.pdf')
+        default_name = os.path.join(str(location), 'report.pdf')
 
-        kwargs = {
-            'parent'   : self,
-            'caption'  : 'Save Report',
-            # don't use 'directory' in order to remember the previous user choice
-            'directory': default_name,
-            'filter'   : 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)',
-            'options'  : QtWidgets.QFileDialog.DontUseNativeDialog}
-        # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        parent = self
+        caption = 'Save Project'
+        filter = 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)'
+        options = QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = default_name
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", options)
         filename = filename_tuple[0]
         if not filename:
             return
@@ -131,8 +125,9 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         """
         Write string to file
         """
-        with open(filename, 'w') as f:
-            f.write(string)
+        with open(filename, 'wb') as f:
+            # weird unit symbols need to be saved as UTF-8
+            f.write(bytes(string, 'utf-8'))
 
     @staticmethod
     def save_pdf(data, filename):
@@ -142,6 +137,8 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         : data: html string
         : filename: name of file to be saved
         """
+        # import moved from top due to cost
+        from xhtml2pdf import pisa
         try:
             # open output file for writing (truncated binary)
             with open(filename, "w+b") as resultFile:

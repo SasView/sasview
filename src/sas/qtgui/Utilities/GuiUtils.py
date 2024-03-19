@@ -6,7 +6,6 @@ import numbers
 import os
 import re
 import sys
-import imp
 import warnings
 import webbrowser
 import urllib.parse
@@ -14,21 +13,21 @@ import json
 import types
 import numpy
 from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 
 warnings.simplefilter("ignore")
 import logging
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from periodictable import formula as Formula
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.ConvertUnits import convertUnit
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Plotting.Plottables import Plottable
 from sasdata.dataloader.data_info import Sample, Source, Vector
 from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
@@ -44,16 +43,10 @@ from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
 from sasmodels.sasview_model import SasviewModel
 
+import sas
+from sas import config
+
 from sasdata.dataloader.loader import Loader
-from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
-
-from sas.qtgui.Utilities import CustomDir
-
-if os.path.splitext(sys.argv[0])[1].lower() != ".py":
-        HELP_DIRECTORY_LOCATION = "doc"
-else:
-        HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
-IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 
 # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
 # "5 [P(Q)] modelname"
@@ -66,156 +59,23 @@ theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 logger = logging.getLogger(__name__)
 
 
-def get_app_dir():
+def get_sensible_default_open_directory():
     """
-        The application directory is the one where the default custom_config.py
-        file resides.
-
-        :returns: app_path - the path to the applicatin directory
+        :returns: app_path - the path to the application directory
     """
     # First, try the directory of the executable we are running
     app_path = sys.path[0]
     if os.path.isfile(app_path):
-        app_path = os.path.dirname(app_path)
-    if os.path.isfile(os.path.join(app_path, "custom_config.py")):
-        app_path = os.path.abspath(app_path)
-        #logging.info("Using application path: %s", app_path)
-        return app_path
+        return os.path.dirname(app_path)
 
-    # Next, try the current working directory
-    if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
-        #logging.info("Using application path: %s", os.getcwd())
-        return os.path.abspath(os.getcwd())
-
-    # Finally, try the directory of the sasview module
-    # TODO: gui_manager will have to know about sasview until we
-    # clean all these module variables and put them into a config class
-    # that can be passed by sasview.py.
-    # logging.info(sys.executable)
-    # logging.info(str(sys.argv))
-    from sas import sasview as sasview
-    app_path = os.path.dirname(sasview.__file__)
-    # logging.info("Using application path: %s", app_path)
-    return app_path
-
-def get_user_directory():
-    """
-        Returns the user's home directory
-    """
-    userdir = os.path.join(os.path.expanduser("~"), ".sasview")
-    if not os.path.isdir(userdir):
-        os.makedirs(userdir)
-    return userdir
-
-def _find_local_config(confg_file, path):
-    """
-        Find configuration file for the current application
-    """
-    config_module = None
-    fObj = None
-    try:
-        fObj, path_config, descr = imp.find_module(confg_file, [path])
-        config_module = imp.load_module(confg_file, fObj, path_config, descr)
-    except ImportError:
-        pass
-    except ValueError:
-        print("Value error")
-        pass
-    finally:
-        if fObj is not None:
-            fObj.close()
-    return config_module
+    # if this fails, use try the directory of the sasview module
+    return os.path.dirname(sas.__file__)
 
 
-# Get APP folder
-PATH_APP = get_app_dir()
-DATAPATH = PATH_APP
-# Read in the local config, which can either be with the main
-# application or in the installation directory
-config = _find_local_config('local_config', PATH_APP)
+# custom open_path
+if config.DEFAULT_OPEN_FOLDER == "" or not os.path.isdir(config.DEFAULT_OPEN_FOLDER):
+    config.DEFAULT_OPEN_FOLDER = get_sensible_default_open_directory()
 
-if config is None:
-    config = _find_local_config('local_config', os.getcwd())
-else:
-    pass
-
-c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
-custom_config = _find_local_config('custom_config', c_conf_dir)
-if custom_config is None:
-    custom_config = _find_local_config('custom_config', os.getcwd())
-    if custom_config is None:
-        msgConfig = "Custom_config file was not imported"
-logging.info("Custom config path: %s", custom_config)
-
-#read some constants from config
-APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
-APPLICATION_NAME = config.__appname__
-SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
-WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
-SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
-SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
-SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-if not WELCOME_PANEL_ON:
-    WELCOME_PANEL_SHOW = False
-else:
-    WELCOME_PANEL_SHOW = True
-try:
-    DATALOADER_SHOW = custom_config.DATALOADER_SHOW
-    TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
-    FIXED_PANEL = custom_config.FIXED_PANEL
-    if WELCOME_PANEL_ON:
-        WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
-    PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = custom_config.CONTROL_WIDTH
-    CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
-    DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
-    CLEANUP_PLOT = custom_config.CLEANUP_PLOT
-    SAS_OPENCL = custom_config.SAS_OPENCL
-    # custom open_path
-    open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder is not None and os.path.isdir(open_folder):
-        DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
-    else:
-        DEFAULT_OPEN_FOLDER = PATH_APP
-except AttributeError:
-    DATALOADER_SHOW = True
-    TOOLBAR_SHOW = True
-    FIXED_PANEL = True
-    WELCOME_PANEL_SHOW = False
-    PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = -1
-    CONTROL_HEIGHT = -1
-    DEFAULT_PERSPECTIVE = None
-    CLEANUP_PLOT = False
-    DEFAULT_OPEN_FOLDER = PATH_APP
-    SAS_OPENCL = config.SAS_OPENCL
-
-#DEFAULT_STYLE = config.DEFAULT_STYLE
-
-PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
-OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
-VIEW_MENU = config.VIEW_MENU
-EDIT_MENU = config.EDIT_MENU
-extension_list = []
-if APPLICATION_STATE_EXTENSION is not None:
-    extension_list.append(APPLICATION_STATE_EXTENSION)
-EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
-try:
-    PLUGINS_WLIST = '|'.join(config.PLUGINS_WLIST)
-except AttributeError:
-    PLUGINS_WLIST = ''
-APPLICATION_WLIST = config.APPLICATION_WLIST
-IS_WIN = True
-IS_LINUX = False
-CLOSE_SHOW = True
-TIME_FACTOR = 2
-NOT_SO_GRAPH_LIST = ["BoxSum"]
 
 
 class Communicate(QtCore.QObject):
@@ -223,99 +83,103 @@ class Communicate(QtCore.QObject):
     Utility class for tracking of the Qt signals
     """
     # File got successfully read
-    fileReadSignal = QtCore.pyqtSignal(list)
+    fileReadSignal = QtCore.Signal(list)
 
     # Open File returns "list" of paths
-    fileDataReceivedSignal = QtCore.pyqtSignal(dict)
+    fileDataReceivedSignal = QtCore.Signal(dict)
 
     # Update Main window status bar with "str"
     # Old "StatusEvent"
-    statusBarUpdateSignal = QtCore.pyqtSignal(str)
+    statusBarUpdateSignal = QtCore.Signal(str)
 
     # Send data to the current perspective
-    updatePerspectiveWithDataSignal = QtCore.pyqtSignal(list)
+    updatePerspectiveWithDataSignal = QtCore.Signal(list)
 
     # New data in current perspective
-    updateModelFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+    updateModelFromPerspectiveSignal = QtCore.Signal(QtGui.QStandardItem)
 
     # New theory data in current perspective
-    updateTheoryFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+    updateTheoryFromPerspectiveSignal = QtCore.Signal(QtGui.QStandardItem)
 
     # Request to delete plots (in the theory view) related to a given model ID
-    deleteIntermediateTheoryPlotsSignal = QtCore.pyqtSignal(str)
+    deleteIntermediateTheoryPlotsSignal = QtCore.Signal(str)
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.pyqtSignal(list, int)
+    plotRequestedSignal = QtCore.Signal(list, int)
 
     # Plot from file names
-    plotFromNameSignal = QtCore.pyqtSignal(str)
+    plotFromNameSignal = QtCore.Signal(str)
 
     # Plot update requested from a perspective
-    plotUpdateSignal = QtCore.pyqtSignal(list)
+    plotUpdateSignal = QtCore.Signal(list)
 
     # Progress bar update value
-    progressBarUpdateSignal = QtCore.pyqtSignal(int)
+    progressBarUpdateSignal = QtCore.Signal(int)
 
     # Workspace charts added/removed
-    activeGraphsSignal = QtCore.pyqtSignal(list)
+    activeGraphsSignal = QtCore.Signal(list)
 
     # Current workspace chart's name changed
-    activeGraphName = QtCore.pyqtSignal(tuple)
+    activeGraphName = QtCore.Signal(tuple)
 
     # Current perspective changed
-    perspectiveChangedSignal = QtCore.pyqtSignal(str)
+    perspectiveChangedSignal = QtCore.Signal(str)
 
     # File/dataset got deleted
-    dataDeletedSignal = QtCore.pyqtSignal(list)
+    dataDeletedSignal = QtCore.Signal(list)
 
     # Send data to Data Operation Utility panel
-    sendDataToPanelSignal = QtCore.pyqtSignal(dict)
+    sendDataToPanelSignal = QtCore.Signal(dict)
 
     # Send result of Data Operation Utility panel to Data Explorer
-    updateModelFromDataOperationPanelSignal = QtCore.pyqtSignal(QtGui.QStandardItem, dict)
+    updateModelFromDataOperationPanelSignal = QtCore.Signal(QtGui.QStandardItem, dict)
 
     # Notify about a new custom plugin being written/deleted/modified
-    customModelDirectoryChanged = QtCore.pyqtSignal()
+    customModelDirectoryChanged = QtCore.Signal()
 
     # Notify the gui manager about new data to be added to the grid view
-    sendDataToGridSignal = QtCore.pyqtSignal(list)
+    sendDataToGridSignal = QtCore.Signal(list)
 
     # Mask Editor requested
-    maskEditorSignal = QtCore.pyqtSignal(Data2D)
+    maskEditorSignal = QtCore.Signal(Data2D)
 
     #second Mask Editor for external
-    extMaskEditorSignal = QtCore.pyqtSignal()
+    extMaskEditorSignal = QtCore.Signal()
 
     # Fitting parameter copy to clipboard
-    copyFitParamsSignal = QtCore.pyqtSignal(str)
+    copyFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Excel
-    copyExcelFitParamsSignal = QtCore.pyqtSignal(str)
+    copyExcelFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Latex
-    copyLatexFitParamsSignal = QtCore.pyqtSignal(str)
+    copyLatexFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter copy to clipboard for Latex
-    SaveFitParamsSignal = QtCore.pyqtSignal(str)
+    SaveFitParamsSignal = QtCore.Signal(str)
 
     # Fitting parameter paste from clipboard
-    pasteFitParamsSignal = QtCore.pyqtSignal()
+    pasteFitParamsSignal = QtCore.Signal()
 
     # Notify about new categories/models from category manager
-    updateModelCategoriesSignal = QtCore.pyqtSignal()
+    updateModelCategoriesSignal = QtCore.Signal()
 
     # Tell the data explorer to switch tabs
-    changeDataExplorerTabSignal = QtCore.pyqtSignal(int)
+    changeDataExplorerTabSignal = QtCore.Signal(int)
 
     # Plot fitting results (FittingWidget->GuiManager)
-    resultPlotUpdateSignal = QtCore.pyqtSignal(list)
+    resultPlotUpdateSignal = QtCore.Signal(list)
 
     # show the plot as a regular in-workspace object
-    forcePlotDisplaySignal = QtCore.pyqtSignal(list)
+    forcePlotDisplaySignal = QtCore.Signal(list)
 
     # Update the masked ranges in fitting
-    updateMaskedDataSignal = QtCore.pyqtSignal()
+    updateMaskedDataSignal = QtCore.Signal()
+
+    # Triggers refresh of all documentation windows
+    documentationRegenInProgressSignal = QtCore.Signal()
+    documentationRegeneratedSignal = QtCore.Signal()
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
@@ -373,7 +237,7 @@ def deleteRedundantPlots(item, new_plots):
         if (plot_data.id is not None) and \
             (plot_data.id not in ids) and \
             (plot_data.name not in names) and \
-            (plot_data.plot_role == Data1D.ROLE_DELETABLE):
+            (plot_data.plot_role == DataRole.ROLE_DELETABLE):
             items_to_delete.append(plot_item)
 
     for plot_item in items_to_delete:
@@ -663,19 +527,6 @@ def openLink(url):
         msg = "Attempt at opening an invalid URL"
         raise AttributeError(msg)
 
-def showHelp(url):
-    """
-    Open a local url in the default browser
-    """
-    location = HELP_DIRECTORY_LOCATION + url
-    #WP: Added to handle OSX bundle docs
-    if os.path.isdir(location) == False:
-        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-        location = sas_path+"/"+location
-    try:
-        webbrowser.open('file://' + os.path.realpath(location))
-    except webbrowser.Error as ex:
-        logging.warning("Cannot display help. %s" % ex)
 
 def retrieveData1d(data):
     """
@@ -840,14 +691,17 @@ def saveAnyData(data, wildcard_dict=None):
         wildcards += f"{wildcard} (*{wildcard_dict[wildcard]});;"
     wildcards += "All files (*.*)"
 
-    kwargs = {
-        'caption'   : 'Save As',
-        'filter'    : wildcards,
-        'parent'    : None,
-        'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
-    }
+    caption = 'Save As'
+    filter = wildcards
+    parent = None
+    options = QtWidgets.QFileDialog.DontUseNativeDialog
     # Query user for filename.
-    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent,
+                                                           caption,
+                                                           "",
+                                                           filter,
+                                                           "",
+                                                           options)
     filename = filename_tuple[0]
 
     # User cancelled or did not enter a filename
@@ -947,7 +801,7 @@ def xyTransform(data, xLabel="", yLabel=""):
         xLabel = "%s^{4}(%s)" % (xname, xunits)
     if xLabel == "ln(x)":
         data.transformX(DataTransform.toLogX, DataTransform.errToLogX)
-        xLabel = "\ln{(%s)}(%s)" % (xname, xunits)
+        xLabel = r"\ln{(%s)}(%s)" % (xname, xunits)
     if xLabel == "log10(x)":
         data.transformX(DataTransform.toX_pos, DataTransform.errToX_pos)
         xscale = 'log'
@@ -961,7 +815,7 @@ def xyTransform(data, xLabel="", yLabel=""):
     # Y
     if yLabel == "ln(y)":
         data.transformY(DataTransform.toLogX, DataTransform.errToLogX)
-        yLabel = "\ln{(%s)}(%s)" % (yname, yunits)
+        yLabel = r"\ln{(%s)}(%s)" % (yname, yunits)
     if yLabel == "y":
         data.transformY(DataTransform.toX, DataTransform.errToX)
         yLabel = "%s(%s)" % (yname, yunits)
@@ -980,31 +834,31 @@ def xyTransform(data, xLabel="", yLabel=""):
     if yLabel == "y*x^(2)":
         data.transformY(DataTransform.toYX2, DataTransform.errToYX2)
         xunits = convertUnit(2, xunits)
-        yLabel = "%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "y*x^(4)":
         data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
         xunits = convertUnit(4, xunits)
-        yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "1/sqrt(y)":
         data.transformY(DataTransform.toOneOverSqrtX, DataTransform.errOneOverSqrtX)
         yunits = convertUnit(-0.5, yunits)
-        yLabel = "1/\sqrt{%s}(%s)" % (yname, yunits)
+        yLabel = r"1/\sqrt{%s}(%s)" % (yname, yunits)
     if yLabel == "ln(y*x)":
         data.transformY(DataTransform.toLogXY, DataTransform.errToLogXY)
-        yLabel = "\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "ln(y*x^(2))":
         data.transformY(DataTransform.toLogYX2, DataTransform.errToLogYX2)
         xunits = convertUnit(2, xunits)
-        yLabel = "\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "ln(y*x^(4))":
         data.transformY(DataTransform.toLogYX4, DataTransform.errToLogYX4)
         xunits = convertUnit(4, xunits)
-        yLabel = "\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "log10(y*x^(4))":
         data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
         xunits = convertUnit(4, xunits)
         yscale = 'log'
-        yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
 
     # Perform the transformation of data in data1d->View
     data.transformView()
@@ -1092,42 +946,67 @@ def replaceHTMLwithASCII(html):
 
     return html
 
-def convertUnitToUTF8(unit):
-    """
-    Convert ASCII unit display into UTF-8 symbol
-    """
-    if unit == "1/A":
-        return "Å<sup>-1</sup>"
-    elif unit == "1/cm":
-        return "cm<sup>-1</sup>"
-    elif unit == "Ang":
-        return "Å"
-    elif unit == "1e-6/Ang^2":
-        return "10<sup>-6</sup>/Å<sup>2</sup>"
-    elif unit == "inf":
-        return "∞"
-    elif unit == "-inf":
-        return "-∞"
-    else:
-        return unit
+def rstToHtml(s):
+    # Extract the unit and replacement parts
+    match_replace = re.match(r'(?:\.\. )?\|(.+?)\| replace:: (.+)', s)
+    match_unit = re.match(r'(?:\.\. )?\|(.+?)\| unicode:: (U\+\w+)', s)
+    unit = None
+    replacement = None
+
+
+    if match_unit:
+        # replace the 'unicode' section
+        unit, unicode_val = match_unit.groups()
+        # Convert the unicode value to actual character representation
+        replacement = chr(int(unicode_val[2:], 16))
+
+    if  match_replace:
+        # replace the 'replace' section
+
+        unit, replacement = match_replace.groups()
+
+        # Convert the unit into a valid Python string condition
+        unit = unit.replace("\\", "").replace(" ", "")
+
+        # Convert the replacement into the desired HTML format
+        replacement = replacement.replace("|Ang|", "Å").replace("\\ :sup:`", "<sup>").replace("`", "</sup>").replace("\\", "")
+        replacement = replacement.replace("|cdot|", "·").replace("|deg|", "°").replace("|pm|", "±")
+
+
+    return unit, replacement
+
+# RST_PROLOG conversion table
+try:
+    from sasmodels.generate import RST_PROLOG
+except ImportError:
+    RST_PROLOG = ""
+RST_PROLOG_DICT = {}
+input_rst_strings = RST_PROLOG.splitlines()
+for line in input_rst_strings:
+    if line.startswith(".. |"):
+        key, value = rstToHtml(line)
+        RST_PROLOG_DICT[key] = value
+# add units not in RST_PROLOG
+# This section will be removed once all these units are added to sasmodels
+RST_PROLOG_DICT["1/A"] = "Å<sup>-1</sup>"
+RST_PROLOG_DICT["1/Ang"] = "Å<sup>-1</sup>"
+RST_PROLOG_DICT["1/cm"] = "cm<sup>-1</sup>"
+RST_PROLOG_DICT["1e-6/Ang^2"] = "10<sup>-6</sup>/Å<sup>2</sup>"
+RST_PROLOG_DICT["1e15/cm^3"] = "10<sup>15</sup>/cm<sup>3</sup>"
+RST_PROLOG_DICT["inf"] = "∞"
+RST_PROLOG_DICT["-inf"] = "-∞"
+RST_PROLOG_DICT["degrees"] = "°"
+
 
 def convertUnitToHTML(unit):
     """
-    Convert ASCII unit display into well rendering HTML
+    Convert ASCII unit display into HTML symbol
     """
-    if unit == "1/A":
-        return "&#x212B;<sup>-1</sup>"
-    elif unit == "1/cm":
-        return "cm<sup>-1</sup>"
-    elif unit == "Ang":
-        return "&#x212B;"
-    elif unit == "1e-6/Ang^2":
-        return "10<sup>-6</sup>/&#x212B;<sup>2</sup>"
-    elif unit == "inf":
-        return "&#x221e;"
-    elif unit == "-inf":
-        return "-&#x221e;"
+    if unit in RST_PROLOG_DICT:
+        return RST_PROLOG_DICT[unit]
     else:
+        if unit is None or "None" in unit:
+            return ""
         return unit
 
 def parseName(name, expression):
@@ -1242,7 +1121,7 @@ def saveData(fp, data):
         objects that can't otherwise be serialized need to be converted
         """
         # tuples and sets (TODO: default JSONEncoder converts tuples to lists, create custom Encoder that preserves tuples)
-        if isinstance(o, (tuple, set, np.float)):
+        if isinstance(o, (tuple, set, float)):
             content = { 'data': list(o) }
             return add_type(content, type(o))
 

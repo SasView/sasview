@@ -1,48 +1,42 @@
 import sys
-import unittest
 
-from PyQt5 import QtGui, QtWidgets
+import pytest
 
-# set up import paths
-import sas.qtgui.path_prepare
+from PySide6 import QtGui, QtWidgets
 
 # Local
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
 
-class WindowTitleTest(unittest.TestCase):
+class WindowTitleTest:
     '''Test the WindowTitle'''
-    def setUp(self):
-        '''Create the WindowTitle'''
-        self.widget = WindowTitle(None, new_title="some title")
 
-    def tearDown(self):
-        '''Destroy the GUI'''
-        self.widget.close()
-        self.widget = None
+    @pytest.fixture(autouse=True)
+    def widget(self, qapp):
+        '''Create/Destroy the WindowTitle'''
+        w = WindowTitle(None, new_title="some title")
 
-    def testDefaults(self):
+        yield w
+
+        w.close()
+
+    def testDefaults(self, widget):
         '''Test the GUI in its default state'''
-        self.widget.show()
-        self.assertIsInstance(self.widget, QtWidgets.QDialog)
-        self.assertEqual(self.widget.windowTitle(), "Modify Window Title")
+        widget.show()
+        assert isinstance(widget, QtWidgets.QDialog)
+        assert widget.windowTitle() == "Modify Window Title"
         
-    def testTitle(self):
+    def testTitle(self, widget):
         '''Modify the title'''
-        self.widget.show()
+        widget.show()
         QtWidgets.qApp.processEvents()
         # make sure we have the pre-set title
-        self.assertEqual(self.widget.txtTitle.text(), "some title")
+        assert widget.txtTitle.text() == "some title"
         # Clear the control and set it to something else
-        self.widget.txtTitle.clear()
-        self.widget.txtTitle.setText("5 elephants")
+        widget.txtTitle.clear()
+        widget.txtTitle.setText("5 elephants")
         QtWidgets.qApp.processEvents()
         # Retrieve value
-        new_title = self.widget.title()
+        new_title = widget.title()
         # Check
-        self.assertEqual(new_title, "5 elephants")
-       
-if __name__ == "__main__":
-    unittest.main()
+        assert new_title == "5 elephants"

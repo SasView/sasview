@@ -14,9 +14,9 @@ zenodo_url = "https://zenodo.org"
 #Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
     'metadata': {
-    'title': 'SasView version 5.0.5',
-    'description': '5.0.5 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.5',
+    'title': 'SasView version 5.0.6',
+    'description': '5.0.6 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.6',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
         {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
@@ -49,6 +49,7 @@ sasview_data = {
         {'name': 'Alina, Gervaise','affiliation': 'University of Tennessee Knoxville'},
         {'name': 'Attala, Ziggy', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Bakker, Jurrian','affiliation': 'Technical Unviersity Delft'},
+        {'name': 'Beaucage, Peter','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2147-0728'},
         {'name': 'Bouwman, Wim','affiliation': 'Technical Univeristy Deflt' },
         {'name': 'Bourne, Robert', 'affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Butler, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-5978-4714'},
@@ -63,7 +64,7 @@ sasview_data = {
         {'name': 'Jackson, Andrew','affiliation': 'European Spallation Source ERIC', 'orcid': '0000-0002-6296-0336'},
         {'name': 'King, Stephen','affiliation': 'STFC - Rutherford Appleton Laboratory', 'orcid': '0000-0003-3386-9151'},
         {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology'},
-        {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology'},
+        {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2380-4090'},
         {'name': 'Maranville, Brian', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-6105-8789'},
         {'name': 'Martinez, Nicolas','affiliation': 'Institut Laue-Langevin'},
         {'name': 'Murphy, Ryan', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-4080-7525'},
@@ -76,7 +77,7 @@ sasview_data = {
         {'name': 'Snow, Tim','affiliation': 'Diamond Light Source','orcid': '0000-0001-7146-6885'},
         {'name': 'Washington, Adam','affiliation': 'STFC - Rutherford Appleton Laboratory'},
         {'name': 'Wilkins, Lucas','affiliation': 'STFC - Rutherford Appleton Laboratory'},
-        {'name': 'Wolf, Caitlyn','affiliation': 'National Institute of Standards and Technology'}
+        {'name': 'Wolf, Caitlyn','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2956-7049'}
         ],
     'grants': [{'id': '10.13039/501100000780::654000'}],
     'license': 'BSD-3-Clause',
@@ -135,29 +136,31 @@ def generate_zenodo(sasview_data, zenodo_api_key):
                                                             "and attach to Zenodo release record.\n- Publish Zenodo record")
     return newDOI
 
-def update_sasview_init(version, doi):
+version_template = \
+"""
+__version__ = "%s"
+__release_date__ = "%i"
+__build__ = "GIT_COMMIT"
+"""
+
+zenodo_template = '__DOI__ = "%s"'
+
+def update_sasview_metadata(version, doi):
+    """
+    Update version and zenodo DOI
     """
 
-    :return:
-    """
+    system_directory = "sasview/src/sas/system"
+    version_filename = os.path.join(system_directory, "version.py")
+    zenodo_filename = os.path.join(system_directory, "zenodo.py")
 
-    init_file = os.path.join('sasview','src', 'sas', 'sasview', '__init__.py')
-    output_lines = []
     year = datetime.datetime.now().year
-    with open(init_file, 'r') as f:
-        for line in f.readlines():
-            if line[:11] in '__version__':
-               output_lines.append('__version__ = \"'+version+'\"\n')
-            elif line[:7] in '__DOI__' :
-                output_lines.append('__DOI__ = \"Zenodo, ' + str(doi) + '\"\n')
-            elif line[:16] in '__release_date__':
-                output_lines.append('__release_date__ = \"' + str(year) + '\"\n')
-            else:
-                output_lines.append(line)
 
-    with open(init_file, 'w') as f:
-        f.writelines(output_lines)
+    with open(version_filename, 'w') as file:
+        file.write(version_template % (version, year))
 
+    with open(zenodo_filename, 'w') as file:
+        file.write(zenodo_template % doi)
 
 def update_sasmodels_init(version):
     """
@@ -241,7 +244,7 @@ if __name__ == "__main__":
         zenodo_api_key = args.zenodo
         new_doi = generate_zenodo(sasview_data, zenodo_api_key)
 
-    update_sasview_init(sasview_version, new_doi)
+    update_sasview_metadata(sasview_version, new_doi)
     update_sasmodels_init(sasmodels_version)
 
     year = datetime.datetime.now().year

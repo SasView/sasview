@@ -1,35 +1,32 @@
 import sys
-import unittest
 import logging
+import pytest
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-
-# set up import paths
-import sas.qtgui.path_prepare
+from PySide6.QtGui import *
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
 # Local
 from sas.qtgui.Utilities.SasviewLogger import QtHandler
 
-if not QApplication.instance():
-    app = QApplication(sys.argv)
 
-class SasviewLoggerTest(unittest.TestCase):
-    def setUp(self):
-        """
-        Prepare the logger
-        """
-        self.logger = logging.getLogger(__name__)
+class SasviewLoggerTest:
+
+    @pytest.fixture(autouse=True)
+    def logger(self, qapp):
+        '''Create/Destroy the logger'''
+        l = logging.getLogger(__name__)
         self.handler = QtHandler()
         self.handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
-        self.logger.addHandler(self.handler)
-        self.logger.setLevel(logging.DEBUG)
+        l.addHandler(self.handler)
+        l.setLevel(logging.DEBUG)
 
         self.outHandlerGui=QTextBrowser()
 
+        yield l
 
-    def testQtHandler(self):
+
+    def testQtHandler(self, logger):
         """
         Test redirection of all levels of logging
         """
@@ -37,18 +34,15 @@ class SasviewLoggerTest(unittest.TestCase):
         self.handler.messageWritten.connect(self.outHandlerGui.insertPlainText)
 
         # Send the signals
-        self.logger.debug('debug message')
-        self.logger.info('info message')
-        self.logger.warning('warning message')
-        self.logger.error('error message')
+        logger.debug('debug message')
+        logger.info('info message')
+        logger.warning('warning message')
+        logger.error('error message')
 
         out=self.outHandlerGui.toPlainText()
 
         # Assure everything got logged
-        self.assertIn('DEBUG: debug message', out)
-        self.assertIn('INFO: info message', out)
-        self.assertIn('WARNING: warning message', out)
-        self.assertIn('ERROR: error message', out)
-
-if __name__ == "__main__":
-    unittest.main()
+        assert 'DEBUG: debug message' in out
+        assert 'INFO: info message' in out
+        assert 'WARNING: warning message' in out
+        assert 'ERROR: error message' in out

@@ -1,9 +1,9 @@
 """
 Allows users to change the range of the current graph
 """
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -16,8 +16,6 @@ class SetGraphRange(QtWidgets.QDialog, Ui_setGraphRangeUI):
         super(SetGraphRange, self).__init__()
 
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         assert(isinstance(x_range, tuple))
         assert(isinstance(y_range, tuple))

@@ -5,23 +5,21 @@ Functions for building sphinx docs.
 For more information on the invocation of sphinx see:
 http://sphinx-doc.org/invocation.html
 """
-from __future__ import print_function
+import sys
+
 
 import subprocess
 import os
 from os.path import join as joinpath, abspath, dirname, isdir, exists, relpath
-import sys
-import fnmatch
 import shutil
-import imp
+from importlib.machinery import SourceFileLoader
 
 from glob import glob
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from distutils.spawn import find_executable
 
-from shutil import copy
-from os import listdir
+from sas.system.user import get_user_dir
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
@@ -32,14 +30,16 @@ SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
 SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
 
 # sasview paths
-SASVIEW_ROOT = joinpath(SPHINX_ROOT, '..', '..')
+SASVIEW_ROOT = abspath(joinpath(SPHINX_ROOT, '..', '..'))
 SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
 # 'platform' descriptor vanished from the main build,
 # so we need to update the location.
 #SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"+platform))
-SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"))
+SASVIEW_BUILD = joinpath(SASVIEW_ROOT, "build", "lib")
 SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
 SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
+SASVIEW_DOC_SOURCE = joinpath(SASVIEW_DOC_TARGET, "source-temp")
+SASVIEW_DOC_BUILD = joinpath(SASVIEW_DOC_TARGET, "build")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
 
 # sasmodels paths
@@ -58,32 +58,49 @@ SASMODELS_GUIDE_EXCLUDE = [
     "index.rst", "install.rst", "intro.rst",
 ]
 
+# sasdata paths
+SASDATA_ROOT = joinpath(SASVIEW_ROOT, "..", "sasdata")
+SASDATA_DOCS = joinpath(SASDATA_ROOT, "docs")
+SASDATA_BUILD = joinpath(SASDATA_ROOT, "build", "lib")
+SASDATA_DEV_SOURCE = joinpath(SASDATA_DOCS, "source", "dev")
+SASDATA_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasdata-dev")
+SASDATA_GUIDE_SOURCE = joinpath(SASDATA_DOCS, "source", "user")
+SASDATA_GUIDE_TARGET = joinpath(SPHINX_SOURCE, "user", "data")
+
 # bumps paths
 BUMPS_DOCS = joinpath(SASVIEW_ROOT, "..", "bumps", "doc")
 BUMPS_SOURCE = joinpath(BUMPS_DOCS, "guide")
 BUMPS_TARGET = joinpath(SPHINX_PERSPECTIVES, "Fitting")
 
-run = imp.load_source('run', joinpath(SASVIEW_ROOT, 'run.py'))
+
+run = SourceFileLoader('run', joinpath(SASVIEW_ROOT, 'run.py')).load_module()
 run.prepare()
 
+
+
 def inplace_change(filename, old_string, new_string):
-# Thanks to http://stackoverflow.com/questions/4128144/replace-string-within-file-contents
-        s=open(filename).read()
-        if old_string in s:
-                print('Changing "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
-                s=s.replace(old_string, new_string)
-                f=open(filename, 'w')
-                f.write(s)
-                f.flush()
-                f.close()
-        else:
-                print('No occurrences of "{old_string}" found in {filename}.'.format(**locals()))
+
+    with open(filename, 'r') as f:
+        s = f.read()
+
+    if old_string in s:
+
+        print('Changing "{old_string}" to "{new_string}" in {filename}'.format(**locals()))
+
+        s = s.replace(old_string, new_string)
+        with open(filename, 'w') as f:
+            f.write(s)
+
+    else:
+        print('No occurrences of "{old_string}" found in {filename}.'.format(**locals()))
+
 
 def _remove_dir(dir_path):
     """Removes the given directory."""
     if isdir(dir_path):
         print("Removing \"%s\"... " % dir_path)
         shutil.rmtree(dir_path)
+
 
 def clean():
     """
@@ -94,12 +111,14 @@ def clean():
     _remove_dir(SPHINX_BUILD)
     _remove_dir(SPHINX_SOURCE)
 
+
 def setup_source_temp():
     """
     Copy the source toctrees to new folder for assembling the sphinx-docs
     """
     print("=== Copying Source toctrees ===")
     shutil.copytree(SASVIEW_DOCS, SPHINX_SOURCE)
+
 
 def retrieve_user_docs():
     """
@@ -145,6 +164,15 @@ def retrieve_user_docs():
         inplace_change(joinpath(catdir, filename), "../../model/", "/user/models/")
 
 
+def retrieve_sasdata_docs():
+    """
+        Copies select files from the bumps documentation into fitting perspective
+    """
+    print("=== Sasdata Docs ===")
+    copy_tree(SASDATA_DEV_SOURCE, SASDATA_DEV_TARGET)
+    copy_tree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET)
+
+
 def retrieve_bumps_docs():
     """
     Copies select files from the bumps documentation into fitting perspective
@@ -166,6 +194,7 @@ The documentation will not include the optimizer selection section.
 Checkout the bumps source tree and rebuild the docs.
 """ % BUMPS_DOCS)
 
+
 def apidoc():
     """
     Runs sphinx-apidoc to generate .rst files from the docstrings in .py files
@@ -183,10 +212,11 @@ def apidoc():
         "-H", "SasView", # Package header
         SASVIEW_BUILD,
         # omit the following documents from the API documentation
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "GUITests.py"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "convertUI.py"),
-        joinpath(SASVIEW_BUILD, "sas", "sasview", "welcome_panel.py"),
-        joinpath(SASVIEW_BUILD, "sas", "sasview", "wxcruft.py"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "UnitTesting"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "Utilities", "UnitTesting"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "MainWindow", "UnitTesting"),
+        joinpath(SASVIEW_BUILD, "sas", "qtgui", "Plotting", "UnitTesting"),
+
     ])
 
     subprocess.check_call([
@@ -198,6 +228,7 @@ def apidoc():
         # omit the following documents from the API documentation
         joinpath(SASMODELS_BUILD, "sasmodels", "models"),
     ])
+
 
 def build_pdf():
     """
@@ -213,9 +244,11 @@ def build_pdf():
     ])
 
     LATEXDIR = joinpath(SPHINX_BUILD, "latex")
-    #TODO: Does it need to be done so many time?
+
     def pdflatex():
         subprocess.call(["pdflatex", "SasView.tex"], cwd=LATEXDIR)
+
+    # Note: pdflatex requires multiple passes to resolve cross-references correctly
     pdflatex()
     pdflatex()
     pdflatex()
@@ -228,65 +261,40 @@ def build_pdf():
     target = joinpath(SASVIEW_DOC_TARGET, "SasView.pdf")
     shutil.copyfile(source, target)
 
+
 def build():
     """
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
+    copy_tree(SPHINX_SOURCE, SASVIEW_DOC_SOURCE)
     print("=== Build HTML Docs from ReST Files ===")
-    subprocess.check_call([
-        "sphinx-build",
-        "-v",
-        "-b", "html", # Builder name. TODO: accept as arg to setup.py.
-        "-d", joinpath(SPHINX_BUILD, "doctrees"),
-        "-W", "--keep-going",
-        SPHINX_SOURCE,
-        joinpath(SPHINX_BUILD, "html")
-    ])
+    try:
+        subprocess.check_call([
+            "sphinx-build",
+            "-v",
+            "-b", "html", # Builder name. TODO: accept as arg to setup.py.
+            "-d", joinpath(SPHINX_BUILD, "doctrees"),
+            "-W", "--keep-going",
+            SPHINX_SOURCE,
+            joinpath(SPHINX_BUILD, "html")
+        ])
+    except Exception as e:
+        print(e)
 
     print("=== Copy HTML Docs to Build Directory ===")
     html = joinpath(SPHINX_BUILD, "html")
-    copy_tree(html, SASVIEW_DOC_TARGET)
-
-def fetch_katex(version, destination="_static"):
-    from zipfile import ZipFile
-    import urllib2
-    url = "https://github.com/Khan/KaTeX/releases/download/%s/katex.zip" % version
-    cache_path = "katex_%s.zip" % version
-    if not exists(cache_path):
-        try:
-            fd_in = urllib2.urlopen(url)
-            with open(cache_path, "wb") as fd_out:
-                fd_out.write(fd_in.read())
-        finally:
-            fd_in.close()
-    with ZipFile(cache_path) as zip:
-        zip.extractall(destination)
-
-def convert_katex():
-    print("=== Preprocess HTML, converting latex to html ===")
-    subprocess.call(["node", "convertKaTex.js", SASVIEW_DOC_TARGET])
-
-def convert_mathjax():
-    print("=== Preprocess HTML, converting latex to html ===")
-    subprocess.call(["node", "convertMathJax.js", SASVIEW_DOC_TARGET])
-
-def fetch_mathjax():
-    subprocess.call(["npm", "install", "mathjax-node-page"])
-    # TODO: copy fonts from node_modules/mathjax/fonts/HTML-CSS/Tex into static
+    copy_tree(html, SASVIEW_DOC_BUILD)
 
 def rebuild():
     clean()
     setup_source_temp()
     retrieve_user_docs()
     retrieve_bumps_docs()
-    #fetch_katex(version=KATEX_VERSION, destination=KATEX_PARENT)
-    #fetch_mathjax()
+    retrieve_sasdata_docs()
     apidoc()
     build()
     if find_executable('latex'):
         build_pdf()
-    #convert_katex()
-    #convert_mathjax()
 
     print("=== Done ===")
 

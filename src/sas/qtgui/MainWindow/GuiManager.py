@@ -6,24 +6,25 @@ import webbrowser
 import traceback
 
 from typing import Optional, Dict
+from pathlib import Path
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QLocale
+from PySide6.QtWidgets import *
+from PySide6.QtGui import *
+from PySide6.QtCore import Qt, QLocale
 
 import matplotlib as mpl
-mpl.use("Qt5Agg")
 
-from sas.sasview import __version__ as SASVIEW_VERSION
-from sas.sasview import __release_date__ as SASVIEW_RELEASE_DATE
+import sas.system.version
+
+#mpl.use("Qt5Agg")
+
+from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
 
 from twisted.internet import reactor
 # General SAS imports
-from sas import get_custom_config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
@@ -31,8 +32,13 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
+from sas.qtgui.Utilities.HidableDialog import hidable_dialog
+from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
+from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -66,6 +72,12 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
+from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
+
+import sas
+from sas import config
+from sas.system import web
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +98,9 @@ class GuiManager:
 
         # Redefine exception hook to not explicitly crash the app.
         sys.excepthook = self.info
+
+        # Ensure the user directory has all required documentation files for future doc regen purposes
+        create_user_files_if_needed()
 
         # Add signal callbacks
         self.addCallbacks()
@@ -109,20 +124,26 @@ class GuiManager:
 
         # Fork off logging messages to the Log Window
         handler = setup_qt_logging()
-        handler.messageWritten.connect(self.appendLog)
+        handler.postman.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
         logging.info("Python: %s" % sys.version)
+        #logging.debug("Debug messages are shown.")
+        #logging.warn("Warnings are shown.")
+        #logging.error("Errors are shown.")
 
         # Set up the status bar
         self.statusBarSetup()
 
         # Current tutorial location
-        self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
+        self._tutorialLocation = os.path.abspath(os.path.join(HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
+
+        if self.WhatsNew.has_new_messages():
+            self.actionWhatsNew()
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
@@ -131,32 +152,35 @@ class GuiManager:
         """
         Populate the main window with widgets
         """
-        # Preload all perspectives
+        # Add the console window as another docked widget
+        self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
+        self.logDockWidget.setObjectName("LogDockWidget")
+        self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
+        # make it hidden by default
+        self.logDockWidget.setVisible(False)
+
+        self.listWidget = QTextBrowser()
+        self.logDockWidget.setWidget(self.listWidget)
+        self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
+
+        # Preferences Panel must exist before perspectives are loaded
+        self.preferences = PreferencesPanel(self._parent)
+
+        # Load all perspectives - Preferences panel must exist
         self.loadAllPerspectives()
 
-        # Add FileDialog widget as docked
+        # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
         self.dockedFilesWidget.setFloating(False)
         self.dockedFilesWidget.setWidget(self.filesWidget)
-
         # Modify menu items on widget visibility change
         self.dockedFilesWidget.visibilityChanged.connect(self.updateContextMenus)
 
         self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
-
-        # Add the console window as another docked widget
-        self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
-        self.logDockWidget.setObjectName("LogDockWidget")
-        self.logDockWidget.visibilityChanged.connect(self.updateLogContextMenus)
-
-
-        self.listWidget = QTextBrowser()
-        self.logDockWidget.setWidget(self.listWidget)
-        self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
@@ -176,8 +200,7 @@ class GuiManager:
         self.results_frame.setVisible(False)
         self.results_panel.windowClosedSignal.connect(lambda: self.results_frame.setVisible(False))
 
-        self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
-        self._workspace.actionHide_Toolbar.setText("Show Toolbar")
+        self._workspace.toolBar.setVisible(config.TOOLBAR_SHOW)
 
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
@@ -188,19 +211,31 @@ class GuiManager:
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
+        self.WhatsNew = WhatsNew(self)
+        self.regenProgress = DocRegenProgress(self)
 
     def loadAllPerspectives(self):
+        """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
         self.closeAllPerspectives()
         # Load all perspectives
-        loaded_dict = {}
+        loaded_dict = {} # dictionary that will ultimately keep track of all perspective instances
         for name, perspective in Perspectives.PERSPECTIVES.items():
             try:
+                # Instantiate perspective
                 loaded_perspective = perspective(parent=self)
+
+                # Save in main dict
                 loaded_dict[name] = loaded_perspective
+
+                # Register the perspective with the prefernce object
+                self.preferences.registerPerspectivePreferences(loaded_perspective)
+
             except Exception as e:
                 logger.error(f"Unable to load {name} perspective.\n{e}")
                 logger.error(e, exc_info=True)
+
+        # attach loaded perspectives to this class
         self.loadedPerspectives = loaded_dict
 
     def closeAllPerspectives(self):
@@ -217,7 +252,8 @@ class GuiManager:
         self.loadedPerspectives = {}
         self._current_perspective = None
 
-    def addCategories(self):
+    @staticmethod
+    def addCategories():
         """
         Make sure categories.json exists and if not compile it and install in ~/.sasview
         """
@@ -340,7 +376,19 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
-        GuiUtils.showHelp(url)
+        # Remove leading forward slashes from relative paths to allow easy Path building
+        if isinstance(url, str):
+            url = url.lstrip("//")
+        url = Path(url)
+        if str(HELP_DIRECTORY_LOCATION.resolve()) not in str(url.absolute()):
+            url_abs = HELP_DIRECTORY_LOCATION / url
+        else:
+            url_abs = Path(url)
+        try:
+            # Help window shows itself
+            self.helpWindow = DocViewWindow(parent=self, source=url_abs)
+        except Exception as ex:
+            logging.warning("Cannot display help. %s" % ex)
 
     def workspace(self):
         """
@@ -411,16 +459,18 @@ class GuiManager:
         #
         # Selection on perspective choice menu
         #
-        if isinstance(new_perspective, FittingWindow):
+        # checking `isinstance`` fails in PySide6 with
+        # AttributeError: type object 'FittingWindow' has no attribute '_abc_impl'
+        if type(new_perspective) == FittingWindow:
             self.checkAnalysisOption(self._workspace.actionFitting)
 
-        elif isinstance(new_perspective, InvariantWindow):
+        elif type(new_perspective) == InvariantWindow:
             self.checkAnalysisOption(self._workspace.actionInvariant)
 
-        elif isinstance(new_perspective, InversionWindow):
+        elif type(new_perspective) == InversionWindow:
             self.checkAnalysisOption(self._workspace.actionInversion)
 
-        elif isinstance(new_perspective, CorfuncWindow):
+        elif type(new_perspective) == CorfuncWindow:
             self.checkAnalysisOption(self._workspace.actionCorfunc)
 
 
@@ -463,7 +513,8 @@ class GuiManager:
         """
         Update progress bar with the required value (0-100)
         """
-        assert -1 <= value <= 100
+        if value < -1 or value > 100:
+            return
         if value == -1:
             self.progress.setVisible(False)
             return
@@ -479,10 +530,15 @@ class GuiManager:
         """
         self.statusLabel.setText(text)
 
-    def appendLog(self, msg):
+    def appendLog(self, signal):
         """Appends a message to the list widget in the Log Explorer. Use this
         instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
-        self.listWidget.append(msg.strip())
+        (message, record) = signal
+        self.listWidget.append(message.strip())
+
+        # Display log if message is error or worse
+        if record.levelno >= 40:
+            self.logDockWidget.setVisible(True)
 
     def createGuiData(self, item, p_file=None):
         """
@@ -512,15 +568,14 @@ class GuiManager:
         """
         # Display confirmation messagebox
         quit_msg = "Are you sure you want to exit the application?"
-        reply = QMessageBox.question(
-            self._parent,
-            'Information',
-            quit_msg,
-            QMessageBox.Yes,
-            QMessageBox.No)
 
-        # Exit if yes
-        if reply == QMessageBox.Yes:
+        answer = hidable_dialog("Exit SasView", quit_msg, config.SHOW_EXIT_MESSAGE, parent=self._parent)
+
+        if answer.result:
+
+            # Only set ask again on accepted quit, otherwise the user might
+            # never be able to leave SasView (@butlerpd might prefer this behaviour though)
+            config.SHOW_EXIT_MESSAGE = answer.ask_again
 
             # save the paths etc.
             self.saveCustomConfig()
@@ -537,7 +592,7 @@ class GuiManager:
         a call-back method when the current version number has been obtained.
         """
         version_info = {"version": "0.0.0"}
-        c = ConnectionProxy(LocalConfig.__update_URL__, LocalConfig.UPDATE_TIMEOUT)
+        c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
         response = c.connect()
         if response is None:
             return
@@ -578,16 +633,15 @@ class GuiManager:
                 msg += " Please try again later."
                 self.communicate.statusBarUpdateSignal.emit(msg)
 
-            elif version.__gt__(LocalConfig.__version__):
+            elif version.__gt__(sas.system.version.__version__):
                 msg = "Version %s is available! " % str(version)
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
                 else:
-                    webbrowser.open(LocalConfig.__download_page__)
+                    webbrowser.open(web.download_url)
                 self.communicate.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
-                msg += " of %s" % str(LocalConfig.__appname__)
                 self.communicate.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
@@ -603,17 +657,15 @@ class GuiManager:
         self._workspace.workspace.addSubWindow(self.welcomePanel)
         self.welcomePanel.show()
 
+    def actionWhatsNew(self):
+        self.WhatsNew.show()
+
     def showWelcomeMessage(self):
         """ Show the Welcome panel, when required """
         # Assure the welcome screen is requested
         show_welcome_widget = True
-        custom_config = get_custom_config()
-        if hasattr(custom_config, "WELCOME_PANEL_SHOW"):
-            if isinstance(custom_config.WELCOME_PANEL_SHOW, bool):
-                show_welcome_widget = custom_config.WELCOME_PANEL_SHOW
-            else:
-                logging.warning("WELCOME_PANEL_SHOW has invalid value in custom_config.py")
-        if show_welcome_widget:
+
+        if config.SHOW_WELCOME_PANEL:
             self.actionWelcome()
 
     def addCallbacks(self):
@@ -646,7 +698,7 @@ class GuiManager:
         #self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
         # orientation viewer set to invisible SASVIEW-1132
-        self._workspace.actionOrientation_Viewer.setVisible(False)
+        self._workspace.actionOrientation_Viewer.setVisible(True)
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
@@ -655,6 +707,7 @@ class GuiManager:
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
+        self._workspace.actionPreferences.triggered.connect(self.actionOpen_Preferences)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
         self._workspace.actionUndo.triggered.connect(self.actionUndo)
@@ -722,9 +775,11 @@ class GuiManager:
         self._workspace.actionAbout.triggered.connect(self.actionAbout)
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
-        
+        self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
+
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
+
 
     #============ FILE =================
     def actionLoadData(self):
@@ -804,6 +859,9 @@ class GuiManager:
             self.filesWidget.saveAnalysis(analysis, tab_id, per.ext)
         else:
             logger.warning('No analysis was available to be saved.')
+
+    def actionOpen_Preferences(self):
+        self.preferences.show()
 
     def actionQuit(self):
         """
@@ -1013,11 +1071,7 @@ class GuiManager:
         """
         Make sasmodels orientation & jitter viewer available
         """
-        from sasmodels.jitter import run as orientation_run
-        try:
-            orientation_run()
-        except Exception as ex:
-            logging.error(str(ex))
+        show_orientation_viewer()
 
     def actionImage_Viewer(self):
         """
@@ -1070,8 +1124,9 @@ class GuiManager:
     def actionFit_Options(self):
         """
         """
-        if getattr(self._current_perspective, "fit_options_widget"):
-            self._current_perspective.fit_options_widget.show()
+        if hasattr(self._current_perspective, "fit_options_widget"):
+            self.preferences.show()
+            self.preferences.setMenuByName(self._current_perspective.fit_options_widget.name)
         pass
 
     def actionGPU_Options(self):
@@ -1079,7 +1134,8 @@ class GuiManager:
         Load the OpenCL selection dialog if the fitting perspective is active
         """
         if hasattr(self._current_perspective, "gpu_options_widget"):
-            self._current_perspective.gpu_options_widget.show()
+            self.preferences.show()
+            self.preferences.setMenuByName(self._current_perspective.gpu_options_widget.name)
         pass
 
     def actionFit_Results(self):
@@ -1226,8 +1282,7 @@ class GuiManager:
         """
         Open the marketplace link in default browser
         """
-        url = LocalConfig.MARKETPLACE_URL
-        webbrowser.open_new(url)
+        webbrowser.open_new(web.marketplace_url)
 
     def actionAbout(self):
         """
@@ -1314,58 +1369,4 @@ class GuiManager:
         """
         Save the config file based on current session values
         """
-        # Load the current file
-        config_content = GuiUtils.custom_config
-
-        changed = self.customSavePaths(config_content)
-        changed = changed or self.customSaveOpenCL(config_content)
-
-        if changed:
-            self.writeCustomConfig(config_content)
-
-    def customSavePaths(self, config_content):
-        """
-        Update the config module with current session paths
-        Returns True if update was done, False, otherwise
-        """
-        changed = False
-        # Find load path
-        open_path = GuiUtils.DEFAULT_OPEN_FOLDER
-        defined_path = self.filesWidget.default_load_location
-        if open_path != defined_path:
-            # Replace the load path
-            config_content.DEFAULT_OPEN_FOLDER = defined_path
-            changed = True
-        return changed
-
-    def customSaveOpenCL(self, config_content):
-        """
-        Update the config module with current session OpenCL choice
-        Returns True if update was done, False, otherwise
-        """
-        changed = False
-        # Find load path
-        file_value = GuiUtils.SAS_OPENCL
-        session_value = os.environ.get("SAS_OPENCL", "")
-        if file_value != session_value:
-            # Replace the load path
-            config_content.SAS_OPENCL = session_value
-            changed = True
-        return changed
-
-    def writeCustomConfig(self, config):
-        """
-        Write custom configuration
-        """
-        from sas import make_custom_config_path
-        path = make_custom_config_path()
-        # Just clobber the file - we already have its content read in
-        with open(path, 'w') as out_f:
-            out_f.write("#Application appearance custom configuration\n")
-            for key, item in config.__dict__.items():
-                if key[:2] == "__":
-                    continue
-                if isinstance(item, str):
-                    item = '"' + item + '"'
-                out_f.write("%s = %s\n" % (key, str(item)))
-        pass # debugger anchor
+        config.save()

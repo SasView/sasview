@@ -448,7 +448,7 @@ class InvariantCalculator(object):
         :note: this function must be call before computing any type
          of invariant
 
-        :return: new data = self._scale *data - self._background
+        :return: new data = self._scale x data - self._background
         """
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
@@ -463,7 +463,7 @@ class InvariantCalculator(object):
         if new_data.dy is None or len(new_data.x) != len(new_data.dy) or \
             (min(new_data.dy) == 0 and max(new_data.dy) == 0):
             new_data.dy = np.ones(len(new_data.x))
-        return  new_data
+        return new_data
 
     def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
         """
@@ -475,7 +475,7 @@ class InvariantCalculator(object):
 
         :param qmin: data first q value to consider during the fit
         :param qmax: data last q value to consider during the fit
-        :param power : power value to consider for power-law
+        :param power: power value to consider for power-law
         :param function: the function to use during the fit
 
         :return a: the scale of the function
@@ -543,10 +543,11 @@ class InvariantCalculator(object):
     def _get_qstar_uncertainty(self, data):
         """
         Compute invariant uncertainty with with pinhole data.
-        This uncertainty is given as follow: ::
+        This uncertainty is given as follows::
 
            dq_star = math.sqrt[(x0**2*(dy0)*dx0)**2 +
                 (x1**2 *(dy1)*dx1)**2 + ..+ (xn**2 *(dyn)*dxn)**2 ]
+                
         where n >= len(data.x)-1
         dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
         dx0 = (x1 - x0)/2
@@ -913,7 +914,8 @@ class InvariantCalculator(object):
         self.get_qstar(extrapolation)
 
         if self._qstar <= 0:
-            msg = "Invalid invariant: Invariant Q* must be greater than zero"
+            msg = "Invalid invariant: Invariant Q* must be greater than zero\n"
+            msg += "Please check if scale and background values are correct"
             raise RuntimeError(msg)
 
         # Compute intermediate constant

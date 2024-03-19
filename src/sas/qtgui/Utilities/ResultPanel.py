@@ -5,11 +5,9 @@ FitPanel class contains fields allowing to fit  models and  data
 import sys
 import datetime
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
-
-from bumps.dream.stats import var_stats, format_vars
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 
 class ResultPanel(QtWidgets.QTabWidget):
@@ -22,7 +20,7 @@ class ResultPanel(QtWidgets.QTabWidget):
     """
     ## Internal name for the AUI manager
     window_name = "Result panel"
-    windowClosedSignal = QtCore.pyqtSignal()
+    windowClosedSignal = QtCore.Signal()
 
     def __init__(self, parent, manager=None, *args, **kwargs):
         """
@@ -31,6 +29,7 @@ class ResultPanel(QtWidgets.QTabWidget):
         self.manager = manager
         self.communicator = self.manager.communicator()
         self.setMinimumSize(400, 400)
+        self.data_id = None
 
         self.updateBumps() # patch bumps ## TEMPORARY ##
 
@@ -55,18 +54,15 @@ class ResultPanel(QtWidgets.QTabWidget):
         sys.modules['bumps.gui.plot_view'] = PlotView
 
     def onPlotResults(self, results, optimizer="Unknown"):
-        # Clear up previous results
-        for view in (self.convergenceView, self.correlationView,
-                     self.uncertaintyView, self.traceView):
-            view.close()
-        # close all tabs. REMEMBER TO USE REVERSED RANGE!!!
-        for index in reversed(range(self.count())):
-            self.removeTab(index)
+        # import moved here due to its cost
+        from bumps.dream.stats import var_stats, format_vars
+        self.clearAnyData()
 
         result = results[0][0]
-        filename = result.data.sas_data.filename
+        name = result.data.sas_data.name
         current_optimizer = optimizer
-        self.setWindowTitle(self.window_name + " - " + filename + " - " + current_optimizer)
+        self.data_id = result.data.sas_data.id
+        self.setWindowTitle(self.window_name + " - " + name + " - " + current_optimizer)
         if hasattr(result, 'convergence') and len(result.convergence) > 0:
             best, pop = result.convergence[:, 0], result.convergence[:, 1:]
             self.convergenceView.update(best, pop)
@@ -94,6 +90,26 @@ class ResultPanel(QtWidgets.QTabWidget):
         # no tabs in the widget - possibly LM optimizer. Mark "closed"
         if self.count()==0:
             self.close()
+
+    def onDataDeleted(self, data):
+        """ Check if the data set is shown in the window and close tabs as needed. """
+        if not data or not self.isVisible():
+            return
+        if data.id == self.data_id:
+            self.setWindowTitle(self.window_name)
+            self.clearAnyData()
+            self.close()
+
+    def clearAnyData(self):
+        """ Clear any previous results and reset window to its base state. """
+        self.data_id = None
+        # Clear up previous results
+        for view in (self.convergenceView, self.correlationView,
+                     self.uncertaintyView, self.traceView):
+            view.close()
+        # close all tabs. REMEMBER TO USE REVERSED RANGE!!!
+        for index in reversed(range(self.count())):
+            self.removeTab(index)
 
     def closeEvent(self, event):
         """

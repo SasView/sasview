@@ -1,6 +1,6 @@
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -67,8 +67,8 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             rect = textRect.topLeft()
             x = rect.x()
             y = rect.y()
-            x += 3.0 # magic value for rendering nice display in the table
-            y += 2.0 # magic value for rendering nice display in the table
+            x += 3 # magic value for rendering nice display in the table
+            y += 2 # magic value for rendering nice display in the table
             rect.setX(x)
             rect.setY(y)
             painter.translate(rect)
@@ -121,8 +121,8 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
     """
     POLYDISPERSE_FUNCTIONS = ['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
 
-    combo_updated = QtCore.pyqtSignal(str, int)
-    filename_updated = QtCore.pyqtSignal(int)
+    combo_updated = QtCore.Signal(str, int)
+    filename_updated = QtCore.Signal(int)
 
     def __init__(self, parent=None):
         """

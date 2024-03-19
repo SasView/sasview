@@ -1,6 +1,6 @@
 import os
 
-from PyQt5 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 from sas.qtgui.Utilities import GuiUtils
 
@@ -15,7 +15,6 @@ class ChangeName(QtWidgets.QDialog, Ui_ChangeCategoryUI):
         self._model_item = None
         self.setupUi(self)
 
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setModal(True)
 
         self.parent = parent

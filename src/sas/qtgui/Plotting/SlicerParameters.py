@@ -6,14 +6,16 @@ import os
 import functools
 import logging
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
 from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
 
@@ -21,6 +23,7 @@ from sasdata.dataloader.loader import Loader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
 # Local UI
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
+from sas import config
 
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
@@ -28,23 +31,25 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     Interaction between the QTableView and the underlying model,
     passed from a slicer instance.
     """
-    closeWidgetSignal = QtCore.pyqtSignal()
+    closeWidgetSignal = QtCore.Signal()
 
     def __init__(self, parent=None,
                  model=None,
                  active_plots=None,
                  validate_method=None,
                  communicator=None):
-        super(SlicerParameters, self).__init__()
+        super(SlicerParameters, self).__init__(parent.manager)
 
         self.setupUi(self)
 
         self.parent = parent
 
+        self.manager = parent.manager
+
         self.model = model
         self.validate_method = validate_method
         self.active_plots = active_plots
-        self.save_location = GuiUtils.DEFAULT_OPEN_FOLDER
+        self.save_location = config.DEFAULT_OPEN_FOLDER
         self.communicator = communicator
 
         # Initially, Apply is disabled
@@ -55,7 +60,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                           1: SectorInteractor,
                           2: AnnulusInteractor,
                           3: BoxInteractorX,
-                          4: BoxInteractorY}
+                          4: BoxInteractorY,
+                          5: WedgeInteractorQ,
+                          6: WedgeInteractorPhi}
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -137,7 +144,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
                 continue
             if str(item) in current_plots.keys():
                 # redo the list
-                checked = current_plots[item]
+                checked = QtCore.Qt.Checked if current_plots[item] else QtCore.Qt.Unchecked
             else:
                 # create a new list
                 checked = QtCore.Qt.Checked if (self.parent.data[0].name == item) else QtCore.Qt.Unchecked
@@ -211,13 +218,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Open save file location dialog
         """
-        kwargs = {
-            'parent'    : self,
-            'caption'   : 'Save files to:',
-            'options'   : QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog,
-            'directory' : self.save_location
-        }
-        folder = QtWidgets.QFileDialog.getExistingDirectory(**kwargs)
+        parent = self
+        caption = 'Save files to:'
+        options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
+        directory = self.save_location
+        folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, options)
 
         if folder is None:
             return
@@ -422,7 +427,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Display generic data averaging help
         """
         url = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
-        GuiUtils.showHelp(url)
+        self.manager.parent.showHelp(url)
 
 
 class ProxyModel(QtCore.QIdentityProxyModel):
@@ -472,7 +477,7 @@ class PositiveDoubleEditor(QtWidgets.QLineEdit):
 
 
 class EditDelegate(QtWidgets.QStyledItemDelegate):
-    refocus_signal = QtCore.pyqtSignal(int, int)
+    refocus_signal = QtCore.Signal(int, int)
 
     def __init__(self, parent=None, validate_method=None):
         super(EditDelegate, self).__init__(parent)

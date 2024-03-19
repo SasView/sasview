@@ -7,9 +7,9 @@ import os
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 import webbrowser
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
@@ -23,16 +23,12 @@ ALLOWED_OPERATORS = ['=']
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
 
 class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
-    constraintReadySignal = QtCore.pyqtSignal(tuple)
+    constraintReadySignal = QtCore.Signal(tuple)
     def __init__(self, parent=None, tabs=None):
         super(ComplexConstraint, self).__init__(parent)
 
         self.setupUi(self)
         self.setModal(True)
-
-        # disable the context help icon
-        windowFlags = self.windowFlags()
-        self.setWindowFlags(windowFlags & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         # Useful globals
         self.tabs = tabs
@@ -88,7 +84,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
 
         self.setupParamWidgets()
 
-
         self.setupMenu()
 
     def setupMenu(self):
@@ -110,10 +105,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # Populate the left combobox parameter arbitrarily with the parameters
         # from the first tab if `All` option is selected
         if self.cbModel1.currentText() == "All":
-            items1 = self.tabs[1].main_params_to_fit
+            items1 = self.tabs[1].main_params_to_fit + self.tabs[1].poly_params_to_fit
         else:
             tab_index1 = self.cbModel1.currentIndex()
-            items1 = self.tabs[tab_index1].main_params_to_fit
+            items1 = self.tabs[tab_index1].main_params_to_fit + self.tabs[tab_index1].poly_params_to_fit
         self.cbParam1.addItems(items1)
         # Show the previously selected parameter if available
         if previous_param1 in items1:
@@ -122,10 +117,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
 
         # Store previously select parameter
         previous_param2 = self.cbParam2.currentText()
-        # M2 has to be non-constrained
         self.cbParam2.clear()
         tab_index2 = self.cbModel2.currentIndex()
-        items2 = [param for param in self.params[tab_index2] if not self.tabs[tab_index2].paramHasConstraint(param)]
+        items2 = [param for param in self.params[tab_index2]]
+        # The following can be used if it is judged preferable that constrained
+        # parameters are not used in the definition of a new constraint
+        #items2 = [param for param in self.params[tab_index2] if not self.tabs[tab_index2].paramHasConstraint(param)]
+
         self.cbParam2.addItems(items2)
         # Show the previously selected parameter if available
         if previous_param2 in items2:
@@ -210,9 +208,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Add visual cues when formula is incorrect
         """
-        # temporarily disable validation
+        # temporarily disable validation, as not yet fully operational
         return
-        #
+
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
@@ -340,7 +338,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         for tab in tabs:
             if hasattr(tab, "kernel_module"):
-                if param in tab.kernel_module.params:
+                if (param in tab.kernel_module.params or
+                    param in tab.poly_params or
+                    param in tab.magnet_params):
                     value_ex = tab.kernel_module.name + "." +param
                     constraint = Constraint(param=param,
                                             value=param,
@@ -357,8 +357,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # loop over parameters in constrained model
         index1 = self.cbModel1.currentIndex()
         index2 = self.cbModel2.currentIndex()
-        items1 = self.tabs[index1].kernel_module.params
-        items2 = self.params[index2]
+        items1 = self.tabs[index1].main_params_to_fit + self.tabs[index1].poly_params_to_fit
+        items2 = self.tabs[index2].main_params_to_fit + self.tabs[index2].poly_params_to_fit
         # create an empty list to store redefined constraints
         redefined_constraints = []
         for item in items1:

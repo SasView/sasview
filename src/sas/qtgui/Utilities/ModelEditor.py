@@ -1,5 +1,5 @@
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtWidgets
 
 from sas.qtgui.Utilities.UI.ModelEditor import Ui_ModelEditor
 from sas.qtgui.Utilities import GuiUtils
@@ -10,12 +10,10 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
     This is a simple text browser allowing for editing python and
     supporting simple highlighting.
     """
-    modelModified = QtCore.pyqtSignal()
+    modelModified = QtCore.Signal()
     def __init__(self, parent=None, is_python=True):
         super(ModelEditor, self).__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.is_python = is_python
 

@@ -3,9 +3,9 @@ import logging
 import re
 import copy
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -25,8 +25,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.setupUi(self)
         self.manager = parent
         self.communicator = self.manager.communicator()
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         # To store input datafiles
         self.filenames = None
@@ -96,7 +94,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
                 else:
                     # filenames without titles by removing time.time()
-                    new_title = re.sub('\d{10}\.\d{2}', '', str(key_id))
+                    new_title = re.sub(r'\d{10}\.\d{2}', '', str(key_id))
                     self.list_data_items.append(new_title)
                     list_datafiles.append(new_title)
 
@@ -154,6 +152,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # Add the new plot to the comboboxes
         self.cbData1.addItem(self.output.name)
         self.cbData2.addItem(self.output.name)
+        if self.filenames is None:
+            self.filenames = {}
         self.filenames[self.output.name] = self.output
 
     def onPrepareOutputData(self):
@@ -367,14 +367,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def _extractData(self, key_id):
         """ Extract data from file with id contained in list of filenames """
         data_complete = self.filenames[key_id]
-        dimension = data_complete.__class__.__name__
-
-        if dimension in ('Data1D', 'Data2D'):
-            return copy.deepcopy(data_complete)
-
-        else:
-            logging.error('Error with data format')
-            return
+        return copy.deepcopy(data_complete)
 
     # ########
     # PLOTS

@@ -6,9 +6,9 @@ Widget for simple add / multiply editor.
 from numpy import *
 import numpy as np
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 import webbrowser
 
 import os
@@ -56,8 +56,6 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.parent = parent
 
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         #  uncheck self.chkOverwrite
         self.chkOverwrite.setChecked(False)
@@ -84,8 +82,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.plugin_dir = models.find_plugins_dir()
 
         # Validators
-        rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")
-        txt_validator = QtGui.QRegExpValidator(rx)
+        rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
+        txt_validator = QtGui.QRegularExpressionValidator(rx)
         self.txtName.setValidator(txt_validator)
 
     def setupModels(self):

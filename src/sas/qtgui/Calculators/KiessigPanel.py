@@ -1,6 +1,6 @@
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.UI import main_resources_rc
 from .UI.KiessigPanel import Ui_KiessigPanel
@@ -14,26 +14,19 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
     def __init__(self, parent=None):
         super(KiessigPanel, self).__init__()
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
-
         self.setWindowTitle("Kiessig Thickness Calculator")
 
         self.manager = parent
         self.thickness = KiessigThicknessCalculator()
 
-        rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.deltaq_in.setValidator(QtGui.QRegExpValidator(rx, self.deltaq_in))
+        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        self.deltaq_in.setValidator(QtGui.QRegularExpressionValidator(rx, self.deltaq_in))
 
         # signals
         self.helpButton.clicked.connect(self.onHelp)
-        self.computeButton.setVisible(False)
         self.closeButton.clicked.connect(self.onClose)
         self.deltaq_in.textChanged.connect(self.onCompute)
         self.deltaq_in.setText("0.05")
-
-        # Set focus away from Close
-        self.computeButton.setFocus()
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())

@@ -1,9 +1,9 @@
 import json
 import os
 
-from PyQt5 import QtGui
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+from PySide6 import QtGui
+from PySide6 import QtCore
+from PySide6 import QtWidgets
 
 from collections import defaultdict
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
@@ -134,9 +134,6 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
     def __init__(self, parent=None, manager=None):
         super(CategoryManager, self).__init__(parent)
         self.setupUi(self)
-
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.communicator = manager.communicator()
 
@@ -277,8 +274,9 @@ class CategoryManager(QtWidgets.QDialog, Ui_CategoryManagerUI):
             input_to_check = str(self.txtSearch.text())
 
         # redefine the proxy model
-        self.model_proxy.setFilterRegExp(QtCore.QRegExp(input_to_check,
-                         QtCore.Qt.CaseInsensitive, QtCore.QRegExp.FixedString))
+        self.model_proxy.setFilterRegularExpression(QtCore.QRegularExpression(input_to_check,
+            QtCore.QRegularExpression.CaseInsensitiveOption |
+            QtCore.QRegularExpression.PatternOption.NoPatternOption))
 
     def onModify(self):
         """
@@ -329,8 +327,6 @@ class ChangeCategory(QtWidgets.QDialog, Ui_ChangeCategoryUI):
     def __init__(self, parent=None, categories=None, model=None):
         super(ChangeCategory, self).__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.model = model
         self.parent = parent

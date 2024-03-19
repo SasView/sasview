@@ -1,7 +1,6 @@
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 
 from sasdata.dataloader.data_info import Detector
 from sasdata.dataloader.data_info import Source
@@ -155,7 +154,7 @@ class FittingLogic:
         new_plot.yaxis(_yaxis, _yunit)
 
         if component is not None:
-            new_plot.plot_role = Data1D.ROLE_DELETABLE #deletable
+            new_plot.plot_role = DataRole.ROLE_DELETABLE #deletable
 
         return new_plot
 

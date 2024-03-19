@@ -1,7 +1,7 @@
 import sys
 import os
-from PyQt5 import QtCore
-from PyQt5 import QtGui, QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui, QtWidgets
 
 # local
 from .UI.InvariantDetailsUI import Ui_Dialog
@@ -132,19 +132,19 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         if self.progress_low_qstar == 'error':
             self.progressBarLowQ.setValue(0)
         else:
-            self.progressBarLowQ.setValue(self.progress_low_qstar)
+            self.progressBarLowQ.setValue(int(self.progress_low_qstar))
             self.progressBarLowQ.setFormat("%.2f %%" % self.progress_low_qstar)
 
         if self.progress_high_qstar == 'error':
             self.progressBarHighQ.setValue(0)
         else:
-            self.progressBarHighQ.setValue(self.progress_high_qstar)
+            self.progressBarHighQ.setValue(int(self.progress_high_qstar))
             self.progressBarHighQ.setFormat("%.2f %%" % self.progress_high_qstar)
 
         if self.progress_data_qstar == 'error':
             self.progressBarData.setValue(0)
         else:
-            self.progressBarData.setValue(self.progress_data_qstar)
+            self.progressBarData.setValue(int(self.progress_data_qstar))
             self.progressBarData.setFormat("%.2f %%" % self.progress_data_qstar)
 
         self.show()

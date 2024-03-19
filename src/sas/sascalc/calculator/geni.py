@@ -9,10 +9,6 @@ import numpy as np
 try:
     if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
         from numba import njit, prange
-        # Suppress numba debug info
-        import logging
-        numba_logger = logging.getLogger('numba')
-        numba_logger.setLevel(logging.WARNING)
         USE_NUMBA = True
     else:
         raise ImportError("fail")

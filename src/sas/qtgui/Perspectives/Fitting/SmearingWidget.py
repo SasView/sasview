@@ -3,9 +3,11 @@ Widget/logic for smearing data.
 """
 import copy
 import numpy as np
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
+import logging
+logger = logging.getLogger(__name__)
 
 from sas.sascalc.fit.qsmearing import smear_selection, PySmear, PySmear2D
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -35,8 +37,8 @@ class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
 
 SMEARING_1D = ["Custom Pinhole Smear", "Custom Slit Smear"]
 SMEARING_2D = ["Custom Pinhole Smear"]
+SMEARING_SESANS = "Hankel Transform"
 SMEARING_QD = "Use dQ Data"
-
 MODEL = [
     'SMEARING',
     'PINHOLE_MIN',
@@ -51,7 +53,7 @@ DEFAULT_PINHOLE_UP=0.0
 DEFAULT_PINHOLE_DOWN=0.0
 
 class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
-    smearingChangedSignal = QtCore.pyqtSignal()
+    smearingChangedSignal = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(SmearingWidget, self).__init__()
@@ -148,10 +150,13 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if self.data is None:
             self.setElementsVisibility(False)
             return
-        # Find out if data has dQ
+        # Find out if data has dQ or is SESANS
         self.current_smearer = smear_selection(self.data, self.kernel_model)
         self.setSmearInfo()
-        if self.smear_type is not None:
+        if self.smear_type == "Hankel Transform":
+            self.cbSmearing.addItem(SMEARING_SESANS)
+            index_to_show = 1
+        elif self.smear_type is not None:
             self.cbSmearing.addItem(SMEARING_QD)
             index_to_show = 1 if keep_order else index_to_show
 
@@ -193,6 +198,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.setElementsVisibility(True)
             self.setSlitLabels()
             self.onSlitSmear()
+        elif text == "Hankel Transform":
+            self.setElementsVisibility(False)
+            self.cbSmearing.setEnabled(False)  # turn off ability to change smearing; no other options for sesans
         self.smearingChangedSignal.emit()
 
     def onModelChange(self):
@@ -257,7 +265,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Use pinhole labels
         """
-        self.lblSmearUp.setText('Slit height')
+        self.lblSmearUp.setText('Slit length')
         self.lblSmearDown.setText('Slit width')
         self.lblUnitUp.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
         self.lblUnitDown.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
@@ -276,7 +284,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             text_unit = '%'
         elif self.smear_type == "Slit":
             text_down = '<html><head/><body><p>Slit width</p></body></html>'
-            text_up = '<html><head/><body><p>Slit height</p></body></html>'
+            text_up = '<html><head/><body><p>Slit length</p></body></html>'
             text_unit = '<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>'
         else:
             text_unit = '%'
@@ -384,16 +392,48 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Create a custom slit smear object that will change the way residuals
         are compute when fitting
         """
-        _, accuracy, d_width, d_height = self.state()
+        _, accuracy, d_width, d_length = self.state()
 
         # Check changes in slit width
         if d_width is None:
             d_width = 0.0
-        if d_height is None:
-            d_height = 0.0
+        if d_length is None:
+            d_length = 0.0
+        q_max = max(self.data.x)
+        smearing_error_flag = False
+        if d_length < d_width:
+            msg = f'Length specified which is less than width. \n' \
+                  f'This is not slit-smearing, probably you switched the two parameters? \n' \
+                  f'I am internally using the smaller parameter as the width and larger as the length. \n' \
+                  f'This is the only mathematically valid version of this.'
+            smearing_error_flag = True
+            temp = d_length
+            d_length = d_width
+            d_width = temp
+        elif d_length < 10 * d_width:
+            msg = f'Slit length specified which is less than 10 x slit width. ' \
+                  f'This is not slit-smearing (at least not in the form we implement). \n' \
+                  f'Use pinhole smearing instead.'
+            smearing_error_flag = True
+        # elif d_length < q_max:
+        #     msg = f'Length specified which is less than q_max for the data. \n' \
+        #           f'This is not covered by existing smearing model. \n' \
+        #           f'Use pinhole smearing instead. '
+        #     smearing_error_flag = True
+        # override all these errors if both values are zero (initial starting state)
+        if d_length == 0 and d_width == 0:
+            smearing_error_flag = False
+
+
+        if smearing_error_flag:
+            logging.critical(msg)
+            errorbox = QtWidgets.QMessageBox()
+            errorbox.setWindowTitle('Smearing Input Error')
+            errorbox.setText(msg)
+            errorbox.exec_()
 
         self.slit_width = d_width
-        self.slit_height = d_height
+        self.slit_length = d_length
 
         if isinstance(self.data, Data2D):
             self.current_smearer = smear_selection(self.data, self.kernel_model)
@@ -406,7 +446,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         data.dxw = None
 
         try:
-            self.dxl = d_height
+            self.dxl = d_length
             data.dxl = self.dxl * np.ones(data_len)
         except:
             self.dxl = None
@@ -437,9 +477,14 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                 self.smear_type = "Pinhole2d"
                 self.dq_l = GuiUtils.formatNumber(np.average(data.dqx_data/np.abs(data.qx_data))*100., high=True)
                 self.dq_r = GuiUtils.formatNumber(np.average(data.dqy_data/np.abs(data.qy_data))*100., high=True)
+        # Check for SESANS data - currently no resolution functions are available for SESANS data
+        # The Hankel transform is treated like other resolution functions.
+        elif (isinstance(self.smearer(), PySmear)
+              and isinstance(self.smearer().resolution, SesansTransform)):
+            self.smear_type = "Hankel Transform"
         # Check for pinhole smearing and get min max if it is.
         elif (isinstance(self.smearer(), PySmear)
-              and isinstance(self.smearer().resolution, (Pinhole1D, SesansTransform))):
+              and isinstance(self.smearer().resolution, Pinhole1D)):
             self.smear_type = "Pinhole"
             self.dq_r = GuiUtils.formatNumber(data.dx[0]/data.x[0] *100., high=True)
             self.dq_l = GuiUtils.formatNumber(data.dx[-1]/data.x[-1] *100., high=True)

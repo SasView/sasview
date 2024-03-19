@@ -30,8 +30,8 @@ Fitting Documentation
 
    Writing a Plugin Model <plugin>
 
+   Scripting interface to Sasmodels <scripting>
+   
    Computations with a GPU <gpu_setup>
-
-   Scripting Interface to sasmodels <scripting>
 
    References <refs>

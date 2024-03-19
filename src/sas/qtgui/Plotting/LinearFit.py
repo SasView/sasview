@@ -5,9 +5,9 @@ import re
 import numpy
 from numbers import Number
 from typing import Optional
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 
@@ -23,7 +23,7 @@ from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
 
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
-    updatePlot = QtCore.pyqtSignal(tuple)
+    updatePlot = QtCore.Signal(tuple)
     def __init__(self, parent=None,
                  data=None,
                  max_range=(0.0, 0.0),
@@ -33,8 +33,6 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         super(LinearFit, self).__init__(parent)
 
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         assert(isinstance(max_range, tuple))
         assert(isinstance(fit_range, tuple))

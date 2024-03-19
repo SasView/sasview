@@ -3,9 +3,9 @@ This object is a small tool to allow user to quickly
 determine the variance in q  from the
 instrumental parameters.
 """
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from twisted.internet import threads
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -40,8 +40,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
     def __init__(self, parent=None):
         super(ResolutionCalculatorPanel, self).__init__()
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
+        self.setFixedSize(self.minimumSizeHint())
 
         self.manager = parent
 

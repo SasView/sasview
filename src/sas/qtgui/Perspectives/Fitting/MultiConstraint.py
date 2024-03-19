@@ -8,8 +8,8 @@ import webbrowser
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
 
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
+from PySide6 import QtWidgets
+from PySide6 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -29,10 +29,6 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
 
         self.setupUi(self)
         self.setModal(True)
-
-        # disable the context help icon
-        windowFlags = self.windowFlags()
-        self.setWindowFlags(windowFlags & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.params = params
         self.parent = parent
@@ -106,6 +102,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         Add visual cues when formula is incorrect
         """
+        # temporarily disable validation, as not yet fully operational
+        return
+
         # Don't validate if requested
         if not self.validate: return
 

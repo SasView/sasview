@@ -9,17 +9,14 @@ import importlib.resources as pkg_resources
 import base64
 from io import BytesIO
 
-import matplotlib.figure
-
 import dominate
 from dominate.tags import *
 from dominate.util import raw
 
 import html2text
 
-from xhtml2pdf import pisa
-
 import sas.sasview
+import sas.system.version
 import sasmodels
 import logging
 
@@ -97,7 +94,7 @@ class ReportBase:
 
         with self._html_doc.head:
             meta(http_equiv="Content-Type", content="text/html; charset=utf-8")
-            meta(name="Generator", content=f"SasView {sas.sasview.__version__}")
+            meta(name="Generator", content=f"SasView {sas.system.version.__version__}")
 
             if style_link is not None:
                 link(rel="stylesheet", href=style_link)
@@ -113,7 +110,7 @@ class ReportBase:
                     h1(title)
                     p(datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y"))
                     with div(id="version-info"):
-                        p(f"sasview {sas.sasview.__version__}, sasmodels {sasmodels.__version__}", cls="sasview-details")
+                        p(f"sasview {sas.system.version.__version__}, sasmodels {sasmodels.__version__}", cls="sasview-details")
 
                 div(id="perspective")
                 with div(id="data"):
@@ -152,7 +149,7 @@ class ReportBase:
 
 
 
-    def add_plot(self, fig: matplotlib.figure.Figure, image_type="png", figure_title: Optional[str]=None):
+    def add_plot(self, fig, image_type="png", figure_title: Optional[str]=None):
         """ Add a plot to the report
 
         :param fig: matplotlib.figure.Figure, Matplotlib figure object to add
@@ -173,7 +170,7 @@ class ReportBase:
         else:
             raise ValueError("image_type must be either 'svg' or 'png'")
 
-    def _add_plot_svg(self, fig: matplotlib.figure.Figure):
+    def _add_plot_svg(self, fig):
         try:
             with BytesIO() as svg_output:
                 fig.savefig(svg_output, format="svg")
@@ -184,7 +181,7 @@ class ReportBase:
             logging.error("Creating of report images failed: %s" % str(ex))
             return
 
-    def _add_plot_png(self, fig: matplotlib.figure.Figure):
+    def _add_plot_png(self, fig):
         try:
             with BytesIO() as png_output:
                 if sys.platform == "darwin":
@@ -266,6 +263,8 @@ class ReportBase:
             print(self.text, file=fid)
 
     def save_pdf(self, filename: str):
+        # import moved because of costly import time
+        from xhtml2pdf import pisa
         with open(filename, 'w+b') as fid:
             try:
                 pisa.CreatePDF(str(self._html_doc),

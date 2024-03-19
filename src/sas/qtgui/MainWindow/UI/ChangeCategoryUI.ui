@@ -81,7 +81,6 @@
      <zorder>cbCategories</zorder>
      <zorder>txtNewCategory</zorder>
      <zorder>cmdAdd</zorder>
-     <zorder>horizontalSpacer_2</zorder>
      <zorder>rbNew</zorder>
      <zorder>rbExisting</zorder>
     </widget>
@@ -126,6 +125,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lstCategories</tabstop>
+  <tabstop>rbExisting</tabstop>
+  <tabstop>cbCategories</tabstop>
+  <tabstop>rbNew</tabstop>
+  <tabstop>txtNewCategory</tabstop>
+  <tabstop>cmdAdd</tabstop>
+  <tabstop>cmdRemove</tabstop>
+  <tabstop>cmdOK</tabstop>
+  <tabstop>cmdCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

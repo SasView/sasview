@@ -1,15 +1,14 @@
 # global
 import logging
 import functools
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PySide6 import QtCore
+from PySide6 import QtGui
+from PySide6 import QtWidgets
 
 from periodictable import formula as Formula
 
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 from sas.qtgui.UI import main_resources_rc
-from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
 
 # Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
@@ -47,8 +46,6 @@ class DensityPanel(QtWidgets.QDialog):
         self.mode = None
         self.manager = parent
         self.setupUi()
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.setupModel()
         self.setupMapper()
@@ -57,15 +54,14 @@ class DensityPanel(QtWidgets.QDialog):
         self.ui = Ui_DensityPanel()
         self.ui.setupUi(self)
 
-        #self.setFixedSize(self.minimumSizeHint())
-        self.resize(self.minimumSizeHint())
+        self.setFixedSize(self.minimumSizeHint())
 
         # set validators
         #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
 
-        rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.ui.editMolarVolume.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMolarVolume))
-        self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
+        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        self.ui.editMolarVolume.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMolarVolume))
+        self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
 
         # signals
         self.ui.editMolarVolume.textEdited.connect(functools.partial(self.setMode, MODES.VOLUME_TO_DENSITY))
@@ -127,6 +123,8 @@ class DensityPanel(QtWidgets.QDialog):
             molarDensity = molarMass / molarVolume
             molarDensity = formatNumber(molarDensity, high=True)
             self.model.item(MODEL.MASS_DENSITY).setText(str(molarDensity))
+            # be sure to store the new value in the model
+            self.model.item(MODEL.MOLAR_VOLUME).setText(current_text)
 
         except (ArithmeticError, ValueError):
             self.model.item(MODEL.MASS_DENSITY).setText("")
@@ -139,6 +137,8 @@ class DensityPanel(QtWidgets.QDialog):
             molarVolume = molarMass / molarDensity
             molarVolume = formatNumber(molarVolume, high=True)
             self.model.item(MODEL.MOLAR_VOLUME).setText(str(molarVolume))
+            # be sure to store the new value in the model
+            self.model.item(MODEL.MASS_DENSITY).setText(current_text)
 
         except (ArithmeticError, ValueError):
             self.model.item(MODEL.MOLAR_VOLUME).setText("")
