@@ -247,8 +247,8 @@ jobs:
       - name: Sign executable and create dmg (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_ISA }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_ISA_PWD }}
         run: |
           echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p DloaAcYP build.keychain
