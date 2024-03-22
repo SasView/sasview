@@ -259,11 +259,11 @@ jobs:
 
           cd installers/dist
           codesign --force -s "Apple Development: Wojciech Potrzebowski (XS6B5SQGHK)" SasView6.app -v
-          #python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
-          #python  ../../build_tools/code_sign_osx.py
-          #codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance" SasView6.app
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
+          python  ../../build_tools/code_sign_osx.py
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Apple Development: Wojciech Potrzebowski (XS6B5SQGHK)" SasView6.app
           hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
-          #codesign -s "Developer ID Application: The International Scattering Alliance" SasView6.dmg
+          codesign -s "Apple Development: Wojciech Potrzebowski (XS6B5SQGHK)" SasView6.dmg
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
