@@ -34,10 +34,10 @@ pyside_Qtlibs = glob.glob(
 #pyside_libs = pyside_QtWebEngineCore + pyside_QtWebEngineProcess
 
 sign_command = ['codesign', '--timestamp', '--options=runtime', '--verify', '--verbose=4', '--force',
-                '--sign',  'Developer ID Application: The International Scattering Alliance']
+                '--sign',  'Developer ID Application: The International Scattering Alliance (8CX8K63BQM)']
 
 sign_deep_command = ['codesign', '--timestamp', '--deep', '--options=runtime', '--verify', '--verbose=4', '--force',
-                 '--sign',  'Developer ID Application: The International Scattering Alliance']
+                 '--sign',  'Developer ID Application: The International Scattering Alliance (8CX8K63BQM)']
 
 #Signing QtWebEngineProcess.app first as it is a helper app
 for sfile in itertools.chain(pyside_QtWebEngineProcessApp):
