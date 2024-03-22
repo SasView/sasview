@@ -258,7 +258,6 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
 
           cd installers/dist
-          codesign --force -s "Apple Development: Wojciech Potrzebowski (XS6B5SQGHK)" SasView6.app -v
           python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python  ../../build_tools/code_sign_osx.py
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Apple Development: Wojciech Potrzebowski (XS6B5SQGHK)" SasView6.app
