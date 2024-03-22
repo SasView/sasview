@@ -262,7 +262,7 @@ jobs:
           python  ../../build_tools/code_sign_osx.py
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.app
           hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
-          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.dmg
+          codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.dmg
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
