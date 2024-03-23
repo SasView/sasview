@@ -276,6 +276,7 @@ jobs:
           if-no-files-found: error
 
       - name: Notarize Release Build (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: lando/notarize-action@v2
         with:
             product-path: "installers/dist/SasView6.dmg"
