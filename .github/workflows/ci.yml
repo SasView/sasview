@@ -263,7 +263,18 @@ jobs:
           codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Apple Development: Wojciech Potrzebowski (XS6B5SQGHK)" SasView6.app
           hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
           codesign -s "Apple Development: Wojciech Potrzebowski (XS6B5SQGHK)" SasView6.dmg
-
+          
+      - name: Notarize Release Build (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        uses: lando/notarize-action@v2
+        with:
+            product-path: "installers/dist/SasView6.dmg"
+            primary-bundle-id: "org.sasview.SasView6"
+            appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+            appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+            appstore-connect-team-id: ${{ secrets.NOTARIZATION_ISA_TEAMID }}
+            verbose: True
+            
       - name: Publish installer package
         if: ${{ matrix.installer }}
         uses: actions/upload-artifact@v3
@@ -275,16 +286,6 @@ jobs:
             installers/dist/sasview6.tar.gz
           if-no-files-found: error
 
-      - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        uses: lando/notarize-action@v2
-        with:
-            product-path: "installers/dist/SasView6.dmg"
-            primary-bundle-id: "org.sasview.SasView6"
-            appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-            appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-            appstore-connect-team-id: ${{ secrets.NOTARIZATION_ISA_TEAMID }}
-            verbose: True
 
   test-installer:
     needs: [ build-matrix ]
