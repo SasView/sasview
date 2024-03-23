@@ -275,6 +275,16 @@ jobs:
             installers/dist/sasview6.tar.gz
           if-no-files-found: error
 
+      - name: Notarize Release Build (OSX)
+        uses: lando/notarize-action@v2
+        with:
+            product-path: "installers/dist/SasView6.dmg"
+            primary-bundle-id: "org.sasview.SasView6"
+            appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+            appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+            appstore-connect-team-id: ${{ secrets.NOTARIZATION_ISA_TEAMID }}
+            verbose: True
+
   test-installer:
     needs: [ build-matrix ]
 
