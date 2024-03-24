@@ -274,7 +274,13 @@ jobs:
             appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
             appstore-connect-team-id: ${{ secrets.NOTARIZATION_ISA_TEAMID }}
             verbose: True
-            
+
+      - name: Staple Release Build (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        uses: BoundfoxStudios/action-xcode-staple@v1
+        with:
+          product-path: "installers/dist/SasView6.dmg"
+
       - name: Publish installer package
         if: ${{ matrix.installer }}
         uses: actions/upload-artifact@v3
