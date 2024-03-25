@@ -280,6 +280,7 @@ jobs:
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: "installers/dist/SasView6.dmg"
+          verbose: True
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
