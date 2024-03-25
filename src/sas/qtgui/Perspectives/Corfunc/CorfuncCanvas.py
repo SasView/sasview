@@ -34,6 +34,8 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
         self._data: Optional[List[Data1D]] = None
 
     def parent(self):
+        """ Parent function is needed by the toolbar, and needs to return the appropriate figure canvas object,
+        which is `self`"""
         return self
 
     def clear(self):
