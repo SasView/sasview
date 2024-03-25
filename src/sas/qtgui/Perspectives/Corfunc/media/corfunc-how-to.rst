@@ -39,7 +39,7 @@ as long as it is feasible.
 The extra options are as follows:
 
 1) There is an option to choose how the tangent slope used for calculating lamellar parameters
-such as `hard block` is calculated. Usually this is done by finding the inflection point of the
+such as `hard block` are calculated. Usually this is done by finding the inflection point of the
 curve. However, in some datasets it is more appropriate to use the point half way between the minimum
 and maximum values of :math:`\Gamma_1`;
 
@@ -77,7 +77,9 @@ Finally, you can see the interface distribution function in the `IDF` tab
 The export buttons allow you to produce CSV files containing either the extrapolated
 Q-space data, or the transformed data.
 
-The structure of the transformed data file is shown below.
+The structure of the transformed data file is shown below (note that as this is a 4 column .csv file,
+SasView will interpret this as a :math:`I(q)` vs :math:`q` curve if you try to load it from the main
+SasView window).
 
  .. figure:: tutorial_export_data.png
     :align: center
