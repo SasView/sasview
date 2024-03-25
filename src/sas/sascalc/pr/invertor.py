@@ -300,7 +300,7 @@ class Invertor(Pinvertor):
         # Reset the background value before proceeding
         # self.background = 0.0
         if not self.est_bck:
-            self.y -= self.background
+            self.y -= self.background         
         out, cov = self.lstsq(nfunc, nr=nr)
         if not self.est_bck:
             self.y += self.background
@@ -483,7 +483,10 @@ class Invertor(Pinvertor):
 
         # Perform the inversion (least square fit)
         # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
+
         rcond = np.finfo(float).eps * max(a.shape)
+        if rcond ==None:
+            rcond =-1
         c, chi2, _, _ = lstsq(a, b, rcond=rcond)
         # Sanity check
         try:
