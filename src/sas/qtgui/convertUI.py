@@ -4,6 +4,7 @@
 #  Arguments: -f -> Force the UI elements to be rebuilt, even if they exist
 import os
 import sys
+import subprocess
 
 def run_compiler(compiler_main, name, *args):
     """ Wrapper to run a compiler, either pyrrc or pyuic"""
@@ -24,8 +25,8 @@ def pyrrc(in_file, out_file):
     """
     Run the qt resource compiler
     """
-    run_line = f"pyside6-rcc {in_file} -o {out_file}"
-    os.system(run_line)
+    run_line = ["pyside6-rcc", in_file, "-o" ,out_file]
+    subprocess.run(run_line, check=True)
 
 
 def pyuic(in_file, out_file):
@@ -34,8 +35,8 @@ def pyuic(in_file, out_file):
     """
     in_file2 = os.path.abspath(in_file)
     out_file2 = os.path.abspath(out_file)
-    run_line = "pyside6-uic " + in_file2 + " -o " + out_file2
-    os.system(run_line)
+    run_line = ["pyside6-uic", in_file2, "-o", out_file2]
+    subprocess.run(run_line, check=True)
 
 def file_in_newer(file_in, file_out):
     """

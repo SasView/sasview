@@ -7,6 +7,9 @@ from PySide6.QtCore import Qt
 from typing import Optional, Callable, Dict, Any, Union, List
 
 from sas.system import config
+
+from sas.qtgui.Perspectives.perspective import Perspective
+
 from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 
@@ -55,6 +58,8 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self._saveStagedChanges)
         self.buttonBox.button(QDialogButtonBox.Help).clicked.connect(self.help)
         self._set_accept()
+
+        self.registered_perspectives: list[str] = []
 
     def addWidgets(self, widgets: Dict[str, Callable]):
         """Add a list of named widgets to the window"""
@@ -169,6 +174,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def addWidget(self, widget: QWidget, name: Optional[str] = None):
         """Add a single widget to the panel"""
+
         # Set the parent of the new widget to the parent of this window
         widget.parent = self
         self.stackedWidget.addWidget(widget)
@@ -177,7 +183,18 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         name = name if name is not None else getattr(widget, 'name', None)
         name = name if name is not None else "Generic Preferences"
         # Add the widget default reset method to the global set
+
         self.listWidget.addItem(name)
+
+    def registerPerspectivePreferences(self, perspective: Perspective):
+        """ Register preferences from a perspective"""
+
+        if perspective.name not in self.registered_perspectives:
+
+            for preference_widget in perspective.preferences:
+
+                self.addWidget(preference_widget)
+                self.registered_perspectives.append(perspective.name)
 
     def help(self):
         """Open the help window associated with the preferences window"""

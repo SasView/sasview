@@ -11,8 +11,6 @@ class WindowTitle(QtWidgets.QDialog, Ui_WindowTitle):
     def __init__(self, parent=None, new_title=""):
         super(WindowTitle, self).__init__(parent)
         self.setupUi(self)
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
 
         self.txtTitle.setText(new_title)
 

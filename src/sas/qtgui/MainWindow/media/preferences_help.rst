@@ -1,7 +1,7 @@
 .. preferences_help.rst
 
 .. Initial Draft: J Krzywon, August 2022
-.. Last Updated: J Krzywon, December 2, 2022
+.. Last Updated: J Krzywon, Nov. 22, 2023
 
 .. _Preferences:
 
@@ -31,6 +31,12 @@ an ellipsis and whitespace. *persistent*
 
 **Legend entry line length**: This defines the maximum number of characters to display in a single line of a plot legend
 before wrapping to the next line. *persistent*
+
+**Disable Residuals Display**: When selected, residual plots are not automatically displayed when fits are completed. The plots
+can still be accessed in the data explorer under the data set the fit was performed on. *persistent*
+
+**Disable Polydispersity Plot Display**: When selected, polydispersity plots are not automatically displayed when fits
+are completed. The plots can still be accessed in the data explorer under the data set the fit was performed on. *persistent*
 
 .. _Display_Preferences:
 

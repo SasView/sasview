@@ -6,7 +6,6 @@ import numbers
 import os
 import re
 import sys
-import imp
 import warnings
 import webbrowser
 import urllib.parse
@@ -14,6 +13,7 @@ import json
 import types
 import numpy
 from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 
@@ -47,12 +47,6 @@ import sas
 from sas import config
 
 from sasdata.dataloader.loader import Loader
-
-if os.path.splitext(sys.argv[0])[1].lower() != ".py":
-        HELP_DIRECTORY_LOCATION = "doc"
-else:
-        HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
-IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 
 # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
 # "5 [P(Q)] modelname"
@@ -182,6 +176,10 @@ class Communicate(QtCore.QObject):
 
     # Update the masked ranges in fitting
     updateMaskedDataSignal = QtCore.Signal()
+
+    # Triggers refresh of all documentation windows
+    documentationRegenInProgressSignal = QtCore.Signal()
+    documentationRegeneratedSignal = QtCore.Signal()
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
@@ -529,19 +527,6 @@ def openLink(url):
         msg = "Attempt at opening an invalid URL"
         raise AttributeError(msg)
 
-def showHelp(url):
-    """
-    Open a local url in the default browser
-    """
-    location = HELP_DIRECTORY_LOCATION + url
-    #WP: Added to handle OSX bundle docs
-    if os.path.isdir(location) == False:
-        sas_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-        location = sas_path+"/"+location
-    try:
-        webbrowser.open('file://' + os.path.realpath(location))
-    except webbrowser.Error as ex:
-        logging.warning("Cannot display help. %s" % ex)
 
 def retrieveData1d(data):
     """

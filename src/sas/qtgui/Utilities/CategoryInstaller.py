@@ -106,19 +106,13 @@ class CategoryInstaller:
         for cat in list(master_category_dict.keys()):
             for ind in range(len(master_category_dict[cat])):
                 model_name, enabled = master_category_dict[cat][ind]
-                if model_name not in _model_list:
-                    del_name = True 
-                    try:
-                        by_model_dict.pop(model_name)
-                        model_enabled_dict.pop(model_name)
-                    except:
-                        logging.error("CategoryInstaller: %s", sys.exc_info()[1])
-                else:
-                    add_list.remove(model_name)
+                add_list.remove(model_name)
+                if not enabled:
+                    model_enabled_dict.pop(model_name)
         if del_name or (len(add_list) > 0):
             for model in add_list:
                 model_enabled_dict[model]= True
-                if _model_dict[model].category is None or len(str(_model_dict[model].category.capitalize())) == 0:
+                if _model_dict[model].category is None or not _model_dict[model].category:
                     by_model_dict[model].append('Uncategorized')
                 else:
                     category = _model_dict[model].category

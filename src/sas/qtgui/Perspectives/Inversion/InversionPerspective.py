@@ -293,7 +293,145 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         page_name = page_name + str(self.maxIndex)
         return page_name
 
-    def setData(self, data_item=None, is_batch=False, tab_index=None):
+
+    def acceptAlpha(self):
+        """Send estimated alpha to input"""
+        self.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem(
+            self.regConstantSuggestionButton.text()))
+
+    def displayChange(self, data_index=0):
+        """Switch to another item in the data list"""
+        if self.dataDeleted:
+            return
+        self.updateDataList(self._data)
+        self.setCurrentData(self.dataList.itemData(data_index))
+
+    ######################################################################
+    # GUI Interaction Events
+
+    def updateCalculator(self):
+        """Update all p(r) params"""
+        self._calculator.set_x(self.logic.data.x)
+        self._calculator.set_y(self.logic.data.y)
+        self._calculator.set_err(self.logic.data.dy)
+        self.set_background(self.backgroundInput.text())
+
+    def set_background(self, value):
+        self._calculator.background = float(value)
+
+    def model_changed(self):
+        """Update the values when user makes changes"""
+        if not self.mapper:
+            msg = "Unable to update P{r}. The connection between the main GUI "
+            msg += "and P(r) was severed. Attempting to restart P(r)."
+            logger.warning(msg)
+            self.setClosable(True)
+            self.close()
+            InversionWindow.__init__(self.parent(), list(self._dataList.keys()))
+            exit(0)
+        if self.dmaxWindow is not None:
+            self.dmaxWindow.nfunc = self.getNFunc()
+            self.dmaxWindow.pr_state = self._calculator
+        self.mapper.toLast()
+
+    def help(self):
+        """
+        Open the P(r) Inversion help browser
+        """
+        tree_location = "/user/qtgui/Perspectives/Inversion/pr_help.html"
+
+        # Actual file anchor will depend on the combo box index
+        # Note that we can be clusmy here, since bad current_fitter_id
+        # will just make the page displayed from the top
+        self._manager.showHelp(tree_location)
+
+    def toggleBgd(self):
+        """
+        Toggle the background between manual and estimated
+        """
+        self.model.blockSignals(True)
+        value = 1 if self.estimateBgd.isChecked() else 0
+        itemt = QtGui.QStandardItem(str(value == 1).lower())
+        self.model.setItem(WIDGETS.W_ESTIMATE, itemt)
+        itemt = QtGui.QStandardItem(str(value == 0).lower())
+        self.model.setItem(WIDGETS.W_MANUAL_INPUT, itemt)
+        self._calculator.set_est_bck(value)
+        self.backgroundInput.setEnabled(self._calculator.est_bck == 0)
+        self.model.blockSignals(False)
+
+    def openExplorerWindow(self):
+        """
+        Open the Explorer window to see correlations between params and results
+        """
+        from .DMaxExplorerWidget import DmaxWindow
+        self.dmaxWindow = DmaxWindow(pr_state=self._calculator,
+                                     nfunc=self.getNFunc(),
+                                     parent=self)
+        self.dmaxWindow.show()
+
+    def showBatchOutput(self):
+        """
+        Display the batch output in tabular form
+        :param output_data: Dictionary mapping name -> P(r) instance
+        """
+        if self.batchResultsWindow is None:
+            self.batchResultsWindow = BatchInversionOutputPanel(
+                parent=self._parent, output_data=self.batchResults)
+        else:
+            self.batchResultsWindow.setupTable(self.batchResults)
+        self.batchResultsWindow.show()
+
+    def stopCalculation(self):
+        """ Stop all threads, return to the base state and update GUI """
+        self.stopCalcThread()
+        self.stopEstimationThread()
+        self.stopEstimateNTThread()
+        # Show any batch calculations that successfully completed
+        if self.isBatch and self.batchResultsWindow is not None:
+            self.showBatchOutput()
+        self.isBatch = False
+        self.isCalculating = False
+        self.updateGuiValues()
+
+    def check_q_low(self, q_value=None):
+        """ Validate the low q value """
+        if not q_value:
+            q_value = float(self.minQInput.text()) if self.minQInput.text() else '0.0'
+        q_min = min(self._calculator.x) if any(self._calculator.x) else -1 * np.inf
+        q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
+        if q_value > q_max:
+            # Value too high - coerce to max q
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_max)))
+        elif q_value < q_min:
+            # Value too low - coerce to min q
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_min)))
+        else:
+            # Valid Q - set model item
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_value)))
+            self._calculator.set_qmin(q_value)
+
+    def check_q_high(self, q_value=None):
+        """ Validate the value of high q sent by the slider """
+        if not q_value:
+            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else '1.0'
+        q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
+        q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else -1 * np.inf
+        if q_value > q_max:
+            # Value too high - coerce to max q
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_max)))
+        elif q_value < q_min:
+            # Value too low - coerce to min q
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_min)))
+        else:
+            # Valid Q - set model item
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_value)))
+            self._calculator.set_qmax(q_value)
+
+    ######################################################################
+    # Response Actions
+
+    def setData(self, data_item=None, is_batch=False):
+
         """
         Assign new data set(s) to the P(r) perspective
         Obtain a QStandardItem object and parse it to get Data1D/2D
