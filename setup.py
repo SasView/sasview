@@ -28,7 +28,6 @@ with open(version_file) as fid:
 CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SASVIEW_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 
-
 # Optionally clean before build.
 dont_clean = 'update' in sys.argv
 if dont_clean:
@@ -85,14 +84,18 @@ build_commands = [
 print(sys.argv)
 
 # determine if this run requires building of Qt GUI ui->py
-build_qt = any(c in sys.argv for c in build_commands)
+build = any(c in sys.argv for c in build_commands)
 force_rebuild = "-f" if 'rebuild_ui' in sys.argv or 'clean' in sys.argv else ""
 if 'rebuild_ui' in sys.argv:
     sys.argv.remove('rebuild_ui')
 
-if build_qt:
+if build:
+    # build qt
     _ = subprocess.call([sys.executable, "src/sas/qtgui/convertUI.py", force_rebuild])
 
+    # download external dependencies
+    from build_tools.get_external_dependencies import fetch_external_dependencies
+    fetch_external_dependencies()
 
 # Required packages
 required = [
