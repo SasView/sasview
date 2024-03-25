@@ -4,7 +4,7 @@ import time
 import logging
 import webbrowser
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PySide6 import QtCore, QtWidgets, QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -18,8 +18,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
-    windowClosedSignal = QtCore.pyqtSignal()
-    def __init__(self, parent = None, output_data=None):
+    windowClosedSignal = QtCore.Signal()
+    def __init__(self, parent=None, output_data=None):
 
         super(BatchOutputPanel, self).__init__(parent._parent)
         self.setupUi(self)
@@ -119,7 +119,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # Find out which items got selected and in which row
         # Select for fitting
 
-        self.actionPlotResults = QtWidgets.QAction(self)
+        self.actionPlotResults = QtGui.QAction(self)
         self.actionPlotResults.setObjectName("actionPlot")
         self.actionPlotResults.setText(QtCore.QCoreApplication.translate("self", "Plot selected fits."))
 
@@ -184,15 +184,13 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         model_name = results[0][0].model.id
         self.tabWidget.setTabToolTip(self.tabWidget.count()-1, model_name)
         self.data_dict[page_name] = results
-
-    @classmethod
-    def onHelp(cls):
+    
+    def onHelp(self):
         """
         Open a local url in the default browser
         """
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        GuiUtils.showHelp(url)
-
+        self.parent.showHelp(url)
 
     def onPlot(self):
         """
@@ -268,15 +266,13 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         time_str = time.strftime("%b %d %H %M of %Y", t)
         default_name = "Batch_Fitting_"+time_str+".csv"
 
-        wildcard = "CSV files (*.csv);;"
-        kwargs = {
-            'caption'   : 'Save As',
-            'directory' : default_name,
-            'filter'    : wildcard,
-            'parent'    : None,
-        }
+        wildcard = "CSV files (*.csv)"
+        caption =  'Save As'
+        directory =  default_name
+        filter =  wildcard
+        parent =  None
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter)
         filename = filename_tuple[0]
 
         # User cancelled.
@@ -461,6 +457,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         super(BatchInversionOutputPanel, self).__init__(parent.parent, output_data)
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
+        self.parent = parent
 
     def setupTable(self, widget=None,  data=None):
         """
@@ -575,17 +572,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         self.tabWidget.addTab(tableItem, tab_name)
         self.tabWidget.setCurrentIndex(self.tab_number-1)
 
-    @classmethod
-    def onHelp(cls):
-        """
-        Open a local url in the default browser
-        """
-        location = GuiUtils.HELP_DIRECTORY_LOCATION
-        url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        try:
-            webbrowser.open('file://' + os.path.realpath(location + url))
-        except webbrowser.Error as ex:
-            logging.warning("Cannot display help. %s" % ex)
+    def onHelp(self):
+        self.parent.onHelp()
 
 
     def closeEvent(self, event):
