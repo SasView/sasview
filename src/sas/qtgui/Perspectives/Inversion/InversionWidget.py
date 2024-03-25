@@ -26,6 +26,10 @@ from ...Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from ...Plotting.Slicers.SectorSlicer import SectorInteractor
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
+#regeneration of documentation
+from pathlib import Path
+from sas.sascalc.doc_regen.makedocumentation import IMAGES_DIRECTORY_LOCATION, HELP_DIRECTORY_LOCATION
+
 TAB_2D = 2
 
 def is_float(value):
@@ -566,7 +570,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id
         # will just make the page displayed from the top
-        self._manager.showHelp(tree_location)
+        self.parent.showHelp(tree_location)
 
     def toggleBgd(self):
         """
@@ -622,6 +626,21 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isBatch = False
         self.isCalculating = False
         self.enableButtons()
+        
+    def onHelp(self):
+        """
+        Show the "Inversion" section of help
+        """
+        regen_in_progress = False
+        help_location = self.getHelpLocation(HELP_DIRECTORY_LOCATION)
+        if regen_in_progress is False:
+            self.parent.showHelp(help_location)
+
+            
+    def getHelpLocation(self, tree_base) -> Path:
+        # Actual file will depend on the current tab
+        tree_location = tree_base / "user" / "qtgui" / "Perspectives" / "Inversion"
+        return tree_location / "pr_help.html"
 
 
     def check_q_low(self, q_value=None):

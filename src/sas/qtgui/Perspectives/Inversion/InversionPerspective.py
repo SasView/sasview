@@ -430,7 +430,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     ######################################################################
     # Response Actions
 
-    def setData(self, data_item=None, is_batch=False):
+    def setData(self, data_item=None, is_batch=False, tab_index=None):
 
         """
         Assign new data set(s) to the P(r) perspective

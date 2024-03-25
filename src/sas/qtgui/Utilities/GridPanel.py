@@ -572,14 +572,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         self.tabWidget.addTab(tableItem, tab_name)
         self.tabWidget.setCurrentIndex(self.tab_number-1)
 
-    @classmethod
-    def onHelp(cls):
-
-        """
-        Open a local url in the default browser
-        """
-        url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        self.parent.showHelp(url)
+    def onHelp(self):
+        self.parent.onHelp()
 
 
     def closeEvent(self, event):
