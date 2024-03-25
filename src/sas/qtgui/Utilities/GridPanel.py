@@ -11,6 +11,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.UI.GridPanelUI import Ui_GridPanelUI
 
 
+
 class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
     Class for stateless grid-like printout of model parameters for mutiple models
@@ -466,10 +467,10 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         Create tablewidget items and show them, based on params
         """
         # headers
-        param_list = ['Filename','Number Of Terms','Reg. Const','Max Distance',
-                      'Rg [Å]', 'Chi^2/dof', 'I(Q=0)', 'Oscillations',
-                      'Background [Å^-1]', 'P+ Fraction', 'P+1-theta Fraction',
-                      'Calc. Time [sec]', 'Q Min', 'Q Max']
+        param_list = ['Filename','Number Of Terms','Reg. Const','Max Distance [Å]',
+                      'Rg [Å]', 'Chi^2/dof', 'I(Q=0) [cm^-1]', 'Oscillations',
+                      'Background [cm^-1]', 'P+ Fraction', 'P+1-theta Fraction',
+                      'Calc. Time [sec]', 'Q Min [Å^-1]', 'Q Max [Å^-1]']
 
         if data is None:
             return
@@ -585,6 +586,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             webbrowser.open('file://' + os.path.realpath(location + url))
         except webbrowser.Error as ex:
             logging.warning("Cannot display help. %s" % ex)
+
 
     def closeEvent(self, event):
         """Tell the parent window the window closed"""
