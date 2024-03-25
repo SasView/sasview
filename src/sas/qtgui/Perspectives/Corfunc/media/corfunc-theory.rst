@@ -51,7 +51,7 @@ measurement error.
 
 The :math:`\Gamma_3` projection is motivated by a system of
 monodisperse, randomly oriented particles in dilute suspension,
-such that there is no spatial correlations between particles.
+such that there are no spatial correlations between particles.
 It is the kind of system described by the Debye equation.
 Just as is the case with :math:`\Gamma_1`, as long as one truly
 has this kind of system, and with caveats about extrapolation
@@ -99,7 +99,7 @@ know that the conjugate of :math:`F` is given by
 .. math::
     F^*(\vec{q}) = \int \rho(r) e^{-i \vec{r}\cdot\vec{q}}
 
-meaning that, with some renaming of variables, we have
+meaning that, with some renaming of variables (from :math:`r` to :math:`s` and :math:`t`), we have
 
 .. math::
     F(\vec{q}) F^*(\vec{q}) = \left(\int \rho(\vec{t}) e^{i \vec{t}\cdot\vec{q}} \; dt^3\right)\left( \int \rho(\vec{s}) e^{-i \vec{s}\cdot\vec{q}} \; ds^3 \right)
@@ -259,7 +259,7 @@ now, we want to average this over all angles, i.e. over all :math:`q`-vectors of
 system relative to :math:`\vec{r}`. This is an unobvious choice of coordinate system, but it simplifies things greatly,
 as in such a coordinate system, the dot product :math:`\vec{r}\cdot\vec{q}` becomes :math:`qr \cos\theta`.
 
-For our averaging there is a total of :math:`4\pi` stradians in a sphere, giving a leading factor of :math:`1/4\pi`.
+For our averaging there is a total of :math:`4\pi` steradians in a sphere, giving a leading factor of :math:`1/4\pi`.
 
 .. math::
     I(\vec{q}) = \frac{1}{4\pi}\int_{\phi=0}{\phi=2\pi}\int_{\theta=0}^{\theta=\pi}\int_{\vec{r}\in\mathbb{R}} \gamma(\vec{r}) e^{i qr \cos\theta} d\vec{r}^3 \sin(\theta) d\theta d\phi
@@ -305,9 +305,9 @@ over :math:`\mathbb{R}^3` can be written as
 Where :math:`\Omega` is a solid angle element. Letting
 
 .. math::
-    `\Gamma_3(r) = \int_\Omega \gamma(\vec{r}) d\Omega` we have,
+    \Gamma_3(r) = \int_\Omega \gamma(\vec{r}) d\Omega
 
-finally,
+we have, finally,
 
 .. math::
     I(q) = \int_0^\infty \Gamma_3(r) \frac{\sin qr}{qr} dr
