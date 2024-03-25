@@ -95,7 +95,8 @@ class PlotterWidget(PlotterBase):
             self.yscale = 'linear'
         self.title(title=value.name)
 
-    def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True):
+    def plot(self, data=None, color=None, marker=None, hide_error=False, transform=True, markeredgecolor=None,
+             markerfacecolor=None, alpha=None):
         """
         Add a new plot of self._data to the chart.
         """
@@ -170,11 +171,17 @@ class PlotterWidget(PlotterBase):
         if color is None:
             color = data.custom_color
 
-        # grid on/off, stored on self
-        ax.grid(self.grid_on)
-
         color = PlotUtilities.getValidColor(color)
         data.custom_color = color
+
+        if markeredgecolor is None:
+            markeredgecolor = color
+
+        if markerfacecolor is None:
+            markerfacecolor = color
+
+        # grid on/off, stored on self
+        ax.grid(self.grid_on)
 
         markersize = data.markersize
 
@@ -204,8 +211,8 @@ class PlotterWidget(PlotterBase):
         else:
             # plot data with/without errorbars
             if hide_error:
-                line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
-                        linestyle='', label=label, picker=True)
+                line = ax.plot(x, y, marker=marker, color=color, mfc=markerfacecolor, mec=markeredgecolor,
+                               markersize=markersize, alpha=alpha, linestyle='', label=label, picker=True)
             else:
                 dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
@@ -218,6 +225,9 @@ class PlotterWidget(PlotterBase):
                             capsize=2, linestyle='',
                             barsabove=False,
                             color=color,
+                            mfc=markerfacecolor,
+                            mec=markeredgecolor,
+                            alpha=alpha,
                             marker=marker,
                             markersize=markersize,
                             lolims=False, uplims=False,
