@@ -105,7 +105,7 @@ class GuiManager:
         # Add signal callbacks
         self.addCallbacks()
 
-        # Assure model categories are available
+        # Assure categories are present
         self.addCategories()
 
         # Create the data manager
@@ -278,7 +278,6 @@ class GuiManager:
             self.removePlotItemsInWindowsMenu(plot)
         else:
             self.addPlotItemsInWindowsMenu(plot)
-
 
     def addPlotItemsInWindowsMenu(self, plot):
         """
