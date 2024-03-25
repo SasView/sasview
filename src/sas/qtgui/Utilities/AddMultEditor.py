@@ -20,6 +20,7 @@ from sasmodels.sasview_model import load_standard_models
 from sas.sascalc.fit import models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
 
 # Local UI
 from sas.qtgui.Utilities.UI.AddMultEditorUI import Ui_AddMultEditorUI
@@ -38,6 +39,10 @@ Model = make_model_from_info(model_info)
 # Color of backgrounds to underline valid or invalid input
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
+
+# Default model names for combo boxes
+CB1_DEFAULT = 'sphere'
+CB2_DEFAULT = 'cylinder'
 
 
 class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
@@ -67,13 +72,16 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         # Flag for correctness of resulting name
         self.good_name = False
 
-        self.setupSignals()
-
+        # Create a base list of layered models that will include plugin models
+        self.layered_models = []
+        # Create base model lists
         self.list_models = self.readModels()
         self.list_standard_models = self.readModels(std_only=True)
-
-        # Fill models' comboboxes
+        # Fill models combo boxes
         self.setupModels()
+
+        # Set signals after model combo boxes are populated
+        self.setupSignals()
 
         self.setFixedSize(self.minimumSizeHint())
 
@@ -93,32 +101,23 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.cbModel2.addItems(self.list_standard_models)
 
         # set the default initial value of Model1 and Model2
-        index_ini_model1 = self.cbModel1.findText('sphere', QtCore.Qt.MatchFixedString)
-
-        if index_ini_model1 >= 0:
-            self.cbModel1.setCurrentIndex(index_ini_model1)
-        else:
-            self.cbModel1.setCurrentIndex(0)
-
-        index_ini_model2 = self.cbModel2.findText('cylinder',
-                                                  QtCore.Qt.MatchFixedString)
-        if index_ini_model2 >= 0:
-            self.cbModel2.setCurrentIndex(index_ini_model2)
-        else:
-            self.cbModel2.setCurrentIndex(0)
+        index_ini_model1 = self.cbModel1.findText(CB1_DEFAULT, QtCore.Qt.MatchFixedString)
+        self.cbModel1.setCurrentIndex(index_ini_model1 if index_ini_model1 >= 0 else 0)
+        index_ini_model2 = self.cbModel2.findText(CB2_DEFAULT, QtCore.Qt.MatchFixedString)
+        self.cbModel2.setCurrentIndex(index_ini_model2 if index_ini_model2 >= 0 else 0)
 
     def readModels(self, std_only=False):
         """ Generate list of all models """
         s_models = load_standard_models()
         models_dict = {}
         for model in s_models:
-            if model.category is None:
-                continue
-            if std_only and 'custom' in model.category:
+            # Check if plugin model is a layered model
+            self._checkIfLayered(model)
+            # Do not include uncategorized models or suppressed models
+            if model.category is None or (std_only and 'custom' in model.category) or model.name in SUPPRESSED_MODELS:
                 continue
             models_dict[model.name] = model
-
-        return sorted([model_name for model_name in models_dict])
+        return sorted(models_dict)
 
     def setupSignals(self):
         """ Signals from various elements """
@@ -130,6 +129,10 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.onApply)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Close).clicked.connect(self.close)
+
+        # Update model lists when new model selected in case one of the items selected is in self.layered_models
+        self.cbModel1.currentIndexChanged.connect(self.updateModels)
+        self.cbModel2.currentIndexChanged.connect(self.updateModels)
 
         # change displayed equation when changing operator
         self.cbOperator.currentIndexChanged.connect(self.onOperatorChange)
@@ -233,8 +236,6 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         # Update list of models in FittingWidget and AddMultEditor
         self.parent.communicate.customModelDirectoryChanged.emit()
-        # Re-read the model list so the new model is included
-        self.list_models = self.readModels()
         self.updateModels()
 
         # Notify the user
@@ -242,7 +243,6 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         msg = "Custom model "+title + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
-
 
     def write_new_model_to_file(self, fname, model1_name, model2_name, operator):
         """ Write and Save file """
@@ -268,29 +268,51 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             out_f.write(output)
 
     def updateModels(self):
-        """ Update contents of comboboxes with new plugin models """
-
-        # Keep pointers to the current indices so we can show the comboboxes with
-        # original selection
-        model_1 = self.cbModel1.currentText()
-        model_2 = self.cbModel2.currentText()
-
+        """ Update contents of combo boxes with new plugin models """
+        # Supress signals to prevent infinite loop
         self.cbModel1.blockSignals(True)
-        self.cbModel1.clear()
+        self.cbModel2.blockSignals(True)
+
+        # Re-read the model list so the new model is included
+        self.list_models = self.readModels()
+        self._updateModelLists()
+
+        self.cbModel2.blockSignals(False)
         self.cbModel1.blockSignals(False)
 
-        self.cbModel2.blockSignals(True)
+    def _updateModelLists(self):
+        """Update the combo boxes for both lists of models. The models in layered_models can only be included a single
+        time in a plugin model. The two combo boxes could be different if a layered model is selected."""
+        # Keep pointers to the current indices, so we can show the combo boxes with original selection
+        model_1 = self.cbModel1.currentText()
+        model_2 = self.cbModel2.currentText()
+        self.cbModel1.clear()
         self.cbModel2.clear()
-        self.cbModel2.blockSignals(False)
         # Retrieve the list of models
-        model_list = self.readModels(std_only=True)
-        # Populate the models comboboxes
-        self.cbModel1.addItems(model_list)
-        self.cbModel2.addItems(model_list)
+        no_layers_list = [model for model in self.list_models if model not in self.layered_models]
+        # Make copies of the original list to allow for list-specific changes
+        model_list_1 = no_layers_list if model_2 in self.layered_models else self.list_models
+        model_list_2 = no_layers_list if model_1 in self.layered_models else self.list_models
 
-        # Scroll back to the user chosen models
-        self.cbModel1.setCurrentIndex(self.cbModel1.findText(model_1))
-        self.cbModel2.setCurrentIndex(self.cbModel2.findText(model_2))
+        # Populate the models combo boxes
+        self.cbModel1.addItems(model_list_1)
+        self.cbModel2.addItems(model_list_2)
+
+        # Reset the model position
+        model1_index = self.cbModel1.findText(model_1)
+        model1_default = self.cbModel1.findText(CB1_DEFAULT)
+        model2_index = self.cbModel2.findText(model_2)
+        model2_default = self.cbModel2.findText(CB2_DEFAULT)
+        index1 = model1_index if model1_index >= 0 else model1_default if model1_default >= 0 else 0
+        index2 = model2_index if model2_index >= 0 else model2_default if model2_default >= 0 else 0
+
+        self.cbModel1.setCurrentIndex(index1)
+        self.cbModel2.setCurrentIndex(index2)
+
+    def _checkIfLayered(self, model):
+        """Check models for layered or conditional parameters. Add them to self.layered_models if criteria is met."""
+        if model.is_multiplicity_model:
+            self.layered_models.append(model.name)
 
     def onHelp(self):
         """ Display related help section """
