@@ -30,7 +30,7 @@ Options
 In addition to the checkboxes that control whether parts of the calculation are executed,
 there are options for choosing how the lamellar parameters are extracted.
 These are intended to give flexibility to users and allow for manual control in certain edge
-cases, or where there is small errors in the transformed data.
+cases, or where there are small errors in the transformed data.
 
 Automatic selection is the most robust choice, this will choose the leftmost option
 as long as it is feasible.
