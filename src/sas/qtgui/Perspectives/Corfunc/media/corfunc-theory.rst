@@ -236,7 +236,7 @@ Then the equation corresponds to the identity function if the integral
 .. math::
     \int cos(qx) cos(qy) dq
 
-is the delta function. This the case, because cosine functions form an orthogonal basis.
+is the delta function. This is the case, because cosine functions form an orthogonal basis.
 When :math:`x=y` the integral is non-zero, being an
 integral of the always positive :math:`cos^2(qx)`.
 Conversely, when :math:`x \neq y` the integral is zero.
