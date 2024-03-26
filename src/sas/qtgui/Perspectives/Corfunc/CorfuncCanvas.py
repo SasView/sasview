@@ -24,7 +24,9 @@ class CorfuncCanvasMeta(type(FigureCanvas), ABCMeta):
 class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
     """ Base class for the canvases in corfunc"""
 
-    def __init__(self, parent: CorfuncWindow, width=5, height=4, dpi=100):
+    def __init__(self, corfunc_window: CorfuncWindow, width=5, height=4, dpi=100):
+
+        self.corfunc_windows = corfunc_window
 
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
