@@ -5,7 +5,7 @@
 
 .. _SANS_Calculator_Tool:
 
-Generic SANS Calculator Tool
+Generic SAS Calculator Tool
 ============================
 
 Description
@@ -41,7 +41,7 @@ data), in a variety of shapes, such as tetrahedra, cubes or hexahedra.
 
 The scattering length density (SLD) is assumed uniform for each pixel or
 element. Depending on the data format the property is either nuclear (in units
-of 10\ :sup:`-6`\ |Ang|:sup:`-2`) (`PDB <PDB Files_>`_ file) or 
+of |Ang|:sup:`-2`) (`PDB <PDB Files_>`_ file) or 
 magnetic SLDs (`OMF <OMF Files_>`_ file) or a combination of both 
 (`SLD <SLD Files_>`_ and `VTK <VTK Files_>`_ files). For magnetic neutron
 scattering, the :ref:`magnetism` documentation gives further details and
@@ -59,9 +59,9 @@ discretized with $N$ 3-dimensional rectangular pixels.
 The elastic scattering intensity is defined as
 
 .. math::
-    I(\mathbf{Q}) = \frac{1}{V}\left\lvert\sum_j^Nv_j\beta_j\exp(i\mathbf{Q}\cdot\mathbf{r_j})\right\rvert^2
+    I(\mathbf{Q}) = \frac{1}{V}\left\lvert\sum_j^Nv_j\rho_j\exp(i\mathbf{Q}\cdot\mathbf{r_j})\right\rvert^2
 
-where $\beta_j$ and $\mathbf{r}_j$ are the scattering length density and
+where $\rho_j$ and $\mathbf{r}_j$ are the scattering length density and
 the position of the $j^\text{th}$ pixel respectively.
 
 The total volume $V_s$ of structures different than the homogenous media is
@@ -71,9 +71,9 @@ equal to
 
     V_s = \sum_j^N v_j
 
-for $\beta_j \ne 0$ where $v_j$ is the volume of the $j^\text{th}$
+for $\rho_j \ne 0$ where $v_j$ is the volume of the $j^\text{th}$
 pixel or natural atomic volume (for .pdb). For atomic structures 
-$v_j \beta_j \equiv b_j$ is the scattering length of the $j^\text{th}$ atom and
+$v_j \rho_j \equiv b_j$ is the scattering length of the $j^\text{th}$ atom and
 the natural atomic volume is given by:
 
    $\frac{\text{atomic mass}}{\text{natural molar density}\times\text{Avogadro number}}$
@@ -86,11 +86,11 @@ For non-magnetic, grid-type data the 1D orientationally averaged scatting intens
 can also be calculated using the *Debye full average* option which uses the Debye formula:
 
 .. math::
-   I(\left\lvert\mathbf{Q}\right\rvert) = \frac{1}{V}\sum_j^N v_j\beta_j \sum_k^N v_k\beta_k 
+   I(\left\lvert\mathbf{Q}\right\rvert) = \frac{1}{V}\sum_j^N v_j\rho_j \sum_k^N v_k\rho_k 
    \frac{\sin\left(\left\lvert\mathbf{Q}\right\rvert\left\lvert\mathbf{r_j}-\mathbf{r_k}\right\rvert\right)}
    {\left\lvert\mathbf{Q}\right\rvert\left\lvert\mathbf{r_j}-\mathbf{r_k}\right\rvert}
 
-*NOTE:* $\beta_j$ *displayed in the GUI may be incorrect (input
+*NOTE:* $\rho_j$ *displayed in the GUI may be incorrect (input
 parameter* solvent_SLD *) but this will not affect the scattering computation if
 the correction of the total volume V is made.*
 
@@ -104,15 +104,15 @@ For example this cube is formed of five finite elements:
    :align: center
 
 Each element has an associated scattering length
-density ($\beta_j$) for the occupied space $V_j$ and the elastic scattering
+density ($\rho_j$) for the occupied space $V_j$ and the elastic scattering
 intensity is calculated as
 
 .. math::
-    I(\mathbf{Q}) = \frac{1}{V}\left\lvert\sum_j^N\beta_j\iiint\limits_{V_j}\exp(i\mathbf{Q}\cdot\mathbf{r_j})\text{d}V\right\rvert^2
+    I(\mathbf{Q}) = \frac{1}{V}\left\lvert\sum_j^N\rho_j\iiint\limits_{V_j}\exp(i\mathbf{Q}\cdot\mathbf{r_j})\text{d}V\right\rvert^2
 
 
 Note that the Fourier transform is calculated over each element - allowing
-regions of space with little variation in $\beta$ to have larger finite
+regions of space with little variation in $\rho$ to have larger finite
 elements, and regions of interest to have much smaller finite elements, and
 hence more detail.
 
@@ -175,7 +175,7 @@ How to use the Tool
 -------------------
 Upon loading the calculator we are shown the following interface:
 
-.. figure:: gen_gui_help.png
+.. figure:: GSC_Oct282023_GUI_Index2.jpg
    :align: center
 
    ..
@@ -229,6 +229,7 @@ Inputs
           In some circumstances these textboxes will be highlighted orange, as a
           warning that with the values chosen numerical artefacts may appear due to
           the Nyquist criterion, or simulation box size.
+        * When calculating 1D data, Q values are evenly spaced in the log scale if "Log Spacing" box is checked.
 	  
 Information Panel
 ^^^^^^^^^^^^^^^^^   	  
@@ -259,14 +260,17 @@ Information Panel
        and the mousewheel used to zoom in and out.
    19) This choice appears only for grid type data and without magnetic SLD.
        This tool allows to either compute the fully oriented 2D scattering pattern,
-       or calculating the 1D orientational averaged intensity $I(Q)$ by the Debye
-       equation.
+       or calculating the 1D orientational averaged intensity $I(Q)$ by the Debye equation. One can also choose a compuation option, Debye full avg. w/ $\beta(Q)$, to calculate 1D scattering pattern together with $\beta(Q)$. $\beta(Q)$ is needed when fitting scattering patterns of concentrated solutions using the inter-particle structure factor, $S(Q)$, with the static decoupling approximation.
    20) Starts the computation of the scattering pattern.
    21) Reset GUI to the initial state.
-   
-   
-As an example :ref:`here <gsc_ex_default_data>` you can find a simple demonstration of
-the functionality of the Generic scattering calculator using the default
+   22) If a PDB file is loaded, the radius of gyration is calculated and displayed. "Rg-MASS" is the radius of gyration based on the mass of all atoms in a molecule. "RG-SLD" is the radius of gyration based on the scattering length of all atoms.
+   23) If the option, Debye full avg. w/ $\beta(Q)$, is chosen, one has the option to check the box "Export Model". Once checked, one can input a file name in the box below. During the computation, the program then exports the calculated normalized form factor, $P(Q)$, and $\beta(Q)$ into this file that automatically become a model in the "Plugin Models". The model name is the same as the file name given in the blox below "Export Model". 
+
+One example is given here ( Click :ref:`here <gsc_ex_customModel_data>` ) to illustrate how to calculate $P(Q)$ and $\beta(Q)$ using a PDB file of a protein. These are 1D functions after averaging over all orientiations of proteins. The program can generate a custom model function, which can be used to fit the 1D small angle scattering data. 
+
+  
+One other example ( Click :ref:`here <gsc_ex_default_data>` ) is a simple demonstration of
+the functionality of the Generic scattering calculator to calculate the 2D scattering pattern using the default
 starting values with no files loaded.
 
 After computation the result will appear in the
@@ -370,9 +374,9 @@ the SLD at the centre of each element. This weighted average is given by:
 
 .. math::
 
-   \bar{\beta} = \frac{\sum\limits_j^n \beta_j r_j^{\prime -2}}{\sum\limits_j^nr_j^{\prime -2}}
+   \bar{\rho} = \frac{\sum\limits_j^n \rho_j r_j^{\prime -2}}{\sum\limits_j^nr_j^{\prime -2}}
 
-Where $\bar{\beta}$ is the estimated SLD for an element and $\beta_j$, $r'_j$
+Where $\bar{\rho}$ is the estimated SLD for an element and $\rho_j$, $r'_j$
 are the SLDs and distances from the centre of the element of each of the $n$
 vertices of the element respectively. $r'_j$ is taken as:
 
@@ -638,3 +642,4 @@ References
 
 | 2015-05-01 Steve King 
 | 2021-09-14 Robert Bourne
+| 2023-10-30 Yun Liu
