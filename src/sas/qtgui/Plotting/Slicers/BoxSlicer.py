@@ -13,11 +13,11 @@ class BoxInteractor(BaseInteractor, SlicerModel):
     by manipulations.py
 
     This class uses two other classes, HorizontalLines and VerticalLines,
-    to define the rectangle area: -x, x ,y, -y. It is subclassed by
+    to define the rectangle area: x1, x2 ,y1, y2. It is subclassed by
     BoxInteractorX and BoxInteracgtorY which define the direction of the
-    average. BoxInteractorX averages all the points from -y to +y as a
+    average. BoxInteractorX averages all the points from y1 to y2 as a
     function of Q_x and BoxInteractorY averages all the points from
-    -x to +x as a function of Q_y
+    x1 to x2 as a function of Q_y
     """
 
     def __init__(self, base, axes, item=None, color='black', zorder=3, direction=None):
@@ -37,18 +37,22 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             self.ywidth = 1.0 * (self.data.ymax - self.data.ymin) / 2
             # when reach qmax reset the graph
             self.qmax = max(numpy.fabs(self.data.ymax), numpy.fabs(self.data.ymin))
-        else:
+        elif self.direction == "X":
             self.xwidth = 1.0 * (self.data.xmax - self.data.xmin) / 2
             self.ywidth = 0.1 * (self.data.ymax - self.data.ymin) / 2
             # when reach qmax reset the graph
             self.qmax = max(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
+        else:
+            msg = "post data:no Box Average direction was supplied"
+            raise ValueError(msg)
 
+        # set the minimum of the box width (x) and height (y) to be
+        # 0.5% of the data2D range in that direction
         self.width_min = 0.005 * (self.data.xmax - self.data.xmin)
         self.height_min = 0.005 * (self.data.ymax - self.data.ymin)
 
         # center of the box
         # puts the center of box at the middle of the data q-range
-
         self.center_x = (self.data.xmin + self.data.xmax) /2
         self.center_y = (self.data.ymin + self.data.ymax) /2
 
@@ -56,14 +60,15 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.nbins = 100
         # If True, I(|Q|) will be return, otherwise,
         # negative q-values are allowed
-        # Should this be set to True??
+        # Default to true on initialize
         self.fold = True
         # reference of the current  Slab averaging
         self.averager = None
         # Flag to determine if the current figure has moved
         # set to False == no motion , set to True== motion
+        # Default to False at initialize (nothing has moved yet)
         self.has_move = False
-        # Create vertical and horizaontal lines for the rectangle
+        # Create vertical and horizontal lines for the rectangle
         self.horizontal_lines = HorizontalDoubleLine(self,
                                                      self.axes,
                                                      color='blue',
@@ -84,7 +89,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                                  center_y=self.center_y)
         self.vertical_lines.qmax = self.qmax
 
-        # PointINteractor determins the center of the box
+        # PointInteractor determines the center of the box
         self.center = PointInteractor(self,
                                       self.axes, color='grey',
                                       zorder=zorder,
@@ -92,10 +97,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                       center_y=self.center_y)
 
         # draw the rectangle and plot the data 1D resulting
-        # of averaging data2D
-        self.update()
-        self._post_data()
-        self.draw()
+        # from averaging of the data2D
+        self.update_and_post()
+        # Set up the default slicer parameters for the parameter editor
+        # window (in SlicerModel.py)
         self.setModelFromParams()
 
     def update_and_post(self):
@@ -175,7 +180,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         if self.direction is None:
             self.direction = direction
 
-
         x_min = self.horizontal_lines.x2
         x_max = self.horizontal_lines.x1
         self.xwidth = numpy.fabs(x_max - x_min)/2
@@ -205,12 +209,13 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         else:
             msg = "post data:no Box Average direction was supplied"
             raise ValueError(msg)
-        # # Average data2D given Qx or Qy
+
+        # Average data2D given Qx or Qy
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                             bin_width=bin_width)
         box.fold = self.fold
         boxavg = box(self.data)
-        # 3 Create Data1D to plot
+        # Create Data1D to plot
         if hasattr(boxavg, "dxl"):
             dxl = boxavg.dxl
         else:
@@ -246,7 +251,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         #new_plot. = "2daverage" + self.data.name
         new_plot.id = (self.averager.__name__) + self.data.name
-        new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
+        # Create id to remove plots after changing slicer so they don't keep
+        # showing up after being closed
+        new_plot.type_id = "Slicer" + self.data.name
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
@@ -318,12 +325,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                      width=self.xwidth, height=self.ywidth)
         self.vertical_lines.update(center=self.center,
                                    width=self.xwidth, height=self.ywidth)
-        # compute the new error and sum given values of params
+        # Compute and plot the 1D average based on these parameters
         self._post_data()
-
-        #self.horizontal_lines.update(x=self.x, y=self.y)
-        #self.vertical_lines.update(x=self.x, y=self.y)
-        #self.post_data(nbins=None)
         self.draw()
 
     def draw(self):
@@ -364,9 +367,9 @@ class PointInteractor(BaseInteractor):
                                      linestyle='-', marker='',
                                      color=self.color,
                                      visible=True)[0]
-        # Flag to determine the motion this point
+        # Flag to determine if this point has moved
         self.has_move = False
-        # connecting the marker to allow them to move
+        # connecting the marker to allow it to be moved
         self.connect_markers([self.center_marker])
         # Update the figure
         self.update()
@@ -438,12 +441,12 @@ class PointInteractor(BaseInteractor):
 class VerticalDoubleLine(BaseInteractor):
     """
     Draw 2 vertical lines that can move symmetrically in opposite directions in x and centered on
-    a point (PointInteractor). It also defines the left and right y positions of a box.
+    a point (PointInteractor). It also defines the top and bottom y positions of a box.
     """
     def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
                  center_x=0.0, center_y=0.0):
         BaseInteractor.__init__(self, base, axes, color=color)
-        # Initialization the class
+        # Initialization of the class
         self.markers = []
         self.axes = axes
         # Center coordinates
@@ -463,12 +466,12 @@ class VerticalDoubleLine(BaseInteractor):
         delta = self.x1 - self.center_x
         self.x2 = self.center_x - delta
         self.save_x2 = self.x2
-        # # save the color of the line
+        # save the color of the line
         self.color = color
         # the height of the rectangle
         self.half_height = numpy.fabs(y)
         self.save_half_height = numpy.fabs(y)
-        # the with of the rectangle
+        # the width of the rectangle
         self.half_width = numpy.fabs(self.x1 - self.x2) / 2
         self.save_half_width = numpy.fabs(self.x1 - self.x2) / 2
         # Create marker
@@ -487,7 +490,7 @@ class VerticalDoubleLine(BaseInteractor):
                                         color=self.color, visible=True)[0]
         # Flag to determine if the lines have moved
         self.has_move = False
-        # Connection the marker and draw the pictures
+        # Connect the marker and draw the picture
         self.connect_markers([self.right_marker])
         self.update()
 
@@ -520,12 +523,12 @@ class VerticalDoubleLine(BaseInteractor):
         :param height: is the height of the new rectangle
         :param center: provided x, y  coordinates of the center point
         """
-        # Save the new height, witdh of the rectangle if given as a param
+        # Save the new height, width of the rectangle if given as a param
         if width is not None:
             self.half_width = width
         if height is not None:
             self.half_height = height
-        # If new  center coordinates are given draw the rectangle
+        # If new center coordinates are given draw the rectangle
         # given these value
         if center is not None:
             self.center_x = center.x
@@ -614,7 +617,7 @@ class HorizontalDoubleLine(BaseInteractor):
                  center_x=0.0, center_y=0.0):
 
         BaseInteractor.__init__(self, base, axes, color=color)
-        # Initialization the class
+        # Initialization of the class
         self.markers = []
         self.axes = axes
         # Center coordinates
@@ -641,7 +644,7 @@ class HorizontalDoubleLine(BaseInteractor):
                                          pickradius=5, label="pick",
                                          zorder=zorder, visible=True)[0]
 
-        # Define 2 horizotnal lines
+        # Define 2 horizontal lines
         self.top_line = self.axes.plot([self.x1, -self.x1], [self.y1, self.y1],
                                        linestyle='-', marker='',
                                        color=self.color, visible=True)[0]
@@ -651,7 +654,7 @@ class HorizontalDoubleLine(BaseInteractor):
                                           color=self.color, visible=True)[0]
         # Flag to determine if the lines have moved
         self.has_move = False
-        # connection the marker and draw the pictures
+        # connect the marker and draw the picture
         self.connect_markers([self.top_marker])
         self.update()
 
@@ -684,7 +687,7 @@ class HorizontalDoubleLine(BaseInteractor):
         :param height: is the height of the new rectangle
         :param center: provided x, y  coordinates of the center point
         """
-        # Save the new height, witdh of the rectangle if given as a param
+        # Save the new height, width of the rectangle if given as a param
         if width is not None:
             self.half_width = width
         if height is not None:
@@ -739,7 +742,7 @@ class HorizontalDoubleLine(BaseInteractor):
         self.has_move = False
         self.base.moveend(ev)
 
-    def restore(self):
+    def restore(self, ev):
         """
         Restore the roughness for this layer.
         """
@@ -760,6 +763,7 @@ class HorizontalDoubleLine(BaseInteractor):
         self.half_height = numpy.fabs(self.y1) - self.center_y
         self.has_move = True
         self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """
