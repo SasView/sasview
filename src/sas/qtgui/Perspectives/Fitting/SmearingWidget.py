@@ -60,6 +60,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
 
         self.setupUi(self)
 
+        # Set parent to read parameters from fitting widget
+        self.parent = parent
         # Local model for holding data
         self.model = None
         # Mapper for model update
@@ -147,7 +149,6 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.cbSmearing.addItem("None")
         if self.data is None:
             self.setElementsVisibility(False)
-            return
         # Find out if data has dQ or is SESANS
         self.current_smearer = smear_selection(self.data, self.kernel_model)
         self.setSmearInfo()
@@ -159,10 +160,13 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             index_to_show = 1 if keep_order else index_to_show
 
         if self.kernel_model is not None:
-            # Only give custom smearing options after the model is defined
-            if isinstance(self.data, Data1D):
+            # Only give custom smearing options after the model is defined, but always offer them
+            #  regardless of the data state
+            if isinstance(self.data, Data1D) or not self.parent.is2D:
+                # 1D data smearing options
                 self.cbSmearing.addItems(SMEARING_1D)
             else:
+                # 2D smearing options
                 self.cbSmearing.addItems(SMEARING_2D)
 
         self.cbSmearing.blockSignals(False)
@@ -177,6 +181,10 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Callback for smearing combobox index change
         """
         text = self.cbSmearing.currentText()
+        # Ensure smearing selector is enabled initially in case swapped data from SESANS
+        self.cbSmearing.setEnabled(True)
+        if self.data is None:
+            return
         if text == 'None':
             self.setElementsVisibility(False)
             self.current_smearer = None
