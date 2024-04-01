@@ -47,9 +47,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             raise ValueError(msg)
 
         # set the minimum of the box width (x) and height (y) to be
-        # 0.5% of the data2D range in that direction
-        self.width_min = 0.005 * (self.data.xmax - self.data.xmin)
-        self.height_min = 0.005 * (self.data.ymax - self.data.ymin)
+        # 2% of the data2D range in that direction
+        self.width_min = 0.02 * (self.data.xmax - self.data.xmin)
+        self.height_min = 0.02 * (self.data.ymax - self.data.ymin)
 
         # center of the box
         # puts the center of box at the middle of the data q-range
@@ -344,6 +344,51 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self._post_data()
         self.draw()
 
+    def validate(self, param_name, param_value):
+        """
+        Validate input from user.
+        Values get checked at apply time.
+        NOTE: If the width becomes arbitrarily small, which a user could in
+              fact type into the box will cause an error here in a way that is
+              difficult to achieve graphically. Thus we use a min width
+              instead, based on a percentage of the total q range of the
+              detector. For sanity we also make sure nobody made those limits
+              negative. This does pose some arbitrary limitations - see to do
+              below
+
+        ..todo:: In principle simply restricting the width to be greater than
+                 0 is not enough to guarantee points will exist in the ROI,
+                 particularly if a future detector has "holes" in it with no
+                 data. Note that a min width parameter is also almost
+                 impossible to define universally given the difference between
+                 detectors (particularly X-ray and neutron). Ideally there
+                 needs to be a boolean function to test if the ROI contains
+                 data points.
+
+        """
+        isValid = True
+
+        if param_name =='x_width':
+            # Can't be negative or smaller than self.width_min if a reasonable
+            # min is provided. NOTE: this is actually the half width or width
+            # to or from the center
+            if param_value <= 0 or param_value <= self.width_min:
+                print("The box width is too small. Please adjust.")
+                isValid = False
+        if param_name =='y_width':
+            # Can't be negative or smaller than self.height_min if a reasonable
+            # min is provided. NOTE: this is actually the half height or height
+            # to or from the center
+            if param_value <= 0 or param_value <= self.height_min:
+                print("The box height is too small. Please adjust.")
+                isValid = False
+        elif param_name == 'nbins':
+            # Can't be negative or 0
+            if param_value < 1:
+                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                isValid = False
+        return isValid
+
     def draw(self):
         """
         Draws the Canvas using the canvas.draw from the calling class
@@ -588,6 +633,7 @@ class VerticalDoubleLine(BaseInteractor):
     def moveend(self, ev):
         """
         After a dragging motion reset the flag self.has_move to False
+        and update the 1D average plot
         """
         self.has_move = False
         self.base.moveend(ev)
@@ -606,15 +652,30 @@ class VerticalDoubleLine(BaseInteractor):
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
+        In principle, the move must not create a box without any data points
+        in it. For now (see to do below), the move cannot create a negative
+        delta. This seems to be sufficient for now. It is not clear why this
+        is not true in the case when entering data manually from the editor.
+
+        ..todo:: In principle simply restricting the width to be greater than
+                 0 is not enough to guarantee points will exist in the ROI,
+                 particularly if a future detector has "holes" in it with no
+                 data. Note that a min width parameter is also almost
+                 impossible to define universally given the difference between
+                 detectors (particularly X-ray and neutron). Ideally there
+                 needs to be a boolean function to test if the ROI contains
+                 data points.
         """
-        self.x1 = x
-        delta = self.x1 - self.center_x
-        self.x2 = self.center_x - delta
-        self.half_width = numpy.fabs(self.x1 - self.x2) / 2
-        self.has_move = True
-        self.x = x
-        self.base.update()
-        self.base.draw()
+        if x - self.center_x <= 0:
+            self.restore(ev)
+        else:
+            self.x1 = x
+            delta = self.x1 - self.center_x
+            self.x2 = self.center_x - delta
+            self.half_width = delta
+            self.has_move = True
+            self.base.update()
+            self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -753,6 +814,7 @@ class HorizontalDoubleLine(BaseInteractor):
     def moveend(self, ev):
         """
         After a dragging motion reset the flag self.has_move to False
+        and update the 1D average plot
         """
         self.has_move = False
         self.base.moveend(ev)
@@ -771,14 +833,30 @@ class HorizontalDoubleLine(BaseInteractor):
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
+        In principle, the move must not create a box without any data points
+        in it. For now (see to do below), the move cannot create a negative
+        delta. This seems to be sufficient for now. It is not clear why this
+        is not true in the case when entering data manually from the editor.
+
+        ..todo:: In principle simply restricting the width to be greater than
+                 0 is not enough to guarantee points will exist in the ROI,
+                 particularly if a future detector has "holes" in it with no
+                 data. Note that a min width parameter is also almost
+                 impossible to define universally given the difference between
+                 detectors (particularly X-ray and neutron). Ideally there
+                 needs to be a boolean function to test if the ROI contains
+                 data points.
         """
-        self.y1 = y
-        delta = self.y1 - self.center_y
-        self.y2 = self.center_y - delta
-        self.half_height = numpy.fabs(self.y1) - self.center_y
-        self.has_move = True
-        self.base.update()
-        self.base.draw()
+        if y - self.center_y <=0:
+            self.restore(ev)
+        else:
+            self.y1 = y
+            delta = self.y1 - self.center_y
+            self.y2 = self.center_y - delta
+            self.half_height = delta
+            self.has_move = True
+            self.base.update()
+            self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -808,20 +886,6 @@ class BoxInteractorX(BoxInteractor):
         from sasdata.data_util.manipulations import SlabX
         super()._post_data(SlabX, direction="X")
 
-    def validate(self, param_name, param_value):
-        """
-        Validate input from user.
-        Values get checked at apply time.
-        """
-        isValid = True
-
-        if param_name == 'nbins':
-            # Can't be 0
-            if param_value < 1:
-                print("Number of bins cannot be less than or equal to 0. Please adjust.")
-                isValid = False
-        return isValid
-
 
 class BoxInteractorY(BoxInteractor):
     """
@@ -841,17 +905,3 @@ class BoxInteractorY(BoxInteractor):
         """
         from sasdata.data_util.manipulations import SlabY
         super()._post_data(SlabY, direction="Y")
-
-    def validate(self, param_name, param_value):
-        """
-        Validate input from user.
-        Values get checked at apply time.
-        """
-        isValid = True
-
-        if param_name == 'nbins':
-            # Can't be 0
-            if param_value < 1:
-                print("Number of bins cannot be less than or equal to 0. Please adjust.")
-                isValid = False
-        return isValid
