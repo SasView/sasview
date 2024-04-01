@@ -194,18 +194,33 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                 msg = "post data:cannot average , averager is empty"
                 raise ValueError(msg)
             self.averager = new_slab
+        # Calculate the bin width from number of points. The only tricky part
+        # is when the box stradles 0 but 0 is not the center.
+        #
+        # todo: This should probably NOT be calculated here. Instead it should
+        #       be calculated as part of manipulations.py which already does
+        #       almost the same math to calculate the bins anyway. See for
+        #       example under "Build array of Q intervals" in the _avg method
+        #       of the _Slab class. Moreover, scripts would more likely prefer
+        #       to pass number of points than bin width anyway. This will
+        #       however be an API change!
+        #            Added by PDB -- 3/31/2024
         if self.direction == "X":
-            if self.fold:
+            if self.fold and (x_max * x_min <= 0):
                 x_low = 0
+                x_high = max(abs(x_min),abs(x_max))
             else:
-                x_low = numpy.fabs(x_min)
-            bin_width = (x_max + x_low) / self.nbins
+                x_low = x_min
+                x_high = x_max
+            bin_width = (x_high - x_low) / self.nbins
         elif self.direction == "Y":
-            if self.fold:
+            if self.fold and (y_max * y_min >= 0):
                 y_low = 0
+                y_high = max(abs(y_min),abs(y_max))
             else:
-                y_low = numpy.fabs(y_min)
-            bin_width = (y_max + y_low) / self.nbins
+                y_low = y_min
+                y_high = y_max
+            bin_width = (y_high + y_low) / self.nbins
         else:
             msg = "post data:no Box Average direction was supplied"
             raise ValueError(msg)
