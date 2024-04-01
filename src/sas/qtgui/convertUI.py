@@ -4,6 +4,7 @@
 #  Arguments: -f -> Force the UI elements to be rebuilt, even if they exist
 import os
 import sys
+import subprocess
 
 def run_compiler(compiler_main, name, *args):
     """ Wrapper to run a compiler, either pyrrc or pyuic"""
