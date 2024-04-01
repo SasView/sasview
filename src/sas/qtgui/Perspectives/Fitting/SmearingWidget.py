@@ -125,14 +125,12 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         # retain the combobox index
         old_index = self.cbSmearing.currentIndex()
-        self.cbSmearing.clear()
-        self.cbSmearing.addItem("None")
         self.gAccuracy.setVisible(False)
         self.data = data
         if data is None:
             self.setElementsVisibility(False)
         model = self.kernel_model
-        self.updateKernelModel(model, keep_order = True, old_index=old_index)
+        self.updateKernelModel(model, keep_order=True, old_index=old_index)
 
     def updateKernelModel(self, kernel_model=None, keep_order=False, old_index=None):
         """
@@ -160,19 +158,15 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.cbSmearing.addItem(SMEARING_QD)
             index_to_show = 1 if keep_order else index_to_show
 
-        if self.kernel_model is None:
-            # No model definend yet - just use data file smearing, if any
-            self.cbSmearing.blockSignals(False)
-            self.cbSmearing.setCurrentIndex(index_to_show)
-            return
+        if self.kernel_model is not None:
+            # Only give custom smearing options after the model is defined
+            if isinstance(self.data, Data1D):
+                self.cbSmearing.addItems(SMEARING_1D)
+            else:
+                self.cbSmearing.addItems(SMEARING_2D)
 
-        if isinstance(self.data, Data1D):
-            self.cbSmearing.addItems(SMEARING_1D)
-        else:
-            self.cbSmearing.addItems(SMEARING_2D)
         self.cbSmearing.blockSignals(False)
-
-        self.cbSmearing.setCurrentIndex(index_to_show)
+        self.cbSmearing.setCurrentIndex(index_to_show if index_to_show >= 0 else 0)
 
     def smearer(self):
         """ Returns the current smearer """
