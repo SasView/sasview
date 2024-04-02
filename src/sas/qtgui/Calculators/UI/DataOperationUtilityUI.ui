@@ -417,15 +417,18 @@ Append(Combine): |</string>
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="cmdReset">
+      <widget class="QPushButton" name="cmdClear">
        <property name="minimumSize">
         <size>
          <width>75</width>
          <height>25</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Clear data selections and graphs in the Data Operations panel.</string>
+       </property>
        <property name="text">
-        <string>Reset</string>
+        <string>Clear</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
