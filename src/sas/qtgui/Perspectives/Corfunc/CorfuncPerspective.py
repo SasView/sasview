@@ -276,7 +276,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.mapper.toFirst()
 
-        self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self.slider.extrapolation_parameters = self.extrapolation_paramameters
         self._q_space_plot.draw_data()
 
     def _run(self):
@@ -292,7 +292,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         calculator = CorfuncCalculator(
             data=self.data,
-            extrapolation_parameters=self.extrapolation_parmameters,
+            extrapolation_parameters=self.extrapolation_paramameters,
             tangent_method=self._tangent_method,
             long_period_method=self._long_period_method)
 
@@ -438,7 +438,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         return False
 
     @property
-    def extrapolation_parmameters(self) -> Optional[ExtrapolationParameters]:
+    def extrapolation_paramameters(self) -> Optional[ExtrapolationParameters]:
         if self.data is not None:
             return ExtrapolationParameters(
                 min(self.data.x),
@@ -508,7 +508,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Reconnect model
         self.model.itemChanged.connect(self.model_changed)
 
-        self.slider.extrapolation_parameters = self.extrapolation_parmameters
+        self.slider.extrapolation_parameters = self.extrapolation_paramameters
         self.slider.setEnabled(True)
 
         self.model_changed(None)
@@ -558,7 +558,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         #       processed
         #
 
-        params = self.extrapolation_parmameters._replace(point_1=safe_float(text))
+        params = self.extrapolation_paramameters._replace(point_1=safe_float(text))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
@@ -572,7 +572,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         #       processed
         #
 
-        params = self.extrapolation_parmameters._replace(point_2=safe_float(text))
+        params = self.extrapolation_paramameters._replace(point_2=safe_float(text))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
@@ -586,7 +586,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         #       processed
         #
 
-        params = self.extrapolation_parmameters._replace(point_3=safe_float(text))
+        params = self.extrapolation_paramameters._replace(point_3=safe_float(text))
         self.slider.extrapolation_parameters = params
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
