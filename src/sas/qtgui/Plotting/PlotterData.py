@@ -34,7 +34,7 @@ class DataRole(Enum):
 class Data1D(PlottableData1D, LoadData1D):
     """
     """
-    def __init__(self, x=None, y=None, dx=None, dy=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None, isSesans=False):
         """
         """
         if x is None:
@@ -42,7 +42,7 @@ class Data1D(PlottableData1D, LoadData1D):
         if y is None:
             y = []
         PlottableData1D.__init__(self, x, y, dx, dy)
-        LoadData1D.__init__(self, x, y, dx, dy)
+        LoadData1D.__init__(self, x, y, dx, dy, isSesans=isSesans)
         self.id = None
         self.list_group_id = []
         self.group_id = None
@@ -93,6 +93,9 @@ class Data1D(PlottableData1D, LoadData1D):
         self.yaxis(data1d._yaxis, data1d._yunit)
         self.title = data1d.title
         self.isSesans = data1d.isSesans
+        if self.isSesans:  # the data is SESANS so update the x and y units
+            self.x_unit = 'A'
+            self.y_unit = 'pol'
         
     def __str__(self):
         """
