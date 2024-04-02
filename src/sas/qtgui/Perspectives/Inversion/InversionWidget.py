@@ -454,6 +454,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.updateDataList(self._data)
             self.setQ()
             self.setCurrentData(self.dataList.itemData(data_index))
+            self.updateGuiValues(data_index)
             self.enableButtons()
         except KeyError:
             # Data might be removed
@@ -826,10 +827,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
         
 
-    def updateDynamicGuiValues(self):
+    def updateDynamicGuiValues(self, index=None):
         """update gui with suggested parameters"""
-        pr = self._calculator
-        alpha = self._calculator.suggested_alpha
+        if index is not None:
+            self.setCurrentData(self.dataList.itemData(index))
+            pr = self.batchResults[self.logic.data.name] 
+            alpha = self.batchResults[self.logic.data.name].suggested_alpha
+        else:    
+            pr = self._calculator
+            alpha = self._calculator.suggested_alpha
         self.model.setItem(WIDGETS.W_MAX_DIST,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
@@ -838,12 +844,17 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self.enableButtons()
 
-    def updateGuiValues(self):
-        pr = self._calculator
-        out = self._calculator.out
-        cov = self._calculator.cov
-        elapsed = self._calculator.elapsed
-        alpha = self._calculator.suggested_alpha
+    def updateGuiValues(self, index=None):
+        if index is not None:
+            self.setCurrentData(self.dataList.itemData(index))
+            pr = self.batchResults[self.logic.data.name] 
+        else:    
+            pr = self._calculator
+            
+        out = pr.out
+        cov = pr.cov
+        elapsed = pr.elapsed
+        alpha = pr.suggested_alpha
         self.check_q_high(pr.get_qmax())
         self.check_q_low(pr.get_qmin())
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
@@ -932,7 +943,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataList.setCurrentIndex(0)
             self.prPlot = None
             self.dataPlot = None
-            self.updateGuiValues()
+            self.updateGuiValues(index=self.dataList.currentIndex())
 
 
 
@@ -970,7 +981,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.d_max = params['d_max']
         self._calculator.nfunc = params['nfunc']
         self.nTermsSuggested = self._calculator.nfunc
-        self.updateDynamicGuiValues()
         # self.acceptAlpha() // suggested values have been disabled to avoid inference with batch
         # self.acceptNoTerms()
         self._calculator.background = params['background']
@@ -1039,6 +1049,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             # If no data sets left, end batch calculation
             self.isCalculating = False
             self.batchComplete = []
+            self.updateGuiValues(index=self.dataList.currentIndex())
             self.calculateAllButton.setText("Calculate All")
             self.enableButtons()
             self.showBatchOutput()
@@ -1243,6 +1254,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.acceptAlpha()
             self.acceptNoTerms()
             self.startThread()
+            self.updateDynamicGuiValues()
+
 
     def _estimateDynamicNTUpdate(self, output_tuple):
         """
@@ -1265,6 +1278,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.acceptAlpha()
             self.acceptNoTerms()
             self.acceptNoTerms()
+            self.updateGuiValues()
             self.startThread()
 
     def _calculateCompleted(self, out, cov, pr, elapsed):
@@ -1310,12 +1324,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             # Udpate internals and GUI
         self.updateDataList(self._data)  
         self._allowPlots = True
-        self.updateGuiValues()
+        
         self.saveToBatchResults()
         if self.isBatch:
             self.batchComplete.append(self.dataList.currentIndex())
             self.startNextBatchItem()
         else:
+            self.updateGuiValues()
             self.isCalculating = False
             self.enableButtons()
 
