@@ -169,7 +169,9 @@ class Invertor(Pinvertor):
             if value <= 0.0:
                 msg = "Invertor: d_max must be greater than zero."
                 msg += "Correct that entry before proceeding"
+                value = 0.001
                 raise ValueError(msg)
+            
             return self.set_dmax(value)
         elif name == 'q_min':
             if value is None:
