@@ -181,28 +181,29 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Callback for smearing combobox index change
         """
         text = self.cbSmearing.currentText()
+        smear = None
         # Ensure smearing selector is enabled initially in case swapped data from SESANS
         self.cbSmearing.setEnabled(True)
-        if self.data is None:
-            return
         if text == 'None':
             self.setElementsVisibility(False)
             self.current_smearer = None
         elif text == "Use dQ Data":
             self.setElementsVisibility(True)
             self.setDQLabels()
-            self.onDQSmear()
+            smear = self.onDQSmear
         elif text == "Custom Pinhole Smear":
             self.setElementsVisibility(True)
             self.setPinholeLabels()
-            self.onPinholeSmear()
+            smear = self.onPinholeSmear
         elif text == "Custom Slit Smear":
             self.setElementsVisibility(True)
             self.setSlitLabels()
-            self.onSlitSmear()
+            smear = self.onSlitSmear
         elif text == "Hankel Transform":
             self.setElementsVisibility(False)
             self.cbSmearing.setEnabled(False)  # turn off ability to change smearing; no other options for sesans
+        if self.data and callable(smear):
+            smear()
         self.smearingChangedSignal.emit()
 
     def onModelChange(self):
