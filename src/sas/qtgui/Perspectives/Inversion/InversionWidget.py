@@ -446,7 +446,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """ Tells the caller this widget can accept new dataset """
         return not self.logic.data_is_loaded
 
-    def displayChange(self, data_index):
+    def displayChange(self, data_index = None):
         """Switch to another item in the data list"""
         if isinstance(self._data, list):
             return
@@ -454,6 +454,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.updateDataList(self._data)
             self.setQ()
             self.setCurrentData(self.dataList.itemData(data_index))
+            self.updateDynamicGuiValues(data_index)
             self.updateGuiValues(data_index)
             self.enableButtons()
         except KeyError:
@@ -829,8 +830,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def updateDynamicGuiValues(self, index=None):
         """update gui with suggested parameters"""
-        if index is not None:
-            self.setCurrentData(self.dataList.itemData(index))
+        if index:
+            self.logic.data = GuiUtils.dataFromItem(self.dataList.itemData(index))
             pr = self.batchResults[self.logic.data.name] 
             alpha = self.batchResults[self.logic.data.name].suggested_alpha
         else:    
@@ -845,9 +846,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.enableButtons()
 
     def updateGuiValues(self, index=None):
-        if index is not None:
-            self.setCurrentData(self.dataList.itemData(index))
+        if index:
+            self.logic.data = GuiUtils.dataFromItem(self.dataList.itemData(index))
             pr = self.batchResults[self.logic.data.name] 
+
         else:    
             pr = self._calculator
             
@@ -1050,6 +1052,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.isCalculating = False
             self.batchComplete = []
             self.updateGuiValues(index=self.dataList.currentIndex())
+            self.updateDynamicGuiValues(index=self.dataList.currentIndex())
             self.calculateAllButton.setText("Calculate All")
             self.enableButtons()
             self.showBatchOutput()
