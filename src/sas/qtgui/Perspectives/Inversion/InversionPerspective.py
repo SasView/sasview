@@ -203,7 +203,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
              return
             
 
-    def updateFromParameters(self, params: dict, tab_name):
+    def _calculateUpdate(self, params: dict, tab_name):
         """ Update the perspective using a dictionary of parameters
         e.g. those loaded via open project or open analysis menu items"""
         raise NotImplementedError("Update from parameters not implemented yet.")
