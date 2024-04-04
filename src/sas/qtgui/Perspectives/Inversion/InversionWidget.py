@@ -42,7 +42,7 @@ def is_float(value):
 
 # Default Values for inputs
 NUMBER_OF_TERMS = 10
-REGULARIZATION = 0.0001
+REGULARIZATION = 0.01
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
 
@@ -453,7 +453,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         try:
             self.updateDataList(self._data)
             self.setQ()
-            self.setCurrentData(self.dataList.itemData(data_index))
+            self.setCurrentData(self.dataList.itemData(data_index)) 
             self.updateDynamicGuiValues(data_index)
             self.updateGuiValues(data_index)
             self.enableButtons()
@@ -622,12 +622,16 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopEstimationThread()
         self.stopEstimateNTThread()
         self.updateGuiValues()
-        # Show any batch calculations that successfully completed
-        if self.isBatch and self.batchResultsWindow is not None:                    
-            self.showBatchOutput()
+
         self.isBatch = False
         self.isCalculating = False
+        self.calculateAllButton.setText("Calculate All")
         self.enableButtons()
+        # Show any batch calculations that successfully completed
+        if self.isBatch and self.batchResultsWindow is not None:                    
+            #self.showBatchOutput()
+            self.updateGuiValues(index=self.dataList.currentIndex())
+            self.updateDynamicGuiValues(index=self.dataList.currentIndex())
         
     def onHelp(self):
         """
@@ -830,7 +834,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def updateDynamicGuiValues(self, index=None):
         """update gui with suggested parameters"""
-        if index:
+        if index is not None and index>0:
             self.logic.data = GuiUtils.dataFromItem(self.dataList.itemData(index))
             pr = self.batchResults[self.logic.data.name] 
             alpha = self.batchResults[self.logic.data.name].suggested_alpha
@@ -846,7 +850,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.enableButtons()
 
     def updateGuiValues(self, index=None):
-        if index:
+        #if index is not None and index>0:
+        if index is not None and index>=0:
             self.logic.data = GuiUtils.dataFromItem(self.dataList.itemData(index))
             pr = self.batchResults[self.logic.data.name] 
 
@@ -887,18 +892,25 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                    QtGui.QStandardItem(
                                        "{:.3g}".format(
                                            pr.get_pos_err(out, cov))))
-        if self.prPlot is not None:
-            title = self.prPlot.name
-            self.prPlot.plot_role = DataRole.ROLE_STAND_ALONE
-            GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
-            self.communicate.plotRequestedSignal.emit([self._data, self.prPlot], None)
+        if self.prPlot is not None:        
+            try:
+                title = self.prPlot.name
+                self.prPlot.plot_role = DataRole.ROLE_STAND_ALONE
+                GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
+                self.communicate.plotRequestedSignal.emit([self._data, self.prPlot], None)
+            except AssertionError:
+                pass
+        
         if self.dataPlot is not None:
-            title = self.dataPlot.name
-            self.dataPlot.plot_role = DataRole.ROLE_DEFAULT
-            self.dataPlot.symbol = "Line"
-            self.dataPlot.show_errors = False
-            GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-            self.communicate.plotRequestedSignal.emit([self._data, self.dataPlot], None)
+            try:
+                title = self.dataPlot.name
+                self.dataPlot.plot_role = DataRole.ROLE_DEFAULT
+                self.dataPlot.symbol = "Line"
+                self.dataPlot.show_errors = False
+                GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
+                self.communicate.plotRequestedSignal.emit([self._data, self.dataPlot], None)
+            except AssertionError:
+                pass
         self.enableButtons()
 
     def removeData(self, data_list=None):
@@ -945,7 +957,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataList.setCurrentIndex(0)
             self.prPlot = None
             self.dataPlot = None
-            self.updateGuiValues(index=self.dataList.currentIndex())
+            self.updateGuiValues(index=0)
 
 
 
