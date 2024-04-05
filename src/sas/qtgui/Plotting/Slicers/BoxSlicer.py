@@ -249,7 +249,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
-        # # If the data file does not tell us what the axes are, just assume...
         if self.direction == "X":
             new_plot.xaxis("\\rm{Q_x}", "A^{-1}")
         elif self.direction == "Y":
@@ -264,7 +263,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        #new_plot. = "2daverage" + self.data.name
         new_plot.id = (self.averager.__name__) + self.data.name
         # Create id to remove plots after changing slicer so they don't keep
         # showing up after being closed
@@ -328,8 +326,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         :param params: a dictionary containing name of slicer parameters and
             values the user assigned to the slicer.
         """
-        self.xwidth = float(numpy.fabs(params["x_width"]))
-        self.ywidth = float(numpy.fabs(params["y_width"]))
+        self.xwidth = params["x_width"]
+        self.ywidth = params["y_width"]
         self.nbins = params["nbins"]
         self.fold = params["fold"]
         self.center_x = params["center_x"]
@@ -391,8 +389,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
     def draw(self):
         """
-        Draws the Canvas using the canvas.draw from the calling class
-        that instatiated this object.
+        Draws the Canvas using the canvas.Draw from the calling class
+        that instantiated this object.
         """
         self.base.draw()
 
