@@ -1,0 +1,1316 @@
+<?xml version="1.0" ?>
+<SASroot version="1.0" xmlns="cansas1d/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd">
+	<SASentry>
+		<Title>
+			1000A_sphere_sm.xml
+		</Title>
+		<Run>
+			1000A_sphere_sm.xml
+		</Run>
+		<SASdata>
+			<Idata>
+				<Q unit="1/A">
+					3.0525e-005
+				</Q>
+				<I unit="1/cm">
+					277930.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					3020.8
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					3.33e-005
+				</Q>
+				<I unit="1/cm">
+					281470.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					3015.1
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					3.885e-005
+				</Q>
+				<I unit="1/cm">
+					276600.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1501.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					4.44e-005
+				</Q>
+				<I unit="1/cm">
+					271150.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1493.6
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					4.995e-005
+				</Q>
+				<I unit="1/cm">
+					268410.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1485.2
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					5.55e-005
+				</Q>
+				<I unit="1/cm">
+					264480.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1475.8
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					6.105e-005
+				</Q>
+				<I unit="1/cm">
+					264460.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					14655.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					6.66e-005
+				</Q>
+				<I unit="1/cm">
+					258080.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1454.3
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					7.215e-005
+				</Q>
+				<I unit="1/cm">
+					255800.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1442.2
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					7.77e-005
+				</Q>
+				<I unit="1/cm">
+					247520.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1429.2
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					8.325e-005
+				</Q>
+				<I unit="1/cm">
+					245300.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1415.3
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					8.88e-005
+				</Q>
+				<I unit="1/cm">
+					240540.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1400.6
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					9.435e-005
+				</Q>
+				<I unit="1/cm">
+					234710.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1385.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					9.99e-005
+				</Q>
+				<I unit="1/cm">
+					228190.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					13687.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00010545
+				</Q>
+				<I unit="1/cm">
+					223900.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1351.5
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000111
+				</Q>
+				<I unit="1/cm">
+					216600.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					769.97
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001221
+				</Q>
+				<I unit="1/cm">
+					203980.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					748.05
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001332
+				</Q>
+				<I unit="1/cm">
+					192730.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					724.56
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001443
+				</Q>
+				<I unit="1/cm">
+					178350.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					699.64
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001554
+				</Q>
+				<I unit="1/cm">
+					166420.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					673.42
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001665
+				</Q>
+				<I unit="1/cm">
+					151830.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					6460.6
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001776
+				</Q>
+				<I unit="1/cm">
+					138840.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					617.69
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001887
+				</Q>
+				<I unit="1/cm">
+					127060.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					588.49
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001998
+				</Q>
+				<I unit="1/cm">
+					114930.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					558.61
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002109
+				</Q>
+				<I unit="1/cm">
+					101910.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					528.21
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000222
+				</Q>
+				<I unit="1/cm">
+					91251.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					497.46
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002331
+				</Q>
+				<I unit="1/cm">
+					79895.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					466.55
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002442
+				</Q>
+				<I unit="1/cm">
+					69495.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					4356.1
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002553
+				</Q>
+				<I unit="1/cm">
+					59637.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					404.85
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002664
+				</Q>
+				<I unit="1/cm">
+					50908.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					374.42
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002775
+				</Q>
+				<I unit="1/cm">
+					43129.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					243.59
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00030525
+				</Q>
+				<I unit="1/cm">
+					27529.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					193.1
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000333
+				</Q>
+				<I unit="1/cm">
+					15863.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					147.72
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00036075
+				</Q>
+				<I unit="1/cm">
+					8965.4
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					109.87
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0003885
+				</Q>
+				<I unit="1/cm">
+					5132.7
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					826.83
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00041625
+				</Q>
+				<I unit="1/cm">
+					3514.3
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					69.119
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000444
+				</Q>
+				<I unit="1/cm">
+					3347.5
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					67.988
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00047175
+				</Q>
+				<I unit="1/cm">
+					3801.3
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					72.844
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0004995
+				</Q>
+				<I unit="1/cm">
+					4566.8
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					77.805
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00052725
+				</Q>
+				<I unit="1/cm">
+					4822.4
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					80.065
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000555
+				</Q>
+				<I unit="1/cm">
+					4516.9
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					55.708
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0006105
+				</Q>
+				<I unit="1/cm">
+					3275.1
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					472.47
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000666
+				</Q>
+				<I unit="1/cm">
+					1697.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					34.247
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0007215
+				</Q>
+				<I unit="1/cm">
+					880.96
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					24.356
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000777
+				</Q>
+				<I unit="1/cm">
+					803.05
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					23.606
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0008325
+				</Q>
+				<I unit="1/cm">
+					1014.2
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					26.645
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000888
+				</Q>
+				<I unit="1/cm">
+					1066.2
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					26.82
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0009435
+				</Q>
+				<I unit="1/cm">
+					772.29
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					23.066
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000999
+				</Q>
+				<I unit="1/cm">
+					465.43
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					175.71
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0010545
+				</Q>
+				<I unit="1/cm">
+					309.6
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					14.287
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00111
+				</Q>
+				<I unit="1/cm">
+					345.28
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					11.656
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001221
+				</Q>
+				<I unit="1/cm">
+					414.17
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					12.599
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001332
+				</Q>
+				<I unit="1/cm">
+					178.79
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					8.4835
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001443
+				</Q>
+				<I unit="1/cm">
+					171.0
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					8.3838
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001554
+				</Q>
+				<I unit="1/cm">
+					184.12
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					8.5329
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001665
+				</Q>
+				<I unit="1/cm">
+					87.754
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					59.424
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001776
+				</Q>
+				<I unit="1/cm">
+					95.545
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					6.4447
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001887
+				</Q>
+				<I unit="1/cm">
+					88.574
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					6.151
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001998
+				</Q>
+				<I unit="1/cm">
+					57.819
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					4.5293
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002109
+				</Q>
+				<I unit="1/cm">
+					75.042
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					5.1544
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00222
+				</Q>
+				<I unit="1/cm">
+					51.668
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					4.6394
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002331
+				</Q>
+				<I unit="1/cm">
+					32.395
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					3.6677
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002442
+				</Q>
+				<I unit="1/cm">
+					37.316
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					42.219
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002553
+				</Q>
+				<I unit="1/cm">
+					29.115
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					3.5983
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002664
+				</Q>
+				<I unit="1/cm">
+					24.194
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					3.0959
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002775
+				</Q>
+				<I unit="1/cm">
+					27.064
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					2.8672
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0030525
+				</Q>
+				<I unit="1/cm">
+					18.59
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					2.3989
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00333
+				</Q>
+				<I unit="1/cm">
+					8.4747
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1.9713
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0036075
+				</Q>
+				<I unit="1/cm">
+					10.388
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1.6403
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.003885
+				</Q>
+				<I unit="1/cm">
+					8.4747
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					14.205
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0041625
+				</Q>
+				<I unit="1/cm">
+					6.0143
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1.3393
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00444
+				</Q>
+				<I unit="1/cm">
+					4.374
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1.2822
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0047175
+				</Q>
+				<I unit="1/cm">
+					4.6474
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1.2226
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.004995
+				</Q>
+				<I unit="1/cm">
+					3.8273
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1.1598
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0052725
+				</Q>
+				<I unit="1/cm">
+					5.4676
+				</I>
+				<Qdev unit="1/A">
+					0.0
+				</Qdev>
+				<Idev unit="1/cm">
+					1.0588
+				</Idev>
+			</Idata>
+		</SASdata>
+		<SASsample name="">
+			<ID>
+				
+			</ID>
+		</SASsample>
+		<SASinstrument>
+			<name>
+				
+			</name>
+			<SASsource/>
+		</SASinstrument>
+		<invariant version="1.0">
+			<filename>
+				1000A_sphere_sm.xml
+			</filename>
+			<timestamp epoch="1289998130.41">
+				Wed Nov 17 07:48:50 2010
+			</timestamp>
+			<state>
+				<power_law_low>
+					False
+				</power_law_low>
+				<npts_high_tcl>
+					10
+				</npts_high_tcl>
+				<surface_tcl>
+					
+				</surface_tcl>
+				<enable_high_cbox>
+					False
+				</enable_high_cbox>
+				<porod_constant_tcl>
+					
+				</porod_constant_tcl>
+				<volume_err_tcl>
+					1.76e-018
+				</volume_err_tcl>
+				<compute_num>
+					1
+				</compute_num>
+				<file>
+					1000A_sphere_sm.xml
+				</file>
+				<enable_low_cbox>
+					False
+				</enable_low_cbox>
+				<is_time_machine>
+					False
+				</is_time_machine>
+				<volume_tcl>
+					4.07e-013
+				</volume_tcl>
+				<state_num>
+					1
+				</state_num>
+				<guinier>
+					True
+				</guinier>
+				<power_high_tcl>
+					4.0
+				</power_high_tcl>
+				<npts_low_tcl>
+					10
+				</npts_low_tcl>
+				<scale_tcl>
+					1.0
+				</scale_tcl>
+				<fix_enable_low>
+					True
+				</fix_enable_low>
+				<power_law_high>
+					False
+				</power_law_high>
+				<fit_enable_high>
+					False
+				</fit_enable_high>
+				<contrast_tcl>
+					1.0
+				</contrast_tcl>
+				<fix_enable_high>
+					True
+				</fix_enable_high>
+				<surface_err_tcl>
+					
+				</surface_err_tcl>
+				<power_low_tcl>
+					4.0
+				</power_low_tcl>
+				<background_tcl>
+					0.0
+				</background_tcl>
+				<fit_enable_low>
+					False
+				</fit_enable_low>
+			</state>
+			<history>
+				<state_1>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						1.76e-018
+					</volume_err_tcl>
+					<compute_num>
+						1
+					</compute_num>
+					<file>
+						1000A_sphere_sm.xml
+					</file>
+					<enable_low_cbox>
+						False
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.07e-013
+					</volume_tcl>
+					<state_num>
+						1
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_1>
+				<state_0>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						1.76e-018
+					</volume_err_tcl>
+					<compute_num>
+						0
+					</compute_num>
+					<file>
+						1000A_sphere_sm.xml
+					</file>
+					<enable_low_cbox>
+						False
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.07e-013
+					</volume_tcl>
+					<state_num>
+						0
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_0>
+			</history>
+			<bookmark/>
+		</invariant>
+	</SASentry>
+</SASroot>
