@@ -36,7 +36,7 @@
    <item row="2" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_8">
      <item>
-      <widget class="QPushButton" name="cmdCalculate">
+      <widget class="QPushButton" name="buttonCalculate">
        <property name="toolTip">
         <string>Compute invariant</string>
        </property>
@@ -59,7 +59,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="cmdStatus">
+      <widget class="QPushButton" name="buttonStatus">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -72,7 +72,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="cmdHelp">
+      <widget class="QPushButton" name="buttonHelp">
        <property name="toolTip">
         <string/>
        </property>
@@ -86,7 +86,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -749,9 +749,9 @@ while extrapolating the low-Q region</string>
   <tabstop>txtSpecSurfErr</tabstop>
   <tabstop>txtInvariantTot</tabstop>
   <tabstop>txtInvariantTotErr</tabstop>
-  <tabstop>cmdCalculate</tabstop>
-  <tabstop>cmdStatus</tabstop>
-  <tabstop>cmdHelp</tabstop>
+  <tabstop>buttonCalculate</tabstop>
+  <tabstop>buttonStatus</tabstop>
+  <tabstop>buttonHelp</tabstop>
   <tabstop>txtBackgd</tabstop>
   <tabstop>txtScale</tabstop>
   <tabstop>txtContrast</tabstop>

@@ -54,7 +54,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         self.lblQDataUnits.setStyleSheet(new_font)
         self.lblQHighQUnits.setStyleSheet(new_font)
 
-        self.cmdOK.clicked.connect(self.accept)
+        self.buttonOK.clicked.connect(self.accept)
 
         self.warning_msg = "No Details on calculations available...\n"
 

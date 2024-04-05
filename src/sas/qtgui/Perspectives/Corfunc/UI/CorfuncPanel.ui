@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1157</width>
-    <height>885</height>
+    <width>1113</width>
+    <height>746</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,7 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_3">
    <item>
-    <widget class="QScrollArea" name="scrollArea">
+    <widget class="QScrollArea" name="scrollAreaCorfunc">
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -43,7 +43,7 @@
         <x>0</x>
         <y>0</y>
         <width>581</width>
-        <height>871</height>
+        <height>728</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -87,7 +87,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
+           <layout class="QVBoxLayout" name="verticalLayout_Input_Left">
             <property name="sizeConstraint">
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
@@ -95,7 +95,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QGroupBox" name="groupBox">
+             <widget class="QGroupBox" name="groupBox_1_Input_Left">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -107,10 +107,10 @@
               </property>
               <layout class="QGridLayout" name="gridLayout_6">
                <item row="4" column="0">
-                <widget class="QFrame" name="frame_5">
+                <widget class="QFrame" name="frame_Input">
                  <layout class="QGridLayout" name="gridLayout_7">
                   <item row="1" column="0">
-                   <widget class="QLabel" name="label_20">
+                   <widget class="QLabel" name="label_TangentMethod">
                     <property name="text">
                      <string>Tangent Method:  </string>
                     </property>
@@ -120,7 +120,7 @@
                    </widget>
                   </item>
                   <item row="0" column="0">
-                   <widget class="QLabel" name="label_18">
+                   <widget class="QLabel" name="label_Fitting">
                     <property name="text">
                      <string>Fitting:  </string>
                     </property>
@@ -130,7 +130,7 @@
                    </widget>
                   </item>
                   <item row="2" column="0">
-                   <widget class="QLabel" name="label_21">
+                   <widget class="QLabel" name="label_LongPeriodMethod">
                     <property name="text">
                      <string>Long Period Method:  </string>
                     </property>
@@ -150,7 +150,7 @@
                    </widget>
                   </item>
                   <item row="0" column="3">
-                   <widget class="QCheckBox" name="fitPorod">
+                   <widget class="QCheckBox" name="checkboxFitPorod">
                     <property name="text">
                      <string>Fit Porod</string>
                     </property>
@@ -160,7 +160,7 @@
                    </widget>
                   </item>
                   <item row="0" column="1">
-                   <widget class="QCheckBox" name="fitBackground">
+                   <widget class="QCheckBox" name="checkboxFitBackground">
                     <property name="text">
                      <string>Fit Background</string>
                     </property>
@@ -216,7 +216,7 @@
                    </widget>
                   </item>
                   <item row="0" column="2">
-                   <widget class="QCheckBox" name="fitGuinier">
+                   <widget class="QCheckBox" name="checkboxFitGuinier">
                     <property name="text">
                      <string>Fit Guinier</string>
                     </property>
@@ -241,14 +241,14 @@
                <item row="0" column="0">
                 <layout class="QHBoxLayout" name="horizontalLayout_4">
                  <item>
-                  <widget class="QLabel" name="lblName">
+                  <widget class="QLabel" name="labelName">
                    <property name="text">
                     <string>Name:</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="txtFilename">
+                  <widget class="QLineEdit" name="textFilename">
                    <property name="enabled">
                     <bool>false</bool>
                    </property>
@@ -373,7 +373,7 @@
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="cmdExtract">
+                  <widget class="QPushButton" name="buttonGo">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -424,7 +424,7 @@
                   <number>10</number>
                  </property>
                  <item>
-                  <widget class="QLabel" name="label_3">
+                  <widget class="QLabel" name="label_Adjust">
                    <property name="text">
                     <string>Adjust:</string>
                    </property>
@@ -436,7 +436,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_4">
+             <widget class="QGroupBox" name="groupBox_2_Extrapolation_Parameters">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -448,9 +448,9 @@
               </property>
               <layout class="QVBoxLayout" name="backgroundLayout">
                <item>
-                <layout class="QGridLayout" name="gridLayout_4">
+                <layout class="QGridLayout" name="gridLayout_Extrapolation_Parameters_1">
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="txtBackground">
+                  <widget class="QLineEdit" name="textBackground">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -460,7 +460,7 @@
                   </widget>
                  </item>
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label">
+                  <widget class="QLabel" name="label_Background">
                    <property name="text">
                     <string>Background:</string>
                    </property>
@@ -482,21 +482,21 @@
                 </layout>
                </item>
                <item>
-                <layout class="QGridLayout" name="gridLayout_2">
+                <layout class="QGridLayout" name="gridLayout_Extrapolation_Parameters_2">
                  <item row="5" column="0" colspan="2">
-                  <layout class="QGridLayout" name="gridLayout_5">
+                  <layout class="QGridLayout" name="gridLayout_Extrapolation_Parameters_bottom">
                    <property name="bottomMargin">
                     <number>0</number>
                    </property>
                    <item row="3" column="4">
-                    <widget class="QLineEdit" name="txtGuinierB">
+                    <widget class="QLineEdit" name="textGuinierB">
                      <property name="readOnly">
                       <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item row="3" column="0">
-                    <widget class="QLabel" name="label_8">
+                    <widget class="QLabel" name="label_Guinier">
                      <property name="text">
                       <string>Guinier</string>
                      </property>
@@ -506,7 +506,7 @@
                     </widget>
                    </item>
                    <item row="3" column="3">
-                    <widget class="QLabel" name="label_7">
+                    <widget class="QLabel" name="label_Guinier_B">
                      <property name="text">
                       <string>     B:</string>
                      </property>
@@ -516,35 +516,35 @@
                     </widget>
                    </item>
                    <item row="4" column="1">
-                    <widget class="QLabel" name="label_10">
+                    <widget class="QLabel" name="label_Porod_K">
                      <property name="text">
                       <string>K:</string>
                      </property>
                     </widget>
                    </item>
                    <item row="4" column="2">
-                    <widget class="QLineEdit" name="txtPorodK">
+                    <widget class="QLineEdit" name="textPorodK">
                      <property name="readOnly">
                       <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item row="3" column="1">
-                    <widget class="QLabel" name="label_6">
+                    <widget class="QLabel" name="label_Guinier_A">
                      <property name="text">
                       <string>A:</string>
                      </property>
                     </widget>
                    </item>
                    <item row="3" column="2">
-                    <widget class="QLineEdit" name="txtGuinierA">
+                    <widget class="QLineEdit" name="textGuinierA">
                      <property name="readOnly">
                       <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item row="4" column="0">
-                    <widget class="QLabel" name="label_9">
+                    <widget class="QLabel" name="label_Porod">
                      <property name="text">
                       <string>Porod</string>
                      </property>
@@ -554,14 +554,14 @@
                     </widget>
                    </item>
                    <item row="4" column="4">
-                    <widget class="QLineEdit" name="txtPorodSigma">
+                    <widget class="QLineEdit" name="textPorodSigma">
                      <property name="readOnly">
                       <bool>false</bool>
                      </property>
                     </widget>
                    </item>
                    <item row="4" column="3">
-                    <widget class="QLabel" name="label_11">
+                    <widget class="QLabel" name="label_Porod_sigma">
                      <property name="text">
                       <string>σ:</string>
                      </property>
@@ -578,7 +578,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_3">
+             <widget class="QGroupBox" name="groupBox_3_Lamellar_Parameters">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -590,7 +590,7 @@
               </property>
               <layout class="QGridLayout" name="gridLayout_3">
                <item row="1" column="0">
-                <layout class="QGridLayout" name="gridLayout_8">
+                <layout class="QGridLayout" name="gridLayout_Lamellar_Parameters">
                  <property name="sizeConstraint">
                   <enum>QLayout::SetDefaultConstraint</enum>
                  </property>
@@ -601,7 +601,7 @@
                   <number>10</number>
                  </property>
                  <item row="2" column="3">
-                  <widget class="QLabel" name="label_13">
+                  <widget class="QLabel" name="label_Stribeck">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -617,14 +617,14 @@
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="QLineEdit" name="txtPolyRyan">
+                  <widget class="QLineEdit" name="textPolyRyan">
                    <property name="readOnly">
                     <bool>true</bool>
                    </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QLineEdit" name="txtAvgHardBlock">
+                  <widget class="QLineEdit" name="textAvgHardBlock">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -643,7 +643,7 @@
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QLabel" name="label_12">
+                  <widget class="QLabel" name="label_Eekhaut">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -659,14 +659,14 @@
                   </widget>
                  </item>
                  <item row="2" column="4">
-                  <widget class="QLineEdit" name="txtPolyStribeck">
+                  <widget class="QLineEdit" name="textPolyStribeck">
                    <property name="readOnly">
                     <bool>true</bool>
                    </property>
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLabel" name="label_16">
+                  <widget class="QLabel" name="label_HardBlock">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -688,7 +688,7 @@
                   </widget>
                  </item>
                  <item row="0" column="0">
-                  <widget class="QLabel" name="label_4">
+                  <widget class="QLabel" name="label_AvgThicknesses">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -704,7 +704,7 @@
                   </widget>
                  </item>
                  <item row="0" column="3">
-                  <widget class="QLabel" name="label_2">
+                  <widget class="QLabel" name="label_SoftBlock">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -726,7 +726,7 @@
                   </widget>
                  </item>
                  <item row="0" column="4">
-                  <widget class="QLineEdit" name="txtAvgSoftBlock">
+                  <widget class="QLineEdit" name="textAvgSoftBlock">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -745,7 +745,7 @@
                   </widget>
                  </item>
                  <item row="2" column="0">
-                  <widget class="QLabel" name="label_5">
+                  <widget class="QLabel" name="label_Polydispersity">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -761,7 +761,7 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QLabel" name="label_15">
+                  <widget class="QLabel" name="label_Interface">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -783,7 +783,7 @@
                   </widget>
                  </item>
                  <item row="1" column="3">
-                  <widget class="QLabel" name="label_17">
+                  <widget class="QLabel" name="label_Core">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -805,7 +805,7 @@
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="QLineEdit" name="txtAvgIntThick">
+                  <widget class="QLineEdit" name="textAvgIntThick">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -824,7 +824,7 @@
                   </widget>
                  </item>
                  <item row="1" column="4">
-                  <widget class="QLineEdit" name="txtAvgCoreThick">
+                  <widget class="QLineEdit" name="textAvgCoreThick">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -937,7 +937,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_2">
+             <widget class="QGroupBox" name="groupBox_4_Export">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -949,7 +949,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
-                <widget class="QPushButton" name="cmdSaveExtrapolation">
+                <widget class="QPushButton" name="buttonExportExtrapolated">
                  <property name="toolTip">
                   <string>Save the extrapolated data (non-transformed)</string>
                  </property>
@@ -959,7 +959,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="cmdSave">
+                <widget class="QPushButton" name="buttonExportTransformed">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -1004,7 +1004,7 @@
              </spacer>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <layout class="QHBoxLayout" name="horizontalLayout_5_bottom">
               <item>
                <spacer name="horizontalSpacer">
                 <property name="orientation">
@@ -1019,7 +1019,7 @@
                </spacer>
               </item>
               <item>
-               <widget class="QPushButton" name="cmdHelp">
+               <widget class="QPushButton" name="buttonHelp">
                 <property name="text">
                  <string>Help</string>
                 </property>
@@ -1058,7 +1058,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -1105,38 +1105,38 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>cmdExtract</tabstop>
+  <tabstop>buttonGo</tabstop>
   <tabstop>txtLowerQMax</tabstop>
   <tabstop>txtUpperQMin</tabstop>
   <tabstop>txtUpperQMax</tabstop>
-  <tabstop>fitBackground</tabstop>
-  <tabstop>fitGuinier</tabstop>
-  <tabstop>fitPorod</tabstop>
+  <tabstop>checkboxFitBackground</tabstop>
+  <tabstop>checkboxFitGuinier</tabstop>
+  <tabstop>checkboxFitPorod</tabstop>
   <tabstop>radTangentInflection</tabstop>
   <tabstop>radTangentMidpoint</tabstop>
   <tabstop>radTangentAuto</tabstop>
   <tabstop>radLongPeriodMax</tabstop>
   <tabstop>radLongPeriodDouble</tabstop>
   <tabstop>radLongPeriodAuto</tabstop>
-  <tabstop>txtBackground</tabstop>
-  <tabstop>txtGuinierA</tabstop>
-  <tabstop>txtGuinierB</tabstop>
-  <tabstop>txtPorodK</tabstop>
-  <tabstop>txtPorodSigma</tabstop>
-  <tabstop>txtAvgHardBlock</tabstop>
-  <tabstop>txtAvgSoftBlock</tabstop>
-  <tabstop>txtAvgIntThick</tabstop>
-  <tabstop>txtAvgCoreThick</tabstop>
-  <tabstop>txtPolyRyan</tabstop>
-  <tabstop>txtPolyStribeck</tabstop>
+  <tabstop>textBackground</tabstop>
+  <tabstop>textGuinierA</tabstop>
+  <tabstop>textGuinierB</tabstop>
+  <tabstop>textPorodK</tabstop>
+  <tabstop>textPorodSigma</tabstop>
+  <tabstop>textAvgHardBlock</tabstop>
+  <tabstop>textAvgSoftBlock</tabstop>
+  <tabstop>textAvgIntThick</tabstop>
+  <tabstop>textAvgCoreThick</tabstop>
+  <tabstop>textPolyRyan</tabstop>
+  <tabstop>textPolyStribeck</tabstop>
   <tabstop>txtLongPeriod</tabstop>
   <tabstop>txtLocalCrystal</tabstop>
-  <tabstop>cmdSaveExtrapolation</tabstop>
-  <tabstop>cmdSave</tabstop>
-  <tabstop>cmdHelp</tabstop>
+  <tabstop>buttonExportExtrapolated</tabstop>
+  <tabstop>buttonExportTransformed</tabstop>
+  <tabstop>buttonHelp</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>scrollArea</tabstop>
-  <tabstop>txtFilename</tabstop>
+  <tabstop>scrollAreaCorfunc</tabstop>
+  <tabstop>textFilename</tabstop>
  </tabstops>
  <resources/>
  <connections/>
