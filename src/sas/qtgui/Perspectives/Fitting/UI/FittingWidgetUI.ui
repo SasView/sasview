@@ -27,18 +27,18 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
    <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_top">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="labelFilenameLeft">
        <property name="text">
         <string>File name:</string>
        </property>
       </widget>
      </item>
      <item>
-      <layout class="QGridLayout" name="gridLayout_3">
+      <layout class="QGridLayout" name="gridLayout_top">
        <item row="0" column="0">
-        <widget class="QComboBox" name="cbFileNames">
+        <widget class="QComboBox" name="comboboxFileNames">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a file to set initial fit parameters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -48,7 +48,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLabel" name="lblFilename">
+        <widget class="QLabel" name="labelFilenameRight">
          <property name="text">
           <string>None</string>
          </property>
@@ -72,17 +72,17 @@
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QTabWidget" name="tabFitting">
+    <widget class="QTabWidget" name="tabOverviewFitting">
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="tabModel">
       <attribute name="title">
        <string>Model</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="0" column="0" colspan="4">
-        <widget class="QGroupBox" name="groupBox_6">
+        <widget class="QGroupBox" name="groupBox_Model">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -94,44 +94,44 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout">
+           <layout class="QGridLayout" name="gridLayout_Category_ModelName_StructureFactor">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="labelCategory">
               <property name="text">
                <string>Category</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLabel" name="lblModel">
+             <widget class="QLabel" name="labelModel">
               <property name="text">
                <string>Model name</string>
               </property>
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QLabel" name="lblStructure">
+             <widget class="QLabel" name="labelStructure">
               <property name="text">
                <string>Structure factor</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QComboBox" name="cbCategory">
+             <widget class="QComboBox" name="comboboxCategory">
               <property name="toolTip">
                <string>Select a category</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QComboBox" name="cbModel">
+             <widget class="QComboBox" name="comboboxModel">
               <property name="toolTip">
                <string>Select a model</string>
               </property>
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QComboBox" name="cbStructureFactor">
+             <widget class="QComboBox" name="comboboxStructureFactor">
               <property name="toolTip">
                <string>Select a structure factor</string>
               </property>
@@ -140,7 +140,7 @@
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QTreeView" name="lstParams">
+           <widget class="QTreeView" name="listModelParameters">
             <property name="styleSheet">
              <string notr="true"/>
             </property>
@@ -156,13 +156,13 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QGroupBox" name="groupBox_7">
+        <widget class="QGroupBox" name="groupBox_Options">
          <property name="title">
           <string>Options </string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QCheckBox" name="chkPolydispersity">
+           <widget class="QCheckBox" name="checkboxPolydispersity">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -178,7 +178,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="chk2DView">
+           <widget class="QCheckBox" name="checkbox2DView">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -194,7 +194,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="chkMagnetism">
+           <widget class="QCheckBox" name="checkboxMagnetism">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -210,7 +210,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="chkChainFit">
+           <widget class="QCheckBox" name="checkboxChainFit">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -229,50 +229,50 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QGroupBox" name="groupBox_8">
+        <widget class="QGroupBox" name="groupBox_FittingDetails">
          <property name="title">
           <string>Fitting details </string>
          </property>
          <layout class="QGridLayout" name="gridLayout_17">
           <item row="0" column="0" colspan="2">
-           <layout class="QGridLayout" name="gridLayout_8">
+           <layout class="QGridLayout" name="gridLayout_FittingDetails_MinRange_MaxRange">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_16">
+             <widget class="QLabel" name="labelMinRangeDisplay">
               <property name="text">
                <string>Min range</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLabel" name="lblMinRangeDef">
+             <widget class="QLabel" name="labelMinRangeValue">
               <property name="text">
                <string>0.005</string>
               </property>
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QLabel" name="label_17">
+             <widget class="QLabel" name="labelAngstromLetterUp">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_18">
+             <widget class="QLabel" name="labelMaxRangeDisplay">
               <property name="text">
                <string>Max range</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QLabel" name="lblMaxRangeDef">
+             <widget class="QLabel" name="labelMaxRangeValue">
               <property name="text">
                <string>0.1</string>
               </property>
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QLabel" name="label_19">
+             <widget class="QLabel" name="labelAngstromLetterDown">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -281,14 +281,14 @@
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_20">
+           <widget class="QLabel" name="labelSmearing">
             <property name="text">
              <string>Smearing:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="lblCurrentSmearing">
+           <widget class="QLabel" name="labelSmearingValue">
             <property name="text">
              <string>None</string>
             </property>
@@ -311,7 +311,7 @@
         </spacer>
        </item>
        <item row="1" column="3">
-        <widget class="QGroupBox" name="groupBox_9">
+        <widget class="QGroupBox" name="groupBox_FittingError">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/DOF (DOF=N&lt;span style=&quot; vertical-align:sub;&quot;&gt;pts&lt;/span&gt;-N&lt;span style=&quot; vertical-align:sub;&quot;&gt;par&lt;/span&gt; fitted)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -320,16 +320,16 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_18">
           <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <layout class="QHBoxLayout" name="horizontalLayout_FittingError">
             <item>
-             <widget class="QLabel" name="label_23">
+             <widget class="QLabel" name="labelChiSquaredLetter">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;χ&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="lblChi2Value">
+             <widget class="QLabel" name="labelChiSquaredValue">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;0.01625&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -352,19 +352,19 @@
        <string>Resolution</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="tab_Polydispersity">
       <attribute name="title">
        <string>Polydispersity</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_10">
        <item row="0" column="0">
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="groupBox_Polydispersity">
          <property name="title">
           <string>Number-average Polydispersity and Orientational Distribution</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
           <item row="0" column="0">
-           <widget class="QTableView" name="lstPoly">
+           <widget class="QTableView" name="listPolydispersity">
             <property name="editTriggers">
              <set>QAbstractItemView::AllEditTriggers</set>
             </property>
@@ -384,13 +384,13 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_6">
+     <widget class="QWidget" name="tab_Magnetism">
       <attribute name="title">
        <string>Magnetism</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_22">
        <item row="0" column="0">
-        <widget class="QGroupBox" name="groupBox_10">
+        <widget class="QGroupBox" name="groupBox_Magnetism">
          <property name="title">
           <string>Polarisation/Magnetic Scattering </string>
          </property>
@@ -409,10 +409,10 @@
            </spacer>
           </item>
           <item row="0" column="0" colspan="3">
-           <widget class="QTableView" name="lstMagnetic"/>
+           <widget class="QTableView" name="listPolarisation_Magnetic_Scattering"/>
           </item>
           <item row="1" column="2">
-           <widget class="QPushButton" name="cmdMagneticDisplay">
+           <widget class="QPushButton" name="buttonDisplayMagneticAngles">
             <property name="text">
              <string>Display
 magnetic
@@ -433,7 +433,7 @@ angles</string>
     </widget>
    </item>
    <item row="2" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_bottom">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -448,7 +448,7 @@ angles</string>
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="cmdPlot">
+      <widget class="QPushButton" name="buttonPlot">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -470,7 +470,7 @@ angles</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="cmdFit">
+      <widget class="QPushButton" name="buttonFit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -489,7 +489,7 @@ angles</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="cmdHelp">
+      <widget class="QPushButton" name="buttonHelp">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -512,22 +512,22 @@ angles</string>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>cbFileNames</tabstop>
-  <tabstop>tabFitting</tabstop>
-  <tabstop>cbCategory</tabstop>
-  <tabstop>cbModel</tabstop>
-  <tabstop>cbStructureFactor</tabstop>
-  <tabstop>lstParams</tabstop>
-  <tabstop>chkPolydispersity</tabstop>
-  <tabstop>chk2DView</tabstop>
-  <tabstop>chkMagnetism</tabstop>
-  <tabstop>chkChainFit</tabstop>
-  <tabstop>lstPoly</tabstop>
-  <tabstop>lstMagnetic</tabstop>
-  <tabstop>cmdMagneticDisplay</tabstop>
-  <tabstop>cmdPlot</tabstop>
-  <tabstop>cmdFit</tabstop>
-  <tabstop>cmdHelp</tabstop>
+  <tabstop>comboboxFileNames</tabstop>
+  <tabstop>tabOverviewFitting</tabstop>
+  <tabstop>comboboxCategory</tabstop>
+  <tabstop>comboboxModel</tabstop>
+  <tabstop>comboboxStructureFactor</tabstop>
+  <tabstop>listModelParameters</tabstop>
+  <tabstop>checkboxPolydispersity</tabstop>
+  <tabstop>checkbox2DView</tabstop>
+  <tabstop>checkboxMagnetism</tabstop>
+  <tabstop>checkboxChainFit</tabstop>
+  <tabstop>listPolydispersity</tabstop>
+  <tabstop>listPolarisation_Magnetic_Scattering</tabstop>
+  <tabstop>buttonDisplayMagneticAngles</tabstop>
+  <tabstop>buttonPlot</tabstop>
+  <tabstop>buttonFit</tabstop>
+  <tabstop>buttonHelp</tabstop>
  </tabstops>
  <resources/>
  <connections/>

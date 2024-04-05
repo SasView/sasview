@@ -170,8 +170,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.label_17.setStyleSheet(new_font)
-        self.label_19.setStyleSheet(new_font)
+        self.labelAngstromLetterUp.setStyleSheet(new_font)
+        self.labelAngstromLetterDown.setStyleSheet(new_font)
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
@@ -363,9 +363,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.boldFont.setBold(True)
 
         # Set data label
-        self.label.setFont(self.boldFont)
-        self.label.setText("No data loaded")
-        self.lblFilename.setText("")
+        self.labelFilenameLeft.setFont(self.boldFont)
+        self.labelFilenameLeft.setText("No data loaded")
+        self.labelFilenameRight.setText("")
 
         # Magnetic angles explained in one picture
         self.magneticAnglesWidget = QtWidgets.QWidget()
@@ -389,28 +389,28 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.model_dict["poly"] = self._poly_model
         self.model_dict["magnet"] = self._magnet_model
 
-        self.lst_dict["standard"] = self.lstParams
-        self.lst_dict["poly"] = self.lstPoly
-        self.lst_dict["magnet"] = self.lstMagnetic
+        self.lst_dict["standard"] = self.listModelParameters
+        self.lst_dict["poly"] = self.listPolydispersity
+        self.lst_dict["magnet"] = self.listPolarisation_Magnetic_Scattering
 
-        self.tabToList[0] = self.lstParams
-        self.tabToList[3] = self.lstPoly
-        self.tabToList[4] = self.lstMagnetic
+        self.tabToList[0] = self.listModelParameters
+        self.tabToList[3] = self.listPolydispersity
+        self.tabToList[4] = self.listPolarisation_Magnetic_Scattering
 
         self.tabToKey[0] = "standard"
         self.tabToKey[3] = "poly"
         self.tabToKey[4] = "magnet"
 
         # Param model displayed in param list
-        self.lstParams.setModel(self._model_model)
+        self.listModelParameters.setModel(self._model_model)
         self.readCategoryInfo()
 
         self.model_parameters = None
 
         # Delegates for custom editing and display
-        self.lstParams.setItemDelegate(ModelViewDelegate(self))
+        self.listModelParameters.setItemDelegate(ModelViewDelegate(self))
 
-        self.lstParams.setAlternatingRowColors(True)
+        self.listModelParameters.setAlternatingRowColors(True)
         stylesheet = """
 
             QTreeView {
@@ -439,74 +439,74 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);
             }
            """
-        self.lstParams.setStyleSheet(stylesheet)
-        self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.lstParams.customContextMenuRequested.connect(self.showModelContextMenu)
-        self.lstParams.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+        self.listModelParameters.setStyleSheet(stylesheet)
+        self.listModelParameters.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.listModelParameters.customContextMenuRequested.connect(self.showModelContextMenu)
+        self.listModelParameters.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
         # Column resize signals
-        self.lstParams.header().sectionResized.connect(self.onColumnWidthUpdate)
+        self.listModelParameters.header().sectionResized.connect(self.onColumnWidthUpdate)
 
         # Poly model displayed in poly list
-        self.lstPoly.setModel(self._poly_model)
+        self.listPolydispersity.setModel(self._poly_model)
         self.setPolyModel()
-        self.setTableProperties(self.lstPoly)
+        self.setTableProperties(self.listPolydispersity)
         # Delegates for custom editing and display
-        self.lstPoly.setItemDelegate(PolyViewDelegate(self))
+        self.listPolydispersity.setItemDelegate(PolyViewDelegate(self))
         # Polydispersity function combo response
-        self.lstPoly.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
-        self.lstPoly.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
+        self.listPolydispersity.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
+        self.listPolydispersity.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
 
-        self.lstPoly.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.lstPoly.customContextMenuRequested.connect(self.showModelContextMenu)
-        self.lstPoly.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+        self.listPolydispersity.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.listPolydispersity.customContextMenuRequested.connect(self.showModelContextMenu)
+        self.listPolydispersity.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
         # Magnetism model displayed in magnetism list
-        self.lstMagnetic.setModel(self._magnet_model)
+        self.listPolarisation_Magnetic_Scattering.setModel(self._magnet_model)
         self.setMagneticModel()
-        self.setTableProperties(self.lstMagnetic)
+        self.setTableProperties(self.listPolarisation_Magnetic_Scattering)
         # Delegates for custom editing and display
-        self.lstMagnetic.setItemDelegate(MagnetismViewDelegate(self))
+        self.listPolarisation_Magnetic_Scattering.setItemDelegate(MagnetismViewDelegate(self))
         # Initial status of the ordering tab - invisible
-        self.tabFitting.removeTab(TAB_ORDERING)
+        self.tabOverviewFitting.removeTab(TAB_ORDERING)
 
     def initializeCategoryCombo(self):
         """
         Model category combo setup
         """
         category_list = sorted(self.master_category_dict.keys())
-        self.cbCategory.addItem(CATEGORY_DEFAULT)
-        self.cbCategory.addItems(category_list)
+        self.comboboxCategory.addItem(CATEGORY_DEFAULT)
+        self.comboboxCategory.addItems(category_list)
         if CATEGORY_STRUCTURE not in category_list:
-            self.cbCategory.addItem(CATEGORY_STRUCTURE)
-        self.cbCategory.setCurrentIndex(0)
+            self.comboboxCategory.addItem(CATEGORY_STRUCTURE)
+        self.comboboxCategory.setCurrentIndex(0)
 
     def setEnablementOnDataLoad(self):
         """
         Enable/disable various UI elements based on data loaded
         """
         # Tag along functionality
-        self.label.setText("Data loaded from: ")
+        self.labelFilenameLeft.setText("Data loaded from: ")
         if self.logic.data.name:
-            self.lblFilename.setText(self.logic.data.name)
+            self.labelFilenameRight.setText(self.logic.data.name)
         else:
-            self.lblFilename.setText(self.logic.data.filename)
+            self.labelFilenameRight.setText(self.logic.data.filename)
         self.updateQRange()
         # Switch off Data2D control
-        self.chk2DView.setEnabled(False)
-        self.chk2DView.setVisible(False)
-        self.chkMagnetism.setEnabled(False)
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
+        self.checkbox2DView.setEnabled(False)
+        self.checkbox2DView.setVisible(False)
+        self.checkboxMagnetism.setEnabled(False)
+        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, self.checkboxMagnetism.isChecked())
         # Combo box or label for file name"
         if self.is_batch_fitting:
-            self.lblFilename.setVisible(False)
+            self.labelFilenameRight.setVisible(False)
             for dataitem in self.all_data:
                 name = GuiUtils.dataFromItem(dataitem).name
-                self.cbFileNames.addItem(name)
-            self.cbFileNames.setVisible(True)
-            self.chkChainFit.setEnabled(True)
-            self.chkChainFit.setVisible(True)
+                self.comboboxFileNames.addItem(name)
+            self.comboboxFileNames.setVisible(True)
+            self.checkboxChainFit.setEnabled(True)
+            self.checkboxChainFit.setVisible(True)
             # This panel is not designed to view individual fits, so disable plotting
-            self.cmdPlot.setVisible(False)
+            self.buttonPlot.setVisible(False)
         # Similarly on other tabs
         self.options_widget.setEnablementOnDataLoad()
         self.onSelectModel()
@@ -519,20 +519,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def disableModelCombo(self):
         """ Disable the combobox """
-        self.cbModel.setEnabled(False)
-        self.lblModel.setEnabled(False)
+        self.comboboxModel.setEnabled(False)
+        self.labelModel.setEnabled(False)
         self.enabled_cbmodel = False
 
     def enableModelCombo(self):
         """ Enable the combobox """
-        self.cbModel.setEnabled(True)
-        self.lblModel.setEnabled(True)
+        self.comboboxModel.setEnabled(True)
+        self.labelModel.setEnabled(True)
         self.enabled_cbmodel = True
 
     def disableStructureCombo(self):
         """ Disable the combobox """
-        self.cbStructureFactor.setEnabled(False)
-        self.lblStructure.setEnabled(False)
+        self.comboboxStructureFactor.setEnabled(False)
+        self.labelStructure.setEnabled(False)
         self.enabled_sfmodel = False
 
     def enableBackgroundParameter(self, set_value: Optional[float] = None):
@@ -553,15 +553,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def enableStructureCombo(self):
         """ Enable the combobox """
-        self.cbStructureFactor.setEnabled(True)
-        self.lblStructure.setEnabled(True)
+        self.comboboxStructureFactor.setEnabled(True)
+        self.labelStructure.setEnabled(True)
         self.enabled_sfmodel = True
 
     def togglePoly(self, isChecked):
         """ Enable/disable the polydispersity tab """
-        self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
+        self.tabOverviewFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
-        self.cmdFit.setEnabled(self.haveParamsToFit())
+        self.buttonFit.setEnabled(self.haveParamsToFit())
         # Set sasmodel polydispersity to 0 if polydispersity is unchecked, if not use Qmodel values
         if self._poly_model.rowCount() > 0:
             for key, value in self.poly_params.items():
@@ -570,22 +570,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
+        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
-        self.cmdFit.setEnabled(self.haveParamsToFit())
+        self.buttonFit.setEnabled(self.haveParamsToFit())
 
     def toggleChainFit(self, isChecked):
         """ Enable/disable chain fitting """
         self.is_chain_fitting = isChecked
         # show/hide the ordering tab
         if isChecked:
-            self.tabFitting.insertTab(TAB_ORDERING, self.tabOrder, "Order")
+            self.tabOverviewFitting.insertTab(TAB_ORDERING, self.tabOrder, "Order")
         else:
-            self.tabFitting.removeTab(TAB_ORDERING)
+            self.tabOverviewFitting.removeTab(TAB_ORDERING)
 
     def toggle2D(self, isChecked):
         """ Enable/disable the controls dependent on 1D/2D data instance """
-        self.chkMagnetism.setEnabled(isChecked)
+        self.checkboxMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
         # Reload the current model
         if self.kernel_module:
@@ -604,21 +604,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Set initial control enablement
         """
-        self.cbFileNames.setVisible(False)
-        self.cmdFit.setEnabled(False)
-        self.cmdPlot.setEnabled(False)
-        self.chkPolydispersity.setEnabled(False)
-        self.chkPolydispersity.setChecked(False)
-        self.chk2DView.setEnabled(True)
-        self.chk2DView.setChecked(False)
-        self.chkMagnetism.setEnabled(False)
-        self.chkMagnetism.setChecked(False)
-        self.chkChainFit.setEnabled(False)
-        self.chkChainFit.setVisible(False)
+        self.comboboxFileNames.setVisible(False)
+        self.buttonFit.setEnabled(False)
+        self.buttonPlot.setEnabled(False)
+        self.checkboxPolydispersity.setEnabled(False)
+        self.checkboxPolydispersity.setChecked(False)
+        self.checkbox2DView.setEnabled(True)
+        self.checkbox2DView.setChecked(False)
+        self.checkboxMagnetism.setEnabled(False)
+        self.checkboxMagnetism.setChecked(False)
+        self.checkboxChainFit.setEnabled(False)
+        self.checkboxChainFit.setVisible(False)
         # Tabs
-        self.tabFitting.setTabEnabled(TAB_POLY, False)
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
-        self.lblChi2Value.setText("---")
+        self.tabOverviewFitting.setTabEnabled(TAB_POLY, False)
+        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, False)
+        self.labelChiSquaredValue.setText("---")
         # Smearing tab
         self.smearing_widget.updateData(self.data)
         # Line edits in the option tab
@@ -629,30 +629,30 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Connect GUI element signals
         """
         # Comboboxes
-        self.cbStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
-        self.cbCategory.currentIndexChanged.connect(self.onSelectCategory)
-        self.cbModel.currentIndexChanged.connect(self.onSelectModel)
-        self.cbFileNames.currentIndexChanged.connect(self.onSelectBatchFilename)
+        self.comboboxStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
+        self.comboboxCategory.currentIndexChanged.connect(self.onSelectCategory)
+        self.comboboxModel.currentIndexChanged.connect(self.onSelectModel)
+        self.comboboxFileNames.currentIndexChanged.connect(self.onSelectBatchFilename)
         # Checkboxes
-        self.chk2DView.toggled.connect(self.toggle2D)
-        self.chkPolydispersity.toggled.connect(self.togglePoly)
-        self.chkMagnetism.toggled.connect(self.toggleMagnetism)
-        self.chkChainFit.toggled.connect(self.toggleChainFit)
+        self.checkbox2DView.toggled.connect(self.toggle2D)
+        self.checkboxPolydispersity.toggled.connect(self.togglePoly)
+        self.checkboxMagnetism.toggled.connect(self.toggleMagnetism)
+        self.checkboxChainFit.toggled.connect(self.toggleChainFit)
         # Buttons
-        self.cmdFit.clicked.connect(self.onFit)
-        self.cmdPlot.clicked.connect(self.onPlot)
-        self.cmdHelp.clicked.connect(self.onHelp)
-        self.cmdMagneticDisplay.clicked.connect(self.onDisplayMagneticAngles)
+        self.buttonFit.clicked.connect(self.onFit)
+        self.buttonPlot.clicked.connect(self.onPlot)
+        self.buttonHelp.clicked.connect(self.onHelp)
+        self.buttonDisplayMagneticAngles.clicked.connect(self.onDisplayMagneticAngles)
 
         # Respond to change in parameters from the UI
         self._model_model.dataChanged.connect(self.onMainParamsChange)
         self._poly_model.dataChanged.connect(self.onPolyModelChange)
         self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
-        self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
-        self.lstParams.installEventFilter(self)
-        self.lstPoly.installEventFilter(self)
-        self.lstMagnetic.installEventFilter(self)
-        self.lstPoly.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        self.listModelParameters.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        self.listModelParameters.installEventFilter(self)
+        self.listPolydispersity.installEventFilter(self)
+        self.listPolarisation_Magnetic_Scattering.installEventFilter(self)
+        self.listPolydispersity.selectionModel().selectionChanged.connect(self.onSelectionChanged)
 
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
@@ -682,7 +682,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def eventFilter(self, obj, event):
         # Catch enter key presses when editing model params
-        if obj in [self.lstParams, self.lstPoly, self.lstMagnetic]:
+        if obj in [self.listModelParameters, self.listPolydispersity, self.listPolarisation_Magnetic_Scattering]:
             if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
                 self.onKey(event)
                 return True
@@ -710,7 +710,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         When clicked on white space: model description
         """
         # See which model we're dealing with by looking at the tab id
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
+        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
         rows = [s.row() for s in current_list.selectionModel().selectedRows()
                 if self.isCheckable(s.row())]
 
@@ -729,8 +729,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         num_rows = len(rows)
         if num_rows < 1:
             return menu
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
         # Select for fitting
         param_string = "parameter " if num_rows == 1 else "parameters "
         to_string = "to its current value" if num_rows == 1 else "to their current values"
@@ -793,7 +793,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the constraint widget and receive the expression
         """
         if current_list is None:
-            current_list = self.lstParams
+            current_list = self.listModelParameters
         model = current_list.model()
         for key, val in self.model_dict.items():
             if val == model:
@@ -810,12 +810,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any of the parameters are polydisperse
         if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
             # no parameters are pd - reset the text to not show the warning
-            mc_widget.lblWarning.setText("")
+            mc_widget.labelWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
 
         constraint = Constraint()
-        c_text = mc_widget.txtConstraint.text()
+        c_text = mc_widget.textConstraint.text()
 
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
@@ -891,11 +891,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Return list of polydisperse parameters for the current model
         """
-        if not self.chkPolydispersity.isChecked():
+        if not self.checkboxPolydispersity.isChecked():
             return []
         poly_model_params = [self.polyNameToParam(self._poly_model.item(row).text())
                              for row in range(self._poly_model.rowCount())
-                             if self.chkPolydispersity.isChecked() and
+                             if self.checkboxPolydispersity.isChecked() and
                              self.isCheckable(row, model_key="poly")]
         return poly_model_params
 
@@ -903,7 +903,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Return list of magnetic parameters for the current model
         """
-        if not self.chkMagnetism.isChecked():
+        if not self.checkboxMagnetism.isChecked():
             return []
         magnetic_model_params = [self._magnet_model.item(row).text()
                             for row in range(self._magnet_model.rowCount())
@@ -1030,10 +1030,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Adds a constraint on a single parameter.
         """
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
         model = self.model_dict[model_key]
-        min_col = self.lstParams.itemDelegate().param_min
-        max_col = self.lstParams.itemDelegate().param_max
+        min_col = self.listModelParameters.itemDelegate().param_min
+        max_col = self.listModelParameters.itemDelegate().param_max
         for row in self.selectedParameters(model_key=model_key):
             param = model.item(row, 0).text()
             value = model.item(row, 1).text()
@@ -1066,8 +1066,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Edit constraints for selected parameters.
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
 
         params_list = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
@@ -1079,12 +1079,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any of the parameters are polydisperse
         if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
             # no parameters are pd - reset the text to not show the warning
-            mc_widget.lblWarning.setText("")
+            mc_widget.labelWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
 
         constraint = Constraint()
-        c_text = mc_widget.txtConstraint.text()
+        c_text = mc_widget.textConstraint.text()
 
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
@@ -1113,8 +1113,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Delete constraints from selected parameters.
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
         params = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
@@ -1263,9 +1263,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameter is chosen for fitting
         """
         status = QtCore.Qt.Checked
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
         model = self.model_dict[model_key]
-        item = model.itemFromIndex(self.lstParams.currentIndex())
+        item = model.itemFromIndex(self.listModelParameters.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
     def deselectParameters(self):
@@ -1273,9 +1273,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameters are removed for fitting
         """
         status = QtCore.Qt.Unchecked
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
         model = self.model_dict[model_key]
-        item = model.itemFromIndex(self.lstParams.currentIndex())
+        item = model.itemFromIndex(self.listModelParameters.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
     def selectedParameters(self, model_key="standard"):
@@ -1465,32 +1465,32 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Respond to select Model from list event
         """
-        model = self.cbModel.currentText()
+        model = self.comboboxModel.currentText()
 
         if model == MODEL_DEFAULT:
             # if the previous category was not the default, keep it.
             # Otherwise, just return
             if self._previous_model_index != 0:
                 # We need to block signals, or else state changes on perceived unchanged conditions
-                self.cbModel.blockSignals(True)
-                self.cbModel.setCurrentIndex(self._previous_model_index)
-                self.cbModel.blockSignals(False)
+                self.comboboxModel.blockSignals(True)
+                self.comboboxModel.setCurrentIndex(self._previous_model_index)
+                self.comboboxModel.blockSignals(False)
             return
         if self.model_data is not None:
             # Store any old parameters before switching to a new model
             self.page_parameters = self.getParameterDict()
 
         # Assure the control is active
-        if not self.cbModel.isEnabled():
+        if not self.comboboxModel.isEnabled():
             return
         # Empty combobox forced to be read
         if not model:
             return
 
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
-        self._previous_model_index = self.cbModel.currentIndex()
+        self.checkboxMagnetism.setEnabled(self.canHaveMagnetism())
+        self.checkboxMagnetism.setEnabled(self.canHaveMagnetism())
+        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, self.checkboxMagnetism.isChecked() and self.canHaveMagnetism())
+        self._previous_model_index = self.comboboxModel.currentIndex()
 
         # Reset parameters to fit
         self.resetParametersToFit()
@@ -1498,8 +1498,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.has_poly_error_column = False
 
         structure = None
-        if self.cbStructureFactor.isEnabled():
-            structure = str(self.cbStructureFactor.currentText())
+        if self.comboboxStructureFactor.isEnabled():
+            structure = str(self.comboboxStructureFactor.currentText())
         self.respondToModelStructure(model=model, structure_factor=structure)
 
         # paste parameters from previous state
@@ -1508,11 +1508,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # disable polydispersity if the model does not support it
         has_poly = self._poly_model.rowCount() != 0
-        self.chkPolydispersity.setEnabled(has_poly)
-        self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
+        self.checkboxPolydispersity.setEnabled(has_poly)
+        self.tabOverviewFitting.setTabEnabled(TAB_POLY, has_poly)
 
         # set focus so it doesn't move up
-        self.cbModel.setFocus()
+        self.comboboxModel.setFocus()
 
     def onSelectBatchFilename(self, data_index):
         """
@@ -1525,9 +1525,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Select Structure Factor from list
         """
-        model = str(self.cbModel.currentText())
-        category = str(self.cbCategory.currentText())
-        structure = str(self.cbStructureFactor.currentText())
+        model = str(self.comboboxModel.currentText())
+        category = str(self.comboboxCategory.currentText())
+        structure = str(self.comboboxStructureFactor.currentText())
         if category == CATEGORY_STRUCTURE:
             model = None
         # copy original clipboard
@@ -1566,26 +1566,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.onCategoriesChanged()
 
         # See if we need to update the combo in-place
-        if self.cbCategory.currentText() != CATEGORY_CUSTOM: return
+        if self.comboboxCategory.currentText() != CATEGORY_CUSTOM: return
 
-        current_text = self.cbModel.currentText()
-        self.cbModel.clear()
+        current_text = self.comboboxModel.currentText()
+        self.comboboxModel.clear()
         self.enableModelCombo()
         self.disableStructureCombo()
         # Retrieve the list of models
         model_list = self.master_category_dict[CATEGORY_CUSTOM]
         # Populate the models combobox
-        self.cbModel.addItems(sorted([model for (model, _) in model_list]))
-        new_index = self.cbModel.findText(current_text)
+        self.comboboxModel.addItems(sorted([model for (model, _) in model_list]))
+        new_index = self.comboboxModel.findText(current_text)
         if new_index != -1:
-            self.cbModel.setCurrentIndex(self.cbModel.findText(current_text))
+            self.comboboxModel.setCurrentIndex(self.comboboxModel.findText(current_text))
 
     def onSelectionChanged(self):
         """
         React to parameter selection
         """
-        current_list = self.tabToList[self.tabFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabFitting.currentIndex()]
+        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
 
         rows = current_list.selectionModel().selectedRows()
         # Clean previous messages
@@ -1613,21 +1613,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Updates the fitting widget format when SESANS data is loaded.
         """
         # update the units in the 'Fitting details' box of the Model tab on the Fit Panel
-        self.label_17.setText("Å")
-        self.label_19.setText("Å")
+        self.labelAngstromLetterUp.setText("Å")
+        self.labelAngstromLetterDown.setText("Å")
         # disable the background parameter and set at 0 for sesans
         self.disableBackgroundParameter(set_value=0.0)
         # update options defaults and settings for SESANS data
         self.options_widget.updateQRange(1, 100000, self.options_widget.NPTS_DEFAULT)
         # update the units in the 'Fitting details' box of the Fit Options tab on the Fit Panel
-        self.options_widget.label_13.setText("Å")
-        self.options_widget.label_15.setText("Å")
+        self.options_widget.labelAngstromInvMinRange.setText("Å")
+        self.options_widget.labelAngstromInvMaxRange.setText("Å")
         # update the smearing drop down box to indicate a Hankel Transform is being used instead of resolution
         self.smearing_widget.onIndexChange(1)
         # update the Weighting box of the Fit Options tab on the Fit Panel
-        self.options_widget.rbWeighting2.setText("Use dP Data")
-        self.options_widget.rbWeighting3.setText("Use |sqrt(P Data)|")
-        self.options_widget.rbWeighting4.setText("Use |P Data|")
+        self.options_widget.radioButtonWeightingUsedIData.setText("Use dP Data")
+        self.options_widget.radioButtonWeightingUseAbsSqrtIData.setText("Use |sqrt(P Data)|")
+        self.options_widget.radioButtonWeightingUseAbsIData.setText("Use |P Data|")
 
     def replaceConstraintName(self, old_name, new_name=""):
         """
@@ -1658,28 +1658,28 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Update the chart
         if self.data_is_loaded:
-            self.cmdPlot.setText("Compute/Plot")
+            self.buttonPlot.setText("Compute/Plot")
             self.calculateQGridForModel()
         else:
-            self.cmdPlot.setText("Calculate")
+            self.buttonPlot.setText("Calculate")
             # Create default datasets if no data passed
             self.createDefaultDataset()
             self.theory_item = None # ensure theory is recalc. before plot, see showTheoryPlot()
 
     def respondToModelStructure(self, model=None, structure_factor=None):
         # Set enablement on calculate/plot
-        self.cmdPlot.setEnabled(True)
+        self.buttonPlot.setEnabled(True)
 
         # kernel parameters -> model_model
         self.SASModelToQModel(model, structure_factor)
 
         # Enable magnetism checkbox for selected models
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+        self.checkboxMagnetism.setEnabled(self.canHaveMagnetism())
+        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, self.checkboxMagnetism.isChecked() and self.canHaveMagnetism())
 
         # Update column widths
         for column, width in self.lstParamHeaderSizes.items():
-            self.lstParams.setColumnWidth(column, width)
+            self.listModelParameters.setColumnWidth(column, width)
 
         # disable background for SESANS data
         # this should be forced to 0 in sasmodels but this tells the user it is enforced to 0 and disables the box
@@ -1700,23 +1700,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Select Category from list
         """
-        category = self.cbCategory.currentText()
+        category = self.comboboxCategory.currentText()
         # Check if the user chose "Choose category entry"
         if category == CATEGORY_DEFAULT:
             # if the previous category was not the default, keep it.
             # Otherwise, just return
             if self._previous_category_index != 0:
                 # We need to block signals, or else state changes on perceived unchanged conditions
-                self.cbCategory.blockSignals(True)
-                self.cbCategory.setCurrentIndex(self._previous_category_index)
-                self.cbCategory.blockSignals(False)
+                self.comboboxCategory.blockSignals(True)
+                self.comboboxCategory.setCurrentIndex(self._previous_category_index)
+                self.comboboxCategory.blockSignals(False)
             return
 
         if category == CATEGORY_STRUCTURE:
             self.disableModelCombo()
             self.enableStructureCombo()
             # set the index to 0
-            self.cbStructureFactor.setCurrentIndex(0)
+            self.comboboxStructureFactor.setCurrentIndex(0)
             self.model_parameters = None
             self._model_model.clear()
             return
@@ -1727,22 +1727,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Wipe out the parameter model
         self._model_model.clear()
         # Safely clear and enable the model combo
-        self.cbModel.blockSignals(True)
-        self.cbModel.clear()
-        self.cbModel.blockSignals(False)
+        self.comboboxModel.blockSignals(True)
+        self.comboboxModel.clear()
+        self.comboboxModel.blockSignals(False)
         self.enableModelCombo()
         self.disableStructureCombo()
         self.kernel_module = None
 
-        self._previous_category_index = self.cbCategory.currentIndex()
+        self._previous_category_index = self.comboboxCategory.currentIndex()
         # Retrieve the list of models
         model_list = self.master_category_dict[category]
         # Populate the models combobox
-        self.cbModel.blockSignals(True)
-        self.cbModel.addItem(MODEL_DEFAULT)
+        self.comboboxModel.blockSignals(True)
+        self.comboboxModel.addItem(MODEL_DEFAULT)
         models_to_show = [m[0] for m in model_list if m[0] != 'rpa' and m[1]]
-        self.cbModel.addItems(sorted(models_to_show))
-        self.cbModel.blockSignals(False)
+        self.comboboxModel.addItems(sorted(models_to_show))
+        self.comboboxModel.blockSignals(False)
 
     def onPolyModelChange(self, top, bottom):
         """
@@ -1759,7 +1759,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # corresponding values in FitPage
         parameter_name = parameter_name.rsplit()[-1]
 
-        delegate = self.lstPoly.itemDelegate()
+        delegate = self.listPolydispersity.itemDelegate()
 
         # Extract changed value.
         if model_column == delegate.poly_parameter:
@@ -1771,7 +1771,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             else:
                 if parameter_name_w in self.poly_params_to_fit:
                     self.poly_params_to_fit.remove(parameter_name_w)
-            self.cmdFit.setEnabled(self.haveParamsToFit())
+            self.buttonFit.setEnabled(self.haveParamsToFit())
             # Update state stack
             self.updateUndo()
 
@@ -1838,7 +1838,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             else:
                 if parameter_name in self.magnet_params_to_fit:
                     self.magnet_params_to_fit.remove(parameter_name)
-            self.cmdFit.setEnabled(self.haveParamsToFit())
+            self.buttonFit.setEnabled(self.haveParamsToFit())
             # Update state stack
             self.updateUndo()
             return
@@ -1849,7 +1849,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except TypeError:
             # Unparsable field
             return
-        delegate = self.lstMagnetic.itemDelegate()
+        delegate = self.listPolarisation_Magnetic_Scattering.itemDelegate()
 
         if model_column > 1:
             if model_column == delegate.mag_min:
@@ -1882,7 +1882,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getHelpLocation(self, tree_base) -> Path:
         # Actual file will depend on the current tab
-        tab_id = self.tabFitting.currentIndex()
+        tab_id = self.tabOverviewFitting.currentIndex()
         tree_location = tree_base / "user" / "qtgui" / "Perspectives" / "Fitting"
 
         match tab_id:
@@ -2131,7 +2131,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
-        self.lblChi2Value.setText(chi2_repr)
+        self.labelChiSquaredValue.setText(chi2_repr)
 
 
     def prepareFitters(self, fitter=None, fit_id=0, weight_increase=1):
@@ -2148,13 +2148,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         qmax = self.q_range_max
 
         params_to_fit = copy.deepcopy(self.main_params_to_fit)
-        if self.chkPolydispersity.isChecked():
+        if self.checkboxPolydispersity.isChecked():
             for p in self.poly_params_to_fit:
                 if "Distribution of" in p:
                     params_to_fit += [self.polyNameToParam(p)]
                 else:
                     params_to_fit += [p]
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
+        if self.checkboxMagnetism.isChecked() and self.canHaveMagnetism():
             params_to_fit += self.magnet_params_to_fit
         if not params_to_fit:
             raise ValueError('Fitting requires at least one parameter to optimize.')
@@ -2287,7 +2287,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #if not self.has_error_column:
             # create top-level error column
         error_column = []
-        self.lstParams.itemDelegate().addErrorColumn()
+        self.listModelParameters.itemDelegate().addErrorColumn()
         self.iterateOverModel(createErrorColumn)
 
         self._model_model.insertColumn(2, error_column)
@@ -2362,7 +2362,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.has_poly_error_column:
             self._poly_model.removeColumn(2)
 
-        self.lstPoly.itemDelegate().addErrorColumn()
+        self.listPolydispersity.itemDelegate().addErrorColumn()
         error_column = []
         self.iterateOverPolyModel(createErrorColumn)
 
@@ -2426,7 +2426,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.has_magnet_error_column:
             self._magnet_model.removeColumn(2)
 
-        self.lstMagnetic.itemDelegate().addErrorColumn()
+        self.listPolarisation_Magnetic_Scattering.itemDelegate().addErrorColumn()
         error_column = []
         self.iterateOverMagnetModel(createErrorColumn)
 
@@ -2441,7 +2441,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Plot the current set of data
         """
         # Regardless of previous state, this should now be `plot show` functionality only
-        self.cmdPlot.setText("Compute/Plot")
+        self.buttonPlot.setText("Compute/Plot")
         # Force data recalculation so existing charts are updated
         if not self.data_is_loaded:
             self.showTheoryPlot()
@@ -2459,11 +2459,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # update display
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
-        self.lblCurrentSmearing.setText(smearing)
+        self.labelSmearingValue.setText(smearing)
         self.calculateQGridForModel()
 
     def onKey(self, event):
-        if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdPlot.isEnabled():
+        if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.buttonPlot.isEnabled():
             self.onPlot()
 
     def recalculatePlotData(self):
@@ -2521,8 +2521,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
             self.options_widget.state()
         # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+        self.labelMinRangeValue.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+        self.labelMaxRangeValue.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
         self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
@@ -2532,8 +2532,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         structure_factor_list = self.master_category_dict.pop(CATEGORY_STRUCTURE)
         factors = [factor[0] for factor in structure_factor_list]
         factors.insert(0, STRUCTURE_DEFAULT)
-        self.cbStructureFactor.clear()
-        self.cbStructureFactor.addItems(sorted(factors))
+        self.comboboxStructureFactor.clear()
+        self.comboboxStructureFactor.addItems(sorted(factors))
 
     def createDefaultDataset(self):
         """
@@ -2659,8 +2659,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.data_is_loaded:
             self.q_range_min, self.q_range_max, self.npts = self.logic.computeDataRange()
         # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+        self.labelMinRangeValue.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+        self.labelMaxRangeValue.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
 
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
@@ -2690,8 +2690,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.enableStructureFactorControl(structure_factor)
 
             # Add S(Q)
-            if self.cbStructureFactor.isEnabled():
-                structure_factor = self.cbStructureFactor.currentText()
+            if self.comboboxStructureFactor.isEnabled():
+                structure_factor = self.comboboxStructureFactor.currentText()
                 self.fromStructureFactorToQModel(structure_factor)
 
             # Add polydispersity to the model
@@ -2710,7 +2710,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # (Re)-create headers
         FittingUtilities.addHeadersToModel(self._model_model)
-        self.lstParams.header().setFont(self.boldFont)
+        self.listModelParameters.header().setFont(self.boldFont)
 
     def fromModelToQModel(self, model_name):
         """
@@ -2718,7 +2718,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         name = model_name
         kernel_module = None
-        if self.cbCategory.currentText() == CATEGORY_CUSTOM:
+        if self.comboboxCategory.currentText() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
             name = os.path.join(models.find_plugins_dir(), model_name+".py")
         try:
@@ -2784,7 +2784,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.kernel_module,
                 self.is2D,
                 self._model_model,
-                self.lstParams)
+                self.listModelParameters)
 
     def fromStructureFactorToQModel(self, structure_factor):
         """
@@ -2815,7 +2815,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 is2D=self.is2D,
                 parameters_original=None,
                 model=self._model_model,
-                view=self.lstParams)
+                view=self.listModelParameters)
 
         # Insert product-only params into QModel
         if product_params:
@@ -2824,7 +2824,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     is2D=self.is2D,
                     parameters_original=None,
                     model=self._model_model,
-                    view=self.lstParams,
+                    view=self.listModelParameters,
                     row_num=2)
 
             # Since this all happens after shells are dealt with and we've inserted rows, fix this counter
@@ -2884,9 +2884,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return False
         if self.main_params_to_fit:
             return True
-        if self.chkPolydispersity.isChecked() and self.poly_params_to_fit:
+        if self.checkboxPolydispersity.isChecked() and self.poly_params_to_fit:
             return True
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnet_params_to_fit:
+        if self.checkboxMagnetism.isChecked() and self.canHaveMagnetism() and self.magnet_params_to_fit:
             return True
         return False
 
@@ -2900,7 +2900,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if model_column == 0:
             self.checkboxSelected(item, model_key="standard")
-            self.cmdFit.setEnabled(self.haveParamsToFit())
+            self.buttonFit.setEnabled(self.haveParamsToFit())
             # Update state stack
             self.updateUndo()
             return
@@ -2923,9 +2923,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             parameter_name = str(self._model_model.data(name_index))
 
         # Update the parameter value - note: this supports +/-inf as well
-        param_column = self.lstParams.itemDelegate().param_value
-        min_column = self.lstParams.itemDelegate().param_min
-        max_column = self.lstParams.itemDelegate().param_max
+        param_column = self.listModelParameters.itemDelegate().param_value
+        min_column = self.listModelParameters.itemDelegate().param_min
+        max_column = self.listModelParameters.itemDelegate().param_max
         if model_column == param_column:
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
@@ -3146,11 +3146,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if not hasattr(model, 'setParam'): return
 
         # add polydisperse parameters if asked
-        if self.chkPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
+        if self.checkboxPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
             for key, value in self.poly_params.items():
                 model.setParam(key, value)
         # add magnetic params if asked
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
+        if self.checkboxMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
             for key, value in self.magnet_params.items():
                 model.setParam(key, value)
 
@@ -3383,7 +3383,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data, weights)
             # Update the control
             chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
-            self.lblChi2Value.setText(chi2_repr)
+            self.labelChiSquaredValue.setText(chi2_repr)
         self.fitResults = False
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data, weights)
@@ -3399,26 +3399,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             Reload the category/model comboboxes
             """
             # Store the current combo indices
-            current_cat = self.cbCategory.currentText()
-            current_model = self.cbModel.currentText()
+            current_cat = self.comboboxCategory.currentText()
+            current_model = self.comboboxModel.currentText()
 
             # reread the category file and repopulate the combo
-            self.cbCategory.blockSignals(True)
-            self.cbCategory.clear()
+            self.comboboxCategory.blockSignals(True)
+            self.comboboxCategory.clear()
             self.readCategoryInfo()
             self.initializeCategoryCombo()
 
             # Scroll back to the original index in Categories
-            new_index = self.cbCategory.findText(current_cat)
+            new_index = self.comboboxCategory.findText(current_cat)
             if new_index != -1:
-                self.cbCategory.setCurrentIndex(new_index)
-            self.cbCategory.blockSignals(False)
+                self.comboboxCategory.setCurrentIndex(new_index)
+            self.comboboxCategory.blockSignals(False)
             # ...and in the Models
-            self.cbModel.blockSignals(True)
-            new_index = self.cbModel.findText(current_model)
+            self.comboboxModel.blockSignals(True)
+            new_index = self.comboboxModel.findText(current_model)
             if new_index != -1:
-                self.cbModel.setCurrentIndex(new_index)
-            self.cbModel.blockSignals(False)
+                self.comboboxModel.setCurrentIndex(new_index)
+            self.comboboxModel.blockSignals(False)
 
             return
 
@@ -3521,8 +3521,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.keys()])
         # Set the default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
-        ind = self._poly_model.index(i,self.lstPoly.itemDelegate().poly_function)
-        self.lstPoly.setIndexWidget(ind, func)
+        ind = self._poly_model.index(i,self.listPolydispersity.itemDelegate().poly_function)
+        self.listPolydispersity.setIndexWidget(ind, func)
         func.currentIndexChanged.connect(lambda: self.onPolyComboIndexChange(str(func.currentText()), i))
 
     def onPolyFilenameChange(self, row_index):
@@ -3533,12 +3533,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         array_caption = 'array'
 
         # Get the combo box reference
-        ind = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
-        widget = self.lstPoly.indexWidget(ind)
+        ind = self._poly_model.index(row_index, self.listPolydispersity.itemDelegate().poly_function)
+        widget = self.listPolydispersity.indexWidget(ind)
 
         # Update the combo box so it displays "array"
         widget.blockSignals(True)
-        widget.setCurrentIndex(self.lstPoly.itemDelegate().POLYDISPERSE_FUNCTIONS.index(array_caption))
+        widget.setCurrentIndex(self.listPolydispersity.itemDelegate().POLYDISPERSE_FUNCTIONS.index(array_caption))
         widget.blockSignals(False)
 
         # Invoke the file reader
@@ -3550,8 +3550,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Get npts/nsigs for current selection
         param = self.model_parameters.form_volume_parameters[row_index]
-        file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
-        combo_box = self.lstPoly.indexWidget(file_index)
+        file_index = self._poly_model.index(row_index, self.listPolydispersity.itemDelegate().poly_function)
+        combo_box = self.listPolydispersity.indexWidget(file_index)
         try:
             self.disp_model = POLYDISPERSITY_MODELS[combo_string]()
         except IndexError:
@@ -3588,8 +3588,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # uncheck the parameter
                 self._poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
                 # disable the row
-                lo = self.lstPoly.itemDelegate().poly_parameter
-                hi = self.lstPoly.itemDelegate().poly_function
+                lo = self.listPolydispersity.itemDelegate().poly_parameter
+                hi = self.listPolydispersity.itemDelegate().poly_function
                 self._poly_model.blockSignals(True)
                 [self._poly_model.item(row_index, i).setEnabled(False) for i in range(lo, hi)]
                 self._poly_model.blockSignals(False)
@@ -3603,14 +3603,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Enable the row in case it was disabled by Array
         self._poly_model.blockSignals(True)
-        max_range = self.lstPoly.itemDelegate().poly_filename
+        max_range = self.listPolydispersity.itemDelegate().poly_filename
         [self._poly_model.item(row_index, i).setEnabled(True) for i in range(7)]
-        file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
+        file_index = self._poly_model.index(row_index, self.listPolydispersity.itemDelegate().poly_filename)
         self._poly_model.setData(file_index, "")
         self._poly_model.blockSignals(False)
 
-        npts_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_npts)
-        nsigs_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_nsigs)
+        npts_index = self._poly_model.index(row_index, self.listPolydispersity.itemDelegate().poly_npts)
+        nsigs_index = self._poly_model.index(row_index, self.listPolydispersity.itemDelegate().poly_nsigs)
 
         npts = POLYDISPERSITY_MODELS[str(combo_string)].default['npts']
         nsigs = POLYDISPERSITY_MODELS[str(combo_string)].default['nsigmas']
@@ -3655,7 +3655,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.disp_model.set_weights(np.array(values), np.array(weights))
         # + update the cell with filename
         fname = os.path.basename(str(datafile))
-        fname_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
+        fname_index = self._poly_model.index(row_index, self.listPolydispersity.itemDelegate().poly_filename)
         self._poly_model.setData(fname_index, fname)
 
     def onColumnWidthUpdate(self, index, old_size, new_size):
@@ -3775,8 +3775,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         shell_index = self._model_model.index(shell_row-1, 1)
         button_index = self._model_model.index(shell_row-1, 4)
 
-        self.lstParams.setIndexWidget(shell_index, func)
-        self.lstParams.setIndexWidget(button_index, button)
+        self.listModelParameters.setIndexWidget(shell_index, func)
+        self.listModelParameters.setIndexWidget(button_index, button)
         self._n_shells_row = shell_row - 1
 
         # Get the default number of shells for the model
@@ -3853,7 +3853,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._model_model,
                 index,
                 first_row,
-                self.lstParams)
+                self.listModelParameters)
 
         self._num_shell_params = len(new_rows)
         self.current_shell_displayed = index
@@ -3916,21 +3916,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         assert isinstance(enabled, bool)
 
-        self.lstParams.setEnabled(enabled)
-        self.lstPoly.setEnabled(enabled)
-        self.lstMagnetic.setEnabled(enabled)
+        self.listModelParameters.setEnabled(enabled)
+        self.listPolydispersity.setEnabled(enabled)
+        self.listPolarisation_Magnetic_Scattering.setEnabled(enabled)
 
-        self.cbCategory.setEnabled(enabled)
+        self.comboboxCategory.setEnabled(enabled)
 
         if enabled:
             # worry about original enablement of model and SF
-            self.cbModel.setEnabled(self.enabled_cbmodel)
-            self.cbStructureFactor.setEnabled(self.enabled_sfmodel)
+            self.comboboxModel.setEnabled(self.enabled_cbmodel)
+            self.comboboxStructureFactor.setEnabled(self.enabled_sfmodel)
         else:
-            self.cbModel.setEnabled(enabled)
-            self.cbStructureFactor.setEnabled(enabled)
+            self.comboboxModel.setEnabled(enabled)
+            self.comboboxStructureFactor.setEnabled(enabled)
 
-        self.cmdPlot.setEnabled(enabled)
+        self.buttonPlot.setEnabled(enabled)
 
     def enableInteractiveElements(self):
         """
@@ -3938,8 +3938,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Enable the param table(s)
         """
         # Notify the user that fitting is available
-        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
-        self.cmdFit.setText("Fit")
+        self.buttonFit.setStyleSheet('QPushButton {color: black;}')
+        self.buttonFit.setText("Fit")
         self.fit_started = False
         self.setInteractiveElements(True)
 
@@ -3950,8 +3950,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Notify the user that fitting is being run
         # Allow for stopping the job
-        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
-        self.cmdFit.setText('Stop fit')
+        self.buttonFit.setStyleSheet('QPushButton {color: red;}')
+        self.buttonFit.setText('Stop fit')
         self.setInteractiveElements(False)
 
     def disableInteractiveElementsOnCalculate(self):
@@ -3961,8 +3961,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Notify the user that fitting is being run
         # Allow for stopping the job
-        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
-        self.cmdFit.setText('Running...')
+        self.buttonFit.setStyleSheet('QPushButton {color: red;}')
+        self.buttonFit.setText('Running...')
         self.setInteractiveElements(False)
 
     def readFitPage(self, fp):
@@ -3973,15 +3973,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Main tab info
         self.logic.data.name = fp.name
         self.data_is_loaded = fp.data_is_loaded
-        self.chkPolydispersity.setChecked(fp.is_polydisperse)
-        self.chkMagnetism.setChecked(fp.is_magnetic)
-        self.chk2DView.setChecked(fp.is2D)
+        self.checkboxPolydispersity.setChecked(fp.is_polydisperse)
+        self.checkboxMagnetism.setChecked(fp.is_magnetic)
+        self.checkbox2DView.setChecked(fp.is2D)
 
         # Update the comboboxes
-        self.cbCategory.setCurrentIndex(self.cbCategory.findText(fp.current_category))
-        self.cbModel.setCurrentIndex(self.cbModel.findText(fp.current_model))
+        self.comboboxCategory.setCurrentIndex(self.comboboxCategory.findText(fp.current_category))
+        self.comboboxModel.setCurrentIndex(self.comboboxModel.findText(fp.current_model))
         if fp.current_factor:
-            self.cbStructureFactor.setCurrentIndex(self.cbStructureFactor.findText(fp.current_factor))
+            self.comboboxStructureFactor.setCurrentIndex(self.comboboxStructureFactor.findText(fp.current_factor))
 
         self.chi2 = fp.chi2
 
@@ -4015,9 +4015,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Main tab info
         fp.name = self.logic.data.name
         fp.data_is_loaded = self.data_is_loaded
-        fp.is_polydisperse = self.chkPolydispersity.isChecked()
-        fp.is_magnetic = self.chkMagnetism.isChecked()
-        fp.is2D = self.chk2DView.isChecked()
+        fp.is_polydisperse = self.checkboxPolydispersity.isChecked()
+        fp.is_magnetic = self.checkboxMagnetism.isChecked()
+        fp.is2D = self.checkbox2DView.isChecked()
         fp.data = self.data
 
         # Use current models - they contain all the required parameters
@@ -4025,12 +4025,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fp.poly_model = self._poly_model
         fp.magnetism_model = self._magnet_model
 
-        if self.cbCategory.currentIndex() != 0:
-            fp.current_category = str(self.cbCategory.currentText())
-            fp.current_model = str(self.cbModel.currentText())
+        if self.comboboxCategory.currentIndex() != 0:
+            fp.current_category = str(self.comboboxCategory.currentText())
+            fp.current_model = str(self.comboboxModel.currentText())
 
-        if self.cbStructureFactor.isEnabled() and self.cbStructureFactor.currentIndex() != 0:
-            fp.current_factor = str(self.cbStructureFactor.currentText())
+        if self.comboboxStructureFactor.isEnabled() and self.comboboxStructureFactor.currentIndex() != 0:
+            fp.current_factor = str(self.comboboxStructureFactor.currentText())
         else:
             fp.current_factor = ''
 
@@ -4101,9 +4101,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         params = FittingUtilities.getStandardParam(self._model_model)
         poly_params = []
         magnet_params = []
-        if self.chkPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
+        if self.checkboxPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
             poly_params = FittingUtilities.getStandardParam(self._poly_model)
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
+        if self.checkboxMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
             magnet_params = FittingUtilities.getStandardParam(self._magnet_model)
         report_logic = ReportPageLogic(self,
                                        kernel_module=self.kernel_module,
@@ -4264,9 +4264,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         serializes combobox state
         """
         param_list = []
-        model = str(self.cbModel.currentText())
-        category = str(self.cbCategory.currentText())
-        structure = str(self.cbStructureFactor.currentText())
+        model = str(self.comboboxModel.currentText())
+        category = str(self.comboboxCategory.currentText())
+        structure = str(self.comboboxStructureFactor.currentText())
         param_list.append(['fitpage_category', category])
         param_list.append(['fitpage_model', model])
         param_list.append(['fitpage_structure', structure])
@@ -4307,16 +4307,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # resolution
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
-        index = self.smearing_widget.cbSmearing.currentIndex()
+        index = self.smearing_widget.comboBoxInstrumentalSmearing.currentIndex()
         param_list.append(['smearing', str(index)])
         param_list.append(['smearing_min', str(smearing_min)])
         param_list.append(['smearing_max', str(smearing_max)])
 
         # checkboxes, if required
-        has_polydisp = self.chkPolydispersity.isChecked()
-        has_magnetism = self.chkMagnetism.isChecked()
-        has_chain = self.chkChainFit.isChecked()
-        has_2D = self.chk2DView.isChecked()
+        has_polydisp = self.checkboxPolydispersity.isChecked()
+        has_magnetism = self.checkboxMagnetism.isChecked()
+        has_chain = self.checkboxChainFit.isChecked()
+        has_2D = self.checkbox2DView.isChecked()
         param_list.append(['polydisperse_params', str(has_polydisp)])
         param_list.append(['magnetic_params', str(has_magnetism)])
         param_list.append(['chainfit_params', str(has_chain)])
@@ -4332,14 +4332,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.kernel_module is None:
             return param_list
 
-        param_list.append(['model_name', str(self.cbModel.currentText())])
+        param_list.append(['model_name', str(self.comboboxModel.currentText())])
 
         def gatherParams(row):
             """
             Create list of main parameters based on _model_model
             """
             param_name = str(self._model_model.item(row, 0).text())
-            current_list = self.tabToList[self.tabFitting.currentIndex()]
+            current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
             model = self._model_model
             if model.item(row, 0) is None:
                 return
@@ -4406,7 +4406,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_nsigs = str(self._poly_model.item(row, 5+column_offset).text())
             param_fun   = str(self._poly_model.item(row, 6+column_offset).text()).rstrip()
             index = self._poly_model.index(row, 6+column_offset)
-            widget = self.lstPoly.indexWidget(index)
+            widget = self.listPolydispersity.indexWidget(index)
             if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                 param_fun = widget.currentText()
             # width
@@ -4432,9 +4432,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                param_error, param_min, param_max])
 
         self.iterateOverModel(gatherParams)
-        if self.chkPolydispersity.isChecked():
+        if self.checkboxPolydispersity.isChecked():
             self.iterateOverPolyModel(gatherPolyParams)
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
+        if self.checkboxMagnetism.isChecked() and self.canHaveMagnetism():
             self.iterateOverMagnetModel(gatherMagnetParams)
 
         if self.kernel_module.is_multiplicity_model:
@@ -4448,11 +4448,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         and fills it up with sent parameters
         """
         if 'fitpage_category' in line_dict:
-            self.cbCategory.setCurrentIndex(self.cbCategory.findText(line_dict['fitpage_category'][0]))
+            self.comboboxCategory.setCurrentIndex(self.comboboxCategory.findText(line_dict['fitpage_category'][0]))
         if 'fitpage_model' in line_dict:
-            self.cbModel.setCurrentIndex(self.cbModel.findText(line_dict['fitpage_model'][0]))
+            self.comboboxModel.setCurrentIndex(self.comboboxModel.findText(line_dict['fitpage_model'][0]))
         if 'fitpage_structure' in line_dict:
-            self.cbStructureFactor.setCurrentIndex(self.cbStructureFactor.findText(line_dict['fitpage_structure'][0]))
+            self.comboboxStructureFactor.setCurrentIndex(self.comboboxStructureFactor.findText(line_dict['fitpage_structure'][0]))
 
         # Now that the page is ready for parameters, fill it up
         self.updatePageWithParameters(line_dict)
@@ -4476,13 +4476,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if 'tab_name' in line_dict.keys() and self.kernel_module is not None:
             self.kernel_module.name = line_dict['tab_name'][0]
         if 'polydisperse_params' in line_dict.keys():
-            self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
+            self.checkboxPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
         if 'magnetic_params' in line_dict.keys():
-            self.chkMagnetism.setChecked(line_dict['magnetic_params'][0]=='True')
+            self.checkboxMagnetism.setChecked(line_dict['magnetic_params'][0]=='True')
         if 'chainfit_params' in line_dict.keys():
-            self.chkChainFit.setChecked(line_dict['chainfit_params'][0]=='True')
+            self.checkboxChainFit.setChecked(line_dict['chainfit_params'][0]=='True')
         if '2D_params' in line_dict.keys():
-            self.chk2DView.setChecked(line_dict['2D_params'][0]=='True')
+            self.checkbox2DView.setChecked(line_dict['2D_params'][0]=='True')
 
         # Create the context dictionary for parameters
         context['model_name'] = model
@@ -4490,7 +4490,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if len(value) > 2:
                 context[key] = value
 
-        if warn_user and str(self.cbModel.currentText()) != str(context['model_name']):
+        if warn_user and str(self.comboboxModel.currentText()) != str(context['model_name']):
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)
             msg.setText("The model in the clipboard is not the same as the currently loaded model. \
@@ -4505,7 +4505,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if 'smearing' in line_dict.keys():
             try:
                 index = int(line_dict['smearing'][0])
-                self.smearing_widget.cbSmearing.setCurrentIndex(index)
+                self.smearing_widget.comboBoxInstrumentalSmearing.setCurrentIndex(index)
             except ValueError:
                 pass
         if 'smearing_min' in line_dict.keys():
@@ -4545,7 +4545,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Find and update the multiplicity combobox
         """
         index = self._model_model.index(self._n_shells_row, 1)
-        widget = self.lstParams.indexWidget(index)
+        widget = self.listModelParameters.indexWidget(index)
         if widget is not None and isinstance(widget, QtWidgets.QComboBox):
             widget.setCurrentIndex(widget.findText(str(multip)))
         self.current_shell_displayed = multip
@@ -4574,7 +4574,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     # quietly pass
                     return
                 index = self._model_model.index(row, 1)
-                widget = self.lstParams.indexWidget(index)
+                widget = self.listModelParameters.indexWidget(index)
                 if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                     #widget.setCurrentIndex(combo_index)
                     return
@@ -4585,7 +4585,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # parameter value can be either just a value or text on the combobox
             param_text = param_dict[param_name][1]
             index = self._model_model.index(row, 1)
-            widget = self.lstParams.indexWidget(index)
+            widget = self.listModelParameters.indexWidget(index)
             if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                 # Find the right index based on text
                 combo_index = int(param_text, 0)
@@ -4715,10 +4715,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Store current state for fit_page
         """
         # Comboboxes
-        state.categorycombobox = self.cbCategory.currentText()
-        state.formfactorcombobox = self.cbModel.currentText()
-        if self.cbStructureFactor.isEnabled():
-            state.structurecombobox = self.cbStructureFactor.currentText()
+        state.categorycombobox = self.comboboxCategory.currentText()
+        state.formfactorcombobox = self.comboboxModel.currentText()
+        if self.comboboxStructureFactor.isEnabled():
+            state.structurecombobox = self.comboboxStructureFactor.currentText()
         state.tcChi = self.chi2
 
         state.enable2D = self.is2D

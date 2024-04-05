@@ -19,9 +19,9 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
-    <layout class="QGridLayout" name="gridLayout_2">
+    <layout class="QGridLayout" name="gridLayout_OpenCL_test_results">
      <item row="0" column="0">
-      <widget class="QGroupBox" name="TestResultsBox">
+      <widget class="QGroupBox" name="GroupBox_test_results">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -55,7 +55,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="falingTestsNoOpenCL">
+      <widget class="QLabel" name="label_falingTestsNoOpenCL">
        <property name="text">
         <string>If tests fail on OpenCL devices, please select the No OpenCL option.</string>
        </property>
@@ -65,7 +65,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="howToReportIssues">
+      <widget class="QLabel" name="label_howToReportIssues">
        <property name="text">
         <string>In the case where many tests are failing, please consider sending the above report to help@sasview.org.</string>
        </property>
@@ -78,7 +78,7 @@
       </widget>
      </item>
      <item row="3" column="0">
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout_bottom">
        <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">

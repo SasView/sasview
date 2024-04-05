@@ -23,7 +23,7 @@ class OrderWidget(QtWidgets.QWidget, Ui_OrderWidgetUI):
         Read in new datasets and update the view
         """
         self.all_data = all_data
-        self.lstOrder.clear()
+        self.listDataOrder.clear()
         self.setupTable()
 
     def setupTable(self):
@@ -37,15 +37,15 @@ class OrderWidget(QtWidgets.QWidget, Ui_OrderWidgetUI):
             if dataset is None: continue
             dataset_name = dataset.name
             self.order[dataset_name] = item
-            self.lstOrder.addItem(dataset_name)
+            self.listDataOrder.addItem(dataset_name)
 
     def ordering(self):
         """
         Returns the current ordering of the datasets
         """
         order = []
-        for row in range(self.lstOrder.count()):
-            item_name = self.lstOrder.item(row).text()
+        for row in range(self.listDataOrder.count()):
+            item_name = self.listDataOrder.item(row).text()
             order.append(self.order[item_name])
         return order
 

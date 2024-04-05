@@ -50,15 +50,15 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
         # Fill up the algorithm combo, based on what BUMPS says is available
         self.active_fitters = [n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS and 'least' not in n.id]
-        self.cbAlgorithm.addItems(self.active_fitters)
-        self.cbAlgorithmDefault.addItems(self.active_fitters)
+        self.comboboxFitAlgorithms.addItems(self.active_fitters)
+        self.comboboxDefaultFitAlgorithm.addItems(self.active_fitters)
 
         # Set the default index
         self.current_fitter_id = getattr(sasview_config, 'FITTING_DEFAULT_OPTIMIZER', fitters.FIT_DEFAULT_ID)
         default_name = [n.name for n in fitters.FITTERS if n.id == self.current_fitter_id][0]
-        default_index = self.cbAlgorithm.findText(default_name)
-        self.cbAlgorithmDefault.setCurrentIndex(default_index)
-        self.cbAlgorithm.setCurrentIndex(default_index)
+        default_index = self.comboboxFitAlgorithms.findText(default_name)
+        self.comboboxDefaultFitAlgorithm.setCurrentIndex(default_index)
+        self.comboboxFitAlgorithms.setCurrentIndex(default_index)
         self._algorithm_change(default_index)
         # previous algorithm choice
         self.previous_index = default_index
@@ -67,8 +67,8 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         self.assignValidators()
 
         # To prevent errors related to parent, connect the combo box changes once the widget is instantiated
-        self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
-        self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
+        self.comboboxFitAlgorithms.currentIndexChanged.connect(self.onAlgorithmChange)
+        self.comboboxDefaultFitAlgorithm.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
 
     #
     # Preference Widget required methods
@@ -77,16 +77,16 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         pass
 
     def _toggleBlockAllSignaling(self, toggle: bool):
-        self.cbAlgorithm.blockSignals(toggle)
-        self.cbAlgorithmDefault.blockSignals(toggle)
+        self.comboboxFitAlgorithms.blockSignals(toggle)
+        self.comboboxDefaultFitAlgorithm.blockSignals(toggle)
 
     def _restoreFromConfig(self):
         optimizer_key = sasview_config.FITTING_DEFAULT_OPTIMIZER
         optimizer_name = bumps.options.FIT_CONFIG.names[optimizer_key]
-        self.cbAlgorithmDefault.setCurrentIndex(self.cbAlgorithmDefault.findText(optimizer_name))
+        self.comboboxDefaultFitAlgorithm.setCurrentIndex(self.comboboxDefaultFitAlgorithm.findText(optimizer_name))
         name = [n.name for n in fitters.FITTERS if n.id == self.current_fitter_id][0]
-        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(name))
-        self._algorithm_change(self.cbAlgorithm.currentIndex())
+        self.comboboxFitAlgorithms.setCurrentIndex(self.comboboxFitAlgorithms.findText(name))
+        self._algorithm_change(self.comboboxFitAlgorithms.currentIndex())
 
     def assignValidators(self):
         """
@@ -118,8 +118,8 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
 
     def onDefaultAlgorithmChange(self):
-        text = self.cbAlgorithmDefault.currentText()
-        self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(text))
+        text = self.comboboxDefaultFitAlgorithm.currentText()
+        self.comboboxFitAlgorithms.setCurrentIndex(self.comboboxFitAlgorithms.findText(text))
         id = dict((new_val, new_k) for new_k, new_val in bumps.options.FIT_CONFIG.names.items()).get(text)
         self._stageChange('FITTING_DEFAULT_OPTIMIZER', id)
 
@@ -134,7 +134,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         """
         # Find the algorithm ID from name
         fitter_id = \
-            [n.id for n in fitters.FITTERS if n.name == str(self.cbAlgorithm.currentText())][0]
+            [n.id for n in fitters.FITTERS if n.name == str(self.comboboxFitAlgorithms.currentText())][0]
 
         # find the right stacked widget
         widget_name = "self.page_"+str(fitter_id)
@@ -152,13 +152,13 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
                                         msg,
                                         QtWidgets.QMessageBox.Ok)
             # Move the index to previous position
-            self.cbAlgorithm.setCurrentIndex(self.previous_index)
+            self.comboboxFitAlgorithms.setCurrentIndex(self.previous_index)
             return
 
-        index_for_this_id = self.stackedWidget.indexOf(widget_to_activate)
+        index_for_this_id = self.stackedWidgetFitAlgorithms.indexOf(widget_to_activate)
 
         # Select the requested widget
-        self.stackedWidget.setCurrentIndex(index_for_this_id)
+        self.stackedWidgetFitAlgorithms.setCurrentIndex(index_for_this_id)
 
         self.updateWidgetFromBumps(fitter_id)
 
@@ -169,7 +169,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
 
     def applyNonConfigValues(self):
         """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
-        self.current_fitter_id = [n.id for n in fitters.FITTERS if n.name == str(self.cbAlgorithm.currentText())][0]
+        self.current_fitter_id = [n.id for n in fitters.FITTERS if n.name == str(self.comboboxFitAlgorithms.currentText())][0]
         options = self.config.values[self.current_fitter_id]
         for option in options.keys():
             # Find the widget name of the option
@@ -191,7 +191,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
                 return
 
         # Notify the perspective, so the window title is updated
-        self.fit_option_changed.emit(self.cbAlgorithm.currentText())
+        self.fit_option_changed.emit(self.comboboxFitAlgorithms.currentText())
 
         def bumpsUpdate(option):
             """
@@ -247,7 +247,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         """
         Sends back the current choice of parameters
         """
-        algorithm = self.cbAlgorithm.currentText()
+        algorithm = self.comboboxFitAlgorithms.currentText()
         return algorithm
 
     def updateWidgetFromBumps(self, fitter_id):

@@ -15,18 +15,18 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="groupBox2ParameterConstraint">
      <property name="title">
       <string>2 parameter constraint</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout2ParameterConstraint">
         <item>
-         <widget class="QComboBox" name="cbModel1"/>
+         <widget class="QComboBox" name="comboboxModel1"/>
         </item>
         <item>
-         <widget class="QComboBox" name="cbParam1">
+         <widget class="QComboBox" name="comboboxParam1">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -44,7 +44,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cbOperator">
+         <widget class="QComboBox" name="comboboxOperator">
           <item>
            <property name="text">
             <string>&gt;</string>
@@ -53,10 +53,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cbModel2"/>
+         <widget class="QComboBox" name="comboboxModel2"/>
         </item>
         <item>
-         <widget class="QComboBox" name="cbParam2">
+         <widget class="QComboBox" name="comboboxParam2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -76,16 +76,16 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="labelEditComplexConstraint">
         <property name="text">
          <string>Edit complex constraint:</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="horizontalLayout_EditComplexConstraint">
         <item>
-         <widget class="QLabel" name="txtParam">
+         <widget class="QLabel" name="textParamComplexConstraint">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -98,14 +98,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="txtOperator">
+         <widget class="QLabel" name="labelOperatorComplexConstraint">
           <property name="text">
            <string>=</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="txtConstraint">
+         <widget class="QLineEdit" name="textComplexConstraint">
           <property name="text">
            <string/>
           </property>
@@ -137,7 +137,7 @@
     </spacer>
    </item>
    <item row="3" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_bottom">
      <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
@@ -152,7 +152,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="cmdAddAll">
+      <widget class="QToolButton" name="buttonAddAll">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -186,7 +186,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="cmdOK">
+      <widget class="QToolButton" name="buttonOK">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -220,7 +220,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="cmdHelp">
+      <widget class="QPushButton" name="buttonHelp">
        <property name="text">
         <string>Help</string>
        </property>

@@ -25,7 +25,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QGroupBox" name="groupBoxFitAlgorithms">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -45,17 +45,17 @@
    </property>
    <layout class="QGridLayout" name="gridLayout_9">
     <item row="1" column="0">
-     <widget class="QStackedWidget" name="stackedWidget">
+     <widget class="QStackedWidget" name="stackedWidgetFitAlgorithms">
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page_dream">
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox_2">
+         <widget class="QGroupBox" name="groupBox_dream">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
@@ -67,21 +67,21 @@
           </property>
           <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="0">
-            <widget class="QLabel" name="label">
+            <widget class="QLabel" name="label_samples_dream">
              <property name="text">
               <string>Samples:</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_3">
+            <widget class="QLabel" name="label_population_dream">
              <property name="text">
               <string>Population:</string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QComboBox" name="init_dream">
+            <widget class="QComboBox" name="combobox_initializer_dream">
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Initializer&lt;/span&gt; determines how the population will be initialized. The options are as follows:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;eps&lt;/span&gt; (epsilon ball), in which the entire initial population is chosen at random from within a tiny hypersphere centered about the initial point&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;lhs&lt;/span&gt; (latin hypersquare), which chops the bounds within each dimension in &lt;span style=&quot; font-weight:600;&quot;&gt;k&lt;/span&gt; equal sized chunks where &lt;span style=&quot; font-weight:600;&quot;&gt;k&lt;/span&gt; is the size of the population and makes sure that each parameter has at least one value within each chunk across the population.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;cov&lt;/span&gt; (covariance matrix), in which the uncertainty is estimated using the covariance matrix at the initial point, and points are selected at random from the corresponding gaussian ellipsoid&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;random&lt;/span&gt; (uniform random), in which the points are selected at random within the bounds of the parameters&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
@@ -115,14 +115,14 @@
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_5">
+            <widget class="QLabel" name="label_thinning_dream">
              <property name="text">
               <string>Thinning:</string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_4">
+            <widget class="QLabel" name="label_initializer_dream">
              <property name="text">
               <string>Initializer:</string>
              </property>
@@ -136,14 +136,14 @@
             </widget>
            </item>
            <item row="5" column="0">
-            <widget class="QLabel" name="label_6">
+            <widget class="QLabel" name="label_steps_dream">
              <property name="text">
               <string>Steps:</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_2">
+            <widget class="QLabel" name="label_burn_in_steps_dream">
              <property name="text">
               <string>Burn-in Steps:</string>
              </property>
@@ -178,13 +178,13 @@
       <widget class="QWidget" name="page_lm">
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox_3">
+         <widget class="QGroupBox" name="groupBox_lm">
           <property name="title">
            <string>Levenberg</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_7">
+            <widget class="QLabel" name="label_steps_lm">
              <property name="text">
               <string>Steps:</string>
              </property>
@@ -198,21 +198,21 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_8">
+            <widget class="QLabel" name="label_f_x_tolerance_lm">
              <property name="text">
               <string>f(x) tolerance:</string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="ftol_lm">
+            <widget class="QLineEdit" name="f_x_tolerance_lm">
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_9">
+            <widget class="QLabel" name="label_x_tolerance_lm">
              <property name="text">
               <string>x tolerance:</string>
              </property>
@@ -246,13 +246,13 @@
       <widget class="QWidget" name="page_newton">
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox_5">
+         <widget class="QGroupBox" name="groupBox_newton">
           <property name="title">
            <string>Quasi-Newton BFGS </string>
           </property>
           <layout class="QGridLayout" name="gridLayout_5">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_10">
+            <widget class="QLabel" name="label_steps_newton">
              <property name="text">
               <string>Steps:</string>
              </property>
@@ -266,7 +266,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_13">
+            <widget class="QLabel" name="label_starts_newton">
              <property name="text">
               <string>Starts:</string>
              </property>
@@ -280,7 +280,7 @@
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_11">
+            <widget class="QLabel" name="label_f_x_tolerance_newton">
              <property name="text">
               <string>f(x) tolerance:</string>
              </property>
@@ -294,7 +294,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_12">
+            <widget class="QLabel" name="label_x_tolerance_newton">
              <property name="text">
               <string>x tolerance:</string>
              </property>
@@ -328,13 +328,13 @@
       <widget class="QWidget" name="page_de">
        <layout class="QGridLayout" name="gridLayout_8">
         <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox_6">
+         <widget class="QGroupBox" name="groupBox_de">
           <property name="title">
            <string>Differential Evolution</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_14">
+            <widget class="QLabel" name="label_steps_de">
              <property name="text">
               <string>Steps:</string>
              </property>
@@ -348,7 +348,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_15">
+            <widget class="QLabel" name="label_population_de">
              <property name="text">
               <string>Population:</string>
              </property>
@@ -358,7 +358,7 @@
             <widget class="QLineEdit" name="pop_de"/>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_18">
+            <widget class="QLabel" name="label_crossover_ratio_de">
              <property name="text">
               <string>Crossover ratio:</string>
              </property>
@@ -372,7 +372,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_19">
+            <widget class="QLabel" name="label_scale_de">
              <property name="text">
               <string>Scale:</string>
              </property>
@@ -386,7 +386,7 @@
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_16">
+            <widget class="QLabel" name="label_f_x_tolerance_de">
              <property name="text">
               <string>f(x) tolerance:</string>
              </property>
@@ -400,7 +400,7 @@
             </widget>
            </item>
            <item row="5" column="0">
-            <widget class="QLabel" name="label_17">
+            <widget class="QLabel" name="label_x_tolerance_de">
              <property name="text">
               <string>x tolerance:</string>
              </property>
@@ -434,13 +434,13 @@
       <widget class="QWidget" name="page_amoeba">
        <layout class="QGridLayout" name="gridLayout_10">
         <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox_7">
+         <widget class="QGroupBox" name="groupBox_amoeba">
           <property name="title">
            <string>Nelder-Mead Simplex</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_11">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_20">
+            <widget class="QLabel" name="label_steps_amoeba">
              <property name="text">
               <string>Steps:</string>
              </property>
@@ -454,7 +454,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_21">
+            <widget class="QLabel" name="label_starts_amoeba">
              <property name="text">
               <string>Starts:</string>
              </property>
@@ -468,7 +468,7 @@
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_22">
+            <widget class="QLabel" name="label_simplex_radius_amoeba">
              <property name="text">
               <string>Simplex radius:</string>
              </property>
@@ -482,7 +482,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_24">
+            <widget class="QLabel" name="label_f_x_tolerance_amoeba">
              <property name="text">
               <string>f(x) tolerance:</string>
              </property>
@@ -496,7 +496,7 @@
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_25">
+            <widget class="QLabel" name="label_x_tolerance_amoeba">
              <property name="text">
               <string>x tolerance:</string>
              </property>
@@ -530,7 +530,7 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="QComboBox" name="cbAlgorithm">
+     <widget class="QComboBox" name="comboboxFitAlgorithms">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -544,7 +544,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_4">
+  <widget class="QGroupBox" name="groupBox_DefaultFitAlgorithm">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -564,7 +564,7 @@
    </property>
    <layout class="QGridLayout" name="gridLayout_12">
     <item row="0" column="0">
-     <widget class="QComboBox" name="cbAlgorithmDefault">
+     <widget class="QComboBox" name="comboboxDefaultFitAlgorithm">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
         <horstretch>0</horstretch>

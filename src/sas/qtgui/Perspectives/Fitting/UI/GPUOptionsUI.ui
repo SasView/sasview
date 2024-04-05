@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../../../../../../../../../Users/UI/res/ball.ico</normaloff>../../../../../../../../../../../Users/UI/res/ball.ico</iconset>
+    <normaloff>../../../../../../../../../Users/UI/res/ball.ico</normaloff>../../../../../../../../../Users/UI/res/ball.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="2">
@@ -82,7 +82,7 @@
     </spacer>
    </item>
    <item row="2" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_bottom">
      <property name="sizeConstraint">
       <enum>QLayout::SetMinimumSize</enum>
      </property>
@@ -108,4 +108,5 @@
   </layout>
  </widget>
  <resources/>
+ <connections/>
 </ui>
