@@ -1515,7 +1515,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # disable polydispersity if the model does not support it
         has_poly = self._poly_model.rowCount() != 0
         self.chkPolydispersity.setEnabled(has_poly)
-        self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
+        if has_poly:
+            self.togglePoly(self.chkPolydispersity.isChecked())
 
         # set focus so it doesn't move up
         self.cbModel.setFocus()
@@ -2242,7 +2243,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
             self._model_model.item(row, 0).child(0).child(0,1).setText(param_repr)
             # modify the param error
-            if self.has_error_column:
+            if self.has_poly_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._model_model.item(row, 0).child(0).child(0,2).setText(error_repr)
 
@@ -3576,7 +3577,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Add an extra safety check to be sure this parameter has the polydisperse table row
             poly_row = self._model_model.item(row, 0).child(0)
             if poly_row:
-                self._model_model.item(row).child(0).child(0, n).setText(combo_string)
+                poly_row.child(0, n).setText(combo_string)
             self._model_model.blockSignals(False)
 
         if combo_string == 'array':
