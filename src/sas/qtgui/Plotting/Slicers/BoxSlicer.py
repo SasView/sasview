@@ -66,7 +66,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.averager = None
         # Flag to determine if the current figure has moved
         # set to False == no motion , set to True== motion
-        # Default to False at initialize (nothing has moved yet)
+        # NOTE: This is not currently ever used. All moves happen in the
+        # individual interactors not the whole slicker. Thus the move(ev)
+        # currently does a pass. Default to False at initialize anyway
+        # (nothing has moved yet) for possible future implementation.
         self.has_move = False
         # Create vertical and horizontal lines for the rectangle
         self.horizontal_lines = HorizontalDoubleLine(self,
@@ -492,6 +495,8 @@ class PointInteractor(BaseInteractor):
 
     def setCursor(self, x, y):
         """
+        ..todo:: the cursor moves are currently being captured somewhere upstream
+                 of BaseInteractor so this never gets called.
         """
         self.move(x, y, None)
         self.update()
@@ -602,7 +607,7 @@ class VerticalDoubleLine(BaseInteractor):
             self.left_line.set(xdata=[self.x2, self.x2],
                                ydata=[self.y1, self.y2])
             return
-        # if x1, y1, y2, y3 are given draw the rectangle with this value
+        # if x1, y1, x2, y2 are given draw the rectangle with these values
         if x1 is not None:
             self.x1 = x1
         if x2 is not None:
@@ -707,6 +712,7 @@ class HorizontalDoubleLine(BaseInteractor):
         delta = self.x1 - self.center_x
         self.x2 = self.center_x - delta
         self.save_x2 = self.x2
+        # Color
         self.color = color
         self.half_height = numpy.fabs(y)
         self.save_half_height = numpy.fabs(y)
@@ -783,7 +789,7 @@ class HorizontalDoubleLine(BaseInteractor):
             self.bottom_line.set(xdata=[self.x1, self.x2],
                                  ydata=[self.y2, self.y2])
             return
-        # if x1, y1, y2, y3 are given draw the rectangle with this value
+        # if x1, y1, x2, y2 are given draw the rectangle with these values
         if x1 is not None:
             self.x1 = x1
         if x2 is not None:
