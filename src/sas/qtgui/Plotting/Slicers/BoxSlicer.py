@@ -33,13 +33,13 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.direction = direction
         # determine x y  values
         if self.direction == "Y":
-            self.xwidth = 0.1 * (self.data.xmax - self.data.xmin) / 2
-            self.ywidth = 1.0 * (self.data.ymax - self.data.ymin) / 2
+            self.half_width = 0.1 * (self.data.xmax - self.data.xmin) / 2
+            self.half_height = 0.9 * (self.data.ymax - self.data.ymin) / 2
             # when reach qmax reset the graph
             self.qmax = max(numpy.fabs(self.data.ymax), numpy.fabs(self.data.ymin))
         elif self.direction == "X":
-            self.xwidth = 1.0 * (self.data.xmax - self.data.xmin) / 2
-            self.ywidth = 0.1 * (self.data.ymax - self.data.ymin) / 2
+            self.half_width = 1.0 * (self.data.xmax - self.data.xmin) / 2
+            self.half_height = 0.1 * (self.data.ymax - self.data.ymin) / 2
             # when reach qmax reset the graph
             self.qmax = max(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
         else:
@@ -47,9 +47,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             raise ValueError(msg)
 
         # set the minimum of the box width (x) and height (y) to be
-        # 2% of the data2D range in that direction
-        self.width_min = 0.02 * (self.data.xmax - self.data.xmin)
-        self.height_min = 0.02 * (self.data.ymax - self.data.ymin)
+        # 4% of the data2D range in that direction (2% of the range
+        # for each half)
+        self.half_width_min = 0.02 * (self.data.xmax - self.data.xmin)
+        self.half_height_min = 0.02 * (self.data.ymax - self.data.ymin)
 
         # center of the box
         # puts the center of box at the middle of the data q-range
@@ -76,8 +77,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                                      self.axes,
                                                      color='blue',
                                                      zorder=zorder,
-                                                     y=self.ywidth,
-                                                     x=self.xwidth,
+                                                     half_height=self.half_height,
+                                                     half_width=self.half_width,
                                                      center_x=self.center_x,
                                                      center_y=self.center_y)
         self.horizontal_lines.qmax = self.qmax
@@ -86,8 +87,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                                  self.axes,
                                                  color='black',
                                                  zorder=zorder,
-                                                 y=self.ywidth,
-                                                 x=self.xwidth,
+                                                 half_height=self.half_height,
+                                                 half_width=self.half_width,
                                                  center_x=self.center_x,
                                                  center_y=self.center_y)
         self.vertical_lines.qmax = self.qmax
@@ -153,14 +154,14 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             self.horizontal_lines.update()
             self.vertical_lines.update(y1=self.horizontal_lines.y1,
                                        y2=self.horizontal_lines.y2,
-                                       height=self.horizontal_lines.half_height)
+                                       half_height=self.horizontal_lines.half_height)
         # check if the vertical lines have moved and
         # update the figure accordingly
         if self.vertical_lines.has_move:
             self.vertical_lines.update()
             self.horizontal_lines.update(x1=self.vertical_lines.x1,
                                          x2=self.vertical_lines.x2,
-                                         width=self.vertical_lines.half_width)
+                                         half_width=self.vertical_lines.half_width)
 
     def save(self, ev):
         """
@@ -185,10 +186,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         x_min = self.horizontal_lines.x2
         x_max = self.horizontal_lines.x1
-        self.xwidth = numpy.fabs(x_max - x_min)/2
+        self.half_width = numpy.fabs(x_max - x_min)/2
         y_min = self.vertical_lines.y2
         y_max = self.vertical_lines.y1
-        self.ywidth = numpy.fabs(y_max - y_min)/2
+        self.half_height = numpy.fabs(y_max - y_min)/2
 
         if nbins is not None:
             self.nbins = nbins
@@ -223,7 +224,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             else:
                 y_low = y_min
                 y_high = y_max
-            bin_width = (y_high + y_low) / self.nbins
+            bin_width = (y_high - y_low) / self.nbins
         else:
             msg = "post data:no Box Average direction was supplied"
             raise ValueError(msg)
@@ -313,8 +314,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         """
         params = {}
-        params["x_width"] = self.xwidth
-        params["y_width"] = self.ywidth
+        params["half_width"] = self.vertical_lines.half_width
+        params["half_height"] = self.horizontal_lines.half_height
         params["nbins"] = self.nbins
         params["center_x"] = self.center.x
         params["center_y"] = self.center.y
@@ -329,8 +330,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         :param params: a dictionary containing name of slicer parameters and
             values the user assigned to the slicer.
         """
-        self.xwidth = params["x_width"]
-        self.ywidth = params["y_width"]
+        self.half_width = params["half_width"]
+        self.half_height = params["half_height"]
         self.nbins = params["nbins"]
         self.fold = params["fold"]
         self.center_x = params["center_x"]
@@ -338,9 +339,9 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         self.center.update(center_x=self.center_x, center_y=self.center_y)
         self.horizontal_lines.update(center=self.center,
-                                     width=self.xwidth, height=self.ywidth)
+                                     half_width=self.half_width, half_height=self.half_height)
         self.vertical_lines.update(center=self.center,
-                                   width=self.xwidth, height=self.ywidth)
+                                   half_width=self.half_width, half_height=self.half_height)
         # Compute and plot the 1D average based on these parameters
         self._post_data()
         self.draw()
@@ -369,18 +370,18 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         """
         isValid = True
 
-        if param_name =='x_width':
-            # Can't be negative or smaller than self.width_min if a reasonable
-            # min is provided. NOTE: this is actually the half width or width
+        if param_name =='half_width':
+            # Can't be negative or smaller than self.half_width_min if a
+            # reasonable min is provided. NOTE: half_width is the width
             # to or from the center
-            if param_value <= 0 or param_value <= self.width_min:
+            if param_value <= 0 or param_value <= self.half_width_min:
                 print("The box width is too small. Please adjust.")
                 isValid = False
-        if param_name =='y_width':
-            # Can't be negative or smaller than self.height_min if a reasonable
-            # min is provided. NOTE: this is actually the half height or height
+        if param_name =='half_height':
+            # Can't be negative or smaller than self.half_height_min if a
+            # reasonable min is provided. NOTE: half_height is the height
             # to or from the center
-            if param_value <= 0 or param_value <= self.height_min:
+            if param_value <= 0 or param_value <= self.half_height_min:
                 print("The box height is too small. Please adjust.")
                 isValid = False
         elif param_name == 'nbins':
@@ -506,37 +507,32 @@ class VerticalDoubleLine(BaseInteractor):
     Draw 2 vertical lines that can move symmetrically in opposite directions in x and centered on
     a point (PointInteractor). It also defines the top and bottom y positions of a box.
     """
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
+    def __init__(self, base, axes, color='black', zorder=5, half_width=0.5, half_height=0.5,
                  center_x=0.0, center_y=0.0):
         BaseInteractor.__init__(self, base, axes, color=color)
         # Initialization of the class
         self.markers = []
         self.axes = axes
+        # the height of the rectangle
+        self.half_height = half_height
+        self.save_half_height = self.half_height
+        # the width of the rectangle
+        self.half_width = half_width
+        self.save_half_width = self.half_width
         # Center coordinates
         self.center_x = center_x
         self.center_y = center_y
-        # defined end points vertical lines and their saved values
-        self.y1 = y + self.center_y
+        # defined end points vertical and horizontal lines and their saved values
+        self.y1 = self.center_y + self.half_height
         self.save_y1 = self.y1
-
-        delta = self.y1 - self.center_y
-        self.y2 = self.center_y - delta
+        self.y2 = self.center_y - self.half_height
         self.save_y2 = self.y2
-
-        self.x1 = x + self.center_x
+        self.x1 = self.center_x + self.half_width
         self.save_x1 = self.x1
-
-        delta = self.x1 - self.center_x
-        self.x2 = self.center_x - delta
+        self.x2 = self.center_x - self.half_width
         self.save_x2 = self.x2
         # save the color of the line
         self.color = color
-        # the height of the rectangle
-        self.half_height = numpy.fabs(y)
-        self.save_half_height = numpy.fabs(y)
-        # the width of the rectangle
-        self.half_width = numpy.fabs(self.x1 - self.x2) / 2
-        self.save_half_width = numpy.fabs(self.x1 - self.x2) / 2
         # Create marker
         self.right_marker = self.axes.plot([self.x1], [0], linestyle='',
                                            marker='s', markersize=10,
@@ -574,32 +570,32 @@ class VerticalDoubleLine(BaseInteractor):
         self.right_line.remove()
         self.left_line.remove()
 
-    def update(self, x1=None, x2=None, y1=None, y2=None, width=None,
-               height=None, center=None):
+    def update(self, x1=None, x2=None, y1=None, y2=None, half_width=None,
+               half_height=None, center=None):
         """
         Draw the new roughness on the graph.
         :param x1: new maximum value of x coordinates
         :param x2: new minimum value of x coordinates
         :param y1: new maximum value of y coordinates
         :param y2: new minimum value of y coordinates
-        :param width: is the width of the new rectangle
-        :param height: is the height of the new rectangle
+        :param half_ width: is the half width of the new rectangle
+        :param half_height: is the half height of the new rectangle
         :param center: provided x, y  coordinates of the center point
         """
         # Save the new height, width of the rectangle if given as a param
-        if width is not None:
-            self.half_width = width
-        if height is not None:
-            self.half_height = height
+        if half_width is not None:
+            self.half_width = half_width
+        if half_height is not None:
+            self.half_height = half_height
         # If new center coordinates are given draw the rectangle
         # given these value
         if center is not None:
             self.center_x = center.x
             self.center_y = center.y
-            self.x1 = self.half_width + self.center_x
-            self.x2 = -self.half_width + self.center_x
-            self.y1 = self.half_height + self.center_y
-            self.y2 = -self.half_height + self.center_y
+            self.x1 = self.center_x + self.half_width
+            self.x2 = self.center_x - self.half_width
+            self.y1 = self.center_y + self.half_height
+            self.y2 = self.center_y - self.half_height
 
             self.right_marker.set(xdata=[self.x1], ydata=[self.center_y])
             self.right_line.set(xdata=[self.x1, self.x1],
@@ -673,9 +669,8 @@ class VerticalDoubleLine(BaseInteractor):
             self.restore(ev)
         else:
             self.x1 = x
-            delta = self.x1 - self.center_x
-            self.x2 = self.center_x - delta
-            self.half_width = delta
+            self.half_width = self.x1 - self.center_x
+            self.x2 = self.center_x - self.half_width
             self.has_move = True
             self.base.update()
             self.base.draw()
@@ -692,7 +687,7 @@ class HorizontalDoubleLine(BaseInteractor):
     Draw 2 vertical lines that can move symmetrically in opposite directions in y and centered on
     a point (PointInteractor). It also defines the left and right x positions of a box.
     """
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
+    def __init__(self, base, axes, color='black', zorder=5, half_width=0.5, half_height=0.5,
                  center_x=0.0, center_y=0.0):
 
         BaseInteractor.__init__(self, base, axes, color=color)
@@ -702,22 +697,21 @@ class HorizontalDoubleLine(BaseInteractor):
         # Center coordinates
         self.center_x = center_x
         self.center_y = center_y
-        self.y1 = y + self.center_y
+        # Box half width and height and  horizontal and vertical limits
+        self.half_height = half_height
+        self.save_half_height = self.half_height
+        self.half_width = half_width
+        self.save_half_width = self.half_width
+        self.y1 = self.center_y + half_height
         self.save_y1 = self.y1
-        delta = self.y1 - self.center_y
-        self.y2 = self.center_y - delta
+        self.y2 = self.center_y - half_height
         self.save_y2 = self.y2
-        self.x1 = x + self.center_x
+        self.x1 = self.center_x + self.half_width
         self.save_x1 = self.x1
-        delta = self.x1 - self.center_x
-        self.x2 = self.center_x - delta
+        self.x2 = self.center_x - self.half_width
         self.save_x2 = self.x2
         # Color
         self.color = color
-        self.half_height = numpy.fabs(y)
-        self.save_half_height = numpy.fabs(y)
-        self.half_width = numpy.fabs(x)
-        self.save_half_width = numpy.fabs(x)
         self.top_marker = self.axes.plot([0], [self.y1], linestyle='',
                                          marker='s', markersize=10,
                                          color=self.color, alpha=0.6,
@@ -756,32 +750,32 @@ class HorizontalDoubleLine(BaseInteractor):
         self.top_line.remove()
 
     def update(self, x1=None, x2=None, y1=None, y2=None,
-               width=None, height=None, center=None):
+               half_width=None, half_height=None, center=None):
         """
         Draw the new roughness on the graph.
         :param x1: new maximum value of x coordinates
         :param x2: new minimum value of x coordinates
         :param y1: new maximum value of y coordinates
         :param y2: new minimum value of y coordinates
-        :param width: is the width of the new rectangle
-        :param height: is the height of the new rectangle
+        :param half_width: is the half width of the new rectangle
+        :param half_height: is the half height of the new rectangle
         :param center: provided x, y  coordinates of the center point
         """
         # Save the new height, width of the rectangle if given as a param
-        if width is not None:
-            self.half_width = width
-        if height is not None:
-            self.half_height = height
+        if half_width is not None:
+            self.half_width = half_width
+        if half_height is not None:
+            self.half_height = half_height
         # If new  center coordinates are given draw the rectangle
         # given these value
         if center is not None:
             self.center_x = center.x
             self.center_y = center.y
-            self.x1 = self.half_width + self.center_x
-            self.x2 = -self.half_width + self.center_x
+            self.x1 = self.center_x + self.half_width
+            self.x2 = self.center_x - self.half_width
 
-            self.y1 = self.half_height + self.center_y
-            self.y2 = -self.half_height + self.center_y
+            self.y1 = self.center_y + self.half_height
+            self.y2 = self.center_y - self.half_height
 
             self.top_marker.set(xdata=[self.center_x], ydata=[self.y1])
             self.top_line.set(xdata=[self.x1, self.x2],
@@ -855,9 +849,8 @@ class HorizontalDoubleLine(BaseInteractor):
             self.restore(ev)
         else:
             self.y1 = y
-            delta = self.y1 - self.center_y
-            self.y2 = self.center_y - delta
-            self.half_height = delta
+            self.half_height = self.y1 - self.center_y
+            self.y2 = self.center_y - self.half_height
             self.has_move = True
             self.base.update()
             self.base.draw()
