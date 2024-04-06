@@ -24,14 +24,21 @@ class CorfuncCanvasMeta(type(FigureCanvas), ABCMeta):
 class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
     """ Base class for the canvases in corfunc"""
 
-    def __init__(self, parent: CorfuncWindow, width=5, height=4, dpi=100):
-        self.parent = parent
+    def __init__(self, corfunc_window: CorfuncWindow, width=5, height=4, dpi=100):
+
+        self.corfunc_windows = corfunc_window
+
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
 
         FigureCanvas.__init__(self, self.fig)
 
         self._data: Optional[List[Data1D]] = None
+
+    def parent(self):
+        """ Parent function is needed by the toolbar, and needs to return the appropriate figure canvas object,
+        which is `self`"""
+        return self
 
     def clear(self):
         """ Remove data from plots"""
