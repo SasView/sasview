@@ -248,7 +248,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.lblUnitSolventSLD.setStyleSheet(new_font)
         self.lblUnitVolume.setStyleSheet(new_font)
-        self.lbl5.setStyleSheet(new_font)
+        self.lblAngstromQx.setStyleSheet(new_font)
         self.lblUnitMx.setStyleSheet(new_font)
         self.lblUnitMy.setStyleSheet(new_font)
         self.lblUnitMz.setStyleSheet(new_font)

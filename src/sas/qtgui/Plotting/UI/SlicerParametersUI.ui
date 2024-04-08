@@ -71,7 +71,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -93,7 +93,7 @@
           <item row="1" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="labelSlicerType">
               <property name="text">
                <string>Slicer type:</string>
               </property>
@@ -222,7 +222,7 @@
             <item row="0" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <widget class="QLabel" name="label_2">
+               <widget class="QLabel" name="labelFileSavedIn">
                 <property name="text">
                  <string>Files saved in:</string>
                 </property>
@@ -255,7 +255,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_4">
+               <widget class="QLabel" name="labelAs">
                 <property name="text">
                  <string>as </string>
                 </property>
@@ -303,7 +303,7 @@
             <item row="2" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
-               <widget class="QLabel" name="label_3">
+               <widget class="QLabel" name="labelFittingOption">
                 <property name="text">
                  <string>Fitting Options:</string>
                 </property>

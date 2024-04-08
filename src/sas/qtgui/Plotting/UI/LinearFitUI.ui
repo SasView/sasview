@@ -40,21 +40,21 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="1">
-         <widget class="QLabel" name="label_9">
+         <widget class="QLabel" name="labelFitRangesMin">
           <property name="text">
            <string>Min</string>
           </property>
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLabel" name="label_10">
+         <widget class="QLabel" name="labelFitRangesMax">
           <property name="text">
            <string>Max</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_8">
+         <widget class="QLabel" name="labelFitRange">
           <property name="text">
            <string>Range (linear scale)</string>
           </property>
@@ -69,7 +69,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum value on the x-axis for the plotted data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="autoFillBackground">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="styleSheet">
            <string notr="true">color: rgb(0, 0, 0);</string>
@@ -133,7 +133,7 @@
       <item row="0" column="0">
        <layout class="QFormLayout" name="formLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="labelFitParameter_a">
           <property name="text">
            <string>a</string>
           </property>
@@ -156,7 +156,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="labelFitParameter_x">
           <property name="text">
            <string>b</string>
           </property>
@@ -179,7 +179,7 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label_7">
+         <widget class="QLabel" name="labelFitParameter_chi_squared_dof">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -206,7 +206,7 @@
       <item row="0" column="1">
        <layout class="QFormLayout" name="formLayout_2">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="labelPlusMinus1">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -229,7 +229,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_6">
+         <widget class="QLabel" name="labelPlusMinus2">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -268,14 +268,14 @@
       <item row="0" column="0">
        <layout class="QFormLayout" name="formLayout_4">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_11">
+         <widget class="QLabel" name="labelGuinier_I_Q_0">
           <property name="text">
            <string>I(q=0)</string>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="txtGuinier_1">
+         <widget class="QLineEdit" name="txtGuinier_I_q_0">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -285,14 +285,14 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_12">
+         <widget class="QLabel" name="labelGuinier_R_g">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g &lt;/span&gt;[Å]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="txtGuinier_2">
+         <widget class="QLineEdit" name="txtGuinier_R_g">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -302,14 +302,14 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label_15">
+         <widget class="QLabel" name="labelGuinier_R_g_times_Q_max">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g&lt;/span&gt;*Q&lt;span style=&quot; vertical-align:sub;&quot;&gt;max&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QLineEdit" name="txtGuinier_3">
+         <widget class="QLineEdit" name="txtGuinier_R_g_times_Q_max">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -319,14 +319,14 @@
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="label_16">
+         <widget class="QLabel" name="labelGuinier_R_g_times_Q_min">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g&lt;/span&gt;*Q&lt;span style=&quot; vertical-align:sub;&quot;&gt;min&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QLineEdit" name="txtGuinier_4">
+         <widget class="QLineEdit" name="txtGuinier_R_g_times_Q_min">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -340,14 +340,14 @@
       <item row="0" column="1">
        <layout class="QFormLayout" name="formLayout_3">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_13">
+         <widget class="QLabel" name="labelPlusMinus3">
           <property name="text">
            <string>+/-</string>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="txtGuinier1_Err">
+         <widget class="QLineEdit" name="txtGuinier_I_q_0_Err">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -363,7 +363,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_14">
+         <widget class="QLabel" name="labelPlusMinus4">
           <property name="text">
            <string>+/-</string>
           </property>

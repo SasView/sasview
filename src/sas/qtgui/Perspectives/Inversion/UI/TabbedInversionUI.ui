@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
+    <width>518</width>
     <height>480</height>
    </rect>
   </property>
@@ -47,7 +47,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -69,7 +69,7 @@
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="labelDataFileName">
               <property name="text">
                <string>Data File Name:</string>
               </property>
@@ -126,7 +126,7 @@ p, li { white-space: pre-wrap; }
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_12">
+           <widget class="QLabel" name="labelParametersNumberOfTerms">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -165,7 +165,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_13">
+           <widget class="QLabel" name="labelParametersRegConstant">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -210,7 +210,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_14">
+           <widget class="QLabel" name="labelParametersMaxDistance">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -270,9 +270,9 @@ p, li { white-space: pre-wrap; }
          <zorder>regConstantSuggestionButton</zorder>
          <zorder>maxDistanceInput</zorder>
          <zorder>explorerButton</zorder>
-         <zorder>label_13</zorder>
-         <zorder>label_12</zorder>
-         <zorder>label_14</zorder>
+         <zorder>labelParametersRegConstant</zorder>
+         <zorder>labelParametersNumberOfTerms</zorder>
+         <zorder>labelParametersMaxDistance</zorder>
         </widget>
        </item>
        <item row="2" column="0">
@@ -282,7 +282,7 @@ p, li { white-space: pre-wrap; }
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_15">
+           <widget class="QLabel" name="labelOutputsR_g">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -307,29 +307,8 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_24">
-            <property name="text">
-             <string>Å</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLabel" name="label_22">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="4">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="5">
-           <widget class="QLineEdit" name="chiDofValue">
+          <item row="2" column="4">
+           <widget class="QLineEdit" name="posFractionValue">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -347,10 +326,67 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_16">
+          <item row="3" column="3">
+           <widget class="QLabel" name="labelPOneMinSigmaFraction">
             <property name="text">
-             <string>I(Q=0)</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; vertical-align:sub;&quot;&gt;1-σ&lt;/span&gt; fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="4">
+           <widget class="QLineEdit" name="sigmaPosFractionValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="backgroundValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLineEdit" name="chiDofValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -374,20 +410,48 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QLabel" name="label_25">
+           <widget class="QLabel" name="labelOutputsI_Q_0Unit">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="label_20">
+          <item row="3" column="2">
+           <widget class="QLabel" name="labelOutputsCalcTimeUnit">
             <property name="text">
-             <string>Oscillations</string>
+             <string>secs</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="5">
+          <item row="2" column="3">
+           <widget class="QLabel" name="labelOuputsPFraction">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt; Fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelOutputsI_Q_0">
+            <property name="text">
+             <string>I(Q=0)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelOutputsCalcTime">
+            <property name="text">
+             <string>Calc. Time</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="labelOutputsChiSquaredDivDOF">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
            <widget class="QLineEdit" name="oscillationValue">
             <property name="enabled">
              <bool>true</bool>
@@ -407,106 +471,35 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_17">
+           <widget class="QLabel" name="labelOutputsBackground">
             <property name="text">
              <string>Background</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="backgroundValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="2">
-           <widget class="QLabel" name="label_26">
+           <widget class="QLabel" name="labelOutputsBackgroundUnit">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="4">
-           <widget class="QLabel" name="label_21">
+          <item row="0" column="2">
+           <widget class="QLabel" name="labelOutputsR_g_Unit">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt; Fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>Å</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="5">
-           <widget class="QLineEdit" name="posFractionValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_18">
+          <item row="1" column="3">
+           <widget class="QLabel" name="labelOutputsOscillations">
             <property name="text">
-             <string>Calc. Time</string>
+             <string>Oscillations</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
            <widget class="QLineEdit" name="computationTimeValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="label_27">
-            <property name="text">
-             <string>secs</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4">
-           <widget class="QLabel" name="label_29">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; vertical-align:sub;&quot;&gt;1-σ&lt;/span&gt; fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="5">
-           <widget class="QLineEdit" name="sigmaPosFractionValue">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -543,7 +536,7 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,1,0,2,2">
             <item>
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="labelOptionsBackgroundLevel">
               <property name="text">
                <string>Background Level:</string>
               </property>
@@ -560,7 +553,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_10">
+             <widget class="QLabel" name="labelOptionsBackgroundLevelUnit">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -591,7 +584,7 @@ p, li { white-space: pre-wrap; }
              <item row="0" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
-                <widget class="QLabel" name="label_7">
+                <widget class="QLabel" name="labelTotalQRangeMin">
                  <property name="text">
                   <string>Min:</string>
                  </property>
@@ -611,14 +604,14 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_11">
+                <widget class="QLabel" name="labelTotalQRangeMinUnit">
                  <property name="text">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_8">
+                <widget class="QLabel" name="labelTotalQRangeMax">
                  <property name="text">
                   <string>Max:</string>
                  </property>
@@ -638,7 +631,7 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_9">
+                <widget class="QLabel" name="labelTotalQRangeMaxUnit">
                  <property name="text">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
@@ -658,7 +651,7 @@ p, li { white-space: pre-wrap; }
              <item row="0" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout">
                <item>
-                <widget class="QLabel" name="label_3">
+                <widget class="QLabel" name="labelSlitParametersHeight">
                  <property name="text">
                   <string>Height</string>
                  </property>
@@ -678,14 +671,14 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_6">
+                <widget class="QLabel" name="labelSlitParametersHeightUnit">
                  <property name="text">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_4">
+                <widget class="QLabel" name="labelSlitParametersWidth">
                  <property name="text">
                   <string>Width</string>
                  </property>
@@ -705,7 +698,7 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_2">
+                <widget class="QLabel" name="labelSlitParametersWidthUnit">
                  <property name="text">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>

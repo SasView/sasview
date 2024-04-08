@@ -27,7 +27,7 @@
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="label_1">
+      <widget class="QLabel" name="labelMolecularFormula">
        <property name="text">
         <string>Molecular Formula</string>
        </property>
@@ -53,14 +53,14 @@
       </widget>
      </item>
      <item row="0" column="2">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="labelExampleMolecularFormula">
        <property name="text">
         <string>e.g. H2O</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="labelMolarMass">
        <property name="text">
         <string>Molar Mass</string>
        </property>
@@ -92,7 +92,7 @@
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="labelExampleMolarMass">
        <property name="text">
         <string>g/mol</string>
        </property>
@@ -121,7 +121,7 @@
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="labelMolarVolume">
        <property name="text">
         <string>Molar Volume</string>
        </property>
@@ -147,14 +147,14 @@
       </widget>
      </item>
      <item row="3" column="2">
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="labelExampleMolarVolume">
        <property name="text">
         <string>cm³/mol</string>
        </property>
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="label_7">
+      <widget class="QLabel" name="labelMassDensity">
        <property name="text">
         <string>Mass Density</string>
        </property>
@@ -180,7 +180,7 @@
       </widget>
      </item>
      <item row="4" column="2">
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="labelExampleMassDensity">
        <property name="text">
         <string>g/cm³</string>
        </property>

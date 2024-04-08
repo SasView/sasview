@@ -72,7 +72,7 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_26">
+         <widget class="QLabel" name="labelSource">
           <property name="minimumSize">
            <size>
             <width>26</width>
@@ -223,7 +223,7 @@
          </widget>
         </item>
         <item row="2" column="0" colspan="2">
-         <widget class="QLabel" name="label_27">
+         <widget class="QLabel" name="labelWavelength">
           <property name="minimumSize">
            <size>
             <width>84</width>
@@ -286,7 +286,7 @@
          </widget>
         </item>
         <item row="3" column="0" colspan="2">
-         <widget class="QLabel" name="label_28">
+         <widget class="QLabel" name="labelWavelengthSpread">
           <property name="minimumSize">
            <size>
             <width>134</width>
@@ -324,7 +324,7 @@
          </widget>
         </item>
         <item row="4" column="0" colspan="2">
-         <widget class="QLabel" name="label_29">
+         <widget class="QLabel" name="labelSourceApertureSize">
           <property name="minimumSize">
            <size>
             <width>143</width>
@@ -368,7 +368,7 @@
          </widget>
         </item>
         <item row="4" column="4">
-         <widget class="QLabel" name="label_39">
+         <widget class="QLabel" name="labelSourceApertureSizeUnit">
           <property name="minimumSize">
            <size>
             <width>22</width>
@@ -384,7 +384,7 @@
          </widget>
         </item>
         <item row="5" column="0" colspan="2">
-         <widget class="QLabel" name="label_30">
+         <widget class="QLabel" name="labelSampleApertureSize">
           <property name="minimumSize">
            <size>
             <width>147</width>
@@ -428,7 +428,7 @@
          </widget>
         </item>
         <item row="5" column="4">
-         <widget class="QLabel" name="label_40">
+         <widget class="QLabel" name="labelSampleApertureSizeUnit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -447,7 +447,7 @@
          </widget>
         </item>
         <item row="6" column="0" colspan="3">
-         <widget class="QLabel" name="label_31">
+         <widget class="QLabel" name="labelSourceSampleApertureDistance">
           <property name="minimumSize">
            <size>
             <width>220</width>
@@ -491,7 +491,7 @@
          </widget>
         </item>
         <item row="6" column="4">
-         <widget class="QLabel" name="label_41">
+         <widget class="QLabel" name="labelSourceSampleApertureDistanceUnit">
           <property name="minimumSize">
            <size>
             <width>22</width>
@@ -504,7 +504,7 @@
          </widget>
         </item>
         <item row="7" column="0" colspan="3">
-         <widget class="QLabel" name="label_32">
+         <widget class="QLabel" name="labelSampleApertureDetectorDistance">
           <property name="minimumSize">
            <size>
             <width>225</width>
@@ -539,7 +539,7 @@
          </widget>
         </item>
         <item row="7" column="4">
-         <widget class="QLabel" name="label_42">
+         <widget class="QLabel" name="labelSampleApertureDetectorDistanceUnit">
           <property name="minimumSize">
            <size>
             <width>22</width>
@@ -552,7 +552,7 @@
          </widget>
         </item>
         <item row="8" column="0" colspan="2">
-         <widget class="QLabel" name="label_33">
+         <widget class="QLabel" name="labelSampleOffset">
           <property name="minimumSize">
            <size>
             <width>100</width>
@@ -587,7 +587,7 @@
          </widget>
         </item>
         <item row="8" column="4">
-         <widget class="QLabel" name="label_43">
+         <widget class="QLabel" name="labelSampleOffsetUnit">
           <property name="minimumSize">
            <size>
             <width>22</width>
@@ -600,7 +600,7 @@
          </widget>
         </item>
         <item row="9" column="0" colspan="3">
-         <widget class="QLabel" name="label_34">
+         <widget class="QLabel" name="labelPixelNumberDetector">
           <property name="minimumSize">
            <size>
             <width>175</width>
@@ -635,7 +635,7 @@
          </widget>
         </item>
         <item row="10" column="0" colspan="2">
-         <widget class="QLabel" name="label_35">
+         <widget class="QLabel" name="labelDetectorPixelSize">
           <property name="minimumSize">
            <size>
             <width>129</width>
@@ -670,7 +670,7 @@
          </widget>
         </item>
         <item row="10" column="4">
-         <widget class="QLabel" name="label_45">
+         <widget class="QLabel" name="labelDetectorPixelSizeUnit">
           <property name="minimumSize">
            <size>
             <width>22</width>
@@ -753,7 +753,7 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_21">
+         <widget class="QLabel" name="labelQx">
           <property name="minimumSize">
            <size>
             <width>21</width>
@@ -801,7 +801,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_22">
+         <widget class="QLabel" name="labelQy">
           <property name="minimumSize">
            <size>
             <width>21</width>
@@ -943,7 +943,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="labelSigma_lamd">
           <property name="minimumSize">
            <size>
             <width>87</width>
@@ -1044,7 +1044,7 @@
          </widget>
         </item>
         <item row="1" column="4">
-         <widget class="QLabel" name="label_6">
+         <widget class="QLabel" name="label1DSigma">
           <property name="minimumSize">
            <size>
             <width>87</width>
@@ -1063,7 +1063,7 @@
          </widget>
         </item>
         <item row="0" column="4">
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="labelSigma_y">
           <property name="minimumSize">
            <size>
             <width>87</width>
@@ -1108,7 +1108,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="labelSigma_x">
           <property name="minimumSize">
            <size>
             <width>87</width>

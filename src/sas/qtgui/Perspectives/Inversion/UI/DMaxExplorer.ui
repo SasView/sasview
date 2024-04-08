@@ -97,7 +97,7 @@
        <item row="1" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="labelNpts">
            <property name="text">
             <string>Npts</string>
            </property>
@@ -107,7 +107,7 @@
           <widget class="QLineEdit" name="Npts"/>
          </item>
          <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="labelMinDistance">
            <property name="text">
             <string>Min Distance [Å]</string>
            </property>
@@ -117,7 +117,7 @@
           <widget class="QLineEdit" name="minDist"/>
          </item>
          <item>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="labelMaxDistance">
            <property name="text">
             <string>Max Distance [Å]</string>
            </property>

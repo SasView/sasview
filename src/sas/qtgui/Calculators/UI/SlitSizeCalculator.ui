@@ -30,7 +30,7 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="labelData">
           <property name="text">
            <string>Data</string>
           </property>
@@ -76,7 +76,7 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="labelSlitSize">
           <property name="text">
            <string>Slit Size (FWHM/2):</string>
           </property>
@@ -100,7 +100,7 @@
       <item row="0" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="labelSlitSizeUnit">
           <property name="text">
            <string>Unit:</string>
           </property>

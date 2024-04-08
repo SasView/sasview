@@ -88,7 +88,7 @@
       <item row="1" column="0">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="labelMinAmpColorMap">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter value for minimum color map amplitude.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -105,7 +105,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="labelMaxAmpColorMap">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter value for maximum color map amplitude.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -145,7 +145,7 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="labelDetectorWidthPixels">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Detector width.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -162,7 +162,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="labelDetectorHeightPixels">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Detector height.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -179,7 +179,7 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label_6">
+         <widget class="QLabel" name="labelDetectorQmax">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum absolute Q&lt;span style=&quot; vertical-align:sub;&quot;&gt;x,y&lt;/span&gt; value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -196,7 +196,7 @@
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="label_7">
+         <widget class="QLabel" name="labelDetectorBeamStopRadius">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum value of Q&lt;span style=&quot; vertical-align:sub;&quot;&gt;x&lt;/span&gt; in units of Q.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>

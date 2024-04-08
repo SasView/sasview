@@ -212,9 +212,9 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         # Possibly Guinier analysis
         i0 = numpy.exp(cstB)
-        self.txtGuinier_1.setText(formatNumber(i0))
+        self.txtGuinier_I_q_0.setText(formatNumber(i0))
         err = numpy.abs(numpy.exp(cstB) * errB)
-        self.txtGuinier1_Err.setText(formatNumber(err))
+        self.txtGuinier_I_q_0_Err.setText(formatNumber(err))
 
         if self.rg_yx:
             rg = numpy.sqrt(-2 * float(cstA))
@@ -233,13 +233,13 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
             else:
                 err = ''
 
-        self.txtGuinier_2.setText(value)
-        self.txtGuinier2_Err.setText(err)
+        self.txtGuinier_R_g.setText(value)
+        self.txtGuinier_R_g_Err.setText(err)
 
         value = formatNumber(rg * self.floatInvTransform(self.xminFit))
-        self.txtGuinier_4.setText(value)
+        self.txtGuinier_R_g_times_Q_min.setText(value)
         value = formatNumber(rg * self.floatInvTransform(self.xmaxFit))
-        self.txtGuinier_3.setText(value)
+        self.txtGuinier_R_g_times_Q_max.setText(value)
 
         tempx = numpy.array(tempx)
         tempy = numpy.array(tempy)

@@ -33,7 +33,7 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="labelKiessigFringeWidth">
           <property name="text">
            <string>Kiessig Fringe Width (Delta Q)</string>
           </property>
@@ -56,7 +56,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="labelUnitKiessigFringeWidth">
           <property name="text">
            <string>1/Å</string>
           </property>
@@ -76,7 +76,7 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="labelThickness">
           <property name="text">
            <string>Thickness (or Diameter)               </string>
           </property>
@@ -102,7 +102,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="labelUnitThicknessAngstrom">
           <property name="text">
            <string>   Å</string>
           </property>

@@ -20,7 +20,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="definitionTab">
       <attribute name="title">
@@ -79,7 +79,7 @@
                 <number>10</number>
                </property>
                <item row="1" column="0">
-                <widget class="QLabel" name="label_5">
+                <widget class="QLabel" name="labelStructureFactor">
                  <property name="text">
                   <string>Structure Factor</string>
                  </property>
@@ -92,7 +92,7 @@
                 <widget class="QComboBox" name="structureFactorCombo"/>
                </item>
                <item row="0" column="0">
-                <widget class="QLabel" name="label_2">
+                <widget class="QLabel" name="labelOrientationalDistribution">
                  <property name="text">
                   <string>Orientational Distribution</string>
                  </property>
@@ -119,7 +119,7 @@
             </layout>
            </item>
            <item>
-            <widget class="QLabel" name="label_6">
+            <widget class="QLabel" name="labelStructureFactorParameters">
              <property name="text">
               <string>Structure Factor Parameters</string>
              </property>
@@ -197,7 +197,7 @@
              <widget class="QFrame" name="frame_3">
               <layout class="QGridLayout" name="gridLayout_2">
                <item row="8" column="0">
-                <widget class="QLabel" name="label_11">
+                <widget class="QLabel" name="labelQMax">
                  <property name="text">
                   <string>Q Max</string>
                  </property>
@@ -207,7 +207,7 @@
                 </widget>
                </item>
                <item row="8" column="3">
-                <widget class="QLabel" name="label_10">
+                <widget class="QLabel" name="labelQMaxUnit">
                  <property name="text">
                   <string>Ang&lt;sup&gt;-1&lt;/sup&gt;</string>
                  </property>
@@ -240,7 +240,7 @@
                 </widget>
                </item>
                <item row="11" column="0">
-                <widget class="QLabel" name="label_12">
+                <widget class="QLabel" name="labelNeutronPolarisation">
                  <property name="text">
                   <string>Neutron Polarisation</string>
                  </property>
@@ -254,7 +254,7 @@
                 </widget>
                </item>
                <item row="9" column="0">
-                <widget class="QLabel" name="label_7">
+                <widget class="QLabel" name="labelQSamples">
                  <property name="text">
                   <string>Q Samples</string>
                  </property>
@@ -342,7 +342,7 @@
                 </layout>
                </item>
                <item row="3" column="0">
-                <widget class="QLabel" name="label_14">
+                <widget class="QLabel" name="labelSampleRadius">
                  <property name="text">
                   <string>Sample Radius</string>
                  </property>
@@ -352,7 +352,7 @@
                 </widget>
                </item>
                <item row="7" column="0">
-                <widget class="QLabel" name="label_8">
+                <widget class="QLabel" name="labelQMin">
                  <property name="text">
                   <string>Q Min</string>
                  </property>
@@ -362,7 +362,7 @@
                 </widget>
                </item>
                <item row="5" column="0">
-                <widget class="QLabel" name="label_4">
+                <widget class="QLabel" name="labelSamplePoints">
                  <property name="text">
                   <string>Sample Points</string>
                  </property>
@@ -372,7 +372,7 @@
                 </widget>
                </item>
                <item row="4" column="0">
-                <widget class="QLabel" name="label_3">
+                <widget class="QLabel" name="labelSampleMethod">
                  <property name="text">
                   <string>Sample Method</string>
                  </property>
@@ -382,7 +382,7 @@
                 </widget>
                </item>
                <item row="6" column="0">
-                <widget class="QLabel" name="label_16">
+                <widget class="QLabel" name="labelRandomSeed">
                  <property name="text">
                   <string>Random Seed</string>
                  </property>
@@ -434,7 +434,7 @@
                 </layout>
                </item>
                <item row="7" column="3">
-                <widget class="QLabel" name="label_9">
+                <widget class="QLabel" name="labelQMinUnit">
                  <property name="text">
                   <string>Ang&lt;sup&gt;-1&lt;/sup&gt;</string>
                  </property>

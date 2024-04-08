@@ -54,14 +54,14 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label_17">
+       <widget class="QLabel" name="labelNeutronSLD">
         <property name="text">
          <string>Neutron SLD</string>
         </property>
        </widget>
       </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="labelNeutron1eLength">
         <property name="text">
          <string>Neutron 1/e length</string>
         </property>
@@ -78,21 +78,21 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_21">
+       <widget class="QLabel" name="labelNeutronIncXs">
         <property name="text">
          <string>Neutron Inc. Xs</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="label_18">
+       <widget class="QLabel" name="label_i_NeutronSLD">
         <property name="text">
          <string>-i</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLabel" name="label_20">
+       <widget class="QLabel" name="label_i_XRaySLD">
         <property name="text">
          <string>-i</string>
         </property>
@@ -109,7 +109,7 @@
        </widget>
       </item>
       <item row="5" column="2" colspan="2">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="labelNeutron1eLengthUnit">
         <property name="text">
          <string>cm</string>
         </property>
@@ -126,7 +126,7 @@
        </widget>
       </item>
       <item row="4" column="2" colspan="2">
-       <widget class="QLabel" name="label_24">
+       <widget class="QLabel" name="labelNeutronAbsXsUnit">
         <property name="text">
          <string>1/cm</string>
         </property>
@@ -143,35 +143,35 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label_23">
+       <widget class="QLabel" name="labelNeutronAbsXs">
         <property name="text">
          <string>Neutron Abs. Xs</string>
         </property>
        </widget>
       </item>
       <item row="3" column="2" colspan="2">
-       <widget class="QLabel" name="label_22">
+       <widget class="QLabel" name="labelNeutronIncXsUnit">
         <property name="text">
          <string>1/cm</string>
         </property>
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="labelXRaySLDUnit">
         <property name="text">
          <string>1/Å²</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_19">
+       <widget class="QLabel" name="labelXRaySLD">
         <property name="text">
          <string>X-Ray SLD</string>
         </property>
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="labelNeutronSLDUnit">
         <property name="text">
          <string>1/Å²</string>
         </property>
@@ -229,21 +229,21 @@
      </property>
      <layout class="QGridLayout" name="gridLayoutInput">
       <item row="1" column="0">
-       <widget class="QLabel" name="label_8">
+       <widget class="QLabel" name="labelMassDensity">
         <property name="text">
          <string>Mass Density</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLabel" name="label_16">
+       <widget class="QLabel" name="labelUnitMassDensity">
         <property name="text">
          <string>g/cm³</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="label_10">
+       <widget class="QLabel" name="labelExampleMolecularFormula">
         <property name="text">
          <string>e.g. H2O</string>
         </property>
@@ -256,21 +256,21 @@
        <widget class="QLineEdit" name="editMassDensity"/>
       </item>
       <item row="2" column="2">
-       <widget class="QLabel" name="label_12">
+       <widget class="QLabel" name="labelUnitNeutronWavelength">
         <property name="text">
          <string>Å</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label_9">
+       <widget class="QLabel" name="labelMolecularFormula">
         <property name="text">
          <string>Molecular Formula</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_11">
+       <widget class="QLabel" name="labelNeutronWavelength">
         <property name="text">
          <string>Neutron Wavelength</string>
         </property>
@@ -290,14 +290,14 @@
        <widget class="QLineEdit" name="editXrayWavelength"/>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_13">
+       <widget class="QLabel" name="labelXRayWavelength">
         <property name="text">
          <string>X-Ray Wavelength</string>
         </property>
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="labelUnitXRayWavelength">
         <property name="text">
          <string>Å</string>
         </property>

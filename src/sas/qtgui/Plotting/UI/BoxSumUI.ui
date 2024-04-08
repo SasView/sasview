@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>322</width>
-    <height>313</height>
+    <width>330</width>
+    <height>340</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -49,7 +49,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="labelBoxSizeHeight">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -90,7 +90,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QLabel" name="label_10">
+          <widget class="QLabel" name="labelBoxSizeHeightUnit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -103,7 +103,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="labelBoxSizeWidth">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -144,7 +144,7 @@
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QLabel" name="label_11">
+          <widget class="QLabel" name="labelBoxSizeWidthUnit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -172,7 +172,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="labelQx">
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;X coordinate of the center of the box.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -207,14 +207,14 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QLabel" name="label_13">
+          <widget class="QLabel" name="labelQxUnit">
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="labelQy">
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Y coordinate of the center of the box.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -252,7 +252,7 @@
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QLabel" name="label_12">
+          <widget class="QLabel" name="labelQyUnit">
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -279,7 +279,7 @@
       <item row="0" column="0">
        <layout class="QFormLayout" name="formLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="labelAvg">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Average point count in selected region.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -299,7 +299,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_6">
+         <widget class="QLabel" name="labelAvgError">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Error of average point count in selected region.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -319,7 +319,7 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label_7">
+         <widget class="QLabel" name="labelNumOfPoints">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Total number of points in the selected region.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -339,7 +339,7 @@
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="label_8">
+         <widget class="QLabel" name="labelSum">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sum of point intensities for all points in the selected region.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -359,7 +359,7 @@
          </widget>
         </item>
         <item row="4" column="0">
-         <widget class="QLabel" name="label_9">
+         <widget class="QLabel" name="labelSumError">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Error of point intensity sum for all points in the selected region.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>

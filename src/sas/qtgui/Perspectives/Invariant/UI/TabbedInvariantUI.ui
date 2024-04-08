@@ -391,7 +391,7 @@
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_3">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="labelCustomizedInputBackground">
               <property name="text">
                <string>Background:</string>
               </property>
@@ -401,14 +401,14 @@
              <widget class="QLineEdit" name="txtBackgd"/>
             </item>
             <item row="0" column="2">
-             <widget class="QLabel" name="label_8">
+             <widget class="QLabel" name="labelCustomizedInputBackgroundUnit">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="0" column="3">
-             <widget class="QLabel" name="label_9">
+             <widget class="QLabel" name="labelCustomizedInputScale">
               <property name="text">
                <string>Scale:</string>
               </property>
@@ -418,7 +418,7 @@
              <widget class="QLineEdit" name="txtScale"/>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_6">
+             <widget class="QLabel" name="labelCustomizedInputContrast">
               <property name="text">
                <string>Contrast:</string>
               </property>
@@ -435,7 +435,7 @@
              </widget>
             </item>
             <item row="1" column="3">
-             <widget class="QLabel" name="label_10">
+             <widget class="QLabel" name="labelCustomizedInputPorodConstant">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porod&lt;br/&gt;constant:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -469,14 +469,14 @@
           <item row="0" column="0" colspan="2">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="label_12">
+             <widget class="QLabel" name="labelExtrapolationQRange">
               <property name="text">
                <string>Q Range:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_14">
+             <widget class="QLabel" name="labelExtrapolationQRangeMin">
               <property name="text">
                <string>Min</string>
               </property>
@@ -496,7 +496,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_13">
+             <widget class="QLabel" name="labelExtrapolarionQRangeMax">
               <property name="text">
                <string>Max</string>
               </property>
@@ -530,7 +530,7 @@
              <item row="1" column="0" colspan="2">
               <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
-                <widget class="QLabel" name="label_16">
+                <widget class="QLabel" name="labelExtrapolationLowQNpts">
                  <property name="text">
                   <string>Npts:</string>
                  </property>
@@ -579,7 +579,7 @@ while extrapolating the low-Q region</string>
              <item row="3" column="0" colspan="2">
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
-                <widget class="QLabel" name="label_17">
+                <widget class="QLabel" name="labelExtrapolationPowerLowQ">
                  <property name="text">
                   <string>Power:</string>
                  </property>
@@ -665,7 +665,7 @@ while extrapolating the low-Q region</string>
              <item row="1" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
-                <widget class="QLabel" name="label_18">
+                <widget class="QLabel" name="labelExtrapolationNptsHighQ">
                  <property name="text">
                   <string>Npts:</string>
                  </property>
@@ -711,7 +711,7 @@ while extrapolating the low-Q region</string>
              <item row="3" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_7">
                <item>
-                <widget class="QLabel" name="label_19">
+                <widget class="QLabel" name="labelExtrapolationPowerHighQ">
                  <property name="text">
                   <string>Power:</string>
                  </property>

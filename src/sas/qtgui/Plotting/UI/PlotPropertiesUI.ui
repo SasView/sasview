@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>319</width>
-    <height>285</height>
+    <height>292</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -33,7 +33,7 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="labelShape">
           <property name="text">
            <string>Shape</string>
           </property>
@@ -43,7 +43,7 @@
          <widget class="QComboBox" name="cbShape"/>
         </item>
         <item row="0" column="3" alignment="Qt::AlignRight">
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="labelSize">
           <property name="text">
            <string>Size</string>
           </property>
@@ -60,7 +60,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="labelColor">
           <property name="text">
            <string>Color</string>
           </property>
@@ -84,7 +84,7 @@
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="labelLegendLabel">
        <property name="text">
         <string>Legend Label</string>
        </property>
