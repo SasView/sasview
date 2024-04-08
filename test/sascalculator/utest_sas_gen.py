@@ -228,7 +228,7 @@ class sas_gen_test(unittest.TestCase):
         from sas.sascalc.calculator.ausaxs.architecture import determine_os, OS
 
         if determine_os() == OS.MAC:
-            self.assertTrue(False, "AUSAXS library is currently not available for MacOS. Skipping test.")
+            self.assertTrue(True, "AUSAXS library is currently not available for MacOS. Skipping test.")
 
         if not ausaxs_sans_debye.ausaxs_available():
             self.assertTrue(False, "AUSAXS library not found, test cannot be run.")
