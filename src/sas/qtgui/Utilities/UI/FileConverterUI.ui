@@ -20,7 +20,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -34,7 +34,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_6">
+           <widget class="QLabel" name="labelInputFormat">
             <property name="text">
              <string>Input Format:</string>
             </property>
@@ -85,7 +85,7 @@
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_7">
+           <widget class="QLabel" name="labelQAxisData">
             <property name="text">
              <string>Q-Axis Data:</string>
             </property>
@@ -108,7 +108,7 @@
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="labelIntensityData">
             <property name="text">
              <string>Intensity Data:</string>
             </property>
@@ -131,7 +131,7 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_9">
+           <widget class="QLabel" name="labelRadiationType">
             <property name="text">
              <string>Radiation Type:</string>
             </property>
@@ -182,7 +182,7 @@
            </layout>
           </item>
           <item row="4" column="0">
-           <widget class="QLabel" name="label_10">
+           <widget class="QLabel" name="labelOutputFile">
             <property name="text">
              <string>Output File:</string>
             </property>
@@ -243,7 +243,7 @@
        <item row="0" column="0">
         <widget class="QTabWidget" name="tabWidget_2">
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="tab_3">
           <attribute name="title">
@@ -255,7 +255,7 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_5">
                <item row="0" column="0">
-                <widget class="QLabel" name="label_2">
+                <widget class="QLabel" name="labelTile">
                  <property name="text">
                   <string>Title</string>
                  </property>
@@ -265,7 +265,7 @@
                 <widget class="QLineEdit" name="txtMG_Title"/>
                </item>
                <item row="1" column="0">
-                <widget class="QLabel" name="label_3">
+                <widget class="QLabel" name="labelRunNumber">
                  <property name="text">
                   <string>Run Number</string>
                  </property>
@@ -275,7 +275,7 @@
                 <widget class="QLineEdit" name="txtMG_RunNumber"/>
                </item>
                <item row="2" column="0">
-                <widget class="QLabel" name="label_4">
+                <widget class="QLabel" name="labelRunName">
                  <property name="text">
                   <string>Run Name</string>
                  </property>
@@ -285,7 +285,7 @@
                 <widget class="QLineEdit" name="txtMG_RunName"/>
                </item>
                <item row="3" column="0">
-                <widget class="QLabel" name="label_5">
+                <widget class="QLabel" name="labelInstrument">
                  <property name="text">
                   <string>Instrument</string>
                  </property>
@@ -321,7 +321,7 @@
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_6">
              <item row="0" column="0">
-              <widget class="QLabel" name="label">
+              <widget class="QLabel" name="labelName">
                <property name="text">
                 <string>Name:</string>
                </property>
@@ -331,7 +331,7 @@
               <widget class="QLineEdit" name="txtMD_Name"/>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_11">
+              <widget class="QLabel" name="labelDistance">
                <property name="text">
                 <string>Distance [mm]:</string>
                </property>
@@ -341,7 +341,7 @@
               <widget class="QLineEdit" name="txtMD_Distance"/>
              </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="label_12">
+              <widget class="QLabel" name="labelOffset">
                <property name="text">
                 <string>Offset [m]</string>
                </property>
@@ -350,7 +350,7 @@
              <item row="2" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
-                <widget class="QLabel" name="label_13">
+                <widget class="QLabel" name="labelOffsetX">
                  <property name="text">
                   <string>X:</string>
                  </property>
@@ -360,7 +360,7 @@
                 <widget class="QLineEdit" name="txtMD_OffsetX"/>
                </item>
                <item>
-                <widget class="QLabel" name="label_14">
+                <widget class="QLabel" name="labelOffsetY">
                  <property name="text">
                   <string>Y:</string>
                  </property>
@@ -372,7 +372,7 @@
               </layout>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_15">
+              <widget class="QLabel" name="labelOrientation">
                <property name="text">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Orientation [°]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
@@ -381,7 +381,7 @@
              <item row="3" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
-                <widget class="QLabel" name="label_16">
+                <widget class="QLabel" name="labelOrientationRoll">
                  <property name="text">
                   <string>Roll:</string>
                  </property>
@@ -391,7 +391,7 @@
                 <widget class="QLineEdit" name="txtMD_OrientRoll"/>
                </item>
                <item>
-                <widget class="QLabel" name="label_17">
+                <widget class="QLabel" name="labelOrientationPitch">
                  <property name="text">
                   <string>Pitch:</string>
                  </property>
@@ -401,7 +401,7 @@
                 <widget class="QLineEdit" name="txtMD_OrientPitch"/>
                </item>
                <item>
-                <widget class="QLabel" name="label_18">
+                <widget class="QLabel" name="labelOrientationYaw">
                  <property name="text">
                   <string>Yaw:</string>
                  </property>
@@ -413,7 +413,7 @@
               </layout>
              </item>
              <item row="4" column="0">
-              <widget class="QLabel" name="label_19">
+              <widget class="QLabel" name="labelPixelSize">
                <property name="text">
                 <string>Pixel size [mm]</string>
                </property>
@@ -422,7 +422,7 @@
              <item row="4" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
-                <widget class="QLabel" name="label_21">
+                <widget class="QLabel" name="labelPixelSizeX">
                  <property name="text">
                   <string>X:</string>
                  </property>
@@ -432,7 +432,7 @@
                 <widget class="QLineEdit" name="txtMD_PixelX"/>
                </item>
                <item>
-                <widget class="QLabel" name="label_20">
+                <widget class="QLabel" name="labelPixelSizeY">
                  <property name="text">
                   <string>Y:</string>
                  </property>
@@ -444,7 +444,7 @@
               </layout>
              </item>
              <item row="5" column="0">
-              <widget class="QLabel" name="label_22">
+              <widget class="QLabel" name="labelBeamCenter">
                <property name="text">
                 <string>Beam center [mm]</string>
                </property>
@@ -475,7 +475,7 @@
               </layout>
              </item>
              <item row="6" column="0">
-              <widget class="QLabel" name="label_25">
+              <widget class="QLabel" name="labelSlitLength">
                <property name="text">
                 <string>Slit length [mm]:</string>
                </property>
@@ -507,7 +507,7 @@
           </attribute>
           <layout class="QGridLayout" name="gridLayout_3">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_26">
+            <widget class="QLabel" name="labelNameSample">
              <property name="text">
               <string>Name:</string>
              </property>
@@ -517,7 +517,7 @@
             <widget class="QLineEdit" name="txtMSa_Name"/>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_27">
+            <widget class="QLabel" name="labelThicknessSample">
              <property name="text">
               <string>Thickness [mm]:</string>
              </property>
@@ -527,7 +527,7 @@
             <widget class="QLineEdit" name="txtMSa_Thickness"/>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_29">
+            <widget class="QLabel" name="labelTransmissionSample">
              <property name="text">
               <string>Transmission:</string>
              </property>
@@ -541,7 +541,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_30">
+            <widget class="QLabel" name="labelTemperatureSample">
              <property name="text">
               <string>Temperature:</string>
              </property>
@@ -557,7 +557,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_28">
+              <widget class="QLabel" name="labelTemperatureUnitSample">
                <property name="text">
                 <string>Unit</string>
                </property>
@@ -569,7 +569,7 @@
             </layout>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_31">
+            <widget class="QLabel" name="labelPositionSample">
              <property name="text">
               <string>Position [mm]</string>
              </property>
@@ -578,7 +578,7 @@
            <item row="4" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_11">
              <item>
-              <widget class="QLabel" name="label_32">
+              <widget class="QLabel" name="labelPositionX">
                <property name="text">
                 <string>X:</string>
                </property>
@@ -588,7 +588,7 @@
               <widget class="QLineEdit" name="txtMSa_PositionX"/>
              </item>
              <item>
-              <widget class="QLabel" name="label_33">
+              <widget class="QLabel" name="labelPositionY">
                <property name="text">
                 <string>Y:</string>
                </property>
@@ -600,7 +600,7 @@
             </layout>
            </item>
            <item row="5" column="0">
-            <widget class="QLabel" name="label_36">
+            <widget class="QLabel" name="labelOrientationSample">
              <property name="text">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Orientation [°]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
@@ -609,7 +609,7 @@
            <item row="5" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <widget class="QLabel" name="label_35">
+              <widget class="QLabel" name="labelOrientationRollSample">
                <property name="text">
                 <string>Roll:</string>
                </property>
@@ -619,7 +619,7 @@
               <widget class="QLineEdit" name="txtMSa_OrientR"/>
              </item>
              <item>
-              <widget class="QLabel" name="label_34">
+              <widget class="QLabel" name="labelOrientationPitchSample">
                <property name="text">
                 <string>Pitch:</string>
                </property>
@@ -629,7 +629,7 @@
               <widget class="QLineEdit" name="txtMSa_OrientP"/>
              </item>
              <item>
-              <widget class="QLabel" name="label_37">
+              <widget class="QLabel" name="labelOrientationYawSample">
                <property name="text">
                 <string>Yaw:</string>
                </property>
@@ -641,7 +641,7 @@
             </layout>
            </item>
            <item row="6" column="0">
-            <widget class="QLabel" name="label_38">
+            <widget class="QLabel" name="labelDetailsSample">
              <property name="text">
               <string>Details:</string>
              </property>
@@ -680,7 +680,7 @@
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_10">
              <item row="0" column="0">
-              <widget class="QLabel" name="label_39">
+              <widget class="QLabel" name="labelNameSource">
                <property name="text">
                 <string>Name:</string>
                </property>
@@ -690,7 +690,7 @@
               <widget class="QLineEdit" name="txtMSo_Name"/>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_40">
+              <widget class="QLabel" name="labelBeamSizeSource">
                <property name="text">
                 <string>Beam size [mm]</string>
                </property>
@@ -699,7 +699,7 @@
              <item row="1" column="1" colspan="2">
               <layout class="QHBoxLayout" name="horizontalLayout_8">
                <item>
-                <widget class="QLabel" name="label_42">
+                <widget class="QLabel" name="labelBeamSizeXSource">
                  <property name="text">
                   <string>X:</string>
                  </property>
@@ -709,7 +709,7 @@
                 <widget class="QLineEdit" name="txtMSo_BeamSizeX"/>
                </item>
                <item>
-                <widget class="QLabel" name="label_41">
+                <widget class="QLabel" name="labelBeamSizeYSource">
                  <property name="text">
                   <string>Y:</string>
                  </property>
@@ -721,7 +721,7 @@
               </layout>
              </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="label_43">
+              <widget class="QLabel" name="labelBeamShapeSource">
                <property name="text">
                 <string>Beam shape:</string>
                </property>
@@ -731,7 +731,7 @@
               <widget class="QLineEdit" name="txtMSo_BeamShape"/>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_44">
+              <widget class="QLabel" name="labelWavelengthSource">
                <property name="text">
                 <string>Wavelength [Ang]:</string>
                </property>
@@ -741,7 +741,7 @@
               <widget class="QLineEdit" name="txtMSo_BeamWavelength"/>
              </item>
              <item row="4" column="0">
-              <widget class="QLabel" name="label_45">
+              <widget class="QLabel" name="labelMinWavelengthSource">
                <property name="text">
                 <string>Min. wavelength [nm]:</string>
                </property>
@@ -751,7 +751,7 @@
               <widget class="QLineEdit" name="txtMSo_MinWavelength"/>
              </item>
              <item row="5" column="0">
-              <widget class="QLabel" name="label_46">
+              <widget class="QLabel" name="labelMaxWavelengthSource">
                <property name="text">
                 <string>Max. wavelength [nm]:</string>
                </property>
@@ -761,7 +761,7 @@
               <widget class="QLineEdit" name="txtMSo_MaxWavelength"/>
              </item>
              <item row="6" column="0" colspan="2">
-              <widget class="QLabel" name="label_47">
+              <widget class="QLabel" name="labelWavelengthSpreadSource">
                <property name="text">
                 <string>Wavelength spread [%]:</string>
                </property>
@@ -797,7 +797,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_12">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_48">
+        <widget class="QLabel" name="labelInstructions">
          <property name="frameShape">
           <enum>QFrame::Box</enum>
          </property>

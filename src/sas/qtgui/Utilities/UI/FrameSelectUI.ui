@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>278</width>
-    <height>173</height>
+    <height>183</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,7 +35,7 @@
      <item row="1" column="0">
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="labelFirstFrame">
          <property name="text">
           <string>First frame:</string>
          </property>
@@ -45,7 +45,7 @@
         <widget class="QLineEdit" name="txtFirstFrame"/>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="labelLastFrame">
          <property name="text">
           <string>Last frame:</string>
          </property>
@@ -55,7 +55,7 @@
         <widget class="QLineEdit" name="txtLastFrame"/>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="labelIncrement">
          <property name="text">
           <string>Increment:</string>
          </property>
