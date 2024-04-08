@@ -42,7 +42,6 @@ def attach_hooks():
         else:
             path = ""
 
-        # currently windows can only use the raw exe
         ausaxs_state = lib_state.READY
         try:
             # evaluate_sans_debye func
