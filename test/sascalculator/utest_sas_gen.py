@@ -227,11 +227,13 @@ class sas_gen_test(unittest.TestCase):
         from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye
         from sas.sascalc.calculator.ausaxs.architecture import determine_os, OS
 
-        if determine_os() == OS.MAC:
+        if determine_os() is OS.MAC:
             self.assertTrue(True, "AUSAXS library is currently not available for MacOS. Skipping test.")
+            return
 
         if not ausaxs_sans_debye.ausaxs_available():
             self.assertTrue(False, "AUSAXS library not found, test cannot be run.")
+            return
 
         # get all pdb files in the data folder
         import glob
