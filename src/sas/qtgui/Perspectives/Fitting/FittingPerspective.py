@@ -372,7 +372,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         try:
             ObjectLibrary.deleteObjectByRef(self.tabs[index])
             self.removeTab(index)
-            del self.tabs[index]
+            # can't just delete the tab, since we still hold a reference to it
+            # del self.tabs[index]
+            # Instead, we just recreate self.tabs without the deleted tab
+            self.tabs = [tab for tab in self.tabs if tab is not self.tabs[index]]
             self.tabsModifiedSignal.emit()
         except IndexError:
             # The tab might have already been deleted previously
