@@ -22,7 +22,7 @@ def determine_os():
 
 def get_ausaxs():
     _os = determine_os()
-    url = "https://github.com/SasView/ausaxs/releases/latest/download/"
+    url = "https://github.com/SasView/AUSAXS/releases/latest/download/"
     libs = None
     if _os == OS.WIN:
         libs = ["libausaxs_avx.dll", "libausaxs_sse.dll"]
