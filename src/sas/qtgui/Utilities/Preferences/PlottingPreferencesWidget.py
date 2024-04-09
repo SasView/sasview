@@ -40,7 +40,7 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.disablePolydispersityPlot.clicked.connect(
             lambda: self._stageChange('DISABLE_POLYDISPERSITY_PLOT', self.disablePolydispersityPlot.isChecked()))
         self.useMatplotlibToolbar = self.addCheckBox(
-            title="Use Matplotlib Toolbar",
+            title="Show toolbar on all new plots",
             checked=config.USE_MATPLOTLIB_TOOLBAR)
         self.useMatplotlibToolbar.clicked.connect(
             lambda: self._stageChange('USE_MATPLOTLIB_TOOLBAR', self.useMatplotlibToolbar.isChecked()))
@@ -60,4 +60,4 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.legendLineLength.setStyleSheet("background-color: white")
         self.disableResidualPlot.setChecked(config.DISABLE_RESIDUAL_PLOT)
         self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)
-        self.useMatplotlibToolbar.setChecked(config.USE_MATPLOTLIB_PLOT_TOOLBAR)
+        self.useMatplotlibToolbar.setChecked(config.USE_MATPLOTLIB_TOOLBAR)
