@@ -134,9 +134,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             show_warning = False
 
         if show_warning:
-            self.textBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
+            self.txtBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
         else:
-            self.textBackground.setStyleSheet("")
+            self.txtBackground.setStyleSheet("")
 
     def isSerializable(self):
         """
@@ -147,16 +147,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""
 
-        self.buttonGo.clicked.connect(self._run)
-        self.buttonGo.setEnabled(False)
+        self.cmdGo.clicked.connect(self._run)
+        self.cmdGo.setEnabled(False)
 
-        self.buttonExportTransformed.clicked.connect(self.on_save_transformed)
-        self.buttonExportTransformed.setEnabled(False)
+        self.cmdExportTransformed.clicked.connect(self.on_save_transformed)
+        self.cmdExportTransformed.setEnabled(False)
 
-        self.buttonExportExtrapolated.clicked.connect(self.on_save_extrapolation)
-        self.buttonExportExtrapolated.setEnabled(False)
+        self.cmdExportExtrapolated.clicked.connect(self.on_save_extrapolation)
+        self.cmdExportExtrapolated.setEnabled(False)
 
-        self.buttonHelp.clicked.connect(self.showHelp)
+        self.cmdHelp.clicked.connect(self.showHelp)
 
         self.model.itemChanged.connect(self.model_changed)
 
@@ -169,24 +169,24 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.set_text_enable(False)
 
         # Calculation Options
-        self.radTangentAuto.clicked.connect(self.set_tangent_method(None))
-        self.radTangentInflection.clicked.connect(self.set_tangent_method(TangentMethod.INFLECTION))
-        self.radTangentMidpoint.clicked.connect(self.set_tangent_method(TangentMethod.HALF_MIN))
+        self.rbTangentAuto.clicked.connect(self.set_tangent_method(None))
+        self.rbTangentInflection.clicked.connect(self.set_tangent_method(TangentMethod.INFLECTION))
+        self.rbTangentMidpoint.clicked.connect(self.set_tangent_method(TangentMethod.HALF_MIN))
 
-        self.radLongPeriodAuto.clicked.connect(self.set_long_period_method(None))
-        self.radLongPeriodMax.clicked.connect(self.set_long_period_method(LongPeriodMethod.MAX))
-        self.radLongPeriodDouble.clicked.connect(self.set_long_period_method(LongPeriodMethod.DOUBLE_MIN))
+        self.rbLongPeriodAuto.clicked.connect(self.set_long_period_method(None))
+        self.rbLongPeriodMax.clicked.connect(self.set_long_period_method(LongPeriodMethod.MAX))
+        self.rbLongPeriodDouble.clicked.connect(self.set_long_period_method(LongPeriodMethod.DOUBLE_MIN))
 
         # Slider values
         self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
         self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
 
         # Validators for other text fields
-        self.textBackground.setValidator(QDoubleValidator())
-        self.textGuinierA.setValidator(QDoubleValidator())
-        self.textGuinierB.setValidator(QDoubleValidator())
-        self.textPorodK.setValidator(QDoubleValidator())
-        self.textPorodSigma.setValidator(QDoubleValidator())
+        self.txtBackground.setValidator(QDoubleValidator())
+        self.txtGuinierA.setValidator(QDoubleValidator())
+        self.txtGuinierB.setValidator(QDoubleValidator())
+        self.txtPorodK.setValidator(QDoubleValidator())
+        self.txtPorodSigma.setValidator(QDoubleValidator())
 
     def set_text_enable(self, state: bool):
         self.txtLowerQMax.setEnabled(state)
@@ -285,8 +285,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             return
 
         self._running = True
-        self.buttonGo.setText("Calculating...")
-        self.buttonGo.repaint()
+        self.cmdGo.setText("Calculating...")
+        self.cmdGo.repaint()
 
         # Set up calculator
 
@@ -296,23 +296,23 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             tangent_method=self._tangent_method,
             long_period_method=self._long_period_method)
 
-        calculator.fit_background = self.checkboxFitBackground.isChecked()
-        calculator.fit_guinier = self.checkboxFitGuinier.isChecked()
-        calculator.fit_porod = self.checkboxFitPorod.isChecked()
+        calculator.fit_background = self.chkFitBackground.isChecked()
+        calculator.fit_guinier = self.chkFitGuinier.isChecked()
+        calculator.fit_porod = self.chkFitPorod.isChecked()
 
 
         if not calculator.fit_background:
-            calculator.background = safe_float(self.textBackground.text())
+            calculator.background = safe_float(self.txtBackground.text())
 
         if not calculator.fit_guinier:
-            guinier = GuinierData(A=safe_float(self.textGuinierA.text()),
-                                  B=safe_float(self.textGuinierB.text()))
+            guinier = GuinierData(A=safe_float(self.txtGuinierA.text()),
+                                  B=safe_float(self.txtGuinierB.text()))
 
             calculator.guinier = guinier
 
         if not calculator.fit_porod:
-            porod = PorodData(K=safe_float(self.textPorodK.text()),
-                              sigma=safe_float(self.textPorodSigma.text()))
+            porod = PorodData(K=safe_float(self.txtPorodK.text()),
+                              sigma=safe_float(self.txtPorodSigma.text()))
 
             calculator.porod = porod
 
@@ -370,17 +370,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                 self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(lamellar.polydispersity_stribeck)))
                 self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(lamellar.long_period)))
 
-            self.buttonExportTransformed.setEnabled(True)
-            self.buttonExportExtrapolated.setEnabled(True)
+            self.cmdExportTransformed.setEnabled(True)
+            self.cmdExportExtrapolated.setEnabled(True)
 
         except ValueError as e:
             logging.error(repr(e))
-            self.buttonExportTransformed.setEnabled(False)
-            self.buttonExportExtrapolated.setEnabled(False)
+            self.cmdExportTransformed.setEnabled(False)
+            self.cmdExportExtrapolated.setEnabled(False)
             self.set_background_warning()
 
-        self.buttonGo.setText("Go")
-        self.buttonGo.repaint()
+        self.cmdGo.setText("Go")
+        self.cmdGo.repaint()
 
         self._running = False
 
@@ -394,24 +394,24 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.mapper.addMapping(self.txtLowerQMax, WIDGETS.W_QMIN)
         self.mapper.addMapping(self.txtUpperQMin, WIDGETS.W_QMAX)
         self.mapper.addMapping(self.txtUpperQMax, WIDGETS.W_QCUTOFF)
-        self.mapper.addMapping(self.textBackground, WIDGETS.W_BACKGROUND)
+        self.mapper.addMapping(self.txtBackground, WIDGETS.W_BACKGROUND)
         #self.mapper.addMapping(self.transformCombo, W.W_TRANSFORM)
 
-        self.mapper.addMapping(self.textGuinierA, WIDGETS.W_GUINIERA)
-        self.mapper.addMapping(self.textGuinierB, WIDGETS.W_GUINIERB)
-        self.mapper.addMapping(self.textPorodK, WIDGETS.W_PORODK)
-        self.mapper.addMapping(self.textPorodSigma, WIDGETS.W_PORODSIGMA)
+        self.mapper.addMapping(self.txtGuinierA, WIDGETS.W_GUINIERA)
+        self.mapper.addMapping(self.txtGuinierB, WIDGETS.W_GUINIERB)
+        self.mapper.addMapping(self.txtPorodK, WIDGETS.W_PORODK)
+        self.mapper.addMapping(self.txtPorodSigma, WIDGETS.W_PORODSIGMA)
 
-        self.mapper.addMapping(self.textAvgCoreThick, WIDGETS.W_CORETHICK)
-        self.mapper.addMapping(self.textAvgIntThick, WIDGETS.W_INTTHICK)
-        self.mapper.addMapping(self.textAvgHardBlock, WIDGETS.W_HARDBLOCK)
-        self.mapper.addMapping(self.textAvgSoftBlock, WIDGETS.W_SOFTBLOCK)
-        self.mapper.addMapping(self.textPolyRyan, WIDGETS.W_POLY_RYAN)
-        self.mapper.addMapping(self.textPolyStribeck, WIDGETS.W_POLY_STRIBECK)
+        self.mapper.addMapping(self.txtAvgCoreThick, WIDGETS.W_CORETHICK)
+        self.mapper.addMapping(self.txtAvgIntThick, WIDGETS.W_INTTHICK)
+        self.mapper.addMapping(self.txtAvgHardBlock, WIDGETS.W_HARDBLOCK)
+        self.mapper.addMapping(self.txtAvgSoftBlock, WIDGETS.W_SOFTBLOCK)
+        self.mapper.addMapping(self.txtPolyRyan, WIDGETS.W_POLY_RYAN)
+        self.mapper.addMapping(self.txtPolyStribeck, WIDGETS.W_POLY_STRIBECK)
         self.mapper.addMapping(self.txtLongPeriod, WIDGETS.W_PERIOD)
         self.mapper.addMapping(self.txtLocalCrystal, WIDGETS.W_CRYSTAL)
 
-        self.mapper.addMapping(self.textFilename, WIDGETS.W_FILENAME)
+        self.mapper.addMapping(self.txtFilename, WIDGETS.W_FILENAME)
 
         self.mapper.toFirst()
 
@@ -492,7 +492,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         log_data_min = math.log(min(self.data.x))
         log_data_max = math.log(max(self.data.x))
 
-        self.buttonGo.setEnabled(True)
+        self.cmdGo.setEnabled(True)
 
         def fractional_position(f):
             return math.exp(f*log_data_max + (1-f)*log_data_min)
@@ -735,22 +735,22 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         :return: {name: value}
         """
         return {
-            'guinier_a': self.textGuinierA.text(),
-            'guinier_b': self.textGuinierB.text(),
-            'porod_k': self.textPorodK.text(),
-            'porod_sigma': self.textPorodSigma.text(),
-            'avg_core_thick': self.textAvgCoreThick.text(),
-            'avg_inter_thick': self.textAvgIntThick.text(),
-            'avg_hard_block_thick': self.textAvgHardBlock.text(),
-            'avg_soft_block_thick': self.textAvgSoftBlock.text(),
+            'guinier_a': self.txtGuinierA.text(),
+            'guinier_b': self.txtGuinierB.text(),
+            'porod_k': self.txtPorodK.text(),
+            'porod_sigma': self.txtPorodSigma.text(),
+            'avg_core_thick': self.txtAvgCoreThick.text(),
+            'avg_inter_thick': self.txtAvgIntThick.text(),
+            'avg_hard_block_thick': self.txtAvgHardBlock.text(),
+            'avg_soft_block_thick': self.txtAvgSoftBlock.text(),
             'local_crystalinity': self.txtLocalCrystal.text(),
-            'polydispersity': self.textPolyRyan.text(),
-            'polydispersity_stribeck': self.textPolyStribeck.text(),
+            'polydispersity': self.txtPolyRyan.text(),
+            'polydispersity_stribeck': self.txtPolyStribeck.text(),
             'long_period': self.txtLongPeriod.text(),
             'lower_q_max': self.txtLowerQMax.text(),
             'upper_q_min': self.txtUpperQMin.text(),
             'upper_q_max': self.txtUpperQMax.text(),
-            'background': self.textBackground.text(),
+            'background': self.txtBackground.text(),
         }
 
     def updateFromParameters(self, params):
@@ -803,8 +803,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             params.get('background', '0')))
         # reconnect model
         self.model.itemChanged.connect(self.model_changed)
-        self.buttonExportTransformed.setEnabled(params.get('guinier_a', '0.0') != '0.0')
-        self.buttonGo.setEnabled(params.get('long_period', '0') != '0')
+        self.cmdExportTransformed.setEnabled(params.get('guinier_a', '0.0') != '0.0')
+        self.cmdGo.setEnabled(params.get('long_period', '0') != '0')
 
     @property
     def real_space_figure(self):

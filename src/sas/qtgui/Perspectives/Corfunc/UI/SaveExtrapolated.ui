@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QDoubleSpinBox" name="spinBoxLow">
+  <widget class="QDoubleSpinBox" name="doubleSpinBoxLow">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -32,7 +32,7 @@
     <double>100.000000000000000</double>
    </property>
   </widget>
-  <widget class="QDoubleSpinBox" name="spinBoxHigh">
+  <widget class="QDoubleSpinBox" name="doubleSpinBoxHigh">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -54,7 +54,7 @@
     <double>1.000000000000000</double>
    </property>
   </widget>
-  <widget class="QDoubleSpinBox" name="spinBoxDelta">
+  <widget class="QDoubleSpinBox" name="doubleSpinBoxDelta">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -160,7 +160,7 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="buttonOK">
+  <widget class="QPushButton" name="cmdOK">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -173,7 +173,7 @@
     <string>OK</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="buttonCancel">
+  <widget class="QPushButton" name="cmdCancel">
    <property name="geometry">
     <rect>
      <x>130</x>
