@@ -92,7 +92,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QCheckBox" name="checkboxNucData">
+         <widget class="QCheckBox" name="chkNucData">
           <property name="text">
            <string/>
           </property>
@@ -171,7 +171,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QCheckBox" name="checkboxMagData">
+         <widget class="QCheckBox" name="chkMagData">
           <property name="text">
            <string/>
           </property>
@@ -1988,9 +1988,9 @@ Number of Qbins &amp;isin; [2, 1000].</string>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>checkboxNucData</tabstop>
+  <tabstop>chkNucData</tabstop>
   <tabstop>txtNucData</tabstop>
-  <tabstop>checkboxMagData</tabstop>
+  <tabstop>chkMagData</tabstop>
   <tabstop>txtMagData</tabstop>
   <tabstop>cbShape</tabstop>
   <tabstop>cmdNucLoad</tabstop>

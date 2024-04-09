@@ -23,8 +23,8 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
         self.deltaq_in.setValidator(QtGui.QRegularExpressionValidator(rx, self.deltaq_in))
 
         # signals
-        self.helpButton.clicked.connect(self.onHelp)
-        self.closeButton.clicked.connect(self.onClose)
+        self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdClose.clicked.connect(self.onClose)
         self.deltaq_in.textChanged.connect(self.onCompute)
         self.deltaq_in.setText("0.05")
 

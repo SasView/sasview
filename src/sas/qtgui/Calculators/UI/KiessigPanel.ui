@@ -33,7 +33,7 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="labelKiessigFringeWidth">
+         <widget class="QLabel" name="lblKiessigFringeWidth">
           <property name="text">
            <string>Kiessig Fringe Width (Delta Q)</string>
           </property>
@@ -56,7 +56,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="labelUnitKiessigFringeWidth">
+         <widget class="QLabel" name="lblUnitKiessigFringeWidth">
           <property name="text">
            <string>1/Å</string>
           </property>
@@ -76,7 +76,7 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="labelThickness">
+         <widget class="QLabel" name="lblThickness">
           <property name="text">
            <string>Thickness (or Diameter)               </string>
           </property>
@@ -102,7 +102,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="labelUnitThicknessAngstrom">
+         <widget class="QLabel" name="lblUnitThicknessAngstrom">
           <property name="text">
            <string>   Å</string>
           </property>
@@ -127,7 +127,7 @@
     </spacer>
    </item>
    <item row="3" column="1">
-    <widget class="QPushButton" name="closeButton">
+    <widget class="QPushButton" name="cmdClose">
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Close this window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -137,7 +137,7 @@
     </widget>
    </item>
    <item row="3" column="2">
-    <widget class="QPushButton" name="helpButton">
+    <widget class="QPushButton" name="cmdHelp">
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Help using the Kiessing fringe calculator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -151,8 +151,8 @@
  <tabstops>
   <tabstop>deltaq_in</tabstop>
   <tabstop>lengthscale_out</tabstop>
-  <tabstop>closeButton</tabstop>
-  <tabstop>helpButton</tabstop>
+  <tabstop>cmdClose</tabstop>
+  <tabstop>cmdHelp</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -31,9 +31,9 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         self.thickness = SlitlengthCalculator()
 
         # signals
-        self.helpButton.clicked.connect(self.onHelp)
-        self.browseButton.clicked.connect(self.onBrowse)
-        self.closeButton.clicked.connect(self.onClose)
+        self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdBrowse.clicked.connect(self.onBrowse)
+        self.cmdClose.clicked.connect(self.onClose)
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
@@ -65,7 +65,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
             logging.error(ex)
             return
 
-        self.data_file.setText(os.path.basename(path_str))
+        self.txtDataFile.setText(os.path.basename(path_str))
         self.calculateSlitSize(data)
 
     def chooseFile(self):
@@ -91,12 +91,12 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         """
         Clear the content of output LineEdits
         """
-        self.slit_length_out.setText("ERROR!")
-        self.unit_out.clear()
+        self.txtSlitLengthOut.setText("ERROR!")
+        self.txtUnitOut.clear()
 
     def calculateSlitSize(self, data=None):
         """
-        Computes slit lenght from given 1D data
+        Computes slit length from given 1D data
         """
         if data is None:
             self.clearResults()
@@ -128,8 +128,8 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
             return
 
         slit_length_str = "{:.5f}".format(slit_length)
-        self.slit_length_out.setText(slit_length_str)
+        self.txtSlitLengthOut.setText(slit_length_str)
 
         #Display unit, which most likely needs to be 1/Ang but needs to be confirmed
-        self.unit_out.setText("[Unknown]")
+        self.txtUnitOut.setText("[Unknown]")
 

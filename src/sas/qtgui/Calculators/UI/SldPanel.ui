@@ -44,7 +44,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayoutOutput">
       <item row="0" column="1">
-       <widget class="QLineEdit" name="editNeutronSldReal">
+       <widget class="QLineEdit" name="txtEditNeutronSldReal">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -54,21 +54,21 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="labelNeutronSLD">
+       <widget class="QLabel" name="lblNeutronSLD">
         <property name="text">
          <string>Neutron SLD</string>
         </property>
        </widget>
       </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="labelNeutron1eLength">
+       <widget class="QLabel" name="lblNeutron1eLength">
         <property name="text">
          <string>Neutron 1/e length</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="editNeutronIncXs">
+       <widget class="QLineEdit" name="txtEditNeutronIncXs">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -78,28 +78,28 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="labelNeutronIncXs">
+       <widget class="QLabel" name="lblNeutronIncXs">
         <property name="text">
          <string>Neutron Inc. Xs</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="label_i_NeutronSLD">
+       <widget class="QLabel" name="lbl_i_NeutronSLD">
         <property name="text">
          <string>-i</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLabel" name="label_i_XRaySLD">
+       <widget class="QLabel" name="lbl_i_XRaySLD">
         <property name="text">
          <string>-i</string>
         </property>
        </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QLineEdit" name="editNeutronSldImag">
+       <widget class="QLineEdit" name="txtEditNeutronSldImag">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -109,14 +109,14 @@
        </widget>
       </item>
       <item row="5" column="2" colspan="2">
-       <widget class="QLabel" name="labelNeutron1eLengthUnit">
+       <widget class="QLabel" name="lblNeutron1eLengthUnit">
         <property name="text">
          <string>cm</string>
         </property>
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QLineEdit" name="editNeutronLength">
+       <widget class="QLineEdit" name="txtEditNeutronLength">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -126,14 +126,14 @@
        </widget>
       </item>
       <item row="4" column="2" colspan="2">
-       <widget class="QLabel" name="labelNeutronAbsXsUnit">
+       <widget class="QLabel" name="lblNeutronAbsXsUnit">
         <property name="text">
          <string>1/cm</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QLineEdit" name="editNeutronAbsXs">
+       <widget class="QLineEdit" name="txtEditNeutronAbsXs">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -143,35 +143,35 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="labelNeutronAbsXs">
+       <widget class="QLabel" name="lblNeutronAbsXs">
         <property name="text">
          <string>Neutron Abs. Xs</string>
         </property>
        </widget>
       </item>
       <item row="3" column="2" colspan="2">
-       <widget class="QLabel" name="labelNeutronIncXsUnit">
+       <widget class="QLabel" name="lblNeutronIncXsUnit">
         <property name="text">
          <string>1/cm</string>
         </property>
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QLabel" name="labelXRaySLDUnit">
+       <widget class="QLabel" name="lblXRaySLDUnit">
         <property name="text">
          <string>1/Å²</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="labelXRaySLD">
+       <widget class="QLabel" name="lblXRaySLD">
         <property name="text">
          <string>X-Ray SLD</string>
         </property>
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QLabel" name="labelNeutronSLDUnit">
+       <widget class="QLabel" name="lblNeutronSLDUnit">
         <property name="text">
          <string>1/Å²</string>
         </property>
@@ -200,7 +200,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="editXraySldReal">
+       <widget class="QLineEdit" name="txtEditXraySldReal">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -210,7 +210,7 @@
        </widget>
       </item>
       <item row="1" column="3">
-       <widget class="QLineEdit" name="editXraySldImag">
+       <widget class="QLineEdit" name="txtEditXraySldImag">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -229,55 +229,55 @@
      </property>
      <layout class="QGridLayout" name="gridLayoutInput">
       <item row="1" column="0">
-       <widget class="QLabel" name="labelMassDensity">
+       <widget class="QLabel" name="lblMassDensity">
         <property name="text">
          <string>Mass Density</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLabel" name="labelUnitMassDensity">
+       <widget class="QLabel" name="lblUnitMassDensity">
         <property name="text">
          <string>g/cm³</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="labelExampleMolecularFormula">
+       <widget class="QLabel" name="lblExampleMolecularFormula">
         <property name="text">
          <string>e.g. H2O</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="editMolecularFormula"/>
+       <widget class="QLineEdit" name="txtEditMolecularFormula"/>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="editMassDensity"/>
+       <widget class="QLineEdit" name="txtEditMassDensity"/>
       </item>
       <item row="2" column="2">
-       <widget class="QLabel" name="labelUnitNeutronWavelength">
+       <widget class="QLabel" name="lblUnitNeutronWavelength">
         <property name="text">
          <string>Å</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="labelMolecularFormula">
+       <widget class="QLabel" name="lblMolecularFormula">
         <property name="text">
          <string>Molecular Formula</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="labelNeutronWavelength">
+       <widget class="QLabel" name="lblNeutronWavelength">
         <property name="text">
          <string>Neutron Wavelength</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="editNeutronWavelength">
+       <widget class="QLineEdit" name="txtEditNeutronWavelength">
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -287,17 +287,17 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="editXrayWavelength"/>
+       <widget class="QLineEdit" name="txtEditXrayWavelength"/>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="labelXRayWavelength">
+       <widget class="QLabel" name="lblXRayWavelength">
         <property name="text">
          <string>X-Ray Wavelength</string>
         </property>
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QLabel" name="labelUnitXRayWavelength">
+       <widget class="QLabel" name="lblUnitXRayWavelength">
         <property name="text">
          <string>Å</string>
         </property>
@@ -322,7 +322,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QPushButton" name="recalculateButton">
+       <widget class="QPushButton" name="cmdRecalculate">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -354,7 +354,7 @@
        </spacer>
       </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="closeButton">
+       <widget class="QPushButton" name="cmdClose">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -367,7 +367,7 @@
        </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QPushButton" name="helpButton">
+       <widget class="QPushButton" name="cmdHelp">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -385,20 +385,20 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>editMolecularFormula</tabstop>
-  <tabstop>editMassDensity</tabstop>
-  <tabstop>editNeutronWavelength</tabstop>
-  <tabstop>editXrayWavelength</tabstop>
-  <tabstop>editNeutronSldReal</tabstop>
-  <tabstop>editNeutronSldImag</tabstop>
-  <tabstop>editXraySldReal</tabstop>
-  <tabstop>editXraySldImag</tabstop>
-  <tabstop>editNeutronIncXs</tabstop>
-  <tabstop>editNeutronAbsXs</tabstop>
-  <tabstop>editNeutronLength</tabstop>
-  <tabstop>closeButton</tabstop>
-  <tabstop>helpButton</tabstop>
-  <tabstop>recalculateButton</tabstop>
+  <tabstop>txtEditMolecularFormula</tabstop>
+  <tabstop>txtEditMassDensity</tabstop>
+  <tabstop>txtEditNeutronWavelength</tabstop>
+  <tabstop>txtEditXrayWavelength</tabstop>
+  <tabstop>txtEditNeutronSldReal</tabstop>
+  <tabstop>txtEditNeutronSldImag</tabstop>
+  <tabstop>txtEditXraySldReal</tabstop>
+  <tabstop>txtEditXraySldImag</tabstop>
+  <tabstop>txtEditNeutronIncXs</tabstop>
+  <tabstop>txtEditNeutronAbsXs</tabstop>
+  <tabstop>txtEditNeutronLength</tabstop>
+  <tabstop>cmdClose</tabstop>
+  <tabstop>cmdHelp</tabstop>
+  <tabstop>cmdRecalculate</tabstop>
  </tabstops>
  <resources/>
  <connections/>

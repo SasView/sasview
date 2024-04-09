@@ -120,8 +120,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdSave.clicked.connect(self.onSaveFile)
 
         # checkboxes
-        self.checkboxNucData.stateChanged.connect(self.change_data_type)
-        self.checkboxMagData.stateChanged.connect(self.change_data_type)
+        self.chkNucData.stateChanged.connect(self.change_data_type)
+        self.chkMagData.stateChanged.connect(self.change_data_type)
 
         self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
         self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
@@ -150,8 +150,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtUpPhi.textChanged.connect(self.update_polarisation_coords)
 
         # setup initial configuration
-        self.checkboxNucData.setEnabled(False)
-        self.checkboxMagData.setEnabled(False)
+        self.chkNucData.setEnabled(False)
+        self.chkMagData.setEnabled(False)
         self.change_data_type()
         # verify that the new enabled files are compatible
         
@@ -493,8 +493,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         enabled to allow the user to specify a simple rectangular lattice.
         """
         # update information on which files are enabled
-        self.is_nuc = self.checkboxNucData.isChecked()
-        self.is_mag = self.checkboxMagData.isChecked()
+        self.is_nuc = self.chkNucData.isChecked()
+        self.is_mag = self.chkMagData.isChecked()
         # enable the corresponding text displays to show this to the user clearly
         self.txtNucData.setEnabled(self.is_nuc)
         self.txtMagData.setEnabled(self.is_mag)
@@ -757,11 +757,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         logging.info("Load Complete")
         # Once data files are loaded allow them to be enabled and then enable them
         if load_nuc:
-            self.checkboxNucData.setEnabled(True)
-            self.checkboxNucData.setChecked(True)
+            self.chkNucData.setEnabled(True)
+            self.chkNucData.setChecked(True)
         else:
-            self.checkboxMagData.setEnabled(True)
-            self.checkboxMagData.setChecked(True)
+            self.chkMagData.setEnabled(True)
+            self.chkMagData.setChecked(True)
         self.update_gui()
         # reset verification now we have loaded new files
         self.verify = False
@@ -1055,10 +1055,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.cmdMagLoad.setEnabled(True)
             self.cmdMagLoad.setText('Load')
             # disable all file checkboxes, as no files are now loaded
-            self.checkboxNucData.setEnabled(False)
-            self.checkboxMagData.setEnabled(False)
-            self.checkboxNucData.setChecked(False)
-            self.checkboxMagData.setChecked(False)
+            self.chkNucData.setEnabled(False)
+            self.chkMagData.setEnabled(False)
+            self.chkNucData.setChecked(False)
+            self.chkMagData.setChecked(False)
             # reset all file data to its default empty state
             self.is_nuc = False
             self.is_mag = False

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1113</width>
-    <height>746</height>
+    <width>1157</width>
+    <height>885</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,7 +43,7 @@
         <x>0</x>
         <y>0</y>
         <width>581</width>
-        <height>728</height>
+        <height>867</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -1141,7 +1141,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

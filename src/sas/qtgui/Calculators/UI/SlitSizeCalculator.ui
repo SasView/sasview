@@ -30,14 +30,14 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="labelData">
+         <widget class="QLabel" name="lblData">
           <property name="text">
            <string>Data</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="data_file">
+         <widget class="QLineEdit" name="txtDataFile">
           <property name="minimumSize">
            <size>
             <width>200</width>
@@ -76,14 +76,14 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="labelSlitSize">
+         <widget class="QLabel" name="lblSlitSize">
           <property name="text">
            <string>Slit Size (FWHM/2):</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="slit_length_out">
+         <widget class="QLineEdit" name="txtSlitLengthOut">
           <property name="minimumSize">
            <size>
             <width>110</width>
@@ -100,14 +100,14 @@
       <item row="0" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QLabel" name="labelSlitSizeUnit">
+         <widget class="QLabel" name="lblSlitSizeUnit">
           <property name="text">
            <string>Unit:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="unit_out">
+         <widget class="QLineEdit" name="txtUnitOut">
           <property name="minimumSize">
            <size>
             <width>100</width>
@@ -125,7 +125,7 @@
     </widget>
    </item>
    <item row="0" column="2">
-    <widget class="QPushButton" name="browseButton">
+    <widget class="QPushButton" name="cmdBrowse">
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Compute the thickness or diameter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -135,7 +135,7 @@
     </widget>
    </item>
    <item row="4" column="2">
-    <widget class="QPushButton" name="helpButton">
+    <widget class="QPushButton" name="cmdHelp">
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Help using the Kiessing fringe calculator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -158,7 +158,7 @@
     </spacer>
    </item>
    <item row="4" column="1">
-    <widget class="QPushButton" name="closeButton">
+    <widget class="QPushButton" name="cmdClose">
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Close this window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -183,12 +183,12 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>data_file</tabstop>
-  <tabstop>browseButton</tabstop>
-  <tabstop>slit_length_out</tabstop>
-  <tabstop>unit_out</tabstop>
-  <tabstop>closeButton</tabstop>
-  <tabstop>helpButton</tabstop>
+  <tabstop>txtDataFile</tabstop>
+  <tabstop>cmdBrowse</tabstop>
+  <tabstop>txtSlitLengthOut</tabstop>
+  <tabstop>txtUnitOut</tabstop>
+  <tabstop>cmdClose</tabstop>
+  <tabstop>cmdHelp</tabstop>
  </tabstops>
  <resources/>
  <connections/>
