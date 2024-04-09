@@ -47,12 +47,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             msg = "post data:no Box Average direction was supplied"
             raise ValueError(msg)
 
-        # set the minimum of the box width (x) and height (y) to be
-        # 4% of the data2D range in that direction (2% of the range
-        # for each half)
-        self.half_width_min = 0.02 * (self.data.xmax - self.data.xmin)
-        self.half_height_min = 0.02 * (self.data.ymax - self.data.ymin)
-
         # center of the box
         # puts the center of box at the middle of the data q-range
         self.center_x = (self.data.xmin + self.data.xmax) /2
@@ -247,6 +241,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             self.restore(ev=None)
             self.update()
             self.draw()
+            self.setModelFromParams()
             return
 
         # Now that we know the move valid, update the half_width and half_height
@@ -364,6 +359,14 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         self.center_x = params["center_x"]
         self.center_y = params["center_y"]
 
+        # save current state of the ROI in case the change leaves no data in
+        # the ROI and thus a disallowed move. Also set the has_move flags to
+        # true in case we have to restore this saved state.
+        self.save(ev=None)
+        self.center.has_move = True
+        self.horizontal_lines.has_move = True
+        self.vertical_lines.has_move = True
+        # Now update the ROI based on the change
         self.center.update(center_x=self.center_x, center_y=self.center_y)
         self.horizontal_lines.update(center=self.center,
                                      half_width=self.half_width, half_height=self.half_height)
@@ -371,50 +374,62 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                    half_width=self.half_width, half_height=self.half_height)
         # Compute and plot the 1D average based on these parameters
         self._post_data()
+        # Now move is over so turn off flags
+        self.center.has_move = False
+        self.horizontal_lines.has_move = False
+        self.vertical_lines.has_move = False
         self.draw()
 
     def validate(self, param_name, param_value):
         """
         Validate input from user.
         Values get checked at apply time.
-        NOTE: If the width becomes arbitrarily small, which a user could in
-              fact type into the box will cause an error here in a way that is
-              difficult to achieve graphically. Thus we use a min width
-              instead, based on a percentage of the total q range of the
-              detector. For sanity we also make sure nobody made those limits
-              negative. This does pose some arbitrary limitations - see to do
-              below
-
-        ..todo:: In principle simply restricting the width to be greater than
-                 0 is not enough to guarantee points will exist in the ROI,
-                 particularly if a future detector has "holes" in it with no
-                 data. Note that a min width parameter is also almost
-                 impossible to define universally given the difference between
-                 detectors (particularly X-ray and neutron). Ideally there
-                 needs to be a boolean function to test if the ROI contains
-                 data points.
-
+        * nbins cannot be zero or samller
+        * The full ROI should stay within the data. thus center_x and center_y
+          are restricted such that the center +/- width (or height) cannot be
+          greate or smaller than data max/min.
+        * The width/height should not be set so small as to leave no data in
+          the ROI. Here we only make sure that the width/height is not zero
+          as done when dragging the vertical or horizontal lines. We let the
+          call to _post_data capture the ValueError of no points in ROI
+          raised by manipulations.py, log the message and negate the entry
+          at that point.
         """
         isValid = True
 
         if param_name =='half_width':
-            # Can't be negative or smaller than self.half_width_min if a
-            # reasonable min is provided. NOTE: half_width is the width
-            # to or from the center
-            if param_value <= 0 or param_value <= self.half_width_min:
-                print("The box width is too small. Please adjust.")
+            # Can't be negative for sure. Also, it should not be so small that
+            # there remains no points to average in the ROI. We leave this
+            # second check to manipulations.py
+            if param_value <= 0:
+                logging.warning("The box width is too small. Please adjust.")
                 isValid = False
-        if param_name =='half_height':
-            # Can't be negative or smaller than self.half_height_min if a
-            # reasonable min is provided. NOTE: half_height is the height
-            # to or from the center
-            if param_value <= 0 or param_value <= self.half_height_min:
-                print("The box height is too small. Please adjust.")
+        elif param_name =='half_height':
+            # Can't be negative for sure. Also, it should not be so small that
+            # there remains no points to average in the ROI. We leave this
+            # second check to manipulations.py
+            if param_value <= 0:
+                logging.warning("The box height is too small. Please adjust.")
                 isValid = False
         elif param_name == 'nbins':
             # Can't be negative or 0
             if param_value < 1:
-                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                logging.warning("Number of bins cannot be less than or equal"\
+                                 "to 0. Please adjust.")
+                isValid = False
+        elif param_name == 'center_x':
+            # Keep the full ROI box within the data (only moving x here)
+            if (param_value + self.half_width) >= self.data.xmax or \
+                    (param_value- self.half_width) <= self.data.xmin:
+                logging.warning("The ROI must be fully contained within the"\
+                                "2D data. Please adjust")
+                isValid = False
+        elif param_name == 'center_y':
+            # Keep the full ROI box within the data (only moving y here)
+            if (param_value + self.half_height) >= self.data.ymax or \
+                    (param_value - self.half_height) <= self.data.ymin:
+                logging.warning("The ROI must be fully contained within the"\
+                                "2D data. Please adjust")
                 isValid = False
         return isValid
 
