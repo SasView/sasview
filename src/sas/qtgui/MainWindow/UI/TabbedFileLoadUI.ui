@@ -14,7 +14,7 @@
    <string>TabWidget</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../UI/main_resources.qrc">
+   <iconset>
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <property name="currentIndex">
