@@ -87,14 +87,14 @@
       <enum>QLayout::SetMinimumSize</enum>
      </property>
      <item>
-      <widget class="QPushButton" name="testButton">
+      <widget class="QPushButton" name="cmdTest">
        <property name="text">
         <string>Test</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="helpButton">
+      <widget class="QPushButton" name="cmdHelp">
        <property name="text">
         <string>Help</string>
        </property>

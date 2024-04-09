@@ -50,7 +50,7 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="page_dream">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -67,21 +67,21 @@
           </property>
           <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_samples_dream">
+            <widget class="QLabel" name="lbl_samples_dream">
              <property name="text">
               <string>Samples:</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_population_dream">
+            <widget class="QLabel" name="lbl_population_dream">
              <property name="text">
               <string>Population:</string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QComboBox" name="combobox_initializer_dream">
+            <widget class="QComboBox" name="cb_initializer_dream">
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Initializer&lt;/span&gt; determines how the population will be initialized. The options are as follows:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;eps&lt;/span&gt; (epsilon ball), in which the entire initial population is chosen at random from within a tiny hypersphere centered about the initial point&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;lhs&lt;/span&gt; (latin hypersquare), which chops the bounds within each dimension in &lt;span style=&quot; font-weight:600;&quot;&gt;k&lt;/span&gt; equal sized chunks where &lt;span style=&quot; font-weight:600;&quot;&gt;k&lt;/span&gt; is the size of the population and makes sure that each parameter has at least one value within each chunk across the population.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;cov&lt;/span&gt; (covariance matrix), in which the uncertainty is estimated using the covariance matrix at the initial point, and points are selected at random from the corresponding gaussian ellipsoid&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;random&lt;/span&gt; (uniform random), in which the points are selected at random within the bounds of the parameters&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
@@ -115,14 +115,14 @@
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_thinning_dream">
+            <widget class="QLabel" name="lbl_thinning_dream">
              <property name="text">
               <string>Thinning:</string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_initializer_dream">
+            <widget class="QLabel" name="lbl_initializer_dream">
              <property name="text">
               <string>Initializer:</string>
              </property>
@@ -136,14 +136,14 @@
             </widget>
            </item>
            <item row="5" column="0">
-            <widget class="QLabel" name="label_steps_dream">
+            <widget class="QLabel" name="lbl_steps_dream">
              <property name="text">
               <string>Steps:</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_burn_in_steps_dream">
+            <widget class="QLabel" name="lbl_burn_in_steps_dream">
              <property name="text">
               <string>Burn-in Steps:</string>
              </property>
@@ -184,7 +184,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_steps_lm">
+            <widget class="QLabel" name="lbl_steps_lm">
              <property name="text">
               <string>Steps:</string>
              </property>
@@ -198,7 +198,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_f_x_tolerance_lm">
+            <widget class="QLabel" name="lbl_f_x_tolerance_lm">
              <property name="text">
               <string>f(x) tolerance:</string>
              </property>
@@ -212,7 +212,7 @@
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_x_tolerance_lm">
+            <widget class="QLabel" name="lbl_x_tolerance_lm">
              <property name="text">
               <string>x tolerance:</string>
              </property>
@@ -252,7 +252,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_5">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_steps_newton">
+            <widget class="QLabel" name="lbl_steps_newton">
              <property name="text">
               <string>Steps:</string>
              </property>
@@ -266,7 +266,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_starts_newton">
+            <widget class="QLabel" name="lbl_starts_newton">
              <property name="text">
               <string>Starts:</string>
              </property>
@@ -280,7 +280,7 @@
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_f_x_tolerance_newton">
+            <widget class="QLabel" name="lbl_f_x_tolerance_newton">
              <property name="text">
               <string>f(x) tolerance:</string>
              </property>
@@ -294,7 +294,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_x_tolerance_newton">
+            <widget class="QLabel" name="lbl_x_tolerance_newton">
              <property name="text">
               <string>x tolerance:</string>
              </property>
@@ -334,7 +334,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_steps_de">
+            <widget class="QLabel" name="lbl_steps_de">
              <property name="text">
               <string>Steps:</string>
              </property>
@@ -348,7 +348,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_population_de">
+            <widget class="QLabel" name="lbl_population_de">
              <property name="text">
               <string>Population:</string>
              </property>
@@ -358,7 +358,7 @@
             <widget class="QLineEdit" name="pop_de"/>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_crossover_ratio_de">
+            <widget class="QLabel" name="lbl_crossover_ratio_de">
              <property name="text">
               <string>Crossover ratio:</string>
              </property>
@@ -372,7 +372,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_scale_de">
+            <widget class="QLabel" name="lbl_scale_de">
              <property name="text">
               <string>Scale:</string>
              </property>
@@ -386,7 +386,7 @@
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_f_x_tolerance_de">
+            <widget class="QLabel" name="lbl_f_x_tolerance_de">
              <property name="text">
               <string>f(x) tolerance:</string>
              </property>
@@ -400,7 +400,7 @@
             </widget>
            </item>
            <item row="5" column="0">
-            <widget class="QLabel" name="label_x_tolerance_de">
+            <widget class="QLabel" name="lbl_x_tolerance_de">
              <property name="text">
               <string>x tolerance:</string>
              </property>
@@ -440,7 +440,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_11">
            <item row="0" column="0">
-            <widget class="QLabel" name="label_steps_amoeba">
+            <widget class="QLabel" name="lbl_steps_amoeba">
              <property name="text">
               <string>Steps:</string>
              </property>
@@ -454,7 +454,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_starts_amoeba">
+            <widget class="QLabel" name="lbl_starts_amoeba">
              <property name="text">
               <string>Starts:</string>
              </property>
@@ -468,7 +468,7 @@
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_simplex_radius_amoeba">
+            <widget class="QLabel" name="lbl_simplex_radius_amoeba">
              <property name="text">
               <string>Simplex radius:</string>
              </property>
@@ -496,7 +496,7 @@
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_x_tolerance_amoeba">
+            <widget class="QLabel" name="lbl_x_tolerance_amoeba">
              <property name="text">
               <string>x tolerance:</string>
              </property>
@@ -530,7 +530,7 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="QComboBox" name="comboboxFitAlgorithms">
+     <widget class="QComboBox" name="cbFitAlgorithms">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -564,7 +564,7 @@
    </property>
    <layout class="QGridLayout" name="gridLayout_12">
     <item row="0" column="0">
-     <widget class="QComboBox" name="comboboxDefaultFitAlgorithm">
+     <widget class="QComboBox" name="cbDefaultFitAlgorithm">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
         <horstretch>0</horstretch>

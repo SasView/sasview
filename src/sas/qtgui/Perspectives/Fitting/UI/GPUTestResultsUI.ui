@@ -55,7 +55,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_falingTestsNoOpenCL">
+      <widget class="QLabel" name="lblFailingTestsNoOpenCL">
        <property name="text">
         <string>If tests fail on OpenCL devices, please select the No OpenCL option.</string>
        </property>
@@ -65,7 +65,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_howToReportIssues">
+      <widget class="QLabel" name="lblHowToReportIssues">
        <property name="text">
         <string>In the case where many tests are failing, please consider sending the above report to help@sasview.org.</string>
        </property>
@@ -93,7 +93,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QDialogButtonBox" name="okButton">
+        <widget class="QDialogButtonBox" name="cmdOK">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -114,7 +114,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>okButton</sender>
+   <sender>cmdOK</sender>
    <signal>accepted()</signal>
    <receiver>GPUTestResults</receiver>
    <slot>accept()</slot>
@@ -130,7 +130,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>okButton</sender>
+   <sender>cmdOK</sender>
    <signal>rejected()</signal>
    <receiver>GPUTestResults</receiver>
    <slot>reject()</slot>

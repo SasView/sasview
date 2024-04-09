@@ -23,7 +23,7 @@
       <item row="0" column="0" rowspan="2">
        <layout class="QGridLayout" name="gridLayoutMinRangeMaxRange">
         <item row="0" column="0">
-         <widget class="QLabel" name="labelMinRange">
+         <widget class="QLabel" name="lblMinRange">
           <property name="text">
            <string>Min range</string>
           </property>
@@ -43,14 +43,14 @@
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLabel" name="labelAngstromInvMinRange">
+         <widget class="QLabel" name="lblAngstromInvMinRange">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="labelMaxRange">
+         <widget class="QLabel" name="lblMaxRange">
           <property name="text">
            <string>Max range</string>
           </property>
@@ -70,7 +70,7 @@
          </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QLabel" name="labelAngstromInvMaxRange">
+         <widget class="QLabel" name="lblAngstromInvMaxRange">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -92,7 +92,7 @@
        </spacer>
       </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="buttonReset">
+       <widget class="QPushButton" name="cmdReset">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reset the Q range to the default.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -102,7 +102,7 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QPushButton" name="buttonMaskEdit">
+       <widget class="QPushButton" name="cmdMaskEdit">
         <property name="text">
          <string>Mask Editor</string>
         </property>
@@ -140,7 +140,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="labelNptsFit">
+         <widget class="QLabel" name="lblNptsFit">
           <property name="text">
            <string>Npts(Fit)</string>
           </property>
@@ -157,7 +157,7 @@
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QCheckBox" name="checkBoxLogSpacedPoints">
+         <widget class="QCheckBox" name="chkLogSpacedPoints">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to use log spaced points.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -170,7 +170,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QLabel" name="labelNpts">
+         <widget class="QLabel" name="lblNpts">
           <property name="text">
            <string>Npts</string>
           </property>
@@ -190,7 +190,7 @@
       <item row="0" column="0">
        <layout class="QVBoxLayout" name="verticalLayoutWeighting">
         <item>
-         <widget class="QRadioButton" name="radioButtonWeightingNone">
+         <widget class="QRadioButton" name="rbWeightingNone">
           <property name="text">
            <string>None</string>
           </property>
@@ -200,21 +200,21 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButtonWeightingUsedIData">
+         <widget class="QRadioButton" name="rbWeightingUsedIData">
           <property name="text">
            <string>Use dI Data</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButtonWeightingUseAbsSqrtIData">
+         <widget class="QRadioButton" name="rbWeightingUseAbsSqrtIData">
           <property name="text">
            <string>Use |sqrt(I Data)|</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButtonWeightingUseAbsIData">
+         <widget class="QRadioButton" name="rbWeightingUseAbsIData">
           <property name="text">
            <string>Use |I Data|</string>
           </property>
@@ -244,14 +244,14 @@
   <tabstop>txtMinRange</tabstop>
   <tabstop>txtMaxRange</tabstop>
   <tabstop>txtNpts</tabstop>
-  <tabstop>checkBoxLogSpacedPoints</tabstop>
+  <tabstop>chkLogSpacedPoints</tabstop>
   <tabstop>txtNptsFit</tabstop>
-  <tabstop>radioButtonWeightingNone</tabstop>
-  <tabstop>radioButtonWeightingUsedIData</tabstop>
-  <tabstop>radioButtonWeightingUseAbsSqrtIData</tabstop>
-  <tabstop>radioButtonWeightingUseAbsIData</tabstop>
-  <tabstop>buttonReset</tabstop>
-  <tabstop>buttonMaskEdit</tabstop>
+  <tabstop>rbWeightingNone</tabstop>
+  <tabstop>rbWeightingUsedIData</tabstop>
+  <tabstop>rbWeightingUseAbsSqrtIData</tabstop>
+  <tabstop>rbWeightingUseAbsIData</tabstop>
+  <tabstop>cmdReset</tabstop>
+  <tabstop>cmdMaskEdit</tabstop>
  </tabstops>
  <resources/>
  <connections/>

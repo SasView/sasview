@@ -23,10 +23,10 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout2ParameterConstraint">
         <item>
-         <widget class="QComboBox" name="comboboxModel1"/>
+         <widget class="QComboBox" name="cbModel1"/>
         </item>
         <item>
-         <widget class="QComboBox" name="comboboxParam1">
+         <widget class="QComboBox" name="cbParam1">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -44,7 +44,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboboxOperator">
+         <widget class="QComboBox" name="cbOperator">
           <item>
            <property name="text">
             <string>&gt;</string>
@@ -53,10 +53,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboboxModel2"/>
+         <widget class="QComboBox" name="cbModel2"/>
         </item>
         <item>
-         <widget class="QComboBox" name="comboboxParam2">
+         <widget class="QComboBox" name="cbParam2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -76,7 +76,7 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="labelEditComplexConstraint">
+       <widget class="QLabel" name="lblEditComplexConstraint">
         <property name="text">
          <string>Edit complex constraint:</string>
         </property>
@@ -98,14 +98,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="labelOperatorComplexConstraint">
+         <widget class="QLabel" name="lblOperatorComplexConstraint">
           <property name="text">
            <string>=</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="textComplexConstraint">
+         <widget class="QLineEdit" name="txtComplexConstraint">
           <property name="text">
            <string/>
           </property>
@@ -152,7 +152,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="buttonAddAll">
+      <widget class="QToolButton" name="cmdAddAll">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -186,7 +186,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="buttonOK">
+      <widget class="QToolButton" name="cmdOK">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -220,7 +220,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonHelp">
+      <widget class="QPushButton" name="cmdHelp">
        <property name="text">
         <string>Help</string>
        </property>

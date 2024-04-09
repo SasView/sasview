@@ -169,8 +169,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Set up various widget states
         """
         # disable special cases until properly defined
-        self.label.setVisible(False)
-        self.comboboxSpecialCases.setVisible(False)
+        self.lblSpecialCases.setVisible(False)
+        self.cbSpecialCases.setVisible(False)
 
         self.sim_fit_labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
         # tab widget - headers
@@ -188,7 +188,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.customContextMenuRequested.connect(self.showModelContextMenu)
 
         # Single Fit is the default, so disable chainfit
-        self.checkBoxChainedFit.setVisible(False)
+        self.cbChainedFit.setVisible(False)
 
         # disabled constraint
         labels = ['Constraint']
@@ -207,14 +207,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Set up signals/slots for this widget
         """
         # simple widgets
-        self.radioButtonSingle.toggled.connect(self.onFitTypeChange)
-        self.radioButtonBatch.toggled.connect(self.onFitTypeChange)
-        self.comboboxSpecialCases.currentIndexChanged.connect(self.onSpecialCaseChange)
-        self.buttonFit.clicked.connect(self.onFit)
-        self.buttonHelp.clicked.connect(self.onHelp)
-        self.buttonAddConstraints.clicked.connect(self.showMultiConstraint)
-        self.checkBoxChainedFit.toggled.connect(self.onChainFit)
-        self.checkBoxWeight.toggled.connect(self.onWeightModify)
+        self.rbSingleFits.toggled.connect(self.onFitTypeChange)
+        self.rbBatchFits.toggled.connect(self.onFitTypeChange)
+        self.cbSpecialCases.currentIndexChanged.connect(self.onSpecialCaseChange)
+        self.cmdFit.clicked.connect(self.onFit)
+        self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdAddConstraints.clicked.connect(self.showMultiConstraint)
+        self.cbChainedFit.toggled.connect(self.onChainFit)
+        self.cbWeight.toggled.connect(self.onWeightModify)
 
         # QTableWidgets
         self.tblTabList.cellChanged.connect(self.onTabCellEdit)
@@ -270,9 +270,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         single fit/batch fit
         """
         source = self.sender().objectName()
-        self.currentType = "BatchPage" if source == "radioButtonBatch" else "FitPage"
-        self.checkBoxChainedFit.setVisible(source=="radioButtonBatch")
-        self.checkBoxWeight.setVisible(source!="radioButtonBatch")
+        self.currentType = "BatchPage" if source == "rbBatchFits" else "FitPage"
+        self.cbChainedFit.setVisible(source=="rbBatchFits")
+        self.cbWeight.setVisible(source!="rbBatchFits")
         self.initializeFitList()
 
     def onSpecialCaseChange(self, index):
@@ -309,8 +309,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if self.is_running:
             self.is_running = False
             #re-enable the Fit button
-            self.buttonFit.setStyleSheet('QPushButton {color: black;}')
-            self.buttonFit.setText("Fit")
+            self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+            self.cmdFit.setText("Fit")
             # stop the fitpages
             self.calc_fit.stop()
             return
@@ -402,8 +402,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.calc_fit.ready(2.5)
 
         # modify the Fit button
-        self.buttonFit.setStyleSheet('QPushButton {color: red;}')
-        self.buttonFit.setText('Stop fit')
+        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        self.cmdFit.setText('Stop fit')
         self.parent.communicate.statusBarUpdateSignal.emit('Fitting started...')
         self.is_running = True
 
@@ -445,7 +445,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             tab_name = item.text()
             self.tabs_for_fitting[tab_name] = (item.checkState() == QtCore.Qt.Checked)
             # Enable fitting only when there are models to fit
-            self.buttonFit.setEnabled(any(self.tabs_for_fitting.values()))
+            self.cmdFit.setEnabled(any(self.tabs_for_fitting.values()))
             return
 
         elif column == self.sim_fit_labels.index('Mnemonic'):
@@ -457,7 +457,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 self.tblTabList.blockSignals(True)
                 item.setBackground(QtCore.Qt.red)
                 self.tblTabList.blockSignals(False)
-                self.buttonFit.setEnabled(False)
+                self.cmdFit.setEnabled(False)
                 if new_moniker == "":
                     msg = "Please use a non-empty name."
                 else:
@@ -469,7 +469,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.tblTabList.blockSignals(True)
             item.setBackground(QtCore.Qt.white)
             self.tblTabList.blockSignals(False)
-            self.buttonFit.setEnabled(True)
+            self.cmdFit.setEnabled(True)
             item.setToolTip("")
             msg = "Fitpage name changed to {}.".format(new_moniker)
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
@@ -502,7 +502,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 self.tblTabList.blockSignals(True)
                 item.setBackground(QtCore.Qt.red)
                 self.tblTabList.blockSignals(False)
-                self.buttonFit.setEnabled(False)
+                self.cmdFit.setEnabled(False)
                 msg = "Weighting must be a numerical value (integer or float)."
                 self.parent.communicate.statusBarUpdateSignal.emit(msg)
                 item.setToolTip(msg)
@@ -512,7 +512,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.tblTabList.blockSignals(True)
             item.setBackground(QtCore.Qt.white)
             self.tblTabList.blockSignals(False)
-            self.buttonFit.setEnabled(True)
+            self.cmdFit.setEnabled(True)
             fit_page_column = self.sim_fit_labels.index('FitPage')
             self.weighting_ratios[self.tblTabList.item(row, fit_page_column).data(0)] = new_weighting
 
@@ -650,8 +650,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to the successful fit complete signal
         """
         #re-enable the Fit button
-        self.buttonFit.setStyleSheet('QPushButton {color: black;}')
-        self.buttonFit.setText("Fit")
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+        self.cmdFit.setText("Fit")
         self.is_running = False
 
         # Notify the parent about completed fitting
@@ -710,8 +710,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to the successful batch fit complete signal
         """
         #re-enable the Fit button
-        self.buttonFit.setStyleSheet('QPushButton {color: black;}')
-        self.buttonFit.setText("Fit")
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+        self.cmdFit.setText("Fit")
         self.is_running = False
 
         # Notify the parent about completed fitting
@@ -757,8 +757,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to fitting failure.
         """
         #re-enable the Fit button
-        self.buttonFit.setStyleSheet('QPushButton {color: black;}')
-        self.buttonFit.setText("Fit")
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
+        self.cmdFit.setText("Fit")
         self.is_running = False
 
         # Notify the parent about completed fitting
@@ -1037,16 +1037,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblConstraints.setRowCount(0)
 
         # Fit disabled
-        self.buttonFit.setEnabled(False)
+        self.cmdFit.setEnabled(False)
 
         if not objects:
             return
 
         tabs = [tab for tab in ObjectLibrary.listObjects() if self.isTabImportable(tab)]
         if len(tabs) < 1:
-            self.buttonAddConstraints.setEnabled(False)
+            self.cmdAddConstraints.setEnabled(False)
         else:
-            self.buttonAddConstraints.setEnabled(True)
+            self.cmdAddConstraints.setEnabled(True)
 
         if not self._row_order:
             # Initialize tab order list
@@ -1059,7 +1059,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.updateFitLine(tab, model_key=model_key)
             self.updateSignalsFromTab(tab)
             # We have at least 1 fit page, allow fitting
-            self.buttonFit.setEnabled(True)
+            self.cmdFit.setEnabled(True)
 
     def orderedSublist(self, order_list, target_list):
         """
@@ -1157,7 +1157,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         param_list.append(['data_id', "cs_tab"+str(self.page_id)])
         param_list.append(['current_type', self.currentType])
         param_list.append(['is_chain_fitting', str(self.is_chain_fitting)])
-        param_list.append(['special_case', self.comboboxSpecialCases.currentText()])
+        param_list.append(['special_case', self.cbSpecialCases.currentText()])
 
         return param_list
 
@@ -1221,12 +1221,12 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # fit/batch radio
         isBatch = parameters['current_type'][0] == 'BatchPage'
         if isBatch:
-            self.radioButtonBatch.toggle()
+            self.rbBatchFits.toggle()
 
         # chain
         is_chain = parameters['is_chain_fitting'][0] == 'True'
         if isBatch:
-            self.checkBoxChainedFit.setChecked(is_chain)
+            self.cbChainedFit.setChecked(is_chain)
 
     def getReport(self):
         """

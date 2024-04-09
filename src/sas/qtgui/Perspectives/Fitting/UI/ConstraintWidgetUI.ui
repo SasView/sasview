@@ -23,7 +23,7 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_SourceChoice">
         <item row="0" column="0">
-         <widget class="QRadioButton" name="radioButtonSingle">
+         <widget class="QRadioButton" name="rbSingleFits">
           <property name="text">
            <string>Single fits</string>
           </property>
@@ -33,21 +33,21 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QRadioButton" name="radioButtonBatch">
+         <widget class="QRadioButton" name="rbBatchFits">
           <property name="text">
            <string>Batch fits</string>
           </property>
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QCheckBox" name="checkBoxWeight">
+         <widget class="QCheckBox" name="cbWeight">
           <property name="text">
            <string>Modify weighting</string>
           </property>
          </widget>
         </item>
         <item row="0" column="3">
-         <widget class="QCheckBox" name="checkBoxChainedFit">
+         <widget class="QCheckBox" name="cbChainedFit">
           <property name="text">
            <string>Chained fit</string>
           </property>
@@ -85,14 +85,14 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayoutSpecialCases">
           <item>
-           <widget class="QLabel" name="labelSpecialCases">
+           <widget class="QLabel" name="lblSpecialCases">
             <property name="text">
              <string>Special cases</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboboxSpecialCases">
+           <widget class="QComboBox" name="cbSpecialCases">
             <item>
              <property name="text">
               <string>None</string>
@@ -116,7 +116,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="buttonAddConstraints">
+         <widget class="QPushButton" name="cmdAddConstraints">
           <property name="toolTip">
            <string>Define constraints between two fit pages.</string>
           </property>
@@ -164,7 +164,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonFit">
+      <widget class="QPushButton" name="cmdFit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -186,7 +186,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonHelp">
+      <widget class="QPushButton" name="cmdHelp">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -212,15 +212,15 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>radioButtonSingle</tabstop>
-  <tabstop>radioButtonBatch</tabstop>
-  <tabstop>checkBoxWeight</tabstop>
-  <tabstop>checkBoxChainedFit</tabstop>
-  <tabstop>comboboxSpecialCases</tabstop>
-  <tabstop>buttonAddConstraints</tabstop>
+  <tabstop>rbSingleFits</tabstop>
+  <tabstop>rbBatchFits</tabstop>
+  <tabstop>cbWeight</tabstop>
+  <tabstop>cbChainedFit</tabstop>
+  <tabstop>cbSpecialCases</tabstop>
+  <tabstop>cmdAddConstraints</tabstop>
   <tabstop>tblConstraints</tabstop>
-  <tabstop>buttonFit</tabstop>
-  <tabstop>buttonHelp</tabstop>
+  <tabstop>cmdFit</tabstop>
+  <tabstop>cmdHelp</tabstop>
  </tabstops>
  <resources/>
  <connections/>

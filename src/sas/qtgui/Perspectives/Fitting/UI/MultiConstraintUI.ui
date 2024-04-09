@@ -29,7 +29,7 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_with_SwapButton">
      <item>
-      <widget class="QLabel" name="label_Parameter1_SwapBox">
+      <widget class="QLabel" name="lbl_Parameter1_SwapBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -42,14 +42,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_equals_function">
+      <widget class="QLabel" name="lbl_equals_function">
        <property name="text">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;= function(&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_Parameter2_SwapBox">
+      <widget class="QLabel" name="lbl_Parameter2_SwapBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -62,7 +62,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_close_bracket">
+      <widget class="QLabel" name="lbl_close_bracket">
        <property name="text">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -82,7 +82,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonSwap">
+      <widget class="QPushButton" name="cmdSwap">
        <property name="text">
         <string>Swap</string>
        </property>
@@ -93,7 +93,7 @@
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_Parameter_TextBox">
      <item>
-      <widget class="QLabel" name="label_Parameter1_TextBox">
+      <widget class="QLabel" name="lbl_Parameter1_TextBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -106,7 +106,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_EqualSign_TextBox">
+      <widget class="QLabel" name="lbl_EqualSign_TextBox">
        <property name="text">
         <string>=</string>
        </property>
@@ -118,7 +118,7 @@
     </layout>
    </item>
    <item row="2" column="0">
-    <widget class="QLabel" name="labelWarning">
+    <widget class="QLabel" name="lblWarning">
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Warning! Polydisperse parameter selected.&lt;br/&gt;&lt;/span&gt;Constraints involving polydisperse parameters only apply to&lt;br/&gt;starting values and are not re-applied during size or angle polydispersity&lt;br/&gt;integrations. To do so requires creating a custom model.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -153,7 +153,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonOK">
+      <widget class="QPushButton" name="cmdOK">
        <property name="text">
         <string>OK</string>
        </property>
@@ -163,14 +163,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonCancel">
+      <widget class="QPushButton" name="cmdCancel">
        <property name="text">
         <string>Cancel</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonHelp">
+      <widget class="QPushButton" name="cmdHelp">
        <property name="text">
         <string>Help</string>
        </property>
@@ -183,7 +183,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonCancel</sender>
+   <sender>cmdCancel</sender>
    <signal>clicked()</signal>
    <receiver>MultiConstraintUI</receiver>
    <slot>reject()</slot>
@@ -199,7 +199,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonOK</sender>
+   <sender>cmdOK</sender>
    <signal>clicked()</signal>
    <receiver>MultiConstraintUI</receiver>
    <slot>accept()</slot>

@@ -57,12 +57,12 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
 
         # Group boxes
         self.boxWeighting.setEnabled(False)
-        self.buttonMaskEdit.setEnabled(False)
+        self.cmdMaskEdit.setEnabled(False)
         # Button groups
-        self.weightingGroup.addButton(self.radioButtonWeightingNone)
-        self.weightingGroup.addButton(self.radioButtonWeightingUsedIData)
-        self.weightingGroup.addButton(self.radioButtonWeightingUseAbsSqrtIData)
-        self.weightingGroup.addButton(self.radioButtonWeightingUseAbsIData)
+        self.weightingGroup.addButton(self.rbWeightingNone)
+        self.weightingGroup.addButton(self.rbWeightingUsedIData)
+        self.weightingGroup.addButton(self.rbWeightingUseAbsSqrtIData)
+        self.weightingGroup.addButton(self.rbWeightingUseAbsIData)
 
         # Let only floats in the range edits
         self.txtMinRange.setValidator(GuiUtils.DoubleValidator())
@@ -74,9 +74,9 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.txtNptsFit.setEnabled(False)
 
         # Attach slots
-        self.buttonReset.clicked.connect(self.onRangeReset)
-        self.buttonMaskEdit.clicked.connect(self.onMaskEdit)
-        self.checkBoxLogSpacedPoints.stateChanged.connect(self.toggleLogData)
+        self.cmdReset.clicked.connect(self.onRangeReset)
+        self.cmdMaskEdit.clicked.connect(self.onMaskEdit)
+        self.chkLogSpacedPoints.stateChanged.connect(self.toggleLogData)
         # Button groups
         self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
@@ -98,8 +98,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.model.blockSignals(False)
 
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.labelAngstromInvMinRange.setStyleSheet(new_font)
-        self.labelAngstromInvMaxRange.setStyleSheet(new_font)
+        self.lblAngstromInvMinRange.setStyleSheet(new_font)
+        self.lblAngstromInvMaxRange.setStyleSheet(new_font)
 
     def initModel(self):
         """
@@ -128,7 +128,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.toFirst()
 
     def setLogScale(self, log_scale):
-        self.checkBoxLogSpacedPoints.setChecked(log_scale)
+        self.chkLogSpacedPoints.setChecked(log_scale)
 
     def toggleLogData(self, isChecked):
         """ Toggles between log and linear data sets """
@@ -206,19 +206,19 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         is2Ddata = isinstance(self.logic.data, Data2D)
         self.boxWeighting.setEnabled(True)
-        self.buttonMaskEdit.setEnabled(is2Ddata)
+        self.cmdMaskEdit.setEnabled(is2Ddata)
         # Switch off txtNpts related controls
         self.txtNpts.setEnabled(False)
-        self.checkBoxLogSpacedPoints.setEnabled(False)
+        self.chkLogSpacedPoints.setEnabled(False)
         # Weighting controls
         if self.logic.di_flag:
-            self.radioButtonWeightingUsedIData.setEnabled(True)
-            self.radioButtonWeightingUsedIData.setChecked(True)
-            self.onWeightingChoice(self.radioButtonWeightingUsedIData)
+            self.rbWeightingUsedIData.setEnabled(True)
+            self.rbWeightingUsedIData.setChecked(True)
+            self.onWeightingChoice(self.rbWeightingUsedIData)
         else:
-            self.radioButtonWeightingUsedIData.setEnabled(False)
-            self.radioButtonWeightingNone.setChecked(True)
-            self.onWeightingChoice(self.radioButtonWeightingNone)
+            self.rbWeightingUsedIData.setEnabled(False)
+            self.rbWeightingNone.setChecked(True)
+            self.onWeightingChoice(self.rbWeightingNone)
 
     def updateMinQ(self, q_min=None):
         if q_min and (isinstance(q_min, (float, str))):
@@ -257,7 +257,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         q_range_max = float(self.model.item(self.MODEL.index('MAX_RANGE')).text())
         npts = int(self.model.item(self.MODEL.index('NPTS')).text())
         npts_fit = int(self.model.item(self.MODEL.index('NPTS_FIT')).text())
-        log_points = self.checkBoxLogSpacedPoints.isChecked()
+        log_points = self.chkLogSpacedPoints.isChecked()
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
 
     def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):

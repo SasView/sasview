@@ -59,8 +59,8 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")
 
-        self.testButton.clicked.connect(self.testButtonClicked)
-        self.helpButton.clicked.connect(self.helpButtonClicked)
+        self.cmdTest.clicked.connect(self.cmdTestClicked)
+        self.cmdHelp.clicked.connect(self.cmdHelpClicked)
         self.testingDoneSignal.connect(self.testCompleted)
         self.testingFailedSignal.connect(self.testFailed)
 
@@ -142,7 +142,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(number_of_tests)
         self.progressBar.setVisible(True)
-        self.testButton.setEnabled(False)
+        self.cmdTest.setEnabled(False)
         no_opencl_msg = self.set_sas_open_cl()
 
         test_thread = threads.deferToThread(self.testThread, no_opencl_msg)
@@ -255,7 +255,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         Testing failed: log the reason
         """
         self.progressBar.setVisible(False)
-        self.testButton.setEnabled(True)
+        self.cmdTest.setEnabled(True)
 
         logging.error(str(msg))
 
@@ -264,7 +264,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         Respond to successful test completion
         """
         self.progressBar.setVisible(False)
-        self.testButton.setEnabled(True)
+        self.cmdTest.setEnabled(True)
 
         GPUTestResults(self, msg)
 

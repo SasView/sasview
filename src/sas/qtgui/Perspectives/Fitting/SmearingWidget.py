@@ -86,8 +86,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.txt_dQ_low.setValidator(GuiUtils.DoubleValidator())
 
         # Attach slots
-        self.comboBoxInstrumentalSmearing.currentIndexChanged.connect(self.onIndexChange)
-        self.comboBoxInstrumentalSmearing.setCurrentIndex(0)
+        self.cbInstrumentalSmearing.currentIndexChanged.connect(self.onIndexChange)
+        self.cbInstrumentalSmearing.setCurrentIndex(0)
         self.txt_dQ_low.setText(str(DEFAULT_PINHOLE_UP))
         self.txt_dQ_high.setText(str(DEFAULT_PINHOLE_DOWN))
 
@@ -115,7 +115,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
 
         self.mapper.addMapping(self.txt_dQ_low,   MODEL.index('PINHOLE_MIN'))
         self.mapper.addMapping(self.txt_dQ_high, MODEL.index('PINHOLE_MAX'))
-        self.mapper.addMapping(self.comboBoxAccuracy,   MODEL.index('ACCURACY'))
+        self.mapper.addMapping(self.cbAccuracy,   MODEL.index('ACCURACY'))
 
         self.mapper.toFirst()
 
@@ -124,9 +124,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Update control elements based on data and model passed
         """
         # retain the combobox index
-        old_index = self.comboBoxInstrumentalSmearing.currentIndex()
-        self.comboBoxInstrumentalSmearing.clear()
-        self.comboBoxInstrumentalSmearing.addItem("None")
+        old_index = self.cbInstrumentalSmearing.currentIndex()
+        self.cbInstrumentalSmearing.clear()
+        self.cbInstrumentalSmearing.addItem("None")
         self.groupBoxAccuracy.setVisible(False)
         self.data = data
         if data is None:
@@ -139,14 +139,14 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Update the model
         """
         self.kernel_model = kernel_model
-        # keep the original comboBoxInstrumentalSmearing value, if already set
-        index_to_show = self.comboBoxInstrumentalSmearing.currentIndex()
+        # keep the original cbInstrumentalSmearing value, if already set
+        index_to_show = self.cbInstrumentalSmearing.currentIndex()
         if old_index is not None:
             index_to_show = old_index
 
-        self.comboBoxInstrumentalSmearing.blockSignals(True)
-        self.comboBoxInstrumentalSmearing.clear()
-        self.comboBoxInstrumentalSmearing.addItem("None")
+        self.cbInstrumentalSmearing.blockSignals(True)
+        self.cbInstrumentalSmearing.clear()
+        self.cbInstrumentalSmearing.addItem("None")
         if self.data is None:
             self.setElementsVisibility(False)
             return
@@ -154,25 +154,25 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.current_smearer = smear_selection(self.data, self.kernel_model)
         self.setSmearInfo()
         if self.smear_type == "Hankel Transform":
-            self.comboBoxInstrumentalSmearing.addItem(SMEARING_SESANS)
+            self.cbInstrumentalSmearing.addItem(SMEARING_SESANS)
             index_to_show = 1
         elif self.smear_type is not None:
-            self.comboBoxInstrumentalSmearing.addItem(SMEARING_QD)
+            self.cbInstrumentalSmearing.addItem(SMEARING_QD)
             index_to_show = 1 if keep_order else index_to_show
 
         if self.kernel_model is None:
             # No model definend yet - just use data file smearing, if any
-            self.comboBoxInstrumentalSmearing.blockSignals(False)
-            self.comboBoxInstrumentalSmearing.setCurrentIndex(index_to_show)
+            self.cbInstrumentalSmearing.blockSignals(False)
+            self.cbInstrumentalSmearing.setCurrentIndex(index_to_show)
             return
 
         if isinstance(self.data, Data1D):
-            self.comboBoxInstrumentalSmearing.addItems(SMEARING_1D)
+            self.cbInstrumentalSmearing.addItems(SMEARING_1D)
         else:
-            self.comboBoxInstrumentalSmearing.addItems(SMEARING_2D)
-        self.comboBoxInstrumentalSmearing.blockSignals(False)
+            self.cbInstrumentalSmearing.addItems(SMEARING_2D)
+        self.cbInstrumentalSmearing.blockSignals(False)
 
-        self.comboBoxInstrumentalSmearing.setCurrentIndex(index_to_show)
+        self.cbInstrumentalSmearing.setCurrentIndex(index_to_show)
 
     def smearer(self):
         """ Returns the current smearer """
@@ -182,7 +182,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Callback for smearing combobox index change
         """
-        text = self.comboBoxInstrumentalSmearing.currentText()
+        text = self.cbInstrumentalSmearing.currentText()
         if text == 'None':
             self.setElementsVisibility(False)
             self.current_smearer = None
@@ -200,7 +200,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.onSlitSmear()
         elif text == "Hankel Transform":
             self.setElementsVisibility(False)
-            self.comboBoxInstrumentalSmearing.setEnabled(False)  # turn off ability to change smearing; no other options for sesans
+            self.cbInstrumentalSmearing.setEnabled(False)  # turn off ability to change smearing; no other options for sesans
         self.smearingChangedSignal.emit()
 
     def onModelChange(self):
@@ -208,7 +208,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Respond to model change by notifying any listeners
         """
         # Recalculate the smearing
-        index = self.comboBoxInstrumentalSmearing.currentIndex()
+        index = self.cbInstrumentalSmearing.currentIndex()
         # update the backup values based on model choice
         smearing, accuracy, d_down, d_up = self.state()
         # don't save the state if dQ Data
@@ -230,19 +230,19 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Labels and linedits visibility control
         """
-        self.label_Smearing_dQ_high.setVisible(visible)
-        self.label_Smearing_dQ_low.setVisible(visible)
+        self.lbl_Smearing_dQ_high.setVisible(visible)
+        self.lbl_Smearing_dQ_low.setVisible(visible)
         self.txt_dQ_high.setVisible(visible)
         self.txt_dQ_low.setVisible(visible)
-        self.labelInvAngstrom_dQ_low.setVisible(visible)
-        self.labelInvAngstrom_dQ_high.setVisible(visible)
+        self.lblInvAngstrom_dQ_low.setVisible(visible)
+        self.lblInvAngstrom_dQ_high.setVisible(visible)
         self.setAccuracyVisibility()
 
     def setAccuracyVisibility(self):
         """
         Accuracy combobox visibility
         """
-        if isinstance(self.data, Data2D) and self.comboBoxInstrumentalSmearing.currentIndex() >= 1:
+        if isinstance(self.data, Data2D) and self.cbInstrumentalSmearing.currentIndex() >= 1:
             self.groupBoxAccuracy.setVisible(True)
         else:
             self.groupBoxAccuracy.setVisible(False)
@@ -252,10 +252,10 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Use pinhole labels
         """
         self.txt_dQ_high.setVisible(False)
-        self.label_Smearing_dQ_high.setText('')
-        self.labelInvAngstrom_dQ_high.setText('')
-        self.label_Smearing_dQ_low.setText('<html><head/><body><p>dQ/Q</p></body></html>')
-        self.labelInvAngstrom_dQ_low.setText('%')
+        self.lbl_Smearing_dQ_high.setText('')
+        self.lblInvAngstrom_dQ_high.setText('')
+        self.lbl_Smearing_dQ_low.setText('<html><head/><body><p>dQ/Q</p></body></html>')
+        self.lblInvAngstrom_dQ_low.setText('%')
         self.txt_dQ_low.setText(str(self.pinhole))
 
         self.txt_dQ_high.setEnabled(True)
@@ -265,10 +265,10 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Use pinhole labels
         """
-        self.label_Smearing_dQ_low.setText('Slit length')
-        self.label_Smearing_dQ_high.setText('Slit width')
-        self.labelInvAngstrom_dQ_low.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
-        self.labelInvAngstrom_dQ_high.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
+        self.lbl_Smearing_dQ_low.setText('Slit length')
+        self.lbl_Smearing_dQ_high.setText('Slit width')
+        self.lblInvAngstrom_dQ_low.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
+        self.lblInvAngstrom_dQ_high.setText('<html><head/><body><p>Å<span style=" vertical-align:super;">-1</span></p></body></html>')
         self.txt_dQ_low.setText(str(self.slit_height))
         self.txt_dQ_high.setText(str(self.slit_width))
         self.txt_dQ_high.setEnabled(True)
@@ -291,11 +291,11 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             text_up = '<html><head/><body><p>&lsaquo;dQ/Q&rsaquo;<span style=" vertical-align:sub;">r</span></p></body></html>'
             text_down = '<html><head/><body><p>&lsaquo;dQ/Q&rsaquo;<span style=" vertical-align:sub;">&phi;</span></p></body></html>'
 
-        self.label_Smearing_dQ_high.setText(text_down)
-        self.label_Smearing_dQ_low.setText(text_up)
+        self.lbl_Smearing_dQ_high.setText(text_down)
+        self.lbl_Smearing_dQ_low.setText(text_up)
 
-        self.labelInvAngstrom_dQ_low.setText(text_unit)
-        self.labelInvAngstrom_dQ_high.setText(text_unit)
+        self.lblInvAngstrom_dQ_low.setText(text_unit)
+        self.lblInvAngstrom_dQ_high.setText(text_unit)
 
         self.txt_dQ_high.setText(str(self.dq_r))
         self.txt_dQ_low.setText(str(self.dq_l))
@@ -306,7 +306,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         Returns current state of controls
         """
-        smearing = self.comboBoxInstrumentalSmearing.currentText()
+        smearing = self.cbInstrumentalSmearing.currentText()
         accuracy = ""
         d_down = None
         d_up = None
@@ -498,6 +498,6 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
 
     def resetSmearer(self):
         self.current_smearer = None
-        self.comboBoxInstrumentalSmearing.blockSignals(True)
-        self.comboBoxInstrumentalSmearing.clear()
-        self.comboBoxInstrumentalSmearing.blockSignals(False)
+        self.cbInstrumentalSmearing.blockSignals(True)
+        self.cbInstrumentalSmearing.clear()
+        self.cbInstrumentalSmearing.blockSignals(False)

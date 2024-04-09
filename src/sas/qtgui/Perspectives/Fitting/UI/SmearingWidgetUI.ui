@@ -29,7 +29,7 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayoutInstrumentalSmearing">
         <item row="0" column="0">
-         <widget class="QComboBox" name="comboBoxInstrumentalSmearing">
+         <widget class="QComboBox" name="cbInstrumentalSmearing">
           <property name="currentIndex">
            <number>0</number>
           </property>
@@ -66,7 +66,7 @@
         <item row="0" column="1" rowspan="2">
          <layout class="QGridLayout" name="gridLayout_dQ">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_Smearing_dQ_low">
+           <widget class="QLabel" name="lbl_Smearing_dQ_low">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;dQ&lt;span style=&quot; vertical-align:sub;&quot;&gt;low&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -76,14 +76,14 @@
            <widget class="QLineEdit" name="txt_dQ_low"/>
           </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="labelInvAngstrom_dQ_low">
+           <widget class="QLabel" name="lblInvAngstrom_dQ_low">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_Smearing_dQ_high">
+           <widget class="QLabel" name="lbl_Smearing_dQ_high">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;dQ&lt;span style=&quot; vertical-align:sub;&quot;&gt;high&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -93,7 +93,7 @@
            <widget class="QLineEdit" name="txt_dQ_high"/>
           </item>
           <item row="1" column="2">
-           <widget class="QLabel" name="labelInvAngstrom_dQ_high">
+           <widget class="QLabel" name="lblInvAngstrom_dQ_high">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -111,7 +111,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="0">
-            <widget class="QComboBox" name="comboBoxAccuracy">
+            <widget class="QComboBox" name="cbAccuracy">
              <item>
               <property name="text">
                <string>Low</string>
