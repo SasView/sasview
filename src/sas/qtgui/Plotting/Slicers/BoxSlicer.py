@@ -4,6 +4,7 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
+import logging
 
 
 class BoxInteractor(BaseInteractor, SlicerModel):
@@ -186,10 +187,8 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
         x_min = self.horizontal_lines.x2
         x_max = self.horizontal_lines.x1
-        self.half_width = numpy.fabs(x_max - x_min)/2
         y_min = self.vertical_lines.y2
         y_max = self.vertical_lines.y1
-        self.half_height = numpy.fabs(y_max - y_min)/2
 
         if nbins is not None:
             self.nbins = nbins
@@ -233,7 +232,27 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                             bin_width=bin_width)
         box.fold = self.fold
-        boxavg = box(self.data)
+        # Check for data inside ROI. A bit of a kludge but faster than
+        # checking twice: once to check and once to do the calculation
+        # Adding a function to manipulations.py that returns the maksed data
+        # set as an object which can then be checked for not being empty before
+        # being passed back to the calculation in manipulations.py?
+        #
+        # Note that it no simple way to ensure that data is in the ROI without
+        # checking (unless one can guarantee a perfect grid in x,y).
+        try:
+            boxavg = box(self.data)
+        except ValueError as ve:
+            logging.error(str(ve))
+            self.restore(ev=None)
+            self.update()
+            self.draw()
+            return
+
+        # Now that we know the move valid, update the half_width and half_height
+        self.half_width = numpy.fabs(x_max - x_min)/2
+        self.half_height = numpy.fabs(y_max - y_min)/2
+
         # Create Data1D to plot
         if hasattr(boxavg, "dxl"):
             dxl = boxavg.dxl
@@ -291,11 +310,19 @@ class BoxInteractor(BaseInteractor, SlicerModel):
 
     def restore(self, ev):
         """
-        Restore the roughness for this layer.
+        Restore the roughness for this layer. Only restores things that have
+        moved. Otherwise you are restoring too far back.
+
+        Save is only done when the mouse is clicked not when it is released.
+        Thus, if vertical lines have changed, they will move horizontal lines
+        also, but the original state of those horizontal lines has not been
+        saved (there was no click event on the horizontal lines). However,
+        restoring the vertical lines and then doing an updated will take care
+        of the related values in horizontal lines.
         """
-        self.horizontal_lines.restore(ev)
-        self.vertical_lines.restore(ev)
-        self.center.restore(ev)
+        if self.horizontal_lines.has_move: self.horizontal_lines.restore(ev)
+        if self.vertical_lines.has_move: self.vertical_lines.restore(ev)
+        if self.center.has_move: self.center.restore(ev)
 
     def move(self, x, y, ev):
         """
@@ -486,7 +513,16 @@ class PointInteractor(BaseInteractor):
 
     def move(self, x, y, ev):
         """
-        Process move to a new position, making sure that the move is allowed.
+        Process move to a new position. The move being allowed here is done
+        by BaseInteractor's drag function which first checks that the x,y
+        cursor resides within the bounds of the plot. This does mean that half
+        the box can still be outside the plot. Restricting this would require
+        Changing the API to pass the width and height values.
+
+        ..todo:: pass the width and heigth and restict the move so that the
+                 entirety of the ROI resides within the plot. This is not a
+                 huge issue as the other half the ROI resides in the plot
+                 and an average for that data given.
         """
         self.x = x
         self.y = y
@@ -620,7 +656,8 @@ class VerticalDoubleLine(BaseInteractor):
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
-        can restore on Esc.
+        can restore on Esc. This save is run on mouse click (not a drag event)
+        by BaseInteractor
         """
         self.save_x2 = self.x2
         self.save_y2 = self.y2
@@ -631,11 +668,11 @@ class VerticalDoubleLine(BaseInteractor):
 
     def moveend(self, ev):
         """
-        After a dragging motion reset the flag self.has_move to False
-        and update the 1D average plot
+        After a dragging motion update the 1D average plot and then reset the
+        flag self.has_move to False.
         """
-        self.has_move = False
         self.base.moveend(ev)
+        self.has_move = False
 
     def restore(self, ev):
         """
@@ -652,28 +689,20 @@ class VerticalDoubleLine(BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         In principle, the move must not create a box without any data points
-        in it. For now (see to do below), the move cannot create a negative
-        delta. This seems to be sufficient for now. It is not clear why this
-        is not true in the case when entering data manually from the editor.
-
-        ..todo:: In principle simply restricting the width to be greater than
-                 0 is not enough to guarantee points will exist in the ROI,
-                 particularly if a future detector has "holes" in it with no
-                 data. Note that a min width parameter is also almost
-                 impossible to define universally given the difference between
-                 detectors (particularly X-ray and neutron). Ideally there
-                 needs to be a boolean function to test if the ROI contains
-                 data points.
+        in it. For the dragging (continuous move), we make sure that the width
+        or height are not negative. We leave the check of whether there are
+        any data in the ROI to the moveend(). This is currently done in
+        _post_data().
         """
-        if x - self.center_x <= 0:
-            self.restore(ev)
-        else:
+        if x - self.center_x > 0:
             self.x1 = x
             self.half_width = self.x1 - self.center_x
             self.x2 = self.center_x - self.half_width
             self.has_move = True
             self.base.update()
             self.base.draw()
+        else:
+            logging.warning("you cannot go negative")
 
     def setCursor(self, x, y):
         """
@@ -800,7 +829,8 @@ class HorizontalDoubleLine(BaseInteractor):
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
-        can restore on Esc.
+        can restore on Esc. This save is run on mouse click (not a drag event)
+        by BaseInteractor
         """
         self.save_x2 = self.x2
         self.save_y2 = self.y2
@@ -811,11 +841,11 @@ class HorizontalDoubleLine(BaseInteractor):
 
     def moveend(self, ev):
         """
-        After a dragging motion reset the flag self.has_move to False
-        and update the 1D average plot
+        After a dragging motion update the 1D average plot and then reset the
+        flag self.has_move to False.
         """
-        self.has_move = False
         self.base.moveend(ev)
+        self.has_move = False
 
     def restore(self, ev):
         """
@@ -832,28 +862,20 @@ class HorizontalDoubleLine(BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         In principle, the move must not create a box without any data points
-        in it. For now (see to do below), the move cannot create a negative
-        delta. This seems to be sufficient for now. It is not clear why this
-        is not true in the case when entering data manually from the editor.
-
-        ..todo:: In principle simply restricting the width to be greater than
-                 0 is not enough to guarantee points will exist in the ROI,
-                 particularly if a future detector has "holes" in it with no
-                 data. Note that a min width parameter is also almost
-                 impossible to define universally given the difference between
-                 detectors (particularly X-ray and neutron). Ideally there
-                 needs to be a boolean function to test if the ROI contains
-                 data points.
+        in it. For the dragging (continuous move), we make sure that the width
+        or height are not negative. We leave the check of whether there are
+        any data in the ROI to the moveend(). This is currently done in
+        _post_data().
         """
-        if y - self.center_y <=0:
-            self.restore(ev)
-        else:
+        if y - self.center_y > 0:
             self.y1 = y
             self.half_height = self.y1 - self.center_y
             self.y2 = self.center_y - self.half_height
             self.has_move = True
             self.base.update()
             self.base.draw()
+        else:
+            logging.warning("you cannot go negative")
 
     def setCursor(self, x, y):
         """
