@@ -36,7 +36,7 @@
    <item row="2" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_8">
      <item>
-      <widget class="QPushButton" name="buttonCalculate">
+      <widget class="QPushButton" name="cmdCalculate">
        <property name="toolTip">
         <string>Compute invariant</string>
        </property>
@@ -59,7 +59,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonStatus">
+      <widget class="QPushButton" name="cmdStatus">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -72,7 +72,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonHelp">
+      <widget class="QPushButton" name="cmdHelp">
        <property name="toolTip">
         <string/>
        </property>
@@ -187,7 +187,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_21">
+           <widget class="QLabel" name="lblVolumeFraction">
             <property name="text">
              <string>Volume fraction:</string>
             </property>
@@ -219,7 +219,7 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="label_20">
+           <widget class="QLabel" name="lblPlusMinus1">
             <property name="text">
              <string>+/-</string>
             </property>
@@ -245,7 +245,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_22">
+           <widget class="QLabel" name="lblSpecificSurface">
             <property name="text">
              <string>Specific Surface:</string>
             </property>
@@ -271,7 +271,7 @@
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QLabel" name="label_23">
+           <widget class="QLabel" name="lblPlusMinus2">
             <property name="text">
              <string>+/-</string>
             </property>
@@ -311,7 +311,7 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_25">
+           <widget class="QLabel" name="lblInvariantTotal">
             <property name="text">
              <string>Invariant Total [Q]:</string>
             </property>
@@ -340,7 +340,7 @@
            </widget>
           </item>
           <item row="3" column="2">
-           <widget class="QLabel" name="label_26">
+           <widget class="QLabel" name="lblPlusMinus3">
             <property name="text">
              <string>+/-</string>
             </property>
@@ -391,7 +391,7 @@
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_3">
             <item row="0" column="0">
-             <widget class="QLabel" name="labelCustomizedInputBackground">
+             <widget class="QLabel" name="lblCustomizedInputBackground">
               <property name="text">
                <string>Background:</string>
               </property>
@@ -401,14 +401,14 @@
              <widget class="QLineEdit" name="txtBackgd"/>
             </item>
             <item row="0" column="2">
-             <widget class="QLabel" name="labelCustomizedInputBackgroundUnit">
+             <widget class="QLabel" name="lblCustomizedInputBackgroundUnit">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="0" column="3">
-             <widget class="QLabel" name="labelCustomizedInputScale">
+             <widget class="QLabel" name="lblCustomizedInputScale">
               <property name="text">
                <string>Scale:</string>
               </property>
@@ -418,7 +418,7 @@
              <widget class="QLineEdit" name="txtScale"/>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="labelCustomizedInputContrast">
+             <widget class="QLabel" name="lblCustomizedInputContrast">
               <property name="text">
                <string>Contrast:</string>
               </property>
@@ -435,7 +435,7 @@
              </widget>
             </item>
             <item row="1" column="3">
-             <widget class="QLabel" name="labelCustomizedInputPorodConstant">
+             <widget class="QLabel" name="lblCustomizedInputPorodConstant">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porod&lt;br/&gt;constant:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -469,14 +469,14 @@
           <item row="0" column="0" colspan="2">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="labelExtrapolationQRange">
+             <widget class="QLabel" name="lblExtrapolationQRange">
               <property name="text">
                <string>Q Range:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="labelExtrapolationQRangeMin">
+             <widget class="QLabel" name="lblExtrapolationQRangeMin">
               <property name="text">
                <string>Min</string>
               </property>
@@ -496,7 +496,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="labelExtrapolarionQRangeMax">
+             <widget class="QLabel" name="lblExtrapolarionQRangeMax">
               <property name="text">
                <string>Max</string>
               </property>
@@ -530,7 +530,7 @@
              <item row="1" column="0" colspan="2">
               <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
-                <widget class="QLabel" name="labelExtrapolationLowQNpts">
+                <widget class="QLabel" name="lblExtrapolationLowQNpts">
                  <property name="text">
                   <string>Npts:</string>
                  </property>
@@ -579,7 +579,7 @@ while extrapolating the low-Q region</string>
              <item row="3" column="0" colspan="2">
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
-                <widget class="QLabel" name="labelExtrapolationPowerLowQ">
+                <widget class="QLabel" name="lblExtrapolationPowerLowQ">
                  <property name="text">
                   <string>Power:</string>
                  </property>
@@ -665,7 +665,7 @@ while extrapolating the low-Q region</string>
              <item row="1" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
-                <widget class="QLabel" name="labelExtrapolationNptsHighQ">
+                <widget class="QLabel" name="lblExtrapolationNptsHighQ">
                  <property name="text">
                   <string>Npts:</string>
                  </property>
@@ -711,7 +711,7 @@ while extrapolating the low-Q region</string>
              <item row="3" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_7">
                <item>
-                <widget class="QLabel" name="labelExtrapolationPowerHighQ">
+                <widget class="QLabel" name="lblExtrapolationPowerHighQ">
                  <property name="text">
                   <string>Power:</string>
                  </property>
@@ -749,9 +749,9 @@ while extrapolating the low-Q region</string>
   <tabstop>txtSpecSurfErr</tabstop>
   <tabstop>txtInvariantTot</tabstop>
   <tabstop>txtInvariantTotErr</tabstop>
-  <tabstop>buttonCalculate</tabstop>
-  <tabstop>buttonStatus</tabstop>
-  <tabstop>buttonHelp</tabstop>
+  <tabstop>cmdCalculate</tabstop>
+  <tabstop>cmdStatus</tabstop>
+  <tabstop>cmdHelp</tabstop>
   <tabstop>txtBackgd</tabstop>
   <tabstop>txtScale</tabstop>
   <tabstop>txtContrast</tabstop>

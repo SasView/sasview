@@ -27,7 +27,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="QLabel" name="labelQStarLowQ">
+       <widget class="QLabel" name="lblQStarLowQ">
         <property name="text">
          <string>Q* from Low-Q</string>
         </property>
@@ -41,7 +41,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="labelQStarFromData">
+       <widget class="QLabel" name="lblQStarFromData">
         <property name="text">
          <string>Q* from Data</string>
         </property>
@@ -55,7 +55,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="labelQStarHighQ">
+       <widget class="QLabel" name="lblQStarHighQ">
         <property name="text">
          <string>Q* from High-Q</string>
         </property>
@@ -78,7 +78,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QLabel" name="labelNumValQStarLowQ">
+       <widget class="QLabel" name="lblNumValQStarLowQ">
         <property name="text">
          <string>Q* from Low-Q</string>
         </property>
@@ -95,7 +95,7 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="labelNumValPlusMinus1">
+       <widget class="QLabel" name="lblNumValPlusMinus1">
         <property name="text">
          <string>+/-</string>
         </property>
@@ -119,7 +119,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="labelNumValQStarData">
+       <widget class="QLabel" name="lblNumValQStarData">
         <property name="text">
          <string>Q* from Data</string>
         </property>
@@ -136,7 +136,7 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLabel" name="labelNumValPlusMinus2">
+       <widget class="QLabel" name="lblNumValPlusMinus2">
         <property name="text">
          <string>+/-</string>
         </property>
@@ -160,7 +160,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="labelQStarHighQ_2">
+       <widget class="QLabel" name="lblQStarHighQ_2">
         <property name="text">
          <string>Q* from High-Q</string>
         </property>
@@ -177,7 +177,7 @@
        </widget>
       </item>
       <item row="2" column="2">
-       <widget class="QLabel" name="labelPlusMinus3">
+       <widget class="QLabel" name="lblPlusMinus3">
         <property name="text">
          <string>+/-</string>
         </property>
@@ -223,7 +223,7 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QDialogButtonBox" name="buttonOK">
+    <widget class="QDialogButtonBox" name="cmdOK">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -237,7 +237,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonOK</sender>
+   <sender>cmdOK</sender>
    <signal>accepted()</signal>
    <receiver>Dialog</receiver>
    <slot>accept()</slot>
@@ -253,7 +253,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonOK</sender>
+   <sender>cmdOK</sender>
    <signal>rejected()</signal>
    <receiver>Dialog</receiver>
    <slot>reject()</slot>

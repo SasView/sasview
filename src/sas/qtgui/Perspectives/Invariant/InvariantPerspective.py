@@ -129,7 +129,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.setupMapper()
 
         # Default enablement
-        self.buttonCalculate.setEnabled(False)
+        self.cmdCalculate.setEnabled(False)
 
         # validator: double
         self.txtExtrapolQMin.setValidator(GuiUtils.DoubleValidator())
@@ -169,7 +169,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def enabling(self):
         """ """
-        self.buttonStatus.setEnabled(True)
+        self.cmdStatus.setEnabled(True)
 
     def setClosable(self, value: bool=True):
         """ Allow outsiders close this widget """
@@ -232,8 +232,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             extrapolation = "low"
 
         # modify the Calculate button to indicate background process
-        self.buttonCalculate.setText("Calculating...")
-        self.buttonCalculate.setEnabled(False)
+        self.cmdCalculate.setText("Calculating...")
+        self.cmdCalculate.setEnabled(False)
 
         # Send the calculations to separate thread.
         d = threads.deferToThread(self.calculateThread, extrapolation)
@@ -255,8 +255,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def allow_calculation(self):
         # Set the calculate button to available
-        self.buttonCalculate.setEnabled(True)
-        self.buttonCalculate.setText("Calculate")
+        self.cmdCalculate.setEnabled(True)
+        self.cmdCalculate.setText("Calculate")
 
     def plotResult(self, model): # TODO: Pythonic name, typing
         """ Plot result of calculation """
@@ -430,10 +430,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR, surface_error)
 
         # Enable the status button
-        self.buttonStatus.setEnabled(True)
+        self.cmdStatus.setEnabled(True)
         # Early exit if calculations failed
         if calculation_failed:
-            self.buttonStatus.setEnabled(False)
+            self.cmdStatus.setEnabled(False)
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
 
@@ -522,7 +522,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """
         self.detailsDialog.setModel(self.model)
         self.detailsDialog.showDialog()
-        self.buttonStatus.setEnabled(False)
+        self.cmdStatus.setEnabled(False)
 
     def onHelp(self):
         """ Display help when clicking on Help button """
@@ -531,9 +531,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def setupSlots(self):
         """ """
-        self.buttonCalculate.clicked.connect(self.calculateInvariant)
-        self.buttonStatus.clicked.connect(self.onStatus)
-        self.buttonHelp.clicked.connect(self.onHelp)
+        self.cmdCalculate.clicked.connect(self.calculateInvariant)
+        self.cmdStatus.clicked.connect(self.onStatus)
+        self.cmdHelp.clicked.connect(self.onHelp)
 
         self.chkLowQ.stateChanged.connect(self.stateChanged)
         self.chkLowQ.stateChanged.connect(self.checkQExtrapolatedData)
@@ -605,7 +605,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         Validators of number of points for extrapolation.
         Error if it is larger than the distribution length
         """
-        self.buttonCalculate.setEnabled(False)
+        self.cmdCalculate.setEnabled(False)
         try:
             int_value = int(self.sender().text())
         except ValueError:
@@ -716,7 +716,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if calculate:
             self.allow_calculation()
         else:
-            self.buttonCalculate.setEnabled(False)
+            self.cmdCalculate.setEnabled(False)
 
     def updateFromGui(self):
         """ Update model when new user inputs """
@@ -747,7 +747,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         except ValueError:
             # empty field, just skip
             self.sender().setStyleSheet(BG_RED)
-            self.buttonCalculate.setEnabled(False)
+            self.cmdCalculate.setEnabled(False)
 
     def lowGuinierAndPowerToggle(self, toggle):
         """
@@ -964,8 +964,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Pass an empty dictionary to set all inputs to their default values
         self.updateFromParameters({})
         # Disable buttons to return to base state
-        self.buttonCalculate.setEnabled(False)
-        self.buttonStatus.setEnabled(False)
+        self.cmdCalculate.setEnabled(False)
+        self.cmdStatus.setEnabled(False)
 
     def updateGuiFromFile(self, data=None):
         """
@@ -1007,7 +1007,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         # Calculate and add to GUI: volume fraction, invariant total,
         # and specific surface if porod checked
-        if self.buttonCalculate.isEnabled():
+        if self.cmdCalculate.isEnabled():
             self.calculateInvariant()
 
     def serializeAll(self):
