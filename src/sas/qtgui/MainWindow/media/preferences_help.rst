@@ -39,7 +39,7 @@ can still be accessed in the data explorer under the data set the fit was perfor
 are completed. The plots can still be accessed in the data explorer under the data set the fit was performed on. *persistent*
 
 **Show toolbar on all new plots**: When selected, all new plots will open a toolbar on the bottom. The toolbar comes
-from Matplotlib. Note: The toolbar can be enabled and disabled in each individual plot by opening the contect menuw with
+from Matplotlib. Note: The toolbar can be enabled and disabled in each individual plot by opening the context menu with
 a right click and selecting 'Toggle Navigation Menu'
 
 .. _Display_Preferences:
