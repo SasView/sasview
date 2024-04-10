@@ -128,8 +128,8 @@ class FunctionViewer(QtWidgets.QWidget):
         # Magnetism controls
 
         self.sld_magnetism_option = SLDMagnetismOption()
-        self.sld_magnetism_option.sldOption.clicked.connect(self.onDisplayTypeSelected)
-        self.sld_magnetism_option.magnetismOption.clicked.connect(self.onDisplayTypeSelected)
+        self.sld_magnetism_option.rbSldOption.clicked.connect(self.onDisplayTypeSelected)
+        self.sld_magnetism_option.rbMagnetismOption.clicked.connect(self.onDisplayTypeSelected)
 
         self.mag_theta_slider = LabelledSlider("θ", -180, 180, 0)
         self.mag_theta_slider.valueChanged.connect(self.onMagThetaChanged)
@@ -234,7 +234,7 @@ class FunctionViewer(QtWidgets.QWidget):
 
         if self.sld_magnetism_option.magnetismOption.isChecked():
             print("Magnetic view selected")
-        if self.sld_magnetism_option.sldOption.isChecked():
+        if self.sld_magnetism_option.rbSldOption.isChecked():
             print("SLD view selected")
 
     # def onThetaChanged(self):

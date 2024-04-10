@@ -18,9 +18,9 @@ class PlaneButtons(QtWidgets.QWidget, Ui_PlaneSelection):
 
         self.setAngles = set_angles_function
 
-        self.selectXY.clicked.connect(lambda: self.setAngles(*z_angles))
-        self.selectYZ.clicked.connect(lambda: self.setAngles(*x_angles))
-        self.selectXZ.clicked.connect(lambda: self.setAngles(*y_angles))
+        self.cmdSelectXY.clicked.connect(lambda: self.setAngles(*z_angles))
+        self.cmdSelectYZ.clicked.connect(lambda: self.setAngles(*x_angles))
+        self.cmdSelectXZ.clicked.connect(lambda: self.setAngles(*y_angles))
 
 
 
@@ -33,7 +33,7 @@ class AxisButtons(QtWidgets.QWidget, Ui_AxisSelection):
 
         self.setAngles = set_angles_function
 
-        self.selectX.clicked.connect(lambda: self.setAngles(*x_angles))
-        self.selectY.clicked.connect(lambda: self.setAngles(*y_angles))
-        self.selectZ.clicked.connect(lambda: self.setAngles(*z_angles))
+        self.cmdSelectX.clicked.connect(lambda: self.setAngles(*x_angles))
+        self.cmdSelectY.clicked.connect(lambda: self.setAngles(*y_angles))
+        self.cmdSelectZ.clicked.connect(lambda: self.setAngles(*z_angles))
 

@@ -120,26 +120,26 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         self.topLayout.addWidget(self.angularSamplingMethodSelector, 0, 1)
 
-        self.structureFactorCombo.addItem("None") # TODO: Structure Factor Options
+        self.cbStructureFactor.addItem("None") # TODO: Structure Factor Options
 
 
         #
         # Calculation Tab
         #
-        self.methodComboOptions = ["Grid", "Random"]
-        for option in self.methodComboOptions:
-            self.methodCombo.addItem(option)
+        self.cbSampleMethodOptions = ["Grid", "Random"]
+        for option in self.cbSampleMethodOptions:
+            self.cbSampleMethod.addItem(option)
 
         # Spatial sampling changed
-        self.nSamplePoints.valueChanged.connect(self.onTimeEstimateParametersChanged)
+        self.spinBoxNSamplePoints.valueChanged.connect(self.onTimeEstimateParametersChanged)
 
         # Q sampling changed
-        # self.useLogQ.clicked.connect(self.updateQSampling)
-        # self.qMinBox.textChanged.connect(self.updateQSampling)
-        # self.qMaxBox.textChanged.connect(self.updateQSampling)
-        # self.qSamplesBox.valueChanged.connect(self.updateQSampling)
+        # self.cbUseLogQ.clicked.connect(self.updateQSampling)
+        # self.txtQMin.textChanged.connect(self.updateQSampling)
+        # self.txtQMin.textChanged.connect(self.updateQSampling)
+        # self.spinBoxQSamples.valueChanged.connect(self.updateQSampling)
 
-        self.qSamplesBox.valueChanged.connect(self.onTimeEstimateParametersChanged)
+        self.spinBoxQSamples.valueChanged.connect(self.onTimeEstimateParametersChanged)
 
         #
         # Output Tabs
@@ -173,8 +173,8 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         self.magnetism_coordinate_mapping: Optional[np.ndarray] = None
 
     def onRadiusChanged(self):
-        if self.radiusFromParticleTab.isChecked():
-            self.sampleRadius.setValue(self.functionViewer.radius_control.radius())
+        if self.cbRadiusFromParticleTab.isChecked():
+            self.doubleSpinSampleRadius.setValue(self.functionViewer.radius_control.radius())
 
     def onTimeEstimateParametersChanged(self):
         """ Called when the number of samples changes """
@@ -190,9 +190,9 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         if self.last_calculation_time is not None:
             time_per_sample = self.last_calculation_time / self.last_calculation_n_r
 
-            est_time = time_per_sample * int(self.nSamplePoints.value()) * int(self.qSamplesBox.value())
+            est_time = time_per_sample * int(self.spinBoxNSamplePoints.value()) * int(self.spinBoxQSamples.value())
 
-            self.timeEstimateLabel.setText(f"Estimated Time: {format_time_estimate(est_time)}")
+            self.lblTimeEstimate.setText(f"Estimated Time: {format_time_estimate(est_time)}")
 
     def onLoad(self):
         print("Load clicked")
@@ -254,21 +254,21 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         return self.angularSamplingMethodSelector.generate_sampler()
 
     def qSampling(self) -> QSample:
-        q_min = float(self.qMinBox.text()) # TODO: Use better box
-        q_max = float(self.qMaxBox.text())
-        n_q = int(self.qSamplesBox.value())
-        is_log = bool(self.useLogQ.isChecked())
+        q_min = float(self.txtQMin.text()) # TODO: Use better box
+        q_max = float(self.txtQMin.text())
+        n_q = int(self.spinBoxQSamples.value())
+        is_log = bool(self.cbUseLogQ.isChecked())
 
         return QSample(q_min, q_max, n_q, is_log)
 
     def spatialSampling(self) -> SpatialDistribution:
         """ Calculate the spatial sampling object based on current gui settings"""
-        sample_type = self.methodCombo.currentIndex()
+        sample_type = self.cbSampleMethod.currentIndex()
 
         # All the methods need the radius, number of points, etc
-        radius = float(self.sampleRadius.value())
-        n_points = int(self.nSamplePoints.value())
-        seed = int(self.randomSeed.text()) if self.fixRandomSeed.isChecked() else None
+        radius = float(self.doubleSpinSampleRadius.value())
+        n_points = int(self.spinBoxNSamplePoints.value())
+        seed = int(self.txtRandomSeed.text()) if self.cbFixRandomSeed.isChecked() else None
 
         if sample_type == 0:
             return GridSampling(radius=radius, desired_points=n_points)
@@ -310,7 +310,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         return np.array([0,0,1])
 
     def currentSeed(self):
-        return self.randomSeed
+        return self.txtRandomSeed
 
     def scatteringCalculation(self) -> ScatteringCalculation:
         """ Get the ScatteringCalculation object that represents the calculation that
@@ -322,7 +322,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         parameter_definition = self.parametersForCalculation()
         polarisation_vector = self.polarisationVector()
         seed = self.currentSeed()
-        bounding_surface_check = self.continuityCheck.isChecked()
+        bounding_surface_check = self.cbContinuityCheck.isChecked()
 
         return ScatteringCalculation(
             q_sampling=q_sampling,
@@ -393,10 +393,10 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
     def qSampling(self) -> QSample:
         """ Calculate the q sampling object based on current gui settings"""
-        is_log = self.useLogQ.isEnabled() and self.useLogQ.isChecked() # Only when it's an option
-        min_q = float(self.qMinBox.text())
-        max_q = float(self.qMaxBox.text())
-        n_samples = int(self.qSamplesBox.value())
+        is_log = self.cbUseLogQ.isEnabled() and self.cbUseLogQ.isChecked() # Only when it's an option
+        min_q = float(self.txtQMin.text())
+        max_q = float(self.txtQMin.text())
+        n_samples = int(self.spinBoxQSamples.value())
 
         return QSample(min_q, max_q, n_samples, is_log)
 

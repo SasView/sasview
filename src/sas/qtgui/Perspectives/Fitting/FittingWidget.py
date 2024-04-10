@@ -170,8 +170,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.labelAngstromLetterUp.setStyleSheet(new_font)
-        self.labelAngstromLetterDown.setStyleSheet(new_font)
+        self.lblAngstromLetterUp.setStyleSheet(new_font)
+        self.lblAngstromLetterDown.setStyleSheet(new_font)
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
@@ -363,9 +363,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.boldFont.setBold(True)
 
         # Set data label
-        self.labelFilenameLeft.setFont(self.boldFont)
-        self.labelFilenameLeft.setText("No data loaded")
-        self.labelFilenameRight.setText("")
+        self.lblFilenameLeft.setFont(self.boldFont)
+        self.lblFilenameLeft.setText("No data loaded")
+        self.lblFilenameRight.setText("")
 
         # Magnetic angles explained in one picture
         self.magneticAnglesWidget = QtWidgets.QWidget()
@@ -485,11 +485,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Enable/disable various UI elements based on data loaded
         """
         # Tag along functionality
-        self.labelFilenameLeft.setText("Data loaded from: ")
+        self.lblFilenameLeft.setText("Data loaded from: ")
         if self.logic.data.name:
-            self.labelFilenameRight.setText(self.logic.data.name)
+            self.lblFilenameRight.setText(self.logic.data.name)
         else:
-            self.labelFilenameRight.setText(self.logic.data.filename)
+            self.lblFilenameRight.setText(self.logic.data.filename)
         self.updateQRange()
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
@@ -498,11 +498,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
         # Combo box or label for file name"
         if self.is_batch_fitting:
-            self.labelFilenameRight.setVisible(False)
+            self.lblFilenameRight.setVisible(False)
             for dataitem in self.all_data:
                 name = GuiUtils.dataFromItem(dataitem).name
-                self.self.cmdHelp.addItem(name)
-            self.self.cmdHelp.setVisible(True)
+                self.cmdHelp.addItem(name)
+            self.cmdHelp.setVisible(True)
             self.chkChainFit.setEnabled(True)
             self.chkChainFit.setVisible(True)
             # This panel is not designed to view individual fits, so disable plotting
@@ -520,19 +520,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def disableModelCombo(self):
         """ Disable the combobox """
         self.cbModel.setEnabled(False)
-        self.labelModel.setEnabled(False)
+        self.lblModel.setEnabled(False)
         self.enabled_cbmodel = False
 
     def enableModelCombo(self):
         """ Enable the combobox """
         self.cbModel.setEnabled(True)
-        self.labelModel.setEnabled(True)
+        self.lblModel.setEnabled(True)
         self.enabled_cbmodel = True
 
     def disableStructureCombo(self):
         """ Disable the combobox """
         self.cbStructureFactor.setEnabled(False)
-        self.labelStructure.setEnabled(False)
+        self.lblStructure.setEnabled(False)
         self.enabled_sfmodel = False
 
     def enableBackgroundParameter(self, set_value: Optional[float] = None):
@@ -554,7 +554,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def enableStructureCombo(self):
         """ Enable the combobox """
         self.cbStructureFactor.setEnabled(True)
-        self.labelStructure.setEnabled(True)
+        self.lblStructure.setEnabled(True)
         self.enabled_sfmodel = True
 
     def togglePoly(self, isChecked):
@@ -604,7 +604,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Set initial control enablement
         """
-        self.self.cmdHelp.setVisible(False)
+        self.cmdHelp.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
         self.chkPolydispersity.setEnabled(False)
@@ -618,7 +618,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Tabs
         self.tabOverviewFitting.setTabEnabled(TAB_POLY, False)
         self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, False)
-        self.labelChiSquaredValue.setText("---")
+        self.lblChiSquaredValue.setText("---")
         # Smearing tab
         self.smearing_widget.updateData(self.data)
         # Line edits in the option tab
@@ -632,7 +632,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
         self.cbCategory.currentIndexChanged.connect(self.onSelectCategory)
         self.cbModel.currentIndexChanged.connect(self.onSelectModel)
-        self.cmdHelp.currentIndexChanged.connect(self.onSelectBatchFilename)
+        self.cbFileNames.currentIndexChanged.connect(self.onSelectBatchFilename)
         # Checkboxes
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
@@ -1613,21 +1613,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Updates the fitting widget format when SESANS data is loaded.
         """
         # update the units in the 'Fitting details' box of the Model tab on the Fit Panel
-        self.labelAngstromLetterUp.setText("Å")
-        self.labelAngstromLetterDown.setText("Å")
+        self.lblAngstromLetterUp.setText("Å")
+        self.lblAngstromLetterDown.setText("Å")
         # disable the background parameter and set at 0 for sesans
         self.disableBackgroundParameter(set_value=0.0)
         # update options defaults and settings for SESANS data
         self.options_widget.updateQRange(1, 100000, self.options_widget.NPTS_DEFAULT)
         # update the units in the 'Fitting details' box of the Fit Options tab on the Fit Panel
-        self.options_widget.labelAngstromInvMinRange.setText("Å")
-        self.options_widget.labelAngstromInvMaxRange.setText("Å")
+        self.options_widget.lblAngstromInvMinRange.setText("Å")
+        self.options_widget.lblAngstromInvMaxRange.setText("Å")
         # update the smearing drop down box to indicate a Hankel Transform is being used instead of resolution
         self.smearing_widget.onIndexChange(1)
         # update the Weighting box of the Fit Options tab on the Fit Panel
-        self.options_widget.radioButtonWeightingUsedIData.setText("Use dP Data")
-        self.options_widget.radioButtonWeightingUseAbsSqrtIData.setText("Use |sqrt(P Data)|")
-        self.options_widget.radioButtonWeightingUseAbsIData.setText("Use |P Data|")
+        self.options_widget.rbWeightingUsedIData.setText("Use dP Data")
+        self.options_widget.rbWeightingUseAbsSqrtIData.setText("Use |sqrt(P Data)|")
+        self.options_widget.rbWeightingUseAbsIData.setText("Use |P Data|")
 
     def replaceConstraintName(self, old_name, new_name=""):
         """
@@ -2131,7 +2131,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
-        self.labelChiSquaredValue.setText(chi2_repr)
+        self.lblChiSquaredValue.setText(chi2_repr)
 
 
     def prepareFitters(self, fitter=None, fit_id=0, weight_increase=1):
@@ -2459,7 +2459,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # update display
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
-        self.labelSmearingValue.setText(smearing)
+        self.lblSmearingValue.setText(smearing)
         self.calculateQGridForModel()
 
     def onKey(self, event):
@@ -2521,8 +2521,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
             self.options_widget.state()
         # set Q range labels on the main tab
-        self.labelMinRangeValue.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-        self.labelMaxRangeValue.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+        self.lblMinRangeValue.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+        self.lblMaxRangeValue.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
         self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
@@ -2659,8 +2659,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.data_is_loaded:
             self.q_range_min, self.q_range_max, self.npts = self.logic.computeDataRange()
         # set Q range labels on the main tab
-        self.labelMinRangeValue.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-        self.labelMaxRangeValue.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+        self.lblMinRangeValue.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+        self.lblMaxRangeValue.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
 
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
@@ -3383,7 +3383,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data, weights)
             # Update the control
             chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
-            self.labelChiSquaredValue.setText(chi2_repr)
+            self.lblChiSquaredValue.setText(chi2_repr)
         self.fitResults = False
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data, weights)

@@ -67,7 +67,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._model_item = QtGui.QStandardItem()
 
         self.detailsDialog = DetailsDialog(self)
-        self.detailsDialog.buttonOK.clicked.connect(self.enabling)
+        self.detailsDialog.cmdOK.clicked.connect(self.enabling)
 
         self._low_extrapolate = False
         self._low_guinier = True

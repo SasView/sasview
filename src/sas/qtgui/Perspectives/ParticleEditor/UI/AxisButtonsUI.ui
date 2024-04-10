@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>100</width>
-    <height>19</height>
+    <width>102</width>
+    <height>24</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QPushButton" name="selectX">
+    <widget class="QPushButton" name="cmdSelectX">
      <property name="minimumSize">
       <size>
        <width>30</width>
@@ -40,7 +40,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="selectY">
+    <widget class="QPushButton" name="cmdSelectY">
      <property name="minimumSize">
       <size>
        <width>30</width>
@@ -53,7 +53,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="selectZ">
+    <widget class="QPushButton" name="cmdSelectZ">
      <property name="minimumSize">
       <size>
        <width>30</width>

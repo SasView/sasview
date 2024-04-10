@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>460</width>
-    <height>20</height>
+    <height>24</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,14 +27,14 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QPushButton" name="loadButton">
+    <widget class="QPushButton" name="cmdLoad">
      <property name="text">
       <string>Load</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="saveButton">
+    <widget class="QPushButton" name="cmdSave">
      <property name="text">
       <string>Save</string>
      </property>
@@ -54,7 +54,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QPushButton" name="buildButton">
+    <widget class="QPushButton" name="cmdBuild">
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Build the current code&lt;/p&gt;&lt;p&gt;Shortcut: shift-Enter&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -64,7 +64,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="scatterButton">
+    <widget class="QPushButton" name="cmdScatter">
      <property name="text">
       <string>Scatter</string>
      </property>

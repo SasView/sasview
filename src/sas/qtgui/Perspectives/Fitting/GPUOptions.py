@@ -59,8 +59,8 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")
 
-        self.cmdTest.clicked.connect(self.cmdTestClicked)
-        self.cmdHelp.clicked.connect(self.cmdHelpClicked)
+        self.cmdTest.clicked.connect(self.testButtonClicked)
+        self.cmdHelp.clicked.connect(self.helpButtonClicked)
         self.testingDoneSignal.connect(self.testCompleted)
         self.testingFailedSignal.connect(self.testFailed)
 

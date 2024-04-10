@@ -40,7 +40,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="labelRadius">
+    <widget class="QLabel" name="lblRadius">
      <property name="text">
       <string>Radius</string>
      </property>
@@ -60,7 +60,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="labelRadiusUnit">
+    <widget class="QLabel" name="lblRadiusUnit">
      <property name="text">
       <string>Å</string>
      </property>
