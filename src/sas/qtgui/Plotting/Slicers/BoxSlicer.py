@@ -905,7 +905,6 @@ class BoxInteractorX(BoxInteractor):
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color, direction="X")
         self.base = base
-        super()._post_data()
 
     def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
