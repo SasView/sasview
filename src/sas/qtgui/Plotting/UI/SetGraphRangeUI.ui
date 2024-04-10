@@ -30,7 +30,7 @@
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="labelXmin">
+      <widget class="QLabel" name="lblXmin">
        <property name="text">
         <string>X min</string>
        </property>
@@ -50,7 +50,7 @@
       <widget class="QLineEdit" name="txtXmax"/>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="labelYmin">
+      <widget class="QLabel" name="lblYmin">
        <property name="text">
         <string>Y min</string>
        </property>
@@ -60,7 +60,7 @@
       <widget class="QLineEdit" name="txtYmin"/>
      </item>
      <item row="1" column="2">
-      <widget class="QLabel" name="labelYmax">
+      <widget class="QLabel" name="lblYmax">
        <property name="text">
         <string>Y max</string>
        </property>

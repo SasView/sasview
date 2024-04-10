@@ -232,7 +232,7 @@ class FunctionViewer(QtWidgets.QWidget):
     def onDisplayTypeSelected(self):
         """ Switch between SLD and magnetism view """
 
-        if self.sld_magnetism_option.magnetismOption.isChecked():
+        if self.sld_magnetism_option.rbMagnetismOption.isChecked():
             print("Magnetic view selected")
         if self.sld_magnetism_option.rbSldOption.isChecked():
             print("SLD view selected")

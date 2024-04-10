@@ -25,7 +25,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
    <item row="0" column="0">
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="lblPerformFit">
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Perform fit for &lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;y(x) = ax + b&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -40,21 +40,21 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="1">
-         <widget class="QLabel" name="labelFitRangesMin">
+         <widget class="QLabel" name="lblFitRangesMin">
           <property name="text">
            <string>Min</string>
           </property>
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLabel" name="labelFitRangesMax">
+         <widget class="QLabel" name="lblFitRangesMax">
           <property name="text">
            <string>Max</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="labelFitRange">
+         <widget class="QLabel" name="lblFitRange">
           <property name="text">
            <string>Range (linear scale)</string>
           </property>
@@ -133,7 +133,7 @@
       <item row="0" column="0">
        <layout class="QFormLayout" name="formLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="labelFitParameter_a">
+         <widget class="QLabel" name="lblFitParameter_a">
           <property name="text">
            <string>a</string>
           </property>
@@ -156,7 +156,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="labelFitParameter_x">
+         <widget class="QLabel" name="lblFitParameter_x">
           <property name="text">
            <string>b</string>
           </property>
@@ -179,7 +179,7 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="labelFitParameter_chi_squared_dof">
+         <widget class="QLabel" name="lblFitParameter_chi_squared_dof">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -206,7 +206,7 @@
       <item row="0" column="1">
        <layout class="QFormLayout" name="formLayout_2">
         <item row="0" column="0">
-         <widget class="QLabel" name="labelPlusMinus1">
+         <widget class="QLabel" name="lblPlusMinus1">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -229,7 +229,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="labelPlusMinus2">
+         <widget class="QLabel" name="lblPlusMinus2">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -268,7 +268,7 @@
       <item row="0" column="0">
        <layout class="QFormLayout" name="formLayout_4">
         <item row="0" column="0">
-         <widget class="QLabel" name="labelGuinier_I_Q_0">
+         <widget class="QLabel" name="lblGuinier_I_Q_0">
           <property name="text">
            <string>I(q=0)</string>
           </property>
@@ -285,7 +285,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="labelGuinier_R_g">
+         <widget class="QLabel" name="lblGuinier_R_g">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g &lt;/span&gt;[Å]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -302,7 +302,7 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="labelGuinier_R_g_times_Q_max">
+         <widget class="QLabel" name="lblGuinier_R_g_times_Q_max">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g&lt;/span&gt;*Q&lt;span style=&quot; vertical-align:sub;&quot;&gt;max&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -319,7 +319,7 @@
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="labelGuinier_R_g_times_Q_min">
+         <widget class="QLabel" name="lblGuinier_R_g_times_Q_min">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g&lt;/span&gt;*Q&lt;span style=&quot; vertical-align:sub;&quot;&gt;min&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -340,7 +340,7 @@
       <item row="0" column="1">
        <layout class="QFormLayout" name="formLayout_3">
         <item row="0" column="0">
-         <widget class="QLabel" name="labelPlusMinus3">
+         <widget class="QLabel" name="lblPlusMinus3">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -363,7 +363,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="labelPlusMinus4">
+         <widget class="QLabel" name="lblPlusMinus4">
           <property name="text">
            <string>+/-</string>
           </property>
@@ -391,7 +391,7 @@
     </widget>
    </item>
    <item row="4" column="0" colspan="2">
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="lblResolutionNotAccounted">
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Resolution is NOT accounted for.&lt;br/&gt;Slit smeared data will give very wrong answers!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -447,10 +447,10 @@
    </item>
   </layout>
   <zorder>guinier_box</zorder>
-  <zorder>label</zorder>
+  <zorder>lblPerformFit</zorder>
   <zorder>groupBox_2</zorder>
   <zorder>groupBox</zorder>
-  <zorder>label_2</zorder>
+  <zorder>lblResolutionNotAccounted</zorder>
  </widget>
  <resources/>
  <connections>

@@ -57,14 +57,14 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         if (self.yLabel == "ln(y)" or self.yLabel == "ln(y*x)") and \
                 (self.xLabel == "x^(2)"):
             if self.yLabel == "ln(y*x)":
-                self.label_12.setText('<html><head/><body><p>Rod diameter [Å]</p></body></html>')
+                self.lblGuinier_R_g.setText('<html><head/><body><p>Rod diameter [Å]</p></body></html>')
                 self.rg_yx = True
             self.rg_on = True
             self.guinier_box.setVisible(True)
 
         if (self.xLabel == "x^(4)") and (self.yLabel == "y*x^(4)"):
             self.bg_on = True
-            self.label_3.setText('Background')
+            self.lblFitParameter_a.setText('Background')
 
         self.x_is_log = self.xLabel == "log10(x)"
         self.y_is_log = self.yLabel == "log10(y)"

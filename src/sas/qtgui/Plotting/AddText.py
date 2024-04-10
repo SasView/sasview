@@ -14,8 +14,8 @@ class AddText(QtWidgets.QDialog, Ui_AddText):
 
         self._font = QtGui.QFont()
         self._color = "black"
-        self.btnFont.clicked.connect(self.onFontChange)
-        self.btnColor.clicked.connect(self.onColorChange)
+        self.cmdFont.clicked.connect(self.onFontChange)
+        self.cmdColor.clicked.connect(self.onColorChange)
 
     def text(self):
         return self.textEdit.toPlainText()
