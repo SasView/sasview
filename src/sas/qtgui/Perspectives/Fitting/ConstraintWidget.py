@@ -188,7 +188,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.customContextMenuRequested.connect(self.showModelContextMenu)
 
         # Single Fit is the default, so disable chainfit
-        self.cbChainedFit.setVisible(False)
+        self.chkChainedFit.setVisible(False)
 
         # disabled constraint
         labels = ['Constraint']
@@ -213,8 +213,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdAddConstraints.clicked.connect(self.showMultiConstraint)
-        self.cbChainedFit.toggled.connect(self.onChainFit)
-        self.cbWeight.toggled.connect(self.onWeightModify)
+        self.chkChainedFit.toggled.connect(self.onChainFit)
+        self.chkWeight.toggled.connect(self.onWeightModify)
 
         # QTableWidgets
         self.tblTabList.cellChanged.connect(self.onTabCellEdit)
@@ -271,8 +271,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         source = self.sender().objectName()
         self.currentType = "BatchPage" if source == "rbBatchFits" else "FitPage"
-        self.cbChainedFit.setVisible(source=="rbBatchFits")
-        self.cbWeight.setVisible(source!="rbBatchFits")
+        self.chkChainedFit.setVisible(source=="rbBatchFits")
+        self.chkWeight.setVisible(source!="rbBatchFits")
         self.initializeFitList()
 
     def onSpecialCaseChange(self, index):
@@ -1226,7 +1226,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # chain
         is_chain = parameters['is_chain_fitting'][0] == 'True'
         if isBatch:
-            self.cbChainedFit.setChecked(is_chain)
+            self.chkChainedFit.setChecked(is_chain)
 
     def getReport(self):
         """

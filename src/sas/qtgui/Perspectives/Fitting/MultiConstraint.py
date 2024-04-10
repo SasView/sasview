@@ -53,13 +53,13 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
 
         # Set param text control to the second parameter passed
         if self.input_constraint is None:
-            self.textConstraint.setText(self.params[1])
+            self.txtConstraint.setText(self.params[1])
         else:
-            self.textConstraint.setText(self.function)
+            self.txtConstraint.setText(self.function)
         self.cmdOK.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdSwap.clicked.connect(self.revert)
-        self.textConstraint.editingFinished.connect(self.validateFormula)
+        self.txtConstraint.editingFinished.connect(self.validateFormula)
 
         # Default focus is on OK
         self.cmdOK.setFocus()
@@ -73,9 +73,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         # change fully qualified param name (e.g. M1.sld -> M1.sld_solvent)
         self.model_name = self.model_name.replace(self.params[0], self.params[1])
         # Try to swap parameter names in the line edit
-        current_text = self.textConstraint.text()
+        current_text = self.txtConstraint.text()
         new_text = current_text.replace(self.params[0], self.params[1])
-        self.textConstraint.setText(new_text)
+        self.txtConstraint.setText(new_text)
         # Update labels and tooltips
         self.setupLabels()
         self.setupTooltip()
@@ -96,7 +96,7 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         tooltip = "E.g.\n%s = 2.0 * (%s)\n" %(self.params[0], self.params[1])
         tooltip += "%s = sqrt(%s) + 5"%(self.params[0], self.params[1])
-        self.textConstraint.setToolTip(tooltip)
+        self.txtConstraint.setToolTip(tooltip)
 
     def validateFormula(self):
         """

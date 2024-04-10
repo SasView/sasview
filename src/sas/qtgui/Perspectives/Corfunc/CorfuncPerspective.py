@@ -107,7 +107,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Things to make the corfunc panel behave
         self.horizontalLayout_3.setStretch(0, 0)
         self.horizontalLayout_3.setStretch(1, 1)
-        self.scrollAreaCorfunc.setFixedWidth(600)
+        self.scrollArea.setFixedWidth(600)
         self.adjustSize()
 
         # Connect buttons to slots.

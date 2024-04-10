@@ -45,7 +45,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="editButton">
+      <widget class="QPushButton" name="cmdEdit">
        <property name="minimumSize">
         <size>
          <width>100</width>
@@ -73,7 +73,7 @@
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QWebEngineView" name="webEngineViewer">
+    <widget class="QWebEngineView" name="webEngineViewer" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -88,7 +88,7 @@
   <customwidget>
    <class>QWebEngineView</class>
    <extends>QWidget</extends>
-   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
+   <header location="global">qwebengineview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

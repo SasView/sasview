@@ -21,7 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_3">
    <item>
-    <widget class="QScrollArea" name="scrollAreaCorfunc">
+    <widget class="QScrollArea" name="scrollArea">
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -87,7 +87,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_Input_Left">
+           <layout class="QVBoxLayout" name="verticalLayout_3">
             <property name="sizeConstraint">
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
@@ -95,7 +95,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QGroupBox" name="groupBox_1_Input_Left">
+             <widget class="QGroupBox" name="groupBox">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -107,7 +107,7 @@
               </property>
               <layout class="QGridLayout" name="gridLayout_6">
                <item row="4" column="0">
-                <widget class="QFrame" name="frame_Input">
+                <widget class="QFrame" name="frame_5">
                  <layout class="QGridLayout" name="gridLayout_7">
                   <item row="1" column="0">
                    <widget class="QLabel" name="lblTangentMethod">
@@ -160,7 +160,7 @@
                    </widget>
                   </item>
                   <item row="0" column="1">
-                   <widget class="QCheckBox" name="checkboxFitBackground">
+                   <widget class="QCheckBox" name="chkFitBackground">
                     <property name="text">
                      <string>Fit Background</string>
                     </property>
@@ -436,7 +436,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_2_Extrapolation_Parameters">
+             <widget class="QGroupBox" name="groupBox_4">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -448,7 +448,7 @@
               </property>
               <layout class="QVBoxLayout" name="backgroundLayout">
                <item>
-                <layout class="QGridLayout" name="gridLayout_Extrapolation_Parameters_1">
+                <layout class="QGridLayout" name="gridLayout_4">
                  <item row="0" column="1">
                   <widget class="QLineEdit" name="txtBackground">
                    <property name="sizePolicy">
@@ -482,9 +482,9 @@
                 </layout>
                </item>
                <item>
-                <layout class="QGridLayout" name="gridLayout_Extrapolation_Parameters_2">
+                <layout class="QGridLayout" name="gridLayout_2">
                  <item row="5" column="0" colspan="2">
-                  <layout class="QGridLayout" name="gridLayout_Extrapolation_Parameters_bottom">
+                  <layout class="QGridLayout" name="gridLayout_5">
                    <property name="bottomMargin">
                     <number>0</number>
                    </property>
@@ -578,7 +578,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_3_Lamellar_Parameters">
+             <widget class="QGroupBox" name="groupBox_3">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -590,7 +590,7 @@
               </property>
               <layout class="QGridLayout" name="gridLayout_3">
                <item row="1" column="0">
-                <layout class="QGridLayout" name="gridLayout_Lamellar_Parameters">
+                <layout class="QGridLayout" name="gridLayout_8">
                  <property name="sizeConstraint">
                   <enum>QLayout::SetDefaultConstraint</enum>
                  </property>
@@ -937,7 +937,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_4_Export">
+             <widget class="QGroupBox" name="groupBox_2">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -1004,7 +1004,7 @@
              </spacer>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_5_bottom">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
                <spacer name="horizontalSpacer">
                 <property name="orientation">
@@ -1109,7 +1109,7 @@
   <tabstop>txtLowerQMax</tabstop>
   <tabstop>txtUpperQMin</tabstop>
   <tabstop>txtUpperQMax</tabstop>
-  <tabstop>checkboxFitBackground</tabstop>
+  <tabstop>chkFitBackground</tabstop>
   <tabstop>chkFitGuinier</tabstop>
   <tabstop>chkFitPorod</tabstop>
   <tabstop>rbTangentInflection</tabstop>
@@ -1135,13 +1135,13 @@
   <tabstop>cmdExportTransformed</tabstop>
   <tabstop>cmdHelp</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>scrollAreaCorfunc</tabstop>
+  <tabstop>scrollArea</tabstop>
   <tabstop>txtFilename</tabstop>
  </tabstops>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

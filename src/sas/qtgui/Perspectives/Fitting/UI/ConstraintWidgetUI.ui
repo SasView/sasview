@@ -40,14 +40,14 @@
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QCheckBox" name="cbWeight">
+         <widget class="QCheckBox" name="chkWeight">
           <property name="text">
            <string>Modify weighting</string>
           </property>
          </widget>
         </item>
         <item row="0" column="3">
-         <widget class="QCheckBox" name="cbChainedFit">
+         <widget class="QCheckBox" name="chkChainedFit">
           <property name="text">
            <string>Chained fit</string>
           </property>
@@ -214,8 +214,8 @@
  <tabstops>
   <tabstop>rbSingleFits</tabstop>
   <tabstop>rbBatchFits</tabstop>
-  <tabstop>cbWeight</tabstop>
-  <tabstop>cbChainedFit</tabstop>
+  <tabstop>chkWeight</tabstop>
+  <tabstop>chkChainedFit</tabstop>
   <tabstop>cbSpecialCases</tabstop>
   <tabstop>cmdAddConstraints</tabstop>
   <tabstop>tblConstraints</tabstop>

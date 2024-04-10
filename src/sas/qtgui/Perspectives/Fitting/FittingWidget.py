@@ -467,7 +467,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Delegates for custom editing and display
         self.lstPolarisation_Magnetic_Scattering.setItemDelegate(MagnetismViewDelegate(self))
         # Initial status of the ordering tab - invisible
-        self.tabOverviewFitting.removeTab(TAB_ORDERING)
+        self.tabFitting.removeTab(TAB_ORDERING)
 
     def initializeCategoryCombo(self):
         """
@@ -495,14 +495,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
         self.chkMagnetism.setEnabled(False)
-        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
         # Combo box or label for file name"
         if self.is_batch_fitting:
             self.lblFilenameRight.setVisible(False)
             for dataitem in self.all_data:
                 name = GuiUtils.dataFromItem(dataitem).name
-                self.cmdHelp.addItem(name)
-            self.cmdHelp.setVisible(True)
+                self.cbFileNames.addItem(name)
+            self.cbFileNames.setVisible(True)
             self.chkChainFit.setEnabled(True)
             self.chkChainFit.setVisible(True)
             # This panel is not designed to view individual fits, so disable plotting
@@ -559,7 +559,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def togglePoly(self, isChecked):
         """ Enable/disable the polydispersity tab """
-        self.tabOverviewFitting.setTabEnabled(TAB_POLY, isChecked)
+        self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         # Set sasmodel polydispersity to 0 if polydispersity is unchecked, if not use Qmodel values
@@ -570,7 +570,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def toggleMagnetism(self, isChecked):
         """ Enable/disable the magnetism tab """
-        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
 
@@ -579,9 +579,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.is_chain_fitting = isChecked
         # show/hide the ordering tab
         if isChecked:
-            self.tabOverviewFitting.insertTab(TAB_ORDERING, self.tabOrder, "Order")
+            self.tabFitting.insertTab(TAB_ORDERING, self.tabOrder, "Order")
         else:
-            self.tabOverviewFitting.removeTab(TAB_ORDERING)
+            self.tabFitting.removeTab(TAB_ORDERING)
 
     def toggle2D(self, isChecked):
         """ Enable/disable the controls dependent on 1D/2D data instance """
@@ -604,7 +604,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Set initial control enablement
         """
-        self.cmdHelp.setVisible(False)
+        self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
         self.chkPolydispersity.setEnabled(False)
@@ -616,9 +616,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.chkChainFit.setEnabled(False)
         self.chkChainFit.setVisible(False)
         # Tabs
-        self.tabOverviewFitting.setTabEnabled(TAB_POLY, False)
-        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, False)
-        self.lblChiSquaredValue.setText("---")
+        self.tabFitting.setTabEnabled(TAB_POLY, False)
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
+        self.lblChi2Value.setText("---")
         # Smearing tab
         self.smearing_widget.updateData(self.data)
         # Line edits in the option tab
@@ -710,7 +710,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         When clicked on white space: model description
         """
         # See which model we're dealing with by looking at the tab id
-        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
+        current_list = self.tabToList[self.tabFitting.currentIndex()]
         rows = [s.row() for s in current_list.selectionModel().selectedRows()
                 if self.isCheckable(s.row())]
 
@@ -729,8 +729,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         num_rows = len(rows)
         if num_rows < 1:
             return menu
-        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
+        current_list = self.tabToList[self.tabFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
         # Select for fitting
         param_string = "parameter " if num_rows == 1 else "parameters "
         to_string = "to its current value" if num_rows == 1 else "to their current values"
@@ -815,7 +815,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         constraint = Constraint()
-        c_text = mc_widget.textConstraint.text()
+        c_text = mc_widget.txtConstraint.text()
 
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
@@ -1030,7 +1030,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Adds a constraint on a single parameter.
         """
-        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
         min_col = self.lstModelParameters.itemDelegate().param_min
         max_col = self.lstModelParameters.itemDelegate().param_max
@@ -1066,8 +1066,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Edit constraints for selected parameters.
         """
-        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
+        current_list = self.tabToList[self.tabFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
 
         params_list = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
@@ -1079,12 +1079,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if any of the parameters are polydisperse
         if not np.any([FittingUtilities.isParamPolydisperse(p, self.model_parameters, is2D=self.is2D) for p in params_list]):
             # no parameters are pd - reset the text to not show the warning
-            mc_widget.labelWarning.setText("")
+            mc_widget.lblWarning.setText("")
         if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
 
         constraint = Constraint()
-        c_text = mc_widget.textConstraint.text()
+        c_text = mc_widget.txtConstraint.text()
 
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
@@ -1113,8 +1113,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Delete constraints from selected parameters.
         """
-        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
+        current_list = self.tabToList[self.tabFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
         params = [s.data() for s in current_list.selectionModel().selectedRows()
                    if self.isCheckable(s.row(), model_key=model_key)]
         for param in params:
@@ -1263,7 +1263,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameter is chosen for fitting
         """
         status = QtCore.Qt.Checked
-        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
         item = model.itemFromIndex(self.lstModelParameters.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
@@ -1273,7 +1273,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Selected parameters are removed for fitting
         """
         status = QtCore.Qt.Unchecked
-        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
         item = model.itemFromIndex(self.lstModelParameters.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
@@ -1489,7 +1489,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.chkMagnetism.setEnabled(self.canHaveMagnetism())
         self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
         self._previous_model_index = self.cbModel.currentIndex()
 
         # Reset parameters to fit
@@ -1509,7 +1509,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # disable polydispersity if the model does not support it
         has_poly = self._poly_model.rowCount() != 0
         self.chkPolydispersity.setEnabled(has_poly)
-        self.tabOverviewFitting.setTabEnabled(TAB_POLY, has_poly)
+        self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
 
         # set focus so it doesn't move up
         self.cbModel.setFocus()
@@ -1584,8 +1584,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         React to parameter selection
         """
-        current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
-        model_key = self.tabToKey[self.tabOverviewFitting.currentIndex()]
+        current_list = self.tabToList[self.tabFitting.currentIndex()]
+        model_key = self.tabToKey[self.tabFitting.currentIndex()]
 
         rows = current_list.selectionModel().selectedRows()
         # Clean previous messages
@@ -1675,7 +1675,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Enable magnetism checkbox for selected models
         self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.tabOverviewFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
 
         # Update column widths
         for column, width in self.lstParamHeaderSizes.items():
@@ -1882,7 +1882,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def getHelpLocation(self, tree_base) -> Path:
         # Actual file will depend on the current tab
-        tab_id = self.tabOverviewFitting.currentIndex()
+        tab_id = self.tabFitting.currentIndex()
         tree_location = tree_base / "user" / "qtgui" / "Perspectives" / "Fitting"
 
         match tab_id:
@@ -2131,7 +2131,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
-        self.lblChiSquaredValue.setText(chi2_repr)
+        self.lblChi2ValueValue.setText(chi2_repr)
 
 
     def prepareFitters(self, fitter=None, fit_id=0, weight_increase=1):
@@ -3383,7 +3383,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data, weights)
             # Update the control
             chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
-            self.lblChiSquaredValue.setText(chi2_repr)
+            self.lblChi2ValueValue.setText(chi2_repr)
         self.fitResults = False
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data, weights)
@@ -4339,7 +4339,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             Create list of main parameters based on _model_model
             """
             param_name = str(self._model_model.item(row, 0).text())
-            current_list = self.tabToList[self.tabOverviewFitting.currentIndex()]
+            current_list = self.tabToList[self.tabFitting.currentIndex()]
             model = self._model_model
             if model.item(row, 0) is None:
                 return

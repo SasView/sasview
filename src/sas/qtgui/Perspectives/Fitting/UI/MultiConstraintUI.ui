@@ -113,7 +113,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="textConstraint"/>
+      <widget class="QLineEdit" name="txtConstraint"/>
      </item>
     </layout>
    </item>

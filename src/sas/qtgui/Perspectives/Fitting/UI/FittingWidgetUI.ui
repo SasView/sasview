@@ -72,7 +72,7 @@
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QTabWidget" name="tabOverviewFitting">
+    <widget class="QTabWidget" name="tabFitting">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -322,14 +322,14 @@
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_FittingError">
             <item>
-             <widget class="QLabel" name="lblChiSquaredLetter">
+             <widget class="QLabel" name="lblChi2Letter">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;χ&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="lblChiSquaredValue">
+             <widget class="QLabel" name="lblChi2Value">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;0.01625&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -513,7 +513,7 @@ angles</string>
  </widget>
  <tabstops>
   <tabstop>cbFileNames</tabstop>
-  <tabstop>tabOverviewFitting</tabstop>
+  <tabstop>tabFitting</tabstop>
   <tabstop>cbCategory</tabstop>
   <tabstop>cbModel</tabstop>
   <tabstop>cbStructureFactor</tabstop>

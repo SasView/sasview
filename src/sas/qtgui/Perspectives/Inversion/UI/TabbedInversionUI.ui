@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>518</width>
+    <width>446</width>
     <height>480</height>
    </rect>
   </property>
@@ -139,7 +139,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="txtNoOfTermsInput">
+           <widget class="QLineEdit" name="noOfTermsInput">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -165,7 +165,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="lblParametersRegConstant">
+           <widget class="QLabel" name="lblParamatersRegConstant">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -184,7 +184,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="txtRegularizationConstantInput">
+           <widget class="QLineEdit" name="regularizationConstantInput">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -223,7 +223,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="txtMaxDistanceInput">
+           <widget class="QLineEdit" name="maxDistanceInput">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -264,13 +264,13 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
          </layout>
-         <zorder>txtNoOfTermsInput</zorder>
+         <zorder>noOfTermsInput</zorder>
          <zorder>cmdNoOfTermsSuggestion</zorder>
-         <zorder>txtRegularizationConstantInput</zorder>
+         <zorder>regularizationConstantInput</zorder>
          <zorder>cmdRegConstantSuggestion</zorder>
-         <zorder>txtMaxDistanceInput</zorder>
+         <zorder>maxDistanceInput</zorder>
          <zorder>cmdExplorer</zorder>
-         <zorder>lblParametersRegConstant</zorder>
+         <zorder>lblParamatersRegConstant</zorder>
          <zorder>lblParametersNumberOfTerms</zorder>
          <zorder>lblParametersMaxDistance</zorder>
         </widget>
@@ -307,71 +307,28 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="2" column="4">
-           <widget class="QLineEdit" name="posFractionValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3">
-           <widget class="QLabel" name="lblPOneMinSigmaFraction">
+          <item row="0" column="2">
+           <widget class="QLabel" name="lblOutputsR_g_Unit">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; vertical-align:sub;&quot;&gt;1-σ&lt;/span&gt; fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>Å</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="4">
-           <widget class="QLineEdit" name="sigmaPosFractionValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="backgroundValue">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::ClickFocus</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
+          <item row="0" column="3">
+           <widget class="QLabel" name="labelSpacer">
+            <property name="text">
+             <string/>
             </property>
            </widget>
           </item>
           <item row="0" column="4">
+           <widget class="QLabel" name="lblOutputsChi2DivDof">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
            <widget class="QLineEdit" name="chiDofValue">
             <property name="enabled">
              <bool>true</bool>
@@ -387,6 +344,13 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="readOnly">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblOutputsI_Q_0">
+            <property name="text">
+             <string>I(Q=0)</string>
             </property>
            </widget>
           </item>
@@ -416,42 +380,14 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="lblOutputsCalcTimeUnit">
-            <property name="text">
-             <string>secs</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QLabel" name="lblOuputsPFraction">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt; Fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblOutputsI_Q_0">
-            <property name="text">
-             <string>I(Q=0)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="lblOutputsCalcTime">
-            <property name="text">
-             <string>Calc. Time</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLabel" name="lblOutputsChiSquaredDivDOF">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="4">
+           <widget class="QLabel" name="lblOutputsOscillations">
+            <property name="text">
+             <string>Oscillations</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
            <widget class="QLineEdit" name="oscillationValue">
             <property name="enabled">
              <bool>true</bool>
@@ -477,6 +413,25 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="backgroundValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="2">
            <widget class="QLabel" name="lblOutputsBackgroundUnit">
             <property name="text">
@@ -484,22 +439,74 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lblOutputsR_g_Unit">
+          <item row="2" column="4">
+           <widget class="QLabel" name="lblOutputsPFraction">
             <property name="text">
-             <string>Å</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt; Fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
-           <widget class="QLabel" name="lblOutputsOscillations">
+          <item row="2" column="5">
+           <widget class="QLineEdit" name="posFractionValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="lblOutputsBalcTime">
             <property name="text">
-             <string>Oscillations</string>
+             <string>Calc. Time</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
            <widget class="QLineEdit" name="computationTimeValue">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLabel" name="lblOutputsCalcTimeUnit">
+            <property name="text">
+             <string>secs</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="4">
+           <widget class="QLabel" name="lblPOneMinSigmaFraction">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; vertical-align:sub;&quot;&gt;1-σ&lt;/span&gt; fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="5">
+           <widget class="QLineEdit" name="sigmaPosFractionValue">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -803,11 +810,11 @@ p, li { white-space: pre-wrap; }
  <tabstops>
   <tabstop>dataList</tabstop>
   <tabstop>cmdRemove</tabstop>
-  <tabstop>txtNoOfTermsInput</tabstop>
+  <tabstop>noOfTermsInput</tabstop>
   <tabstop>cmdNoOfTermsSuggestion</tabstop>
-  <tabstop>txtRegularizationConstantInput</tabstop>
+  <tabstop>regularizationConstantInput</tabstop>
   <tabstop>cmdRegConstantSuggestion</tabstop>
-  <tabstop>txtMaxDistanceInput</tabstop>
+  <tabstop>maxDistanceInput</tabstop>
   <tabstop>cmdExplorer</tabstop>
   <tabstop>rgValue</tabstop>
   <tabstop>chiDofValue</tabstop>
