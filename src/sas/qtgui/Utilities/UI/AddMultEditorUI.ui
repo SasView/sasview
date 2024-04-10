@@ -80,14 +80,14 @@
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="labelModel1">
+         <widget class="QLabel" name="lblModel1">
           <property name="text">
            <string>model_1</string>
           </property>
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLabel" name="labelModel2">
+         <widget class="QLabel" name="lblModel2">
           <property name="text">
            <string>model_2</string>
           </property>

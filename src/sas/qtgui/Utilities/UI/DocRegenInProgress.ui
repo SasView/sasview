@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
-    <widget class="QLabel" name="labelDocumentationGenerationInProcess">
+    <widget class="QLabel" name="lbDocumentationGenerationInProcess">
      <property name="text">
       <string>::Documentation Generation In Progress::</string>
      </property>
@@ -25,7 +25,7 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="QLabel" name="labelMayTakeAFewMinutes">
+    <widget class="QLabel" name="lblMayTakeAFewMinutes">
      <property name="text">
       <string>This process may take a few minutes.</string>
      </property>

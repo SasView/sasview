@@ -102,9 +102,9 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.cmdClose.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
 
-        self.btnQFile.clicked.connect(self.onQFileOpen)
-        self.btnIFile.clicked.connect(self.onIFileOpen)
-        self.btnOutputFile.clicked.connect(self.onNewFile)
+        self.cmdQFile.clicked.connect(self.onQFileOpen)
+        self.cmdIFile.clicked.connect(self.onIFileOpen)
+        self.cmdOutputFile.clicked.connect(self.onNewFile)
 
         self.txtOutputFile.editingFinished.connect(self.onNewFileEdited)
 
@@ -351,9 +351,9 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         """
         # ASCII 2D allows for one file only
         self.is1D = not '2D' in self.cbInputFormat.currentText()
-        self.label_7.setVisible(self.is1D)
+        self.lblQAxisData.setVisible(self.is1D)
         self.txtQFile.setVisible(self.is1D)
-        self.btnQFile.setVisible(self.is1D)
+        self.cmdQFile.setVisible(self.is1D)
         self.isBSL = 'BSL' in self.cbInputFormat.currentText()
 
         # clear out filename fields

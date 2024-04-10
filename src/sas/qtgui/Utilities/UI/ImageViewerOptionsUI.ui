@@ -25,14 +25,14 @@
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
-           <widget class="QLabel" name="labelXVal">
+           <widget class="QLabel" name="lblXVal">
             <property name="text">
              <string>x values from pixel # to:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLabel" name="labelXmin">
+           <widget class="QLabel" name="lblXmin">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;X&lt;span style=&quot; vertical-align:sub;&quot;&gt;min&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -42,14 +42,14 @@
            <widget class="QLineEdit" name="txtXmin"/>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelYVal">
+           <widget class="QLabel" name="lblYVal">
             <property name="text">
              <string>y values from pixel # to:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="labelYmin">
+           <widget class="QLabel" name="lblYmin">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Y&lt;span style=&quot; vertical-align:sub;&quot;&gt;min&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -59,14 +59,14 @@
            <widget class="QLineEdit" name="txtYmin"/>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="labelZValRange">
+           <widget class="QLabel" name="lblZValRange">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;z value range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLabel" name="labelFromZero">
+           <widget class="QLabel" name="lblFromZero">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;From 0 to:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -80,7 +80,7 @@
         <item row="0" column="1">
          <layout class="QFormLayout" name="formLayout_2">
           <item row="0" column="0">
-           <widget class="QLabel" name="labelXmax">
+           <widget class="QLabel" name="lblXmax">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;X&lt;span style=&quot; vertical-align:sub;&quot;&gt;max&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -90,7 +90,7 @@
            <widget class="QLineEdit" name="txtXmax"/>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelYmax">
+           <widget class="QLabel" name="lblYmax">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Y&lt;span style=&quot; vertical-align:sub;&quot;&gt;max&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>

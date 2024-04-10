@@ -58,7 +58,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="closeButton">
+      <widget class="QPushButton" name="cmdClose">
        <property name="minimumSize">
         <size>
          <width>100</width>
@@ -73,7 +73,7 @@
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QWebEngineView" name="webEngineViewer" native="true">
+    <widget class="QWebEngineView" name="webEngineViewer">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -88,7 +88,7 @@
   <customwidget>
    <class>QWebEngineView</class>
    <extends>QWidget</extends>
-   <header location="global">qwebengineview.h</header>
+   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

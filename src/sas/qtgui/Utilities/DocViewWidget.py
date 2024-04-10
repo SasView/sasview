@@ -48,8 +48,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
     def initializeSignals(self):
         """Initialize all external signals that will trigger events for the window."""
-        self.editButton.clicked.connect(self.onEdit)
-        self.closeButton.clicked.connect(self.onClose)
+        self.cmdEdit.clicked.connect(self.onEdit)
+        self.cmdClose.clicked.connect(self.onClose)
         self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
 
     def onEdit(self):
@@ -106,7 +106,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         if not MAIN_DOC_SRC.exists() and not HELP_DIRECTORY_LOCATION.exists():
             # The user docs were never built - disable edit button and do not attempt doc regen
-            self.editButton.setEnabled(False)
+            self.cmdEdit.setEnabled(False)
             self.load404()
             return
 

@@ -35,7 +35,7 @@
      <item row="1" column="0">
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QLabel" name="labelFirstFrame">
+        <widget class="QLabel" name="lblFirstFrame">
          <property name="text">
           <string>First frame:</string>
          </property>
@@ -45,7 +45,7 @@
         <widget class="QLineEdit" name="txtFirstFrame"/>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="labelLastFrame">
+        <widget class="QLabel" name="lblLastFrame">
          <property name="text">
           <string>Last frame:</string>
          </property>
@@ -55,7 +55,7 @@
         <widget class="QLineEdit" name="txtLastFrame"/>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="labelIncrement">
+        <widget class="QLabel" name="lblIncrement">
          <property name="text">
           <string>Increment:</string>
          </property>
