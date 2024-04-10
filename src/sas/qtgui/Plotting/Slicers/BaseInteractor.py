@@ -1,3 +1,5 @@
+import logging
+
 interface_color = 'black'
 disable_color = 'gray'
 active_color = 'red'
@@ -139,7 +141,8 @@ class BaseInteractor(object):
             self.clickx, self.clicky = ev.xdata, ev.ydata
             self.move(ev.xdata, ev.ydata, ev)
         else:
-            self.restore(ev)
+            logging.warning("the handle cannot be moved outside the data")
+            #self.restore(ev)
         return True
 
     def onKey(self, ev):

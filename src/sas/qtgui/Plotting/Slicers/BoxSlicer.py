@@ -35,14 +35,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         # determine x y  values
         if self.direction == "Y":
             self.half_width = 0.1 * (self.data.xmax - self.data.xmin) / 2
-            self.half_height = 0.9 * (self.data.ymax - self.data.ymin) / 2
-            # when reach qmax reset the graph
-            self.qmax = max(numpy.fabs(self.data.ymax), numpy.fabs(self.data.ymin))
+            self.half_height = 1.0 * (self.data.ymax - self.data.ymin) / 2
         elif self.direction == "X":
             self.half_width = 1.0 * (self.data.xmax - self.data.xmin) / 2
             self.half_height = 0.1 * (self.data.ymax - self.data.ymin) / 2
-            # when reach qmax reset the graph
-            self.qmax = max(numpy.fabs(self.data.xmax), numpy.fabs(self.data.xmin))
         else:
             msg = "post data:no Box Average direction was supplied"
             raise ValueError(msg)
@@ -76,7 +72,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                                      half_width=self.half_width,
                                                      center_x=self.center_x,
                                                      center_y=self.center_y)
-        self.horizontal_lines.qmax = self.qmax
 
         self.vertical_lines = VerticalDoubleLine(self,
                                                  self.axes,
@@ -86,7 +81,6 @@ class BoxInteractor(BaseInteractor, SlicerModel):
                                                  half_width=self.half_width,
                                                  center_x=self.center_x,
                                                  center_y=self.center_y)
-        self.vertical_lines.qmax = self.qmax
 
         # PointInteractor determines the center of the box
         self.center = PointInteractor(self,
@@ -179,10 +173,10 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         if self.direction is None:
             self.direction = direction
 
-        x_min = self.horizontal_lines.x2
-        x_max = self.horizontal_lines.x1
-        y_min = self.vertical_lines.y2
-        y_max = self.vertical_lines.y1
+        x_min = self.vertical_lines.x2
+        x_max = self.vertical_lines.x1
+        y_min = self.horizontal_lines.y2
+        y_max = self.horizontal_lines.y1
 
         if nbins is not None:
             self.nbins = nbins
@@ -931,7 +925,6 @@ class BoxInteractorY(BoxInteractor):
     def __init__(self, base, axes, item=None, color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, item=item, color=color, direction="Y")
         self.base = base
-        super()._post_data()
 
     def _post_data(self, new_slab=None, nbins=None, direction=None):
         """
