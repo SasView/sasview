@@ -11,8 +11,8 @@ class RadiusSelection(QtWidgets.QWidget, Ui_RadiusSelection):
         self.setupUi(self)
 
         if text is not None:
-            self.label.setText(text)
+            self.lblRadius.setText(text)
 
 
     def radius(self):
-        return float(self.radiusField.value())
+        return float(self.doubleSpinRadius.value())

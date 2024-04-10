@@ -123,7 +123,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self.setupMapper()
 
         #Hidding calculate all buton
-        self.calculateAllButton.setVisible(False)
+        self.cmdCalculateAll.setVisible(False)
         # Set base window state
         self.setupWindow()
 
@@ -194,29 +194,29 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     def setupLinks(self):
         """Connect the use controls to their appropriate methods"""
         self.dataList.currentIndexChanged.connect(self.displayChange)
-        self.calculateAllButton.clicked.connect(self.startThreadAll)
-        self.calculateThisButton.clicked.connect(self.startThread)
-        self.stopButton.clicked.connect(self.stopCalculation)
-        self.removeButton.clicked.connect(self.removeData)
-        self.helpButton.clicked.connect(self.help)
-        self.estimateBgd.toggled.connect(self.toggleBgd)
-        self.manualBgd.toggled.connect(self.toggleBgd)
-        self.regConstantSuggestionButton.clicked.connect(self.acceptAlpha)
-        self.noOfTermsSuggestionButton.clicked.connect(self.acceptNoTerms)
-        self.explorerButton.clicked.connect(self.openExplorerWindow)
+        self.cmdCalculateAll.clicked.connect(self.startThreadAll)
+        self.cmdCalculateThis.clicked.connect(self.startThread)
+        self.cmdStop.clicked.connect(self.stopCalculation)
+        self.cmdRemove.clicked.connect(self.removeData)
+        self.cmdHelp.clicked.connect(self.help)
+        self.rbEstimateBackground.toggled.connect(self.toggleBgd)
+        self.rbManualBackground.toggled.connect(self.toggleBgd)
+        self.cmdRegConstantSuggestion.clicked.connect(self.acceptAlpha)
+        self.cmdNoOfTermsSuggestion.clicked.connect(self.acceptNoTerms)
+        self.cmdExplorer.clicked.connect(self.openExplorerWindow)
 
-        self.backgroundInput.textChanged.connect(
-            lambda: self.set_background(self.backgroundInput.text()))
-        self.regularizationConstantInput.textChanged.connect(
-            lambda: self._calculator.set_alpha(str_to_float(self.regularizationConstantInput.text())))
-        self.maxDistanceInput.textChanged.connect(
-            lambda: self._calculator.set_dmax(str_to_float(self.maxDistanceInput.text())))
+        self.txtBackgroundInput.textChanged.connect(
+            lambda: self.set_background(self.txtBackgroundInput.text()))
+        self.txtRegularizationConstantInput.textChanged.connect(
+            lambda: self._calculator.set_alpha(str_to_float(self.txtRegularizationConstantInput.text())))
+        self.txtMaxDistanceInput.textChanged.connect(
+            lambda: self._calculator.set_dmax(str_to_float(self.txtMaxDistanceInput.text())))
         self.maxQInput.editingFinished.connect(self.check_q_high)
         self.minQInput.editingFinished.connect(self.check_q_low)
-        self.slitHeightInput.textChanged.connect(
-            lambda: self._calculator.set_slit_height(str_to_float(self.slitHeightInput.text())))
-        self.slitWidthInput.textChanged.connect(
-            lambda: self._calculator.set_slit_width(str_to_float(self.slitWidthInput.text())))
+        self.txtSlitHeightInput.textChanged.connect(
+            lambda: self._calculator.set_slit_height(str_to_float(self.txtSlitHeightInput.text())))
+        self.txtSlitWidthInput.textChanged.connect(
+            lambda: self._calculator.set_slit_width(str_to_float(self.txtSlitWidthInput.text())))
 
         self.model.itemChanged.connect(self.model_changed)
         self.estimateNTSignal.connect(self._estimateNTUpdate)
@@ -225,7 +225,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self.estimateSignal.connect(self._estimateUpdate)
         self.calculateSignal.connect(self._calculateUpdate)
 
-        self.maxDistanceInput.textEdited.connect(self.performEstimateDynamic)
+        self.txtMaxDistanceInput.textEdited.connect(self.performEstimateDynamic)
 
     def setupMapper(self):
         # Set up the mapper.
@@ -235,25 +235,25 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         # Filename
         self.mapper.addMapping(self.dataList, WIDGETS.W_FILENAME)
         # Background
-        self.mapper.addMapping(self.backgroundInput, WIDGETS.W_BACKGROUND_INPUT)
-        self.mapper.addMapping(self.estimateBgd, WIDGETS.W_ESTIMATE)
-        self.mapper.addMapping(self.manualBgd, WIDGETS.W_MANUAL_INPUT)
+        self.mapper.addMapping(self.txtBackgroundInput, WIDGETS.W_BACKGROUND_INPUT)
+        self.mapper.addMapping(self.rbEstimateBackground, WIDGETS.W_ESTIMATE)
+        self.mapper.addMapping(self.rbManualBackground, WIDGETS.W_MANUAL_INPUT)
 
         # Qmin/Qmax
         self.mapper.addMapping(self.minQInput, WIDGETS.W_QMIN)
         self.mapper.addMapping(self.maxQInput, WIDGETS.W_QMAX)
 
         # Slit Parameter items
-        self.mapper.addMapping(self.slitWidthInput, WIDGETS.W_SLIT_WIDTH)
-        self.mapper.addMapping(self.slitHeightInput, WIDGETS.W_SLIT_HEIGHT)
+        self.mapper.addMapping(self.txtSlitWidthInput, WIDGETS.W_SLIT_WIDTH)
+        self.mapper.addMapping(self.txtSlitHeightInput, WIDGETS.W_SLIT_HEIGHT)
 
         # Parameter Items
-        self.mapper.addMapping(self.regularizationConstantInput, WIDGETS.W_REGULARIZATION)
-        self.mapper.addMapping(self.regConstantSuggestionButton, WIDGETS.W_REGULARIZATION_SUGGEST)
-        self.mapper.addMapping(self.explorerButton, WIDGETS.W_EXPLORE)
-        self.mapper.addMapping(self.maxDistanceInput, WIDGETS.W_MAX_DIST)
-        self.mapper.addMapping(self.noOfTermsInput, WIDGETS.W_NO_TERMS)
-        self.mapper.addMapping(self.noOfTermsSuggestionButton, WIDGETS.W_NO_TERMS_SUGGEST)
+        self.mapper.addMapping(self.txtRegularizationConstantInput, WIDGETS.W_REGULARIZATION)
+        self.mapper.addMapping(self.cmdRegConstantSuggestion, WIDGETS.W_REGULARIZATION_SUGGEST)
+        self.mapper.addMapping(self.cmdExplorer, WIDGETS.W_EXPLORE)
+        self.mapper.addMapping(self.txtMaxDistanceInput, WIDGETS.W_MAX_DIST)
+        self.mapper.addMapping(self.txtNoOfTermsInput, WIDGETS.W_NO_TERMS)
+        self.mapper.addMapping(self.cmdNoOfTermsSuggestion, WIDGETS.W_NO_TERMS_SUGGEST)
 
         # Output
         self.mapper.addMapping(self.rgValue, WIDGETS.W_RG)
@@ -266,10 +266,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self.mapper.addMapping(self.sigmaPosFractionValue, WIDGETS.W_SIGMA_POS_FRACTION)
 
         # Main Buttons
-        self.mapper.addMapping(self.removeButton, WIDGETS.W_REMOVE)
-        self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
-        self.mapper.addMapping(self.calculateThisButton, WIDGETS.W_CALCULATE_VISIBLE)
-        self.mapper.addMapping(self.helpButton, WIDGETS.W_HELP)
+        self.mapper.addMapping(self.cmdRemove, WIDGETS.W_REMOVE)
+        self.mapper.addMapping(self.cmdCalculateAll, WIDGETS.W_CALCULATE_ALL)
+        self.mapper.addMapping(self.cmdCalculateThis, WIDGETS.W_CALCULATE_VISIBLE)
+        self.mapper.addMapping(self.cmdHelp, WIDGETS.W_HELP)
 
         self.mapper.toFirst()
 
@@ -313,17 +313,17 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
-        self.estimateBgd.setChecked(True)
+        self.rbEstimateBackground.setChecked(True)
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
-        self.noOfTermsInput.setValidator(QtGui.QIntValidator())
-        self.regularizationConstantInput.setValidator(GuiUtils.DoubleValidator())
-        self.maxDistanceInput.setValidator(GuiUtils.DoubleValidator())
+        self.txtNoOfTermsInput.setValidator(QtGui.QIntValidator())
+        self.txtRegularizationConstantInput.setValidator(GuiUtils.DoubleValidator())
+        self.txtMaxDistanceInput.setValidator(GuiUtils.DoubleValidator())
         self.minQInput.setValidator(GuiUtils.DoubleValidator())
         self.maxQInput.setValidator(GuiUtils.DoubleValidator())
-        self.slitHeightInput.setValidator(GuiUtils.DoubleValidator())
-        self.slitWidthInput.setValidator(GuiUtils.DoubleValidator())
+        self.txtSlitHeightInput.setValidator(GuiUtils.DoubleValidator())
+        self.txtSlitWidthInput.setValidator(GuiUtils.DoubleValidator())
 
     ######################################################################
     # Methods for updating GUI
@@ -332,17 +332,17 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         """
         Enable buttons when data is present, else disable them
         """
-        self.calculateAllButton.setEnabled(len(self._dataList) > 1
+        self.cmdCalculateAll.setEnabled(len(self._dataList) > 1
                                            and not self.isBatch
                                            and not self.isCalculating)
-        self.calculateThisButton.setEnabled(self.logic.data_is_loaded
+        self.cmdCalculateThis.setEnabled(self.logic.data_is_loaded
                                             and not self.isBatch
                                             and not self.isCalculating)
-        self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
-        self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
-        self.stopButton.setVisible(self.isCalculating)
-        self.regConstantSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
-        self.noOfTermsSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.cmdRemove.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.cmdExplorer.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.cmdStop.setVisible(self.isCalculating)
+        self.cmdRegConstantSuggestion.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.cmdNoOfTermsSuggestion.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
 
     def populateDataComboBox(self, name, data_ref):
         """
@@ -355,12 +355,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     def acceptNoTerms(self):
         """Send estimated no of terms to input"""
         self.model.setItem(WIDGETS.W_NO_TERMS, QtGui.QStandardItem(
-            self.noOfTermsSuggestionButton.text()))
+            self.cmdNoOfTermsSuggestion.text()))
 
     def acceptAlpha(self):
         """Send estimated alpha to input"""
         self.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem(
-            self.regConstantSuggestionButton.text()))
+            self.cmdRegConstantSuggestion.text()))
 
     def displayChange(self, data_index=0):
         """Switch to another item in the data list"""
@@ -377,7 +377,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self._calculator.set_x(self.logic.data.x)
         self._calculator.set_y(self.logic.data.y)
         self._calculator.set_err(self.logic.data.dy)
-        self.set_background(self.backgroundInput.text())
+        self.set_background(self.txtBackgroundInput.text())
 
     def set_background(self, value):
         self._calculator.background = float(value)
@@ -413,13 +413,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         Toggle the background between manual and estimated
         """
         self.model.blockSignals(True)
-        value = 1 if self.estimateBgd.isChecked() else 0
+        value = 1 if self.rbEstimateBackground.isChecked() else 0
         itemt = QtGui.QStandardItem(str(value == 1).lower())
         self.model.setItem(WIDGETS.W_ESTIMATE, itemt)
         itemt = QtGui.QStandardItem(str(value == 0).lower())
         self.model.setItem(WIDGETS.W_MANUAL_INPUT, itemt)
         self._calculator.set_est_bck(value)
-        self.backgroundInput.setEnabled(self._calculator.est_bck == 0)
+        self.txtBackgroundInput.setEnabled(self._calculator.est_bck == 0)
         self.model.blockSignals(False)
 
     def openExplorerWindow(self):
@@ -582,11 +582,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
     def getNFunc(self):
         """Get the n_func value from the GUI object"""
         try:
-            nfunc = int(self.noOfTermsInput.text())
+            nfunc = int(self.txtNoOfTermsInput.text())
         except ValueError:
             logger.error("Incorrect number of terms specified: %s"
-                          %self.noOfTermsInput.text())
-            self.noOfTermsInput.setText(str(NUMBER_OF_TERMS))
+                          %self.txtNoOfTermsInput.text())
+            self.txtNoOfTermsInput.setText(str(NUMBER_OF_TERMS))
             nfunc = NUMBER_OF_TERMS
         return nfunc
 
@@ -610,8 +610,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         alpha = self._calculator.suggested_alpha
         self.model.setItem(WIDGETS.W_MAX_DIST,
                             QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
-        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
-        self.noOfTermsSuggestionButton.setText(
+        self.cmdRegConstantSuggestion.setText("{:-3.2g}".format(alpha))
+        self.cmdNoOfTermsSuggestion.setText(
              "{:n}".format(self.nTermsSuggested))
 
         self.enableButtons()
@@ -632,7 +632,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
                            QtGui.QStandardItem("{:.4g}".format(elapsed)))
         self.model.setItem(WIDGETS.W_MAX_DIST,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
-        self.regConstantSuggestionButton.setText("{:.2g}".format(alpha))
+        self.cmdRegConstantSuggestion.setText("{:.2g}".format(alpha))
 
         if isinstance(pr.chi2, np.ndarray):
             self.model.setItem(WIDGETS.W_CHI_SQUARED,
@@ -696,9 +696,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             self._calculator = Invertor()
             self.closeBatchResults()
             self.nTermsSuggested = NUMBER_OF_TERMS
-            self.noOfTermsSuggestionButton.setText("{:n}".format(
+            self.cmdNoOfTermsSuggestion.setText("{:n}".format(
                 self.nTermsSuggested))
-            self.regConstantSuggestionButton.setText("{:-3.2g}".format(
+            self.cmdRegConstantSuggestion.setText("{:-3.2g}".format(
                 REGULARIZATION))
             # self.updateGuiValues()
             self.setupModel()
@@ -780,7 +780,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         self.isCalculating = True
         self.isBatch = True
         self.batchComplete = []
-        self.calculateAllButton.setText("Calculating...")
+        self.cmdCalculateAll.setText("Calculating...")
         self.enableButtons()
         self.batchResultsWindow = BatchInversionOutputPanel(
             parent=self, output_data=self.batchResults)
@@ -801,7 +801,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             # If no data sets left, end batch calculation
             self.isCalculating = False
             self.batchComplete = []
-            self.calculateAllButton.setText("Calculate All")
+            self.cmdCalculateAll.setText("Calculate All")
             self.showBatchOutput()
             self.enableButtons()
 

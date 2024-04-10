@@ -57,15 +57,15 @@ class DensityPanel(QtWidgets.QDialog):
         self.setFixedSize(self.minimumSizeHint())
 
         # set validators
-        #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
+        #self.ui.txtEditMolecularFormula.setValidator(FormulaValidator(self.ui.txtEditMolecularFormula))
 
         rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.ui.editMolarVolume.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMolarVolume))
-        self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
+        self.ui.txtEditMolarVolume.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.txtEditMolarVolume))
+        self.ui.txtEditMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.txtEditMassDensity))
 
         # signals
-        self.ui.editMolarVolume.textEdited.connect(functools.partial(self.setMode, MODES.VOLUME_TO_DENSITY))
-        self.ui.editMassDensity.textEdited.connect(functools.partial(self.setMode, MODES.DENSITY_TO_VOLUME))
+        self.ui.txtEditMolarVolume.textEdited.connect(functools.partial(self.setMode, MODES.VOLUME_TO_DENSITY))
+        self.ui.txtEditMassDensity.textEdited.connect(functools.partial(self.setMode, MODES.DENSITY_TO_VOLUME))
 
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
@@ -79,9 +79,9 @@ class DensityPanel(QtWidgets.QDialog):
 
         self.model.dataChanged.connect(self.dataChanged)
 
-        self.ui.editMolarVolume.textEdited.connect(self.volumeChanged)
-        self.ui.editMassDensity.textEdited.connect(self.massChanged)
-        self.ui.editMolecularFormula.textEdited.connect(self.formulaChanged)
+        self.ui.txtEditMolarVolume.textEdited.connect(self.volumeChanged)
+        self.ui.txtEditMassDensity.textEdited.connect(self.massChanged)
+        self.ui.txtEditMolecularFormula.textEdited.connect(self.formulaChanged)
 
         self.modelReset()
 
@@ -90,10 +90,10 @@ class DensityPanel(QtWidgets.QDialog):
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
 
-        self.mapper.addMapping(self.ui.editMolecularFormula, MODEL.MOLECULAR_FORMULA)
-        self.mapper.addMapping(self.ui.editMolarMass       , MODEL.MOLAR_MASS)
-        self.mapper.addMapping(self.ui.editMolarVolume     , MODEL.MOLAR_VOLUME)
-        self.mapper.addMapping(self.ui.editMassDensity     , MODEL.MASS_DENSITY)
+        self.mapper.addMapping(self.ui.txtEditMolecularFormula, MODEL.MOLECULAR_FORMULA)
+        self.mapper.addMapping(self.ui.txtEditMolarMass       , MODEL.MOLAR_MASS)
+        self.mapper.addMapping(self.ui.txtEditMolarVolume     , MODEL.MOLAR_VOLUME)
+        self.mapper.addMapping(self.ui.txtEditMassDensity     , MODEL.MASS_DENSITY)
 
         self.mapper.toFirst()
 

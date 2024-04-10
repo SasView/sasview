@@ -45,7 +45,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="editButton">
+      <widget class="QPushButton" name="cmdEdit">
        <property name="minimumSize">
         <size>
          <width>100</width>
@@ -58,7 +58,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="closeButton">
+      <widget class="QPushButton" name="cmdClose">
        <property name="minimumSize">
         <size>
          <width>100</width>

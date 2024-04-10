@@ -45,7 +45,7 @@ class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
             self.cbShape.setCurrentIndex(marker_index)
         if self._legend:
             self.txtLegend.setText(self._legend)
-        self.sbSize.setValue(self._markersize)
+        self.spinBoxSize.setValue(self._markersize)
 
         # Connect slots
         self.cmdCustom.clicked.connect(self.onColorChange)
@@ -61,7 +61,7 @@ class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
 
     def markersize(self):
         ''' return marker size (int) '''
-        return self.sbSize.value()
+        return self.spinBoxSize.value()
 
     def color(self):
         ''' return current color: index in COLORS or a hex string '''

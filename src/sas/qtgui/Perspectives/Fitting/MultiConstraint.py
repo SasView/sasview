@@ -58,7 +58,7 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
             self.txtConstraint.setText(self.function)
         self.cmdOK.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
-        self.cmdRevert.clicked.connect(self.revert)
+        self.cmdSwap.clicked.connect(self.revert)
         self.txtConstraint.editingFinished.connect(self.validateFormula)
 
         # Default focus is on OK
@@ -86,9 +86,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         l1 = str(self.params[0])
         l2 = str(self.params[1])
-        self.txtParam1.setText(l1)
-        self.txtParam1_2.setText(l1)
-        self.txtParam2.setText(l2)
+        self.lbl_Parameter1_SwapBox.setText(l1)
+        self.lbl_Parameter1_TextBox.setText(l1)
+        self.lbl_Parameter2_SwapBox.setText(l2)
 
     def setupTooltip(self):
         """

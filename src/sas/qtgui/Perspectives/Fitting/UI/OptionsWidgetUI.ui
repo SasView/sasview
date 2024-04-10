@@ -15,15 +15,15 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_23">
    <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox_4">
+    <widget class="QGroupBox" name="groupBoxFittingRange">
      <property name="title">
       <string>Fitting range</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_11">
       <item row="0" column="0" rowspan="2">
-       <layout class="QGridLayout" name="gridLayout_13">
+       <layout class="QGridLayout" name="gridLayoutMinRangeMaxRange">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_9">
+         <widget class="QLabel" name="lblMinRange">
           <property name="text">
            <string>Min range</string>
           </property>
@@ -43,14 +43,14 @@
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLabel" name="label_13">
+         <widget class="QLabel" name="lblAngstromInvMinRange">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_14">
+         <widget class="QLabel" name="lblMaxRange">
           <property name="text">
            <string>Max range</string>
           </property>
@@ -70,7 +70,7 @@
          </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QLabel" name="label_15">
+         <widget class="QLabel" name="lblAngstromInvMaxRange">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -79,7 +79,7 @@
        </layout>
       </item>
       <item row="0" column="1" rowspan="2">
-       <spacer name="horizontalSpacer_8">
+       <spacer name="horizontalSpacerFittingRange">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -112,15 +112,15 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox_5">
+    <widget class="QGroupBox" name="groupBoxDataPoints">
      <property name="title">
       <string>Data points</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_14">
       <item row="0" column="0">
-       <layout class="QGridLayout" name="gridLayout_15">
+       <layout class="QGridLayout" name="gridLayoutDataPoints">
         <item row="1" column="2">
-         <spacer name="horizontalSpacer_9">
+         <spacer name="horizontalSpacerDataPoints">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -140,7 +140,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_22">
+         <widget class="QLabel" name="lblNptsFit">
           <property name="text">
            <string>Npts(Fit)</string>
           </property>
@@ -157,7 +157,7 @@
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QCheckBox" name="chkLogData">
+         <widget class="QCheckBox" name="chkLogSpacedPoints">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to use log spaced points.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -170,7 +170,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QLabel" name="label_21">
+         <widget class="QLabel" name="lblNpts">
           <property name="text">
            <string>Npts</string>
           </property>
@@ -188,9 +188,9 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_20">
       <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayoutWeighting">
         <item>
-         <widget class="QRadioButton" name="rbWeighting1">
+         <widget class="QRadioButton" name="rbWeightingNone">
           <property name="text">
            <string>None</string>
           </property>
@@ -200,21 +200,21 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rbWeighting2">
+         <widget class="QRadioButton" name="rbWeightingUsedIData">
           <property name="text">
            <string>Use dI Data</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rbWeighting3">
+         <widget class="QRadioButton" name="rbWeightingUseAbsSqrtIData">
           <property name="text">
            <string>Use |sqrt(I Data)|</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rbWeighting4">
+         <widget class="QRadioButton" name="rbWeightingUseAbsIData">
           <property name="text">
            <string>Use |I Data|</string>
           </property>
@@ -244,12 +244,12 @@
   <tabstop>txtMinRange</tabstop>
   <tabstop>txtMaxRange</tabstop>
   <tabstop>txtNpts</tabstop>
-  <tabstop>chkLogData</tabstop>
+  <tabstop>chkLogSpacedPoints</tabstop>
   <tabstop>txtNptsFit</tabstop>
-  <tabstop>rbWeighting1</tabstop>
-  <tabstop>rbWeighting2</tabstop>
-  <tabstop>rbWeighting3</tabstop>
-  <tabstop>rbWeighting4</tabstop>
+  <tabstop>rbWeightingNone</tabstop>
+  <tabstop>rbWeightingUsedIData</tabstop>
+  <tabstop>rbWeightingUseAbsSqrtIData</tabstop>
+  <tabstop>rbWeightingUseAbsIData</tabstop>
   <tabstop>cmdReset</tabstop>
   <tabstop>cmdMaskEdit</tabstop>
  </tabstops>

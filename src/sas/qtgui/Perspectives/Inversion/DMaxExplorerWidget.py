@@ -76,9 +76,9 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.maxDist.setValidator(GuiUtils.DoubleValidator())
 
     def setupSlots(self):
-        self.closeButton.clicked.connect(self.close)
+        self.cmdClose.clicked.connect(self.close)
         self.model.itemChanged.connect(self.modelChanged)
-        self.dependentVariable.currentIndexChanged.connect(lambda:self.modelChanged(None))
+        self.cbDependentVariable.currentIndexChanged.connect(lambda:self.modelChanged(None))
 
     def setupModel(self):
         self.model.blockSignals(True)
@@ -101,7 +101,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.mapper.addMapping(self.Npts, W.NPTS)
         self.mapper.addMapping(self.minDist, W.DMIN)
         self.mapper.addMapping(self.maxDist, W.DMAX)
-        self.mapper.addMapping(self.dependentVariable, W.VARIABLE)
+        self.mapper.addMapping(self.cbDependentVariable, W.VARIABLE)
 
         self.mapper.toFirst()
 
@@ -157,7 +157,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             msg += "for D_max=%s\n%s" % (str(x), ex)
             logger.error(msg)
 
-        plotter = self.dependentVariable.currentText()
+        plotter = self.cbDependentVariable.currentText()
         x_label = "D_{max}"
         x_unit = "A"
         if plotter == "χ²/dof":

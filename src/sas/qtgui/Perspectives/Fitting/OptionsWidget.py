@@ -59,10 +59,10 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.boxWeighting.setEnabled(False)
         self.cmdMaskEdit.setEnabled(False)
         # Button groups
-        self.weightingGroup.addButton(self.rbWeighting1)
-        self.weightingGroup.addButton(self.rbWeighting2)
-        self.weightingGroup.addButton(self.rbWeighting3)
-        self.weightingGroup.addButton(self.rbWeighting4)
+        self.weightingGroup.addButton(self.rbWeightingNone)
+        self.weightingGroup.addButton(self.rbWeightingUsedIData)
+        self.weightingGroup.addButton(self.rbWeightingUseAbsSqrtIData)
+        self.weightingGroup.addButton(self.rbWeightingUseAbsIData)
 
         # Let only floats in the range edits
         self.txtMinRange.setValidator(GuiUtils.DoubleValidator())
@@ -76,7 +76,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         # Attach slots
         self.cmdReset.clicked.connect(self.onRangeReset)
         self.cmdMaskEdit.clicked.connect(self.onMaskEdit)
-        self.chkLogData.stateChanged.connect(self.toggleLogData)
+        self.chkLogSpacedPoints.stateChanged.connect(self.toggleLogData)
         # Button groups
         self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
@@ -98,8 +98,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.model.blockSignals(False)
 
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.label_13.setStyleSheet(new_font)
-        self.label_15.setStyleSheet(new_font)
+        self.lblAngstromInvMinRange.setStyleSheet(new_font)
+        self.lblAngstromInvMaxRange.setStyleSheet(new_font)
 
     def initModel(self):
         """
@@ -128,7 +128,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.toFirst()
 
     def setLogScale(self, log_scale):
-        self.chkLogData.setChecked(log_scale)
+        self.chkLogSpacedPoints.setChecked(log_scale)
 
     def toggleLogData(self, isChecked):
         """ Toggles between log and linear data sets """
@@ -209,16 +209,16 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.cmdMaskEdit.setEnabled(is2Ddata)
         # Switch off txtNpts related controls
         self.txtNpts.setEnabled(False)
-        self.chkLogData.setEnabled(False)
+        self.chkLogSpacedPoints.setEnabled(False)
         # Weighting controls
         if self.logic.di_flag:
-            self.rbWeighting2.setEnabled(True)
-            self.rbWeighting2.setChecked(True)
-            self.onWeightingChoice(self.rbWeighting2)
+            self.rbWeightingUsedIData.setEnabled(True)
+            self.rbWeightingUsedIData.setChecked(True)
+            self.onWeightingChoice(self.rbWeightingUsedIData)
         else:
-            self.rbWeighting2.setEnabled(False)
-            self.rbWeighting1.setChecked(True)
-            self.onWeightingChoice(self.rbWeighting1)
+            self.rbWeightingUsedIData.setEnabled(False)
+            self.rbWeightingNone.setChecked(True)
+            self.onWeightingChoice(self.rbWeightingNone)
 
     def updateMinQ(self, q_min=None):
         if q_min and (isinstance(q_min, (float, str))):
@@ -257,7 +257,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         q_range_max = float(self.model.item(self.MODEL.index('MAX_RANGE')).text())
         npts = int(self.model.item(self.MODEL.index('NPTS')).text())
         npts_fit = int(self.model.item(self.MODEL.index('NPTS_FIT')).text())
-        log_points = self.chkLogData.isChecked()
+        log_points = self.chkLogSpacedPoints.isChecked()
         return (q_range_min, q_range_max, npts, log_points, self.weighting)
 
     def npts2fit(self, data=None, qmin=None, qmax=None, npts=None):

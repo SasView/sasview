@@ -241,7 +241,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.txtExtension.setEnabled(enabled)
         self.cmdFiles.setEnabled(enabled)
         self.cbFitOptions.setEnabled(enabled)
-        self.label_4.setEnabled(enabled)
+        self.lblAs.setEnabled(enabled)
         self.cbSaveExt.setEnabled(enabled)
 
     def onParamChange(self):

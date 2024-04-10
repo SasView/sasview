@@ -102,13 +102,13 @@ class SldPanel(QtWidgets.QDialog):
 
     def _getOutputs(self):
         return {
-            MODEL.NEUTRON_SLD_REAL: self.ui.editNeutronSldReal,
-            MODEL.NEUTRON_SLD_IMAG: self.ui.editNeutronSldImag,
-            MODEL.XRAY_SLD_REAL: self.ui.editXraySldReal,
-            MODEL.XRAY_SLD_IMAG: self.ui.editXraySldImag,
-            MODEL.NEUTRON_INC_XS: self.ui.editNeutronIncXs,
-            MODEL.NEUTRON_ABS_XS: self.ui.editNeutronAbsXs,
-            MODEL.NEUTRON_LENGTH: self.ui.editNeutronLength
+            MODEL.NEUTRON_SLD_REAL: self.ui.txtEditNeutronSldReal,
+            MODEL.NEUTRON_SLD_IMAG: self.ui.txtEditNeutronSldImag,
+            MODEL.XRAY_SLD_REAL: self.ui.txtEditXraySldReal,
+            MODEL.XRAY_SLD_IMAG: self.ui.txtEditXraySldImag,
+            MODEL.NEUTRON_INC_XS: self.ui.txtEditNeutronIncXs,
+            MODEL.NEUTRON_ABS_XS: self.ui.txtEditNeutronAbsXs,
+            MODEL.NEUTRON_LENGTH: self.ui.txtEditNeutronLength
         }
 
     def setupUi(self):
@@ -117,20 +117,20 @@ class SldPanel(QtWidgets.QDialog):
 
         # set validators
         # TODO: GuiUtils.FormulaValidator() crashes with Qt5 - fix
-        #self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
+        #self.ui.txtEditMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.txtEditMolecularFormula))
 
         # No need for recalculate
-        self.ui.recalculateButton.setVisible(False)
+        self.ui.cmdRecalculate.setVisible(False)
 
         rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
-        self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
-        self.ui.editNeutronWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editNeutronWavelength))
-        self.ui.editXrayWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editXrayWavelength))
+        self.ui.txtEditMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.txtEditMassDensity))
+        self.ui.txtEditNeutronWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.txtEditNeutronWavelength))
+        self.ui.txtEditXrayWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.txtEditXrayWavelength))
 
         # signals
-        self.ui.helpButton.clicked.connect(self.displayHelp)
-        self.ui.closeButton.clicked.connect(self.closePanel)
-        self.ui.recalculateButton.clicked.connect(self.calculateSLD)
+        self.ui.cmdHelp.clicked.connect(self.displayHelp)
+        self.ui.cmdClose.clicked.connect(self.closePanel)
+        self.ui.cmdRecalculate.clicked.connect(self.calculateSLD)
 
     def calculateSLD(self):
         self.recalculateSLD()
@@ -147,10 +147,10 @@ class SldPanel(QtWidgets.QDialog):
 
         #self.model.dataChanged.connect(self.dataChanged)
 
-        self.ui.editMassDensity.textChanged.connect(self.recalculateSLD)
-        self.ui.editMolecularFormula.textChanged.connect(self.recalculateSLD)
-        self.ui.editNeutronWavelength.textChanged.connect(self.recalculateSLD)
-        self.ui.editXrayWavelength.textChanged.connect(self.recalculateSLD)
+        self.ui.txtEditMassDensity.textChanged.connect(self.recalculateSLD)
+        self.ui.txtEditMolecularFormula.textChanged.connect(self.recalculateSLD)
+        self.ui.txtEditNeutronWavelength.textChanged.connect(self.recalculateSLD)
+        self.ui.txtEditXrayWavelength.textChanged.connect(self.recalculateSLD)
 
         self.modelReset()
 
@@ -158,10 +158,10 @@ class SldPanel(QtWidgets.QDialog):
         self.mapper = QtWidgets.QDataWidgetMapper(self)
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
-        self.mapper.addMapping(self.ui.editMolecularFormula , MODEL.MOLECULAR_FORMULA)
-        self.mapper.addMapping(self.ui.editMassDensity      , MODEL.MASS_DENSITY)
-        self.mapper.addMapping(self.ui.editNeutronWavelength, MODEL.NEUTRON_WAVELENGTH)
-        self.mapper.addMapping(self.ui.editXrayWavelength   , MODEL.XRAY_WAVELENGTH)
+        self.mapper.addMapping(self.ui.txtEditMolecularFormula , MODEL.MOLECULAR_FORMULA)
+        self.mapper.addMapping(self.ui.txtEditMassDensity      , MODEL.MASS_DENSITY)
+        self.mapper.addMapping(self.ui.txtEditNeutronWavelength, MODEL.NEUTRON_WAVELENGTH)
+        self.mapper.addMapping(self.ui.txtEditXrayWavelength   , MODEL.XRAY_WAVELENGTH)
 
         for key, edit in self._getOutputs().items():
             self.mapper.addMapping(edit, key)
@@ -179,10 +179,10 @@ class SldPanel(QtWidgets.QDialog):
             self.recalculateSLD()
 
     def recalculateSLD(self):
-        formula = self.ui.editMolecularFormula.text()
-        density = self.ui.editMassDensity.text()
-        neutronWavelength = self.ui.editNeutronWavelength.text()
-        xrayWavelength = self.ui.editXrayWavelength.text()
+        formula = self.ui.txtEditMolecularFormula.text()
+        density = self.ui.txtEditMassDensity.text()
+        neutronWavelength = self.ui.txtEditNeutronWavelength.text()
+        xrayWavelength = self.ui.txtEditXrayWavelength.text()
 
         if not formula or not density:
             return
@@ -199,35 +199,35 @@ class SldPanel(QtWidgets.QDialog):
             self.model.item(MODEL.NEUTRON_ABS_XS).setText(format(results.neutron_abs_xs))
             self.model.item(MODEL.NEUTRON_LENGTH).setText(format(results.neutron_length))
             self.model.item(MODEL.NEUTRON_LENGTH).setEnabled(True)
-            self.ui.editNeutronSldReal.setEnabled(True)
-            self.ui.editNeutronSldImag.setEnabled(True)
-            self.ui.editNeutronIncXs.setEnabled(True)
-            self.ui.editNeutronLength.setEnabled(True)
-            self.ui.editNeutronAbsXs.setEnabled(True)
+            self.ui.txtEditNeutronSldReal.setEnabled(True)
+            self.ui.txtEditNeutronSldImag.setEnabled(True)
+            self.ui.txtEditNeutronIncXs.setEnabled(True)
+            self.ui.txtEditNeutronLength.setEnabled(True)
+            self.ui.txtEditNeutronAbsXs.setEnabled(True)
         else:
             self.model.item(MODEL.NEUTRON_SLD_REAL).setText("")
             self.model.item(MODEL.NEUTRON_SLD_IMAG).setText("")
             self.model.item(MODEL.NEUTRON_INC_XS).setText("")
             self.model.item(MODEL.NEUTRON_ABS_XS).setText("")
             self.model.item(MODEL.NEUTRON_LENGTH).setText("")
-            self.ui.editNeutronSldReal.setEnabled(False)
-            self.ui.editNeutronSldImag.setEnabled(False)
-            self.ui.editNeutronIncXs.setEnabled(False)
-            self.ui.editNeutronLength.setEnabled(False)
-            self.ui.editNeutronAbsXs.setEnabled(False)
+            self.ui.txtEditNeutronSldReal.setEnabled(False)
+            self.ui.txtEditNeutronSldImag.setEnabled(False)
+            self.ui.txtEditNeutronIncXs.setEnabled(False)
+            self.ui.txtEditNeutronLength.setEnabled(False)
+            self.ui.txtEditNeutronAbsXs.setEnabled(False)
 
         if xrayWavelength and float(xrayWavelength) > np.finfo(float).eps:
             results = xraySldAlgorithm(str(formula), float(density), float(xrayWavelength))
 
             self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
             self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))
-            self.ui.editXraySldReal.setEnabled(True)
-            self.ui.editXraySldImag.setEnabled(True)
+            self.ui.txtEditXraySldReal.setEnabled(True)
+            self.ui.txtEditXraySldImag.setEnabled(True)
         else:
             self.model.item(MODEL.XRAY_SLD_REAL).setText("")
             self.model.item(MODEL.XRAY_SLD_IMAG).setText("")
-            self.ui.editXraySldReal.setEnabled(False)
-            self.ui.editXraySldImag.setEnabled(False)
+            self.ui.txtEditXraySldReal.setEnabled(False)
+            self.ui.txtEditXraySldImag.setEnabled(False)
 
     def modelReset(self):
         #self.model.beginResetModel()

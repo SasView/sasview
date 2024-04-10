@@ -69,7 +69,7 @@
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="lblDataFileName">
               <property name="text">
                <string>Data File Name:</string>
               </property>
@@ -86,7 +86,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="removeButton">
+             <widget class="QPushButton" name="cmdRemove">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -126,7 +126,7 @@ p, li { white-space: pre-wrap; }
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_12">
+           <widget class="QLabel" name="lblParametersNumberOfTerms">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -155,7 +155,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QPushButton" name="noOfTermsSuggestionButton">
+           <widget class="QPushButton" name="cmdNoOfTermsSuggestion">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -165,7 +165,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_13">
+           <widget class="QLabel" name="lblParamatersRegConstant">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -200,7 +200,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QPushButton" name="regConstantSuggestionButton">
+           <widget class="QPushButton" name="cmdRegConstantSuggestion">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -210,7 +210,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_14">
+           <widget class="QLabel" name="lblParametersMaxDistance">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -239,7 +239,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QPushButton" name="explorerButton">
+           <widget class="QPushButton" name="cmdExplorer">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -265,14 +265,14 @@ p, li { white-space: pre-wrap; }
           </item>
          </layout>
          <zorder>noOfTermsInput</zorder>
-         <zorder>noOfTermsSuggestionButton</zorder>
+         <zorder>cmdNoOfTermsSuggestion</zorder>
          <zorder>regularizationConstantInput</zorder>
-         <zorder>regConstantSuggestionButton</zorder>
+         <zorder>cmdRegConstantSuggestion</zorder>
          <zorder>maxDistanceInput</zorder>
-         <zorder>explorerButton</zorder>
-         <zorder>label_13</zorder>
-         <zorder>label_12</zorder>
-         <zorder>label_14</zorder>
+         <zorder>cmdExplorer</zorder>
+         <zorder>lblParamatersRegConstant</zorder>
+         <zorder>lblParametersNumberOfTerms</zorder>
+         <zorder>lblParametersMaxDistance</zorder>
         </widget>
        </item>
        <item row="2" column="0">
@@ -282,7 +282,7 @@ p, li { white-space: pre-wrap; }
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_15">
+           <widget class="QLabel" name="lblOutputsR_g">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;R&lt;span style=&quot; vertical-align:sub;&quot;&gt;g&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -308,21 +308,21 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="label_24">
+           <widget class="QLabel" name="lblOutputsR_g_Unit">
             <property name="text">
              <string>Å</string>
             </property>
            </widget>
           </item>
           <item row="0" column="3">
-           <widget class="QLabel" name="label_22">
+           <widget class="QLabel" name="labelSpacer">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
           <item row="0" column="4">
-           <widget class="QLabel" name="label_19">
+           <widget class="QLabel" name="lblOutputsChi2DivDof">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;χ&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;/dof&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -348,7 +348,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_16">
+           <widget class="QLabel" name="lblOutputsI_Q_0">
             <property name="text">
              <string>I(Q=0)</string>
             </property>
@@ -374,14 +374,14 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QLabel" name="label_25">
+           <widget class="QLabel" name="lblOutputsI_Q_0Unit">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
           <item row="1" column="4">
-           <widget class="QLabel" name="label_20">
+           <widget class="QLabel" name="lblOutputsOscillations">
             <property name="text">
              <string>Oscillations</string>
             </property>
@@ -407,7 +407,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_17">
+           <widget class="QLabel" name="lblOutputsBackground">
             <property name="text">
              <string>Background</string>
             </property>
@@ -433,14 +433,14 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QLabel" name="label_26">
+           <widget class="QLabel" name="lblOutputsBackgroundUnit">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
           <item row="2" column="4">
-           <widget class="QLabel" name="label_21">
+           <widget class="QLabel" name="lblOutputsPFraction">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt; Fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -466,7 +466,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_18">
+           <widget class="QLabel" name="lblOutputsBalcTime">
             <property name="text">
              <string>Calc. Time</string>
             </property>
@@ -492,14 +492,14 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="3" column="2">
-           <widget class="QLabel" name="label_27">
+           <widget class="QLabel" name="lblOutputsCalcTimeUnit">
             <property name="text">
              <string>secs</string>
             </property>
            </widget>
           </item>
           <item row="3" column="4">
-           <widget class="QLabel" name="label_29">
+           <widget class="QLabel" name="lblPOneMinSigmaFraction">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;P&lt;span style=&quot; vertical-align:super;&quot;&gt;+&lt;/span&gt;&lt;span style=&quot; vertical-align:sub;&quot;&gt;1-σ&lt;/span&gt; fraction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
@@ -543,14 +543,14 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,1,0,2,2">
             <item>
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="lblOptionsBackgroundLevel">
               <property name="text">
                <string>Background Level:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="backgroundInput">
+             <widget class="QLineEdit" name="txtBackgroundInput">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -560,21 +560,21 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_10">
+             <widget class="QLabel" name="lblOptionsBackgroundLevelUnit">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="estimateBgd">
+             <widget class="QRadioButton" name="rbEstimateBackground">
               <property name="text">
                <string>Estimate</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="manualBgd">
+             <widget class="QRadioButton" name="rbManualBackground">
               <property name="text">
                <string>Manual Input</string>
               </property>
@@ -591,7 +591,7 @@ p, li { white-space: pre-wrap; }
              <item row="0" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
-                <widget class="QLabel" name="label_7">
+                <widget class="QLabel" name="lblTotalQRangeMin">
                  <property name="text">
                   <string>Min:</string>
                  </property>
@@ -611,14 +611,14 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_11">
+                <widget class="QLabel" name="lblTotalQRangeMinUnit">
                  <property name="text">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_8">
+                <widget class="QLabel" name="lblTotalQRangeMax">
                  <property name="text">
                   <string>Max:</string>
                  </property>
@@ -638,7 +638,7 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_9">
+                <widget class="QLabel" name="lblTotalQRangeMaxUnit">
                  <property name="text">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
@@ -658,14 +658,14 @@ p, li { white-space: pre-wrap; }
              <item row="0" column="0">
               <layout class="QHBoxLayout" name="horizontalLayout">
                <item>
-                <widget class="QLabel" name="label_3">
+                <widget class="QLabel" name="lblSlitParametersHeight">
                  <property name="text">
                   <string>Height</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="slitHeightInput">
+                <widget class="QLineEdit" name="txtSlitHeightInput">
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
@@ -678,21 +678,21 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_6">
+                <widget class="QLabel" name="lblSlitParametersHeightUnit">
                  <property name="text">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_4">
+                <widget class="QLabel" name="lblSlitParametersWidth">
                  <property name="text">
                   <string>Width</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="slitWidthInput">
+                <widget class="QLineEdit" name="txtSlitWidthInput">
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
@@ -705,7 +705,7 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_2">
+                <widget class="QLabel" name="lblSlitParametersWidthUnit">
                  <property name="text">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
@@ -742,7 +742,7 @@ p, li { white-space: pre-wrap; }
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
-      <widget class="QPushButton" name="calculateThisButton">
+      <widget class="QPushButton" name="cmdCalculateThis">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -752,7 +752,7 @@ p, li { white-space: pre-wrap; }
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="calculateAllButton">
+      <widget class="QPushButton" name="cmdCalculateAll">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -768,7 +768,7 @@ p, li { white-space: pre-wrap; }
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="stopButton">
+      <widget class="QPushButton" name="cmdStop">
        <property name="text">
         <string>Stop P(r)</string>
        </property>
@@ -791,7 +791,7 @@ p, li { white-space: pre-wrap; }
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="helpButton">
+      <widget class="QPushButton" name="cmdHelp">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -809,13 +809,13 @@ p, li { white-space: pre-wrap; }
  </widget>
  <tabstops>
   <tabstop>dataList</tabstop>
-  <tabstop>removeButton</tabstop>
+  <tabstop>cmdRemove</tabstop>
   <tabstop>noOfTermsInput</tabstop>
-  <tabstop>noOfTermsSuggestionButton</tabstop>
+  <tabstop>cmdNoOfTermsSuggestion</tabstop>
   <tabstop>regularizationConstantInput</tabstop>
-  <tabstop>regConstantSuggestionButton</tabstop>
+  <tabstop>cmdRegConstantSuggestion</tabstop>
   <tabstop>maxDistanceInput</tabstop>
-  <tabstop>explorerButton</tabstop>
+  <tabstop>cmdExplorer</tabstop>
   <tabstop>rgValue</tabstop>
   <tabstop>chiDofValue</tabstop>
   <tabstop>iQ0Value</tabstop>
@@ -824,18 +824,18 @@ p, li { white-space: pre-wrap; }
   <tabstop>posFractionValue</tabstop>
   <tabstop>computationTimeValue</tabstop>
   <tabstop>sigmaPosFractionValue</tabstop>
-  <tabstop>calculateThisButton</tabstop>
-  <tabstop>calculateAllButton</tabstop>
-  <tabstop>stopButton</tabstop>
-  <tabstop>helpButton</tabstop>
+  <tabstop>cmdCalculateThis</tabstop>
+  <tabstop>cmdCalculateAll</tabstop>
+  <tabstop>cmdStop</tabstop>
+  <tabstop>cmdHelp</tabstop>
   <tabstop>PrTabWidget</tabstop>
-  <tabstop>backgroundInput</tabstop>
-  <tabstop>estimateBgd</tabstop>
-  <tabstop>manualBgd</tabstop>
+  <tabstop>txtBackgroundInput</tabstop>
+  <tabstop>rbEstimateBackground</tabstop>
+  <tabstop>rbManualBackground</tabstop>
   <tabstop>minQInput</tabstop>
   <tabstop>maxQInput</tabstop>
-  <tabstop>slitHeightInput</tabstop>
-  <tabstop>slitWidthInput</tabstop>
+  <tabstop>txtSlitHeightInput</tabstop>
+  <tabstop>txtSlitWidthInput</tabstop>
  </tabstops>
  <resources/>
  <connections/>

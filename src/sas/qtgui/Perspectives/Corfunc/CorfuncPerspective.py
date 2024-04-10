@@ -147,14 +147,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""
 
-        self.cmdExtract.clicked.connect(self._run)
-        self.cmdExtract.setEnabled(False)
+        self.cmdGo.clicked.connect(self._run)
+        self.cmdGo.setEnabled(False)
 
-        self.cmdSave.clicked.connect(self.on_save_transformed)
-        self.cmdSave.setEnabled(False)
+        self.cmdExportTransformed.clicked.connect(self.on_save_transformed)
+        self.cmdExportTransformed.setEnabled(False)
 
-        self.cmdSaveExtrapolation.clicked.connect(self.on_save_extrapolation)
-        self.cmdSaveExtrapolation.setEnabled(False)
+        self.cmdExportExtrapolated.clicked.connect(self.on_save_extrapolation)
+        self.cmdExportExtrapolated.setEnabled(False)
 
         self.cmdHelp.clicked.connect(self.showHelp)
 
@@ -169,13 +169,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.set_text_enable(False)
 
         # Calculation Options
-        self.radTangentAuto.clicked.connect(self.set_tangent_method(None))
-        self.radTangentInflection.clicked.connect(self.set_tangent_method(TangentMethod.INFLECTION))
-        self.radTangentMidpoint.clicked.connect(self.set_tangent_method(TangentMethod.HALF_MIN))
+        self.rbTangentAuto.clicked.connect(self.set_tangent_method(None))
+        self.rbTangentInflection.clicked.connect(self.set_tangent_method(TangentMethod.INFLECTION))
+        self.rbTangentMidpoint.clicked.connect(self.set_tangent_method(TangentMethod.HALF_MIN))
 
-        self.radLongPeriodAuto.clicked.connect(self.set_long_period_method(None))
-        self.radLongPeriodMax.clicked.connect(self.set_long_period_method(LongPeriodMethod.MAX))
-        self.radLongPeriodDouble.clicked.connect(self.set_long_period_method(LongPeriodMethod.DOUBLE_MIN))
+        self.rbLongPeriodAuto.clicked.connect(self.set_long_period_method(None))
+        self.rbLongPeriodMax.clicked.connect(self.set_long_period_method(LongPeriodMethod.MAX))
+        self.rbLongPeriodDouble.clicked.connect(self.set_long_period_method(LongPeriodMethod.DOUBLE_MIN))
 
         # Slider values
         self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
@@ -285,8 +285,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             return
 
         self._running = True
-        self.cmdExtract.setText("Calculating...")
-        self.cmdExtract.repaint()
+        self.cmdGo.setText("Calculating...")
+        self.cmdGo.repaint()
 
         # Set up calculator
 
@@ -296,9 +296,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             tangent_method=self._tangent_method,
             long_period_method=self._long_period_method)
 
-        calculator.fit_background = self.fitBackground.isChecked()
-        calculator.fit_guinier = self.fitGuinier.isChecked()
-        calculator.fit_porod = self.fitPorod.isChecked()
+        calculator.fit_background = self.chkFitBackground.isChecked()
+        calculator.fit_guinier = self.chkFitGuinier.isChecked()
+        calculator.fit_porod = self.chkFitPorod.isChecked()
 
 
         if not calculator.fit_background:
@@ -370,17 +370,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                 self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(lamellar.polydispersity_stribeck)))
                 self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(lamellar.long_period)))
 
-            self.cmdSave.setEnabled(True)
-            self.cmdSaveExtrapolation.setEnabled(True)
+            self.cmdExportTransformed.setEnabled(True)
+            self.cmdExportExtrapolated.setEnabled(True)
 
         except ValueError as e:
             logging.error(repr(e))
-            self.cmdSave.setEnabled(False)
-            self.cmdSaveExtrapolation.setEnabled(False)
+            self.cmdExportTransformed.setEnabled(False)
+            self.cmdExportExtrapolated.setEnabled(False)
             self.set_background_warning()
 
-        self.cmdExtract.setText("Go")
-        self.cmdExtract.repaint()
+        self.cmdGo.setText("Go")
+        self.cmdGo.repaint()
 
         self._running = False
 
@@ -492,7 +492,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         log_data_min = math.log(min(self.data.x))
         log_data_max = math.log(max(self.data.x))
 
-        self.cmdExtract.setEnabled(True)
+        self.cmdGo.setEnabled(True)
 
         def fractional_position(f):
             return math.exp(f*log_data_max + (1-f)*log_data_min)
@@ -803,8 +803,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             params.get('background', '0')))
         # reconnect model
         self.model.itemChanged.connect(self.model_changed)
-        self.cmdSave.setEnabled(params.get('guinier_a', '0.0') != '0.0')
-        self.cmdExtract.setEnabled(params.get('long_period', '0') != '0')
+        self.cmdExportTransformed.setEnabled(params.get('guinier_a', '0.0') != '0.0')
+        self.cmdGo.setEnabled(params.get('long_period', '0') != '0')
 
     @property
     def real_space_figure(self):

@@ -37,9 +37,9 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
         self.cmdCancel.clicked.connect(self.on_cancel)
 
         # Default values from input qs
-        self.spnLow.setValue(input_qs[0])
-        self.spnHigh.setValue(input_qs[-1])
-        self.spnDelta.setValue(np.mean(input_qs[1:] - input_qs[:-1]))
+        self.doubleSpinBoxLow.setValue(input_qs[0])
+        self.doubleSpinBoxHigh.setValue(input_qs[-1])
+        self.doubleSpinBoxDelta.setValue(np.mean(input_qs[1:] - input_qs[:-1]))
 
 
     def on_ok(self):
@@ -48,9 +48,9 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
             self._input_validation()
 
             q = np.arange(
-                self.spnLow.value(),
-                self.spnHigh.value(),
-                self.spnDelta.value())
+                self.doubleSpinBoxLow.value(),
+                self.doubleSpinBoxHigh.value(),
+                self.doubleSpinBoxDelta.value())
 
             intensity = self.interpolation_function(q)
 
@@ -69,10 +69,10 @@ class SaveExtrapolatedPopup(QDialog, Ui_SaveExtrapolatedPanel):
         """ Check input is valid, notify user if not"""
 
         # Range values
-        if self.spnLow.value() >= self.spnHigh.value():
+        if self.doubleSpinBoxLow.value() >= self.doubleSpinBoxHigh.value():
             raise UserInputInvalid("High Q value should be greater than low Q value.")
 
-        if self.spnDelta.value() <= 0:
+        if self.doubleSpinBoxDelta.value() <= 0:
             raise UserInputInvalid("Delta Q (sampling interval) should be a positive number.")
 
         return

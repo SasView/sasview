@@ -92,7 +92,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QCheckBox" name="checkboxNucData">
+         <widget class="QCheckBox" name="chkNucData">
           <property name="text">
            <string/>
           </property>
@@ -171,7 +171,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QCheckBox" name="checkboxMagData">
+         <widget class="QCheckBox" name="chkMagData">
           <property name="text">
            <string/>
           </property>
@@ -1007,7 +1007,7 @@ Not editable.</string>
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="1" column="2">
-         <widget class="QLabel" name="lbl5">
+         <widget class="QLabel" name="lblAngstromQx">
           <property name="font">
            <font>
             <bold>false</bold>
@@ -1446,7 +1446,7 @@ Number of Qbins &amp;isin; [2, 1000].</string>
          </widget>
         </item>
         <item row="5" column="2">
-         <widget class="QLabel" name="lbl2">
+         <widget class="QLabel" name="lblBackgdUnit">
           <property name="font">
            <font>
             <bold>false</bold>
@@ -1988,9 +1988,9 @@ Number of Qbins &amp;isin; [2, 1000].</string>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>checkboxNucData</tabstop>
+  <tabstop>chkNucData</tabstop>
   <tabstop>txtNucData</tabstop>
-  <tabstop>checkboxMagData</tabstop>
+  <tabstop>chkMagData</tabstop>
   <tabstop>txtMagData</tabstop>
   <tabstop>cbShape</tabstop>
   <tabstop>cmdNucLoad</tabstop>

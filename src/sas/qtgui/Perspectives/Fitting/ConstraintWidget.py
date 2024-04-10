@@ -169,8 +169,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Set up various widget states
         """
         # disable special cases until properly defined
-        self.label.setVisible(False)
-        self.cbCases.setVisible(False)
+        self.lblSpecialCases.setVisible(False)
+        self.cbSpecialCases.setVisible(False)
 
         self.sim_fit_labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
         # tab widget - headers
@@ -188,7 +188,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.customContextMenuRequested.connect(self.showModelContextMenu)
 
         # Single Fit is the default, so disable chainfit
-        self.chkChain.setVisible(False)
+        self.chkChainedFit.setVisible(False)
 
         # disabled constraint
         labels = ['Constraint']
@@ -207,13 +207,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Set up signals/slots for this widget
         """
         # simple widgets
-        self.btnSingle.toggled.connect(self.onFitTypeChange)
-        self.btnBatch.toggled.connect(self.onFitTypeChange)
-        self.cbCases.currentIndexChanged.connect(self.onSpecialCaseChange)
+        self.rbSingleFits.toggled.connect(self.onFitTypeChange)
+        self.rbBatchFits.toggled.connect(self.onFitTypeChange)
+        self.cbSpecialCases.currentIndexChanged.connect(self.onSpecialCaseChange)
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdHelp.clicked.connect(self.onHelp)
-        self.cmdAdd.clicked.connect(self.showMultiConstraint)
-        self.chkChain.toggled.connect(self.onChainFit)
+        self.cmdAddConstraints.clicked.connect(self.showMultiConstraint)
+        self.chkChainedFit.toggled.connect(self.onChainFit)
         self.chkWeight.toggled.connect(self.onWeightModify)
 
         # QTableWidgets
@@ -270,9 +270,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         single fit/batch fit
         """
         source = self.sender().objectName()
-        self.currentType = "BatchPage" if source == "btnBatch" else "FitPage"
-        self.chkChain.setVisible(source=="btnBatch")
-        self.chkWeight.setVisible(source!="btnBatch")
+        self.currentType = "BatchPage" if source == "rbBatchFits" else "FitPage"
+        self.chkChainedFit.setVisible(source=="rbBatchFits")
+        self.chkWeight.setVisible(source!="rbBatchFits")
         self.initializeFitList()
 
     def onSpecialCaseChange(self, index):
@@ -1044,9 +1044,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         tabs = [tab for tab in ObjectLibrary.listObjects() if self.isTabImportable(tab)]
         if len(tabs) < 1:
-            self.cmdAdd.setEnabled(False)
+            self.cmdAddConstraints.setEnabled(False)
         else:
-            self.cmdAdd.setEnabled(True)
+            self.cmdAddConstraints.setEnabled(True)
 
         if not self._row_order:
             # Initialize tab order list
@@ -1157,7 +1157,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         param_list.append(['data_id', "cs_tab"+str(self.page_id)])
         param_list.append(['current_type', self.currentType])
         param_list.append(['is_chain_fitting', str(self.is_chain_fitting)])
-        param_list.append(['special_case', self.cbCases.currentText()])
+        param_list.append(['special_case', self.cbSpecialCases.currentText()])
 
         return param_list
 
@@ -1221,12 +1221,12 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # fit/batch radio
         isBatch = parameters['current_type'][0] == 'BatchPage'
         if isBatch:
-            self.btnBatch.toggle()
+            self.rbBatchFits.toggle()
 
         # chain
         is_chain = parameters['is_chain_fitting'][0] == 'True'
         if isBatch:
-            self.chkChain.setChecked(is_chain)
+            self.chkChainedFit.setChecked(is_chain)
 
     def getReport(self):
         """

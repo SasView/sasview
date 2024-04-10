@@ -64,7 +64,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdAddAll.clicked.connect(self.onSetAll)
 
-        self.txtConstraint.editingFinished.connect(self.validateFormula)
+        self.txtComplexConstraint.editingFinished.connect(self.validateFormula)
         self.cbModel1.currentIndexChanged.connect(self.onModelIndexChange)
         self.cbModel2.currentIndexChanged.connect(self.onModelIndexChange)
 
@@ -130,14 +130,14 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             index2 = self.cbParam2.findText(previous_param2)
             self.cbParam2.setCurrentIndex(index2)
 
-        self.txtParam.setText(self.cbModel1.currentText() + ":"
+        self.txtParamComplexConstraint.setText(self.cbModel1.currentText() + ":"
                               + self.cbParam1.currentText())
 
         self.cbOperator.clear()
         self.cbOperator.addItems(ALLOWED_OPERATORS)
-        self.txtOperator.setText(self.cbOperator.currentText())
+        self.lblOperatorComplexConstraint.setText(self.cbOperator.currentText())
 
-        self.txtConstraint.setText(self.tab_names[tab_index2]+"."+self.cbParam2.currentText())
+        self.txtComplexConstraint.setText(self.tab_names[tab_index2]+"."+self.cbParam2.currentText())
 
         # disable Apply if no parameters available
         if len(items1)==0:
@@ -160,11 +160,11 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
 
     def setupTooltip(self):
         """
-        Tooltip for txtConstraint
+        Tooltip for txtComplexConstraint
         """
         tooltip = "E.g. M1:scale = 2.0 * M2.scale\n"
         tooltip += "M1:scale = sqrt(M2.scale) + 5"
-        self.txtConstraint.setToolTip(tooltip)
+        self.txtComplexConstraint.setToolTip(tooltip)
 
     def onParamIndexChange(self, index):
         """
@@ -175,9 +175,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         param1 = self.cbParam1.currentText()
         param2 = self.cbParam2.currentText()
         if source == "cbParam1":
-            self.txtParam.setText(self.cbModel1.currentText() + ":" + param1)
+            self.txtParamComplexConstraint.setText(self.cbModel1.currentText() + ":" + param1)
         else:
-            self.txtConstraint.setText(self.cbModel2.currentText() + "." + param2)
+            self.txtComplexConstraint.setText(self.cbModel2.currentText() + "." + param2)
         # Check if any of the parameters are polydisperse
         params_list = [param1, param2]
         all_pars = [tab.model_parameters for tab in self.tabs]
@@ -202,7 +202,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Respond to operator combo box changes
         """
-        self.txtOperator.setText(self.cbOperator.currentText())
+        self.lblOperatorComplexConstraint.setText(self.cbOperator.currentText())
 
     def validateFormula(self):
         """
@@ -211,15 +211,15 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # temporarily disable validation, as not yet fully operational
         return
 
-        formula_is_valid = self.validateConstraint(self.txtConstraint.text())
+        formula_is_valid = self.validateConstraint(self.txtComplexConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
             self.cmdAddAll.setEnabled(False)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: red;}")
+            self.txtComplexConstraint.setStyleSheet("QLineEdit {background-color: red;}")
         else:
             self.cmdOK.setEnabled(True)
             self.cmdAddAll.setEnabled(True)
-            self.txtConstraint.setStyleSheet("QLineEdit {background-color: white;}")
+            self.txtComplexConstraint.setStyleSheet("QLineEdit {background-color: white;}")
 
     def validateConstraint(self, constraint_text):
         """
@@ -269,7 +269,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         param = self.cbParam1.currentText()
         value = self.cbParam2.currentText()
-        func = self.txtConstraint.text()
+        func = self.txtComplexConstraint.text()
         value_ex = (self.cbModel1.currentText() + "."
                     + self.cbParam1.currentText())
         model1 = self.cbModel1.currentText()
@@ -311,7 +311,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             tabs = [tab for tab in self.tabs if
                     tab.kernel_module.name != self.cbModel2.currentText()]
             self.applyAcrossTabs(tabs, self.cbParam1.currentText(),
-                                 self.txtConstraint.text())
+                                 self.txtComplexConstraint.text())
             self.setupParamWidgets()
             return
 

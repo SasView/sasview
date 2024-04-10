@@ -170,8 +170,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
-        self.label_17.setStyleSheet(new_font)
-        self.label_19.setStyleSheet(new_font)
+        self.lblAngstromLetterUp.setStyleSheet(new_font)
+        self.lblAngstromLetterDown.setStyleSheet(new_font)
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
@@ -363,9 +363,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.boldFont.setBold(True)
 
         # Set data label
-        self.label.setFont(self.boldFont)
-        self.label.setText("No data loaded")
-        self.lblFilename.setText("")
+        self.lblFilenameLeft.setFont(self.boldFont)
+        self.lblFilenameLeft.setText("No data loaded")
+        self.lblFilenameRight.setText("")
 
         # Magnetic angles explained in one picture
         self.magneticAnglesWidget = QtWidgets.QWidget()
@@ -389,28 +389,28 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.model_dict["poly"] = self._poly_model
         self.model_dict["magnet"] = self._magnet_model
 
-        self.lst_dict["standard"] = self.lstParams
-        self.lst_dict["poly"] = self.lstPoly
-        self.lst_dict["magnet"] = self.lstMagnetic
+        self.lst_dict["standard"] = self.lstModelParameters
+        self.lst_dict["poly"] = self.lstPolydispersity
+        self.lst_dict["magnet"] = self.lstPolarisation_Magnetic_Scattering
 
-        self.tabToList[0] = self.lstParams
-        self.tabToList[3] = self.lstPoly
-        self.tabToList[4] = self.lstMagnetic
+        self.tabToList[0] = self.lstModelParameters
+        self.tabToList[3] = self.lstPolydispersity
+        self.tabToList[4] = self.lstPolarisation_Magnetic_Scattering
 
         self.tabToKey[0] = "standard"
         self.tabToKey[3] = "poly"
         self.tabToKey[4] = "magnet"
 
         # Param model displayed in param list
-        self.lstParams.setModel(self._model_model)
+        self.lstModelParameters.setModel(self._model_model)
         self.readCategoryInfo()
 
         self.model_parameters = None
 
         # Delegates for custom editing and display
-        self.lstParams.setItemDelegate(ModelViewDelegate(self))
+        self.lstModelParameters.setItemDelegate(ModelViewDelegate(self))
 
-        self.lstParams.setAlternatingRowColors(True)
+        self.lstModelParameters.setAlternatingRowColors(True)
         stylesheet = """
 
             QTreeView {
@@ -439,33 +439,33 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);
             }
            """
-        self.lstParams.setStyleSheet(stylesheet)
-        self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.lstParams.customContextMenuRequested.connect(self.showModelContextMenu)
-        self.lstParams.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+        self.lstModelParameters.setStyleSheet(stylesheet)
+        self.lstModelParameters.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.lstModelParameters.customContextMenuRequested.connect(self.showModelContextMenu)
+        self.lstModelParameters.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
         # Column resize signals
-        self.lstParams.header().sectionResized.connect(self.onColumnWidthUpdate)
+        self.lstModelParameters.header().sectionResized.connect(self.onColumnWidthUpdate)
 
         # Poly model displayed in poly list
-        self.lstPoly.setModel(self._poly_model)
+        self.lstPolydispersity.setModel(self._poly_model)
         self.setPolyModel()
-        self.setTableProperties(self.lstPoly)
+        self.setTableProperties(self.lstPolydispersity)
         # Delegates for custom editing and display
-        self.lstPoly.setItemDelegate(PolyViewDelegate(self))
+        self.lstPolydispersity.setItemDelegate(PolyViewDelegate(self))
         # Polydispersity function combo response
-        self.lstPoly.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
-        self.lstPoly.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
+        self.lstPolydispersity.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
+        self.lstPolydispersity.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
 
-        self.lstPoly.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.lstPoly.customContextMenuRequested.connect(self.showModelContextMenu)
-        self.lstPoly.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
+        self.lstPolydispersity.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.lstPolydispersity.customContextMenuRequested.connect(self.showModelContextMenu)
+        self.lstPolydispersity.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
         # Magnetism model displayed in magnetism list
-        self.lstMagnetic.setModel(self._magnet_model)
+        self.lstPolarisation_Magnetic_Scattering.setModel(self._magnet_model)
         self.setMagneticModel()
-        self.setTableProperties(self.lstMagnetic)
+        self.setTableProperties(self.lstPolarisation_Magnetic_Scattering)
         # Delegates for custom editing and display
-        self.lstMagnetic.setItemDelegate(MagnetismViewDelegate(self))
+        self.lstPolarisation_Magnetic_Scattering.setItemDelegate(MagnetismViewDelegate(self))
         # Initial status of the ordering tab - invisible
         self.tabFitting.removeTab(TAB_ORDERING)
 
@@ -485,11 +485,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Enable/disable various UI elements based on data loaded
         """
         # Tag along functionality
-        self.label.setText("Data loaded from: ")
+        self.lblFilenameLeft.setText("Data loaded from: ")
         if self.logic.data.name:
-            self.lblFilename.setText(self.logic.data.name)
+            self.lblFilenameRight.setText(self.logic.data.name)
         else:
-            self.lblFilename.setText(self.logic.data.filename)
+            self.lblFilenameRight.setText(self.logic.data.filename)
         self.updateQRange()
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
@@ -498,7 +498,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
         # Combo box or label for file name"
         if self.is_batch_fitting:
-            self.lblFilename.setVisible(False)
+            self.lblFilenameRight.setVisible(False)
             for dataitem in self.all_data:
                 name = GuiUtils.dataFromItem(dataitem).name
                 self.cbFileNames.addItem(name)
@@ -642,17 +642,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
         self.cmdHelp.clicked.connect(self.onHelp)
-        self.cmdMagneticDisplay.clicked.connect(self.onDisplayMagneticAngles)
+        self.cmdDisplayMagneticAngles.clicked.connect(self.onDisplayMagneticAngles)
 
         # Respond to change in parameters from the UI
         self._model_model.dataChanged.connect(self.onMainParamsChange)
         self._poly_model.dataChanged.connect(self.onPolyModelChange)
         self._magnet_model.dataChanged.connect(self.onMagnetModelChange)
-        self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
-        self.lstParams.installEventFilter(self)
-        self.lstPoly.installEventFilter(self)
-        self.lstMagnetic.installEventFilter(self)
-        self.lstPoly.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        self.lstModelParameters.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+        self.lstModelParameters.installEventFilter(self)
+        self.lstPolydispersity.installEventFilter(self)
+        self.lstPolarisation_Magnetic_Scattering.installEventFilter(self)
+        self.lstPolydispersity.selectionModel().selectionChanged.connect(self.onSelectionChanged)
 
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
@@ -682,7 +682,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def eventFilter(self, obj, event):
         # Catch enter key presses when editing model params
-        if obj in [self.lstParams, self.lstPoly, self.lstMagnetic]:
+        if obj in [self.lstModelParameters, self.lstPolydispersity, self.lstPolarisation_Magnetic_Scattering]:
             if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
                 self.onKey(event)
                 return True
@@ -793,7 +793,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the constraint widget and receive the expression
         """
         if current_list is None:
-            current_list = self.lstParams
+            current_list = self.lstModelParameters
         model = current_list.model()
         for key, val in self.model_dict.items():
             if val == model:
@@ -1032,8 +1032,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
-        min_col = self.lstParams.itemDelegate().param_min
-        max_col = self.lstParams.itemDelegate().param_max
+        min_col = self.lstModelParameters.itemDelegate().param_min
+        max_col = self.lstModelParameters.itemDelegate().param_max
         for row in self.selectedParameters(model_key=model_key):
             param = model.item(row, 0).text()
             value = model.item(row, 1).text()
@@ -1265,7 +1265,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         status = QtCore.Qt.Checked
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
-        item = model.itemFromIndex(self.lstParams.currentIndex())
+        item = model.itemFromIndex(self.lstModelParameters.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
     def deselectParameters(self):
@@ -1275,7 +1275,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         status = QtCore.Qt.Unchecked
         model_key = self.tabToKey[self.tabFitting.currentIndex()]
         model = self.model_dict[model_key]
-        item = model.itemFromIndex(self.lstParams.currentIndex())
+        item = model.itemFromIndex(self.lstModelParameters.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
     def selectedParameters(self, model_key="standard"):
@@ -1613,21 +1613,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Updates the fitting widget format when SESANS data is loaded.
         """
         # update the units in the 'Fitting details' box of the Model tab on the Fit Panel
-        self.label_17.setText("Å")
-        self.label_19.setText("Å")
+        self.lblAngstromLetterUp.setText("Å")
+        self.lblAngstromLetterDown.setText("Å")
         # disable the background parameter and set at 0 for sesans
         self.disableBackgroundParameter(set_value=0.0)
         # update options defaults and settings for SESANS data
         self.options_widget.updateQRange(1, 100000, self.options_widget.NPTS_DEFAULT)
         # update the units in the 'Fitting details' box of the Fit Options tab on the Fit Panel
-        self.options_widget.label_13.setText("Å")
-        self.options_widget.label_15.setText("Å")
+        self.options_widget.lblAngstromInvMinRange.setText("Å")
+        self.options_widget.lblAngstromInvMaxRange.setText("Å")
         # update the smearing drop down box to indicate a Hankel Transform is being used instead of resolution
         self.smearing_widget.onIndexChange(1)
         # update the Weighting box of the Fit Options tab on the Fit Panel
-        self.options_widget.rbWeighting2.setText("Use dP Data")
-        self.options_widget.rbWeighting3.setText("Use |sqrt(P Data)|")
-        self.options_widget.rbWeighting4.setText("Use |P Data|")
+        self.options_widget.rbWeightingUsedIData.setText("Use dP Data")
+        self.options_widget.rbWeightingUseAbsSqrtIData.setText("Use |sqrt(P Data)|")
+        self.options_widget.rbWeightingUseAbsIData.setText("Use |P Data|")
 
     def replaceConstraintName(self, old_name, new_name=""):
         """
@@ -1679,7 +1679,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Update column widths
         for column, width in self.lstParamHeaderSizes.items():
-            self.lstParams.setColumnWidth(column, width)
+            self.lstModelParameters.setColumnWidth(column, width)
 
         # disable background for SESANS data
         # this should be forced to 0 in sasmodels but this tells the user it is enforced to 0 and disables the box
@@ -1759,7 +1759,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # corresponding values in FitPage
         parameter_name = parameter_name.rsplit()[-1]
 
-        delegate = self.lstPoly.itemDelegate()
+        delegate = self.lstPolydispersity.itemDelegate()
 
         # Extract changed value.
         if model_column == delegate.poly_parameter:
@@ -1849,7 +1849,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except TypeError:
             # Unparsable field
             return
-        delegate = self.lstMagnetic.itemDelegate()
+        delegate = self.lstPolarisation_Magnetic_Scattering.itemDelegate()
 
         if model_column > 1:
             if model_column == delegate.mag_min:
@@ -2131,7 +2131,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
-        self.lblChi2Value.setText(chi2_repr)
+        self.lblChi2ValueValue.setText(chi2_repr)
 
 
     def prepareFitters(self, fitter=None, fit_id=0, weight_increase=1):
@@ -2287,7 +2287,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #if not self.has_error_column:
             # create top-level error column
         error_column = []
-        self.lstParams.itemDelegate().addErrorColumn()
+        self.lstModelParameters.itemDelegate().addErrorColumn()
         self.iterateOverModel(createErrorColumn)
 
         self._model_model.insertColumn(2, error_column)
@@ -2362,7 +2362,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.has_poly_error_column:
             self._poly_model.removeColumn(2)
 
-        self.lstPoly.itemDelegate().addErrorColumn()
+        self.lstPolydispersity.itemDelegate().addErrorColumn()
         error_column = []
         self.iterateOverPolyModel(createErrorColumn)
 
@@ -2426,7 +2426,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.has_magnet_error_column:
             self._magnet_model.removeColumn(2)
 
-        self.lstMagnetic.itemDelegate().addErrorColumn()
+        self.lstPolarisation_Magnetic_Scattering.itemDelegate().addErrorColumn()
         error_column = []
         self.iterateOverMagnetModel(createErrorColumn)
 
@@ -2459,7 +2459,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # update display
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
-        self.lblCurrentSmearing.setText(smearing)
+        self.lblSmearingValue.setText(smearing)
         self.calculateQGridForModel()
 
     def onKey(self, event):
@@ -2521,8 +2521,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
             self.options_widget.state()
         # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+        self.lblMinRangeValue.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+        self.lblMaxRangeValue.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
         self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
@@ -2659,8 +2659,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.data_is_loaded:
             self.q_range_min, self.q_range_max, self.npts = self.logic.computeDataRange()
         # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
-        self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
+        self.lblMinRangeValue.setText(GuiUtils.formatNumber(self.q_range_min, high=True))
+        self.lblMaxRangeValue.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
 
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
@@ -2710,7 +2710,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # (Re)-create headers
         FittingUtilities.addHeadersToModel(self._model_model)
-        self.lstParams.header().setFont(self.boldFont)
+        self.lstModelParameters.header().setFont(self.boldFont)
 
     def fromModelToQModel(self, model_name):
         """
@@ -2784,7 +2784,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.kernel_module,
                 self.is2D,
                 self._model_model,
-                self.lstParams)
+                self.lstModelParameters)
 
     def fromStructureFactorToQModel(self, structure_factor):
         """
@@ -2815,7 +2815,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 is2D=self.is2D,
                 parameters_original=None,
                 model=self._model_model,
-                view=self.lstParams)
+                view=self.lstModelParameters)
 
         # Insert product-only params into QModel
         if product_params:
@@ -2824,7 +2824,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     is2D=self.is2D,
                     parameters_original=None,
                     model=self._model_model,
-                    view=self.lstParams,
+                    view=self.lstModelParameters,
                     row_num=2)
 
             # Since this all happens after shells are dealt with and we've inserted rows, fix this counter
@@ -2923,9 +2923,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             parameter_name = str(self._model_model.data(name_index))
 
         # Update the parameter value - note: this supports +/-inf as well
-        param_column = self.lstParams.itemDelegate().param_value
-        min_column = self.lstParams.itemDelegate().param_min
-        max_column = self.lstParams.itemDelegate().param_max
+        param_column = self.lstModelParameters.itemDelegate().param_value
+        min_column = self.lstModelParameters.itemDelegate().param_min
+        max_column = self.lstModelParameters.itemDelegate().param_max
         if model_column == param_column:
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
@@ -3383,7 +3383,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.chi2 = FittingUtilities.calculateChi2(weighted_data, self.data, weights)
             # Update the control
             chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
-            self.lblChi2Value.setText(chi2_repr)
+            self.lblChi2ValueValue.setText(chi2_repr)
         self.fitResults = False
 
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data, weights)
@@ -3521,8 +3521,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.keys()])
         # Set the default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
-        ind = self._poly_model.index(i,self.lstPoly.itemDelegate().poly_function)
-        self.lstPoly.setIndexWidget(ind, func)
+        ind = self._poly_model.index(i,self.lstPolydispersity.itemDelegate().poly_function)
+        self.lstPolydispersity.setIndexWidget(ind, func)
         func.currentIndexChanged.connect(lambda: self.onPolyComboIndexChange(str(func.currentText()), i))
 
     def onPolyFilenameChange(self, row_index):
@@ -3533,12 +3533,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         array_caption = 'array'
 
         # Get the combo box reference
-        ind = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
-        widget = self.lstPoly.indexWidget(ind)
+        ind = self._poly_model.index(row_index, self.lstPolydispersity.itemDelegate().poly_function)
+        widget = self.lstPolydispersity.indexWidget(ind)
 
         # Update the combo box so it displays "array"
         widget.blockSignals(True)
-        widget.setCurrentIndex(self.lstPoly.itemDelegate().POLYDISPERSE_FUNCTIONS.index(array_caption))
+        widget.setCurrentIndex(self.lstPolydispersity.itemDelegate().POLYDISPERSE_FUNCTIONS.index(array_caption))
         widget.blockSignals(False)
 
         # Invoke the file reader
@@ -3550,8 +3550,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Get npts/nsigs for current selection
         param = self.model_parameters.form_volume_parameters[row_index]
-        file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
-        combo_box = self.lstPoly.indexWidget(file_index)
+        file_index = self._poly_model.index(row_index, self.lstPolydispersity.itemDelegate().poly_function)
+        combo_box = self.lstPolydispersity.indexWidget(file_index)
         try:
             self.disp_model = POLYDISPERSITY_MODELS[combo_string]()
         except IndexError:
@@ -3588,8 +3588,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 # uncheck the parameter
                 self._poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
                 # disable the row
-                lo = self.lstPoly.itemDelegate().poly_parameter
-                hi = self.lstPoly.itemDelegate().poly_function
+                lo = self.lstPolydispersity.itemDelegate().poly_parameter
+                hi = self.lstPolydispersity.itemDelegate().poly_function
                 self._poly_model.blockSignals(True)
                 [self._poly_model.item(row_index, i).setEnabled(False) for i in range(lo, hi)]
                 self._poly_model.blockSignals(False)
@@ -3603,14 +3603,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Enable the row in case it was disabled by Array
         self._poly_model.blockSignals(True)
-        max_range = self.lstPoly.itemDelegate().poly_filename
+        max_range = self.lstPolydispersity.itemDelegate().poly_filename
         [self._poly_model.item(row_index, i).setEnabled(True) for i in range(7)]
-        file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
+        file_index = self._poly_model.index(row_index, self.lstPolydispersity.itemDelegate().poly_filename)
         self._poly_model.setData(file_index, "")
         self._poly_model.blockSignals(False)
 
-        npts_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_npts)
-        nsigs_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_nsigs)
+        npts_index = self._poly_model.index(row_index, self.lstPolydispersity.itemDelegate().poly_npts)
+        nsigs_index = self._poly_model.index(row_index, self.lstPolydispersity.itemDelegate().poly_nsigs)
 
         npts = POLYDISPERSITY_MODELS[str(combo_string)].default['npts']
         nsigs = POLYDISPERSITY_MODELS[str(combo_string)].default['nsigmas']
@@ -3655,7 +3655,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.disp_model.set_weights(np.array(values), np.array(weights))
         # + update the cell with filename
         fname = os.path.basename(str(datafile))
-        fname_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
+        fname_index = self._poly_model.index(row_index, self.lstPolydispersity.itemDelegate().poly_filename)
         self._poly_model.setData(fname_index, fname)
 
     def onColumnWidthUpdate(self, index, old_size, new_size):
@@ -3775,8 +3775,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         shell_index = self._model_model.index(shell_row-1, 1)
         button_index = self._model_model.index(shell_row-1, 4)
 
-        self.lstParams.setIndexWidget(shell_index, func)
-        self.lstParams.setIndexWidget(button_index, button)
+        self.lstModelParameters.setIndexWidget(shell_index, func)
+        self.lstModelParameters.setIndexWidget(button_index, button)
         self._n_shells_row = shell_row - 1
 
         # Get the default number of shells for the model
@@ -3853,7 +3853,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._model_model,
                 index,
                 first_row,
-                self.lstParams)
+                self.lstModelParameters)
 
         self._num_shell_params = len(new_rows)
         self.current_shell_displayed = index
@@ -3916,9 +3916,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         assert isinstance(enabled, bool)
 
-        self.lstParams.setEnabled(enabled)
-        self.lstPoly.setEnabled(enabled)
-        self.lstMagnetic.setEnabled(enabled)
+        self.lstModelParameters.setEnabled(enabled)
+        self.lstPolydispersity.setEnabled(enabled)
+        self.lstPolarisation_Magnetic_Scattering.setEnabled(enabled)
 
         self.cbCategory.setEnabled(enabled)
 
@@ -4307,7 +4307,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # resolution
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
-        index = self.smearing_widget.cbSmearing.currentIndex()
+        index = self.smearing_widget.cbInstrumentalSmearing.currentIndex()
         param_list.append(['smearing', str(index)])
         param_list.append(['smearing_min', str(smearing_min)])
         param_list.append(['smearing_max', str(smearing_max)])
@@ -4406,7 +4406,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             param_nsigs = str(self._poly_model.item(row, 5+column_offset).text())
             param_fun   = str(self._poly_model.item(row, 6+column_offset).text()).rstrip()
             index = self._poly_model.index(row, 6+column_offset)
-            widget = self.lstPoly.indexWidget(index)
+            widget = self.lstPolydispersity.indexWidget(index)
             if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                 param_fun = widget.currentText()
             # width
@@ -4505,7 +4505,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if 'smearing' in line_dict.keys():
             try:
                 index = int(line_dict['smearing'][0])
-                self.smearing_widget.cbSmearing.setCurrentIndex(index)
+                self.smearing_widget.cbInstrumentalSmearing.setCurrentIndex(index)
             except ValueError:
                 pass
         if 'smearing_min' in line_dict.keys():
@@ -4545,7 +4545,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Find and update the multiplicity combobox
         """
         index = self._model_model.index(self._n_shells_row, 1)
-        widget = self.lstParams.indexWidget(index)
+        widget = self.lstModelParameters.indexWidget(index)
         if widget is not None and isinstance(widget, QtWidgets.QComboBox):
             widget.setCurrentIndex(widget.findText(str(multip)))
         self.current_shell_displayed = multip
@@ -4574,7 +4574,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     # quietly pass
                     return
                 index = self._model_model.index(row, 1)
-                widget = self.lstParams.indexWidget(index)
+                widget = self.lstModelParameters.indexWidget(index)
                 if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                     #widget.setCurrentIndex(combo_index)
                     return
@@ -4585,7 +4585,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # parameter value can be either just a value or text on the combobox
             param_text = param_dict[param_name][1]
             index = self._model_model.index(row, 1)
-            widget = self.lstParams.indexWidget(index)
+            widget = self.lstModelParameters.indexWidget(index)
             if widget is not None and isinstance(widget, QtWidgets.QComboBox):
                 # Find the right index based on text
                 combo_index = int(param_text, 0)
