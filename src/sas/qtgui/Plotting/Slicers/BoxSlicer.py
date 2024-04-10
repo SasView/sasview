@@ -522,22 +522,21 @@ class PointInteractor(BaseInteractor):
 
     def move(self, x, y, ev):
         """
-        Process move to a new position. The move being allowed here is done
-        by BaseInteractor's drag function which first checks that the x,y
-        cursor resides within the bounds of the plot. This does mean that half
-        the box can still be outside the plot. Restricting this would require
-        Changing the API to pass the width and height values.
-
-        ..todo:: pass the width and heigth and restict the move so that the
-                 entirety of the ROI resides within the plot. This is not a
-                 huge issue as the other half the ROI resides in the plot
-                 and an average for that data given.
+        Process move to a new position. BaseInteractor checks that the center
+        is within the data. Here we check to make sure that the center move
+        does not cause any part of the ROI box to move outside the data.
         """
-        self.x = x
-        self.y = y
-        self.has_move = True
-        self.base.update()
-        self.base.draw()
+        if x - self.base.half_width >= self.base.data.xmin and\
+            y - self.base.half_height >= self.base.data.ymin and\
+            x + self.base.half_width <= self.base.data.xmax and\
+            y + self.base.half_height <= self.base.data.ymax:
+            self.x = x
+            self.y = y
+            self.has_move = True
+            self.base.update()
+            self.base.draw()
+        else:
+            logging.warning("The ROI must stay within the data please")
 
     def setCursor(self, x, y):
         """
@@ -699,17 +698,21 @@ class VerticalDoubleLine(BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         In principle, the move must not create a box without any data points
         in it. For the dragging (continuous move), we make sure that the width
-        or height are not negative. We leave the check of whether there are
-        any data in the ROI to the moveend(). This is currently done in
-        _post_data().
+        or height are not negative and that the entire ROI resides withing the
+        data. We leave the check of whether there are any data in that ROI to
+        the manipulations.py which is called from _post_data, itself being
+        called on moveend(ev).
         """
         if x - self.center_x > 0:
-            self.x1 = x
-            self.half_width = self.x1 - self.center_x
-            self.x2 = self.center_x - self.half_width
-            self.has_move = True
-            self.base.update()
-            self.base.draw()
+            if self.center_x - (x - self.center_x) >= self.base.data.xmin:
+                self.x1 = x
+                self.half_width = self.x1 - self.center_x
+                self.x2 = self.center_x - self.half_width
+                self.has_move = True
+                self.base.update()
+                self.base.draw()
+            else:
+                logging.warning("The ROI must stay within the data please")
         else:
             logging.warning("you cannot go negative")
 
@@ -872,17 +875,21 @@ class HorizontalDoubleLine(BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         In principle, the move must not create a box without any data points
         in it. For the dragging (continuous move), we make sure that the width
-        or height are not negative. We leave the check of whether there are
-        any data in the ROI to the moveend(). This is currently done in
-        _post_data().
+        or height are not negative and that the entire ROI resides withing the
+        data. We leave the check of whether there are any data in that ROI to
+        the manipulations.py which is called from _post_data, itself being
+        called on moveend(ev).
         """
         if y - self.center_y > 0:
-            self.y1 = y
-            self.half_height = self.y1 - self.center_y
-            self.y2 = self.center_y - self.half_height
-            self.has_move = True
-            self.base.update()
-            self.base.draw()
+            if self.center_y - (y - self.center_y) >= self.base.data.ymin:
+                self.y1 = y
+                self.half_height = self.y1 - self.center_y
+                self.y2 = self.center_y - self.half_height
+                self.has_move = True
+                self.base.update()
+                self.base.draw()
+            else:
+                logging.warning("The ROI must stay within the data please")
         else:
             logging.warning("you cannot go negative")
 
