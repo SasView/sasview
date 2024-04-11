@@ -2323,8 +2323,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Update the polydispersity model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
-            return
 
         def updateFittedValues(row_i):
             # Utility function for main model update
@@ -2389,8 +2387,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Update the magnetic model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
-            return
         if self._magnet_model.rowCount() == 0:
             return
 
@@ -4551,8 +4547,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Update the model with new parameters
         """
         assert isinstance(param_dict, dict)
-        if not dict:
-            return
 
         def updateFittedValues(row):
             # Utility function for main model update
@@ -4602,8 +4596,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Update the polydispersity model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
-            return
 
         def updateFittedValues(row):
             # Utility function for main model update
@@ -4650,8 +4642,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Update the magnetism model with new parameters, create the errors column
         """
         assert isinstance(param_dict, dict)
-        if not dict:
-            return
 
         def updateFittedValues(row):
             # Utility function for main model update
