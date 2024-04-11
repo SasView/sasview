@@ -34,3 +34,4 @@ superqt
 pyopengl
 pyopengl_accelerate
 sphinx
+scipy=1.11.4; platform_system == "Darwin"
