@@ -594,7 +594,7 @@ class VerticalDoubleLine(BaseInteractor):
         # Flag to determine if the lines have moved
         self.has_move = False
         # Connect the marker and draw the picture
-        self.connect_markers([self.right_marker])
+        self.connect_markers([self.right_marker, self.right_line])
         self.update()
 
     def setLayer(self, n):
@@ -770,7 +770,7 @@ class HorizontalDoubleLine(BaseInteractor):
         # Flag to determine if the lines have moved
         self.has_move = False
         # connect the marker and draw the picture
-        self.connect_markers([self.top_marker])
+        self.connect_markers([self.top_marker, self.top_line])
         self.update()
 
     def setLayer(self, n):
