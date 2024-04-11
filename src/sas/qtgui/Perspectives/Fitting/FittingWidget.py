@@ -368,6 +368,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblFilename.setText("")
 
         # Magnetic angles explained in one picture
+        from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC
+        if not MAIN_DOC_SRC.exists() and not HELP_DIRECTORY_LOCATION.exists():
+            print("docs not exist")
+        print("main doc src", MAIN_DOC_SRC)
+        print("help directory location", HELP_DIRECTORY_LOCATION)
+        print("images directory location", IMAGES_DIRECTORY_LOCATION)
         self.magneticAnglesWidget = QtWidgets.QWidget()
         labl = QtWidgets.QLabel(self.magneticAnglesWidget)
         pixmap = QtGui.QPixmap(IMAGES_DIRECTORY_LOCATION / 'M_angles_pic.png')

@@ -222,6 +222,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         load_thread.addCallback(self.loadComplete)
         load_thread.addErrback(self.loadFailed)
 
+        # switch to data tab after reading from either file or folder
+        self.setCurrentIndex(0)
+
     def loadFile(self, event=None):
         """
         Called when the "Load" button pressed.
