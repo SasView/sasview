@@ -36,9 +36,7 @@ def attach_hooks():
                 path = loc.joinpath("libausaxs_sse.so")
         elif sys is OS.MAC:
             if arch is Arch.AVX:
-                path = loc.joinpath("libausaxs_avx.dylib")
-            else:
-                path = loc.joinpath("libausaxs_sse.dylib")
+                path = loc.joinpath("libausaxs_x86_64.dylib")
         else:
             path = ""
 

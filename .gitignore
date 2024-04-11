@@ -30,7 +30,6 @@
 *.so
 *.exe
 
-external
 /build
 /dist
 sasview.egg-info
