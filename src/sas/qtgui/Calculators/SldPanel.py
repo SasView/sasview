@@ -147,10 +147,10 @@ class SldPanel(QtWidgets.QDialog):
 
         #self.model.dataChanged.connect(self.dataChanged)
 
-        self.ui.editMassDensity.textChanged.connect(self.recalculateSLD)
-        self.ui.editMolecularFormula.textChanged.connect(self.recalculateSLD)
-        self.ui.editNeutronWavelength.textChanged.connect(self.recalculateSLD)
-        self.ui.editXrayWavelength.textChanged.connect(self.recalculateSLD)
+        self.ui.editMassDensity.editingFinished.connect(self.recalculateSLD)
+        self.ui.editMolecularFormula.editingFinished.connect(self.recalculateSLD)
+        self.ui.editNeutronWavelength.editingFinished.connect(self.recalculateSLD)
+        self.ui.editXrayWavelength.editingFinished.connect(self.recalculateSLD)
 
         self.modelReset()
 
