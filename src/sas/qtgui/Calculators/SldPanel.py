@@ -116,11 +116,8 @@ class SldPanel(QtWidgets.QDialog):
         self.ui.setupUi(self)
 
         # set validators
-        # TODO: GuiUtils.FormulaValidator() crashes with Qt5 - fix
-        #self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
-
-        # No need for recalculate
-        self.ui.recalculateButton.setVisible(False)
+        # Chemical formula is checked via periodictable.formula module.
+        self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
 
         rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
@@ -146,11 +143,6 @@ class SldPanel(QtWidgets.QDialog):
             self.model.setItem(key, QtGui.QStandardItem())
 
         #self.model.dataChanged.connect(self.dataChanged)
-
-        self.ui.editMassDensity.editingFinished.connect(self.recalculateSLD)
-        self.ui.editMolecularFormula.editingFinished.connect(self.recalculateSLD)
-        self.ui.editNeutronWavelength.editingFinished.connect(self.recalculateSLD)
-        self.ui.editXrayWavelength.editingFinished.connect(self.recalculateSLD)
 
         self.modelReset()
 
