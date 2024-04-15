@@ -3852,6 +3852,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             index = 0
             logger.error("Multiplicity incorrect! Setting to 0")
         self.kernel_module.multiplicity = index
+        # Copy existing param values before removing rows to retain param values when changing n-shells
+        self.clipboard_copy()
         if remove_rows > 1:
             self._model_model.removeRows(first_row, remove_rows)
 
@@ -3878,6 +3880,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.setPolyModel()
         if self.canHaveMagnetism():
             self.setMagneticModel()
+
+        self.clipboard_paste()
 
     def onShowSLDProfile(self):
         """
