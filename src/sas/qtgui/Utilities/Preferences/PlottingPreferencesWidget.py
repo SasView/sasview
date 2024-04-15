@@ -10,7 +10,8 @@ class PlottingPreferencesWidget(PreferencesWidget):
                               'FITTING_PLOT_LEGEND_TRUNCATE',
                               'FITTING_PLOT_LEGEND_MAX_LINE_LENGTH',
                               'DISABLE_RESIDUAL_PLOT',
-                              'DISABLE_POLYDISPERSITY_PLOT']
+                              'DISABLE_POLYDISPERSITY_PLOT',
+                              'USE_MATPLOTLIB_TOOLBAR']
 
     def _addAllWidgets(self):
         self.legendFullWidth = self.addCheckBox(
@@ -38,6 +39,11 @@ class PlottingPreferencesWidget(PreferencesWidget):
             checked=config.DISABLE_POLYDISPERSITY_PLOT)
         self.disablePolydispersityPlot.clicked.connect(
             lambda: self._stageChange('DISABLE_POLYDISPERSITY_PLOT', self.disablePolydispersityPlot.isChecked()))
+        self.useMatplotlibToolbar = self.addCheckBox(
+            title="Show toolbar on all new plots",
+            checked=config.USE_MATPLOTLIB_TOOLBAR)
+        self.useMatplotlibToolbar.clicked.connect(
+            lambda: self._stageChange('USE_MATPLOTLIB_TOOLBAR', self.useMatplotlibToolbar.isChecked()))
 
     def _toggleBlockAllSignaling(self, toggle):
         self.legendFullWidth.blockSignals(toggle)
@@ -45,6 +51,7 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.legendLineLength.blockSignals(toggle)
         self.disableResidualPlot.blockSignals(toggle)
         self.disablePolydispersityPlot.blockSignals(toggle)
+        self.useMatplotlibToolbar.blockSignals(toggle)
 
     def _restoreFromConfig(self):
         self.legendFullWidth.setChecked(bool(config.FITTING_PLOT_FULL_WIDTH_LEGENDS))
@@ -53,3 +60,4 @@ class PlottingPreferencesWidget(PreferencesWidget):
         self.legendLineLength.setStyleSheet("background-color: white")
         self.disableResidualPlot.setChecked(config.DISABLE_RESIDUAL_PLOT)
         self.disablePolydispersityPlot.setChecked(config.DISABLE_POLYDISPERSITY_PLOT)
+        self.useMatplotlibToolbar.setChecked(config.USE_MATPLOTLIB_TOOLBAR)
