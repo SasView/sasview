@@ -22,6 +22,8 @@ from sas.qtgui.Plotting.Binder import BindArtist
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
+from sas import config
+
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
@@ -123,8 +125,10 @@ class PlotterBase(QtWidgets.QWidget):
         layout.addWidget(self.toolbar)
         if not quickplot:
             # Add the toolbar
-            # self.toolbar.show()
-            self.toolbar.hide() # hide for the time being
+            if config.USE_MATPLOTLIB_TOOLBAR:
+                self.toolbar.show()
+            else:
+                self.toolbar.hide() # hide for the time being
             # Notify PlotHelper about the new plot
             self.upatePlotHelper()
         else:
