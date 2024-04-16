@@ -322,7 +322,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QPushButton" name="recalculateButton">
+       <widget class="QPushButton" name="calculateButton">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -336,10 +336,10 @@
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>Recalculate</string>
+         <string>Calculate</string>
         </property>
         <property name="autoDefault">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -407,7 +407,7 @@
   <tabstop>editNeutronLength</tabstop>
   <tabstop>closeButton</tabstop>
   <tabstop>helpButton</tabstop>
-  <tabstop>recalculateButton</tabstop>
+  <tabstop>calculateButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

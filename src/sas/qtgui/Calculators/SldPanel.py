@@ -127,7 +127,7 @@ class SldPanel(QtWidgets.QDialog):
         # signals
         self.ui.helpButton.clicked.connect(self.displayHelp)
         self.ui.closeButton.clicked.connect(self.closePanel)
-        self.ui.recalculateButton.clicked.connect(self.calculateSLD)
+        self.ui.calculateButton.clicked.connect(self.calculateSLD)
 
     def calculateSLD(self):
         self.recalculateSLD()
