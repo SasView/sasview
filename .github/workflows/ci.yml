@@ -195,7 +195,6 @@ jobs:
       ### Build the installer (if enabled)
 
       - name: Install utilities to build installer
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
           python -m pip install pyinstaller
 
