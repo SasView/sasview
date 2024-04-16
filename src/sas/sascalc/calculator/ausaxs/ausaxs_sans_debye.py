@@ -25,18 +25,11 @@ def attach_hooks():
     # so we have to do all operations on the dll inside the with statement
     with resources.as_file(resources.files("sas.sascalc.calculator.ausaxs.lib")) as loc:
         if sys is OS.WIN:
-            if arch is Arch.AVX:
-                path = loc.joinpath("libausaxs_avx.dll")
-            else:
-                path = loc.joinpath("libausaxs_sse.dll")
+            path = loc.joinpath("libausaxs.dll")
         elif sys is OS.LINUX:
-            if arch is Arch.AVX:
-                path = loc.joinpath("libausaxs_avx.so")
-            else:
-                path = loc.joinpath("libausaxs_sse.so")
+            path = loc.joinpath("libausaxs.so")
         elif sys is OS.MAC:
-            if arch is Arch.AVX:
-                path = loc.joinpath("libausaxs_x86_64.dylib")
+            path = loc.joinpath("libausaxs.dylib")
         else:
             path = ""
 

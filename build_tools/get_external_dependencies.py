@@ -25,11 +25,11 @@ def get_ausaxs():
     url = "https://github.com/SasView/AUSAXS/releases/latest/download/"
     libs = None
     if _os == OS.WIN:
-        libs = ["libausaxs_avx.dll", "libausaxs_sse.dll"]
+        libs = ["libausaxs.dll"]
     elif _os == OS.LINUX:
-        libs = ["libausaxs_avx.so", "libausaxs_sse.so"]
+        libs = ["libausaxs.so"]
     elif _os == OS.MAC:
-        libs = ["libausaxs_x86_64.dylib"]
+        libs = ["libausaxs.dylib"]
     if libs is not None:
         # we have to use a relative path since the package is not installed yet
         base_loc = "src/sas/sascalc/calculator/ausaxs/lib/"
