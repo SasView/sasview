@@ -25,7 +25,6 @@ datas = [
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
-# datas.append((os.path.join(PYTHON_PACKAGES, 'freetype'), 'freetype'))
 
 def add_data(data):
     for component in data:
@@ -103,7 +102,7 @@ if platform.system() == 'Darwin':
           exclude_binaries=True,
           name='sasview',
           debug=False,
-          upx=False,
+          upx=True,
           icon=os.path.join("../src/sas/qtgui/images","ball.icns"),
           version="version.txt",
           console=False )
