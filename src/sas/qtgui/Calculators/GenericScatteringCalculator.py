@@ -225,9 +225,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtSampleRoll.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleRoll))   
 
-         # 0 <= Qmin&QMax <= 1000
-        self.txtQxMax.setValidator(QtGui.QDoubleValidator(0,1000,10,self.txtQxMax))
-        self.txtQxMin.setValidator(QtGui.QDoubleValidator(0,1000,10,self.txtQxMin))
+        self.change_qValidator()
         
         # 2 <= Qbin and nodes integers < 1000
         validat_regex_int = QtCore.QRegularExpression(r'^[2-9]|[1-9]\d{1,2}$')
@@ -560,22 +558,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.check_for_magnetic_controls()
 
     def change_qValidator(self):
-            #GSC default values .3 and .0003; perhaps better to use values based on RG in future.
-            #note: Fitting window defaults to .5 and .0005. Perhaps better to use those?
-            if float(self.txtQxMax.text()) == 0:
-                self.txtQxMax.setText("0.3")
-            if float(self.txtQxMin.text()) == 0:
-                self.txtQxMin.setText("0.0003")    
+        # GSC default values .3 and .0003; perhaps better to use values based on RG in future.
+        # note: Fitting window defaults to .5 and .0005. Perhaps better to use those?
+        # TODO: Use Rg calculation to estimate Q range and remove the coercion below
+        if float(self.txtQxMax.text()) == 0:
+            self.txtQxMax.setText("0.3")
+        if float(self.txtQxMin.text()) == 0:
+            self.txtQxMin.setText("0.0003")
 
-            min = 0 if not self.checkboxLogSpace.isChecked() else 1e-10
-                # 0 < Qmin&QMax <= 1000
-            self.txtQxMax.setValidator(QtGui.QDoubleValidator(min,1000,10,
-                                                            self.txtQxMax))
-            self.txtQxMin.setValidator(QtGui.QDoubleValidator(min,1000,10,
-                                                            self.txtQxMin))
-
-
-            return
+        min = 0 if not self.checkboxLogSpace.isChecked() else 1e-10
+        # 0 < Qmin&QMax <= 1000
+        self.txtQxMax.setValidator(QtGui.QDoubleValidator(min, 1000, 10, self.txtQxMax))
+        self.txtQxMin.setValidator(QtGui.QDoubleValidator(min, 1000, 10, self.txtQxMin))
     
     def update_cbOptionsCalc_visibility(self):
         # Only allow 1D averaging if no magnetic data and not elements
