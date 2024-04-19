@@ -1458,13 +1458,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         
         if self.checkboxPluginModel.isChecked():
             self.fQ = FQ(self.xValues, self.nuc_sld_data, self.npts_x)
-            gscmodel = gsc_model.writePlugin(self)              #[0] = model, [1] = fullpath, [2] = pluginlocation
-            TabbedModelEditor.writeFile(gscmodel[1], gscmodel[0])
+            model_str, model_path = gsc_model.generate_plugin(self.txtFileName.text(), self.data_to_plot, self.xValues,
+                                                              self.fQ, self.rGMass)
+            TabbedModelEditor.writeFile(model_path, model_str)
             self.manager.communicate.customModelDirectoryChanged.emit()
 
             # Notify the user
-            msg = "Custom model " + gscmodel[2], self.txtFileName.text() + \
-                " successfully created."
+            msg = "Custom model " + model_path.absolute() + " successfully created."
             logging.info(msg)
 
         self.cmdCompute.setText('Compute')

@@ -1,52 +1,57 @@
 """
 create plugin model from the Generic Scattering Calculator
 """
-import os
 import logging
 import math
+from pathlib import Path
+
+import numpy as np
 
 from sas.sascalc.fit import models
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 
 
-def writePlugin(obj):
+def generate_plugin(f_name: str, data_to_plot: np.ndarray, x_values: np.ndarray, f_q: list,
+                    mass: float) -> tuple[str, Path]:
+    """Generate an empirical plugin model using calculated data.
+
+    :param f_name: The desired file name for the resulting model
+    :param data_to_plot: The plottable data
+    :param x_values: The x values, as a numpy array
+    :param f_q: The calculated F(Q)
+    :param mass: The mass associated with the Rg calculation
+    """
     # check if file exists & assign filename
-    plugin_location = models.find_plugins_dir()
-    full_path = os.path.join(plugin_location, obj.txtFileName.text())
-    if os.path.splitext(full_path)[1] != ".py":
-        full_path += ".py"
+    plugin_location = Path(models.find_plugins_dir())
+    full_path = plugin_location / f_name
+    if full_path.suffix != '.py':
+        full_path.with_suffix('.py')
 
-    # generate the model representation as string
-    model_str = generateModel(obj)
+    # generate the model representation as a string
+    model_str = generate_model(f_name, data_to_plot, x_values, f_q, mass)
 
-    return [model_str , full_path, plugin_location]
-    
-def generateModel(obj):
+    return model_str, full_path
+
+
+def generate_model(f_name: str, data_to_plot: np.ndarray, x_values: np.ndarray, f_q: list, mass: float) -> str:
+    """Generate an empirical model from the current plugin state
     """
-    generate model from the current plugin state
-    """
 
-    """
-    This should be the correct normalization, but P(Q) has already been rescaled in a different part of the code
+    # TODO:
+    #  This should be the correct normalization, but P(Q) has already been rescaled in a different part of the code
+    #  pix_symbol = self.nuc_sld_data.pix_symbol
+    #  sld = 0
+    #  for i, sym in enumerate(pix_symbol):
+    #      atom = periodictable.elements.symbol(sym)
+    #      sld += atom.neutron.b_c
+    #  normPQ = self.data_to_plot / (sld**2)
+    norm_pq = data_to_plot/data_to_plot[0]   # temporary fix
 
-    pix_symbol = self.nuc_sld_data.pix_symbol
-    sld = 0
-    for i, sym in enumerate(pix_symbol):
-        atom = periodictable.elements.symbol(sym)
-        sld += atom.neutron.b_c
-    #normPQ = self.data_to_plot / (sld**2)""" 
-    normPQ = obj.data_to_plot/obj.data_to_plot[0]    #temporary fix
-
-
-    nq = len(obj.xValues)
-    logq = ','.join(f'{math.log(v):.15e}' for v in obj.xValues.tolist())
-    fQ = ','.join(f'{v:.15e}' for v in obj.fQ.tolist())
-    logFQSQavg = ','.join(f'{math.log(v):.15e}' for v in normPQ)
-    logq = "{"+logq+"}"
-    fQ = "{"+fQ+"}"
-    logFQSQ = "{"+logFQSQavg+"}"
-    rG = obj.rGMass
+    nq = len(x_values)
+    log_q = "{" + ','.join(f'{math.log(v):.15e}' for v in x_values.tolist()) + "}"
+    f_q = "{" + ','.join(f'{v:.15e}' for v in f_q) + "}"
+    log_fq_sq_avg = "{" + ','.join(f'{math.log(v):.15e}' for v in norm_pq) + "}"
     prefactor = 1e-2
+
     model_str = (f'''
 r"""
 Example empirical model using interp.
@@ -58,7 +63,7 @@ from numpy import inf
 from types import SimpleNamespace as dotted
 
 
-name = "{obj.txtFileName.text()}"
+name = "{f_name}"
 title = "Model precalculated from PDB file."
 description = """
 Interpolate F(q) values from an interpolation table generated for the PDB
@@ -76,9 +81,9 @@ parameters = [
 
 c_code =  r"""
 #define NQ {nq}
-constant double LOGQ[NQ] = {logq};
-constant double FQ[NQ] = {fQ};
-constant double LOGFQSQ[NQ] = {logFQSQ};
+constant double LOGQ[NQ] = {log_q};
+constant double FQ[NQ] = {f_q};
+constant double LOGFQSQ[NQ] = {log_fq_sq_avg};
 constant double prefactor = {prefactor};
 
 static double
@@ -95,7 +100,7 @@ radius_effective(int mode, double swelling,double protein_volume)
     case 1: // equivalent sphere
     return (cbrt(protein_volume*3.0/4.0/M_PI))*swelling;
     case 2: // radius of gyration
-    return {rG}*swelling;
+    return {mass}*swelling;
     }}
 }}
 
