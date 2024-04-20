@@ -3,7 +3,7 @@ Compute scattering from a set of points.
 For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 """
 import os
-
+import logging
 import numpy as np
 
 try:
@@ -35,14 +35,14 @@ def Iq(q, x, y, z, sld, vol, is_avg=False):
     if not index.all():
         coords, sld, vol = (v[index] for v in (sld, coords, vol))
     q, coords, sld, vol = [np.asarray(v, dtype='d') for v in (q, coords, sld, vol)]
-    I_out = np.empty_like(q)
+    w = sld * vol
+
     if is_avg:
         r = np.linalg.norm(coords, axis=0)
-        #print('avg', I_out.shape, q.shape, r.shape, sld.shape, vol.shape)
-        _calc_Iq_avg(I_out, q, r, sld, vol)
+        I_out = _calc_Iq_avg(q, r, w)
     else:
-        #print('not avg', I_out.shape, q.shape, coords.shape, sld.shape, vol.shape)
-        _calc_Iq(I_out, q, coords, sld, vol)
+        from sas.sascalc.calculator.ausaxs.ausaxs_sans_debye import evaluate_sans_debye
+        I_out = evaluate_sans_debye(q, coords, w)
     return I_out * (1.0E+8/np.sum(vol))
 
 def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_phi, elements=None, is_elements=False):
@@ -89,48 +89,15 @@ def Iqxy(qx, qy, x, y, z, sld, vol, mx, my, mz, in_spin, out_spin, s_theta, s_ph
             I_out = I_out.reshape(qx.shape)
     return I_out * (1.0E+8/np.sum(vol))
 
-@njit('(f8[:], f8[:], f8[:], f8[:], f8[:])')
-def _calc_Iq_avg(Iq, q, r, sld, vol):
-    weight = sld * vol
+@njit('(f8[:], f8[:], f8[:])')
+def _calc_Iq_avg(q, r, w):
+    Iq = np.zeros_like(q)
     for i, qi in enumerate(q):
         # use q/pi since np.sinc = sin(pi x)/(pi x)
         bes = np.sinc((qi/np.pi)*r)
-        Fq = np.sum(weight * bes)
+        Fq = np.sum(w * bes)
         Iq[i] = Fq**2
-
-def _calc_Iq(Iq, q, coords, sld, vol, worksize=1000000):
-    """
-    Compute Iq as sum rho_j rho_k j0(q ||x_j - x_k||)
-    Chunk the calculation so that the q x r intermediate matrix has fewer
-    than worksize elements.
-    """
-    Iq[:] = 0.
-    q_pi = q/np.pi  # Precompute q/pi since np.sinc = sin(pi x)/(pi x).
-    weight = sld * vol
-    batch_size = worksize // coords.shape[0]
-    for batch in range(0, len(q), batch_size):
-        _calc_Iq_batch(Iq[batch:batch+batch_size], q_pi[batch:batch+batch_size],
-                       coords, weight)
-
-def _calc_Iq_batch(Iq, q_pi, coords, weight):
-    """
-    Helper function for _calc_Iq which operates on a batch of q values.
-    *Iq* is accumulated within each batch, and should be initialized to zero.
-    *q_pi* is q/pi, needed because np.sinc computes sin(pi x)/(pi x).
-    *coords* are the sample points.
-    *weights* is volume*rho for each point.
-    """
-    for j in range(len(weight)):
-        # Compute dx for one row of the upper triangle matrix.
-        dx = coords[:, j:] - coords[:, j:j+1]
-        # Find the length of each dx vector.
-        r = np.sqrt(np.sum(dx**2, axis=0))
-        # Compute I_jk = rho_j rho_k j0(q ||x_j - x_k||) over all q in batch.
-        bes = np.sinc(q_pi[:, None]*r[None, :])
-        I_jk = (weight[j:] * weight[j])[None, :] * bes
-        # Accumulate terms I(j,j), I(j, k+1..n) and by symmetry I(k+1..n, j).
-        # Don't double-count the diagonal.
-        Iq += 2*np.sum(I_jk, axis=1) - I_jk[:, 0]
+    return Iq
 
 @njit('(f8[:], f8[:], f8[:, :], f8[:], f8[:])')
 def _calc_Iq_numba(Iq, q, coords, sld, vol):
@@ -509,5 +476,3 @@ def _spin_weights(in_spin, out_spin):
         in_spin * out_spin / norm,             # uu
     )
     return weight
-
-
