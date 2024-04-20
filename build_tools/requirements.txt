@@ -2,6 +2,7 @@
 appdirs
 bumps
 cffi
+cpufeature
 docutils
 dominate
 h5py
