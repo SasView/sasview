@@ -303,6 +303,7 @@ jobs:
           mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
 
       - name: Upload Release Installer to GitHub
+        if: ${{ matrix.installer }}
         uses: ncipollo/release-action@v1
         with:
           draft: false
