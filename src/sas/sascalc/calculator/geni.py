@@ -610,7 +610,8 @@ def FQ(qX, nuc_sld_data, npts_x):
     cohB = np.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in nuc_sld_data.pix_symbol])
     
     for i in range(npts_x):
-        fQ = np.sum(cohB*(np.sin(qX[i] * magnitudeRelativeCoordinate) / (qX[i] * magnitudeRelativeCoordinate)))
+#        fQ = np.sum(cohB*(np.sin(qX[i] * magnitudeRelativeCoordinate) / (qX[i] * magnitudeRelativeCoordinate)))
+        fQ = np.sum(cohB*np.sinc(qX[i] * magnitudeRelativeCoordinate / np.pi))
         fQlist[i] = (fQ)
 
     fQlist = fQlist / abs(np.sum(cohB)) #normalization
