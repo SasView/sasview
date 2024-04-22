@@ -231,7 +231,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         try:
             boxavg = box(self.data)
         except ValueError as ve:
-            logging.error(str(ve))
+            logging.warning(str(ve))
             self.restore(ev=None)
             self.update()
             self.draw()
@@ -467,6 +467,8 @@ class PointInteractor(BaseInteractor):
                                      visible=True)[0]
         # Flag to determine if this point has moved
         self.has_move = False
+        # Flag to verify if the last move was valid
+        self.valid_move = True
         # connecting the marker to allow it to be moved
         self.connect_markers([self.center_marker])
         # Update the figure
@@ -530,13 +532,16 @@ class PointInteractor(BaseInteractor):
             y - self.base.half_height >= self.base.data.ymin and\
             x + self.base.half_width <= self.base.data.xmax and\
             y + self.base.half_height <= self.base.data.ymax:
+            self.valid_move = True
             self.x = x
             self.y = y
             self.has_move = True
             self.base.update()
             self.base.draw()
         else:
-            logging.warning("The ROI must stay within the data please")
+            if self.valid_move == True:
+                self.valid_move = False
+                logging.warning("The ROI must stay within the data please")
 
     def setCursor(self, x, y):
         """
@@ -593,6 +598,8 @@ class VerticalDoubleLine(BaseInteractor):
                                         color=self.color, visible=True)[0]
         # Flag to determine if the lines have moved
         self.has_move = False
+        # Flag to verify if the last move was valid
+        self.valid_move = True
         # Connect the marker and draw the picture
         self.connect_markers([self.right_marker, self.right_line])
         self.update()
@@ -705,6 +712,7 @@ class VerticalDoubleLine(BaseInteractor):
         """
         if x - self.center_x > 0:
             if self.center_x - (x - self.center_x) >= self.base.data.xmin:
+                self.valid_move = True
                 self.x1 = x
                 self.half_width = self.x1 - self.center_x
                 self.x2 = self.center_x - self.half_width
@@ -712,9 +720,13 @@ class VerticalDoubleLine(BaseInteractor):
                 self.base.update()
                 self.base.draw()
             else:
-                logging.warning("The ROI must stay within the data please")
+                if self.valid_move == True:
+                    self.valid_move = False
+                    logging.warning("The ROI must stay within the data please")
         else:
-            logging.warning("you cannot go negative")
+            if self.valid_move == True:
+                self.valid_move = False
+                logging.warning("the ROI cannot be negative")
 
     def setCursor(self, x, y):
         """
@@ -769,6 +781,8 @@ class HorizontalDoubleLine(BaseInteractor):
                                           color=self.color, visible=True)[0]
         # Flag to determine if the lines have moved
         self.has_move = False
+        # Flag to verify if the last move was valid
+        self.valid_move = True
         # connect the marker and draw the picture
         self.connect_markers([self.top_marker, self.top_line])
         self.update()
@@ -882,6 +896,7 @@ class HorizontalDoubleLine(BaseInteractor):
         """
         if y - self.center_y > 0:
             if self.center_y - (y - self.center_y) >= self.base.data.ymin:
+                self.valid_move = True
                 self.y1 = y
                 self.half_height = self.y1 - self.center_y
                 self.y2 = self.center_y - self.half_height
@@ -889,9 +904,13 @@ class HorizontalDoubleLine(BaseInteractor):
                 self.base.update()
                 self.base.draw()
             else:
-                logging.warning("The ROI must stay within the data please")
+                if self.valid_move == True:
+                    self.valid_move = False
+                    logging.warning("The ROI must stay within the data please")
         else:
-            logging.warning("you cannot go negative")
+            if self.valid_move == True:
+                self.valid_move = False
+                logging.warning("the ROI cannot be negative")
 
     def setCursor(self, x, y):
         """

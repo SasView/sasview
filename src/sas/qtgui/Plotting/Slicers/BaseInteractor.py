@@ -140,9 +140,6 @@ class BaseInteractor(object):
         if inside:
             self.clickx, self.clicky = ev.xdata, ev.ydata
             self.move(ev.xdata, ev.ydata, ev)
-        else:
-            logging.warning("the handle cannot be moved outside the data")
-            #self.restore(ev)
         return True
 
     def onKey(self, ev):
