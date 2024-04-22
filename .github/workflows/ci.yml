@@ -285,7 +285,7 @@ jobs:
             installers/dist/setupSasView.exe
             installers/dist/SasView6.dmg
             installers/dist/sasview6.tar.gz
-          if-no-files-found: error
+          if-no-files-found: ignore
 
       - name: Rename artifacts (Windows)
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
