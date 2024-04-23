@@ -1,5 +1,24 @@
 import requests
-from sas.sascalc.calculator.ausaxs.architecture import OS, determine_os
+from enum import Enum
+
+class OS(Enum):
+    WIN = 0
+    LINUX = 1
+    MAC = 2
+    UNKNOWN = 3
+
+def determine_os():
+    """
+    Get the operating system of the current machine.
+    """
+    import platform
+    if platform.system() == "Windows":
+        return OS.WIN
+    elif platform.system() == "Linux":
+        return OS.LINUX
+    elif platform.system() == "Darwin":
+        return OS.MAC
+    return OS.UNKNOWN
 
 def get_ausaxs():
     _os = determine_os()
