@@ -813,6 +813,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.update_gui()
         # reset verification now we have loaded new files
         self.verify = False
+
         self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
         self.toggle_error_functionality()
 
