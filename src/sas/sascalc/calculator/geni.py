@@ -512,33 +512,33 @@ def _spin_weights(in_spin, out_spin):
     )
     return weight
 
-def radius_of_gyration(nuc_sld_data):
+def radius_of_gyration(nuc_sl_data):
     #Calculate Center of Mass(CoM) First
-    CoM = centerOfMass(nuc_sld_data)
+    CoM = centerOfMass(nuc_sl_data)
 
     #Now Calculate RoG
     guinier_num = guinier_den = rog_num = rog_den = 0.0
 
     dtype = np.dtype('double')
-    x, y, z = nuc_sld_data.pos_x, nuc_sld_data.pos_y, nuc_sld_data.pos_z
-    pix_symbol = nuc_sld_data.pix_symbol
+    x, y, z = nuc_sl_data.pos_x, nuc_sl_data.pos_y, nuc_sl_data.pos_z
+    pix_symbol = nuc_sl_data.pix_symbol
     coordinates = np.array([x, y, z], dtype=dtype).T
-    slds, masses = np.empty(len(pix_symbol), dtype), np.empty(len(pix_symbol), dtype)
+    coherentSLs, masses = np.empty(len(pix_symbol), dtype), np.empty(len(pix_symbol), dtype)
     for i, sym in enumerate(pix_symbol):
         atom = periodictable.elements.symbol(sym)
         masses[i] = atom.mass
-        slds[i] = atom.neutron.b_c
+        coherentSLs[i] = atom.neutron.b_c
         #solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
 
     #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
-    # contrastSLD = sld - solvent_sld         #femtometer
-    contrastSLDs = slds                       #femtometer
+    # This method only calculates RG of proteins in vacuum. Implementing the RG calcuation in solvent needs the input of the solvent volume.
+    contrastSLs = coherentSLs                       #femtometer
     rsq = np.sum((CoM - coordinates)**2, axis=1)
 
     rog_num = np.sum(masses * rsq)
     rog_den = np.sum(masses)
-    guinier_num = np.sum(contrastSLDs * rsq)
-    guinier_den = np.sum(contrastSLDs)
+    guinier_num = np.sum(contrastSLs * rsq)
+    guinier_den = np.sum(contrastSLs)
 
 
     if rog_den <= 0: #Should never happen as there are no zero or negative mass atoms
@@ -561,16 +561,16 @@ def radius_of_gyration(nuc_sld_data):
     return [rog_mass,guinier_value,rGMass]          #[String, String, Float], float used for plugin model
 
     
-def centerOfMass(nuc_sld_data):
+def centerOfMass(nuc_sl_data):
     """Calculate Center of Mass(CoM) of provided atom"""
     CoMnumerator= [0.0,0.0,0.0]
     CoMdenominator = [0.0,0.0,0.0]
 
-    for i in range(len(nuc_sld_data.pos_x)):
-        coordinates = [float(nuc_sld_data.pos_x[i]),float(nuc_sld_data.pos_y[i]),float(nuc_sld_data.pos_z[i])]
+    for i in range(len(nuc_sl_data.pos_x)):
+        coordinates = [float(nuc_sl_data.pos_x[i]),float(nuc_sl_data.pos_y[i]),float(nuc_sl_data.pos_z[i])]
         
         #Coh b - Coherent Scattering Length(fm)
-        cohB = periodictable.elements.symbol(nuc_sld_data.pix_symbol[i]).neutron.b_c
+        cohB = periodictable.elements.symbol(nuc_sl_data.pix_symbol[i]).neutron.b_c
 
         for j in range(3): #sets CiN
             CoMnumerator[j] += (coordinates[j]*cohB)
@@ -582,12 +582,12 @@ def centerOfMass(nuc_sld_data):
     
     return CoM
     
-def create_betaPlot(qX, nuc_sld_data, npts_x, formFactor):
+def create_betaPlot(qX, nuc_sl_data, npts_x, formFactor):
     """Carry out the compuation of beta Q using provided & calculated data
     Returns a list of BetaQ values
 
     """
-    fQ = FQ(qX, nuc_sld_data, npts_x)
+    fQ = FQ(qX, nuc_sl_data, npts_x)
     
     #Center Of Mass Calculation
     data_betaQ = (fQ**2)/formFactor
@@ -600,14 +600,14 @@ def create_betaPlot(qX, nuc_sld_data, npts_x, formFactor):
     return data_betaQ
 
 
-def FQ(qX, nuc_sld_data, npts_x):
+def FQ(qX, nuc_sl_data, npts_x):
     fQlist = np.empty(npts_x)
-    CoM = centerOfMass(nuc_sld_data)
-    r_x = np.subtract(nuc_sld_data.pos_x , CoM[0])
-    r_y = np.subtract(nuc_sld_data.pos_y , CoM[1])
-    r_z = np.subtract(nuc_sld_data.pos_z , CoM[2])
+    CoM = centerOfMass(nuc_sl_data)
+    r_x = np.subtract(nuc_sl_data.pos_x , CoM[0])
+    r_y = np.subtract(nuc_sl_data.pos_y , CoM[1])
+    r_z = np.subtract(nuc_sl_data.pos_z , CoM[2])
     magnitudeRelativeCoordinate = np.sqrt(np.power(r_x, 2) + np.power(r_y, 2) + np.power(r_z, 2))
-    cohB = np.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in nuc_sld_data.pix_symbol])
+    cohB = np.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in nuc_sl_data.pix_symbol])
     
     for i in range(npts_x):
 #        fQ = np.sum(cohB*(np.sin(qX[i] * magnitudeRelativeCoordinate) / (qX[i] * magnitudeRelativeCoordinate)))
