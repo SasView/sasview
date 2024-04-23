@@ -558,13 +558,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.check_for_magnetic_controls()
 
     def change_qValidator(self):
-        # GSC default values .3 and .0003; perhaps better to use values based on RG in future.
-        # note: Fitting window defaults to .5 and .0005. Perhaps better to use those?
-        # TODO: Use Rg calculation to estimate Q range and remove the coercion below
-        if float(self.txtQxMax.text()) == 0:
-            self.txtQxMax.setText("0.3")
-        if float(self.txtQxMin.text()) == 0:
-            self.txtQxMin.setText("0.0003")
+            #Default Q range to calculate P(Q) is from 0.0003 to 0.3 A^-1.
+            #The Q range needed for calculating P(Q) depends on the protein size.
+            #It is perhaps better to use values based on RG in future.
+            #For example: Q_min * RG = 0.2 and Q_max * RG = 15 could be a good start
+            #Note: Fitting window defaults to .5 and .0005.
+            if float(self.txtQxMax.text()) == 0:
+                self.txtQxMax.setText("0.3")
+            if float(self.txtQxMin.text()) == 0:
+                self.txtQxMin.setText("0.0003")    
 
         min = 0 if not self.checkboxLogSpace.isChecked() else 1e-10
         # 0 < Qmin&QMax <= 1000

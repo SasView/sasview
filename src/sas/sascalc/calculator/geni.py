@@ -512,8 +512,13 @@ def _spin_weights(in_spin, out_spin):
     )
     return weight
 
+
 def radius_of_gyration(nuc_sld_data):
-    #Calculate Center of Mass(CoM) First
+    """Calculate parameters related to the radius of gyration using and SLD profile.
+
+    :param nuc_sld_data: A
+    """
+    # Calculate Center of Mass(CoM) First
     CoM = centerOfMass(nuc_sld_data)
 
     #Now Calculate RoG
@@ -530,7 +535,8 @@ def radius_of_gyration(nuc_sld_data):
         slds[i] = atom.neutron.b_c
         #solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
 
-    #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
+    # TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise
+    #  approximation. Until then Solvent SLD does not impact RG - SLD.
     # contrastSLD = sld - solvent_sld         #femtometer
     contrastSLDs = slds                       #femtometer
     rsq = np.sum((CoM - coordinates)**2, axis=1)
