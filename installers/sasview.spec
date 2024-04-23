@@ -76,8 +76,8 @@ if platform.system() == 'Windows':
     ])
 
 a = Analysis(
-    ['sasview.py'],
-    pathex=[],
+    ['installertest.py'],
+    pathex=[/src/prototype/],
     binaries=[],
     datas=datas,
     hiddenimports=hiddenimports,
