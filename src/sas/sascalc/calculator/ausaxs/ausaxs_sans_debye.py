@@ -24,14 +24,16 @@ def attach_hooks():
     # as_file extracts the dll if it is in a zip file and probably deletes it afterwards,
     # so we have to do all operations on the dll inside the with statement
     with resources.as_file(resources.files("sas.sascalc.calculator.ausaxs.lib")) as loc:
-        if sys is OS.WIN:
+        if sys is OS.WIN and arch is Arch.AVX:
             path = loc.joinpath("libausaxs.dll")
-        elif sys is OS.LINUX:
+        elif sys is OS.LINUX and arch is Arch.AVX:
             path = loc.joinpath("libausaxs.so")
         elif sys is OS.MAC:
             path = loc.joinpath("libausaxs.dylib")
         else:
-            path = ""
+            ausaxs_state = lib_state.FAILED
+            logging.log("AUSAXS: Unsupported OS or CPU architecture. Using default Debye implementation.")
+            return
 
         ausaxs_state = lib_state.READY
         try:
