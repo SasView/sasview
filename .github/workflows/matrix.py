@@ -43,8 +43,8 @@ python_release_list = [
 
 # List of python versions to use for tests
 python_test_list = python_release_list + [
-    '3.9',
-    '3.10'
+    '3.10',
+    '3.11'
 ]
 
 
