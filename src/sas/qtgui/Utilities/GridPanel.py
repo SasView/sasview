@@ -18,7 +18,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
     windowClosedSignal = QtCore.Signal()
-    def __init__(self, parent = None, output_data=None):
+    def __init__(self, parent=None, output_data=None):
 
         super(BatchOutputPanel, self).__init__(parent._parent)
         self.setupUi(self)
@@ -179,15 +179,13 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         model_name = results[0][0].model.id
         self.tabWidget.setTabToolTip(self.tabWidget.count()-1, model_name)
         self.data_dict[page_name] = results
-
-    @classmethod
-    def onHelp(cls):
+    
+    def onHelp(self):
         """
         Open a local url in the default browser
         """
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        GuiUtils.showHelp(url)
-
+        self.parent.showHelp(url)
 
     def onPlot(self):
         """
@@ -257,7 +255,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         time_str = time.strftime("%b %d %H %M of %Y", t)
         default_name = "Batch_Fitting_"+time_str+".csv"
 
-        wildcard = "CSV files (*.csv);;"
+        wildcard = "CSV files (*.csv)"
         caption =  'Save As'
         directory =  default_name
         filter =  wildcard
@@ -443,6 +441,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         super(BatchInversionOutputPanel, self).__init__(parent._parent, output_data)
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
+        self.parent = parent
 
     def setupTable(self, widget=None,  data=None):
         """
@@ -492,17 +491,12 @@ class BatchInversionOutputPanel(BatchOutputPanel):
 
         self.tblParams.resizeColumnsToContents()
 
-    @classmethod
-    def onHelp(cls):
+    def onHelp(self):
         """
         Open a local url in the default browser
         """
-        location = GuiUtils.HELP_DIRECTORY_LOCATION
         url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        try:
-            webbrowser.open('file://' + os.path.realpath(location + url))
-        except webbrowser.Error as ex:
-            logging.warning("Cannot display help. %s" % ex)
+        self.parent.showHelp(url)
 
     def closeEvent(self, event):
         """Tell the parent window the window closed"""

@@ -49,7 +49,7 @@ class PlotterBaseTest:
         assert isinstance(plotter.canvas, FigureCanvas)
         assert isinstance(plotter.properties, ScaleProperties)
 
-        assert plotter._data == []
+        assert len(plotter._data) == 0
         assert plotter._xscale == 'log'
         assert plotter._yscale == 'log'
         assert plotter.scale == 'linear'

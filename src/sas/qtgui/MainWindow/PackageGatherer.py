@@ -86,7 +86,7 @@ class PackageGatherer:
                             'dis', 'distutils', 'doctest', 'email', 'encodings', 'ensurepip', 'enum', 'filecmp',
                             'fileinput', 'fnmatch', 'formatter', 'fractions', 'ftplib', 'functools', 'genericpath',
                             'getopt', 'getpass', 'gettext', 'glob', 'graphlib', 'gzip', 'hashlib', 'heapq', 'hmac',
-                            'html', 'http', 'idlelib', 'imaplib', 'imghdr', 'imp', 'importlib', 'inspect', 'io',
+                            'html', 'http', 'idlelib', 'imaplib', 'imghdr', 'importlib', 'inspect', 'io',
                             'ipaddress', 'json', 'keyword', 'lib2to3', 'linecache', 'locale', 'logging', 'lzma',
                             'mailbox', 'mailcap', 'mimetypes', 'modulefinder', 'msilib', 'multiprocessing', 'netrc',
                             'nntplib', 'ntpath', 'nturl2path', 'numbers', 'opcode', 'operator', 'optparse', 'os',

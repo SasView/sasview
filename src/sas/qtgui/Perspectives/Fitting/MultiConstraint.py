@@ -30,10 +30,6 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         self.setupUi(self)
         self.setModal(True)
 
-        # disable the context help icon
-        windowFlags = self.windowFlags()
-        self.setWindowFlags(windowFlags & ~QtCore.Qt.WindowContextHelpButtonHint)
-
         self.params = params
         self.parent = parent
         # Text of the constraint
@@ -106,6 +102,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         Add visual cues when formula is incorrect
         """
+        # temporarily disable validation, as not yet fully operational
+        return
+
         # Don't validate if requested
         if not self.validate: return
 

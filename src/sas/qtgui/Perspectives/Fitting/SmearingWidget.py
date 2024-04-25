@@ -37,8 +37,8 @@ class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
 
 SMEARING_1D = ["Custom Pinhole Smear", "Custom Slit Smear"]
 SMEARING_2D = ["Custom Pinhole Smear"]
+SMEARING_SESANS = "Hankel Transform"
 SMEARING_QD = "Use dQ Data"
-
 MODEL = [
     'SMEARING',
     'PINHOLE_MIN',
@@ -150,10 +150,13 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         if self.data is None:
             self.setElementsVisibility(False)
             return
-        # Find out if data has dQ
+        # Find out if data has dQ or is SESANS
         self.current_smearer = smear_selection(self.data, self.kernel_model)
         self.setSmearInfo()
-        if self.smear_type is not None:
+        if self.smear_type == "Hankel Transform":
+            self.cbSmearing.addItem(SMEARING_SESANS)
+            index_to_show = 1
+        elif self.smear_type is not None:
             self.cbSmearing.addItem(SMEARING_QD)
             index_to_show = 1 if keep_order else index_to_show
 
@@ -195,6 +198,9 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.setElementsVisibility(True)
             self.setSlitLabels()
             self.onSlitSmear()
+        elif text == "Hankel Transform":
+            self.setElementsVisibility(False)
+            self.cbSmearing.setEnabled(False)  # turn off ability to change smearing; no other options for sesans
         self.smearingChangedSignal.emit()
 
     def onModelChange(self):
@@ -471,9 +477,14 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                 self.smear_type = "Pinhole2d"
                 self.dq_l = GuiUtils.formatNumber(np.average(data.dqx_data/np.abs(data.qx_data))*100., high=True)
                 self.dq_r = GuiUtils.formatNumber(np.average(data.dqy_data/np.abs(data.qy_data))*100., high=True)
+        # Check for SESANS data - currently no resolution functions are available for SESANS data
+        # The Hankel transform is treated like other resolution functions.
+        elif (isinstance(self.smearer(), PySmear)
+              and isinstance(self.smearer().resolution, SesansTransform)):
+            self.smear_type = "Hankel Transform"
         # Check for pinhole smearing and get min max if it is.
         elif (isinstance(self.smearer(), PySmear)
-              and isinstance(self.smearer().resolution, (Pinhole1D, SesansTransform))):
+              and isinstance(self.smearer().resolution, Pinhole1D)):
             self.smear_type = "Pinhole"
             self.dq_r = GuiUtils.formatNumber(data.dx[0]/data.x[0] *100., high=True)
             self.dq_l = GuiUtils.formatNumber(data.dx[-1]/data.x[-1] *100., high=True)

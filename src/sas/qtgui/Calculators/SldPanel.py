@@ -95,8 +95,6 @@ class SldPanel(QtWidgets.QDialog):
         self.manager = parent
 
         self.setupUi()
-        # disable the context help icon
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setFixedSize(self.minimumSizeHint())
 
         self.setupModel()
@@ -118,11 +116,8 @@ class SldPanel(QtWidgets.QDialog):
         self.ui.setupUi(self)
 
         # set validators
-        # TODO: GuiUtils.FormulaValidator() crashes with Qt5 - fix
-        #self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
-
-        # No need for recalculate
-        self.ui.recalculateButton.setVisible(False)
+        # Chemical formula is checked via periodictable.formula module.
+        self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
 
         rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
@@ -132,7 +127,7 @@ class SldPanel(QtWidgets.QDialog):
         # signals
         self.ui.helpButton.clicked.connect(self.displayHelp)
         self.ui.closeButton.clicked.connect(self.closePanel)
-        self.ui.recalculateButton.clicked.connect(self.calculateSLD)
+        self.ui.calculateButton.clicked.connect(self.calculateSLD)
 
     def calculateSLD(self):
         self.recalculateSLD()
@@ -148,11 +143,6 @@ class SldPanel(QtWidgets.QDialog):
             self.model.setItem(key, QtGui.QStandardItem())
 
         #self.model.dataChanged.connect(self.dataChanged)
-
-        self.ui.editMassDensity.textChanged.connect(self.recalculateSLD)
-        self.ui.editMolecularFormula.textChanged.connect(self.recalculateSLD)
-        self.ui.editNeutronWavelength.textChanged.connect(self.recalculateSLD)
-        self.ui.editXrayWavelength.textChanged.connect(self.recalculateSLD)
 
         self.modelReset()
 

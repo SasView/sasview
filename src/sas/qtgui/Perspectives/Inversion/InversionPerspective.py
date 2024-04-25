@@ -439,7 +439,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
         """
         if self.batchResultsWindow is None:
             self.batchResultsWindow = BatchInversionOutputPanel(
-                parent=self, output_data=self.batchResults)
+                parent=self._parent, output_data=self.batchResults)
         else:
             self.batchResultsWindow.setupTable(self.batchResults)
         self.batchResultsWindow.show()

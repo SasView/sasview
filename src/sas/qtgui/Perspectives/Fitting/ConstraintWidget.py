@@ -1212,7 +1212,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 if model_name != model:
                     continue
                 # check/uncheck item
-                self.tblConstraints.item(row,0).setCheckState(int(check_state))
+                if 'Unchecked' in check_state:
+                    self.tblConstraints.item(row, 0).setCheckState(QtCore.Qt.Unchecked)
+                else:
+                    self.tblConstraints.item(row, 0).setCheckState(QtCore.Qt.Checked)
 
         # fit/batch radio
         isBatch = parameters['current_type'][0] == 'BatchPage'

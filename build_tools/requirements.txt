@@ -9,16 +9,12 @@ tinycc
 h5py
 sphinx
 pyparsing 
-html5lib 
-pybind11 
+html5lib
 appdirs
-six 
-numba 
-mako 
+numba
 ipython 
 qtconsole 
-xhtml2pdf 
-pylint
+xhtml2pdf
 periodictable 
 uncertainties 
 matplotlib
@@ -37,3 +33,4 @@ zope
 superqt
 pyopengl
 pyopengl_accelerate
+sphinx
