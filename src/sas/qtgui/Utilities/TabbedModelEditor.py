@@ -35,6 +35,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # globals
         self.filename = ""
         self.is_python = True
+        self.is_documentation = False
         self.window_title = self.windowTitle()
         self.edit_only = edit_only
         self.load_file = load_file.lstrip("//") if load_file else None
@@ -149,6 +150,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             else:
                 filename = MAIN_DOC_SRC / self.load_file.replace(".html", ".rst")
                 self.is_python = False
+                self.is_documentation = True
         else:
             plugin_location = models.find_plugins_dir()
             filename = QtWidgets.QFileDialog.getOpenFileName(
@@ -192,7 +194,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.tabWidget.setTabText(0, display_name)
 
         # Check the validity of loaded model if the model is python
-        if self.is_python is True:
+        if self.is_python:
             error_line = self.checkModel(plugin_text)
             if error_line > 0:
                 # select bad line
@@ -459,13 +461,17 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msg = str(filename) + " successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
-        self.regenerateDocumentation()
+        if self.is_documentation:
+            self.regenerateDocumentation()
     
     def regenerateDocumentation(self):
         """
         Defer to subprocess the documentation regeneration process
         """
-        if self.parent.helpWindow:
+        # TODO: Move the doc regen methods out of the documentation window - this forces the window to remain open
+        #  in order for the documentation regeneration process to run.
+        # The regen method is part of the documentation window. If the window is closed, the method no longer exists.
+        if hasattr(self.parent, 'helpWindow'):
             self.parent.helpWindow.regenerateHtml(self.filename)
 
     def canWriteModel(self, model=None, full_path=""):
