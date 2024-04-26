@@ -528,20 +528,21 @@ class PointInteractor(BaseInteractor):
         is within the data. Here we check to make sure that the center move
         does not cause any part of the ROI box to move outside the data.
         """
-        if x - self.base.half_width >= self.base.data.xmin and\
-            y - self.base.half_height >= self.base.data.ymin and\
-            x + self.base.half_width <= self.base.data.xmax and\
-            y + self.base.half_height <= self.base.data.ymax:
-            self.valid_move = True
-            self.x = x
-            self.y = y
-            self.has_move = True
-            self.base.update()
-            self.base.draw()
+        if x - self.base.half_width < self.base.data.xmin:
+            self.x = self.base.data.xmin + self.base.half_width
+        elif x + self.base.half_width > self.base.data.xmax:
+            self.x = self.base.data.xmax - self.base.half_width
         else:
-            if self.valid_move == True:
-                self.valid_move = False
-                logging.warning("The ROI must stay within the data please")
+            self.x = x
+        if y - self.base.half_height < self.base.data.ymin:
+            self.y = self.base.data.ymin + self.base.half_height
+        elif y + self.base.half_height > self.base.data.ymax:
+            self.y = self.base.data.ymax - self.base.half_height
+        else:
+            self.y = y
+        self.has_move = True
+        self.base.update()
+        self.base.draw()
 
     def setCursor(self, x, y):
         """
@@ -711,18 +712,16 @@ class VerticalDoubleLine(BaseInteractor):
         called on moveend(ev).
         """
         if x - self.center_x > 0:
-            if self.center_x - (x - self.center_x) >= self.base.data.xmin:
-                self.valid_move = True
-                self.x1 = x
-                self.half_width = self.x1 - self.center_x
-                self.x2 = self.center_x - self.half_width
-                self.has_move = True
-                self.base.update()
-                self.base.draw()
+            self.valid_move = True
+            if self.center_x - (x - self.center_x) < self.base.data.xmin:
+                self.x1 = self.center_x - (self.base.data.xmin - self.center_x)
             else:
-                if self.valid_move == True:
-                    self.valid_move = False
-                    logging.warning("The ROI must stay within the data please")
+                self.x1 = x
+            self.half_width = self.x1 - self.center_x
+            self.x2 = self.center_x - self.half_width
+            self.has_move = True
+            self.base.update()
+            self.base.draw()
         else:
             if self.valid_move == True:
                 self.valid_move = False
@@ -895,18 +894,16 @@ class HorizontalDoubleLine(BaseInteractor):
         called on moveend(ev).
         """
         if y - self.center_y > 0:
-            if self.center_y - (y - self.center_y) >= self.base.data.ymin:
-                self.valid_move = True
-                self.y1 = y
-                self.half_height = self.y1 - self.center_y
-                self.y2 = self.center_y - self.half_height
-                self.has_move = True
-                self.base.update()
-                self.base.draw()
+            self.valid_move = True
+            if self.center_y - (y - self.center_y) < self.base.data.ymin:
+                self.y1 = self.center_y - (self.base.data.ymin - self.center_y)
             else:
-                if self.valid_move == True:
-                    self.valid_move = False
-                    logging.warning("The ROI must stay within the data please")
+                self.y1 = y
+            self.half_height = self.y1 - self.center_y
+            self.y2 = self.center_y - self.half_height
+            self.has_move = True
+            self.base.update()
+            self.base.draw()
         else:
             if self.valid_move == True:
                 self.valid_move = False
