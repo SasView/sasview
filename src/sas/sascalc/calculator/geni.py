@@ -522,6 +522,7 @@ def radius_of_gyration(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> tuple[str, str, f
     """Calculate parameters related to the radius of gyration using and SLD profile.
 
     :param nuc_sl_data: A scattering length object for a series of atomic points in space
+    :return: A tuple of the string representation of the radius of gyration, Guinier slope, and Rg as a float.
     """
     # Calculate Center of Mass First
     c_o_m = center_of_mass(nuc_sl_data)
@@ -572,7 +573,10 @@ def radius_of_gyration(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> tuple[str, str, f
 
     
 def center_of_mass(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> list[float]:
-    """Calculate Center of Mass(CoM) of provided molecule using an SL profile"""
+    """Calculate Center of Mass(CoM) of provided molecule using an SL profile
+
+    :param nuc_sl_data: A coordinate data object (MagSLD or OMF2SLD)
+    :return: A list of the calculated spatial center of mass, given as cartesian coordinates."""
     masses = np.asarray([0.0, 0.0, 0.0])
     densities = np.asarray([0.0, 0.0, 0.0])
 
@@ -597,9 +601,11 @@ def center_of_mass(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> list[float]:
 
 def create_beta_plot(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD], form_factor: np.ndarray) -> np.ndarray:
     """Carry out the computation of beta Q using provided & calculated data
-    Returns a list of BetaQ values
 
-    """
+    :param q_x: The Q values where the beta will be calculated.
+    :param nuc_sl_data: A coordinate data object (MagSLD or OMF2SLD)
+    :param form_factor: The form factor calculated prior to applying the beta approximation.
+    :return: An array of form factor values with the beta approximation applied."""
     f_q = f_of_q(q_x, nuc_sl_data)
     
     # Center Of Mass Calculation
@@ -613,6 +619,11 @@ def create_beta_plot(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD], form_
 
 
 def f_of_q(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD]) -> np.ndarray:
+    """Compute the base F(Q) calculation based from the nuclear data.
+
+    :param q_x: The Q values where the beta will be calculated.
+    :param nuc_sl_data: A coordinate data object (MagSLD or OMF2SLD)
+    :return: An array of form factor data."""
     c_o_m = center_of_mass(nuc_sl_data)
     r_x = np.subtract(nuc_sl_data.pos_x, c_o_m[0])
     r_y = np.subtract(nuc_sl_data.pos_y, c_o_m[1])
