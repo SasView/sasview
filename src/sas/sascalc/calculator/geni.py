@@ -3,9 +3,14 @@ Compute scattering from a set of points.
 For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 """
 import os
+import logging
 
 import numpy as np
 import periodictable
+
+from typing import Union
+
+from sas.sascalc.calculator.sas_gen import MagSLD, OMF2SLD
 
 
 try:
@@ -513,44 +518,44 @@ def _spin_weights(in_spin, out_spin):
     return weight
 
 
-def radius_of_gyration(nuc_sl_data):
+def radius_of_gyration(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> tuple[str, str, float]:
     """Calculate parameters related to the radius of gyration using and SLD profile.
 
-    :param nuc_sld_data: A
+    :param nuc_sl_data: A scattering length object for a series of atomic points in space
     """
-    # Calculate Center of Mass(CoM) First
-    CoM = centerOfMass(nuc_sl_data)
+    # Calculate Center of Mass First
+    c_o_m = center_of_mass(nuc_sl_data)
 
-    #Now Calculate RoG
-    guinier_num = guinier_den = rog_num = rog_den = 0.0
-
-    dtype = np.dtype('double')
-    x, y, z = nuc_sl_data.pos_x, nuc_sl_data.pos_y, nuc_sl_data.pos_z
+    x = nuc_sl_data.pos_x
+    y = nuc_sl_data.pos_y
+    z = nuc_sl_data.pos_z
     pix_symbol = nuc_sl_data.pix_symbol
-    coordinates = np.array([x, y, z], dtype=dtype).T
-    coherentSLs, masses = np.empty(len(pix_symbol), dtype), np.empty(len(pix_symbol), dtype)
+    coordinates = np.array([x, y, z]).T
+    coherent_sls, masses = np.empty(len(pix_symbol)), np.empty(len(pix_symbol))
     for i, sym in enumerate(pix_symbol):
         atom = periodictable.elements.symbol(sym)
         masses[i] = atom.mass
-        coherentSLs[i] = atom.neutron.b_c
-        #solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
+        coherent_sls[i] = atom.neutron.b_c
+        # solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
 
-    #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
-    # This method only calculates RG of proteins in vacuum. Implementing the RG calcuation in solvent needs the input of the solvent volume.
-    contrastSLs = coherentSLs                       #femtometer
-    rsq = np.sum((CoM - coordinates)**2, axis=1)
+    # TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a imprecise
+    #  approximation. Until then Solvent SLD does not impact RG - SLD.
+    #  This method only calculates RG of proteins in vacuum. Implementing the RG calcuation in solvent needs
+    #  the input of the solvent volume.
+    contrast_sls = coherent_sls  # femtometer
+    rsq = np.sum((c_o_m - coordinates)**2, axis=1)
 
     rog_num = np.sum(masses * rsq)
     rog_den = np.sum(masses)
-    guinier_num = np.sum(contrastSLs * rsq)
-    guinier_den = np.sum(contrastSLs)
-
+    guinier_num = np.sum(contrast_sls * rsq)
+    guinier_den = np.sum(contrast_sls)
 
     if rog_den <= 0: #Should never happen as there are no zero or negative mass atoms
         rog_mass = "NaN"
+        r_g_mass = 0.0
         logging.warning("Atomic Mass is zero for all atoms in the system.")
     else:
-        rGMass = np.sqrt(rog_num/rog_den)
+        r_g_mass = np.sqrt(rog_num/rog_den)
         rog_mass = (str(round(np.sqrt(rog_num/rog_den),1)) + " Å")
 
     #Avoid division by zero - May occur through contrast matching
@@ -558,34 +563,36 @@ def radius_of_gyration(nuc_sl_data):
         guinier_value = "NaN"
         logging.warning("Effective Coherent Scattering Length is zero for all atoms in the system.")
     elif (guinier_num/guinier_den) < 0:
-        guinier_value = (str(round(np.sqrt(-guinier_num/guinier_den),1)) + " Å")
+        guinier_value = (str(round(np.sqrt(-guinier_num/guinier_den), 1)) + " Å")
         logging.warning("Radius of Gyration Squared is negative. R(G)^2 is assumed to be |R(G)|* R(G).")
     else:
-        guinier_value = (str(round(np.sqrt(guinier_num/guinier_den),1)) + " Å")
+        guinier_value = (str(round(np.sqrt(guinier_num/guinier_den), 1)) + " Å")
 
-    return [rog_mass,guinier_value,rGMass]          #[String, String, Float], float used for plugin model
+    return rog_mass, guinier_value, r_g_mass  # (String, String, Float), float used for plugin model
 
     
-def centerOfMass(nuc_sl_data):
-    """Calculate Center of Mass(CoM) of provided atom"""
-    CoMnumerator= [0.0,0.0,0.0]
-    CoMdenominator = [0.0,0.0,0.0]
+def center_of_mass(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> list[float]:
+    """Calculate Center of Mass(CoM) of provided molecule using an SL profile"""
+    masses = np.asarray([0.0, 0.0, 0.0])
+    densities = np.asarray([0.0, 0.0, 0.0])
+
+    # Only call periodictable once per element -> minimizes calculation time
+    coh_b_storage = {}
 
     for i in range(len(nuc_sl_data.pos_x)):
-        coordinates = [float(nuc_sl_data.pos_x[i]),float(nuc_sl_data.pos_y[i]),float(nuc_sl_data.pos_z[i])]
+        coordinates = np.asarray([float(nuc_sl_data.pos_x[i]), float(nuc_sl_data.pos_y[i]), float(nuc_sl_data.pos_z[i])])
         
         #Coh b - Coherent Scattering Length(fm)
-        cohB = periodictable.elements.symbol(nuc_sl_data.pix_symbol[i]).neutron.b_c
+        symbol = nuc_sl_data.pix_symbol[i]
+        coh_b = coh_b_storage.get(symbol, periodictable.elements.symbol(symbol).neutron.b_c)
+        coh_b_storage[symbol] = coh_b
 
-        for j in range(3): #sets CiN
-            CoMnumerator[j] += (coordinates[j]*cohB)
-            CoMdenominator[j] += cohB
+        masses += (coordinates*coh_b)
+        densities += coh_b
 
-    CoM = [] 
-    for i in range(3):   
-        CoM.append(CoMnumerator[i]/CoMdenominator[i] if CoMdenominator != 0 else 0) #center of mass, test for division by zero
+    c_o_m = np.divide(masses, densities)
     
-    return CoM
+    return c_o_m
     
 def create_betaPlot(qX, nuc_sl_data, npts_x, formFactor):
     """Carry out the compuation of beta Q using provided & calculated data
@@ -607,7 +614,7 @@ def create_betaPlot(qX, nuc_sl_data, npts_x, formFactor):
 
 def FQ(qX, nuc_sl_data, npts_x):
     fQlist = np.empty(npts_x)
-    CoM = centerOfMass(nuc_sl_data)
+    CoM = center_of_mass(nuc_sl_data)
     r_x = np.subtract(nuc_sl_data.pos_x , CoM[0])
     r_y = np.subtract(nuc_sl_data.pos_y , CoM[1])
     r_z = np.subtract(nuc_sl_data.pos_z , CoM[2])
