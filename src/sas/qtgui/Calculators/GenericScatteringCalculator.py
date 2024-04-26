@@ -28,7 +28,7 @@ from sasdata.dataloader.data_info import Detector, Source
 from sas.system.version import __version__
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.fit import models
-from sas.sascalc.calculator.geni import radius_of_gyration, create_betaPlot, FQ
+from sas.sascalc.calculator.geni import radius_of_gyration, create_beta_plot, f_of_q
 import sas.sascalc.calculator.gsc_model as gsc_model
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
@@ -1451,10 +1451,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # if Beta(Q) Calculation has been requested, run calculation
         if self.is_beta:
-            self.data_betaQ  = create_betaPlot(self.xValues, self.nuc_sld_data, self.npts_x, self.data_to_plot)
+            self.data_betaQ  = create_beta_plot(self.xValues, self.nuc_sld_data, self.data_to_plot)
         
         if self.checkboxPluginModel.isChecked():
-            self.fQ = FQ(self.xValues, self.nuc_sld_data, self.npts_x)
+            self.fQ = f_of_q(self.xValues, self.nuc_sld_data)
             model_str, model_path = gsc_model.generate_plugin(self.txtFileName.text(), self.data_to_plot, self.xValues,
                                                               self.fQ, self.rGMass)
             TabbedModelEditor.writeFile(model_path, model_str)

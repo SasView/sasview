@@ -593,41 +593,35 @@ def center_of_mass(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> list[float]:
     c_o_m = np.divide(masses, densities)
     
     return c_o_m
-    
-def create_betaPlot(qX, nuc_sl_data, npts_x, formFactor):
-    """Carry out the compuation of beta Q using provided & calculated data
+
+
+def create_beta_plot(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD], form_factor: np.ndarray) -> np.ndarray:
+    """Carry out the computation of beta Q using provided & calculated data
     Returns a list of BetaQ values
 
     """
-    fQ = FQ(qX, nuc_sl_data, npts_x)
+    f_q = f_of_q(q_x, nuc_sl_data)
     
-    #Center Of Mass Calculation
-    data_betaQ = (fQ**2)/formFactor
-
+    # Center Of Mass Calculation
+    data_beta_q = (f_q**2) / form_factor
     
-    #Scale Beta Q to 0-1
-    scalingFactor = data_betaQ[0]
-    data_betaQ = data_betaQ / scalingFactor
+    # Scale Beta Q to 0-1
+    scaling_factor = data_beta_q[0]
+    data_beta_q = data_beta_q / scaling_factor
 
-    return data_betaQ
+    return data_beta_q
 
 
-def FQ(qX, nuc_sl_data, npts_x):
-    fQlist = np.empty(npts_x)
-    CoM = center_of_mass(nuc_sl_data)
-    r_x = np.subtract(nuc_sl_data.pos_x , CoM[0])
-    r_y = np.subtract(nuc_sl_data.pos_y , CoM[1])
-    r_z = np.subtract(nuc_sl_data.pos_z , CoM[2])
-    magnitudeRelativeCoordinate = np.sqrt(np.power(r_x, 2) + np.power(r_y, 2) + np.power(r_z, 2))
-    cohB = np.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in nuc_sl_data.pix_symbol])
-    
-    for i in range(npts_x):
-#        fQ = np.sum(cohB*(np.sin(qX[i] * magnitudeRelativeCoordinate) / (qX[i] * magnitudeRelativeCoordinate)))
-        fQ = np.sum(cohB*np.sinc(qX[i] * magnitudeRelativeCoordinate / np.pi))
-        fQlist[i] = (fQ)
+def f_of_q(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD]) -> np.ndarray:
+    c_o_m = center_of_mass(nuc_sl_data)
+    r_x = np.subtract(nuc_sl_data.pos_x, c_o_m[0])
+    r_y = np.subtract(nuc_sl_data.pos_y, c_o_m[1])
+    r_z = np.subtract(nuc_sl_data.pos_z, c_o_m[2])
+    magnitude_relative_coordinate = np.sqrt(np.power(r_x, 2) + np.power(r_y, 2) + np.power(r_z, 2))
+    coh_b = np.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in nuc_sl_data.pix_symbol])
 
-    fQlist = fQlist / abs(np.sum(cohB)) #normalization
-
-    return fQlist
+    f_of_q_list = [np.sum(coh_b * np.sinc(q_x[i] * magnitude_relative_coordinate / np.pi)) for i in range(len(q_x))]
+    f_of_q_list = np.asarray(f_of_q_list) / abs(np.sum(coh_b))  # normalization
+    return f_of_q_list
 
 
