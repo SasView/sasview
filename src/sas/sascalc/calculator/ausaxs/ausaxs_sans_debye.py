@@ -14,7 +14,7 @@ class lib_state(Enum):
 ausaxs_state = lib_state.UNINITIALIZED
 ausaxs = None
 
-def attach_hooks():
+def _attach_hooks():
     global ausaxs_state
     global ausaxs
 
@@ -52,12 +52,26 @@ def attach_hooks():
             logging.warning("Failed to hook into AUSAXS library, using default Debye implementation")
             print(e)
 
+def _invoke(q, coords, w, queue):
+    _Iq = (ct.c_double * len(q))()
+    _nq = ct.c_int(len(q))
+    _nc = ct.c_int(len(w))
+    _q = q.ctypes.data_as(ct.POINTER(ct.c_double))
+    _x = coords[0:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    _y = coords[1:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    _z = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    _w = w.ctypes.data_as(ct.POINTER(ct.c_double))
+    _status = ct.c_int()
+    ausaxs.evaluate_sans_debye(_q, _x, _y, _z, _w, _nq, _nc, ct.byref(_status), _Iq)
+    queue.put(np.array(_Iq))
+    queue.put(_status.value)
+
 def ausaxs_available():
     """
     Check if the AUSAXS library is available.
     """
     if ausaxs_state is lib_state.UNINITIALIZED:
-        attach_hooks()
+        _attach_hooks()
     return ausaxs_state is lib_state.READY
 
 def evaluate_sans_debye(q, coords, w):
@@ -70,28 +84,14 @@ def evaluate_sans_debye(q, coords, w):
     """
     global ausaxs_state
     if ausaxs_state is lib_state.UNINITIALIZED:
-        attach_hooks()
+        _attach_hooks()
     if ausaxs_state is lib_state.FAILED:
         from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
         return sasview_sans_debye(q, coords, w)
     
-    def invoke(q, coords, w, queue):
-        _Iq = (ct.c_double * len(q))()
-        _nq = ct.c_int(len(q))
-        _nc = ct.c_int(len(w))
-        _q = q.ctypes.data_as(ct.POINTER(ct.c_double))
-        _x = coords[0:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-        _y = coords[1:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-        _z = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-        _w = w.ctypes.data_as(ct.POINTER(ct.c_double))
-        _status = ct.c_int()
-        ausaxs.evaluate_sans_debye(_q, _x, _y, _z, _w, _nq, _nc, ct.byref(_status), _Iq)
-        queue.put(np.array(_Iq))
-        queue.put(_status.value)
-
     # invoke the function as a subprocess to avoid propagating segfaults
     queue = multiprocessing.Queue()
-    p = multiprocessing.Process(target=invoke, args=(q, coords, w, queue))
+    p = multiprocessing.Process(target=_invoke, args=(q, coords, w, queue))
     p.start()
     p.join()
     if p.exitcode == 0:
