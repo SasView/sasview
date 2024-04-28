@@ -96,6 +96,9 @@ def evaluate_sans_debye(q, coords, w):
     if p.exitcode == 0:
         _Iq = queue.get()
         status = queue.get()
+    else:
+        logging.error("AUSAXS calculator seems to have crashed. Using default Debye implementation instead.")
+        ausaxs_state = lib_state.FAILED
 
     if (p.exitcode != 0 or status != 0):
         logging.error("AUSAXS calculator terminated unexpectedly. Using default Debye implementation instead.")

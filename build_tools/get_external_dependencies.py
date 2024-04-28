@@ -7,7 +7,7 @@ class OS(Enum):
     MAC = 2
     UNKNOWN = 3
 
-def determine_os():
+def get_os():
     """
     Get the operating system of the current machine.
     """
@@ -21,7 +21,7 @@ def determine_os():
     return OS.UNKNOWN
 
 def get_ausaxs():
-    _os = determine_os()
+    _os = get_os()
     url = "https://github.com/SasView/AUSAXS/releases/latest/download/"
     libs = None
     if _os == OS.WIN:
@@ -38,7 +38,7 @@ def get_ausaxs():
 
             # disable macos for now by renaming the local file
             if _os is OS.MAC:
-                lib = "libausaxs.dylib.disabled"
+                lib = "libausaxs.dylib"
 
             with open(base_loc+lib, "wb") as f:
                 f.write(response.content)
