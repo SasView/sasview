@@ -68,6 +68,7 @@ def evaluate_sans_debye(q, coords, w):
     *coords* are the sample points.
     *w* is the weight associated with each point.
     """
+    global ausaxs_state
     if ausaxs_state is lib_state.UNINITIALIZED:
         attach_hooks()
     if ausaxs_state is lib_state.FAILED:
