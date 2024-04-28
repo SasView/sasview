@@ -29,7 +29,7 @@ def attach_hooks():
             logging.log("AUSAXS: Unsupported OS. Using default Debye implementation.")
             return
 
-        path = loc.joinpath("libausaxs", ext)
+        path = loc.joinpath("libausaxs" + ext)
         ausaxs_state = lib_state.READY
         try:
             # evaluate_sans_debye func
@@ -85,14 +85,18 @@ def evaluate_sans_debye(q, coords, w):
         _w = w.ctypes.data_as(ct.POINTER(ct.c_double))
         _status = ct.c_int()
         ausaxs.evaluate_sans_debye(_q, _x, _y, _z, _w, _nq, _nc, ct.byref(_status), _Iq)
-        queue.put([_Iq, _status.value])
+        queue.put(np.array(_Iq))
+        queue.put(_status.value)
 
     # invoke the function as a subprocess to avoid propagating segfaults
     queue = multiprocessing.Queue()
     p = multiprocessing.Process(target=invoke, args=(q, coords, w, queue))
     p.start()
     p.join()
-    _Iq, status = queue.get()
+    if p.exitcode == 0:
+        _Iq = queue.get()
+        status = queue.get()
+
     if (p.exitcode != 0 or status != 0):
         logging.error("AUSAXS calculator terminated unexpectedly. Using default Debye implementation instead.")
         from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
