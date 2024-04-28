@@ -78,7 +78,9 @@ def _invoke_independent(q, coords, w, queue):
     """
     ausaxs, ausaxs_state = _attach_hooks()
     if not ausaxs_state is lib_state.READY:
-        return None, -1
+        queue.put(np.array(Iq))
+        queue.put(-1)
+        return
     Iq, nq, nc, q, x, y, z, w, status = _prepare_invocation(q, coords, w)
     ausaxs.evaluate_sans_debye(q, x, y, z, w, nq, nc, ct.byref(status), Iq)
     queue.put(np.array(Iq))
@@ -112,8 +114,8 @@ def evaluate_sans_debye(q, coords, w):
         p.start()
         p.join()
         if p.exitcode == 0:
-            Iq = queue.get()
-            status = queue.get()
+            Iq = queue.get_nowait()
+            status = queue.get_nowait()
             first_time = False
         else:
             logging.error("AUSAXS calculator seems to have crashed. Using default Debye implementation instead.")
