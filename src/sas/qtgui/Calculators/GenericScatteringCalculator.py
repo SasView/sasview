@@ -1401,7 +1401,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         chunk_size = 32 if self.is_avg else 256
         out = []
         # the 1D AUSAXS calculator cannot be chunked
-        if self.is_avg & len(input[1]) is 0:
+        if self.is_avg and not len(input[1]):
             self.data_to_plot = self.model.runXY(input)
 
         # chunk the other calculations to allow cancellation        

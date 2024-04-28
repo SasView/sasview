@@ -1,8 +1,9 @@
 import ctypes as ct
 import numpy as np
 import logging
-from enum import Enum
+import multiprocessing
 import importlib.resources as resources
+from enum import Enum
 
 # we need to be able to differentiate between being uninitialized and failing to load
 class lib_state(Enum):
@@ -17,24 +18,18 @@ def attach_hooks():
     global ausaxs_state
     global ausaxs
 
-    from sas.sascalc.calculator.ausaxs.architecture import OS, Arch, determine_os, determine_cpu_support
-    sys = determine_os()
-    arch = determine_cpu_support()
+    from sas.sascalc.calculator.ausaxs.architecture import get_shared_lib_extension
 
     # as_file extracts the dll if it is in a zip file and probably deletes it afterwards,
     # so we have to do all operations on the dll inside the with statement
     with resources.as_file(resources.files("sas.sascalc.calculator.ausaxs.lib")) as loc:
-        if sys is OS.WIN and arch is Arch.AVX:
-            path = loc.joinpath("libausaxs.dll")
-        elif sys is OS.LINUX and arch is Arch.AVX:
-            path = loc.joinpath("libausaxs.so")
-        elif sys is OS.MAC:
-            path = loc.joinpath("libausaxs.dylib")
-        else:
+        ext = get_shared_lib_extension()
+        if (ext == ""):
             ausaxs_state = lib_state.FAILED
-            logging.log("AUSAXS: Unsupported OS or CPU architecture. Using default Debye implementation.")
+            logging.log("AUSAXS: Unsupported OS. Using default Debye implementation.")
             return
 
+        path = loc.joinpath("libausaxs", ext)
         ausaxs_state = lib_state.READY
         try:
             # evaluate_sans_debye func
@@ -78,22 +73,27 @@ def evaluate_sans_debye(q, coords, w):
     if ausaxs_state is lib_state.FAILED:
         from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
         return sasview_sans_debye(q, coords, w)
+    
+    def invoke(q, coords, w, queue):
+        _Iq = (ct.c_double * len(q))()
+        _nq = ct.c_int(len(q))
+        _nc = ct.c_int(len(w))
+        _q = q.ctypes.data_as(ct.POINTER(ct.c_double))
+        _x = coords[0:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+        _y = coords[1:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+        _z = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+        _w = w.ctypes.data_as(ct.POINTER(ct.c_double))
+        _status = ct.c_int()
+        ausaxs.evaluate_sans_debye(_q, _x, _y, _z, _w, _nq, _nc, ct.byref(_status), _Iq)
+        queue.put([_Iq, _status.value])
 
-    _Iq = (ct.c_double * len(q))()
-    _nq = ct.c_int(len(q))
-    _nc = ct.c_int(len(w))
-    _q = q.ctypes.data_as(ct.POINTER(ct.c_double))
-    _x = coords[0:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-    _y = coords[1:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-    _z = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-    _w = w.ctypes.data_as(ct.POINTER(ct.c_double))
-    _status = ct.c_int()
-
-    # do the call
-    ausaxs.evaluate_sans_debye(_q, _x, _y, _z, _w, _nq, _nc, ct.byref(_status), _Iq)
-
-    # check for errors
-    if _status.value != 0:
+    # invoke the function as a subprocess to avoid propagating segfaults
+    queue = multiprocessing.Queue()
+    p = multiprocessing.Process(target=invoke, args=(q, coords, w, queue))
+    p.start()
+    p.join()
+    _Iq, status = queue.get()
+    if (p.exitcode != 0 or status != 0):
         logging.error("AUSAXS calculator terminated unexpectedly. Using default Debye implementation instead.")
         from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
         return sasview_sans_debye(q, coords, w)

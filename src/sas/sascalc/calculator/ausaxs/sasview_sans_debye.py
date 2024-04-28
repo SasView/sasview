@@ -7,6 +7,7 @@ def sasview_sans_debye(q, coords, weight, worksize=100000):
     *q* is the q values for the calculation.
     *coords* are the sample points.
     *weight* is the weight associated with each point.
+    *worksize* is the number of q values to compute at once.
     """
     Iq = np.zeros_like(q)
     q_pi = q/np.pi  # Precompute q/pi since np.sinc = sin(pi x)/(pi x).
