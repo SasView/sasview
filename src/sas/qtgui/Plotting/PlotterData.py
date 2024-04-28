@@ -34,7 +34,7 @@ class DataRole(Enum):
 class Data1D(PlottableData1D, LoadData1D):
     """
     """
-    def __init__(self, x=None, y=None, dx=None, dy=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None, isSesans=False):
         """
         """
         if x is None:
@@ -42,7 +42,7 @@ class Data1D(PlottableData1D, LoadData1D):
         if y is None:
             y = []
         PlottableData1D.__init__(self, x, y, dx, dy)
-        LoadData1D.__init__(self, x, y, dx, dy)
+        LoadData1D.__init__(self, x, y, dx, dy, isSesans=isSesans)
         self.id = None
         self.list_group_id = []
         self.group_id = None
@@ -93,6 +93,9 @@ class Data1D(PlottableData1D, LoadData1D):
         self.yaxis(data1d._yaxis, data1d._yunit)
         self.title = data1d.title
         self.isSesans = data1d.isSesans
+        if self.isSesans:  # the data is SESANS so update the x and y units
+            self.x_unit = 'A'
+            self.y_unit = 'pol'
         
     def __str__(self):
         """
@@ -105,50 +108,43 @@ class Data1D(PlottableData1D, LoadData1D):
     def _perform_operation(self, other, operation):
         """
         """
-        # First, check the data compatibility
-        dy, dy_other = self._validity_check(other)
-        result = Data1D(x=[], y=[], dx=None, dy=None)
-        result.clone_without_data(length=len(self.x), clone=self)
-        result.copy_from_datainfo(data1d=self)
-        if self.dxw is None:
-            result.dxw = None
+        # Check for compatibility of the x-ranges and populate the data used for the operation
+        # sets up _operation for both datasets
+        # interpolation will be implemented on the 'other' dataset as needed
+        if self.isSesans:
+            self._interpolation_operation(other, scale='linear')
         else:
-            result.dxw = numpy.zeros(len(self.x))
-        if self.dxl is None:
-            result.dxl = None
-        else:
-            result.dxl = numpy.zeros(len(self.x))
+            self._interpolation_operation(other, scale='log')
 
-        for i in range(len(self.x)):
-            result.x[i] = self.x[i]
-            if self.dx is not None and len(self.x) == len(self.dx):
-                result.dx[i] = self.dx[i]
-            if self.dxw is not None and len(self.x) == len(self.dxw):
-                result.dxw[i] = self.dxw[i]
-            if self.dxl is not None and len(self.x) == len(self.dxl):
-                result.dxl[i] = self.dxl[i]
-            
-            a = Uncertainty(self.y[i], dy[i]**2)
+        result = Data1D(x=[], y=[], dx=None, dy=None)
+        result.clone_without_data(length=self._operation.x.size, clone=self)
+        result.copy_from_datainfo(data1d=self)
+        result.x = numpy.copy(self._operation.x)
+        result.y = numpy.zeros(self._operation.x.size)
+        result.dy = numpy.zeros(self._operation.x.size)
+        result.dx = None if self._operation.dx is None else numpy.copy(self._operation.dx)
+        result.dxl = None if self._operation.dxl is None else numpy.copy(self._operation.dxl)
+        result.dxw = None if self._operation.dxw is None else numpy.copy(self._operation.dxw)
+        result.lam = None if self._operation.lam is None else numpy.copy(self._operation.lam)
+        result.dlam = None if self._operation.dlam is None else numpy.copy(self._operation.dlam)
+
+        for i in range(result.x.size):
+            a = Uncertainty(self._operation.y[i], self._operation.dy[i]**2)
             if isinstance(other, Data1D):
-                b = Uncertainty(other.y[i], dy_other[i]**2)
-                if other.dx is not None:
-                    result.dx[i] *= self.dx[i]
-                    result.dx[i] += (other.dx[i]**2)
-                    result.dx[i] /= 2
-                    result.dx[i] = math.sqrt(result.dx[i])
-                if result.dxl is not None and other.dxl is not None:
-                    result.dxl[i] *= self.dxl[i]
-                    result.dxl[i] += (other.dxl[i]**2)
-                    result.dxl[i] /= 2
-                    result.dxl[i] = math.sqrt(result.dxl[i])
+                b = Uncertainty(other._operation.y[i], other._operation.dy[i]**2)
+                if result.dx is not None and other._operation.dx is not None:
+                    result.dx[i] = math.sqrt((self._operation.dx[i]**2 + other._operation.dx[i]**2) / 2)
+                if result.dxl is not None and other._operation.dxl is not None:
+                    result.dxl[i] = math.sqrt((self._operation.dxl[i]**2 + other._operation.dxl[i]**2) / 2)
+                if result.dxw is not None and other._operation.dxw is not None:
+                    result.dxw[i] = math.sqrt((self._operation.dxw[i]**2 + other._operation.dxw[i]**2) / 2)
             else:
                 b = other
-            
             output = operation(a, b)
             result.y[i] = output.x
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
-    
+
     def _perform_union(self, other):
         """
         """

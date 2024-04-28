@@ -1007,6 +1007,8 @@ class GuiManager:
         self.communicate.sendDataToPanelSignal.emit(dict(data, **theory))
 
         self.DataOperation.show()
+        # automatically add any new loaded data to the data operation combo boxes
+        self.filesWidget.model.rowsInserted.connect(self.updateDataOperationComboboxFromModel)
 
     def actionSLD_Calculator(self):
         """
@@ -1330,6 +1332,13 @@ class GuiManager:
 
         self.filesWidget.model.appendRow(new_item)
         self._data_manager.add_data(new_datalist_item)
+
+    def updateDataOperationComboboxFromModel(self):
+        """
+        Update the Data Operation panel combo boxes with new data
+        """
+        data, theory = self.filesWidget.getAllFlatData()
+        self.DataOperation.updateCombobox(dict(data, **theory))
 
     def showPlotFromName(self, name):
         """

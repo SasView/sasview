@@ -6,6 +6,7 @@ import copy
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
+import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -17,6 +18,13 @@ from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
 BG_WHITE = "background-color: rgb(255, 255, 255); color: rgb(0, 0, 0);"
 BG_RED = "background-color: rgb(244, 170, 164);"
+
+# colors for data operation plots
+OUTPUT_COLOR = "#000000"  # black
+DATA1_COLOR = '#B22222'  # firebrick
+DATA2_COLOR = '#0000FF'  # blue
+TRIMMED_COLOR = '#FFFFFF'  # white
+TRIMMED_ALPHA = 0.3  # semi-transparent points trimmed for operation
 
 
 class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
@@ -49,8 +57,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # push buttons
         self.cmdClose.clicked.connect(self.onClose)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdSave.clicked.connect(self.onSave)
         self.cmdCompute.clicked.connect(self.onCompute)
-        self.cmdReset.clicked.connect(self.onReset)
+        self.cmdClear.clicked.connect(self.onClear)
 
         self.cmdCompute.setEnabled(False)
 
@@ -73,15 +82,11 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def updateCombobox(self, filenames):
         """ Function to fill comboboxes with names of datafiles loaded in
          DataExplorer. For Data2, there is the additional option of choosing
-         a number to apply to data1 """
+         a number to apply to data1
+         """
         self.filenames = filenames
 
         if list(filenames.keys()):
-            # clear contents of comboboxes
-            self.cbData1.clear()
-            self.cbData1.addItems(['Select Data'])
-            self.cbData2.clear()
-            self.cbData2.addItems(['Select Data', 'Number'])
 
             list_datafiles = []
 
@@ -89,12 +94,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 if filenames[key_id].name:
                     # filenames with titles
                     new_title = filenames[key_id].name
-                    list_datafiles.append(new_title)
-                    self.list_data_items.append(new_title)
 
                 else:
                     # filenames without titles by removing time.time()
                     new_title = re.sub(r'\d{10}\.\d{2}', '', str(key_id))
+
+                # only append new data files added to the explorer
+                if new_title not in self.list_data_items:
                     self.list_data_items.append(new_title)
                     list_datafiles.append(new_title)
 
@@ -114,21 +120,20 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
     def onClose(self):
         """ Close dialog """
-        self.onReset()
-
+        self.onClear()
         self.cbData1.clear()
         self.cbData1.addItems(['No Data Available'])
         self.cbData2.clear()
         self.cbData2.addItems(['No Data Available'])
         self.close()
 
-
     def onCompute(self):
-        """ perform calculation """
+        """ perform calculation - don't send to data explorer"""
         # set operator to be applied
         operator = self.cbOperator.currentText()
         # calculate and send data to DataExplorer
-        output = None
+        if self.data1 is None or self.data2 is None:
+            logging.warning("Please set both Data1 and Data2 to complete operation.")
         try:
             data1 = self.data1
             data2 = self.data2
@@ -139,22 +144,26 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         self.output = output
 
-        # if outputname was unused, write output result to it
+        self.updatePlot(self.graphOutput, self.layoutOutput, self.output, operation_data=True)
+        self.updatePlot(self.graphData1, self.layoutData1, self.data1, operation_data=True)
+        self.updatePlot(self.graphData2, self.layoutData2, self.data2, operation_data=True)
+        logging.info("Data operation complete.")
+
+    def onSave(self):
+        """ send to data explorer which will automatically update comboboxes"""
+        # if output name was unused, write output result to it
         # and display plot
-        if self.onCheckOutputName():
-            # add outputname to self.filenames
-            self.list_data_items.append(str(self.txtOutputData.text()))
+        if self.onCheckOutputName() and self.output is not None:
+            # # add outputname to self.filenames
+            # self.list_data_items.append(str(self.txtOutputData.text()))
             # send result to DataExplorer
             self.onPrepareOutputData()
-            # plot result
-            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
 
-        # Add the new plot to the comboboxes
-        self.cbData1.addItem(self.output.name)
-        self.cbData2.addItem(self.output.name)
-        if self.filenames is None:
-            self.filenames = {}
-        self.filenames[self.output.name] = self.output
+            if self.filenames is None:
+                self.filenames = {}
+            self.filenames[self.output.name] = self.output
+        elif self.output is None:
+            logging.warning("No output data to save.")
 
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
@@ -165,36 +174,41 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.output,
             name=name)
 
-        new_datalist_item = {name + str(time.time()):
-                                 self.output}
+        new_datalist_item = {name + str(time.time()): self.output}
         self.communicator. \
             updateModelFromDataOperationPanelSignal.emit(new_item, new_datalist_item)
 
     def onSelectOperator(self):
         """ Change GUI when operator changed """
         self.lblOperatorApplied.setText(self.cbOperator.currentText())
-        self.newPlot(self.graphOutput, self.layoutOutput)
+        self.resetOutput()
 
-    def onReset(self):
+    def onClear(self):
         """
-        Reset Panel to its initial state (default values) keeping
-        the names of loaded data
+        Clear and reset panel to its initial state (default values).
+        This will clear any current data selections, operator selections, and the graphs.
         """
         self.txtNumber.setText('1.0')
-        self.txtOutputData.setText('MyNewDataName')
+
+        # sets new default name for output data that doesn't already exist
+        self.txtOutputData.setText(self.uniqueOutputName())
 
         self.txtNumber.setEnabled(False)
         self.cmdCompute.setEnabled(False)
 
+        # changing the index back to default will also set self.data1/self.data2 back to None
         self.cbData1.setCurrentIndex(0)
         self.cbData2.setCurrentIndex(0)
+        # switch back to white in case previous step resulted in failing the data check
+        self.cbData1.setStyleSheet(BG_WHITE)
+        self.cbData2.setStyleSheet(BG_WHITE)
         self.cbOperator.setCurrentIndex(0)
 
         self.data1OK = False
         self.data2OK = False
 
-        # Empty graphs
-        self.newPlot(self.graphOutput, self.layoutOutput)
+        self.resetOutput()
+        # Empty graphs and
         self.newPlot(self.graphData1, self.layoutData1)
         self.newPlot(self.graphData2, self.layoutData2)
 
@@ -209,8 +223,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.newPlot(self.graphData1, self.layoutData1)
             self.data1 = None
             self.data1OK = False
-            self.cmdCompute.setEnabled(False) # self.onCheckChosenData())
-            return
+            self.cmdCompute.setEnabled(False)  # self.onCheckChosenData())
+            self.resetOutput()
 
         else:
             self.data1OK = True
@@ -219,10 +233,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.data1 = self._extractData(key_id1)
             # plot Data1
             self.updatePlot(self.graphData1, self.layoutData1, self.data1)
-            # plot default for output graph
-            self.newPlot(self.graphOutput, self.layoutOutput)
             # Enable Compute button only if Data2 is defined and data compatible
             self.cmdCompute.setEnabled(self.onCheckChosenData())
+            self.resetOutput()
 
     def onSelectData2(self):
         """ Plot for selection of Data2 """
@@ -231,11 +244,12 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         if choice_data2 in wrong_choices:
             self.newPlot(self.graphData2, self.layoutData2)
+            self.data2 = None
             self.txtNumber.setEnabled(False)
             self.data2OK = False
             self.onCheckChosenData()
             self.cmdCompute.setEnabled(False)
-            return
+            self.resetOutput()
 
         elif choice_data2 == 'Number':
             self.data2OK = True
@@ -246,9 +260,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             self.cmdCompute.setEnabled(self.onCheckChosenData())
             # Display value of coefficient in graphData2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
-            # plot default for output graph
-            self.newPlot(self.graphOutput, self.layoutOutput)
-            self.onCheckChosenData()
+            self.resetOutput()
 
         else:
             self.txtNumber.setEnabled(False)
@@ -259,8 +271,16 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
             # plot Data2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
-            # plot default for output graph
-            self.newPlot(self.graphOutput, self.layoutOutput)
+            self.resetOutput()
+
+        # show interpolation warning when a 1D dataset is chosen for Data2
+        if isinstance(self.data2, Data1D):
+            self.cautionStatement.setText(
+                "CAUTION: interpolation of Data2 will occur for 1D-datasets if x-axis points\n"
+                "are not close. This could introduce artifacts. Please see documentation."
+            )
+        else:
+            self.cautionStatement.setText("")
 
     def onInputCoefficient(self):
         """ Check input of number when a coefficient is required
@@ -283,6 +303,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.txtNumber.setStyleSheet(BG_WHITE)
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
+                # self.updatePlot(self.graphData2, self.layoutData2, self.data2, color='tab:red')
 
     def onCheckChosenData(self):
         """ check that data1 and data2 are compatible """
@@ -298,26 +319,23 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
-                print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
                 logging.error('Cannot compute data of different dimensions')
                 return False
 
-            elif self.data1.__class__.__name__ == 'Data1D'\
-                    and (len(self.data2.x) != len(self.data1.x) or
-                             not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
-                logging.error('Cannot compute 1D data of different lengths')
+            elif self.data1.x_unit != self.data2.x_unit:
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
+                logging.error('Cannot compute data on data with different x-units.')
                 return False
 
             elif self.data1.__class__.__name__ == 'Data2D' \
                     and (len(self.data2.qx_data) != len(self.data1.qx_data) \
-                    or len(self.data2.qy_data) != len(self.data1.qy_data)
-                    or not all(i == j for i, j in
-                                     zip(self.data1.qx_data, self.data2.qx_data))
-                    or not all(i == j for i, j in
-                                zip(self.data1.qy_data, self.data2.qy_data))
-                         ):
+                         or len(self.data2.qy_data) != len(self.data1.qy_data)
+                         or not all(i == j for i, j in
+                                    zip(self.data1.qx_data, self.data2.qx_data))
+                         or not all(i == j for i, j in
+                                    zip(self.data1.qy_data, self.data2.qy_data))
+            ):
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
                 logging.error('Cannot compute 2D data of different lengths')
@@ -346,6 +364,25 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         else:
             self.txtOutputData.setStyleSheet(BG_WHITE)
             return True
+
+    def uniqueOutputName(self):
+        """Gets the next unique output name if previous outputs have been saved with default name."""
+        output_name = "MyNewDataName1"
+        i = 1
+        while output_name in self.list_data_items:
+            i += 1
+            output_name = f"MyNewDataName{str(i)}"
+        self.txtOutputData.setText(output_name)
+        return output_name
+
+    def resetOutput(self):
+        """Resets the output data and output graph upon any change to Data1, Data2, or operator."""
+        # plot default for output graph
+        self.newPlot(self.graphOutput, self.layoutOutput)
+        # reset the output until onCompute is called
+        self.output = None
+        # sets new default name for output data that doesn't already exist
+        self.txtOutputData.setText(self.uniqueOutputName())
 
     # ########
     # Modification of inputs
@@ -387,7 +424,28 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         graph.setLayout(layout)
 
-    def updatePlot(self, graph, layout, data):
+    def operationData1D(self, operation_data, reference_data=None):
+
+        """
+        Create instance of PlotterData.Data1D from the operation data for plotting purposes.
+        """
+
+        if isinstance(operation_data, float):
+            new_operation_data = Data1D(2)
+            if isinstance(reference_data, Data1D):
+                new_operation_data.copy_from_datainfo(data1d=reference_data)
+                new_operation_data.x = np.array([reference_data.x.min(), reference_data.x.max()])
+            else:
+                new_operation_data.x = np.array([1e-5, 1])
+            new_operation_data.y = np.array([operation_data, operation_data])
+            new_operation_data.dy = np.zeros(2)
+            new_operation_data.dx = np.zeros(2)
+        else:
+            new_operation_data = Data1D(x=operation_data.x, y=operation_data.y, dy=operation_data.dy, dx=None)
+            new_operation_data.copy_from_datainfo(data1d=operation_data)
+        return new_operation_data
+
+    def updatePlot(self, graph, layout, data, color=None, operation_data=False):
         """ plot data in graph after clearing its layout """
 
         assert isinstance(graph, QtWidgets.QGraphicsView)
@@ -399,7 +457,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             layout.removeItem(item)
 
         layout.setContentsMargins(0, 0, 0, 0)
-
         if isinstance(data, Data2D):
             # plot 2D data
             plotter2D = Plotter2DWidget(self, quickplot=True)
@@ -430,16 +487,72 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='x', labelsize=8)
             plotter.ax.tick_params(axis='y', labelsize=8)
 
-            plotter.plot(data=data, hide_error=True, marker='.')
+            # determine color based on the graph for consistency across all graphs
+            if color is None:
+                if graph.objectName() == 'graphData1':
+                    color = DATA1_COLOR
+                elif graph.objectName() == 'graphData2':
+                    color = DATA2_COLOR
+                elif graph.objectName() == 'graphOutput':
+                    color = OUTPUT_COLOR
+
+            # if operation data is available, outline the trim points of data1 and data2
+            if operation_data and graph.objectName() != 'graphOutput':
+                markerfacecolor = TRIMMED_COLOR
+                markeredgecolor = color
+                alpha = TRIMMED_ALPHA
+            else:
+                markerfacecolor = None
+                markeredgecolor = None
+                alpha = None
+
+            if graph.objectName() == 'graphOutput':
+                if operation_data:
+                    plotter.plot(data=self.operationData1D(self.data1._operation, reference_data=self.data1),
+                                 hide_error=True, marker='o', color=DATA1_COLOR,
+                                 markerfacecolor=None, markeredgecolor=None)
+                    if isinstance(self.data2, float):
+                        operation_data = self.operationData1D(self.data2,
+                                                              reference_data=self.data1 if isinstance(self.data1,
+                                                                                                      Data1D) else None)
+                        plotter.plot(data=operation_data, hide_error=True, marker='-', color=DATA2_COLOR)
+                    else:
+                        operation_data = self.operationData1D(self.data2._operation, reference_data=self.data2)
+                        plotter.plot(data=operation_data,
+                                     hide_error=True, marker='o', color=DATA2_COLOR,
+                                     markerfacecolor=None, markeredgecolor=None)
+                plotter.plot(data=data, hide_error=True, marker='o', color=color, markerfacecolor=markerfacecolor,
+                             markeredgecolor=markeredgecolor)
+            else:
+                plotter.plot(data=data, hide_error=True, marker='o', color=color, markerfacecolor=markerfacecolor,
+                             markeredgecolor=markeredgecolor, alpha=alpha)
+                if graph.objectName() == 'graphData1' and operation_data:
+                    plotter.plot(data=self.operationData1D(data._operation, reference_data=data),
+                                 hide_error=True, marker='o', color=DATA1_COLOR,
+                                 markerfacecolor=None, markeredgecolor=None)
+                elif graph.objectName() == 'graphData2' and operation_data:
+                    plotter.plot(data=self.operationData1D(data._operation, reference_data=data),
+                                 hide_error=True, marker='o', color=DATA2_COLOR,
+                                 markerfacecolor=None, markeredgecolor=None)
 
             plotter.show()
 
         elif float(data) and self.cbData2.currentText() == 'Number':
             # display value of coefficient (to be applied to Data1)
-            # in graphData2
-            layout.addWidget(self.prepareSubgraphWithData(data))
-
+            # in graphData2 as a line
+            plotter = PlotterWidget(self, quickplot=True)
+            plotter.showLegend = False
             graph.setLayout(layout)
+            layout.addWidget(plotter)
+
+            plotter.ax.tick_params(axis='x', labelsize=8)
+            plotter.ax.tick_params(axis='y', labelsize=8)
+
+            operation_data = self.operationData1D(data,
+                                                  reference_data=self.data1 if isinstance(self.data1, Data1D) else None)
+            plotter.plot(data=operation_data, hide_error=True, marker='-', color=DATA2_COLOR)
+
+            plotter.show()
 
     def prepareSubgraphWithData(self, data):
         """ Create graphics view containing scene with string """
