@@ -78,7 +78,7 @@ def _invoke_independent(q, coords, w, queue):
     """
     ausaxs, ausaxs_state = _attach_hooks()
     if not ausaxs_state is lib_state.READY:
-        queue.put(np.array(Iq))
+        queue.put(None)
         queue.put(-1)
         return
     Iq, nq, nc, q, x, y, z, w, status = _prepare_invocation(q, coords, w)
