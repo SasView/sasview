@@ -434,7 +434,7 @@ section, change it to::
      from sasmodels.core import load_model_info
      from sasmodels.sasview_model import make_model_from_info
 
-     model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
+     model_info = load_model_info('power_law+fractal+gaussian_peak+gaussian_peak')
      model_info.name = 'MyBigPluginModel'
      model_info.description = 'For fitting pores in crystalline framework'
      Model = make_model_from_info(model_info)
