@@ -69,7 +69,7 @@ def _invoke(q, coords, w):
     """
     Iq, nq, nc, q, x, y, z, w, status = _prepare_invocation(q, coords, w)
     ausaxs.evaluate_sans_debye(q, x, y, z, w, nq, nc, ct.byref(status), Iq)
-    return Iq, status.value
+    return np.array(Iq), status.value
 
 def _invoke_independent(q, coords, w, queue):
     """
@@ -118,7 +118,7 @@ def evaluate_sans_debye(q, coords, w):
             status = queue.get_nowait()
             first_time = False
         else:
-            logging.error("AUSAXS calculator seems to have crashed. Using default Debye implementation instead.")
+            logging.warning(f"AUSAXS calculator seems to have crashed (exit code \"{p.exitcode}\"). Using default Debye implementation instead.")
             ausaxs_state = lib_state.FAILED
             return sasview_sans_debye(q, coords, w)
 
@@ -132,7 +132,7 @@ def evaluate_sans_debye(q, coords, w):
         Iq, status = _invoke(q, coords, w)
 
     if (status != 0):
-        logging.error("AUSAXS calculator terminated unexpectedly. Using default Debye implementation instead.")
+        logging.warning(f"AUSAXS calculator terminated unexpectedly (error code \"{status}\"). Using default Debye implementation instead.")
         return sasview_sans_debye(q, coords, w)
 
-    return np.array(Iq)
+    return Iq
