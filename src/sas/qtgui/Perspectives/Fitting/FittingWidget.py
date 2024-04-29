@@ -1,6 +1,6 @@
 import json
 import os
-import sys
+import re
 from collections import defaultdict
 from typing import Any, Tuple, Optional
 from pathlib import Path
@@ -3769,7 +3769,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item5 = QtGui.QStandardItem()
         button = None
         for p in self.kernel_module.params.keys():
-            if 'sld' in p:
+            if re.search(r'^sld[_]?\d+$', p):
                 # Only display the SLD Profile button for models with SLD parameters
                 button = QtWidgets.QPushButton()
                 button.setText("Show SLD Profile")
