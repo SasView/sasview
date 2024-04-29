@@ -22,9 +22,9 @@ def generate_plugin(f_name: str, data_to_plot: np.ndarray, x_values: np.ndarray,
     """
     # check if file exists & assign filename
     plugin_location = Path(models.find_plugins_dir())
+    if not f_name.endswith('.py'):
+        f_name += '.py'
     full_path = plugin_location / f_name
-    if full_path.suffix != '.py':
-        full_path.with_suffix('.py')
 
     # generate the model representation as a string
     model_str = generate_model(f_name, data_to_plot, x_values, f_q, mass)

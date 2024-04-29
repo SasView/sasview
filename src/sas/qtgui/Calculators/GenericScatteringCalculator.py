@@ -1461,7 +1461,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.manager.communicate.customModelDirectoryChanged.emit()
 
             # Notify the user
-            msg = "Custom model " + model_path.absolute() + " successfully created."
+            msg = "Custom model " + str(model_path.absolute()) + " successfully created."
             logging.info(msg)
 
         self.cmdCompute.setText('Compute')
