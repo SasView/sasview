@@ -35,11 +35,11 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.11
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: set-matrix
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
@@ -61,10 +61,10 @@ jobs:
           echo '${{ toJson(matrix) }}'
 
       - name: Obtain SasView source from git
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -232,7 +232,7 @@ jobs:
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -278,14 +278,14 @@ jobs:
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
             installers/dist/SasView6.dmg
             installers/dist/sasview6.tar.gz
-          if-no-files-found: error
+          if-no-files-found: ignore
 
       - name: Rename artifacts (Windows)
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
@@ -303,6 +303,7 @@ jobs:
           mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
 
       - name: Upload Release Installer to GitHub
+        if: ${{ matrix.installer }}
         uses: ncipollo/release-action@v1
         with:
           draft: false
@@ -310,7 +311,7 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/setupSasView-6.0.0-alpha-Win64.exe, installers/dist/SasView-6.0.0-alpha-MacOSX.dmg, installers/dist/SasView-6.0.0-alpha-Linux.tar.gz"
+          artifacts: "installers/dist/*SasView-6.0.0-*"
           name: "Release 6.0.0-alpha"
           bodyFile: "build_tools/release_notes/6.0.0_notes.txt"
           tag: "v6.0.0-alpha"
@@ -354,7 +355,7 @@ jobs:
 
       - name: Retrieve installer (workflow image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         id: download
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}

@@ -67,6 +67,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
                                         phi=self.phi, theta2=self.theta2)
         self.left_line.update(left=True)
         self.left_line.qmax = self.qmax
+        self.fold = True
         # draw the sector
         self.update()
         self._post_data()
@@ -151,6 +152,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
                        phi_min=phimin + numpy.pi,
                        phi_max=phimax + numpy.pi, nbins=nbins)
 
+        sect.fold = self.fold
         sector = sect(self.data)
         # Create 1D data resulting from average
 
@@ -178,8 +180,8 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "SectorQ" + self.data.name
+        new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
@@ -250,6 +252,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         params["Phi [deg]"] = self.main_line.theta * 180 / numpy.pi
         params["Delta_Phi [deg]"] = numpy.fabs(self.left_line.phi * 180 / numpy.pi)
         params["nbins"] = self.nbins
+        params["fold"] = self.fold
         return params
 
     def setParams(self, params):
@@ -269,6 +272,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             params["Delta_Phi [deg]"] = MIN_PHI
 
         self.nbins = int(params["nbins"])
+        self.fold =params["fold"]
         self.main_line.theta = main
         # Reset the slicer parameters
         self.main_line.update()
@@ -381,13 +385,13 @@ class SideInteractor(BaseInteractor):
         else:
             self.phi = numpy.fabs(self.phi)
         if side:
-            self.theta = mline.alpha + self.phi
+            self.theta = mline.theta + self.phi
 
         if mline is not None:
             if delta != 0:
                 self.theta2 = mline + delta
             else:
-                self.theta2 = mline.alpha
+                self.theta2 = mline.theta
         if delta == 0:
             theta3 = self.theta + delta
         else:
