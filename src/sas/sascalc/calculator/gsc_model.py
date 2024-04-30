@@ -63,7 +63,7 @@ from numpy import inf
 from types import SimpleNamespace as dotted
 
 
-name = "{f_name}"
+name = "{f_name.replace('.py', '')}"
 title = "Model precalculated from PDB file."
 description = """
 Interpolate F(q) values from an interpolation table generated for the PDB
