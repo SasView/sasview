@@ -3769,7 +3769,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item5 = QtGui.QStandardItem()
         button = None
         for p in self.kernel_module.params.keys():
-            if re.search(r'^sld[_]?\d+$', p):
+            if re.search(r'^sld.*\d+$', p):
                 # Only display the SLD Profile button for models with SLD parameters
                 button = QtWidgets.QPushButton()
                 button.setText("Show SLD Profile")
