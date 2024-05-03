@@ -1424,30 +1424,36 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         nq = len(input[0])
         chunk_size = 32 if self.is_avg else 256
         out = []
-        for ind in range(0, nq, chunk_size):
-            t = timer()
-            if t > next_update:
-                update(time=t, percentage=100*ind/nq)
-                time.sleep(0.01)
-                next_update = t + update_rate
-            if self.is_avg:
-                inputi = [input[0][ind:ind + chunk_size], []]
-                outi = self.model.run(inputi)
-            else:
-                inputi = [input[0][ind:ind + chunk_size],
-                          input[1][ind:ind + chunk_size]]
-                outi = self.model.runXY(inputi)
-            out.append(outi)
-            if self.cancelCalculation:
-                update(time=t, percentage=100*(ind + chunk_size)/nq) # ensure final progress shown
-                self.data_to_plot = numpy.full(nq, numpy.nan)
-                self.data_to_plot[:ind + chunk_size] = numpy.hstack(out)
-                logging.info('Gen computation cancelled.')
-                break
+        # the 1D AUSAXS calculator cannot be chunked
+        if self.is_avg and not len(input[1]):
+            self.data_to_plot = self.model.runXY(input)
+
+        # chunk the other calculations to allow cancellation        
         else:
-            out = numpy.hstack(out)
-            self.data_to_plot = out
-            logging.info('Gen computation completed.')
+            for ind in range(0, nq, chunk_size):
+                t = timer()
+                if t > next_update:
+                    update(time=t, percentage=100*ind/nq)
+                    time.sleep(0.01)
+                    next_update = t + update_rate
+                if self.is_avg:
+                    inputi = [input[0][ind:ind + chunk_size], []]
+                    outi = self.model.run(inputi)
+                else:
+                    inputi = [input[0][ind:ind + chunk_size],
+                            input[1][ind:ind + chunk_size]]
+                    outi = self.model.runXY(inputi)
+                out.append(outi)
+                if self.cancelCalculation:
+                    update(time=t, percentage=100*(ind + chunk_size)/nq) # ensure final progress shown
+                    self.data_to_plot = numpy.full(nq, numpy.nan)
+                    self.data_to_plot[:ind + chunk_size] = numpy.hstack(out)
+                    logging.info('Gen computation cancelled.')
+                    break
+            else:
+                out = numpy.hstack(out)
+                self.data_to_plot = out
+                logging.info('Gen computation completed.')
 
         # if Beta(Q) Calculation has been requested, run calculation
         if self.is_beta:
