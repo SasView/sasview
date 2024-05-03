@@ -19,7 +19,6 @@ periodictable
 pybind11
 pylint
 pyopengl
-pyopengl_accelerate
 pyparsing
 pytest
 pytest_qt
