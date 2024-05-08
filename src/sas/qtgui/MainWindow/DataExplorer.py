@@ -1336,8 +1336,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         caption = 'Choose files'
         directory = self.default_load_location
         filter = wlist
-        options = QtWidgets.QFileDialog.DontUseNativeDialog | QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
-        paths = QtWidgets.QFileDialog.getOpenFileNames(parent, caption, directory, filter, options=options)[0]
+        paths = QtWidgets.QFileDialog.getOpenFileNames(parent, caption, directory, filter)[0]
 
         if not paths:
             return
