@@ -153,6 +153,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Current view on model
         self.current_view = self.treeView
 
+    @property
+    def default_load_location(self) -> str:
+        return self._default_load_location
+
+    @default_load_location.setter
+    def default_load_location(self, value: str):
+        # Ensure the config entry is updated
+        self._default_load_location = value
+        config.DEFAULT_OPEN_FOLDER = value
+
     def createSendToMenu(self):
         self.actionReplace = QtGui.QAction(self)
         self.actionReplace.setObjectName(u"actionReplace")
@@ -218,6 +228,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Threaded file load
         """
+        self.default_load_location = os.path.dirname(url[0])
         load_thread = threads.deferToThread(self.readData, url)
         load_thread.addCallback(self.loadComplete)
         load_thread.addErrback(self.loadFailed)
@@ -252,7 +263,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         folder = str(folder)
         if not os.path.isdir(folder):
             return
-        self.default_load_location = folder
         # get content of dir into a list
         path_str = [os.path.join(os.path.abspath(folder), filename)
                     for filename in os.listdir(folder)]
@@ -1335,7 +1345,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if not isinstance(paths, list):
             paths = [paths]
 
-        self.default_load_location = os.path.dirname(paths[0])
         return paths
 
     def readData(self, path):
