@@ -803,7 +803,7 @@ class GuiManager:
         """
         """
         self.filesWidget.loadAnalysis()
-        pass
+
 
     def actionSave_Project(self):
         """
@@ -873,13 +873,11 @@ class GuiManager:
         """
         """
         print("actionUndo TRIGGERED")
-        pass
 
     def actionRedo(self):
         """
         """
         print("actionRedo TRIGGERED")
-        pass
 
     def actionCopy(self):
         """
@@ -916,7 +914,7 @@ class GuiManager:
         logging.warning(" *** actionOpen_Analysis logging *******")
         print("actionReset print TRIGGERED")
         sys.stderr.write("STDERR - TRIGGERED")
-        pass
+
 
     def actionExcel(self):
         """
@@ -966,7 +964,6 @@ class GuiManager:
         else:
             self._workspace.actionHide_Toolbar.setText("Hide Toolbar")
             self._workspace.toolBar.setVisible(True)
-        pass
 
     def actionHide_DataExplorer(self):
         """
@@ -976,7 +973,6 @@ class GuiManager:
             self.dockedFilesWidget.setVisible(False)
         else:
             self.dockedFilesWidget.setVisible(True)
-        pass
 
     def actionHide_LogExplorer(self):
         """
@@ -986,13 +982,11 @@ class GuiManager:
             self.logDockWidget.setVisible(False)
         else:
             self.logDockWidget.setVisible(True)
-        pass
 
     def actionStartup_Settings(self):
         """
         """
         print("actionStartup_Settings TRIGGERED")
-        pass
 
     def actionCategory_Manager(self):
         """
@@ -1118,7 +1112,7 @@ class GuiManager:
         """
         """
         print("actionCombine_Batch_Fit TRIGGERED")
-        pass
+
 
     def actionFit_Options(self):
         """
@@ -1126,7 +1120,6 @@ class GuiManager:
         if hasattr(self._current_perspective, "fit_options_widget"):
             self.preferences.show()
             self.preferences.setMenuByName(self._current_perspective.fit_options_widget.name)
-        pass
 
     def actionGPU_Options(self):
         """
@@ -1135,7 +1128,6 @@ class GuiManager:
         if hasattr(self._current_perspective, "gpu_options_widget"):
             self.preferences.show()
             self.preferences.setMenuByName(self._current_perspective.gpu_options_widget.name)
-        pass
 
     def actionFit_Results(self):
         """
@@ -1245,14 +1237,12 @@ class GuiManager:
         Closes all Plotters and Plotter2Ds.
         """
         self.filesWidget.closeAllPlots()
-        pass
 
     def actionMinimizePlots(self):
         """
         Minimizes all Plotters and Plotter2Ds.
         """
         self.filesWidget.minimizeAllPlots()
-        pass
 
     #============ HELP =================
     def actionDocumentation(self):
