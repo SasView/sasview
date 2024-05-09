@@ -535,7 +535,13 @@ class GuiManager:
         (message, record) = signal
         self.listWidget.append(message.strip())
 
-        # Display log if message is error or worse
+        # Display log if message is warning (30) or higher
+        # 10: Debug
+        # 20: Info
+        # 30: Warning
+        # 40: Error
+        # 50: Critical
+
         if record.levelno >= 30:
             self.logDockWidget.setVisible(True)
 
