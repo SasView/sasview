@@ -55,7 +55,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Read in default locations
         self.default_save_location = None
-        self._default_load_location = config.DEFAULT_OPEN_FOLDER
         self.default_project_location = None
 
         self.manager = manager if manager is not None else DataManager()
@@ -155,12 +154,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     @property
     def default_load_location(self) -> str:
-        return self._default_load_location
+        # Ensure the default load location is always read from the config
+        return config.DEFAULT_OPEN_FOLDER
 
     @default_load_location.setter
     def default_load_location(self, value: str):
         # Ensure the config entry is updated
-        self._default_load_location = value
         config.DEFAULT_OPEN_FOLDER = value
 
     def createSendToMenu(self):
