@@ -536,7 +536,7 @@ class GuiManager:
         self.listWidget.append(message.strip())
 
         # Display log if message is error or worse
-        if record.levelno >= 40:
+        if record.levelno >= 30:
             self.logDockWidget.setVisible(True)
 
     def createGuiData(self, item, p_file=None):
