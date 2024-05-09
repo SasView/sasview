@@ -1,7 +1,9 @@
 from collections import defaultdict
 
 from PySide6 import QtWidgets
+from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QDialog, QWidget, QTextBrowser, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox
+from PySide6.QtCore import QUrl
 
 from sas.system.version import __version__ as sasview_version
 import importlib.resources as resources
@@ -10,6 +12,8 @@ from sas.system import config
 
 
 from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_version, newest
+
+
 
 def whats_new_messages(strictly_newer=True):
     """ Accumulate all files that are newer than the value in the config
@@ -44,6 +48,44 @@ def whats_new_messages(strictly_newer=True):
 
     return out
 
+class WhatsNewBrowser(QTextBrowser):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        css = resources.read_text("sas.qtgui.Utilities.WhatsNew.css", "style.css")
+        self.css_data = "<style>\n" + css + "</style>"
+
+    def setHtml(self, text: str) -> None:
+        """ Overriden to inject CSS into HTML files - very, very ugly"""
+        super().setHtml(text.replace("<!-- INJECT CSS HERE -->", self.css_data))
+
+    def loadResource(self, kind: int, url: QUrl | str):
+
+        """ Override the resource discovery to get the images we need """
+
+        if isinstance(url, QUrl):
+            name = url.toString()
+        else:
+            name = url
+
+        if kind == 2:
+
+            # This is pretty nasty, there's probably a better way
+            if name.startswith("whatsnew/"):
+                parts = name.split("/")[1:]
+
+                location = resources.files("sas.qtgui.Utilities.WhatsNew.messages")
+
+                for part in parts:
+                    location = location.joinpath(part)
+
+                im = QPixmap(str(location))
+
+                return im
+
+        return super().loadResource(kind, url)
+
+
 
 class WhatsNew(QDialog):
     """ What's New window: displays messages about what is new in this version of SasView
@@ -59,7 +101,7 @@ class WhatsNew(QDialog):
 
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
-        self.browser = QTextBrowser()
+        self.browser = WhatsNewBrowser()
         self.browser.setOpenLinks(True)
         self.browser.setOpenExternalLinks(True)
 
@@ -116,7 +158,7 @@ class WhatsNew(QDialog):
 
         self.show_file()
 
-        self.setFixedSize(500, 400)
+        self.setFixedSize(800, 600)
         self.setModal(True)
 
     def next_file(self):
@@ -129,9 +171,9 @@ class WhatsNew(QDialog):
             filename = self.all_messages[self.current_index]
             with open(filename, 'r') as fid:
                 data = fid.read()
-                self.browser.setText(data)
+                self.browser.setHtml(data)
         else:
-            self.browser.setText("<html><body><h1>You should not see this!!!</h1></body></html>")
+            self.browser.setHtml("<html><body><h1>You should not see this!!!</h1></body></html>")
 
     def close_me(self):
         if self.showAgain is not None:
