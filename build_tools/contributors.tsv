@@ -1,64 +1,67 @@
-Role	Contributor	Producer	Related Person	Affiliation	Orchid
-Meaning	"Have they contributed to the codebase (including docs, website, code reviews etc)"	"Admin role, getting funding etc"	Something else		
-"Alina, Gervaise"	x				
-"Anuchitanukul, Atijit "			x		
-"Attala, Ziggy"	x				
-"Bakker, Jurrian"	x				
-"Beaucage, Peter"	x				
-"Bourne, Robert"	x				
-"Bouwman, Wim"	x				
-"Butler, Paul"	x	x			
-"Cadwallader-Jones, Iestyn"	x				
-"Campbell, Kieran"	x				
-"Cho, Jae Hie"	x				
-"Cooper-Benun, Torin"		x			
-"Corona, Patrick"			x		
-"Dorian, Lazono"					
-"Doucet, Mathieu"	x				
-"Durniak, Celine"	x				
-"Ferraz Leal, Ricardo"					
-"Forster, Laura"	x				
-"Fragneto, Giovanna"		x			
-"Fultz, Brent"			?		
-"Gilbert, Peter"	x				
-"Gonzalez, Miguel"	x				
-"Heenan, Richard"	x				
-"Jackson, Andrew"	x				
-"Juhas, Pavol"		?			
-"Kienzle, Paul"	x				
-"King, Stephen"	x	x			
-"Knudsen, Mikke"			x		
-"Krueger, Susan"			x		
-"Krzywon, Jeff"	x				
-"Liu, Yun"	x				
-"Lytje, Kristian "	x				
-"Maranville, Brian"	x				
-"Markvardsen, Anders"		x			
-"Martinez, Nicolas"	x				
-"McKerns, Mike"			?		
-"Miller, Brayden "	x				
-"Mothander, Karolina"			?		
-"Murphy, Ryan"	x				
-"Narayanan, Theyencheri"			?		
-"Nielsen, Torben"		x			
-"O'Driscoll, Lewis"	x				
-"Parsons, Drew"			x		
-"Porcar, Lionel"			?		
-"Potrzebowski, Wojciech"	x	x			
-"Pozzo, Lilo"			?		
-"Prescott, Stuart"	x				
-"Rakitin, Maksim"			x		
-"Rennie, Adrian"			?		
-"Rod, Thomas Holm"		x			
-"Rooks, Jack"	x				
-"Rozyczko, Piotr"	x				
-"Snow, Tim"	x				
-"Stelhorn, Anika"	x				
-"Taylor, Jonathan"			?		
-"Teixeira, Susana"	?		?		
-"Udby, Linda"			?		
-"Washington, Adam"	x				
-"Weigandt, Katie"	x				
-"Wilkins, Lucas"	x				
-"Wolf, Caitlyn"	x				
-"Zhang, Alex "	x				
+Role	Affiliation	Contributor	Producer	Related Person		Orchid	Notes
+Meaning		"Have they contributed to the codebase (including docs, website, code reviews etc)"	"Admin role, getting funding etc"	Something else			
+"Alina, Gervaise"	"University of Tennessee, Knoxville"	x					
+Andrew Nilson	ANSTO	x					Check institution
+"Anuchitanukul, Atijit "	Oak Ridge National Laboratory			x			
+"Attala, Ziggy"	ISIS Neutron and Muon Source	x					"Changed RAL to ISIS, as we have diamond separately, needs to be checked"
+"Bakker, Jurrian"	"Technical University, Delft"	x					
+"Beaucage, Peter"	National Institute of Standards and Technology	x					
+"Bourne, Robert"	ISIS Neutron and Muon Source	x					
+"Bouwman, Wim"	"Technical University, Delft"	x					
+"Butler, Paul"	National Institute of Standards and Technology	x	x				
+"Cadwallader-Jones, Iestyn"	Institut Laue-Langevin	x					
+"Campbell, Kieran"	University of Oxford	x					
+"Cho, Jae Hie"	"University of Tennessee, Knoxville"	x					
+"Cooper-Benun, Torin"	European Spallation Source		x				
+"Corona, Patrick"	"University of Tennessee, Knoville"			x			
+"Dorian, Lazono"	Institut Laue-Langevin						Check institution
+"Doucet, Mathieu"	Oak Ridge National Laboratory	x					
+"Durniak, Celine"	European Spallation Source	x					
+"Ferraz Leal, Ricardo"	Oak Ridge National Laboratory						Check name
+"Forster, Laura"	Diamond Light Source	x					
+"Fragneto, Giovanna"	ISIS Neutron and Muon Source		x				
+"Fultz, Brent"	"Technical University, Delft"			?			
+"Gilbert, Peter"	National Institute of Standards and Technology	x					
+"Gonzalez, Miguel"	Institut Laue-Langevin	x					
+"Heenan, Richard"	ISIS Neutron and Muon Source	x					
+"Hewins, Ellis"	ISIS Neutron and Muon Source	x					
+"Jackson, Andrew"	European Spallation Source	x					
+"Juhas, Pavol"	Brookhaven National Laboratory		?				
+"Kienzle, Paul"	National Institute of Standards and Technology	x					
+"King, Stephen"	ISIS Neutron and Muon Source	x	x				
+"Knudsen, Mikke"	University of Copenhagen			x			
+"Krueger, Susan"	National Institute of Standards and Technology			x			
+"Krzywon, Jeff"	National Institute of Standards and Technology	x					
+"Liu, Yun"	National Institute of Standards and Technology	x					Check institution
+"Lopes, Ruben"	ISIS Neutron and Muon Source	x					
+"Lytje, Kristian "	Aarhus University	x					
+"Maranville, Brian"	National Institute of Standards and Technology	x					
+"Markvardsen, Anders"	ISIS Neutron and Muon Source		x				
+"Martinez, Nicolas"	Institut Laue-Langevin	x					
+"McKerns, Mike"	California Institute of Technology			?			
+"Miller, Brayden "	National Institute of Standards and Technology	x					Check institution
+"Mothander, Karolina"	Lund University			?			
+"Murphy, Ryan"	National Institute of Standards and Technology	x					
+"Narayanan, Theyencheri"	European Synchrotron Radiation Facility			?			
+"Nielsen, Torben"	European Spallation Source		x				
+"O'Driscoll, Lewis"	ISIS Neutron and Muon Source	x					
+"Parsons, Drew"	University of Calgari and the Debian Project			x			
+"Porcar, Lionel"	Institut Laue-Langevin			?			
+"Potrzebowski, Wojciech"	European Spallation Source	x	x				ESS Still here?
+"Pozzo, Lilo"	University of Washington			?			
+"Prescott, Stuart"	University of New South Wales and the Debian Project	x					
+"Rakitin, Maksim"	Brookhaven National Laboratory			x			
+"Rennie, Adrian"	Uppsala University			?			
+"Rod, Thomas Holm"	European Spallation Source		x				
+"Rooks, Jack"	National Institute of Standards and Technology	x					Check institution
+"Rozyczko, Piotr"	European Spallation Source	x					
+"Snow, Tim"	Diamond Light Source	x					
+"Stelhorn, Anika"	European Spallation Source	x					
+"Taylor, Jonathan"	European Spallation Source			?			
+"Teixeira, Susana"	National Institute of Standards and Technology	?		?			
+"Udby, Linda"	Niels Bohr Institute			?			
+"Washington, Adam"	ISIS Neutron and Muon Source	x					
+"Weigandt, Katie"	National Institute of Standards and Technology	x					Check institution
+"Wilkins, Lucas"	ISIS Neutron and Muon Source	x					
+"Wolf, Caitlyn"	National Institute of Standards and Technology	x					
+"Zhang, Alex "	National Institute of Standards and Technology	x					Check institution
