@@ -7,14 +7,17 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Bakker, Jurrian"	"Technical University, Delft"	x					
 "Beaucage, Peter"	National Institute of Standards and Technology	x					
 "Bourne, Robert"	ISIS Neutron and Muon Source	x					
-"Bouwman, Wim"	"Technical University, Delft"	x					
+"Bouwman, Wim"	"Technical University, Delft"	x
+"Bressler, Ingo"  Paul Scherrer Institute  x
 "Butler, Paul"	National Institute of Standards and Technology	x	x				
 "Cadwallader-Jones, Iestyn"	Institut Laue-Langevin	x					
 "Campbell, Kieran"	University of Oxford	x					
 "Cho, Jae Hie"	"University of Tennessee, Knoxville"	x					
 "Cooper-Benun, Torin"	European Spallation Source		x				
+"Cortes Hernandez, R"                                          affiliation?
 "Corona, Patrick"	"University of Tennessee, Knoxville"			x
 "Doucet, Mathieu"	Oak Ridge National Laboratory	x					
+"Doutch, James" ISIS Neutron and Muon Source     x
 "Durniak, Celine"	European Spallation Source	x					
 "Ferraz Leal, Ricardo"	Oak Ridge National Laboratory						Check name
 "Forster, Laura"	Diamond Light Source	x					
@@ -24,11 +27,14 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Gonzalez, Miguel"	Institut Laue-Langevin	x					
 "Heenan, Richard"	ISIS Neutron and Muon Source	x					
 "Hewins, Ellis"	ISIS Neutron and Muon Source	x					
+"Honecker, Dirk" ISIS Neutron and Muon Source  x
 "Jackson, Andrew"	European Spallation Source	x					
+"Jensen, Grethe" National Institute of Standards and Technology  ?
 "Juhas, Pavol"	Brookhaven National Laboratory		?				
 "Karliczek, Julius"	Institut Laue-Langevin	x					
 "Kienzle, Paul"	National Institute of Standards and Technology	x					
 "King, Stephen"	ISIS Neutron and Muon Source	x	x				
+"Kline, Steve" National Institute of Standards and Technology x
 "Knudsen, Mikke"	University of Copenhagen			x			
 "Krueger, Susan"	National Institute of Standards and Technology			x			
 "Krzywon, Jeff"	National Institute of Standards and Technology	x					
@@ -36,6 +42,7 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Lopes, Ruben"	ISIS Neutron and Muon Source	x					
 "Lozano, Dorian"	Institut Laue-Langevin	x					
 "Lytje, Kristian "	Aarhus University	x					
+"Mannicke, David"  Australian National Science and Technology Organisation x
 "Maranville, Brian"	National Institute of Standards and Technology	x					
 "Markvardsen, Anders"	ISIS Neutron and Muon Source		x				
 "Martinez, Nicolas"	Institut Laue-Langevin	x					
@@ -44,10 +51,17 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Mothander, Karolina"	Lund University			?			
 "Murphy, Ryan"	National Institute of Standards and Technology	x					
 "Narayanan, Theyencheri"	European Synchrotron Radiation Facility			?			
-"Nelson, Andrew" 	ANSTO	x
+"Nelson, Andrew" 	Australian National Science and Technology Organisation	x
 "Nielsen, Torben"	European Spallation Source		x
+"Oakley, Michael" ISIS?
 "O'Driscoll, Lewis"	ISIS Neutron and Muon Source	x					
+"Park, H"                                              affiliation?
+"Parker, Peter" ISIS Neutron and Muon Source x
 "Parsons, Drew"	University of Cagliari			x
+"Pauw, Brian" Federal Institute for Materials Research and Testing      x
+"Pellicelli, R"                                    affiliation?
+"Perring, Toby" ISIS Neutron and Muon Source   x
+"Peterson, Pete" Oak Ridge National Laboratory x
 "Porcar, Lionel"	Institut Laue-Langevin			?			
 "Potrzebowski, Wojciech"	SciLifeLab	x	x	
 "Pozzo, Lilo"	University of Washington			?			
@@ -57,6 +71,7 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Rod, Thomas Holm"	European Spallation Source		x				
 "Rooks, Jack"	University of Delaware	x
 "Rozyczko, Piotr"	European Spallation Source	x					
+"Shan, X"                                          affiliation?
 "Snow, Tim"	Diamond Light Source	x					
 "Stellhorn, Annika"	European Spallation Source	x
 "Taylor, Jonathan"	European Spallation Source			?			
@@ -64,6 +79,9 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Udby, Linda"	Niels Bohr Institute			?			
 "Washington, Adam"	ISIS Neutron and Muon Source	x					
 "Weigandt, Katie"	National Institute of Standards and Technology	x					Check institution
+"Whitley, Robert"  ISIS?
 "Wilkins, Lucas"	ISIS Neutron and Muon Source	x					
 "Wolf, Caitlyn"	National Institute of Standards and Technology	x					
 "Zhang, Alex "	National Institute of Standards and Technology	x					Check institution
+"Zheng, A"                                                                affiliation?
+"Zhou, Jae-He"                                                             affiliation?
