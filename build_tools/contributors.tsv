@@ -1,9 +1,8 @@
-Role	Affiliation	Contributor	Producer	Related Person		Orchid	Notes
+Name	Affiliation	Creator Producer	RelatedPerson		ORCID	Notes
 Meaning		"Have they contributed to the codebase (including docs, website, code reviews etc)"	"Admin role, getting funding etc"	Something else			
 "Agouzal, Nouhaila"	Institut Laue-Langevin	x					
 "Alina, Gervaise"	"University of Tennessee, Knoxville"	x					
-Andrew Nilson	ANSTO	x					Check institution
-"Anuchitanukul, Atijit "	Oak Ridge National Laboratory			x			
+"Anuchitanukul, Atijit "	Oak Ridge National Laboratory			x
 "Attala, Ziggy"	ISIS Neutron and Muon Source	x					"Changed RAL to ISIS, as we have diamond separately, needs to be checked"
 "Bakker, Jurrian"	"Technical University, Delft"	x					
 "Beaucage, Peter"	National Institute of Standards and Technology	x					
@@ -14,7 +13,7 @@ Andrew Nilson	ANSTO	x					Check institution
 "Campbell, Kieran"	University of Oxford	x					
 "Cho, Jae Hie"	"University of Tennessee, Knoxville"	x					
 "Cooper-Benun, Torin"	European Spallation Source		x				
-"Corona, Patrick"	"University of Tennessee, Knoville"			x			
+"Corona, Patrick"	"University of Tennessee, Knoxville"			x
 "Doucet, Mathieu"	Oak Ridge National Laboratory	x					
 "Durniak, Celine"	European Spallation Source	x					
 "Ferraz Leal, Ricardo"	Oak Ridge National Laboratory						Check name
@@ -41,24 +40,25 @@ Andrew Nilson	ANSTO	x					Check institution
 "Markvardsen, Anders"	ISIS Neutron and Muon Source		x				
 "Martinez, Nicolas"	Institut Laue-Langevin	x					
 "McKerns, Mike"	California Institute of Technology			?			
-"Miller, Brayden "	National Institute of Standards and Technology	x					Check institution
+"Miller, Brayden "	National Institute of Standards and Technology	x
 "Mothander, Karolina"	Lund University			?			
 "Murphy, Ryan"	National Institute of Standards and Technology	x					
 "Narayanan, Theyencheri"	European Synchrotron Radiation Facility			?			
-"Nielsen, Torben"	European Spallation Source		x				
+"Nelson, Andrew" 	ANSTO	x
+"Nielsen, Torben"	European Spallation Source		x
 "O'Driscoll, Lewis"	ISIS Neutron and Muon Source	x					
-"Parsons, Drew"	University of Calgari and the Debian Project			x			
+"Parsons, Drew"	University of Cagliari			x
 "Porcar, Lionel"	Institut Laue-Langevin			?			
 "Potrzebowski, Wojciech"	SciLifeLab	x	x	
 "Pozzo, Lilo"	University of Washington			?			
-"Prescott, Stuart"	University of New South Wales and the Debian Project	x					
+"Prescott, Stuart"	University of New South Wales	x
 "Rakitin, Maksim"	Brookhaven National Laboratory			x			
 "Rennie, Adrian"	Uppsala University			?			
 "Rod, Thomas Holm"	European Spallation Source		x				
-"Rooks, Jack"	National Institute of Standards and Technology	x					Check institution
+"Rooks, Jack"	University of Delaware	x
 "Rozyczko, Piotr"	European Spallation Source	x					
 "Snow, Tim"	Diamond Light Source	x					
-"Stelhorn, Anika"	European Spallation Source	x					
+"Stellhorn, Annika"	European Spallation Source	x
 "Taylor, Jonathan"	European Spallation Source			?			
 "Teixeira, Susana"	National Institute of Standards and Technology	?		?			
 "Udby, Linda"	Niels Bohr Institute			?			
