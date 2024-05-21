@@ -10,6 +10,8 @@ from tkinter import ttk
 import os
 import os.path
 from datetime import datetime
+
+from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog
 import string
 
@@ -47,13 +49,15 @@ class MuMagLib():
         self.SimpleFit_SANSgeometry = 0
 
     #####################################################################################################################
-    def get_directory(self):
-        fname = QFileDialog.getOpenFileName()
-        if fname:
-            fname = fname[0]
-            index = [i for i, val in enumerate(fname) if val == "/"]
-            fname = fname[0:index[-1]+1]
-        return fname
+
+    @staticmethod
+    def directory_popup():
+        directory = QFileDialog.getExistingDirectory()
+
+        if directory.strip() == "":
+            return None
+        else:
+            return directory
 
     #####################################################################################################################
     # Import experimental data and get information from filenames
@@ -61,10 +65,14 @@ class MuMagLib():
 
         self.DataCounter = 0
         # Predefine array's
-        DIR = self.get_directory()
-        for name in os.listdir(DIR):
+        directory = MuMagLib.directory_popup()
+
+        if directory is None:
+            return
+
+        for name in os.listdir(directory):
             if name.find(".csv") != -1:
-                data = np.genfromtxt(DIR + '/' + name)
+                data = np.genfromtxt(directory + '/' + name)
                 Lq = len(data[:, 0])
                 if self.DataCounter == 0:
                     self.q_exp = np.array([np.zeros(Lq)])
@@ -84,12 +92,12 @@ class MuMagLib():
                     self.DataCounter = self.DataCounter + 1
 
         # Load the data and sort the data
-        for name in os.listdir(DIR):
+        for name in os.listdir(directory):
             if name.find(".csv") != -1:
                 str_name = name[0:len(name)-4]
                 str_name = str_name.split('_')
                 idx = int(str_name[0])
-                data = np.genfromtxt(DIR + '/' + name)
+                data = np.genfromtxt(directory + '/' + name)
                 self.B_0_exp[idx-1] = float(str_name[1])
                 self.Ms_exp[idx-1] = float(str_name[2])
                 self.Hdem_exp[idx-1] = float(str_name[3])
@@ -440,3 +448,10 @@ class MuMagLib():
         ax.set_ylim(y_min, y_max)
         figure.tight_layout()
         figure.canvas.draw()
+
+if __name__ == "__main__":
+
+    app = QtWidgets.QApplication([])
+    # app.exec_()
+
+    MuMagLib.directory_popup()
