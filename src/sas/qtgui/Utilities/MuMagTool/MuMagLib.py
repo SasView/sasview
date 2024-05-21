@@ -132,8 +132,8 @@ class MuMagLib():
             ax.loglog(q[k, :], I_exp[k, :], linestyle='-', color=colors[k], linewidth=0.5, label=r'$B_0 = ' + str(B_0[k]) + '$ T')
             ax.loglog(q[k, :], I_exp[k, :], '.', color=colors[k], linewidth=0.3, markersize=1)
 
-        ax.set_xlabel(r'$q$ [1/nm]', usetex=True)
-        ax.set_ylabel(r'$I_{\mathrm{exp}}$', usetex=True)
+        ax.set_xlabel(r'$q$ [1/nm]')
+        ax.set_ylabel(r'$I_{\mathrm{exp}}$')
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
         figure.tight_layout()
@@ -434,8 +434,8 @@ class MuMagLib():
             ax.plot(q[k, :], I_fit[k, :], linestyle='solid', color=colors[k],
                      linewidth=0.5, label='(fit) B_0 = ' + str(B_0[k]) + ' T')
 
-        ax.set_xlabel(r'$q$ [1/nm]', usetex=True)
-        ax.set_ylabel(r'$I_{\mathrm{exp}}$', usetex=True)
+        ax.set_xlabel(r'$q$ [1/nm]')
+        ax.set_ylabel(r'$I_{\mathrm{exp}}$')
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
         figure.tight_layout()
