@@ -18,6 +18,7 @@ import string
 from sas.qtgui.Utilities.MuMagTool import MuMagParallelGeo
 from sas.qtgui.Utilities.MuMagTool import MuMagPerpendicularGeo
 from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
+from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters
 
 from sasdata.dataloader.loader import Loader
 
@@ -133,115 +134,111 @@ class MuMagLib():
         figure.tight_layout()
         figure.canvas.draw()
 
-    #######################################################################################################################
 
-    def simple_fit_button_callback(self, q_max, H_min, A1, A2, A_N, SANSgeometry, figure, axes1, axes2, axes3, axes4):
+    def simple_fit_button_callback(self, parameters: FitParameters, figure, axes1, axes2, axes3, axes4):
 
-        if np.size(self.q_exp) > 1:
-
-            # search index for q_max
-            q_diff = (self.q_exp[0, :]*1e-9 - q_max)**2
-            K_q = np.where(q_diff == np.min(q_diff))
-            K_q = K_q[0][0]
-
-            # search index for H_min
-            H_diff = (self.B_0_exp - H_min)**2
-            K_H = np.where(H_diff == np.min(H_diff))
-            K_H = K_H[0][0]
-
-            # apply the restrictions
-            mu_0 = 4*math.pi*1e-7
-            q = self.q_exp[K_H:, 0:K_q]
-            I_exp_red = self.I_exp[K_H:, 0:K_q]
-            sigma = self.sigma_exp[K_H:, 0:K_q]
-            H_0 = np.outer(self.B_0_exp[K_H:]/mu_0 * 1e-3, np.ones(K_q))
-            H_dem = np.outer(self.Hdem_exp[K_H:], np.ones(K_q))/mu_0 * 1e-3
-            Ms = np.outer(self.Ms_exp[K_H:], np.ones(K_q))/mu_0 * 1e-3
-
-            # Least Squares Fit in case of perpendicular SANS geometry
-            if SANSgeometry == "perpendicular":
-                A_1 = A1 * 1e-12
-                A_2 = A2 * 1e-12
-                A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M \
-                    = MuMagPerpendicularGeo.SweepA_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
-
-                A_opt = MuMagPerpendicularGeo.OptimA_SPI_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
-                chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M = MuMagPerpendicularGeo.LSQ_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
-
-                I_opt = MuMagPerpendicularGeo.SANS_Model_PERP(q, S_H_opt, S_M_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
-
-                d2chi_dA2 = MuMagPerpendicularGeo.FDM2Ord_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
-
-                N_mu = len(I_exp_red[0, :])
-                N_nu = len(I_exp_red[:, 0])
-                A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
-
-                MuMagPerpendicularGeo.PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt,
-                                                                       S_H_opt, S_M_opt, A_Uncertainty * 1e12,
-                                                                       figure, axes1, axes2, axes3, axes4)
-
-                # Save to global Variables
-                self.SimpleFit_q_exp = q
-                self.SimpleFit_I_exp = I_exp_red
-                self.SimpleFit_sigma_exp = sigma
-                self.SimpleFit_B_0_exp = self.B_0_exp[K_H:]
-                self.SimpleFit_Ms_exp = self.Ms_exp[K_H:]
-                self.SimpleFit_Hdem_exp = self.Hdem_exp[K_H:]
-                self.SimpleFit_I_fit = I_opt
-                self.SimpleFit_A = A
-                self.SimpleFit_chi_q = chi_q
-                self.SimpleFit_S_H_fit = S_H_opt
-                self.SimpleFit_S_M_fit = S_M_opt
-                self.SimpleFit_I_res_fit = I_res_opt
-                self.SimpleFit_A_opt = A_opt
-                self.SimpleFit_chi_q_opt = chi_q_opt
-                self.SimpleFit_A_sigma = A_Uncertainty
-                self.SimpleFit_SANSgeometry = "perpendicular"
-
-            elif SANSgeometry == "parallel":
-
-                A_1 = A1 * 1e-12
-                A_2 = A2 * 1e-12
-                A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H \
-                    = MuMagParallelGeo.SweepA_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
-
-                A_opt = MuMagParallelGeo.OptimA_SPI_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
-                chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H = MuMagParallelGeo.LSQ_PAR(q, I_exp_red, sigma,
-                                                                                           Ms, H_0,
-                                                                                           H_dem,
-                                                                                           A_opt)
-
-                I_opt = MuMagParallelGeo.SANS_Model_PAR(q, S_H_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
-
-                d2chi_dA2 = MuMagParallelGeo.FDM2Ord_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
-                N_mu = len(I_exp_red[0, :])
-                N_nu = len(I_exp_red[:, 0])
-                A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
-
-                MuMagParallelGeo.PlotFittingResultsPAR_SimpleFit(q, A, chi_q, A_opt, chi_q_opt,
-                                                                 I_res_opt, S_H_opt, A_Uncertainty * 1e12,
-                                                                 figure, axes1, axes2, axes3, axes4)
-
-                # Save to global Variables
-                self.SimpleFit_q_exp = q
-                self.SimpleFit_I_exp = I_exp_red
-                self.SimpleFit_sigma_exp = sigma
-                self.SimpleFit_B_0_exp = self.B_0_exp[K_H:]
-                self.SimpleFit_Ms_exp = self.Ms_exp[K_H:]
-                self.SimpleFit_Hdem_exp = self.Hdem_exp[K_H:]
-                self.SimpleFit_I_fit = I_opt
-                self.SimpleFit_A = A
-                self.SimpleFit_chi_q = chi_q
-                self.SimpleFit_S_H_fit = S_H_opt
-                self.SimpleFit_I_res_fit = I_res_opt
-                self.SimpleFit_A_opt = A_opt
-                self.SimpleFit_chi_q_opt = chi_q_opt
-                self.SimpleFit_A_sigma = A_Uncertainty
-                self.SimpleFit_SANSgeometry = "parallel"
-
-        else:
+        if self.input_data is None:
             messagebox.showerror(title="Error!",
                                  message="No experimental Data available! Please import experimental data!")
+
+            return None
+
+        # Use an index for data upto qmax based on first data set
+        # Not ideal, would be preferable make sure the data was
+        # compatible, using something like interpolation TODO
+        square_distance_from_qmax = (self.input_data[0].scattering_curve.x - parameters.q_max) ** 2
+        max_q_index = np.argmin(square_distance_from_qmax)[0]
+
+        filtered_inputs = [datum.restrict_by_index(max_q_index)
+                           for datum in self.input_data
+                           if datum.applied_field > parameters.min_applied_field]
+
+
+
+        # Least Squares Fit in case of perpendicular SANS geometry
+        if parameters.experiment_geometry == "perpendicular":
+
+            A_1 = A1 * 1e-12
+            A_2 = A2 * 1e-12
+
+            A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M \
+                = MuMagPerpendicularGeo.SweepA_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
+
+            A_opt = MuMagPerpendicularGeo.OptimA_SPI_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
+            chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M = MuMagPerpendicularGeo.LSQ_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
+
+            I_opt = MuMagPerpendicularGeo.SANS_Model_PERP(q, S_H_opt, S_M_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
+
+            d2chi_dA2 = MuMagPerpendicularGeo.FDM2Ord_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
+
+            N_mu = len(I_exp_red[0, :])
+            N_nu = len(I_exp_red[:, 0])
+            A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
+
+            MuMagPerpendicularGeo.PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt,
+                                                                   S_H_opt, S_M_opt, A_Uncertainty * 1e12,
+                                                                   figure, axes1, axes2, axes3, axes4)
+
+            # Save to global Variables
+            self.SimpleFit_q_exp = q
+            self.SimpleFit_I_exp = I_exp_red
+            self.SimpleFit_sigma_exp = sigma
+            self.SimpleFit_B_0_exp = self.B_0_exp[K_H:]
+            self.SimpleFit_Ms_exp = self.Ms_exp[K_H:]
+            self.SimpleFit_Hdem_exp = self.Hdem_exp[K_H:]
+            self.SimpleFit_I_fit = I_opt
+            self.SimpleFit_A = A
+            self.SimpleFit_chi_q = chi_q
+            self.SimpleFit_S_H_fit = S_H_opt
+            self.SimpleFit_S_M_fit = S_M_opt
+            self.SimpleFit_I_res_fit = I_res_opt
+            self.SimpleFit_A_opt = A_opt
+            self.SimpleFit_chi_q_opt = chi_q_opt
+            self.SimpleFit_A_sigma = A_Uncertainty
+            self.SimpleFit_SANSgeometry = "perpendicular"
+
+        else:
+
+            A_1 = A1 * 1e-12
+            A_2 = A2 * 1e-12
+            A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H \
+                = MuMagParallelGeo.SweepA_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
+
+            A_opt = MuMagParallelGeo.OptimA_SPI_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
+            chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H = MuMagParallelGeo.LSQ_PAR(q, I_exp_red, sigma,
+                                                                                       Ms, H_0,
+                                                                                       H_dem,
+                                                                                       A_opt)
+
+            I_opt = MuMagParallelGeo.SANS_Model_PAR(q, S_H_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
+
+            d2chi_dA2 = MuMagParallelGeo.FDM2Ord_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
+            N_mu = len(I_exp_red[0, :])
+            N_nu = len(I_exp_red[:, 0])
+            A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
+
+            MuMagParallelGeo.PlotFittingResultsPAR_SimpleFit(q, A, chi_q, A_opt, chi_q_opt,
+                                                             I_res_opt, S_H_opt, A_Uncertainty * 1e12,
+                                                             figure, axes1, axes2, axes3, axes4)
+
+            # Save to global Variables
+            self.SimpleFit_q_exp = q
+            self.SimpleFit_I_exp = I_exp_red
+            self.SimpleFit_sigma_exp = sigma
+            self.SimpleFit_B_0_exp = self.B_0_exp[K_H:]
+            self.SimpleFit_Ms_exp = self.Ms_exp[K_H:]
+            self.SimpleFit_Hdem_exp = self.Hdem_exp[K_H:]
+            self.SimpleFit_I_fit = I_opt
+            self.SimpleFit_A = A
+            self.SimpleFit_chi_q = chi_q
+            self.SimpleFit_S_H_fit = S_H_opt
+            self.SimpleFit_I_res_fit = I_res_opt
+            self.SimpleFit_A_opt = A_opt
+            self.SimpleFit_chi_q_opt = chi_q_opt
+            self.SimpleFit_A_sigma = A_Uncertainty
+            self.SimpleFit_SANSgeometry = "parallel"
+
+
 
 ######################################################################################################################
     def save_button_callback(self):

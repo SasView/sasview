@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 import numpy as np
 
+from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters
+
+
 class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
     def __init__(self, parent=None):
         super().__init__()
@@ -62,14 +65,17 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.MuMagLib_obj.plot_exp_data(self.fig, self.simple_fit_axes)
         self.figure_canvas.draw()
 
+    def fit_parameters(self) -> FitParameters:
+        return FitParameters(
+            q_max = float(self.qMaxEdit.toPlainText()),
+            min_applied_field= float(self.HminEdit.toPlainText()),
+            exchange_A_min = float(self.AMinEdit.toPlainText()),
+            exchange_A_max = float(self.AMaxEdit.toPlainText()),
+            exchange_A_n = int(self.ASamplesEdit.toPlainText()),
+            experiment_geometry = self.ScatteringGeometrySelect.currentText())
+
     def simple_fit_button_callback(self):
 
-        q_max = float(self.qMaxEdit.toPlainText())
-        H_min = float(self.HminEdit.toPlainText())
-        exchange_A_min = float(self.AMinEdit.toPlainText())
-        exchange_A_max = float(self.AMaxEdit.toPlainText())
-        exchange_A_n = int(self.ASamplesEdit.toPlainText())
-        experiment_geometry = self.ScatteringGeometrySelect.currentText()
 
         # Clear axes
         self.simple_fit_axes.cla()
@@ -84,19 +90,16 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.residuals_axes.set_visible(True)
         self.s_h_axes.set_visible(True)
 
-        if experiment_geometry == 'perpendicular':
+        parameters = self.fit_parameters()
+
+        if parameters.experiment_geometry == 'perpendicular':
             self.longitudinal_scattering_axes.set_visible(True)
         else:
             self.longitudinal_scattering_axes.set_visible(False)
 
 
         self.MuMagLib_obj.simple_fit_button_callback(
-            q_max,
-            H_min,
-            exchange_A_min,
-            exchange_A_max,
-            exchange_A_n,
-            experiment_geometry,
+            parameters,
             self.fig,
             self.chi_squared_axes,
             self.residuals_axes,
