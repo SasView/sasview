@@ -44,7 +44,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         layout.addWidget(self.figure_canvas)
 
     def import_data_button_callback(self):
-        self.MuMagLib_obj.import_data_button_callback_sub()
+        self.MuMagLib_obj.import_data()
 
     def plot_experimental_data_button_callback(self):
         self.simple_fit_axes.set_visible(True)
@@ -59,7 +59,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.s_h_axes.cla()
         self.longitudinal_scattering_axes.cla()
 
-        self.MuMagLib_obj.plot_experimental_data(self.fig, self.simple_fit_axes)
+        self.MuMagLib_obj.plot_exp_data(self.fig, self.simple_fit_axes)
         self.figure_canvas.draw()
 
     def simple_fit_button_callback(self):

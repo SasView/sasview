@@ -17,38 +17,15 @@ import string
 
 from sas.qtgui.Utilities.MuMagTool import MuMagParallelGeo
 from sas.qtgui.Utilities.MuMagTool import MuMagPerpendicularGeo
+from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
+
+from sasdata.dataloader.loader import Loader
+
 
 class MuMagLib():
     def __init__(self):
 
-        # attributes for the input data
-        self.q_exp = 0
-        self.I_exp = 0
-        self.sigma_exp = 0
-        self.B_0_exp = 0
-        self.Ms_exp = 0
-        self.Hdem_exp = 0
-        self.DataCounter = 0
-
-        # attributes for the simple fit result
-        self.SimpleFit_q_exp = 0
-        self.SimpleFit_I_exp = 0
-        self.SimpleFit_sigma_exp = 0
-        self.SimpleFit_B_0_exp = 0
-        self.SimpleFit_Ms_exp = 0
-        self.SimpleFit_Hdem_exp = 0
-        self.SimpleFit_I_fit = 0
-        self.SimpleFit_A = 0
-        self.SimpleFit_chi_q = 0
-        self.SimpleFit_S_H_fit = 0
-        self.SimpleFit_S_M_fit = 0
-        self.SimpleFit_I_res_fit = 0
-        self.SimpleFit_A_opt = 0
-        self.SimpleFit_chi_q_opt = 0
-        self.SimpleFit_A_sigma = 0
-        self.SimpleFit_SANSgeometry = 0
-
-    #####################################################################################################################
+        self.input_data: list[ExperimentalData] | None = None
 
     @staticmethod
     def directory_popup():
@@ -59,91 +36,99 @@ class MuMagLib():
         else:
             return directory
 
-    #####################################################################################################################
-    # Import experimental data and get information from filenames
-    def import_data_button_callback_sub(self):
 
-        self.DataCounter = 0
-        # Predefine array's
+    def import_data(self):
+        """Import experimental data and get information from filenames"""
+
+        # Get the directory from the user
         directory = MuMagLib.directory_popup()
 
         if directory is None:
             return
 
-        for name in os.listdir(directory):
-            if name.find(".csv") != -1:
-                data = np.genfromtxt(directory + '/' + name)
-                Lq = len(data[:, 0])
-                if self.DataCounter == 0:
-                    self.q_exp = np.array([np.zeros(Lq)])
-                    self.I_exp = np.array([np.zeros(Lq)])
-                    self.sigma_exp = np.array([np.zeros(Lq)])
-                    self.B_0_exp = np.array([np.zeros(1)])
-                    self.Ms_exp = np.array([np.zeros(1)])
-                    self.Hdem_exp = np.array([np.zeros(1)])
-                    self.DataCounter = self.DataCounter + 1
-                else:
-                    self.q_exp = np.append(self.q_exp, [np.zeros(Lq)], axis=0)
-                    self.I_exp = np.append(self.I_exp, [np.zeros(Lq)], axis=0)
-                    self.sigma_exp = np.append(self.sigma_exp, [np.zeros(Lq)], axis=0)
-                    self.B_0_exp = np.append(self.B_0_exp, [np.zeros(1)])
-                    self.Ms_exp = np.append(self.Ms_exp, [np.zeros(1)])
-                    self.Hdem_exp = np.append(self.Hdem_exp, [np.zeros(1)])
-                    self.DataCounter = self.DataCounter + 1
+        # Load the data
+        loader = Loader()
+        input_names = [name for name in os.listdir(directory) if name.lower().endswith(".csv")]
+        input_paths = [os.path.join(directory, filename) for filename in input_names]
 
-        # Load the data and sort the data
-        for name in os.listdir(directory):
-            if name.find(".csv") != -1:
-                str_name = name[0:len(name)-4]
-                str_name = str_name.split('_')
-                idx = int(str_name[0])
-                data = np.genfromtxt(directory + '/' + name)
-                self.B_0_exp[idx-1] = float(str_name[1])
-                self.Ms_exp[idx-1] = float(str_name[2])
-                self.Hdem_exp[idx-1] = float(str_name[3])
-                self.q_exp[idx-1, :] = data[:, 0].T * 1e9
-                self.I_exp[idx-1, :] = data[:, 1].T
-                self.sigma_exp[idx-1, :] = data[:, 2].T
+        input_data = loader.load(input_paths)
 
-    #####################################################################################################################
-    # Plot Experimental Data: Set Bounds and Call Plotting Function
-    def plot_experimental_data(self, figure, axes):
+        data = []
+        for filename, data1d in zip(input_names, input_data):
 
-        if np.size(self.q_exp) > 1:
-            q_exp_min = np.amin(self.q_exp)*1e-9
-            q_exp_min = 10**(np.floor(np.log10(q_exp_min))) * np.floor(q_exp_min/10**(np.floor(np.log10(q_exp_min))))
+            # Extract the metadata from the filename
+            filename_parts = filename.split(".")
+            filename = ".".join(filename_parts[-1])
 
-            q_exp_max = np.amax(self.q_exp)*1e-9
-            q_exp_max = 10**(np.floor(np.log10(q_exp_max))) * np.ceil(q_exp_max/10**(np.floor(np.log10(q_exp_max))))
+            parts = filename.split("_")
 
-            I_exp_min = np.amin(self.I_exp)
-            I_exp_min = 10**(np.floor(np.log10(I_exp_min))) * np.floor(I_exp_min/10**(np.floor(np.log10(I_exp_min))))
+            applied_field = float(parts[1])  # mT
+            saturation_magnetisation = float(parts[2])  # mT
+            demagnetising_field = float(parts[3])  # mT
 
-            I_exp_max = np.amax(self.I_exp)
-            I_exp_max = 10 ** (np.floor(np.log10(I_exp_max))) * np.ceil(I_exp_max / 10 ** (np.floor(np.log10(I_exp_max))))
+            # Create input data object
+            data.append(ExperimentalData(
+                scattering_curve=data1d,
+                applied_field=applied_field,
+                saturation_magnetisation=saturation_magnetisation,
+                demagnetising_field=demagnetising_field))
 
-            self.plot_exp_data(figure, axes, self.q_exp*1e-9, self.I_exp, self.B_0_exp*1e-3, q_exp_min, q_exp_max, I_exp_min, I_exp_max)
-        else:
-            messagebox.showerror(title="Error!", message="No experimental data available! Please import experimental data!")
+        self.input_data = sorted(data, key=lambda x: x.applied_field)
+
+    def nice_log_plot_bounds(self, data: list[np.ndarray]):
+        """ Get nice bounds for the loglog plots
+
+        :return: (lower, upper) bounds appropriate to pass to plt.xlim/ylim
+        """
+
+        upper = np.amax(np.array(data))
+        lower = np.amin(np.array(data))
+
+        return (
+            10 ** (np.floor(np.log10(lower))) * np.floor(lower / 10 ** (np.floor(np.log10(lower)))),
+            10 ** (np.floor(np.log10(upper))) * np.ceil(upper / 10 ** (np.floor(np.log10(upper))))
+        )
+
+
 
 
 
 
     ################################################################################################################
-    # Plot Experimental Data: Generate Figure
-    def plot_exp_data(self, figure, axes, q, I_exp, B_0, x_min, x_max, y_min, y_max):
+    #
+    def plot_exp_data(self, figure, axes):
+        """ Plot Experimental Data: Generate Figure """
+
+        if self.input_data is None:
+
+            messagebox.showerror(
+                title="Error!",
+                message="No experimental data available! Please import experimental data!")
+
+            return
 
         ax = axes
-        colors = pl.cm.jet(np.linspace(0, 1, len(B_0)))
-        for k in np.arange(0, len(B_0)):
-            #print(k)
-            ax.loglog(q[k, :], I_exp[k, :], linestyle='-', color=colors[k], linewidth=0.5, label=r'$B_0 = ' + str(B_0[k]) + '$ T')
-            ax.loglog(q[k, :], I_exp[k, :], '.', color=colors[k], linewidth=0.3, markersize=1)
+        colors = pl.cm.jet(np.linspace(0, 1, len(self.input_data)))
+
+        for i, datum in enumerate(self.input_data):
+
+            ax.loglog(datum.scattering_curve.x,
+                      datum.scattering_curve.y,
+                      linestyle='-', color=colors[i], linewidth=0.5,
+                      label=r'$B_0 = ' + str(datum.applied_field) + '$ T')
+
+            ax.loglog(datum.scattering_curve.x,
+                      datum.scattering_curve.y, '.',
+                      color=colors[i], linewidth=0.3, markersize=1)
+
+        # Plot limits
+        qlim = self.nice_log_plot_bounds([datum.scattering_curve.q for datum in self.input_data])
+        ilim = self.nice_log_plot_bounds([datum.scattering_curve.I for datum in self.input_data])
 
         ax.set_xlabel(r'$q$ [1/nm]')
         ax.set_ylabel(r'$I_{\mathrm{exp}}$')
-        ax.set_xlim(x_min, x_max)
-        ax.set_ylim(y_min, y_max)
+        ax.set_xlim(qlim)
+        ax.set_ylim(ilim)
         figure.tight_layout()
         figure.canvas.draw()
 
