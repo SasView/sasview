@@ -58,9 +58,10 @@ class MuMagLib():
 
             # Extract the metadata from the filename
             filename_parts = filename.split(".")
-            filename = ".".join(filename_parts[-1])
+            filename = ".".join(filename_parts[:-1])
 
             parts = filename.split("_")
+
 
             applied_field = float(parts[1])  # mT
             saturation_magnetisation = float(parts[2])  # mT
@@ -122,8 +123,8 @@ class MuMagLib():
                       color=colors[i], linewidth=0.3, markersize=1)
 
         # Plot limits
-        qlim = self.nice_log_plot_bounds([datum.scattering_curve.q for datum in self.input_data])
-        ilim = self.nice_log_plot_bounds([datum.scattering_curve.I for datum in self.input_data])
+        qlim = self.nice_log_plot_bounds([datum.scattering_curve.x for datum in self.input_data])
+        ilim = self.nice_log_plot_bounds([datum.scattering_curve.y for datum in self.input_data])
 
         ax.set_xlabel(r'$q$ [1/nm]')
         ax.set_ylabel(r'$I_{\mathrm{exp}}$')
