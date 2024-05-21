@@ -7,7 +7,9 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 
 @dataclass
 class ExperimentalData:
-    input_data: Data1D
+    """ Datapoint used as input for the MuMag tool"""
+
+    scattering_curve: Data1D
 
     applied_field: float
     saturation_magnetisation: float
