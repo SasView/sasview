@@ -66,38 +66,55 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         q_max = float(self.qMaxEdit.toPlainText())
         H_min = float(self.HminEdit.toPlainText())
-        A1 = float(self.AMinEdit.toPlainText())
-        A2 = float(self.AMaxEdit.toPlainText())
-        A_N = int(self.ASamplesEdit.toPlainText())
-        SANSgeometry = self.ScatteringGeometrySelect.currentText()
+        exchange_A_min = float(self.AMinEdit.toPlainText())
+        exchange_A_max = float(self.AMaxEdit.toPlainText())
+        exchange_A_n = int(self.ASamplesEdit.toPlainText())
+        experiment_geometry = self.ScatteringGeometrySelect.currentText()
 
+        # Clear axes
         self.simple_fit_axes.cla()
         self.chi_squared_axes.cla()
         self.residuals_axes.cla()
         self.s_h_axes.cla()
         self.longitudinal_scattering_axes.cla()
+
+        # Set axes visibility
         self.simple_fit_axes.set_visible(False)
-        if SANSgeometry == 'perpendicular':
-            self.chi_squared_axes.set_visible(True)
-            self.residuals_axes.set_visible(True)
-            self.s_h_axes.set_visible(True)
+        self.chi_squared_axes.set_visible(True)
+        self.residuals_axes.set_visible(True)
+        self.s_h_axes.set_visible(True)
+
+        if experiment_geometry == 'perpendicular':
             self.longitudinal_scattering_axes.set_visible(True)
-        elif SANSgeometry == 'parallel':
-            self.chi_squared_axes.set_visible(True)
-            self.residuals_axes.set_visible(True)
-            self.s_h_axes.set_visible(True)
+        else:
             self.longitudinal_scattering_axes.set_visible(False)
 
-        self.MuMagLib_obj.simple_fit_button_callback(q_max, H_min, A1, A2, A_N, SANSgeometry,
-                                                     self.fig, self.chi_squared_axes, self.residuals_axes, self.s_h_axes, self.longitudinal_scattering_axes)
+
+        self.MuMagLib_obj.simple_fit_button_callback(
+            q_max,
+            H_min,
+            exchange_A_min,
+            exchange_A_max,
+            exchange_A_n,
+            experiment_geometry,
+            self.fig,
+            self.chi_squared_axes,
+            self.residuals_axes,
+            self.s_h_axes,
+            self.longitudinal_scattering_axes)
+
         self.figure_canvas.draw()
 
     def compare_data_button_callback(self):
+
+        # Clear axes
         self.simple_fit_axes.cla()
         self.chi_squared_axes.cla()
         self.residuals_axes.cla()
         self.s_h_axes.cla()
         self.longitudinal_scattering_axes.cla()
+
+        # Set visibility
         self.simple_fit_axes.set_visible(True)
         self.chi_squared_axes.set_visible(False)
         self.residuals_axes.set_visible(False)
