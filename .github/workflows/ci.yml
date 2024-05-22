@@ -204,7 +204,7 @@ jobs:
           cd installers
           rm -rf build/ dist/
           mkdir -p dist
-          pyinstaller sasview.spec
+          pyinstaller sasview.spec --noupx
           cd dist
           # the following builds a symlink farm in the package; it should
           # not be necessary, but without it, there will be lots of errors
