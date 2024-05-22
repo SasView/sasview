@@ -1,6 +1,7 @@
 Name	Affiliation	Creator Producer	RelatedPerson		ORCID	Notes
 Meaning		"Have they contributed to the codebase (including docs, website, code reviews etc)"	"Admin role, getting funding etc"	Something else			
-"Agouzal, Nouhaila"	Institut Laue-Langevin	x					
+"Adams Michels" University of Luxembourg    x
+"Agouzal, Nouhaila"	Institut Laue-Langevin	x
 "Alina, Gervaise"	"University of Tennessee, Knoxville"	x					
 "Anuchitanukul, Atijit "	Oak Ridge National Laboratory			x
 "Attala, Ziggy"	ISIS Neutron and Muon Source	x					"Changed RAL to ISIS, as we have diamond separately, needs to be checked"
@@ -18,12 +19,15 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Corona, Patrick"	"University of California, Santa Barbara"			x
 "Doucet, Mathieu"	Oak Ridge National Laboratory	x					
 "Doutch, James" ISIS Neutron and Muon Source            x
-"Durniak, Celine"	European Spallation Source	x					
+"Dresen, Dominique" University of Cologne x
+"Durniak, Celine"	European Spallation Source	x
 "Ferraz Leal, Ricardo"	Oak Ridge National Laboratory   x
 "Forster, Laura"	Diamond Light Source	x					
 "Fragneto, Giovanna"	European Spallation Source		x
 "Fultz, Brent"	California Institute of Technology     x
-"Gilbert, Peter"	National Institute of Standards and Technology	x					
+"Gaudet, Jonathan"  University of Maryland  x
+"Gerina, Mariana"   Charles University          x
+"Gilbert, Peter"	National Institute of Standards and Technology	x
 "Gonzalez, Miguel"	Institut Laue-Langevin	x					
 "Heenan, Richard"	ISIS Neutron and Muon Source	x					
 "Hewins, Ellis"	ISIS Neutron and Muon Source	x					
@@ -58,6 +62,7 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Park, Helen"   National Institute of Standards and Technology	x
 "Parker, Peter" Oak Ridge National Laboratory x
 "Parsons, Drew"	University of Cagliari			x
+"Patrou, Maria" Oak Ridge National Laboratory           x
 "Pauw, Brian" Federal Institute for Materials Research and Testing          x
 "Pellicelli, R"                                    affiliation?
 "Perring, Toby" ISIS Neutron and Muon Source        x
@@ -69,6 +74,7 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Rakitin, Maksim"	Brookhaven National Laboratory	x
 "Rennie, Adrian"	Uppsala University			x
 "Richter, Tobias"   European Spallation Source  x   x           Check Current affiliation?
+"Roberts, Graham"   University of Connecticut           x
 "Rod, Thomas Holm"	European Spallation Source		x
 "Rooks, Jack"	University of Delaware	x
 "Rozyczko, Piotr"	European Spallation Source	x					
@@ -77,12 +83,14 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Stellhorn, Annika"	European Spallation Source	x
 "Taylor, Jonathan"	European Spallation Source		x
 "Teixeira, Susana"	National Institute of Standards and Technology	?		?			
-"Udby, Linda"	Niels Bohr Institute			?			
+"Tumarkin, Jessica" "University of Tennessee, Knoxville"    x
+"Udby, Linda"	Niels Bohr Institute			?
 "Washington, Adam"	ISIS Neutron and Muon Source	x					
 "Weigandt, Katie"	National Institute of Standards and Technology	x
 "Whitley, Robert"  ISIS?
 "Wilkins, Lucas"	ISIS Neutron and Muon Source	x					
 "Wolf, Caitlyn"	National Institute of Standards and Technology	x					
-"Zhang, Alex "	National Institute of Standards and Technology	x
-"Zheng, A"                                                                affiliation?
+"Zakoutna, Dominika"    Charles University          x
+"Zhang, Anita"  University of Princeton x
+"Zheng, Alex"   National Institute of Standards and Technology	x
 "Zhou, Jae-He"                                                             affiliation?
