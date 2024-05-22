@@ -11,26 +11,26 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Bressler, Ingo"  Paul Scherrer Institute  x
 "Butler, Paul"	National Institute of Standards and Technology	x	x				
 "Cadwallader-Jones, Iestyn"	Institut Laue-Langevin	x					
-"Campbell, Kieran"	University of Oxford	x					
+"Campbell, Kieran"	ISIS Neutron and Muon Source	x
 "Cho, Jae Hie"	"University of Tennessee, Knoxville"	x					
-"Cooper-Benun, Torin"	European Spallation Source		x				
-"Cortes Hernandez, R"                                          affiliation?
-"Corona, Patrick"	"University of Tennessee, Knoxville"			x
+"Cooper-Benun, Torin"	ISIS Neutron and Muon Source  x
+"Cortes Hernandez, R" "University of Tennessee, Knoxville"  x
+"Corona, Patrick"	"University of California, Santa Barbara"			x
 "Doucet, Mathieu"	Oak Ridge National Laboratory	x					
-"Doutch, James" ISIS Neutron and Muon Source     x
+"Doutch, James" ISIS Neutron and Muon Source            x
 "Durniak, Celine"	European Spallation Source	x					
-"Ferraz Leal, Ricardo"	Oak Ridge National Laboratory						Check name
+"Ferraz Leal, Ricardo"	Oak Ridge National Laboratory   x
 "Forster, Laura"	Diamond Light Source	x					
-"Fragneto, Giovanna"	ISIS Neutron and Muon Source		x				
-"Fultz, Brent"	"Technical University, Delft"			?			
+"Fragneto, Giovanna"	European Spallation Source		x
+"Fultz, Brent"	California Institute of Technology     x
 "Gilbert, Peter"	National Institute of Standards and Technology	x					
 "Gonzalez, Miguel"	Institut Laue-Langevin	x					
 "Heenan, Richard"	ISIS Neutron and Muon Source	x					
 "Hewins, Ellis"	ISIS Neutron and Muon Source	x					
-"Honecker, Dirk" ISIS Neutron and Muon Source  x
+"Honecker, Dirk" ISIS Neutron and Muon Source   x
 "Jackson, Andrew"	European Spallation Source	x					
-"Jensen, Grethe" National Institute of Standards and Technology  ?
-"Juhas, Pavol"	Brookhaven National Laboratory		?				
+"Jensen, Grethe" National Institute of Standards and Technology x
+"Juhas, Pavol"	Brookhaven National Laboratory  x
 "Karliczek, Julius"	Institut Laue-Langevin	x					
 "Kienzle, Paul"	National Institute of Standards and Technology	x					
 "King, Stephen"	ISIS Neutron and Muon Source	x	x				
@@ -38,50 +38,51 @@ Meaning		"Have they contributed to the codebase (including docs, website, code r
 "Knudsen, Mikke"	University of Copenhagen			x			
 "Krueger, Susan"	National Institute of Standards and Technology			x			
 "Krzywon, Jeff"	National Institute of Standards and Technology	x					
-"Liu, Yun"	National Institute of Standards and Technology	x					Check institution
+"Liu, Yun"	National Institute of Standards and Technology	x
 "Lopes, Ruben"	ISIS Neutron and Muon Source	x					
 "Lozano, Dorian"	Institut Laue-Langevin	x					
 "Lytje, Kristian "	Aarhus University	x					
 "Mannicke, David"  Australian National Science and Technology Organisation x
 "Maranville, Brian"	National Institute of Standards and Technology	x					
-"Markvardsen, Anders"	ISIS Neutron and Muon Source		x				
+"Markvardsen, Anders"	ISIS Neutron and Muon Source	x	x
 "Martinez, Nicolas"	Institut Laue-Langevin	x					
-"McKerns, Mike"	California Institute of Technology			?			
+"McKerns, Mike"	California Institute of Technology  x
 "Miller, Brayden "	National Institute of Standards and Technology	x
-"Mothander, Karolina"	Lund University			?			
+"Mothander, Karolina"	Lund University x
 "Murphy, Ryan"	National Institute of Standards and Technology	x					
-"Narayanan, Theyencheri"	European Synchrotron Radiation Facility			?			
+"Narayanan, Theyencheri"	European Synchrotron Radiation Facility			x
 "Nelson, Andrew" 	Australian National Science and Technology Organisation	x
-"Nielsen, Torben"	European Spallation Source		x
+"Nielsen, Torben"	European Spallation Source	x	x
 "Oakley, Michael" ISIS?
 "O'Driscoll, Lewis"	ISIS Neutron and Muon Source	x					
-"Park, H"                                              affiliation?
-"Parker, Peter" ISIS Neutron and Muon Source x
+"Park, Helen"   National Institute of Standards and Technology	x
+"Parker, Peter" Oak Ridge National Laboratory x
 "Parsons, Drew"	University of Cagliari			x
-"Pauw, Brian" Federal Institute for Materials Research and Testing      x
+"Pauw, Brian" Federal Institute for Materials Research and Testing          x
 "Pellicelli, R"                                    affiliation?
-"Perring, Toby" ISIS Neutron and Muon Source   x
-"Peterson, Pete" Oak Ridge National Laboratory x
-"Porcar, Lionel"	Institut Laue-Langevin			?			
+"Perring, Toby" ISIS Neutron and Muon Source        x
+"Peterson, Pete" Oak Ridge National Laboratory  x
+"Porcar, Lionel"	Institut Laue-Langevin			x
 "Potrzebowski, Wojciech"	SciLifeLab	x	x	
-"Pozzo, Lilo"	University of Washington			?			
+"Pozzo, Lilo"	University of Washington			x
 "Prescott, Stuart"	University of New South Wales	x
-"Rakitin, Maksim"	Brookhaven National Laboratory			x			
-"Rennie, Adrian"	Uppsala University			?			
-"Rod, Thomas Holm"	European Spallation Source		x				
+"Rakitin, Maksim"	Brookhaven National Laboratory	x
+"Rennie, Adrian"	Uppsala University			x
+"Richter, Tobias"   European Spallation Source  x   x           Check Current affiliation?
+"Rod, Thomas Holm"	European Spallation Source		x
 "Rooks, Jack"	University of Delaware	x
 "Rozyczko, Piotr"	European Spallation Source	x					
-"Shan, X"                                          affiliation?
+"Shan, Xael"    National Institute of Standards and Technology  x
 "Snow, Tim"	Diamond Light Source	x					
 "Stellhorn, Annika"	European Spallation Source	x
-"Taylor, Jonathan"	European Spallation Source			?			
+"Taylor, Jonathan"	European Spallation Source		x
 "Teixeira, Susana"	National Institute of Standards and Technology	?		?			
 "Udby, Linda"	Niels Bohr Institute			?			
 "Washington, Adam"	ISIS Neutron and Muon Source	x					
-"Weigandt, Katie"	National Institute of Standards and Technology	x					Check institution
+"Weigandt, Katie"	National Institute of Standards and Technology	x
 "Whitley, Robert"  ISIS?
 "Wilkins, Lucas"	ISIS Neutron and Muon Source	x					
 "Wolf, Caitlyn"	National Institute of Standards and Technology	x					
-"Zhang, Alex "	National Institute of Standards and Technology	x					Check institution
+"Zhang, Alex "	National Institute of Standards and Technology	x
 "Zheng, A"                                                                affiliation?
 "Zhou, Jae-He"                                                             affiliation?
