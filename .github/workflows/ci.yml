@@ -251,7 +251,8 @@ jobs:
           security unlock-keychain -p DloaAcYP build.keychain
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
-
+          security find-identity -p codesigning
+          
           cd installers/dist
           python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python  ../../build_tools/code_sign_osx.py
