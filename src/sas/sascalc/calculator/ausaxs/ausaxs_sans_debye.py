@@ -95,7 +95,7 @@ def ausaxs_available():
         ausaxs, ausaxs_state = _attach_hooks()
     return ausaxs_state is lib_state.READY
 
-first_time = True
+first_time = False
 def evaluate_sans_debye(q, coords, w):
     """
     Compute I(q) for a set of points using Debye sums.
