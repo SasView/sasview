@@ -67,12 +67,12 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
     def fit_parameters(self) -> FitParameters:
         return FitParameters(
-            q_max = float(self.qMaxEdit.toPlainText()),
-            min_applied_field= float(self.HminEdit.toPlainText()),
-            exchange_A_min = float(self.AMinEdit.toPlainText()),
-            exchange_A_max = float(self.AMaxEdit.toPlainText()),
-            exchange_A_n = int(self.ASamplesEdit.toPlainText()),
-            experiment_geometry = self.ScatteringGeometrySelect.currentText())
+            q_max=self.qMaxSpinBox.value(),
+            min_applied_field=self.hMinSpinBox.value(),
+            exchange_A_min=self.aMinSpinBox.value(),
+            exchange_A_max=self.aMaxSpinBox.value(),
+            exchange_A_n=self.aSamplesSpinBox.value(),
+            experiment_geometry=self.ScatteringGeometrySelect.currentText())
 
     def simple_fit_button_callback(self):
 
