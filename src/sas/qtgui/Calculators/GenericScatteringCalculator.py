@@ -5,6 +5,7 @@ import numpy
 import logging
 import time
 import timeit
+import math
 
 from scipy.spatial.transform import Rotation
 
@@ -21,9 +22,14 @@ from twisted.internet import threads
 import periodictable
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
+from sas.system.version import __version__
 from sas.sascalc.calculator import sas_gen
+from sas.sascalc.fit import models
+from sas.sascalc.calculator.geni import radius_of_gyration, create_beta_plot, f_of_q
+import sas.sascalc.calculator.gsc_model as gsc_model
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.Plotter import Plotter
@@ -34,9 +40,6 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local UI
 from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
-
-_Q1D_MIN = 0.001
-
 
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
@@ -84,6 +87,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.is_beta = False
         self.data_to_plot = None
         self.data_betaQ = None
+        self.fQ = []
         self.graph_num = 1      # index for name of graph
 
         # finish UI setup - install qml window
@@ -100,7 +104,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # code to highlight incompleted values in the GUI and prevent calculation
         # list of lineEdits to be checked
         self.lineEdits = [self.txtUpFracIn, self.txtUpFracOut, self.txtUpTheta, self.txtUpPhi, self.txtBackground,
-                            self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax,
+                            self.txtScale, self.txtSolventSLD, self.txtTotalVolume, self.txtNoQBins, self.txtQxMax, self.txtQxMin,
                             self.txtMx, self.txtMy, self.txtMz, self.txtNucl, self.txtXnodes, self.txtYnodes,
                             self.txtZnodes, self.txtXstepsize, self.txtYstepsize, self.txtZstepsize, self.txtEnvYaw,
                             self.txtEnvPitch, self.txtEnvRoll, self.txtSampleYaw, self.txtSamplePitch, self.txtSampleRoll]
@@ -122,6 +126,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # checkboxes
         self.checkboxNucData.stateChanged.connect(self.change_data_type)
         self.checkboxMagData.stateChanged.connect(self.change_data_type)
+        self.checkboxPluginModel.stateChanged.connect(self.update_file_name)
+        self.checkboxLogSpace.stateChanged.connect(self.change_qValidator)
 
         self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
         self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
@@ -138,6 +144,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtMx.textChanged.connect(self.check_for_magnetic_controls)
         self.txtMy.textChanged.connect(self.check_for_magnetic_controls)
         self.txtMz.textChanged.connect(self.check_for_magnetic_controls)
+
+        #check for SLD changes
+        #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
+        # self.txtSolventSLD.editingFinished.connect(self.update_Rg)        
 
         #update coord display
         self.txtEnvYaw.textChanged.connect(self.update_coords)
@@ -215,15 +225,16 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtSampleRoll.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleRoll))   
 
-        # 0 < Qmax <= 1000
-        validat_regex_q = QtCore.QRegularExpression(r'^1000$|^[+]?(\d{1,3}([.]\d+)?)$')
-        self.txtQxMax.setValidator(QtGui.QRegularExpressionValidator(validat_regex_q,
-                                                          self.txtQxMax))
-
+        self.change_qValidator()
+        
         # 2 <= Qbin and nodes integers < 1000
         validat_regex_int = QtCore.QRegularExpression(r'^[2-9]|[1-9]\d{1,2}$')
         self.txtNoQBins.setValidator(QtGui.QRegularExpressionValidator(validat_regex_int,
                                                             self.txtNoQBins))
+        
+        # Plugin File Name
+        rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
+        self.txtFileName.setValidator(QtGui.QRegularExpressionValidator(rx))
 
         self.txtXnodes.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_int, self.txtXnodes))
@@ -447,10 +458,23 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 zstepsize = float(self.txtZstepsize.text())
                 value = float(str(self.txtQxMax.text()))
                 max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))                   
-                if value <= 0 or value > max_q:
+                if value <= 0 or value > max_q or value < float(self.txtQxMin.text()):
                     self.txtQxMax.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
                 else:
                     self.txtQxMax.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
+                #if 2D scattering, program sets qmin to -qmax
+                if not self.is_avg:
+                    self.txtQxMin.setText(str(-value))
+            elif sender == self.txtQxMin and self.is_avg:
+                xstepsize = float(self.txtXstepsize.text())
+                ystepsize = float(self.txtYstepsize.text())
+                zstepsize = float(self.txtZstepsize.text())
+                value = float(str(self.txtQxMin.text()))
+                min_q = numpy.pi / (min(xstepsize, ystepsize, zstepsize))
+                if value <= 0 or value > min_q or value > float(self.txtQxMax.text()):
+                    self.txtQxMin.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
+                else:
+                    self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
 
             
 
@@ -533,7 +557,21 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.update_gui()
         self.check_for_magnetic_controls()
 
+    def change_qValidator(self):
+        #Default Q range to calculate P(Q) is from 0.0003 to 0.3 A^-1.
+        #The Q range needed for calculating P(Q) depends on the protein size.
+        #It is perhaps better to use values based on RG in future.
+        #For example: Q_min * RG = 0.2 and Q_max * RG = 15 could be a good start
+        #Note: Fitting window defaults to .5 and .0005.
+        if float(self.txtQxMax.text()) == 0:
+            self.txtQxMax.setText("0.3")
+        if float(self.txtQxMin.text()) == 0:
+            self.txtQxMin.setText("0.0003")
 
+        min = 0 if not self.checkboxLogSpace.isChecked() else 1e-10
+        # 0 < Qmin&QMax <= 1000
+        self.txtQxMax.setValidator(QtGui.QDoubleValidator(min, 1000, 10, self.txtQxMax))
+        self.txtQxMin.setValidator(QtGui.QDoubleValidator(min, 1000, 10, self.txtQxMin))
     
     def update_cbOptionsCalc_visibility(self):
         # Only allow 1D averaging if no magnetic data and not elements
@@ -550,6 +588,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtMx.setEnabled(not self.is_mag)
             self.txtMy.setEnabled(not self.is_mag)
             self.txtMz.setEnabled(not self.is_mag)
+            self.txtQxMin.setEnabled(not self.is_mag)
+            self.checkboxLogSpace.setChecked(not self.is_mag)
+            self.checkboxLogSpace.setEnabled(not self.is_mag)
 
         
     def change_is_avg(self):
@@ -569,18 +610,25 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # did user request Beta(Q) calculation?
         self.is_beta = (self.cbOptionsCalc.currentIndex() == 2)
         # If averaging then set to 0 and diable the magnetic SLD textboxes
-        if self.is_avg:
-            self.txtMx.setEnabled(False)
-            self.txtMy.setEnabled(False)
-            self.txtMz.setEnabled(False)
+        self.txtMx.setEnabled(not self.is_avg)
+        self.txtMy.setEnabled(not self.is_avg)
+        self.txtMz.setEnabled(not self.is_avg)
+        self.txtQxMin.setEnabled(self.is_avg)
+        self.checkboxLogSpace.setChecked(self.is_avg)
+        self.checkboxLogSpace.setEnabled(self.is_avg)
+        self.checkboxPluginModel.setEnabled(self.is_avg)
+        
+        if self.is_avg:   
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
             self.txtMz.setText("0.0")
+            self.txtQxMin.setText(str(float(self.txtQxMax.text())*.001))
+            
         # If not averaging then re-enable the magnetic sld textboxes
         else:
-            self.txtMx.setEnabled(True)
-            self.txtMy.setEnabled(True)
-            self.txtMz.setEnabled(True)
+            self.txtQxMin.setText(str(float(self.txtQxMax.text())*-1))
+            self.checkboxPluginModel.setChecked(False)
+            self.txtFileName.setEnabled(False)
     
     def check_for_magnetic_controls(self):
         if self.txtMx.hasAcceptableInput() and self.txtMy.hasAcceptableInput() and self.txtMz.hasAcceptableInput():
@@ -765,6 +813,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.update_gui()
         # reset verification now we have loaded new files
         self.verify = False
+
         self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
         self.toggle_error_functionality()
 
@@ -861,68 +910,30 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtYstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.ystepsize))
             self.txtZstepsize.setText(GuiUtils.formatValue(self.mag_sld_data.zstepsize))
         # otherwise leave as set since editable by user
+        self.update_Rg()
 
-        # update the value of the Radius of Gyration with values from the loaded data
+        
+    def update_Rg(self):
+        #update RG boxes or run RG calculation
         if self.is_nuc:
             if self.nuc_sld_data.is_elements:
-                self.txtROG.setText(str("N/A for Elements"))
+                self.txtRgMass.setText(str("N/A"))
+                self.txtRG.setText(str("N/A "))                    
+                logging.info("SasView does not support computation of Radius of Gyration for elements.")
             else:
-                self.txtROG.setText(self.radius_of_gyration() + " Å")
+                rgVals = radius_of_gyration(self.nuc_sld_data)  #[String, String, Float], float used for plugin model
+                self.txtRgMass.setText(rgVals[0])
+                self.txtRG.setText(rgVals[1])
+                self.rGMass = rgVals[2]                         #used in plugin model
+
         elif self.is_mag:
-            self.txtROG.setText(str("N/A for magnetic data"))
+            self.txtRgMass.setText(str("N/A"))            
+            self.txtRG.setText(str("N/A"))
+            logging.info("SasView does not support computation of Radius of Gyration for Magnetic Data.")
         else:
-            self.txtROG.setText(str("N/A for no data"))
+            self.txtRgMass.setText(str("No Data"))
+            self.txtRG.setText(str("No Data"))
             
-
-        # If nodes or stepsize changed then this may effect what values are allowed
-        self.gui_text_changed(sender=self.txtNoQBins)
-        self.gui_text_changed(sender=self.txtQxMax)
-    
-    def radius_of_gyration(self):
-        #Calculate Center of Mass(CoM) First
-        CoM = self.centerOfMass()
-
-        #Now Calculate RoG
-        RoGNumerator = RoGDenominator = 0.0
-
-        for i in range(len(self.nuc_sld_data.pos_x)):
-            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
-            
-            #Coh b - Coherent Scattering Length(fm)
-            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
-
-            #Calculate the Magnitude of the Coordinate vector for the atom and the center of mass
-            MagnitudeOfCoM = numpy.sqrt(numpy.power(CoM[0]-coordinates[0],2) + numpy.power(CoM[1]-coordinates[1],2) + numpy.power(CoM[2]-coordinates[2],2))
-
-            #Calculate Rate of Gyration (Squared) with the formular
-            RoGNumerator += cohB * (numpy.power(MagnitudeOfCoM,2))
-            RoGDenominator += cohB
-
-        #Avoid division by zero - May occur through contrast matching
-        RoG = str(round(numpy.sqrt(RoGNumerator/RoGDenominator),1)) if RoGDenominator != 0 else "NaN"
-
-        return RoG
-    
-    def centerOfMass(self):
-        """Calculate Center of Mass(CoM) of provided atom"""
-        CoMnumerator= [0.0,0.0,0.0]
-        CoMdenominator = [0.0,0.0,0.0]
-
-        for i in range(len(self.nuc_sld_data.pos_x)):
-            coordinates = [float(self.nuc_sld_data.pos_x[i]),float(self.nuc_sld_data.pos_y[i]),float(self.nuc_sld_data.pos_z[i])]
-            
-            #Coh b - Coherent Scattering Length(fm)
-            cohB = periodictable.elements.symbol(self.nuc_sld_data.pix_symbol[i]).neutron.b_c
-
-            for j in range(3): #sets CiN
-                CoMnumerator[j] += (coordinates[j]*cohB)
-                CoMdenominator[j] += cohB
-
-        CoM = [] 
-        for i in range(3):   
-            CoM.append(CoMnumerator[i]/CoMdenominator[i] if CoMdenominator != 0 else 0) #center of mass, test for division by zero
-        
-        return CoM
         
 
     def update_geometry_effects(self):
@@ -952,6 +963,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # If nodes or stepsize changed then this may effect what values are allowed
         self.gui_text_changed(sender=self.txtNoQBins)
         self.gui_text_changed(sender=self.txtQxMax)
+        self.gui_text_changed(sender=self.txtQxMin)
 
     def write_new_values_from_gui(self):
         """Update parameters in model using modified inputs from GUI
@@ -1017,6 +1029,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.txtTotalVolume.setText("216000.0")
             self.txtNoQBins.setText("30")
             self.txtQxMax.setText("0.3")
+            self.txtQxMin.setText("0.0003")
             self.txtNoPixels.setText("1000")
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
@@ -1163,17 +1176,28 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         residuals.dxw = None
         """
         self.qmax_x = float(self.txtQxMax.text())
+        self.qmin_x = float(self.txtQxMin.text())
         self.npts_x = int(self.txtNoQBins.text())
+        self.xValues = numpy.array(self.npts_x)
         # Default values
         xmax = self.qmax_x
-        xmin = self.qmax_x * _Q1D_MIN
+        xmin = self.qmin_x
         qstep = self.npts_x
-        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        if self.checkboxLogSpace.isChecked():
+            self.xValues = numpy.logspace(start=math.log(xmin,10),
+                                stop=math.log(xmax,10), 
+                                num=qstep, 
+                                endpoint=True)
+        else:
+            self.xValues = numpy.linspace(start=xmin, 
+                           stop=xmax, 
+                           num=qstep, 
+                           endpoint=True)        
         # store x and y bin centers in q space
-        y = numpy.ones(len(x))
-        dy = numpy.zeros(len(x))
-        dx = numpy.zeros(len(x))
-        self.data = Data1D(x=x, y=y)
+        y = numpy.ones(len(self.xValues))
+        dy = numpy.zeros(len(self.xValues))
+        dx = numpy.zeros(len(self.xValues))
+        self.data = Data1D(x=self.xValues, y=y)
         self.data.dx = dx
         self.data.dy = dy
     
@@ -1433,8 +1457,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         # if Beta(Q) Calculation has been requested, run calculation
         if self.is_beta:
-            self.create_betaPlot()
+            self.data_betaQ  = create_beta_plot(self.xValues, self.nuc_sld_data, self.data_to_plot)
         
+        if self.checkboxPluginModel.isChecked():
+            self.fQ = f_of_q(self.xValues, self.nuc_sld_data)
+            model_str, model_path = gsc_model.generate_plugin(self.txtFileName.text(), self.data_to_plot, self.xValues,
+                                                              self.fQ, self.rGMass)
+            TabbedModelEditor.writeFile(model_path, model_str)
+            self.manager.communicate.customModelDirectoryChanged.emit()
+
+            # Notify the user
+            msg = "Custom model " + str(model_path.absolute()) + " successfully created."
+            logging.info(msg)
+
         self.cmdCompute.setText('Compute')
         self.cmdCompute.setToolTip("<html><head/><body><p>Compute the scattering pattern and display 1D or 2D plot depending on the settings.</p></body></html>")
         self.cmdCompute.clicked.disconnect()
@@ -1442,55 +1477,31 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdCompute.setEnabled(True)
         return
     
-    def create_betaPlot(self):
-        """Carry out the compuation of beta Q using provided & calculated data
-        Returns a list of BetaQ values
-
-        """
-        
-        #Center Of Mass Calculation
-        CoM = self.centerOfMass()
-        self.data_betaQ = []
-
-        # Default values
-        xmax = self.qmax_x
-        xmin = self.qmax_x * _Q1D_MIN
-        qstep = self.npts_x
-
-        currentQValue = []
-        formFactor = self.data_to_plot
-
-        for a in range(self.npts_x):  
-            fQ = 0     
-            currentQValue.append(xmin + (xmax - xmin)/(self.npts_x-1)*a)
-     
-            for b in range(len(self.nuc_sld_data.pos_x)):
-                #atoms
-                atomName = str(self.nuc_sld_data.pix_symbol[b])
-                #Coherent Scattering Length of Atom
-                cohB = periodictable.elements.symbol(atomName).neutron.b_c
-
-                x = float(self.nuc_sld_data.pos_x[b])
-                y = float(self.nuc_sld_data.pos_y[b])
-                z = float(self.nuc_sld_data.pos_z[b])
-
-                r_x = x - CoM[0]
-                r_y = y - CoM[1]
-                r_z = z - CoM[2]
-
-                magnitudeRelativeCoordinate = numpy.sqrt(r_x**2 + r_y**2 + r_z**2)
     
-                fQ +=  (cohB * (numpy.sin(currentQValue[a] * magnitudeRelativeCoordinate) / (currentQValue[a] * magnitudeRelativeCoordinate)))
 
-            #Beta Q Calculation
-            self.data_betaQ.append((fQ**2)/(formFactor[a]))
+    def update_file_name(self):
+        if self.checkboxPluginModel.isChecked():
+            self.txtFileName.setText(self.getFileName())
+            self.txtFileName.setEnabled(True)
+        else:
+            self.txtFileName.setText("")
+            self.txtFileName.setEnabled(False)
 
-        #Scale Beta Q to 0-1
-        scalingFactor = self.data_betaQ[0]
-        self.data_betaQ = [x/scalingFactor for x in self.data_betaQ]
-
-        return
-
+    def getFileName(self):
+        plugin_location = models.find_plugins_dir()
+        i = 0
+        while True:
+            full_path = os.path.join(plugin_location, "custom_gsc" + str(i))
+            if os.path.splitext(full_path)[1] != ".py":
+                full_path += ".py"
+            if not os.path.exists(full_path):
+                break
+            else:
+                i += 1
+            
+        return ("custom_gsc" + str(i))
+        
+        
     def onSaveFile(self):
         """Save data as .sld file"""
         path = os.path.dirname(str(self.datafile))
@@ -1568,6 +1579,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
                 dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
                 dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
+
+                self.graph_num += 1
         else:
             data = Data2D(image=numpy.nan_to_num(self.data_to_plot),
                           qx_data=self.data.qx_data,

@@ -5,6 +5,12 @@ For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 import os
 import logging
 import numpy as np
+import periodictable
+
+from typing import Union
+
+from sas.sascalc.calculator.sas_gen import MagSLD, OMF2SLD
+
 
 try:
     if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):
@@ -476,3 +482,123 @@ def _spin_weights(in_spin, out_spin):
         in_spin * out_spin / norm,             # uu
     )
     return weight
+
+
+def radius_of_gyration(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> tuple[str, str, float]:
+    """Calculate parameters related to the radius of gyration using and SLD profile.
+
+    :param nuc_sl_data: A scattering length object for a series of atomic points in space
+    :return: A tuple of the string representation of the radius of gyration, Guinier slope, and Rg as a float.
+    """
+    # Calculate Center of Mass First
+    c_o_m = center_of_mass(nuc_sl_data)
+
+    x = nuc_sl_data.pos_x
+    y = nuc_sl_data.pos_y
+    z = nuc_sl_data.pos_z
+    pix_symbol = nuc_sl_data.pix_symbol
+    coordinates = np.array([x, y, z]).T
+    coherent_sls, masses = np.empty(len(pix_symbol)), np.empty(len(pix_symbol))
+    for i, sym in enumerate(pix_symbol):
+        atom = periodictable.elements.symbol(sym)
+        masses[i] = atom.mass
+        coherent_sls[i] = atom.neutron.b_c
+        # solvent_slds = atoms.volume() * 10**24 * float(self.txtSolventSLD.text()) * 10**5
+
+    # TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a imprecise
+    #  approximation. Until then Solvent SLD does not impact RG - SLD.
+    #  This method only calculates RG of proteins in vacuum. Implementing the RG calcuation in solvent needs
+    #  the input of the solvent volume.
+    contrast_sls = coherent_sls  # femtometer
+    rsq = np.sum((c_o_m - coordinates)**2, axis=1)
+
+    rog_num = np.sum(masses * rsq)
+    rog_den = np.sum(masses)
+    guinier_num = np.sum(contrast_sls * rsq)
+    guinier_den = np.sum(contrast_sls)
+
+    if rog_den <= 0: #Should never happen as there are no zero or negative mass atoms
+        rog_mass = "NaN"
+        r_g_mass = 0.0
+        logging.warning("Atomic Mass is zero for all atoms in the system.")
+    else:
+        r_g_mass = np.sqrt(rog_num/rog_den)
+        rog_mass = (str(round(np.sqrt(rog_num/rog_den),1)) + " Å")
+
+    #Avoid division by zero - May occur through contrast matching
+    if guinier_den == 0:
+        guinier_value = "NaN"
+        logging.warning("Effective Coherent Scattering Length is zero for all atoms in the system.")
+    elif (guinier_num/guinier_den) < 0:
+        guinier_value = (str(round(np.sqrt(-guinier_num/guinier_den), 1)) + " Å")
+        logging.warning("Radius of Gyration Squared is negative. R(G)^2 is assumed to be |R(G)|* R(G).")
+    else:
+        guinier_value = (str(round(np.sqrt(guinier_num/guinier_den), 1)) + " Å")
+
+    return rog_mass, guinier_value, r_g_mass  # (String, String, Float), float used for plugin model
+
+    
+def center_of_mass(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> list[float]:
+    """Calculate Center of Mass(CoM) of provided molecule using an SL profile
+
+    :param nuc_sl_data: A coordinate data object (MagSLD or OMF2SLD)
+    :return: A list of the calculated spatial center of mass, given as cartesian coordinates."""
+    masses = np.asarray([0.0, 0.0, 0.0])
+    densities = np.asarray([0.0, 0.0, 0.0])
+
+    # Only call periodictable once per element -> minimizes calculation time
+    coh_b_storage = {}
+
+    for i in range(len(nuc_sl_data.pos_x)):
+        coordinates = np.asarray([float(nuc_sl_data.pos_x[i]), float(nuc_sl_data.pos_y[i]), float(nuc_sl_data.pos_z[i])])
+        
+        #Coh b - Coherent Scattering Length(fm)
+        symbol = nuc_sl_data.pix_symbol[i]
+        coh_b = coh_b_storage.get(symbol, periodictable.elements.symbol(symbol).neutron.b_c)
+        coh_b_storage[symbol] = coh_b
+
+        masses += (coordinates*coh_b)
+        densities += coh_b
+
+    c_o_m = np.divide(masses, densities)
+    
+    return c_o_m
+
+
+def create_beta_plot(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD], form_factor: np.ndarray) -> np.ndarray:
+    """Carry out the computation of beta Q using provided & calculated data
+
+    :param q_x: The Q values where the beta will be calculated.
+    :param nuc_sl_data: A coordinate data object (MagSLD or OMF2SLD)
+    :param form_factor: The form factor calculated prior to applying the beta approximation.
+    :return: An array of form factor values with the beta approximation applied."""
+    f_q = f_of_q(q_x, nuc_sl_data)
+    
+    # Center Of Mass Calculation
+    data_beta_q = (f_q**2) / form_factor
+    
+    # Scale Beta Q to 0-1
+    scaling_factor = data_beta_q[0]
+    data_beta_q = data_beta_q / scaling_factor
+
+    return data_beta_q
+
+
+def f_of_q(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD]) -> np.ndarray:
+    """Compute the base F(Q) calculation based from the nuclear data.
+
+    :param q_x: The Q values where the beta will be calculated.
+    :param nuc_sl_data: A coordinate data object (MagSLD or OMF2SLD)
+    :return: An array of form factor data."""
+    c_o_m = center_of_mass(nuc_sl_data)
+    r_x = np.subtract(nuc_sl_data.pos_x, c_o_m[0])
+    r_y = np.subtract(nuc_sl_data.pos_y, c_o_m[1])
+    r_z = np.subtract(nuc_sl_data.pos_z, c_o_m[2])
+    magnitude_relative_coordinate = np.sqrt(np.power(r_x, 2) + np.power(r_y, 2) + np.power(r_z, 2))
+    coh_b = np.asarray([periodictable.elements.symbol(atom).neutron.b_c for atom in nuc_sl_data.pix_symbol])
+
+    f_of_q_list = [np.sum(coh_b * np.sinc(q_x[i] * magnitude_relative_coordinate / np.pi)) for i in range(len(q_x))]
+    f_of_q_list = np.asarray(f_of_q_list) / abs(np.sum(coh_b))  # normalization
+    return f_of_q_list
+
+
