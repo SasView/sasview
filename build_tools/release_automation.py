@@ -10,15 +10,15 @@ from pathlib import Path
 
 from sas.system.legal import legal
 
-#Replace with live server and live server key
-#DO NOT STORE KEY ON GITHUB
-#TEST settings for Sandbox
+# Replace with live server and live server key
+# DO NOT STORE KEY ON GITHUB
+# TEST settings for Sandbox
 zenodo_url = "https://zenodo.org"
 
-#Record metadata
-#Should import release notes from git repo, for now will need to cut and paste
+# Record metadata
+# Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
-    'metadata': {
+'metadata': {
     'title': 'SasView version 5.0.6',
     'description': '5.0.6 release',
     'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.6',
@@ -189,6 +189,7 @@ def generate_zenodo(sasview_data, zenodo_api_key):
                                                             "and attach to Zenodo release record.\n- Publish Zenodo record")
     return newDOI
 
+
 version_template = \
 """
 __version__ = "%s"
@@ -197,6 +198,7 @@ __build__ = "GIT_COMMIT"
 """
 
 zenodo_template = '__DOI__ = "%s"'
+
 
 def update_sasview_metadata(version, doi):
     """
@@ -214,6 +216,7 @@ def update_sasview_metadata(version, doi):
 
     with open(zenodo_filename, 'w') as file:
         file.write(zenodo_template % doi)
+
 
 def update_sasmodels_init(version):
     """
@@ -266,6 +269,7 @@ def prepare_release_notes(issues_list, repository, username, password):
         issue_titles.append(issue_title)
     return issue_titles
 
+
 if __name__ == "__main__":
     """
     Setups init and license files
@@ -287,7 +291,7 @@ if __name__ == "__main__":
 
     sasview_version = args.sasview_version
     sasmodels_version = args.sasmodels_version
-    sasview_data['metadata']['title'] = 'SasView version '+ sasview_version
+    sasview_data['metadata']['title'] = 'SasView version ' + sasview_version
     sasview_data['metadata']['description'] = sasview_version + ' release'
     sasview_data['metadata']['related_identifiers'][0]['identifier'] = \
         'https://github.com/SasView/sasview/releases/tag/v' + sasview_version
@@ -318,7 +322,7 @@ if __name__ == "__main__":
     sasmodels_issues_list = args.sasmodels_list
     sasdata_issues_list = args.sasdata_list
 
-    #Release notes template is generated if github credentials are provided
+    # Release notes template is generated if github credentials are provided
     if args.username and args.password:
         username = args.username
         password = args.password
@@ -327,7 +331,7 @@ if __name__ == "__main__":
         sasmodels_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
         sasdata_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
 
-        print('Copy text bellow to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
+        print('Copy text below to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
         for issue_title in sasview_issues:
             print(f'Fixes sasview {issue_title}')
 
