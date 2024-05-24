@@ -88,9 +88,57 @@ sasview_data = {
     }
 }
 
+CURRENT_PATH = Path('.').resolve()
+SASVIEW_PATH = CURRENT_PATH / 'sasview'
+SASDATA_PATH = CURRENT_PATH / 'sasdata'
+SASMODELS_PATH = CURRENT_PATH / 'sasmodels'
+for path in [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]:
+    if not path.exists():
+        missing_repo = path.parts[-1]
+        msg = f"""The {missing_repo} repository does not exist relative to the run path of release_automation.py.
+        Please ensure you are running this script from the directory all sub packages are in.
+        Usage:
+            `python ./sasview/release_automation.py [options]
+        """
+        logging.error(msg)
+CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.csv'
+
+
 class SplitArgs(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values.split(','))
+
+
+def generate_sasview_data() -> dict:
+    """Read in a known file and parse it for the information required to populate the list of participants used
+    in the zenodo record generation. The defined contributor types and difference between creators are defined in
+    https://help.zenodo.org/docs/deposit/describe-records/contributors/.
+
+    :return: A dictionary with a lists of creators and contributors."""
+    if CONTRIBUTORS_FILE.exists():
+        contributors = []
+        creators = []
+        with open(CONTRIBUTORS_FILE) as f:
+            # Rear in the lines and ignore the first line
+            lines = f.readlines()[1:]
+            for line in lines:
+                values = line.split('\t')
+                record = {'name': values[0], 'affiliation': values[1]}
+                if values[5]:
+                    # TODO: Should we grab the latest affiliation information using the ORCID ID?
+                    record['orcid'] = values[5]
+                if values[2]:
+                    creators.append(record)
+                elif values[3]:
+                    record['type'] = 'Producer'
+                    contributors.append(record)
+                elif values[4]:
+                    record['type'] = 'Other'
+                    contributors.append(record)
+        return {"creators": creators, "contributors": contributors}
+    else:
+        return {}
+
 
 def generate_zenodo(sasview_data, zenodo_api_key):
     """
@@ -237,6 +285,10 @@ if __name__ == "__main__":
     sasview_data['metadata']['description'] = sasview_version + ' release'
     sasview_data['metadata']['related_identifiers'][0]['identifier'] = \
         'https://github.com/SasView/sasview/releases/tag/v' + sasview_version
+    # Generate a list of contributors using a file, if that file exists, otherwise use the pre-defined list given here.
+    contributors = generate_sasview_data()
+    if contributors:
+        sasview_data.update(contributors)
 
     # Generates zenodo doi if zenodo api key is provided
     new_doi = ''
