@@ -232,15 +232,14 @@ def update_sasmodels_init(version):
     with open(init_file, 'w') as f:
         f.writelines(output_lines)
 
-def update_file(license_file, license_line, line_to_update):
-    """
 
-    :return:
-    """
-    with open(license_file, 'r') as f:
+def update_file(license_file: Path, license_line: str, line_to_update: int):
+    """Update a specific line in a text file."""
+    with open(license_file, 'rw') as f:
         output_lines = f.readlines()
         output_lines[line_to_update] = license_line
-    with open(license_file, 'w') as f:
+        # Move to the top of the file
+        f.seek(0)
         f.writelines(output_lines)
 
 
