@@ -191,8 +191,7 @@ def generate_zenodo(sasview_data, zenodo_api_key):
 
 
 version_template = \
-"""
-__version__ = "%s"
+"""__version__ = "%s"
 __release_date__ = "%i"
 __build__ = "GIT_COMMIT"
 """
@@ -238,11 +237,10 @@ def update_sasmodels_init(version):
 
 def update_file(license_file: Path, license_line: str, line_to_update: int):
     """Update a specific line in a text file."""
-    with open(license_file, 'rw') as f:
+    with open(license_file, 'r') as f:
         output_lines = f.readlines()
         output_lines[line_to_update] = license_line
-        # Move to the top of the file
-        f.seek(0)
+    with open(license_file, 'w') as f:
         f.writelines(output_lines)
 
 
@@ -329,7 +327,7 @@ if __name__ == "__main__":
 
         sasview_issues = prepare_release_notes(sasview_issues_list, 'sasview', username, password)
         sasmodels_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
-        sasdata_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
+        sasdata_issues = prepare_release_notes(sasdata_issues_list, 'sasmodels', username, password)
 
         print('Copy text below to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
         for issue_title in sasview_issues:
