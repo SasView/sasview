@@ -1,9 +1,14 @@
+import logging
+
 import requests
 import argparse
 import json
 import datetime
 import sys
 import os
+from pathlib import Path
+
+from sas.system.legal import legal
 
 #Replace with live server and live server key
 #DO NOT STORE KEY ON GITHUB
@@ -272,11 +277,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser('Script to automate release process')
     parser.add_argument('-v', '--sasview_version', required=True)
     parser.add_argument('-s', '--sasmodels_version', required=True)
+    parser.add_argument('-d', '--sasdata_version', required=True)
     parser.add_argument('-z', '--zenodo', default=False)
     parser.add_argument('-u', '--username', default=False)
     parser.add_argument('-p', '--password', default=False)
     parser.add_argument('-l', '--sasview_list', default=False, action=SplitArgs)
     parser.add_argument('-m', '--sasmodels_list', default=False, action=SplitArgs)
+    parser.add_argument('-n', '--sasdata_list', default=False, action=SplitArgs)
     args = parser.parse_args()
 
     sasview_version = args.sasview_version
@@ -299,18 +306,18 @@ if __name__ == "__main__":
     update_sasview_metadata(sasview_version, new_doi)
     update_sasmodels_init(sasmodels_version)
 
-    year = datetime.datetime.now().year
-    license_line = 'Copyright (c) 2009-' + str(year) + ', SasView Developers\n\n'
-    license_file = os.path.join('sasview', 'LICENSE.txt')
-    update_file(license_file, license_line, 0)
-    license_file = os.path.join('sasmodels', 'LICENSE.txt')
-    update_file(license_file, license_line, 0)
-    license_line = 'Copyright (c) 2009-' + str(year) + ' UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT, BAM\n'
-    license_file = os.path.join('sasview', 'installers', 'license.txt')
+    # Pull the license from a know location
+    license_line = legal.copyright
+    subpackages = [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]
+    for subpackage in subpackages:
+        license_file = subpackage / 'LICENSE.txt'
+        update_file(license_file, license_line, 0)
+    license_file = SASVIEW_PATH / 'installers' / 'license.txt'
     update_file(license_file, license_line, -1)
 
     sasview_issues_list = args.sasview_list
     sasmodels_issues_list = args.sasmodels_list
+    sasdata_issues_list = args.sasdata_list
 
     #Release notes template is generated if github credentials are provided
     if args.username and args.password:
@@ -319,6 +326,7 @@ if __name__ == "__main__":
 
         sasview_issues = prepare_release_notes(sasview_issues_list, 'sasview', username, password)
         sasmodels_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
+        sasdata_issues = prepare_release_notes(sasmodels_issues_list, 'sasmodels', username, password)
 
         print('Copy text bellow to  /sasview/docs/sphinx-docs/source/user/RELEASE.rst and adapt accordingly')
         for issue_title in sasview_issues:
@@ -326,3 +334,6 @@ if __name__ == "__main__":
 
         for issue_title in sasmodels_issues:
             print(f'Fixes sasmodels {issue_title}')
+
+        for issue_title in sasdata_issues:
+            print(f'Fixes sasdata {issue_title}')
