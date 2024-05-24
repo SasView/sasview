@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
+from sas.qtgui.Utilities.MuMagTool.fit_parameters import ExperimentGeometry
 
 
 @dataclass
@@ -25,4 +26,5 @@ class FitResults:
     optimal_A_chi_sq: float
     optimal_A_stdev: float # check
 
-    geometry: str
+    geometry: ExperimentGeometry
+

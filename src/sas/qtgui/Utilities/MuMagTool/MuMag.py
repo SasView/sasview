@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 import numpy as np
 
-from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters
+from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters, ExperimentGeometry
 
 
 class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
@@ -32,15 +32,15 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.PlotDisplayPanel.setLayout(layout)
 
         self.fig = plt.figure() #Figure(figsize=(width, height), dpi=dpi)
-        self.simple_fit_axes = self.fig.add_subplot(111)
+        self.simple_fit_axes = self.fig.add_subplot(1, 1, 1)
         self.simple_fit_axes.set_visible(False)
-        self.chi_squared_axes = self.fig.add_subplot(221)
+        self.chi_squared_axes = self.fig.add_subplot(2, 2, 1)
         self.chi_squared_axes.set_visible(False)
-        self.residuals_axes = self.fig.add_subplot(222)
+        self.residuals_axes = self.fig.add_subplot(2, 2, 2)
         self.residuals_axes.set_visible(False)
-        self.s_h_axes = self.fig.add_subplot(223)
+        self.s_h_axes = self.fig.add_subplot(2, 2, 3)
         self.s_h_axes.set_visible(False)
-        self.longitudinal_scattering_axes = self.fig.add_subplot(224)
+        self.longitudinal_scattering_axes = self.fig.add_subplot(2, 2, 4)
         self.longitudinal_scattering_axes.set_visible(False)
 
         self.figure_canvas = FigureCanvas(self.fig)
@@ -66,13 +66,22 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.figure_canvas.draw()
 
     def fit_parameters(self) -> FitParameters:
+
+        match self.ScatteringGeometrySelect.currentText().lower():
+            case "parallel":
+                geometry = ExperimentGeometry.PARALLEL
+            case "perpendicular":
+                geometry = ExperimentGeometry.PERPENDICULAR
+            case _:
+                raise ValueError(f"Unknown experiment geometry: {self.ScatteringGeometrySelect.currentText()}")
+
         return FitParameters(
             q_max=self.qMaxSpinBox.value(),
             min_applied_field=self.hMinSpinBox.value(),
             exchange_A_min=self.aMinSpinBox.value(),
             exchange_A_max=self.aMaxSpinBox.value(),
             exchange_A_n=self.aSamplesSpinBox.value(),
-            experiment_geometry=self.ScatteringGeometrySelect.currentText())
+            experiment_geometry=geometry)
 
     def simple_fit_button_callback(self):
 
@@ -92,10 +101,13 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         parameters = self.fit_parameters()
 
-        if parameters.experiment_geometry == 'perpendicular':
-            self.longitudinal_scattering_axes.set_visible(True)
-        else:
-            self.longitudinal_scattering_axes.set_visible(False)
+        match parameters.experiment_geometry:
+            case ExperimentGeometry.PERPENDICULAR:
+                self.longitudinal_scattering_axes.set_visible(True)
+            case ExperimentGeometry.PARALLEL:
+                self.longitudinal_scattering_axes.set_visible(False)
+            case _:
+                raise ValueError(f"Unknown Value: {parameters.experiment_geometry}")
 
 
         self.MuMagLib_obj.simple_fit_button_callback(
