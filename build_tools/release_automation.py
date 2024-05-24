@@ -235,6 +235,24 @@ def update_sasmodels_init(version):
         f.writelines(output_lines)
 
 
+def update_sasdata_init(version):
+    """Modify the sasdata __init__.py file in order to update the version
+
+    :param version:
+    :return:
+    """
+    init_file = CURRENT_PATH / 'sasdata' / 'sasdata' / '__init__.py'
+    output_lines = []
+    with open(init_file, 'r') as f:
+        for line in f.readlines():
+            if line[:11] == '__version__':
+                output_lines.append('__version__ = \"' + version + '\"\n')
+            else:
+                output_lines.append(line)
+    with open(init_file, 'w') as f:
+        f.writelines(output_lines)
+
+
 def update_file(license_file: Path, license_line: str, line_to_update: int):
     """Update a specific line in a text file."""
     with open(license_file, 'r') as f:
@@ -289,6 +307,7 @@ if __name__ == "__main__":
 
     sasview_version = args.sasview_version
     sasmodels_version = args.sasmodels_version
+    sasdata_version = args.sasdata_version
     sasview_data['metadata']['title'] = 'SasView version ' + sasview_version
     sasview_data['metadata']['description'] = sasview_version + ' release'
     sasview_data['metadata']['related_identifiers'][0]['identifier'] = \
@@ -306,6 +325,7 @@ if __name__ == "__main__":
 
     update_sasview_metadata(sasview_version, new_doi)
     update_sasmodels_init(sasmodels_version)
+    update_sasdata_init(sasdata_version)
 
     # Pull the license from a know location
     license_line = legal.copyright
