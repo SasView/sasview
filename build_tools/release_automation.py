@@ -277,12 +277,13 @@ def prepare_release_notes(issues_list, repository, username, password):
     """
     issue_titles = []
     for issue in issues_list:
-        #WARNING: One can try running with auth but there is limitted number of requests
+        # WARNING: One can try running with auth but there is limitted number of requests
         response = requests.get('https://api.github.com/repos/SasView/' + repository + '/issues/' + issue,
                                 auth=(username, password))
+        if response.status_code != 200:
+            return []
         title = response.json()['title']
-        issue_title = f"#{issue}, {title}"
-        issue_titles.append(issue_title)
+        issue_titles.append(f"#{issue}, {title}")
     return issue_titles
 
 
