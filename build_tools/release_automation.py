@@ -10,6 +10,23 @@ from pathlib import Path
 
 from sas.system.legal import legal
 
+USAGE = '''This script should be run from one directory above the base sasview directory. This script also requires both
+ sasmodels and sasdata repositories to be in the same directory as the sasview repository.
+
+Usage: `python sasview/build_tools/release_automation.py [opts]`
+
+Options include:
+    -v/--sasview_version: The sasview version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
+    -s/--sasmodels_version: The sasmodels version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
+    -d/--sasdata_version: The sasdata version for the upcoming release in x.y.z(a|b)(0-9) format. **required**
+    -z/--zenodo: The Zenodo api key for modifying/creating Zenodo entries.
+    -u/--username: Your Github username for fetching the repositories.
+    -p/--password: Your Github password for fetching the repositories.
+    -l/--sasview_list: A comma-delimited list of sasview issue numbers closed for this release.
+    -m/--sasmodels_list: A comma-delimited list of sasmodels issue numbers closed for this release.
+    -n/--sasdata_list: A comma-delimited list of sasdata issue numbers closed for this release.
+'''
+
 # Replace with live server and live server key
 # DO NOT STORE KEY ON GITHUB
 # TEST settings for Sandbox
@@ -287,13 +304,7 @@ def prepare_release_notes(issues_list, repository, username, password):
     return issue_titles
 
 
-if __name__ == "__main__":
-    """
-    Setups init and license files
-    Generates zenodo doi and writes to the init file
-    Templates release notes
-    """
-
+def parse_args():
     parser = argparse.ArgumentParser('Script to automate release process')
     parser.add_argument('-v', '--sasview_version', required=True)
     parser.add_argument('-s', '--sasmodels_version', required=True)
@@ -304,7 +315,12 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--sasview_list', default=False, action=SplitArgs)
     parser.add_argument('-m', '--sasmodels_list', default=False, action=SplitArgs)
     parser.add_argument('-n', '--sasdata_list', default=False, action=SplitArgs)
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main(args=None):
+    if not args:
+        args = parse_args()
 
     sasview_version = args.sasview_version
     sasmodels_version = args.sasmodels_version
@@ -359,3 +375,17 @@ if __name__ == "__main__":
 
         for issue_title in sasdata_issues:
             print(f'Fixes sasdata {issue_title}')
+
+
+if __name__ == "__main__":
+    """
+    Setups init and license files
+    Generates zenodo doi and writes to the init file
+    Templates release notes
+    """
+
+    args = parse_args()
+    if args.help:
+        print(USAGE)
+    else:
+        main(args)
