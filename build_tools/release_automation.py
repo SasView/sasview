@@ -385,7 +385,7 @@ if __name__ == "__main__":
     """
 
     args = parse_args()
-    if args.help:
+    if hasattr(args, 'help'):
         print(USAGE)
     else:
         main(args)
