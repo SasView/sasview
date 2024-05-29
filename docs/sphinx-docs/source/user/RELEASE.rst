@@ -13,6 +13,151 @@ Release Notes
 Features
 ========
 
+New in Version 6.0.0
+--------------------
+This is a major release with a number of new features, enhancements, and bug fixes as described below. Many of the new
+features are now highlighted in our 'What's New' window displayed when SasView starts.
+
+This version of SasView is built with Sasmodels v1.0.7, Sasdata v0.9.0, and bumps main.
+
+New Features
+^^^^^^^^^^^^
+* Improvements to Corfunc by @lucas-wilkins in #2450
+* Corfunc perspective needs export and report capabilities by @lucas-wilkins in #2065
+* Add a preferences window by @krzywon in #2167
+* Debye efficiency by @klytje in #2859
+* Rog and beta q by @smalex-z in #2535
+* Custom fit models by @smalex-z in #2565
+* 1763 implement the orientation viewer in 5x and GL Subsystem by @lucas-wilkins in #2394
+* Particle editor by @lucas-wilkins in #2520
+* Slicer extension by @butlerpd in #1919
+* Wedge slicer by @ehewins in #2566
+* Add command line interface to allow scripts to be run from sasview.exe by @pkienzle in #2280
+* Local documentation generation by @tsole0 in #2576
+* What's new dialog by @lucas-wilkins in #2608
+
+Feature Enhancements
+^^^^^^^^^^^^^^^^^^^^
+
+Log Explorer Enhancements
+_________________________
+* Improved log explorer behaviour by @rozyczko in #2620 and @rprospero in #2639
+* 2875 drop logger level required to force log explorer to pop up from error to warning by @lucas-wilkins in #2879
+
+Tool Enhancements
+_________________
+* Tool[s] menu reorganised and renamed by @lucas-wilkins in #2430
+* SLD calculator tool buttons by @rozyczko in #2302
+* Update sas_gen.py to speed up data loading by @timsnow in #2617
+* 2060 read oommf v2 files by @wpotrzebowski in #2116
+
+Plotting Enhancements
+_____________________
+* 1726 allow user to choose default for plot navigation tools - merge into release_6.0.0 by @juliuskarliczek in #2849
+* Two options to disable residuals and polydispersity distribution plots by @lozanodorian in #2558
+* Grid lines toggle for standard Plot1D by @rozyczko in #2630
+* created submenu for slicers being part of #2604 by @astellhorn in #2610
+* Plot label customisation widget #1920 by @rozyczko in #2096
+* Add persistent legend visibility toggle by @pbeaucage in #2266
+* Add masked data toggle to 2D plots by @krzywon in #2368
+* Add +/- 1 and 3 sigma lines on residual plots by @butlerpd in #2443
+* new color map code, based on a BSD-3 licensed module by @rozyczko in #2335
+* Update fitting and plotting defaults by @butlerpd in #2354
+
+General GUI Enhancements
+________________________
+* initial version of modified Send To button by @rozyczko in #2613
+* Add a button group to allow for proper logic of radio buttons by @rozyczko in #2848
+* 2242 quit dont ask me again by @lucas-wilkins in #2294
+* 2385 incosistent tabbing order across the widgets by @rozyczko in #2401
+* Stop making huge folder tree in user profile by @llimeht in #2262
+* Call magnetic angles up_theta by @dehoni in #1971
+
+Fitting Enhancements
+____________________
+* Allow for user adjusted relative weighting of different data sets in constrained fits by @Caddy-Jones in #1973
+* Improved/fixed category manager by @rozyczko in #2649
+* Handling of constraints for polydisperse parameters (fix #1588) by @gonzalezma in #2348
+
+Bug Fixes
+^^^^^^^^^
+General GUI Fixes
+_________________
+* 2789: phantom perspective windows by @krzywon in #2790
+* Re-enabled "close window" option on modal dialogs by @rozyczko in #2690
+* 1524 when loading data the data explorer should revert to the data tab by @juliuskarliczek in #2852
+* Force main window to maximize #2272 by @rozyczko in #2273
+* A few more or less obvious fixes for speed of SasView startup by @rozyczko in #2275
+
+Plotting Fixes
+______________
+* fix for broken context menus in 1d plots by @rozyczko in #2670
+* DIfferentiate which combobox to put the graphs in. by @rozyczko in #2298
+* Fit intermittent plot blanking (#2267) by @pbeaucage in #2300
+* Fix unusable legend size with long filenames on Mac by @pbeaucage in #2264
+* Fix plot legend not updating on custom change. #2361 by @rozyczko in #2362
+* 2350: Close the BUMPS/DREAM results panel when data is deleted by @krzywon in #2365
+* fixed sesans residuals plots to show in real space rather than q space by @caitwolf in #2338
+
+Fitting and Other Perspective Fixes
+_____________
+* FIX: fix model date format in the user model docstring by @mrakitin in #2713
+* Various Multiplicity Model Fixes by @krzywon in #2647
+* 2855: Fix model save error by @krzywon in #2864
+* Fix "Use dQ Data" bug that swtiched slit length and slit width in the gui by @caitwolf in #2336
+* 2319: Fix copy/paste when selecting a structure factor by @krzywon in #2320
+* 1999: Clip fitting values set outside the fit range by @krzywon in #2422
+* Fixed breaking bug in pr_inversion by @lucas-wilkins in #2178
+* Fixes in invariant prespective by @wpotrzebowski in #2357
+* Fixes binning bug in implementation of sesans data by @caitwolf in #2331
+* fix confusing slit resolution parameters and add guardrails by @pbeaucage in #2283
+
+Other Fixes
+___________
+* Cherry-picked new_numpy_behaviour by @wpotrzebowski in #2655
+* Fit report save fix by @rozyczko in #2684
+* Fix for empty save format for grid files by @rozyczko in #2683
+
+Documentation Changes
+^^^^^^^^^^^^^^^^^^^^^
+* 2679: Update preferences documentation by @krzywon in #2680
+* Include SasData documentation in SasView by @krzywon in #2672
+* Corfunc Docs by @lucas-wilkins in #2823
+* Docstrings in perspective.py by @lucas-wilkins in #2207
+* Update Optimizer Help Doc by @smk78 in #2359
+* Update of the sld calculator documentation. Fixes #2689. by @katieweigandt in #2785
+* Update rst strings to fix doc build warnings by @smk78 in #2288
+
+Infrastructure Changes
+^^^^^^^^^^^^^^^^^^^^^^
+
+Build System
+____________
+* Rework CI to be non-repetitive, simpler, test more things by @llimeht in #2263
+* Stop existing concurrent CI by @krzywon in #2638
+* Release 6.0.0 notarization fix by @wpotrzebowski in #2709
+* Fixes problem with using deprecated node.js by @butlerpd in #2836
+* Run unit tests of Qt GUI and have CI gate on them by @llimeht in #2252
+* Remove ubuntu 18.04 from CI by @krzywon in #2439
+
+Python Dependencies
+___________________
+* Added 3.11, removed 3.8 by @rozyczko in #2582
+* Warnings removals and python 3.9 drop in tests by @wpotrzebowski in #2860
+* Pyside6 merge by @rozyczko in #2478
+* Pyinstaller 6 by @krzywon in #2854
+* Cleanup of requirements.txt by @krzywon in #2856
+* 2806 [6.0.0]: Remove imp module by @krzywon in #2809
+* Remove pyopengl_accelerate from requirements.txt by @wpotrzebowski in #2865
+
+Developer Enhancements
+______________________
+* Add argument to convertUI that forces full UI rebuild by @krzywon in #2483
+* Run.py: Prioritize sibling modules over installed modules by @krzywon in #2772
+* Use sasdata package in place of sas.sascalc.dataloader by @krzywon in #2141
+* Clean up sas.sasview by @lucas-wilkins in #2154, #2159, and #2161
+
+
 New in Version 5.0.6
 --------------------
 This is a point release which fixes a number of issues reported in earlier versions
