@@ -18,7 +18,7 @@ New in Version 6.0.0
 This is a major release with a number of new features, enhancements, and bug fixes as described below. Many of the new
 features are now highlighted in our 'What's New' window displayed when SasView starts.
 
-This version of SasView is built with Sasmodels v1.0.7, Sasdata v0.9.0, and bumps main.
+This version of SasView is built with Sasmodels v1.0.7, Sasdata v0.9.0, and bumps v0.9.2.
 
 New Features
 ^^^^^^^^^^^^
