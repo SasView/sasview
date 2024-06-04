@@ -38,7 +38,7 @@ sasview_data = {
 'metadata': {
     'title': f'SasView version 6.0.0',
     'description': f'6.0.0 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v5.0.6',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.0.0-beta-1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
         {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
