@@ -16,7 +16,6 @@ class FitResults:
 
     S_H: np.ndarray
     S_M: np.ndarray
-
     I_residual: np.ndarray  # Nuclear + Magnetic cross section at complete magnetic saturation
 
     exchange_A: np.ndarray
@@ -27,4 +26,3 @@ class FitResults:
     optimal_A_stdev: float # check
 
     geometry: ExperimentGeometry
-

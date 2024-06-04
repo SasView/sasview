@@ -2,178 +2,142 @@ import numpy as np
 import scipy.optimize as scopt
 import matplotlib.pyplot as plt
 
+from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
+from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters
+from sas.qtgui.Utilities.MuMagTool.fit_result import FitResults
+from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutput
+from sas.qtgui.Utilities.MuMagTool.sweep_output import SweepOutput
+
+mu_0 = 4 * np.pi * 1e-7
+
+def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
+    """ Least squares fitting for a given exchange stiffness, A
+
+        We are fitting the equation:
+
+          I_sim = I_res + response_H * S_H + response_M * S_M
+                = (I_res, S_H, S_M) . (1, response_H, response_M)
+                = (I_res, S_H, S_M) . least_squares_x
+
+        finding I_res, S_H, and S_M for each q value
 
 
-####################################################################################################
-# Functions for the analysis of perpendicular SANS #################################################
-####################################################################################################
-# Lorentzian Model for the generation of clean synthetic test data for perpendicular SANS geometry
-def LorentzianModelPERP(q, A, M_s, H_0, H_dem, a_H, a_M, l_c):
+    """
 
-    # All inputs in SI-units
-    # Micromagnetic Model
-    mu_0 = 4 * np.pi * 1e-7
-    H_i = H_0 - H_dem
-    l_H = np.sqrt((2*A)/(mu_0 * M_s * H_i))
-    H_eff = H_i * (1 + l_H**2 * q**2)
-    p = M_s/H_eff
-    R_H = p**2 / 4 * (2 + 1/np.sqrt(1 + p))
-    R_M = (np.sqrt(1 + p) - 1)/2
+    # Get matrices from the input data
+    n_data = len(data)
 
-    # Lorentzian functions for S_H, S_M
-    S_H = a_H**2/(1 + q**2 * l_c**2)**2
-    S_M = a_M**2/(1 + q**2 * l_c**2)**2
+    applied_field = np.array([datum.applied_field for datum in data])
+    demagnetising_field = np.array([datum.demagnetising_field for datum in data])
+    saturation_magnetisation = np.array([datum.saturation_magnetisation for datum in data])
 
-    # Magnetic SANS cross sections
-    I_M = R_H * S_H + R_M * S_M
+    q = np.array([datum.scattering_curve.x for datum in data]) # TODO: Check for transpose
+    I = np.array([datum.scattering_curve.y for datum in data])
+    I_stdev = np.array([datum.scattering_curve.dy for datum in data])
 
-    # Model of I_res
-    idx = np.argmax(H_0[:, 1])
-    print(H_0[idx, 1]*mu_0*1e3)
-    I_res = 0.9 * I_M[idx, :]
-
-    # Total SANS cross section
-    I_sim = I_res + I_M
-    sigma = 0 * I_sim + 1
-
-    return I_sim, sigma, S_H, S_M, I_res
-
-####################################################################################################
-# Lorentzian Model for the generation of noisy synthetic test data for perpendicular SANS geometry
-def LorentzianNoisyModelPERP(q, A, M_s, H_0, H_dem, a_H, a_M, l_c, beta):
-
-    # All inputs in SI-units
+    n_q = q.shape[0]
 
     # Micromagnetic Model
-    mu_0 = 4 * np.pi * 1e-7
-    H_i = H_0 - H_dem
-    l_H = np.sqrt((2*A)/(mu_0 * M_s * H_i))
-    H_eff = H_i * (1 + l_H**2 * q**2)
-    p = M_s/H_eff
-    R_H = p**2 / 4 * (2 + 1/np.sqrt(1 + p))
-    R_M = (np.sqrt(1 + p) - 1)/2
+    internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
+    magnetic_scattering_length = np.sqrt((2 * A) / (mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field))
+    effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
 
-    # Lorentzian functions for S_H, S_M
-    S_H = a_H**2/(1 + q**2 * l_c**2)**2
-    S_M = a_M**2/(1 + q**2 * l_c**2)**2
+    # Calculate the response functions
+    p = saturation_magnetisation.reshape(-1, 1) / effective_field
+    response_H = (p ** 2) / 4 * (2 + 1 / np.sqrt(1 + p))
+    response_M = (np.sqrt(1 + p) - 1) / 2
 
-    # Magnetic SANS cross sections
-    I_M = R_H * S_H + R_M * S_M
+    print("Shapes:")
+    print(" I", I.shape)
+    print(" q", q.shape)
+    print(" sigma", I_stdev.shape)
+    print(" response H", response_H.shape)
+    print(" response M", response_M.shape)
 
-    # Model of I_res
-    idx = np.argmax(H_0[:, 1])
-    I_res = 0.9 * I_M[idx, :]
+    # Lists for output of calculation
+    I_residual = []
+    S_H = []
+    S_M = []
 
-    # Model of standard deviation
-    sigma = beta * (I_res + I_M)
+    I_residual_error_weight = []
+    S_M_error_weight = []
+    S_H_error_weight = []
 
-    # Total SANS cross section
-    I_sim = I_res + I_M + sigma * np.random.randn(len(sigma[:, 1]), len(sigma[1, :]))
+    for nu in range(n_q):
 
-    return I_sim, sigma, S_H, S_M, I_res
 
-####################################################################################################
-# Least squares method for perpendicular SANS geometry
-def LSQ_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A):
-
-    # Micromagnetic Model
-    mu_0 = 4 * np.pi * 1e-7
-    H_i = H_0 - H_dem
-    l_H = np.sqrt((2 * A) / (mu_0 * M_s * H_i))
-    H_eff = H_i * (1 + (l_H ** 2) * (q ** 2))
-    p = M_s / H_eff
-    R_H = (p ** 2) / 4 * (2 + 1 / np.sqrt(1 + p))
-    R_M = (np.sqrt(1 + p) - 1) / 2
-
-    # Non-negative least squares loop
-    L_nu = len(q[1, :])
-    S_H = np.zeros((1, L_nu))
-    S_M = np.zeros((1, L_nu))
-    I_res = np.zeros((1, L_nu))
-    sigma_S_H = np.zeros((1, L_nu))
-    sigma_S_M = np.zeros((1, L_nu))
-    sigma_I_res = np.zeros((1, L_nu))
-    for nu in np.arange(0, L_nu):
-        A = np.array([1/sigma[:, nu], R_H[:, nu]/sigma[:, nu], R_M[:, nu]/sigma[:, nu]]).T
-        y = I_exp[:, nu]/sigma[:, nu]
-        c = np.matmul(A.T, y)
-        H = np.dot(A.T, A)
 
         # non-negative linear least squares
-        x = scopt.nnls(H, c)
-        I_res[0, nu] = x[0][0]
-        S_H[0, nu] = x[0][1]
-        S_M[0, nu] = x[0][2]
+        least_squares_x = (np.array([np.ones((n_data,)), response_H[:, nu], response_M[:, nu]]) / I_stdev[:, nu]).T
+        least_squares_y = I[:, nu]/I_stdev[:, nu]
 
-        Gamma = np.linalg.inv(np.dot(H.T, H))
-        sigma_I_res[0, nu] = Gamma[0, 0]
-        sigma_S_H[0, nu] = Gamma[1, 1]
-        sigma_S_M[0, nu] = Gamma[2, 2]
+        print("Least Squares X", least_squares_x.shape)
+        print("Least Squares Y", least_squares_y.shape)
 
-    I_sim = I_res + R_H * S_H + R_M * S_M
-    s_q = np.mean(((I_exp - I_sim)/sigma)**2, axis=0)
+        least_squares_x_squared = np.dot(least_squares_x.T, least_squares_x)
 
-    sigma_S_H = np.sqrt(np.abs(sigma_S_H * s_q))
-    sigma_S_M = np.sqrt(np.abs(sigma_S_M * s_q))
-    sigma_I_res = np.sqrt(np.abs(sigma_I_res * s_q))
+        # Non-negative least squares
+        fit_result = scopt.nnls(
+                       least_squares_x_squared,
+                       np.matmul(least_squares_x.T, least_squares_y))
 
-    chi_q = np.mean(s_q)
+        I_residual.append(fit_result[0][0])
+        S_H.append(fit_result[0][1])
+        S_M.append(fit_result[0][2])
 
-    return chi_q, I_res, S_H, S_M, sigma_I_res, sigma_S_H, sigma_S_M
+        errors = np.linalg.inv(np.dot(least_squares_x_squared.T, least_squares_x_squared))
 
-####################################################################################################
-# Least squares method for perpendicular SANS geometry
-def chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A):
+        I_residual_error_weight.append(errors[0, 0])
+        S_H_error_weight.append(errors[1, 1])
+        S_M_error_weight.append(errors[2, 2])
 
-    # Micromagnetic Model
-    A = abs(A)
-    mu_0 = 4 * np.pi * 1e-7
-    H_i = H_0 - H_dem
-    l_H = np.sqrt((2 * A) / (mu_0 * M_s * H_i))
-    H_eff = H_i * (1 + (l_H ** 2) * (q ** 2))
-    p = M_s / H_eff
-    R_H = (p ** 2) / 4 * (2 + 1 / np.sqrt(1 + p))
-    R_M = (np.sqrt(1 + p) - 1) / 2
+    # Arrayise
+    S_H = np.array(S_H)
+    S_M = np.array(S_M)
+    I_residual = np.array(I_residual)
 
-    # Non-negative least squares loop
-    L_nu = len(q[0, :])
-    S_H = np.zeros((1, L_nu))
-    S_M = np.zeros((1, L_nu))
-    I_res = np.zeros((1, L_nu))
-    for nu in np.arange(0, L_nu):
-        A = np.array([1/sigma[:, nu], R_H[:, nu]/sigma[:, nu], R_M[:, nu]/sigma[:, nu]]).T
-        y = I_exp[:, nu]/sigma[:, nu]
+    I_sim = I_residual.reshape(-1, 1) + response_H * S_H.reshape(-1, 1) + response_M * S_M.reshape(-1, 1)
 
-        c = np.matmul(A.T, y)
-        H = np.dot(A.T, A)
+    s_q = np.mean(((I - I_sim)/I_stdev)**2, axis=1)
 
-        # non-negative linear least squares
-        x = scopt.nnls(H, c)
-        I_res[0, nu] = x[0][0]
-        S_H[0, nu] = x[0][1]
-        S_M[0, nu] = x[0][2]
+    sigma_I_res = np.sqrt(np.abs(np.array(I_residual_error_weight) * s_q))
+    sigma_S_H = np.sqrt(np.abs(np.array(S_H_error_weight) * s_q))
+    sigma_S_M = np.sqrt(np.abs(np.array(S_M_error_weight) * s_q))
 
-    I_sim = I_res + R_H * S_H + R_M * S_M
-    s_q = np.mean(((I_exp - I_sim)/sigma)**2, axis=0)
-    chi_q = np.mean(s_q)
+    chi_sq = float(np.mean(s_q))
 
-    return chi_q
+    return LeastSquaresOutput(
+        exchange_A=A,
+        exchange_A_chi_sq=chi_sq,
+        q=np.mean(q, axis=1),
+        I_residual=I_residual,
+        I_simulated=I_sim,
+        S_H=S_H,
+        S_M=S_M,
+        I_residual_stdev=sigma_I_res,
+        S_H_stdev=sigma_S_H,
+        S_M_stdev=sigma_S_M)
+
 
 ####################################################################################################
 # Sweep over Exchange Stiffness A for perpendicular SANS geometry
-def SweepA_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_1, A_2, A_N):
+def SweepA_PERP(parameters: FitParameters, data: list[ExperimentalData]):
 
-    A = np.linspace(A_1, A_2, A_N)
-    chi_q = np.zeros(len(A))
-    for k in np.arange(0, len(A)):
-        chi_q[k], I_res, S_H, S_M, sigma_I_res, sigma_S_H, sigma_S_M = LSQ_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A[k])
+    a_values = np.linspace(
+                        parameters.exchange_A_min,
+                        parameters.exchange_A_max,
+                        parameters.exchange_A_n) * 1e-12 # From pJ/m to J/m
 
-    min_idx = np.argmin(chi_q)
-    A_opt = A[min_idx]
+    least_squared_fits = [LSQ_PERP(data, a) for a in a_values]
 
-    chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M = LSQ_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_opt)
+    optimal_fit = min(least_squared_fits, key=lambda x: x.exchange_A_chi_sq)
 
-    return A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M
+    chi_sq = np.array([fit.exchange_A_chi_sq for fit in least_squared_fits])
+
+    return SweepOutput(
+        exchange_A_checked=a_values,
+        exchange_A_chi_sq=chi_sq,
+        optimal=optimal_fit)
 
 ####################################################################################################
 # find optimal Exchange Stiffness A for perpendicular SANS geometry using fsolve function (slow and very accurate)
@@ -188,7 +152,7 @@ def OptimA_fsolve_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_initial):
 # find optimal Exchange Stiffness A for perpendicular SANS geometry using
 # successive parabolic interpolation (fast and accurate)
 # implemented as Jarratt's Method
-def OptimA_SPI_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_1, eps):
+def OptimA_SPI_PERP(data: list[ExperimentalData], A_1, epsilon):
 
     delta = A_1 * 0.1
 
@@ -196,12 +160,12 @@ def OptimA_SPI_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_1, eps):
     x_2 = A_1
     x_3 = A_1 + delta
 
-    y_1 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, x_1)
-    y_2 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, x_2)
-    y_3 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, x_3)
+    y_1 = LSQ_PERP(data, x_1).exchange_A_chi_sq
+    y_2 = LSQ_PERP(data, x_2).exchange_A_chi_sq
+    y_3 = LSQ_PERP(data, x_3).exchange_A_chi_sq
 
     x_4 = x_3 + 0.5 * ((x_2 - x_3)**2 * (y_3 - y_1) + (x_1 - x_3)**2 * (y_2 - y_3))/((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
-    while np.abs(2 * (x_4 - x_3)/(x_4 + x_3)) > eps:
+    while np.abs(2 * (x_4 - x_3)/(x_4 + x_3)) > epsilon:
 
         x_1 = x_2
         x_2 = x_3
@@ -209,7 +173,7 @@ def OptimA_SPI_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_1, eps):
 
         y_1 = y_2
         y_2 = y_3
-        y_3 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, x_3)
+        y_3 = LSQ_PERP(data, x_3).exchange_A_chi_sq
 
         x_4 = x_3 + 0.5 * ((x_2 - x_3) ** 2 * (y_3 - y_1) + (x_1 - x_3) ** 2 * (y_2 - y_3)) / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
 
@@ -232,39 +196,47 @@ def SANS_Model_PERP(q, S_H, S_M, I_res, M_s, H_0, H_dem, A):
 
 ####################################################################################################
 # Plot Fitting results of simple fit
-def PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, A_Uncertainty,
+def PlotFittingResultsPERP_SimpleFit(z: SweepOutput, A_Uncertainty,
                                      figure, axes1, axes2, axes3, axes4):
 
     if A_Uncertainty < 1e-4:
         A_Uncertainty = 0
 
     A_uncertainty_str = str(A_Uncertainty)
-    A_opt_str = str(A_opt * 1e12)
+    A_opt_str = str(z.optimal.exchange_A * 1e12)
+
+    q = z.optimal.q * 1e-9
+
+    # Plot A search data
+
     axes1.set_title('$A_{\mathrm{opt}} = (' + A_opt_str[0:5] + ' \pm ' + A_uncertainty_str[0:4] + ')$ pJ/m')
-    axes1.plot(A * 1e12, chi_q)
-    axes1.plot(A_opt * 1e12, chi_q_opt, 'o')
-    axes1.set_xlim([min(A * 1e12), max(A * 1e12)])
+    axes1.plot(z.exchange_A_checked * 1e12, z.exchange_A_chi_sq)
+    axes1.plot(z.optimal.exchange_A * 1e12, z.optimal.exchange_A_chi_sq, 'o')
+
+    axes1.set_xlim([min(z.exchange_A_checked * 1e12), max(z.exchange_A_checked * 1e12)])
     axes1.set_xlabel('$A$ [pJ/m]')
     axes1.set_ylabel('$\chi^2$')
 
-    axes2.plot(q[0, :] * 1e-9, I_res_opt[0, :], label='fit')
+    # Residual intensity plot
+
+    axes2.plot(q, z.optimal.I_residual, label='fit')
     axes2.set_yscale('log')
     axes2.set_xscale('log')
-    axes2.set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
+    axes2.set_xlim([min(q), max(q)])
     axes2.set_xlabel('$q$ [1/nm]')
     axes2.set_ylabel('$I_{\mathrm{res}}$')
 
-    axes3.plot(q[0, :] * 1e-9, S_H_opt[0, :], label='fit')
+    axes3.plot(q, z.optimal.S_H[0, :], label='fit')
     axes3.set_yscale('log')
     axes3.set_xscale('log')
-    axes3.set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
+    axes3.set_xlim([min(q), max(q)])
     axes3.set_xlabel('$q$ [1/nm]')
     axes3.set_ylabel('$S_H$')
 
-    axes4.plot(q[0, :] * 1e-9, S_M_opt[0, :], label='fit')
+    axes4.plot(q, z.optimal.S_M, label='fit')
     axes4.set_yscale('log')
     axes4.set_xscale('log')
-    axes4.set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
+    axes4.set_xlim([min(q), max(q)])
     axes4.set_xlabel('$q$ [1/nm]')
     axes4.set_ylabel('$S_M$')
 
@@ -283,10 +255,13 @@ def PlotSweepFitResultPERP(q_max_mat, H_min_mat, A_opt_mat):
     plt.show()
 
 ####################################################################################################
-# Second Order Derivative of chi-square function via Finite Differences
-def FDM2Ord_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_opt):
+#
+def uncertainty_perp(data: list[ExperimentalData], A_opt: float):
+    """Calculate the uncertainty for the optimal exchange stiffness A"""
 
-    p = 0.001
+    # Estimate variance from second order derivative of chi-square function via Finite Differences
+
+    p = 0.001 # fractional gap size for finite differences
     dA = A_opt * p
     A1 = A_opt - 2*dA
     A2 = A_opt - 1*dA
@@ -294,12 +269,17 @@ def FDM2Ord_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_opt):
     A4 = A_opt + 1*dA
     A5 = A_opt + 2*dA
 
-    chi1 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A1)
-    chi2 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A2)
-    chi3 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A3)
-    chi4 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A4)
-    chi5 = chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A5)
+    chi1 = LSQ_PERP(data, A1).exchange_A_chi_sq
+    chi2 = LSQ_PERP(data, A2).exchange_A_chi_sq
+    chi3 = LSQ_PERP(data, A3).exchange_A_chi_sq
+    chi4 = LSQ_PERP(data, A4).exchange_A_chi_sq
+    chi5 = LSQ_PERP(data, A5).exchange_A_chi_sq
 
-    d2_chi_dA2 = (-chi1 + 16 * chi2 - 30 * chi3 + 16 * chi4 - chi5)/(12 * dA**2)
+    d2chi_dA2 = (-chi1 + 16 * chi2 - 30 * chi3 + 16 * chi4 - chi5)/(12 * dA**2)
 
-    return d2_chi_dA2
+    # Scale variance by number of samples and return reciprocal square root
+
+    n_field_strengths = len(data)  # Number of fields
+    n_q = len(data[0].scattering_curve.x)  # Number of q points
+
+    return np.sqrt(2 / (n_field_strengths * n_q * d2chi_dA2))

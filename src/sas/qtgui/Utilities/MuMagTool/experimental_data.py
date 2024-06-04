@@ -22,4 +22,8 @@ class ExperimentalData:
         y = self.scattering_curve.y[:max_index]
         dy = self.scattering_curve.dy[:max_index]
 
-        return Data1D(x=x, y=y, dy=dy)
+        return ExperimentalData(
+            scattering_curve=Data1D(x=x, y=y, dy=dy),
+            applied_field=self.applied_field,
+            saturation_magnetisation=self.saturation_magnetisation,
+            demagnetising_field=self.demagnetising_field)

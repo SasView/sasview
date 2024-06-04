@@ -3,12 +3,14 @@ from enum import Enum
 
 
 class ExperimentGeometry(Enum):
+    """ Type of experiment """
     PARALLEL = 1
     PERPENDICULAR = 2
 
 
 @dataclass
 class FitParameters:
+    """ Input parameters for the fit"""
     q_max: float
     min_applied_field: float
     exchange_A_min: float

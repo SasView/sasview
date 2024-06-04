@@ -140,65 +140,55 @@ class MuMagLib():
         # Not ideal, would be preferable make sure the data was
         # compatible, using something like interpolation TODO
         square_distance_from_qmax = (self.input_data[0].scattering_curve.x - parameters.q_max) ** 2
-        max_q_index = np.argmin(square_distance_from_qmax)[0]
+        max_q_index = int(np.argmin(square_distance_from_qmax))
 
         filtered_inputs = [datum.restrict_by_index(max_q_index)
                            for datum in self.input_data
                            if datum.applied_field > parameters.min_applied_field]
 
 
-
         # Least Squares Fit in case of perpendicular SANS geometry
         match parameters.experiment_geometry:
             case ExperimentGeometry.PERPENDICULAR:
 
-                A_1 = A1 * 1e-12
-                A_2 = A2 * 1e-12
 
-                A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M \
-                    = MuMagPerpendicularGeo.SweepA_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
+                sweep_data = MuMagPerpendicularGeo.SweepA_PERP(parameters, filtered_inputs)
 
-                A_opt = MuMagPerpendicularGeo.OptimA_SPI_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
-                chi_q_opt, I_res_opt, S_H_opt, S_M_opt, sigma_I_res, sigma_S_H, sigma_S_M = MuMagPerpendicularGeo.LSQ_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
+                A_opt = MuMagPerpendicularGeo.OptimA_SPI_PERP(filtered_inputs, sweep_data.optimal.exchange_A, epsilon=0.0001)
 
-                I_opt = MuMagPerpendicularGeo.SANS_Model_PERP(q, S_H_opt, S_M_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
+                least_squares_fit_at_optimum = MuMagPerpendicularGeo.LSQ_PERP(filtered_inputs, A_opt)
 
-                d2chi_dA2 = MuMagPerpendicularGeo.FDM2Ord_PERP(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
+                I_opt = least_squares_fit_at_optimum.I_simulated
 
-                N_mu = len(I_exp_red[0, :])
-                N_nu = len(I_exp_red[:, 0])
-                A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
+                uncertainty = MuMagPerpendicularGeo.uncertainty_perp(filtered_inputs, A_opt)
 
-                MuMagPerpendicularGeo.PlotFittingResultsPERP_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt,
-                                                                       S_H_opt, S_M_opt, A_Uncertainty * 1e12,
+                MuMagPerpendicularGeo.PlotFittingResultsPERP_SimpleFit(sweep_data, uncertainty * 1e12,
                                                                        figure, axes1, axes2, axes3, axes4)
 
                 # Save to global Variables
-                self.SimpleFit_q_exp = q
-                self.SimpleFit_I_exp = I_exp_red
-                self.SimpleFit_sigma_exp = sigma
-                self.SimpleFit_B_0_exp = self.B_0_exp[K_H:]
-                self.SimpleFit_Ms_exp = self.Ms_exp[K_H:]
-                self.SimpleFit_Hdem_exp = self.Hdem_exp[K_H:]
-                self.SimpleFit_I_fit = I_opt
-                self.SimpleFit_A = A
-                self.SimpleFit_chi_q = chi_q
-                self.SimpleFit_S_H_fit = S_H_opt
-                self.SimpleFit_S_M_fit = S_M_opt
-                self.SimpleFit_I_res_fit = I_res_opt
-                self.SimpleFit_A_opt = A_opt
-                self.SimpleFit_chi_q_opt = chi_q_opt
-                self.SimpleFit_A_sigma = A_Uncertainty
-                self.SimpleFit_SANSgeometry = "perpendicular"
+                # self.SimpleFit_q_exp = q
+                # self.SimpleFit_I_exp = I_exp_red
+                # self.SimpleFit_sigma_exp = sigma
+                # self.SimpleFit_B_0_exp = self.B_0_exp[K_H:]
+                # self.SimpleFit_Ms_exp = self.Ms_exp[K_H:]
+                # self.SimpleFit_Hdem_exp = self.Hdem_exp[K_H:]
+                # self.SimpleFit_I_fit = I_opt
+                # self.SimpleFit_A = A
+                # self.SimpleFit_chi_q = chi_q
+                # self.SimpleFit_S_H_fit = S_H_opt
+                # self.SimpleFit_S_M_fit = S_M_opt
+                # self.SimpleFit_I_res_fit = I_res_opt
+                # self.SimpleFit_A_opt = A_opt
+                # self.SimpleFit_chi_q_opt = chi_q_opt
+                # self.SimpleFit_A_sigma = A_Uncertainty
+                # self.SimpleFit_SANSgeometry = "perpendicular"
 
             case ExperimentGeometry.PARALLEL:
 
-                A_1 = A1 * 1e-12
-                A_2 = A2 * 1e-12
                 A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H \
-                    = MuMagParallelGeo.SweepA_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, A_2, A_N)
+                    = MuMagParallelGeo.SweepA_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_min, A_max_J, A_N)
 
-                A_opt = MuMagParallelGeo.OptimA_SPI_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_1, 0.0001)
+                A_opt = MuMagParallelGeo.OptimA_SPI_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_min, 0.0001)
                 chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H = MuMagParallelGeo.LSQ_PAR(q, I_exp_red, sigma,
                                                                                            Ms, H_0,
                                                                                            H_dem,
@@ -207,9 +197,9 @@ class MuMagLib():
                 I_opt = MuMagParallelGeo.SANS_Model_PAR(q, S_H_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
 
                 d2chi_dA2 = MuMagParallelGeo.FDM2Ord_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
-                N_mu = len(I_exp_red[0, :])
-                N_nu = len(I_exp_red[:, 0])
-                A_Uncertainty = np.sqrt(2 / (N_mu * N_nu * d2chi_dA2))
+                n_field_strengths = len(I_exp_red[0, :])
+                n_q = len(I_exp_red[:, 0])
+                A_Uncertainty = np.sqrt(2 / (n_field_strengths * n_q * d2chi_dA2))
 
                 MuMagParallelGeo.PlotFittingResultsPAR_SimpleFit(q, A, chi_q, A_opt, chi_q_opt,
                                                                  I_res_opt, S_H_opt, A_Uncertainty * 1e12,
