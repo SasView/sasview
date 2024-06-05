@@ -1,96 +1,102 @@
-Name	Affiliation	Creator Producer	RelatedPerson		ORCID	Notes
-Meaning		"Have they contributed to the codebase (including docs, website, code reviews etc)"	"Admin role, getting funding etc"	Something else			
-"Adams Michels" University of Luxembourg    x
-"Agouzal, Nouhaila"	Institut Laue-Langevin	x
-"Alina, Gervaise"	"University of Tennessee, Knoxville"	x					
-"Anuchitanukul, Atijit "	Oak Ridge National Laboratory			x
-"Attala, Ziggy"	ISIS Neutron and Muon Source	x					"Changed RAL to ISIS, as we have diamond separately, needs to be checked"
-"Bakker, Jurrian"	"Technical University, Delft"	x					
-"Beaucage, Peter"	National Institute of Standards and Technology	x					
-"Bourne, Robert"	ISIS Neutron and Muon Source	x					
-"Bouwman, Wim"	"Technical University, Delft"	x
-"Bressler, Ingo"  Paul Scherrer Institute  x
-"Butler, Paul"	National Institute of Standards and Technology	x	x				
-"Cadwallader-Jones, Iestyn"	Institut Laue-Langevin	x					
-"Campbell, Kieran"	ISIS Neutron and Muon Source	x
-"Cho, Jae Hie"	"University of Tennessee, Knoxville"	x					
-"Cooper-Benun, Torin"	ISIS Neutron and Muon Source  x
-"Cortes Hernandez, R" "University of Tennessee, Knoxville"  x
-"Corona, Patrick"	"University of California, Santa Barbara"			x
-"Doucet, Mathieu"	Oak Ridge National Laboratory	x					
-"Doutch, James" ISIS Neutron and Muon Source            x
-"Dresen, Dominique" University of Cologne x
-"Durniak, Celine"	European Spallation Source	x
-"Ferraz Leal, Ricardo"	Oak Ridge National Laboratory   x
-"Forster, Laura"	Diamond Light Source	x					
-"Fragneto, Giovanna"	European Spallation Source		x
-"Fultz, Brent"	California Institute of Technology     x
-"Gaudet, Jonathan"  University of Maryland  x
-"Gerina, Mariana"   Charles University          x
-"Gilbert, Peter"	National Institute of Standards and Technology	x
-"Gonzalez, Miguel"	Institut Laue-Langevin	x					
-"Heenan, Richard"	ISIS Neutron and Muon Source	x					
-"Hewins, Ellis"	ISIS Neutron and Muon Source	x					
-"Honecker, Dirk" ISIS Neutron and Muon Source   x
-"Jackson, Andrew"	European Spallation Source	x					
-"Jensen, Grethe" National Institute of Standards and Technology x
-"Juhas, Pavol"	Brookhaven National Laboratory  x
-"Karliczek, Julius"	Institut Laue-Langevin	x					
-"Kienzle, Paul"	National Institute of Standards and Technology	x					
-"King, Stephen"	ISIS Neutron and Muon Source	x	x				
-"Kline, Steve" National Institute of Standards and Technology x
-"Knudsen, Mikke"	University of Copenhagen			x			
-"Krueger, Susan"	National Institute of Standards and Technology			x			
-"Krzywon, Jeff"	National Institute of Standards and Technology	x					
-"Liu, Yun"	National Institute of Standards and Technology	x
-"Lopes, Ruben"	ISIS Neutron and Muon Source	x					
-"Lozano, Dorian"	Institut Laue-Langevin	x					
-"Lytje, Kristian "	Aarhus University	x					
-"Mannicke, David"  Australian National Science and Technology Organisation x
-"Maranville, Brian"	National Institute of Standards and Technology	x					
-"Markvardsen, Anders"	ISIS Neutron and Muon Source	x	x
-"Martinez, Nicolas"	Institut Laue-Langevin	x					
-"McKerns, Mike"	California Institute of Technology  x
-"Miller, Brayden "	National Institute of Standards and Technology	x
-"Mothander, Karolina"	Lund University x
-"Murphy, Ryan"	National Institute of Standards and Technology	x					
-"Narayanan, Theyencheri"	European Synchrotron Radiation Facility			x
-"Nelson, Andrew" 	Australian National Science and Technology Organisation	x
-"Nielsen, Torben"	European Spallation Source	x	x
-"Oakley, Michael" ISIS?
-"O'Driscoll, Lewis"	ISIS Neutron and Muon Source	x					
-"Park, Helen"   National Institute of Standards and Technology	x
-"Parker, Peter" Oak Ridge National Laboratory x
-"Parsons, Drew"	University of Cagliari			x
-"Patrou, Maria" Oak Ridge National Laboratory           x
-"Pauw, Brian" Federal Institute for Materials Research and Testing          x
-"Pellicelli, R"                                    affiliation?
-"Perring, Toby" ISIS Neutron and Muon Source        x
-"Peterson, Pete" Oak Ridge National Laboratory  x
-"Porcar, Lionel"	Institut Laue-Langevin			x
-"Potrzebowski, Wojciech"	SciLifeLab	x	x	
-"Pozzo, Lilo"	University of Washington			x
-"Prescott, Stuart"	University of New South Wales	x
-"Rakitin, Maksim"	Brookhaven National Laboratory	x
-"Rennie, Adrian"	Uppsala University			x
-"Richter, Tobias"   European Spallation Source  x   x           Check Current affiliation?
-"Roberts, Graham"   University of Connecticut           x
-"Rod, Thomas Holm"	European Spallation Source		x
-"Rooks, Jack"	University of Delaware	x
-"Rozyczko, Piotr"	European Spallation Source	x					
-"Shan, Xael"    National Institute of Standards and Technology  x
-"Snow, Tim"	Diamond Light Source	x					
-"Stellhorn, Annika"	European Spallation Source	x
-"Taylor, Jonathan"	European Spallation Source		x
-"Teixeira, Susana"	National Institute of Standards and Technology	?		?			
-"Tumarkin, Jessica" "University of Tennessee, Knoxville"    x
-"Udby, Linda"	Niels Bohr Institute			?
-"Washington, Adam"	ISIS Neutron and Muon Source	x					
-"Weigandt, Katie"	National Institute of Standards and Technology	x
-"Whitley, Robert"  ISIS?
-"Wilkins, Lucas"	ISIS Neutron and Muon Source	x					
-"Wolf, Caitlyn"	National Institute of Standards and Technology	x					
-"Zakoutna, Dominika"    Charles University          x
-"Zhang, Anita"  University of Princeton x
-"Zheng, Alex"   National Institute of Standards and Technology	x
-"Zhou, Jae-He"                                                             affiliation?
+Name	Affiliation	Creator	Producer	RelatedPerson	ORCID	Notes
+Adams, Michels	University of Luxembourg	x				None
+Agouzal, Nouhaila	Institut Laue-Langevin	x				None
+Alina, Gervaise	University of Tennessee, Knoxville	x				None
+Anuchitanukul, Atijit	Oak Ridge National Laboratory	 	 	x	 	Who is this person? why are they listed? what role?
+Attala, Ziggy	ISIS Neutron and Muon Source	x				Changed RAL to ISIS, as we have diamond separately, needs to be checked
+Bakker, Jurrian	Technical University, Delft	x				None
+Beaucage, Peter	National Institute of Standards and Technology	x				None
+Berger, Jordan	University of Delaware	x				None
+Bourne, Robert	ISIS Neutron and Muon Source	x				None
+Bouwman, Wim	"Technical University, Delft"	x				None
+Bressler, Ingo	Paul Scherrer Institute	x				None
+Butler, Paul	National Institute of Standards and Technology	x	x			None
+Cadwallader-Jones, Iestyn	Institut Laue-Langevin	x				None
+Campbell, Kieran	ISIS Neutron and Muon Source	x				None
+Cho, Jae-Hie	"University of Tennessee, Knoxville"	x				None
+Cooper-Benun, Torin	ISIS Neutron and Muon Source	x				None
+Cortes Hernandez, R	University of Tennessee, Knoxville	x				None
+Corona, Patrick	University of California, Santa Barbara			x		None
+Doucet, Mathieu	Oak Ridge National Laboratory	x				None
+Doutch, James	ISIS Neutron and Muon Source     	x				None
+Dresen, Dominique	University of Cologne	x				None
+Drosos,Giogos	ETH Zurich	x				Submitted PR externally - never communicated directly with group. Still counts?
+Durniak, Celine	European Spallation Source	x				None
+Farrow, Chris	California Institute of Technology	x				None
+Ferraz Leal, Ricardo	Oak Ridge National Laboratory	x				None
+Ford, Rachel	California Institute of Technology	x				At Grenoble camp and worked on adding assigned model all week till RKH pointed out that it duplicated an existing model. Still should count?
+Forster, Laura	Diamond Light Source	x				None
+Fragneto, Giovanna	European Spallation Source		x			None
+Fultz, Brent	California Institute of Technology		x			None
+Gaudet, Jonathan	University of Maryland	x				None
+Gerina, Mariana	Charles University	x				None
+Gilbert, Peter	National Institute of Standards and Technology	x				Not sure he is properly an author vs other? check contribution.
+Gonzalez, Miguel	Institut Laue-Langevin	x				None
+Heenan, Richard	ISIS Neutron and Muon Source	x				None
+Hewins, Ellis	ISIS Neutron and Muon Source	x				None
+Honecker, Dirk	ISIS Neutron and Muon Source	x				None
+Jackson, Andrew	European Spallation Source	x				None
+Jensen, Grethe	National Institute of Standards and Technology	x				None
+Juhas, Pavol	Brookhaven National Laboratory	x				None
+Karliczek, Julius	Institut Laue-Langevin	x				None
+Kienzle, Paul	National Institute of Standards and Technology	x				None
+King, Stephen	ISIS Neutron and Muon Source	x	x			None
+Kline, Steve	National Institute of Standards and Technology	x				None
+Knudsen, Mikke	University of Copenhagen			x		Who is this person? What is the connection?
+Krueger, Susan	National Institute of Standards and Technology			x		None
+Krzywon, Jeff	National Institute of Standards and Technology	x				None
+Lin, Jiao	California Institute of Technology	x				None
+Liu, Yun	National Institute of Standards and Technology	x				None
+Lopes, Ruben	ISIS Neutron and Muon Source	x				None
+Lozano, Dorian	Institut Laue-Langevin	x				None
+Lytje, Kristian	Aarhus University	x				None
+Mannicke, David	Australian National Science and Technology Organisation	x				None
+Maranville, Brian	National Institute of Standards and Technology	x				None
+Markvardsen, Anders	ISIS Neutron and Muon Source	x	x			None
+Martinez, Nicolas	Institut Laue-Langevin	x				None
+McKerns, Mike	California Institute of Technology	x				None
+Miller, Brayden	National Institute of Standards and Technology	x				None
+Mothander, Karolina	Lund University x					None
+Murphy, Ryan	National Institute of Standards and Technology	x				None
+Narayanan, Theyencheri	European Synchrotron Radiation Facility			x		None
+Nelson, Andrew 	Australian National Science and Technology Organisation	x				None
+Nielsen, Torben	European Spallation Source	x	x			None
+Oakley, Michael	ISIS Neutron and Muon Source	x				Was he ISIS or some other part of RAL? also list as author? or Other?
+O'Driscoll, Lewis	ISIS Neutron and Muon Source	x				None
+Park, Helen	National Institute of Standards and Technology	x				None
+Parker, Peter	ISIS Neutron and Muon Source	x				None
+Parsons, Drew	University of Cagliari			x		Or should he be listed as creator?
+Patrou, Maria	Oak Ridge National Laboratory	x				No commits yet but contributed 6 days at contributor camp on designs and path forwards
+Pauw, Brian	Federal Institute for Materials Research and Testing			x		None
+Pellicelli, R						Who is this person (and what it their affiliation?) How did the name show up here (could tell us who they are?)
+Perring, Toby	ISIS Neutron and Muon Source		x			None
+Peterson, Pete	Oak Ridge National Laboratory	x				None
+Porcar, Lionel	Institut Laue-Langevin			x		None
+Potrzebowski, Wojciech	SciLifeLab	x	x			None
+Pozzo, Lilo	University of Washington			x		None
+Prescott, Stuart	University of New South Wales	x				None
+Prevost, Sylvain	Institut Laue-Langevin			x		None
+Rakitin, Maksim	Brookhaven National Laboratory	x				None
+Rennie, Adrian	Uppsala University			x		None
+Richter, Tobias	European Spallation Source	x				Was at Diamond as creator. counts as Producer at ESS? How to list here?
+Roberts, Graham	University of Connecticut			x		Working on AI module but mostly alone? so not yet creator?
+Rod, Thomas Holm	European Spallation Source		x			None
+Rooks, Jack	University of Delaware	x				None
+Rozyczko, Piotr	European Spallation Source	x				None
+Shan, Xael	National Institute of Standards and Technology	x				None
+Shang, Yingrui	Oak Ridge National Laboratory			x		None
+Snow, Tim	Diamond Light Source	x				None
+Stellhorn, Annika	European Spallation Source	x				None
+Taylor, Jonathan	European Spallation Source		x			None
+Teixeira, Susana	National Institute of Standards and Technology	x				None
+Tumarkin, Jessica	University of Tennessee, Knoxville	x				None
+Udby, Linda	Niels Bohr Institute			x		Who is this person and why are they on the list?
+Washington, Adam	ISIS Neutron and Muon Source	x				None
+Weigandt, Katie	National Institute of Standards and Technology	x				None
+Whitley, Robert	ISIS Neutron and Muon Source	x				None
+Wilkins, Lucas	ISIS Neutron and Muon Source	x				None
+Wolf, Caitlyn	National Institute of Standards and Technology	x				None
+Zakoutna, Dominika	Charles University			x		None
+Zhang, Anita	University of Princeton	x				None
+Zheng, Alex	National Institute of Standards and Technolog	x				None
+Zhou, Jae-He						I don't think this is a real person? Jae-he Cho was. Where does this come from?
