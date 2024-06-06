@@ -66,6 +66,13 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.figure_canvas.draw()
 
     def fit_parameters(self) -> FitParameters:
+        """ Get an object containing all the parameters needed for doing the fitting """
+
+        a_min = self.aMinSpinBox.value()
+        a_max = self.aMaxSpinBox.value()
+
+        if a_max <= a_min:
+            raise ValueError(f"minimum A must be less than maximum A")
 
         match self.ScatteringGeometrySelect.currentText().lower():
             case "parallel":
@@ -78,9 +85,9 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         return FitParameters(
             q_max=self.qMaxSpinBox.value(),
             min_applied_field=self.hMinSpinBox.value(),
-            exchange_A_min=self.aMinSpinBox.value(),
-            exchange_A_max=self.aMaxSpinBox.value(),
             exchange_A_n=self.aSamplesSpinBox.value(),
+            exchange_A_min=a_min,
+            exchange_A_max=a_max,
             experiment_geometry=geometry)
 
     def simple_fit_button_callback(self):

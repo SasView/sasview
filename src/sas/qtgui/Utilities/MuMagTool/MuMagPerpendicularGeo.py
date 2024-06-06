@@ -47,13 +47,6 @@ def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
     response_H = (p ** 2) / 4 * (2 + 1 / np.sqrt(1 + p))
     response_M = (np.sqrt(1 + p) - 1) / 2
 
-    print("Shapes:")
-    print(" I", I.shape)
-    print(" q", q.shape)
-    print(" sigma", I_stdev.shape)
-    print(" response H", response_H.shape)
-    print(" response M", response_M.shape)
-
     # Lists for output of calculation
     I_residual = []
     S_H = []
@@ -71,15 +64,20 @@ def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
         least_squares_x = (np.array([np.ones((n_data,)), response_H[:, nu], response_M[:, nu]]) / I_stdev[:, nu]).T
         least_squares_y = I[:, nu]/I_stdev[:, nu]
 
-        print("Least Squares X", least_squares_x.shape)
-        print("Least Squares Y", least_squares_y.shape)
-
         least_squares_x_squared = np.dot(least_squares_x.T, least_squares_x)
 
         # Non-negative least squares
-        fit_result = scopt.nnls(
-                       least_squares_x_squared,
-                       np.matmul(least_squares_x.T, least_squares_y))
+        try:
+            fit_result = scopt.nnls(
+                           least_squares_x_squared,
+                           np.matmul(least_squares_x.T, least_squares_y))
+
+        except ValueError as ve:
+            print("Value Error:")
+            print(" A =", A)
+
+            raise ve
+
 
         I_residual.append(fit_result[0][0])
         S_H.append(fit_result[0][1])
@@ -166,6 +164,8 @@ def OptimA_SPI_PERP(data: list[ExperimentalData], A_1, epsilon):
 
     x_4 = x_3 + 0.5 * ((x_2 - x_3)**2 * (y_3 - y_1) + (x_1 - x_3)**2 * (y_2 - y_3))/((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
     while np.abs(2 * (x_4 - x_3)/(x_4 + x_3)) > epsilon:
+
+        print("x1,x2,x3,x4:", x_1, x_2, x_3, x_4)
 
         x_1 = x_2
         x_2 = x_3
