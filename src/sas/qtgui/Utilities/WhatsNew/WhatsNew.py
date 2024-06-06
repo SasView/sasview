@@ -195,18 +195,10 @@ def main():
 
     from sas.qtgui.convertUI import main
 
-    def maybe_show_whats_new(strictly_newer=True):
-        global whats_new_window
-        """ Show the What's New dialogue if it is wanted """
-
-        if whats_new_messages(strictly_newer=strictly_newer):
-            whats_new_window = WhatsNew()
-            whats_new_window.show()
-
-
     app = QtWidgets.QApplication([])
 
-    maybe_show_whats_new()
+    whats_new_window = WhatsNew()
+    whats_new_window.show()
 
     app.exec_()
 
