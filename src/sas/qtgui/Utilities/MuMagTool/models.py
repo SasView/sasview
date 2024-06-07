@@ -106,3 +106,16 @@ def SANS_Model_PERP(q, S_H, S_M, I_res, M_s, H_0, H_dem, A):
     R_M = (np.sqrt(1 + p) - 1) / 2
 
     return I_res + R_H * S_H + R_M * S_M
+
+def SANS_Model_PAR(q, S_H, I_res, M_s, H_0, H_dem, A):
+    """ 1D-Cross-Section of the parallel model"""
+
+    # Micromagnetic Model
+    mu_0 = 4 * np.pi * 1e-7
+    H_i = H_0 - H_dem
+    l_H = np.sqrt((2 * A) / (mu_0 * M_s * H_i))
+    H_eff = H_i * (1 + (l_H ** 2) * (q ** 2))
+    p = M_s / H_eff
+    R_H = (p ** 2) / 2
+
+    return I_res + R_H * S_H

@@ -117,7 +117,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
                 raise ValueError(f"Unknown Value: {parameters.experiment_geometry}")
 
 
-        self.MuMagLib_obj.simple_fit_button_callback(
+        self.MuMagLib_obj.do_fit(
             parameters,
             self.fig,
             self.chi_squared_axes,

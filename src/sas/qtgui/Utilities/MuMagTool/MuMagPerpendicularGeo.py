@@ -4,18 +4,19 @@ import numpy as np
 import scipy.optimize as scopt
 import matplotlib.pyplot as plt
 
+from sas.qtgui.Utilities.MuMagTool.MuMagParallelGeo import LSQ_PAR
 from sasdata.dataloader import Data1D
 from data_util.nxsunit import Converter
 from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
-from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters
+from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters, ExperimentGeometry
 from sas.qtgui.Utilities.MuMagTool.fit_result import FitResults
 from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutput, LeastSquaresOutputPerpendicular
 from sas.qtgui.Utilities.MuMagTool.sweep_output import SweepOutput
 
 mu_0 = 4 * np.pi * 1e-7
 
-def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
-    """ Least squares fitting for a given exchange stiffness, A
+def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutputPerpendicular:
+    """ Least squares fitting for a given exchange stiffness, A, perpendicular case
 
         We are fitting the equation:
 
@@ -142,15 +143,24 @@ def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
 
 
 ####################################################################################################
-# Sweep over Exchange Stiffness A for perpendicular SANS geometry
-def SweepA_PERP(parameters: FitParameters, data: list[ExperimentalData]) -> SweepOutput:
+#
+def sweep(parameters: FitParameters, data: list[ExperimentalData]) -> SweepOutput:
+    """ Sweep over Exchange Stiffness A for perpendicular SANS geometry to
+    get an initial estimate which can then be refined"""
 
     a_values = np.linspace(
                         parameters.exchange_A_min,
                         parameters.exchange_A_max,
                         parameters.exchange_A_n) * 1e-12 # From pJ/m to J/m
 
-    least_squared_fits = [LSQ_PERP(data, a) for a in a_values]
+    if parameters.experiment_geometry == ExperimentGeometry.PERPENDICULAR:
+        least_squared_fits = [LSQ_PERP(data, a) for a in a_values]
+
+    elif parameters.experiment_geometry == ExperimentGeometry.PARALLEL:
+        least_squared_fits = [LSQ_PAR(data, a) for a in a_values]
+
+    else:
+        raise ValueError(f"Unknown ExperimentGeometry value: {parameters.experiment_geometry}")
 
     optimal_fit = min(least_squared_fits, key=lambda x: x.exchange_A_chi_sq)
 
@@ -198,7 +208,7 @@ def OptimA_SPI_PERP(data: list[ExperimentalData], A_1, epsilon):
 
 ####################################################################################################
 # Plot Fitting results of simple fit
-def PlotFittingResultsPERP_SimpleFit(z: SweepOutput, A_Uncertainty,
+def PlotFittingResultsPERP_SimpleFit(z: SweepOutput, refined: LeastSquaresOutputPerpendicular, A_Uncertainty,
                                      figure, axes1, axes2, axes3, axes4):
 
     if A_Uncertainty < 1e-4:
@@ -258,30 +268,3 @@ def PlotSweepFitResultPERP(q_max_mat, H_min_mat, A_opt_mat):
 
 ####################################################################################################
 #
-def uncertainty_perp(data: list[ExperimentalData], A_opt: float):
-    """Calculate the uncertainty for the optimal exchange stiffness A"""
-
-    # Estimate variance from second order derivative of chi-square function via Finite Differences
-
-    p = 0.001 # fractional gap size for finite differences
-    dA = A_opt * p
-    A1 = A_opt - 2*dA
-    A2 = A_opt - 1*dA
-    A3 = A_opt
-    A4 = A_opt + 1*dA
-    A5 = A_opt + 2*dA
-
-    chi1 = LSQ_PERP(data, A1).exchange_A_chi_sq
-    chi2 = LSQ_PERP(data, A2).exchange_A_chi_sq
-    chi3 = LSQ_PERP(data, A3).exchange_A_chi_sq
-    chi4 = LSQ_PERP(data, A4).exchange_A_chi_sq
-    chi5 = LSQ_PERP(data, A5).exchange_A_chi_sq
-
-    d2chi_dA2 = (-chi1 + 16 * chi2 - 30 * chi3 + 16 * chi4 - chi5)/(12 * dA**2)
-
-    # Scale variance by number of samples and return reciprocal square root
-
-    n_field_strengths = len(data)  # Number of fields
-    n_q = len(data[0].scattering_curve.x)  # Number of q points
-
-    return np.sqrt(2 / (n_field_strengths * n_q * d2chi_dA2))

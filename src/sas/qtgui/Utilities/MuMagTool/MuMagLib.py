@@ -17,8 +17,13 @@ import string
 
 from sas.qtgui.Utilities.MuMagTool import MuMagParallelGeo
 from sas.qtgui.Utilities.MuMagTool import MuMagPerpendicularGeo
+from sas.qtgui.Utilities.MuMagTool.MuMagParallelGeo import LSQ_PAR
+from sas.qtgui.Utilities.MuMagTool.MuMagPerpendicularGeo import LSQ_PERP
 from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
 from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters, ExperimentGeometry
+from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutputPerpendicular, \
+    LeastSquaresOutputParallel
+from sas.qtgui.Utilities.MuMagTool.sweep_output import SweepOutput
 
 from sasdata.dataloader.loader import Loader
 
@@ -128,7 +133,8 @@ class MuMagLib():
         figure.canvas.draw()
 
 
-    def simple_fit_button_callback(self, parameters: FitParameters, figure, axes1, axes2, axes3, axes4):
+    # @staticmethod
+    def do_fit(self, parameters: FitParameters, figure, axes1, axes2, axes3, axes4):
 
         if self.input_data is None:
             messagebox.showerror(title="Error!",
@@ -152,18 +158,34 @@ class MuMagLib():
             case ExperimentGeometry.PERPENDICULAR:
 
 
-                sweep_data = MuMagPerpendicularGeo.SweepA_PERP(parameters, filtered_inputs)
+                sweep_data = MuMagPerpendicularGeo.sweep(parameters, filtered_inputs)
 
-                A_opt = MuMagPerpendicularGeo.OptimA_SPI_PERP(filtered_inputs, sweep_data.optimal.exchange_A, epsilon=0.0001)
+                crude_A = sweep_data.optimal.exchange_A
+                refined_A = self.refine_exchange_A(filtered_inputs, crude_A, ExperimentGeometry.PERPENDICULAR)
 
-                least_squares_fit_at_optimum = MuMagPerpendicularGeo.LSQ_PERP(filtered_inputs, A_opt)
+                refined = MuMagPerpendicularGeo.LSQ_PERP(filtered_inputs, refined_A)
 
-                I_opt = least_squares_fit_at_optimum.I_simulated
+                uncertainty = self.uncertainty(filtered_inputs, refined_A, ExperimentGeometry.PERPENDICULAR)
 
-                uncertainty = MuMagPerpendicularGeo.uncertainty_perp(filtered_inputs, A_opt)
+                self.plot_results(sweep_data, refined, uncertainty * 1e12, figure, axes1, axes2, axes3, axes4)
 
-                MuMagPerpendicularGeo.PlotFittingResultsPERP_SimpleFit(sweep_data, uncertainty * 1e12,
-                                                                       figure, axes1, axes2, axes3, axes4)
+
+
+            case ExperimentGeometry.PARALLEL:
+
+
+                sweep_data = MuMagPerpendicularGeo.sweep(parameters, filtered_inputs)
+
+                crude_A = sweep_data.optimal.exchange_A
+                print(crude_A)
+                refined_A = self.refine_exchange_A(filtered_inputs, parameters.exchange_A_min*1e-12, ExperimentGeometry.PARALLEL)
+
+                refined = MuMagPerpendicularGeo.LSQ_PAR(filtered_inputs, refined_A)
+
+                uncertainty = self.uncertainty(filtered_inputs, refined_A, ExperimentGeometry.PARALLEL)
+
+                self.plot_results(sweep_data, refined, uncertainty * 1e12,
+                                              figure, axes1, axes2, axes3, axes4)
 
                 # Save to global Variables
                 # self.SimpleFit_q_exp = q
@@ -176,55 +198,94 @@ class MuMagLib():
                 # self.SimpleFit_A = A
                 # self.SimpleFit_chi_q = chi_q
                 # self.SimpleFit_S_H_fit = S_H_opt
-                # self.SimpleFit_S_M_fit = S_M_opt
                 # self.SimpleFit_I_res_fit = I_res_opt
                 # self.SimpleFit_A_opt = A_opt
                 # self.SimpleFit_chi_q_opt = chi_q_opt
                 # self.SimpleFit_A_sigma = A_Uncertainty
-                # self.SimpleFit_SANSgeometry = "perpendicular"
+                # self.SimpleFit_SANSgeometry = "parallel"
 
+    @staticmethod
+    def refine_exchange_A(
+            data: list[ExperimentalData],
+            exchange_A_initial: float,
+            geometry: ExperimentGeometry,
+            epsilon: float = 0.0001):
+
+        """ Refines the A parameter using Jarratt's method of successive parabolic interpolation"""
+
+        match geometry:
             case ExperimentGeometry.PARALLEL:
+                least_squares_function = LSQ_PAR
+            case ExperimentGeometry.PERPENDICULAR:
+                least_squares_function = LSQ_PERP
+            case _:
+                raise ValueError(f"Unknown experimental geometry: {geometry}")
 
-                A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H \
-                    = MuMagParallelGeo.SweepA_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_min, A_max_J, A_N)
+        delta = exchange_A_initial * 0.1
 
-                A_opt = MuMagParallelGeo.OptimA_SPI_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_min, 0.0001)
-                chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H = MuMagParallelGeo.LSQ_PAR(q, I_exp_red, sigma,
-                                                                                           Ms, H_0,
-                                                                                           H_dem,
-                                                                                           A_opt)
+        x_1 = exchange_A_initial - delta
+        x_2 = exchange_A_initial
+        x_3 = exchange_A_initial + delta
 
-                I_opt = MuMagParallelGeo.SANS_Model_PAR(q, S_H_opt, I_res_opt, Ms, H_0, H_dem, A_opt)
+        y_1 = least_squares_function(data, x_1).exchange_A_chi_sq
+        y_2 = least_squares_function(data, x_2).exchange_A_chi_sq
+        y_3 = least_squares_function(data, x_3).exchange_A_chi_sq
 
-                d2chi_dA2 = MuMagParallelGeo.FDM2Ord_PAR(q, I_exp_red, sigma, Ms, H_0, H_dem, A_opt)
-                n_field_strengths = len(I_exp_red[0, :])
-                n_q = len(I_exp_red[:, 0])
-                A_Uncertainty = np.sqrt(2 / (n_field_strengths * n_q * d2chi_dA2))
+        x_4 = x_3 + 0.5 * ((x_2 - x_3) ** 2 * (y_3 - y_1) + (x_1 - x_3) ** 2 * (y_2 - y_3)) \
+              / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
 
-                MuMagParallelGeo.PlotFittingResultsPAR_SimpleFit(q, A, chi_q, A_opt, chi_q_opt,
-                                                                 I_res_opt, S_H_opt, A_Uncertainty * 1e12,
-                                                                 figure, axes1, axes2, axes3, axes4)
+        for i in range(200):
+            if np.abs(2 * (x_4 - x_3) / (x_4 + x_3)) < epsilon:
+                break
 
-                # Save to global Variables
-                self.SimpleFit_q_exp = q
-                self.SimpleFit_I_exp = I_exp_red
-                self.SimpleFit_sigma_exp = sigma
-                self.SimpleFit_B_0_exp = self.B_0_exp[K_H:]
-                self.SimpleFit_Ms_exp = self.Ms_exp[K_H:]
-                self.SimpleFit_Hdem_exp = self.Hdem_exp[K_H:]
-                self.SimpleFit_I_fit = I_opt
-                self.SimpleFit_A = A
-                self.SimpleFit_chi_q = chi_q
-                self.SimpleFit_S_H_fit = S_H_opt
-                self.SimpleFit_I_res_fit = I_res_opt
-                self.SimpleFit_A_opt = A_opt
-                self.SimpleFit_chi_q_opt = chi_q_opt
-                self.SimpleFit_A_sigma = A_Uncertainty
-                self.SimpleFit_SANSgeometry = "parallel"
+            x_1, x_2, x_3 = x_2, x_3, x_4
+            y_1, y_2, y_3 = y_2, y_3, least_squares_function(data, x_3).exchange_A_chi_sq
 
+            x_4 = x_3 + 0.5 * ((x_2 - x_3) ** 2 * (y_3 - y_1) + (x_1 - x_3) ** 2 * (y_2 - y_3)) \
+                  / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
 
+        return x_4
 
-######################################################################################################################
+    @staticmethod
+    def uncertainty(
+            data: list[ExperimentalData],
+            A_opt: float,
+            geometry: ExperimentGeometry):
+        """Calculate the uncertainty for the optimal exchange stiffness A"""
+
+        # Estimate variance from second order derivative of chi-square function via Finite Differences
+
+        match geometry:
+            case ExperimentGeometry.PARALLEL:
+                least_squares_function = LSQ_PAR
+            case ExperimentGeometry.PERPENDICULAR:
+                least_squares_function = LSQ_PERP
+            case _:
+                raise ValueError(f"Unknown experimental geometry: {geometry}")
+
+        p = 0.001  # fractional gap size for finite differences
+        dA = A_opt * p
+        A1 = A_opt - 2 * dA
+        A2 = A_opt - 1 * dA
+        A3 = A_opt
+        A4 = A_opt + 1 * dA
+        A5 = A_opt + 2 * dA
+
+        chi1 = least_squares_function(data, A1).exchange_A_chi_sq
+        chi2 = least_squares_function(data, A2).exchange_A_chi_sq
+        chi3 = least_squares_function(data, A3).exchange_A_chi_sq
+        chi4 = least_squares_function(data, A4).exchange_A_chi_sq
+        chi5 = least_squares_function(data, A5).exchange_A_chi_sq
+
+        d2chi_dA2 = (-chi1 + 16 * chi2 - 30 * chi3 + 16 * chi4 - chi5) / (12 * dA ** 2)
+
+        # Scale variance by number of samples and return reciprocal square root
+
+        n_field_strengths = len(data)  # Number of fields
+        n_q = len(data[0].scattering_curve.x)  # Number of q points
+
+        return np.sqrt(2 / (n_field_strengths * n_q * d2chi_dA2))
+
     def save_button_callback(self):
 
         SimpleFit_q_exp = self.SimpleFit_q_exp
@@ -355,8 +416,60 @@ class MuMagLib():
         else:
             messagebox.showerror(title="Error!", message="No SimpleFit results available!")
 
+    @staticmethod
+    def plot_results(sweep_data: SweepOutput,
+                     refined: LeastSquaresOutputPerpendicular | LeastSquaresOutputParallel,
+                     A_Uncertainty,
+                     figure, axes1, axes2, axes3, axes4):
 
-#################################################################################################################
+        if A_Uncertainty < 1e-4:
+            A_Uncertainty = 0
+
+        A_uncertainty_str = str(A_Uncertainty)
+        A_opt_str = str(refined.exchange_A * 1e12)
+
+        q = refined.q * 1e-9
+
+        # Plot A search data
+
+        axes1.set_title('$A_{\mathrm{opt}} = (' + A_opt_str[0:5] + ' \pm ' + A_uncertainty_str[0:4] + ')$ pJ/m')
+        axes1.plot(sweep_data.exchange_A_checked * 1e12, sweep_data.exchange_A_chi_sq)
+        axes1.plot(sweep_data.optimal.exchange_A * 1e12, sweep_data.optimal.exchange_A_chi_sq, 'o')
+
+        axes1.set_xlim([min(sweep_data.exchange_A_checked * 1e12), max(sweep_data.exchange_A_checked * 1e12)])
+        axes1.set_xlabel('$A$ [pJ/m]')
+        axes1.set_ylabel('$\chi^2$')
+
+        # Residual intensity plot
+
+        axes2.plot(q, refined.I_residual, label='fit')
+        axes2.set_yscale('log')
+        axes2.set_xscale('log')
+        axes2.set_xlim([min(q), max(q)])
+        axes2.set_xlabel('$q$ [1/nm]')
+        axes2.set_ylabel('$I_{\mathrm{res}}$')
+
+        # S_H parameter
+
+        axes3.plot(q, refined.S_H, label='fit')
+        axes3.set_yscale('log')
+        axes3.set_xscale('log')
+        axes3.set_xlim([min(q), max(q)])
+        axes3.set_xlabel('$q$ [1/nm]')
+        axes3.set_ylabel('$S_H$')
+
+        # S_M parameter
+        if isinstance(refined, LeastSquaresOutputPerpendicular):
+            axes4.plot(q, refined.S_M, label='fit')
+            axes4.set_yscale('log')
+            axes4.set_xscale('log')
+            axes4.set_xlim([min(q), max(q)])
+            axes4.set_xlabel('$q$ [1/nm]')
+            axes4.set_ylabel('$S_M$')
+
+        figure.tight_layout()
+
+    #################################################################################################################
 
     def SimpleFit_CompareButtonCallback(self, figure, axes):
 

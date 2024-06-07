@@ -2,185 +2,131 @@ import numpy as np
 import scipy.optimize as scopt
 import matplotlib.pyplot as plt
 
+from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
+from sas.qtgui.Utilities.MuMagTool.fit_parameters import ExperimentGeometry
+from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutputParallel, \
+    LeastSquaresOutputPerpendicular
+from sas.qtgui.Utilities.MuMagTool.sweep_output import SweepOutput
 
-####################################################################################################
-# Least squares method for parallel SANS geometry
-def LSQ_PAR(q, I_exp, sigma, M_s, H_0, H_dem, A):
+mu_0 = 4 * np.pi * 1e-7
+
+def LSQ_PAR(data: list[ExperimentalData], A):
+
+    """ Least squares fitting for a given exchange stiffness, A, parallel case
+
+            We are fitting the equation:
+
+              I_sim = I_res + response_H * S_H
+                    = (I_res, S_H) . (1, response_H)
+                    = (I_res, S_H) . least_squares_x
+
+            finding I_res and S_H for each q value
+
+
+        """
+
+    # Get matrices from the input data
+    n_data = len(data)
+
+    #  Factor of (1e-3 / mu_0) converts from mT to A/m
+    applied_field = np.array([datum.applied_field for datum in data]) * (1e-3 / mu_0)
+    demagnetising_field = np.array([datum.demagnetising_field for datum in data]) * (1e-3 / mu_0)
+    saturation_magnetisation = np.array([datum.saturation_magnetisation for datum in data]) * (1e-3 / mu_0)
+
+    # TODO: The following is how things should be done in the future, rather than hard-coding
+    #  a scaling factor...
+    # def data_nanometers(data: Data1D):
+    #     raw_data = data.x
+    #     units = data.x_unit
+    #     converter = Converter(units)
+    #     return converter.scale("1/m", raw_data)
+    #
+    # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
+
+    q = np.array([datum.scattering_curve.x for datum in data]) * 1e9
+    I = np.array([datum.scattering_curve.y for datum in data])
+    I_stdev = np.array([datum.scattering_curve.dy for datum in data])
+
+    n_q = q.shape[1]
 
     # Micromagnetic Model
-    mu_0 = 4 * np.pi * 1e-7
-    H_i = H_0 - H_dem
-    l_H = np.sqrt((2 * A) / (mu_0 * M_s * H_i))
-    H_eff = H_i * (1 + (l_H ** 2) * (q ** 2))
-    p = M_s / H_eff
-    R_H = (p ** 2) / 2
+    internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
+    magnetic_scattering_length = np.sqrt((2 * A) / (mu_0 * saturation_magnetisation.reshape(-1, 1) * internal_field))
+    effective_field = internal_field * (1 + (magnetic_scattering_length ** 2) * (q ** 2))
 
-    # Non-negative least squares loop
-    L_nu = len(q[1, :])
-    S_H = np.zeros((1, L_nu))
-    I_res = np.zeros((1, L_nu))
-    sigma_S_H = np.zeros((1, L_nu))
-    sigma_I_res = np.zeros((1, L_nu))
-    for nu in np.arange(0, L_nu):
-        A = np.array([1/sigma[:, nu], R_H[:, nu]/sigma[:, nu]]).T
-        y = I_exp[:, nu]/sigma[:, nu]
-        c = np.matmul(A.T, y)
-        H = np.dot(A.T, A)
+    # Calculate the response functions
+    p = saturation_magnetisation.reshape(-1, 1) / effective_field
+    response_H = (p ** 2) / 2
+
+    # print("Input", q.shape, q[0,10])
+    # sys.exit()
+
+    # Lists for output of calculation
+    I_residual = []
+    S_H = []
+
+    I_residual_error_weight = []
+    S_H_error_weight = []
+
+    for nu in range(n_q):
 
         # non-negative linear least squares
-        x = scopt.nnls(H, c)
-        I_res[0, nu] = x[0][0]
-        S_H[0, nu] = x[0][1]
+        least_squares_x = (np.array([np.ones((n_data,)), response_H[:, nu]]) / I_stdev[:, nu]).T
+        least_squares_y = I[:, nu] / I_stdev[:, nu]
 
-        Gamma = np.linalg.inv(np.dot(H.T, H))
-        sigma_I_res[0, nu] = Gamma[0, 0]
-        sigma_S_H[0, nu] = Gamma[1, 1]
+        least_squares_x_squared = np.dot(least_squares_x.T, least_squares_x)
 
-    I_sim = I_res + R_H * S_H
-    s_q = np.mean(((I_exp - I_sim)/sigma)**2, axis=0)
+        # Non-negative least squares
+        try:
+            fit_result = scopt.nnls(
+                least_squares_x_squared,
+                np.matmul(least_squares_x.T, least_squares_y))
 
-    sigma_S_H = np.sqrt(np.abs(sigma_S_H * s_q))
-    sigma_I_res = np.sqrt(np.abs(sigma_I_res * s_q))
+        except ValueError as ve:
+            print("Value Error:")
+            print(" A =", A)
 
-    chi_q = np.mean(s_q)
+            raise ve
 
-    return chi_q, I_res, S_H, sigma_I_res, sigma_S_H
+        I_residual.append(fit_result[0][0])
+        S_H.append(fit_result[0][1])
 
-####################################################################################################
-# Least squares method for parallel SANS geometry
-def chi_q_PAR(q, I_exp, sigma, M_s, H_0, H_dem, A):
+        errors = np.linalg.inv(np.dot(least_squares_x_squared.T, least_squares_x_squared))
 
-    # Micromagnetic Model
-    mu_0 = 4 * np.pi * 1e-7
-    H_i = H_0 - H_dem
-    l_H = np.sqrt((2 * A) / (mu_0 * M_s * H_i))
-    H_eff = H_i * (1 + (l_H ** 2) * (q ** 2))
-    p = M_s / H_eff
-    R_H = (p ** 2) / 2
+        I_residual_error_weight.append(errors[0, 0])
+        S_H_error_weight.append(errors[1, 1])
 
-    # Non-negative least squares loop
-    L_nu = len(q[0, :])
-    S_H = np.zeros((1, L_nu))
-    I_res = np.zeros((1, L_nu))
-    for nu in np.arange(0, L_nu):
-        A = np.array([1/sigma[:, nu], R_H[:, nu]/sigma[:, nu]]).T
-        y = I_exp[:, nu]/sigma[:, nu]
+    # Arrayise
+    S_H = np.array(S_H)
+    I_residual = np.array(I_residual)
 
-        c = np.matmul(A.T, y)
-        H = np.dot(A.T, A)
+    I_sim = I_residual + response_H * S_H
 
-        # non-negative linear least squares
-        x = scopt.nnls(H, c)
-        I_res[0, nu] = x[0][0]
-        S_H[0, nu] = x[0][1]
+    s_q = np.mean(((I - I_sim) / I_stdev) ** 2, axis=0)
 
-    I_sim = I_res + R_H * S_H
-    s_q = np.mean(((I_exp - I_sim)/sigma)**2, axis=0)
-    chi_q = np.mean(s_q)
+    sigma_I_res = np.sqrt(np.abs(np.array(I_residual_error_weight) * s_q))
+    sigma_S_H = np.sqrt(np.abs(np.array(S_H_error_weight) * s_q))
 
-    return chi_q
+    chi_sq = float(np.mean(s_q))
 
-####################################################################################################
-# Sweep over Exchange Stiffness A for parallel SANS geometry
-def SweepA_PAR(q, I_exp, sigma, M_s, H_0, H_dem, A_1, A_2, A_N):
+    output_q_values = np.mean(q, axis=0)
 
-    A = np.linspace(A_1, A_2, A_N) * 1e-12 # pJ/m -> J/m
-    chi_q = np.zeros(len(A))
-    for k in np.arange(0, len(A)):
-        chi_q[k], I_res, S_H, sigma_I_res, sigma_S_H = LSQ_PAR(q, I_exp, sigma, M_s, H_0, H_dem, A[k])
+    return LeastSquaresOutputParallel(
+        exchange_A=A,
+        exchange_A_chi_sq=chi_sq,
+        q=output_q_values,
+        I_residual=I_residual,
+        I_simulated=I_sim,
+        S_H=S_H,
+        I_residual_stdev=sigma_I_res,
+        S_H_stdev=sigma_S_H)
 
-    min_idx = np.argmin(chi_q)
-    A_opt = A[min_idx]
-
-    chi_q_opt, I_res_opt, S_H_opt, sigma_I_res, sigma_S_H = LSQ_PAR(q, I_exp, sigma, M_s, H_0, H_dem, A_opt)
-
-    return A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt,  sigma_I_res, sigma_S_H
 
 ####################################################################################################
-# find optimal Exchange Stiffness A for parallel SANS geometry using fsolve function (slow and very accurate)
-def OptimA_fsolve_PAR(q, I_exp, sigma, M_s, H_0, H_dem, A_initial):
 
-    def func(A):
-        return chi_q_PAR(q, I_exp, sigma, M_s, H_0, H_dem, A)
-
-    return scopt.fsolve(func, A_initial)
-
-####################################################################################################
-# find optimal Exchange Stiffness A for parallel SANS geometry using successive parabolic interpolation (fast and accurate)
-# implemented as Jarratt's Method
-def OptimA_SPI_PAR(q, I_exp, sigma, M_s, H_0, H_dem, A_1, eps):
-
-    delta = A_1 * 0.1
-
-    x_1 = A_1 - delta
-    x_2 = A_1
-    x_3 = A_1 + delta
-
-    y_1 = chi_q_PAR(q, I_exp, sigma, M_s, H_0, H_dem, x_1)
-    y_2 = chi_q_PAR(q, I_exp, sigma, M_s, H_0, H_dem, x_2)
-    y_3 = chi_q_PAR(q, I_exp, sigma, M_s, H_0, H_dem, x_3)
-
-    x_4 = x_3 + 0.5 * ((x_2 - x_3)**2 * (y_3 - y_1) + (x_1 - x_3)**2 * (y_2 - y_3))/((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
-    while np.abs(2 * (x_4 - x_3)/(x_4 + x_3)) > eps:
-
-        x_1 = x_2
-        x_2 = x_3
-        x_3 = x_4
-
-        y_1 = y_2
-        y_2 = y_3
-        y_3 = chi_q_PAR(q, I_exp, sigma, M_s, H_0, H_dem, x_3)
-
-        x_4 = x_3 + 0.5 * ((x_2 - x_3) ** 2 * (y_3 - y_1) + (x_1 - x_3) ** 2 * (y_2 - y_3)) / ((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
-
-    return x_4
-
-####################################################################################################
-# 1D-Cross-Section of the parallel model
-def SANS_Model_PAR(q, S_H, I_res, M_s, H_0, H_dem, A):
-
-    # Micromagnetic Model
-    mu_0 = 4 * np.pi * 1e-7
-    H_i = H_0 - H_dem
-    l_H = np.sqrt((2 * A) / (mu_0 * M_s * H_i))
-    H_eff = H_i * (1 + (l_H ** 2) * (q ** 2))
-    p = M_s / H_eff
-    R_H = (p ** 2) / 2
-
-    return I_res + R_H * S_H
 
 ####################################################################################################
 # Plot Fitting results of simple fit
-def PlotFittingResultsPAR_SimpleFit(q, A, chi_q, A_opt, chi_q_opt, I_res_opt, S_H_opt, A_Uncertainty,
-                                    figure, axes1, axes2, axes3, axes4):
-
-    if A_Uncertainty < 1e-4:
-        A_Uncertainty = 0
-
-    A_uncertainty_str = str(A_Uncertainty)
-    A_opt_str = str(A_opt * 1e12)
-    axes1.set_title('$A_{\mathrm{opt}} = (' + A_opt_str[0:5] + ' \pm ' + A_uncertainty_str[0:4] + ')$ pJ/m')
-    axes1.plot(A * 1e12, chi_q)
-    axes1.plot(A_opt * 1e12, chi_q_opt, 'o')
-    axes1.set_xlim([min(A * 1e12), max(A * 1e12)])
-    axes1.set_xlabel('$A$ [pJ/m]')
-    axes1.set_ylabel('$\chi^2$')
-
-    axes2.plot(q[0, :] * 1e-9, I_res_opt[0, :], label='fit')
-    axes2.set_yscale('log')
-    axes2.set_xscale('log')
-    axes2.set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
-    axes2.set_xlabel('$q$ [1/nm]')
-    axes2.set_ylabel('$I_{\mathrm{res}}$')
-
-    axes3.plot(q[0, :] * 1e-9, S_H_opt[0, :], label='fit')
-    axes3.set_yscale('log')
-    axes3.set_xscale('log')
-    axes3.set_xlim([min(q[0, :] * 1e-9), max(q[0, :] * 1e-9)])
-    axes3.set_xlabel('$q$ [1/nm]')
-    axes3.set_ylabel('$S_H$')
-
-    figure.tight_layout()
 
 ####################################################################################################
 def PlotSweepFitResultPAR(q_max_mat, H_min_mat, A_opt_mat):
