@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutput
+from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutputParallel, LeastSquaresOutputPerpendicular
 
 
 @dataclass

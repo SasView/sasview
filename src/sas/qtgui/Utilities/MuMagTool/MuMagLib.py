@@ -144,7 +144,7 @@ class MuMagLib():
 
         filtered_inputs = [datum.restrict_by_index(max_q_index)
                            for datum in self.input_data
-                           if datum.applied_field > parameters.min_applied_field]
+                           if datum.applied_field >= parameters.min_applied_field]
 
 
         # Least Squares Fit in case of perpendicular SANS geometry

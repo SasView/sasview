@@ -1,11 +1,15 @@
+import sys
+
 import numpy as np
 import scipy.optimize as scopt
 import matplotlib.pyplot as plt
 
+from sasdata.dataloader import Data1D
+from data_util.nxsunit import Converter
 from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
 from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters
 from sas.qtgui.Utilities.MuMagTool.fit_result import FitResults
-from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutput
+from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutput, LeastSquaresOutputPerpendicular
 from sas.qtgui.Utilities.MuMagTool.sweep_output import SweepOutput
 
 mu_0 = 4 * np.pi * 1e-7
@@ -24,18 +28,32 @@ def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
 
     """
 
+
+
     # Get matrices from the input data
     n_data = len(data)
 
-    applied_field = np.array([datum.applied_field for datum in data])
-    demagnetising_field = np.array([datum.demagnetising_field for datum in data])
-    saturation_magnetisation = np.array([datum.saturation_magnetisation for datum in data])
+    #  Factor of (1e-3 / mu_0) converts from mT to A/m
+    applied_field = np.array([datum.applied_field for datum in data]) * (1e-3 / mu_0)
+    demagnetising_field = np.array([datum.demagnetising_field for datum in data]) * (1e-3 / mu_0)
+    saturation_magnetisation = np.array([datum.saturation_magnetisation for datum in data]) * (1e-3 / mu_0)
 
-    q = np.array([datum.scattering_curve.x for datum in data]) # TODO: Check for transpose
+    # TODO: The following is how things should be done in the future, rather than hard-coding
+    #  a scaling factor...
+    # def data_nanometers(data: Data1D):
+    #     raw_data = data.x
+    #     units = data.x_unit
+    #     converter = Converter(units)
+    #     return converter.scale("1/m", raw_data)
+    #
+    # q = np.array([data_nanometers(datum.scattering_curve) for datum in data])
+
+
+    q = np.array([datum.scattering_curve.x for datum in data]) * 1e9
     I = np.array([datum.scattering_curve.y for datum in data])
     I_stdev = np.array([datum.scattering_curve.dy for datum in data])
 
-    n_q = q.shape[0]
+    n_q = q.shape[1]
 
     # Micromagnetic Model
     internal_field = (applied_field - demagnetising_field).reshape(-1, 1)
@@ -46,6 +64,9 @@ def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
     p = saturation_magnetisation.reshape(-1, 1) / effective_field
     response_H = (p ** 2) / 4 * (2 + 1 / np.sqrt(1 + p))
     response_M = (np.sqrt(1 + p) - 1) / 2
+
+    # print("Input", q.shape, q[0,10])
+    # sys.exit()
 
     # Lists for output of calculation
     I_residual = []
@@ -89,14 +110,15 @@ def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
         S_H_error_weight.append(errors[1, 1])
         S_M_error_weight.append(errors[2, 2])
 
+
     # Arrayise
     S_H = np.array(S_H)
     S_M = np.array(S_M)
     I_residual = np.array(I_residual)
 
-    I_sim = I_residual.reshape(-1, 1) + response_H * S_H.reshape(-1, 1) + response_M * S_M.reshape(-1, 1)
+    I_sim = I_residual + response_H * S_H + response_M * S_M
 
-    s_q = np.mean(((I - I_sim)/I_stdev)**2, axis=1)
+    s_q = np.mean(((I - I_sim)/I_stdev)**2, axis=0)
 
     sigma_I_res = np.sqrt(np.abs(np.array(I_residual_error_weight) * s_q))
     sigma_S_H = np.sqrt(np.abs(np.array(S_H_error_weight) * s_q))
@@ -104,10 +126,12 @@ def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
 
     chi_sq = float(np.mean(s_q))
 
-    return LeastSquaresOutput(
+    output_q_values = np.mean(q, axis=0)
+
+    return LeastSquaresOutputPerpendicular(
         exchange_A=A,
         exchange_A_chi_sq=chi_sq,
-        q=np.mean(q, axis=1),
+        q=output_q_values,
         I_residual=I_residual,
         I_simulated=I_sim,
         S_H=S_H,
@@ -119,7 +143,7 @@ def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutput:
 
 ####################################################################################################
 # Sweep over Exchange Stiffness A for perpendicular SANS geometry
-def SweepA_PERP(parameters: FitParameters, data: list[ExperimentalData]):
+def SweepA_PERP(parameters: FitParameters, data: list[ExperimentalData]) -> SweepOutput:
 
     a_values = np.linspace(
                         parameters.exchange_A_min,
@@ -137,14 +161,6 @@ def SweepA_PERP(parameters: FitParameters, data: list[ExperimentalData]):
         exchange_A_chi_sq=chi_sq,
         optimal=optimal_fit)
 
-####################################################################################################
-# find optimal Exchange Stiffness A for perpendicular SANS geometry using fsolve function (slow and very accurate)
-def OptimA_fsolve_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A_initial):
-
-    def func(A):
-        return chi_q_PERP(q, I_exp, sigma, M_s, H_0, H_dem, A)
-
-    return scopt.fsolve(func, A_initial)
 
 ####################################################################################################
 # find optimal Exchange Stiffness A for perpendicular SANS geometry using
@@ -165,7 +181,7 @@ def OptimA_SPI_PERP(data: list[ExperimentalData], A_1, epsilon):
     x_4 = x_3 + 0.5 * ((x_2 - x_3)**2 * (y_3 - y_1) + (x_1 - x_3)**2 * (y_2 - y_3))/((x_2 - x_3) * (y_3 - y_1) + (x_1 - x_3) * (y_2 - y_3))
     while np.abs(2 * (x_4 - x_3)/(x_4 + x_3)) > epsilon:
 
-        print("x1,x2,x3,x4:", x_1, x_2, x_3, x_4)
+        # print("x1,x2,x3,x4:", x_1, x_2, x_3, x_4)
 
         x_1 = x_2
         x_2 = x_3
@@ -179,20 +195,6 @@ def OptimA_SPI_PERP(data: list[ExperimentalData], A_1, epsilon):
 
     return x_4
 
-####################################################################################################
-# 1D-Cross-Section of the perendicular model
-def SANS_Model_PERP(q, S_H, S_M, I_res, M_s, H_0, H_dem, A):
-
-    # Micromagnetic Model
-    mu_0 = 4 * np.pi * 1e-7
-    H_i = H_0 - H_dem
-    l_H = np.sqrt((2 * A) / (mu_0 * M_s * H_i))
-    H_eff = H_i * (1 + (l_H ** 2) * (q ** 2))
-    p = M_s / H_eff
-    R_H = (p ** 2) / 4 * (2 + 1 / np.sqrt(1 + p))
-    R_M = (np.sqrt(1 + p) - 1) / 2
-
-    return I_res + R_H * S_H + R_M * S_M
 
 ####################################################################################################
 # Plot Fitting results of simple fit
@@ -226,7 +228,7 @@ def PlotFittingResultsPERP_SimpleFit(z: SweepOutput, A_Uncertainty,
     axes2.set_xlabel('$q$ [1/nm]')
     axes2.set_ylabel('$I_{\mathrm{res}}$')
 
-    axes3.plot(q, z.optimal.S_H[0, :], label='fit')
+    axes3.plot(q, z.optimal.S_H, label='fit')
     axes3.set_yscale('log')
     axes3.set_xscale('log')
     axes3.set_xlim([min(q), max(q)])

@@ -1,8 +1,7 @@
+import numpy as np
 
-####################################################################################################
-# Lorentzian Model for the generation of noisy synthetic test data for perpendicular SANS geometry
 def LorentzianNoisyModelPERP(q, A, M_s, H_0, H_dem, a_H, a_M, l_c, beta):
-
+    """ Lorentzian Model for the generation of noisy synthetic test data for perpendicular SANS geometry """
     # All inputs in SI-units
 
     # Micromagnetic Model
@@ -34,13 +33,8 @@ def LorentzianNoisyModelPERP(q, A, M_s, H_0, H_dem, a_H, a_M, l_c, beta):
     return I_sim, sigma, S_H, S_M, I_res
 
 
-
-
-####################################################################################################
-# Functions for the analysis of parallel SANS ######################################################
-####################################################################################################
-# Lorentzian Model for the generation of clean synthetic test data for perpendicular SANS geometry
 def LorentzianModelPAR(q, A, M_s, H_0, H_dem, a_H, l_c):
+    """ Lorentzian Model for the generation of clean synthetic test data for parallel SANS geometry"""
 
     # All inputs in SI-units
     # Micromagnetic Model
@@ -68,11 +62,8 @@ def LorentzianModelPAR(q, A, M_s, H_0, H_dem, a_H, l_c):
     return I_sim, sigma, S_H, I_res
 
 
-####################################################################################################
-# Functions for the analysis of perpendicular SANS #################################################
-####################################################################################################
-# Lorentzian Model for the generation of clean synthetic test data for perpendicular SANS geometry
 def LorentzianModelPERP(q, A, M_s, H_0, H_dem, a_H, a_M, l_c):
+    """ Lorentzian Model for the generation of clean synthetic test data for perpendicular SANS geometry"""
 
     # All inputs in SI-units
     # Micromagnetic Model
@@ -101,3 +92,17 @@ def LorentzianModelPERP(q, A, M_s, H_0, H_dem, a_H, a_M, l_c):
     sigma = 0 * I_sim + 1
 
     return I_sim, sigma, S_H, S_M, I_res
+
+def SANS_Model_PERP(q, S_H, S_M, I_res, M_s, H_0, H_dem, A):
+    """ 1D-Cross-Section of the perendicular model """
+
+    # Micromagnetic Model
+    mu_0 = 4 * np.pi * 1e-7
+    H_i = H_0 - H_dem
+    l_H = np.sqrt((2 * A) / (mu_0 * M_s * H_i))
+    H_eff = H_i * (1 + (l_H ** 2) * (q ** 2))
+    p = M_s / H_eff
+    R_H = (p ** 2) / 4 * (2 + 1 / np.sqrt(1 + p))
+    R_M = (np.sqrt(1 + p) - 1) / 2
+
+    return I_res + R_H * S_H + R_M * S_M
