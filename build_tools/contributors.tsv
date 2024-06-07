@@ -1,8 +1,8 @@
 Name	Affiliation	Creator	Producer	RelatedPerson	ORCID	Notes
-Adams, Michels	University of Luxembourg	x				None
+Adams, Michel	University of Luxembourg	x				None
 Agouzal, Nouhaila	Institut Laue-Langevin	x				None
 Alina, Gervaise	University of Tennessee, Knoxville	x				None
-Anuchitanukul, Atijit	Oak Ridge National Laboratory	 	 	x	 	Who is this person? why are they listed? what role?
+Anuchitanukul, Atijit	Oak Ridge National Laboratory	 	 	x	 	worked with Anders on FIT benmchmarking. Should be ISIS?
 Attala, Ziggy	ISIS Neutron and Muon Source	x				Changed RAL to ISIS, as we have diamond separately, needs to be checked
 Bakker, Jurrian	Technical University, Delft	x				None
 Beaucage, Peter	National Institute of Standards and Technology	x			0000-0002-2147-0728	None
@@ -10,7 +10,7 @@ Berger, Jordan	University of Delaware	x				None
 Bourne, Robert	ISIS Neutron and Muon Source	x				None
 Bouwman, Wim	"Technical University, Delft"	x				None
 Bressler, Ingo	Paul Scherrer Institute	x				None
-Butler, Paul	National Institute of Standards and Technology	x	x		0000-0002-5978-4714	None
+Butler, Paul	National Institute of Standards and Technology	x			0000-0002-5978-4714	None
 Cadwallader-Jones, Iestyn	Institut Laue-Langevin	x				None
 Campbell, Kieran	ISIS Neutron and Muon Source	x				None
 Cho, Jae-Hie	"University of Tennessee, Knoxville"	x				None
@@ -20,7 +20,7 @@ Corona, Patrick	University of California, Santa Barbara			x		None
 Doucet, Mathieu	Oak Ridge National Laboratory	x			0000-0002-5560-6478	None
 Doutch, James	ISIS Neutron and Muon Source     	x				None
 Dresen, Dominique	University of Cologne	x				None
-Drosos,Giogos	ETH Zurich	x				Submitted PR externally - never communicated directly with group. Still counts?
+Drosos, Giogos	ETH Zurich	x				Submitted PR externally - never communicated directly with group. Still counts?
 Durniak, Celine	European Spallation Source	x				None
 Farrow, Chris	California Institute of Technology	x				None
 Ferraz Leal, Ricardo	Oak Ridge National Laboratory	x				None
@@ -56,12 +56,12 @@ Markvardsen, Anders	ISIS Neutron and Muon Source	x	x			None
 Martinez, Nicolas	Institut Laue-Langevin	x				None
 McKerns, Mike	California Institute of Technology	x				None
 Miller, Brayden	National Institute of Standards and Technology	x				None
-Mothander, Karolina	Lund University x					None
+Mothander, Karolina	Lund University	x				None
 Murphy, Ryan	National Institute of Standards and Technology	x			0000-0002-4080-7525	None
 Narayanan, Theyencheri	European Synchrotron Radiation Facility			x		None
 Nelson, Andrew 	Australian National Science and Technology Organisation	x				None
 Nielsen, Torben	European Spallation Source	x	x			None
-Oakley, Michael	ISIS Neutron and Muon Source	x				Was he ISIS or some other part of RAL? also list as author? or Other?
+Oakley, Michael	ISIS Neutron and Muon Source	x				None
 O'Driscoll, Lewis	ISIS Neutron and Muon Source	x				None
 Park, Helen	National Institute of Standards and Technology	x				None
 Parker, Peter	ISIS Neutron and Muon Source	x				None
@@ -78,7 +78,7 @@ Prescott, Stuart	University of New South Wales	x			0000-0001-5639-9688	None
 Prevost, Sylvain	Institut Laue-Langevin			x		None
 Rakitin, Maksim	Brookhaven National Laboratory	x				None
 Rennie, Adrian	Uppsala University			x		None
-Richter, Tobias	European Spallation Source	x				Was at Diamond as creator. counts as Producer at ESS? How to list here?
+Richter, Tobias	Diamond Light Source	x	x			Was at Diamond as creator. counts as Producer at ESS? How to list here?
 Roberts, Graham	University of Connecticut			x		Working on AI module but mostly alone? so not yet creator?
 Rod, Thomas Holm	European Spallation Source		x			None
 Rooks, Jack	University of Delaware	x				None
@@ -90,7 +90,7 @@ Stellhorn, Annika	European Spallation Source	x				None
 Taylor, Jonathan	European Spallation Source		x			None
 Teixeira, Susana	National Institute of Standards and Technology	x				None
 Tumarkin, Jessica	University of Tennessee, Knoxville	x				None
-Udby, Linda	Niels Bohr Institute			x		Who is this person and why are they on the list?
+Udby, Linda	Niels Bohr Institute			x		Pan-learning person.
 Washington, Adam	ISIS Neutron and Muon Source	x				None
 Weigandt, Katie	National Institute of Standards and Technology	x				None
 Whitley, Robert	ISIS Neutron and Muon Source	x				None
@@ -99,4 +99,4 @@ Wolf, Caitlyn	National Institute of Standards and Technology	x			0000-0002-2956-
 Zakoutna, Dominika	Charles University			x		None
 Zhang, Anita	University of Princeton	x				None
 Zheng, Alex	National Institute of Standards and Technolog	x				None
-Zhou, Jae-He						I don't think this is a real person? Jae-he Cho was. Where does this come from?
+Zhou, Jing	University of Tennessee, Knoxville					First person working on SANS part of DANSE project, but not really SansView yet? not sure how (or if) to list.
