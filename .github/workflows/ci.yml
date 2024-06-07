@@ -121,6 +121,7 @@ jobs:
           rm -rf dist
           python setup.py clean
           python setup.py build
+          mv build/lib/sasdata/example_data/* ../sasview/src/sas/example_data/
           python -m pip install --no-deps .
 
       - name: Build and install sasmodels
