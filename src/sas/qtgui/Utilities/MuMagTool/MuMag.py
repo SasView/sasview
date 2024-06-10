@@ -10,60 +10,127 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 import numpy as np
 
+from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
+from sas.qtgui.Utilities.MuMagTool.failure import LoadFailure
 from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters, ExperimentGeometry
+from sas.qtgui.Utilities.MuMagTool.MuMagLib import MuMagLib
 
+from logging import getLogger
+
+log = getLogger("MuMag")
 
 class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
     def __init__(self, parent=None):
         super().__init__()
+
         self.setupUi(self)
 
-        self.MuMagLib_obj = MuMagLib.MuMagLib()
-
         # Callbacks
-        self.ImportDataButton.clicked.connect(self.import_data_button_callback)
-        self.PlotDataButton.clicked.connect(self.plot_experimental_data_button_callback)
+        self.ImportDataButton.clicked.connect(self.importData)
         self.SimpleFitButton.clicked.connect(self.simple_fit_button_callback)
         self.CompareResultsButton.clicked.connect(self.compare_data_button_callback)
         self.SaveResultsButton.clicked.connect(self.save_data_button_callback)
 
+        #
+        # Data
+        #
+
+        self.data: list[ExperimentalData] | None = None
+
+        #
         # Plotting
-        layout = QVBoxLayout()
-        self.PlotDisplayPanel.setLayout(layout)
+        #
 
-        self.fig = plt.figure() #Figure(figsize=(width, height), dpi=dpi)
-        self.simple_fit_axes = self.fig.add_subplot(1, 1, 1)
-        self.simple_fit_axes.set_visible(False)
-        self.chi_squared_axes = self.fig.add_subplot(2, 2, 1)
+        # Data
+        data_plot_layout = QVBoxLayout()
+        self.data_tab.setLayout(data_plot_layout)
+        self.data_figure = plt.figure() #Figure(figsize=(width, height), dpi=dpi)
+        self.figure_canvas = FigureCanvas(self.data_figure)
+        self.data_axes = self.data_figure.add_subplot(1, 1, 1)
+        self.data_axes.set_visible(False)
+        data_plot_layout.addWidget(self.figure_canvas)
+
+        # Fit results
+        fit_results_layout = QVBoxLayout()
+        self.fit_results_tab.setLayout(fit_results_layout)
+        self.fit_results_figure = plt.figure()
+        self.fit_results_canvas = FigureCanvas(self.fit_results_figure)
+
+        self.chi_squared_axes = self.fit_results_figure.add_subplot(2, 2, 1)
         self.chi_squared_axes.set_visible(False)
-        self.residuals_axes = self.fig.add_subplot(2, 2, 2)
+        self.residuals_axes = self.fit_results_figure.add_subplot(2, 2, 2)
         self.residuals_axes.set_visible(False)
-        self.s_h_axes = self.fig.add_subplot(2, 2, 3)
+        self.s_h_axes = self.fit_results_figure.add_subplot(2, 2, 3)
         self.s_h_axes.set_visible(False)
-        self.longitudinal_scattering_axes = self.fig.add_subplot(2, 2, 4)
+        self.longitudinal_scattering_axes = self.fit_results_figure.add_subplot(2, 2, 4)
         self.longitudinal_scattering_axes.set_visible(False)
 
-        self.figure_canvas = FigureCanvas(self.fig)
-        layout.addWidget(self.figure_canvas)
+        fit_results_layout.addWidget(self.fit_results_canvas)
 
-    def import_data_button_callback(self):
-        self.MuMagLib_obj.import_data()
+    def importData(self):
+        """ Callback for the import data button """
 
-    def plot_experimental_data_button_callback(self):
-        self.simple_fit_axes.set_visible(True)
+        # Get the directory from the user
+        directory = MuMagLib.directory_popup()
+
+        if directory is None:
+            log.info("No directory selected")
+            return
+
+        try:
+            self.data = MuMagLib.import_data(directory)
+        except LoadFailure as lf:
+            log.error(repr(lf))
+            return
+
+        log.info(f"Loaded {len(self.data)} datasets")
+        self.plot_data()
+        self.data_figure.canvas.draw()
+
+    def hide_everything(self):
+
+        self.data_axes.set_visible(True)
         self.chi_squared_axes.set_visible(False)
         self.residuals_axes.set_visible(False)
         self.s_h_axes.set_visible(False)
         self.longitudinal_scattering_axes.set_visible(False)
 
-        self.simple_fit_axes.cla()
+        self.data_axes.cla()
         self.chi_squared_axes.cla()
         self.residuals_axes.cla()
         self.s_h_axes.cla()
         self.longitudinal_scattering_axes.cla()
 
-        self.MuMagLib_obj.plot_exp_data(self.fig, self.simple_fit_axes)
-        self.figure_canvas.draw()
+
+
+    def plot_data(self):
+        """ Plot Experimental Data: Generate Figure """
+
+        colors = pl.cm.jet(np.linspace(0, 1, len(self.data)))
+
+        for i, datum in enumerate(self.data):
+
+            self.data_axes.loglog(datum.scattering_curve.x,
+                      datum.scattering_curve.y,
+                      linestyle='-', color=colors[i], linewidth=0.5,
+                      label=r'$B_0 = ' + str(datum.applied_field) + '$ T')
+
+            self.data_axes.loglog(datum.scattering_curve.x,
+                      datum.scattering_curve.y, '.',
+                      color=colors[i], linewidth=0.3, markersize=1)
+
+        # Plot limits
+        qlim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.x for datum in self.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.y for datum in self.data])
+
+        self.data_axes.set_xlabel(r'$q$ [1/nm]')
+        self.data_axes.set_ylabel(r'$I_{\mathrm{exp}}$')
+        self.data_axes.set_xlim(qlim)
+        self.data_axes.set_ylim(ilim)
+        self.data_figure.tight_layout()
+        self.data_figure.canvas.draw()
+        self.data_axes.set_visible(True)
+
 
     def fit_parameters(self) -> FitParameters:
         """ Get an object containing all the parameters needed for doing the fitting """
@@ -94,14 +161,14 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
 
         # Clear axes
-        self.simple_fit_axes.cla()
+        self.data_axes.cla()
         self.chi_squared_axes.cla()
         self.residuals_axes.cla()
         self.s_h_axes.cla()
         self.longitudinal_scattering_axes.cla()
 
         # Set axes visibility
-        self.simple_fit_axes.set_visible(False)
+        self.data_axes.set_visible(False)
         self.chi_squared_axes.set_visible(True)
         self.residuals_axes.set_visible(True)
         self.s_h_axes.set_visible(True)
@@ -119,7 +186,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         self.MuMagLib_obj.do_fit(
             parameters,
-            self.fig,
+            self.data_figure,
             self.chi_squared_axes,
             self.residuals_axes,
             self.s_h_axes,
@@ -130,20 +197,20 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
     def compare_data_button_callback(self):
 
         # Clear axes
-        self.simple_fit_axes.cla()
+        self.data_axes.cla()
         self.chi_squared_axes.cla()
         self.residuals_axes.cla()
         self.s_h_axes.cla()
         self.longitudinal_scattering_axes.cla()
 
         # Set visibility
-        self.simple_fit_axes.set_visible(True)
+        self.data_axes.set_visible(True)
         self.chi_squared_axes.set_visible(False)
         self.residuals_axes.set_visible(False)
         self.s_h_axes.set_visible(False)
         self.longitudinal_scattering_axes.set_visible(False)
 
-        self.MuMagLib_obj.SimpleFit_CompareButtonCallback(self.fig, self.simple_fit_axes)
+        self.MuMagLib_obj.SimpleFit_CompareButtonCallback(self.data_figure, self.data_axes)
 
 
 

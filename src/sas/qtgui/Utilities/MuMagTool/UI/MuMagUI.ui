@@ -262,19 +262,24 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox_3">
-      <property name="title">
-       <string>Display</string>
+     <widget class="QTabWidget" name="plot_tabs">
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <widget class="QWidget" name="PlotDisplayPanel" native="true">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>20</y>
-         <width>761</width>
-         <height>411</height>
-        </rect>
-       </property>
+      <widget class="QWidget" name="data_tab">
+       <attribute name="title">
+        <string>Data</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="fit_results_tab">
+       <attribute name="title">
+        <string>Fit Results</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="comparison_tab">
+       <attribute name="title">
+        <string>Comparison</string>
+       </attribute>
       </widget>
      </widget>
     </item>

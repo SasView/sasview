@@ -1,25 +1,18 @@
 import numpy as np
-import math
-import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
-import scipy.optimize as scopt
-from tkinter import *
-from tkinter import filedialog
 from tkinter import messagebox
-from tkinter import ttk
 import os
 import os.path
 from datetime import datetime
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog
-import string
 
-from sas.qtgui.Utilities.MuMagTool import MuMagParallelGeo
 from sas.qtgui.Utilities.MuMagTool import MuMagPerpendicularGeo
 from sas.qtgui.Utilities.MuMagTool.MuMagParallelGeo import LSQ_PAR
 from sas.qtgui.Utilities.MuMagTool.MuMagPerpendicularGeo import LSQ_PERP
 from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
+from sas.qtgui.Utilities.MuMagTool.failure import LoadFailure
 from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters, ExperimentGeometry
 from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutputPerpendicular, \
     LeastSquaresOutputParallel
@@ -28,7 +21,7 @@ from sas.qtgui.Utilities.MuMagTool.sweep_output import SweepOutput
 from sasdata.dataloader.loader import Loader
 
 
-class MuMagLib():
+class MuMagLib:
     def __init__(self):
 
         self.input_data: list[ExperimentalData] | None = None
@@ -43,46 +36,45 @@ class MuMagLib():
             return directory
 
 
-    def import_data(self):
+    @staticmethod
+    def import_data(directory):
         """Import experimental data and get information from filenames"""
 
-        # Get the directory from the user
-        directory = MuMagLib.directory_popup()
+        try:
+            # Load the data
+            loader = Loader()
+            input_names = [name for name in os.listdir(directory) if name.lower().endswith(".csv")]
+            input_paths = [os.path.join(directory, filename) for filename in input_names]
 
-        if directory is None:
-            return
+            input_data = loader.load(input_paths)
 
-        # Load the data
-        loader = Loader()
-        input_names = [name for name in os.listdir(directory) if name.lower().endswith(".csv")]
-        input_paths = [os.path.join(directory, filename) for filename in input_names]
+            data = []
+            for filename, data1d in zip(input_names, input_data):
 
-        input_data = loader.load(input_paths)
+                # Extract the metadata from the filename
+                filename_parts = filename.split(".")
+                filename = ".".join(filename_parts[:-1])
 
-        data = []
-        for filename, data1d in zip(input_names, input_data):
+                parts = filename.split("_")
 
-            # Extract the metadata from the filename
-            filename_parts = filename.split(".")
-            filename = ".".join(filename_parts[:-1])
+                applied_field = float(parts[1])  # mT
+                saturation_magnetisation = float(parts[2])  # mT
+                demagnetising_field = float(parts[3])  # mT
 
-            parts = filename.split("_")
+                # Create input data object
+                data.append(ExperimentalData(
+                    scattering_curve=data1d,
+                    applied_field=applied_field,
+                    saturation_magnetisation=saturation_magnetisation,
+                    demagnetising_field=demagnetising_field))
 
+            return sorted(data, key=lambda x: x.applied_field)
 
-            applied_field = float(parts[1])  # mT
-            saturation_magnetisation = float(parts[2])  # mT
-            demagnetising_field = float(parts[3])  # mT
+        except Exception as e:
+            raise LoadFailure(f"Failed to load from {directory}: " + repr(e))
 
-            # Create input data object
-            data.append(ExperimentalData(
-                scattering_curve=data1d,
-                applied_field=applied_field,
-                saturation_magnetisation=saturation_magnetisation,
-                demagnetising_field=demagnetising_field))
-
-        self.input_data = sorted(data, key=lambda x: x.applied_field)
-
-    def nice_log_plot_bounds(self, data: list[np.ndarray]):
+    @staticmethod
+    def nice_log_plot_bounds(data: list[np.ndarray]):
         """ Get nice bounds for the loglog plots
 
         :return: (lower, upper) bounds appropriate to pass to plt.xlim/ylim
@@ -95,42 +87,6 @@ class MuMagLib():
             10 ** (np.floor(np.log10(lower))) * np.floor(lower / 10 ** (np.floor(np.log10(lower)))),
             10 ** (np.floor(np.log10(upper))) * np.ceil(upper / 10 ** (np.floor(np.log10(upper))))
         )
-
-    def plot_exp_data(self, figure, axes):
-        """ Plot Experimental Data: Generate Figure """
-
-        if self.input_data is None:
-
-            messagebox.showerror(
-                title="Error!",
-                message="No experimental data available! Please import experimental data!")
-
-            return
-
-        ax = axes
-        colors = pl.cm.jet(np.linspace(0, 1, len(self.input_data)))
-
-        for i, datum in enumerate(self.input_data):
-
-            ax.loglog(datum.scattering_curve.x,
-                      datum.scattering_curve.y,
-                      linestyle='-', color=colors[i], linewidth=0.5,
-                      label=r'$B_0 = ' + str(datum.applied_field) + '$ T')
-
-            ax.loglog(datum.scattering_curve.x,
-                      datum.scattering_curve.y, '.',
-                      color=colors[i], linewidth=0.3, markersize=1)
-
-        # Plot limits
-        qlim = self.nice_log_plot_bounds([datum.scattering_curve.x for datum in self.input_data])
-        ilim = self.nice_log_plot_bounds([datum.scattering_curve.y for datum in self.input_data])
-
-        ax.set_xlabel(r'$q$ [1/nm]')
-        ax.set_ylabel(r'$I_{\mathrm{exp}}$')
-        ax.set_xlim(qlim)
-        ax.set_ylim(ilim)
-        figure.tight_layout()
-        figure.canvas.draw()
 
 
     # @staticmethod
