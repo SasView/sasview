@@ -295,10 +295,6 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
     def onHelp(self):
         """ Display related help section """
 
-        try:
-            help_location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                            "/user/qtgui/Perspectives/Fitting/fitting_help.html#add-multiply-models"
-            webbrowser.open('file://' + os.path.realpath(help_location))
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        help_location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#add-multiply-models"
+        self.parent.showHelp(help_location)
+
