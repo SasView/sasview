@@ -1,17 +1,16 @@
 from sas.qtgui.Utilities.MuMagTool.UI.MuMagUI import Ui_MuMagTool
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QVBoxLayout
 from PySide6 import QtWidgets
 from sas.qtgui.Utilities.MuMagTool import MuMagLib
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-# from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 import matplotlib.pylab as pl
 import numpy as np
 
 from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
-from sas.qtgui.Utilities.MuMagTool.failure import LoadFailure
+from sas.qtgui.Utilities.MuMagTool.failure import LoadFailure, FitFailure
 from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters, ExperimentGeometry
 from sas.qtgui.Utilities.MuMagTool.MuMagLib import MuMagLib
 
@@ -23,6 +22,8 @@ from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutpu
 log = getLogger("MuMag")
 
 class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
+    """ Main widget for the MuMag tool """
+
     def __init__(self, parent=None):
         super().__init__()
 
@@ -31,8 +32,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         # Callbacks
         self.ImportDataButton.clicked.connect(self.importData)
         self.SimpleFitButton.clicked.connect(self.onFit)
-        self.CompareResultsButton.clicked.connect(self.compare_data_button_callback)
-        self.SaveResultsButton.clicked.connect(self.save_data_button_callback)
+        self.SaveResultsButton.clicked.connect(self.onSave)
 
         #
         # Data
@@ -67,6 +67,16 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         fit_results_layout.addWidget(self.fit_results_canvas)
 
+        # Comparison
+        comparison_layout = QVBoxLayout()
+        self.comparison_tab.setLayout(comparison_layout)
+        self.comparison_figure = plt.figure()
+        self.comparison_canvas = FigureCanvas(self.comparison_figure)
+
+        self.comparison_axes = self.comparison_figure.add_subplot(1, 1, 1)
+
+        comparison_layout.addWidget(self.comparison_canvas)
+
         # Set visibility
         self.hide_everything()
 
@@ -90,7 +100,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         self.hide_everything()
         self.plot_tabs.setTabEnabled(0, True)
-        self.plot_data()
+        self.show_input_data()
 
     def hide_everything(self):
         """ Hide all plots, disable tabs"""
@@ -107,7 +117,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.plot_tabs.setTabEnabled(0, False)
 
 
-    def plot_data(self):
+    def show_input_data(self):
         """ Plot Experimental Data: Generate Figure """
 
         colors = pl.cm.jet(np.linspace(0, 1, len(self.data)))
@@ -176,9 +186,15 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             case ExperimentGeometry.PARALLEL:
                 self.longitudinal_scattering_axes.set_visible(False)
             case _:
-                raise ValueError(f"Unknown Value: {parameters.experiment_geometry}")
+                raise log.error(f"Unknown geometry: {parameters.experiment_geometry}")
 
-        self.fit_data = MuMagLib.simple_fit(self.data, parameters)
+        try:
+            self.fit_data = MuMagLib.simple_fit(self.data, parameters)
+
+        except FitFailure as ff:
+            log.error("Fitting failed - are the parameters correct? "+repr(ff))
+            return
+
 
         self.show_fit_results()
 
@@ -192,18 +208,17 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             return
 
         # Some dereferencing to make things more readable
-        A_uncertainty = self.fit_data.optimal_exchange_A_uncertainty
         refined = self.fit_data.refined_fit_data
         sweep_data = self.fit_data.sweep_data
 
-        # Text to show TODO: Replace with field in dialog
-        if A_uncertainty < 1e-4:
-            A_uncertainty = 0
-
-        A_uncertainty_str = str(A_uncertainty)
-        A_opt_str = str(refined.exchange_A * 1e12)
-
         q = refined.q * 1e-9
+
+        # Update text boxes
+
+        self.exchange_a_display.setText(f"{self.fit_data.refined_fit_data.exchange_A * 1e12 : .5g} pJ/m")
+        self.exchange_a_std_display.setText(f"{self.fit_data.optimal_exchange_A_uncertainty : .5g} pJ/m")
+
+
 
         # Clear plots
         self.chi_squared_axes.cla()
@@ -212,7 +227,6 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.longitudinal_scattering_axes.cla()
 
         # Plot A search data
-        self.chi_squared_axes.set_title('$A_{\mathrm{opt}} = (' + A_opt_str[0:5] + ' \pm ' + A_uncertainty_str[0:4] + ')$ pJ/m')
         self.chi_squared_axes.plot(sweep_data.exchange_A_checked * 1e12, sweep_data.exchange_A_chi_sq)
         self.chi_squared_axes.plot(sweep_data.optimal.exchange_A * 1e12, sweep_data.optimal.exchange_A_chi_sq, 'o')
 
@@ -252,35 +266,60 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.s_h_axes.set_visible(True)
         self.longitudinal_scattering_axes.set_visible(True)
 
+        #
+        # Comparison Tab
+        #
+
+        # Plot limits
+        qlim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.x for datum in self.data])
+        ilim = MuMagLib.nice_log_plot_bounds([datum.scattering_curve.y for datum in self.data])
+
+        # Show the experimental data
+        # colors = pl.cm.jet(np.linspace(0, 1, len(self.fit_data.input_data)))
+        # for k, datum in enumerate(self.fit_data.input_data):
+        #     self.comparison_axes.loglog(
+        #         datum.scattering_curve.x,
+        #         datum.scattering_curve.y,
+        #         linestyle='dotted', color=colors[k], linewidth=0.3, markersize=1)
+
+        n_sim = self.fit_data.refined_fit_data.I_simulated.shape[0]
+        colors = pl.cm.YlGn(np.linspace(0, 1, n_sim))
+        for k in range(0, n_sim):
+            self.comparison_axes.loglog(
+                self.fit_data.refined_fit_data.q,
+                self.fit_data.refined_fit_data.I_simulated[k, :],
+                linestyle='solid', color=colors[k],
+                linewidth=0.5, label='(fit) B_0 = ' + str(self.fit_data.input_data[k].applied_field) + ' T')
+
+        self.comparison_axes.set_xlabel(r'$q$ [1/nm]')
+        self.comparison_axes.set_ylabel(r'$I_{\mathrm{exp}}$')
+        self.comparison_axes.set_xlim(qlim)
+        self.comparison_axes.set_ylim(ilim)
+        self.comparison_figure.tight_layout()
+        self.comparison_figure.canvas.draw()
+
+
+        #
+        # Set up tabs
+        #
+
         self.plot_tabs.setTabEnabled(1, True)
         self.plot_tabs.setTabEnabled(2, True)
 
         self.plot_tabs.setCurrentIndex(1)
 
+    def onSave(self):
+        """ Save button pressed """
 
-    def compare_data_button_callback(self):
+        if self.fit_data is None:
+            log.error("Nothing to save!")
+            return
 
-        # Clear axes
-        self.data_axes.cla()
-        self.chi_squared_axes.cla()
-        self.residual_axes.cla()
-        self.s_h_axes.cla()
-        self.longitudinal_scattering_axes.cla()
+        directory = MuMagLib.directory_popup()
 
-        # Set visibility
-        self.data_axes.set_visible(True)
-        self.chi_squared_axes.set_visible(False)
-        self.residual_axes.set_visible(False)
-        self.s_h_axes.set_visible(False)
-        self.longitudinal_scattering_axes.set_visible(False)
+        if directory is not None:
 
-        self.MuMagLib_obj.SimpleFit_CompareButtonCallback(self.data_figure, self.data_axes)
-
-
-
-    def save_data_button_callback(self):
-        self.MuMagLib_obj.save_button_callback()
-
+            MuMagLib.save_data(self.fit_data, directory)
 
 
 def main():
