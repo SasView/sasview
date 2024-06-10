@@ -9,13 +9,8 @@ import scipy.optimize
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog
 
-from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
-from sas.qtgui.Utilities.MuMagTool.failure import LoadFailure, FitFailure
-from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters, ExperimentGeometry
-from sas.qtgui.Utilities.MuMagTool.fit_result import FitResults
-from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutputPerpendicular, \
-    LeastSquaresOutputParallel
-from sas.qtgui.Utilities.MuMagTool.sweep_output import SweepOutput
+from sas.qtgui.Utilities.MuMag.datastructures import ExperimentalData, LoadFailure, FitFailure, ExperimentGeometry, \
+    FitParameters, FitResults, LeastSquaresOutputParallel, LeastSquaresOutputPerpendicular, SweepOutput
 
 from sasdata.dataloader.loader import Loader
 

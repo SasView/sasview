@@ -35,7 +35,7 @@ from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
 
-from sas.qtgui.Utilities.MuMagTool.MuMag import MuMag
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
 from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 

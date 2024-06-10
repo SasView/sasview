@@ -1,7 +1,7 @@
-from sas.qtgui.Utilities.MuMagTool.UI.MuMagUI import Ui_MuMagTool
+from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
 from PySide6.QtWidgets import QVBoxLayout
 from PySide6 import QtWidgets
-from sas.qtgui.Utilities.MuMagTool import MuMagLib
+from sas.qtgui.Utilities.MuMag import MuMagLib
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
@@ -9,15 +9,11 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 import numpy as np
 
-from sas.qtgui.Utilities.MuMagTool.experimental_data import ExperimentalData
-from sas.qtgui.Utilities.MuMagTool.failure import LoadFailure, FitFailure
-from sas.qtgui.Utilities.MuMagTool.fit_parameters import FitParameters, ExperimentGeometry
-from sas.qtgui.Utilities.MuMagTool.MuMagLib import MuMagLib
+from sas.qtgui.Utilities.MuMag.datastructures import ExperimentalData, LoadFailure, FitFailure, ExperimentGeometry, \
+    FitParameters, FitResults, LeastSquaresOutputPerpendicular
+from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
 
 from logging import getLogger
-
-from sas.qtgui.Utilities.MuMagTool.fit_result import FitResults
-from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutputPerpendicular
 
 log = getLogger("MuMag")
 

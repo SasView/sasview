@@ -1,5 +1,7 @@
 import numpy as np
 
+""" Models that are useful for verifying results of MuMag """
+
 def LorentzianNoisyModelPERP(q, A, M_s, H_0, H_dem, a_H, a_M, l_c, beta):
     """ Lorentzian Model for the generation of noisy synthetic test data for perpendicular SANS geometry """
     # All inputs in SI-units
