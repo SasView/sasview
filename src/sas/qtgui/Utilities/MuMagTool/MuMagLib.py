@@ -89,7 +89,7 @@ class MuMagLib:
 
 
     @staticmethod
-    def do_fit(data: list[ExperimentalData], parameters: FitParameters):
+    def simple_fit(data: list[ExperimentalData], parameters: FitParameters):
         """ Main fitting ("simple fit") """
 
         geometry = parameters.experiment_geometry
@@ -105,7 +105,7 @@ class MuMagLib:
                            if datum.applied_field >= parameters.min_applied_field]
 
         # Brute force check for something near the minimum
-        sweep_data = MuMagLib.sweep(parameters, filtered_inputs)
+        sweep_data = MuMagLib.sweep_exchange_A(parameters, filtered_inputs)
 
         # Refine this result
         crude_A = sweep_data.optimal.exchange_A
@@ -121,7 +121,7 @@ class MuMagLib:
             optimal_exchange_A_uncertainty=uncertainty)
 
     @staticmethod
-    def sweep(parameters: FitParameters, data: list[ExperimentalData]) -> SweepOutput:
+    def sweep_exchange_A(parameters: FitParameters, data: list[ExperimentalData]) -> SweepOutput:
         """ Sweep over Exchange Stiffness A for perpendicular SANS geometry to
         get an initial estimate which can then be refined"""
 
@@ -131,10 +131,10 @@ class MuMagLib:
             parameters.exchange_A_n) * 1e-12  # From pJ/m to J/m
 
         if parameters.experiment_geometry == ExperimentGeometry.PERPENDICULAR:
-            least_squared_fits = [MuMagLib.LSQ_PERP(data, a) for a in a_values]
+            least_squared_fits = [MuMagLib.least_squares_perpendicular(data, a) for a in a_values]
 
         elif parameters.experiment_geometry == ExperimentGeometry.PARALLEL:
-            least_squared_fits = [MuMagLib.LSQ_PAR(data, a) for a in a_values]
+            least_squared_fits = [MuMagLib.least_squares_parallel(data, a) for a in a_values]
 
         else:
             raise ValueError(f"Unknown ExperimentGeometry value: {parameters.experiment_geometry}")
@@ -149,7 +149,7 @@ class MuMagLib:
             optimal=optimal_fit)
 
     @staticmethod
-    def LSQ_PERP(data: list[ExperimentalData], A) -> LeastSquaresOutputPerpendicular:
+    def least_squares_perpendicular(data: list[ExperimentalData], A) -> LeastSquaresOutputPerpendicular:
         """ Least squares fitting for a given exchange stiffness, A, perpendicular case
 
             We are fitting the equation:
@@ -271,7 +271,7 @@ class MuMagLib:
 
 
     @staticmethod
-    def LSQ_PAR(data: list[ExperimentalData], A):
+    def least_squares_parallel(data: list[ExperimentalData], A):
 
         """ Least squares fitting for a given exchange stiffness, A, parallel case
 
@@ -391,9 +391,9 @@ class MuMagLib:
 
         match geometry:
             case ExperimentGeometry.PARALLEL:
-                least_squares_function = MuMagLib.LSQ_PAR
+                least_squares_function = MuMagLib.least_squares_parallel
             case ExperimentGeometry.PERPENDICULAR:
-                least_squares_function = MuMagLib.LSQ_PERP
+                least_squares_function = MuMagLib.least_squares_perpendicular
             case _:
                 raise ValueError(f"Unknown experimental geometry: {geometry}")
 
@@ -438,9 +438,9 @@ class MuMagLib:
 
         match geometry:
             case ExperimentGeometry.PARALLEL:
-                least_squares_function = MuMagLib.LSQ_PAR
+                least_squares_function = MuMagLib.least_squares_parallel
             case ExperimentGeometry.PERPENDICULAR:
-                least_squares_function = MuMagLib.LSQ_PERP
+                least_squares_function = MuMagLib.least_squares_perpendicular
             case _:
                 raise ValueError(f"Unknown experimental geometry: {geometry}")
 
@@ -595,59 +595,6 @@ class MuMagLib:
                                                                        SimpleFit_I_res_fit[0, :]]).T, delimiter=" ")
 
 
-
-    @staticmethod
-    def plot_results(sweep_data: SweepOutput,
-                     refined: LeastSquaresOutputPerpendicular | LeastSquaresOutputParallel,
-                     A_Uncertainty,
-                     figure, axes1, axes2, axes3, axes4):
-
-        if A_Uncertainty < 1e-4:
-            A_Uncertainty = 0
-
-        A_uncertainty_str = str(A_Uncertainty)
-        A_opt_str = str(refined.exchange_A * 1e12)
-
-        q = refined.q * 1e-9
-
-        # Plot A search data
-
-        axes1.set_title('$A_{\mathrm{opt}} = (' + A_opt_str[0:5] + ' \pm ' + A_uncertainty_str[0:4] + ')$ pJ/m')
-        axes1.plot(sweep_data.exchange_A_checked * 1e12, sweep_data.exchange_A_chi_sq)
-        axes1.plot(sweep_data.optimal.exchange_A * 1e12, sweep_data.optimal.exchange_A_chi_sq, 'o')
-
-        axes1.set_xlim([min(sweep_data.exchange_A_checked * 1e12), max(sweep_data.exchange_A_checked * 1e12)])
-        axes1.set_xlabel('$A$ [pJ/m]')
-        axes1.set_ylabel('$\chi^2$')
-
-        # Residual intensity plot
-
-        axes2.plot(q, refined.I_residual, label='fit')
-        axes2.set_yscale('log')
-        axes2.set_xscale('log')
-        axes2.set_xlim([min(q), max(q)])
-        axes2.set_xlabel('$q$ [1/nm]')
-        axes2.set_ylabel('$I_{\mathrm{res}}$')
-
-        # S_H parameter
-
-        axes3.plot(q, refined.S_H, label='fit')
-        axes3.set_yscale('log')
-        axes3.set_xscale('log')
-        axes3.set_xlim([min(q), max(q)])
-        axes3.set_xlabel('$q$ [1/nm]')
-        axes3.set_ylabel('$S_H$')
-
-        # S_M parameter
-        if isinstance(refined, LeastSquaresOutputPerpendicular):
-            axes4.plot(q, refined.S_M, label='fit')
-            axes4.set_yscale('log')
-            axes4.set_xscale('log')
-            axes4.set_xlim([min(q), max(q)])
-            axes4.set_xlabel('$q$ [1/nm]')
-            axes4.set_ylabel('$S_M$')
-
-        figure.tight_layout()
 
     #################################################################################################################
 

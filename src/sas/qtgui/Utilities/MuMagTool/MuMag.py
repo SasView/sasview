@@ -18,6 +18,7 @@ from sas.qtgui.Utilities.MuMagTool.MuMagLib import MuMagLib
 from logging import getLogger
 
 from sas.qtgui.Utilities.MuMagTool.fit_result import FitResults
+from sas.qtgui.Utilities.MuMagTool.least_squares_output import LeastSquaresOutputPerpendicular
 
 log = getLogger("MuMag")
 
@@ -29,7 +30,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         # Callbacks
         self.ImportDataButton.clicked.connect(self.importData)
-        self.SimpleFitButton.clicked.connect(self.simple_fit_button_callback)
+        self.SimpleFitButton.clicked.connect(self.onFit)
         self.CompareResultsButton.clicked.connect(self.compare_data_button_callback)
         self.SaveResultsButton.clicked.connect(self.save_data_button_callback)
 
@@ -60,15 +61,14 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.fit_results_canvas = FigureCanvas(self.fit_results_figure)
 
         self.chi_squared_axes = self.fit_results_figure.add_subplot(2, 2, 1)
-        self.chi_squared_axes.set_visible(False)
-        self.residuals_axes = self.fit_results_figure.add_subplot(2, 2, 2)
-        self.residuals_axes.set_visible(False)
+        self.residual_axes = self.fit_results_figure.add_subplot(2, 2, 2)
         self.s_h_axes = self.fit_results_figure.add_subplot(2, 2, 3)
-        self.s_h_axes.set_visible(False)
         self.longitudinal_scattering_axes = self.fit_results_figure.add_subplot(2, 2, 4)
-        self.longitudinal_scattering_axes.set_visible(False)
 
         fit_results_layout.addWidget(self.fit_results_canvas)
+
+        # Set visibility
+        self.hide_everything()
 
     def importData(self):
         """ Callback for the import data button """
@@ -89,23 +89,22 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         log.info(f"Loaded {len(self.data)} datasets")
 
         self.hide_everything()
+        self.plot_tabs.setTabEnabled(0, True)
         self.plot_data()
 
-
     def hide_everything(self):
-
-        self.data_axes.set_visible(False)
-        self.chi_squared_axes.set_visible(False)
-        self.residuals_axes.set_visible(False)
-        self.s_h_axes.set_visible(False)
-        self.longitudinal_scattering_axes.set_visible(False)
+        """ Hide all plots, disable tabs"""
 
         self.data_axes.cla()
         self.chi_squared_axes.cla()
-        self.residuals_axes.cla()
+        self.residual_axes.cla()
         self.s_h_axes.cla()
         self.longitudinal_scattering_axes.cla()
 
+        self.plot_tabs.setTabEnabled(1, False)
+        self.plot_tabs.setTabEnabled(2, False)
+        # weird order because of how the widget behaves when all are not enabled
+        self.plot_tabs.setTabEnabled(0, False)
 
 
     def plot_data(self):
@@ -133,12 +132,12 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.data_axes.set_xlim(qlim)
         self.data_axes.set_ylim(ilim)
         self.data_figure.tight_layout()
-        
+
         self.data_axes.set_visible(True)
         self.data_figure.canvas.draw()
 
 
-    def fit_parameters(self) -> FitParameters:
+    def get_fit_parameters(self) -> FitParameters:
         """ Get an object containing all the parameters needed for doing the fitting """
 
         a_min = self.aMinSpinBox.value()
@@ -163,26 +162,13 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             exchange_A_max=a_max,
             experiment_geometry=geometry)
 
-    def simple_fit_button_callback(self):
+    def onFit(self):
 
         if self.data is None:
             log.error("No data loaded")
             return None
 
-        # Clear axes
-        self.data_axes.cla()
-        self.chi_squared_axes.cla()
-        self.residuals_axes.cla()
-        self.s_h_axes.cla()
-        self.longitudinal_scattering_axes.cla()
-
-        # Set axes visibility
-        self.data_axes.set_visible(False)
-        self.chi_squared_axes.set_visible(True)
-        self.residuals_axes.set_visible(True)
-        self.s_h_axes.set_visible(True)
-
-        parameters = self.fit_parameters()
+        parameters = self.get_fit_parameters()
 
         match parameters.experiment_geometry:
             case ExperimentGeometry.PERPENDICULAR:
@@ -192,11 +178,84 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             case _:
                 raise ValueError(f"Unknown Value: {parameters.experiment_geometry}")
 
+        self.fit_data = MuMagLib.simple_fit(self.data, parameters)
 
-        self.fit_data = MuMagLib.do_fit(self.data, parameters)
+        self.show_fit_results()
 
-        self.figure_canvas.draw()
 
+    def show_fit_results(self):
+        """ Show the results of the fit in the widget """
+
+        # Check for data
+        if self.fit_data is None:
+            log.error("No fit data to show")
+            return
+
+        # Some dereferencing to make things more readable
+        A_uncertainty = self.fit_data.optimal_exchange_A_uncertainty
+        refined = self.fit_data.refined_fit_data
+        sweep_data = self.fit_data.sweep_data
+
+        # Text to show TODO: Replace with field in dialog
+        if A_uncertainty < 1e-4:
+            A_uncertainty = 0
+
+        A_uncertainty_str = str(A_uncertainty)
+        A_opt_str = str(refined.exchange_A * 1e12)
+
+        q = refined.q * 1e-9
+
+        # Clear plots
+        self.chi_squared_axes.cla()
+        self.residual_axes.cla()
+        self.s_h_axes.cla()
+        self.longitudinal_scattering_axes.cla()
+
+        # Plot A search data
+        self.chi_squared_axes.set_title('$A_{\mathrm{opt}} = (' + A_opt_str[0:5] + ' \pm ' + A_uncertainty_str[0:4] + ')$ pJ/m')
+        self.chi_squared_axes.plot(sweep_data.exchange_A_checked * 1e12, sweep_data.exchange_A_chi_sq)
+        self.chi_squared_axes.plot(sweep_data.optimal.exchange_A * 1e12, sweep_data.optimal.exchange_A_chi_sq, 'o')
+
+        self.chi_squared_axes.set_xlim([min(sweep_data.exchange_A_checked * 1e12), max(sweep_data.exchange_A_checked * 1e12)])
+        self.chi_squared_axes.set_xlabel('$A$ [pJ/m]')
+        self.chi_squared_axes.set_ylabel('$\chi^2$')
+
+        # Residual intensity plot
+        self.residual_axes.plot(q, refined.I_residual, label='fit')
+        self.residual_axes.set_yscale('log')
+        self.residual_axes.set_xscale('log')
+        self.residual_axes.set_xlim([min(q), max(q)])
+        self.residual_axes.set_xlabel('$q$ [1/nm]')
+        self.residual_axes.set_ylabel('$I_{\mathrm{res}}$')
+
+        # S_H parameter
+        self.s_h_axes.plot(q, refined.S_H, label='fit')
+        self.s_h_axes.set_yscale('log')
+        self.s_h_axes.set_xscale('log')
+        self.s_h_axes.set_xlim([min(q), max(q)])
+        self.s_h_axes.set_xlabel('$q$ [1/nm]')
+        self.s_h_axes.set_ylabel('$S_H$')
+
+        # S_M parameter
+        if isinstance(refined, LeastSquaresOutputPerpendicular):
+            self.longitudinal_scattering_axes.plot(q, refined.S_M, label='fit')
+            self.longitudinal_scattering_axes.set_yscale('log')
+            self.longitudinal_scattering_axes.set_xscale('log')
+            self.longitudinal_scattering_axes.set_xlim([min(q), max(q)])
+            self.longitudinal_scattering_axes.set_xlabel('$q$ [1/nm]')
+            self.longitudinal_scattering_axes.set_ylabel('$S_M$')
+
+        self.fit_results_figure.tight_layout()
+
+        self.chi_squared_axes.set_visible(True)
+        self.residual_axes.set_visible(True)
+        self.s_h_axes.set_visible(True)
+        self.longitudinal_scattering_axes.set_visible(True)
+
+        self.plot_tabs.setTabEnabled(1, True)
+        self.plot_tabs.setTabEnabled(2, True)
+
+        self.plot_tabs.setCurrentIndex(1)
 
 
     def compare_data_button_callback(self):
@@ -204,14 +263,14 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         # Clear axes
         self.data_axes.cla()
         self.chi_squared_axes.cla()
-        self.residuals_axes.cla()
+        self.residual_axes.cla()
         self.s_h_axes.cla()
         self.longitudinal_scattering_axes.cla()
 
         # Set visibility
         self.data_axes.set_visible(True)
         self.chi_squared_axes.set_visible(False)
-        self.residuals_axes.set_visible(False)
+        self.residual_axes.set_visible(False)
         self.s_h_axes.set_visible(False)
         self.longitudinal_scattering_axes.set_visible(False)
 
