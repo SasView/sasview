@@ -17,6 +17,8 @@ from sas.qtgui.Utilities.MuMagTool.MuMagLib import MuMagLib
 
 from logging import getLogger
 
+from sas.qtgui.Utilities.MuMagTool.fit_result import FitResults
+
 log = getLogger("MuMag")
 
 class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
@@ -36,6 +38,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         #
 
         self.data: list[ExperimentalData] | None = None
+        self.fit_data: FitResults | None = None
 
         #
         # Plotting
@@ -84,12 +87,14 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             return
 
         log.info(f"Loaded {len(self.data)} datasets")
+
+        self.hide_everything()
         self.plot_data()
-        self.data_figure.canvas.draw()
+
 
     def hide_everything(self):
 
-        self.data_axes.set_visible(True)
+        self.data_axes.set_visible(False)
         self.chi_squared_axes.set_visible(False)
         self.residuals_axes.set_visible(False)
         self.s_h_axes.set_visible(False)
@@ -128,8 +133,9 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.data_axes.set_xlim(qlim)
         self.data_axes.set_ylim(ilim)
         self.data_figure.tight_layout()
-        self.data_figure.canvas.draw()
+        
         self.data_axes.set_visible(True)
+        self.data_figure.canvas.draw()
 
 
     def fit_parameters(self) -> FitParameters:
@@ -159,6 +165,9 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
     def simple_fit_button_callback(self):
 
+        if self.data is None:
+            log.error("No data loaded")
+            return None
 
         # Clear axes
         self.data_axes.cla()
@@ -184,15 +193,11 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
                 raise ValueError(f"Unknown Value: {parameters.experiment_geometry}")
 
 
-        self.MuMagLib_obj.do_fit(
-            parameters,
-            self.data_figure,
-            self.chi_squared_axes,
-            self.residuals_axes,
-            self.s_h_axes,
-            self.longitudinal_scattering_axes)
+        self.fit_data = MuMagLib.do_fit(self.data, parameters)
 
         self.figure_canvas.draw()
+
+
 
     def compare_data_button_callback(self):
 
