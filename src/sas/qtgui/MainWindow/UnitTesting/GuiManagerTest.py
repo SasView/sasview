@@ -11,7 +11,6 @@ from PySide6 import QtCore
 
 # Local
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
 from sas.qtgui.Utilities.HidableDialog import HidableDialog
@@ -61,8 +60,6 @@ class GuiManagerTest:
         assert manager._workspace.dockWidgetArea(manager.logDockWidget) == QtCore.Qt.BottomDockWidgetArea
 
         assert isinstance(manager.ackWidget, Acknowledgements)
-        assert isinstance(manager.aboutWidget, AboutBox)
-        #assert isinstance(manager.welcomePanel, WelcomePanel)
 
     def skip_testLogging(self, manager):
         """

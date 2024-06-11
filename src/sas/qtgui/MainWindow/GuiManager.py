@@ -15,6 +15,7 @@ from PySide6.QtCore import Qt, QLocale
 import matplotlib as mpl
 
 import sas.system.version
+from sas.qtgui.Utilities.About.About import About
 
 #mpl.use("Qt5Agg")
 
@@ -40,7 +41,6 @@ from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
-from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
 from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
@@ -184,7 +184,6 @@ class GuiManager:
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
-        self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
 
         self.grid_window = None
@@ -1287,10 +1286,9 @@ class GuiManager:
         """
         Open the About box
         """
-        # Update the about box with current version and stuff
 
-        # TODO: proper sizing
-        self.aboutWidget.show()
+        about = About()
+        about.exec()
 
     def actionCheck_for_update(self):
         """
