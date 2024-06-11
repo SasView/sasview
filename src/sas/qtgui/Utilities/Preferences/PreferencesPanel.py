@@ -147,7 +147,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             msgBox.show()
             if msgBox.exec() == QMessageBox.Yes:
                 self.parent.guiManager.quitApplication()
-                os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
+                os.execl(sys.executable, sys.executable, *sys.argv)
         self._reset_state()
 
     def _cancelStaging(self):
