@@ -452,36 +452,34 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         items = [data_item] if (is_batch and len(data_item)>1) else data_item
         for data in items:
             logic_data = GuiUtils.dataFromItem(data)
-            is_2Ddata = isinstance(logic_data, Data2D)
-            if is_2Ddata and is_batch:
-                 msg = "2D Data cannot be inverted as Batch"
-                 raise RuntimeError(msg)
-            else:    
-                # Find the first unassigned tab.
-                # If none, open a new tab.
-                available_tabs = [tab.acceptsData() for tab in self.tabs]
-                tab_ids = [tab.tab_id for tab in self.tabs]
-                if tab_index is not None:
-                    if tab_index not in tab_ids: 
-                        self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index=tab_index)
-                    else:
-                        self.setCurrentIndex(tab_index-1)                
-                        self.swapData(data = data, is2D = is_2Ddata,tab_index=self.currentIndex())
-                        return
-                #debug Batch mode, gives none Type has no attribute name
-                if not is_batch and np.any(available_tabs):
-                    first_good_tab = available_tabs.index(True)
-                    self.tabs[first_good_tab].data = data
-                    self.tabs[first_good_tab].updateTab(data = data, is2D = is_2Ddata, tab_index=first_good_tab) 
+            
 
+   
+            # Find the first unassigned tab.
+            # If none, open a new tab.
+            available_tabs = [tab.acceptsData() for tab in self.tabs]
+            tab_ids = [tab.tab_id for tab in self.tabs]
+            if tab_index is not None:
+                if tab_index not in tab_ids: 
+                    self.addData(data = data, is_batch=is_batch, tab_index=tab_index)
                 else:
-                    self.addData(data = data, is2D=is_2Ddata, is_batch=is_batch, tab_index = tab_index)               
+                    self.setCurrentIndex(tab_index-1)                
+                    self.swapData(data = data,tab_index=self.currentIndex())
+                    return
+            #debug Batch mode, gives none Type has no attribute name
+            if not is_batch and np.any(available_tabs):
+                first_good_tab = available_tabs.index(True)
+                self.tabs[first_good_tab].data = data
+                self.tabs[first_good_tab].updateTab(data = data, tab_index=first_good_tab) 
+
+            else:
+                self.addData(data = data, is_batch=is_batch, tab_index = tab_index)               
 
 
 
 
 
-    def swapData(self, data = None, is2D = False,tab_index=None):
+    def swapData(self, data = None, tab_index=None):
         """
         Replace the data from the current tab
         """
@@ -498,7 +496,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             raise RuntimeError(msg)
 
         self.currentTab.data = data
-        self.currentTab.updateTab(data = data, is2D = is2D,tab_index= tab_index)
+        self.currentTab.updateTab(data = data, tab_index= tab_index)
 
 
 
@@ -526,7 +524,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
 
-    def addData(self, data=None, is_batch=False, tab_index=None, is2D=False):
+    def addData(self, data=None, is_batch=False, tab_index=None):
 
         """
         Add a new tab for passed data
@@ -544,7 +542,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         #ObjectLibrary.addObject(tab_name, tab)
         icon = QtGui.QIcon()
         # Setting UP batch Mode for 1D data
-        if is_batch and not is2D:
+        if is_batch:
             tab.setPlotable(False)
             for element in data:
                 tab.logic.data = GuiUtils.dataFromItem(element)
@@ -556,7 +554,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         else:        
             if data is not None:               
-                tab.updateTab(data = data, is2D = is2D, tab_index=tab_index)
+                tab.updateTab(data = data, tab_index=tab_index)
                 
         tab.is_batch = is_batch                
         self.addTab(tab, icon, tab.tab_name)
