@@ -27,7 +27,7 @@
 
 ## Anticipated for beta version
 - PDB-based model saved to custom model (for S(q) calculations)?
-- Batch Processing and 2D data slicing and processing for P(r)
+- Batch Processing for P(r)
 - Local documentation generator
 - Log explorer
 - Send To button with replacement options

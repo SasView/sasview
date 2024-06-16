@@ -22,15 +22,12 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from ...Plotting.Plotter import Plotter
-from ...Plotting.Plotter2D import Plotter2D, Plotter2DWidget
-from ...Plotting.Slicers.SectorSlicer import SectorInteractor
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 #regeneration of documentation
 from pathlib import Path
 from sas.sascalc.doc_regen.makedocumentation import IMAGES_DIRECTORY_LOCATION, HELP_DIRECTORY_LOCATION
 
-TAB_2D = 2
 
 def is_float(value):
     """Converts text input values to floats. Empty strings throw ValueError"""
@@ -46,10 +43,6 @@ REGULARIZATION = 0.01
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
 
-# Default Values for 2D slicing
-START_ANGLE = 0
-NO_OF_SLICES = 6
-NO_OF_QBINS = 20
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 logger = logging.getLogger(__name__)
@@ -81,27 +74,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # Necessary globals
         self.parent = parent
 
-        # 2D Data globals #####################
-
-        self.is2D = False  # used to determine weather its a 2D tab
-        self.isSlicing = False  # used to determine weather 2D data is being sliced
-        self.startAngle = None  # start point for where to start slicing
-        self.noOfSlices = None  # number of slices
-
-        self.slices = {}  # List to store the slices from 2D data
-        self.isSliced = False
-
-        # Slice values
-
-        self.phi = None  # Phi Value of slice
-        self.deltaPhi = None  # Number of slicer
-        self.qbins = None  # Number of points on plot
-
-        # 2D Data Plot
 
         self.plot_widgets = {}
         self.active_plots = {}
-        self.plotList = None
+
 
         ########################################
         
@@ -223,7 +199,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.stopButton.clicked.connect(self.stopCalculation)
         self.removeButton.clicked.connect(self.removeData)
         self.showResultsButton.clicked.connect(self.showBatchOutput)
-        self.sliceButton.clicked.connect(self.slice)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
         self.manualBgd.toggled.connect(self.toggleBgd)
@@ -238,9 +213,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.maxDistanceInput.textChanged.connect(
             lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
         
-        self.noOfSlicesInput.editingFinished.connect(self.updateSlicerParams)
-        self.startAngleInput.editingFinished.connect(self.updateSlicerParams)
-        self.noOfQbinsInput.editingFinished.connect(self.updateSlicerParams)
 
         # Signals asking for replot
         self.maxQInput.editingFinished.connect(self.check_q_high)
@@ -291,9 +263,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.mapper.addMapping(self.noOfTermsInput, WIDGETS.W_NO_TERMS)
         self.mapper.addMapping(self.noOfTermsSuggestionButton, WIDGETS.W_NO_TERMS_SUGGEST)
 
-        self.mapper.addMapping(self.noOfSlicesInput, WIDGETS.W_NO_OF_SLICES)
-        self.mapper.addMapping(self.startAngleInput, WIDGETS.W_START_ANGLE)
-        self.mapper.addMapping(self.noOfQbinsInput, WIDGETS.W_NO_OF_QBINS)
 
         # Output
         self.mapper.addMapping(self.rgValue, WIDGETS.W_RG)
@@ -352,13 +321,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION, blank_item)
 
 
-        startAngle_item = QtGui.QStandardItem(str(START_ANGLE))
-        self.model.setItem(WIDGETS.W_START_ANGLE, startAngle_item)
-        noOfSlices_item = QtGui.QStandardItem(str(NO_OF_SLICES))
-        self.model.setItem(WIDGETS.W_NO_OF_SLICES, noOfSlices_item)
-        Qbins_item = QtGui.QStandardItem(str(NO_OF_QBINS))
-        self.model.setItem(WIDGETS.W_NO_OF_QBINS, Qbins_item)
-
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
@@ -374,10 +336,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.slitHeightInput.setValidator(GuiUtils.DoubleValidator())
         self.slitWidthInput.setValidator(GuiUtils.DoubleValidator())
         
-
-        self.noOfSlicesInput.setValidator(QtGui.QIntValidator())
-        self.startAngleInput.setValidator(GuiUtils.DoubleValidator())
-        self.noOfQbinsInput.setValidator(GuiUtils.DoubleValidator())
 
     ######################################################################
     # Methods for updating GUI
@@ -397,20 +355,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.showResultsButton.setEnabled(self.logic.data_is_loaded
                                           and not self.isBatch
                                           and not self.isCalculating and self.batchResultsWindow is not None)
-        self.sliceButton.setVisible(not isinstance(self.logic.data, Data2D))
-        self.sliceButton.setEnabled(not self.isSlicing and isinstance(self.logic.data, Data2D))
-        self.sliceButton.setVisible(self.logic.data_is_loaded and self.is2D)
         self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
         self.noOfTermsSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
-        self.PrTabWidget.setTabEnabled(TAB_2D, self.is2D)
 
 
-    def toggle2DData(self, isChecked):
-        """ Enable/disable the 2D data tab """
-        self.PrTabWidget.setTabEnabled(TAB_2D, isChecked)
 
     def populateDataComboBox(self, name, data_ref):
         """
@@ -467,46 +418,20 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.set_qmin(qmin)
         self._calculator.set_qmax(qmax)
 
-    def updateTab(self, data = None, is2D=False, tab_index=None):
-        self.is2D = is2D
+    def updateTab(self, data = None, tab_index=None):
         self.logic.data = GuiUtils.dataFromItem(data)
         self.swapDataComboBox(self.logic.data.name, data)        
 
-        if is2D:
-            data.isSliced = False 
-            plots = GuiUtils.plotsFromDisplayName(self.logic.data.name, data.model()) 
-            for item, plot_set  in plots.items():
-                
-                
-                #self.plot2D.plot(plot_set)
-                
-                title = self.add2DPlot(plot_set, item)
-                
-                if item.parent() is not None:
-                    item = item.parent()
-                self.plot2D.item = item
-                self.plot2D.id=self.logic.data.name 
-                self.plot2D.onSectorView()                
-                self.updateSlicerParams()
 
-        else: #1D data                     
-            self.logic.add_errors()
-            self.setQ()
+    #1D data                     
+        self.logic.add_errors()
+        self.setQ()
         self.updateDynamicGuiValues()
         self.updateGuiValues()
         self.enableButtons()
         self.calculateAllButton.setVisible(False)
         self.showResultsButton.setVisible(False)
 
-    def add2DPlot(self, plot_set, item):
-        """
-        Create a new 2D plot
-        """
-        self.plot2D = Plotter2DWidget(parent=self, manager=self)
-        self.plot2D.item = item
-        self.plot2D.plot(plot_set)
-        self.addPlot(self.plot2D)
-        self.active_plots[self.plot2D.data[0].name] = self.plot2D
 
     def addPlot(self, new_plot): 
         title = str(PlotHelper.idOfPlot(new_plot))
@@ -729,9 +654,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.slitHeightInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_height))
             self.slitWidthInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_width))
             
-            self.noOfSlicesInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).noOfSlices))
-            self.startAngleInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).startAngle))
-            self.noOfQbinsInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).Qbins))
         except:
             # Data might be removed
             self.setDefaultParameters()
@@ -747,9 +669,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.slitHeightInput.setText("")
         self.slitWidthInput.setText("")
 
-        self.noOfSlicesInput.setText(str(NO_OF_SLICES))
-        self.startAngleInput.setText(str(START_ANGLE))
-        self.noOfQbinsInput.setText(str(NO_OF_QBINS))
 
 
     def resetCalcPrams(self):
@@ -815,10 +734,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
 
-        # prevent 2D data from being set and calculated
-        # this could happen when batch processing 2D slices
-        if isinstance(data_ref, Data2D):
-            return
 
         # Data references
         self._data = data_ref
@@ -916,7 +831,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def removeData(self, data_list=None):
         """Remove the existing data reference from the P(r) Persepective"""
         self.batchResults = {}
-        if self.is2D or self.isBatch:
+        if self.isBatch:
             self.prPlot = None
             self.dataPlot = None
             self.dataList.removeItem(self.dataList.currentIndex())
@@ -1356,54 +1271,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         logger.error(error)
         self.stopCalculation()
 
-    #####################################################
-    # Methods for slicing 2D Data
-
-    def slice(self):
-        """
-            Slice the data
-        """
-        self.sliceButton.setText("Slicing...")
-        self.isSlicing = True
-        self.enableButtons()
-
-        slicedData = self.multiSlicer()
-        self.isSliced = True
-
-        labels = ["title", "phi", "Qbins", "DeltaPhi"]
-        self.sliceList.setColumnCount(len(labels))
-        self.sliceList.setHorizontalHeaderLabels(labels)
-        self.sliceList.setEnabled(False)
-        self.sliceList.setRowCount(self.noOfSlices)
-        self.sliceList.setEnabled(True)
-        itemList = []
-        for row, slice in enumerate(slicedData):
-            # functool's partial function here is used to -> the slice into the showPlot function for the specified slice in the table
-            # A better solution could be used here to avoid the need to import functools
-            from functools import partial
- 
-            self.sliceList.setItem(row, 0, QtWidgets.QTableWidgetItem(slice.title))  # sets the title
-            self.sliceList.setItem(row, 1, QtWidgets.QTableWidgetItem(str(slice.phi)))  # sets the phi
-            self.sliceList.setItem(row, 2, QtWidgets.QTableWidgetItem(str(slice.Qbins)))  # set Number of points on plot
-            self.sliceList.setItem(row, 3, QtWidgets.QTableWidgetItem(str(slice.deltaPhi)))  # set Delta phi           
-            item = GuiUtils.createModelItemWithPlot(update_data=slice, name=str(slice.title))
-            itemList.append(item)
-            self.parent.communicate.updateModelFromPerspectiveSignal.emit(item)
-
-            #self.logic.data = GuiUtils.dataFromItem(item)            
-
-        
-        self.sendToInversion( itemList)
-        #self.calculateAllButton.setVisible(True)
-        self.plot2D.update()
-        self.sliceList.resizeColumnsToContents()
-        self.sliceList.resizeRowsToContents()
-        self.sliceButton.setText("Slice")
-        #self.sliceList.show()
-        self.isSlicing = False
-        
-        self.enableButtons()
-        #self.showResultsButton.setVisible(True)
 
     def sendToInversion(self, items):
         """
@@ -1424,86 +1291,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
 
 
-    def show1DPlot(self, data):
-        """
-        show a 1D plot of all of the slices
-        """
-
-        self.plot1D = self.logic.new1DPlot(data, self.tab_id)
-        params = self.plot2D.slicer.getParams()
-        params["Phi [deg]"] = data.phi
-        #self.plot2D.slicer.setParams(params)
-        self.plot2D.slicer.setParams(params)
-
-    def updateSlicerParams(self):
-        try:
-            self.startAngle = float(self.startAngleInput.text())
-        except ValueError:
-            self.startAngle = START_ANGLE
-            self.startAngleInput.setText(str(START_ANGLE))
-
-        try:
-            self.noOfSlices = int(self.noOfSlicesInput.text())
-        except ValueError:
-            self.noOfSlices = NO_OF_SLICES
-            self.noOfSlicesInput.setText(str(NO_OF_SLICES))
-
-        try:
-            self.qbins = float(self.noOfQbinsInput.text())
-        except ValueError:
-            self.qbins = NO_OF_QBINS
-            self.noOfQbinsInput.setText(str(NO_OF_QBINS))
-
-        self.phi = self.startAngle
-        self.deltaPhi = (180 / self.noOfSlices)
-        #print(self.deltaPhi)
-        self.setSlicerParams()   
-        self.plot2D.update()
-        #self.plot2D.onSectorView()
-
-    def setSlicerParams(self):
-        params = self.plot2D.slicer.getParams()
-        params["Phi [deg]"] = self.phi
-        params["Delta_Phi [deg]"] = self.deltaPhi
-        params["nbins"] = self.qbins
-
-        self.deltaPhiValue.setText(str(self.deltaPhi))
-        self.plot2D.slicer.setParams(params)
-        #self.plot2D.onSectorView()
-
-    def multiSlicer(self):
-        listOfSlices = list()
-        self.plot1D.clean()
-        
-        self.updateSlicerParams()
-
-        for i in range(self.noOfSlices):
-            params = self.plot2D.slicer.getParams()
-            params["Phi [deg]"] = self.phi            
-            self.setSlicerParams()
-            slicePlot = self.plot2D.slicer.captureSlice()
-            slicePlot.title += ' φ {}'.format(self.phi)
-            slicePlot.phi = self.phi
-            slicePlot.startAngle = self.startAngle
-            slicePlot.noOfSlices = self.noOfSlices
-            slicePlot.Qbins = self.qbins
-            slicePlot.deltaPhi = self.deltaPhi
-            slicePlot.name = self.logic.data.filename
-
-            listOfSlices.append(slicePlot)
-            self.phi += self.deltaPhi
-        return listOfSlices
 
 
-
-class InversionWidget2D(InversionWidget):
-    """
-    TO DO In the future:
-    Separate InversionWidget and InversionWidget2D
-    so that this class is similar to InversionWidget
-    with a few 2D attributes abd methods.
-    """
-    pass
 
 
 def debug(checkpoint):
