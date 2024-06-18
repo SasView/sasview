@@ -172,9 +172,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.DEFAULT_PERSPECTIVE = "Fitting"
         # self.DEFAULT_PERSPECTIVE = "Corfunc"
 
-        # Logging options
-        self.FILTER_DEBUG_LOGS = True
-
         # Default threading model
         self.USING_TWISTED = False
 
