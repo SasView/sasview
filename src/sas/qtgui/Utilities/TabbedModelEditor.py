@@ -541,12 +541,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         param_str = self.strFromParamDict(model['parameters'])
         pd_param_str = self.strFromParamDict(model['pd_parameters'])
         func_str = model['text']
-        model_text = CUSTOM_TEMPLATE % {
-            'name': name,
-            'title': 'User model for ' + name,
-            'description': desc_str,
-            'date': datetime.datetime.now().strftime('%Y-%m-%d'),
-        }
+        model_text = CUSTOM_TEMPLATE.format(name = name,
+                                            title = 'User model for ' + name,
+                                            description = desc_str,
+                                            date = datetime.datetime.now().strftime('%Y-%m-%d')
+                                            )
 
         # Write out parameters
         param_names = []    # to store parameter names
@@ -562,7 +561,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 param_names.append(pname)
                 pd_params.append(pname)
                 model_text += "    ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n" % (pname, pvalue, desc)
-        model_text += '    ]\n'
+        model_text += '    ]\n\n'
 
         # Write out function definition
         model_text += 'def Iq(%s):\n' % ', '.join(['x'] + param_names)
@@ -575,13 +574,17 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             model_text +="    import numpy as np\n"
         for func_line in func_str.split('\n'):
                 model_text +='%s%s\n' % ("    ", func_line)
-        model_text +='## uncomment the following if Iq works for vector x\n'
+        model_text +='\n## uncomment the following if Iq works for vector x\n'
         model_text +='#Iq.vectorized = True\n'
 
-        # If polydisperse, create place holders for form_volume, ER and VR
+        # Add parameters to ER and VR functions and include placeholder functions
+        model_text += "\n"
+        model_text += ER_VR_TEMPLATE.format(args = ', '.join(param_names))
+
+        # If polydisperse, create place holders for form_volume
         if pd_params:
             model_text +="\n"
-            model_text +=CUSTOM_TEMPLATE_PD % {'args': ', '.join(pd_params)}
+            model_text +=CUSTOM_TEMPLATE_PD.format(args = ', '.join(pd_params))
 
         # Create place holder for Iqxy
         model_text +="\n"
@@ -642,9 +645,9 @@ r"""
 Definition
 ----------
 
-Calculates %(name)s.
+Calculates {name}.
 
-%(description)s
+{description}
 
 References
 ----------
@@ -652,29 +655,22 @@ References
 Authorship and Verification
 ---------------------------
 
-* **Author:** --- **Date:** %(date)s
-* **Last Modified by:** --- **Date:** %(date)s
-* **Last Reviewed by:** --- **Date:** %(date)s
+* **Author:** --- **Date:** {date}
+* **Last Modified by:** --- **Date:** {date}
+* **Last Reviewed by:** --- **Date:** {date}
 """
 
 from sasmodels.special import *
 from numpy import inf
 
-name = "%(name)s"
-title = "%(title)s"
-description = """%(description)s"""
+name = "{name}"
+title = "{title}"
+description = """{description}"""
 
 '''
 
-CUSTOM_TEMPLATE_PD = '''\
-def form_volume(%(args)s):
-    """
-    Volume of the particles used to compute absolute scattering intensity
-    and to weight polydisperse parameter contributions.
-    """
-    return 0.0
-
-def ER(%(args)s):
+ER_VR_TEMPLATE = '''\
+def ER({args}):
     """
     Effective radius of particles to be used when computing structure factors.
 
@@ -682,13 +678,22 @@ def ER(%(args)s):
     """
     return 0.0
 
-def VR(%(args)s):
+def VR({args}):
     """
     Volume ratio of particles to be used when computing structure factors.
 
     Input parameters are vectors ranging over the mesh of polydispersity values.
     """
     return 1.0
+'''
+
+CUSTOM_TEMPLATE_PD = '''\
+def form_volume({args}):
+    """
+    Volume of the particles used to compute absolute scattering intensity
+    and to weight polydisperse parameter contributions.
+    """
+    return 0.0
 '''
 
 SUM_TEMPLATE = """
