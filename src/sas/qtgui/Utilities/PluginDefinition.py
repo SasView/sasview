@@ -31,6 +31,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         # {<row>: (<parameter>, <value>)}
         self.parameter_dict = {}
         self.pd_parameter_dict = {}
+        self.displayed_default_form_volume = False
 
         # Initialize widgets
         self.addWidgets()
@@ -176,6 +177,17 @@ return y
                     break
             if any_text_present:
                 # Display the Form Function box because there are polydisperse parameters
+                # First insert the first user-specified parameter into sample form volume function
+                if not self.displayed_default_form_volume:
+                    text = \
+"""y = {0}
+
+return 0.0
+""".format(self.model['pd_parameters'][0][0])
+                    self.model['form_volume_text'] = text
+                    self.txtFormVolumeFunction.insertPlainText(text)
+                    self.displayed_default_form_volume = True
+
                 self.formFunctionBox.setVisible(True)
                 self.includePolydisperseFuncsSignal.emit()
                 break
