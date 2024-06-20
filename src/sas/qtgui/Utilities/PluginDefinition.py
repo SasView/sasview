@@ -19,6 +19,8 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     model form and parameters.
     """
     modelModified = QtCore.Signal()
+    omitPolydisperseFuncsSignal = QtCore.Signal()
+    includePolydisperseFuncsSignal = QtCore.Signal()
     def __init__(self, parent=None):
         super(PluginDefinition, self).__init__(parent)
         self.setupUi(self)
@@ -174,10 +176,12 @@ return y
             if any_text_present:
                 # Display the Form Function box because there are polydisperse parameters
                 self.formFunctionBox.setVisible(True)
+                self.includePolydisperseFuncsSignal.emit()
                 break
             else:
                 # Hide the Form Function box because there are no polydisperse parameters
                 self.formFunctionBox.setVisible(False)
+                self.omitPolydisperseFuncsSignal.emit()
     
         self.modelModified.emit()
 
