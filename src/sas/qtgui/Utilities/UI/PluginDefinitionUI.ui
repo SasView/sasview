@@ -150,7 +150,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </widget>
    </item>
    <item row="4" column="0">
-    <widget class="QGroupBox" name="groupBox_7">
+    <widget class="QGroupBox" name="formFunctionBox">
      <property name="title">
       <string>Form Volume Function</string>
      </property>
