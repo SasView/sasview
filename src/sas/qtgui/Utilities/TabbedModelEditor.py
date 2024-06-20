@@ -43,6 +43,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.is_modified = False
         self.label = None
         self.file_to_regenerate = ""
+        self.include_polydisperse = False
 
         self.addWidgets()
 
@@ -96,6 +97,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.plugin_widget.modelModified.connect(self.editorModelModified)
         self.editor_widget.modelModified.connect(self.editorModelModified)
         self.plugin_widget.txtName.editingFinished.connect(self.pluginTitleSet)
+        self.plugin_widget.includePolydisperseFuncsSignal.connect(self.includePolydisperseFuncs)
+        self.plugin_widget.omitPolydisperseFuncsSignal.connect(self.omitPolydisperseFuncs)
 
     def setPluginActive(self, is_active=True):
         """
@@ -268,7 +271,23 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.plugin_widget.txtFunction.setStyleSheet("")
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
         self.is_modified = True
-
+    
+    def omitPolydisperseFuncs(self):
+        """
+        User has no polydisperse parameters.
+        Omit polydisperse-only functions from model text.
+        Note that this is necessary because Form Volume Function text box does not clear its text when it disappears.
+        """
+        self.include_polydisperse = False
+    
+    def includePolydisperseFuncs(self):
+        """
+        User has defined polydisperse parameters.
+        Include polydisperse-only functions from model text.
+        By default these are not included even if text exists in Form Volume Function text box.
+        """
+        self.include_polydisperse = True
+            
     def pluginTitleSet(self):
         """
         User modified the model name.
@@ -607,7 +626,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_text += ER_VR_TEMPLATE.format(args = ', '.join(param_names))
 
         # If polydisperse, create place holders for form_volume
-        if pd_params:
+        if pd_params and self.include_polydisperse == True:
             model_text +="\n"
             model_text +=CUSTOM_TEMPLATE_PD.format(args = ', '.join(pd_params))
             for func_line in form_vol_str.split('\n'):
