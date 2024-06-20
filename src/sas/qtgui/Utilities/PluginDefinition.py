@@ -65,6 +65,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
 
 return y
 """
+        self.model['func_text'] = text
         self.txtFunction.insertPlainText(text)
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
