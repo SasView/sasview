@@ -60,6 +60,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
 
         self.setupUi(self)
 
+        # Set parent to read parameters from fitting widget
+        self.parent = parent
         # Local model for holding data
         self.model = None
         # Mapper for model update
@@ -125,14 +127,12 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         """
         # retain the combobox index
         old_index = self.cbSmearing.currentIndex()
-        self.cbSmearing.clear()
-        self.cbSmearing.addItem("None")
         self.gAccuracy.setVisible(False)
         self.data = data
         if data is None:
             self.setElementsVisibility(False)
         model = self.kernel_model
-        self.updateKernelModel(model, keep_order = True, old_index=old_index)
+        self.updateKernelModel(model, keep_order=True, old_index=old_index)
 
     def updateKernelModel(self, kernel_model=None, keep_order=False, old_index=None):
         """
@@ -149,7 +149,6 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         self.cbSmearing.addItem("None")
         if self.data is None:
             self.setElementsVisibility(False)
-            return
         # Find out if data has dQ or is SESANS
         self.current_smearer = smear_selection(self.data, self.kernel_model)
         self.setSmearInfo()
@@ -160,19 +159,18 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.cbSmearing.addItem(SMEARING_QD)
             index_to_show = 1 if keep_order else index_to_show
 
-        if self.kernel_model is None:
-            # No model definend yet - just use data file smearing, if any
-            self.cbSmearing.blockSignals(False)
-            self.cbSmearing.setCurrentIndex(index_to_show)
-            return
+        if self.kernel_model is not None:
+            # Only give custom smearing options after the model is defined, but always offer them
+            #  regardless of the data state
+            if isinstance(self.data, Data1D) or not self.parent.is2D:
+                # 1D data smearing options
+                self.cbSmearing.addItems(SMEARING_1D)
+            else:
+                # 2D smearing options
+                self.cbSmearing.addItems(SMEARING_2D)
 
-        if isinstance(self.data, Data1D):
-            self.cbSmearing.addItems(SMEARING_1D)
-        else:
-            self.cbSmearing.addItems(SMEARING_2D)
         self.cbSmearing.blockSignals(False)
-
-        self.cbSmearing.setCurrentIndex(index_to_show)
+        self.cbSmearing.setCurrentIndex(index_to_show if index_to_show >= 0 else 0)
 
     def smearer(self):
         """ Returns the current smearer """
@@ -183,24 +181,29 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Callback for smearing combobox index change
         """
         text = self.cbSmearing.currentText()
+        smear = None
+        # Ensure smearing selector is enabled initially in case swapped data from SESANS
+        self.cbSmearing.setEnabled(True)
         if text == 'None':
             self.setElementsVisibility(False)
             self.current_smearer = None
         elif text == "Use dQ Data":
             self.setElementsVisibility(True)
             self.setDQLabels()
-            self.onDQSmear()
+            smear = self.onDQSmear
         elif text == "Custom Pinhole Smear":
             self.setElementsVisibility(True)
             self.setPinholeLabels()
-            self.onPinholeSmear()
+            smear = self.onPinholeSmear
         elif text == "Custom Slit Smear":
             self.setElementsVisibility(True)
             self.setSlitLabels()
-            self.onSlitSmear()
+            smear = self.onSlitSmear
         elif text == "Hankel Transform":
             self.setElementsVisibility(False)
             self.cbSmearing.setEnabled(False)  # turn off ability to change smearing; no other options for sesans
+        if self.data and callable(smear):
+            smear()
         self.smearingChangedSignal.emit()
 
     def onModelChange(self):

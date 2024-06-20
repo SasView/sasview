@@ -21,7 +21,8 @@ from sasmodels.resolution2d import Pinhole2D
 
 from sasdata.data_util.nxsunit import Converter
 
-def smear_selection(data, model = None):
+
+def smear_selection(data, model=None):
     """
     Creates the right type of smearer according
     to the data.
@@ -41,20 +42,18 @@ def smear_selection(data, model = None):
     # Sanity check. If we are not dealing with a SAS Data1D
     # object, just return None
     # This checks for 2D data (does not throw exception because fail is common)
-    if  data.__class__.__name__ not in ['Data1D', 'Theory1D']:
+    if data.__class__.__name__ not in ['Data1D', 'Theory1D']:
         if data is None:
             return None
         elif data.dqx_data is None or data.dqy_data is None:
             return None
         return PySmear2D(data)
     # This checks for 1D data with smearing info in the data itself (again, fail is likely; no exceptions)
-    if  not hasattr(data, "dx") and not hasattr(data, "dxl")\
-         and not hasattr(data, "dxw"):
+    if not hasattr(data, "dx") and not hasattr(data, "dxl") and not hasattr(data, "dxw"):
         return None
 
     # Look for resolution smearing data
-    # This is the code that checks for SESANS data; it looks for the file loader
-    # TODO: change other sanity checks to check for file loader instead of data structure?
+    # Check if the loader flagged this as SESANS data and use Hankel transform as the resolution
     if data.isSesans:  # data.dx data is not required in the Hankel transform for SESANS data
         # Pre-compute the Hankel matrix (H)
         SElength = Converter(data._xunit)(data.x, "A")
@@ -70,42 +69,25 @@ def smear_selection(data, model = None):
         # Then return the actual transform, as if it were a smearing function
         return PySmear(hankel, model, offset=0)
 
-    _found_resolution = False
-    if data.dx is not None and len(data.dx) == len(data.x):
-
-        # Check that we have non-zero data
+    # Only return pinhole resolution if there is at least one resolution point greater than 0
+    #  This eliminates edge cases where dQ is reported as 0.0 for *all* data points
+    if data.dx is not None and len(data.dx) == len(data.x) and np.any(data.dx[data.dx > 0]):
+        # Check for negative resolution values and throw an error if present
         if np.min(data.dx) < 0:
             raise ValueError('one or more of your dx values are negative, please check the data file!')
-        else:
-            _found_resolution = True
-            #print "_found_resolution",_found_resolution
-            #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]
-    # If we found resolution smearing data, return a QSmearer
-    if _found_resolution:
-         return pinhole_smear(data, model)
+        return pinhole_smear(data, model)
 
-    # Look for slit smearing data
-    _found_slit = False
-    if data.dxl is not None and len(data.dxl) == len(data.x) \
-        and data.dxw is not None and len(data.dxw) == len(data.x):
+    # Look for slit smeared data
+    if (data.dxl is not None and len(data.dxl) == len(data.x)
+            and data.dxw is not None and len(data.dxw) == len(data.x)):
 
-        # Check that we have non-zero data
-        if data.dxl[0] > 0.0 or data.dxw[0] > 0.0:
-            _found_slit = True
+        # Check that we have non-zero data in either of the slit-smeared resolutions.
+        #  Note - All resolutions are assumed to be the same value for slit smeared data
+        if ((np.any(data.dxl[data.dxl > 0]) and len(data.dxl) == len([dxl for dxl in data.dxl if dxl == data.dxl[0]]))
+                or np.any(data.dxw[data.dxw > 0]) and len(data.dxw) == len([dxw for dxw in data.dxw if dxw == data.dxw[0]])):
+            return slit_smear(data, model)
 
-        # Sanity check: all data should be the same as a function of Q
-        for item in data.dxl:
-            if data.dxl[0] != item:
-                _found_resolution = False
-                break
-
-        for item in data.dxw:
-            if data.dxw[0] != item:
-                _found_resolution = False
-                break
-    # If we found slit smearing data, return a slit smearer
-    if _found_slit:
-        return slit_smear(data, model)
+    # Getting here means no viable resolution was provided with the data set - No resolution should be applied
     return None
 
 
