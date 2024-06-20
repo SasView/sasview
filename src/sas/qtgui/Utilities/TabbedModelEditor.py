@@ -70,6 +70,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.tabWidget.addTab(self.editor_widget, "Model editor")
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
 
+        # Initially hide form function box
+        self.plugin_widget.formFunctionBox.setVisible(False)
+
         if self.edit_only:
             self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setText("Save")
             # Hide signals from the plugin widget
@@ -445,7 +448,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # make sure we have the file handle ready
         assert(filename != "")
         # Retrieve model string
-        model_str = self.getModel()['text']
+        model_str = self.getModel()['func_text']
         if w.is_python and self.is_python:
             error_line = self.checkModel(model_str)
             if error_line > 0:
@@ -508,12 +511,17 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Don't accept but return
             return False
         # Update model editor if plugin definition changed
-        func_str = model['text']
+        func_str = model['func_text']
+        form_vol_str = model['form_volume_text']
         msg = None
         if func_str:
             if 'return' not in func_str:
                 msg = "Error: The func(x) must 'return' a value at least.\n"
                 msg += "For example: \n\nreturn 2*x"
+        elif form_vol_str:
+            if 'return' not in form_vol_str:
+                msg = "Error: The form_volume() must 'return' a value at least.\n"
+                msg += "For example: \n\nreturn 0.0"
         else:
             msg = 'Error: Function is not defined.'
         if msg is not None:
@@ -556,7 +564,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         desc_str = model['description']
         param_str = self.strFromParamDict(model['parameters'])
         pd_param_str = self.strFromParamDict(model['pd_parameters'])
-        func_str = model['text']
+        func_str = model['func_text']
+        form_vol_str = model['form_volume_text']
         model_text = CUSTOM_TEMPLATE.format(name = name,
                                             title = 'User model for ' + name,
                                             description = desc_str,
@@ -601,6 +610,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if pd_params:
             model_text +="\n"
             model_text +=CUSTOM_TEMPLATE_PD.format(args = ', '.join(pd_params))
+            for func_line in form_vol_str.split('\n'):
+                model_text +='%s%s\n' % ("    ", func_line)
 
         # Create place holder for Iqxy
         model_text +="\n"
@@ -709,7 +720,6 @@ def form_volume({args}):
     Volume of the particles used to compute absolute scattering intensity
     and to weight polydisperse parameter contributions.
     """
-    return 0.0
 '''
 
 SUM_TEMPLATE = """

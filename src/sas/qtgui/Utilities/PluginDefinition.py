@@ -66,6 +66,8 @@ return y
         self.txtFunction.insertPlainText(text)
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
+        self.txtFormVolumeFunction.setFont(GuiUtils.getMonospaceFont())
+
         # Validators
         rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
 
@@ -75,7 +77,8 @@ return y
         # importing QSyntaxHighlighter
         # DO NOT MOVE TO TOP
         from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
-        self.highlight = PythonHighlighter(self.txtFunction.document())
+        self.highlightFunction = PythonHighlighter(self.txtFunction.document())
+        self.highlightFormVolumeFunction = PythonHighlighter(self.txtFormVolumeFunction.document())
 
     def initializeModel(self):
         """
@@ -88,7 +91,9 @@ return y
             'description':'',
             'parameters':{},
             'pd_parameters':{},
-            'text':''}
+            'func_text':'',
+            'form_volume_text':''
+            }
 
     def addSignals(self):
         """
@@ -101,6 +106,7 @@ return y
         # QTextEdit doesn't have a signal for edit finish, so we respond to text changed.
         # Possibly a slight overkill.
         self.txtFunction.textChanged.connect(self.onFunctionChanged)
+        self.txtFormVolumeFunction.textChanged.connect(self.onFormVolumeFunctionChanged)
         self.chkOverwrite.toggled.connect(self.onOverwrite)
 
     def onPluginNameChanged(self):
@@ -139,7 +145,7 @@ return y
 
     def onParamsPDChanged(self, row, column):
         """
-        Respond to changes in non-polydisperse parameter table
+        Respond to changes in polydisperse parameter table
         """
         param = value = None
         if self.tblParamsPD.item(row, 0):
@@ -152,9 +158,27 @@ return y
         self.model['pd_parameters'] = self.pd_parameter_dict
 
         # Check if the update was Value for last row. If so, add a new row
-        if column == 1 and row == self.tblParamsPD.rowCount()-1:
+        if column == 1 and row == self.tblParamsPD.rowCount() - 1:
             # Add a row
             self.tblParamsPD.insertRow(self.tblParamsPD.rowCount())
+        
+        # Check to see if there is any polydisperse parameter text present
+        any_text_present = False
+        for row in range(self.tblParamsPD.rowCount()):
+            for column in range(self.tblParamsPD.columnCount()):
+                table_cell_contents = self.tblParamsPD.item(row, column)
+                if table_cell_contents and table_cell_contents.text():
+                    # There is text in at least one cell
+                    any_text_present = True
+                    break
+            if any_text_present:
+                # Display the Form Function box because there are polydisperse parameters
+                self.formFunctionBox.setVisible(True)
+                break
+            else:
+                # Hide the Form Function box because there are no polydisperse parameters
+                self.formFunctionBox.setVisible(False)
+    
         self.modelModified.emit()
 
 
@@ -166,8 +190,20 @@ return y
         # mind the performance!
         #self.addTooltip()
         new_text = self.txtFunction.toPlainText().lstrip().rstrip()
-        if new_text != self.model['text']:
-            self.model['text'] = new_text
+        if new_text != self.model['func_text']:
+            self.model['func_text'] = new_text
+            self.modelModified.emit()
+    
+    def onFormVolumeFunctionChanged(self):
+        """
+        Respond to changes in form volume function body
+        """
+        # keep in mind that this is called every time the text changes.
+        # mind the performance!
+        #self.addTooltip()
+        new_text = self.txtFormVolumeFunction.toPlainText().lstrip().rstrip()
+        if new_text != self.model['form_volume_text']:
+            self.model['form_volume_text'] = new_text
             self.modelModified.emit()
 
     def onOverwrite(self):
