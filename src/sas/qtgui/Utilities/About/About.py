@@ -84,14 +84,21 @@ class About(QDialog):
 
                 button.setIcon(QIcon(pixmap))
 
-            button.setStyleSheet("background-color: white; color: black;")
+            button.setStyleSheet("""
+                QPushButton {
+                    background-color: white; 
+                    color: black;
+                }
+                
+                QPushButton:hover {
+                    border: none;
+                }
+                """)
 
             button.setToolTip(name)
             button.clicked.connect(functools.partial(GuiUtils.openLink, url))
 
             button.setIconSize(QSize(80, 80))
-
-
 
             i, j = divmod(index, 4)
             self.button_layout.addWidget(button, i, j)
