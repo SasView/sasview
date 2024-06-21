@@ -467,7 +467,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # make sure we have the file handle ready
         assert(filename != "")
         # Retrieve model string
-        model_str = self.getModel()['func_text']
+        model_str = self.getModel()['text']
         if w.is_python and self.is_python:
             error_line = self.checkModel(model_str)
             if error_line > 0:
