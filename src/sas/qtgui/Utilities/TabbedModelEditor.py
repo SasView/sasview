@@ -306,6 +306,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # get required filename
         filename = model['filename']
 
+        if filename == "":
+            QtWidgets.QMessageBox.critical(self, "Plugin Error", "Please specify a filename.")
+            return
+
         # check if file exists
         plugin_location = models.find_plugins_dir()
         full_path = os.path.join(plugin_location, filename)
