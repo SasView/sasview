@@ -42,29 +42,36 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         # Initialize signals
         self.addSignals()
 
-    def addTooltip(self):
+    def addTooltips(self):
         """
-        Add the default tooltip to the text field
+        Add the default tooltips to the Iq and form_volume function text boxes
         """
-        hint_function = "#Example:\n\n"
-        hint_function += "if x <= 0:\n"
-        hint_function += "    y = A + B\n"
+        hint_function = "This function returns the scattering intensity for a given q.\n"
+        hint_function += "Example:\n\n"
+        hint_function += "if q <= 0:\n"
+        hint_function += "    intensity = A + B\n"
         hint_function += "else:\n"
-        hint_function += "    y = A + B * cos(2 * pi * x)\n"
-        hint_function += "return y\n"
+        hint_function += "    intensity = A + B * cos(2 * pi * q)\n"
+        hint_function += "return intensity\n"
         self.txtFunction.setToolTip(hint_function)
+        hint_function = "This function returns the volume of the particle.\n"
+        hint_function += "Example:\n\n"
+        hint_function += "volume = (4 / 3) * pi * R**3\n"
+        hint_function += "return volume\n"
+        self.txtFormVolumeFunction.setToolTip(hint_function)
+
 
     def addWidgets(self):
         """
         Initialize various widgets in the dialog
         """
-        self.addTooltip()
+        self.addTooltips()
 
         # Initial text in the function table
         text = \
-"""y = x
+"""intensity = q
 
-return y
+return intensity
 """
         self.model['func_text'] = text
         self.txtFunction.insertPlainText(text)
@@ -180,9 +187,9 @@ return y
                 # First insert the first user-specified parameter into sample form volume function
                 if not self.displayed_default_form_volume:
                     text = \
-"""y = {0}
+"""volume = {0} * 0.0
 
-return 0.0
+return volume
 """.format(self.model['pd_parameters'][0][0])
                     self.model['form_volume_text'] = text
                     self.txtFormVolumeFunction.insertPlainText(text)

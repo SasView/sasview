@@ -608,7 +608,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_text += '    ]\n\n'
 
         # Write out function definition
-        model_text += 'def Iq(%s):\n' % ', '.join(['x'] + param_names)
+        model_text += 'def Iq(%s):\n' % ', '.join(['q'] + param_names)
         model_text += '    """Absolute scattering"""\n'
         if "scipy." in func_str:
             model_text +="    import scipy\n"

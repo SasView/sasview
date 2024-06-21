@@ -84,7 +84,7 @@ value</string>
    <item row="3" column="0">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Function(x)</string>
+      <string>Enter function for calculating scattering intensity I(Q):</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_6">
       <item row="0" column="0">
@@ -152,7 +152,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <item row="4" column="0">
     <widget class="QGroupBox" name="formFunctionBox">
      <property name="title">
-      <string>Form Volume Function</string>
+      <string>Enter function for calculating volume of the particle:</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_9">
       <item row="0" column="0">
