@@ -133,9 +133,21 @@ return y
         self.model['parameters'] = self.parameter_dict
 
         # Check if the update was Value for last row. If so, add a new row
-        if column == 1 and row == self.tblParams.rowCount()-1:
+        if row == self.tblParams.rowCount() - 1:
             # Add a row
             self.tblParams.insertRow(self.tblParams.rowCount())
+        
+        # Check to see if the last two rows are empty. If so, remove the last row
+        remove_last_row = 0
+        for i in range(2):
+            for j in range(2):
+                cell_contents = self.tblParams.item(self.tblParams.rowCount() - (2 - i), j)
+                if cell_contents == None or cell_contents.text() == "":
+                    remove_last_row += 1
+        if remove_last_row == 4:
+            # If all four last cells are empty, remove the last row
+            self.tblParams.removeRow(self.tblParams.rowCount() - 1)
+
         self.modelModified.emit()
 
     def onParamsPDChanged(self, row, column):
@@ -153,9 +165,21 @@ return y
         self.model['pd_parameters'] = self.pd_parameter_dict
 
         # Check if the update was Value for last row. If so, add a new row
-        if column == 1 and row == self.tblParamsPD.rowCount()-1:
+        if row == self.tblParamsPD.rowCount() - 1:
             # Add a row
             self.tblParamsPD.insertRow(self.tblParamsPD.rowCount())
+        
+        # Check to see if the last two rows are empty. If so, remove the last row
+        remove_last_row = 0
+        for i in range(2):
+            for j in range(2):
+                cell_contents = self.tblParamsPD.item(self.tblParamsPD.rowCount() - (2 - i), j)
+                if cell_contents == None or cell_contents.text() == "":
+                    remove_last_row += 1
+        if remove_last_row == 4:
+            # If all four last cells are empty, remove the last row
+            self.tblParamsPD.removeRow(self.tblParamsPD.rowCount() - 1)
+
         self.modelModified.emit()
 
 
