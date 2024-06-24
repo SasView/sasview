@@ -33,7 +33,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.setupUi(self)
 
         # globals
-        self.filename = ""
+        self.filename_py = ""
+        self.filename_c = ""
         self.is_python = True
         self.is_documentation = False
         self.window_title = self.windowTitle()
@@ -198,8 +199,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.editor_widget.setEnabled(True)
         self.editor_widget.blockSignals(False)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
-        self.filename = Path(filename)
-        display_name = self.filename.stem
+        self.filename_py = Path(filename)
+        display_name = self.filename_py.stem
         if not self.model:
             self.setWindowTitle(self.window_title + " - " + display_name)
         else:
@@ -221,14 +222,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.editor_widget.txtEditor.setToolTip("")
 
         # See if there is filename.c present
-        c_path = self.filename.parent / self.filename.name.replace(".py", ".c")
-        if not c_path.exists() or ".rst" in c_path.name: return
+        self.filename_c = self.filename_py.parent / self.filename_py.name.replace(".py", ".c")
+        if not self.filename_c.exists() or ".rst" in self.filename_c.name: return
         # add a tab with the same highlighting
-        c_display_name = c_path.name
+        c_display_name = self.filename_c.name
         self.c_editor_widget = ModelEditor(self, is_python=False)
         self.tabWidget.addTab(self.c_editor_widget, c_display_name)
         # Read in the file and set in on the widget
-        with open(c_path, 'r', encoding="utf-8") as plugin:
+        with open(self.filename_c, 'r', encoding="utf-8") as plugin:
             self.c_editor_widget.txtEditor.setPlainText(plugin.read())
         self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
@@ -338,34 +339,64 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # check if file exists
         plugin_location = models.find_plugins_dir()
-        full_path = os.path.join(plugin_location, filename)
-        if os.path.splitext(full_path)[1] != ".py":
-            full_path += ".py"
+        if model['gen_python'] == True:
+            full_path = os.path.join(plugin_location, filename)
+            if os.path.splitext(full_path)[1] != ".py":
+                full_path += ".py"
 
-        # Update the global path definition
-        self.filename = full_path
+            # Update the global path definition
+            self.filename_py = full_path
 
-        if not self.canWriteModel(model, full_path):
-            return
+            if not self.canWriteModel(model, full_path):
+                return
 
-        # generate the model representation as string
-        model_str = self.generateModel(model, full_path)
-        self.writeFile(full_path, model_str)
+            # generate the model representation as string
+            model_str = self.generatePyModel(model, full_path)
+            self.writeFile(full_path, model_str)
+
+        if model['gen_c'] == True:
+            c_path = os.path.join(plugin_location, filename)
+            if os.path.splitext(c_path)[1] != ".c":
+                c_path += ".c"
+            
+            # Update the global path definition
+            self.filename_c = c_path
+            
+            if not self.canWriteModel(model, c_path):
+                return
+
+            # generate the model representation as string
+            c_model_str = self.generateCModel(model, c_path)
+            self.writeFile(c_path, c_model_str)
 
         # disable "Apply"
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
 
         # Run the model test in sasmodels
-        if not self.isModelCorrect(full_path):
+        if not self.isModelCorrect(full_path) and model['gen_python'] == True:
             return
 
         self.editor_widget.setEnabled(True)
 
         # Update the editor here.
         # Simple string forced into control.
-        self.editor_widget.blockSignals(True)
-        self.editor_widget.txtEditor.setPlainText(model_str)
-        self.editor_widget.blockSignals(False)
+        if model['gen_python'] == True:
+            self.editor_widget.blockSignals(True)
+            self.editor_widget.txtEditor.setPlainText(model_str)
+            self.editor_widget.blockSignals(False)
+        if model['gen_c'] == True:
+            # Add a tab to TabbedModelEditor for the C model
+            c_display_name = Path(self.filename_c).name
+            self.c_editor_widget = ModelEditor(self, is_python=False)
+            self.tabWidget.addTab(self.c_editor_widget, c_display_name)
+
+            # Update the editor
+            self.c_editor_widget.blockSignals(True)
+            self.c_editor_widget.txtEditor.setPlainText(c_model_str)
+            self.c_editor_widget.blockSignals(False)
+
+            # Connect 'modified' signal
+            self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
         # Set the widget title
         self.setTabEdited(False)
@@ -458,7 +489,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Save the current state of the Model Editor
         """
-        filename = self.filename
+        filename = self.filename_py
         w = self.tabWidget.currentWidget()
         if not w.is_python:
             base, _ = os.path.splitext(filename)
@@ -502,7 +533,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         #  in order for the documentation regeneration process to run.
         # The regen method is part of the documentation window. If the window is closed, the method no longer exists.
         if hasattr(self.parent, 'helpWindow'):
-            self.parent.helpWindow.regenerateHtml(self.filename)
+            self.parent.helpWindow.regenerateHtml(self.filename_py)
 
     def canWriteModel(self, model=None, full_path=""):
         """
@@ -571,8 +602,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         with open(fname, 'w', encoding="utf-8") as out_f:
             out_f.write(model_str)
+    
+    def generateCModel(self, model, fname):
+        """
+        Generate C model from the current plugin state
+        :param model: plugin model
+        :param fname: filename
+        """
+        model_text = ""
+        return model_text
+        
 
-    def generateModel(self, model, fname):
+    def generatePyModel(self, model, fname):
         """
         generate model from the current plugin state
         """

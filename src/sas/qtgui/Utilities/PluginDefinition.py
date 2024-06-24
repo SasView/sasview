@@ -99,6 +99,8 @@ return intensity
         self.model = {
             'filename':'',
             'overwrite':False,
+            'gen_python':True,
+            'gen_c':False,
             'description':'',
             'parameters':{},
             'pd_parameters':{},
@@ -119,6 +121,8 @@ return intensity
         self.txtFunction.textChanged.connect(self.onFunctionChanged)
         self.txtFormVolumeFunction.textChanged.connect(self.onFormVolumeFunctionChanged)
         self.chkOverwrite.toggled.connect(self.onOverwrite)
+        self.chkGenPython.toggled.connect(self.onGenPython)
+        self.chkGenC.toggled.connect(self.onGenC)
 
     def onPluginNameChanged(self):
         """
@@ -235,6 +239,20 @@ return volume
         Respond to change in file overwrite checkbox
         """
         self.model['overwrite'] = self.chkOverwrite.isChecked()
+        self.modelModified.emit()
+    
+    def onGenPython(self):
+        """
+        Respond to change in generate Python checkbox
+        """
+        self.model['gen_python'] = self.chkGenPython.isChecked()
+        self.modelModified.emit()
+    
+    def onGenC(self):
+        """
+        Respond to change in generate C checkbox
+        """
+        self.model['gen_c'] = self.chkGenC.isChecked()
         self.modelModified.emit()
 
     def getModel(self):
