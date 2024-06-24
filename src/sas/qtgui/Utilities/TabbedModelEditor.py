@@ -195,7 +195,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Check the validity of loaded model if the model is python
         if self.is_python:
-            error_line = self.checkModel(plugin_text, run_unit_test=False)
+            error_line = self.checkModel(plugin_text)
             if error_line > 0:
                 # select bad line
                 cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
@@ -353,11 +353,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
 
-    def checkModel(self, full_path, run_unit_test=True):
+    def checkModel(self, full_path):
         """
-        Run the ast check
-        and return True if the model is good.
-        False otherwise.
+        Run ast and model checks
+        Attempt to return the line number of the error if any
+        :param full_path: full path to the model file
         """
         # successfulCheck = True
         error_line = 0
@@ -365,8 +365,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             with open(full_path, 'r', encoding="utf-8") as plugin:
                 model_str = plugin.read()
             ast.parse(model_str)
-            if run_unit_test:
-                model_check = GuiUtils.checkModel(full_path)
+            GuiUtils.checkModel(full_path)
 
         except Exception as ex:
             msg = "Error building model: " + str(ex)
