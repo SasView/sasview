@@ -697,6 +697,17 @@ name = "{name}"
 title = "{title}"
 description = """{description}"""
 
+# Optional flags (can be removed). Read documentation by pressing 'Help' for more information.
+
+# single = True indicates that the model can be run using single precision floating point values. Defaults to True.
+single = True
+
+# opencl = False indicates that the model should not be run using OpenCL. Defaults to False.
+opencl = False
+
+# structure_factor = False indicates that the model cannot be used as a structure factor to account for interactions between particles. Defaults to False.
+structure_factor = False
+
 '''
 
 ER_VR_TEMPLATE = '''\
