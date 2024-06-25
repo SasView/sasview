@@ -337,6 +337,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # get required filename
         filename = model['filename']
 
+        # If user has not specified an output file type, throw error message
+        if model['gen_python'] == False and model['gen_c'] == False:
+                msg = "No output model language specified.\n"
+                msg += "Please select what kind of models (Python, C) to generate."
+                QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
+                return
+
         # check if file exists
         plugin_location = models.find_plugins_dir()
         if model['gen_python'] == True:
@@ -377,7 +384,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             return
 
         self.editor_widget.setEnabled(True)
-
+        
         # Update the editor here.
         # Simple string forced into control.
         if model['gen_python'] == True:
