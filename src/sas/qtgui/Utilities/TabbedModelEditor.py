@@ -350,13 +350,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             full_path = os.path.join(plugin_location, filename)
             if os.path.splitext(full_path)[1] != ".py":
                 full_path += ".py"
-
             # Update the global path definition
             self.filename_py = full_path
-
             if not self.canWriteModel(model, full_path):
                 return
-
             # generate the model representation as string
             model_str = self.generatePyModel(model, full_path)
             self.writeFile(full_path, model_str)
@@ -365,13 +362,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             c_path = os.path.join(plugin_location, filename)
             if os.path.splitext(c_path)[1] != ".c":
                 c_path += ".c"
-            
             # Update the global path definition
             self.filename_c = c_path
-            
             if not self.canWriteModel(model, c_path):
                 return
-
             # generate the model representation as string
             c_model_str = self.generateCModel(model, c_path)
             self.writeFile(c_path, c_model_str)
@@ -616,7 +610,19 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         :param model: plugin model
         :param fname: filename
         """
-        model_text = ""
+        param_names = []
+        pd_param_names = []
+        param_str = self.strFromParamDict(model['parameters'])
+        pd_param_str = self.strFromParamDict(model['pd_parameters'])
+        for pname, _, _ in self.getParamHelper(param_str):
+                param_names.append(pname)
+        for pd_pname, _, _ in self.getParamHelper(pd_param_str):
+                pd_param_names.append(pd_pname)
+        print(param_names, pd_param_names)
+        model_text = C_TEMPLATE.format(poly_args = ',\n\t'.join(pd_param_names),
+                                       args = ',\n\t'.join(param_names),
+                                        poly_arg1 = pd_param_names[0])
+        
         return model_text
         
 
@@ -807,6 +813,81 @@ from sasmodels.sasview_model import make_model_from_info
 model_info = load_model_info('{model1}{operator}{model2}')
 model_info.name = '{name}'{desc_line}
 Model = make_model_from_info(model_info)
+"""
+
+C_TEMPLATE = """\
+static double
+form_volume({poly_args}) // Remove arguments as needed
+{{
+    return 0.0*{poly_arg1};
+}}
+
+static double
+radius_effective(int mode) // Add arguments as needed
+{{
+    switch (mode) {{
+    default:
+    case 1:
+    // Define effective radius calculations here...
+    return 0.0;
+    }}
+}}
+
+static void
+Fq(double q, 
+    double *F1,
+    double *F2,
+    {args}) // Remove arguments as needed
+{{
+    // Define F(Q) calculations here...
+    // IMPORTANT: You do not have to define Iq if your model uses Fq for beta approximation; the *F2 value is <F(Q)^2> and equivalent to the output of Iq.
+    // IMPORTANT: You may use Fq instead of Iq even if you do not need <F(Q)> (*F1) for beta approximation, but this is not recommended.
+    // IMPORTANT: Additionally, you must still define Iqac or Iqabc if your model has orientation parameters.
+    *F1 = 0.0;
+    *F2 = 0.0;
+}}
+
+static double
+Iq(double q,
+    {args}) // Remove arguments as needed
+{{
+    // Define I(Q) calculations here for models independent of shape orientation
+    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, or Iqabc; remove others.
+    return 1.0;
+}}
+
+static double
+Iqac(double qab,
+    double qc,
+    {args}) // Remove arguments as needed
+{{
+    // Define I(Q) calculations here for models dependent on shape orientation in which the shape is rotationally symmetric about *c* axis
+    // Note: *psi* angle not needed for shapes symmetric about *c* axis
+    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy; remove others.
+    return 1.0;
+}}
+
+static double
+Iqabc(double qa,
+    double qb,
+    double qc,
+    {args}) // Remove arguments as needed
+{{
+    // Define I(Q) calculations here for models dependent on shape orientation in all three axes
+    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy; remove others.
+    return 1.0;
+}}
+
+static double
+Iqxy(double qx,
+    double qy,
+    {args}) // Remove arguments as needed
+{{
+    // Define I(Q) calculations here for 2D magnetic models.
+    // WARNING: The use of Iqxy is generally discouraged; Use Iqabc instead for its better orientational averaging and documentation for details.
+    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy; remove others.
+    return 1.0;
+}}
 """
 
 if __name__ == '__main__':
