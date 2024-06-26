@@ -210,7 +210,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Check the validity of loaded model if the model is python
         if self.is_python:
-            error_line = self.checkModel(plugin_text)
+            error_line = self.checkModel(self.filename)
             if error_line > 0:
                 # select bad line
                 cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
@@ -497,9 +497,20 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Get model filepath
         plugin_location = models.find_plugins_dir()
         full_path = os.path.join(plugin_location, filename)
-        if os.path.splitext(full_path)[1] != ".py":
+        if not w.is_python and self.is_python:
+            pass
+        elif os.path.splitext(full_path)[1] != ".py":
             full_path += ".py"
+
+        # Check model as long as there is a .py file in one of the tabs
         if w.is_python and self.is_python:
+            check_model = True
+        elif not w.is_python and self.is_python:
+            # Set full_path to the .py file so that we can run a model check on it (the .py model should link to the .c model)
+            full_path = self.filename.with_suffix(".py")
+            check_model = True
+        
+        if check_model:
             error_line = self.checkModel(full_path)
             if error_line > 0:
                 # select bad line
@@ -508,8 +519,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 return
 
         # change the frame colours back
-        w.txtEditor.setStyleSheet("")
-        w.txtEditor.setToolTip("")
+        try:
+            self.c_editor_widget.txtEditor.setStyleSheet("")
+            self.c_editor_widget.txtEditor.setToolTip("")
+        except AttributeError:
+            pass
+        self.editor_widget.txtEditor.setStyleSheet("")
+        self.editor_widget.txtEditor.setToolTip("")
 
         # Update the tab title
         self.setTabEdited(False)
