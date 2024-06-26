@@ -664,6 +664,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 model_text += "    ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n" % (pname, pvalue, desc)
         model_text += '    ]\n\n'
 
+        # If creating a C model, link it to the Python file
+
+        if model['gen_c']:
+            model_text += LINK_C_MODEL_TEMPLATE.format(c_model_name = name + '.c')
+            model_text += '\n\n'
+
         # Write out function definition
         model_text += 'def Iq(%s):\n' % ', '.join(['q'] + param_names)
         model_text += '    """Absolute scattering"""\n'
@@ -817,6 +823,12 @@ model_info = load_model_info('{model1}{operator}{model2}')
 model_info.name = '{name}'{desc_line}
 Model = make_model_from_info(model_info)
 """
+
+LINK_C_MODEL_TEMPLATE = '''\
+# Note: removing the "source = []" line will unlink the C model from the Python model, 
+# which means the C model will not be checked for errors when edited.
+source = ['{c_model_name}']
+'''
 
 C_PD_TEMPLATE = '''\
 static double
