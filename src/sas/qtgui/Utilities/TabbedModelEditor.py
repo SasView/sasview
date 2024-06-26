@@ -615,13 +615,16 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         param_str = self.strFromParamDict(model['parameters'])
         pd_param_str = self.strFromParamDict(model['pd_parameters'])
         for pname, _, _ in self.getParamHelper(param_str):
-                param_names.append(pname)
+                param_names.append('double ' + pname)
         for pd_pname, _, _ in self.getParamHelper(pd_param_str):
-                pd_param_names.append(pd_pname)
-        print(param_names, pd_param_names)
-        model_text = C_TEMPLATE.format(poly_args = ',\n\t'.join(pd_param_names),
-                                       args = ',\n\t'.join(param_names),
-                                        poly_arg1 = pd_param_names[0])
+                pd_param_names.append('double ' + pd_pname)
+        
+        # Add polydisperse-dependent functions if polydisperse parameters are present
+        if pd_param_names != []:
+            model_text = C_PD_TEMPLATE.format(poly_args = ', '.join(pd_param_names),
+                                              poly_arg1 = pd_param_names[0].split(' ')[1]) # Remove 'double' from the first argument
+        # Add all other function templates
+        model_text = C_TEMPLATE.format(args = ',\n\t'.join(param_names))
         
         return model_text
         
@@ -815,13 +818,15 @@ model_info.name = '{name}'{desc_line}
 Model = make_model_from_info(model_info)
 """
 
-C_TEMPLATE = """\
+C_PD_TEMPLATE = '''\
 static double
 form_volume({poly_args}) // Remove arguments as needed
 {{
     return 0.0*{poly_arg1};
 }}
+'''
 
+C_TEMPLATE = """\
 static double
 radius_effective(int mode) // Add arguments as needed
 {{
