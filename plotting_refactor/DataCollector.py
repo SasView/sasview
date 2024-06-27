@@ -8,35 +8,34 @@ class DataCollector:
         self.datasets: List[Dataset] = []
         self.datasetcreator = RandomDatasetCreator.DatasetCreator()
 
-    def update_dataset(self, main_window, fitpage_index, create_fit):
+    def update_dataset(self, main_window, fitpage_index, create_fit, checked_2d):
         # search for an existing dataset with the right fitpage_index
-        # TODO: should be searched by id instead
         existing_dataset_index = -1
         for i in range(len(self.datasets)):
             if self.datasets[i].get_fitpage_index() == fitpage_index:
                 existing_dataset_index = i
         if existing_dataset_index == -1:
             # create new dataset in case it does not already exist
-            x_data, y_data, y_fit = self.simulate_data(main_window, fitpage_index, create_fit)
+            x_data, y_data, y_fit = self.simulate_data(main_window, fitpage_index, create_fit, checked_2d)
             plotpage_index = -1
 
-            dataset = Dataset(fitpage_index, x_data, y_data, y_fit, plotpage_index)
+            dataset = Dataset(fitpage_index, x_data, y_data, y_fit, checked_2d, plotpage_index)
             self.datasets.append(dataset)
         else:
             # update values for existing dataset with respect to the number boxes in the fitpage
-            x_data, y_data, y_fit = self.simulate_data(main_window, fitpage_index, create_fit)
+            x_data, y_data, y_fit = self.simulate_data(main_window, fitpage_index, create_fit, checked_2d)
             self.datasets[existing_dataset_index].set_x_data(x_data)
             self.datasets[existing_dataset_index].set_y_data(y_data)
             self.datasets[existing_dataset_index].set_y_fit(y_fit)
 
-    def simulate_data(self, main_window, fitpage_index, create_fit):
+    def simulate_data(self, main_window, fitpage_index, create_fit, checked_2d):
         combobox_index = main_window.fittingTabs.currentWidget().get_combobox_index()
         param_scale = main_window.fittingTabs.currentWidget().doubleSpinBox_scale.value()
         param_radius = main_window.fittingTabs.currentWidget().doubleSpinBox_radius.value()
         param_height = main_window.fittingTabs.currentWidget().doubleSpinBox_height.value()
 
         x_data, y_data, y_fit = self.datasetcreator.createRandomDataset(param_scale, param_radius, param_height,
-                                                                        combobox_index, create_fit)
+                                                                        combobox_index, create_fit, checked_2d)
 
         return x_data, y_data, y_fit
 

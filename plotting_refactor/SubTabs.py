@@ -42,23 +42,27 @@ class SubTabs(QTabWidget):
                     if isinstance(plottable_or_modifier_item, PlottableItem):
                         plottable = plottable_or_modifier_item
                         dataset = self.datacollector.get_data_id(plottable_or_modifier_item.get_data_id())
-                        if plottable.type_num == 1: #data plot: log-log plot, show only data
-                            ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
-                            ax[j].set_yscale('log')
-                        elif plottable.type_num == 2: #fit plot: log-log plot, show fit and data curve
-                            ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
-                            ax[j].plot(dataset.get_x_data(), dataset.get_y_fit())
-                            ax[j].set_yscale('log')
-                        elif plottable.type_num == 3: #residual plot lin-log plot, show calc and show res only
-                            ax[j].plot(dataset.get_x_data(), np.subtract(dataset.get_y_fit(), dataset.get_y_data()))
+                        if dataset.is_2d():
+                            #plot 2d data. and modifier for linestyles or linecolors make no sense for 2d objects
+                            pass
+                        else:
+                            if plottable.type_num == 1: #data plot: log-log plot, show only data
+                                ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
+                                ax[j].set_yscale('log')
+                            elif plottable.type_num == 2: #fit plot: log-log plot, show fit and data curve
+                                ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
+                                ax[j].plot(dataset.get_x_data(), dataset.get_y_fit())
+                                ax[j].set_yscale('log')
+                            elif plottable.type_num == 3: #residual plot lin-log plot, show calc and show res only
+                                ax[j].plot(dataset.get_x_data(), np.subtract(dataset.get_y_fit(), dataset.get_y_data()))
 
-                        # iterate through plottable modifier, e.g. linecolor, linestyle
-                        for l in range(plottable.childCount()):
-                            plottable_modifier = plottable.child(l)
-                            if isinstance(plottable_modifier.data(0, 1), ModifierLinecolor):
-                                ax[j].get_lines()[-1].set_color(plottable_modifier.text(0).split('=')[1])
-                            elif isinstance(plottable_modifier.data(0, 1), ModifierLinestyle):
-                                ax[j].get_lines()[-1].set_linestyle(plottable_modifier.text(0).split('=')[1])
+                            # iterate through plottable modifier, e.g. linecolor, linestyle
+                            for l in range(plottable.childCount()):
+                                plottable_modifier = plottable.child(l)
+                                if isinstance(plottable_modifier.data(0, 1), ModifierLinecolor):
+                                    ax[j].get_lines()[-1].set_color(plottable_modifier.text(0).split('=')[1])
+                                elif isinstance(plottable_modifier.data(0, 1), ModifierLinestyle):
+                                    ax[j].get_lines()[-1].set_linestyle(plottable_modifier.text(0).split('=')[1])
 
                     elif isinstance(plottable_or_modifier_item, PlotModifier):
                         plot_modifier = plottable_or_modifier_item
