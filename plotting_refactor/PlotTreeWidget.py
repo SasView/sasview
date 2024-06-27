@@ -34,7 +34,24 @@ class PlotTreeWidget(QTreeWidget):
 
 
     def dragMoveEvent(self, event):
-        event.acceptProposedAction()
+        targetItem = self.itemAt(event.position().toPoint())
+        if targetItem is not None:
+            if event.mimeData().hasFormat('ID'):
+                if isinstance(targetItem, PlotItem):
+                    event.acceptProposedAction()
+                else:
+                    event.ignore()
+            elif event.mimeData().hasFormat('Modifier'):
+                if isinstance(targetItem, PlotItem):
+                    event.acceptProposedAction()
+                elif isinstance(targetItem, PlottableItem):
+                    event.acceptProposedAction()
+                else:
+                    event.ignore()
+            else:
+                event.ignore()
+        else:
+            event.ignore()
 
     def dropEvent(self, event):
         if event.mimeData().data('ID'):
