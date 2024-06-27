@@ -206,7 +206,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Check the validity of loaded model if the model is python
         if self.is_python:
-            error_line = self.checkModel(self.filename)
+            error_line = self.checkModel(self.filename_py)
             if error_line > 0:
                 # select bad line
                 cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
@@ -497,7 +497,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             check_model = True
         elif not w.is_python and self.is_python:
             # Set full_path to the .py file so that we can run a model check on it (the .py model should link to the .c model)
-            full_path = self.filename.with_suffix(".py")
+            print(self.filename_py)
+            full_path = self.filename_py
             check_model = True
         
         if check_model:
