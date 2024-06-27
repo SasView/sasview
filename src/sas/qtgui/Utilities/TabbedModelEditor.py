@@ -610,6 +610,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         :param model: plugin model
         :param fname: filename
         """
+
+        model_text = C_COMMENT_TEMPLATE
+
         param_names = []
         pd_param_names = []
         param_str = self.strFromParamDict(model['parameters'])
@@ -621,10 +624,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         
         # Add polydisperse-dependent functions if polydisperse parameters are present
         if pd_param_names != []:
-            model_text = C_PD_TEMPLATE.format(poly_args = ', '.join(pd_param_names),
+            model_text += C_PD_TEMPLATE.format(poly_args = ', '.join(pd_param_names),
                                               poly_arg1 = pd_param_names[0].split(' ')[1]) # Remove 'double' from the first argument
         # Add all other function templates
-        model_text = C_TEMPLATE.format(args = ',\n\t'.join(param_names))
+        model_text += C_TEMPLATE.format(args = ',\n\t'.join(param_names))
         
         return model_text
         
@@ -787,6 +790,8 @@ opencl = False
 # structure_factor = False indicates that the model cannot be used as a structure factor to account for interactions between particles. Defaults to False.
 structure_factor = False
 
+# have_fq = False indicates that the model does not define F(Q) calculations in a linked C model. Note that F(Q) calculations are only necessary for accomadating beta approximation. Defaults to False.
+have_fq = False
 '''
 
 ER_VR_TEMPLATE = '''\
@@ -828,6 +833,25 @@ LINK_C_MODEL_TEMPLATE = '''\
 # Note: removing the "source = []" line will unlink the C model from the Python model, 
 # which means the C model will not be checked for errors when edited.
 source = ['{c_model_name}']
+'''
+
+C_COMMENT_TEMPLATE = '''\
+//:::Custom C model template:::
+// This is a template for a custom C model.
+// C Models are used for a variety of reasons in SasView, including better performance and the ability to perform calculations not possible in Python.
+// For example, all oriented and magnetic models, as well as most models using structure factor calculations, are written in C.
+// HOW TO USE THIS TEMPLATE:
+// 1. Determine which functions you will need to perform your calculations; delete unused functions.
+//   1.1 Note that you must define either Iq, Fq, or one of Iqac, Iqabc:
+//     Iq if your model does not use orientation parameters or use structure factor calculations;
+//     Fq if your model uses structure factor calculations;
+//     Iqac or Iqabc if your model uses orientation parameters/is magnetic;
+//     Fq AND Iqac/Iqabc if your model uses orientation parameters/is magnetic and has structure factor calculations.
+// 2. Write C code independently of this editor and paste it into the appropriate functions.
+//   2.1 Note that the C editor does not support C syntax checking, so writing C code directly into the SasView editor is not reccomended.
+// 3. Ensure a python file links to your C model (source = ['filename.c'])
+// 4. Press 'Apply' or 'Save' to save your model and run a model check (note that the model check will fail if there is no python file of the same name in your plugins directory)
+
 '''
 
 C_PD_TEMPLATE = '''\
