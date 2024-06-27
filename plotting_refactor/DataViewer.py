@@ -65,8 +65,8 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
             self.show()
             self.main_window.cmdShowDataViewer.setText("Hide Data Viewer")
 
-    def update_dataset(self, main_window, fitpage_index, create_fit):
-        self.datacollector.update_dataset(main_window, fitpage_index, create_fit)
+    def update_dataset(self, main_window, fitpage_index, create_fit, checked_2d):
+        self.datacollector.update_dataset(main_window, fitpage_index, create_fit, checked_2d)
 
     def update_plot_tree(self, fitpage_index):
         # check if an item for the fitpage index already exists
