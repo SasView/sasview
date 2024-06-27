@@ -208,6 +208,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Name the tab with .py filename
         self.tabWidget.setTabText(0, display_name)
 
+        # In case previous model was incorrect, change the frame colours back
+        self.editor_widget.txtEditor.setStyleSheet("")
+        self.editor_widget.txtEditor.setToolTip("")
+
         # Check the validity of loaded model if the model is python
         if self.is_python:
             error_line = self.checkModel(self.filename)
@@ -215,11 +219,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 # select bad line
                 cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
                 self.editor_widget.txtEditor.setTextCursor(cursor)
-                return
-
-        # In case previous model was incorrect, change the frame colours back
-        self.editor_widget.txtEditor.setStyleSheet("")
-        self.editor_widget.txtEditor.setToolTip("")
+                # Do not return because we still want to load C file if it exists
+                QtWidgets.QMessageBox.warning(self, "Model check failed", "The loaded model contains errors. Please correct all errors before using model.")
 
         # See if there is filename.c present
         self.filename_c = self.filename_py.parent / self.filename_py.name.replace(".py", ".c")
@@ -438,9 +439,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Set the status bar message
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
             self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
-
-            # Remove the file so it is not being loaded on refresh
-            os.remove(full_path)
 
             # Put a thick, red border around the editor.
             from sas.qtgui.Utilities.CodeEditor import QCodeEditor
