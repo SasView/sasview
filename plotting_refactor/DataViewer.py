@@ -83,7 +83,8 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
 
         # add data child and corresponding plot children in every case
         subtab_data = SubTabItem(tab_item, ["Data"], fitpage_index, 0)
-        subplot_data = PlotItem(subtab_data, ["Data Plot"], fitpage_index, 0, 0)
+        subplot_data = PlotItem(subtab_data, ["Data Plot"], fitpage_index, 0, 0,
+                                self.datacollector.get_data_fp(fitpage_index).is_2d())
         fitpage_id = self.datacollector.get_data_fp(fitpage_index).get_data_id()
 
         # create plottables in the plottreewidget with indicators (type_nums) to identify what kind of plot it is while
@@ -105,35 +106,35 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
 
             # if the data is 2d, then every plot contains only one plottable
             if self.datacollector.get_data_fp(fitpage_index).is_2d():
-                subplot_data_subtab_fit = PlotItem(subtab_fit, ["Data"], fitpage_index, 1, 0)
+                subplot_data_subtab_fit = PlotItem(subtab_fit, ["Data"], fitpage_index, 1, 0, True)
                 plottable_subplot_data_subtab_fit = PlottableItem(subplot_data_subtab_fit, ["2d Plottable Fit Data"], fitpage_id, 4)
 
-                subplot_fit_subtab_fit = PlotItem(subtab_fit, ["Fit"], fitpage_index, 1, 1)
+                subplot_fit_subtab_fit = PlotItem(subtab_fit, ["Fit"], fitpage_index, 1, 1, True)
                 plottable_subplot_fit_subtab_fit = PlottableItem(subplot_fit_subtab_fit, ["2d Plottable Fit Fit"], fitpage_id, 5)
 
 
-                subplot_data_subtab_residuals = PlotItem(subtab_residuals, ["Data"], fitpage_index, 2, 0)
+                subplot_data_subtab_residuals = PlotItem(subtab_residuals, ["Data"], fitpage_index, 2, 0, True)
                 plottable_subplot_data_subtab_residuals = PlottableItem(subplot_data_subtab_residuals, ["2d Plottable Residuals Data"], fitpage_id, 4)
 
-                subplot_fit_subtab_residuals = PlotItem(subtab_residuals, ["Fit"], fitpage_index, 2, 1)
+                subplot_fit_subtab_residuals = PlotItem(subtab_residuals, ["Fit"], fitpage_index, 2, 1, True)
                 plottable_subplot_fit_subtab_residuals = PlottableItem(subplot_fit_subtab_residuals, ["2d Plottable Residuals Fit"], fitpage_id, 5)
 
-                subplot_residuals_subtab_residuals = PlotItem(subtab_residuals, ["Residuals"], fitpage_index, 2, 2)
+                subplot_residuals_subtab_residuals = PlotItem(subtab_residuals, ["Residuals"], fitpage_index, 2, 2, True)
                 plottable_subplot_residuals_subtab_residuals = PlottableItem(subplot_residuals_subtab_residuals, ["2d Plottable Residuals Residuals"], fitpage_id, 6)
 
             else:  # if the data is 1d, multiple plottables can be plotted in one plot
-                subplot_fit = PlotItem(subtab_fit, ["Fit Plot"], fitpage_index, 1, 0)
+                subplot_fit = PlotItem(subtab_fit, ["Fit Plot"], fitpage_index, 1, 0, False)
 
                 plottable_fit_data = PlottableItem(subplot_fit, ["Plottable Fit Data"], fitpage_id, 1)
                 plottable_fit_fit = PlottableItem(subplot_fit, ["Plottable Fit Fit"], fitpage_id, 2)
 
                 # on the residuals subtab: create 2 plots with 3 datasets: on the top plot is the data and the fit,
                 # on the bottom plot is the residuals displayed with the same x-axis for comparison
-                subplot_residuals_fit = PlotItem(subtab_residuals, ["Fit Plot"], fitpage_index, 2, 0)
+                subplot_residuals_fit = PlotItem(subtab_residuals, ["Fit Plot"], fitpage_index, 2, 0, False)
                 plottable_res_data = PlottableItem(subplot_residuals_fit, ["Plottable Res Data"], fitpage_id, 1)
                 plottable_res_fit = PlottableItem(subplot_residuals_fit, ["Plottable Res Fit"], fitpage_id, 2)
 
-                subplot_res = PlotItem(subtab_residuals, ["Residuals Plot"], fitpage_index, 2, 1)
+                subplot_res = PlotItem(subtab_residuals, ["Residuals Plot"], fitpage_index, 2, 1, False)
                 plottable_res = PlottableItem(subplot_res, ["Plottable Residuals"], fitpage_id, 3)
 
         self.plotTreeWidget.expandAll()
