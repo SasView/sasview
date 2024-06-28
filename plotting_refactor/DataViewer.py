@@ -76,34 +76,66 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
                 if fitpage_index == self.plotTreeWidget.topLevelItem(i).data(0, 1).get_fitpage_index():
                     self.plotTreeWidget.takeTopLevelItem(i)
 
-        #add tab
+        # add tab
         tab_name = "Plot for Fitpage " + str(fitpage_index)
         tab_item = TabItem(self.plotTreeWidget, [tab_name], fitpage_index)
         tab_item.setData(0, 1, tab_item)
 
-        #add data child and corresponding plot children in every case
+        # add data child and corresponding plot children in every case
         subtab_data = SubTabItem(tab_item, ["Data"], fitpage_index, 0)
         subplot_data = PlotItem(subtab_data, ["Data Plot"], fitpage_index, 0, 0)
-        plottable_data = PlottableItem(subplot_data, [str(self.datacollector.get_data_fp(fitpage_index).get_data_id())],
-                                       self.datacollector.get_data_fp(fitpage_index).get_data_id(), 1)
+        fitpage_id = self.datacollector.get_data_fp(fitpage_index).get_data_id()
+
+        # create plottables in the plottreewidget with indicators (type_nums) to identify what kind of plot it is while
+        # plotting in subtabs.py: type_num = 1 : 1d data, type_num = 2 : 1d fit, type_num = 3 : 1d residuals
+        # type_num = 4 : 2d data, type_num = 5 : 2d fit, type_num = 6 : 2d residuals
+        # 2d plots cannot overlap each other as curves can do
+        # for every 2d data an additional plot is added and 1 plottable is inserted
+        if self.datacollector.get_data_fp(fitpage_index).is_2d():
+            plottable_data = PlottableItem(subplot_data, ["2d " + str(fitpage_id)], fitpage_id, 4)
+        else:
+            plottable_data = PlottableItem(subplot_data, [str(fitpage_id)], fitpage_id, 1)
+
         #add fit and residuals in case it was generated
         if self.datacollector.get_data_fp(fitpage_index).has_y_fit():
+            # on the fit tab: one central plot that shows the dataset and the according fit curve
+            # create tab for fit and residual plot
             subtab_fit = SubTabItem(tab_item, ["Fit"], fitpage_index, 1)
-            subplot_fit = PlotItem(subtab_fit, ["Fit Plot"], fitpage_index, 1, 0)
-            plottable_fit_data = PlottableItem(subplot_fit, ["Plottable Fit Data"],
-                                               self.datacollector.get_data_fp(fitpage_index).get_data_id(), 1)
-            plottable_fit_fit = PlottableItem(subplot_fit, ["Plottable Fit Fit"],
-                                          self.datacollector.get_data_fp(fitpage_index).get_data_id(), 2)
+            subtab_residuals = SubTabItem(tab_item, ["Residuals"], fitpage_index, 2)
 
-            subtab_res = SubTabItem(tab_item, ["Residuals"], fitpage_index, 2)
-            subplot_res_fit = PlotItem(subtab_res, ["Fit Plot"], fitpage_index, 2, 0)
-            plottable_res_data = PlottableItem(subplot_res_fit, ["Plottable Res Data"],
-                                               self.datacollector.get_data_fp(fitpage_index).get_data_id(), 1)
-            plottable_res_fit = PlottableItem(subplot_res_fit, ["Plottable Res Fit"],
-                                               self.datacollector.get_data_fp(fitpage_index).get_data_id(), 2)
-            subplot_res = PlotItem(subtab_res, ["Residuals Plot"], fitpage_index, 2, 1)
-            plottable_res = PlottableItem(subplot_res, ["Plottable Residuals"],
-                                          self.datacollector.get_data_fp(fitpage_index).get_data_id(), 3)
+            # if the data is 2d, then every plot contains only one plottable
+            if self.datacollector.get_data_fp(fitpage_index).is_2d():
+                subplot_data_subtab_fit = PlotItem(subtab_fit, ["Data"], fitpage_index, 1, 0)
+                plottable_subplot_data_subtab_fit = PlottableItem(subplot_data_subtab_fit, ["2d Plottable Fit Data"], fitpage_id, 4)
+
+                subplot_fit_subtab_fit = PlotItem(subtab_fit, ["Fit"], fitpage_index, 1, 1)
+                plottable_subplot_fit_subtab_fit = PlottableItem(subplot_fit_subtab_fit, ["2d Plottable Fit Fit"], fitpage_id, 5)
+
+
+                subplot_data_subtab_residuals = PlotItem(subtab_residuals, ["Data"], fitpage_index, 2, 0)
+                plottable_subplot_data_subtab_residuals = PlottableItem(subplot_data_subtab_residuals, ["2d Plottable Residuals Data"], fitpage_id, 4)
+
+                subplot_fit_subtab_residuals = PlotItem(subtab_residuals, ["Fit"], fitpage_index, 2, 1)
+                plottable_subplot_fit_subtab_residuals = PlottableItem(subplot_fit_subtab_residuals, ["2d Plottable Residuals Fit"], fitpage_id, 5)
+
+                subplot_residuals_subtab_residuals = PlotItem(subtab_residuals, ["Residuals"], fitpage_index, 2, 2)
+                plottable_subplot_residuals_subtab_residuals = PlottableItem(subplot_residuals_subtab_residuals, ["2d Plottable Residuals Residuals"], fitpage_id, 6)
+
+            else:  # if the data is 1d, multiple plottables can be plotted in one plot
+                subplot_fit = PlotItem(subtab_fit, ["Fit Plot"], fitpage_index, 1, 0)
+
+                plottable_fit_data = PlottableItem(subplot_fit, ["Plottable Fit Data"], fitpage_id, 1)
+                plottable_fit_fit = PlottableItem(subplot_fit, ["Plottable Fit Fit"], fitpage_id, 2)
+
+                # on the residuals subtab: create 2 plots with 3 datasets: on the top plot is the data and the fit,
+                # on the bottom plot is the residuals displayed with the same x-axis for comparison
+                subplot_residuals_fit = PlotItem(subtab_residuals, ["Fit Plot"], fitpage_index, 2, 0)
+                plottable_res_data = PlottableItem(subplot_residuals_fit, ["Plottable Res Data"], fitpage_id, 1)
+                plottable_res_fit = PlottableItem(subplot_residuals_fit, ["Plottable Res Fit"], fitpage_id, 2)
+
+                subplot_res = PlotItem(subtab_residuals, ["Residuals Plot"], fitpage_index, 2, 1)
+                plottable_res = PlottableItem(subplot_res, ["Plottable Residuals"], fitpage_id, 3)
+
         self.plotTreeWidget.expandAll()
         self.redrawAll()
 
