@@ -14,6 +14,7 @@ lxml
 mako
 matplotlib
 numba
+numpy==1.26.4 # 2.0.0 deprecates many functions used in the codebase (and potentially in dependencies)
 periodictable
 pybind11
 pylint
@@ -24,6 +25,7 @@ pytest_qt
 pytest-mock
 pytools
 qtconsole
+scipy==1.13 # 1.14 deprecates some functions used in the codebase (and potentially in dependencies)
 six
 sphinx
 superqt
@@ -38,6 +40,4 @@ zope
 pywin32; platform_system == "Windows"
 
 # Alphabetized list of version-pinned packages
-numpy==1.26.4 # 2.0.0 deprecates many functions used in the codebase (and potentially in dependencies)
 PySide6==6.4.3  # Later versions do not mesh well with pyinstaller < 6.0
-scipy==1.13 # 1.14 deprecates some functions used in the codebase (and potentially in dependencies)
