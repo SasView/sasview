@@ -481,6 +481,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Save the current state of the Model Editor
         """
+        clear_error_formatting = True # Assume we will clear error formating (if any) after saving
         filename = self.filename_py
         w = self.tabWidget.currentWidget()
         if not w.is_python:
@@ -523,15 +524,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 if user_decision == False:
                     # If the user decides to continue editing without saving, return
                     return
+                else:
+                    clear_error_formatting = False
 
-        # change the frame colours back
-        try:
-            self.c_editor_widget.txtEditor.setStyleSheet("")
-            self.c_editor_widget.txtEditor.setToolTip("")
-        except AttributeError:
-            pass
-        self.editor_widget.txtEditor.setStyleSheet("")
-        self.editor_widget.txtEditor.setToolTip("")
+        if clear_error_formatting:
+        # change the frame colours back, if errors were fixed
+            try:
+                self.c_editor_widget.txtEditor.setStyleSheet("")
+                self.c_editor_widget.txtEditor.setToolTip("")
+            except AttributeError:
+                pass
+            self.editor_widget.txtEditor.setStyleSheet("")
+            self.editor_widget.txtEditor.setToolTip("")
 
         # Update the tab title
         self.setTabEdited(False)
