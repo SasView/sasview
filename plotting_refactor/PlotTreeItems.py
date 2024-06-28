@@ -18,12 +18,16 @@ class SubTabItem(TabItem):
         return self.subtab_index
 
 class PlotItem(SubTabItem):
-    def __init__(self, parent, name, fitpage_index, subtab_index, ax_index):
+    def __init__(self, parent, name, fitpage_index, subtab_index, ax_index, is_plot_2d):
         super().__init__(parent, name, fitpage_index, subtab_index)
         self.ax_index = ax_index
+        self.is_plot_2d = is_plot_2d
 
     def get_ax_index(self):
         return self.ax_index
+
+    def is2d(self):
+        return self.is2d
 
 class PlottableItem(QTreeWidgetItem):
     def __init__(self, parent, name, data_id, type_num):
