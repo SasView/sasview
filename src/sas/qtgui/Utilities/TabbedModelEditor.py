@@ -393,6 +393,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Add a tab to TabbedModelEditor for the Python model if not already open
             if not self.isWidgetInTab(self.tabWidget, self.editor_widget):
                 self.addTab("python", Path(self.filename_py).name)
+            elif self.tabWidget.tabText(self.tabWidget.indexOf(self.editor_widget)) != Path(self.filename_py).name:
+                # If title of tab is not what the filename is, update the tab title
+                self.tabWidget.setTabText(self.tabWidget.indexOf(self.editor_widget), Path(self.filename_py).name)
 
             self.editor_widget.blockSignals(True)
             self.editor_widget.txtEditor.setPlainText(model_str)
@@ -402,6 +405,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Add a tab to TabbedModelEditor for the C model if not already open
             if not self.isWidgetInTab(self.tabWidget, self.c_editor_widget):
                 self.addTab("c", Path(self.filename_c).name)
+            elif self.tabWidget.tabText(self.tabWidget.indexOf(self.c_editor_widget)) != Path(self.filename_c).name:
+                # If title of tab is not what the filename is, update the tab title
+                self.tabWidget.setTabText(self.tabWidget.indexOf(self.c_editor_widget), Path(self.filename_c).name)
 
             # Update the editor
             self.c_editor_widget.blockSignals(True)
