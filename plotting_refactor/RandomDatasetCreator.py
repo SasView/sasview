@@ -24,7 +24,7 @@ class DatasetCreator:
 
     def createRandomDataset(self, scale, radius, height, combobox_index, fit=False, second_dimension=False):
         self.combobox_index = combobox_index
-        size = 250
+        size = 100
         intensity_fit = np.array([])
         if second_dimension:
             q = np.linspace(start=1, stop=10, num=size).reshape(size, 1)

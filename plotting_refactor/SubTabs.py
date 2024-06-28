@@ -3,6 +3,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
 from typing import List
 import matplotlib.figure
+import matplotlib.colors as colors
 from PlotTreeItems import PlottableItem
 from PlotModifiers import PlotModifier, ModifierLinecolor, ModifierLinestyle, ModifierColormap
 
@@ -35,16 +36,29 @@ class SubTabs(QTabWidget):
             # iterate through subplots
             for j in range(subplot_count):
                 ax[j].set_title(str(tabitem.child(i).child(j).text(0)))
-                ax[j].set_xscale('log')
                 # iterate through plottables and plot modifiers
                 for k in range(tabitem.child(i).child(j).childCount()):
                     plottable_or_modifier_item = tabitem.child(i).child(j).child(k).data(0, 1)
                     if isinstance(plottable_or_modifier_item, PlottableItem):
                         plottable = plottable_or_modifier_item
-                        dataset = self.datacollector.get_data_id(plottable_or_modifier_item.get_data_id())
+                        dataset = self.datacollector.get_data_id(plottable.get_data_id())
                         if dataset.is_2d():
-                            #plot 2d data. and modifier for linestyles or linecolors make no sense for 2d objects
-                            pass
+                            x = dataset.get_x_data()
+                            y = dataset.get_y_data()
+                            y_fit = dataset.get_y_fit()
+                            if plottable.type_num == 4:
+                                cm = ax[j].pcolor(x[0], x[1], y,
+                                                  norm=matplotlib.colors.LogNorm(vmin=np.min(y), vmax=np.max(y)),
+                                                  cmap='jet')
+                            elif plottable.type_num == 5:
+                                cm = ax[j].pcolor(x[0], x[1], y_fit,
+                                                  norm=matplotlib.colors.LogNorm(vmin=np.min(y_fit), vmax=np.max(y_fit)),
+                                                  cmap='jet')
+                            elif plottable.type_num == 6:
+                                y_res = np.absolute(np.subtract(y_fit,y))
+                                cm = ax[j].pcolor(x[0], x[1], y_res,
+                                                  norm=matplotlib.colors.LogNorm(vmin=np.min(y_res), vmax=np.max(y_res)),
+                                                  cmap='jet')
                         else:
                             if plottable.type_num == 1: #data plot: log-log plot, show only data
                                 ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
