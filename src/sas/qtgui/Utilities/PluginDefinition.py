@@ -19,6 +19,8 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     model form and parameters.
     """
     modelModified = QtCore.Signal()
+    omitPolydisperseFuncsSignal = QtCore.Signal()
+    includePolydisperseFuncsSignal = QtCore.Signal()
     def __init__(self, parent=None):
         super(PluginDefinition, self).__init__(parent)
         self.setupUi(self)
@@ -29,6 +31,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         # {<row>: (<parameter>, <value>)}
         self.parameter_dict = {}
         self.pd_parameter_dict = {}
+        self.displayed_default_form_volume = False
 
         # Initialize widgets
         self.addWidgets()
@@ -39,32 +42,42 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         # Initialize signals
         self.addSignals()
 
-    def addTooltip(self):
+    def addTooltips(self):
         """
-        Add the default tooltip to the text field
+        Add the default tooltips to the Iq and form_volume function text boxes
         """
-        hint_function = "#Example:\n\n"
-        hint_function += "if x <= 0:\n"
-        hint_function += "    y = A + B\n"
+        hint_function = "This function returns the scattering intensity for a given q.\n"
+        hint_function += "Example:\n\n"
+        hint_function += "if q <= 0:\n"
+        hint_function += "    intensity = A + B\n"
         hint_function += "else:\n"
-        hint_function += "    y = A + B * cos(2 * pi * x)\n"
-        hint_function += "return y\n"
+        hint_function += "    intensity = A + B * cos(2 * pi * q)\n"
+        hint_function += "return intensity\n"
         self.txtFunction.setToolTip(hint_function)
+        hint_function = "This function returns the volume of the particle.\n"
+        hint_function += "Example:\n\n"
+        hint_function += "volume = (4 / 3) * pi * R**3\n"
+        hint_function += "return volume\n"
+        self.txtFormVolumeFunction.setToolTip(hint_function)
+
 
     def addWidgets(self):
         """
         Initialize various widgets in the dialog
         """
-        self.addTooltip()
+        self.addTooltips()
 
         # Initial text in the function table
         text = \
-"""y = x
+"""intensity = q
 
-return y
+return intensity
 """
+        self.model['func_text'] = text
         self.txtFunction.insertPlainText(text)
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
+
+        self.txtFormVolumeFunction.setFont(GuiUtils.getMonospaceFont())
 
         # Validators
         rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
@@ -75,7 +88,8 @@ return y
         # importing QSyntaxHighlighter
         # DO NOT MOVE TO TOP
         from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
-        self.highlight = PythonHighlighter(self.txtFunction.document())
+        self.highlightFunction = PythonHighlighter(self.txtFunction.document())
+        self.highlightFormVolumeFunction = PythonHighlighter(self.txtFormVolumeFunction.document())
 
     def initializeModel(self):
         """
@@ -85,10 +99,14 @@ return y
         self.model = {
             'filename':'',
             'overwrite':False,
+            'gen_python':True,
+            'gen_c':False,
             'description':'',
             'parameters':{},
             'pd_parameters':{},
-            'text':''}
+            'func_text':'',
+            'form_volume_text':''
+            }
 
     def addSignals(self):
         """
@@ -101,7 +119,10 @@ return y
         # QTextEdit doesn't have a signal for edit finish, so we respond to text changed.
         # Possibly a slight overkill.
         self.txtFunction.textChanged.connect(self.onFunctionChanged)
+        self.txtFormVolumeFunction.textChanged.connect(self.onFormVolumeFunctionChanged)
         self.chkOverwrite.toggled.connect(self.onOverwrite)
+        self.chkGenPython.toggled.connect(self.onGenPython)
+        self.chkGenC.toggled.connect(self.onGenC)
 
     def onPluginNameChanged(self):
         """
@@ -139,7 +160,7 @@ return y
 
     def onParamsPDChanged(self, row, column):
         """
-        Respond to changes in non-polydisperse parameter table
+        Respond to changes in polydisperse parameter table
         """
         param = value = None
         if self.tblParamsPD.item(row, 0):
@@ -152,9 +173,40 @@ return y
         self.model['pd_parameters'] = self.pd_parameter_dict
 
         # Check if the update was Value for last row. If so, add a new row
-        if column == 1 and row == self.tblParamsPD.rowCount()-1:
+        if column == 1 and row == self.tblParamsPD.rowCount() - 1:
             # Add a row
             self.tblParamsPD.insertRow(self.tblParamsPD.rowCount())
+        
+        # Check to see if there is any polydisperse parameter text present
+        any_text_present = False
+        for row in range(self.tblParamsPD.rowCount()):
+            for column in range(self.tblParamsPD.columnCount()):
+                table_cell_contents = self.tblParamsPD.item(row, column)
+                if table_cell_contents and table_cell_contents.text():
+                    # There is text in at least one cell
+                    any_text_present = True
+                    break
+            if any_text_present:
+                # Display the Form Function box because there are polydisperse parameters
+                # First insert the first user-specified parameter into sample form volume function
+                if not self.displayed_default_form_volume:
+                    text = \
+"""volume = {0} * 0.0
+
+return volume
+""".format(self.model['pd_parameters'][0][0])
+                    self.model['form_volume_text'] = text
+                    self.txtFormVolumeFunction.insertPlainText(text)
+                    self.displayed_default_form_volume = True
+
+                self.formFunctionBox.setVisible(True)
+                self.includePolydisperseFuncsSignal.emit()
+                break
+            else:
+                # Hide the Form Function box because there are no polydisperse parameters
+                self.formFunctionBox.setVisible(False)
+                self.omitPolydisperseFuncsSignal.emit()
+    
         self.modelModified.emit()
 
 
@@ -166,8 +218,20 @@ return y
         # mind the performance!
         #self.addTooltip()
         new_text = self.txtFunction.toPlainText().lstrip().rstrip()
-        if new_text != self.model['text']:
-            self.model['text'] = new_text
+        if new_text != self.model['func_text']:
+            self.model['func_text'] = new_text
+            self.modelModified.emit()
+    
+    def onFormVolumeFunctionChanged(self):
+        """
+        Respond to changes in form volume function body
+        """
+        # keep in mind that this is called every time the text changes.
+        # mind the performance!
+        #self.addTooltip()
+        new_text = self.txtFormVolumeFunction.toPlainText().lstrip().rstrip()
+        if new_text != self.model['form_volume_text']:
+            self.model['form_volume_text'] = new_text
             self.modelModified.emit()
 
     def onOverwrite(self):
@@ -175,6 +239,20 @@ return y
         Respond to change in file overwrite checkbox
         """
         self.model['overwrite'] = self.chkOverwrite.isChecked()
+        self.modelModified.emit()
+    
+    def onGenPython(self):
+        """
+        Respond to change in generate Python checkbox
+        """
+        self.model['gen_python'] = self.chkGenPython.isChecked()
+        self.modelModified.emit()
+    
+    def onGenC(self):
+        """
+        Respond to change in generate C checkbox
+        """
+        self.model['gen_c'] = self.chkGenC.isChecked()
         self.modelModified.emit()
 
     def getModel(self):
