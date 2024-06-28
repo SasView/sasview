@@ -347,17 +347,20 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # check if file exists
         plugin_location = models.find_plugins_dir()
+
+        # Generate the full path of the python path for the model
+        full_path_py = os.path.join(plugin_location, filename)
+        if os.path.splitext(full_path_py)[1] != ".py":
+            full_path_py += ".py"
+
         if model['gen_python'] == True:
-            full_path = os.path.join(plugin_location, filename)
-            if os.path.splitext(full_path)[1] != ".py":
-                full_path += ".py"
             # Update the global path definition
-            self.filename_py = full_path
-            if not self.canWriteModel(model, full_path):
+            self.filename_py = full_path_py
+            if not self.canWriteModel(model, full_path_py):
                 return
             # generate the model representation as string
-            model_str = self.generatePyModel(model, full_path)
-            self.writeFile(full_path, model_str)
+            model_str = self.generatePyModel(model, full_path_py)
+            self.writeFile(full_path_py, model_str)
 
         if model['gen_c'] == True:
             c_path = os.path.join(plugin_location, filename)
@@ -515,7 +518,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 # select bad line
                 cursor = QtGui.QTextCursor(w.txtEditor.document().findBlockByLineNumber(error_line-1))
                 w.txtEditor.setTextCursor(cursor)
-                return
+
+                # Ask the user if they want to save the file with errors or continue editing
+                user_decision = self.saveOverrideWarning(filename, model_str)
+                if user_decision == False:
+                    # If the user decides to continue editing without saving, return
+                    return
 
         # change the frame colours back
         try:
@@ -548,6 +556,47 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # The regen method is part of the documentation window. If the window is closed, the method no longer exists.
         if hasattr(self.parent, 'helpWindow'):
             self.parent.helpWindow.regenerateHtml(self.filename_py)
+    
+    def saveOverrideWarning(self, filename, model_str):
+        """
+        Throw popup asking user if they want to save the model despite a bad model check.
+        Save model if user chooses to save, and do nothing if the user chooses to continue editing.
+        
+        Returns True if user wanted to save file anyways, False if user wanted to continue editing without saving
+        """
+        msgBox = QtWidgets.QMessageBox(self)
+        msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+        msgBox.setText("Model check failed. Do you want to save the file anyways?")
+        msgBox.setWindowTitle("Model Error")
+
+        # Add buttons
+        buttonContinue = msgBox.addButton("Continue editing", QtWidgets.QMessageBox.NoRole)
+        buttonSave = msgBox.addButton("Save anyways", QtWidgets.QMessageBox.AcceptRole)
+        # Set default button
+        msgBox.setDefaultButton(buttonContinue)
+
+        # Execute the message box and wait for the user's response
+        userChoice = msgBox.exec_()
+
+        # Check which button was clicked and execute the corresponding code
+        if msgBox.clickedButton() == buttonContinue:
+            return False
+        elif msgBox.clickedButton() == buttonSave:
+            # Save files anyways
+            py_file = os.path.splitext(filename)[0] + ".py"
+            c_file = os.path.splitext(filename)[0] + ".c"
+            py_tab_open = self.isWidgetInTab(self.tabWidget, self.editor_widget)
+            c_tab_open = self.isWidgetInTab(self.tabWidget, self.c_editor_widget)
+
+            # Check to see if we have a certain model type open, and if so, write models
+            if py_tab_open and c_tab_open:
+                    self.writeFile(py_file, self.editor_widget.getModel()['text'])
+                    self.writeFile(c_file, self.c_editor_widget.getModel()['text'])
+            elif py_tab_open:
+                    self.writeFile(py_file, self.editor_widget.getModel()['text'])
+            elif c_tab_open:
+                    self.writeFile(c_file, self.c_editor_widget.getModel()['text'])
+            return True
 
     def canWriteModel(self, model=None, full_path=""):
         """
@@ -608,6 +657,16 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Retrieves plugin model from the currently open tab
         """
         return self.tabWidget.currentWidget().getModel()
+
+    @classmethod
+    def isWidgetInTab(cls, tabWidget, widget_to_check):
+        """
+        Check to see if a `widget_to_check` is a tab in the `tabWidget`
+        """
+        for i in range(tabWidget.count()):
+            if tabWidget.widget(i) == widget_to_check:
+                return True
+        return False
 
     @classmethod
     def writeFile(cls, fname, model_str=""):
