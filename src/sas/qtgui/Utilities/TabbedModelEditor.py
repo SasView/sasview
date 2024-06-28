@@ -42,6 +42,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.load_file = load_file.lstrip("//") if load_file else None
         self.model = model
         self.is_modified = False
+        self.showNoCompileWarning = True
         self.label = None
         self.file_to_regenerate = ""
         self.include_polydisperse = False
@@ -370,9 +371,15 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
 
         # Run the model test in sasmodels and check model syntax. Returns error line if checks fail.
-        error_line = self.checkModel(full_path)
-        if error_line > 0:
-            return
+        if os.path.exists(full_path_py):
+            error_line = self.checkModel(full_path_py)
+            if error_line > 0:
+                return
+        else:
+            if self.showNoCompileWarning:
+                # Show message box that tells user no model checks will be run until a python file of the same name is created in the plugins directory.
+                self.noModelCheckWarning()
+            
 
         self.editor_widget.setEnabled(True)
         
@@ -548,7 +555,26 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # The regen method is part of the documentation window. If the window is closed, the method no longer exists.
         if hasattr(self.parent, 'helpWindow'):
             self.parent.helpWindow.regenerateHtml(self.filename_py)
-    
+
+    def noModelCheckWarning(self):
+        """
+        Throw popup informing the user that no model checks will be run on a pure C model.
+        Ask user to acknowledge and give option to not display again.
+        """
+        msgBox = QtWidgets.QMessageBox(self)
+        msgBox.setIcon(QtWidgets.QMessageBox.Information)
+        msgBox.setText("No model checks will be run on your C file until a python file of the same name is created in your plugin directory.")
+        msgBox.setWindowTitle("No Python File Detected")
+        buttonContinue = msgBox.addButton("OK", QtWidgets.QMessageBox.AcceptRole)
+        doNotShowAgainCheckbox = QtWidgets.QCheckBox("Do not show again")
+        msgBox.setCheckBox(doNotShowAgainCheckbox)
+
+        msgBox.exec_()
+
+        if doNotShowAgainCheckbox.isChecked():
+            # Update flag to not show popup again while this instance of TabbedModelEditor is open
+            self.showNoCompileWarning = False
+ 
     def saveOverrideWarning(self, filename, model_str):
         """
         Throw popup asking user if they want to save the model despite a bad model check.
