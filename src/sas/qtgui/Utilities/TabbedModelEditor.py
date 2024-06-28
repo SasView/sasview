@@ -68,10 +68,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.setPluginActive(True)
 
         self.editor_widget = ModelEditor(self)
-        # Initially, nothing in the editor
+        self.c_editor_widget = ModelEditor(self)
+        # Initially, nothing in the editors
         self.editor_widget.setEnabled(False)
-        self.tabWidget.addTab(self.editor_widget, "Model editor")
+        self.c_editor_widget.setEnabled(False)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
+
 
         # Initially hide form function box
         self.plugin_widget.formFunctionBox.setVisible(False)
@@ -82,6 +84,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.plugin_widget.blockSignals(True)
             # and hide the tab/widget itself
             self.tabWidget.removeTab(0)
+            self.addTab("python", "Model Editor")
         
         if self.model is not None:
             self.cmdLoad.setText("Load file...")
@@ -98,6 +101,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # signals from tabs
         self.plugin_widget.modelModified.connect(self.editorModelModified)
         self.editor_widget.modelModified.connect(self.editorModelModified)
+        self.c_editor_widget.modelModified.connect(self.editorModelModified)
         self.plugin_widget.txtName.editingFinished.connect(self.pluginTitleSet)
         self.plugin_widget.includePolydisperseFuncsSignal.connect(self.includePolydisperseFuncs)
         self.plugin_widget.omitPolydisperseFuncsSignal.connect(self.omitPolydisperseFuncs)
@@ -383,25 +387,26 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         self.editor_widget.setEnabled(True)
         
-        # Update the editor here.
+        # Update the editor(s) here.
         # Simple string forced into control.
         if model['gen_python'] == True:
+            # Add a tab to TabbedModelEditor for the Python model if not already open
+            if not self.isWidgetInTab(self.tabWidget, self.editor_widget):
+                self.addTab("python", Path(self.filename_py).name)
+
             self.editor_widget.blockSignals(True)
             self.editor_widget.txtEditor.setPlainText(model_str)
             self.editor_widget.blockSignals(False)
+
         if model['gen_c'] == True:
-            # Add a tab to TabbedModelEditor for the C model
-            c_display_name = Path(self.filename_c).name
-            self.c_editor_widget = ModelEditor(self, is_python=False)
-            self.tabWidget.addTab(self.c_editor_widget, c_display_name)
+            # Add a tab to TabbedModelEditor for the C model if not already open
+            if not self.isWidgetInTab(self.tabWidget, self.c_editor_widget):
+                self.addTab("c", Path(self.filename_c).name)
 
             # Update the editor
             self.c_editor_widget.blockSignals(True)
             self.c_editor_widget.txtEditor.setPlainText(c_model_str)
             self.c_editor_widget.blockSignals(False)
-
-            # Connect 'modified' signal
-            self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
         # Set the widget title
         self.setTabEdited(False)
@@ -671,6 +676,32 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Retrieves plugin model from the currently open tab
         """
         return self.tabWidget.currentWidget().getModel()
+    
+    def addTab(self, filetype, name):
+        """
+        Add a tab to the tab widget
+        :param filetype: filetype of tab to add: "python" or "c"
+        :param name: name to display on tab
+        """
+        if filetype == "python":
+            #display_name = Path(self.filename_py).name
+            self.editor_widget = ModelEditor(self, is_python=True)
+            self.tabWidget.addTab(self.editor_widget, name)
+        elif filetype == "c":
+            #display_name = Path(self.filename_c).name
+            self.c_editor_widget = ModelEditor(self, is_python=False)
+            self.tabWidget.addTab(self.c_editor_widget, name)
+    
+    def removeTab(self, filetype):
+        """
+        Remove a tab from the tab widget.
+        Assume that the tab to remove exists.
+        :param filetype: filetype of tab to remove: "python" or "c"
+        """
+        if filetype == "python":
+            self.tabWidget.removeTab(self.tabWidget.indexOf(self.editor_widget))
+        elif filetype == "c":
+            self.tabWidget.removeTab(self.tabWidget.indexOf(self.c_editor_widget))
 
     @classmethod
     def isWidgetInTab(cls, tabWidget, widget_to_check):
