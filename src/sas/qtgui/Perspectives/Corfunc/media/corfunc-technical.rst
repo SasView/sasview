@@ -178,12 +178,12 @@ The structural parameters extracted are:
 *   Average Core Thickness :math:`= D_0`
 *   Average Interface Thickness :math:`\text{} = D_{tr}`
 *   Eekhaut Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
-*   Stribeck Polydispersity
+*   Stribeck Polydispersity :math:`= \frac{L_c}{(L_c - L_p)\Gamma_{\text{max}}}`
 *   Local Crystallinity :math:`= L_c/L_p`
 
 which lead to:
 
 *   Average Soft Block Thickness :math:`= L_p - L_c = L_a`
-*   Average Chord Length :math:`= ((1/L_c) + (1/L_a)) :sup:`-1``
-*   Average Crystalline Chord Length :math:`= ((1/L_c) + (1/L_a)) :sup:`-1` / \Phi_{\text{c}}`
-*   Non-Ideality :math:`= (L_p – L_p*) :sup:`2` /  L_p :sup:`2``
+*   Average Chord Length :math:`= ((1/L_c) + (1/L_a))^{-1}`
+*   Average Crystalline Chord Length :math:`= \frac{L_a L_c}{\Phi_{\text{c}} (L_c + L_a)}`
+*   Non-Ideality :math:`= \left(\frac{L_p – L_p*}{L_p}\right)^2`
