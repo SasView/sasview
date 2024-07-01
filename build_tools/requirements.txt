@@ -25,7 +25,7 @@ pytest_qt
 pytest-mock
 pytools
 qtconsole
-scipy==1.14.0
+scipy
 six
 sphinx
 superqt
