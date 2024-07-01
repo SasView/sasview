@@ -275,11 +275,13 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         """
         Open the help menu when the help button is clicked
         """
-        help_location = GuiUtils.HELP_DIRECTORY_LOCATION
-        help_location += "/user/qtgui/Perspectives/Fitting/gpu_setup.html"
-        help_location += "#device-selection"
+        from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION
+
+        help_path = HELP_DIRECTORY_LOCATION / "user" / "qtgui" / "Perspectives" / "Fitting" / "gpu_setup.html"
+        help_location = help_path.as_uri() + "#device-selection"
+
         # Display the page in default browser
-        webbrowser.open('file://' + os.path.realpath(help_location))
+        webbrowser.open(help_location)
 
     def reject(self):
         """
