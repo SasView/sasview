@@ -161,12 +161,17 @@ class Invertor(Pinvertor):
             return self.set_y(value)
         elif name == 'err':
             value2 = abs(value)
+            if None in value:
+                msg = "Invertor: Data has no uncertainty. "
+                msg += "Delete that entry before proceeding"
             return self.set_err(value2)
         elif name == 'd_max':
             if value <= 0.0:
                 msg = "Invertor: d_max must be greater than zero."
                 msg += "Correct that entry before proceeding"
+                value = 0.001
                 raise ValueError(msg)
+            
             return self.set_dmax(value)
         elif name == 'q_min':
             if value is None:
@@ -297,7 +302,7 @@ class Invertor(Pinvertor):
         # Reset the background value before proceeding
         # self.background = 0.0
         if not self.est_bck:
-            self.y -= self.background
+            self.y -= self.background         
         out, cov = self.lstsq(nfunc, nr=nr)
         if not self.est_bck:
             self.y += self.background
@@ -345,7 +350,7 @@ class Invertor(Pinvertor):
         res = self.residuals(out)
         chisqr = 0
         for i in range(len(res)):
-            chisqr += res[i]
+            chisqr += math.fabs(res[i])
 
         self.chi2 = chisqr
 
@@ -377,7 +382,7 @@ class Invertor(Pinvertor):
         # Compute chi^2
         res = self.pr_residuals(out)
         chisqr = 0
-        chisq = np.sum(res)
+        chisq = np.sum(math.fabs(res))
 
         self.chisqr = chisqr
 
@@ -480,7 +485,10 @@ class Invertor(Pinvertor):
 
         # Perform the inversion (least square fit)
         # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
+
         rcond = np.finfo(float).eps * max(a.shape)
+        if rcond ==None:
+            rcond =-1
         c, chi2, _, _ = lstsq(a, b, rcond=rcond)
         # Sanity check
         try:
@@ -496,7 +504,7 @@ class Invertor(Pinvertor):
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 
-        if math.fabs(self.alpha) > 0:
+        if self.alpha > 0:
             new_alpha = sum_sig / (sum_reg / self.alpha)
         else:
             new_alpha = 0.0

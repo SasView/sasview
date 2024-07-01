@@ -70,7 +70,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.fold = True
         # draw the sector
         self.update()
-        self._post_data()
+        self._post_data(show_plots = False)
         self.draw()
         self.setModelFromParams()
 
@@ -131,7 +131,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.right_line.save(ev)
         self.left_line.save(ev)
 
-    def _post_data(self, nbins=None):
+    def _post_data(self, nbins=None, show_plots=True):
         """
         compute sector averaging of data2D into data1D
         :param nbins: the number of point to plot for the average 1D data
@@ -183,16 +183,22 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot.id = "SectorQ" + self.data.name
         new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
         new_plot.is_data = True
-        item = self._item
-        if self._item.parent() is not None:
-            item = self._item.parent()
-        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
 
-        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
-        if self.update_model:
-            self.setModelFromParams()
+        if show_plots:
+            item = self._item
+            if self._item.parent() is not None:
+                item = self._item.parent()
+            GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+            self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+            self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
+
+            if self.update_model:
+                self.setModelFromParams()
+            self.draw()
+        else:
+            return new_plot
+
 
     def validate(self, param_name, param_value):
         """
@@ -281,7 +287,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.left_line.update(phi=phi, delta=None, mline=self.main_line,
                               side=True, left=True)
         # Post the new corresponding data
-        self._post_data(nbins=self.nbins)
+        self._post_data(nbins=self.nbins, show_plots = False)
         self.draw()
 
     def draw(self):
@@ -290,6 +296,10 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         """
         self.base.draw()
 
+    def captureSlice(self, nbins=None):
+        new_plot = self._post_data(nbins, show_plots = False)
+
+        return new_plot
 
 class SideInteractor(BaseInteractor):
     """
@@ -427,6 +437,8 @@ class SideInteractor(BaseInteractor):
         self.theta = numpy.arctan2(y, x)
         self.has_move = True
         if not self.left_moving:
+
+
             if  self.theta2 - self.theta <= 0 and self.theta2 > 0:
                 self.restore(ev)
                 return
@@ -449,17 +461,22 @@ class SideInteractor(BaseInteractor):
         else:
             if  self.theta < 0 and (self.theta + numpy.pi * 2 - self.theta2) <= 0:
                 self.restore(ev)
+
                 return
             elif self.theta2 < 0 and (self.theta - self.theta2) <= 0:
                 self.restore(ev)
                 return
             elif  self.theta > 0 and self.theta - self.theta2 <= 0:
+
                 self.restore(ev)
+
                 return
             elif self.theta - self.theta2 >= numpy.pi / 2 or  \
                 ((self.theta + numpy.pi * 2 - self.theta2) >= numpy.pi / 2 and \
                  self.theta < 0 and self.theta2 > 0):
+
                 self.restore(ev)
+
                 return
 
         self.phi = numpy.fabs(self.theta2 - self.theta)
