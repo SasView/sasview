@@ -220,7 +220,59 @@ class sas_gen_test(unittest.TestCase):
         # only require errors <1% due to larger discretisation
         for val in np.abs(errs):
             self.assertLessEqual(val, 1e-2)
-    
+
+    def test_debye_impl(self):
+        """
+        Test that the Debye algorithm supplied by the external AUSAXS library agrees with the default implementation.
+        """
+        from sas.sascalc.calculator.ausaxs import sasview_sans_debye
+        from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye
+
+        from sas.sascalc.calculator.ausaxs.architecture import get_os, OS
+        if get_os() is OS.MAC:
+            self.assertTrue(True, "AUSAXS library is currently not available for MacOS. Skipping test.")
+            return
+
+        if not ausaxs_sans_debye.ausaxs_available():
+            self.assertTrue(False, "AUSAXS library not found, test cannot be run.")
+            return
+
+        # get all pdb files in the data folder
+        import glob
+        pdb_files = glob.glob(os.path.join(os.path.dirname(__file__), 'data/debye_test_files', '*.pdb'))
+
+        for pdb_file in pdb_files:
+            # load pdb file
+            f = self.pdbloader.read(pdb_file)
+            coords = np.vstack([f.pos_x, f.pos_y, f.pos_z])
+            q = np.linspace(0.001, 1, 100)
+            w = np.random.rand(coords.shape[1]) # random weights
+
+            analytical = sasview_sans_debye.sasview_sans_debye(q, coords, w)
+            external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
+
+            # compare the two
+            errs = (external - analytical)/analytical
+            different_entries = 0
+            for val in np.abs(errs):
+                self.assertLessEqual(val, 0.01, "Ensure that the error is acceptable.")
+                if val != 0:
+                    different_entries += 1
+            self.assertTrue(different_entries > len(q)*0.5, "Check that two different algorithms were actually run.")
+
+        # test a larger q-range
+        f = self.pdbloader.read(os.path.join(os.path.dirname(__file__), "data/debye_test_files/SASDPP4.pdb"))
+        coords = np.vstack([f.pos_x, f.pos_y, f.pos_z])
+        q = np.linspace(0.1, 10, 100)
+        w = np.random.rand(coords.shape[1]) # random weights
+
+        analytical = sasview_sans_debye.sasview_sans_debye(q, coords, w)
+        external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
+
+        errs = (external - analytical)/analytical
+        for val in np.abs(errs):
+            self.assertLessEqual(val, 0.01)
+
     def test_calculator_elements(self):
         """
         Test that the calculator correctly calculates scattering for element type data.
