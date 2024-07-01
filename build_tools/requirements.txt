@@ -25,7 +25,7 @@ pytest_qt
 pytest-mock
 pytools
 qtconsole
-scipy==1.13 # 1.14 deprecates some functions used in the codebase (and potentially in dependencies)
+scipy==1.13.1
 six
 sphinx
 superqt
