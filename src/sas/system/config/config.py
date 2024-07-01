@@ -160,7 +160,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
             'P(r) files (*.prv)',
             'Corfunc files (*.crf)']
 
-        self.SHOW_WELCOME_PANEL = False
+        self.SHOW_WELCOME_PANEL = True
 
 
 
