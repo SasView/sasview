@@ -176,7 +176,7 @@ The structural parameters extracted are:
 *   Long Period :math:`= L_p`
 *   Average Hard Block Thickness :math:`= L_c`
 *   Average Core Thickness :math:`= D_0`
-*   Average Interface Thickness :math:`\text{} = D_{tr}`
+*   Average Interface Thickness :math:`= D_{tr}`
 *   Eekhaut Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
 *   Stribeck Polydispersity :math:`= \frac{L_c}{(L_c - L_p)\Gamma_{\text{max}}}`
 *   Local Crystallinity :math:`= L_c/L_p`
