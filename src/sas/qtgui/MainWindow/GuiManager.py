@@ -30,6 +30,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
+from sas.qtgui.Utilities.ReparameterizationEditor import ReparameterizationEditor
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
@@ -755,6 +756,7 @@ class GuiManager:
         self._workspace.actionAdd_Custom_Model.triggered.connect(self.actionAdd_Custom_Model)
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
         self._workspace.actionManage_Custom_Models.triggered.connect(self.actionManage_Custom_Models)
+        self._workspace.actionReparameterize_Model.triggered.connect(self.actionReparameterize_Model)
         self._workspace.actionAddMult_Models.triggered.connect(self.actionAddMult_Models)
         self._workspace.actionEditMask.triggered.connect(self.actionEditMask)
 
@@ -1168,6 +1170,12 @@ class GuiManager:
         """
         self.model_manager = PluginManager(self)
         self.model_manager.show()
+
+    def actionReparameterize_Model(self):
+        """
+        """
+        self.reparameterizer = ReparameterizationEditor(self)
+        self.reparameterizer.show()
 
     def actionAddMult_Models(self):
         """
