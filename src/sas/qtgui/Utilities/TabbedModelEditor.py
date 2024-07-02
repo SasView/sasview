@@ -519,7 +519,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             check_model = True
         elif not w.is_python and self.is_python:
             # Set full_path to the .py file so that we can run a model check on it (the .py model should link to the .c model)
-            print(self.filename_py)
             full_path = self.filename_py
             check_model = True
         
@@ -693,10 +692,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             #display_name = Path(self.filename_py).name
             self.editor_widget = ModelEditor(self, is_python=True)
             self.tabWidget.addTab(self.editor_widget, name)
+            self.editor_widget.modelModified.connect(self.editorModelModified)
         elif filetype == "c":
             #display_name = Path(self.filename_c).name
             self.c_editor_widget = ModelEditor(self, is_python=False)
             self.tabWidget.addTab(self.c_editor_widget, name)
+            self.c_editor_widget.modelModified.connect(self.editorModelModified)
     
     def removeTab(self, filetype):
         """
