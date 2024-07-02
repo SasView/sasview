@@ -39,11 +39,11 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.11
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: set-matrix
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
@@ -65,10 +65,10 @@ jobs:
           echo '${{ toJson(matrix) }}'
 
       - name: Obtain SasView source from git
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -202,7 +202,7 @@ jobs:
       - name: Install utilities to build installer
         if: ${{ matrix.installer }}
         run: |
-          python -m pip install pyinstaller==5.13.2
+          python -m pip install pyinstaller
 
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
@@ -238,7 +238,7 @@ jobs:
 
       - name: Collect a debug tarball of the installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
@@ -248,8 +248,8 @@ jobs:
       - name: Sign executable and create dmg (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_ISA }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_ISA_PWD }}
         run: |
           echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p DloaAcYP build.keychain
@@ -257,24 +257,82 @@ jobs:
           security unlock-keychain -p DloaAcYP build.keychain
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
-
+          security find-identity -p codesigning
+          
           cd installers/dist
           python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python  ../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.app
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.app
           hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
-          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.dmg
+          codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.dmg
+
+      - name: Notarize Release Build (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        uses: lando/notarize-action@v2
+        with:
+          product-path: "installers/dist/SasView6.dmg"
+          primary-bundle-id: "org.sasview.SasView6"
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+          appstore-connect-team-id: W2AG9MPZ43
+          verbose: True
+
+      - name: Staple Release Build (OSX)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        uses: BoundfoxStudios/action-xcode-staple@v1
+        with:
+          product-path: "installers/dist/SasView6.dmg"
+
+      - name: Sign binary
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        uses: lando/code-sign-action@v2
+        with:
+          file: installers/dist/setupSasView.exe
+          certificate-data: ${{ secrets.WINDOZE_CERT_DATA }}
+          certificate-password: ${{ secrets.WINDOZE_CERT_PASSWORD }}
+          keylocker-host: ${{ secrets.KEYLOCKER_HOST }}
+          keylocker-api-key: ${{ secrets.KEYLOCKER_API_KEY }}
+          keylocker-cert-sha1-hash: ${{ secrets.KEYLOCKER_CERT_SHA1_HASH }}
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
             installers/dist/SasView6.dmg
             installers/dist/sasview6.tar.gz
-          if-no-files-found: error
+          if-no-files-found: ignore
+
+      - name: Rename artifacts (Windows)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        run: |
+          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
+
+      - name: Rename artifacts (MacOS)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        run: |    
+          mv installers/dist/SasView6.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
+
+      - name: Rename artifacts (Linux)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
+        run: |    
+          mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
+
+      - name: Upload Release Installer to GitHub
+        if: ${{ matrix.installer }}
+        uses: ncipollo/release-action@v1
+        with:
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "installers/dist/*SasView-6.0.0-*"
+          name: "Release 6.0.0-alpha"
+          bodyFile: "build_tools/release_notes/6.0.0_notes.txt"
+          tag: "v6.0.0-alpha"
 
   test-installer:
     needs: [ build-matrix ]
@@ -315,7 +373,7 @@ jobs:
 
       - name: Retrieve installer (workflow image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         id: download
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}

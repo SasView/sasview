@@ -2,7 +2,6 @@ import sys
 import os
 import logging
 from pathlib import Path
-from typing import Union
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
@@ -10,7 +9,7 @@ from twisted.internet import threads
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
-from sas.sascalc.doc_regen.makedocumentation import make_documentation, HELP_DIRECTORY_LOCATION, MAIN_PY_SRC, MAIN_DOC_SRC
+from sas.sascalc.doc_regen.makedocumentation import make_documentation, HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE
 
 HTML_404 = '''
 <html>
@@ -145,7 +144,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             self.loadHtml() #loads the html file specified in the source url to the QWebViewer
 
     @staticmethod
-    def newer(src: Union[Path, os.path, str], html: Union[Path, os.path, str]) -> bool:
+    def newer(src: PATH_LIKE, html: PATH_LIKE) -> bool:
         """Compare two files to determine if a file regeneration is required.
 
         :param src: The ReST file that might need regeneration.
@@ -204,7 +203,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             abs_url = QtCore.QUrl.fromLocalFile(url)
         return abs_url
 
-    def regenerateHtml(self, file_name: Union[Path, os.path, str]):
+    def regenerateHtml(self, file_name: PATH_LIKE):
         """Regenerate the documentation for the file passed to the method
 
         :param file_name: A file-path like object that needs regeneration.
@@ -216,7 +215,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.regen_in_progress = True
 
     @staticmethod
-    def regenerateDocs(target: Union[Path, os.path, str] = None):
+    def regenerateDocs(target: PATH_LIKE = None):
         """Regenerates documentation for a specific file (target) in a subprocess
 
         :param target: A file-path like object that needs regeneration.
