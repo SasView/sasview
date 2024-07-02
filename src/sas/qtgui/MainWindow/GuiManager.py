@@ -1264,8 +1264,9 @@ class GuiManager:
         """
         Open the page with tutorial PDF links
         """
-        helpfile = "/user/tutorial.html"
-        self.showHelp(helpfile)
+
+        help_path = HELP_DIRECTORY_LOCATION / "user" / "tutorial.html"
+        webbrowser.open(help_path.as_uri())
 
     def actionAcknowledge(self):
         """
