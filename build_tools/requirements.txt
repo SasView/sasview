@@ -1,5 +1,5 @@
 numpy 
-scipy=1.13.1
+scipy==1.13.1
 docutils 
 pytest
 pytest_qt
