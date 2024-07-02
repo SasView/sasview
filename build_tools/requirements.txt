@@ -14,7 +14,7 @@ lxml
 mako
 matplotlib
 numba
-numpy
+numpy==1.26.4
 periodictable
 pybind11
 pylint
@@ -25,7 +25,7 @@ pytest_qt
 pytest-mock
 pytools
 qtconsole
-scipy
+scipy==1.13.1
 six
 sphinx
 superqt
