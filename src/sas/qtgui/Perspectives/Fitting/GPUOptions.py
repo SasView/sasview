@@ -54,7 +54,6 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.setupUi(self)
 
         self.radio_buttons = []
-
         self.add_options()
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")
@@ -88,6 +87,10 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
 
         self.cl_options = {}
 
+        # Create a button group for the radio buttons
+        self.radio_group = QtWidgets.QButtonGroup()
+
+        # Create a radio button for each openCL option and add to layout
         for title, descr in cl_tuple:
 
             # Create an item for each openCL option
@@ -95,7 +98,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
             radio_button.setObjectName(_fromUtf8(descr))
             radio_button.setText(_translate("GPUOptions", descr, None))
             self.optionsLayout.addWidget(radio_button)
-
+            self.radio_group.addButton(radio_button)
             if title.lower() == config.SAS_OPENCL.lower():
                 radio_button.setChecked(True)
 
