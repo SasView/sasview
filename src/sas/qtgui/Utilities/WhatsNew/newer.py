@@ -32,6 +32,7 @@ def strictly_newer_than(version_a: str, version_b: str) -> bool:
 
     return False
 
+
 def newest(version_a: str, version_b: str) -> str:
     """Return the newest of two versions by the comparison used in the what's new box,
      if they are equally new, return the first one.

@@ -1,7 +1,9 @@
 from collections import defaultdict
 
 from PySide6 import QtWidgets
+from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QDialog, QWidget, QTextBrowser, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox
+from PySide6.QtCore import QUrl
 
 from sas.system.version import __version__ as sasview_version
 import importlib.resources as resources
@@ -11,8 +13,14 @@ from sas.system import config
 
 from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_version, newest
 
-def whats_new_messages():
-    """ Accumulate all files that are newer than the value in the config"""
+
+
+def whats_new_messages(strictly_newer=True):
+    """ Accumulate all files that are newer than the value in the config
+
+    :param strictly_newer: require strictly newer stuff, strictness is needed for showing new things
+                           when there is an update, non-strictness is needed for the menu access.
+    """
 
     out = defaultdict(list)
     message_dir = resources.files("sas.qtgui.Utilities.WhatsNew.messages")
@@ -23,7 +31,11 @@ def whats_new_messages():
             newer = False
 
             try:
-                newer = strictly_newer_than(message_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
+                if strictly_newer:
+                    newer = strictly_newer_than(message_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
+                else:
+                    # Include current version
+                    newer = not strictly_newer_than(config.LAST_WHATS_NEW_HIDDEN_VERSION, message_dir.name)
 
             except ValueError:
                 pass
@@ -36,6 +48,44 @@ def whats_new_messages():
 
     return out
 
+class WhatsNewBrowser(QTextBrowser):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        css = resources.read_text("sas.qtgui.Utilities.WhatsNew.css", "style.css")
+        self.css_data = "<style>\n" + css + "</style>"
+
+    def setHtml(self, text: str) -> None:
+        """ Overriden to inject CSS into HTML files - very, very ugly"""
+        super().setHtml(text.replace("<!-- INJECT CSS HERE -->", self.css_data))
+
+    def loadResource(self, kind: int, url: QUrl | str):
+
+        """ Override the resource discovery to get the images we need """
+
+        if isinstance(url, QUrl):
+            name = url.toString()
+        else:
+            name = url
+
+        if kind == 2:
+
+            # This is pretty nasty, there's probably a better way
+            if name.startswith("whatsnew/"):
+                parts = name.split("/")[1:]
+
+                location = resources.files("sas.qtgui.Utilities.WhatsNew.messages")
+
+                for part in parts:
+                    location = location.joinpath(part)
+
+                im = QPixmap(str(location))
+
+                return im
+
+        return super().loadResource(kind, url)
+
+
 
 class WhatsNew(QDialog):
     """ What's New window: displays messages about what is new in this version of SasView
@@ -46,12 +96,12 @@ class WhatsNew(QDialog):
     To add new messages, just dump a (self-contained) html file into the appropriate folder
 
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, strictly_newer=True):
         super().__init__()
 
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
-        self.browser = QTextBrowser()
+        self.browser = WhatsNewBrowser()
         self.browser.setOpenLinks(True)
         self.browser.setOpenExternalLinks(True)
 
@@ -67,14 +117,22 @@ class WhatsNew(QDialog):
         self.closeButton = QPushButton("Close")
         self.nextButton = QPushButton("Next")
 
-        self.showAgain = QCheckBox("Show on Startup")
-        self.showAgain.setChecked(True)
-
-        # add a horizontal spacer
-        self.buttonLayout.addWidget(self.showAgain)
-        self.buttonLayout.addSpacerItem(QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+        # Only show the show on startup checkbox if we're not up-to-date
         self.buttonLayout.addWidget(self.closeButton)
+
+        if strictly_newer_than(sasview_version, config.LAST_WHATS_NEW_HIDDEN_VERSION):
+
+            self.showAgain = QCheckBox("Show on Startup")
+            self.showAgain.setChecked(True)
+            self.buttonLayout.addWidget(self.showAgain)
+
+        else:
+            self.showAgain = None
+
+        # other buttons
+        self.buttonLayout.addSpacerItem(QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
         self.buttonLayout.addWidget(self.nextButton)
+
 
         # Viewer
         self.setLayout(self.mainLayout)
@@ -86,7 +144,7 @@ class WhatsNew(QDialog):
         self.nextButton.clicked.connect(self.next_file)
 
         # # Gather new files
-        new_messages = whats_new_messages()
+        new_messages = whats_new_messages(strictly_newer=strictly_newer)
         new_message_directories = [key for key in new_messages.keys()]
         new_message_directories.sort(key=reduced_version)
 
@@ -100,6 +158,7 @@ class WhatsNew(QDialog):
 
         self.show_file()
 
+        self.setFixedSize(800, 600)
         self.setModal(True)
 
     def next_file(self):
@@ -112,14 +171,15 @@ class WhatsNew(QDialog):
             filename = self.all_messages[self.current_index]
             with open(filename, 'r') as fid:
                 data = fid.read()
-                self.browser.setText(data)
+                self.browser.setHtml(data)
         else:
-            self.browser.setText("<html><body><h1>You should not see this!!!</h1></body></html>")
+            self.browser.setHtml("<html><body><h1>You should not see this!!!</h1></body></html>")
 
     def close_me(self):
-        if not self.showAgain.isChecked():
-            # We choose the newest, for backwards compatability, i.e. we never reduce the last version
-            config.LAST_WHATS_NEW_HIDDEN_VERSION = newest(sasview_version, config.LAST_WHATS_NEW_HIDDEN_VERSION)
+        if self.showAgain is not None:
+            if not self.showAgain.isChecked():
+                # We choose the newest, for backwards compatability, i.e. we never reduce the last version
+                config.LAST_WHATS_NEW_HIDDEN_VERSION = newest(sasview_version, config.LAST_WHATS_NEW_HIDDEN_VERSION)
 
         self.close()
 
@@ -129,25 +189,16 @@ class WhatsNew(QDialog):
 
 
 
-def maybe_show_whats_new():
-    global whats_new_window
-    """ Show the What's New dialogue if it is wanted """
-
-    if whats_new_messages():
-        whats_new_window = WhatsNew()
-        whats_new_window.show()
-
 
 def main():
     """ Demo/testing window"""
 
     from sas.qtgui.convertUI import main
 
-    main()
-
     app = QtWidgets.QApplication([])
 
-    maybe_show_whats_new()
+    whats_new_window = WhatsNew()
+    whats_new_window.show()
 
     app.exec_()
 
