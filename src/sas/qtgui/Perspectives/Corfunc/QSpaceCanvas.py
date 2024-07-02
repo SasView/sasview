@@ -14,8 +14,9 @@ from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState
 class QSpaceCanvas(CorfuncCanvas):
     """ Canvas for displaying input data and extrapolation parameters"""
 
-    def __init__(self, parent: CorfuncWindow, width=5, height=4, dpi=100):
-        super().__init__(parent, width, height, dpi)
+    def __init__(self, corfunc_window: CorfuncWindow, width=5, height=4, dpi=100):
+        super().__init__(corfunc_window, width, height, dpi)
+
 
         self.extrap: Optional[Data1D] = None
 
@@ -78,7 +79,7 @@ class QSpaceCanvas(CorfuncCanvas):
 
         if self.data is not None:
 
-            extrapolation_params = self.parent.extrapolation_parmameters
+            extrapolation_params = self.corfunc_windows.extrapolation_paramameters
 
             self.axes.errorbar(self.data[0].x,
                                self.data[0].y,

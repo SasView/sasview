@@ -288,30 +288,41 @@ displays the *Easy Add/Multiply Editor* dialog.
 
 .. image:: sum_model.png
 
-This option creates a custom Plugin Model of the form::
+This editor allows the creation of combined custom Plugin Models.
+Give the new model a name (which will appear in the list of plugin models on the *FitPage*)
+and brief description (to appear under the *Details* button on the *FitPage*). The model name must not contain
+spaces (use underscores to separate words if necessary) and if it is longer
+than ~25 characters the name will not display in full in the list of models.
+Now select two models, as model_1 (or p1) and model_2 (or p2), and the
+required operator, '+', '*', or '@'  between them. Finally, click the *Apply* button
+to generate and test the model.
+
+The `+` operator sums the individual I(Q) calculations and introduces a third scale factor::
 
      Plugin Model = scale_factor * {(scale_1 * model_1) +/- (scale_2 * model_2)} + background
 
-or::
+the `*` operator multiplies the individual I(Q) calculations::
 
      Plugin Model = scale_factor * (model1 * model2) + background
 
-In the *Easy Add/Multiply Editor* give the new model a name (which will appear
-in the list of plugin models on the *FitPage*) and brief description (to appear
-under the *Details* button on the *FitPage*). The model name must not contain
-spaces (use underscores to separate words if necessary) and if it is longer
-than ~25 characters the name will not display in full in the list of models.
-Now select two built-in models, as model_1 (or p1) and model_2 (or p2), and the
-required operator, '+' or '*' between them. Finally, click the *Apply* button
-to generate and test the model, and then click *Close*.
+and the `@` operator treats the combination as a form factor [F(Q)] for model_1 and a structure factor [S(Q)] for
+model_2. The scale and background for F(Q) and S(Q) are set to 1 and 0 respectively and the combined model should
+support the beta approximation::
 
-Any changes to a plugin model generated in this way only become effective
-*after* it is re-selected from the plugin models drop-down menu on the FitPage.
+    Plugin Model = scale_factor * vol_fraction * <FF> * S(Q) + background :: No beta
+    Plugin Model = scale_factor * (vol_fraction / form_volume) * (<FF> + <F>^2 * (S(Q) - 1)) + background :: beta
 
-**In SasView 4.x**, if the model is not listed you can try and force a
+**All Versions** Changes made to a plugin model are not applied to models actively in use on fit pages.
+To apply plugin model changes, re-select the model from the drop-down menu on the FitPage.
+
+**In SasView 6.x**, multiplicity models cannot be combined. If a model with any layer or conditional parameter is
+selected, similar models are removed from the other combo box.
+
+**In SasView 4.x**, if the model is not listed on a fit page you can try and force a
 recompilation of the plugins by selecting *Fitting* > *Plugin Model Operations*
-> *Load Plugin Models*. **In SasView 5.x**, you may need to restart the
-program.
+> *Load Plugin Models*. **In SasView 5.0.2 and earlier**, you may need to restart the
+program. **In SasView 5.0.3 and later**, the new model should appear in the list as soon as
+the model is saved.
 
 .. warning::
 
@@ -434,7 +445,7 @@ section, change it to::
      from sasmodels.core import load_model_info
      from sasmodels.sasview_model import make_model_from_info
 
-     model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
+     model_info = load_model_info('power_law+fractal+gaussian_peak+gaussian_peak')
      model_info.name = 'MyBigPluginModel'
      model_info.description = 'For fitting pores in crystalline framework'
      Model = make_model_from_info(model_info)
@@ -1133,7 +1144,7 @@ using an on-the-fly :ref:`SESANS` from *Q*-space to real-space.
 To use this functionality it is important that the SESANS data file has
 the extension .ses to distinguish it from *Q*-space data. The SESANS user
 community is gradually refining the structure and content of its data files.
-Some current examples can be found in the \\test\\sesans_data folder within
+Some current examples can be found in the \\example_data\\sesans_data folder within
 the SasView installation folder. For more information about the contents
 of .ses files, see :ref:`Formats`.
 
@@ -1143,16 +1154,16 @@ Load the .ses file and Send to Fitting as normal.
 
 The first true indication that the data are not SANS data comes when the
 data are plotted. Instead of *Intensity* vs *Q*, the data are displayed
-as a normalised depolarisation (*P*) vs spin-echo length (*z*).
+as a normalised depolarisation (*P*) vs spin-echo length (:math:`{\delta}`).
 
 .. image:: fitting_sesans_2.png
 
 Since SESANS data normally represent much longer length scales than SANS
 data, it will likely be necessary to significantly increase key size
 parameters in a model before attempting any fitting. In the screenshot
-above, the radius of the sphere has been increased from its default
+above for example, the radius of the sphere could be increased from its default
 value of 50 |Ang| to 5000 |Ang| in order to get the transform to show
-something sensible.
+something more sensible.
 
 The model parameters can then be optimised by checking them as required
 and clicking the Fit button as is normal.
@@ -1168,4 +1179,4 @@ command line interpreter, see :ref:`sesans_fitting`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 26Oct2022
+.. note::  This help document was last changed by Caitlyn Wolf, 20March2024
