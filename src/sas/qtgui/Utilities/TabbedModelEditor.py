@@ -25,6 +25,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     Once the model is defined, it can be saved as a plugin.
     """
     # Signals for intertab communication plugin -> editor
+
     def __init__(self, parent=None, edit_only=False, model=False, load_file=None):
         super(TabbedModelEditor, self).__init__(parent._parent)
 
@@ -373,6 +374,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # disable "Apply"
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
+
+        # Allow user to toggle 'Generate Python model' checkbox
+        self.plugin_widget.enablePyCheckboxSignal.emit()
 
         # Run the model test in sasmodels and check model syntax. Returns error line if checks fail.
         if os.path.exists(full_path_py):
