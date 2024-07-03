@@ -120,8 +120,8 @@ return intensity
         """
         Define slots for widget signals
         """
-        self.txtName.editingFinished.connect(self.onPluginNameChanged)
-        self.txtDescription.editingFinished.connect(self.onDescriptionChanged)
+        self.txtName.textChanged.connect(self.onPluginNameChanged)
+        self.txtDescription.textChanged.connect(self.onDescriptionChanged)
         self.tblParams.cellChanged.connect(self.onParamsChanged)
         self.tblParamsPD.cellChanged.connect(self.onParamsPDChanged)
         # QTextEdit doesn't have a signal for edit finish, so we respond to text changed.
