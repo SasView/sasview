@@ -996,7 +996,8 @@ C_COMMENT_TEMPLATE = '''\
 // 3. Ensure a python file links to your C model (source = ['filename.c'])
 // 4. Press 'Apply' or 'Save' to save your model and run a model check (note that the model check will fail if there is no python file of the same name in your plugins directory)
 
-// NOTE: SasView has many built-in functions that you can use in your C model--for example, spherical Bessel functions (lib/sas_3j1x_x.c), Gaussian quadrature (lib/sas_J1.c), and more. Check documentation for full list.
+// NOTE: SasView has many built-in functions that you can use in your C model--for example, spherical Bessel functions (lib/sas_3j1x_x.c), Gaussian quadrature (lib/sas_J1.c), and more.
+//       To include, add their filename to the `source = []` list in the python file linking to your C model.
 // NOTE: It also has many common constants following the C99 standard, such as M_PI, M_SQRT1_2, and M_E. Check documentation for full list.
 
 '''
