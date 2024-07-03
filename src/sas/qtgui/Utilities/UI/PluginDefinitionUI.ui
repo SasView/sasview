@@ -128,7 +128,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="4" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QCheckBox" name="chkGenPython">
@@ -156,6 +156,16 @@
        <widget class="QCheckBox" name="chkOverwrite">
         <property name="text">
          <string>Overwrite existing plugin model of this name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="infoLabel">
+        <property name="styleSheet">
+         <string notr="true">font-size: 8pt</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>

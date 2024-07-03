@@ -1,9 +1,12 @@
+import os.path
+
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 
 from sas.qtgui.Utilities.UI.PluginDefinitionUI import Ui_PluginDefinition
 from sas.qtgui.Utilities import GuiUtils
+from sas.sascalc.fit.models import find_plugins_dir
 
 # txtName
 # txtDescription
@@ -21,9 +24,14 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     modelModified = QtCore.Signal()
     omitPolydisperseFuncsSignal = QtCore.Signal()
     includePolydisperseFuncsSignal = QtCore.Signal()
+    enablePyCheckboxSignal = QtCore.Signal()
+
     def __init__(self, parent=None):
         super(PluginDefinition, self).__init__(parent)
+
         self.setupUi(self)
+
+        self.infoLabel.setVisible(False)
 
         # globals
         self.initializeModel()
@@ -123,12 +131,16 @@ return intensity
         self.chkOverwrite.toggled.connect(self.onOverwrite)
         self.chkGenPython.toggled.connect(self.onGenPython)
         self.chkGenC.toggled.connect(self.onGenC)
+        self.enablePyCheckboxSignal.connect(lambda: self.checkPyModelExists(self.model['filename']))
 
     def onPluginNameChanged(self):
         """
         Respond to changes in plugin name
         """
         self.model['filename'] = self.txtName.text()
+
+        self.checkPyModelExists(self.model['filename'])
+
         self.modelModified.emit()
 
     def onDescriptionChanged(self):
@@ -254,6 +266,23 @@ return volume
         """
         self.model['gen_c'] = self.chkGenC.isChecked()
         self.modelModified.emit()
+    
+    def checkPyModelExists(self, filename):
+        """
+        Checks if a Python model exists in the user plugin directory and forces enabling Python checkbox if not
+        :param filename: name of the file (without extension)
+        """
+        if not os.path.exists(os.path.join(find_plugins_dir(), filename + '.py')):
+            # If the user has not yet created a Python file for a specific filename, then force them to create one
+            self.chkGenPython.setChecked(True)
+            self.chkGenPython.setEnabled(False)
+            self.infoLabel.setText("No Python model of the same name detected. Generating Python model is required.")
+            self.infoLabel.setVisible(True)
+        else:
+            self.infoLabel.setVisible(False)
+            self.chkGenPython.setEnabled(True)
+        return os.path.exists(os.path.join(find_plugins_dir(), filename + '.py'))
+        
 
     def getModel(self):
         """
