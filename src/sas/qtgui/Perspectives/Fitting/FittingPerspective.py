@@ -79,7 +79,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
         self.fit_options_widget = FittingOptions(config=self.fit_options)
-        self.fit_options.selected_id = self.fit_options_widget.cbAlgorithm.currentText().lower()
+        self.fit_options.selected_id = self.fit_options_widget.current_fitter_id
 
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
