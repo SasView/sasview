@@ -11,6 +11,7 @@ PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
 datas = [
     ('../src/sas/qtgui/images', 'images'),
+    ('../src/sas/qtgui/images', "sas/qtgui/images"),
     ('../src/sas/sasview/media', 'media'),
     ('../src/sas/example_data', 'example_data'),
     ('../src/sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib'),    
