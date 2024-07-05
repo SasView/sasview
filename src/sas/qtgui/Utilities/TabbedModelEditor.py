@@ -1089,9 +1089,9 @@ radius_effective(int mode) // Add arguments as needed
 
 static void
 Fq(double q, 
-    double *F1,
-    double *F2,
-    {args}) // Remove arguments as needed
+   double *F1,
+   double *F2,
+   {args}) // Remove arguments as needed
 {{
     // Define F(Q) calculations here...
     // IMPORTANT: You do not have to define Iq if your model uses Fq for beta approximation; the *F2 value is <F(Q)^2> and equivalent to the output of Iq.
@@ -1103,7 +1103,7 @@ Fq(double q,
 
 static double
 Iq(double q,
-    {args}) // Remove arguments as needed
+   {args}) // Remove arguments as needed
 {{
     // Define I(Q) calculations here for models independent of shape orientation
     // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, or Iqabc; remove others.
@@ -1112,8 +1112,8 @@ Iq(double q,
 
 static double
 Iqac(double qab,
-    double qc,
-    {args}) // Remove arguments as needed
+     double qc,
+     {args}) // Remove arguments as needed
 {{
     // Define I(Q) calculations here for models dependent on shape orientation in which the shape is rotationally symmetric about *c* axis
     // Note: *psi* angle not needed for shapes symmetric about *c* axis
@@ -1123,9 +1123,9 @@ Iqac(double qab,
 
 static double
 Iqabc(double qa,
-    double qb,
-    double qc,
-    {args}) // Remove arguments as needed
+      double qb,
+      double qc,
+      {args}) // Remove arguments as needed
 {{
     // Define I(Q) calculations here for models dependent on shape orientation in all three axes
     // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy; remove others.
@@ -1134,8 +1134,8 @@ Iqabc(double qa,
 
 static double
 Iqxy(double qx,
-    double qy,
-    {args}) // Remove arguments as needed
+     double qy,
+     {args}) // Remove arguments as needed
 {{
     // Define I(Q) calculations here for 2D magnetic models.
     // WARNING: The use of Iqxy is generally discouraged; Use Iqabc instead for its better orientational averaging and documentation for details.
