@@ -1045,25 +1045,38 @@ source = ['{c_model_name}']
 '''
 
 C_COMMENT_TEMPLATE = '''\
-//:::Custom C model template:::
+// :::Custom C model template:::
 // This is a template for a custom C model.
-// C Models are used for a variety of reasons in SasView, including better performance and the ability to perform calculations not possible in Python.
-// For example, all oriented and magnetic models, as well as most models using structure factor calculations, are written in C.
+// C Models are used for a variety of reasons in SasView, including better
+//   performance and the ability to perform calculations not possible in Python.
+// For example, all oriented and magnetic models, as well as most models
+// using structure factor calculations, are written in C.
 // HOW TO USE THIS TEMPLATE:
-// 1. Determine which functions you will need to perform your calculations; delete unused functions.
+// 1. Determine which functions you will need to perform your calculations;
+//    delete unused functions.
 //   1.1 Note that you must define either Iq, Fq, or one of Iqac, Iqabc:
-//     Iq if your model does not use orientation parameters or use structure factor calculations;
+//     Iq if your model does not use orientation parameters or use structure
+//       factor calculations;
 //     Fq if your model uses structure factor calculations;
 //     Iqac or Iqabc if your model uses orientation parameters/is magnetic;
-//     Fq AND Iqac/Iqabc if your model uses orientation parameters/is magnetic and has structure factor calculations.
-// 2. Write C code independently of this editor and paste it into the appropriate functions.
-//   2.1 Note that the C editor does not support C syntax checking, so writing C code directly into the SasView editor is not reccomended.
+//     Fq AND Iqac/Iqabc if your model uses orientation parameters or
+//       is magnetic and has structure factor calculations.
+// 2. Write C code independently of this editor and paste it into the
+//      appropriate functions.
+//    2.1 Note that the C editor does not support C syntax checking, so
+//          writing C code directly into the SasView editor is not reccomended.
 // 3. Ensure a python file links to your C model (source = ['filename.c'])
-// 4. Press 'Apply' or 'Save' to save your model and run a model check (note that the model check will fail if there is no python file of the same name in your plugins directory)
-
-// NOTE: SasView has many built-in functions that you can use in your C model--for example, spherical Bessel functions (lib/sas_3j1x_x.c), Gaussian quadrature (lib/sas_J1.c), and more.
-//       To include, add their filename to the `source = []` list in the python file linking to your C model.
-// NOTE: It also has many common constants following the C99 standard, such as M_PI, M_SQRT1_2, and M_E. Check documentation for full list.
+// 4. Press 'Apply' or 'Save' to save your model and run a model check
+//      (note that the model check will fail if there is no python file of the
+//      same name in your plugins directory)
+// 
+// NOTE: SasView has many built-in functions that you can use in your C model--
+//       for example, spherical Bessel functions (lib/sas_3j1x_x.c), Gaussian
+//       quadrature (lib/sas_J1.c), and more.
+//       To include, add their filename to the `source = []` list in the python
+//       file linking to your C model.
+// NOTE: It also has many common constants following the C99 standard, such as
+//       M_PI, M_SQRT1_2, and M_E. Check documentation for full list.
 
 '''
 
@@ -1094,9 +1107,12 @@ Fq(double q,
    {args}) // Remove arguments as needed
 {{
     // Define F(Q) calculations here...
-    // IMPORTANT: You do not have to define Iq if your model uses Fq for beta approximation; the *F2 value is <F(Q)^2> and equivalent to the output of Iq.
-    // IMPORTANT: You may use Fq instead of Iq even if you do not need <F(Q)> (*F1) for beta approximation, but this is not recommended.
-    // IMPORTANT: Additionally, you must still define Iqac or Iqabc if your model has orientation parameters.
+    //IMPORTANT: You do not have to define Iq if your model uses Fq for
+    //    beta approximation; the *F2 value is F(Q)^2 and equivalent to
+    //    the output of Iq. You may use Fq instead of Iq even if you do
+    //    not need F(Q) (*F1) for beta approximation, but this is not recommended.
+    //    Additionally, you must still define Iqac or Iqabc if your
+    //    model has orientation parameters.
     *F1 = 0.0;
     *F2 = 0.0;
 }}
@@ -1106,7 +1122,8 @@ Iq(double q,
    {args}) // Remove arguments as needed
 {{
     // Define I(Q) calculations here for models independent of shape orientation
-    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, or Iqabc; remove others.
+    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, or Iqabc;
+    //    remove others.
     return 1.0;
 }}
 
@@ -1115,9 +1132,11 @@ Iqac(double qab,
      double qc,
      {args}) // Remove arguments as needed
 {{
-    // Define I(Q) calculations here for models dependent on shape orientation in which the shape is rotationally symmetric about *c* axis
+    // Define I(Q) calculations here for models dependent on shape orientation in
+    // which the shape is rotationally symmetric about *c* axis.
     // Note: *psi* angle not needed for shapes symmetric about *c* axis
-    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy; remove others.
+    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy;
+    //   remove others.
     return 1.0;
 }}
 
@@ -1127,8 +1146,10 @@ Iqabc(double qa,
       double qc,
       {args}) // Remove arguments as needed
 {{
-    // Define I(Q) calculations here for models dependent on shape orientation in all three axes
-    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy; remove others.
+    // Define I(Q) calculations here for models dependent on shape orientation in
+    // all three axes.
+    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy;
+    //   remove others.
     return 1.0;
 }}
 
@@ -1138,8 +1159,11 @@ Iqxy(double qx,
      {args}) // Remove arguments as needed
 {{
     // Define I(Q) calculations here for 2D magnetic models.
-    // WARNING: The use of Iqxy is generally discouraged; Use Iqabc instead for its better orientational averaging and documentation for details.
-    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy; remove others.
+    // WARNING: The use of Iqxy is generally discouraged; Use Iqabc instead
+    //    for its better orientational averaging and documentation for details.
+    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy;
+    //    remove others.
+    
     return 1.0;
 }}
 """
