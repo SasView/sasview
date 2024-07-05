@@ -6,6 +6,7 @@ import ast
 import datetime
 import logging
 import traceback
+import importlib.util
 
 from PySide6 import QtWidgets, QtCore, QtGui
 from pathlib import Path
@@ -565,6 +566,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Notify listeners, since the plugin name might have changed
         self.parent.communicate.customModelDirectoryChanged.emit()
 
+        if self.isWidgetInTab(self.tabWidget, self.plugin_widget):
+            # Attempt to update the plugin widget with updated model information
+            self.updateToPlugin(full_path)
+
         # notify the user
         msg = str(filename) + " successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
@@ -730,6 +735,34 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         elif filetype == "c":
             self.tabWidget.removeTab(self.tabWidget.indexOf(self.c_editor_widget))
 
+    def updateToPlugin(self, full_path):
+        """
+        Update the plugin tab with new info from the model editor
+        """
+        self.model = self.getModel()
+        model_text = self.model['text']
+
+        spec = importlib.util.spec_from_file_location("model", full_path) # Easier to import than use regex
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        description = module.description
+        parameters = module.parameters
+        iq_text = self.extractFunctionBody(model_text, "Iq")
+        form_volume_text = self.extractFunctionBody(model_text, "form_volume")
+
+        slim_param_list = []
+        for param in parameters:
+            if param[0]:
+                # Extract parameter name, default value, and whether "volume" parameter
+                slim_param_list.append([param[0], param[2], param[4]])
+
+        # Send parameters in a list of lists format to listening widget
+        self.plugin_widget.sendNewParamSignal.emit(slim_param_list)
+        self.plugin_widget.sendNewDescriptionSignal.emit(description)
+        self.plugin_widget.sendNewIqSignal.emit(iq_text)
+        self.plugin_widget.sendNewFormVolumeSignal.emit(form_volume_text)
+
     @classmethod
     def isWidgetInTab(cls, tabWidget, widget_to_check):
         """
@@ -894,6 +927,38 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                     value = 1
             param_str += params[0] + " = " + str(value) + "\n"
         return param_str
+    
+    @classmethod
+    def extractFunctionBody(cls, source_code, function_name):
+        """
+        Extract the body of a function from a model file
+        """
+        tree = ast.parse(source_code)
+        extractor = cls.FunctionBodyExtractor(function_name)
+        extractor.visit(tree)
+        return extractor.function_body_source
+    
+    class FunctionBodyExtractor(ast.NodeVisitor):
+        """
+        Class to extract the body of a function from a model file
+        """
+        def __init__(self, function_name):
+            self.function_name = function_name
+            self.function_body_source = None
+
+        def visit_FunctionDef(self, node):
+            """
+            Extract the source code of the function with the given name.
+            NOTE: Do NOT change the name of this method-- visit_ is a prefix that ast.NodeVisitor uses
+            """
+            if node.name == self.function_name:
+                body = node.body
+                # Check if the first statement is an Expr node containing a constant (docstring)
+                if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant):
+                    body = body[1:]  # Exclude the docstring
+                self.function_body_source = ast.unparse(body)
+            # Continue traversing to find nested functions or other function definitions
+            self.generic_visit(node)
 
 
 CUSTOM_TEMPLATE = '''\
