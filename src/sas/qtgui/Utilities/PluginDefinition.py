@@ -1,4 +1,5 @@
 import os.path
+import logging
 
 from PySide6 import QtCore
 from PySide6 import QtGui
@@ -25,6 +26,10 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     omitPolydisperseFuncsSignal = QtCore.Signal()
     includePolydisperseFuncsSignal = QtCore.Signal()
     enablePyCheckboxSignal = QtCore.Signal()
+    sendNewParamSignal = QtCore.Signal(list)
+    sendNewDescriptionSignal = QtCore.Signal(str)
+    sendNewIqSignal = QtCore.Signal(str)
+    sendNewFormVolumeSignal = QtCore.Signal(str)
 
     def __init__(self, parent=None):
         super(PluginDefinition, self).__init__(parent)
@@ -132,6 +137,10 @@ return intensity
         self.chkGenPython.toggled.connect(self.onGenPython)
         self.chkGenC.toggled.connect(self.onGenC)
         self.enablePyCheckboxSignal.connect(lambda: self.checkPyModelExists(self.model['filename']))
+        self.sendNewParamSignal.connect(self.updateParamTableFromEditor)
+        self.sendNewDescriptionSignal.connect(lambda description: self.txtDescription.setText(description))
+        self.sendNewIqSignal.connect(lambda iq: self.txtFunction.setPlainText(iq))
+        self.sendNewFormVolumeSignal.connect(lambda form_volume: self.txtFormVolumeFunction.setPlainText(form_volume))
 
     def onPluginNameChanged(self):
         """
@@ -282,7 +291,35 @@ return volume
             self.infoLabel.setVisible(False)
             self.chkGenPython.setEnabled(True)
         return os.path.exists(os.path.join(find_plugins_dir(), filename + '.py'))
-        
+
+    def updateParamTableFromEditor(self, param_list):
+        """
+        Add parameters sent from model editor to the parameter tables
+        :param param_list: list of parameters to add to the parameter tables [name, default_value, type]
+        """
+        updated_params_non_pd = [param for param in param_list if param[2] != 'volume']
+        updated_params_pd = [param for param in param_list if param[2] == 'volume']
+
+        # Prepare the table for updating
+        self.tblParams.blockSignals(True)
+        self.tblParamsPD.blockSignals(True)
+        self.tblParams.clearContents()
+        self.tblParamsPD.clearContents()
+        self.tblParams.setRowCount(len(updated_params_non_pd) + 1)
+        self.tblParamsPD.setRowCount(len(updated_params_pd) + 1)
+
+        # Iterate over cells and add the new parameters to them
+        for table, params in [[self.tblParams, updated_params_non_pd], [self.tblParamsPD, updated_params_pd]]:
+            for row, param in enumerate(params):
+                for column in range(2):
+                    if column < len(param):  # Check if the column index is within the bounds of param length
+                        item = QtWidgets.QTableWidgetItem(str(param[column]))
+                        table.setItem(row, column, item)
+                    else:
+                        logging.info(f"Missing data for Row {row}, Column {column}")
+
+        self.tblParams.blockSignals(False)
+        self.tblParamsPD.blockSignals(False)
 
     def getModel(self):
         """
