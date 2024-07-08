@@ -14,7 +14,7 @@ lxml
 mako
 matplotlib
 numba
-numpy==1.26.4
+numpy==2.0.0
 periodictable
 pybind11
 pylint
