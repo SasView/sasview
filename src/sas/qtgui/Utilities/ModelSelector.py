@@ -21,7 +21,7 @@ CATEGORY_STRUCTURE = "Structure Factor"
 
 class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
     """
-    Helper widget to get model parameters from a list of available models sorted by class
+    Helper widget to get model parameters from a list of available models sorted by type
     """
 
     # Signals
@@ -45,9 +45,10 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
         Connect signals to slots
         """
         if self.parent:
-            self.parent.destroyed.connect(self.onParentClosed)
+            self.parent.destroyed.connect(self.onClose)
         self.modelTree.itemSelectionChanged.connect(self.onSelectionChanged)
         self.cmdLoadModel.clicked.connect(self.onLoadModel)
+        self.cmdCancel.clicked.connect(self.onClose)
     
     def onLoad(self):
         # Create model dictionary of all models and load it into the QTreeWidget
@@ -209,6 +210,6 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
         # TODO: Define plugin_models property in ModelManager.
         return manager.base.plugin_models
         
-    def onParentClosed(self):
+    def onClose(self):
         self.close()
         self.deleteLater()

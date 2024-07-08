@@ -16,14 +16,20 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
     
     def addSignals(self):
         self.selectModelButton.clicked.connect(self.onSelectModel)
+        self.cmdCancel.clicked.connect(self.close)
 
     def onSelectModel(self):
+        """
+        Launch model selection dialog
+        """
         self.model_selector = ModelSelector(self)
         self.model_selector.returnModelParamsSignal.connect(self.loadOldParams)
         self.model_selector.show()
 
-    def loadOldParams(self, params): 
-        # Load parameters from the selected model into the oldParamTree
+    def loadOldParams(self, params):
+        """
+        Load parameters from the selected model into the oldParamTree
+        """
         for param in params:
             item = QtWidgets.QTreeWidgetItem(self.oldParamTree)
             item.setText(0, param.name)
@@ -49,6 +55,5 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                     
 
     def closeEvent(self, event):
-        # Perform any cleanup or save operations before closing
         self.close()
         self.deleteLater()  # Schedule the window for deletion
