@@ -150,7 +150,6 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
         self.close()
         self.deleteLater()
 
-
     def getParameters(self):
         name = self.selection
         kernel_module = None
