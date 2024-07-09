@@ -39,7 +39,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             specs = [ ("default", "default"),
                        ("min", "limits[0]"),
                        ("max", "limits[1]"),
-                       ("units", "units")
+                       ("units", "units"),
+                       ("type", "type")
                      ]
             for spec in specs:
                 sub_item = QtWidgets.QTreeWidgetItem(item)
