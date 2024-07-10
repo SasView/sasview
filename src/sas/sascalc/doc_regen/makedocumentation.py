@@ -38,6 +38,10 @@ if os.path.exists(SAS_DIR / "doc"):
     # This is the directory structure for the installed version of SasView (primary for times when both exist)
     BASE_DIR = SAS_DIR / "doc"
     ORIGINAL_DOCS_SRC = BASE_DIR / "source"
+elif os.path.exists(SAS_DIR / '..' / 'Frameworks' / 'doc'):
+    # In the MacOS bundle, the executable and packages are in parallel directories
+    BASE_DIR = SAS_DIR / '..' / 'Frameworks' / 'doc'
+    ORIGINAL_DOCS_SRC = BASE_DIR / "source"
 else:
     # This is the directory structure for developers
     BASE_DIR = SAS_DIR / "docs" / "sphinx-docs"
