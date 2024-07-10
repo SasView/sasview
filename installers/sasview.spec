@@ -120,7 +120,7 @@ else:
         strip=False,
         upx=True,
         console=True,
-        hide_console=True)
+        hide_console='hide_early')
 
 coll = COLLECT(
     exe,
