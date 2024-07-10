@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QWidget, QTabWidget, QVBoxLayout
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
+from PySide6.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QMainWindow, QDockWidget
+from PySide6.QtCore import Qt
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
 from typing import List
 import matplotlib.figure
 import matplotlib.colors as colors
@@ -18,10 +18,6 @@ class SubTabs(QTabWidget):
 
         # iterate through subtabs
         for i in range(tabitem.childCount()):
-            #add subtabs
-            subtab_widget = QWidget()
-            subtab = self.addTab(QWidget(), tabitem.child(i).text(0))
-
             #add subplots
             layout = QVBoxLayout()
             figure = matplotlib.figure.Figure(figsize=(5, 5))
@@ -87,7 +83,15 @@ class SubTabs(QTabWidget):
                                 ax[j].get_lines()[m].set_color(cmap(m/(n-1)))
 
             figure.tight_layout()
-            self.widget(i).setLayout(layout)
+            canvas_widget = QWidget()
+            canvas_widget.setLayout(layout)
+
+            dock_container = QMainWindow()
+            dock_widget = QDockWidget()
+            dock_widget.setWidget(canvas_widget)
+            dock_container.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock_widget)
+
+            self.addTab(dock_container, tabitem.child(i).text(0))
             self.figures.append(figure)
 
     def get_fitpage_index(self):
