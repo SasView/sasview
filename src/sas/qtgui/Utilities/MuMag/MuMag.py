@@ -1,3 +1,5 @@
+import webbrowser
+
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
 from PySide6.QtWidgets import QVBoxLayout
 from PySide6 import QtWidgets
@@ -29,6 +31,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.ImportDataButton.clicked.connect(self.importData)
         self.SimpleFitButton.clicked.connect(self.onFit)
         self.SaveResultsButton.clicked.connect(self.onSave)
+        self.helpButton.clicked.connect(self.onHelp)
 
         #
         # Data
@@ -318,6 +321,8 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
             MuMagLib.save_data(self.fit_data, directory)
 
+    def onHelp(self):
+        webbrowser.open("https://www.sasview.org/docs/user/qtgui/Utilities/MuMag/mumag_help.html")
 
 def main():
     """ Show a demo of the slider """
