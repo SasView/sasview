@@ -13,11 +13,14 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
 
     # Signals
     returnNewParamsSignal = QtCore.Signal(list)
+    returnEditedParamSignal = QtCore.Signal(list, str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, properties=None):
         super(ParameterEditDialog, self).__init__(parent)
 
         self.parent = parent
+        self.properties = properties
+        self.previous_name = None # Previous name of the parameter, if any
 
         self.setupUi(self)
 
@@ -35,7 +38,19 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
     def onLoad(self):
         self.valuesTable.resizeRowsToContents()
         self.adjustTableSize()
-    
+
+        # Detect if properties are passed in (if we are in edit-mode)
+        if self.properties:
+            self.setWindowTitle("Edit Parameter: %s" % self.properties['name'])
+
+            # Load properties into table
+            for property in self.properties:
+                if property not in ("name", "highlighted_property"):
+                    self.writeValuesToTable(self.valuesTable, property, str(self.properties[property]))
+                elif property == "name":
+                    self.txtName.setText(self.properties[property])
+                    self.previous_name = self.properties[property]
+
     def onCellPressed(self):
         # Clear bold formatting in the first column
         for row in range(self.valuesTable.rowCount()):
@@ -55,7 +70,11 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
         """
         Return the values in the table to the listening parent widget
         """
-        self.returnNewParamsSignal.emit(self.getValues())
+        if self.properties:
+            self.returnEditedParamSignal.emit(self.getValues(), self.previous_name)
+        else:
+            self.returnNewParamsSignal.emit(self.getValues())
+
         self.onClose()
     
     def getValues(self):
@@ -83,7 +102,7 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
         parameter.default = self.getValuesFromTable(self.valuesTable, "Default")
         parameter.units = self.getValuesFromTable(self.valuesTable, "Units")
         parameter.type = self.getValuesFromTable(self.valuesTable, "Type")
-        parameter.description = self.valuesTable.item(self.valuesTable.findItems("Description", QtCore.Qt.MatchContains)[0].row(), 1).text()
+        parameter.description = self.getValuesFromTable(self.valuesTable, "Description")
 
         return [parameter]
     
@@ -97,7 +116,27 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
         :param table: QTableWidget
         :param search_string: str
         """
-        return table.item(table.findItems(search_string, QtCore.Qt.MatchContains)[0].row(), 1).text()
+        property_row = table.findItems(search_string, QtCore.Qt.MatchContains)[0].row()
+        try:
+            return table.item(property_row, 1).text()
+        except AttributeError:
+            return ""
+    
+    @staticmethod
+    def writeValuesToTable(table, search_string, value):
+        """
+        Write values to column 2 of table given a search string in column 1
+        :param table: QTableWidget
+        :param search_string: str
+        """
+        property_row = table.findItems(search_string, QtCore.Qt.MatchContains)[0].row()
+        try:
+            return table.item(property_row, 1).setText(value)
+        except AttributeError:
+            # Generate and place a blank QTableWidgetItem so we can set its text
+            new_item = QtWidgets.QTableWidgetItem()
+            table.setItem(property_row, 1, new_item)
+            return table.item(property_row, 1).setText(value)
     
     def onClose(self):
         self.close()
