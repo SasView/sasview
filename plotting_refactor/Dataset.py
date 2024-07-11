@@ -56,7 +56,8 @@ class Dataset:
     def set_y_fit(self, y_fit):
         self.y_fit = y_fit
 
+    def set_2d(self, checked_2d):
+        self.data_2d = checked_2d
+
     def is_2d(self):
         return self.data_2d
-
-
