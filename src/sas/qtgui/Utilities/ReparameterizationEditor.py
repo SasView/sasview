@@ -32,20 +32,24 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Launch model selection dialog
         """
         self.model_selector = ModelSelector(self)
-        self.model_selector.returnModelParamsSignal.connect(lambda params: self.loadParams(params, self.oldParamTree))
+        self.model_selector.returnModelParamsSignal.connect(lambda model_name, params: self.loadParams(model_name, params, self.oldParamTree))
         self.model_selector.show()
 
-    def loadParams(self, params, tree):
+    def loadParams(self, model_name, params, tree):
         """
         Load parameters from the selected model into the oldParamTree
         :param param:
         :param tree: the tree widget to load the parameters into
+        :param model_name: the name of the model that the parameters are from
         """
         for param in params:
             item = QtWidgets.QTreeWidgetItem(tree)
             item.setText(0, param.name)
             tree.addTopLevelItem(item)
             self.addSubItems(param, item)
+        # Once model is loaded sucessfully, update txtSelectModelInfo to reflect the model name
+        self.lblSelectModelInfo.setText("Model <b>%s</b> loaded successfully" % model_name)
+
 
     def onAddParam(self):
         """

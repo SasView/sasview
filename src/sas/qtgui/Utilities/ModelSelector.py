@@ -25,7 +25,7 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
     """
 
     # Signals
-    returnModelParamsSignal = QtCore.Signal(list)
+    returnModelParamsSignal = QtCore.Signal(str, list)
 
     def __init__(self, parent=None):
         super(ModelSelector, self).__init__(parent)
@@ -146,11 +146,14 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
         Get parameters for selected model, convert to usable data, send to parent. Close dialog if sucessful.
         """
         iq_parameters = self.getParameters()
-        self.returnModelParamsSignal.emit(iq_parameters)
+        self.returnModelParamsSignal.emit(self.lblSelection.text(), iq_parameters)
         self.close()
         self.deleteLater()
 
     def getParameters(self):
+        """
+        Get parameters for the selected model and return them as a list
+        """
         name = self.selection
         kernel_module = None
 

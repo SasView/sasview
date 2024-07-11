@@ -274,7 +274,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <item row="1" column="0" colspan="2">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QCheckBox" name="checkBox">
+         <widget class="QCheckBox" name="chkOverwrite">
           <property name="text">
            <string>Overwrite existing plugin model</string>
           </property>
@@ -294,7 +294,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="lblSelectModelInfo">
           <property name="text">
            <string>Select model to be reparameterized</string>
           </property>
