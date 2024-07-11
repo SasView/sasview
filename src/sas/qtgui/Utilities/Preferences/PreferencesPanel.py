@@ -30,6 +30,23 @@ ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
 logger = logging.getLogger(__name__)
 
 
+def restart_main():
+    # Restart the application...
+    executable = sys.executable
+    executable_filename = os.path.split(executable)[1]
+    if executable_filename.lower().startswith('python'):
+        # application is running within a python interpreter
+        python = executable
+        os.execv(python, [python, ] + sys.argv)
+        pass
+    else:
+        # application is running as a standalone executable
+        os.execv(executable, sys.argv)
+        pass
+    pass
+
+
+
 class PreferencesPanel(QDialog, Ui_preferencesUI):
     """A preferences panel to house all SasView related settings. The left side of the window is a listWidget with a
     options menus available. The right side of the window is a stackedWidget object that houses the options
@@ -147,7 +164,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             msgBox.show()
             if msgBox.exec() == QMessageBox.Yes:
                 self.parent.guiManager.quitApplication()
-                os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
+                restart_main()
         self._reset_state()
 
     def _cancelStaging(self):
