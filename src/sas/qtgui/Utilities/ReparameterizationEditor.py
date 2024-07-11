@@ -42,6 +42,10 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         :param tree: the tree widget to load the parameters into
         :param model_name: the name of the model that the parameters are from
         """
+        # Clear the tree widget
+        tree.clear()
+
+        # Add parameters to the tree
         for param in params:
             item = QtWidgets.QTreeWidgetItem(tree)
             item.setText(0, param.name)
