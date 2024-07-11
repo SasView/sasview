@@ -99,8 +99,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             if param_item.text(0) == param_name: # If the parameter name is the one the user selected
                 properties['name'] = param_item.text(0)
                 for property in range(param_item.childCount()): # Iterate over all properties (children) of the parameter and add them to dict
-                    prop_item = param_item.child(property)
-                    properties[prop_item.text(0)] = prop_item.text(1)
+                    if param_item.child(property).text(0) == 'description':
+                        # Access the description text, which is in another sub-item
+                        prop_item = param_item.child(property).child(0)
+                        properties['description'] = prop_item.text(1)
+                    else:
+                        prop_item = param_item.child(property)
+                        properties[prop_item.text(0)] = prop_item.text(1)
                 break
         return properties
     
@@ -150,6 +155,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                 sub_item.setText(1, str(getattr(param, prop_name)[index]))
             else:
                 sub_item.setText(1, str(getattr(param, prop[1])))
+        
+        # Now add the description as a collapsed item, separate from the other properties
+        sub_item = QtWidgets.QTreeWidgetItem(top_item)
+        sub_item.setText(0, "description")
+        sub_sub_item = QtWidgets.QTreeWidgetItem(sub_item)
+        description = str(param.description)
+        sub_sub_item.setText(1, description)
     
     @classmethod
     def getParameterSelection(cls, selected_item):
@@ -157,9 +169,12 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Return the text of the parameter's name even if selected_item is a 'property' item
         :param selected_item: QTreeWidgetItem that represents either a parameter or a property
         """
-        if selected_item.parent() is None:
+        if selected_item.parent() == None:
             # User selected a parametery, not a property
             param_to_open = selected_item.text(0)
+        elif selected_item.parent().parent() != None:
+            # User selected the description text
+            param_to_open = selected_item.parent().parent().text(0)
         else:
             # User selected a property, not a parameter
             param_to_open = selected_item.parent().text(0)
