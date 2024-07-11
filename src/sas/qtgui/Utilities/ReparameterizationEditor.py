@@ -1,8 +1,11 @@
+import logging
 from PySide6 import QtWidgets, QtCore, QtGui
 
 from sas.qtgui.Utilities.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
 from sas.qtgui.Utilities.ModelSelector import ModelSelector
 from sas.qtgui.Utilities.ParameterEditDialog import ParameterEditDialog
+
+logger = logging.getLogger(__name__)
 
 class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
@@ -21,6 +24,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.selectModelButton.clicked.connect(self.onSelectModel)
         self.cmdCancel.clicked.connect(self.close)
         self.cmdAddParam.clicked.connect(self.onAddParam)
+        self.cmdDeleteParam.clicked.connect(self.onDeleteParam)
         self.cmdEditSelected.clicked.connect(self.editSelected)
 
     def onSelectModel(self):
@@ -51,19 +55,30 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.param_creator.returnNewParamsSignal.connect(lambda params: self.loadParams(params, self.newParamTree))
         self.param_creator.show()
     
+    def onDeleteParam(self):
+        """
+        Delete the selected parameter from the newParamTree
+        """
+        # Get selected item
+        selected_item = self.newParamTree.currentItem()
+        param_to_delete = self.getParameterSelection(selected_item)
+
+        # Find the parameter item by using param_to_delete
+        for i in range(self.newParamTree.topLevelItemCount()):
+            param = self.newParamTree.topLevelItem(i)
+            if param.text(0) == param_to_delete:
+                # Remove the parameter from the tree
+                self.newParamTree.takeTopLevelItem(i)
+                return
+        return logger.warning("Could not find parameter to delete: %s" % param_to_delete)
+    
     def editSelected(self):
         """
         Edit the selected parameter in a new parameter editor dialog
         """
-        # get selected item
+        # Get selected item
         selected_item = self.newParamTree.currentItem()
-        param_to_open = None
-        if selected_item.parent() is None:
-            # User selected a parametery, not a property
-            param_to_open = selected_item.text(0)
-        else:
-            # User selected a property, not a parameter
-            param_to_open = selected_item.parent().text(0)
+        param_to_open = self.getParameterSelection(selected_item)
         
         highlighted_property = selected_item.text(0) # What the user wants to edit specifically
         
@@ -135,6 +150,20 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                 sub_item.setText(1, str(getattr(param, prop_name)[index]))
             else:
                 sub_item.setText(1, str(getattr(param, prop[1])))
+    
+    @classmethod
+    def getParameterSelection(cls, selected_item):
+        """
+        Return the text of the parameter's name even if selected_item is a 'property' item
+        :param selected_item: QTreeWidgetItem that represents either a parameter or a property
+        """
+        if selected_item.parent() is None:
+            # User selected a parametery, not a property
+            param_to_open = selected_item.text(0)
+        else:
+            # User selected a property, not a parameter
+            param_to_open = selected_item.parent().text(0)
+        return param_to_open
 
     def closeEvent(self, event):
         self.close()
