@@ -4,10 +4,29 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolb
 from typing import List
 import matplotlib.figure
 import matplotlib.colors as colors
+import matplotlib.gridspec as gridspec
 from PlotTreeItems import PlottableItem
 from PlotModifiers import PlotModifier, ModifierLinecolor, ModifierLinestyle, ModifierColormap
 
 import numpy as np
+
+class ClickableCanvas(FigureCanvasQTAgg):
+    def __init__(self, figure):
+        super().__init__(figure)
+        self.mpl_connect("button_press_event", self.onclick)
+        self.big = 0
+
+    def onclick(self, event):
+        big = self.big
+        if event.inaxes:
+            axs = self.figure.get_axes()
+            for index, ax in enumerate(axs):
+                if (index != big) and (ax == event.inaxes):
+                    temp = axs[big].get_position()
+                    axs[big].set_position(axs[index].get_position())
+                    axs[index].set_position(temp)
+                    self.big = index
+                self.draw()
 
 class SubTabs(QTabWidget):
     def __init__(self, datacollector, tabitem):
@@ -15,22 +34,37 @@ class SubTabs(QTabWidget):
 
         self.datacollector = datacollector
         self.figures: List[matplotlib.figure] = []
-
         # iterate through subtabs
+        print(tabitem.childCount())
         for i in range(tabitem.childCount()):
             #add subplots
             layout = QVBoxLayout()
             figure = matplotlib.figure.Figure(figsize=(5, 5))
-            canvas = FigureCanvasQTAgg(figure)
+            canvas = ClickableCanvas(figure)
             layout.addWidget(canvas)
             layout.addWidget(NavigationToolbar2QT(canvas))
 
             subplot_count = tabitem.child(i).childCount()
-            ax = figure.subplots(subplot_count)
-            if subplot_count <= 1:
+            #print("childcount 1", tabitem.child(i).childCount())
+            #ax = figure.subplots(subplot_count)
+            if subplot_count == 1:
+                ax = figure.subplots(subplot_count)
                 ax = [ax]
+            else:
+                # region for the big central plot in gridspec
+                gridspec = figure.add_gridspec(ncols=2, width_ratios=[3, 1])
+                # region for the small side plots in sub_gridspec
+                sub_gridspec = gridspec[1].subgridspec(ncols=1, nrows=subplot_count - 1)
+
+                ax = [figure.add_subplot(gridspec[0])]
+                # add small plots to axes list, so it can be accessed that way
+                for idx in range(subplot_count-1):
+                    ax.append(figure.add_subplot(sub_gridspec[idx]))
+
+            #print("childcount 2", tabitem.child(i).childCount())
             # iterate through subplots
-            for j in range(subplot_count):
+            for j in range(tabitem.child(i).childCount()):
+                print(tabitem.text(0), tabitem.child(i).text(0), tabitem.child(i).child(j).text(0))
                 ax[j].set_title(str(tabitem.child(i).child(j).text(0)))
                 # iterate through plottables and plot modifiers
                 for k in range(tabitem.child(i).child(j).childCount()):
