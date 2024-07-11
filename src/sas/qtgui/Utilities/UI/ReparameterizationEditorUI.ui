@@ -258,7 +258,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
       <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit">
+       <widget class="QLineEdit" name="txtNewModelName">
         <property name="placeholderText">
          <string>Enter plugin name</string>
         </property>

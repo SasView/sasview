@@ -1,5 +1,9 @@
 import logging
+import os
+import pathlib
 from PySide6 import QtWidgets, QtCore, QtGui
+
+from sas.sascalc.fit.models import find_plugins_dir
 
 from sas.qtgui.Utilities.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
 from sas.qtgui.Utilities.ModelSelector import ModelSelector
@@ -23,6 +27,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
     def addSignals(self):
         self.selectModelButton.clicked.connect(self.onSelectModel)
         self.cmdCancel.clicked.connect(self.close)
+        self.cmdApply.clicked.connect(self.onApply)
         self.cmdAddParam.clicked.connect(self.onAddParam)
         self.cmdDeleteParam.clicked.connect(self.onDeleteParam)
         self.cmdEditSelected.clicked.connect(self.editSelected)
@@ -137,6 +142,38 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                 self.addSubItems(unpacked_param, param)
                 # Make sure to update the name of the parameter
                 param.setText(0, unpacked_param.name)
+    
+    def onApply(self):
+        """
+        Generate output reparameterized model and write to file
+        """
+        # Get the name of the new model
+        model_name = self.txtNewModelName.text()
+        overwrite_plugin = self.chkOverwrite.isChecked()
+        user_plugin_dir = pathlib.Path(find_plugins_dir())
+        output_file_path = user_plugin_dir / (model_name + ".py")
+
+        # Check if the file already exists
+        if os.path.exists(output_file_path) and not overwrite_plugin:
+            return logger.warning("File already exists and overwrite is not checked. Aborting.") # TODO Replace with a a dialog box
+        else:
+            # Write the new model to the file
+            model_text = self.generateModelText()
+            self.writeModel(output_file_path, model_text)
+
+            # Notify user that model was written sucessfully
+            msg = "Reparameterized model "+ model_name + " successfully created."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            logger.info(msg)
+    
+    def generateModelText(self):
+        """
+        Generate the output model text
+        """
+        output = "" # TODO: Define the output model text, this is just a placeholder function for now
+        return output
+
+    ### CLASS METHODS ###
 
     @classmethod
     def addSubItems(cls, param, top_item):
@@ -187,6 +224,24 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             # User selected a property, not a parameter
             param_to_open = selected_item.parent().text(0)
         return param_to_open
+
+    ### STATIC METHODS ###
+
+    @staticmethod
+    def writeModel(output_file_path, model_text):
+        """
+        Write the new model to the given file
+        :param output_file_path: pathlib.Path object pointing to output file location
+        :param model_text: str of the model text to write
+        """
+        try:
+            with open(output_file_path, 'w') as f:
+                f.write(model_text)
+        except Exception as ex:
+            logger.error("Error writing model to file: %s" % ex)
+    
+    ### OVERRIDES ###
+    # Functions that overwrite the default behavior of the parent class
 
     def closeEvent(self, event):
         self.close()
