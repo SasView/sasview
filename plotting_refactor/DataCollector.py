@@ -15,7 +15,7 @@ class DataCollector:
             if self.datasets[i].get_fitpage_index() == fitpage_index:
                 existing_dataset_index = i
         if existing_dataset_index == -1:
-            # create new dataset in case it does not already exist
+            # create new dataset in case it does not exist
             x_data, y_data, y_fit = self.simulate_data(main_window, fitpage_index, create_fit, checked_2d)
             plotpage_index = -1
 
@@ -27,6 +27,7 @@ class DataCollector:
             self.datasets[existing_dataset_index].set_x_data(x_data)
             self.datasets[existing_dataset_index].set_y_data(y_data)
             self.datasets[existing_dataset_index].set_y_fit(y_fit)
+            self.datasets[existing_dataset_index].set_2d(checked_2d)
 
     def simulate_data(self, main_window, fitpage_index, create_fit, checked_2d):
         combobox_index = main_window.fittingTabs.currentWidget().get_combobox_index()

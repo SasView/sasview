@@ -103,7 +103,6 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
             # create tab for fit and residual plot
             subtab_fit = SubTabItem(tab_item, ["Fit"], fitpage_index, 1)
             subtab_residuals = SubTabItem(tab_item, ["Residuals"], fitpage_index, 2)
-
             # if the data is 2d, then every plot contains only one plottable
             if self.datacollector.get_data_fp(fitpage_index).is_2d():
                 subplot_data_subtab_fit = PlotItem(subtab_fit, ["Data"], fitpage_index, 1, 0, True)
@@ -124,7 +123,6 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
 
             else:  # if the data is 1d, multiple plottables can be plotted in one plot
                 subplot_fit = PlotItem(subtab_fit, ["Fit Plot"], fitpage_index, 1, 0, False)
-
                 plottable_fit_data = PlottableItem(subplot_fit, ["Plottable Fit Data"], fitpage_id, 1)
                 plottable_fit_fit = PlottableItem(subplot_fit, ["Plottable Fit Fit"], fitpage_id, 2)
 
