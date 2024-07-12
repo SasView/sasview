@@ -19,13 +19,12 @@ class PlotWidget(QTabWidget):
         plot_index = self.datacollector.get_data_fp(fitpage_index).get_plotpage_index()
         if plot_index == -1:
             self.datacollector.set_plot_index(fitpage_index, self.count())
-            self.addTab(SubTabs(self.datacollector, tabitem), "Plot for FitPage " + str(fitpage_index))
+            self.addTab(SubTabs(self.datacollector, tabitem),
+                        "Plot for FitPage " + str(fitpage_index))
         else:
             self.removeTab(plot_index)
             self.insertTab(plot_index, SubTabs(self.datacollector, tabitem),
                            "Plot for FitPage " + str(fitpage_index))
-
-
 
     def get_subtabs(self, fitpage_index):
         for i in range(self.count()):
