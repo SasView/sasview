@@ -35,7 +35,6 @@ class SubTabs(QTabWidget):
         self.datacollector = datacollector
         self.figures: List[matplotlib.figure] = []
         # iterate through subtabs
-        print(tabitem.childCount())
         for i in range(tabitem.childCount()):
             #add subplots
             layout = QVBoxLayout()
@@ -61,10 +60,8 @@ class SubTabs(QTabWidget):
                 for idx in range(subplot_count-1):
                     ax.append(figure.add_subplot(sub_gridspec[idx]))
 
-            #print("childcount 2", tabitem.child(i).childCount())
             # iterate through subplots
             for j in range(tabitem.child(i).childCount()):
-                print(tabitem.text(0), tabitem.child(i).text(0), tabitem.child(i).child(j).text(0))
                 ax[j].set_title(str(tabitem.child(i).child(j).text(0)))
                 # iterate through plottables and plot modifiers
                 for k in range(tabitem.child(i).child(j).childCount()):
@@ -94,7 +91,7 @@ class SubTabs(QTabWidget):
                                 ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
                                 ax[j].set_yscale('log')
                             elif plottable.type_num == 2: #fit plot: log-log plot, show fit and data curve
-                                ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
+                                #ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
                                 ax[j].plot(dataset.get_x_data(), dataset.get_y_fit())
                                 ax[j].set_yscale('log')
                             elif plottable.type_num == 3: #residual plot lin-log plot, show calc and show res only
