@@ -5,6 +5,7 @@ from PySide6 import QtWidgets, QtCore, QtGui
 
 from sas.sascalc.fit.models import find_plugins_dir
 
+from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
 from sas.qtgui.Utilities.ModelSelector import ModelSelector
 from sas.qtgui.Utilities.ParameterEditDialog import ParameterEditDialog
@@ -22,6 +23,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         self.addSignals()
 
+        self.onLoad()
+
         self.newParamTreeEditable = False
         self.old_model_name = None # Name of the model to be reparameterized
         self.new_params_dict = {} # Dictionary of new parameters to be added to the model
@@ -33,6 +36,36 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.cmdAddParam.clicked.connect(self.onAddParam)
         self.cmdDeleteParam.clicked.connect(self.onDeleteParam)
         self.cmdEditSelected.clicked.connect(self.editSelected)
+    
+    def onLoad(self):
+        
+        self.addTooltips()
+
+        text = \
+""""""
+        self.txtFunction.insertPlainText(text)
+        self.txtFunction.setFont(GuiUtils.getMonospaceFont())
+
+        # Validators
+        rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
+
+        txt_validator = QtGui.QRegularExpressionValidator(rx)
+        self.txtNewModelName.setValidator(txt_validator)
+        # Weird import location - workaround for a bug in Sphinx choking on
+        # importing QSyntaxHighlighter
+        # DO NOT MOVE TO TOP
+        from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
+        self.highlight = PythonHighlighter(self.txtFunction.document())
+    
+    def addTooltips(self):
+        """
+        Add the default tooltips to the text field
+        """
+        hint_function = "Example:\n\n"
+        hint_function += "helper_constant = new_parameter1 * M_PI\n"
+        hint_function += "old_parameter1 = helper_constant\n"
+        hint_function += "old_parameter2 = helper_constant / new_parameter2\n"
+        self.txtFunction.setToolTip(hint_function)
 
     def onSelectModel(self):
         """
