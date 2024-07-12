@@ -452,7 +452,7 @@ jobs:
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
-          sudo DEBIAN_FRONTEND=noninteractive apt install libegl1 libopengl0 libGLU
+          sudo DEBIAN_FRONTEND=noninteractive apt install libegl1 libopengl0
           sudo DEBIAN_FRONTEND=noninteractive apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
 
       - name: Try running the installation (Linux)
