@@ -136,13 +136,20 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
                 plottable_res = PlottableItem(subplot_res, ["Plottable Residuals"], fitpage_id, 3)
 
         self.plotTreeWidget.expandAll()
-        self.redrawAll()
+        self.redrawAll(1, 0)
 
-    def redrawAll(self):
+    def redrawAll(self, redraw_fitpage_index, redraw_subtab_index):
+        print(redraw_fitpage_index, redraw_subtab_index)
+        # parameters fitpage_index and subtab_index are used, when a dropSignal invokes the redrawing. After redrawing,
+        # the subtab given by the parameters will be displayed
         if self.plotTreeWidget.topLevelItemCount() != 0:
             for i in range(self.plotTreeWidget.topLevelItemCount()):
                 if isinstance(self.plotTreeWidget.topLevelItem(i).data(0, 1), TabItem):
                     self.plot_widget.redrawTab(self.plotTreeWidget.topLevelItem(i))
+
+        plotpage_index = self.datacollector.get_plotpage_index(redraw_fitpage_index)
+        self.plot_widget.setCurrentIndex(plotpage_index)
+        self.plot_widget.widget(plotpage_index).setCurrentIndex(redraw_subtab_index)
 
     def onAddModifier(self):
         currentmodifier = self.comboBoxModifier.currentText()
