@@ -23,6 +23,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.addSignals()
 
         self.newParamTreeEditable = False
+        self.old_model_name = None # Name of the model to be reparameterized
+        self.new_params_dict = {} # Dictionary of new parameters to be added to the model
     
     def addSignals(self):
         self.selectModelButton.clicked.connect(self.onSelectModel)
@@ -40,7 +42,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.model_selector.returnModelParamsSignal.connect(lambda model_name, params: self.loadParams(params, self.oldParamTree, model_name))
         self.model_selector.show()
 
-    def loadParams(self, params, tree, model_name=None):
+    def loadParams(self, params, tree, model_name=None, append=False):
         """
         Load parameters from the selected model into a tree widget
         :param param: sasmodels.modelinfo.Parameter class
@@ -56,19 +58,19 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             item = QtWidgets.QTreeWidgetItem(tree)
             item.setText(0, param.name)
             tree.addTopLevelItem(item)
-            self.addSubItems(param, item)
+            self.addSubItems(param, item, append=append)
         
         if tree == self.oldParamTree:
             # Once model is loaded sucessfully, update txtSelectModelInfo to reflect the model name
-        self.lblSelectModelInfo.setText("Model <b>%s</b> loaded successfully" % model_name)
-
+            self.old_model_name = model_name
+            self.lblSelectModelInfo.setText("Model <b>%s</b> loaded successfully" % self.old_model_name)
 
     def onAddParam(self):
         """
         Add parameter to "New parameters box" by invoking parameter editor dialog
         """
         self.param_creator = ParameterEditDialog(self)
-        self.param_creator.returnNewParamsSignal.connect(lambda params: self.loadParams(params, self.newParamTree))
+        self.param_creator.returnNewParamsSignal.connect(lambda params: self.loadParams(params, self.newParamTree, append=True))
         self.param_creator.show()
     
     def onDeleteParam(self):
@@ -85,6 +87,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             if param.text(0) == param_to_delete:
                 # Remove the parameter from the tree
                 self.newParamTree.takeTopLevelItem(i)
+                # Remove the parameter from the dictionary
+                self.new_params_dict.pop(param_to_delete)
                 return
         return logger.warning("Could not find parameter to delete: %s" % param_to_delete)
     
@@ -136,13 +140,14 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         for i in range(self.newParamTree.topLevelItemCount()):
             param = self.newParamTree.topLevelItem(i)
             if param.text(0) == old_name:
-                # First delete all sub-items of the parameter
+                self.new_params_dict.pop(old_name) # Remove the old parameter from the dictionary
+                # Delete all sub-items of the parameter
                 while param.childCount() > 0:
                     sub_item = param.child(0)
                     param.removeChild(sub_item)
 
                 # Now add all the updated properties
-                self.addSubItems(unpacked_param, param)
+                self.addSubItems(unpacked_param, param, append=True)
                 # Make sure to update the name of the parameter
                 param.setText(0, unpacked_param.name)
     
@@ -169,30 +174,35 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             logger.info(msg)
     
-    def generateModelText(self):
+    def generateModelText(self) -> str:
         """
         Generate the output model text
         """
         output = "" # TODO: Define the output model text, this is just a placeholder function for now
+        translation_text = self.txtFunction.toPlainText()
+        old_model_name = self.old_model_name
+        parameters_text = ""
+        for param_name, param_properties in self.new_params_dict.items():
+            parameters_text += f"\n\t['{param_name}', '{param_properties['units']}', {param_properties['default']}, [{param_properties['min']}, {param_properties['max']}], '{param_properties['type']}', '{param_properties['description']}'],"
+        output = REPARAMETARIZED_MODEL_TEMPLATE.format(parameters=parameters_text, translation=translation_text, old_model_name=old_model_name)
         return output
 
-    ### CLASS METHODS ###
-
-    @classmethod
-    def addSubItems(cls, param, top_item):
+    def addSubItems(self, param, top_item, append=False):
         """
         Add sub-items to the given top-level item for the given parameter
         :param param: the Sasmodels Parameter class that contains properties to add
         :param top_item: the top-level item to add the properties to (QTreeWidgetItem)
+        :param append: Whether or not to include parameter when exporting to model file
         """
         # Create list of properties: (display name, property name)
-        properties = [ ("default", "default"),
+        properties_index = [ ("default", "default"),
                     ("min", "limits[0]"),
                     ("max", "limits[1]"),
                     ("units", "units"),
                     ("type", "type")
                     ]
-        for prop in properties:
+        output_properties = {} # Dictionary of properties used in generating the output model text
+        for prop in properties_index:
             sub_item = QtWidgets.QTreeWidgetItem(top_item)
             sub_item.setText(0, prop[0]) # First column is display name
             if '[' in prop[1]:
@@ -200,19 +210,29 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                 prop_name, index = prop[1].split('[')
                 index = int(index[:-1])  # Remove the closing ']' and convert to int
                 # Use getattr to get the property, then index into it
-                sub_item.setText(1, str(getattr(param, prop_name)[index]))
+                value = getattr(param, prop_name)[index]
+                sub_item.setText(1, str(value))
             else:
-                sub_item.setText(1, str(getattr(param, prop[1])))
-        
+                value = getattr(param, prop[1])
+                sub_item.setText(1, str(value))
+            output_properties[prop[0]] = value # Add property to output dictionary
+
         # Now add the description as a collapsed item, separate from the other properties
         sub_item = QtWidgets.QTreeWidgetItem(top_item)
         sub_item.setText(0, "description")
         sub_sub_item = QtWidgets.QTreeWidgetItem(sub_item)
         description = str(param.description)
         sub_sub_item.setText(1, description)
+        output_properties['description'] = description # Add description to output dictionary
+
+        if append:
+            # If the item is in the newParamTree, add the output properties to the dictionary
+            self.new_params_dict[param.name] = output_properties
+
+    ### CLASS METHODS ###
     
     @classmethod
-    def getParameterSelection(cls, selected_item):
+    def getParameterSelection(cls, selected_item) -> str:
         """
         Return the text of the parameter's name even if selected_item is a 'property' item
         :param selected_item: QTreeWidgetItem that represents either a parameter or a property
@@ -249,3 +269,21 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
     def closeEvent(self, event):
         self.close()
         self.deleteLater()  # Schedule the window for deletion
+
+
+REPARAMETARIZED_MODEL_TEMPLATE = '''\
+from numpy import inf
+
+from sasmodels.core import reparameterize
+from sasmodels.special import *
+
+parameters = [
+    # name, units, default, [min, max], type, description{parameters}
+]
+
+translation = """
+    {translation}
+"""
+
+model_info = reparameterize('{old_model_name}', parameters, translation, __file__)
+'''
