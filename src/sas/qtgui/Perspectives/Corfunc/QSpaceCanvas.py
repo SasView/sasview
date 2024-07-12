@@ -42,7 +42,7 @@ class QSpaceCanvas(CorfuncCanvas):
                                   parameters.extrapolation_parameters.point_3,
                                   parameters.extrapolation_parameters.data_q_max]):
 
-            line.set_xdata(position)
+            line.set_xdata([position, position])
             line.set_color('k')
 
         if parameters.working_line_id is not None:
