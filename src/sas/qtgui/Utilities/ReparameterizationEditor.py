@@ -28,6 +28,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.newParamTreeEditable = False
         self.old_model_name = None # Name of the model to be reparameterized
         self.new_params_dict = {} # Dictionary of new parameters to be added to the model
+        self.is_modified = False
     
     def addSignals(self):
         self.selectModelButton.clicked.connect(self.onSelectModel)
@@ -36,8 +37,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.cmdAddParam.clicked.connect(self.onAddParam)
         self.cmdDeleteParam.clicked.connect(self.onDeleteParam)
         self.cmdEditSelected.clicked.connect(self.editSelected)
+        self.txtNewModelName.textChanged.connect(self.editorModelModified)
+        self.txtFunction.textChanged.connect(self.editorModelModified)
     
     def onLoad(self):
+
+        # Disable `Apply` button
+        self.cmdApply.setEnabled(False)
         
         self.addTooltips()
 
@@ -97,6 +103,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             # Once model is loaded sucessfully, update txtSelectModelInfo to reflect the model name
             self.old_model_name = model_name
             self.lblSelectModelInfo.setText("Model <b>%s</b> loaded successfully" % self.old_model_name)
+        
+        self.setWindowEdited(True)
 
     def onAddParam(self):
         """
@@ -206,6 +214,11 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             msg = "Reparameterized model "+ model_name + " successfully created."
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             logger.info(msg)
+        
+        if self.is_modified:
+            self.is_modified = False
+            self.setWindowEdited(False)
+            self.cmdApply.setEnabled(False)
     
     def generateModelText(self) -> str:
         """
@@ -261,6 +274,32 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         if append:
             # If the item is in the newParamTree, add the output properties to the dictionary
             self.new_params_dict[param.name] = output_properties
+    
+    def setWindowEdited(self, is_edited):
+            """
+            Change the widget name to indicate unsaved state
+            Unsaved state: add "*" to filename display
+            saved state: remove "*" from filename display
+            """
+            current_text = self.windowTitle()
+
+            if is_edited:
+                if current_text[-1] != "*":
+                    current_text += "*"
+            else:
+                if current_text[-1] == "*":
+                    current_text = current_text[:-1]
+            self.setWindowTitle(current_text)
+    
+    def editorModelModified(self):
+        """
+        User modified the model in the Model Editor.
+        Disable the plugin editor and show that the model is changed.
+        """
+        self.setWindowEdited(True)
+        self.txtFunction.setStyleSheet("")
+        self.cmdApply.setEnabled(True)
+        self.is_modified = True
 
     ### CLASS METHODS ###
     
