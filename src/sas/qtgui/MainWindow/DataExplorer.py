@@ -289,6 +289,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
+            self.communicator.statusBarUpdateSignal.emit(f"Loading Project... {os.path.basename(filename)}\n")
             self.default_project_location = os.path.dirname(filename)
             # Delete all data and initialize all perspectives
             self.deleteAllItems()
@@ -297,6 +298,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.cbFitting.blockSignals(False)
             self.initPerspectives()
             self.readProject(filename)
+            self.communicator.statusBarUpdateSignal.emit("Project loaded.\n")
 
     def loadAnalysis(self):
         """
