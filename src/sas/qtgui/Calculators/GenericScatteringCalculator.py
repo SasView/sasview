@@ -1591,6 +1591,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           err_image=self.data.err_data)
             data.title = "GenSAS {}  #{} 2D".format(self.file_name(),
                                                     int(self.graph_num))
+            data.id = "gsc_2d_{}".format(self.graph_num) # required for serialization
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
             data.xmin = self.data.xmin
