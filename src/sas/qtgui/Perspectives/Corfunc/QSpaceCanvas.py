@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
+import numpy as np
 from matplotlib.lines import Line2D
 
 if TYPE_CHECKING:
@@ -42,7 +43,7 @@ class QSpaceCanvas(CorfuncCanvas):
                                   parameters.extrapolation_parameters.point_3,
                                   parameters.extrapolation_parameters.data_q_max]):
 
-            line.set_xdata([position, position])
+            line.set_xdata(np.array([position]))
             line.set_color('k')
 
         if parameters.working_line_id is not None:
@@ -52,7 +53,7 @@ class QSpaceCanvas(CorfuncCanvas):
             self.ghost_line.set_alpha(0)
         else:
             self.ghost_line.set_alpha(0.5)
-            self.ghost_line.set_xdata(parameters.dragging_line_position)
+            self.ghost_line.set_xdata(np.array([parameters.dragging_line_position]))
 
         self.draw()
 
