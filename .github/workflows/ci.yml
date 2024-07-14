@@ -106,8 +106,8 @@ jobs:
       - name: Fetch sources for sibling projects
         run: |
           git clone --depth=50 --branch=release_0.9.0 https://github.com/SasView/sasdata.git ../sasdata
-          git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-          git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+          git clone --depth=50 --branch=release_1.0.8 https://github.com/SasView/sasmodels.git ../sasmodels
+          git clone --depth=50 --branch=v0.9.2 https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
         run: |
@@ -242,8 +242,8 @@ jobs:
       - name: Sign executable and create dmg (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_ISA }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_ISA_PWD }}
         run: |
           echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p DloaAcYP build.keychain
@@ -251,13 +251,14 @@ jobs:
           security unlock-keychain -p DloaAcYP build.keychain
           security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k DloaAcYP build.keychain
-
+          security find-identity -p codesigning
+          
           cd installers/dist
           python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python  ../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.app
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.app
           hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
-          codesign -s "Developer ID Application: European Spallation Source Eric (W2AG9MPZ43)" SasView6.dmg
+          codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.dmg
 
       - name: Notarize Release Build (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
@@ -275,6 +276,17 @@ jobs:
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: "installers/dist/SasView6.dmg"
+
+      - name: Sign binary
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        uses: lando/code-sign-action@v2
+        with:
+          file: installers/dist/setupSasView.exe
+          certificate-data: ${{ secrets.WINDOZE_CERT_DATA }}
+          certificate-password: ${{ secrets.WINDOZE_CERT_PASSWORD }}
+          keylocker-host: ${{ secrets.KEYLOCKER_HOST }}
+          keylocker-api-key: ${{ secrets.KEYLOCKER_API_KEY }}
+          keylocker-cert-sha1-hash: ${{ secrets.KEYLOCKER_CERT_SHA1_HASH }}
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
