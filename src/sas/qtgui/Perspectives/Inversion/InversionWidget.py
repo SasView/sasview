@@ -17,7 +17,7 @@ from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
@@ -39,7 +39,7 @@ def is_float(value):
 
 # Default Values for inputs
 NUMBER_OF_TERMS = 10
-REGULARIZATION = 0.01
+REGULARIZATION = 0.0
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
 
@@ -345,13 +345,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Enable buttons when data is present, else disable them
         """
         self.calculateAllButton.setEnabled(not self.isCalculating
-                                           and self.logic.data_is_loaded and not isinstance(self.logic.data, Data2D))
+                                           and self.logic.data_is_loaded)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
-                                            and not isinstance(self.logic.data, Data2D)
                                             and not self.isCalculating)
-        self.calculateAllButton.setVisible(not isinstance(self.logic.data, Data2D))
-        self.calculateThisButton.setVisible(not isinstance(self.logic.data, Data2D)
-                                            and not self.isCalculating)
+        self.calculateAllButton.setVisible(self.isBatch)
+        self.calculateThisButton.setVisible(not self.isCalculating)
         self.showResultsButton.setEnabled(self.logic.data_is_loaded
                                           and not self.isBatch
                                           and not self.isCalculating and self.batchResultsWindow is not None)
@@ -550,11 +548,12 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self.isBatch = False
         self.isCalculating = False
-        self.calculateAllButton.setText("Calculate All")
+        
         self.enableButtons()
         # Show any batch calculations that successfully completed
         if self.isBatch and self.batchResultsWindow is not None:                    
             #self.showBatchOutput()
+            self.calculateAllButton.setText("Calculate All")
             self.updateGuiValues(index=self.dataList.currentIndex())
             self.updateDynamicGuiValues(index=self.dataList.currentIndex())
         

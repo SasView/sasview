@@ -438,6 +438,10 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         Pass it over to the calculator
         """
         assert data_item is not None
+        
+        if not isinstance(data_item, Data1D):
+            msg = "Invariant cannot be computed with 2D data."
+            raise ValueError(msg)
 
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the P(r) Perspective"
