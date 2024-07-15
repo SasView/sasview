@@ -38,13 +38,9 @@ def restart_main():
         # application is running within a python interpreter
         python = executable
         os.execv(python, [python, ] + sys.argv)
-        pass
     else:
         # application is running as a standalone executable
         os.execv(executable, sys.argv)
-        pass
-    pass
-
 
 
 class PreferencesPanel(QDialog, Ui_preferencesUI):
