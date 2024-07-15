@@ -345,7 +345,6 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             with open(full_path, 'r', encoding="utf-8") as plugin:
                 model_str = plugin.read()
             ast.parse(model_str)
-            print("Passed AST Check")
             GuiUtils.checkModel(full_path)
 
         except Exception as ex:
@@ -354,8 +353,6 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             # print four last lines of the stack trace
             # this will point out the exact line failing
             all_lines = traceback.format_exc().split('\n')
-            for line in all_lines:
-                print(line)
             last_lines = all_lines[-4:]
             traceback_to_show = '\n'.join(last_lines)
             logging.error(traceback_to_show)
