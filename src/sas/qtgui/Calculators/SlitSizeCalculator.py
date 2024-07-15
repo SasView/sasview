@@ -77,8 +77,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         # But only with Qt built-in dialog (non-platform native)
         path = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "",
                                                  "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)",
-                                                 None,
-                                                 QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+                                                 None)[0]
         return path
 
     def onClose(self):

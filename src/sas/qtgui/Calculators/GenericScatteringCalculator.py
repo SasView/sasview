@@ -664,26 +664,22 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
-
-                self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;"
-                                            "SLD files (*.SLD *.sld);;"
-                                            "PDB files (*.pdb *.PDB);;"
-                                            "VTK files (*.vtk *.VTK);;"
-                                            "All files (*.*)",
-                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
-                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
-                                            )[0]
+                f_type = """
+                    All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
+                        SLD files (*.SLD *.sld);;
+                        PDB files (*.pdb *.PDB);;
+                        VTK files (*.vtk *.VTK);;
+                        All files (*.*)
+                """
             else:
-                self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;"
-                                            "OMF files (*.OMF *.omf);;"
-                                            "SLD files (*.SLD *.sld);;"
-                                            "VTK files (*.vtk *.VTK);;"
-                                            "All files (*.*)",
-                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
-                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
-                                            )[0]
+                f_type = """
+                    All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;
+                        OMF files (*.OMF *.omf);;
+                        SLD files (*.SLD *.sld);;
+                        VTK files (*.vtk *.VTK);;
+                        All files (*.*)
+                """
+            self.datafile = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "", f_type)[0]
             # If a file has been sucessfully chosen
             if self.datafile:
                 # set basic data about the file
@@ -1509,9 +1505,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         parent = self
         directory =  default_name
         filter = 'SLD file (*.sld)'
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, 'Save SLD file', directory, filter, "", options=options)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, 'Save SLD file', directory, filter, "")
         filename = filename_tuple[0]
         if filename:
             try:
