@@ -125,6 +125,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # suggested nTerms
         self.nTermsSuggested = NUMBER_OF_TERMS
+        # suggested alpha
+        self._calculator.alpha = REGULARIZATION
 
         self.maxIndex = 1
 
@@ -208,6 +210,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         self.backgroundInput.textChanged.connect(
             lambda: self.set_background(self.backgroundInput.text()))
+        self.noOfTermsInput.textChanged.connect(
+            lambda: self.set_nTermsSuggested(self.noOfTermsInput.text()))
         self.regularizationConstantInput.textChanged.connect(
             lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
         self.maxDistanceInput.textChanged.connect(
@@ -454,7 +458,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
         # Update the active chart list
         self.active_plots[new_plot.data[0].name] = new_plot
-
+        
     ######################################################################
     # GUI Interaction Events
 
@@ -466,10 +470,19 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.setQ()
         self._calculator.set_err(self.logic.data.dy)
         self.set_background(self.backgroundInput.text())
+        self.set_nTermsSuggested(self.noOfTermsInput.text())
+        self._calculator.set_alpha(is_float(self.regularizationConstantInput.text()))
+        self._calculator.set_dmax(is_float(self.maxDistanceInput.text()))
 
     def set_background(self, value):
         """sets background"""
         self._calculator.background = float(value)
+ 
+    def set_nTermsSuggested(self, value):
+        """noOfTerms"""
+        self.nTermsSuggested = float(value)       
+
+
 
     def model_changed(self):
         """Update the values when user makes changes"""
@@ -725,6 +738,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             nfunc = NUMBER_OF_TERMS
         return nfunc
 
+
+
     def setCurrentData(self, data_ref):
         """Get the data by reference and display as necessary"""
         if data_ref is None:
@@ -738,8 +753,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._data = data_ref
         self.setParameters()
         self.logic.data = GuiUtils.dataFromItem(data_ref)
-        if isinstance(self.logic.data, Data2D):
-            return
         self.resetCalcPrams()
         self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
         self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
@@ -860,10 +873,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self._calculator = Invertor()
             self.closeBatchResults()
             self.nTermsSuggested = NUMBER_OF_TERMS
+            self._calculator.suggested_alpha = REGULARIZATION
             self.noOfTermsSuggestionButton.setText("{:n}".format(
                 self.nTermsSuggested))
             self.regConstantSuggestionButton.setText("{:-3.2g}".format(
-                REGULARIZATION))
+                self._calculator.suggested_alpha))
             self.updateGuiValues()
             self.setupModel()
             
@@ -909,6 +923,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator.d_max = params['d_max']
         self._calculator.nfunc = params['nfunc']
         self.nTermsSuggested = self._calculator.nfunc
+
         # self.acceptAlpha() // suggested values have been disabled to avoid inference with batch
         # self.acceptNoTerms()
         self._calculator.background = params['background']
@@ -1031,7 +1046,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         pr.slit_height = 0.0
         pr.slit_width = 0.0
         nfunc = self.getNFunc()
-
+        pr.suggested_alpha = self._calculator.alpha
         self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
                                              completefn=self._estimateNTCompleted,
@@ -1056,7 +1071,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         pr.slit_height = 0.0
         pr.slit_width = 0.0
         nfunc = self.getNFunc()
-
+        pr.suggested_alpha = self._calculator.alpha
         self.estimationThreadNT = EstimateNT(pr, nfunc,
                                              error_func=self._threadError,
                                              completefn=self._estimateDynamicNTCompleted,
@@ -1173,7 +1188,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         nterms, alpha, message, elapsed = output_tuple
         self._calculator.elapsed += elapsed
-        self._calculator.suggested_alpha = alpha
+        self._calculator.alpha = alpha
         self.nTermsSuggested = nterms
         # Save useful info
         self.updateGuiValues()

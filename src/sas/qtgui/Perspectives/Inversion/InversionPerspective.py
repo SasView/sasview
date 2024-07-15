@@ -16,7 +16,7 @@ from .InversionLogic import InversionLogic
 # pr inversion calculation elements
 
 from sas.sascalc.pr.invertor import Invertor
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
@@ -314,10 +314,15 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self._calculator.set_x(self.logic.data.x)
         self._calculator.set_y(self.logic.data.y)
         self._calculator.set_err(self.logic.data.dy)
-        self.set_background(self.backgroundInput.text())
+        self.nTermsSuggested(self.noOfTermsInput.text())
 
     def set_background(self, value):
+        """sets background"""
         self._calculator.background = float(value)
+ 
+    def set_nTermsSuggested(self, value):
+        """noOfTerms"""
+        self.nTermsSuggested = float(value)  
 
     def model_changed(self):
         """Update the values when user makes changes"""
@@ -439,9 +444,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         assert data_item is not None
         
-        if not isinstance(data_item, Data1D):
-            msg = "Invariant cannot be computed with 2D data."
-            raise ValueError(msg)
+
 
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the P(r) Perspective"
@@ -456,7 +459,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         items = [data_item] if (is_batch and len(data_item)>1) else data_item
         for data in items:
             logic_data = GuiUtils.dataFromItem(data)
-            
+            if not isinstance(logic_data, Data1D):
+                msg = "Invariant cannot be computed with 2D data."
+                raise ValueError(msg)
 
    
             # Find the first unassigned tab.
