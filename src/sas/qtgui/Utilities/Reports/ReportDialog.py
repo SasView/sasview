@@ -82,9 +82,8 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         parent = self
         caption = 'Save Project'
         filter = 'PDF file (*.pdf);;HTML file (*.html);;Text file (*.txt)'
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
         directory = default_name
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", options)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "")
         filename = filename_tuple[0]
         if not filename:
             return
