@@ -106,7 +106,7 @@ class Invertor(Pinvertor):
     ## Time elapsed for last computation
     elapsed = 0
     ## Alpha to get the reg term the same size as the signal
-    suggested_alpha = 0
+    suggested_alpha = 0.0
     ## Last number of base functions used
     nfunc = 10
     ## Last output values
