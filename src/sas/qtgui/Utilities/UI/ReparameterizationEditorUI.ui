@@ -158,7 +158,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </layout>
       </item>
       <item row="3" column="0">
-       <widget class="QTreeWidget" name="newParamTree">
+       <widget class="QParameterTreeWidget" name="newParamTree">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -340,7 +340,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="1" column="0">
-       <widget class="QTreeWidget" name="oldParamTree">
+       <widget class="QParameterTreeWidget" name="oldParamTree">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -376,6 +376,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+    <class>QParameterTreeWidget</class>
+    <extends>QWidget</extends>
+    <header location="global">sas.qtgui.Utilities.ParameterTree.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
