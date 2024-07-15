@@ -48,6 +48,11 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         # Disable `Apply` button
         self.cmdApply.setEnabled(False)
+
+        self.oldParamTree.setDisabledText("Load a model to display")
+        self.newParamTree.setDisabledText("Add a parameter to display")
+        self.oldParamTree.setEnabled(False)
+        self.newParamTree.setEnabled(False)
         
         self.addTooltips()
 
@@ -93,8 +98,11 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         :param model_name: the name of the model that the parameters are from
         """
         if tree == self.oldParamTree:
-            # Clear the tree widget
-            tree.clear()
+            tree.clear() # Clear the tree widget
+        
+        if not tree.isEnabled():
+            # Enable tree if necessary
+            tree.setEnabled(True)
 
         # Add parameters to the tree
         for param in params:
@@ -104,6 +112,10 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             self.addSubItems(param, item, append=append)
         
         if tree == self.oldParamTree:
+            if tree.topLevelItemCount() == 0:
+                # If no parameters were found, disable the tree
+                tree.setDisabledText("No parameters found in model")
+                tree.setEnabled(False)
             # Once model is loaded sucessfully, update txtSelectModelInfo to reflect the model name
             self.old_model_name = model_name
             self.lblSelectModelInfo.setText("Model <b>%s</b> loaded successfully" % self.old_model_name)
@@ -122,6 +134,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         Delete the selected parameter from the newParamTree
         """
+        delete_sucessful = False # Track whether the delete action was sucessful or not
+
         # Get selected item
         selected_item = self.newParamTree.currentItem()
         param_to_delete = self.getParameterSelection(selected_item)
@@ -134,8 +148,14 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                 self.newParamTree.takeTopLevelItem(i)
                 # Remove the parameter from the dictionary
                 self.new_params_dict.pop(param_to_delete)
-                return
-        return logger.warning("Could not find parameter to delete: %s" % param_to_delete)
+                delete_sucessful = True
+        
+        if self.newParamTree.topLevelItemCount() == 0:
+            # If there are no parameters left, disable the tree
+            self.newParamTree.setEnabled(False)
+        
+        if not delete_sucessful:
+            return logger.warning("Could not find parameter to delete: %s" % param_to_delete)
     
     def editSelected(self):
         """
