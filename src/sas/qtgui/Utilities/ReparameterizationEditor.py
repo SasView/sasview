@@ -1,6 +1,10 @@
+import ast
 import logging
 import os
 import pathlib
+import re
+import traceback
+
 from PySide6 import QtWidgets, QtCore, QtGui
 
 from sas.sascalc.fit.models import find_plugins_dir
@@ -205,16 +209,24 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         # Check if the file already exists
         if os.path.exists(output_file_path) and not overwrite_plugin:
             return logger.warning("File already exists and overwrite is not checked. Aborting.") # TODO Replace with a a dialog box
-        else:
-            # Write the new model to the file
-            model_text = self.generateModelText()
-            self.writeModel(output_file_path, model_text)
 
-            # Notify user that model was written sucessfully
-            msg = "Reparameterized model "+ model_name + " successfully created."
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
-            logger.info(msg)
-        
+        # Write the new model to the file
+        model_text = self.generateModelText()
+        self.writeModel(output_file_path, model_text)
+
+        # Test the model for errors (file must be generated first)
+        error_line = self.checkModel(output_file_path)
+        if error_line > 0:
+            return
+
+        self.txtFunction.setStyleSheet("")
+        self.addTooltips() # Reset the tooltips
+
+        # Notify user that model was written sucessfully
+        msg = "Reparameterized model "+ model_name + " successfully created."
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        logger.info(msg)
+    
         if self.is_modified:
             self.is_modified = False
             self.setWindowEdited(False)
@@ -297,9 +309,67 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Disable the plugin editor and show that the model is changed.
         """
         self.setWindowEdited(True)
-        self.txtFunction.setStyleSheet("")
         self.cmdApply.setEnabled(True)
         self.is_modified = True
+    
+    def checkModel(self, full_path):
+        """
+        Run ast and model checks
+        Attempt to return the line number of the error if any
+        :param full_path: full path to the model file
+        :param translation_text: the text within
+        """
+        # successfulCheck = True
+        error_line = 0
+        try:
+            with open(full_path, 'r', encoding="utf-8") as plugin:
+                model_str = plugin.read()
+            ast.parse(model_str)
+            print("Passed AST Check")
+            GuiUtils.checkModel(full_path)
+
+        except Exception as ex:
+            msg = "Error building model: " + str(ex)
+            logging.error(msg)
+            # print four last lines of the stack trace
+            # this will point out the exact line failing
+            all_lines = traceback.format_exc().split('\n')
+            for line in all_lines:
+                print(line)
+            last_lines = all_lines[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            logging.error(traceback_to_show)
+
+            # Set the status bar message
+            # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
+            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+
+            # Format text box with error indicators
+            self.txtFunction.setStyleSheet("border: 5px solid red")
+            # last_lines = traceback.format_exc().split('\n')[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            self.txtFunction.setToolTip(traceback_to_show)
+
+            # attempt to find the failing command line number, usually the last line with
+            # `File ... line` syntax
+            reversed_error_text = list(reversed(all_lines))
+            for line in reversed_error_text:
+                if ('File' in line and 'line' in line):
+                    # If model check fails (not syntax) then 'line' and 'File' will be in adjacent lines
+                    error_line = re.split('line ', line)[1]
+                    try:
+                        error_line = int(error_line)
+                        break
+                    except ValueError:
+                        # Sometimes the line number is followed by more text
+                        try:
+                            error_line = error_line.split(',')[0]
+                            error_line = int(error_line)
+                            break
+                        except ValueError:
+                            error_line = 0
+
+        return error_line
 
     ### CLASS METHODS ###
     
