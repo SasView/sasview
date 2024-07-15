@@ -252,7 +252,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         parent = self
         caption = 'Choose a directory'
-        options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
+        options = QtWidgets.QFileDialog.ShowDirsOnly
         directory = self.default_load_location
         folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, options)
 
@@ -293,8 +293,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Project',
-            'filter'    : 'Project Files (*.json);;Old Project Files (*.svs);;All files (*.*)',
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+            'filter'    : 'Project Files (*.json);;Old Project Files (*.svs);;All files (*.*)'
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
@@ -315,8 +314,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         kwargs = {
             'parent'    : self,
             'caption'   : 'Open Analysis',
-            'filter'    : file_filter,
-            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
+            'filter'    : file_filter
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
@@ -329,9 +327,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         parent = self
         caption = 'Save Project'
         filter = 'Project (*.json)'
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
         directory = self.default_project_location
-        name_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", options)
+        name_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "")
         filename = name_tuple[0]
         if not filename:
             return
@@ -355,7 +352,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filter = wildcard
         parent = None
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "", QtWidgets.QFileDialog.DontUseNativeDialog)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, directory, filter, "")
         filename = filename_tuple[0]
         return filename
 
