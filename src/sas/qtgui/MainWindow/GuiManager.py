@@ -36,11 +36,11 @@ from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orienta
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
 from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
-
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
+from sas.qtgui.Utilities.About.About import About
+
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
-from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
 from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
@@ -184,7 +184,6 @@ class GuiManager:
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
-        self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
 
         self.grid_window = None
@@ -663,6 +662,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
+        self.WhatsNew = WhatsNew(strictly_newer=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
@@ -1286,7 +1286,8 @@ class GuiManager:
         # Update the about box with current version and stuff
 
         # TODO: proper sizing
-        self.aboutWidget.show()
+        about = About()
+        about.exec()
 
     def actionCheck_for_update(self):
         """
