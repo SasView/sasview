@@ -12,7 +12,7 @@ import scipy.optimize
 from scipy.interpolate import interp1d
 from scipy.signal import argrelextrema
 from scipy.fftpack import dct
-from scipy.integrate import trapz, cumtrapz
+from scipy.integrate import trapezoid, cumulative_trapezoid
 
 from sas.sascalc.corfunc.calculation_data import (TransformedData,
                                                   LamellarParameters,
@@ -416,7 +416,7 @@ class CorfuncCalculator:
         # numerical approximation for increasing R using the trapezium rule
         # Note: SasView 4.x series limited the range to xs <= 1000.0
 
-        gamma3 = cumtrapz(gamma1, xs) / xs[1:]
+        gamma3 = cumulative_trapezoid(gamma1, xs) / xs[1:]
         gamma3 = np.hstack((1.0, gamma3))  # gamma3(0) is defined as 1
 
         # Interface Distribution function
@@ -428,7 +428,7 @@ class CorfuncCalculator:
         #    IDF(x) = int_0^inf q^4 * I(q) * cos(q*x) * dq
         # => IDF(0) = int_0^inf q^4 * I(q) * dq
 
-        idf[0] = trapz(-qs ** 4 * (iqs - background), qs)
+        idf[0] = trapezoid(-qs ** 4 * (iqs - background), qs)
         idf /= Q  # Normalise using scattering invariant
 
         transform1d = Data1D(xs, gamma1)
