@@ -2,6 +2,8 @@
 
 Instances of the spatial sampler
 
+
+
 """
 
 import math
@@ -72,6 +74,9 @@ class RandomCube(BoundedByCube):
         # Accessing this will generate random seeds if they don't exist and store them to be accessed if they do
         self.seeds = defaultdict(lambda: self._seed_rng.integers(0, 0x7fff_ffff_ffff_ffff))
 
+    def allows_bootstrap(self) -> bool:
+        return True
+
     def generate(self, start_index: int, end_index: int) -> VectorComponents3:
         # This method of tracking seeds only works if the same start_indices are used each time points
         # in a region are requested - i.e. if they're chunks form a grid
@@ -90,9 +95,10 @@ class RandomCube(BoundedByCube):
 
 
 class PointGeneratorStepper:
-    """ Generate batches of step_size points from a PointGenerator instance"""
+    """ Generate batches of step_size points from a PointGenerator instance
+    """
 
-    def __init__(self, point_generator: SpatialDistribution, step_size: int):
+    def __init__(self, point_generator: SpatialDistribution, step_size: int, bootstrap_sections: int):
         self.point_generator = point_generator
         self.step_size = step_size
 
