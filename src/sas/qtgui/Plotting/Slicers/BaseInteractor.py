@@ -1,3 +1,5 @@
+import logging
+
 interface_color = 'black'
 disable_color = 'gray'
 active_color = 'red'
@@ -138,8 +140,6 @@ class BaseInteractor(object):
         if inside:
             self.clickx, self.clicky = ev.xdata, ev.ydata
             self.move(ev.xdata, ev.ydata, ev)
-        else:
-            self.restore(ev)
         return True
 
     def onKey(self, ev):

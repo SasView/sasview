@@ -1,36 +1,43 @@
-numpy 
-scipy
-docutils 
+# Alphabetized list of OS and version agnostic dependencies
+appdirs
+bumps
+cffi
+docutils
+dominate
+h5py
+html2text
+html5lib
+importlib-resources
+ipython
+jsonschema
+lxml
+mako
+matplotlib
+numba
+numpy==1.26.4
+periodictable
+pybind11
+pylint
+pyopengl
+pyparsing
 pytest
 pytest_qt
 pytest-mock
-unittest-xml-reporting
-tinycc 
-h5py
+pytools
+qtconsole
+scipy==1.13.1
+six
 sphinx
-pyparsing 
-html5lib
-appdirs
-numba
-ipython 
-qtconsole 
-xhtml2pdf
-periodictable 
-uncertainties 
-matplotlib
-lxml
-pytools 
-cffi
-dominate
-importlib-resources
-bumps
-html2text
-jsonschema
-pywin32; platform_system == "Windows"
-PySide6==6.4.3
-twisted
-zope
 superqt
-pyopengl
-pyopengl_accelerate
-sphinx
+tinycc
+twisted
+uncertainties
+unittest-xml-reporting
+xhtml2pdf
+zope
+
+# Alphabetized list of OS-specific packages
+pywin32; platform_system == "Windows"
+
+# Alphabetized list of version-pinned packages
+PySide6==6.4.3  # Later versions do not mesh well with pyinstaller < 6.0

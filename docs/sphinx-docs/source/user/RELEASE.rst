@@ -13,6 +13,150 @@ Release Notes
 Features
 ========
 
+New in Version 6.0.0
+--------------------
+This is a major release with a number of new features, enhancements, and bug fixes as described below. Many of the new
+features are now highlighted in our 'What's New' window displayed when SasView starts.
+
+This version of SasView is built with Sasmodels v1.0.8, Sasdata v0.9.0, and bumps v0.9.2.
+
+New Features
+^^^^^^^^^^^^
+* Improvements to Corfunc by @lucas-wilkins in https://github.com/SasView/sasview/pull/2450
+* Corfunc perspective needs export and report capabilities by @lucas-wilkins in https://github.com/SasView/sasview/pull/2065
+* Add a preferences window by @krzywon in https://github.com/SasView/sasview/pull/2167
+* Debye efficiency by @klytje in https://github.com/SasView/sasview/pull/2859
+* Rog and beta q by @smalex-z in https://github.com/SasView/sasview/pull/2535
+* Custom fit models by @smalex-z in https://github.com/SasView/sasview/pull/2565
+* Implement the orientation viewer in 5x and GL Subsystem by @lucas-wilkins in https://github.com/SasView/sasview/pull/2394
+* Slicer extension by @butlerpd in https://github.com/SasView/sasview/pull/1919
+* Wedge slicer by @ehewins in https://github.com/SasView/sasview/pull/2566
+* Add command line interface to allow scripts to be run from sasview.exe by @pkienzle in https://github.com/SasView/sasview/pull/2280
+* Local documentation generation by @tsole0 in https://github.com/SasView/sasview/pull/2576
+* What's new dialog by @lucas-wilkins in https://github.com/SasView/sasview/pull/2608
+
+Feature Enhancements
+^^^^^^^^^^^^^^^^^^^^
+
+Log Explorer Enhancements
+_________________________
+* Improved log explorer behaviour by @rozyczko in https://github.com/SasView/sasview/pull/2620 and @rprospero in https://github.com/SasView/sasview/pull/2639
+* Drop logger level required to force log explorer to pop up from error to warning by @lucas-wilkins in https://github.com/SasView/sasview/pull/2879
+
+Tool Enhancements
+_________________
+* Tool[s] menu reorganised and renamed by @lucas-wilkins in https://github.com/SasView/sasview/pull/2430
+* SLD calculator tool buttons by @rozyczko in https://github.com/SasView/sasview/pull/2302
+* Update sas_gen.py to speed up data loading by @timsnow in https://github.com/SasView/sasview/pull/2617
+* Read oommf v2 files by @wpotrzebowski in https://github.com/SasView/sasview/pull/2116
+
+Plotting Enhancements
+_____________________
+* Allow user to choose default for plot navigation tools - merge into release_6.0.0 by @juliuskarliczek in https://github.com/SasView/sasview/pull/2849
+* Two options to disable residuals and polydispersity distribution plots by @lozanodorian in https://github.com/SasView/sasview/pull/2558
+* Grid lines toggle for standard Plot1D by @rozyczko in https://github.com/SasView/sasview/pull/2630
+* Created submenu for slicers by @astellhorn in https://github.com/SasView/sasview/pull/2610
+* Plot label customisation widget by @rozyczko in https://github.com/SasView/sasview/pull/2096
+* Add persistent legend visibility toggle by @pbeaucage in https://github.com/SasView/sasview/pull/2266
+* Add masked data toggle to 2D plots by @krzywon in https://github.com/SasView/sasview/pull/2368
+* Add +/- 1 and 3 sigma lines on residual plots by @butlerpd in https://github.com/SasView/sasview/pull/2443
+* New color map code, based on a BSD-3 licensed module by @rozyczko in https://github.com/SasView/sasview/pull/2335
+* Update fitting and plotting defaults by @butlerpd in https://github.com/SasView/sasview/pull/2354
+
+General GUI Enhancements
+________________________
+* initial version of modified Send To button by @rozyczko in https://github.com/SasView/sasview/pull/2613
+* Add a button group to allow for proper logic of radio buttons by @rozyczko in https://github.com/SasView/sasview/pull/2848
+* Quit dont ask me again by @lucas-wilkins in https://github.com/SasView/sasview/pull/2294
+* Inconsistent tabbing order across the widgets by @rozyczko in https://github.com/SasView/sasview/pull/2401
+* Stop making huge folder tree in user profile by @llimeht in https://github.com/SasView/sasview/pull/2262
+* Call magnetic angles up_theta by @dehoni in https://github.com/SasView/sasview/pull/1971
+
+Fitting Enhancements
+____________________
+* Allow for user adjusted relative weighting of different data sets in constrained fits by @Caddy-Jones in https://github.com/SasView/sasview/pull/1973
+* Improved/fixed category manager by @rozyczko in https://github.com/SasView/sasview/pull/2649
+* Handling of constraints for polydisperse parameters by @gonzalezma in https://github.com/SasView/sasview/pull/2348
+
+Bug Fixes
+^^^^^^^^^
+General GUI Fixes
+_________________
+* Phantom perspective windows by @krzywon in https://github.com/SasView/sasview/pull/2790
+* Re-enabled "close window" option on modal dialogs by @rozyczko in https://github.com/SasView/sasview/pull/2690
+* When loading data the data explorer should revert to the data tab by @juliuskarliczek in https://github.com/SasView/sasview/pull/2852
+* Force main window to maximize by @rozyczko in https://github.com/SasView/sasview/pull/2273
+* A few more or less obvious fixes for speed of SasView startup by @rozyczko in https://github.com/SasView/sasview/pull/2275
+
+Plotting Fixes
+______________
+* Fix for broken context menus in 1d plots by @rozyczko in https://github.com/SasView/sasview/pull/2670
+* Differentiate which combobox to put the graphs in. by @rozyczko in https://github.com/SasView/sasview/pull/2298
+* Fit intermittent plot blanking by @pbeaucage in https://github.com/SasView/sasview/pull/2300
+* Fix unusable legend size with long filenames on Mac by @pbeaucage in https://github.com/SasView/sasview/pull/2264
+* Fix plot legend not updating on custom change by @rozyczko in https://github.com/SasView/sasview/pull/2362
+* Close the BUMPS/DREAM results panel when data is deleted by @krzywon in https://github.com/SasView/sasview/pull/2365
+* Fixed sesans residuals plots to show in real space rather than q space by @caitwolf in https://github.com/SasView/sasview/pull/2338
+
+Fitting and Other Perspective Fixes
+_____________
+* Fix model date format in the user model docstring by @mrakitin in https://github.com/SasView/sasview/pull/2713
+* Various Multiplicity Model Fixes by @krzywon in https://github.com/SasView/sasview/pull/2647
+* Fix model save error by @krzywon in https://github.com/SasView/sasview/pull/2864
+* Fix "Use dQ Data" bug that swtiched slit length and slit width in the gui by @caitwolf in https://github.com/SasView/sasview/pull/2336
+* Fix copy/paste when selecting a structure factor by @krzywon in https://github.com/SasView/sasview/pull/2320
+* Clip fitting values set outside the fit range by @krzywon in https://github.com/SasView/sasview/pull/2422
+* Fixed breaking bug in pr_inversion by @lucas-wilkins in https://github.com/SasView/sasview/pull/2178
+* Fixes in invariant prespective by @wpotrzebowski in https://github.com/SasView/sasview/pull/2357
+* Fixes binning bug in implementation of sesans data by @caitwolf in https://github.com/SasView/sasview/pull/2331
+* Fix confusing slit resolution parameters and add guardrails by @pbeaucage in https://github.com/SasView/sasview/pull/2283
+
+Other Fixes
+___________
+* Cherry-picked new_numpy_behaviour by @wpotrzebowski in https://github.com/SasView/sasview/pull/2655
+* Fit report save fix by @rozyczko in https://github.com/SasView/sasview/pull/2684
+* Fix for empty save format for grid files by @rozyczko in https://github.com/SasView/sasview/pull/2683
+
+Documentation Changes
+^^^^^^^^^^^^^^^^^^^^^
+* Update preferences documentation by @krzywon in https://github.com/SasView/sasview/pull/2680
+* Include SasData documentation in SasView by @krzywon in https://github.com/SasView/sasview/pull/2672
+* Corfunc Docs by @lucas-wilkins in https://github.com/SasView/sasview/pull/2823
+* Docstrings in perspective.py by @lucas-wilkins in https://github.com/SasView/sasview/pull/2207
+* Update Optimizer Help Doc by @smk78 in https://github.com/SasView/sasview/pull/2359
+* Update of the sld calculator documentation by @katieweigandt in https://github.com/SasView/sasview/pull/2785
+* Update rst strings to fix doc build warnings by @smk78 in https://github.com/SasView/sasview/pull/2288
+
+Infrastructure Changes
+^^^^^^^^^^^^^^^^^^^^^^
+
+Build System
+____________
+* Rework CI to be non-repetitive, simpler, test more things by @llimeht in https://github.com/SasView/sasview/pull/2263
+* Stop existing concurrent CI by @krzywon in https://github.com/SasView/sasview/pull/2638
+* Release 6.0.0 notarization fix by @wpotrzebowski in https://github.com/SasView/sasview/pull/2709
+* Fixes problem with using deprecated node.js by @butlerpd in https://github.com/SasView/sasview/pull/2836
+* Run unit tests of Qt GUI and have CI gate on them by @llimeht in https://github.com/SasView/sasview/pull/2252
+* Remove ubuntu 18.04 from CI by @krzywon in https://github.com/SasView/sasview/pull/2439
+
+Python Dependencies
+___________________
+* Added python 3.11 support, removed 3.8 by @rozyczko in https://github.com/SasView/sasview/pull/2582
+* Warnings removals and python 3.9 drop in tests by @wpotrzebowski in https://github.com/SasView/sasview/pull/2860
+* Change GUI package from PyQt5 to Pyside6 by @rozyczko in https://github.com/SasView/sasview/pull/2478
+* Pyinstaller 6 by @krzywon in https://github.com/SasView/sasview/pull/2854
+* Cleanup of requirements.txt by @krzywon in https://github.com/SasView/sasview/pull/2856
+* Remove imp module by @krzywon in https://github.com/SasView/sasview/pull/2809
+* Remove pyopengl_accelerate from requirements.txt by @wpotrzebowski in https://github.com/SasView/sasview/pull/2865
+
+Developer Enhancements
+______________________
+* Add argument to convertUI that forces full UI rebuild by @krzywon in https://github.com/SasView/sasview/pull/2483
+* Run.py: Prioritize sibling modules over installed modules by @krzywon in https://github.com/SasView/sasview/pull/2772
+* Use sasdata package in place of sas.sascalc.dataloader by @krzywon in https://github.com/SasView/sasview/pull/2141
+* Clean up sas.sasview by @lucas-wilkins in https://github.com/SasView/sasview/pull/2154, https://github.com/SasView/sasview/pull/2159, and https://github.com/SasView/sasview/pull/2161
+
+
 New in Version 5.0.6
 --------------------
 This is a point release which fixes a number of issues reported in earlier versions
@@ -613,7 +757,7 @@ models directly. For example::
 
      from sasmodels.core import load_model_info
      from sasmodels.sasview_model import make_model_from_info
-     model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
+     model_info = load_model_info('power_law+fractal+gaussian_peak+gaussian_peak')
      model_info.name = 'MyBigPluginModel'
      model_info.description = 'For fitting pores in crystalline framework'
      Model = make_model_from_info(model_info)
@@ -1465,7 +1609,7 @@ built-in models directly. For example::
 
      from sasmodels.core import load_model_info
      from sasmodels.sasview_model import make_model_from_info
-     model_info = load_model_info('power_law + fractal + gaussian_peak + gaussian_peak')
+     model_info = load_model_info('power_law+fractal+gaussian_peak+gaussian_peak')
      model_info.name = 'MyBigPluginModel'
      model_info.description = 'For fitting pores in crystalline framework'
      Model = make_model_from_info(model_info)

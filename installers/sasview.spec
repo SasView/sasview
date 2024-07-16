@@ -13,6 +13,7 @@ datas = [
     ('../src/sas/qtgui/images', 'images'),
     ('../src/sas/sasview/media', 'media'),
     ('../src/sas/example_data', 'example_data'),
+    ('../src/sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib'),    
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
     ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
@@ -25,7 +26,6 @@ datas = [
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
-# datas.append((os.path.join(PYTHON_PACKAGES, 'freetype'), 'freetype'))
 
 def add_data(data):
     for component in data:
@@ -103,7 +103,7 @@ if platform.system() == 'Darwin':
           exclude_binaries=True,
           name='sasview',
           debug=False,
-          upx=False,
+          upx=True,
           icon=os.path.join("../src/sas/qtgui/images","ball.icns"),
           version="version.txt",
           console=False )

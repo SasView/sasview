@@ -172,9 +172,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.DEFAULT_PERSPECTIVE = "Fitting"
         # self.DEFAULT_PERSPECTIVE = "Corfunc"
 
-        # Logging options
-        self.FILTER_DEBUG_LOGS = True
-
         # Default threading model
         self.USING_TWISTED = False
 
@@ -204,6 +201,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Polydispersity plot management
         # If true, disables polydispersity plot display
         self.DISABLE_POLYDISPERSITY_PLOT = False
+
+        # Using Matplotlib Toolbar in Main Plotting Function
+        self.USE_MATPLOTLIB_TOOLBAR = False
 
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
