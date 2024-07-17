@@ -45,7 +45,7 @@ def setup_logging(level=logging.INFO):
         fd = importlib.resources.open_text('sas.system', 'log.ini')
         logging.config.fileConfig(fd)
     except FileNotFoundError:
-        print(f"ERROR: Log config '{filename}' not found...", file=sys.stderr)
+        print(f"ERROR: Log config '{fd.name}' not found...", file=sys.stderr)
 
     #print_config()
 

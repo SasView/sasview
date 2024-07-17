@@ -122,7 +122,8 @@ else:
         icon=os.path.join("../src/sas/qtgui/images","ball.ico"),
         strip=False,
         upx=True,
-        console=False)
+        console=True,
+        hide_console='hide-early')
 
 coll = COLLECT(
     exe,
