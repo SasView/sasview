@@ -51,7 +51,6 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
                     self.txtName.setText(self.properties[property])
                 elif property == "id":
                     self.id = self.properties[property]
-                    print(type(self.id))
 
     def onCellPressed(self):
         # Clear bold formatting in the first column
