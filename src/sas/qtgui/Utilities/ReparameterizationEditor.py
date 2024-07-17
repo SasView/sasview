@@ -121,8 +121,9 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             # Once model is loaded sucessfully, update txtSelectModelInfo to reflect the model name
             self.old_model_name = model_name
             self.lblSelectModelInfo.setText("Model <b>%s</b> loaded successfully" % self.old_model_name)
+            self.selectModelButton.setText("Change...")
         
-        self.setWindowEdited(True)
+        self.editorModelModified()
 
         # Check for duplicate parameter names
         self.checkDuplicates(tree)
@@ -159,6 +160,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         if not delete_sucessful:
             return logger.warning("Could not find parameter to delete: %s" % param_to_delete.text(0))
+        else:
+            self.editorModelModified()
     
     def editSelected(self):
         """
@@ -226,8 +229,41 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         # Check if the file already exists
         if os.path.exists(output_file_path) and not overwrite_plugin:
-            return logger.warning("File already exists and overwrite is not checked. Aborting.") # TODO Replace with a a dialog box
+            msg = "File with specified name already exists.\n"
+            msg += "Please specify different filename or allow file overwrite."
+            QtWidgets.QMessageBox.critical(self, "Overwrite Error", msg)
+            return
 
+        # Check if the model name is empty
+        if not model_name:
+            msg = "No model name specified.\n"
+            msg += "Please specify a name before continuing."
+            QtWidgets.QMessageBox.critical(self, "Model Error", msg)
+            return
+
+        # Check if there are model warnings
+        param_warnings = False
+        for i in range(self.newParamTree.topLevelItemCount()):
+            param = self.newParamTree.topLevelItem(i)
+            if param.toolTip(1) != "":
+                param_warnings = True
+                break
+        if param_warnings:
+            # Display a warning allowing the user to cancel or continue
+            msgBox = QtWidgets.QMessageBox(self)
+            msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgBox.setWindowTitle("Model Warning")
+            msgBox.setText("Some of your parameters contain warnings.\nThis could cause errors or unexpected behavior in the model.")
+            msgBox.addButton("Continue anyways", QtWidgets.QMessageBox.AcceptRole)
+            cancelButton = msgBox.addButton(QtWidgets.QMessageBox.Cancel)
+
+            msgBox.exec_()
+
+            # Check which button was clicked
+            if msgBox.clickedButton() == cancelButton:
+                # Cancel button clicked
+                return
+    
         # Write the new model to the file
         model_text = self.generateModelText()
         self.writeModel(output_file_path, model_text)
@@ -348,9 +384,21 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         User modified the model in the Model Editor.
         Disable the plugin editor and show that the model is changed.
         """
-        self.setWindowEdited(True)
-        self.cmdApply.setEnabled(True)
-        self.is_modified = True
+        #Check to see if model was edited back into original state
+        f_box = True if self.txtFunction.toPlainText() == "" else False
+        n_box = True if self.txtNewModelName.text() == "" else False
+        p_boxes = True if not self.newParamTree.isEnabled() and not self.oldParamTree.isEnabled() else False
+        
+        if all([f_box, n_box, p_boxes]):
+            # Model was edited back into default state, so no need to prompt user to save before exiting
+            self.setWindowEdited(False)
+            self.cmdApply.setEnabled(False)
+            self.is_modified = False
+        else:
+            # Otherwise, model was edited and needs to be saved before exiting
+            self.setWindowEdited(True)
+            self.cmdApply.setEnabled(True)
+            self.is_modified = True
     
     def checkModel(self, full_path):
         """
@@ -567,6 +615,22 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
     # Functions that overwrite the default behavior of the parent class
 
     def closeEvent(self, event):
+
+        if self.is_modified:
+            # Display a warning allowing the user to cancel or continue
+            msgBox = QtWidgets.QMessageBox(self)
+            msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgBox.setWindowTitle("Unsaved Changes")
+            msgBox.setText("You have unsaved changes. Are you sure you want to close?")
+            msgBox.addButton("Close without saving", QtWidgets.QMessageBox.AcceptRole)
+            cancelButton = msgBox.addButton(QtWidgets.QMessageBox.Cancel)
+
+            msgBox.exec_()
+            if msgBox.clickedButton() == cancelButton:
+                # Cancel button clicked
+                event.ignore()
+                return
+
         self.close()
         self.deleteLater()  # Schedule the window for deletion
 
