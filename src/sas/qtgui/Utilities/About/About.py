@@ -33,6 +33,10 @@ class About(QDialog):
 
         self.setWindowTitle("About SasView")
 
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
+
         self.mainLayout = QVBoxLayout()
 
         # Top row of labels, title and version
