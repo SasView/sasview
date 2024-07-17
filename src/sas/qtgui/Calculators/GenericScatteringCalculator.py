@@ -1571,6 +1571,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
             data.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
             data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
+            data.id = data.title # required for serialization
 
             self.graph_num += 1
             if self.is_beta:
@@ -1579,6 +1580,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
                 dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
                 dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
+                dataBetaQ.id = dataBetaQ.title # required for serialization
 
                 self.graph_num += 1
         else:
