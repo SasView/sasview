@@ -5,6 +5,7 @@ import pathlib
 import re
 import traceback
 
+from numpy import inf
 from PySide6 import QtWidgets, QtCore, QtGui
 
 from sas.sascalc.fit.models import find_plugins_dir
@@ -13,6 +14,8 @@ from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
 from sas.qtgui.Utilities.ModelSelector import ModelSelector
 from sas.qtgui.Utilities.ParameterEditDialog import ParameterEditDialog
+
+from sasmodels.modelinfo import Parameter
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +32,6 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         self.onLoad()
 
-        self.newParamTreeEditable = False
-        self.old_model_name = None # Name of the model to be reparameterized
-        self.new_params_dict = {} # Dictionary of new parameters to be added to the model
         self.is_modified = False
     
     def addSignals(self):
@@ -43,6 +43,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.cmdEditSelected.clicked.connect(self.editSelected)
         self.txtNewModelName.textChanged.connect(self.editorModelModified)
         self.txtFunction.textChanged.connect(self.editorModelModified)
+        self.newParamTree.doubleClicked.connect(self.editSelected)
     
     def onLoad(self):
 
@@ -90,7 +91,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.model_selector.returnModelParamsSignal.connect(lambda model_name, params: self.loadParams(params, self.oldParamTree, model_name))
         self.model_selector.show()
 
-    def loadParams(self, params, tree, model_name=None, append=False):
+    def loadParams(self, params, tree, model_name=None):
         """
         Load parameters from the selected model into a tree widget
         :param param: sasmodels.modelinfo.Parameter class
@@ -109,7 +110,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             item = QtWidgets.QTreeWidgetItem(tree)
             item.setText(0, param.name)
             tree.addTopLevelItem(item)
-            self.addSubItems(param, item, append=append)
+            self.addSubItems(param, item)
+            self.badPropsCheck(item)
         
         if tree == self.oldParamTree:
             if tree.topLevelItemCount() == 0:
@@ -122,12 +124,15 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         self.setWindowEdited(True)
 
+        # Check for duplicate parameter names
+        self.checkDuplicates(tree)
+
     def onAddParam(self):
         """
         Add parameter to "New parameters box" by invoking parameter editor dialog
         """
         self.param_creator = ParameterEditDialog(self)
-        self.param_creator.returnNewParamsSignal.connect(lambda params: self.loadParams(params, self.newParamTree, append=True))
+        self.param_creator.returnNewParamsSignal.connect(lambda params: self.loadParams(params, self.newParamTree))
         self.param_creator.show()
     
     def onDeleteParam(self):
@@ -143,11 +148,9 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         # Find the parameter item by using param_to_delete
         for i in range(self.newParamTree.topLevelItemCount()):
             param = self.newParamTree.topLevelItem(i)
-            if param.text(0) == param_to_delete:
+            if param == param_to_delete:
                 # Remove the parameter from the tree
                 self.newParamTree.takeTopLevelItem(i)
-                # Remove the parameter from the dictionary
-                self.new_params_dict.pop(param_to_delete)
                 delete_sucessful = True
         
         if self.newParamTree.topLevelItemCount() == 0:
@@ -155,66 +158,61 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             self.newParamTree.setEnabled(False)
         
         if not delete_sucessful:
-            return logger.warning("Could not find parameter to delete: %s" % param_to_delete)
+            return logger.warning("Could not find parameter to delete: %s" % param_to_delete.text(0))
     
     def editSelected(self):
         """
         Edit the selected parameter in a new parameter editor dialog
         """
         # Get selected item
-        selected_item = self.newParamTree.currentItem()
-        param_to_open = self.getParameterSelection(selected_item)
+        selected_item = self.newParamTree.currentItem() # The item that the user selected (could be a sub-item)
+        param_to_open = self.getParameterSelection(selected_item) # The top-level item to open
         
         highlighted_property = selected_item.text(0) # What the user wants to edit specifically
         
         # Find the parameter item by using param_to_open and format as a dictionary
-        param_properties = self.getParamProperties(self.newParamTree, param_to_open)
-        param_properties['highlighted_property'] = highlighted_property # Which property the cursor will start on
-        self.param_editor = ParameterEditDialog(self, param_properties)
+        param_properties = self.getParamProperties(param_to_open)
+        param_properties['highlighted_property'] = highlighted_property # TODO: Which property the cursor will start on
+        self.param_editor = ParameterEditDialog(self, param_properties, param_to_open)
         self.param_editor.returnEditedParamSignal.connect(self.updateParam)
         self.param_editor.show()
     
-    def getParamProperties(self, tree, param_name):
+    def getParamProperties(self, param) -> dict:
         """
-        Return a dictionary of property name: value pairs for the given parameter name
+        Return a dictionary of property name: value pairs for the given parameter
+        :param param: the parameter to get properties for (QTreeWidgetItem)
         """
         properties = {}
-        for param in range(tree.topLevelItemCount()): # Iterate over all top-level items (parameters)
-            param_item = tree.topLevelItem(param)
-            if param_item.text(0) == param_name: # If the parameter name is the one the user selected
-                properties['name'] = param_item.text(0)
-                for property in range(param_item.childCount()): # Iterate over all properties (children) of the parameter and add them to dict
-                    if param_item.child(property).text(0) == 'description':
-                        # Access the description text, which is in another sub-item
-                        prop_item = param_item.child(property).child(0)
-                        properties['description'] = prop_item.text(1)
-                    else:
-                        prop_item = param_item.child(property)
-                        properties[prop_item.text(0)] = prop_item.text(1)
-                break
+        properties['name'] = param.text(0)
+        for property in range(param.childCount()): # Iterate over all properties (children) of the parameter and add them to dict
+            if param.child(property).text(0) == 'description':
+                # Access the description text, which is in another sub-item
+                prop_item = param.child(property).child(0)
+                properties['description'] = prop_item.text(1)
+            else:
+                prop_item = param.child(property)
+                properties[prop_item.text(0)] = prop_item.text(1)
         return properties
     
-    def updateParam(self, updated_param, old_name):
+    def updateParam(self, updated_param: Parameter, qtree_item: QtWidgets.QTreeWidgetItem):
         """
         Update given parameter in the newParamTree with the updated properties
         :param updated_param: Sasview Parameter class with updated properties
-        :param old_name: the old name of the parameter (so we can detect which parameter to update)
+        :param qtree_item: the qtree_item to update
         """
         unpacked_param = updated_param[0] # updated_param is sent as a list but will only have one item. Unpack it.
 
-        for i in range(self.newParamTree.topLevelItemCount()):
-            param = self.newParamTree.topLevelItem(i)
-            if param.text(0) == old_name:
-                self.new_params_dict.pop(old_name) # Remove the old parameter from the dictionary
-                # Delete all sub-items of the parameter
-                while param.childCount() > 0:
-                    sub_item = param.child(0)
-                    param.removeChild(sub_item)
+        # Delete all sub-items of the parameter
+        while qtree_item.childCount() > 0:
+            sub_item = qtree_item.child(0)
+            qtree_item.removeChild(sub_item)
 
-                # Now add all the updated properties
-                self.addSubItems(unpacked_param, param, append=True)
-                # Make sure to update the name of the parameter
-                param.setText(0, unpacked_param.name)
+        # Now add all the updated properties
+        self.addSubItems(unpacked_param, qtree_item)
+        # Make sure to update the name of the parameter
+        qtree_item.setText(0, unpacked_param.name)
+        self.badPropsCheck(qtree_item) # Check for bad parameter properties
+        self.checkDuplicates(self.newParamTree) # Check for duplicate parameter names
     
     def onApply(self):
         """
@@ -260,12 +258,37 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         translation_text = self.txtFunction.toPlainText()
         old_model_name = self.old_model_name
         parameters_text = ""
-        for param_name, param_properties in self.new_params_dict.items():
-            parameters_text += f"\n\t['{param_name}', '{param_properties['units']}', {param_properties['default']}, [{param_properties['min']}, {param_properties['max']}], '{param_properties['type']}', '{param_properties['description']}'],"
+        output_properties = [
+            "name",
+            "units",
+            "default",
+            "min",
+            "max",
+            "type",
+            "description"
+        ] # Order in this list MATTERS! Do not change it; it will change the order of parameter properties in the output model
+
+        # Format the parameters into text for the output file
+        for i in range(self.newParamTree.topLevelItemCount()):
+            param = self.newParamTree.topLevelItem(i)
+            param_properties = self.getParamProperties(param)
+            parameters_text += "\n\t[ "
+            for output_property in output_properties:
+                if output_property not in ('min', 'max'):
+                    # Add the property to the output text
+                    parameters_text += f"{param_properties[output_property]}, " if output_property == "default" else f"'{param_properties[output_property]}', "
+                # 'min' and 'max' must be formatted together as a list in the output, so we need to handle them separately
+                elif output_property == 'min':
+                    parameters_text += f"[{param_properties[output_property]}, "
+                elif output_property == 'max':
+                    parameters_text += f"{param_properties[output_property]}], "
+
+            parameters_text = parameters_text[:-2] # Remove trailing comma and space
+            parameters_text += "],"
         output = REPARAMETARIZED_MODEL_TEMPLATE.format(parameters=parameters_text, translation=translation_text, old_model_name=old_model_name)
         return output
 
-    def addSubItems(self, param, top_item, append=False):
+    def addSubItems(self, param, top_item):
         """
         Add sub-items to the given top-level item for the given parameter
         :param param: the Sasmodels Parameter class that contains properties to add
@@ -301,11 +324,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         sub_sub_item = QtWidgets.QTreeWidgetItem(sub_item)
         description = str(param.description)
         sub_sub_item.setText(1, description)
+        output_properties['name'] = param.name # Add name to output dictionary
         output_properties['description'] = description # Add description to output dictionary
-
-        if append:
-            # If the item is in the newParamTree, add the output properties to the dictionary
-            self.new_params_dict[param.name] = output_properties
     
     def setWindowEdited(self, is_edited):
             """
@@ -387,24 +407,145 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                             error_line = 0
 
         return error_line
+    
+    def badPropsCheck(self, param_item):
+        """
+        Check a parameter for bad properties.
+        :param param_item: the parameter to check (QTreeWidgetItem)
+        """
+        self.removeParameterWarning(param_item)
+
+        # Get dictionary form of properties for easy manipulation
+        error_message = ""
+        properties = {}
+        properties['name'] = param_item.text(0)
+        for i in range(param_item.childCount()):
+            prop = param_item.child(i)
+            if prop.text(0) == "default":
+                properties['default'] = prop.text(1)
+            elif prop.text(0) == "min":
+                properties['min'] = prop.text(1)
+            elif prop.text(0) == "max":
+                properties['max'] = prop.text(1)
+            elif prop.text(0) == "units":
+                properties['units'] = prop.text(1)
+            elif prop.text(0) == "type":
+                properties['type'] = prop.text(1)
+        
+        # Ensure the name is not empty
+        if properties['name'] == "":
+            error_message += "Parameter name cannot be empty\n"
+        
+        # List of properties to convert to floats
+        conversion_list = ['min', 'max', 'default']
+
+        # Ensure that there is at least min, max, and default properties
+        for item in conversion_list:
+            if item not in properties or properties[item] == "":
+                error_message += f"Missing '{item}' property\n"
+                conversion_list.remove(item) # Remove the property from the list of properties to convert
+        
+        # Try to convert min, max, and default to floats
+        macro_set = {'M_PI', 'M_PI_2', 'M_PI_4', 'M_SQRT1_2', 'M_E', 'M_PI_180', 'M_4PI_3', inf, -inf}
+        for to_convert in conversion_list:
+            try:
+                properties[to_convert] = float(properties[to_convert])
+            except ValueError:
+                if properties[to_convert] in macro_set:
+                    continue # Skip if the value is a macro
+                else:
+                    error_message += f"'{to_convert}' contains invalid value\n"
+        
+        # Check if min is less than max
+        if 'min' not in error_message and 'max' not in error_message:
+            if properties['min'] >= properties['max']:
+                error_message += "Minimum value must be less than maximum value\n"
+        
+        # Ensure that units and type are not numbers
+        for item in ['units', 'type']:
+            if item in properties:
+                try:
+                    float(properties[item])
+                    error_message += f"'{item}' must be a string or left blank.\n"
+                except ValueError:
+                    pass
+        
+        error_message = error_message.strip() # Remove trailing newline
+        if error_message != "":
+            # If there are any errors, display a warning icon
+            self.parameterWarning(param_item, error_message)
+
+    def checkDuplicates(self, tree: QtWidgets.QTreeWidget):
+        """
+        Check for parameters with the same name and display caution icons if found.
+        NOTE: This method MUST come after badPropsCheck, as badPropsCheck overrides existing tooltip text,
+        while this method will add to it if needed.
+        :param tree: the QTreeWidget to check for duplicates.
+        """
+        # If more than one parameter in the tree is the same, display warning icon
+        count_dict = {}
+        for i in range(tree.topLevelItemCount()):
+            item_name = tree.topLevelItem(i).text(0)
+            if item_name in count_dict:
+                count_dict[item_name] += 1
+            else:
+                count_dict[item_name] = 1
+        
+        duplicates = [key for key, value in count_dict.items() if value > 1]
+
+        for i in range(tree.topLevelItemCount()):
+            item = tree.topLevelItem(i)
+            current_tooltip = item.toolTip(1)
+            duplicate_warning = "Cannot use duplicate parameter names"
+            if current_tooltip == duplicate_warning:
+                # If tooltip is already displaying the warning, clear the warning and then check if it needs to be re-added
+                # Therefore, we can avoid adding the same warning multiple times
+                self.removeParameterWarning(item)
+
+            if item.text(0) in duplicates:
+                if current_tooltip == "":
+                    # If tooltip is empty, show only this warning
+                    updated_tooltip = duplicate_warning
+                else:
+                    updated_tooltip = current_tooltip + "\n" + duplicate_warning
+                self.parameterWarning(item, updated_tooltip)
+    
+    def parameterWarning(self, table_item, tool_tip_text):
+        """
+        Display a warning icon on a parameter and set tooltip.
+        :param table_item: The QTreeWidgetItem to add the icon to
+        :param tool_tip_text: The tooltip text to display when the user hovers over the warning
+        """
+        icon = self.style().standardIcon(QtWidgets.QStyle.SP_MessageBoxWarning)
+        table_item.setToolTip(1, tool_tip_text)
+        table_item.setIcon(1, icon)
 
     ### CLASS METHODS ###
+
+    @classmethod
+    def removeParameterWarning(cls, table_item):
+        """
+        Remove the warning icon from a parameter
+        :param table_item: The QTreeWidgetItem to remove the icon from
+        """
+        table_item.setToolTip(1, "")
+        table_item.setIcon(1, QtGui.QIcon())
     
     @classmethod
-    def getParameterSelection(cls, selected_item) -> str:
+    def getParameterSelection(cls, selected_item) -> QtWidgets.QTreeWidgetItem:
         """
-        Return the text of the parameter's name even if selected_item is a 'property' item
+        Return the QTreeWidgetItem of the parameter even if selected_item is a 'property' (sub) item
         :param selected_item: QTreeWidgetItem that represents either a parameter or a property
         """
         if selected_item.parent() == None:
             # User selected a parametery, not a property
-            param_to_open = selected_item.text(0)
+            param_to_open = selected_item
         elif selected_item.parent().parent() != None:
             # User selected the description text
-            param_to_open = selected_item.parent().parent().text(0)
+            param_to_open = selected_item.parent().parent()
         else:
             # User selected a property, not a parameter
-            param_to_open = selected_item.parent().text(0)
+            param_to_open = selected_item.parent()
         return param_to_open
 
     ### STATIC METHODS ###
@@ -445,4 +586,5 @@ translation = """
 """
 
 model_info = reparameterize('{old_model_name}', parameters, translation, __file__)
+
 '''

@@ -13,14 +13,14 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
 
     # Signals
     returnNewParamsSignal = QtCore.Signal(list)
-    returnEditedParamSignal = QtCore.Signal(list, str)
+    returnEditedParamSignal = QtCore.Signal(list, QtWidgets.QTreeWidgetItem)
 
-    def __init__(self, parent=None, properties=None):
+    def __init__(self, parent=None, properties=None, qtree_item=None):
         super(ParameterEditDialog, self).__init__(parent)
 
         self.parent = parent
         self.properties = properties
-        self.previous_name = None # Previous name of the parameter, if any
+        self.qtree_item = qtree_item
 
         self.setupUi(self)
 
@@ -45,11 +45,13 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
 
             # Load properties into table
             for property in self.properties:
-                if property not in ("name", "highlighted_property"):
+                if property not in ("name", "highlighted_property", "id"):
                     self.writeValuesToTable(self.valuesTable, property, str(self.properties[property]))
                 elif property == "name":
                     self.txtName.setText(self.properties[property])
-                    self.previous_name = self.properties[property]
+                elif property == "id":
+                    self.id = self.properties[property]
+                    print(type(self.id))
 
     def onCellPressed(self):
         # Clear bold formatting in the first column
@@ -71,7 +73,7 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
         Return the values in the table to the listening parent widget
         """
         if self.properties:
-            self.returnEditedParamSignal.emit(self.getValues(), self.previous_name)
+            self.returnEditedParamSignal.emit(self.getValues(), self.qtree_item)
         else:
             self.returnNewParamsSignal.emit(self.getValues())
 
