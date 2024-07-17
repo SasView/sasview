@@ -1161,6 +1161,9 @@ def saveData(fp, data):
         if isinstance(o, numbers.Real):
             return float(o)
 
+        if isinstance(o, DataRole):
+            return o.value
+
         # not supported
         logging.info("data cannot be serialized to json: %s" % type(o))
         return None
