@@ -662,6 +662,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
+        self.WhatsNew = WhatsNew(strictly_newer=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
