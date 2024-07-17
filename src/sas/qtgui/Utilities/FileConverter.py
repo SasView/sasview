@@ -293,9 +293,8 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         caption = 'Save As'
         filter = wildcard
         parent = None
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, "", filter, "", options)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, "", filter, "")
         filename = filename_tuple[0]
 
         # User cancelled.
