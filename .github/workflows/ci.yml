@@ -142,7 +142,7 @@ jobs:
 
       - name: Python package version list
         run: |
-        uv pip freeze
+          uv pip freeze
 
       ### Actual building of sasview
 
