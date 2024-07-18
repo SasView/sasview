@@ -1202,7 +1202,7 @@ class PDBReader(object):
             for line in lines:
                 try:
                     # check if line starts with "ATOM"
-                    if line[0:6] in ('ATM   ', 'ATOM  ', 'HETATM'):
+                    if line[0:6] in ('ATM   ', 'ATOM  '):
                         # define fields of interest
                         atom_name = line[12:16].strip()
                         try:
@@ -1275,16 +1275,17 @@ class PDBReader(object):
                     self.logger.error(f"Failed to read line: {line}")
                     self.logger.exception(exc)
 
-            ordered_pairs = sorted(list(connected_pairs)) # Why *not* sort
-            x_lines = [(pos_x[a], pos_x[b]) for a, b in ordered_pairs]
-            y_lines = [(pos_y[a], pos_y[b]) for a, b in ordered_pairs]
-            z_lines = [(pos_z[a], pos_z[b]) for a, b in ordered_pairs]
-
             # Reshape stuff for file
 
             pos_x = np.reshape(pos_x, (-1, ))
             pos_y = np.reshape(pos_y, (-1, ))
             pos_z = np.reshape(pos_z, (-1, ))
+
+            n_atoms = len(pos_x)
+            ordered_pairs = sorted([(a, b) for a, b in connected_pairs if a < n_atoms and b < n_atoms])  # Why *not* sort
+            x_lines = [(pos_x[a], pos_x[b]) for a, b in ordered_pairs]
+            y_lines = [(pos_y[a], pos_y[b]) for a, b in ordered_pairs]
+            z_lines = [(pos_z[a], pos_z[b]) for a, b in ordered_pairs]
 
             sld_n = np.reshape(sld_n, (-1, ))
 
