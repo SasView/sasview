@@ -1,9 +1,9 @@
 from collections import defaultdict
 
 from PySide6 import QtWidgets
-from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtGui import QImage, QPixmap, QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QTextBrowser, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QUrl, QSize
 
 from sas.system.version import __version__ as sasview_version
 import importlib.resources as resources
@@ -100,6 +100,10 @@ class WhatsNew(QDialog):
         super().__init__()
 
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
+
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
 
         self.browser = WhatsNewBrowser()
         self.browser.setOpenLinks(True)
