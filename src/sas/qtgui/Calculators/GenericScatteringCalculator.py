@@ -291,6 +291,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
         beamWindow.figure.add_axes(axes_beam)
 
+        # TODO: Should be defined in init
         self.coord_windows = [sampleWindow, envWindow, beamWindow]
         self.coord_axes = [axes_sample, axes_env, axes_beam]
         self.coord_arrows = []
@@ -313,11 +314,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                              mutation_scale=10,
                              lw=2)
 
+            arrows.set_realtime(True)
+
             self.coord_arrows.append(arrows)
+            axes.add_artist(arrows)
 
             # Set axes properties
-            axes.set_realtime(True)
-            axes.add_artist(arrows)
             axes.set_xlim3d(-1, 1)
             axes.set_ylim3d(-1, 1)
             axes.set_zlim3d(-1, 1)
