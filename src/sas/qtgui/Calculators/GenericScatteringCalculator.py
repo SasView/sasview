@@ -273,6 +273,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnity.setStyleSheet(new_font)
         self.lblUnitz.setStyleSheet(new_font)
 
+        # List to keep hold of plot3d windows so they don't get disposed by garbage collection
+        self.plot3ds = []
+
     def setup_display(self):
         """
         This function sets up the GUI display of the different coordinate systems.
@@ -1595,9 +1598,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if has_arrow:
             graph_title += ' - Magnetic Vector as Arrow'
 
-        plot3D = Plotter3D(self, graph_title)
+        plot3D = Plotter3D(self, self, graph_title)
         plot3D.plot(sld_data, has_arrow=has_arrow)
         plot3D.show()
+
+        self.plot3ds.append(plot3D)
+
         self.graph_num += 1
 
     def plot_1_2d(self):
@@ -1850,7 +1856,16 @@ class Plotter3DWidget(PlotterBase):
 
 
 class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
-    def __init__(self, parent=None, graph_title=''):
+    def __init__(self, gsc_instance: GenericScatteringCalculator | None, parent=None, graph_title=''):
         self.graph_title = graph_title
         Plotter3DWidget.__init__(self, manager=parent)
         self.setWindowTitle(self.graph_title)
+        self.gsc_instance = gsc_instance
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        # Make sure we remove reference to this plot so that it can be garbage collected
+
+        if self.gsc_instance is not None:
+            self.gsc_instance.plot3ds.remove(self)
+
+        event.accept()
