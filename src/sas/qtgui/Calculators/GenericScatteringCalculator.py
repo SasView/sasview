@@ -278,41 +278,61 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.view_azim = 45
         self.view_elev = 45
         self.mouse_down = False
+
         sampleWindow = FigureCanvas(Figure())
         axes_sample = Axes3D(sampleWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
         sampleWindow.figure.add_axes(axes_sample)
+
         envWindow = FigureCanvas(Figure())
         axes_env = Axes3D(envWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
         envWindow.figure.add_axes(axes_env)
+
         beamWindow = FigureCanvas(Figure())
         axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
         beamWindow.figure.add_axes(axes_beam)
+
         self.coord_windows = [sampleWindow, envWindow, beamWindow]
         self.coord_axes = [axes_sample, axes_env, axes_beam]
         self.coord_arrows = []
+
         titles = ["sample", "environment", "beamline"]
-        for i, window in enumerate(self.coord_windows):
+        for i, (window, axes) in enumerate(zip(self.coord_windows, self.coord_axes)):
             self.coordDisplay.addWidget(window)
 
             self.coord_axes[i].set_box_aspect((1, 1, 1))
 
             window.installEventFilter(self)
+
             # stack in order zs, xs, ys to match the coord system used in sasview
-            self.coord_arrows.append(Arrow3D(self.coord_axes[i].figure, [[0, 0],[0, 0],[0, 1]], [[0, 1],[0, 0],[0, 0]], [[0, 0],[0, 1],[0, 0]], [[1, 0 ,0],[0, 1, 0],[0, 0, 1]], arrowstyle = "->", mutation_scale=10, lw=2))
-            self.coord_arrows[i].set_realtime(True)
-            self.coord_axes[i].add_artist(self.coord_arrows[i])
-            self.coord_axes[i].set_xlim3d(-1, 1)
-            self.coord_axes[i].set_ylim3d(-1, 1)
-            self.coord_axes[i].set_zlim3d(-1, 1)
-            self.coord_axes[i].set_axis_off()
-            self.coord_axes[i].set_title(titles[i])
-            self.coord_axes[i].disable_mouse_rotation()
+            arrows = Arrow3D(axes.figure,
+                             [[0, 0], [0, 0], [0, 1]],
+                             [[0, 1], [0, 0], [0, 0]],
+                             [[0, 0], [0, 1], [0, 0]],
+                             [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                             arrowstyle="->",
+                             mutation_scale=10,
+                             lw=2)
+
+            self.coord_arrows.append(arrows)
+
+            # Set axes properties
+            axes.set_realtime(True)
+            axes.add_artist(arrows)
+            axes.set_xlim3d(-1, 1)
+            axes.set_ylim3d(-1, 1)
+            axes.set_zlim3d(-1, 1)
+            axes.set_axis_off()
+            axes.set_title(titles[i])
+            axes.disable_mouse_rotation()
+
         self.polarisation_arrow = Arrow3D(self.coord_axes[1].figure, [[0, 0.8]], [[0, 0]], [[0, 0]], [[1, 0 ,0.7]], arrowstyle = "->", mutation_scale=10, lw=3)
         self.polarisation_arrow.set_realtime(True)
         self.coord_axes[1].add_artist(self.polarisation_arrow)
+
         self.coord_axes[0].text2D(0.75, 0.01, 'x', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[0].transAxes)
         self.coord_axes[0].text2D(0.85, 0.01, 'y', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[0].transAxes)
         self.coord_axes[0].text2D(0.95, 0.01, 'z', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[0].transAxes)
+
         self.p_text = self.coord_axes[1].text2D(0.65, 0.01, 'p', verticalalignment='bottom', horizontalalignment='right', color='#ff00bb', fontsize=15, transform=self.coord_axes[1].transAxes)
         self.p_text.set_visible(False)
         self.coord_axes[1].text2D(0.75, 0.01, 'u', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[1].transAxes)
