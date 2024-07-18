@@ -1190,10 +1190,9 @@ class PDBReader(object):
         vol_pix = []
         pix_symbol = []
         connected_pairs = set()
-        x_lines = []
-        y_lines = []
-        z_lines = []
+
         atom_value_dict = {}
+
         try:
             input_f = open(path, 'rb')
             buff = decode(input_f.read())
@@ -1203,7 +1202,7 @@ class PDBReader(object):
             for line in lines:
                 try:
                     # check if line starts with "ATOM"
-                    if line[0:6] in ('ATM   ', 'ATOM  '):
+                    if line[0:6] in ('ATM   ', 'ATOM  ', 'HETATM'):
                         # define fields of interest
                         atom_name = line[12:16].strip()
                         try:
