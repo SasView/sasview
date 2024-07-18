@@ -280,9 +280,27 @@ class PlotterWidget(PlotterBase):
             x_range = self.setRange.xrange()
             y_range = self.setRange.yrange()
         else:
-            # Use default ranges given by matplotlib
-            x_range = default_x_range = self.ax.get_xlim()
-            y_range = default_y_range = self.ax.get_ylim()
+            if isinstance(data, Data1D):
+                # Get default ranges from data
+                # factors of .99 and 1.01 provides a small gap so end points not shown right at edge
+                default_x_range = (0.99*np.min(x), 1.01*np.max(x))
+
+                # Need to make space for error bars
+                dy = data.view.dy
+                if dy is None:
+                    default_y_range = (0.99 * np.min(y), 1.01 * np.max(y))
+                else:
+                    default_y_range = (0.99*np.min(np.array(y) - np.array(dy)),
+                                       1.01*np.max(np.array(y) + np.array(dy)))
+
+            else:
+                # Use default ranges given by matplotlib
+                default_x_range = self.ax.get_xlim()
+                default_y_range = self.ax.get_ylim()
+
+            x_range = default_x_range
+            y_range = default_y_range
+
             modified = False
         self.setRange = SetGraphRange(parent=self, x_range=x_range, y_range=y_range)
         self.setRange.rangeModified = modified
