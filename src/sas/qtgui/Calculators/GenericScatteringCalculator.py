@@ -1788,6 +1788,8 @@ class Plotter3DWidget(PlotterBase):
         self.figure.canvas.resizing = False
         self.figure.canvas.draw()
 
+        self.setFocus()
+
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
