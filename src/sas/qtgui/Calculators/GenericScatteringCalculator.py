@@ -291,12 +291,15 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.coord_axes = [axes_sample, axes_env, axes_beam]
         self.coord_arrows = []
         titles = ["sample", "environment", "beamline"]
-        for i in range(len(self.coord_windows)):
-            self.coordDisplay.addWidget(self.coord_windows[i])
-            if int(mpl_version.split(".")[0]) >= 3: # how mpl plots 3D graphs changed in 3.3.0 to allow better aspect ratios
+        for i, window in enumerate(self.coord_windows):
+            self.coordDisplay.addWidget(window)
+
+            # how mpl plots 3D graphs changed in 3.3.0 to allow better aspect ratios
+            if int(mpl_version.split(".")[0]) >= 3:
                 if int(mpl_version.split(".")[1]) >= 3:
                     self.coord_axes[i].set_box_aspect((1,1,1))
-            self.coord_windows[i].installEventFilter(self)
+
+            window.installEventFilter(self)
             # stack in order zs, xs, ys to match the coord system used in sasview
             self.coord_arrows.append(Arrow3D(self.coord_axes[i].figure, [[0, 0],[0, 0],[0, 1]], [[0, 1],[0, 0],[0, 0]], [[0, 0],[0, 1],[0, 0]], [[1, 0 ,0],[0, 1, 0],[0, 0, 1]], arrowstyle = "->", mutation_scale=10, lw=2))
             self.coord_arrows[i].set_realtime(True)
