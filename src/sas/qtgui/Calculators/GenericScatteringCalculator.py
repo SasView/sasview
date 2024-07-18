@@ -330,24 +330,24 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             axes.set_title(titles[i])
             axes.disable_mouse_rotation()
 
-        self.polarisation_arrow = Arrow3D(self.coord_axes[1].figure, [[0, 0.8]], [[0, 0]], [[0, 0]], [[1, 0 ,0.7]], arrowstyle = "->", mutation_scale=10, lw=3)
+        self.polarisation_arrow = Arrow3D(self.coord_axes[1].figure, [[0, 0.8]], [[0, 0]], [[0, 0]], [[1, 0, 0.7]], arrowstyle = "->", mutation_scale=10, lw=3)
         self.polarisation_arrow.set_realtime(True)
         self.coord_axes[1].add_artist(self.polarisation_arrow)
 
-        self.coord_axes[0].text2D(0.75, 0.01, 'x', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[0].transAxes)
-        self.coord_axes[0].text2D(0.85, 0.01, 'y', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[0].transAxes)
-        self.coord_axes[0].text2D(0.95, 0.01, 'z', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.7, 0.01, 'x', verticalalignment='bottom', horizontalalignment='left', color='red', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.8, 0.01, 'y', verticalalignment='bottom', horizontalalignment='left', color='green', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.9, 0.01, 'z', verticalalignment='bottom', horizontalalignment='left', color='blue', fontsize=15, transform=self.coord_axes[0].transAxes)
 
-        self.p_text = self.coord_axes[1].text2D(0.65, 0.01, 'p', verticalalignment='bottom', horizontalalignment='right', color='#ff00bb', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.p_text = self.coord_axes[1].text2D(0.6, 0.01, 'p', verticalalignment='bottom', horizontalalignment='left', color='#ff00bb', fontsize=15, transform=self.coord_axes[1].transAxes)
         self.p_text.set_visible(False)
 
-        self.coord_axes[1].text2D(0.75, 0.01, 'u', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[1].transAxes)
-        self.coord_axes[1].text2D(0.85, 0.01, 'v', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[1].transAxes)
-        self.coord_axes[1].text2D(0.95, 0.01, 'w', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.7, 0.01, 'u', verticalalignment='bottom', horizontalalignment='left', color='red', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.8, 0.01, 'v', verticalalignment='bottom', horizontalalignment='left', color='green', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.9, 0.01, 'w', verticalalignment='bottom', horizontalalignment='left', color='blue', fontsize=15, transform=self.coord_axes[1].transAxes)
 
-        self.coord_axes[2].text2D(0.75, 0.01, 'U', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[2].transAxes)
-        self.coord_axes[2].text2D(0.85, 0.01, 'V', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[2].transAxes)
-        self.coord_axes[2].text2D(0.95, 0.01, 'W', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.7, 0.01, 'U', verticalalignment='bottom', horizontalalignment='left', color='red', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.8, 0.01, 'V', verticalalignment='bottom', horizontalalignment='left', color='green', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.89, 0.01, 'W', verticalalignment='bottom', horizontalalignment='left', color='blue', fontsize=15, transform=self.coord_axes[2].transAxes)
 
 
     def update_coords(self):
