@@ -86,19 +86,19 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install uv
-          uv pip install --upgrade pip
-          uv pip install wheel setuptools
-          uv pip install -r build_tools/requirements.txt
+          uv pip install --system --upgrade pip
+          uv pip install --system wheel setuptools
+          uv pip install --system -r build_tools/requirements.txt
 
       - name: Install pywin32 (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
-          uv pip install pywin32
+          uv pip install --system pywin32
 
       - name: Install pyopencl (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
-          uv pip install pytools mako cffi
+          uv pip install --system pytools mako cffi
           choco install opencl-intel-cpu-runtime
           choco install innosetup
           python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
@@ -106,7 +106,7 @@ jobs:
       - name: Install pyopencl (Linux + macOS)
         if: ${{ !startsWith(matrix.os, 'windows') }}
         run: |
-          uv pip install pyopencl
+          uv pip install --system pyopencl
 
       - name: Fetch sources for sibling projects
         run: |
@@ -122,7 +122,7 @@ jobs:
           python setup.py clean
           python setup.py build
           mv build/lib/sasdata/example_data/* ../sasview/src/sas/example_data/
-          uv pip install --no-deps .
+          uv pip install --system --no-deps .
 
       - name: Build and install sasmodels
         run: |
@@ -131,7 +131,7 @@ jobs:
           rm -rf dist
           python setup.py clean
           python setup.py build
-          uv pip install --no-deps .
+          uv pip install --system --no-deps .
 
       - name: Build and install bumps
         run: |
@@ -140,7 +140,7 @@ jobs:
           rm -rf dist
           python setup.py clean
           python setup.py build
-          uv pip install --no-deps .
+          uv pip install --system --no-deps .
 
       ### Document the build environment
 
@@ -158,7 +158,7 @@ jobs:
           # BUILD SASVIEW
           python setup.py clean
           python setup.py build
-          uv pip install --no-deps .
+          uv pip install --system --no-deps .
 
       ### Run tests (if enabled)
 
@@ -201,7 +201,7 @@ jobs:
 
       - name: Install utilities to build installer
         run: |
-          uv pip install pyinstaller
+          uv pip install --system pyinstaller
 
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
