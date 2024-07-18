@@ -305,24 +305,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             window.installEventFilter(self)
 
             # stack in order zs, xs, ys to match the coord system used in sasview
-            arrows = Arrow3D(axes.figure,
-                             [[0, 0], [0, 0], [0, 1]],
-                             [[0, 1], [0, 0], [0, 0]],
-                             [[0, 0], [0, 1], [0, 0]],
-                             [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-                             arrowstyle="->",
-                             mutation_scale=10,
-                             lw=2)
+            arrows = []
+            for x, y, z, color, in [[0, 1, 0, 'r'], [0, 0, 1, 'g'], [1, 0, 0, 'b']]:
 
-            arrows.set_realtime(True)
+                arrow = Arrow3D(axes.figure, [[0, x]], [[0, y]], [[0, z]],
+                                colors=[color],
+                                arrowstyle="->",
+                                mutation_scale=10,
+                                lw=2)
+
+                arrow.set_realtime(True)
+                axes.add_artist(arrow)
+
+                arrows.append(arrow)
+
 
             self.coord_arrows.append(arrows)
-            axes.add_artist(arrows)
 
             # Set axes properties
-            axes.set_xlim3d(-1, 1)
-            axes.set_ylim3d(-1, 1)
-            axes.set_zlim3d(-1, 1)
+            axes.set_xlim3d(-1.1, 1.1)
+            axes.set_ylim3d(-1.1, 1.1)
+            axes.set_zlim3d(-1.1, 1.1)
             axes.set_axis_off()
             axes.set_title(titles[i])
             axes.disable_mouse_rotation()
@@ -337,9 +340,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         self.p_text = self.coord_axes[1].text2D(0.65, 0.01, 'p', verticalalignment='bottom', horizontalalignment='right', color='#ff00bb', fontsize=15, transform=self.coord_axes[1].transAxes)
         self.p_text.set_visible(False)
+
         self.coord_axes[1].text2D(0.75, 0.01, 'u', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[1].transAxes)
         self.coord_axes[1].text2D(0.85, 0.01, 'v', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[1].transAxes)
         self.coord_axes[1].text2D(0.95, 0.01, 'w', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[1].transAxes)
+
         self.coord_axes[2].text2D(0.75, 0.01, 'U', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[2].transAxes)
         self.coord_axes[2].text2D(0.85, 0.01, 'V', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[2].transAxes)
         self.coord_axes[2].text2D(0.95, 0.01, 'W', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[2].transAxes)
@@ -351,17 +356,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         This is one of four functions affecting the coordinate system visualisation which should be updated if
         a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
         """
-        if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and self.txtEnvRoll.hasAcceptableInput() \
-           and self.txtSampleYaw.hasAcceptableInput() and self.txtSamplePitch.hasAcceptableInput() and self.txtSampleRoll.hasAcceptableInput():
+        if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and \
+                self.txtEnvRoll.hasAcceptableInput() and self.txtSampleYaw.hasAcceptableInput() and \
+                self.txtSamplePitch.hasAcceptableInput() and self.txtSampleRoll.hasAcceptableInput():
+
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
             basis_vectors = numpy.array([[1,0,0],[0,1,0],[0,0,1]])
+
             #TODO: when scipy version updated can just use Rotation.as_matrix() to get new basis vectors - function name currently varies between versions used.
             uvw_matrix = UVW_to_uvw.apply(basis_vectors)
+
             xs, ys, zs = numpy.transpose(numpy.stack((numpy.zeros_like(uvw_matrix), uvw_matrix)), axes=(2, 1, 0))
-            self.coord_arrows[1].update_data(zs, xs, ys) # stack in order zs, xs, ys to match the coord system used in sasview
+            for i in range(3):
+                # stack in order zs, xs, ys to match the coord system used in sasview
+                self.coord_arrows[1][i].update_data([zs[i]], [xs[i]], [ys[i]])
+
             xyz_matrix = UVW_to_xyz.apply(basis_vectors)
             xs, ys, zs = numpy.transpose(numpy.stack((numpy.zeros_like(xyz_matrix), xyz_matrix)), axes=(2, 1, 0))
-            self.coord_arrows[0].update_data(zs, xs, ys) # stack in order zs, xs, ys to match the coord system used in sasview
+            for i in range(3):
+                # stack in order zs, xs, ys to match the coord system used in sasview
+                self.coord_arrows[0][i].update_data([zs[i]], [xs[i]], [ys[i]])
+
             self.update_polarisation_coords()
 
 
