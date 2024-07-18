@@ -89,6 +89,7 @@ jobs:
           uv pip install --system --upgrade pip
           uv pip install --system wheel setuptools
           uv pip install --system -r build_tools/requirements.txt
+          uv pip install --system requests
 
       - name: Install pywin32 (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
