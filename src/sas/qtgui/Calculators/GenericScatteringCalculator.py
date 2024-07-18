@@ -129,8 +129,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxPluginModel.stateChanged.connect(self.update_file_name)
         self.checkboxLogSpace.stateChanged.connect(self.change_qValidator)
 
-        self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
-        self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
+
+        # Connect plotting button, Use a function not lambda because of some bugs with referencing
+        def plot3d_with_arrows():
+            self.plot3d(has_arrow=True)
+
+        self.cmdDraw.clicked.connect(plot3d_with_arrows)
+        self.cmdDrawpoints.clicked.connect(self.plot3d)
 
         # update pixel no./total volume when changed in GUI
         self.txtXnodes.textChanged.connect(self.update_geometry_effects)
@@ -244,7 +249,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             QtGui.QRegularExpressionValidator(validat_regex_int, self.txtZnodes))         
 
         # plots - 3D in real space
-        self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
+        self.trigger_plot_3d.connect(self.plot3d)
 
         # plots - 3D in real space
         self.calculationFinishedSignal.connect(self.plot_1_2d)
@@ -784,7 +789,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         Once the data has been loaded in by the required reader it is necessary to do a small
         amount of final processing to put them in the required form. This involves converting
-        all the data to instances of MagSLD and reporting any errors. Additionally verification
+        all the data to instances of MagSLD and reporting any errors. Additionally, verification
         of the newly loaded file is carried out.
 
         :param data: The data loaded from the requested file.
@@ -1303,7 +1308,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # if present is given in case the sld file format is expanded to include them
         if self.is_nuc:
             if self.nuc_sld_data.has_conect:
-                sld_data.has_conect=True
+                sld_data.has_conect = True
                 sld_data.line_x = self.nuc_sld_data.line_x
                 sld_data.line_y = self.nuc_sld_data.line_y
                 sld_data.line_z = self.nuc_sld_data.line_z
