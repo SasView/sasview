@@ -490,8 +490,6 @@ class Invertor(Pinvertor):
             chi2 = -1.0
         self.chi2 = chi2
 
-        inv_cov = np.zeros([nfunc, nfunc])
-
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
         inv_cov = self._get_invcov_matrix(nfunc, nr, a)
         # Compute the reg term size for the output
