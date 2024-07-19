@@ -496,7 +496,7 @@ class Invertor(Pinvertor):
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 
         if self.alpha > 0:
-            new_alpha = sum_sig / (sum_reg / self.alpha)
+            new_alpha = self.alpha * sum_sig / sum_reg
         else:
             new_alpha = 0.0
         self.suggested_alpha = new_alpha
