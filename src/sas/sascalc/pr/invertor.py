@@ -379,13 +379,6 @@ class Invertor(Pinvertor):
         t_0 = time.time()
         out, cov_x, _, _, _ = optimize.leastsq(self.pr_residuals, p, full_output=1)
 
-        # Compute chi^2
-        res = self.pr_residuals(out)
-        chisqr = 0
-        chisq = np.sum(math.fabs(res))
-
-        self.chisqr = chisqr
-
         # Store computation time
         self.elapsed = time.time() - t_0
 
