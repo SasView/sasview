@@ -150,9 +150,11 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 plotable_xs.append(x)
             except Exception as ex:
                 # This inversion failed, skip this D_max value
-                msg = "ExploreDialog: inversion failed "
-                msg += "for D_max=%s\n%s" % (str(x), ex)
-                msg = "Please adapt Inversion parameters"
+
+                msg = (f"ExploreDialog: inversion failed for D_max={x}\n"
+                       f"{ex}\n"
+                       f"Please adapt Inversion parameters")
+                
                 logger.error(msg)
 
         #Return the invertor to its original state
