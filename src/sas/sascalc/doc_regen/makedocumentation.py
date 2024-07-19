@@ -38,6 +38,10 @@ if os.path.exists(SAS_DIR / "doc"):
     # This is the directory structure for the installed version of SasView (primary for times when both exist)
     BASE_DIR = SAS_DIR / "doc"
     ORIGINAL_DOCS_SRC = BASE_DIR / "source"
+elif os.path.exists(SAS_DIR / '..' / 'Frameworks' / 'doc'):
+    # In the MacOS bundle, the executable and packages are in parallel directories
+    BASE_DIR = SAS_DIR / '..' / 'Frameworks' / 'doc'
+    ORIGINAL_DOCS_SRC = BASE_DIR / "source"
 else:
     # This is the directory structure for developers
     BASE_DIR = SAS_DIR / "docs" / "sphinx-docs"
@@ -99,6 +103,7 @@ def call_regenmodel(filepath: list[PATH_LIKE]):
 
     :param filepath: A file-path like object or list of file-path like objects to regenerate.
     """
+    create_user_files_if_needed()
     from sas.sascalc.doc_regen.regenmodel import run_sphinx, process_model
     filepaths = [Path(path) for path in filepath]
     rst_files = [Path(process_model(py_file, True)) for py_file in filepaths]
@@ -184,6 +189,7 @@ def make_documentation(target: PATH_LIKE = "."):
 
     :param target: A file name that needs the html regenerated.
     """
+    create_user_files_if_needed()
     # Ensure target is a path object
     if target:
         target = Path(target)

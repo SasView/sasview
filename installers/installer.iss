@@ -26,7 +26,7 @@ UsedUserAreasWarning=no
 LicenseFile=license.txt
 ArchitecturesInstallIn64BitMode=x64
 OutputBaseFilename=setupSasView
-SetupIconFile=dist\sasview\_internal\images\ball.ico
+SetupIconFile=dist\sasview\images\ball.ico
 
 
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
@@ -55,9 +55,8 @@ end;
 
 [Files]
 Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
 Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\sasview\_internal\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
-Source: "dist\sasview\_internal\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
