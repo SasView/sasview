@@ -154,7 +154,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 msg = (f"ExploreDialog: inversion failed for D_max={x}\n"
                        f"{ex}\n"
                        f"Please adapt Inversion parameters")
-                
+
                 logger.error(msg)
 
         #Return the invertor to its original state
