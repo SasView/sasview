@@ -1,5 +1,8 @@
 import sys
 import os
+
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
 from matplotlib.figure import Figure
 import numpy
 import logging
@@ -1658,8 +1661,9 @@ class Plotter3DWidget(PlotterBase):
     """
     3D Plot widget for use with a QDialog
     """
-    def __init__(self, parent=None, manager=None):
+    def __init__(self, parent=None, parent_window=None, manager=None):
         super(Plotter3DWidget, self).__init__(parent,  manager=manager)
+        self.parent_window = parent_window
 
     @property
     def data(self):
@@ -1836,6 +1840,9 @@ class Plotter3DWidget(PlotterBase):
         self.figure.canvas.resizing = False
         self.figure.canvas.draw()
 
+        self.parent_window.setFocus()
+        self.setFocus()
+
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
@@ -1858,9 +1865,13 @@ class Plotter3DWidget(PlotterBase):
 class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
     def __init__(self, gsc_instance: GenericScatteringCalculator | None, parent=None, graph_title=''):
         self.graph_title = graph_title
-        Plotter3DWidget.__init__(self, manager=parent)
+        Plotter3DWidget.__init__(self, parent_window=self, manager=parent)
         self.setWindowTitle(self.graph_title)
         self.gsc_instance = gsc_instance
+
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         # Make sure we remove reference to this plot so that it can be garbage collected
@@ -1869,3 +1880,4 @@ class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
             self.gsc_instance.plot3ds.remove(self)
 
         event.accept()
+        
