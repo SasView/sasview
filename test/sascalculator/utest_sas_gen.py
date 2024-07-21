@@ -241,6 +241,8 @@ class sas_gen_test(unittest.TestCase):
         import glob
         pdb_files = glob.glob(os.path.join(os.path.dirname(__file__), 'data/debye_test_files', '*.pdb'))
 
+        np.random.seed(1984)
+
         for pdb_file in pdb_files:
             # load pdb file
             f = self.pdbloader.read(pdb_file)
