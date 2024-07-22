@@ -4467,6 +4467,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if self.kernel_module.is_multiplicity_model:
                 self.kernel_module.multiplicity=multip
                 self.updateMultiplicityCombo(multip)
+        else:
+            self._n_shells_row = -1
+            self._num_shell_params = -1
 
         if 'tab_name' in line_dict.keys() and self.kernel_module is not None:
             self.kernel_module.name = line_dict['tab_name'][0]
