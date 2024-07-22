@@ -71,6 +71,8 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
         """
         Return the values in the table to the listening parent widget
         """
+        self.cmdSave.setFocus() # Ensure that all table values are written to table's data() before saving
+
         if self.properties:
             self.returnEditedParamSignal.emit(self.getValues(), self.qtree_item)
         else:
