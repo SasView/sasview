@@ -44,6 +44,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.txtNewModelName.textChanged.connect(self.editorModelModified)
         self.txtFunction.textChanged.connect(self.editorModelModified)
         self.newParamTree.doubleClicked.connect(self.editSelected)
+        self.cmdHelp.clicked.connect(self.onHelp)
     
     def onLoad(self):
 
@@ -567,6 +568,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         icon = self.style().standardIcon(QtWidgets.QStyle.SP_MessageBoxWarning)
         table_item.setToolTip(1, tool_tip_text)
         table_item.setIcon(1, icon)
+    
+    def onHelp(self):
+        """
+        Show the "Reparameterization" section of help
+        """
+        tree_location = "/user/qtgui/Perspectives/Fitting/plugin.html#reparameterized-models"
+        self.parent.showHelp(tree_location)
 
     ### CLASS METHODS ###
 
