@@ -1,5 +1,8 @@
 import sys
 import os
+
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
 from matplotlib.figure import Figure
 import numpy
 import logging
@@ -664,26 +667,22 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
-
-                self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;"
-                                            "SLD files (*.SLD *.sld);;"
-                                            "PDB files (*.pdb *.PDB);;"
-                                            "VTK files (*.vtk *.VTK);;"
-                                            "All files (*.*)",
-                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
-                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
-                                            )[0]
+                f_type = """
+                    All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
+                        SLD files (*.SLD *.sld);;
+                        PDB files (*.pdb *.PDB);;
+                        VTK files (*.vtk *.VTK);;
+                        All files (*.*)
+                """
             else:
-                self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;"
-                                            "OMF files (*.OMF *.omf);;"
-                                            "SLD files (*.SLD *.sld);;"
-                                            "VTK files (*.vtk *.VTK);;"
-                                            "All files (*.*)",
-                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
-                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
-                                            )[0]
+                f_type = """
+                    All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;
+                        OMF files (*.OMF *.omf);;
+                        SLD files (*.SLD *.sld);;
+                        VTK files (*.vtk *.VTK);;
+                        All files (*.*)
+                """
+            self.datafile = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "", f_type)[0]
             # If a file has been sucessfully chosen
             if self.datafile:
                 # set basic data about the file
@@ -1509,9 +1508,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         parent = self
         directory =  default_name
         filter = 'SLD file (*.sld)'
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, 'Save SLD file', directory, filter, "", options=options)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, 'Save SLD file', directory, filter, "")
         filename = filename_tuple[0]
         if filename:
             try:
@@ -1571,6 +1569,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
             data.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
             data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
+            data.id = data.title # required for serialization
 
             self.graph_num += 1
             if self.is_beta:
@@ -1579,6 +1578,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
                 dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
                 dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
+                dataBetaQ.id = dataBetaQ.title # required for serialization
 
                 self.graph_num += 1
         else:
@@ -1591,6 +1591,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           err_image=self.data.err_data)
             data.title = "GenSAS {}  #{} 2D".format(self.file_name(),
                                                     int(self.graph_num))
+            data.id = "gsc_2d_{}".format(self.graph_num) # required for serialization
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
             data.xmin = self.data.xmin
@@ -1612,8 +1613,9 @@ class Plotter3DWidget(PlotterBase):
     """
     3D Plot widget for use with a QDialog
     """
-    def __init__(self, parent=None, manager=None):
+    def __init__(self, parent=None, parent_window=None, manager=None):
         super(Plotter3DWidget, self).__init__(parent,  manager=manager)
+        self.parent_window = parent_window
 
     @property
     def data(self):
@@ -1790,6 +1792,9 @@ class Plotter3DWidget(PlotterBase):
         self.figure.canvas.resizing = False
         self.figure.canvas.draw()
 
+        self.parent_window.setFocus()
+        self.setFocus()
+
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
@@ -1812,5 +1817,11 @@ class Plotter3DWidget(PlotterBase):
 class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
     def __init__(self, parent=None, graph_title=''):
         self.graph_title = graph_title
-        Plotter3DWidget.__init__(self, manager=parent)
+        Plotter3DWidget.__init__(self, parent_window=self, manager=parent)
         self.setWindowTitle(self.graph_title)
+
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
+
+

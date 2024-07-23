@@ -1,11 +1,12 @@
 from typing import Optional, List
 
 import numpy as np
+from PySide6.QtGui import QIcon
 from scipy.special import erfinv
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 
 from sasmodels.core import load_model_info, build_model
 from sasmodels.data import empty_data2D
@@ -24,8 +25,6 @@ from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import Or
 
 class OrientationViewer(QtWidgets.QWidget):
     """ Orientation viewer widget """
-
-
 
     # Dimensions of scattering cuboid
     a = 10
@@ -65,6 +64,11 @@ class OrientationViewer(QtWidgets.QWidget):
         self.parent = parent
 
         self.setWindowTitle("Orientation Viewer")
+
+
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
 
         self._colormap_name = 'viridis'
 
