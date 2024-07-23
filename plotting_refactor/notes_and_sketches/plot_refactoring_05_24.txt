@@ -1,0 +1,34 @@
+plot refactoring meeting 24.05.2024
+
+arbitrary number of plots in one subplot window? e.g. 2x2?
+
+polydispersity subplot for single parameters
+
+for a trend: show subplots all in one subplot? like in a grid?
+
+dataselector tree structure -move data around
+sasview drag and drop mechanism for dataexplorer droppable data load widget
+SAS qtgui mainwindow
+
+
+mockup for subplots in one minor subplot window
+
+2dviewing for data and fit and residuals, 3 of them side by side?
+datatab - only data very big
+fittab - data and fit
+residualstab - all three
+
+dockable possibility for tabs and subtabs
+
+
+
+
+lin scale for the residuals
+
+
+
+2d plotting different 2d scaling for different detectors on the same instrument
+
+
+
+
