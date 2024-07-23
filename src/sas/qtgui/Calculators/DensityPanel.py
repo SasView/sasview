@@ -56,16 +56,9 @@ class DensityPanel(QtWidgets.QDialog):
 
         self.setFixedSize(self.minimumSizeHint())
 
-        # set validators
-        #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
-
         rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMolarVolume.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMolarVolume))
         self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
-
-        # signals
-        self.ui.editMolarVolume.textEdited.connect(functools.partial(self.setMode, MODES.VOLUME_TO_DENSITY))
-        self.ui.editMassDensity.textEdited.connect(functools.partial(self.setMode, MODES.DENSITY_TO_VOLUME))
 
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
         self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
@@ -116,6 +109,7 @@ class DensityPanel(QtWidgets.QDialog):
                 self._updateVolume()
 
     def volumeChanged(self, current_text):
+        self.setMode(MODES.VOLUME_TO_DENSITY)
         try:
             molarMass = float(toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text()))
             molarVolume = float(current_text)
@@ -130,6 +124,7 @@ class DensityPanel(QtWidgets.QDialog):
             self.model.item(MODEL.MASS_DENSITY).setText("")
 
     def massChanged(self, current_text):
+        self.setMode(MODES.DENSITY_TO_VOLUME)
         try:
             molarMass = float(toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text()))
             molarDensity = float(current_text)
