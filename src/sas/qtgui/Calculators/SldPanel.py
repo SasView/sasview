@@ -180,18 +180,18 @@ class SldPanel(QtWidgets.QDialog):
 
     def recalculateSLD(self):
         formula = self.ui.editMolecularFormula.text()
-        density = self.ui.editMassDensity.text()
+        density = float(self.ui.editMassDensity.text()) if self.ui.editMassDensity.text() else None
         neutronWavelength = self.ui.editNeutronWavelength.text()
         xrayWavelength = self.ui.editXrayWavelength.text()
 
-        if not formula or not density:
+        if not formula:
             return
 
         def format(value):
             return ("%-5.3g" % value).strip()
 
         if neutronWavelength and float(neutronWavelength) > np.finfo(float).eps:
-            results = neutronSldAlgorithm(str(formula), float(density), float(neutronWavelength))
+            results = neutronSldAlgorithm(str(formula), density, float(neutronWavelength))
 
             self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
             self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
@@ -217,7 +217,7 @@ class SldPanel(QtWidgets.QDialog):
             self.ui.editNeutronAbsXs.setEnabled(False)
 
         if xrayWavelength and float(xrayWavelength) > np.finfo(float).eps:
-            results = xraySldAlgorithm(str(formula), float(density), float(xrayWavelength))
+            results = xraySldAlgorithm(str(formula), density, float(xrayWavelength))
 
             self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
             self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))
