@@ -703,8 +703,15 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion, Perspective):
             # self.updateGuiValues()
             self.setupModel()
         else:
+            # Block the signal, otherwise self.displayChange, triggered by a change to self.dataList, will run in
+            #  parallel with self.updateGuiValues. If self.displayChange is not finished before self.updateGuiValues
+            #  is launched, plots that have been deleted may still get called, throwing AttributeErrors.
+            self.dataList.blockSignals(True)
             self.dataList.setCurrentIndex(0)
+            self.displayChange(0)
+            self.dataList.blockSignals(False)
             self.updateGuiValues()
+        self.enableButtons()
 
     def serializeAll(self):
         """
