@@ -518,6 +518,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.onSelectModel()
         # Smearing tab
         self.smearing_widget.updateData(self.data)
+        # Check if a model was already loaded when data is sent to the tab
+        self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
