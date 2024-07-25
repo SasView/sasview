@@ -1811,7 +1811,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             if model_column not in delegate.columnDict():
                 return
-            self.poly_params[parameter_name_w] = value
+            # Map the column to the poly param that was changed
+            associations = {1: "width", 4: "npts", 5: "nsigmas"}
+            self.poly_params[f"{parameter_name}.{associations.get(model_column, 1)}"] = value
             self.kernel_module.setParam(parameter_name_w, value)
 
             # Update plot
@@ -2218,6 +2220,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Update the model with new parameters, create the errors column
         """
+        print(param_dict)
         assert isinstance(param_dict, dict)
 
         def updateFittedValues(row):
@@ -2237,6 +2240,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         def updatePolyValues(row):
             # Utility function for updateof polydispersity part of the main model
             param_name = str(self._model_model.item(row, 0).text())+'.width'
+            print(f"name: {param_name}")
             if not self.isCheckable(row) or param_name not in list(param_dict.keys()):
                 return
             # modify the param value
