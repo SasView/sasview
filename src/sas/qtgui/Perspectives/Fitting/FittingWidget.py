@@ -2220,7 +2220,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Update the model with new parameters, create the errors column
         """
-        print(param_dict)
         assert isinstance(param_dict, dict)
 
         def updateFittedValues(row):
@@ -2240,7 +2239,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         def updatePolyValues(row):
             # Utility function for updateof polydispersity part of the main model
             param_name = str(self._model_model.item(row, 0).text())+'.width'
-            print(f"name: {param_name}")
             if not self.isCheckable(row) or param_name not in list(param_dict.keys()):
                 return
             # modify the param value
