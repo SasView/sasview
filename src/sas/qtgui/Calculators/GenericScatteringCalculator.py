@@ -1,5 +1,8 @@
 import sys
 import os
+
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
 from matplotlib.figure import Figure
 import numpy
 import logging
@@ -129,8 +132,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxPluginModel.stateChanged.connect(self.update_file_name)
         self.checkboxLogSpace.stateChanged.connect(self.change_qValidator)
 
-        self.cmdDraw.clicked.connect(lambda: self.plot3d(has_arrow=True))
-        self.cmdDrawpoints.clicked.connect(lambda: self.plot3d(has_arrow=False))
+
+        # Connect plotting button, Use a function not lambda because of some bugs with referencing
+        def plot3d_with_arrows():
+            self.plot3d(has_arrow=True)
+
+        self.cmdDraw.clicked.connect(plot3d_with_arrows)
+        self.cmdDrawpoints.clicked.connect(self.plot3d)
 
         # update pixel no./total volume when changed in GUI
         self.txtXnodes.textChanged.connect(self.update_geometry_effects)
@@ -244,7 +252,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             QtGui.QRegularExpressionValidator(validat_regex_int, self.txtZnodes))         
 
         # plots - 3D in real space
-        self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
+        self.trigger_plot_3d.connect(self.plot3d)
 
         # plots - 3D in real space
         self.calculationFinishedSignal.connect(self.plot_1_2d)
@@ -268,6 +276,9 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.lblUnity.setStyleSheet(new_font)
         self.lblUnitz.setStyleSheet(new_font)
 
+        # List to keep hold of plot3d windows so they don't get disposed by garbage collection
+        self.plot3ds = []
+
     def setup_display(self):
         """
         This function sets up the GUI display of the different coordinate systems.
@@ -278,49 +289,76 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.view_azim = 45
         self.view_elev = 45
         self.mouse_down = False
+
         sampleWindow = FigureCanvas(Figure())
         axes_sample = Axes3D(sampleWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
         sampleWindow.figure.add_axes(axes_sample)
+
         envWindow = FigureCanvas(Figure())
         axes_env = Axes3D(envWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
         envWindow.figure.add_axes(axes_env)
+
         beamWindow = FigureCanvas(Figure())
         axes_beam = Axes3D(beamWindow.figure, azim=self.view_azim, elev=self.view_elev, auto_add_to_figure=False)
         beamWindow.figure.add_axes(axes_beam)
+
+        # TODO: Should be defined in init
         self.coord_windows = [sampleWindow, envWindow, beamWindow]
         self.coord_axes = [axes_sample, axes_env, axes_beam]
         self.coord_arrows = []
+
         titles = ["sample", "environment", "beamline"]
-        for i in range(len(self.coord_windows)):
-            self.coordDisplay.addWidget(self.coord_windows[i])
-            if int(mpl_version.split(".")[0]) >= 3: # how mpl plots 3D graphs changed in 3.3.0 to allow better aspect ratios
-                if int(mpl_version.split(".")[1]) >= 3:
-                    self.coord_axes[i].set_box_aspect((1,1,1))
-            self.coord_windows[i].installEventFilter(self)
+        for i, (window, axes) in enumerate(zip(self.coord_windows, self.coord_axes)):
+            self.coordDisplay.addWidget(window)
+
+            self.coord_axes[i].set_box_aspect((1, 1, 1))
+
+            window.installEventFilter(self)
+
             # stack in order zs, xs, ys to match the coord system used in sasview
-            self.coord_arrows.append(Arrow3D(self.coord_axes[i].figure, [[0, 0],[0, 0],[0, 1]], [[0, 1],[0, 0],[0, 0]], [[0, 0],[0, 1],[0, 0]], [[1, 0 ,0],[0, 1, 0],[0, 0, 1]], arrowstyle = "->", mutation_scale=10, lw=2))
-            self.coord_arrows[i].set_realtime(True)
-            self.coord_axes[i].add_artist(self.coord_arrows[i])
-            self.coord_axes[i].set_xlim3d(-1, 1)
-            self.coord_axes[i].set_ylim3d(-1, 1)
-            self.coord_axes[i].set_zlim3d(-1, 1)
-            self.coord_axes[i].set_axis_off()
-            self.coord_axes[i].set_title(titles[i])
-            self.coord_axes[i].disable_mouse_rotation()
-        self.polarisation_arrow = Arrow3D(self.coord_axes[1].figure, [[0, 0.8]], [[0, 0]], [[0, 0]], [[1, 0 ,0.7]], arrowstyle = "->", mutation_scale=10, lw=3)
+            arrows = []
+            for x, y, z, color, in [[0, 1, 0, 'r'], [0, 0, 1, 'g'], [1, 0, 0, 'b']]:
+
+                arrow = Arrow3D(axes.figure, [[0, x]], [[0, y]], [[0, z]],
+                                colors=[color],
+                                arrowstyle="->",
+                                mutation_scale=10,
+                                lw=2)
+
+                arrow.set_realtime(True)
+                axes.add_artist(arrow)
+
+                arrows.append(arrow)
+
+
+            self.coord_arrows.append(arrows)
+
+            # Set axes properties
+            axes.set_xlim3d(-1.1, 1.1)
+            axes.set_ylim3d(-1.1, 1.1)
+            axes.set_zlim3d(-1.1, 1.1)
+            axes.set_axis_off()
+            axes.set_title(titles[i])
+            axes.disable_mouse_rotation()
+
+        self.polarisation_arrow = Arrow3D(self.coord_axes[1].figure, [[0, 0.8]], [[0, 0]], [[0, 0]], [[1, 0, 0.7]], arrowstyle = "->", mutation_scale=10, lw=3)
         self.polarisation_arrow.set_realtime(True)
         self.coord_axes[1].add_artist(self.polarisation_arrow)
-        self.coord_axes[0].text2D(0.75, 0.01, 'x', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[0].transAxes)
-        self.coord_axes[0].text2D(0.85, 0.01, 'y', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[0].transAxes)
-        self.coord_axes[0].text2D(0.95, 0.01, 'z', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[0].transAxes)
-        self.p_text = self.coord_axes[1].text2D(0.65, 0.01, 'p', verticalalignment='bottom', horizontalalignment='right', color='#ff00bb', fontsize=15, transform=self.coord_axes[1].transAxes)
+
+        self.coord_axes[0].text2D(0.7, 0.01, 'x', verticalalignment='bottom', horizontalalignment='left', color='red', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.8, 0.01, 'y', verticalalignment='bottom', horizontalalignment='left', color='green', fontsize=15, transform=self.coord_axes[0].transAxes)
+        self.coord_axes[0].text2D(0.9, 0.01, 'z', verticalalignment='bottom', horizontalalignment='left', color='blue', fontsize=15, transform=self.coord_axes[0].transAxes)
+
+        self.p_text = self.coord_axes[1].text2D(0.6, 0.01, 'p', verticalalignment='bottom', horizontalalignment='left', color='#ff00bb', fontsize=15, transform=self.coord_axes[1].transAxes)
         self.p_text.set_visible(False)
-        self.coord_axes[1].text2D(0.75, 0.01, 'u', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[1].transAxes)
-        self.coord_axes[1].text2D(0.85, 0.01, 'v', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[1].transAxes)
-        self.coord_axes[1].text2D(0.95, 0.01, 'w', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[1].transAxes)
-        self.coord_axes[2].text2D(0.75, 0.01, 'U', verticalalignment='bottom', horizontalalignment='right', color='red', fontsize=15, transform=self.coord_axes[2].transAxes)
-        self.coord_axes[2].text2D(0.85, 0.01, 'V', verticalalignment='bottom', horizontalalignment='right', color='green', fontsize=15, transform=self.coord_axes[2].transAxes)
-        self.coord_axes[2].text2D(0.95, 0.01, 'W', verticalalignment='bottom', horizontalalignment='right', color='blue', fontsize=15, transform=self.coord_axes[2].transAxes)
+
+        self.coord_axes[1].text2D(0.7, 0.01, 'u', verticalalignment='bottom', horizontalalignment='left', color='red', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.8, 0.01, 'v', verticalalignment='bottom', horizontalalignment='left', color='green', fontsize=15, transform=self.coord_axes[1].transAxes)
+        self.coord_axes[1].text2D(0.9, 0.01, 'w', verticalalignment='bottom', horizontalalignment='left', color='blue', fontsize=15, transform=self.coord_axes[1].transAxes)
+
+        self.coord_axes[2].text2D(0.7, 0.01, 'U', verticalalignment='bottom', horizontalalignment='left', color='red', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.8, 0.01, 'V', verticalalignment='bottom', horizontalalignment='left', color='green', fontsize=15, transform=self.coord_axes[2].transAxes)
+        self.coord_axes[2].text2D(0.89, 0.01, 'W', verticalalignment='bottom', horizontalalignment='left', color='blue', fontsize=15, transform=self.coord_axes[2].transAxes)
 
 
     def update_coords(self):
@@ -329,17 +367,27 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         This is one of four functions affecting the coordinate system visualisation which should be updated if
         a new 3D rendering library is used: `setup_display()`, `update_coords()`, `update_polarisation_coords()`, `set_polarisation_visible()`.
         """
-        if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and self.txtEnvRoll.hasAcceptableInput() \
-           and self.txtSampleYaw.hasAcceptableInput() and self.txtSamplePitch.hasAcceptableInput() and self.txtSampleRoll.hasAcceptableInput():
+        if self.txtEnvYaw.hasAcceptableInput() and self.txtEnvPitch.hasAcceptableInput() and \
+                self.txtEnvRoll.hasAcceptableInput() and self.txtSampleYaw.hasAcceptableInput() and \
+                self.txtSamplePitch.hasAcceptableInput() and self.txtSampleRoll.hasAcceptableInput():
+
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
             basis_vectors = numpy.array([[1,0,0],[0,1,0],[0,0,1]])
+
             #TODO: when scipy version updated can just use Rotation.as_matrix() to get new basis vectors - function name currently varies between versions used.
             uvw_matrix = UVW_to_uvw.apply(basis_vectors)
+
             xs, ys, zs = numpy.transpose(numpy.stack((numpy.zeros_like(uvw_matrix), uvw_matrix)), axes=(2, 1, 0))
-            self.coord_arrows[1].update_data(zs, xs, ys) # stack in order zs, xs, ys to match the coord system used in sasview
+            for i in range(3):
+                # stack in order zs, xs, ys to match the coord system used in sasview
+                self.coord_arrows[1][i].update_data([zs[i]], [xs[i]], [ys[i]])
+
             xyz_matrix = UVW_to_xyz.apply(basis_vectors)
             xs, ys, zs = numpy.transpose(numpy.stack((numpy.zeros_like(xyz_matrix), xyz_matrix)), axes=(2, 1, 0))
-            self.coord_arrows[0].update_data(zs, xs, ys) # stack in order zs, xs, ys to match the coord system used in sasview
+            for i in range(3):
+                # stack in order zs, xs, ys to match the coord system used in sasview
+                self.coord_arrows[0][i].update_data([zs[i]], [xs[i]], [ys[i]])
+
             self.update_polarisation_coords()
 
 
@@ -664,26 +712,22 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             load_nuc = self.sender() == self.cmdNucLoad
             # request a file from the user
             if load_nuc:
-
-                self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;"
-                                            "SLD files (*.SLD *.sld);;"
-                                            "PDB files (*.pdb *.PDB);;"
-                                            "VTK files (*.vtk *.VTK);;"
-                                            "All files (*.*)",
-                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
-                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons,
-                                            )[0]
+                f_type = """
+                    All supported files (*.SLD *.sld *.pdb *.PDB, *.vtk, *.VTK);;
+                        SLD files (*.SLD *.sld);;
+                        PDB files (*.pdb *.PDB);;
+                        VTK files (*.vtk *.VTK);;
+                        All files (*.*)
+                """
             else:
-                self.datafile = QtWidgets.QFileDialog.getOpenFileName(
-                    self, "Choose a file", "","All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;"
-                                            "OMF files (*.OMF *.omf);;"
-                                            "SLD files (*.SLD *.sld);;"
-                                            "VTK files (*.vtk *.VTK);;"
-                                            "All files (*.*)",
-                    options=QtWidgets.QFileDialog.DontUseNativeDialog |
-                            QtWidgets.QFileDialog.DontUseCustomDirectoryIcons
-                                            )[0]
+                f_type = """
+                    All supported files (*.OMF *.omf *.SLD *.sld, *.vtk, *.VTK);;
+                        OMF files (*.OMF *.omf);;
+                        SLD files (*.SLD *.sld);;
+                        VTK files (*.vtk *.VTK);;
+                        All files (*.*)
+                """
+            self.datafile = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "", f_type)[0]
             # If a file has been sucessfully chosen
             if self.datafile:
                 # set basic data about the file
@@ -751,7 +795,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         Once the data has been loaded in by the required reader it is necessary to do a small
         amount of final processing to put them in the required form. This involves converting
-        all the data to instances of MagSLD and reporting any errors. Additionally verification
+        all the data to instances of MagSLD and reporting any errors. Additionally, verification
         of the newly loaded file is carried out.
 
         :param data: The data loaded from the requested file.
@@ -1270,7 +1314,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # if present is given in case the sld file format is expanded to include them
         if self.is_nuc:
             if self.nuc_sld_data.has_conect:
-                sld_data.has_conect=True
+                sld_data.has_conect = True
                 sld_data.line_x = self.nuc_sld_data.line_x
                 sld_data.line_y = self.nuc_sld_data.line_y
                 sld_data.line_z = self.nuc_sld_data.line_z
@@ -1509,9 +1553,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         parent = self
         directory =  default_name
         filter = 'SLD file (*.sld)'
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, 'Save SLD file', directory, filter, "", options=options)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, 'Save SLD file', directory, filter, "")
         filename = filename_tuple[0]
         if filename:
             try:
@@ -1558,9 +1601,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if has_arrow:
             graph_title += ' - Magnetic Vector as Arrow'
 
-        plot3D = Plotter3D(self, graph_title)
+        plot3D = Plotter3D(self, self, graph_title)
         plot3D.plot(sld_data, has_arrow=has_arrow)
         plot3D.show()
+
+        self.plot3ds.append(plot3D)
+
         self.graph_num += 1
 
     def plot_1_2d(self):
@@ -1571,6 +1617,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
             data.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
             data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
+            data.id = data.title # required for serialization
 
             self.graph_num += 1
             if self.is_beta:
@@ -1579,6 +1626,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                                     int(self.graph_num))
                 dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
                 dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
+                dataBetaQ.id = dataBetaQ.title # required for serialization
 
                 self.graph_num += 1
         else:
@@ -1591,6 +1639,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           err_image=self.data.err_data)
             data.title = "GenSAS {}  #{} 2D".format(self.file_name(),
                                                     int(self.graph_num))
+            data.id = "gsc_2d_{}".format(self.graph_num) # required for serialization
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
             data.xmin = self.data.xmin
@@ -1612,8 +1661,9 @@ class Plotter3DWidget(PlotterBase):
     """
     3D Plot widget for use with a QDialog
     """
-    def __init__(self, parent=None, manager=None):
+    def __init__(self, parent=None, parent_window=None, manager=None):
         super(Plotter3DWidget, self).__init__(parent,  manager=manager)
+        self.parent_window = parent_window
 
     @property
     def data(self):
@@ -1790,6 +1840,9 @@ class Plotter3DWidget(PlotterBase):
         self.figure.canvas.resizing = False
         self.figure.canvas.draw()
 
+        self.parent_window.setFocus()
+        self.setFocus()
+
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
@@ -1810,7 +1863,21 @@ class Plotter3DWidget(PlotterBase):
 
 
 class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
-    def __init__(self, parent=None, graph_title=''):
+    def __init__(self, gsc_instance: GenericScatteringCalculator | None, parent=None, graph_title=''):
         self.graph_title = graph_title
-        Plotter3DWidget.__init__(self, manager=parent)
+        Plotter3DWidget.__init__(self, parent_window=self, manager=parent)
         self.setWindowTitle(self.graph_title)
+        self.gsc_instance = gsc_instance
+
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        # Make sure we remove reference to this plot so that it can be garbage collected
+
+        if self.gsc_instance is not None:
+            self.gsc_instance.plot3ds.remove(self)
+
+        event.accept()
+        

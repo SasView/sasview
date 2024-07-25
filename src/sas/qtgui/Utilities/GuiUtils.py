@@ -694,14 +694,12 @@ def saveAnyData(data, wildcard_dict=None):
     caption = 'Save As'
     filter = wildcards
     parent = None
-    options = QtWidgets.QFileDialog.DontUseNativeDialog
     # Query user for filename.
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent,
                                                            caption,
                                                            "",
                                                            filter,
-                                                           "",
-                                                           options)
+                                                           "")
     filename = filename_tuple[0]
 
     # User cancelled or did not enter a filename
@@ -1161,6 +1159,9 @@ def saveData(fp, data):
 
         if isinstance(o, numbers.Real):
             return float(o)
+
+        if isinstance(o, DataRole):
+            return o.value
 
         # not supported
         logging.info("data cannot be serialized to json: %s" % type(o))
