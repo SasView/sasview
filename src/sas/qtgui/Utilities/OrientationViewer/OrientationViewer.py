@@ -1,3 +1,4 @@
+import webbrowser
 from typing import Optional, List
 
 import numpy as np
@@ -8,6 +9,7 @@ from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtCore import Qt, QSize
 
+from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sasmodels.core import load_model_info, build_model
 from sasmodels.data import empty_data2D
 from sasmodels.direct_model import DirectModel
@@ -82,6 +84,17 @@ class OrientationViewer(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.scene)
         layout.addWidget(self.controller)
+
+        helpWidget = QtWidgets.QWidget()
+        helpLayout = QtWidgets.QHBoxLayout()
+        helpButton = QtWidgets.QPushButton("Help")
+
+        helpWidget.setLayout(helpLayout)
+        helpLayout.addSpacerItem(QtWidgets.QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        helpLayout.addWidget(helpButton)
+        helpButton.clicked.connect(self.onHelp)
+        layout.addWidget(helpWidget)
+
         self.setLayout(layout)
 
         self.arrow = Translation(0,0,1.5,
@@ -290,6 +303,12 @@ class OrientationViewer(QtWidgets.QWidget):
             pass
 
         event.accept()
+
+    def onHelp(self):
+        # Use a web link until document viewer is in a good enough state to use
+        url = "https://www.sasview.org/docs/user/qtgui/Perspectives/Fitting/orientation/orientation.html"
+
+        webbrowser.open(url)
 
 
 # Code for handling multiple orientation viewers

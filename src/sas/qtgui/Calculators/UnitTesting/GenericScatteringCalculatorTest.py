@@ -445,7 +445,7 @@ class Plotter3DTest:
     def plotter(self, qapp):
         """Create/Destroy the Plotter"""
         parent_test = MagicMock()
-        p = Plotter3D(parent=parent_test, graph_title='test')
+        p = Plotter3D(None, parent=parent_test, graph_title='test')
 
         yield p
 
