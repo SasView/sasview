@@ -58,61 +58,59 @@ class DataCollector:
     def get_datasets(self) -> list:
         return self.datasets
 
+    def find_object_by_property(self, obj_list, property_name, property_value):
+        for obj in obj_list:
+            if hasattr(obj, property_name) and getattr(obj, property_name) == property_value:
+                return obj
+
+        return None
+
     def get_data_by_fp(self, fitpage_index: int) -> Dataset:
         """
         Get the dataset for a certain fitpage
         """
-        for dataset in self.datasets:
-            if fitpage_index == dataset.get_fitpage_index():
-                return dataset
+        return self.find_object_by_property(self.datasets, "fitpage_index", fitpage_index)
 
     def get_data_by_id(self, data_id: int) -> Dataset:
         """
         Get the dataset for certain id
         """
-        for dataset in self.datasets:
-            if data_id == dataset.get_data_id():
-                return dataset
+        return self.find_object_by_property(self.datasets, "data_id", data_id)
 
     def get_x_data(self, fitpage_index: int) -> list:
         """
         Get x data for certain fitpage index
         """
-        for dataset in self.datasets:
-            if fitpage_index == dataset.get_fitpage_index():
-                return dataset.get_x_data()
+        dataset = self.find_object_by_property(self.datasets, "fitpage_index", fitpage_index)
+        return dataset.get_x_data()
 
     def get_y_data(self, fitpage_index: int) -> list:
         """
         Get y data for certain fitpage index
         """
-        for dataset in self.datasets:
-            if fitpage_index == dataset.get_fitpage_index():
-                return dataset.get_y_data()
+        dataset = self.find_object_by_property(self.datasets, "fitpage_index", fitpage_index)
+        return dataset.get_y_data()
 
     def get_y_fit_data(self, fitpage_index: int) -> list:
         """
         Get y fit data for certain fitpage index
         """
-        for dataset in self.datasets:
-            if fitpage_index == dataset.get_fitpage_index():
-                return dataset.get_y_fit()
+        dataset = self.find_object_by_property(self.datasets, "fitpage_index", fitpage_index)
+        return dataset.get_y_fit()
 
     def get_plotpage_index(self, fitpage_index: int) -> int:
         """
         Get the plotpage index for a certain fitpage index: Plotpage index refers to the index of the major tabs in
         the plotting widget in which the data is displayed.
         """
-        for dataset in self.datasets:
-            if fitpage_index == dataset.get_fitpage_index():
-                return dataset.get_plotpage_index()
+        dataset = self.find_object_by_property(self.datasets, "fitpage_index", fitpage_index)
+        return dataset.get_plotpage_index()
 
     def set_plot_index(self, fitpage_index: int, plot_index: int):
         """
         Set the plotpage index for the dataset for a certain fitpage index. Plotpage index refers to the index of the
         major tabs in the plotting widget in which the data is displayed.
         """
-        for dataset in self.datasets:
-            if fitpage_index == dataset.get_fitpage_index():
-                dataset.set_plotpage_index(plot_index)
+        dataset = self.find_object_by_property(self.datasets, "fitpage_index", fitpage_index)
+        dataset.set_plotpage_index(plot_index)
 
