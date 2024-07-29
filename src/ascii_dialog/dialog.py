@@ -37,11 +37,12 @@ class AsciiDialog(QWidget):
         self.colcount_label = QLabel('Number of Columns')
         self.colcount_entry = QSpinBox()
         self.colcount_entry.setMinimum(1)
+        self.colcount_entry.valueChanged.connect(self.update_colcount)
         self.colcount_layout.addWidget(self.colcount_label)
         self.colcount_layout.addWidget(self.colcount_entry)
 
         ## Column Editor
-        self.col_editor = ColEditor(4) ## TODO: 4 is just a placeholder. Use value from colcount
+        self.col_editor = ColEditor(self.colcount_entry.value())
 
         self.layout = QVBoxLayout(self)
 
@@ -74,6 +75,10 @@ class AsciiDialog(QWidget):
 
         self.attempt_guesses()
 
+    @Slot()
+    def update_colcount(self):
+        self.col_editor.set_cols(self.colcount_entry.value())
+        print(self.colcount_entry.value())
 
 if __name__ == "__main__":
     app = QApplication([])
