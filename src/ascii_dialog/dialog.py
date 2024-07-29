@@ -1,3 +1,4 @@
+from PySide6 import QtGui
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
@@ -48,6 +49,8 @@ class AsciiDialog(QWidget):
 
         self.table = QTableWidget()
         self.table.show()
+        # Make the table readonly
+        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
 
         self.layout = QVBoxLayout(self)
 
