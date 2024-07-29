@@ -77,7 +77,7 @@ class AsciiDialog(QWidget):
         # draw the full table later.
 
         # Don't try to fill the table if there's no data.
-        if self.raw_csv is not None:
+        if self.raw_csv is None:
             return
 
         starting_pos = self.startline_entry.value()
