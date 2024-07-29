@@ -6,6 +6,8 @@ from col_editor import ColEditor
 from guess import guess_column_count, guess_seperator
 from os import path
 
+TABLE_MAX_ROWS = 100
+
 class AsciiDialog(QWidget):
     def __init__(self):
         super().__init__()
@@ -88,7 +90,7 @@ class AsciiDialog(QWidget):
 
         starting_pos = self.startline_entry.value()
 
-        self.table.setRowCount(len(self.raw_csv) - starting_pos)
+        self.table.setRowCount(min(len(self.raw_csv) - starting_pos, TABLE_MAX_ROWS))
         self.table.setColumnCount(self.colcount_entry.value())
         self.table.setHorizontalHeaderLabels(self.col_editor.col_names())
 
@@ -97,6 +99,8 @@ class AsciiDialog(QWidget):
             row_split = row.split(self.sep_entry.text())
             for j, col_value in enumerate(row_split):
                 self.table.setItem(i, j, QTableWidgetItem(col_value))
+            if i == TABLE_MAX_ROWS:
+                break
 
         self.table.show()
         self.table.resizeColumnsToContents()
