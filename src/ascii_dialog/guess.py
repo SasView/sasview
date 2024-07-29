@@ -26,3 +26,7 @@ def guess_seperator(raw_csv: list[str]) -> str | None:
 
     # No seperator found.
     return None
+
+def guess_column_count(raw_csv: list[str], sep: str, starting_pos: int) -> int:
+    """Guess the amount of columns present in the data."""
+    return len(raw_csv[starting_pos].split(sep))
