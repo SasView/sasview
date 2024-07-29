@@ -104,6 +104,7 @@ class AsciiDialog(QWidget):
             self.raw_csv = file.readlines()
 
         self.attempt_guesses()
+        self.fill_table()
 
     @Slot()
     def update_colcount(self):
