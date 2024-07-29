@@ -40,4 +40,4 @@ class ColEditor(QWidget):
             self.cols = new_cols
 
     def col_names(self) -> list[str]:
-        return [col.value() for col in self.option_widgets]
+        return [col.currentText() for col in self.option_widgets]
