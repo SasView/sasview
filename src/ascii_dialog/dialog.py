@@ -25,7 +25,7 @@ class AsciiDialog(QWidget):
 
         # TODO: Add error handling
         with open(filename) as file:
-            self.raw_csv = file.read()
+            self.raw_csv = file.readlines()
 
 
 if __name__ == "__main__":
