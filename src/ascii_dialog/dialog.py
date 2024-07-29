@@ -1,6 +1,6 @@
 from PySide6 import QtGui
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
+from PySide6.QtWidgets import QAbstractScrollArea, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
 from guess import guess_column_count, guess_seperator
@@ -52,6 +52,7 @@ class AsciiDialog(QWidget):
         self.table.show()
         # Make the table readonly
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
 
         self.layout = QVBoxLayout(self)
 
@@ -97,6 +98,7 @@ class AsciiDialog(QWidget):
                 self.table.setItem(i, j, QTableWidgetItem(col_value))
 
         self.table.show()
+        self.table.resizeColumnsToContents()
 
 
     @Slot()
