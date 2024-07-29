@@ -38,3 +38,6 @@ class ColEditor(QWidget):
                 box.setParent(None)
             self.option_widgets = self.option_widgets[0:length - excess_cols]
             self.cols = new_cols
+
+    def col_names(self) -> list[str]:
+        return [col.value() for col in self.option_widgets]
