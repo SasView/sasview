@@ -6,6 +6,8 @@ class AsciiDialog(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.raw_csv = None
+
         self.filename_label = QLabel("Click the button below to load a file.")
 
         self.load_button = QPushButton("Load File")
@@ -20,7 +22,10 @@ class AsciiDialog(QWidget):
     def load(self):
         filename = QFileDialog.getOpenFileName(self)[0]
         self.filename_label.setText(path.basename(filename))
-        print(filename)
+
+        # TODO: Add error handling
+        with open(filename) as file:
+            self.raw_csv = file.read()
 
 
 if __name__ == "__main__":
