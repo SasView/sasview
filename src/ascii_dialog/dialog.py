@@ -113,7 +113,6 @@ class AsciiDialog(QWidget):
     @Slot()
     def update_colcount(self):
         self.col_editor.set_cols(self.colcount_entry.value())
-        print(self.colcount_entry.value())
 
 if __name__ == "__main__":
     app = QApplication([])
