@@ -23,6 +23,7 @@ class AsciiDialog(QWidget):
         self.sep_layout = QHBoxLayout()
         self.sep_label = QLabel('Seperator')
         self.sep_entry = QLineEdit()
+        self.sep_entry.textChanged.connect(self.update_seperator)
         self.sep_layout.addWidget(self.sep_label)
         self.sep_layout.addWidget(self.sep_entry)
 
@@ -119,6 +120,10 @@ class AsciiDialog(QWidget):
 
     @Slot()
     def update_startpos(self):
+        self.fill_table()
+
+    @Slot()
+    def update_seperator(self):
         self.fill_table()
 
 if __name__ == "__main__":
