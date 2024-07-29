@@ -68,7 +68,7 @@ class SubTabs(QTabWidget):
                     plottable_or_modifier_item = tabitem.child(i).child(j).child(k).data(0, 1)
                     if isinstance(plottable_or_modifier_item, PlottableItem):
                         plottable = plottable_or_modifier_item
-                        dataset = self.datacollector.get_data_id(plottable.get_data_id())
+                        dataset = self.datacollector.get_data_by_id(plottable.get_data_id())
                         if dataset.is_2d():
                             x = dataset.get_x_data()
                             y = dataset.get_y_data()
