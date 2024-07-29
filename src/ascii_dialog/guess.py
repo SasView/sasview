@@ -5,7 +5,7 @@ def guess_seperator(raw_csv: list[str]) -> str | None:
     None if a seperator cannot be guessed, and thus will likely require manual
     intervention from the user."""
 
-    candidates = [",", ";", ":", "\t" " "]
+    candidates = [",", ";", ":", "\t"]
 
     for sep in candidates:
         if all([sep in line for line in raw_csv]):
