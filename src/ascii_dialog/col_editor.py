@@ -13,3 +13,5 @@ class ColEditor(QWidget):
             new_combo_box = QComboBox()
             for option in placeholder_options:
                 new_combo_box.addItem(option)
+            self.option_widgets.append(new_combo_box)
+            self.layout.addWidget(new_combo_box)
