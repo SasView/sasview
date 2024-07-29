@@ -1,7 +1,7 @@
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
-from guess import guess_seperator
+from guess import guess_column_count, guess_seperator
 from os import path
 
 class AsciiDialog(QWidget):
@@ -53,6 +53,9 @@ class AsciiDialog(QWidget):
             guessed_seperator = ''
 
         self.sep_entry.setText(guessed_seperator)
+
+        guessed_colcount = guess_column_count(self.raw_csv, guessed_seperator, self.startline_entry.value())
+        self.colcount_entry.setValue(guessed_colcount)
 
     @Slot()
     def load(self):
