@@ -84,27 +84,27 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         # add data child and corresponding plot children in every case
         subtab_data = SubTabItem(tab_item, ["Data"], fitpage_index, 0)
         subplot_data = PlotItem(subtab_data, ["Data Plot"], fitpage_index, 0, 0,
-                                self.datacollector.get_data_fp(fitpage_index).is_2d())
-        fitpage_id = self.datacollector.get_data_fp(fitpage_index).get_data_id()
+                                self.datacollector.get_data_by_fp(fitpage_index).is_2d())
+        fitpage_id = self.datacollector.get_data_by_fp(fitpage_index).get_data_id()
 
         # create plottables in the plottreewidget with indicators (type_nums) to identify what kind of plot it is while
         # plotting in subtabs.py: type_num = 1 : 1d data, type_num = 2 : 1d fit, type_num = 3 : 1d residuals
         # type_num = 4 : 2d data, type_num = 5 : 2d fit, type_num = 6 : 2d residuals
         # 2d plots cannot overlap each other as curves can do
         # for every 2d data an additional plot is added and 1 plottable is inserted
-        if self.datacollector.get_data_fp(fitpage_index).is_2d():
+        if self.datacollector.get_data_by_fp(fitpage_index).is_2d():
             plottable_data = PlottableItem(subplot_data, ["2d " + str(fitpage_id)], fitpage_id, 4)
         else:
             plottable_data = PlottableItem(subplot_data, [str(fitpage_id)], fitpage_id, 1)
 
         #add fit and residuals in case it was generated
-        if self.datacollector.get_data_fp(fitpage_index).has_y_fit():
+        if self.datacollector.get_data_by_fp(fitpage_index).has_y_fit():
             # on the fit tab: one central plot that shows the dataset and the according fit curve
             # create tab for fit and residual plot
             subtab_fit = SubTabItem(tab_item, ["Fit"], fitpage_index, 1)
             subtab_residuals = SubTabItem(tab_item, ["Residuals"], fitpage_index, 2)
             # if the data is 2d, then every plot contains only one plottable
-            if self.datacollector.get_data_fp(fitpage_index).is_2d():
+            if self.datacollector.get_data_by_fp(fitpage_index).is_2d():
                 subplot_data_subtab_fit = PlotItem(subtab_fit, ["Data"], fitpage_index, 1, 0, True)
                 plottable_subplot_data_subtab_fit = PlottableItem(subplot_data_subtab_fit, ["2d Plottable Fit Data"], fitpage_id, 4)
 

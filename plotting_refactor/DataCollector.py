@@ -58,7 +58,7 @@ class DataCollector:
     def get_datasets(self) -> list:
         return self.datasets
 
-    def get_data_fp(self, fitpage_index: int) -> Dataset:
+    def get_data_by_fp(self, fitpage_index: int) -> Dataset:
         """
         Get the dataset for a certain fitpage
         """
@@ -66,7 +66,7 @@ class DataCollector:
             if fitpage_index == dataset.get_fitpage_index():
                 return dataset
 
-    def get_data_id(self, data_id: int) -> Dataset:
+    def get_data_by_id(self, data_id: int) -> Dataset:
         """
         Get the dataset for certain id
         """
