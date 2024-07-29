@@ -36,6 +36,7 @@ class AsciiDialog(QWidget):
         self.colcount_layout = QHBoxLayout()
         self.colcount_label = QLabel('Number of Columns')
         self.colcount_entry = QSpinBox()
+        self.colcount_entry.setMinimum(1)
         self.colcount_layout.addWidget(self.colcount_label)
         self.colcount_layout.addWidget(self.colcount_entry)
 
