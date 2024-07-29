@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QApplication
+from PySide6.QtGui import QIntValidator
+from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from guess import guess_seperator
 from os import path
@@ -15,17 +16,27 @@ class AsciiDialog(QWidget):
         self.load_button.clicked.connect(self.load)
 
         # Data parameters
+
+        ## Seperator
         self.sep_layout = QHBoxLayout()
         self.sep_label = QLabel('Seperator')
         self.sep_entry = QLineEdit()
         self.sep_layout.addWidget(self.sep_label)
         self.sep_layout.addWidget(self.sep_entry)
 
+        ## Starting Line
+        self.startline_layout = QHBoxLayout()
+        self.startline_label = QLabel('Starting Line')
+        self.startline_entry = QSpinBox()
+        self.startline_layout.addWidget(self.startline_label)
+        self.startline_layout.addWidget(self.startline_entry)
+
         self.layout = QVBoxLayout(self)
 
         self.layout.addWidget(self.filename_label)
         self.layout.addWidget(self.load_button)
         self.layout.addLayout(self.sep_layout)
+        self.layout.addLayout(self.startline_layout)
 
     def attempt_guesses(self):
         guessed_seperator = guess_seperator(self.raw_csv)
