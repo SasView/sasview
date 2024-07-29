@@ -31,12 +31,20 @@ class AsciiDialog(QWidget):
         self.startline_layout.addWidget(self.startline_label)
         self.startline_layout.addWidget(self.startline_entry)
 
+        ## Column Count
+        self.colcount_layout = QHBoxLayout()
+        self.colcount_label = QLabel('Number of Columns')
+        self.colcount_entry = QSpinBox()
+        self.colcount_layout.addWidget(self.colcount_label)
+        self.colcount_layout.addWidget(self.colcount_entry)
+
         self.layout = QVBoxLayout(self)
 
         self.layout.addWidget(self.filename_label)
         self.layout.addWidget(self.load_button)
         self.layout.addLayout(self.sep_layout)
         self.layout.addLayout(self.startline_layout)
+        self.layout.addLayout(self.colcount_layout)
 
     def attempt_guesses(self):
         guessed_seperator = guess_seperator(self.raw_csv)
