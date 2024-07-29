@@ -56,10 +56,14 @@ def excepthook(exc_type, exc_value, exc_tb):
     QtWidgets.QApplication.quit()
 
 
-sys.excepthook = excepthook
-app = QtWidgets.QApplication(sys.argv)
-window = MainWindow()
-window.show()
+def main():
+    sys.excepthook = excepthook
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
 
-ret = app.exec()
-sys.exit(ret)
+    ret = app.exec()
+    sys.exit(ret)
+
+if __name__ == '__main__':
+    main()
