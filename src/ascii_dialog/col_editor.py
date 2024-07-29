@@ -37,3 +37,4 @@ class ColEditor(QWidget):
                 self.layout.removeWidget(box)
                 box.setParent(None)
             self.option_widgets = self.option_widgets[0:length - excess_cols]
+            self.cols = new_cols
