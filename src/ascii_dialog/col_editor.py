@@ -5,7 +5,7 @@ class ColEditor(QWidget):
     def __init__(self, cols: int):
         super().__init__()
 
-        self.layout = QHBoxLayout()
+        self.layout = QHBoxLayout(self)
         self.option_widgets = []
         for _ in range(cols):
             # TODO: This is placeholder data.
