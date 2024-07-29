@@ -27,6 +27,7 @@ class ColEditor(QWidget):
             for _ in range(new_cols - self.cols):
                 new_combo_box = create_col_combo_box()
                 self.option_widgets.append(new_combo_box)
+                self.layout.addWidget(new_combo_box)
             self.cols = new_cols
         if self.cols > new_cols:
             excess_cols = new_cols - self.cols
