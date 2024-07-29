@@ -1,19 +1,25 @@
 from PySide6.QtWidgets import QFileDialog, QLabel, QPushButton, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
+from os import path
 
 class AsciiDialog(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.filename_label = QLabel("Click the button below to load a file.")
+
         self.load_button = QPushButton("Load File")
         self.load_button.clicked.connect(self.load)
 
         self.layout = QVBoxLayout(self)
+
+        self.layout.addWidget(self.filename_label)
         self.layout.addWidget(self.load_button)
 
     @Slot()
     def load(self):
-        filename = QFileDialog.getOpenFileName(self)
+        filename = QFileDialog.getOpenFileName(self)[0]
+        self.filename_label.setText(path.basename(filename))
         print(filename)
 
 
