@@ -791,12 +791,12 @@ def xyTransform(data, xLabel="", yLabel=""):
         xLabel = "%s(%s)" % (xname, xunits)
     if xLabel == "x^(2)":
         data.transformX(DataTransform.toX2, DataTransform.errToX2)
-        xunits = convertUnit(2, xunits)
-        xLabel = "%s^{2}(%s)" % (xname, xunits)
+        new_xunits = convertUnit(2, xunits)
+        xLabel = "%s^{2}(%s)" % (xname, new_xunits)
     if xLabel == "x^(4)":
         data.transformX(DataTransform.toX4, DataTransform.errToX4)
-        xunits = convertUnit(4, xunits)
-        xLabel = "%s^{4}(%s)" % (xname, xunits)
+        new_xunits = convertUnit(4, xunits)
+        xLabel = "%s^{4}(%s)" % (xname, new_xunits)
     if xLabel == "ln(x)":
         data.transformX(DataTransform.toLogX, DataTransform.errToLogX)
         xLabel = r"\ln{(%s)}(%s)" % (xname, xunits)
@@ -806,8 +806,8 @@ def xyTransform(data, xLabel="", yLabel=""):
         xLabel = "%s(%s)" % (xname, xunits)
     if xLabel == "log10(x^(4))":
         data.transformX(DataTransform.toX4, DataTransform.errToX4)
-        xunits = convertUnit(4, xunits)
-        xLabel = "%s^{4}(%s)" % (xname, xunits)
+        new_xunits = convertUnit(4, xunits)
+        xLabel = "%s^{4}(%s)" % (xname, new_xunits)
         xscale = 'log'
 
     # Y
@@ -823,40 +823,40 @@ def xyTransform(data, xLabel="", yLabel=""):
         yLabel = "%s(%s)" % (yname, yunits)
     if yLabel == "y^(2)":
         data.transformY(DataTransform.toX2, DataTransform.errToX2)
-        yunits = convertUnit(2, yunits)
-        yLabel = "%s^{2}(%s)" % (yname, yunits)
+        new_yunits = convertUnit(2, yunits)
+        yLabel = "%s^{2}(%s)" % (yname, new_yunits)
     if yLabel == "1/y":
         data.transformY(DataTransform.toOneOverX, DataTransform.errOneOverX)
-        yunits = convertUnit(-1, yunits)
-        yLabel = "1/%s(%s)" % (yname, yunits)
+        new_yunits = convertUnit(-1, yunits)
+        yLabel = "1/%s(%s)" % (yname, new_yunits)
     if yLabel == "y*x^(2)":
         data.transformY(DataTransform.toYX2, DataTransform.errToYX2)
-        xunits = convertUnit(2, xunits)
-        yLabel = r"%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
+        new_xunits = convertUnit(2, xunits)
+        yLabel = r"%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, new_xunits)
     if yLabel == "y*x^(4)":
         data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
-        xunits = convertUnit(4, xunits)
-        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+        new_xunits = convertUnit(4, xunits)
+        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, new_xunits)
     if yLabel == "1/sqrt(y)":
         data.transformY(DataTransform.toOneOverSqrtX, DataTransform.errOneOverSqrtX)
-        yunits = convertUnit(-0.5, yunits)
-        yLabel = r"1/\sqrt{%s}(%s)" % (yname, yunits)
+        new_yunits = convertUnit(-0.5, yunits)
+        yLabel = r"1/\sqrt{%s}(%s)" % (yname, new_yunits)
     if yLabel == "ln(y*x)":
         data.transformY(DataTransform.toLogXY, DataTransform.errToLogXY)
         yLabel = r"\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "ln(y*x^(2))":
         data.transformY(DataTransform.toLogYX2, DataTransform.errToLogYX2)
-        xunits = convertUnit(2, xunits)
-        yLabel = r"\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
+        new_xunits = convertUnit(2, xunits)
+        yLabel = r"\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, new_xunits)
     if yLabel == "ln(y*x^(4))":
         data.transformY(DataTransform.toLogYX4, DataTransform.errToLogYX4)
-        xunits = convertUnit(4, xunits)
-        yLabel = r"\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
+        new_xunits = convertUnit(4, xunits)
+        yLabel = r"\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, new_xunits)
     if yLabel == "log10(y*x^(4))":
         data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
-        xunits = convertUnit(4, xunits)
+        new_xunits = convertUnit(4, xunits)
         yscale = 'log'
-        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, new_xunits)
 
     # Perform the transformation of data in data1d->View
     data.transformView()
