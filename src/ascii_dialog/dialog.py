@@ -1,5 +1,5 @@
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QVBoxLayout, QWidget, QApplication
+from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QTableWidget, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
 from guess import guess_column_count, guess_seperator
@@ -44,6 +44,11 @@ class AsciiDialog(QWidget):
         ## Column Editor
         self.col_editor = ColEditor(self.colcount_entry.value())
 
+        ## Data Table
+
+        self.table = QTableWidget()
+        self.table.show()
+
         self.layout = QVBoxLayout(self)
 
         self.layout.addWidget(self.filename_label)
@@ -52,6 +57,8 @@ class AsciiDialog(QWidget):
         self.layout.addLayout(self.startline_layout)
         self.layout.addLayout(self.colcount_layout)
         self.layout.addWidget(self.col_editor)
+        self.layout.addWidget(self.table)
+
 
     def attempt_guesses(self):
         guessed_seperator = guess_seperator(self.raw_csv)
@@ -63,6 +70,29 @@ class AsciiDialog(QWidget):
 
         guessed_colcount = guess_column_count(self.raw_csv, guessed_seperator, self.startline_entry.value())
         self.colcount_entry.setValue(guessed_colcount)
+
+    def fill_table(self):
+        # At the moment, we're just going to start making the table from where
+        # the user told us to start. Just trying this for now. We might want to
+        # draw the full table later.
+
+        # Don't try to fill the table if there's no data.
+        if self.raw_csv is not None:
+            return
+
+        starting_pos = self.startline_entry.value()
+
+        self.table.setRowCount(len(self.raw_csv) - starting_pos)
+        self.table.setColumnCount(self.colcount_entry.value())
+        self.table.setHorizontalHeaderLabels(self.col_editor.col_names())
+
+        # Now fill the table with data
+        for i, row in enumerate(self.raw_csv[starting_pos::]):
+            for j, col_value in enumerate(row):
+                self.table.setItem(i, j, col_value)
+
+        self.table.show()
+
 
     @Slot()
     def load(self):
