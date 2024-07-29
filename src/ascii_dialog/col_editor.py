@@ -35,4 +35,5 @@ class ColEditor(QWidget):
             excess_combo_boxes = self.option_widgets[length - excess_cols:length]
             for box in excess_combo_boxes:
                 self.layout.removeWidget(box)
+                box.setParent(None)
             self.option_widgets = self.option_widgets[0:length - excess_cols]
