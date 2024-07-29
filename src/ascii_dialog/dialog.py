@@ -1,5 +1,5 @@
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QTableWidget, QVBoxLayout, QWidget, QApplication
+from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
 from guess import guess_column_count, guess_seperator
@@ -88,8 +88,9 @@ class AsciiDialog(QWidget):
 
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv[starting_pos::]):
-            for j, col_value in enumerate(row):
-                self.table.setItem(i, j, col_value)
+            row_split = row.split(self.sep_entry.text())
+            for j, col_value in enumerate(row_split):
+                self.table.setItem(i, j, QTableWidgetItem(col_value))
 
         self.table.show()
 
