@@ -30,6 +30,7 @@ class AsciiDialog(QWidget):
         self.startline_layout = QHBoxLayout()
         self.startline_label = QLabel('Starting Line')
         self.startline_entry = QSpinBox()
+        self.startline_entry.valueChanged.connect(self.update_startpos)
         self.startline_layout.addWidget(self.startline_label)
         self.startline_layout.addWidget(self.startline_entry)
 
@@ -113,6 +114,10 @@ class AsciiDialog(QWidget):
     @Slot()
     def update_colcount(self):
         self.col_editor.set_cols(self.colcount_entry.value())
+
+    @Slot()
+    def update_startpos(self):
+        self.fill_table()
 
 if __name__ == "__main__":
     app = QApplication([])
