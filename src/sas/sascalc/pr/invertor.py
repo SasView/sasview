@@ -106,7 +106,7 @@ class Invertor(Pinvertor):
     ## Time elapsed for last computation
     elapsed = 0
     ## Alpha to get the reg term the same size as the signal
-    suggested_alpha = 0
+    suggested_alpha = 0.0
     ## Last number of base functions used
     nfunc = 10
     ## Last output values
@@ -161,12 +161,17 @@ class Invertor(Pinvertor):
             return self.set_y(value)
         elif name == 'err':
             value2 = abs(value)
+            if None in value:
+                msg = "Invertor: Data has no uncertainty. "
+                msg += "Delete that entry before proceeding"
             return self.set_err(value2)
         elif name == 'd_max':
             if value <= 0.0:
                 msg = "Invertor: d_max must be greater than zero."
                 msg += "Correct that entry before proceeding"
+                value = 0.001
                 raise ValueError(msg)
+            
             return self.set_dmax(value)
         elif name == 'q_min':
             if value is None:
@@ -297,7 +302,7 @@ class Invertor(Pinvertor):
         # Reset the background value before proceeding
         # self.background = 0.0
         if not self.est_bck:
-            self.y -= self.background
+            self.y -= self.background         
         out, cov = self.lstsq(nfunc, nr=nr)
         if not self.est_bck:
             self.y += self.background
@@ -345,7 +350,7 @@ class Invertor(Pinvertor):
         res = self.residuals(out)
         chisqr = 0
         for i in range(len(res)):
-            chisqr += res[i]
+            chisqr += math.fabs(res[i])
 
         self.chi2 = chisqr
 
@@ -373,13 +378,6 @@ class Invertor(Pinvertor):
         p = np.ones(nfunc)
         t_0 = time.time()
         out, cov_x, _, _, _ = optimize.leastsq(self.pr_residuals, p, full_output=1)
-
-        # Compute chi^2
-        res = self.pr_residuals(out)
-        chisqr = 0
-        chisq = np.sum(res)
-
-        self.chisqr = chisqr
 
         # Store computation time
         self.elapsed = time.time() - t_0
@@ -480,7 +478,10 @@ class Invertor(Pinvertor):
 
         # Perform the inversion (least square fit)
         # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
+
         rcond = np.finfo(float).eps * max(a.shape)
+        if rcond ==None:
+            rcond =-1
         c, chi2, _, _ = lstsq(a, b, rcond=rcond)
         # Sanity check
         try:
@@ -489,15 +490,13 @@ class Invertor(Pinvertor):
             chi2 = -1.0
         self.chi2 = chi2
 
-        inv_cov = np.zeros([nfunc, nfunc])
-
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
         inv_cov = self._get_invcov_matrix(nfunc, nr, a)
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 
-        if math.fabs(self.alpha) > 0:
-            new_alpha = sum_sig / (sum_reg / self.alpha)
+        if self.alpha > 0:
+            new_alpha = self.alpha * sum_sig / sum_reg
         else:
             new_alpha = 0.0
         self.suggested_alpha = new_alpha

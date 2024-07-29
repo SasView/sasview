@@ -2,7 +2,7 @@ import math
 import logging
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -42,7 +42,7 @@ class InversionLogic(object):
         """ accessor """
         return self.data_is_loaded
 
-    def new1DPlot(self, out, pr, q=None):
+    def new1DPlot(self, tab_id=1, out=None, pr=None, q=None):
         """
         Create a new 1D data instance based on fitting results
         """
@@ -72,7 +72,7 @@ class InversionLogic(object):
             logger.info("Could not compute I(q) for q =", list((x[index])))
 
         new_plot = Data1D(x, y)
-        new_plot.name = IQ_FIT_LABEL + f"[{self._data.name}]"
+        new_plot.name = "%s [%s]" % (IQ_FIT_LABEL, self._data.name)
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
         title = "I(q)"
@@ -81,7 +81,7 @@ class InversionLogic(object):
         # If we have a group ID, use it
         if 'plot_group_id' in pr.info:
             new_plot.group_id = pr.info["plot_group_id"]
-        new_plot.id = IQ_FIT_LABEL
+        new_plot.id = str(tab_id) +IQ_FIT_LABEL
 
 
         # If we have used slit smearing, plot the smeared I(q) too
@@ -111,6 +111,8 @@ class InversionLogic(object):
 
         return new_plot
 
+
+
     def newPRPlot(self, out, pr, cov=None):
         """
         """
@@ -124,7 +126,7 @@ class InversionLogic(object):
             (y, dy) = pr.pr_err(out, cov, x)
             new_plot = Data1D(x, y, dy=dy)
 
-        new_plot.name = PR_FIT_LABEL + f"[{self._data.name}]"
+        new_plot.name = "%s [%s]" % (PR_FIT_LABEL, self._data.name)
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ", "cm^{-3}")
         new_plot.title = "P(r) fit"
@@ -135,12 +137,17 @@ class InversionLogic(object):
 
         return new_plot
 
-    def add_errors(self, sigma=0.05):
+    def add_errors(self, sigma=1.0):
         """
         Adds errors to data set is they are not available.
         Uses  $\Delta y = \sigma | y |$.
         """
-        self._data.dy = sigma * np.fabs(self._data.y)
+        if np.size(self._data.dy) == 0:
+            self._data.dy = np.sqrt(np.fabs(self._data.y))*sigma
+        elif np.any(self._data.dy) <= 0:
+            self._data.dy = np.where(self._data.dy <= 0, np.sqrt(np.fabs(self._data.y))*sigma, self._data.dy)
+
+        
 
     def computeDataRange(self):
         """
@@ -156,8 +163,13 @@ class InversionLogic(object):
         qmin, qmax = None, None
         if isinstance(data, Data1D):
             try:
-                qmin = min(data.x)
                 qmax = max(data.x)
+                #set q values where Intensity is zero, 
+                #to qmax and exclude from minimum accepted q
+                #to avoid dodgy points around beam stop
+                usable_qrange=np.where(data.y <= 0, qmax, data.x)
+                qmin = min(usable_qrange)
+                
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename
