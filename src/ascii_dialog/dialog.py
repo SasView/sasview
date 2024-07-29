@@ -1,6 +1,7 @@
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
+from col_editor import ColEditor
 from guess import guess_column_count, guess_seperator
 from os import path
 
@@ -38,6 +39,9 @@ class AsciiDialog(QWidget):
         self.colcount_layout.addWidget(self.colcount_label)
         self.colcount_layout.addWidget(self.colcount_entry)
 
+        ## Column Editor
+        self.col_editor = ColEditor(4) ## TODO: 4 is just a placeholder. Use value from colcount
+
         self.layout = QVBoxLayout(self)
 
         self.layout.addWidget(self.filename_label)
@@ -45,6 +49,7 @@ class AsciiDialog(QWidget):
         self.layout.addLayout(self.sep_layout)
         self.layout.addLayout(self.startline_layout)
         self.layout.addLayout(self.colcount_layout)
+        self.layout.addWidget(self.col_editor)
 
     def attempt_guesses(self):
         guessed_seperator = guess_seperator(self.raw_csv)
