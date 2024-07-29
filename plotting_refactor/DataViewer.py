@@ -41,7 +41,7 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         self.dataTreeWidget.clear()
         self.dataTreeWidget.blockSignals(False)
 
-        datasets = self.datacollector.get_datasets()
+        datasets = self.datacollector.datasets
         for i in range(len(datasets)):
             fitpage_index = datasets[i].get_fitpage_index()
             name = "Data from Fitpage " + str(fitpage_index)
