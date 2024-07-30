@@ -206,6 +206,7 @@ class GuiManager:
         self.KIESSIGCalculator = KiessigPanel(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
+        self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNew(self)
@@ -1041,7 +1042,8 @@ class GuiManager:
         try:
             # delayed import due to numba instantiation in GSC
             from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
-            self.GENSASCalculator = GenericScatteringCalculator(self)
+            if self.GENSASCalculator is None:
+                self.GENSASCalculator = GenericScatteringCalculator(self)
             self.GENSASCalculator.show()
         except Exception as ex:
             logging.error(str(ex))
