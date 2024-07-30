@@ -783,6 +783,10 @@ class GuiManager:
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
+        # Dev
+        self._workspace.actionParticle_Editor.triggered.connect(self.particleEditor)
+        self._workspace.actionAscii_Loader.triggered.connect(self.asciiLoader)
+
 
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
@@ -1440,3 +1444,13 @@ class GuiManager:
         # file manager
         self.filesWidget.reset()
 
+
+    # ============= DEV =================
+
+    def particleEditor(self):
+        from sas.qtgui.Perspectives.ParticleEditor.DesignWindow import show_particle_editor
+        show_particle_editor()
+
+
+    def asciiLoader(self):
+        pass

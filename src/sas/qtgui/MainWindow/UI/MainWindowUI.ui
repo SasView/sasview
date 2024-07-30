@@ -167,6 +167,15 @@
     <addaction name="actionCheck_for_update"/>
     <addaction name="actionWhat_s_New"/>
    </widget>
+   <widget class="QMenu" name="menuDev">
+    <property name="title">
+     <string>Dev</string>
+    </property>
+    <addaction name="actionAscii_Loader"/>
+    <addaction name="actionParticle_Editor"/>
+    <addaction name="separator"/>
+    <addaction name="actionDev_Tools"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
@@ -175,6 +184,7 @@
    <addaction name="menuFitting"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuDev"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="sizePolicy">
@@ -650,6 +660,21 @@
   <action name="actionClose_Project">
    <property name="text">
     <string>Close Project</string>
+   </property>
+  </action>
+  <action name="actionAscii_Loader">
+   <property name="text">
+    <string>Ascii Loader</string>
+   </property>
+  </action>
+  <action name="actionParticle_Editor">
+   <property name="text">
+    <string>Particle Editor</string>
+   </property>
+  </action>
+  <action name="actionDev_Tools">
+   <property name="text">
+    <string>Dev Tools</string>
    </property>
   </action>
  </widget>
