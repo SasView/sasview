@@ -1465,3 +1465,4 @@ class GuiManager:
                 logger.info(datum.summary())
         else:
             logger.error('ASCII Reader Closed')
+
