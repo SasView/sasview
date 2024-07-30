@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+from ascii_dialog.dataset_types import DatasetType
+
+
 def guess_seperator(raw_csv: list[str]) -> str | None:
     """Try to guess what the seperator is in raw_csv, and return it. Will return
     None if a seperator cannot be guessed, and thus will likely require manual
@@ -30,3 +33,10 @@ def guess_seperator(raw_csv: list[str]) -> str | None:
 def guess_column_count(raw_csv: list[str], sep: str, starting_pos: int) -> int:
     """Guess the amount of columns present in the data."""
     return len(raw_csv[starting_pos].split(sep))
+
+def guess_columns(col_count: int, dataset_type: DatasetType) -> list[str]:
+    # Ideally we want an exact match but if the ordering is bigger than the col
+    # count then we can accept that as well.
+    for order_list in dataset_type.expected_orders:
+        if len(order_list) >= col_count:
+            return order_list
