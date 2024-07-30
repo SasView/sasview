@@ -40,16 +40,16 @@ class ColEditor(QWidget):
             self.cols = new_cols
 
     def set_col_order(self, cols: list[str]):
-        for i, col_name in enumerate(cols):
-            self.option_widgets[i].setCurrentText(col_name)
+        try:
+            for i, col_name in enumerate(cols):
+                self.option_widgets[i].setCurrentText(col_name)
+        except IndexError:
+            pass # Can ignore because it means we've run out of widgets.
 
     def col_names(self) -> list[str]:
         return [col.currentText() for col in self.option_widgets]
 
     def replace_options(self, new_options: list[str]) -> None:
-        try:
-            for box in self.option_widgets:
-                box.clear()
-                box.addItems(new_options)
-        except IndexError:
-            pass # Can ignore because it means we've run out of widgets.
+        for box in self.option_widgets:
+            box.clear()
+            box.addItems(new_options)
