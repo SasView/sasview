@@ -784,6 +784,7 @@ class GuiManager:
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
         # Dev
+        self._workspace.menuDev.menuAction().setVisible(config.DEV_MENU)
         self._workspace.actionParticle_Editor.triggered.connect(self.particleEditor)
         self._workspace.actionAscii_Loader.triggered.connect(self.asciiLoader)
 
