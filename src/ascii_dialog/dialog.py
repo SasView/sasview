@@ -5,7 +5,7 @@ from PySide6.QtCore import Slot
 from col_editor import ColEditor
 from guess import guess_column_count, guess_seperator, guess_starting_position
 from os import path
-from dataset_types import dataset_types
+from dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 import re
 
 TABLE_MAX_ROWS = 100
@@ -158,6 +158,13 @@ class AsciiDialog(QWidget):
         self.table.show()
         self.table.resizeColumnsToContents()
 
+    def current_dataset_type(self) -> DatasetType:
+        # TODO: Using linear search but should probably just use a dictionary
+        # later.
+        for type in [one_dim, two_dim, sesans]:
+            if type.name == self.dataset_combobox.currentText():
+                return type
+        return one_dim
 
     @Slot()
     def load(self):
