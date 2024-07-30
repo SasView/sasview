@@ -33,6 +33,7 @@ class AsciiDialog(QWidget):
         self.dataset_layout = QHBoxLayout()
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
+        self.dataset_combobox.currentTextChanged.connect(self.change_dataset_type)
         for name in dataset_types:
             self.dataset_combobox.addItem(name)
         self.dataset_layout.addWidget(self.dataset_label)
@@ -198,6 +199,11 @@ class AsciiDialog(QWidget):
         check_box = self.sender()
         self.seperators[check_box.text()] = check_box.isChecked()
         self.fill_table()
+
+    @Slot()
+    def change_dataset_type(self):
+        new_dataset = self.current_dataset_type()
+        self.col_editor.replace_options(new_dataset.required + new_dataset.optional)
 
 if __name__ == "__main__":
     app = QApplication([])
