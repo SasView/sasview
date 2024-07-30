@@ -39,6 +39,10 @@ class ColEditor(QWidget):
             self.option_widgets = self.option_widgets[0:length - excess_cols]
             self.cols = new_cols
 
+    def set_col_order(self, cols: list[str]):
+        for i, col_name in enumerate(cols):
+            self.option_widgets[i].setCurrentText(col_name)
+
     def col_names(self) -> list[str]:
         return [col.currentText() for col in self.option_widgets]
 
