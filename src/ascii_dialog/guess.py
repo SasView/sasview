@@ -42,3 +42,13 @@ def guess_columns(col_count: int, dataset_type: DatasetType) -> list[str]:
             return order_list
 
     return dataset_type.expected_orders[-1]
+
+def guess_starting_position(split_csv: list[list[str]]) -> int:
+    """Try to look for a line where the first item in the row can be converted
+    to a number. If such a line doesn't existTry to look for a line where the
+    first item in the row can be converted to a number. If such a line doesn't
+    exist, then just return 0 as the starting position."""
+    for i, row in enumerate(split_csv):
+        if row[0].replace('.', '').isdigit():
+            return i
+    return 0
