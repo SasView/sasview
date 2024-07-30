@@ -23,9 +23,13 @@ class AsciiDialog(QWidget):
         # Data parameters
 
         ## Dataset type selection
+        self.dataset_layout = QHBoxLayout()
+        self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
         for name in dataset_types:
             self.dataset_combobox.addItem(name)
+        self.dataset_layout.addWidget(self.dataset_label)
+        self.dataset_layout.addWidget(self.dataset_combobox)
 
         ## Seperator
         self.sep_layout = QHBoxLayout()
@@ -67,7 +71,7 @@ class AsciiDialog(QWidget):
 
         self.layout.addWidget(self.filename_label)
         self.layout.addWidget(self.load_button)
-        self.layout.addWidget(self.dataset_combobox)
+        self.layout.addLayout(self.dataset_layout)
         self.layout.addLayout(self.sep_layout)
         self.layout.addLayout(self.startline_layout)
         self.layout.addLayout(self.colcount_layout)
