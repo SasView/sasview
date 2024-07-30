@@ -174,7 +174,11 @@ class AsciiDialog(QWidget):
 
     @Slot()
     def load(self):
-        filename = QFileDialog.getOpenFileName(self)[0]
+        result = QFileDialog.getOpenFileName(self)
+        # Happens when the user cancels without selecting a file.
+        if result[1] == '':
+            return
+        filename = result[1]
         self.filename_label.setText(path.basename(filename))
 
         # TODO: Add error handling
