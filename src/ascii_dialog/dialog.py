@@ -137,7 +137,7 @@ class AsciiDialog(QWidget):
 
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv[starting_pos::]):
-            row_split = row.split(self.sep_entry.text())
+            row_split = self.splt_line(row)
             for j, col_value in enumerate(row_split):
                 self.table.setItem(i, j, QTableWidgetItem(col_value))
             if i == TABLE_MAX_ROWS:
