@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from ascii_dialog.dataset_types import DatasetType
+from dataset_types import DatasetType
 
 
 def guess_seperator(raw_csv: list[str]) -> str | None:
