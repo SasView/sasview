@@ -166,6 +166,7 @@ class AsciiDialog(QWidget):
     @Slot()
     def update_colcount(self):
         self.col_editor.set_cols(self.colcount_entry.value())
+        self.fill_table()
 
     @Slot()
     def update_startpos(self):
@@ -179,6 +180,7 @@ class AsciiDialog(QWidget):
     def seperator_toggle(self):
         check_box = self.sender()
         self.seperators[check_box.text()] = check_box.isChecked()
+        self.fill_table()
 
 if __name__ == "__main__":
     app = QApplication([])
