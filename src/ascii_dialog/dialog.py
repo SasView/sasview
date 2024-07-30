@@ -100,7 +100,7 @@ class AsciiDialog(QWidget):
                     case 'Comma':
                         seperator_text = r','
                     case 'Whitespace':
-                        seperator_text = r'␣+'
+                        seperator_text = r'\s+'
                     case 'Tab':
                         seperator_text = r'\t'
                 expr += seperator_text
