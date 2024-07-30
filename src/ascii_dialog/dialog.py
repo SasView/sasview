@@ -90,7 +90,7 @@ class AsciiDialog(QWidget):
         self.layout.addWidget(self.col_editor)
         self.layout.addWidget(self.table)
 
-    def splt_line(self, line: str) -> list[str]:
+    def split_line(self, line: str) -> list[str]:
         expr = ''
         for seperator, isenabled in self.seperators.items():
             if expr != r'':
@@ -118,7 +118,7 @@ class AsciiDialog(QWidget):
 
         # self.sep_entry.setText(guessed_seperator)
 
-        split_csv = [self.splt_line(line) for line in self.raw_csv]
+        split_csv = [self.split_line(line) for line in self.raw_csv]
 
         starting_pos = guess_starting_position(split_csv)
 
@@ -146,7 +146,7 @@ class AsciiDialog(QWidget):
 
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv[starting_pos::]):
-            row_split = self.splt_line(row)
+            row_split = self.split_line(row)
             for j, col_value in enumerate(row_split):
                 self.table.setItem(i, j, QTableWidgetItem(col_value))
             if i == TABLE_MAX_ROWS:
