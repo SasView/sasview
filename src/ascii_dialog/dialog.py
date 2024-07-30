@@ -1,10 +1,11 @@
 from PySide6 import QtGui
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import QAbstractScrollArea, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
+from PySide6.QtWidgets import QAbstractScrollArea, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
 from guess import guess_column_count, guess_seperator
 from os import path
+from dataset_types import dataset_types
 
 TABLE_MAX_ROWS = 100
 
@@ -20,6 +21,11 @@ class AsciiDialog(QWidget):
         self.load_button.clicked.connect(self.load)
 
         # Data parameters
+
+        ## Dataset type selection
+        self.dataset_combobox = QComboBox()
+        for name in dataset_types:
+            self.dataset_combobox.addItem(name)
 
         ## Seperator
         self.sep_layout = QHBoxLayout()
@@ -61,6 +67,7 @@ class AsciiDialog(QWidget):
 
         self.layout.addWidget(self.filename_label)
         self.layout.addWidget(self.load_button)
+        self.layout.addWidget(self.dataset_combobox)
         self.layout.addLayout(self.sep_layout)
         self.layout.addLayout(self.startline_layout)
         self.layout.addLayout(self.colcount_layout)
