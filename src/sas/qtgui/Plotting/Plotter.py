@@ -283,15 +283,17 @@ class PlotterWidget(PlotterBase):
             if isinstance(data, Data1D):
                 # Get default ranges from data
                 # factors of .99 and 1.01 provides a small gap so end points not shown right at edge
-                default_x_range = (0.99*np.min(x), 1.01*np.max(x))
+                pad_delta = 0.01
+
+                default_x_range = ((1-pad_delta)*np.min(x), (1+pad_delta)*np.max(x))
 
                 # Need to make space for error bars
                 dy = data.view.dy
                 if dy is None:
-                    default_y_range = (0.99 * np.min(y), 1.01 * np.max(y))
+                    default_y_range = ((1-pad_delta) * np.min(y), (1+pad_delta) * np.max(y))
                 else:
-                    default_y_range = (0.99*np.min(np.array(y) - np.array(dy)),
-                                       1.01*np.max(np.array(y) + np.array(dy)))
+                    default_y_range = ((1-pad_delta)*np.min(np.array(y) - np.array(dy)),
+                                       (1+pad_delta)*np.max(np.array(y) + np.array(dy)))
 
             else:
                 # Use default ranges given by matplotlib
