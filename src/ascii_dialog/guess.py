@@ -30,9 +30,9 @@ def guess_seperator(raw_csv: list[str]) -> str | None:
     # No seperator found.
     return None
 
-def guess_column_count(raw_csv: list[str], sep: str, starting_pos: int) -> int:
+def guess_column_count(split_csv: list[list[str]], starting_pos: int) -> int:
     """Guess the amount of columns present in the data."""
-    return len(raw_csv[starting_pos].split(sep))
+    return len(split_csv[starting_pos])
 
 def guess_columns(col_count: int, dataset_type: DatasetType) -> list[str]:
     # Ideally we want an exact match but if the ordering is bigger than the col
