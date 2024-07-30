@@ -1,11 +1,12 @@
 from PySide6 import QtGui
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import QAbstractScrollArea, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
+from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
 from guess import guess_column_count, guess_seperator
 from os import path
 from dataset_types import dataset_types
+import re
 
 TABLE_MAX_ROWS = 100
 
@@ -14,6 +15,12 @@ class AsciiDialog(QWidget):
         super().__init__()
 
         self.raw_csv = None
+
+        self.seperators = {
+            'Comma': True,
+            'Whitespace': True,
+            'Tab': True
+        }
 
         self.filename_label = QLabel("Click the button below to load a file.")
 
@@ -33,11 +40,16 @@ class AsciiDialog(QWidget):
 
         ## Seperator
         self.sep_layout = QHBoxLayout()
-        self.sep_label = QLabel('Seperator')
-        self.sep_entry = QLineEdit()
-        self.sep_entry.textChanged.connect(self.update_seperator)
+
+        self.sep_widgets = []
+        self.sep_label = QLabel('Seperators:')
         self.sep_layout.addWidget(self.sep_label)
-        self.sep_layout.addWidget(self.sep_entry)
+        for seperator_name, value in self.seperators.items():
+            check_box = QCheckBox(seperator_name)
+            check_box.setChecked(value)
+            check_box.clicked.connect(self.seperator_toggle)
+            self.sep_widgets.append(check_box)
+            self.sep_layout.addWidget(check_box)
 
         ## Starting Line
         self.startline_layout = QHBoxLayout()
@@ -142,6 +154,11 @@ class AsciiDialog(QWidget):
     @Slot()
     def update_seperator(self):
         self.fill_table()
+
+    @Slot()
+    def seperator_toggle(self):
+        check_box = self.sender()
+        self.seperators[check_box.text()] = check_box.isChecked()
 
 if __name__ == "__main__":
     app = QApplication([])
