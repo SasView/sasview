@@ -49,6 +49,6 @@ def guess_starting_position(split_csv: list[list[str]]) -> int:
     first item in the row can be converted to a number. If such a line doesn't
     exist, then just return 0 as the starting position."""
     for i, row in enumerate(split_csv):
-        if row[0].replace('.', '').isdigit():
+        if row[0].replace('.', '').replace('-', '').isdigit():
             return i
     return 0
