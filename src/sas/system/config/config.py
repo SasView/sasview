@@ -162,8 +162,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         self.SHOW_WELCOME_PANEL = False
 
-
-
         # OpenCL option - should be a string, either, "none", a number, or pair of form "A:B"
         self.SAS_OPENCL = "none"
 
@@ -210,6 +208,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # What's New variables
         self.LAST_WHATS_NEW_HIDDEN_VERSION = "5.0.0"
+
+        # Developer menu
+        self.DEV_MENU = False
 
         #
         # Lock the class down, this is necessary both for
