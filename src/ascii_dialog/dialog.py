@@ -1,5 +1,5 @@
 from PySide6 import QtGui
-from PySide6.QtGui import QIntValidator
+from PySide6.QtGui import QColor, QIntValidator
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
@@ -145,10 +145,13 @@ class AsciiDialog(QWidget):
         self.table.setHorizontalHeaderLabels(self.col_editor.col_names())
 
         # Now fill the table with data
-        for i, row in enumerate(self.raw_csv[starting_pos::]):
+        for i, row in enumerate(self.raw_csv):
             row_split = self.split_line(row)
             for j, col_value in enumerate(row_split):
-                self.table.setItem(i, j, QTableWidgetItem(col_value))
+                item = QTableWidgetItem(col_value)
+                if i < starting_pos:
+                    item.setForeground(QColor.fromString('grey'))
+                self.table.setItem(i, j, item)
             if i == TABLE_MAX_ROWS:
                 break
 
