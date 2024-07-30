@@ -118,7 +118,7 @@ class AsciiDialog(QWidget):
 
         # self.sep_entry.setText(guessed_seperator)
 
-        split_csv = [self.split_line(line) for line in self.raw_csv]
+        split_csv = [self.split_line(line.strip()) for line in self.raw_csv]
 
         starting_pos = guess_starting_position(split_csv)
 
