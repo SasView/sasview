@@ -108,14 +108,18 @@ class AsciiDialog(QWidget):
         return re.split(expr, line)
 
     def attempt_guesses(self):
-        guessed_seperator = guess_seperator(self.raw_csv)
-        if guessed_seperator == None:
-            # Seperator couldn't be guessed; just let the user fill that in.
-            guessed_seperator = ''
+        # TODO: We're not guessing seperators anymore (just presuming that they
+        # are all enabled). Can probably delete this code later.
+        #
+        # guessed_seperator = guess_seperator(self.raw_csv)
+        # if guessed_seperator == None:
+        #     # Seperator couldn't be guessed; just let the user fill that in.
+        #     guessed_seperator = ''
 
-        self.sep_entry.setText(guessed_seperator)
+        # self.sep_entry.setText(guessed_seperator)
 
-        guessed_colcount = guess_column_count(self.raw_csv, guessed_seperator, self.startline_entry.value())
+        guessed_colcount = guess_column_count([self.splt_line(line) for line in self.raw_csv],
+                                              self.startline_entry.value())
         self.colcount_entry.setValue(guessed_colcount)
 
     def fill_table(self):
