@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>26</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -166,6 +166,15 @@
     <addaction name="separator"/>
     <addaction name="actionCheck_for_update"/>
     <addaction name="actionWhat_s_New"/>
+   </widget>
+   <widget class="QMenu" name="menuDev">
+    <property name="title">
+     <string>Dev</string>
+    </property>
+    <addaction name="actionAscii_Loader"/>
+    <addaction name="actionParticle_Editor"/>
+    <addaction name="separator"/>
+    <addaction name="actionDev_Tools"/>
    </widget>
    <widget class="QMenu" name="menuDev">
     <property name="title">

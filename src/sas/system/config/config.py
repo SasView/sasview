@@ -218,6 +218,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Developer menu
         self.DEV_MENU = False
 
+        # Developer menu
+        self.DEV_MENU = False
+
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files
