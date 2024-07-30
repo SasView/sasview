@@ -162,8 +162,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         self.SHOW_WELCOME_PANEL = False
 
-
-
         # OpenCL option - should be a string, either, "none", a number, or pair of form "A:B"
         self.SAS_OPENCL = "none"
 
@@ -212,6 +210,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # Last version that the update prompt was dismissed for
         self.LAST_UPDATE_DISMISSED_VERSION = "5.0.0"
+
+        # Developer menu
+        self.DEV_MENU = False
 
         #
         # Lock the class down, this is necessary both for
