@@ -33,7 +33,6 @@ class AsciiDialog(QWidget):
         self.dataset_layout = QHBoxLayout()
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
-        self.dataset_combobox.currentTextChanged.connect(self.change_dataset_type)
         for name in dataset_types:
             self.dataset_combobox.addItem(name)
         self.dataset_layout.addWidget(self.dataset_label)
@@ -73,6 +72,7 @@ class AsciiDialog(QWidget):
         current_dataset_type = self.current_dataset_type()
         options =  current_dataset_type.required + current_dataset_type.optional
         self.col_editor = ColEditor(self.colcount_entry.value(), options)
+        self.dataset_combobox.currentTextChanged.connect(self.change_dataset_type)
 
         ## Data Table
 
