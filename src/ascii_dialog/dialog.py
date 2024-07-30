@@ -175,7 +175,8 @@ class AsciiDialog(QWidget):
     @Slot()
     def load(self):
         result = QFileDialog.getOpenFileName(self)
-        # Happens when the user cancels without selecting a file.
+        # Happens when the user cancels without selecting a file. There isn't a
+        # file to load in this case.
         if result[1] == '':
             return
         filename = result[0]
