@@ -40,3 +40,5 @@ def guess_columns(col_count: int, dataset_type: DatasetType) -> list[str]:
     for order_list in dataset_type.expected_orders:
         if len(order_list) >= col_count:
             return order_list
+
+    return dataset_type.expected_orders[-1]
