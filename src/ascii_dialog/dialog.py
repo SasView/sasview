@@ -3,7 +3,7 @@ from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
-from guess import guess_column_count, guess_seperator
+from guess import guess_column_count, guess_seperator, guess_starting_position
 from os import path
 from dataset_types import dataset_types
 import re
@@ -118,9 +118,14 @@ class AsciiDialog(QWidget):
 
         # self.sep_entry.setText(guessed_seperator)
 
-        guessed_colcount = guess_column_count([self.splt_line(line) for line in self.raw_csv],
-                                              self.startline_entry.value())
+        split_csv = [self.splt_line(line) for line in self.raw_csv]
+
+        starting_pos = guess_starting_position(split_csv)
+
+        guessed_colcount = guess_column_count(split_csv,
+                                              starting_pos)
         self.colcount_entry.setValue(guessed_colcount)
+        self.startline_entry.setValue(starting_pos)
 
     def fill_table(self):
         # At the moment, we're just going to start making the table from where
