@@ -178,7 +178,7 @@ class AsciiDialog(QWidget):
         # Happens when the user cancels without selecting a file.
         if result[1] == '':
             return
-        filename = result[1]
+        filename = result[0]
         self.filename_label.setText(path.basename(filename))
 
         # TODO: Add error handling
