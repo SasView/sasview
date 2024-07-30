@@ -41,3 +41,8 @@ class ColEditor(QWidget):
 
     def col_names(self) -> list[str]:
         return [col.currentText() for col in self.option_widgets]
+
+    def replace_options(self, new_options: list[str]) -> None:
+        for box in self.option_widgets:
+            box.clear()
+            box.addItems(new_options)
