@@ -69,7 +69,9 @@ class AsciiDialog(QWidget):
         self.colcount_layout.addWidget(self.colcount_entry)
 
         ## Column Editor
-        self.col_editor = ColEditor(self.colcount_entry.value())
+        current_dataset_type = self.current_dataset_type()
+        options =  current_dataset_type.required + current_dataset_type.optional
+        self.col_editor = ColEditor(self.colcount_entry.value(), options)
 
         ## Data Table
 
