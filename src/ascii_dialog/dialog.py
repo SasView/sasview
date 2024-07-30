@@ -3,7 +3,7 @@ from PySide6.QtGui import QColor, QIntValidator
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
-from guess import guess_column_count, guess_seperator, guess_starting_position
+from guess import guess_column_count, guess_columns, guess_seperator, guess_starting_position
 from os import path
 from dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 import re
@@ -127,6 +127,9 @@ class AsciiDialog(QWidget):
 
         guessed_colcount = guess_column_count(split_csv,
                                               starting_pos)
+
+        columns = guess_columns(guessed_colcount, self.current_dataset_type())
+        self.col_editor.set_col_order(columns)
         self.colcount_entry.setValue(guessed_colcount)
         self.startline_entry.setValue(starting_pos)
 
