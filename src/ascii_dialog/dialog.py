@@ -90,6 +90,22 @@ class AsciiDialog(QWidget):
         self.layout.addWidget(self.col_editor)
         self.layout.addWidget(self.table)
 
+    def splt_line(self, line: str) -> list[str]:
+        expr = ''
+        for seperator, isenabled in self.seperators.items():
+            if expr != r'':
+                expr += r'|'
+            if isenabled:
+                match seperator:
+                    case 'Comma':
+                        seperator_text = r','
+                    case 'Whitespace':
+                        seperator_text = r'␣*'
+                    case 'Tab':
+                        seperator_text = r'\t'
+                expr += seperator_text
+
+        return re.split(expr, line)
 
     def attempt_guesses(self):
         guessed_seperator = guess_seperator(self.raw_csv)
