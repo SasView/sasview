@@ -88,6 +88,8 @@ class AsciiDialog(QWidget):
         if self.raw_csv is None:
             return
 
+        self.table.clear()
+
         starting_pos = self.startline_entry.value()
 
         self.table.setRowCount(min(len(self.raw_csv) - starting_pos, TABLE_MAX_ROWS))
