@@ -13,10 +13,11 @@ First layer of the model QStandardItemModel would be Data nodes
 
 Relation datasets/fitpages <--> existing plots?
 How is the current logic behind plotting something new and replotting an existing plot
-
+Checking if certain id already exists in the model/the dictionary for plotted objects
 
 plotting tools for 1d and 2d exist and can keep functioning that way?
 They just produce QWidgets that can be embedded inside the tabs afterwards
+GuiManager-filesWidget.plotData creates an instance of PlotterWidget, which is a QWidget and
 
 
 Where are the QWidgets from the Plotting generated? Where is explicitly show() stated?
