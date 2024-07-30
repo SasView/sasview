@@ -208,6 +208,10 @@ class AsciiDialog(QWidget):
         new_dataset = self.current_dataset_type()
         self.col_editor.replace_options(new_dataset.required + new_dataset.optional)
 
+        # Update columns as they'll be different now.
+        columns = guess_columns(self.colcount_entry.value(), self.current_dataset_type())
+        self.col_editor.set_col_order(columns)
+
 if __name__ == "__main__":
     app = QApplication([])
 
