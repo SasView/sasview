@@ -6,6 +6,7 @@ class ColEditor(QWidget):
         new_combo_box = QComboBox()
         for option in self.options:
             new_combo_box.addItem(option)
+        new_combo_box.setEditable(True)
         return new_combo_box
     def __init__(self, cols: int, options: list[str]):
         super().__init__()
