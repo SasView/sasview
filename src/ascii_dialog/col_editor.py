@@ -16,7 +16,6 @@ class ColEditor(QWidget):
         self.layout = QHBoxLayout(self)
         self.option_widgets = []
         for _ in range(cols):
-            # TODO: This is placeholder data.
             new_combo_box = self.create_col_combo_box()
             self.option_widgets.append(new_combo_box)
             self.layout.addWidget(new_combo_box)
