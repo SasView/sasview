@@ -1,3 +1,4 @@
+from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 
 
@@ -7,6 +8,8 @@ class ColEditor(QWidget):
         for option in self.options:
             new_combo_box.addItem(option)
         new_combo_box.setEditable(True)
+        validator = QRegularExpressionValidator(r"[a-zA-Z0-9]+")
+        new_combo_box.setValidator(validator)
         return new_combo_box
     def __init__(self, cols: int, options: list[str]):
         super().__init__()
