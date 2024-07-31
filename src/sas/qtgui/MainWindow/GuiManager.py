@@ -73,6 +73,7 @@ from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
+from sas.qtgui.Utilities.UploadDocs import temp
 
 import sas
 from sas import config
@@ -713,6 +714,7 @@ class GuiManager:
         self._workspace.actionSave.triggered.connect(self.actionSave_Project)
         self._workspace.actionSave_Analysis.triggered.connect(self.actionSave_Analysis)
         self._workspace.actionPreferences.triggered.connect(self.actionOpen_Preferences)
+        self._workspace.actionUpload.triggered.connect(self.actionUploadDocumentation)
         self._workspace.actionQuit.triggered.connect(self.actionQuit)
         # Edit
         self._workspace.actionUndo.triggered.connect(self.actionUndo)
@@ -867,6 +869,9 @@ class GuiManager:
 
     def actionOpen_Preferences(self):
         self.preferences.show()
+    
+    def actionUploadDocumentation(self):
+        temp()
 
     def actionQuit(self):
         """

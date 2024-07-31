@@ -24,13 +24,19 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menuDocumentation">
+     <property name="title">
+      <string>Documentation</string>
+     </property>
+     <addaction name="actionUpload"/>
+    </widget>
     <addaction name="actionLoadData"/>
     <addaction name="actionLoad_Data_Folder"/>
     <addaction name="separator"/>
@@ -41,6 +47,7 @@
     <addaction name="actionSave_Analysis"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
+    <addaction name="menuDocumentation"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -623,6 +630,11 @@
   <action name="actionWhat_s_New">
    <property name="text">
     <string>What's New</string>
+   </property>
+  </action>
+  <action name="actionUpload">
+   <property name="text">
+    <string>Upload</string>
    </property>
   </action>
  </widget>
