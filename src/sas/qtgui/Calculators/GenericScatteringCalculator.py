@@ -1532,6 +1532,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Overwrite the close event and hide the window instead of closing it
         """
         self.hideWindow()
+        event.ignore()
 
     def update_file_name(self):
         if self.checkboxPluginModel.isChecked():
