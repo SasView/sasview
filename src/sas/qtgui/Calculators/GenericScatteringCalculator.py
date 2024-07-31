@@ -117,7 +117,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             lineEdit.installEventFilter(self)                            # when textbox enabled/disabled
 
         # push buttons
-        self.cmdClose.clicked.connect(self.accept)
+        self.cmdClose.clicked.connect(self.hideWindow)
         self.cmdHelp.clicked.connect(self.onHelp)
 
         self.cmdNucLoad.clicked.connect(self.loadFile)
@@ -1520,8 +1520,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdCompute.setEnabled(True)
         return
-    
-    
+
+    def hideWindow(self):
+        """
+        Hide the window when the close button is clicked
+        """
+        self.hide()
+
+    def closeEvent(self, event):
+        """
+        Overwrite the close event and hide the window instead of closing it
+        """
+        self.hideWindow()
 
     def update_file_name(self):
         if self.checkboxPluginModel.isChecked():
