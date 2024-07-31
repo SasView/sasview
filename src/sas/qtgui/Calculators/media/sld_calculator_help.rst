@@ -73,13 +73,13 @@ Specifying Materials or Mixtures in the Molecular Formula Field
 
 *For isotopic substitution you must also adjust the density for your mixture.* There is a density calculator in SASview that may be useful, but measurement with a density meter is recommended.
 
-**Mass Fraction** can be entered with each component of the mixture written as XX%wt "component" and each component separated with //. The mass fraction of the last component does not need to be specified as the sum of the fractions must add to 100. The mass density field must be updated to specify the density of the mixture. For example:
+**Mass Fraction** can be entered with each component of the mixture written as XX%wt *or* XXwt% "component" and each component separated with //. The mass fraction of the last component does not need to be specified as the sum of the fractions must add to 100. The mass density field must be updated to specify the density of the mixture. For example:
 
     50%wt Co // Ti
 
     1%wtNaCl // 50%wtD2O // H2O
 
-**Volume Fraction** can be entered in the same way by substituting *%vol* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field must also be updated to specify the density of the mixture. (Note: vol% and wt% will lead to syntax errors).
+**Volume Fraction** can be entered in the same way by substituting *%vol or vol%* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field must also be updated to specify the density of the mixture, or, if no density value is given, will be calculated from the molecular formula when all individual densities are provided.
 
     50%vol H2O@1 // D2O\@1.1
 
