@@ -1,6 +1,7 @@
 # global
 import numpy as np
 import logging
+from pyparsing.exceptions import ParseException
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
@@ -184,8 +185,17 @@ class SldPanel(QtWidgets.QDialog):
         neutronWavelength = self.ui.editNeutronWavelength.text()
         xrayWavelength = self.ui.editXrayWavelength.text()
 
-        if not formula:
+        if (not formula) or (not density and '@' not in formula):
             return
+        # If the formula cannot be properly parsed, do not attempt to run further calculations
+        # This is helpful when the user pauses typing while entering the formula.
+        try:
+            Formula(formula, density)
+        except (ValueError, ParseException):
+            self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
+            return
+
+        self.ui.editMolecularFormula.setStyleSheet("background-color: white")
 
         def format(value):
             return ("%-5.3g" % value).strip()
