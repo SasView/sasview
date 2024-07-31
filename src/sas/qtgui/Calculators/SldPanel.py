@@ -185,7 +185,10 @@ class SldPanel(QtWidgets.QDialog):
         neutronWavelength = self.ui.editNeutronWavelength.text()
         xrayWavelength = self.ui.editXrayWavelength.text()
 
-        if (not formula) or (not density and '@' not in formula):
+        if not formula:
+            return
+        if not density and '@' not in formula:
+            self.ui.editMassDensity.setStyleSheet("background-color: yellow")
             return
         # If the formula cannot be properly parsed, do not attempt to run further calculations
         # This is helpful when the user pauses typing while entering the formula.
@@ -196,6 +199,7 @@ class SldPanel(QtWidgets.QDialog):
             return
 
         self.ui.editMolecularFormula.setStyleSheet("background-color: white")
+        self.ui.editMassDensity.setStyleSheet("background-color: white")
 
         def format(value):
             return ("%-5.3g" % value).strip()
