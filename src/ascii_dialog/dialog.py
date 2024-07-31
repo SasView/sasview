@@ -127,6 +127,7 @@ class AsciiDialog(QWidget):
 
         guessed_colcount = guess_column_count(split_csv,
                                               starting_pos)
+        self.col_editor.set_cols(guessed_colcount)
 
         columns = guess_columns(guessed_colcount, self.current_dataset_type())
         self.col_editor.set_col_order(columns)
