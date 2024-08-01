@@ -82,6 +82,9 @@ class AsciiDialog(QWidget):
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
 
+        # Warning Label
+        self.warning_label = QLabel('All is good')
+
         self.layout = QVBoxLayout(self)
 
         self.layout.addWidget(self.filename_label)
@@ -92,6 +95,7 @@ class AsciiDialog(QWidget):
         self.layout.addLayout(self.colcount_layout)
         self.layout.addWidget(self.col_editor)
         self.layout.addWidget(self.table)
+        self.layout.addWidget(self.warning_label)
 
     def split_line(self, line: str) -> list[str]:
         expr = ''
