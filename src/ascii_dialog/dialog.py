@@ -1,5 +1,5 @@
 from PySide6 import QtGui
-from PySide6.QtGui import QColor, QIntValidator
+from PySide6.QtGui import QColor, QIntValidator, QPalette
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from col_editor import ColEditor
@@ -229,6 +229,11 @@ class AsciiDialog(QWidget):
     def is_required_met(self):
         dataset = self.current_dataset_type()
         return [col in dataset.required for col in self.col_editor.col_names()]
+
+    def set_required_error(self):
+        self.warning_label.setText('Required columns are missing.')
+        palette = self.warning_label.palette()
+        palette.setColor(QPalette.ColorRole.WindowText, QColor.fromString('Red'))
 
 if __name__ == "__main__":
     app = QApplication([])
