@@ -4,6 +4,7 @@ Utilities for uploading documentation to GitHub and PatchUploader dialog
 import difflib
 import gzip # Use gzip to compress data and make unreadable, better chance of causing errors rather than unnessary PRs if corrupted
 import json # Use json to process data to avoid security vulnerabilities of pickle
+import logging
 import os
 
 from hashlib import sha224 # Use hashlib to create hashes of files to compare
@@ -17,31 +18,64 @@ from sas.sascalc.data_util.calcthread import CalcThread
 
 from sas.sascalc.doc_regen.makedocumentation import USER_DOC_BASE, MAIN_DOC_SRC
 
-SAVE_DATA_DIRECTORY = USER_DOC_BASE / "data"
+from sas.system.version import __version__
+
+SAVE_DATA_DIRECTORY = USER_DOC_BASE / __version__ / "data"
 SAVE_DATA_FILE = SAVE_DATA_DIRECTORY / "docdata.dat"
 
+logger = logging.getLogger(__name__)
+
+def TEMPORARY():
+    """
+    Create temporary data file if it doesn't already exist.
+    Will be removed in future commit--data file should be created by SasView the first time it is run.
+    """
+    if not os.path.exists(SAVE_DATA_FILE):
+        createDat()
+        saveToDat(getCurrentState(), 'active')
+        saveToDat(getCurrentState(), 'base')
+
+def updateHash(filepath: Path):
+    """
+    Update the hash value of a given file stored in docdata.dat
+    :param filepath: os.path.Path object of the file to update
+    """
+    # Generate new hash
+    new_hash = getHash(filepath)
+
+    # Retrieve active data and update hash
+    active_data = readFromDat()['active']
+    try:
+        active_data[str(filepath)] = new_hash
+    except KeyError:
+        logger.warning(f"Could not find hash for {filepath} in active data. Documentation may be impossible to upload.")
+    
+    # Save active data
+    saveToDat(active_data, 'active')
 
 def checkDiffs():
     """
     Determinine if documentation has been modified.
     Return list of modified files or None if no changes.
     """
-    cur_state = getCurrentState()
+
+    TEMPORARY()
 
     if not os.path.exists(SAVE_DATA_FILE):
-        createJson()
-        saveToJson(cur_state)
-        raise FileNotFoundError("No previous documentation state found. Uploading capabilities not available.") #TODO: Replace with some sort of popup message
-    
-    with gzip.open(SAVE_DATA_FILE, 'rt', encoding="utf-8") as f:
-        prev_state = json.load(f)
+        raise FileNotFoundError("No previous documentation state found. Uploading capabilities not available.")
+        #TODO: Replace with some sort of popup message
+
+    json_data = readFromDat()
+    cur_docstate = json_data['active']
+    prev_state = json_data['base']
     
     # Compare current state to previous state
     dif_dict = {}
-    difs = [dif_dict for _ in cur_state.items()]
-    cur_items = list(cur_state.items())
+    difs = [dif_dict for _ in cur_docstate.items()]
+    cur_items = list(cur_docstate.items())
     prev_items = list(prev_state.items())
     synchedLists, extraneous = syncLists(cur_items, prev_items)
+
     for new_file, old_file in synchedLists:
         checkIfUpdated(new_file, old_file, dif_dict)
     
@@ -83,16 +117,19 @@ def checkIfUpdated(new_file, old_file, dif_dict):
         return None
 
 
-def createJson():
+def createDat():
     """
-    Create JSON file to store data.
+    Create .dat file to store data with JSON template
+    WARNING: Will overwrite existing data if it exists
     """
     if not os.path.exists(SAVE_DATA_DIRECTORY):
         os.mkdir(SAVE_DATA_DIRECTORY)
 
+    structure = {'active': {}, 'base': {}, 'static': {}}
+
     # Create json file
-    with open(SAVE_DATA_FILE, 'x', encoding="utf-8"):
-        pass
+    with gzip.open(SAVE_DATA_FILE, 'wt', encoding="utf-8") as f:
+        f.write(json.dumps(structure, ensure_ascii=False, indent=4))
 
 
 def getCurrentState():
@@ -128,16 +165,34 @@ def getHash(file_path):
     return sha224(file_text.encode()).hexdigest()
     
 
-def saveToJson(data: dict):
+def saveToDat(data: dict, library: str):
     """
     Save data to JSON file.
+    :param data: data to save
+    :param library: One of: 'active' or 'base'
     """
     if not os.path.exists(SAVE_DATA_FILE):
-        createJson()
+        # If data file does not exist, create it
+        createDat()
+        logger.warning("Documentation from last upload not found! Created new data file.")
+        #TODO: Compare active to static and if they are not the same, you have a more serious problem!
+        
+    json_data = readFromDat()
+    json_data[library] = data
 
-    json_text = json.dumps(data, ensure_ascii=False, indent=4)
     with gzip.open(SAVE_DATA_FILE, 'wt', encoding="utf-8") as f:
-        f.write(json_text)
+        f.write(json.dumps(json_data))
+
+def readFromDat():
+    """
+    Open data file and return data as a dict.
+    'active': current filenames and hashes
+    'base': filenames and hashes from last upload to GitHub
+    """
+    with gzip.open(SAVE_DATA_FILE, 'rt', encoding="utf-8") as f:
+            raw = f.read()
+            json_data = json.loads(raw)
+    return json_data
 
 class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
     """
@@ -149,13 +204,13 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         self.setupUi(self)
 
         self.model = QtGui.QStandardItemModel()
-        self.model.setColumnCount(2)
 
         for file in self.getDiffItems():
-            self.addItemToModel(file)
-            print(file)
+            basename = os.path.basename(file)
+            self.addItemToModel(basename)
 
         self.lstFiles.setModel(self.model)
+        self.lstFiles.setItemDelegate(CheckBoxTextDelegate())
     
     def addItemToModel(self, text):
         """
@@ -174,7 +229,6 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
 
         # Add the items to the model
         self.model.appendRow([checkbox_item, text_item])
-        print(self.model.item(0, 1).text())
     
     def getDiffItems(self):
         """
@@ -183,6 +237,47 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         diff_dict = checkDiffs()
         diff_list = [filename for filename in diff_dict.keys()]
         return diff_list
+
+class CheckBoxTextDelegate(QtWidgets.QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        model = index.model()
+
+        # Get the checkbox item and the text item from the model
+        checkbox_item = model.item(index.row(), 0)
+        text_item = model.item(index.row(), 1)
+
+        # Draw the checkbox
+        if checkbox_item:
+            checkbox_rect = QtWidgets.QStyle.alignedRect(option.direction, QtCore.Qt.AlignLeft,
+                                                         QtCore.QSize(20, 20), option.rect)
+            check_state = QtWidgets.QStyle.State_Off
+            if checkbox_item.checkState() == QtCore.Qt.Checked:
+                check_state = QtWidgets.QStyle.State_On
+
+            checkbox_option = QtWidgets.QStyleOptionButton()
+            checkbox_option.rect = checkbox_rect
+            checkbox_option.state = QtWidgets.QStyle.State_Enabled | check_state
+
+            QtWidgets.QApplication.style().drawPrimitive(QtWidgets.QStyle.PE_IndicatorCheckBox,
+                                                         checkbox_option, painter)
+
+        # Draw the text
+        if text_item:
+            text_rect = option.rect
+            text_rect.setLeft(checkbox_rect.right() + 5)
+            painter.drawText(text_rect, QtCore.Qt.AlignVCenter, text_item.text())
+
+    def editorEvent(self, event, model, option, index):
+        if event.type() == QtCore.QEvent.MouseButtonPress or event.type() == QtCore.QEvent.MouseButtonRelease:
+            checkbox_item = model.item(index.row(), 0)
+            if checkbox_item:
+                if event.type() == QtCore.QEvent.MouseButtonPress:
+                    if checkbox_item.checkState() == QtCore.Qt.Checked:
+                        checkbox_item.setCheckState(QtCore.Qt.Unchecked)
+                    else:
+                        checkbox_item.setCheckState(QtCore.Qt.Checked)
+                return True
+        return False
     
 
 

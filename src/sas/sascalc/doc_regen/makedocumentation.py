@@ -1,6 +1,7 @@
 """
 Creates documentation from .py files
 """
+import logging
 import os
 import sys
 import subprocess
@@ -32,6 +33,8 @@ HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
 RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
 SAS_DIR = Path(sys.argv[0]).parent
+
+logger = logging.getLogger(__name__)
 
 # Find the original documentation location, depending on where the files originate from
 if os.path.exists(SAS_DIR / "doc"):
@@ -184,10 +187,11 @@ def call_one_file(file: PATH_LIKE):
     generate_toc(TARGETS)
 
 
-def make_documentation(target: PATH_LIKE = "."):
+def make_documentation(target: PATH_LIKE = ".", update_hash_function = None):
     """Similar to call_one_file, but will fall back to calling all files and regenerating everything if an error occurs.
 
     :param target: A file name that needs the html regenerated.
+    :param update_hash_function: A function to update the hash of the file. Dependency injection to fix circular imports.
     """
     create_user_files_if_needed()
     # Ensure target is a path object
@@ -205,7 +209,13 @@ def make_documentation(target: PATH_LIKE = "."):
     except Exception as e:
         call_all_files()  # Regenerate all RSTs
         generate_html()  # Regenerate all HTML
-
+    
+    if update_hash_function:
+        # Regenerate the hash of the documentation
+        try:
+            update_hash_function(target)
+        except Exception as e:
+            logger.warning(f"Could not update hash of file {target}: {e}")
 
 if __name__ == "__main__":
     create_user_files_if_needed()
