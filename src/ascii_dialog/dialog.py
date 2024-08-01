@@ -131,6 +131,7 @@ class AsciiDialog(QWidget):
 
         columns = guess_columns(guessed_colcount, self.current_dataset_type())
         self.col_editor.set_col_order(columns)
+        self.col_editor.column_changed.connect(self.update_column)
         self.colcount_entry.setValue(guessed_colcount)
         self.startline_entry.setValue(starting_pos)
 
@@ -200,6 +201,10 @@ class AsciiDialog(QWidget):
 
     @Slot()
     def update_seperator(self):
+        self.fill_table()
+
+    @Slot()
+    def update_column(self):
         self.fill_table()
 
     @Slot()
