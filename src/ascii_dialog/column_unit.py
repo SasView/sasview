@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 from dataset_types import default_units
 
-
 class ColumnUnit(QWidget):
+    column_changed = Signal()
+
     def create_col_combo_box(self, options) -> QComboBox:
         new_combo_box = QComboBox()
         for option in options:
@@ -45,6 +46,7 @@ class ColumnUnit(QWidget):
         new_unit = default_units[new_option]
         self.unit_widget.clear()
         self.unit_widget.addItem(new_unit)
+        self.column_changed.emit()
 
     @property
     def current_column(self):
