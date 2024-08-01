@@ -75,7 +75,7 @@ class ColEditor(QWidget):
             pass # Can ignore because it means we've run out of widgets.
 
     def col_names(self) -> list[str]:
-        return [col[0].currentText() for col in self.option_widgets]
+        return [widget.current_column() for widget in self.option_widgets]
 
     def replace_options(self, new_options: list[str]) -> None:
         self.options = new_options
