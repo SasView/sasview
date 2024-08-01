@@ -66,7 +66,10 @@ class ColEditor(QWidget):
     def set_col_order(self, cols: list[str]):
         try:
             for i, col_name in enumerate(cols):
-                self.option_widgets[i].setCurrentText(col_name)
+                self.option_widgets[i][0].setCurrentText(col_name)
+                new_unit = default_units[col_name]
+                self.option_widgets[i][1].clear()
+                self.option_widgets[i][1].addItem(new_unit)
         except IndexError:
             pass # Can ignore because it means we've run out of widgets.
 
