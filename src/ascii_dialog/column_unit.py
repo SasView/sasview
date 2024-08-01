@@ -36,7 +36,12 @@ class ColumnUnit(QWidget):
     @Slot()
     def on_option_change(self):
         # Need to update units.
+        #
+        # If the new option is empty string, its probably because the current
+        # options have been removed. Can safely ignore this.
         new_option = self.col_widget.currentText()
+        if new_option == '':
+            return
         new_unit = default_units[new_option]
         self.unit_widget.clear()
         self.unit_widget.addItem(new_unit)
