@@ -292,7 +292,7 @@ class GuiManager:
         # create action for this plot
         action = self._workspace.menuWindow.addAction(name)
         # connect action to slot
-        action.triggered.connect(lambda chk, item=name: self.plotSelectedSlot(name))
+        action.triggered.connect(lambda: self.plotSelectedSlot(name))
         # add action to windows menu
         self._workspace.menuWindow.addAction(action)
 
