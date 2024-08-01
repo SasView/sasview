@@ -21,6 +21,13 @@ class ColumnUnit(QWidget):
         new_combo_box.addItem(default_unit)
         return new_combo_box
 
+    def replace_options(self, new_options):
+        self.col_widget.clear()
+        self.col_widget.addItems(new_options)
+        new_unit = default_units[self.col_widget.currentText()]
+        self.unit_widget.clear()
+        self.unit_widget.addItem(new_unit)
+
     def __init__(self, options) -> None:
         super().__init__()
         self.col_widget = self.create_col_combo_box(options)
