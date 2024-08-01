@@ -48,7 +48,7 @@ class ColumnUnit(QWidget):
 
     @property
     def current_column(self):
-        self.col_widget.currentText()
+        return self.col_widget.currentText()
 
 
     def __init__(self, options) -> None:
