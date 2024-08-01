@@ -222,6 +222,10 @@ class AsciiDialog(QWidget):
         columns = guess_columns(self.colcount_entry.value(), self.current_dataset_type())
         self.col_editor.set_col_order(columns)
 
+    def is_required_met(self):
+        dataset = self.current_dataset_type()
+        return [col in dataset.required for col in self.col_editor.col_names()]
+
 if __name__ == "__main__":
     app = QApplication([])
 
