@@ -1,7 +1,7 @@
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtCore import Slot
-from ascii_dialog.column_unit import ColumnUnit
+from column_unit import ColumnUnit
 from dataset_types import default_units
 
 
