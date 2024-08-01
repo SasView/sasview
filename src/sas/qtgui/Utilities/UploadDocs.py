@@ -98,7 +98,6 @@ def syncLists(list1, list2):
     return output, extraneous
 
 
-
 def checkIfUpdated(new_file, old_file, dif_dict):
     """
     Helper function that checks if a file has been updated since the last upload.
@@ -211,7 +210,41 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
 
         self.lstFiles.setModel(self.model)
         self.lstFiles.setItemDelegate(CheckBoxTextDelegate())
+
+        self.addSignals()
     
+    def addSignals(self):
+        """
+        Connect signals to slots.
+        """
+        self.cmdSubmit.clicked.connect(self.upload)
+    
+    def upload(self):
+        """
+        Upload documentation to GitHub
+        """
+        files_to_upload = []
+
+        for file in self.getDiffItems():
+            if self.isChecked(os.path.basename(file)):
+                files_to_upload.append(file)
+
+        # Prepare json information for upload to API
+        author_name = self.txtName.text()
+        change_msg = self.txtChanges.toPlainText()
+
+        #TODO: Implement upload to GitHub API
+    
+    def isChecked(self, basename):
+        """
+        Return True if the checkbox for the given file is checked.
+        Assume no duplicate names.
+        """
+        for i in range(self.model.rowCount()):
+            if self.model.item(i, 1).text() == basename:
+                return self.model.item(i, 0).checkState() == QtCore.Qt.Checked
+        raise ValueError(f"File {basename} not found in model.")
+
     def addItemToModel(self, text):
         """
         Add an item to the lstFiles model.
@@ -239,6 +272,9 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         return diff_list
 
 class CheckBoxTextDelegate(QtWidgets.QStyledItemDelegate):
+    """
+    Delegate for the PatchUploader dialog that draws a checkbox and text in the same row.
+    """
     def paint(self, painter, option, index):
         model = index.model()
 
@@ -268,16 +304,19 @@ class CheckBoxTextDelegate(QtWidgets.QStyledItemDelegate):
             painter.drawText(text_rect, QtCore.Qt.AlignVCenter, text_item.text())
 
     def editorEvent(self, event, model, option, index):
+        # Check if the event is a mouse button press or release
         if event.type() == QtCore.QEvent.MouseButtonPress or event.type() == QtCore.QEvent.MouseButtonRelease:
+            # Get the checkbox item from the model
             checkbox_item = model.item(index.row(), 0)
             if checkbox_item:
+                 # Toggle the checkbox state on mouse button press
                 if event.type() == QtCore.QEvent.MouseButtonPress:
                     if checkbox_item.checkState() == QtCore.Qt.Checked:
                         checkbox_item.setCheckState(QtCore.Qt.Unchecked)
                     else:
                         checkbox_item.setCheckState(QtCore.Qt.Checked)
+                # Indicate that the event has been handled
                 return True
+        # Pass the event on if it's not handled
         return False
     
-
-
