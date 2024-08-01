@@ -75,6 +75,9 @@ class ColEditor(QWidget):
 
     def replace_options(self, new_options: list[str]) -> None:
         self.options = new_options
-        for box in self.option_widgets:
-            box.clear()
-            box.addItems(new_options)
+        for col_box, unit_box in self.option_widgets:
+            col_box.clear()
+            col_box.addItems(new_options)
+            new_unit = default_units[col_box.currentText()]
+            unit_box.clear()
+            unit_box.addItem(new_unit)
