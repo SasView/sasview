@@ -1,6 +1,6 @@
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Signal
 from column_unit import ColumnUnit
 from dataset_types import default_units
 
@@ -27,9 +27,11 @@ class ColEditor(QWidget):
     #     # self.option_widgets.append(new_col_combo_box)
     #     return new_col_combo_box, new_unit_combo_box
 
+    column_changed = Signal()
+
     @Slot()
     def on_column_update(self):
-        pass
+        self.column_changed.emit()
 
 
     def __init__(self, cols: int, options: list[str]):
@@ -53,6 +55,7 @@ class ColEditor(QWidget):
                 # self.option_widgets.append(new_combo_box)
                 # self.layout.addWidget(new_combo_box)
                 new_widget = ColumnUnit(self.options)
+                new_widget.column_changed.connect(self.on_column_update)
                 self.layout.addWidget(new_widget)
                 self.option_widgets.append(new_widget)
 
