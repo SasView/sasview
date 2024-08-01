@@ -1,20 +1,31 @@
 import numpy as np
 from scipy.optimize import curve_fit
-from scipy import integrate
 from scipy import special
 
 
 class DatasetCreator:
+    """
+    Class to generate data that can be used by the demo plots.
+    self.combobox_index remains a class variable, because then the fitting algorithm can use the same method in
+    differrent cases.
+    """
     def __init__(self):
         self.combobox_index = -1
 
     def func_2d(self, q, scale, radius, height):
+        """
+        add 2d function that represents 2d "simulated" data in the 2d plots
+        """
         x = self.func(q[0], scale, radius, height)
         y = self.func(q[1], scale, radius, height)
         z = np.matmul(x, y)
         return z
 
     def func(self, q, scale, radius, height):
+        """
+        function for generating data with either spherical functions (case self.combobox_index== 0) or bessel functions
+        (case self.combobox_index == 1)
+        """
         if self.combobox_index == 0:
             volume = 4 / 3 * np.pi * radius**3
             return scale / volume * (3*volume*(np.sin(q*radius)-q*radius*np.cos(q*radius)) / (q*radius)**3)**2
@@ -23,6 +34,9 @@ class DatasetCreator:
             return 4 * scale * volume * (special.jv(1, q*radius))**2 / (q*radius)**2
 
     def createRandomDataset(self, scale, radius, height, combobox_index, fit=False, second_dimension=False):
+        """
+        Creates a dataset with x, y and y_fit values, that use a 1d fitting algorithm. errors are applied to the data.
+        """
         self.combobox_index = combobox_index
         size = 100
         intensity_fit = np.array([])
