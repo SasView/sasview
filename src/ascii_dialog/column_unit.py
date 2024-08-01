@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from PySide6.QtWidgets import QComboBox, QWidget
+from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 from dataset_types import default_units
 
@@ -43,3 +43,6 @@ class ColumnUnit(QWidget):
         super().__init__()
         self.col_widget = self.create_col_combo_box(options)
         self.unit_widget = self.create_unit_combo_box(self.col_widget.currentText())
+        self.layout = QHBoxLayout(self)
+        self.layout.addWidget(self.col_widget)
+        self.layout.addWidget(self.unit_widget)
