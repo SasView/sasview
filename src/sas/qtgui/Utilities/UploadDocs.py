@@ -1,12 +1,16 @@
 """
-Utilities for uploading documentation to GitHub
+Utilities for uploading documentation to GitHub and PatchUploader dialog
 """
+import difflib
+import gzip # Use gzip to compress data and make unreadable, better chance of causing errors rather than unnessary PRs if corrupted
 import json # Use json to process data to avoid security vulnerabilities of pickle
 import os
-import gzip # Use gzip to compress data and make unreadable, less likely to be tampered with and cause unnecessary PRs
-from hashlib import sha224 # Use hashlib to create hashes of files to compare
 
+from hashlib import sha224 # Use hashlib to create hashes of files to compare
 from pathlib import Path
+from PySide6 import QtWidgets, QtCore, QtGui
+
+from sas.qtgui.Utilities.UI.PatchUploaderUI import Ui_PatchUploader
 
 from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
@@ -27,7 +31,7 @@ def checkDiffs():
     if not os.path.exists(SAVE_DATA_FILE):
         createJson()
         saveToJson(cur_state)
-        raise FileNotFoundError("No previous documentation state found. Uploading capabilities not available.")
+        raise FileNotFoundError("No previous documentation state found. Uploading capabilities not available.") #TODO: Replace with some sort of popup message
     
     with gzip.open(SAVE_DATA_FILE, 'rt', encoding="utf-8") as f:
         prev_state = json.load(f)
@@ -38,14 +42,10 @@ def checkDiffs():
     cur_items = list(cur_state.items())
     prev_items = list(prev_state.items())
     synchedLists, extraneous = syncLists(cur_items, prev_items)
-    try:
-        for new_file, old_file in synchedLists:
-            checkIfUpdated(new_file, old_file, dif_dict)
-
-    except Exception as e:
-        print(e)
+    for new_file, old_file in synchedLists:
+        checkIfUpdated(new_file, old_file, dif_dict)
     
-    print(dif_dict)
+    return dif_dict
 
 def syncLists(list1, list2):
     """
@@ -139,16 +139,50 @@ def saveToJson(data: dict):
     with gzip.open(SAVE_DATA_FILE, 'wt', encoding="utf-8") as f:
         f.write(json_text)
 
+class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
+    """
+    Dialog for uploading documentation to GitHub
+    """
 
-def getDiffFromJson():
-    """
-    Get data from JSON file.
-    """
-    pass
+    def __init__(self, parent=None):
+        super(PatchUploader, self).__init__(parent._parent)
+        self.setupUi(self)
+
+        self.model = QtGui.QStandardItemModel()
+        self.model.setColumnCount(2)
+
+        for file in self.getDiffItems():
+            self.addItemToModel(file)
+            print(file)
+
+        self.lstFiles.setModel(self.model)
+    
+    def addItemToModel(self, text):
+        """
+        Add an item to the lstFiles model.
+        """
+        # Create the checkbox item
+        checkbox_item = QtGui.QStandardItem()
+        checkbox_item.setCheckable(True)
+        checkbox_item.setEditable(False)
+
+        # Create the text item with the Courier New font
+        text_item = QtGui.QStandardItem(text)
+        text_font = QtGui.QFont("Courier New", pointSize=10, weight=QtGui.QFont.Normal)
+        text_item.setFont(text_font)
+        text_item.setEditable(False)
+
+        # Add the items to the model
+        self.model.appendRow([checkbox_item, text_item])
+        print(self.model.item(0, 1).text())
+    
+    def getDiffItems(self):
+        """
+        Returns a list of files that have been modified.
+        """
+        diff_dict = checkDiffs()
+        diff_list = [filename for filename in diff_dict.keys()]
+        return diff_list
+    
 
 
-def temp():
-    """
-    DELETE LATER!!!
-    """
-    checkDiffs()

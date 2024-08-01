@@ -73,7 +73,7 @@ from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
-from sas.qtgui.Utilities.UploadDocs import temp
+from sas.qtgui.Utilities.UploadDocs import PatchUploader
 
 import sas
 from sas import config
@@ -871,7 +871,8 @@ class GuiManager:
         self.preferences.show()
     
     def actionUploadDocumentation(self):
-        temp()
+        self.patchUploader = PatchUploader(self)
+        self.patchUploader.show()
 
     def actionQuit(self):
         """
