@@ -26,9 +26,6 @@ class ColumnUnit(QWidget):
     def replace_options(self, new_options):
         self.col_widget.clear()
         self.col_widget.addItems(new_options)
-        new_unit = default_units[self.col_widget.currentText()]
-        self.unit_widget.clear()
-        self.unit_widget.addItem(new_unit)
 
     def set_current_column(self, new_column_value: str):
         self.col_widget.setCurrentText(new_column_value)
