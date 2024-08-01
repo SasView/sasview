@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 from dataset_types import default_units
@@ -13,6 +14,7 @@ class ColumnUnit(QWidget):
         new_combo_box.setEditable(True)
         validator = QRegularExpressionValidator(r"[a-zA-Z0-9]+")
         new_combo_box.setValidator(validator)
+        new_combo_box.currentTextChanged.connect(self.on_option_change)
         return new_combo_box
 
     def create_unit_combo_box(self, selected_option: str) -> QComboBox:
@@ -31,6 +33,14 @@ class ColumnUnit(QWidget):
     def set_current_column(self, new_column_value: str):
         self.col_widget.setCurrentText(new_column_value)
         new_unit = default_units[new_column_value]
+        self.unit_widget.clear()
+        self.unit_widget.addItem(new_unit)
+
+    @Slot()
+    def on_option_change(self):
+        # Need to update units.
+        new_option = self.col_widget.currentText()
+        new_unit = default_units[new_option]
         self.unit_widget.clear()
         self.unit_widget.addItem(new_unit)
 
