@@ -163,7 +163,6 @@ class AsciiDialog(QWidget):
                 break
 
         self.table.show()
-        self.table.resizeColumnsToContents()
 
     def current_dataset_type(self) -> DatasetType:
         # TODO: Using linear search but should probably just use a dictionary
