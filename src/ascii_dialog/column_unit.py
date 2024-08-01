@@ -34,6 +34,10 @@ class ColumnUnit(QWidget):
         self.unit_widget.clear()
         self.unit_widget.addItem(new_unit)
 
+    @property
+    def current_column(self):
+        self.col_widget.currentText()
+
 
     def __init__(self, options) -> None:
         super().__init__()
