@@ -5,7 +5,6 @@ cffi
 docutils
 dominate
 h5py
-html2text
 html5lib
 importlib-resources
 ipython

@@ -9,7 +9,7 @@ from typing import List
 import logging
 from io import BytesIO
 import urllib.parse
-import html2text
+from sas.qtgui.Utilities.Reports.html2text import html2text
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from bumps import options

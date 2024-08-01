@@ -13,7 +13,7 @@ import dominate
 from dominate.tags import *
 from dominate.util import raw
 
-import html2text
+from sas.qtgui.Utilities.Reports.html2text import html2text
 
 import sas.sasview
 import sas.system.version
