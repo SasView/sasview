@@ -2,6 +2,10 @@ import time
 
 
 class Dataset:
+    """
+    Generic dataset class to hold all of the generated data for one fitpage with its generated id in one place.
+    The generated id is a timestamp with the fitpage number that the dataset belongs to as a prefix.
+    """
     def __init__(self, fitpage_index, x_data, y_data, y_fit, data_2d, plotpage_index=0):
         self.fitpage_index = fitpage_index
         self.x_data = x_data
