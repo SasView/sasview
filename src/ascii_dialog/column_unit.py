@@ -28,6 +28,13 @@ class ColumnUnit(QWidget):
         self.unit_widget.clear()
         self.unit_widget.addItem(new_unit)
 
+    def set_current_column(self, new_column_value: str):
+        self.col_widget.setCurrentText(new_column_value)
+        new_unit = default_units[new_column_value]
+        self.unit_widget.clear()
+        self.unit_widget.addItem(new_unit)
+
+
     def __init__(self, options) -> None:
         super().__init__()
         self.col_widget = self.create_col_combo_box(options)
