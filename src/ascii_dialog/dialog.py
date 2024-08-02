@@ -73,6 +73,7 @@ class AsciiDialog(QWidget):
         options =  current_dataset_type.required + current_dataset_type.optional
         self.col_editor = ColEditor(self.colcount_entry.value(), options)
         self.dataset_combobox.currentTextChanged.connect(self.change_dataset_type)
+        self.col_editor.column_changed.connect(self.update_column)
 
         ## Data Table
 
@@ -135,7 +136,6 @@ class AsciiDialog(QWidget):
 
         columns = guess_columns(guessed_colcount, self.current_dataset_type())
         self.col_editor.set_col_order(columns)
-        self.col_editor.column_changed.connect(self.update_column)
         self.colcount_entry.setValue(guessed_colcount)
         self.startline_entry.setValue(starting_pos)
 
