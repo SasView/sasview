@@ -41,6 +41,7 @@ class ColumnUnit(QWidget):
         #
         # If the new option is empty string, its probably because the current
         # options have been removed. Can safely ignore this.
+        self.column_changed.emit()
         new_option = self.col_widget.currentText()
         if new_option == '':
             return
@@ -53,7 +54,6 @@ class ColumnUnit(QWidget):
             # the case in the real version so for now we'll just clear the unit
             # widget.
             self.unit_widget.clear()
-        self.column_changed.emit()
 
     @property
     def current_column(self):
