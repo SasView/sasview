@@ -2,6 +2,7 @@ from PySide6 import QtGui
 from PySide6.QtGui import QColor, QIntValidator, QPalette
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
+from warning_label import WarningLabel
 from col_editor import ColEditor
 from guess import guess_column_count, guess_columns, guess_seperator, guess_starting_position
 from os import path
@@ -84,7 +85,7 @@ class AsciiDialog(QWidget):
         self.table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
 
         # Warning Label
-        self.warning_label = QLabel('All is good')
+        self.warning_label = WarningLabel(self.required_missing())
 
         self.layout = QVBoxLayout(self)
 
@@ -211,8 +212,7 @@ class AsciiDialog(QWidget):
     def update_column(self):
         self.fill_table()
         required_missing = self.required_missing()
-        if len(required_missing) != 0:
-            self.set_required_error(required_missing)
+        self.warning_label.update(required_missing)
 
     @Slot()
     def seperator_toggle(self):
