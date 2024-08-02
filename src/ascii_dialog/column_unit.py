@@ -34,6 +34,7 @@ class ColumnUnit(QWidget):
         self.unit_widget.clear()
         self.unit_widget.addItem(new_unit)
 
+
     @Slot()
     def on_option_change(self):
         # Need to update units.
@@ -43,9 +44,15 @@ class ColumnUnit(QWidget):
         new_option = self.col_widget.currentText()
         if new_option == '':
             return
-        new_unit = default_units[new_option]
-        self.unit_widget.clear()
-        self.unit_widget.addItem(new_unit)
+        try:
+            new_unit = default_units[new_option]
+            self.unit_widget.clear()
+            self.unit_widget.addItem(new_unit)
+        except KeyError:
+            # Means the units for this column aren't known. This shouldn't be
+            # the case in the real version so for now we'll just clear the unit
+            # widget.
+            self.unit_widget.clear()
         self.column_changed.emit()
 
     @property
