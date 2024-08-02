@@ -234,6 +234,10 @@ class AsciiDialog(QWidget):
         missing_columns = [col for col in dataset.required if col not in self.col_editor.col_names()]
         return missing_columns
 
+    def duplicate_columns(self) -> list[str]:
+        col_names = self.col_editor.col_names()
+        [col for col in col_names if col_names.count(col) > 1]
+
     def set_required_error(self, required_missing):
         self.warning_label.setText(f'The following columns are missing: {required_missing}')
         self.warning_label.setStyleSheet("QLabel { color: red}")
