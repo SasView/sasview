@@ -8,7 +8,12 @@ from FitPage import FitPage
 from DataViewer import DataViewer
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-
+    """
+    MainWindow for the application, uses self.fittingTabs to create a tab selection of FitPages in which
+    comboboxes and spinboxes are placed for data creation. Also has calculation and plot buttons to invoke methods
+    for these logics.
+    Owner of the DataViewer, that centralizes the logic between plotting and data handling (with the DataCollector)
+    """
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)
@@ -28,18 +33,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionNewFitPage.triggered.connect(self.onActionNewFitPage)
 
     def onPlot(self):
+        """
+        Invoked when pressing plot button, collects the fitpage_index for the currently selected fitpage and gives it
+        to other parts of the program where this is used as a unique identifier for datasets that are saved in the
+        DataCollector.
+        Invokes plot creation after data creation.
+        """
         fitpage_index = self.fittingTabs.currentWidget().get_int_identifier()
         self.onCalculate()
         self.dataviewer.create_plot(fitpage_index)
 
     def onCalculate(self):
+        """
+        Calculates data for the currently selected fitpage. This data is then shown in the DataViewer dataTreeWidget.
+        """
         fitpage_index = self.fittingTabs.currentWidget().get_int_identifier()
         create_fit = self.fittingTabs.currentWidget().get_checkbox_fit()
         checked_2d = self.fittingTabs.currentWidget().get_checkbox_2d()
         self.dataviewer.update_dataset(fitpage_index, create_fit, checked_2d)
-        self.dataviewer.update_datasets_from_collector()
 
     def onActionNewFitPage(self):
+        """
+        Creates a new fitpage by the button in the menubar of the mainwindow on top.
+        """
         self.fitPageCounter += 1
         self.newFitPage = FitPage(self.fitPageCounter)
         self.fittingTabs.addTab(self.newFitPage, "Fit Page " + str(self.fitPageCounter))
