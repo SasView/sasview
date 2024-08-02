@@ -11,7 +11,18 @@ from PlotModifiers import ModifierLinecolor, ModifierLinestyle, ModifierColormap
 
 
 class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
+    """
+    Class for interface between Plotwidget and Datacollector. Processing of signals for plotting,
+    redrawing of existing plots, adding new plot modifiers ends here.
+    """
     def __init__(self, main_window):
+        """
+        Main Window is used as a parameter in the constructor to be able to hand it further to the Datacollector which
+        can then directly read values from checkboxes and spinboxes for new model calculations.
+
+        self.dataTreeWidget and self.plotTreeWidget represent data that exists in the DataCollector or existing plots
+        in the plot widget, respectively.
+        """
         super(DataViewer, self).__init__()
         self.setupUi(self)
 
@@ -27,7 +38,6 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
 
         self.setupMofifierCombobox()
         self.plot_widget = PlotWidget(self.datacollector)
-        self.data_origin_fitpage_index = None
 
     def create_plot(self, fitpage_index):
         self.update_plot_tree(fitpage_index)
@@ -35,12 +45,10 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         self.plot_widget.activateWindow()
 
     def update_datasets_from_collector(self):
-        # block signals to prevent currentItemChanged to be called. otherwise the program crashes, because it tries
-        # to access the current item.
-        self.dataTreeWidget.blockSignals(True)
-        self.dataTreeWidget.clear()
-        self.dataTreeWidget.blockSignals(False)
-
+        """
+        Collects datasets from the datacollector and adds them to the dataTreeWidget. Is called upon a plot or
+        calculation request from the mainwindow
+        """
         datasets = self.datacollector.datasets
         for i in range(len(datasets)):
             fitpage_index = datasets[i].get_fitpage_index()
@@ -57,6 +65,9 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         self.dataTreeWidget.expandAll()
 
     def onShowDataViewer(self):
+        """
+        Function for handling showing and hiding of the data viewer and the button for that in the main window
+        """
         if self.isVisible():
             self.hide()
             self.main_window.cmdShowDataViewer.setText("Show Data Viewer")
@@ -66,9 +77,20 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
             self.main_window.cmdShowDataViewer.setText("Hide Data Viewer")
 
     def update_dataset(self, fitpage_index, create_fit, checked_2d):
+        """
+        Updates existing or non-existing datasets in the datacollector for a fitpage in the mainwindow
+        """
         self.datacollector.update_dataset(self.main_window, fitpage_index, create_fit, checked_2d)
 
     def update_plot_tree(self, fitpage_index):
+        """
+        Function to populate the plotTreeWidget for a certain fitpage. Checks if a plot for the given fitpage already
+        exists and recreates it if so. Therefore it collects all the data for the given fitpage from the datacollector
+        and creates the Tabs, Subtabs, Plots, Plottables for the plotTreeWidget. This mechanism also checks, if a
+        dataitem that comes from the datacollector is 2d. If it is 2d, the type_num for this PlottableItem will be
+        different (4 instead of 1) and the SubTabs.py can recognize, that only this 2d data can be plotted in one
+        actual plot.
+        """
         # check if an item for the fitpage index already exists
         # if one is found - remove from tree
         for i in range(self.plotTreeWidget.topLevelItemCount()):
@@ -136,12 +158,16 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
                 plottable_res = PlottableItem(subplot_res, ["Plottable Residuals"], fitpage_id, 3)
 
         self.plotTreeWidget.expandAll()
-        self.redrawAll(1, 0)
+        self.redrawAll(fitpage_index, 0)
 
     def redrawAll(self, redraw_fitpage_index, redraw_subtab_index):
-        print(redraw_fitpage_index, redraw_subtab_index)
-        # parameters fitpage_index and subtab_index are used, when a dropSignal invokes the redrawing. After redrawing,
-        # the subtab given by the parameters will be displayed
+        """
+        Redraws all tabs in the plotTreeWidget. parameters redraw_fitpage_index and redraw_subtab_index are used to show
+        the subtab for which the redrawAll was invoked, because a modifier was dragged onto a child plot or plottable
+        item in the plotTreeWidget.
+        If redrawing is invoked from the update_plot_tree method, only the fitpage_index will be used but 0 for
+        the subplot.
+        """
         if self.plotTreeWidget.topLevelItemCount() != 0:
             for i in range(self.plotTreeWidget.topLevelItemCount()):
                 if isinstance(self.plotTreeWidget.topLevelItem(i).data(0, 1), TabItem):
@@ -152,6 +178,10 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         self.plot_widget.widget(plotpage_index).setCurrentIndex(redraw_subtab_index)
 
     def onAddModifier(self):
+        """
+        Add modifiers via button press to the plotTreeWidget. These can then be dragged around on PlotItems and
+        PlottableItems. Logic for dragging is in the PlotTreeWidget.py.
+        """
         currentmodifier = self.comboBoxModifier.currentText()
         if 'color' in currentmodifier:
             mod = ModifierLinecolor(self.plotTreeWidget, [currentmodifier])
@@ -160,6 +190,9 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         if 'scheme' in currentmodifier:
             mod = ModifierColormap(self.plotTreeWidget, [currentmodifier])
     def setupMofifierCombobox(self):
+        """
+        Gives all the different available modifiers to the combobox so that they can be created by user selection.
+        """
         self.comboBoxModifier.addItem("color=r")
         self.comboBoxModifier.addItem("color=g")
         self.comboBoxModifier.addItem("color=b")
