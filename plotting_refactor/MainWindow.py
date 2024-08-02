@@ -36,7 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         fitpage_index = self.fittingTabs.currentWidget().get_int_identifier()
         create_fit = self.fittingTabs.currentWidget().get_checkbox_fit()
         checked_2d = self.fittingTabs.currentWidget().get_checkbox_2d()
-        self.dataviewer.update_dataset(self, fitpage_index, create_fit, checked_2d)
+        self.dataviewer.update_dataset(fitpage_index, create_fit, checked_2d)
         self.dataviewer.update_datasets_from_collector()
 
     def onActionNewFitPage(self):
