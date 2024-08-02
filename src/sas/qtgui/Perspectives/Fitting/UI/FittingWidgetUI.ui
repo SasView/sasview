@@ -360,7 +360,7 @@
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Polydispersity and Orientational Distribution</string>
+          <string>Number-average Polydispersity and Orientational Distribution</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
           <item row="0" column="0">
