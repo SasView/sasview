@@ -210,8 +210,9 @@ class AsciiDialog(QWidget):
     @Slot()
     def update_column(self):
         self.fill_table()
-        if not self.is_required_met():
-            self.set_required_error()
+        required_missing = self.required_missing()
+        if len(required_missing) != 0:
+            self.set_required_error(required_missing)
 
     @Slot()
     def seperator_toggle(self):
@@ -228,12 +229,13 @@ class AsciiDialog(QWidget):
         columns = guess_columns(self.colcount_entry.value(), self.current_dataset_type())
         self.col_editor.set_col_order(columns)
 
-    def is_required_met(self):
+    def required_missing(self) -> list[str]:
         dataset = self.current_dataset_type()
-        return all([col in dataset.required for col in self.col_editor.col_names()])
+        missing_columns = [col for col in self.col_editor.col_names() if col not in dataset.required]
+        return missing_columns
 
-    def set_required_error(self):
-        self.warning_label.setText('Required columns are missing.')
+    def set_required_error(self, required_missing):
+        self.warning_label.setText(f'The following columns are missing: {required_missing}')
         self.warning_label.setStyleSheet("QLabel { color: red}")
 
 if __name__ == "__main__":
