@@ -230,12 +230,11 @@ class AsciiDialog(QWidget):
 
     def is_required_met(self):
         dataset = self.current_dataset_type()
-        return [col in dataset.required for col in self.col_editor.col_names()]
+        return all([col in dataset.required for col in self.col_editor.col_names()])
 
     def set_required_error(self):
         self.warning_label.setText('Required columns are missing.')
-        palette = self.warning_label.palette()
-        palette.setColor(QPalette.ColorRole.WindowText, QColor.fromString('Red'))
+        self.warning_label.setStyleSheet("QLabel { color: red}")
 
 if __name__ == "__main__":
     app = QApplication([])
