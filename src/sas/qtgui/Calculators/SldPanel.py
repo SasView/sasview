@@ -1,6 +1,7 @@
 # global
 import numpy as np
 import logging
+from pyparsing.exceptions import ParseException
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
@@ -180,18 +181,31 @@ class SldPanel(QtWidgets.QDialog):
 
     def recalculateSLD(self):
         formula = self.ui.editMolecularFormula.text()
-        density = self.ui.editMassDensity.text()
+        density = float(self.ui.editMassDensity.text()) if self.ui.editMassDensity.text() else None
         neutronWavelength = self.ui.editNeutronWavelength.text()
         xrayWavelength = self.ui.editXrayWavelength.text()
 
-        if not formula or not density:
+        if not formula:
             return
+        if not density and '@' not in formula:
+            self.ui.editMassDensity.setStyleSheet("background-color: yellow")
+            return
+        # If the formula cannot be properly parsed, do not attempt to run further calculations
+        # This is helpful when the user pauses typing while entering the formula.
+        try:
+            Formula(formula, density)
+        except (ValueError, ParseException):
+            self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
+            return
+
+        self.ui.editMolecularFormula.setStyleSheet("background-color: white")
+        self.ui.editMassDensity.setStyleSheet("background-color: white")
 
         def format(value):
             return ("%-5.3g" % value).strip()
 
         if neutronWavelength and float(neutronWavelength) > np.finfo(float).eps:
-            results = neutronSldAlgorithm(str(formula), float(density), float(neutronWavelength))
+            results = neutronSldAlgorithm(str(formula), density, float(neutronWavelength))
 
             self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
             self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
@@ -217,7 +231,7 @@ class SldPanel(QtWidgets.QDialog):
             self.ui.editNeutronAbsXs.setEnabled(False)
 
         if xrayWavelength and float(xrayWavelength) > np.finfo(float).eps:
-            results = xraySldAlgorithm(str(formula), float(density), float(xrayWavelength))
+            results = xraySldAlgorithm(str(formula), density, float(xrayWavelength))
 
             self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
             self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))
