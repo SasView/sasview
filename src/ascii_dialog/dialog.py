@@ -210,6 +210,8 @@ class AsciiDialog(QWidget):
     @Slot()
     def update_column(self):
         self.fill_table()
+        if not self.is_required_met():
+            self.set_required_error()
 
     @Slot()
     def seperator_toggle(self):
