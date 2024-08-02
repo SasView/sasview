@@ -263,8 +263,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Utility variable to enable unselectable option in category combobox
         self._previous_category_index = 0
         # Utility variables for multishell display
-        self._n_shells_row = 0
-        self._num_shell_params = 0
+        self._n_shells_row = -1
+        self._num_shell_params = -1
         # Dictionary of {model name: model class} for the current category
         self.models = {}
         # Dictionary of QModels
