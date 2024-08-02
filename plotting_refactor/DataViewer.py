@@ -81,6 +81,7 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         Updates existing or non-existing datasets in the datacollector for a fitpage in the mainwindow
         """
         self.datacollector.update_dataset(self.main_window, fitpage_index, create_fit, checked_2d)
+        self.update_datasets_from_collector()
 
     def update_plot_tree(self, fitpage_index):
         """
