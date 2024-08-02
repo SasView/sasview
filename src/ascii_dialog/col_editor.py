@@ -70,6 +70,7 @@ class ColEditor(QWidget):
                 box.setParent(None)
             self.option_widgets = self.option_widgets[0:length - excess_cols]
             self.cols = new_cols
+        self.column_changed.emit()
 
     def set_col_order(self, cols: list[str]):
         try:
