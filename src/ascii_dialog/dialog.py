@@ -85,7 +85,7 @@ class AsciiDialog(QWidget):
         self.table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
 
         # Warning Label
-        self.warning_label = WarningLabel(self.required_missing())
+        self.warning_label = WarningLabel(self.required_missing(), self.duplicate_columns())
 
         self.layout = QVBoxLayout(self)
 
@@ -212,7 +212,8 @@ class AsciiDialog(QWidget):
     def update_column(self):
         self.fill_table()
         required_missing = self.required_missing()
-        self.warning_label.update(required_missing)
+        duplicates = self.duplicate_columns()
+        self.warning_label.update(required_missing, duplicates)
 
     @Slot()
     def seperator_toggle(self):
@@ -236,7 +237,7 @@ class AsciiDialog(QWidget):
 
     def duplicate_columns(self) -> list[str]:
         col_names = self.col_editor.col_names()
-        [col for col in col_names if col_names.count(col) > 1]
+        return [col for col in col_names if col_names.count(col) > 1]
 
     def set_required_error(self, required_missing):
         self.warning_label.setText(f'The following columns are missing: {required_missing}')
