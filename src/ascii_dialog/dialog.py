@@ -231,7 +231,7 @@ class AsciiDialog(QWidget):
 
     def required_missing(self) -> list[str]:
         dataset = self.current_dataset_type()
-        missing_columns = [col for col in self.col_editor.col_names() if col not in dataset.required]
+        missing_columns = [col for col in dataset.required if col not in self.col_editor.col_names()]
         return missing_columns
 
     def set_required_error(self, required_missing):
