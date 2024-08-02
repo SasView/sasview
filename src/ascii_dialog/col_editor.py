@@ -43,6 +43,7 @@ class ColEditor(QWidget):
         self.option_widgets = []
         for _ in range(cols):
             new_widget = ColumnUnit(self.options)
+            new_widget.column_changed.connect(self.on_column_update)
             self.layout.addWidget(new_widget)
             self.option_widgets.append(new_widget)
 
