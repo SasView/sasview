@@ -379,13 +379,6 @@ class Invertor(Pinvertor):
         t_0 = time.time()
         out, cov_x, _, _, _ = optimize.leastsq(self.pr_residuals, p, full_output=1)
 
-        # Compute chi^2
-        res = self.pr_residuals(out)
-        chisqr = 0
-        chisq = np.sum(math.fabs(res))
-
-        self.chisqr = chisqr
-
         # Store computation time
         self.elapsed = time.time() - t_0
 
@@ -497,15 +490,13 @@ class Invertor(Pinvertor):
             chi2 = -1.0
         self.chi2 = chi2
 
-        inv_cov = np.zeros([nfunc, nfunc])
-
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
         inv_cov = self._get_invcov_matrix(nfunc, nr, a)
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 
         if self.alpha > 0:
-            new_alpha = sum_sig / (sum_reg / self.alpha)
+            new_alpha = self.alpha * sum_sig / sum_reg
         else:
             new_alpha = 0.0
         self.suggested_alpha = new_alpha

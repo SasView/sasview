@@ -88,8 +88,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         Open file load dialog and load a .csv file
         """
         datafile = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Choose a file with results", "", "CSV files (*.csv)", None,
-            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+            self, "Choose a file with results", "", "CSV files (*.csv)", None)[0]
 
         if not datafile:
             logging.info("No data file chosen.")
@@ -206,7 +205,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # look for the 'Data' column and extract the filename
         for row in rows:
             try:
-                name = data['Filename'][row]
+                name = data['Data'][row]
                 # emit a signal so the plots are being shown
                 self.communicate.plotFromNameSignal.emit(name)
 

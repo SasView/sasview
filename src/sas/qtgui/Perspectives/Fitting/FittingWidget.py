@@ -3629,8 +3629,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the load file dialog and loads requested data into state
         """
         datafile = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Choose a weight file", "", "All files (*.*)", None,
-            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+            self, "Choose a weight file", "", "All files (*.*)", None)[0]
 
         if not datafile:
             logger.info("No weight data chosen.")
@@ -4243,8 +4242,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         parent = self
         caption = 'Save Project'
         filter = 'Text (*.txt);;Excel (*.xls);;Latex (*.log)'
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
-        file_path = save_dialog.getSaveFileName(parent, caption, "", filter, "", options)
+        file_path = save_dialog.getSaveFileName(parent, caption, "", filter, "")
         filename = file_path[0]
 
         if not filename:

@@ -12,6 +12,8 @@ import numpy as np
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
 
 # sas-global
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -42,6 +44,10 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.parent = parent
 
         self.setWindowTitle("Dmax Explorer")
+
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
 
         self.pr_state = pr_state
         self.nfunc = nfunc
@@ -144,9 +150,11 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 plotable_xs.append(x)
             except Exception as ex:
                 # This inversion failed, skip this D_max value
-                msg = "ExploreDialog: inversion failed "
-                msg += "for D_max=%s\n%s" % (str(x), ex)
-                msg = "Please adapt Inversion parameters"
+
+                msg = (f"ExploreDialog: inversion failed for D_max={x}\n"
+                       f"{ex}\n"
+                       f"Please adapt Inversion parameters")
+
                 logger.error(msg)
 
         #Return the invertor to its original state
