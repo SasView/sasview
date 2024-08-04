@@ -34,9 +34,9 @@ class Pinvertor(object):
         #Maximum distance between any two points in the system
         self.set_dmax(180)
         #Minimum q to include in inversion
-        self.set_qmin(-1.0)
+        self.set_qmin(0)
         #Maximum q to include in inversion
-        self.set_qmax(-1.0)
+        self.set_qmax(np.inf)
         #Flag for whether or not to evaluate a constant background
         #while inverting
         self.set_est_bck(0)

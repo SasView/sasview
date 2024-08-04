@@ -219,8 +219,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         
 
         # Signals asking for replot
-        self.maxQInput.editingFinished.connect(self.check_q_high)
-        self.minQInput.editingFinished.connect(self.check_q_low)
+        self.maxQInput.editingFinished.connect(self.updateMaxQ)
+        self.minQInput.editingFinished.connect(self.updateMinQ)
         self.slitHeightInput.textChanged.connect(
             lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
         self.slitWidthInput.textChanged.connect(
@@ -405,7 +405,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             return
         try:
             self.updateDataList(self._data)
-            self.setQ()
             self.setCurrentData(self.dataList.itemData(data_index)) 
             self.updateDynamicGuiValues(data_index)
             self.updateGuiValues(data_index)
@@ -417,8 +416,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def setQ(self):
         """calculate qmin and qmax values and update calculator accordingly"""
         qmin, qmax = self.logic.computeDataRange()
-        self._calculator.set_qmin(qmin)
-        self._calculator.set_qmax(qmax)
+        self.updateMinQ(qmin)
+        self.updateMaxQ(qmax)
 
     def updateTab(self, data = None, tab_index=None):
         self.logic.data = GuiUtils.dataFromItem(data)
@@ -426,8 +425,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
 
     #1D data                     
-        self.logic.add_errors()
-        self.setQ()
+        self.logic.add_errors()        
         self.updateDynamicGuiValues()
         self.updateGuiValues()
         self.enableButtons()
@@ -586,41 +584,55 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         return tree_location / "pr_help.html"
 
 
-    def check_q_low(self, q_value=None):
+    def updateMinQ(self, q_value=None):
         """ Validate the low q value """
         if not q_value:
-            q_value = float(self.minQInput.text()) if self.minQInput.text() else 0.0
-        q_min = min(self._calculator.x) if any(self._calculator.x) else 0.0
-        q_max = self._calculator.get_qmax() if self._calculator.get_qmax() is not None else np.inf
+            q_value = float(self.minQInput.text()) if isinstance(self.minQInput.text(), (float, str)) else 0.0
+        q_value = float(q_value)    
+        q_min = float(self._calculator.get_qmin()) if self._calculator.get_qmin() is not None else 0.0
+        q_max = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf
         if q_value > q_max:
             # Value too high - coerce to max q
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_max)))
+            q_value=q_max
         elif q_value < q_min:
             # Value too low - coerce to min q
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_min)))
-        else:
-            # Valid Q - set model item
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_value)))
-            self._calculator.set_qmin(q_value)
+            q_value=q_min
+        # Valid Q - set model item     
+        q_min = q_value
+
+        self.updateQRange(q_min, q_max)
 
 
-    def check_q_high(self, q_value=None):
+    def updateMaxQ(self, q_value=None):
         """ Validate the value of high q sent by the slider """
         if not q_value:
-            q_value = float(self.maxQInput.text()) if self.maxQInput.text() else 1.0
-        q_max = max(self._calculator.x) if any(self._calculator.x) else np.inf
-        q_min = self._calculator.get_qmin() if self._calculator.get_qmin() is not None else 0.0
+            q_value = float(self.maxQInput.text()) if isinstance(self.maxQInput.text(), (float, str)) else np.inf
+        q_value = float(q_value)    
+        q_min = float(self._calculator.get_qmin()) if self._calculator.get_qmin() is not None else 0.0
+        q_max = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf
         if q_value > q_max:
             # Value too high - coerce to max q
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_max)))
+            q_value =  q_max
         elif q_value < q_min:
             # Value too low - coerce to min q
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_min)))
-        else:
-            # Valid Q - set model item
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_value)))
-            self._calculator.set_qmax(q_value)
+            q_value=q_min
+        # Valid Q - set model item   
+        q_max = q_value                   
 
+        self.updateQRange(q_min, q_max)
+
+    def updateQRange(self, q_range_min, q_range_max):
+        """
+        Update the local model based on calculated values
+        """
+        qmax = str(q_range_max)
+        qmin = str(q_range_min)
+        self._calculator.set_qmin(q_range_min)
+        self._calculator.set_qmax(q_range_max)
+        self.maxQInput.setText(f"{float(q_range_max):.3}") 
+        self.minQInput.setText(f"{float(q_range_min):.3}") 
+        self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_range_min)))
+        self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(q_range_max)))
 
     ######################################################################
     # Response Actions
@@ -676,8 +688,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.regularizationConstantInput.setText(str(REGULARIZATION))
         self.maxDistanceInput.setText(str(MAX_DIST))
         self.backgroundInput.setText(str(BACKGROUND_INPUT))
-        self.minQInput.setText("")
-        self.maxQInput.setText("")
+        self.minQInput.setText("0.0")
+        self.maxQInput.setText("0.0")
         self.slitHeightInput.setText("")
         self.slitWidthInput.setText("")
 
@@ -789,8 +801,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         cov = pr.cov
         elapsed = pr.elapsed
         alpha = pr.suggested_alpha
-        self.check_q_high(pr.get_qmax())
-        self.check_q_low(pr.get_qmin())
+        self.updateMaxQ(pr.get_qmax())
+        self.updateMinQ(pr.get_qmin())
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
                            QtGui.QStandardItem("{:.3g}".format(pr.background)))
         self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
@@ -915,9 +927,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Updates the calculator page with the given parameters
         """
         self._calculator.q_max = params['q_max']
-        self.check_q_high(self._calculator.get_qmax())
+        self.updateMaxQ(self._calculator.get_qmax())
         self._calculator.q_min = params['q_min']
-        self.check_q_low(self._calculator.get_qmin())
+        self.updateMinQ(self._calculator.get_qmin())
         self._calculator.alpha = params['alpha']
         self._calculator.suggested_alpha = params['suggested_alpha']
         self._calculator.d_max = params['d_max']
@@ -1261,9 +1273,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataPlot.slider_update_on_move = False
             self.dataPlot.slider_perspective_name = "Inversion"
             self.dataPlot.slider_low_q_input = ['minQInput']
-            self.dataPlot.slider_low_q_setter = ['check_q_low']
+            self.dataPlot.slider_low_q_setter = ['updateMinQ']
             self.dataPlot.slider_high_q_input = ['maxQInput']
-            self.dataPlot.slider_high_q_setter = ['check_q_high']
+            self.dataPlot.slider_high_q_setter = ['updateMaxQ']
 
             # Udpate internals and GUI
         self.updateDataList(self._data)  
@@ -1290,7 +1302,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         Send `items` to the Inversion perspective, in either single fit or batch mode
         """
-        # Check if perspective is correct, otherwise complain
+        # if perspective is correct, otherwise complain
         if self.parent._current_perspective.name != 'Inversion':
             msg = "Please change current perspective to Inversion."
             msgbox = QtWidgets.QMessageBox()
