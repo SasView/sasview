@@ -74,7 +74,6 @@ class SubTabs(QTabWidget):
                             for ii in range(plottable.childCount()):
                                 if isinstance(plottable.child(ii), ModifierColormap):
                                     colormap_modifier = plottable.child(ii).text(0).split('=')[1]
-                            print("cm: ", colormap_modifier)
                             if colormap_modifier == "":
                                 colormap_modifier = "jet"
 
