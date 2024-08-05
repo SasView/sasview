@@ -260,6 +260,7 @@ class AsciiDialog(QWidget):
     @Slot()
     def update_row_status(self, row):
         self.row_status_widgets[row] = self.table.cellWidget(row, 0).checkState()
+        self.fill_table()
 
     def required_missing(self) -> list[str]:
         dataset = self.current_dataset_type()
