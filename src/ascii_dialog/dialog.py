@@ -212,14 +212,18 @@ class AsciiDialog(QWidget):
             item = self.table.item(row, column)
             if item is None:
                 continue
+            item_font = item.font()
             match row_status:
                 case Qt.CheckState.PartiallyChecked:
                     item.setForeground(QColor.fromString('grey'))
+                    item_font.setStrikeOut(False)
                 case Qt.CheckState.Unchecked:
                     item.setForeground(QColor.fromString('grey'))
-                    item_font = item.font()
                     item_font.setStrikeOut(True)
-                    item.setFont(item_font)
+                case _:
+                    item.setForeground(QColor.fromString('black'))
+                    item_font.setStrikeOut(False)
+            item.setFont(item_font)
 
 
     @Slot()
