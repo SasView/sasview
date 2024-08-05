@@ -183,19 +183,21 @@ class AsciiDialog(QWidget):
                 if j >= col_count:
                     continue # Ignore rows that have extra columns.
                 item = QTableWidgetItem(col_value)
-                if initial_state == Qt.CheckState.PartiallyChecked:
-                    item.setForeground(QColor.fromString('grey'))
-                elif initial_state == Qt.CheckState.Unchecked:
-                    item.setForeground(QColor.fromString('grey'))
-                    item_font = item.font()
-                    item_font.setStrikeOut(True)
-                    item.setFont(item_font)
-                    item.font().setStrikeOut(True)
+                # if initial_state == Qt.CheckState.PartiallyChecked:
+                #     item.setForeground(QColor.fromString('grey'))
+                # elif initial_state == Qt.CheckState.Unchecked:
+                #     item.setForeground(QColor.fromString('grey'))
+                #     item_font = item.font()
+                #     item_font.setStrikeOut(True)
+                #     item.setFont(item_font)
+                #     item.font().setStrikeOut(True)
                 self.table.setItem(i, j + 1, item)
             if i == TABLE_MAX_ROWS:
                 break
 
         self.table.show()
+        for row in range(self.table.rowCount()):
+            self.set_row_typesetting(row, self.row_status_widgets[row])
 
     def current_dataset_type(self) -> DatasetType:
         # TODO: Using linear search but should probably just use a dictionary
@@ -204,6 +206,21 @@ class AsciiDialog(QWidget):
             if type.name == self.dataset_combobox.currentText():
                 return type
         return one_dim
+
+    def set_row_typesetting(self, row, row_status: Qt.CheckState):
+        for column in range(1, self.table.columnCount() + 1):
+            item = self.table.item(row, column)
+            if item is None:
+                continue
+            match row_status:
+                case Qt.CheckState.PartiallyChecked:
+                    item.setForeground(QColor.fromString('grey'))
+                case Qt.CheckState.Unchecked:
+                    item.setForeground(QColor.fromString('grey'))
+                    item_font = item.font()
+                    item_font.setStrikeOut(True)
+                    item.setFont(item_font)
+
 
     @Slot()
     def load(self):
@@ -259,8 +276,9 @@ class AsciiDialog(QWidget):
 
     @Slot()
     def update_row_status(self, row):
-        self.row_status_widgets[row] = self.table.cellWidget(row, 0).checkState()
-        self.fill_table()
+        new_status = self.table.cellWidget(row, 0).checkState()
+        self.row_status_widgets[row] = new_status
+        self.set_row_typesetting(row, new_status)
 
     def required_missing(self) -> list[str]:
         dataset = self.current_dataset_type()
