@@ -102,23 +102,23 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.logic = InversionLogic()
 
         # current QStandardItem showing on the panel
-        self._data = None
+        self.data = None
 
         if data is not None:
             self.data = data
             if isinstance(data, list):
-                self._data = data
+                self.data = data
 
-        # Reference to Dmax window for self._data
+        # Reference to Dmax window for self.data
         self.dmaxWindow = None
 
-        # p(r) calculator for self._data
+        # p(r) calculator for self.data
         self._calculator = Invertor()
 
         # Default to background estimate
         self._calculator.est_bck = True
 
-        # plots of self._data
+        # plots of self.data
         self.prPlot = None
         self.dataPlot = None
         self.plot1D = Plotter(quickplot=True)
@@ -127,6 +127,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.nTermsSuggested = NUMBER_OF_TERMS
         # suggested alpha
         self._calculator.alpha = REGULARIZATION
+        
+
 
         self.maxIndex = 1
 
@@ -137,8 +139,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isCalculating = False
 
         # Dictionary mapping data to all parameters
-        self._dataList = {}
-        self._data = data
+        self.dataDictionary = {}
+
 
         # Mapping for all data items
         self.model = QtGui.QStandardItemModel(self)
@@ -149,6 +151,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isBatch = False
         self.batchResultsWindow = None
         self._allowPlots = True
+
+
+        if self.logic.data_is_loaded:
+            self.qmin, self.qmax = self.logic.computeDataRange()
+
 
         # Add validators
         self.setupValidators()
@@ -163,6 +170,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.setupMapper()
 
         self.setupWindow()
+
 
     ######################################################################
     # Base Perspective Class Definitions
@@ -401,10 +409,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def displayChange(self, data_index = None):
         """Switch to another item in the data list"""
-        if isinstance(self._data, list):
+        if isinstance(self.data, list):
             return
         try:
-            self.updateDataList(self._data)
+            self.updateDataList(self.data)
             self.setCurrentData(self.dataList.itemData(data_index)) 
             self.updateDynamicGuiValues(data_index)
             self.updateGuiValues(data_index)
@@ -490,7 +498,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             logger.warning(msg)
             self.setClosable(True)
             self.close()
-            InversionWidget.__init__(self.parent(), list(self._dataList.keys()))
+            InversionWidget.__init__(self.parent(), list(self.dataDictionary.keys()))
             exit(0)
         if self.dmaxWindow is not None:
             self.dmaxWindow.nfunc = self.getNFunc()
@@ -589,44 +597,44 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if not q_value:
             q_value = float(self.minQInput.text()) if isinstance(self.minQInput.text(), (float, str)) else 0.0
         q_value = float(q_value)    
-        q_min = float(self._calculator.get_qmin()) if self._calculator.get_qmin() is not None else 0.0
-        q_max = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf
-        if q_value > q_max:
+        qmin = float(self._calculator.get_qmin()) if self._calculator.get_qmin() is not None else 0.0
+        qmax = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf
+        if q_value > qmax:
             # Value too high - coerce to max q
-            q_value=q_max
-        elif q_value < q_min:
+            q_value =qmax
+        elif q_value < qmin:
             # Value too low - coerce to min q
-            q_value=q_min
+            q_value = qmin
         # Valid Q - set model item     
-        q_min = q_value
+        qmin = q_value
 
-        self.updateQRange(q_min, q_max)
+        self.updateQRange(qmin, qmax)
 
 
     def updateMaxQ(self, q_value=None):
-        """ Validate the value of high q sent by the slider """
+        """ Validate the value of high q """
         if not q_value:
             q_value = float(self.maxQInput.text()) if isinstance(self.maxQInput.text(), (float, str)) else np.inf
         q_value = float(q_value)    
-        q_min = float(self._calculator.get_qmin()) if self._calculator.get_qmin() is not None else 0.0
-        q_max = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf
-        if q_value > q_max:
+        qmin = float(self._calculator.get_qmin()) if self._calculator.get_qmin() is not None else 0.0
+        qmax = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf
+        if q_value > qmax:
             # Value too high - coerce to max q
-            q_value =  q_max
-        elif q_value < q_min:
+            q_value =  qmax
+        elif q_value < qmin:
             # Value too low - coerce to min q
-            q_value=q_min
+            q_value=qmin
         # Valid Q - set model item   
-        q_max = q_value                   
+        qmax = q_value                   
 
-        self.updateQRange(q_min, q_max)
+        self.updateQRange(qmin, qmax)
 
     def updateQRange(self, q_range_min, q_range_max):
         """
         Update the local model based on calculated values
         """
-        qmax = str(q_range_max)
-        qmin = str(q_range_min)
+        self.qmax = str(q_range_max)
+        self.qmin = str(q_range_min)
         self._calculator.set_qmin(q_range_min)
         self._calculator.set_qmax(q_range_max)
         self.maxQInput.setText(f"{float(q_range_max):.3}") 
@@ -638,11 +646,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     # Response Actions
 
     def updateDataList(self, dataRef):
-        """Save the current data state of the window into self._data_list"""
+        """Save the current data state of the window into self.data_list"""
         if dataRef is None:
             return
         self.saveParameters()
-        self._dataList[dataRef] = {
+        self.dataDictionary[dataRef] = {
             DICT_KEYS[0]: self._calculator,
             DICT_KEYS[1]: self.prPlot,
             DICT_KEYS[2]: self.dataPlot
@@ -669,14 +677,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def setParameters(self):
         try:
             """ sets parameters previously saved with saveParameters """
-            self.noOfTermsInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).noOfTerms))
-            self.regularizationConstantInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).regConst))
-            self.maxDistanceInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).maxDist))
-            self.backgroundInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).background))
-            self.minQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).q_min))
-            self.maxQInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).q_max))
-            self.slitHeightInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_height))
-            self.slitWidthInput.setText(str(self._dataList[self._data].get(DICT_KEYS[0]).slit_width))
+            self.noOfTermsInput.setText(str(self.dataDictionary[self.data].get(DICT_KEYS[0]).noOfTerms))
+            self.regularizationConstantInput.setText(str(self.dataDictionary[self.data].get(DICT_KEYS[0]).regConst))
+            self.maxDistanceInput.setText(str(self.dataDictionary[self.data].get(DICT_KEYS[0]).maxDist))
+            self.backgroundInput.setText(str(self.dataDictionary[self.data].get(DICT_KEYS[0]).background))
+            self.minQInput.setText(str(self.dataDictionary[self.data].get(DICT_KEYS[0]).q_min))
+            self.maxQInput.setText(str(self.dataDictionary[self.data].get(DICT_KEYS[0]).q_max))
+            self.slitHeightInput.setText(str(self.dataDictionary[self.data].get(DICT_KEYS[0]).slit_height))
+            self.slitWidthInput.setText(str(self.dataDictionary[self.data].get(DICT_KEYS[0]).slit_width))
             
         except:
             # Data might be removed
@@ -762,13 +770,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
 
         # Data references
-        self._data = data_ref
+        self.data = data_ref
         self.setParameters()
         self.logic.data = GuiUtils.dataFromItem(data_ref)
         self.resetCalcPrams()
-        self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
-        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
-        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
+        self._calculator = self.dataDictionary[data_ref].get(DICT_KEYS[0])
+        self.prPlot = self.dataDictionary[data_ref].get(DICT_KEYS[1])
+        self.dataPlot = self.dataDictionary[data_ref].get(DICT_KEYS[2])
         
 
     def updateDynamicGuiValues(self, index=None):
@@ -835,8 +843,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             try:
                 title = self.prPlot.name
                 self.prPlot.plot_role = DataRole.ROLE_STAND_ALONE
-                GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
-                self.communicate.plotRequestedSignal.emit([self._data, self.prPlot], None)
+                GuiUtils.updateModelItemWithPlot(self.data, self.prPlot, title)
+                self.communicate.plotRequestedSignal.emit([self.data, self.prPlot], None)
             except AssertionError:
                 pass
         
@@ -846,8 +854,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                 self.dataPlot.plot_role = DataRole.ROLE_DEFAULT
                 self.dataPlot.symbol = "Line"
                 self.dataPlot.show_errors = False
-                GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-                self.communicate.plotRequestedSignal.emit([self._data, self.dataPlot], None)
+                GuiUtils.updateModelItemWithPlot(self.data, self.dataPlot, title)
+                self.communicate.plotRequestedSignal.emit([self.data, self.dataPlot], None)
             except AssertionError:
                 pass
         self.enableButtons()
@@ -861,24 +869,24 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.dataList.removeItem(self.dataList.currentIndex())
             self._allowPlots = True
         if not data_list:
-            data_list = [self._data]
+            data_list = [self.data]
         self.closeDMax()
         for data in data_list:
-            self._dataList.pop(data, None)
+            self.dataDictionary.pop(data, None)
         if self.dataPlot:
             # Reset dataplot sliders
             self.dataPlot.slider_low_q_input = []
             self.dataPlot.slider_high_q_input = []
             self.dataPlot.slider_low_q_setter = []
             self.dataPlot.slider_high_q_setter = []
-        self._data = None
+        self.data = None
         length = len(data_list)
         for index in reversed(range(length)):
             if self.dataList.itemData(index) in data_list:
                 self.dataList.removeItem(index)
         # Last file removed
         self.dataDeleted = False
-        if len(self._dataList) == 0:
+        if len(self.dataDictionary) == 0:
             self.prPlot = None
             self.dataPlot = None
             self.logic.data = None
@@ -987,7 +995,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         self.isBatch = False
         
-        for index in range(len(self._dataList)):
+        for index in range(len(self.dataDictionary)):
 
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
@@ -1266,19 +1274,20 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
             self.prPlot.show_yzero = True
             self.prPlot.filename = self.logic.data.filename
-            self.dataPlot = self.logic.new1DPlot(self.tab_id, out, self._calculator)
-            self.dataPlot.filename = self.logic.data.filename
+            dataPlot = self.logic.new1DPlot(self.tab_id, out, self._calculator)
+            dataPlot.filename = self.logic.data.filename
 
-            self.dataPlot.show_q_range_sliders = True
-            self.dataPlot.slider_update_on_move = False
-            self.dataPlot.slider_perspective_name = "Inversion"
-            self.dataPlot.slider_low_q_input = ['minQInput']
-            self.dataPlot.slider_low_q_setter = ['updateMinQ']
-            self.dataPlot.slider_high_q_input = ['maxQInput']
-            self.dataPlot.slider_high_q_setter = ['updateMaxQ']
-
+            dataPlot.show_q_range_sliders = True
+            dataPlot.slider_update_on_move = False
+            dataPlot.slider_perspective_name = "Inversion"
+            dataPlot.slider_tab_name = self.currentTabName()
+            dataPlot.slider_low_q_input = ['minQInput']
+            dataPlot.slider_low_q_setter = ['updateMinQ']
+            dataPlot.slider_high_q_input = ['maxQInput']
+            dataPlot.slider_high_q_setter = ['updateMaxQ']
+        self.dataPlot = dataPlot 
             # Udpate internals and GUI
-        self.updateDataList(self._data)  
+        self.updateDataList(self.data)  
         self._allowPlots = True
         
         self.saveToBatchResults()
