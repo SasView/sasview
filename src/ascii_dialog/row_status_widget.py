@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Signal, Slot
 from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QCheckBox
 
 
 class RowStatusWidget(QCheckBox):
+    status_changed = Signal(int)
     def update_label(self):
         current_status = self.checkState()
         match current_status:
@@ -19,6 +20,7 @@ class RowStatusWidget(QCheckBox):
     @Slot()
     def on_state_change(self):
         self.update_label()
+        self.status_changed.emit()
 
     def __init__(self, initial_value: Qt.CheckState, row: int):
         super().__init__()
