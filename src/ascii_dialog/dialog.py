@@ -163,8 +163,8 @@ class AsciiDialog(QWidget):
 
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv):
-            if i <= len(self.row_status_widgets):
-                row_status = self.row_status_widgets[0]
+            if i < len(self.row_status_widgets):
+                row_status = self.row_status_widgets[i]
             else:
                 row_status = RowStatusWidget()
                 self.row_status_widgets.append(row_status)
