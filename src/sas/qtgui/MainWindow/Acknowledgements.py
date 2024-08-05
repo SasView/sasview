@@ -1,5 +1,7 @@
 import functools
 from PySide6 import QtWidgets, QtCore
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
 
 import sas.sasview
 import sas.system.version
@@ -12,6 +14,10 @@ class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
         super(Acknowledgements, self).__init__(parent)
         self.setupUi(self)
+
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
 
         self.addText()
 

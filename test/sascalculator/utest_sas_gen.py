@@ -228,6 +228,8 @@ class sas_gen_test(unittest.TestCase):
         from sas.sascalc.calculator.ausaxs import sasview_sans_debye
         from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye
 
+        rng = np.random.default_rng(1984)
+
         from sas.sascalc.calculator.ausaxs.architecture import get_os, OS
         if get_os() is OS.MAC:
             self.assertTrue(True, "AUSAXS library is currently not available for MacOS. Skipping test.")
@@ -246,7 +248,7 @@ class sas_gen_test(unittest.TestCase):
             f = self.pdbloader.read(pdb_file)
             coords = np.vstack([f.pos_x, f.pos_y, f.pos_z])
             q = np.linspace(0.001, 1, 100)
-            w = np.random.rand(coords.shape[1]) # random weights
+            w = rng.random(coords.shape[1]) # random weights
 
             analytical = sasview_sans_debye.sasview_sans_debye(q, coords, w)
             external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
@@ -264,7 +266,7 @@ class sas_gen_test(unittest.TestCase):
         f = self.pdbloader.read(os.path.join(os.path.dirname(__file__), "data/debye_test_files/SASDPP4.pdb"))
         coords = np.vstack([f.pos_x, f.pos_y, f.pos_z])
         q = np.linspace(0.1, 10, 100)
-        w = np.random.rand(coords.shape[1]) # random weights
+        w = rng.random(coords.shape[1]) # random weights
 
         analytical = sasview_sans_debye.sasview_sans_debye(q, coords, w)
         external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
