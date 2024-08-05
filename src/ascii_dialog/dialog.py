@@ -10,7 +10,7 @@ from os import path
 from dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 import re
 
-TABLE_MAX_ROWS = 100
+TABLE_MAX_ROWS = 1000
 
 class AsciiDialog(QWidget):
     def __init__(self):
