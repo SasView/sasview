@@ -1,6 +1,5 @@
-from typing import Optional, Callable, Tuple, Protocol, List
+from typing import Optional, Tuple, List
 import numpy as np
-from enum import Enum
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
@@ -32,7 +31,12 @@ class QSample:
 
 
 class SpatialDistribution(ABC):
-    """ Base class for point generators """
+    """ Base class for point generators
+
+    Batches need to be usable for bootstrapping, the run needs to be split into
+    n_bootstrap sections, and the output saved for each section, so that it can
+    be rebuilt in different combinations to establish a variance.
+    """
 
     def __init__(self, radius: float, n_points: int, n_desired_points):
         self.radius = radius
@@ -40,7 +44,11 @@ class SpatialDistribution(ABC):
         self.n_points = n_points
 
     @property
-    def info(self):
+    def allows_bootstrap(self) -> bool:
+        return False
+
+    @property
+    def info(self) -> str:
         """ Information to be displayed in the settings window next to the point number input """
         return ""
 
@@ -55,6 +63,7 @@ class SpatialDistribution(ABC):
     def bounding_surface_check_points(self) -> VectorComponents3:
         pts = self._bounding_surface_check_points()
         return pts[:, 0], pts[:, 1], pts[:, 2]
+
 
 class AngularDistribution(ABC):
     """ Base class for angular distributions """
@@ -126,6 +135,8 @@ class SamplingDistribution:
 class QSpaceScattering:
     abscissa: QSample
     ordinate: np.ndarray
+    upper_error: np.ndarray | None = None
+    lower_error: np.ndarray | None = None
 
 @dataclass
 class RealSpaceScattering:

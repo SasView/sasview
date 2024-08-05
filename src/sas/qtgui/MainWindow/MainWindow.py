@@ -11,6 +11,8 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPixmap, QGuiApplication, QCursor
 from PySide6.QtCore import Qt, QTimer
 
+from importlib import resources
+
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_SasView
@@ -57,12 +59,16 @@ def SplashScreen():
     Displays splash screen as soon as humanely possible.
     The screen will disappear as soon as the event loop starts.
     """
-    pixmap_path = "images/SVwelcome_mini.png"
-    if os.path.splitext(sys.argv[0])[1].lower() == ".py":
-        pixmap_path = "src/sas/qtgui/images/SVwelcome_mini.png"
-    pixmap = QPixmap(pixmap_path)
-    splashScreen = QSplashScreen(pixmap)
-    return splashScreen
+
+    with resources.open_binary("sas.qtgui.images", "SVwelcome_mini.png") as file:
+        image_data = file.read()
+
+        pixmap = QPixmap()
+        pixmap.loadFromData(image_data)
+
+        splashScreen = QSplashScreen(pixmap)
+
+        return splashScreen
 
 def get_highdpi_scaling():
     return 1.0

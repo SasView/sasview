@@ -515,7 +515,7 @@
   </action>
   <action name="actionAcknowledge">
    <property name="text">
-    <string>Acknowledge</string>
+    <string>Cite Sasview</string>
    </property>
   </action>
   <action name="actionAbout">

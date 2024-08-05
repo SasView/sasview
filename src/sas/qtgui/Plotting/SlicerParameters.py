@@ -220,7 +220,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         parent = self
         caption = 'Save files to:'
-        options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog
+        options = QtWidgets.QFileDialog.ShowDirsOnly
         directory = self.save_location
         folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, options)
 
