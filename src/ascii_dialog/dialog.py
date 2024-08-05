@@ -230,6 +230,8 @@ class AsciiDialog(QWidget):
         with open(filename) as file:
             self.raw_csv = file.readlines()
 
+        # Reset checkboxes
+        self.rows_is_included = []
         self.attempt_guesses()
         self.fill_table()
 
