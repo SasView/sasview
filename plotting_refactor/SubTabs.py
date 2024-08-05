@@ -44,8 +44,6 @@ class SubTabs(QTabWidget):
             layout.addWidget(NavigationToolbar2QT(canvas))
 
             subplot_count = tabitem.child(i).childCount()
-            #print("childcount 1", tabitem.child(i).childCount())
-            #ax = figure.subplots(subplot_count)
             if subplot_count == 1:
                 ax = figure.subplots(subplot_count)
                 ax = [ax]
@@ -70,22 +68,32 @@ class SubTabs(QTabWidget):
                         plottable = plottable_or_modifier_item
                         dataset = self.datacollector.get_data_by_id(plottable.get_data_id())
                         if dataset.is_2d():
+
+                            #collect a possible existing colormap plot modifier
+                            colormap_modifier = ""
+                            for ii in range(plottable.childCount()):
+                                if isinstance(plottable.child(ii), ModifierColormap):
+                                    colormap_modifier = plottable.child(ii).text(0).split('=')[1]
+                            print("cm: ", colormap_modifier)
+                            if colormap_modifier == "":
+                                colormap_modifier = "jet"
+
                             x = dataset.get_x_data()
                             y = dataset.get_y_data()
                             y_fit = dataset.get_y_fit()
                             if plottable.type_num == 4:
                                 cm = ax[j].pcolor(x[0], x[1], y,
                                                   norm=matplotlib.colors.LogNorm(vmin=np.min(y), vmax=np.max(y)),
-                                                  cmap='jet')
+                                                  cmap=colormap_modifier)
                             elif plottable.type_num == 5:
                                 cm = ax[j].pcolor(x[0], x[1], y_fit,
                                                   norm=matplotlib.colors.LogNorm(vmin=np.min(y_fit), vmax=np.max(y_fit)),
-                                                  cmap='jet')
+                                                  cmap=colormap_modifier)
                             elif plottable.type_num == 6:
                                 y_res = np.absolute(np.subtract(y_fit,y))
                                 cm = ax[j].pcolor(x[0], x[1], y_res,
                                                   norm=matplotlib.colors.LogNorm(vmin=np.min(y_res), vmax=np.max(y_res)),
-                                                  cmap='jet')
+                                                  cmap=colormap_modifier)
                         else:
                             if plottable.type_num == 1: #data plot: log-log plot, show only data
                                 ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
