@@ -1,5 +1,5 @@
 from PySide6 import QtGui
-from PySide6.QtGui import QColor, QIntValidator, QPalette
+from PySide6.QtGui import QColor, QIntValidator, QPalette, Qt
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from warning_label import WarningLabel
@@ -100,7 +100,7 @@ class AsciiDialog(QWidget):
         self.layout.addWidget(self.table)
         self.layout.addWidget(self.warning_label)
 
-        self.row_status_widgets: list[RowStatusWidget] = []
+        self.row_status_widgets: list[Qt.CheckState] = []
 
     def split_line(self, line: str) -> list[str]:
         expr = ''
@@ -164,10 +164,11 @@ class AsciiDialog(QWidget):
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv):
             if i < len(self.row_status_widgets):
-                row_status = self.row_status_widgets[i]
+                initial_state = self.row_status_widgets[i]
             else:
-                row_status = RowStatusWidget()
-                self.row_status_widgets.append(row_status)
+                # TODO: Change default
+                initial_state = Qt.CheckState.Checked
+            row_status = RowStatusWidget(initial_state, i)
             self.table.setCellWidget(i, 0, row_status)
             row_split = self.split_line(row)
             for j, col_value in enumerate(row_split):
