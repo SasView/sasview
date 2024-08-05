@@ -166,6 +166,7 @@ class AsciiDialog(QWidget):
         self.table.setRowCount(min(len(self.raw_csv) - starting_pos, TABLE_MAX_ROWS))
         self.table.setColumnCount(col_count + 1)
         self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.col_names())
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv):
