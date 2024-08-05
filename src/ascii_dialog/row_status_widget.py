@@ -20,8 +20,10 @@ class RowStatusWidget(QCheckBox):
     def on_state_change(self):
         self.update_label()
 
-    def __init__(self):
+    def __init__(self, initial_value: Qt.CheckState, row: int):
         super().__init__()
+        self.row = row
         self.setTristate(True)
+        self.setCheckState(initial_value)
         self.update_label()
         self.stateChanged.connect(self.on_state_change)
