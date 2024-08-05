@@ -173,6 +173,7 @@ class AsciiDialog(QWidget):
                 initial_state = self.row_status_widgets[i]
             else:
                 initial_state = self.guess_row_status(i)
+                self.row_status_widgets.append(initial_state)
             row_status = RowStatusWidget(initial_state, i)
             row_status.status_changed.connect(self.update_row_status)
             self.table.setCellWidget(i, 0, row_status)
