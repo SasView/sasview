@@ -8,14 +8,11 @@ from PySide6.QtWidgets import QCheckBox
 class RowStatusWidget(QCheckBox):
     status_changed = Signal(int)
     def update_label(self):
-        current_status = self.checkState()
-        match current_status:
-            case Qt.CheckState.Unchecked:
-                self.setText('Not included')
-            case Qt.CheckState.PartiallyChecked:
-                self.setText('Included as metadata')
-            case Qt.CheckState.Checked:
-                self.setText('Included as data')
+        if self.isChecked():
+            self.setText('Included')
+        else:
+            self.setText('Not Included')
+
 
     @Slot()
     def on_state_change(self):
@@ -25,7 +22,6 @@ class RowStatusWidget(QCheckBox):
     def __init__(self, initial_value: Qt.CheckState, row: int):
         super().__init__()
         self.row = row
-        self.setTristate(True)
         self.setCheckState(initial_value)
         self.update_label()
         self.stateChanged.connect(self.on_state_change)
