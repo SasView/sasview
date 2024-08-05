@@ -183,8 +183,14 @@ class AsciiDialog(QWidget):
                 if j >= col_count:
                     continue # Ignore rows that have extra columns.
                 item = QTableWidgetItem(col_value)
-                if i < starting_pos:
+                if initial_state == Qt.CheckState.PartiallyChecked:
                     item.setForeground(QColor.fromString('grey'))
+                elif initial_state == Qt.CheckState.Unchecked:
+                    item.setForeground(QColor.fromString('grey'))
+                    item_font = item.font()
+                    item_font.setStrikeOut(True)
+                    item.setFont(item_font)
+                    item.font().setStrikeOut(True)
                 self.table.setItem(i, j + 1, item)
             if i == TABLE_MAX_ROWS:
                 break
