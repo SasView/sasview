@@ -19,9 +19,9 @@ class RowStatusWidget(QCheckBox):
         self.update_label()
         self.status_changed.emit(self.row)
 
-    def __init__(self, initial_value: Qt.CheckState, row: int):
+    def __init__(self, initial_value: bool, row: int):
         super().__init__()
         self.row = row
-        self.setCheckState(initial_value)
+        self.setChecked(initial_value)
         self.update_label()
         self.stateChanged.connect(self.on_state_change)
