@@ -175,9 +175,10 @@ class AsciiDialog(QWidget):
             else:
                 initial_state = True
                 self.rows_is_included.append(initial_state)
-            row_status = RowStatusWidget(initial_state, i)
-            row_status.status_changed.connect(self.update_row_status)
-            self.table.setCellWidget(i, 0, row_status)
+            if i >= starting_pos:
+                row_status = RowStatusWidget(initial_state, i)
+                row_status.status_changed.connect(self.update_row_status)
+                self.table.setCellWidget(i, 0, row_status)
             row_split = self.split_line(row)
             for j, col_value in enumerate(row_split):
                 if j >= col_count:
@@ -199,18 +200,19 @@ class AsciiDialog(QWidget):
                 return type
         return one_dim
 
-    def set_row_typesetting(self, row, row_status: bool):
+    def set_row_typesetting(self, row, item_checked: bool):
+        starting_pos = self.startline_entry.value()
         for column in range(1, self.table.columnCount() + 1):
             item = self.table.item(row, column)
             if item is None:
                 continue
             item_font = item.font()
-            if row_status:
-                item.setForeground(QColor.fromString('black'))
-                item_font.setStrikeOut(False)
-            else:
+            if not item_checked or row < starting_pos:
                 item.setForeground(QColor.fromString('grey'))
                 item_font.setStrikeOut(True)
+            else:
+                item.setForeground(QColor.fromString('black'))
+                item_font.setStrikeOut(False)
             item.setFont(item_font)
 
 
