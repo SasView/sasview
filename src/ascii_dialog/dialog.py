@@ -100,6 +100,8 @@ class AsciiDialog(QWidget):
         self.layout.addWidget(self.table)
         self.layout.addWidget(self.warning_label)
 
+        self.row_status_widgets: list[RowStatusWidget] = []
+
     def split_line(self, line: str) -> list[str]:
         expr = ''
         for seperator, isenabled in self.seperators.items():
@@ -161,7 +163,11 @@ class AsciiDialog(QWidget):
 
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv):
-            row_status = RowStatusWidget()
+            if i <= len(self.row_status_widgets):
+                row_status = self.row_status_widgets[0]
+            else:
+                row_status = RowStatusWidget()
+                self.row_status_widgets.append(row_status)
             self.table.setCellWidget(i, 0, row_status)
             row_split = self.split_line(row)
             for j, col_value in enumerate(row_split):
