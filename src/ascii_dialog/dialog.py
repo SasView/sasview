@@ -174,6 +174,7 @@ class AsciiDialog(QWidget):
             else:
                 initial_state = self.guess_row_status(i)
             row_status = RowStatusWidget(initial_state, i)
+            row_status.status_changed.connect(self.update_row_status)
             self.table.setCellWidget(i, 0, row_status)
             row_split = self.split_line(row)
             for j, col_value in enumerate(row_split):
@@ -247,6 +248,10 @@ class AsciiDialog(QWidget):
         # Update columns as they'll be different now.
         columns = guess_columns(self.colcount_entry.value(), self.current_dataset_type())
         self.col_editor.set_col_order(columns)
+
+    @Slot()
+    def update_row_status(self, row):
+        self.row_status_widgets[row] = self.table.cellWidget(row, 0).checkState()
 
     def required_missing(self) -> list[str]:
         dataset = self.current_dataset_type()
