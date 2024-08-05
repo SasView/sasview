@@ -20,7 +20,7 @@ class RowStatusWidget(QCheckBox):
     @Slot()
     def on_state_change(self):
         self.update_label()
-        self.status_changed.emit()
+        self.status_changed.emit(self.row)
 
     def __init__(self, initial_value: Qt.CheckState, row: int):
         super().__init__()
