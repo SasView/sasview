@@ -436,7 +436,7 @@ def sizeDistribution(input):
     res = input["Resolution"]
     Gmat = G_matrix(Q[Ibeg:Ifin],Bins,contrast,input["Model"],res)
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
-    chisq,BinMag,Ic[Ibeg:Ifin] = MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,IterMax=500,report=True)
+    chisq,BinMag,Ic[Ibeg:Ifin] = MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,IterMax=5000,report=True)
     BinMag = BinMag/(2.*Dbins)
     return chisq,Bins,Dbins,BinMag,Q[Ibeg:Ifin],Ic[Ibeg:Ifin]
 
@@ -447,7 +447,7 @@ Q = np.array([])
 I = np.array([])
 dI = np.array([])
 
-with open("test_data/LMA70_usans_irena_input.csv") as fp:
+with open("test_data/Alumina_usaxs_irena_input.csv") as fp:
     spamreader = csv.reader(fp, delimiter=',')
 
     for row in spamreader:
@@ -465,17 +465,17 @@ data_from_loader.filename = "mock data"
 input = {}
 input["Filename"] = data_from_loader.filename
 input["Data"] = [data_from_loader.x,data_from_loader.y]
-Qmin = min(data_from_loader.x)
-Qmax = max(data_from_loader.x)
+Qmin = min(data_from_loader.x[25:])
+Qmax = max(data_from_loader.x[:94])
 input["Limits"] = [Qmin, Qmax]
 input["Scale"] = 1
 input["Logbin"] = True
-input["DiamRange"] = [10,1e5,100] 
-input["WeightFactors"] = np.ones(len(data_from_loader.y))*100
+input["DiamRange"] = [75,5000,200] 
+input["WeightFactors"] = np.ones(len(data_from_loader.y))
 input["Contrast"] = 1 
-input["Sky"] = 1e-8
-#input["Weights"] = 1/(dI*dI)
-input["Weights"] = 1/(I*I)
+input["Sky"] = 1e-3
+input["Weights"] = 1/(dI*dI)
+#input["Weights"] = 1/(I*I)
 input["Background"] = np.ones(len(data_from_loader.y))*0.120605
 input["Model"] = 'Sphere'
 perfect1D = rst.Perfect1D(data_from_loader.x) 
@@ -483,7 +483,7 @@ qlength, qwidth = 0.117, None
 Ibeg = np.searchsorted(Q,Qmin)
 Ifin = np.searchsorted(Q,Qmax)+1
 slit1D = rst.Slit1D(Q[Ibeg:Ifin],q_length=qlength,q_width=qwidth,q_calc=Q[Ibeg:Ifin])
-input["Resolution"] = slit1D
+input["Resolution"] = perfect1D
 
 # Call the sizeDistribution function and feed in the input
 chisq,Bins,Dbins,BinMag,Qc,Ic = sizeDistribution(input)
@@ -505,7 +505,7 @@ dist_result._logx = True
 #plt.loglog(Q,I)
 
 plt.figure()
-plt.bar(x=dist_result.x,height=dist_result.y,width=dist_result.binWidth,label='fit_distribution')
+plt.bar(x=dist_result.x,height=dist_result.y/SphereVol(dist_result.x),width=dist_result.binWidth,label='fit_distribution')
 if dist_result._logx is True:
     plt.xscale('log')
 plt.xlabel('r')
@@ -519,4 +519,8 @@ plt.xlabel('Q ['+I_result.x_unit+']')
 plt.ylabel('I(Q) ['+I_result.y_unit+']')
 plt.legend()
 
+plt.figure()
+plt.semilogx(I_result.x,I_result.y-data_from_loader.y[25:94],'.')
+plt.xlabel('Q ['+I_result.x_unit+']')
+plt.ylabel('I residual ['+I_result.y_unit+']')
 plt.show()
