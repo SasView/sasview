@@ -163,7 +163,7 @@ class AsciiDialog(QWidget):
         starting_pos = self.startline_entry.value()
         col_count = self.colcount_entry.value()
 
-        self.table.setRowCount(min(len(self.raw_csv) - starting_pos, TABLE_MAX_ROWS))
+        self.table.setRowCount(min(len(self.raw_csv), TABLE_MAX_ROWS))
         self.table.setColumnCount(col_count + 1)
         self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.col_names())
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
