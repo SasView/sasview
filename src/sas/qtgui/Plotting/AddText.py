@@ -1,6 +1,8 @@
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
 
 import sas.sasview
 
@@ -12,6 +14,10 @@ class AddText(QtWidgets.QDialog, Ui_AddText):
         super(AddText, self).__init__()
         self.setupUi(self)
 
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
+        
         self._font = QtGui.QFont()
         self._color = "black"
         self.btnFont.clicked.connect(self.onFontChange)

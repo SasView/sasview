@@ -12,7 +12,7 @@ from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SetGraphRangeUI import Ui_setGraphRangeUI
 
 class SetGraphRange(QtWidgets.QDialog, Ui_setGraphRangeUI):
-    def __init__(self, parent=None, x_range=(0.0, 0.0), y_range=(0.0, 0.0)):
+    def __init__(self, parent=None, x_range: tuple[float, float]=(0.0, 0.0), y_range: tuple[float, float]=(0.0, 0.0)):
         super(SetGraphRange, self).__init__()
 
         self.setupUi(self)
