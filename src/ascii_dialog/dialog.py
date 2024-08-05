@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDi
 from PySide6.QtCore import Slot
 from warning_label import WarningLabel
 from col_editor import ColEditor
+from row_status_widget import RowStatusWidget
 from guess import guess_column_count, guess_columns, guess_seperator, guess_starting_position
 from os import path
 from dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
@@ -154,17 +155,19 @@ class AsciiDialog(QWidget):
         starting_pos = self.startline_entry.value()
 
         self.table.setRowCount(min(len(self.raw_csv) - starting_pos, TABLE_MAX_ROWS))
-        self.table.setColumnCount(self.colcount_entry.value())
-        self.table.setHorizontalHeaderLabels(self.col_editor.col_names())
+        self.table.setColumnCount(self.colcount_entry.value() + 1)
+        self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.col_names())
 
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv):
+            row_status = RowStatusWidget()
+            self.table.setCellWidget(i, 0, row_status)
             row_split = self.split_line(row)
             for j, col_value in enumerate(row_split):
                 item = QTableWidgetItem(col_value)
                 if i < starting_pos:
                     item.setForeground(QColor.fromString('grey'))
-                self.table.setItem(i, j, item)
+                self.table.setItem(i, j + 1, item)
             if i == TABLE_MAX_ROWS:
                 break
 
