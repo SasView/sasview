@@ -142,10 +142,10 @@ class InversionLogic(object):
         Adds errors to data set is they are not available.
         Uses  $\Delta y = \sigma | y |$.
         """
-        if np.size(self._data.dy) == 0:
+        if np.size(self._data.dy) == 0.0:
             self._data.dy = np.sqrt(np.fabs(self._data.y))*sigma
-        elif np.any(self._data.dy) <= 0:
-            self._data.dy = np.where(self._data.dy <= 0, np.sqrt(np.fabs(self._data.y))*sigma, self._data.dy)
+        elif self._data.dy is not None and np.any(self._data.dy) <= 0.0:
+            self._data.dy = np.where(self._data.dy <= 0.0, np.sqrt(np.fabs(self._data.y))*sigma, self._data.dy)
 
         
 
