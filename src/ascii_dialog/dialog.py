@@ -132,16 +132,22 @@ class AsciiDialog(QWidget):
 
         split_csv = [self.split_line(line.strip()) for line in self.raw_csv]
 
-        starting_pos = guess_starting_position(split_csv)
+        self.initial_starting_pos = guess_starting_position(split_csv)
 
         guessed_colcount = guess_column_count(split_csv,
-                                              starting_pos)
+                                              self.initial_starting_pos)
         self.col_editor.set_cols(guessed_colcount)
 
         columns = guess_columns(guessed_colcount, self.current_dataset_type())
         self.col_editor.set_col_order(columns)
         self.colcount_entry.setValue(guessed_colcount)
-        self.startline_entry.setValue(starting_pos)
+        self.startline_entry.setValue(self.initial_starting_pos)
+
+    def guess_row_status(self, row) -> Qt.CheckState:
+        if row < self.initial_starting_pos:
+            return Qt.CheckState.PartiallyChecked
+        else:
+            return Qt.CheckState.Checked
 
     def fill_table(self):
         # At the moment, we're just going to start making the table from where
@@ -166,8 +172,7 @@ class AsciiDialog(QWidget):
             if i < len(self.row_status_widgets):
                 initial_state = self.row_status_widgets[i]
             else:
-                # TODO: Change default
-                initial_state = Qt.CheckState.Checked
+                initial_state = self.guess_row_status(i)
             row_status = RowStatusWidget(initial_state, i)
             self.table.setCellWidget(i, 0, row_status)
             row_split = self.split_line(row)
