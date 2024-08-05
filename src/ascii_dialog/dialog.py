@@ -153,9 +153,10 @@ class AsciiDialog(QWidget):
         self.table.clear()
 
         starting_pos = self.startline_entry.value()
+        col_count = self.colcount_entry.value()
 
         self.table.setRowCount(min(len(self.raw_csv) - starting_pos, TABLE_MAX_ROWS))
-        self.table.setColumnCount(self.colcount_entry.value() + 1)
+        self.table.setColumnCount(col_count + 1)
         self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.col_names())
 
         # Now fill the table with data
@@ -164,6 +165,8 @@ class AsciiDialog(QWidget):
             self.table.setCellWidget(i, 0, row_status)
             row_split = self.split_line(row)
             for j, col_value in enumerate(row_split):
+                if j >= col_count:
+                    continue # Ignore rows that have extra columns.
                 item = QTableWidgetItem(col_value)
                 if i < starting_pos:
                     item.setForeground(QColor.fromString('grey'))
