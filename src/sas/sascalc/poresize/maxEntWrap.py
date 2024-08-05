@@ -2,11 +2,9 @@ from GSASIIsasd import SizeDistribution
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-import sasmodels
 
-fileName = "Iq_for_dist1.txt"
-if fileName[:-3] == "ses" or fileName[:-5] == "sesans":
-    
+fileName = "I_for_dist1.txt"
+#if fileName[:-3] == "ses" or fileName[:-5] == "sesans":
 
 Q = np.array([])
 I = np.array([])

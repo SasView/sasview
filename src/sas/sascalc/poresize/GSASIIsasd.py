@@ -19,8 +19,6 @@ import scipy.special as scsp
 import scipy.optimize as so
 #import pdb
 
-import GSASIIpath
-GSASIIpath.SetVersionNumber("$Revision: 5698 $")
 import GSASIIpwd as G2pwd
 
 # trig functions in degrees
@@ -452,8 +450,6 @@ def SchulzZimmCume(x,pos,args):
     mat = np.outer(np.ones(nP),fxn)
     cume = np.sum(np.tril(mat),axis=1)/np.sum(fxn)
     return np.interp(x,X,cume,0,1)
-    
-    return []
     
 ################################################################################
 #### Structure factors for condensed systems
