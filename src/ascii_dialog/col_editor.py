@@ -6,27 +6,6 @@ from dataset_types import default_units
 
 
 class ColEditor(QWidget):
-    # def create_col_combo_box(self) -> QComboBox:
-    #     new_combo_box = QComboBox()
-    #     for option in self.options:
-    #         new_combo_box.addItem(option)
-    #     new_combo_box.setEditable(True)
-    #     validator = QRegularExpressionValidator(r"[a-zA-Z0-9]+")
-    #     new_combo_box.setValidator(validator)
-    #     return new_combo_box
-
-    # def create_unit_combo_box(self, selected_option: str) -> QComboBox:
-    #     new_combo_box = QComboBox()
-    #     default_unit = default_units[selected_option]
-    #     new_combo_box.addItem(default_unit)
-    #     return new_combo_box
-
-    # def create_col_unit_box(self) -> tuple[QComboBox, QComboBox]:
-    #     new_col_combo_box = self.create_col_combo_box()
-    #     new_unit_combo_box = self.create_unit_combo_box(new_col_combo_box.currentText())
-    #     # self.option_widgets.append(new_col_combo_box)
-    #     return new_col_combo_box, new_unit_combo_box
-
     column_changed = Signal()
 
     @Slot()
