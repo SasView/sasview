@@ -1,5 +1,5 @@
 from PySide6.QtGui import QColor, Qt
-from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
+from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from warning_label import WarningLabel
 from col_editor import ColEditor
@@ -228,14 +228,15 @@ class AsciiDialog(QWidget):
         filename = result[0]
         self.filename_label.setText(path.basename(filename))
 
-        # TODO: Add error handling
-        with open(filename) as file:
-            self.raw_csv = file.readlines()
-
-        # Reset checkboxes
-        self.rows_is_included = []
-        self.attempt_guesses()
-        self.fill_table()
+        try:
+            with open(filename) as file:
+                self.raw_csv = file.readlines()
+            # Reset checkboxes
+            self.rows_is_included = []
+            self.attempt_guesses()
+            self.fill_table()
+        except OSError:
+            QMessageBox.critical(self, 'File Read Error', ' There was an error reading that file.')
 
     @Slot()
     def update_colcount(self) -> None:
