@@ -16,9 +16,9 @@ class AsciiDialog(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.raw_csv = None
+        self.raw_csv: str | None = None
 
-        self.seperators = {
+        self.seperators: dict[str, bool] = {
             'Comma': True,
             'Whitespace': True,
             'Tab': True
@@ -28,8 +28,6 @@ class AsciiDialog(QWidget):
 
         self.load_button = QPushButton("Load File")
         self.load_button.clicked.connect(self.load)
-
-        # Data parameters
 
         ## Dataset type selection
         self.dataset_layout = QHBoxLayout()
@@ -43,7 +41,7 @@ class AsciiDialog(QWidget):
         ## Seperator
         self.sep_layout = QHBoxLayout()
 
-        self.sep_widgets = []
+        self.sep_widgets: list[QWidget] = []
         self.sep_label = QLabel('Seperators:')
         self.sep_layout.addWidget(self.sep_label)
         for seperator_name, value in self.seperators.items():
@@ -83,6 +81,7 @@ class AsciiDialog(QWidget):
         self.table.show()
         # Make the table readonly
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        # The table's width will always resize to fit the amount of space it has.
         self.table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
 
         # Warning Label
