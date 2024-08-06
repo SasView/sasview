@@ -4,8 +4,10 @@ from PySide6.QtWidgets import QLabel
 
 
 class WarningLabel(QLabel):
-    """Widget to display an appropriate warning message based whether there
-    exists columns that are missing, or there are columns that are duplicated."""
+    """Widget to display an appropriate warning message based on whether there
+    exists columns that are missing, or there are columns that are duplicated.
+
+    """
     def set_font_red(self):
         self.setStyleSheet("QLabel { color: red}")
 
