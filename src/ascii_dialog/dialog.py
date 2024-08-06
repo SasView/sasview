@@ -132,12 +132,6 @@ class AsciiDialog(QWidget):
         self.colcount_entry.setValue(guessed_colcount)
         self.startline_entry.setValue(self.initial_starting_pos)
 
-    def guess_row_status(self, row: int) -> Qt.CheckState:
-        if row < self.initial_starting_pos:
-            return Qt.CheckState.PartiallyChecked
-        else:
-            return Qt.CheckState.Checked
-
     def fill_table(self) -> None:
         # Don't try to fill the table if there's no data.
         if self.raw_csv is None:
