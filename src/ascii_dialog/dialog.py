@@ -119,16 +119,6 @@ class AsciiDialog(QWidget):
         return re.split(expr, line)
 
     def attempt_guesses(self):
-        # TODO: We're not guessing seperators anymore (just presuming that they
-        # are all enabled). Can probably delete this code later.
-        #
-        # guessed_seperator = guess_seperator(self.raw_csv)
-        # if guessed_seperator == None:
-        #     # Seperator couldn't be guessed; just let the user fill that in.
-        #     guessed_seperator = ''
-
-        # self.sep_entry.setText(guessed_seperator)
-
         split_csv = [self.split_line(line.strip()) for line in self.raw_csv]
 
         self.initial_starting_pos = guess_starting_position(split_csv)
