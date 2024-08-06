@@ -302,7 +302,7 @@ class AsciiDialog(QWidget):
     def duplicate_columns(self) -> set[str]:
         """Returns all of the columns which have been sselected multiple times."""
         col_names = self.col_editor.col_names()
-        return set([col for col in col_names if col_names.count(col) > 1])
+        return set([col for col in col_names if not col == '<ignore>' and col_names.count(col) > 1])
 
 if __name__ == "__main__":
     app = QApplication([])
