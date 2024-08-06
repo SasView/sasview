@@ -13,6 +13,12 @@ import re
 TABLE_MAX_ROWS = 1000
 
 class AsciiDialog(QWidget):
+    """A dialog window allowing the user to adjust various properties regarding
+    how an ASCII file should be interpreted. This widget allows the user to
+    visualise what the data will look like with the parameter the user has
+    selected.
+
+    """
     def __init__(self):
         super().__init__()
 
@@ -102,6 +108,10 @@ class AsciiDialog(QWidget):
         self.rows_is_included: list[bool] = []
 
     def split_line(self, line: str) -> list[str]:
+        """Split a line in a CSV file based on which seperators the user has
+        selected on the widget.
+
+        """
         expr = ''
         for seperator, isenabled in self.seperators.items():
             if isenabled:
@@ -119,6 +129,10 @@ class AsciiDialog(QWidget):
         return re.split(expr, line)
 
     def attempt_guesses(self) -> None:
+        """Attempt to guess various parameters of the data to provide some
+        default values. Uses the guess.py module
+
+        """
         split_csv = [self.split_line(line.strip()) for line in self.raw_csv]
 
         self.initial_starting_pos = guess_starting_position(split_csv)
@@ -133,6 +147,11 @@ class AsciiDialog(QWidget):
         self.startline_entry.setValue(self.initial_starting_pos)
 
     def fill_table(self) -> None:
+        """Write the data to the table based on the parameters the user has
+        selected.
+
+        """
+
         # Don't try to fill the table if there's no data.
         if self.raw_csv is None:
             return
@@ -168,6 +187,8 @@ class AsciiDialog(QWidget):
                 break
 
         self.table.show()
+
+        # Apply typesetting to each row.
         for row in range(self.table.rowCount()):
             self.set_row_typesetting(row, self.rows_is_included[row])
 
