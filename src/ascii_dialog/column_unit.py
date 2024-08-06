@@ -8,7 +8,7 @@ from dataset_types import default_units
 class ColumnUnit(QWidget):
     column_changed = Signal()
 
-    def create_col_combo_box(self, options) -> QComboBox:
+    def create_col_combo_box(self, options: list[str]) -> QComboBox:
         new_combo_box = QComboBox()
         for option in options:
             new_combo_box.addItem(option)
@@ -24,11 +24,11 @@ class ColumnUnit(QWidget):
         new_combo_box.addItem(default_unit)
         return new_combo_box
 
-    def replace_options(self, new_options):
+    def replace_options(self, new_options) -> None:
         self.col_widget.clear()
         self.col_widget.addItems(new_options)
 
-    def set_current_column(self, new_column_value: str):
+    def set_current_column(self, new_column_value: str) -> None:
         self.col_widget.setCurrentText(new_column_value)
         new_unit = default_units[new_column_value]
         self.unit_widget.clear()
@@ -37,8 +37,6 @@ class ColumnUnit(QWidget):
 
     @Slot()
     def on_option_change(self):
-        # Need to update units.
-        #
         # If the new option is empty string, its probably because the current
         # options have been removed. Can safely ignore this.
         self.column_changed.emit()
