@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QCheckBox
 
 
