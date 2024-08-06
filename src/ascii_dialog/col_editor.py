@@ -31,9 +31,6 @@ class ColEditor(QWidget):
         # remove some.
         if self.cols < new_cols:
             for _ in range(new_cols - self.cols):
-                # new_combo_box = self.create_col_combo_box()
-                # self.option_widgets.append(new_combo_box)
-                # self.layout.addWidget(new_combo_box)
                 new_widget = ColumnUnit(self.options)
                 new_widget.column_changed.connect(self.on_column_update)
                 self.layout.addWidget(new_widget)
@@ -64,9 +61,4 @@ class ColEditor(QWidget):
     def replace_options(self, new_options: list[str]) -> None:
         self.options = new_options
         for widget in self.option_widgets:
-            # col_box.clear()
-            # col_box.addItems(new_options)
-            # new_unit = default_units[col_box.currentText()]
-            # unit_box.clear()
-            # unit_box.addItem(new_unit)
             widget.replace_options(new_options)
