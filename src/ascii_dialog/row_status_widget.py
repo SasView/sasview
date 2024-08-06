@@ -6,8 +6,11 @@ from PySide6.QtWidgets import QCheckBox
 
 
 class RowStatusWidget(QCheckBox):
+    """Widget to toggle whether the row is to be included as part of the data."""
     status_changed = Signal(int)
     def update_label(self):
+        """Update the label of the check box depending on whether it is checked,
+        or not."""
         if self.isChecked():
             self.setText('Included')
         else:
