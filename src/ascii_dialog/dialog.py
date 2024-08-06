@@ -75,8 +75,7 @@ class AsciiDialog(QWidget):
         self.colcount_layout.addWidget(self.colcount_entry)
 
         ## Column Editor
-        current_dataset_type = self.current_dataset_type()
-        options =  current_dataset_type.required + current_dataset_type.optional
+        options =  self.dataset_options()
         self.col_editor = ColEditor(self.colcount_entry.value(), options)
         self.dataset_combobox.currentTextChanged.connect(self.change_dataset_type)
         self.col_editor.column_changed.connect(self.update_column)
@@ -277,7 +276,8 @@ class AsciiDialog(QWidget):
     def change_dataset_type(self) -> None:
         """Triggered when the selected dataset type has changed."""
         new_dataset = self.current_dataset_type()
-        self.col_editor.replace_options(new_dataset.required + new_dataset.optional)
+        options = self.dataset_options()
+        self.col_editor.replace_options(options)
 
         # Update columns as they'll be different now.
         columns = guess_columns(self.colcount_entry.value(), self.current_dataset_type())
@@ -303,6 +303,10 @@ class AsciiDialog(QWidget):
         """Returns all of the columns which have been sselected multiple times."""
         col_names = self.col_editor.col_names()
         return set([col for col in col_names if not col == '<ignore>' and col_names.count(col) > 1])
+
+    def dataset_options(self) -> list[str]:
+        current_dataset_type = self.current_dataset_type()
+        return current_dataset_type.required + current_dataset_type.optional + ['<ignore>']
 
 if __name__ == "__main__":
     app = QApplication([])
