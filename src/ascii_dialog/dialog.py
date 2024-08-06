@@ -161,13 +161,21 @@ class AsciiDialog(QWidget):
         starting_pos = self.startline_entry.value()
         col_count = self.colcount_entry.value()
 
-        self.table.setRowCount(min(len(self.raw_csv), TABLE_MAX_ROWS + 2))
+        self.table.setRowCount(min(len(self.raw_csv), TABLE_MAX_ROWS + 1))
         self.table.setColumnCount(col_count + 1)
         self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.col_names())
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         # Now fill the table with data
         for i, row in enumerate(self.raw_csv):
+            if i == TABLE_MAX_ROWS:
+                #  Fill with elipsis to indicate there is more data.
+                for j in range(len(row_split)):
+                    elipsis_item = QTableWidgetItem("...")
+                    elipsis_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    self.table.setItem(i, j, elipsis_item)
+                break
+
             if i < len(self.rows_is_included):
                 initial_state = self.rows_is_included[i]
             else:
@@ -184,13 +192,6 @@ class AsciiDialog(QWidget):
                 item = QTableWidgetItem(col_value)
                 self.table.setItem(i, j + 1, item)
             self.set_row_typesetting(i, self.rows_is_included[i])
-            if i == TABLE_MAX_ROWS:
-                #  Fill with elipsis to indicate there is more data.
-                for j in range(len(row_split)):
-                    elipsis_item = QTableWidgetItem("...")
-                    elipsis_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                    self.table.setItem(i + 1, j, elipsis_item)
-                break
 
         self.table.show()
 
