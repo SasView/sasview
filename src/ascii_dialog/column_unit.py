@@ -8,6 +8,14 @@ from dataset_types import default_units
 class ColumnUnit(QWidget):
     """Widget with 2 combo boxes: one allowing the user to pick a column, and
     another to specify the units for that column."""
+    def __init__(self, options) -> None:
+        super().__init__()
+        self.col_widget = self.create_col_combo_box(options)
+        self.unit_widget = self.create_unit_combo_box(self.col_widget.currentText())
+        self.layout = QHBoxLayout(self)
+        self.layout.addWidget(self.col_widget)
+        self.layout.addWidget(self.unit_widget)
+
     column_changed = Signal()
 
     def create_col_combo_box(self, options: list[str]) -> QComboBox:
@@ -64,12 +72,3 @@ class ColumnUnit(QWidget):
     def current_column(self):
         """The currently selected column."""
         return self.col_widget.currentText()
-
-
-    def __init__(self, options) -> None:
-        super().__init__()
-        self.col_widget = self.create_col_combo_box(options)
-        self.unit_widget = self.create_unit_combo_box(self.col_widget.currentText())
-        self.layout = QHBoxLayout(self)
-        self.layout.addWidget(self.col_widget)
-        self.layout.addWidget(self.unit_widget)
