@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(1, 'C:/Sasview_dev')
 import numpy as np
 import math
 import csv

@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(1, 'C:/Sasview_dev')
 import pytest
 from GSASIIsasd import SizeDistribution
 import unittest
