@@ -17,9 +17,11 @@ def guess_columns(col_count: int, dataset_type: DatasetType) -> list[str]:
 
 def guess_starting_position(split_csv: list[list[str]]) -> int:
     """Try to look for a line where the first item in the row can be converted
-    to a number. If such a line doesn't existTry to look for a line where the
+    to a number. If such a line doesn't exist, try to look for a line where the
     first item in the row can be converted to a number. If such a line doesn't
-    exist, then just return 0 as the starting position."""
+    exist, then just return 0 as the starting position.
+
+    """
     for i, row in enumerate(split_csv):
         if row[0].replace('.', '').replace('-', '').isdigit():
             return i
