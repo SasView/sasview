@@ -161,7 +161,7 @@ class AsciiDialog(QWidget):
         starting_pos = self.startline_entry.value()
         col_count = self.colcount_entry.value()
 
-        self.table.setRowCount(min(len(self.raw_csv), TABLE_MAX_ROWS))
+        self.table.setRowCount(min(len(self.raw_csv), TABLE_MAX_ROWS + 2))
         self.table.setColumnCount(col_count + 1)
         self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.col_names())
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -184,6 +184,10 @@ class AsciiDialog(QWidget):
                 item = QTableWidgetItem(col_value)
                 self.table.setItem(i, j + 1, item)
             if i == TABLE_MAX_ROWS:
+                #  Fill with elipsis to indicate there is more data.
+                for j in range(len(row_split)):
+                    elipsis_item = QTableWidgetItem("...")
+                    self.table.setItem(i + 1, j, elipsis_item)
                 break
 
         self.table.show()
