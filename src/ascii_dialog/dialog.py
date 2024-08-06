@@ -139,10 +139,6 @@ class AsciiDialog(QWidget):
             return Qt.CheckState.Checked
 
     def fill_table(self):
-        # At the moment, we're just going to start making the table from where
-        # the user told us to start. Just trying this for now. We might want to
-        # draw the full table later.
-
         # Don't try to fill the table if there's no data.
         if self.raw_csv is None:
             return
