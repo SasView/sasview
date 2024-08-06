@@ -183,6 +183,7 @@ class AsciiDialog(QWidget):
                     continue # Ignore rows that have extra columns.
                 item = QTableWidgetItem(col_value)
                 self.table.setItem(i, j + 1, item)
+            self.set_row_typesetting(i, self.rows_is_included[i])
             if i == TABLE_MAX_ROWS:
                 #  Fill with elipsis to indicate there is more data.
                 for j in range(len(row_split)):
@@ -192,10 +193,6 @@ class AsciiDialog(QWidget):
                 break
 
         self.table.show()
-
-        # Apply typesetting to each row.
-        for row in range(self.table.rowCount()):
-            self.set_row_typesetting(row, self.rows_is_included[row])
 
     def current_dataset_type(self) -> DatasetType:
         """Get the dataset type that the user has currently selected."""
