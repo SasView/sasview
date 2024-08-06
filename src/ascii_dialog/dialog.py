@@ -193,9 +193,14 @@ class AsciiDialog(QWidget):
             self.set_row_typesetting(row, self.rows_is_included[row])
 
     def current_dataset_type(self) -> DatasetType:
+        """Get the dataset type that the user has currently selected."""
         return dataset_dictionary[self.dataset_combobox.currentText()]
 
     def set_row_typesetting(self, row: int, item_checked: bool) -> None:
+        """Set the typesetting for the given role depending on whether it is to
+        be included in the data being loaded, or not.
+
+        """
         starting_pos = self.startline_entry.value()
         for column in range(1, self.table.columnCount() + 1):
             item = self.table.item(row, column)
@@ -213,6 +218,7 @@ class AsciiDialog(QWidget):
 
     @Slot()
     def load(self) -> None:
+        """Open the file loading dialog, and load the file the user selects."""
         result = QFileDialog.getOpenFileName(self)
         # Happens when the user cancels without selecting a file. There isn't a
         # file to load in this case.
@@ -232,19 +238,26 @@ class AsciiDialog(QWidget):
 
     @Slot()
     def update_colcount(self) -> None:
+        """Triggered when the amount of columns the user has selected has
+        changed.
+
+        """
         self.col_editor.set_cols(self.colcount_entry.value())
         self.fill_table()
 
     @Slot()
     def update_startpos(self) -> None:
+        """Triggered when the starting position of the data has changed."""
         self.fill_table()
 
     @Slot()
     def update_seperator(self) -> None:
+        """Changed when the user modifies the set of seperators being used."""
         self.fill_table()
 
     @Slot()
     def update_column(self) -> None:
+        """Triggered when any of the columns has been changed."""
         self.fill_table()
         required_missing = self.required_missing()
         duplicates = self.duplicate_columns()
@@ -252,12 +265,14 @@ class AsciiDialog(QWidget):
 
     @Slot()
     def seperator_toggle(self) -> None:
+        """Triggered when one of the seperator check boxes has been toggled."""
         check_box = self.sender()
         self.seperators[check_box.text()] = check_box.isChecked()
         self.fill_table()
 
     @Slot()
     def change_dataset_type(self) -> None:
+        """Triggered when the selected dataset type has changed."""
         new_dataset = self.current_dataset_type()
         self.col_editor.replace_options(new_dataset.required + new_dataset.optional)
 
@@ -267,16 +282,22 @@ class AsciiDialog(QWidget):
 
     @Slot()
     def update_row_status(self, row: int) -> None:
+        """Triggered when the status of row has changed."""
         new_status = self.table.cellWidget(row, 0).isChecked()
         self.rows_is_included[row] = new_status
         self.set_row_typesetting(row, new_status)
 
     def required_missing(self) -> list[str]:
+        """Returns all the columns that are required by the dataset type but
+        have not currently been selected.
+
+        """
         dataset = self.current_dataset_type()
         missing_columns = [col for col in dataset.required if col not in self.col_editor.col_names()]
         return missing_columns
 
     def duplicate_columns(self) -> list[str]:
+        """Returns all of the columns which have been sselected multiple times."""
         col_names = self.col_editor.col_names()
         return [col for col in col_names if col_names.count(col) > 1]
 
