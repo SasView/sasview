@@ -6,6 +6,8 @@ from dataset_types import default_units
 
 
 class ColEditor(QWidget):
+    """An editor widget which allows the user to specify the columns of the data
+    from a set of options based on which dataset type has been selected."""
     column_changed = Signal()
 
     @Slot()
@@ -27,6 +29,8 @@ class ColEditor(QWidget):
             self.option_widgets.append(new_widget)
 
     def set_cols(self, new_cols: int):
+        """Set the amount of columns for the user to edit."""
+
         # Decides whether we need to extend the current set of combo boxes, or
         # remove some.
         if self.cols < new_cols:
@@ -49,6 +53,11 @@ class ColEditor(QWidget):
         self.column_changed.emit()
 
     def set_col_order(self, cols: list[str]):
+        """Sets the series of currently selected columns to be cols, in that
+        order. If there are not enough column widgets include as many of the
+        columns in cols as possible.
+
+        """
         try:
             for i, col_name in enumerate(cols):
                 self.option_widgets[i].set_current_column(col_name)
@@ -56,9 +65,11 @@ class ColEditor(QWidget):
             pass # Can ignore because it means we've run out of widgets.
 
     def col_names(self) -> list[str]:
+        """Get a list of all of the currently selected columns."""
         return [widget.current_column for widget in self.option_widgets]
 
     def replace_options(self, new_options: list[str]) -> None:
+        """Replace options from which the user can choose for each column."""
         self.options = new_options
         for widget in self.option_widgets:
             widget.replace_options(new_options)
