@@ -5,7 +5,7 @@ from PySide6.QtCore import Slot
 from warning_label import WarningLabel
 from col_editor import ColEditor
 from row_status_widget import RowStatusWidget
-from guess import guess_column_count, guess_columns, guess_seperator, guess_starting_position
+from guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
 from dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 import re
