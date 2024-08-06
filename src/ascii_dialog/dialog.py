@@ -275,7 +275,6 @@ class AsciiDialog(QWidget):
     @Slot()
     def change_dataset_type(self) -> None:
         """Triggered when the selected dataset type has changed."""
-        new_dataset = self.current_dataset_type()
         options = self.dataset_options()
         self.col_editor.replace_options(options)
 
