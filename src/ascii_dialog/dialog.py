@@ -187,6 +187,7 @@ class AsciiDialog(QWidget):
                 #  Fill with elipsis to indicate there is more data.
                 for j in range(len(row_split)):
                     elipsis_item = QTableWidgetItem("...")
+                    elipsis_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     self.table.setItem(i + 1, j, elipsis_item)
                 break
 
