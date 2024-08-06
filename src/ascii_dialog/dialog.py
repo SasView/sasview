@@ -7,7 +7,7 @@ from col_editor import ColEditor
 from row_status_widget import RowStatusWidget
 from guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
-from dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
+from dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans, dataset_dictionary
 import re
 
 TABLE_MAX_ROWS = 1000
@@ -193,12 +193,7 @@ class AsciiDialog(QWidget):
             self.set_row_typesetting(row, self.rows_is_included[row])
 
     def current_dataset_type(self) -> DatasetType:
-        # TODO: Using linear search but should probably just use a dictionary
-        # later.
-        for type in [one_dim, two_dim, sesans]:
-            if type.name == self.dataset_combobox.currentText():
-                return type
-        return one_dim
+        return dataset_dictionary[self.dataset_combobox.currentText()]
 
     def set_row_typesetting(self, row: int, item_checked: bool) -> None:
         starting_pos = self.startline_entry.value()
