@@ -270,10 +270,6 @@ class AsciiDialog(QWidget):
         col_names = self.col_editor.col_names()
         return [col for col in col_names if col_names.count(col) > 1]
 
-    def set_required_error(self, required_missing):
-        self.warning_label.setText(f'The following columns are missing: {required_missing}')
-        self.warning_label.setStyleSheet("QLabel { color: red}")
-
 if __name__ == "__main__":
     app = QApplication([])
 
