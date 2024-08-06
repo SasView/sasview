@@ -1,13 +1,12 @@
-from PySide6 import QtGui
-from PySide6.QtGui import QColor, QIntValidator, QPalette, Qt
-from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QSizePolicy, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
+from PySide6.QtGui import QColor, Qt
+from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Slot
 from warning_label import WarningLabel
 from col_editor import ColEditor
 from row_status_widget import RowStatusWidget
 from guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
-from dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans, dataset_dictionary
+from dataset_types import DatasetType, dataset_types, dataset_dictionary
 import re
 
 TABLE_MAX_ROWS = 1000
