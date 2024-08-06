@@ -6,9 +6,13 @@ from PySide6.QtGui import QRegularExpressionValidator
 from dataset_types import default_units
 
 class ColumnUnit(QWidget):
+    """Widget with 2 combo boxes: one allowing the user to pick a column, and
+    another to specify the units for that column."""
     column_changed = Signal()
 
     def create_col_combo_box(self, options: list[str]) -> QComboBox:
+        """Create the combo box for specifying the column based on the given
+        options."""
         new_combo_box = QComboBox()
         for option in options:
             new_combo_box.addItem(option)
@@ -19,16 +23,19 @@ class ColumnUnit(QWidget):
         return new_combo_box
 
     def create_unit_combo_box(self, selected_option: str) -> QComboBox:
+        """Create the combo box for specifying the unit for selected_option"""
         new_combo_box = QComboBox()
         default_unit = default_units[selected_option]
         new_combo_box.addItem(default_unit)
         return new_combo_box
 
     def replace_options(self, new_options) -> None:
+        """Replace the old options for the column with new_options"""
         self.col_widget.clear()
         self.col_widget.addItems(new_options)
 
     def set_current_column(self, new_column_value: str) -> None:
+        """Change the current selected column to new_column_value"""
         self.col_widget.setCurrentText(new_column_value)
         new_unit = default_units[new_column_value]
         self.unit_widget.clear()
@@ -55,6 +62,7 @@ class ColumnUnit(QWidget):
 
     @property
     def current_column(self):
+        """The currently selected column."""
         return self.col_widget.currentText()
 
 
