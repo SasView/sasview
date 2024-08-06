@@ -118,7 +118,7 @@ class AsciiDialog(QWidget):
 
         return re.split(expr, line)
 
-    def attempt_guesses(self):
+    def attempt_guesses(self) -> None:
         split_csv = [self.split_line(line.strip()) for line in self.raw_csv]
 
         self.initial_starting_pos = guess_starting_position(split_csv)
@@ -132,13 +132,13 @@ class AsciiDialog(QWidget):
         self.colcount_entry.setValue(guessed_colcount)
         self.startline_entry.setValue(self.initial_starting_pos)
 
-    def guess_row_status(self, row) -> Qt.CheckState:
+    def guess_row_status(self, row: int) -> Qt.CheckState:
         if row < self.initial_starting_pos:
             return Qt.CheckState.PartiallyChecked
         else:
             return Qt.CheckState.Checked
 
-    def fill_table(self):
+    def fill_table(self) -> None:
         # Don't try to fill the table if there's no data.
         if self.raw_csv is None:
             return
@@ -185,7 +185,7 @@ class AsciiDialog(QWidget):
                 return type
         return one_dim
 
-    def set_row_typesetting(self, row, item_checked: bool):
+    def set_row_typesetting(self, row: int, item_checked: bool) -> None:
         starting_pos = self.startline_entry.value()
         for column in range(1, self.table.columnCount() + 1):
             item = self.table.item(row, column)
@@ -202,7 +202,7 @@ class AsciiDialog(QWidget):
 
 
     @Slot()
-    def load(self):
+    def load(self) -> None:
         result = QFileDialog.getOpenFileName(self)
         # Happens when the user cancels without selecting a file. There isn't a
         # file to load in this case.
@@ -221,33 +221,33 @@ class AsciiDialog(QWidget):
         self.fill_table()
 
     @Slot()
-    def update_colcount(self):
+    def update_colcount(self) -> None:
         self.col_editor.set_cols(self.colcount_entry.value())
         self.fill_table()
 
     @Slot()
-    def update_startpos(self):
+    def update_startpos(self) -> None:
         self.fill_table()
 
     @Slot()
-    def update_seperator(self):
+    def update_seperator(self) -> None:
         self.fill_table()
 
     @Slot()
-    def update_column(self):
+    def update_column(self) -> None:
         self.fill_table()
         required_missing = self.required_missing()
         duplicates = self.duplicate_columns()
         self.warning_label.update(required_missing, duplicates)
 
     @Slot()
-    def seperator_toggle(self):
+    def seperator_toggle(self) -> None:
         check_box = self.sender()
         self.seperators[check_box.text()] = check_box.isChecked()
         self.fill_table()
 
     @Slot()
-    def change_dataset_type(self):
+    def change_dataset_type(self) -> None:
         new_dataset = self.current_dataset_type()
         self.col_editor.replace_options(new_dataset.required + new_dataset.optional)
 
@@ -256,7 +256,7 @@ class AsciiDialog(QWidget):
         self.col_editor.set_col_order(columns)
 
     @Slot()
-    def update_row_status(self, row):
+    def update_row_status(self, row: int) -> None:
         new_status = self.table.cellWidget(row, 0).isChecked()
         self.rows_is_included[row] = new_status
         self.set_row_typesetting(row, new_status)
