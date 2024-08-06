@@ -7,6 +7,10 @@ def guess_column_count(split_csv: list[list[str]], starting_pos: int) -> int:
     return len(split_csv[starting_pos])
 
 def guess_columns(col_count: int, dataset_type: DatasetType) -> list[str]:
+    """Based on the amount of columns specified in col_count, try to find a set
+    of columns that best matchs the dataset_type.
+
+    """
     # Ideally we want an exact match but if the ordering is bigger than the col
     # count then we can accept that as well.
     for order_list in dataset_type.expected_orders:
