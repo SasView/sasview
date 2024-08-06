@@ -6,6 +6,7 @@ import gzip # Use gzip to compress data and make unreadable, better chance of ca
 import json # Use json to process data to avoid security vulnerabilities of pickle
 import logging
 import os
+import requests
 
 from hashlib import sha224 # Use hashlib to create hashes of files to compare
 from pathlib import Path
@@ -34,6 +35,22 @@ def TEMPORARY():
         createDat()
         saveToDat(getCurrentState(), 'active')
         saveToDat(getCurrentState(), 'base')
+    
+    if not os.path.exists(SAVE_DATA_DIRECTORY / 'static.dat'):
+        if not os.path.exists(SAVE_DATA_DIRECTORY):
+            os.mkdir(SAVE_DATA_DIRECTORY)
+
+        structure = {'static': {}}
+
+        # Create json file
+        with gzip.open(SAVE_DATA_DIRECTORY / 'static.dat', 'wt', encoding="utf-8") as f:
+            f.write(json.dumps(structure, ensure_ascii=False, indent=4))
+        
+        json_data = readFromDat(SAVE_DATA_DIRECTORY / 'static.dat')
+        json_data['static'] = getCurrentState()
+
+        with gzip.open(SAVE_DATA_DIRECTORY / 'static.dat', 'wt', encoding="utf-8") as f:
+            f.write(json.dumps(json_data, ensure_ascii=False, indent=4))
 
 def updateHash(filepath: Path):
     """
@@ -44,7 +61,7 @@ def updateHash(filepath: Path):
     new_hash = getHash(filepath)
 
     # Retrieve active data and update hash
-    active_data = readFromDat()['active']
+    active_data = readFromDat(SAVE_DATA_FILE)['active']
     try:
         active_data[str(filepath)] = new_hash
     except KeyError:
@@ -65,7 +82,7 @@ def checkDiffs():
         raise FileNotFoundError("No previous documentation state found. Uploading capabilities not available.")
         #TODO: Replace with some sort of popup message
 
-    json_data = readFromDat()
+    json_data = readFromDat(SAVE_DATA_FILE)
     cur_docstate = json_data['active']
     prev_state = json_data['base']
     
@@ -101,8 +118,9 @@ def syncLists(list1, list2):
 def checkIfUpdated(new_file, old_file, dif_dict):
     """
     Helper function that checks if a file has been updated since the last upload.
-    :param tuple: (tuple(str, str), tuple(str, str), dict) - tuple of tuples containing file path and last modified date;
-    dictionary of files that have been updated since last upload.
+    :param new_file: tuple(str, str) - tuple containing file path and hash of current state
+    :param old_file: tuple(str, str) - tuple containing file path and hash of previous state
+    :param dif_dict: dictionary of files that have been updated since last upload.
     """
 
     if new_file[0] != old_file[0]:
@@ -124,7 +142,7 @@ def createDat():
     if not os.path.exists(SAVE_DATA_DIRECTORY):
         os.mkdir(SAVE_DATA_DIRECTORY)
 
-    structure = {'active': {}, 'base': {}, 'static': {}}
+    structure = {'active': {}, 'base': {}}
 
     # Create json file
     with gzip.open(SAVE_DATA_FILE, 'wt', encoding="utf-8") as f:
@@ -176,22 +194,43 @@ def saveToDat(data: dict, library: str):
         logger.warning("Documentation from last upload not found! Created new data file.")
         #TODO: Compare active to static and if they are not the same, you have a more serious problem!
         
-    json_data = readFromDat()
+    json_data = readFromDat(SAVE_DATA_FILE)
     json_data[library] = data
 
     with gzip.open(SAVE_DATA_FILE, 'wt', encoding="utf-8") as f:
         f.write(json.dumps(json_data))
 
-def readFromDat():
+def readFromDat(path: Path):
     """
     Open data file and return data as a dict.
     'active': current filenames and hashes
     'base': filenames and hashes from last upload to GitHub
     """
-    with gzip.open(SAVE_DATA_FILE, 'rt', encoding="utf-8") as f:
+    with gzip.open(path, 'rt', encoding="utf-8") as f:
             raw = f.read()
             json_data = json.loads(raw)
     return json_data
+
+def getHashes(file_path: Path):
+    """
+    Compare the hashes of a file accross all databases. Effectivly tells you the status of the file edits.
+    :param file_path: path to file
+    :return: dictionary of hashes from each database
+    """
+    save_data_json = readFromDat(SAVE_DATA_FILE)
+    static_path = [SAVE_DATA_DIRECTORY / file for file in os.listdir(SAVE_DATA_DIRECTORY) if file.endswith('.dat') and file != os.path.basename(SAVE_DATA_FILE)] # Should just be one file
+    static_json = readFromDat(static_path[0])
+
+    # Add static database to save_data database
+    save_data_json['static'] = static_json['static']
+
+    hash_dict = {}
+
+    for database in save_data_json:
+        if file_path in save_data_json[database]:
+            hash_dict[database] = save_data_json[database][file_path]
+
+    return hash_dict
 
 class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
     """
@@ -201,6 +240,8 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
     def __init__(self, parent=None):
         super(PatchUploader, self).__init__(parent._parent)
         self.setupUi(self)
+
+        self.uploadURL = "http://127.0.0.1:5000/post" # Test server for development, TODO replace later
 
         self.model = QtGui.QStandardItemModel()
 
@@ -217,11 +258,18 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Connect signals to slots.
         """
-        self.cmdSubmit.clicked.connect(self.upload)
+        self.cmdSubmit.clicked.connect(self.apiInteraction)
     
-    def upload(self):
+    def apiInteraction(self):
         """
-        Upload documentation to GitHub
+        Upload documentation to DANSE API and handle response.
+        """
+        response = self.postRequest()
+        # TODO: Handle response
+    
+    def postRequest(self):
+        """
+        Format and send POST request
         """
         files_to_upload = []
 
@@ -233,7 +281,32 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         author_name = self.txtName.text()
         change_msg = self.txtChanges.toPlainText()
 
-        #TODO: Implement upload to GitHub API
+        # Check to see if the user has already submitted the file to a branch
+        branches_exist = {}
+        for file in files_to_upload:
+            hashes = getHashes(file)
+            if hashes['static'] != hashes['base']:
+                # User's submission is already submitted to a branch
+                branches_exist[file] = True
+            else:
+                branches_exist[file] = False
+        
+        # Format files into a dictionary and open them as binary packets for upload
+        files = {}
+        for file in files_to_upload:
+            files[file] = open(file, 'rb')
+
+        #Format into a json request to send to DANSE-2 API
+        json_packet = json.dumps(
+                    {'sasview_version': __version__,
+                       'author': author_name,
+                       'changes': change_msg,
+                       'branches_exist': branches_exist
+                    }
+        )
+        response = requests.post(self.uploadURL, files=files, json=json_packet)
+        return response
+
     
     def isChecked(self, basename):
         """
