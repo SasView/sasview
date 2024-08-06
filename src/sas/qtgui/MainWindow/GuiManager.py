@@ -36,11 +36,11 @@ from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orienta
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
 from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
-
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
+from sas.qtgui.Utilities.About.About import About
+
 from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
-from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.MainWindow.CategoryManager import CategoryManager
 from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
@@ -51,7 +51,6 @@ from sas.qtgui.Calculators.SldPanel import SldPanel
 from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
-from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 
@@ -184,7 +183,6 @@ class GuiManager:
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
-        self.aboutWidget = AboutBox()
         self.categoryManagerWidget = CategoryManager(self._parent, manager=self)
 
         self.grid_window = None
@@ -207,8 +205,8 @@ class GuiManager:
         self.DVCalculator = DensityPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
-        self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
+        self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNew(self)
@@ -294,7 +292,7 @@ class GuiManager:
         # create action for this plot
         action = self._workspace.menuWindow.addAction(name)
         # connect action to slot
-        action.triggered.connect(lambda chk, item=name: self.plotSelectedSlot(name))
+        action.triggered.connect(lambda: self.plotSelectedSlot(name))
         # add action to windows menu
         self._workspace.menuWindow.addAction(action)
 
@@ -663,6 +661,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
+        self.WhatsNew = WhatsNew(strictly_newer=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
@@ -781,6 +780,11 @@ class GuiManager:
         self._workspace.actionWelcomeWidget.triggered.connect(self.actionWelcome)
         self._workspace.actionCheck_for_update.triggered.connect(self.actionCheck_for_update)
         self._workspace.actionWhat_s_New.triggered.connect(self.actionWhatsNew)
+        # Dev
+        self._workspace.menuDev.menuAction().setVisible(config.DEV_MENU)
+        self._workspace.actionParticle_Editor.triggered.connect(self.particleEditor)
+        self._workspace.actionAscii_Loader.triggered.connect(self.asciiLoader)
+
 
         self.communicate.sendDataToGridSignal.connect(self.showBatchOutput)
         self.communicate.resultPlotUpdateSignal.connect(self.showFitResults)
@@ -1041,6 +1045,10 @@ class GuiManager:
         """
         """
         try:
+            # delayed import due to numba instantiation in GSC
+            from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
+            if self.GENSASCalculator is None:
+                self.GENSASCalculator = GenericScatteringCalculator(self)
             self.GENSASCalculator.show()
         except Exception as ex:
             logging.error(str(ex))
@@ -1264,8 +1272,8 @@ class GuiManager:
         """
         Open the page with tutorial PDF links
         """
-        helpfile = "/user/tutorial.html"
-        self.showHelp(helpfile)
+
+        webbrowser.open("https://www.sasview.org/docs/user/tutorial.html")
 
     def actionAcknowledge(self):
         """
@@ -1286,7 +1294,8 @@ class GuiManager:
         # Update the about box with current version and stuff
 
         # TODO: proper sizing
-        self.aboutWidget.show()
+        about = About()
+        about.exec()
 
     def actionCheck_for_update(self):
         """
@@ -1365,3 +1374,14 @@ class GuiManager:
         Save the config file based on current session values
         """
         config.save()
+
+
+    # ============= DEV =================
+
+    def particleEditor(self):
+        from sas.qtgui.Perspectives.ParticleEditor.DesignWindow import show_particle_editor
+        show_particle_editor()
+
+
+    def asciiLoader(self):
+        pass
