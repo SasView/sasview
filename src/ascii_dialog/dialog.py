@@ -104,9 +104,9 @@ class AsciiDialog(QWidget):
     def split_line(self, line: str) -> list[str]:
         expr = ''
         for seperator, isenabled in self.seperators.items():
-            if expr != r'':
-                expr += r'|'
             if isenabled:
+                if expr != r'':
+                    expr += r'|'
                 match seperator:
                     case 'Comma':
                         seperator_text = r','
