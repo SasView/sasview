@@ -292,19 +292,26 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
                 branches_exist[file] = False
         
         # Format files into a dictionary and open them as binary packets for upload
-        files = {}
+        rst_content = {}
         for file in files_to_upload:
-            files[file] = open(file, 'rb')
+            rst_content[file] = open(file, 'rb')
 
         #Format into a json request to send to DANSE-2 API
-        json_packet = json.dumps(
-                    {'sasview_version': __version__,
+        json_packet = {'sasview_version': __version__,
                        'author': author_name,
                        'changes': change_msg,
                        'branches_exist': branches_exist
                     }
-        )
-        response = requests.post(self.uploadURL, files=files, json=json_packet)
+
+        files = {'json': (None, json.dumps(json_packet), 'application/json')}
+        for key, value in rst_content.items():
+            files[key] = (key, value, 'application/octet-stream')
+
+        response = requests.post(self.uploadURL, files=files)
+
+        for _, file in rst_content.items():
+            file.close()
+
         return response
 
     
