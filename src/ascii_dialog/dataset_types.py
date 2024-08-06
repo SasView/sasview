@@ -39,6 +39,8 @@ sesans = DatasetType(
 
 dataset_types = {dataset.name for dataset in [one_dim, two_dim, sesans]}
 
+dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
+
 
 #
 # Some default units, this is not how they should be represented, some might not be correct
