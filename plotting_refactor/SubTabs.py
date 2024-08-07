@@ -87,7 +87,7 @@ class SubTabs(QTabWidget):
                                                   norm=matplotlib.colors.LogNorm(vmin=np.min(y_fit), vmax=np.max(y_fit)),
                                                   cmap=colormap_modifier)
                             elif plottable.type_num == 6:
-                                y_res = np.absolute(np.subtract(y_fit,y))
+                                y_res = np.absolute(np.subtract(y_fit, y))
                                 cm = ax[j].pcolor(x[0], x[1], y_res,
                                                   norm=matplotlib.colors.LogNorm(vmin=np.min(y_res), vmax=np.max(y_res)),
                                                   cmap=colormap_modifier)

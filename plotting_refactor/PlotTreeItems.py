@@ -1,6 +1,10 @@
-#items that are supposed to be used in the plottreewidget for checking if an item is for example a tab or a subtab
 from PySide6.QtWidgets import QTreeWidgetItem
+
 class TabItem(QTreeWidgetItem):
+    """
+    Class for representation in the PlotTreeWidget. Saves the fitpage index to know, which data needs to be plotted
+    in the redrawing process of this tab.
+    """
     def __init__(self, parent, name, fitpage_index):
         super().__init__(parent, name)
         self._fitpage_index = fitpage_index
@@ -11,6 +15,10 @@ class TabItem(QTreeWidgetItem):
         return self._fitpage_index
 
 class SubTabItem(TabItem):
+    """
+    Class for representation in the PlotTreeWidget. Has both fitpage index (from the parent TabItem) and subtab_index
+    for plotting purposes in the redrawing process.
+    """
     def __init__(self, parent, name, fitpage_index, subtab_index):
         super().__init__(parent, name, fitpage_index)
         self._subtab_index = subtab_index
@@ -20,6 +28,10 @@ class SubTabItem(TabItem):
         return self._subtab_index
 
 class PlotItem(SubTabItem):
+    """
+    Class for representation in the PlotTreeWidget. Has fitpage_index and subtab_index from the parent items. _ax_index
+    and _is_plot_2d class attributes are used when the PlotTreeWidget item is drawn for redrawing.
+    """
     def __init__(self, parent, name, fitpage_index, subtab_index, ax_index, is_plot_2d):
         super().__init__(parent, name, fitpage_index, subtab_index)
         self._ax_index = ax_index
@@ -34,6 +46,10 @@ class PlotItem(SubTabItem):
         return self._is_plot_2d
 
 class PlottableItem(QTreeWidgetItem):
+    """
+    Class for representation in the PlotTreeWidget. Has _data_id and _type_num for replotting purposes in the redrawing
+    process.
+    """
     def __init__(self, parent, name, data_id, type_num):
         super().__init__(parent, name)
         self._data_id = data_id
