@@ -1,4 +1,4 @@
-from GSASIIsasd import SizeDistribution
+from maxEnt_method import SizeDistribution
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
