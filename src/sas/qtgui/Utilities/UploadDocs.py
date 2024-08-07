@@ -7,10 +7,12 @@ import json # Use json to process data to avoid security vulnerabilities of pick
 import logging
 import os
 import requests
+import time
 
 from hashlib import sha224 # Use hashlib to create hashes of files to compare
 from pathlib import Path
 from PySide6 import QtWidgets, QtCore, QtGui
+from twisted.internet import threads
 
 from sas.qtgui.Utilities.UI.PatchUploaderUI import Ui_PatchUploader
 
@@ -242,6 +244,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         self.setupUi(self)
 
         self.uploadURL = "http://127.0.0.1:5000/post" # Test server for development, TODO replace later
+        self.parent = parent
 
         self.model = QtGui.QStandardItemModel()
 
@@ -264,12 +267,13 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Upload documentation to DANSE API and handle response.
         """
-        response = self.postRequest()
+        files = self.genPostRequest()
+        self.createThread(files)
         # TODO: Handle response
     
-    def postRequest(self):
+    def genPostRequest(self):
         """
-        Format and send POST request
+        Format POST request
         """
         files_to_upload = []
 
@@ -307,14 +311,34 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         for key, value in rst_content.items():
             files[key] = (key, value, 'application/octet-stream')
 
-        response = requests.post(self.uploadURL, files=files)
-
-        for _, file in rst_content.items():
-            file.close()
-
-        return response
-
+        return files
     
+    def createThread(self, files):
+        """
+        Create a thread to send the request to the API
+        """
+        self.parent.communicate.statusBarUpdateSignal.emit('Beginning documentation upload...')
+        d = threads.deferToThread(self.sendRequest, self.uploadURL, files)
+        d.addCallback(self.docUploadComplete)
+        print(d)
+        
+    @staticmethod
+    def sendRequest(url, files):
+        """
+        Send the request to the API in separate thread
+        """
+        thread = DocsUploadThread(url, files)
+
+        return thread.response
+    
+    def docUploadComplete(self, response):
+        """
+        Handle the response from the API
+        """
+        print("Response:", response)
+        if response.status_code == 200:
+            self.parent.communicate.statusBarUpdateSignal.emit('Documentation uploaded successfully.')
+
     def isChecked(self, basename):
         """
         Return True if the checkbox for the given file is checked.
@@ -399,4 +423,34 @@ class CheckBoxTextDelegate(QtWidgets.QStyledItemDelegate):
                 return True
         # Pass the event on if it's not handled
         return False
+
+class DocsUploadThread():
+    """Thread performing a request to GitHub
+    NOTE: Not using CalcThread because it created weird heisenbugs that interfered with callbacks (also overkill)
+    """
+
+    def __init__(self,
+                 upload_url,
+                 files,):
+        self.url = upload_url
+        self.files = files
+        self.response = None
+        self.compute()
+
+    def compute(self):
+        """
+        Upload the docs in a separate thread
+        """
+        try:
+            response = requests.post(self.url, files=self.files)
+
+            # Close the file bytestreams after the request is sent
+            for key, file in self.files.items():
+                if file[1] is not None and key != 'json':
+                    file[1].close()
+                
+            self.response = response
+            return
+        except KeyboardInterrupt as msg:
+            logging.log(0, msg)
     
