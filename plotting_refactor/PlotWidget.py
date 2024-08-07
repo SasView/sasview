@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QTabWidget, QWidget, QVBoxLayout
+from PySide6.QtWidgets import QTabWidget
 from SubTabs import SubTabs
 
 class PlotWidget(QTabWidget):
