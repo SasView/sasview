@@ -11,7 +11,7 @@ class FitPage(QtWidgets.QWidget, Ui_fitPageWidget):
         super(FitPage, self).__init__()
         self.setupUi(self)
 
-        #fitPageIdentifier keeps track of which number this fitpage is identifier by (it is incremental)
+        #identifier keeps track of which number this fitpage is identifier by (it is incremental)
         self._identifier = identifier
 
         self.comboBoxFormFactor.addItems(["Sphere", "Cylinder"])
