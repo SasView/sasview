@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets
 
-from DataViewerUI import Ui_DataViewer
+from UI.DataViewerUI import Ui_DataViewer
 from PlotWidget import PlotWidget
 from DataTreeWidget import DataTreeWidget
 from PlotTreeWidget import PlotTreeWidget

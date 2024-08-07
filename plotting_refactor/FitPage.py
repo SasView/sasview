@@ -1,5 +1,5 @@
 from PySide6 import QtWidgets
-from FitPageUI import Ui_fitPageWidget
+from UI.FitPageUI import Ui_fitPageWidget
 
 
 class FitPage(QtWidgets.QWidget, Ui_fitPageWidget):
