@@ -3,8 +3,6 @@ from PySide6.QtCore import Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
 from typing import List
 import matplotlib.figure
-import matplotlib.colors as colors
-import matplotlib.gridspec as gridspec
 from PlotTreeItems import PlottableItem
 from PlotModifiers import PlotModifier, ModifierLinecolor, ModifierLinestyle, ModifierColormap
 

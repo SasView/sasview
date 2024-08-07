@@ -1,5 +1,4 @@
 import sys
-import os
 import traceback
 from PySide6 import QtWidgets
 
