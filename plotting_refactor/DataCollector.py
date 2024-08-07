@@ -22,7 +22,7 @@ class DataCollector:
         # search for an existing dataset with the right fitpage_index
         existing_dataset_index = -1
         for i, dataset in enumerate(self._datasets):
-            if dataset.get_fitpage_index() == fitpage_index:
+            if dataset.fitpage_index == fitpage_index:
                 existing_dataset_index = i
 
         if existing_dataset_index == -1:
@@ -35,10 +35,10 @@ class DataCollector:
         else:
             # update values for existing dataset with respect to the number boxes in the fitpage
             x_data, y_data, y_fit = self.simulate_data(main_window, create_fit, checked_2d)
-            self._datasets[existing_dataset_index].set_x_data(x_data)
-            self._datasets[existing_dataset_index].set_y_data(y_data)
-            self._datasets[existing_dataset_index].set_y_fit(y_fit)
-            self._datasets[existing_dataset_index].set_2d(checked_2d)
+            self._datasets[existing_dataset_index].x_data = x_data
+            self._datasets[existing_dataset_index].y_data = y_data
+            self._datasets[existing_dataset_index].y_fit = y_fit
+            self._datasets[existing_dataset_index].is_data_2d = checked_2d
 
     def simulate_data(self, main_window: QtWidgets.QMainWindow, create_fit: bool, checked_2d: bool):
         """
@@ -83,21 +83,21 @@ class DataCollector:
         Get x data for certain fitpage index
         """
         dataset = self.find_object_by_property(self._datasets, "fitpage_index", fitpage_index)
-        return dataset.get_x_data()
+        return dataset.x_data
 
     def get_y_data(self, fitpage_index: int) -> list:
         """
         Get y data for certain fitpage index
         """
         dataset = self.find_object_by_property(self._datasets, "fitpage_index", fitpage_index)
-        return dataset.get_y_data()
+        return dataset.y_data
 
     def get_y_fit_data(self, fitpage_index: int) -> list:
         """
         Get y fit data for certain fitpage index
         """
         dataset = self.find_object_by_property(self._datasets, "fitpage_index", fitpage_index)
-        return dataset.get_y_fit()
+        return dataset.y_fit
 
     def get_plotpage_index(self, fitpage_index: int) -> int:
         """
@@ -105,7 +105,7 @@ class DataCollector:
         the plotting widget in which the data is displayed.
         """
         dataset = self.find_object_by_property(self._datasets, "fitpage_index", fitpage_index)
-        return dataset.get_plotpage_index()
+        return dataset.plotpage_index
 
     def set_plot_index(self, fitpage_index: int, plot_index: int):
         """
@@ -113,5 +113,5 @@ class DataCollector:
         major tabs in the plotting widget in which the data is displayed.
         """
         dataset = self.find_object_by_property(self._datasets, "fitpage_index", fitpage_index)
-        dataset.set_plotpage_index(plot_index)
+        dataset.plotpage_index = plot_index
 

@@ -66,8 +66,8 @@ class SubTabs(QTabWidget):
                     plottable_or_modifier_item = tabitem.child(i).child(j).child(k).data(0, 1)
                     if isinstance(plottable_or_modifier_item, PlottableItem):
                         plottable = plottable_or_modifier_item
-                        dataset = self.datacollector.get_data_by_id(plottable.get_data_id())
-                        if dataset.is_2d():
+                        dataset = self.datacollector.get_data_by_id(plottable.data_id)
+                        if dataset.is_data_2d:
 
                             #collect a possible existing colormap plot modifier
                             colormap_modifier = ""
@@ -77,9 +77,9 @@ class SubTabs(QTabWidget):
                             if colormap_modifier == "":
                                 colormap_modifier = "jet"
 
-                            x = dataset.get_x_data()
-                            y = dataset.get_y_data()
-                            y_fit = dataset.get_y_fit()
+                            x = dataset.x_data
+                            y = dataset.y_data
+                            y_fit = dataset.y_fit
                             if plottable.type_num == 4:
                                 cm = ax[j].pcolor(x[0], x[1], y,
                                                   norm=matplotlib.colors.LogNorm(vmin=np.min(y), vmax=np.max(y)),
@@ -95,14 +95,13 @@ class SubTabs(QTabWidget):
                                                   cmap=colormap_modifier)
                         else:
                             if plottable.type_num == 1: #data plot: log-log plot, show only data
-                                ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
+                                ax[j].plot(dataset.x_data, dataset.y_data)
                                 ax[j].set_yscale('log')
                             elif plottable.type_num == 2: #fit plot: log-log plot, show fit and data curve
-                                #ax[j].plot(dataset.get_x_data(), dataset.get_y_data())
-                                ax[j].plot(dataset.get_x_data(), dataset.get_y_fit())
+                                ax[j].plot(dataset.x_data, dataset.y_fit)
                                 ax[j].set_yscale('log')
                             elif plottable.type_num == 3: #residual plot lin-log plot, show calc and show res only
-                                ax[j].plot(dataset.get_x_data(), np.subtract(dataset.get_y_fit(), dataset.get_y_data()))
+                                ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
 
                             # iterate through plottable modifier, e.g. linecolor, linestyle
                             for l in range(plottable.childCount()):

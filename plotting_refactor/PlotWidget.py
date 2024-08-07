@@ -15,8 +15,8 @@ class PlotWidget(QTabWidget):
     def redrawTab(self, tabitem):
         # check if the tab is already existing.
         # if it is not existing: create it. otherwise: recalculate the tab
-        fitpage_index = tabitem.get_fitpage_index()
-        plot_index = self.datacollector.get_data_by_fp(fitpage_index).get_plotpage_index()
+        fitpage_index = tabitem.fitpage_index
+        plot_index = self.datacollector.get_data_by_fp(fitpage_index).plotpage_index
         if plot_index == -1:
             self.datacollector.set_plot_index(fitpage_index, self.count())
             self.addTab(SubTabs(self.datacollector, tabitem),
