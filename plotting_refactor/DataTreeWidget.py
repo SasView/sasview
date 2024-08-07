@@ -1,9 +1,7 @@
-from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QAbstractItemView
-from PySide6.QtCore import QMimeData, QRect, QByteArray, QDataStream, QIODevice, Qt
+from PySide6.QtWidgets import QTreeWidget
+from PySide6.QtCore import QMimeData, QRect, QByteArray, Qt
 from PySide6.QtGui import QDrag
 from DataTreeItems import DataItem
-import DataViewer
-import DataCollector
 
 class DataTreeWidget(QTreeWidget):
     """
