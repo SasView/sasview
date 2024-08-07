@@ -2,15 +2,15 @@ from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QAbstractItemView
 from PySide6.QtCore import QMimeData, QRect, QByteArray, QDataStream, QIODevice, Qt
 from PySide6.QtGui import QDrag
 from DataTreeItems import DataItem
-from DataViewer import DataViewer
-from DataCollector import DataCollector
+import DataViewer
+import DataCollector
 
 class DataTreeWidget(QTreeWidget):
     """
     Tree widget that is appearing in the DataViewer. It represents data stored in the DataCollector by objects from
     DataTreeItems. Instantiating of these DataTreeItems happens in the DataViewer.
     """
-    def __init__(self, dataviewer: DataViewer, datacollector: DataCollector):
+    def __init__(self, dataviewer, datacollector):
         super().__init__(parent=dataviewer)
         self.datacollector = datacollector
         self.setGeometry(QRect(10, 10, 391, 312))
@@ -29,8 +29,8 @@ class DataTreeWidget(QTreeWidget):
             if isinstance(item.data(0, 1), DataItem):
                 drag = QDrag(self)
                 mimeData = QMimeData()
-                mimeData.setData('ID', QByteArray(str(item.data(0, 1).get_data_id())))
-                mimeData.setData('Type', QByteArray(str(item.data(0, 1).get_type_num())))
+                mimeData.setData('ID', QByteArray(str(item.data(0, 1).data_id)))
+                mimeData.setData('Type', QByteArray(str(item.data(0, 1).type_num)))
 
                 drag.setMimeData(mimeData)
                 drag.exec(supportedActions)
