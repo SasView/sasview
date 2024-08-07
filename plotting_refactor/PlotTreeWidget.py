@@ -19,6 +19,7 @@ class PlotTreeWidget(QTreeWidget):
 
     def startDrag(self, supportedActions):
         item = self.currentItem()
+
         if item:
             if isinstance(item, PlotModifier):
                 drag = QDrag(self)
@@ -53,6 +54,7 @@ class PlotTreeWidget(QTreeWidget):
             event.ignore()
 
     def dropEvent(self, event):
+
         if event.mimeData().data('ID'):
             data_id = event.mimeData().data('ID').data()
             data_type = event.mimeData().data('Type').data()
@@ -61,12 +63,15 @@ class PlotTreeWidget(QTreeWidget):
             if isinstance(targetItem.data(0, 1), PlotItem):
                 new_plottable = PlottableItem(targetItem, [str(data_id.decode('utf-8'))],
                                               int(data_id), int(data_type))
+
                 # get the fitpage index and the subtab index of the targetItem, so that they can be activated upon redrawing
-                redraw_fitpage_index = targetItem.data(0, 1).get_figpage_index(),
-                redraw_subtab_index = targetItem.data(0, 1).get_subtab_index()
+                redraw_fitpage_index = targetItem.data(0, 1).fitpage_index
+                redraw_subtab_index = targetItem.data(0, 1).subtab_index
+
             elif isinstance(targetItem.data(0, 1), PlottableItem):
                 # as soon as plottable slots are there, they can be filled in here
                 pass
+
             self.dropSignal.emit(redraw_fitpage_index, redraw_subtab_index)
             event.acceptProposedAction()
 
@@ -75,19 +80,20 @@ class PlotTreeWidget(QTreeWidget):
             data = ctypes.cast(data_address, ctypes.py_object).value
             clone = data.clone()
             targetItem = self.itemAt(event.position().toPoint())
+
             if isinstance(targetItem.data(0, 1), PlottableItem):
                 targetItem.addChild(clone)
-                redraw_fitpage_index = targetItem.parent().data(0, 1).get_fitpage_index()
-                redraw_subtab_index = targetItem.parent().data(0, 1).get_subtab_index()
-                print(str(targetItem.data(0, 1).get_type()))
+                redraw_fitpage_index = targetItem.parent().data(0, 1).fitpage_index
+                redraw_subtab_index = targetItem.parent().data(0, 1).subtab_index
+
             elif isinstance(targetItem.data(0, 1), PlotItem):
                 targetItem.addChild(clone)
-                redraw_fitpage_index = targetItem.data(0, 1).get_fitpage_index()
-                redraw_subtab_index = targetItem.data(0, 1).get_subtab_index()
-                print(str(targetItem.data(0, 1).get_type()))
+                redraw_fitpage_index = targetItem.data(0, 1).fitpage_index
+                redraw_subtab_index = targetItem.data(0, 1).subtab_index
 
             self.dropSignal.emit(redraw_fitpage_index, redraw_subtab_index)
             event.acceptProposedAction()
+
         else:
             event.ignore()
 
