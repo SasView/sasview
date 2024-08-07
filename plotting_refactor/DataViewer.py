@@ -7,7 +7,7 @@ from PlotTreeWidget import PlotTreeWidget
 from DataCollector import DataCollector
 from DataTreeItems import PlotPageItem, DataItem
 from PlotTreeItems import TabItem, SubTabItem, PlotItem, PlottableItem
-from PlotModifiers import ModifierLinecolor, ModifierLinestyle, ModifierColormap, PlotModifier
+from PlotModifiers import ModifierLinecolor, ModifierLinestyle, ModifierColormap
 
 
 class DataViewer(QtWidgets.QWidget, Ui_DataViewer):

@@ -2,7 +2,6 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy import special
 
-
 class DatasetCreator:
     """
     Class to generate data that can be used by the demo plots.
