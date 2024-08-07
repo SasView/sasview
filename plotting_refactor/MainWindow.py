@@ -3,7 +3,7 @@ import os
 import traceback
 from PySide6 import QtWidgets
 
-from MainWindowUI import Ui_MainWindow
+from UI.MainWindowUI import Ui_MainWindow
 from FitPage import FitPage
 from DataViewer import DataViewer
 
