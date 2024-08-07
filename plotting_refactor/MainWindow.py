@@ -22,7 +22,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setFixedSize(700, 560)
 
         self.fitPageCounter = 1
-        self.newFitPage = FitPage(int_identifier=self.fitPageCounter)
+        self.newFitPage = FitPage(identifier=self.fitPageCounter)
         self.fittingTabs.addTab(self.newFitPage, "Fit Page "+str(self.fitPageCounter))
 
         self.dataviewer = DataViewer(self)
@@ -39,7 +39,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         DataCollector.
         Invokes plot creation after data creation.
         """
-        fitpage_index = self.fittingTabs.currentWidget().get_int_identifier()
+        fitpage_index = self.fittingTabs.currentWidget().int_identifier
         self.onCalculate()
         self.dataviewer.create_plot(fitpage_index)
 
@@ -47,7 +47,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Calculates data for the currently selected fitpage. This data is then shown in the DataViewer dataTreeWidget.
         """
-        fitpage_index = self.fittingTabs.currentWidget().get_int_identifier()
+        fitpage_index = self.fittingTabs.currentWidget().identifier
         create_fit = self.fittingTabs.currentWidget().get_checkbox_fit()
         checked_2d = self.fittingTabs.currentWidget().get_checkbox_2d()
         self.dataviewer.update_dataset(fitpage_index, create_fit, checked_2d)
