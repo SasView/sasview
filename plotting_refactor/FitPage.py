@@ -3,6 +3,10 @@ from UI.FitPageUI import Ui_fitPageWidget
 
 
 class FitPage(QtWidgets.QWidget, Ui_fitPageWidget):
+    """
+    Widget that is shown in the tabs from the Mainwindow. Is a subclass of a widget to directly store fitpage indexes
+    in it.
+    """
     def __init__(self, int_identifier):
         super(FitPage, self).__init__()
         self.setupUi(self)
