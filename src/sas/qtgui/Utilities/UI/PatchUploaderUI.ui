@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>326</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Upload Documentation to Developers</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="0">
@@ -52,7 +52,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QListView" name="lstFiles">
+       <widget class="CustomListView" name="lstFiles">
         <property name="alternatingRowColors">
          <bool>true</bool>
         </property>
@@ -86,7 +86,7 @@
         <item>
          <widget class="QLabel" name="lblDescription">
           <property name="text">
-           <string>What documentation did you change?</string>
+           <string>What did you change?</string>
           </property>
          </widget>
         </item>
@@ -100,6 +100,13 @@
    </item>
   </layout>
  </widget>
+<customwidgets>
+  <customwidget>
+   <class>CustomListView</class>
+   <extends>QWidget</extends>
+   <header location="global">sas.qtgui.Utilities.CustomListView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
