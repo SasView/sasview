@@ -9,6 +9,11 @@ from PlotModifiers import PlotModifier, ModifierLinecolor, ModifierLinestyle, Mo
 import numpy as np
 
 class ClickableCanvas(FigureCanvasQTAgg):
+    """
+    This class provides an extension of the normal Qt Figure Canvas, so that clicks on subplots of a figure can be
+    processed to switch the plot position. Example: if there are 3 plots in a figure 1,2,3 and plot 3 is clicked,
+    the clicked plot will always change its position with the plot 1.
+    """
     def __init__(self, figure):
         super().__init__(figure)
         self.mpl_connect("button_press_event", self.onclick)
@@ -27,6 +32,13 @@ class ClickableCanvas(FigureCanvasQTAgg):
                 self.draw()
 
 class SubTabs(QTabWidget):
+    """
+    Class for keeping subtabs and adding figures with subplots to them. It takes a tabitem to process and iterates
+    over all the existing children of the given tabitem to plot their contents in the respective order. For example
+    for every child item of the TabItem, one subtab will be created and for every child item of the subtab, one plot
+    will be generated.
+    The application of modifiers onto plots is also managed in this class constructor.
+    """
     def __init__(self, datacollector, tabitem):
         super().__init__()
 
@@ -41,11 +53,15 @@ class SubTabs(QTabWidget):
             layout.addWidget(canvas)
             layout.addWidget(NavigationToolbar2QT(canvas))
 
+            # decide whether there is only one plot needs to be plotted. then, only one central plot is needed
             subplot_count = tabitem.child(i).childCount()
             if subplot_count == 1:
                 ax = figure.subplots(subplot_count)
+                # putting the axes object in a list so that the access can be generic for both cases with multiple
+                # subplots and without
                 ax = [ax]
             else:
+                # for multiple subplots: decide on the ratios for the bigger, central plot and the smaller, side plots
                 # region for the big central plot in gridspec
                 gridspec = figure.add_gridspec(ncols=2, width_ratios=[3, 1])
                 # region for the small side plots in sub_gridspec
@@ -56,18 +72,26 @@ class SubTabs(QTabWidget):
                 for idx in range(subplot_count-1):
                     ax.append(figure.add_subplot(sub_gridspec[idx]))
 
+            # after the subplots are created, the axes objects need to be filled with actual lines/2d plots
             # iterate through subplots
             for j in range(tabitem.child(i).childCount()):
+                # set the title of the plot with the subplot name of the PlotTreeWidget item
                 ax[j].set_title(str(tabitem.child(i).child(j).text(0)))
-                # iterate through plottables and plot modifiers
+
+                # iterate through plottables and plot modifiers (PlotTreeWidget items)
                 for k in range(tabitem.child(i).child(j).childCount()):
+
                     plottable_or_modifier_item = tabitem.child(i).child(j).child(k).data(0, 1)
+                    # check if the plottable or modifier item is a PlottableItem (actual data to be displayed)
                     if isinstance(plottable_or_modifier_item, PlottableItem):
                         plottable = plottable_or_modifier_item
                         dataset = self.datacollector.get_data_by_id(plottable.data_id)
+
+                        # if the dataset is 2d, plotting will be done with a heatmap plot
                         if dataset.is_data_2d:
 
-                            # collect a possible existing colormap plot modifier
+                            # collect a possible existing colormap plot modifier (child item)
+                            # and save it, so that it can be used during plot creation
                             colormap_modifier = ""
                             for ii in range(plottable.childCount()):
                                 if isinstance(plottable.child(ii), ModifierColormap):
@@ -75,9 +99,12 @@ class SubTabs(QTabWidget):
                             if colormap_modifier == "":
                                 colormap_modifier = "jet"
 
+                            # get the data from the dataset for the plot
                             x = dataset.x_data
                             y = dataset.y_data
                             y_fit = dataset.y_fit
+
+                            # check if the plot is a data plot (4), fit plot (5) or residual plot (6)
                             if plottable.type_num == 4:
                                 ax[j].pcolor(x[0], x[1], y,
                                              norm=matplotlib.colors.LogNorm(vmin=np.min(y),
@@ -94,7 +121,10 @@ class SubTabs(QTabWidget):
                                              norm=matplotlib.colors.LogNorm(vmin=np.min(y_res),
                                                                             vmax=np.max(y_res)),
                                              cmap=colormap_modifier)
+
+                        # if it is not a 2d plot, it must be a 1d plot (line plot)
                         else:
+                            # select again for data plot (1), fit plot (2) and residual plot (3)
                             if plottable.type_num == 1:  # data plot: log-log plot, show only data
                                 ax[j].plot(dataset.x_data, dataset.y_data)
                                 ax[j].set_yscale('log')
@@ -112,6 +142,8 @@ class SubTabs(QTabWidget):
                                 elif isinstance(plottable_modifier.data(0, 1), ModifierLinestyle):
                                     ax[j].get_lines()[-1].set_linestyle(plottable_modifier.text(0).split('=')[1])
 
+                    # applying a colormap to a set of lines and setting the respective color to lines that are
+                    # returned by the axes object
                     elif isinstance(plottable_or_modifier_item, PlotModifier):
                         plot_modifier = plottable_or_modifier_item
                         if isinstance(plot_modifier, ModifierColormap):
@@ -120,10 +152,13 @@ class SubTabs(QTabWidget):
                             for m in range(n):
                                 ax[j].get_lines()[m].set_color(cmap(m/(n-1)))
 
+            # create the widget that will be inside the dock widget
             figure.tight_layout()
             canvas_widget = QWidget()
             canvas_widget.setLayout(layout)
 
+            # create the main window, which is the container for the dock widget, so that it can be dragged out and
+            # put in again
             dock_container = QMainWindow()
             dock_widget = QDockWidget()
             dock_widget.setWidget(canvas_widget)
