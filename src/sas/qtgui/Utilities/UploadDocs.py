@@ -239,6 +239,8 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
     Dialog for uploading documentation to GitHub
     """
 
+    docsUploadingSignal = QtCore.Signal(bool)
+
     def __init__(self, parent=None):
         super(PatchUploader, self).__init__(parent._parent)
         self.setupUi(self)
@@ -253,7 +255,8 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
             self.addItemToModel(basename)
 
         self.lstFiles.setModel(self.model)
-        self.lstFiles.setItemDelegate(CheckBoxTextDelegate())
+        self.delegate = CheckBoxTextDelegate(self.lstFiles)
+        self.lstFiles.setItemDelegate(self.delegate)
 
         self.addSignals()
     
@@ -262,6 +265,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         Connect signals to slots.
         """
         self.cmdSubmit.clicked.connect(self.apiInteraction)
+        self.docsUploadingSignal.connect(self.setWidgetEnabled)
     
     def apiInteraction(self):
         """
@@ -318,9 +322,9 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         Create a thread to send the request to the API
         """
         self.parent.communicate.statusBarUpdateSignal.emit('Beginning documentation upload...')
+        self.docsUploadingSignal.emit(True)
         d = threads.deferToThread(self.sendRequest, self.uploadURL, files)
         d.addCallback(self.docUploadComplete)
-        print(d)
         
     @staticmethod
     def sendRequest(url, files):
@@ -335,8 +339,8 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Handle the response from the API
         """
-        print("Response:", response)
         if response.status_code == 200:
+            self.docsUploadingSignal.emit(False) # Trigger the signal to re-enable the dialog
             self.parent.communicate.statusBarUpdateSignal.emit('Documentation uploaded successfully.')
 
     def isChecked(self, basename):
@@ -375,11 +379,63 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         diff_list = [filename for filename in diff_dict.keys()]
         return diff_list
 
+    def setWidgetEnabled(self, uploading: bool):
+        """
+        Enable/disable the PatchUploader dialog during upload.
+        """
+        enabled = not uploading # If uploading, dialog is DISabled
+        self.cmdSubmit.setEnabled(enabled)
+        self.txtChanges.setEnabled(enabled)
+        self.txtName.setEnabled(enabled)
+        if uploading:
+            self.cmdSubmit.setText("Uploading...")
+            self.cmdSubmit.setStyleSheet("color: red")
+            self.delegate.disableTable(True, "Upload in progress...")
+        else:
+            self.cmdSubmit.setText("Submit")
+            self.cmdSubmit.setStyleSheet("color: black")
+            self.delegate.disableTable(False, "")
+
+
 class CheckBoxTextDelegate(QtWidgets.QStyledItemDelegate):
     """
     Delegate for the PatchUploader dialog that draws a checkbox and text in the same row.
+    Includes functionality for "disabling" the table
     """
+    def __init__(self, parent=None):
+        super(CheckBoxTextDelegate, self).__init__(parent)
+        self.disabled = False  # Flag to track if the table is disabled
+        self.disabled_text = "Table is disabled"  # Default text for disabled state
+
     def paint(self, painter, option, index):
+        if self.disabled:
+            # First, paint the items normally
+            self.paintEnabled(painter, option, index)
+
+            # Then, trigger a repaint of the entire table
+            self.paintDisabledOverlay(painter)
+        else:
+            # Paint the items normally
+            self.paintEnabled(painter, option, index)
+
+    def paintDisabledOverlay(self, painter):
+        # Get the dimensions of the entire table view
+        table_rect = self.parent().viewport().rect()
+
+        # Set the painter to use a semi-transparent light gray color
+        semi_transparent_gray = QtGui.QColor(200, 200, 200, 150)
+        painter.fillRect(table_rect, semi_transparent_gray)
+
+        # Set the pen and font for drawing the italic text
+        painter.setPen(QtGui.QColor(100, 100, 100))
+        font = painter.font()
+        font.setItalic(True)
+        painter.setFont(font)
+
+        # Draw the italic text in the center of the table
+        painter.drawText(table_rect, QtCore.Qt.AlignCenter, self.disabled_text)
+
+    def paintEnabled(self, painter, option, index):
         model = index.model()
 
         # Get the checkbox item and the text item from the model
@@ -407,7 +463,19 @@ class CheckBoxTextDelegate(QtWidgets.QStyledItemDelegate):
             text_rect.setLeft(checkbox_rect.right() + 5)
             painter.drawText(text_rect, QtCore.Qt.AlignVCenter, text_item.text())
 
+    def disableTable(self, disable, text="Table is disabled"):
+        """
+        Function to enable or disable the table rendering.
+        When disabled, the table is painted with a semi-transparent overlay and text.
+        """
+        self.disabled = disable
+        self.disabled_text = text
+        self.parent().viewport().update()  # Trigger a repaint of the table
+
     def editorEvent(self, event, model, option, index):
+        if self.disabled:
+            return False  # Ignore events when the table is disabled
+
         # Check if the event is a mouse button press or release
         if event.type() == QtCore.QEvent.MouseButtonPress or event.type() == QtCore.QEvent.MouseButtonRelease:
             # Get the checkbox item from the model
