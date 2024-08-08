@@ -34,7 +34,7 @@ class SubTabs(QTabWidget):
         self.figures: List[matplotlib.figure] = []
         # iterate through subtabs
         for i in range(tabitem.childCount()):
-            #add subplots
+            # add subplots
             layout = QVBoxLayout()
             figure = matplotlib.figure.Figure(figsize=(5, 5))
             canvas = ClickableCanvas(figure)
@@ -67,7 +67,7 @@ class SubTabs(QTabWidget):
                         dataset = self.datacollector.get_data_by_id(plottable.data_id)
                         if dataset.is_data_2d:
 
-                            #collect a possible existing colormap plot modifier
+                            # collect a possible existing colormap plot modifier
                             colormap_modifier = ""
                             for ii in range(plottable.childCount()):
                                 if isinstance(plottable.child(ii), ModifierColormap):
@@ -79,26 +79,29 @@ class SubTabs(QTabWidget):
                             y = dataset.y_data
                             y_fit = dataset.y_fit
                             if plottable.type_num == 4:
-                                cm = ax[j].pcolor(x[0], x[1], y,
-                                                  norm=matplotlib.colors.LogNorm(vmin=np.min(y), vmax=np.max(y)),
-                                                  cmap=colormap_modifier)
+                                ax[j].pcolor(x[0], x[1], y,
+                                             norm=matplotlib.colors.LogNorm(vmin=np.min(y),
+                                                                            vmax=np.max(y)),
+                                             cmap=colormap_modifier)
                             elif plottable.type_num == 5:
-                                cm = ax[j].pcolor(x[0], x[1], y_fit,
-                                                  norm=matplotlib.colors.LogNorm(vmin=np.min(y_fit), vmax=np.max(y_fit)),
-                                                  cmap=colormap_modifier)
+                                ax[j].pcolor(x[0], x[1], y_fit,
+                                             norm=matplotlib.colors.LogNorm(vmin=np.min(y_fit),
+                                                                            vmax=np.max(y_fit)),
+                                             cmap=colormap_modifier)
                             elif plottable.type_num == 6:
                                 y_res = np.absolute(np.subtract(y_fit, y))
-                                cm = ax[j].pcolor(x[0], x[1], y_res,
-                                                  norm=matplotlib.colors.LogNorm(vmin=np.min(y_res), vmax=np.max(y_res)),
-                                                  cmap=colormap_modifier)
+                                ax[j].pcolor(x[0], x[1], y_res,
+                                             norm=matplotlib.colors.LogNorm(vmin=np.min(y_res),
+                                                                            vmax=np.max(y_res)),
+                                             cmap=colormap_modifier)
                         else:
-                            if plottable.type_num == 1: #data plot: log-log plot, show only data
+                            if plottable.type_num == 1:  # data plot: log-log plot, show only data
                                 ax[j].plot(dataset.x_data, dataset.y_data)
                                 ax[j].set_yscale('log')
-                            elif plottable.type_num == 2: #fit plot: log-log plot, show fit and data curve
+                            elif plottable.type_num == 2:  # fit plot: log-log plot, show fit and data curve
                                 ax[j].plot(dataset.x_data, dataset.y_fit)
                                 ax[j].set_yscale('log')
-                            elif plottable.type_num == 3: #residual plot lin-log plot, show calc and show res only
+                            elif plottable.type_num == 3:  # residual plot lin-log plot, show calc and show res only
                                 ax[j].plot(dataset.x_data, np.subtract(dataset.y_fit, dataset.y_data))
 
                             # iterate through plottable modifier, e.g. linecolor, linestyle
@@ -129,5 +132,4 @@ class SubTabs(QTabWidget):
             self.addTab(dock_container, tabitem.child(i).text(0))
             self.figures.append(figure)
 
-    def get_fitpage_index(self):
-        return self.fitpage_index
+
