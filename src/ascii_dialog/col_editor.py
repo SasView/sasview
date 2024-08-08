@@ -2,7 +2,6 @@ from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtCore import Slot, Signal
 from column_unit import ColumnUnit
-from dataset_types import default_units
 
 
 class ColEditor(QWidget):
