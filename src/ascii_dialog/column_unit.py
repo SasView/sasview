@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QCompleter, QHBoxLayout, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
-from dataset_types import default_units
+from sasdata.dataset_types import unit_kinds
 
 class ColumnUnit(QWidget):
     """Widget with 2 combo boxes: one allowing the user to pick a column, and
@@ -33,9 +33,19 @@ class ColumnUnit(QWidget):
     def create_unit_combo_box(self, selected_option: str) -> QComboBox:
         """Create the combo box for specifying the unit for selected_option"""
         new_combo_box = QComboBox()
-        default_unit = default_units[selected_option]
-        new_combo_box.addItem(default_unit)
+        new_combo_box.setEditable(True)
+        # word_list = ['alpha', 'omega', 'omicron', 'zeta']
+        # completer = QCompleter(word_list, self)
+        # new_combo_box.setCompleter(completer)
+        self.update_units(new_combo_box, selected_option)
         return new_combo_box
+
+    def update_units(self, unit_box: QComboBox, selected_option: str):
+        unit_box.clear()
+        options = [unit.ascii_symbol for unit in unit_kinds[selected_option].units]
+        for option in options:
+            unit_box.addItem(option)
+
 
     def replace_options(self, new_options) -> None:
         """Replace the old options for the column with new_options"""
@@ -45,9 +55,7 @@ class ColumnUnit(QWidget):
     def set_current_column(self, new_column_value: str) -> None:
         """Change the current selected column to new_column_value"""
         self.col_widget.setCurrentText(new_column_value)
-        new_unit = default_units[new_column_value]
-        self.unit_widget.clear()
-        self.unit_widget.addItem(new_unit)
+        self.update_units(self.unit_widget, new_column_value)
 
 
     @Slot()
@@ -59,9 +67,7 @@ class ColumnUnit(QWidget):
         if new_option == '':
             return
         try:
-            new_unit = default_units[new_option]
-            self.unit_widget.clear()
-            self.unit_widget.addItem(new_unit)
+            self.update_units(self.unit_widget, new_option)
         except KeyError:
             # Means the units for this column aren't known. This shouldn't be
             # the case in the real version so for now we'll just clear the unit
