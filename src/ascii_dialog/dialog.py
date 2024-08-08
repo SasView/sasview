@@ -6,10 +6,12 @@ from col_editor import ColEditor
 from row_status_widget import RowStatusWidget
 from guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
-from dataset_types import DatasetType, dataset_types, dataset_dictionary
+from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 import re
 
 TABLE_MAX_ROWS = 1000
+
+dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
 
 class AsciiDialog(QWidget):
     """A dialog window allowing the user to adjust various properties regarding
