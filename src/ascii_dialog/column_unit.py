@@ -5,6 +5,8 @@ from PySide6.QtWidgets import QComboBox, QCompleter, QHBoxLayout, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 from sasdata.dataset_types import unit_kinds
 
+from unit_selector import UnitSelector
+
 class ColumnUnit(QWidget):
     """Widget with 2 combo boxes: one allowing the user to pick a column, and
     another to specify the units for that column."""
@@ -38,6 +40,7 @@ class ColumnUnit(QWidget):
         # completer = QCompleter(word_list, self)
         # new_combo_box.setCompleter(completer)
         self.update_units(new_combo_box, selected_option)
+        new_combo_box.currentTextChanged.connect(self.on_unit_change)
         return new_combo_box
 
     def update_units(self, unit_box: QComboBox, selected_option: str):
@@ -45,6 +48,7 @@ class ColumnUnit(QWidget):
         options = [unit.symbol for unit in unit_kinds[selected_option].units]
         for option in options:
             unit_box.addItem(option)
+        unit_box.addItem('Select More')
 
 
     def replace_options(self, new_options) -> None:
@@ -73,6 +77,13 @@ class ColumnUnit(QWidget):
             # the case in the real version so for now we'll just clear the unit
             # widget.
             self.unit_widget.clear()
+
+    @Slot()
+    def on_unit_change(self):
+        if self.unit_widget.currentText() == 'Select More':
+            selector = UnitSelector()
+            selector.exec()
+            print(selector.selected_unit)
 
     @property
     def current_column(self):
