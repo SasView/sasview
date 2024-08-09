@@ -192,7 +192,7 @@ class decision_helper():
 
         return beta
 class maxEntMethod():
-    def MaxEntMove(fSum, blank, chisq, chizer, c1, c2, s1, s2):
+    def MaxEntMove(self,fSum, blank, chisq, chizer, c1, c2, s1, s2):
         '''
         Goal is to choose the next target Chi^2
         And to move beta one step closer towards the solution (see SB eq. 12 and the text below for the definition of beta)
@@ -236,7 +236,7 @@ class maxEntMethod():
         chtarg = ctarg * chisq
         return w, chtarg, loop, a_new, fx, beta
 
-    def MaxEnt_SB(Iq,sigma,Gqr,first_bins,IterMax,report):
+    def MaxEnt_SB(self,Iq,sigma,Gqr,first_bins,IterMax=5000,report=True):
         '''
         Do the complete Maximum Entropy algorithm of Skilling and Bryan
         
@@ -317,7 +317,7 @@ class maxEntMethod():
             beta[1] = 0.0
             beta[2] = 0.0
             if (iter > 0):
-                w, chtarg, loop, a_new, fx, beta = MaxEntMove(fSum, blank, chisq, chizer, c1, c2, s1, s2)
+                w, chtarg, loop, a_new, fx, beta = self.MaxEntMove(fSum, blank, chisq, chizer, c1, c2, s1, s2)
                 
             f_old = f.copy()                # preserve the last solution
             f += xi.transpose().dot(beta)   # move the solution towards the solution, SB eq. 25
@@ -371,7 +371,8 @@ def sizeDistribution(input):
         Background                   | float[npt]: Scattering background to be subtracted
         Resolution                   | obj: resolution object
         Model                        | string: model name, currently only supports 'Sphere'
-    '''         
+    '''
+    iterMax = input["IterMax"]      
     Qmin = input["Limits"][0]
     Qmax = input["Limits"][1]
     scale = input["Scale"]
@@ -397,6 +398,7 @@ def sizeDistribution(input):
     res = input["Resolution"]
     Gmat = matrix_operation().G_matrix(Q[Ibeg:Ifin],Bins,contrast,input["Model"],res)
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
-    chisq,BinMag,Ic[Ibeg:Ifin] = maxEntMethod().MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,IterMax=5000,report=True)
+    MethodCall = maxEntMethod()
+    chisq,BinMag,Ic[Ibeg:Ifin] = MethodCall.MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,iterMax,report=True)
     BinMag = BinMag/(2.*Dbins)
     return chisq,Bins,Dbins,BinMag,Q[Ibeg:Ifin],Ic[Ibeg:Ifin]

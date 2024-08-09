@@ -34,6 +34,7 @@ data_from_loader.filename = file
 
 # Contrust the input dictionary
 input = {}
+input["IterMax"] = 5000
 input["Filename"] = data_from_loader.filename
 input["Data"] = [data_from_loader.x,data_from_loader.y]
 Qmin = min(data_from_loader.x[25:])
