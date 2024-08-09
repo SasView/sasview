@@ -38,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         DataCollector.
         Invokes plot creation after data creation.
         """
-        fitpage_index = self.fittingTabs.currentWidget().int_identifier
+        fitpage_index = self.fittingTabs.currentWidget().identifier
         self.onCalculate()
         self.dataviewer.create_plot(fitpage_index)
 
