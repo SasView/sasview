@@ -22,7 +22,7 @@ class UnitSelector(QWidget):
         current_group = self.current_unit_group()
         units = current_group.units
         if search_input != '':
-            units = [unit for unit in units if search_input in unit.name]
+            units = [unit for unit in units if search_input.lower() in unit.name]
         self.unit_list_widget.populate_list(units)
 
 
