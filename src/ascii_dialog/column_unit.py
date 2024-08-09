@@ -83,7 +83,7 @@ class ColumnUnit(QWidget):
         if self.unit_widget.currentText() == 'Select More':
             selector = UnitSelector()
             selector.exec()
-            print(selector.selected_unit)
+            self.unit_widget.setCurrentText(selector.selected_unit.symbol)
 
     @property
     def current_column(self):
