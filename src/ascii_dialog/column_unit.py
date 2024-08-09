@@ -47,7 +47,9 @@ class ColumnUnit(QWidget):
     def update_units(self, unit_box: QComboBox, selected_option: str):
         unit_box.clear()
         options = [unit.symbol for unit in unit_kinds[selected_option].units]
-        for option in options:
+        # We don't have preferred units yet. In order to simulate this, just
+        # take the first 5 options to display.
+        for option in options[:5]:
             unit_box.addItem(option)
         unit_box.addItem('Select More')
 
