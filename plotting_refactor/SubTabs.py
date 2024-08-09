@@ -39,6 +39,20 @@ class SubTabs(QTabWidget):
     will be generated.
     The application of modifiers onto plots is also managed in this class constructor.
     """
+    def grayOutOnDock(self, dock_container: QMainWindow, dock_widget: QDockWidget):
+        """
+        Function that is connected to the topLevelChanged slot of the dock widget for the plot widget. When the
+        dock is floating, the area where the dock widget was before, is grayed out. When it is docked in again,
+        the state is reverted.
+        """
+        name = dock_container.objectName()
+        if dock_widget.isFloating():
+            print("gray")
+            dock_container.setStyleSheet("QMainWindow#" + name + " { background-color: gray }")
+        else:
+            print("white")
+            dock_container.setStyleSheet("QMainWindow#" + name + " { background-color: white }")
+
     def __init__(self, datacollector, tabitem):
         super().__init__()
 
@@ -160,7 +174,14 @@ class SubTabs(QTabWidget):
             # create the main window, which is the container for the dock widget, so that it can be dragged out and
             # put in again
             dock_container = QMainWindow()
+            # set the object name for later, so that the style sheet changes for graying out only affects the dock
+            # container itself and not the child widgets of the dock container. fitpage_index is used as an identifier
+            # here
+            dock_container.setObjectName("DockContainer" + str(tabitem.data(0, 1).fitpage_index))
             dock_widget = QDockWidget()
+
+            dock_widget.topLevelChanged.connect(lambda x: self.grayOutOnDock(dock_container, dock_widget))
+
             dock_widget.setWidget(canvas_widget)
             dock_container.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, dock_widget)
 
