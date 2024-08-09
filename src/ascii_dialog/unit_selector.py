@@ -53,6 +53,7 @@ class UnitSelector(QDialog):
 
         self.search_box = QLineEdit()
         self.search_box.textChanged.connect(self.on_search_changed)
+        self.search_box.setPlaceholderText('Search for a unit...')
 
         self.unit_list_widget = UnitListWidget()
         # TODO: Are they all named units?
