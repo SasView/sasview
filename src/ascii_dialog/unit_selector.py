@@ -1,3 +1,4 @@
+from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication, QComboBox, QListWidget, QVBoxLayout, QWidget
 from sasdata.quantities.units import UnitGroup, length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance
 
@@ -15,12 +16,18 @@ class UnitSelector(QWidget):
         index = self.unit_type_selector.currentIndex()
         return all_unit_groups[index]
 
+    @Slot()
+    def unit_group_changed(self):
+        new_group = self.current_unit_group()
+        self.unit_list_widget.populate_list(new_group.units)
+
     def __init__(self):
         super().__init__()
 
         self.unit_type_selector = QComboBox()
         unit_group_names = [group.name for group in all_unit_groups]
         self.unit_type_selector.addItems(unit_group_names)
+        self.unit_type_selector.currentTextChanged.connect(self.unit_group_changed)
 
         self.unit_list_widget = UnitListWidget()
         # TODO: Are they all named units?
