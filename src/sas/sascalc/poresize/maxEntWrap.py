@@ -54,7 +54,7 @@ perfect1D = rst.Perfect1D(data_from_loader.x)
 qlength, qwidth = 0.117, None 
 Ibeg = np.searchsorted(Q,Qmin)
 Ifin = np.searchsorted(Q,Qmax)+1
-slit1D = rst.Slit1D(Q[Ibeg:Ifin],q_length=qlength,q_width=qwidth,q_calc=Q[Ibeg:Ifin])
+#slit1D = rst.Slit1D(Q[Ibeg:Ifin],q_length=qlength,q_width=qwidth,q_calc=Q[Ibeg:Ifin])
 input["Resolution"] = perfect1D
 
 # Call the sizeDistribution function and feed in the input
@@ -72,10 +72,10 @@ dist_result._logx = True
 
 if __name__ == "__main__":
     # Plot to visualize
-    I_smeared = slit1D.apply(I)
-    plt.figure()
-    plt.loglog(Q,I_smeared)
-    plt.loglog(Q,I)
+    #I_smeared = slit1D.apply(I[Ibeg:Ifin])
+    #plt.figure()
+    #plt.loglog(Q[Ibeg:Ifin],I_smeared)
+    #plt.loglog(Q,I)
 
     plt.figure()
     plt.bar(x=dist_result.x,height=dist_result.y/SphereVol(dist_result.x),width=dist_result.binWidth,label='fit_distribution')
