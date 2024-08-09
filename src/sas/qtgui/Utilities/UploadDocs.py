@@ -253,21 +253,10 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         self.lstFiles.setModel(self.model)
         self.delegate = CheckBoxTextDelegate(self.lstFiles)
 
-        changed_files = self.getDiffItems()
-
-        for file in changed_files:
-            basename = os.path.basename(file)
-            self.addItemToModel(basename)
-
         self.lstFiles.setDelegate(self.delegate) # NOTE: Use setDelegate() instead of setItemDelegate()
 
-        if self.model.rowCount() == 0:
-            self.cmdSubmit.setEnabled(False)
-            self.txtChanges.setEnabled(False)
-            self.txtName.setEnabled(False)
-            self.delegate.disableTable(True, "No changes to upload")
-
         self.addSignals()
+        self.refresh() # Populate lstFiles with changed files
     
     def addSignals(self):
         """
@@ -283,6 +272,28 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         files = self.genPostRequest()
         self.createThread(files)
         # TODO: Handle response
+    
+    def refresh(self):
+        """
+        Check for updated diffs and update lstFiles
+        """
+        changed_files = self.getDiffItems()
+        self.model.clear()
+
+        for file in changed_files:
+            basename = os.path.basename(file)
+            self.addItemToModel(basename)
+        
+        if self.model.rowCount() == 0:
+            self.cmdSubmit.setEnabled(False)
+            self.txtChanges.setEnabled(False)
+            self.txtName.setEnabled(False)
+            self.delegate.disableTable(True, "No changes to upload")
+        else:
+            self.cmdSubmit.setEnabled(True)
+            self.txtChanges.setEnabled(True)
+            self.txtName.setEnabled(True)
+            self.delegate.disableTable(False, "")
     
     def genPostRequest(self):
         """

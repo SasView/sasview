@@ -181,6 +181,9 @@ class Communicate(QtCore.QObject):
     documentationRegenInProgressSignal = QtCore.Signal()
     documentationRegeneratedSignal = QtCore.Signal()
 
+    # Triggers refresh of all patch upload windows
+    refreshUpdatedDocsSignal = QtCore.Signal()
+
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
     Adds a checkboxed row named "name" to QStandardItem

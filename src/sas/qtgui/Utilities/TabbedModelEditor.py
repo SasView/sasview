@@ -17,6 +17,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
 from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.UploadDocs import updateHash, PatchUploader
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
@@ -461,6 +462,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
         if self.is_documentation:
+            updateHash(self.filename) #Update hash of file to mark that it has changed
+            self.parent.communicate.refreshUpdatedDocsSignal.emit() #Refresh changes in patchuplaoder dialog
             self.regenerateDocumentation()
     
     def regenerateDocumentation(self):

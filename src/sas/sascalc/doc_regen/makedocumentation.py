@@ -187,7 +187,7 @@ def call_one_file(file: PATH_LIKE):
     generate_toc(TARGETS)
 
 
-def make_documentation(target: PATH_LIKE = ".", update_hash_function = None):
+def make_documentation(target: PATH_LIKE = "."):
     """Similar to call_one_file, but will fall back to calling all files and regenerating everything if an error occurs.
 
     :param target: A file name that needs the html regenerated.
@@ -209,13 +209,6 @@ def make_documentation(target: PATH_LIKE = ".", update_hash_function = None):
     except Exception as e:
         call_all_files()  # Regenerate all RSTs
         generate_html()  # Regenerate all HTML
-    
-    if update_hash_function:
-        # Regenerate the hash of the documentation
-        try:
-            update_hash_function(target)
-        except Exception as e:
-            logger.warning(f"Could not update hash of file {target}: {e}")
 
 if __name__ == "__main__":
     create_user_files_if_needed()

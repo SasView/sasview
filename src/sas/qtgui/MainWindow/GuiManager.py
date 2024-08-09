@@ -690,6 +690,7 @@ class GuiManager:
         self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
         self.communicate.activeGraphsSignal.connect(self.updatePlotItems)
+        self.communicate.refreshUpdatedDocsSignal.connect(self.refreshEditedDocs)
 
 
     def addTriggers(self):
@@ -873,6 +874,13 @@ class GuiManager:
     def actionUploadDocumentation(self):
         self.patchUploader = PatchUploader(self)
         self.patchUploader.show()
+    
+    def refreshEditedDocs(self):
+        """
+        Refresh the list of documents that have been edited
+        """
+        if self.patchUploader:
+            self.patchUploader.refresh()
 
     def actionQuit(self):
         """

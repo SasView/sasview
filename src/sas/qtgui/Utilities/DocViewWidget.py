@@ -8,7 +8,6 @@ from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
-from sas.qtgui.Utilities.UploadDocs import updateHash
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
@@ -51,7 +50,7 @@ class DocGenThread(CalcThread):
         """
         try:
             if self.target.exists():
-                make_documentation(self.target, updateHash)
+                make_documentation(self.target)
             else:
                 return
         except KeyboardInterrupt as msg:
