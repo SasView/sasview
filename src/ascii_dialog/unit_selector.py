@@ -1,5 +1,5 @@
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QApplication, QComboBox, QDialog, QLineEdit, QListWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QComboBox, QDialog, QLineEdit, QListWidget, QPushButton, QVBoxLayout, QWidget
 from sasdata.quantities.units import NamedUnit, UnitGroup, length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance
 
 from unit_list_widget import UnitListWidget
@@ -36,6 +36,10 @@ class UnitSelector(QDialog):
         self.search_box.setText('')
         self.unit_list_widget.populate_list(new_group.units)
 
+    @Slot()
+    def select_unit(self):
+        self.accept()
+
     def __init__(self):
         super().__init__()
 
@@ -51,15 +55,20 @@ class UnitSelector(QDialog):
         # TODO: Are they all named units?
         self.unit_list_widget.populate_list(self.current_unit_group().units)
 
+        self.select_button = QPushButton('Select Unit')
+        self.select_button.pressed.connect(self.select_unit)
+
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.unit_type_selector)
         self.layout.addWidget(self.search_box)
         self.layout.addWidget(self.unit_list_widget)
+        self.layout.addWidget(self.select_button)
 
 if __name__ == "__main__":
     app = QApplication([])
 
     widget = UnitSelector()
-    widget.show()
+    widget.exec()
+    print(widget.selected_unit)
 
-    exit(app.exec())
+    exit()
