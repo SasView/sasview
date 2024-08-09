@@ -42,7 +42,7 @@ class ColumnUnit(QWidget):
 
     def update_units(self, unit_box: QComboBox, selected_option: str):
         unit_box.clear()
-        options = [unit.ascii_symbol for unit in unit_kinds[selected_option].units]
+        options = [unit.symbol for unit in unit_kinds[selected_option].units]
         for option in options:
             unit_box.addItem(option)
 
