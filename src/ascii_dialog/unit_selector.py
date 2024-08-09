@@ -1,5 +1,5 @@
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QApplication, QComboBox, QListWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QComboBox, QLineEdit, QListWidget, QVBoxLayout, QWidget
 from sasdata.quantities.units import UnitGroup, length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance
 
 from unit_list_widget import UnitListWidget
@@ -17,8 +17,19 @@ class UnitSelector(QWidget):
         return all_unit_groups[index]
 
     @Slot()
+    def on_search_changed(self):
+        search_input = self.search_box.text()
+        current_group = self.current_unit_group()
+        units = current_group.units
+        if search_input != '':
+            units = [unit for unit in units if search_input in unit.name]
+        self.unit_list_widget.populate_list(units)
+
+
+    @Slot()
     def unit_group_changed(self):
         new_group = self.current_unit_group()
+        self.search_box.setText('')
         self.unit_list_widget.populate_list(new_group.units)
 
     def __init__(self):
@@ -29,12 +40,16 @@ class UnitSelector(QWidget):
         self.unit_type_selector.addItems(unit_group_names)
         self.unit_type_selector.currentTextChanged.connect(self.unit_group_changed)
 
+        self.search_box = QLineEdit()
+        self.search_box.textChanged.connect(self.on_search_changed)
+
         self.unit_list_widget = UnitListWidget()
         # TODO: Are they all named units?
         self.unit_list_widget.populate_list(self.current_unit_group().units)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.unit_type_selector)
+        self.layout.addWidget(self.search_box)
         self.layout.addWidget(self.unit_list_widget)
 
 if __name__ == "__main__":
