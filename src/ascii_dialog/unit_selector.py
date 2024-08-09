@@ -40,12 +40,15 @@ class UnitSelector(QDialog):
     def select_unit(self):
         self.accept()
 
-    def __init__(self):
+    def __init__(self, default_group='length', allow_group_edit=True):
         super().__init__()
 
         self.unit_type_selector = QComboBox()
         unit_group_names = [group.name for group in all_unit_groups]
         self.unit_type_selector.addItems(unit_group_names)
+        self.unit_type_selector.setCurrentText(default_group)
+        if not allow_group_edit:
+            self.unit_type_selector.setDisabled(True)
         self.unit_type_selector.currentTextChanged.connect(self.unit_group_changed)
 
         self.search_box = QLineEdit()
