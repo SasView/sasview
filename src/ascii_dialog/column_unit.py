@@ -4,6 +4,7 @@ from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QComboBox, QCompleter, QHBoxLayout, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 from sasdata.dataset_types import unit_kinds
+from sasdata.quantities.units import symbol_lookup
 
 from unit_selector import UnitSelector
 
@@ -89,3 +90,8 @@ class ColumnUnit(QWidget):
     def current_column(self):
         """The currently selected column."""
         return self.col_widget.currentText()
+
+    @property
+    def current_unit(self):
+        """The currently selected unit."""
+        return symbol_lookup[self.unit_widget.currentText()]
