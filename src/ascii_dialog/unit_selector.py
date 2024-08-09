@@ -1,6 +1,6 @@
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication, QComboBox, QDialog, QLineEdit, QListWidget, QVBoxLayout, QWidget
-from sasdata.quantities.units import UnitGroup, length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance
+from sasdata.quantities.units import NamedUnit, UnitGroup, length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance
 
 from unit_list_widget import UnitListWidget
 
@@ -15,6 +15,10 @@ class UnitSelector(QDialog):
     def current_unit_group(self) -> UnitGroup:
         index = self.unit_type_selector.currentIndex()
         return all_unit_groups[index]
+
+    @property
+    def selected_unit(self) -> NamedUnit | None:
+        return self.unit_list_widget.selected_unit
 
     @Slot()
     def on_search_changed(self):
