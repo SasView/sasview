@@ -17,7 +17,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
 from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
-from sas.qtgui.Utilities.UploadDocs import updateHash, PatchUploader
+from sas.qtgui.Utilities.UploadDocs import updateHash
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
