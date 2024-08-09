@@ -82,7 +82,7 @@ class ColumnUnit(QWidget):
     @Slot()
     def on_unit_change(self):
         if self.unit_widget.currentText() == 'Select More':
-            selector = UnitSelector()
+            selector = UnitSelector(unit_kinds[self.col_widget.currentText()].name, False)
             selector.exec()
             self.unit_widget.setCurrentText(selector.selected_unit.symbol)
 
