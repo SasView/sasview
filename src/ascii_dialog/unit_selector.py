@@ -58,6 +58,7 @@ class UnitSelector(QDialog):
         self.unit_list_widget = UnitListWidget()
         # TODO: Are they all named units?
         self.unit_list_widget.populate_list(self.current_unit_group().units)
+        self.unit_list_widget.itemDoubleClicked.connect(self.select_unit)
 
         self.select_button = QPushButton('Select Unit')
         self.select_button.pressed.connect(self.select_unit)
