@@ -34,6 +34,7 @@ class AsciiDialog(QWidget):
 
         self.filename_label = QLabel("Click the button below to load a file.")
         self.filename_chooser = QComboBox()
+        self.filename_chooser.currentTextChanged.connect(self.update_current_file)
 
         self.load_button = QPushButton("Load File")
         self.load_button.clicked.connect(self.load)
@@ -239,20 +240,22 @@ class AsciiDialog(QWidget):
         filename = result[0]
         basename = path.basename(filename)
         self.filename_label.setText(basename)
-        self.filename_chooser.addItem(basename)
-        self.filename_chooser.setCurrentText(basename)
 
         try:
             with open(filename) as file:
                 file_csv = file.readlines()
             # TODO: This assumes that no two files will be loaded with the same
             # name. This might not be a reasonable assumption.
-            self.files[filename] = file_csv
-            self.current_filename = filename
+            self.files[basename] = file_csv
+            self.current_filename = basename
             # Reset checkboxes
             self.rows_is_included = []
             self.attempt_guesses()
-            self.fill_table()
+            # This will trigger the update current file event which will cause
+            # the table to be drawn.
+            self.filename_chooser.addItem(basename)
+            self.filename_chooser.setCurrentText(basename)
+
         except OSError:
             QMessageBox.critical(self, 'File Read Error', ' There was an error reading that file.')
 
@@ -282,6 +285,15 @@ class AsciiDialog(QWidget):
         required_missing = self.required_missing()
         duplicates = self.duplicate_columns()
         self.warning_label.update(required_missing, duplicates)
+
+    @Slot()
+    def update_current_file(self) -> None:
+        """Triggered when the current file (choosen from the file chooser
+        ComboBox) changes.
+
+        """
+        self.current_filename = self.filename_chooser.currentText()
+        self.fill_table()
 
     @Slot()
     def seperator_toggle(self) -> None:
