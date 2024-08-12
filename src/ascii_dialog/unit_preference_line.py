@@ -17,7 +17,7 @@ class UnitPreferenceLine(QWidget):
         self.unit_button = QPushButton(initial_unit.symbol)
         self.unit_button.clicked.connect(self.on_unit_press)
 
-        self.layout = QHBoxLayout()
+        self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.column_label)
         self.layout.addWidget(self.unit_button)
 
