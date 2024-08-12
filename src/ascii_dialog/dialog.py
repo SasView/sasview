@@ -24,6 +24,7 @@ class AsciiDialog(QWidget):
         super().__init__()
 
         self.files: dict[str, list[str]] = {}
+        self.files_is_included: dict[str, list[bool]] = {}
         self.current_filename: str | None = None
 
         self.seperators: dict[str, bool] = {
@@ -109,13 +110,18 @@ class AsciiDialog(QWidget):
         self.layout.addWidget(self.table)
         self.layout.addWidget(self.warning_label)
 
-        self.rows_is_included: list[bool] = []
-
     @property
     def raw_csv(self) -> list[str] | None:
         if self.current_filename is None:
             return None
         return self.files[self.current_filename]
+
+    @property
+    def rows_is_included(self) -> list[bool] | None:
+        if self.current_filename is None:
+            return None
+        return self.files_is_included[self.current_filename]
+
 
     def split_line(self, line: str) -> list[str]:
         """Split a line in a CSV file based on which seperators the user has
@@ -249,7 +255,7 @@ class AsciiDialog(QWidget):
             self.files[basename] = file_csv
             self.current_filename = basename
             # Reset checkboxes
-            self.rows_is_included = []
+            self.files_is_included[basename] = []
             # Attempt guesses when this is the first file that has been loaded.
             if len(self.files) == 1:
                 self.attempt_guesses()
