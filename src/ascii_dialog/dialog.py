@@ -250,7 +250,9 @@ class AsciiDialog(QWidget):
             self.current_filename = basename
             # Reset checkboxes
             self.rows_is_included = []
-            self.attempt_guesses()
+            # Attempt guesses when this is the first file that has been loaded.
+            if len(self.files) == 1:
+                self.attempt_guesses()
             # This will trigger the update current file event which will cause
             # the table to be drawn.
             self.filename_chooser.addItem(basename)
