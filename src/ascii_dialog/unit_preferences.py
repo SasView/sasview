@@ -17,7 +17,7 @@ class UnitPreferences(QWidget):
         for name in column_names:
             self.columns[name] = random.choice(unit_kinds[name].units)
 
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout(self)
         for column_name, unit in self.columns.items():
             line = UnitPreferenceLine(column_name, unit, unit_kinds[column_name])
             self.layout.addWidget(line)
