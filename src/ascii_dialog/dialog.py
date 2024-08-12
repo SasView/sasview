@@ -23,9 +23,8 @@ class AsciiDialog(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.raw_csv: list[str] | None = None
-
         self.files: dict[str, list[str]] = {}
+        self.current_filename: str | None = None
 
         self.seperators: dict[str, bool] = {
             'Comma': True,
@@ -108,6 +107,12 @@ class AsciiDialog(QWidget):
         self.layout.addWidget(self.warning_label)
 
         self.rows_is_included: list[bool] = []
+
+    @property
+    def raw_csv(self) -> list[str] | None:
+        if self.current_filename is None:
+            return None
+        return self.files[self.current_filename]
 
     def split_line(self, line: str) -> list[str]:
         """Split a line in a CSV file based on which seperators the user has
@@ -235,10 +240,10 @@ class AsciiDialog(QWidget):
         try:
             with open(filename) as file:
                 file_csv = file.readlines()
-            self.raw_csv = file_csv
             # TODO: This assumes that no two files will be loaded with the same
             # name. This might not be a reasonable assumption.
             self.files[filename] = file_csv
+            self.current_filename = filename
             # Reset checkboxes
             self.rows_is_included = []
             self.attempt_guesses()
