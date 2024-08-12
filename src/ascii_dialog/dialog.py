@@ -23,7 +23,9 @@ class AsciiDialog(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.raw_csv: str | None = None
+        self.raw_csv: list[str] | None = None
+
+        self.files: dict[str, list[str]] = {}
 
         self.seperators: dict[str, bool] = {
             'Comma': True,
@@ -232,7 +234,11 @@ class AsciiDialog(QWidget):
 
         try:
             with open(filename) as file:
-                self.raw_csv = file.readlines()
+                file_csv = file.readlines()
+            self.raw_csv = file_csv
+            # TODO: This assumes that no two files will be loaded with the same
+            # name. This might not be a reasonable assumption.
+            self.files[filename] = file_csv
             # Reset checkboxes
             self.rows_is_included = []
             self.attempt_guesses()
