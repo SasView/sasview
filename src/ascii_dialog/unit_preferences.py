@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QWidget
 from sasdata.quantities.units import NamedUnit
 from sasdata.dataset_types import unit_kinds
@@ -20,6 +21,7 @@ class UnitPreferences(QWidget):
         self.layout = QVBoxLayout(self)
         preference_lines = QWidget()
         scroll_area = QScrollArea()
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_layout = QVBoxLayout(preference_lines)
         for column_name, unit in self.columns.items():
             line = UnitPreferenceLine(column_name, unit, unit_kinds[column_name])
