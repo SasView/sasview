@@ -33,6 +33,7 @@ class AsciiDialog(QWidget):
         }
 
         self.filename_label = QLabel("Click the button below to load a file.")
+        self.filename_chooser = QComboBox()
 
         self.load_button = QPushButton("Load File")
         self.load_button.clicked.connect(self.load)
@@ -97,6 +98,7 @@ class AsciiDialog(QWidget):
         self.layout = QVBoxLayout(self)
 
         self.layout.addWidget(self.filename_label)
+        self.layout.addWidget(self.filename_chooser)
         self.layout.addWidget(self.load_button)
         self.layout.addLayout(self.dataset_layout)
         self.layout.addLayout(self.sep_layout)
@@ -235,7 +237,10 @@ class AsciiDialog(QWidget):
         if result[1] == '':
             return
         filename = result[0]
-        self.filename_label.setText(path.basename(filename))
+        basename = path.basename(filename)
+        self.filename_label.setText(basename)
+        self.filename_chooser.addItem(basename)
+        self.filename_chooser.setCurrentText(basename)
 
         try:
             with open(filename) as file:
