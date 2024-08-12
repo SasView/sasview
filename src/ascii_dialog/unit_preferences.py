@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QWidget
 from sasdata.quantities.units import NamedUnit
 from sasdata.dataset_types import unit_kinds
 from unit_preference_line import UnitPreferenceLine
@@ -18,10 +18,15 @@ class UnitPreferences(QWidget):
             self.columns[name] = random.choice(unit_kinds[name].units)
 
         self.layout = QVBoxLayout(self)
+        preference_lines = QWidget()
+        scroll_area = QScrollArea()
+        scroll_layout = QVBoxLayout(preference_lines)
         for column_name, unit in self.columns.items():
             line = UnitPreferenceLine(column_name, unit, unit_kinds[column_name])
-            self.layout.addWidget(line)
+            scroll_layout.addWidget(line)
 
+        scroll_area.setWidget(preference_lines)
+        self.layout.addWidget(scroll_area)
 
 
 if __name__ == "__main__":
