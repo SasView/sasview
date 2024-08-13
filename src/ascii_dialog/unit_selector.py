@@ -35,6 +35,10 @@ class UnitSelector(QDialog):
     def select_unit(self):
         self.accept()
 
+    @Slot()
+    def selection_changed(self):
+        self.select_button.setDisabled(False)
+
     def __init__(self, default_group='length', allow_group_edit=True):
         super().__init__()
 
@@ -52,10 +56,11 @@ class UnitSelector(QDialog):
         self.unit_list_widget = UnitListWidget()
         # TODO: Are they all named units?
         self.unit_list_widget.populate_list(self.current_unit_group().units)
-        self.unit_list_widget.itemDoubleClicked.connect(self.select_unit)
+        self.unit_list_widget.itemSelectionChanged.connect(self.selection_changed)
 
         self.select_button = QPushButton('Select Unit')
         self.select_button.pressed.connect(self.select_unit)
+        self.select_button.setDisabled(True)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.unit_type_selector)
