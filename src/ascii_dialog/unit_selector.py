@@ -1,6 +1,6 @@
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QApplication, QComboBox, QDialog, QLineEdit, QListWidget, QPushButton, QVBoxLayout, QWidget
-from sasdata.quantities.units import NamedUnit, UnitGroup, length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance, unit_group_names, unit_groups
+from PySide6.QtWidgets import QApplication, QComboBox, QDialog, QLineEdit, QPushButton, QVBoxLayout
+from sasdata.quantities.units import NamedUnit, UnitGroup, unit_group_names, unit_groups
 
 from unit_list_widget import UnitListWidget
 
