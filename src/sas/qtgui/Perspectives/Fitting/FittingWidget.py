@@ -263,8 +263,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Utility variable to enable unselectable option in category combobox
         self._previous_category_index = 0
         # Utility variables for multishell display
-        self._n_shells_row = 0
-        self._num_shell_params = 0
+        self._n_shells_row = -1
+        self._num_shell_params = -1
         # Dictionary of {model name: model class} for the current category
         self.models = {}
         # Dictionary of QModels
@@ -518,6 +518,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.onSelectModel()
         # Smearing tab
         self.smearing_widget.updateData(self.data)
+        # Check if a model was already loaded when data is sent to the tab
+        self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
@@ -1811,7 +1813,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             if model_column not in delegate.columnDict():
                 return
-            self.poly_params[parameter_name_w] = value
+            # Map the column to the poly param that was changed
+            associations = {1: "width", 4: "npts", 5: "nsigmas"}
+            self.poly_params[f"{parameter_name}.{associations.get(model_column, 'width')}"] = value
             self.kernel_module.setParam(parameter_name_w, value)
 
             # Update plot
