@@ -1,15 +1,10 @@
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication, QComboBox, QDialog, QLineEdit, QListWidget, QPushButton, QVBoxLayout, QWidget
-from sasdata.quantities.units import NamedUnit, UnitGroup, length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance
+from sasdata.quantities.units import NamedUnit, UnitGroup, length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance, unit_group_names, unit_groups
 
 from unit_list_widget import UnitListWidget
 
-# TODO: Ask Lucas if this list can be in his code (or if it already is and I
-# can't find it). I am lazy so only doing a subsection for now.
-
-all_unit_groups = [
-    length, area, volume, inverse_length, inverse_area, inverse_volume, time, rate, speed, density, force, pressure, energy, power, charge, potential, resistance
-]
+all_unit_groups = list(unit_groups.values())
 
 class UnitSelector(QDialog):
     def current_unit_group(self) -> UnitGroup:
@@ -44,7 +39,6 @@ class UnitSelector(QDialog):
         super().__init__()
 
         self.unit_type_selector = QComboBox()
-        unit_group_names = [group.name for group in all_unit_groups]
         self.unit_type_selector.addItems(unit_group_names)
         self.unit_type_selector.setCurrentText(default_group)
         if not allow_group_edit:
