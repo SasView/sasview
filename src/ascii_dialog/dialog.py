@@ -342,7 +342,8 @@ class AsciiDialog(QWidget):
     def change_inclusion(self, indexes: list[QModelIndex], new_value: bool):
         for index in indexes:
             row = index.row()
-            self.rows_is_included[row] = new_value
+            self.table.cellWidget(row, 0).setChecked(new_value)
+            self.update_row_status(row)
 
     @Slot()
     def select_items(self) -> None:
