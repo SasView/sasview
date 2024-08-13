@@ -1,6 +1,7 @@
-from PySide6.QtGui import QColor, Qt
+from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, Qt
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
-from PySide6.QtCore import Slot
+from PySide6.QtCore import QModelIndex, QPoint, Slot
+from selection_menu import SelectionMenu
 from warning_label import WarningLabel
 from col_editor import ColEditor
 from row_status_widget import RowStatusWidget
@@ -93,6 +94,9 @@ class AsciiDialog(QWidget):
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         # The table's width will always resize to fit the amount of space it has.
         self.table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+        # Add the context menu
+        self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self.show_context_menu)
 
         # Warning Label
         self.warning_label = WarningLabel(self.required_missing(), self.duplicate_columns())
@@ -326,6 +330,29 @@ class AsciiDialog(QWidget):
         new_status = self.table.cellWidget(row, 0).isChecked()
         self.rows_is_included[row] = new_status
         self.set_row_typesetting(row, new_status)
+
+    @Slot()
+    def show_context_menu(self, point: QPoint) -> None:
+        """Show the context menu for the table."""
+        context_menu = SelectionMenu(self)
+        context_menu.select_all_event.connect(self.select_items)
+        context_menu.deselect_all_event.connect(self.deselect_items)
+        context_menu.exec(QCursor.pos())
+
+    def change_inclusion(self, indexes: list[QModelIndex], new_value: bool):
+        for index in indexes:
+            row = index.row()
+            self.rows_is_included[row] = new_value
+
+    @Slot()
+    def select_items(self) -> None:
+        """Include all of the items that have been selected in the table."""
+        self.change_inclusion(self.table.selectedIndexes(), True)
+
+    @Slot()
+    def deselect_items(self) -> None:
+        """Don't include all of the items that have been selected in the table."""
+        self.change_inclusion(self.table.selectedIndexes(), False)
 
     def required_missing(self) -> list[str]:
         """Returns all the columns that are required by the dataset type but
