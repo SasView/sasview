@@ -9,6 +9,7 @@ from h5py._hl.group import Group
 class Hd5TreeWidget(QTreeWidget):
     def __init__(self, hd5_file: H5File):
         super().__init__()
+        self.header().setVisible(False)
         self.hd5_file: H5File = hd5_file
 
     def __add_to_tree__(self, root: QTreeWidgetItem, group: H5Group):
