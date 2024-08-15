@@ -334,6 +334,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
         self.q_sliders.line_min.input = self.txtFitRangeMin
         self.q_sliders.line_max.input = self.txtFitRangeMax
+        self.q_sliders.line_min.connect_markers([self.q_sliders.line_min.line, self.q_sliders.line_min.inner_marker])
+        self.q_sliders.line_max.connect_markers([self.q_sliders.line_max.line, self.q_sliders.line_max.inner_marker])
         # Ensure values are updated on redraw of plots
         self.q_sliders.line_min.inputChanged()
         self.q_sliders.line_max.inputChanged()
