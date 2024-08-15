@@ -15,9 +15,8 @@ class Hd5Viewer(QWidget):
         self.tree = Hd5TreeWidget(self.hd5_file)
         self.tree.update_tree()
 
-        self.layout = QHBoxLayout()
+        self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.tree)
-
 
 if __name__ == "__main__":
     if len(argv) < 2:
