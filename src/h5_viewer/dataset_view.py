@@ -5,7 +5,7 @@ from h5py import Dataset
 
 
 class DatasetViewWidget(QWidget):
-    def __init__(self, initial_dataset: Dataset):
+    def __init__(self, initial_dataset: Dataset | None):
         super().__init__()
         self._current_dataset = initial_dataset
 
