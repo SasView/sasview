@@ -19,7 +19,6 @@ class Hd5TreeWidget(QTreeWidget):
 
     def __add_to_tree__(self, root: QTreeWidgetItem, group: H5Group):
         for name, group_item in group.items():
-            self.h5_items.append(group_item)
             if isinstance(group_item, Group):
                 new_tree_item = QTreeWidgetItem(root, [name])
                 new_tree_item.setData(0, Qt.ItemDataRole.UserRole, group_item)
