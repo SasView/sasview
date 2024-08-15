@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from PySide6.QtWidgets import QLabel, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHeaderView, QLabel, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 from h5py import Dataset
 from numpy import ndarray
 
@@ -36,6 +36,7 @@ class DatasetViewWidget(QWidget):
             self.table.setDisabled(False)
             self.table.setColumnCount(self._current_dataset.ndim)
             self.table.setRowCount(self._current_dataset.shape[0])
+            self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
             for i, row in enumerate(self._current_dataset):
                 # If the dataset is 1 dimensional then 'row' is just the value
                 # itself but otherwise it'll be an array of values.
