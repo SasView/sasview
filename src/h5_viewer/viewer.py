@@ -2,7 +2,7 @@
 
 from PySide6.QtCore import Slot
 import h5py
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QSizePolicy, QWidget
 from h5py._hl.dataset import Dataset
 from h5_tree import Hd5TreeWidget
 from h5py import File as H5File
@@ -19,6 +19,7 @@ class Hd5Viewer(QWidget):
         self.tree = Hd5TreeWidget(self.hd5_file)
         self.tree.update_tree()
         self.tree.selection_changed.connect(self.change_selection)
+        self.tree.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
         # Viewer widget
         self.dataset_viewer = DatasetViewWidget(None)
