@@ -33,6 +33,8 @@ class Hd5Viewer(QWidget):
         new_selection = self.tree.selected_item
         if isinstance(new_selection, Dataset):
             self.dataset_viewer.current_dataset = new_selection
+        else:
+            self.dataset_viewer.current_dataset = None
 
 if __name__ == "__main__":
     if len(argv) < 2:

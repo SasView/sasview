@@ -55,6 +55,6 @@ class DatasetViewWidget(QWidget):
         return self.current_dataset
 
     @current_dataset.setter
-    def current_dataset(self, value: Dataset):
+    def current_dataset(self, value: Dataset | None):
         self._current_dataset = value
         self.update_view()
