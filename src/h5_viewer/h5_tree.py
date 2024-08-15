@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 from h5py import File as H5File, HLObject
 from h5py import Group as H5Group
@@ -7,6 +8,8 @@ from h5py import Dataset
 from h5py._hl.group import Group
 
 class Hd5TreeWidget(QTreeWidget):
+    selection_changed = Signal()
+
     def __init__(self, hd5_file: H5File):
         super().__init__()
         self.header().setVisible(False)
@@ -16,6 +19,8 @@ class Hd5TreeWidget(QTreeWidget):
         # the ordering of them in this list is important because it will be
         # needed to retrieve items based on what the current index selected is.
         self.h5_items: list[HLObject] = []
+
+        self.currentItemChanged.connect(self.selection_changed)
 
     def __add_to_tree__(self, root: QTreeWidgetItem, group: H5Group):
         for name, group_item in group.items():
