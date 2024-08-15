@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+from PySide6.QtCore import Slot
 import h5py
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QWidget
+from h5py._hl.dataset import Dataset
 from h5_tree import Hd5TreeWidget
 from h5py import File as H5File
 from sys import argv
@@ -16,6 +18,7 @@ class Hd5Viewer(QWidget):
         # Tree widget
         self.tree = Hd5TreeWidget(self.hd5_file)
         self.tree.update_tree()
+        self.tree.selection_changed.connect(self.change_selection)
 
         # Viewer widget
         self.dataset_viewer = DatasetViewWidget(None)
@@ -23,6 +26,12 @@ class Hd5Viewer(QWidget):
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.tree)
         self.layout.addWidget(self.dataset_viewer)
+
+    @Slot()
+    def change_selection(self):
+        new_selection = self.tree.selected_item
+        if isinstance(new_selection, Dataset):
+            self.dataset_viewer.current_dataset = new_selection
 
 if __name__ == "__main__":
     if len(argv) < 2:
