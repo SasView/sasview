@@ -15,11 +15,6 @@ class Hd5TreeWidget(QTreeWidget):
         self.header().setVisible(False)
         self.hd5_file: H5File = hd5_file
 
-        # While the items in this list are already contained din the hd5_file,
-        # the ordering of them in this list is important because it will be
-        # needed to retrieve items based on what the current index selected is.
-        self.h5_items: list[HLObject] = []
-
         self.currentItemChanged.connect(self.selection_changed)
 
     def __add_to_tree__(self, root: QTreeWidgetItem, group: H5Group):
