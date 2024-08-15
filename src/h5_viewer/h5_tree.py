@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Qt
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 from h5py import File as H5File, HLObject
 from h5py import Group as H5Group
@@ -27,14 +27,16 @@ class Hd5TreeWidget(QTreeWidget):
             self.h5_items.append(group_item)
             if isinstance(group_item, Group):
                 new_tree_item = QTreeWidgetItem(root, [name])
+                new_tree_item.setData(0, Qt.ItemDataRole.UserRole, group_item)
                 self.__add_to_tree__(new_tree_item, group_item)
             elif isinstance(group_item, Dataset):
                 # TODO: Might be able to reduce code duplication here.
                 new_tree_item = QTreeWidgetItem(root, [name])
+                new_tree_item.setData(0, Qt.ItemDataRole.UserRole, group_item)
 
     @property
     def selected_item(self) -> HLObject:
-        return self.h5_items[self.currentIndex().row()]
+        return self.currentItem().data(0, Qt.ItemDataRole.UserRole)
 
     def update_tree(self):
         self.h5_items = []
