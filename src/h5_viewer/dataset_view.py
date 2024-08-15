@@ -11,12 +11,14 @@ class DatasetViewWidget(QWidget):
         self._current_dataset: Dataset | None = initial_dataset
 
         self.dataset_label = QLabel()
+        self.datatype_label = QLabel()
         self.table = QTableWidget()
         # Make the table readonly
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.dataset_label)
+        self.layout.addWidget(self.datatype_label)
         self.layout.addWidget(self.table)
 
         self.update_view()
@@ -24,8 +26,10 @@ class DatasetViewWidget(QWidget):
     def update_view(self):
         if self._current_dataset is None:
             self.dataset_label.setText('Select a dataset on the left to view it.')
+            self.datatype_label.setText('')
         else:
             self.dataset_label.setText(self._current_dataset.name)
+            self.datatype_label.setText(f'Datatype: {str(self._current_dataset.dtype)}')
         self.fill_table()
 
     def fill_table(self):
