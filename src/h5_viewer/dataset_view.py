@@ -32,6 +32,8 @@ class DatasetViewWidget(QWidget):
         self.table.clear()
         if self._current_dataset is None:
             self.table.setDisabled(True)
+            self.table.setRowCount(0)
+            self.table.setColumnCount(0)
         else:
             self.table.setDisabled(False)
             self.table.setColumnCount(self._current_dataset.ndim)
