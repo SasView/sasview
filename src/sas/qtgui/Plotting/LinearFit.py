@@ -109,6 +109,13 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         # connect Fit button
         self.cmdFit.clicked.connect(self.fit)
+        self.parent.installEventFilter(self)
+
+    def eventFilter(self, watched, event):
+        if watched is self.parent and event.type() == QtCore.QEvent.Close:
+            self.q_sliders = None
+            self.close()
+        return super(LinearFit, self).eventFilter(watched, event)
 
     def setRangeLabel(self, label=""):
         """
