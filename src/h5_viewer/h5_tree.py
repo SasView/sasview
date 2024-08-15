@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 from h5py import File as H5File, HLObject
 from h5py import Group as H5Group
 from h5py import Dataset
+from h5py._hl.attrs import AttributeManager
 from h5py._hl.group import Group
 
 class Hd5TreeWidget(QTreeWidget):
@@ -17,12 +18,14 @@ class Hd5TreeWidget(QTreeWidget):
 
         self.currentItemChanged.connect(self.selection_changed)
 
-    def __add_to_tree__(self, root: QTreeWidgetItem, group: H5Group):
+    def __add_to_tree__(self, root: QTreeWidgetItem, group: H5Group | AttributeManager):
         for name, group_item in group.items():
             new_tree_item = QTreeWidgetItem(root, [name])
             new_tree_item.setData(0, Qt.ItemDataRole.UserRole, group_item)
             if isinstance(group_item, Group):
                 self.__add_to_tree__(new_tree_item, group_item)
+            elif isinstance(group_item, Dataset):
+                self.__add_to_tree__(new_tree_item, group_item.attrs)
 
     @property
     def selected_item(self) -> HLObject:
