@@ -6,6 +6,8 @@ from h5_tree import Hd5TreeWidget
 from h5py import File as H5File
 from sys import argv
 
+from dataset_view import DatasetViewWidget
+
 class Hd5Viewer(QWidget):
     def __init__(self, hd5_file: H5File):
         super().__init__()
@@ -15,8 +17,12 @@ class Hd5Viewer(QWidget):
         self.tree = Hd5TreeWidget(self.hd5_file)
         self.tree.update_tree()
 
+        # Viewer widget
+        self.dataset_viewer = DatasetViewWidget(None)
+
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.tree)
+        self.layout.addWidget(self.dataset_viewer)
 
 if __name__ == "__main__":
     if len(argv) < 2:
