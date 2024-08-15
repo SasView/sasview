@@ -9,13 +9,17 @@ class DatasetViewWidget(QWidget):
         super().__init__()
         self._current_dataset: Dataset | None = initial_dataset
 
-        self.dataset_label = QLabel('Select a dataset on the left to view it.')
+        self.dataset_label = QLabel()
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.dataset_label)
 
+        self.update_view()
+
     def update_view(self):
-        if not self._current_dataset is None:
+        if self._current_dataset is None:
+            self.dataset_label.setText('Select a dataset on the left to view it.')
+        else:
             self.dataset_label.setText(self._current_dataset.name)
 
     @property
