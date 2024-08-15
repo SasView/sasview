@@ -19,14 +19,10 @@ class Hd5TreeWidget(QTreeWidget):
 
     def __add_to_tree__(self, root: QTreeWidgetItem, group: H5Group):
         for name, group_item in group.items():
+            new_tree_item = QTreeWidgetItem(root, [name])
+            new_tree_item.setData(0, Qt.ItemDataRole.UserRole, group_item)
             if isinstance(group_item, Group):
-                new_tree_item = QTreeWidgetItem(root, [name])
-                new_tree_item.setData(0, Qt.ItemDataRole.UserRole, group_item)
                 self.__add_to_tree__(new_tree_item, group_item)
-            elif isinstance(group_item, Dataset):
-                # TODO: Might be able to reduce code duplication here.
-                new_tree_item = QTreeWidgetItem(root, [name])
-                new_tree_item.setData(0, Qt.ItemDataRole.UserRole, group_item)
 
     @property
     def selected_item(self) -> HLObject:
