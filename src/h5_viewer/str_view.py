@@ -10,7 +10,7 @@ class StrViewWidget(QWidget):
 
         self.value_label = QLabel()
 
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.value_label)
 
     def update_view(self):
