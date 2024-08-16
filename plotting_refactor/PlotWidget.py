@@ -2,12 +2,25 @@ from PySide6.QtWidgets import QTabWidget
 from SubTabs import SubTabs
 
 class PlotWidget(QTabWidget):
-    def __init__(self, datacollector):
+    def __init__(self, dataviewer, datacollector):
         super().__init__()
         self.setWindowTitle("Plot Widget")
         self.setMinimumSize(600, 600)
 
+        self.setTabsClosable(True)
+
+        self.dataviewer = dataviewer
         self.datacollector = datacollector
+
+        self.tabCloseRequested.connect(self.closeTab)
+
+    def closeTab(self, index: int):
+        """
+        Action that is executed, when a tab is closed in the plotwidget.
+        """
+        self.removeTab(index)
+
+        self.dataviewer.remove_plottree_item(index)
 
     def widget(self, index) -> SubTabs:
         return super().widget(index)

@@ -37,7 +37,7 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         self.plotTreeWidget.dropSignal.connect(self.redrawAll)
 
         self.setupMofifierCombobox()
-        self.plot_widget = PlotWidget(self.datacollector)
+        self.plot_widget = PlotWidget(self, self.datacollector)
 
     def create_plot(self, fitpage_index):
         self.update_plot_tree(fitpage_index)
@@ -182,6 +182,22 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         plotpage_index = self.datacollector.get_plotpage_index(redraw_fitpage_index)
         self.plot_widget.setCurrentIndex(plotpage_index)
         self.plot_widget.widget(plotpage_index).setCurrentIndex(redraw_subtab_index)
+
+    def remove_plottree_item(self, index: int):
+        """
+        Remove toplevelitem from plottreeitem upon closing a tab in the plottreewidget.
+        """
+        # search for the existing dataset with the right plotpage index
+        datasets = self.datacollector.datasets
+        for dataset in datasets:
+            if dataset.plotpage_index == index:
+                fitpage_index_tab = dataset.fitpage_index
+
+        # look through the toplevel items for the item with the right fitpage_index, that needs to be deleted.
+        for i in range(self.plotTreeWidget.topLevelItemCount()):
+            if self.plotTreeWidget.topLevelItem(i).data(0, 1).fitpage_index == fitpage_index_tab:
+                self.plotTreeWidget.takeTopLevelItem(i)
+
 
     def onAddModifier(self):
         """
