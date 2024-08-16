@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from PySide6.QtWidgets import QWidget
-from pprint import pprint
+from json import dumps
+from pprint import pformat
 
 class JsonViewWidget(QWidget):
     def __init__(self, initial_json_dict: dict[str, object]):
@@ -15,3 +16,7 @@ class JsonViewWidget(QWidget):
     @current_json_dict.setter
     def current_json_dict(self, value: dict[str, object]):
         self._json_dict = value
+
+    @property
+    def formatted_json(self) -> str:
+        return pformat(dumps(self._json_dict))
