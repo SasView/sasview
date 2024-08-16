@@ -11,6 +11,7 @@ class JsonViewWidget(QWidget):
 
         self.label = QLabel('JSON Data')
         self.text_box = QTextEdit()
+        self.text_box.setReadOnly(True)
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label)
