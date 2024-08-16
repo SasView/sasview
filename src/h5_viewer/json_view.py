@@ -13,7 +13,7 @@ class JsonViewWidget(QWidget):
         self.text_box = QTextEdit()
         self.text_box.setReadOnly(True)
 
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.text_box)
 
