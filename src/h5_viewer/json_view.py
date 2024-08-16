@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QLabel, QTextEdit, QVBoxLayout, QWidget
 from json import dumps
 from pprint import pformat
@@ -24,7 +25,12 @@ class JsonViewWidget(QWidget):
     @current_json_dict.setter
     def current_json_dict(self, value: dict[str, object]):
         self._json_dict = value
+        self.update_box()
 
     @property
     def formatted_json(self) -> str:
         return pformat(dumps(self._json_dict))
+
+    @Slot()
+    def update_box(self):
+        self.text_box.setText(self.formatted_json)
