@@ -19,6 +19,7 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName=c:\{#MyAppName}-{#MyAppVersion}
+UsePreviousAppDir=no
 DefaultGroupName={#MyAppName}-{#MyAppVersion}
 DisableProgramGroupPage=yes
 DisableDirPage=no
