@@ -44,25 +44,31 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         self.plot_widget.show()
         self.plot_widget.activateWindow()
 
-    def update_datasets_from_collector(self):
+    def update_datasets_from_collector(self, fitpage_index: int):
         """
         Collects datasets from the datacollector and adds them to the dataTreeWidget. Is called upon a plot or
-        calculation request from the mainwindow
+        calculation request from the mainwindow. Only adds the dataset with the corresponding fitpage_index.
         """
         datasets = self.datacollector.datasets
-        for i in range(len(datasets)):
-            fitpage_index = datasets[i].fitpage_index
-            name = "Data from Fitpage " + str(fitpage_index)
-            data_id = datasets[i].data_id
-            item = PlotPageItem(self.dataTreeWidget, [name], fitpage_index, data_id)
-            item.setData(0, 1, item)
-            subitem_data = DataItem(item, ["Data"], fitpage_index, data_id, 1)
-            subitem_data.setData(0, 1, subitem_data)
-            if datasets[i].has_y_fit():
-                subitem_fit = DataItem(item, ["Fit"], fitpage_index, data_id, 2)
-                subitem_fit.setData(0, 1, subitem_fit)
+        already_exists = False
+        for i in range(self.dataTreeWidget.topLevelItemCount()):
+            if fitpage_index == self.dataTreeWidget.topLevelItem(i).data(0, 1).fitpage_index:
+                already_exists = True
 
-        self.dataTreeWidget.expandAll()
+        if not already_exists:
+            for dataset in datasets:
+                if fitpage_index == dataset.fitpage_index:
+                    name = "Data from Fitpage " + str(fitpage_index)
+                    data_id = dataset.data_id
+                    item = PlotPageItem(self.dataTreeWidget, [name], fitpage_index, data_id)
+                    item.setData(0, 1, item)
+                    subitem_data = DataItem(item, ["Data"], fitpage_index, data_id, 1)
+                    subitem_data.setData(0, 1, subitem_data)
+                    if dataset.has_y_fit():
+                        subitem_fit = DataItem(item, ["Fit"], fitpage_index, data_id, 2)
+                        subitem_fit.setData(0, 1, subitem_fit)
+
+            self.dataTreeWidget.expandAll()
 
     def onShowDataViewer(self):
         """
@@ -72,7 +78,6 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
             self.hide()
             self.main_window.cmdShowDataViewer.setText("Show Data Viewer")
         else:
-            self.update_datasets_from_collector()
             self.show()
             self.main_window.cmdShowDataViewer.setText("Hide Data Viewer")
 
@@ -81,7 +86,7 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
         Updates existing or non-existing datasets in the datacollector for a fitpage in the mainwindow
         """
         self.datacollector.update_dataset(self.main_window, fitpage_index, create_fit, checked_2d)
-        self.update_datasets_from_collector()
+        self.update_datasets_from_collector(fitpage_index)
 
     def update_plot_tree(self, fitpage_index):
         """
