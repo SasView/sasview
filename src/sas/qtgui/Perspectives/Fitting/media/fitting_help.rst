@@ -16,6 +16,8 @@ something for new branch here
 To fit some data you must first load some data, activate one or more data sets,
 send those data sets to fitting, and select a model to fit to each data set.
 
+...But there is a change **here** now too!
+
 Instructions on how to load and activate data are in the section :ref:`Loading_data`.
 
 SasView can fit data in one of three ways:
