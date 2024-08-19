@@ -879,8 +879,9 @@ class GuiManager:
         """
         Refresh the list of documents that have been edited
         """
-        if self.patchUploader:
-            self.patchUploader.refresh()
+        if hasattr(self, 'patchUploader'):
+            if isinstance(self.patchUploader, PatchUploader) and self.patchUploader.isVisible():
+                self.patchUploader.refresh()
 
     def actionQuit(self):
         """

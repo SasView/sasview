@@ -25,6 +25,7 @@ from sas.system.version import __version__
 
 SAVE_DATA_DIRECTORY = USER_DOC_BASE / __version__ / "data"
 SAVE_DATA_FILE = SAVE_DATA_DIRECTORY / "docdata.dat"
+STATIC_DATA_FILE = SAVE_DATA_DIRECTORY / "static.dat"
 
 logger = logging.getLogger(__name__)
 
@@ -334,7 +335,8 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
 
         #Format into a json request to send to DANSE-2 API
         json_packet = {'sasview_version': __version__,
-                       'hash': hashes['active'],
+                       'active_hash': hashes['active'],
+                       'base_hash': hashes['base'],
                        'author': author_name,
                        'changes': change_msg,
                        'branches_exist': branches_exist
