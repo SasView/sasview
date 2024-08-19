@@ -202,7 +202,11 @@ class SldPanel(QtWidgets.QDialog):
             return ("%-5.3g" % value).strip()
 
         if neutronWavelength and float(neutronWavelength) > np.finfo(float).eps:
-            results = neutronSldAlgorithm(str(formula), density, float(neutronWavelength))
+            try:
+                results = neutronSldAlgorithm(str(formula), density, float(neutronWavelength))
+            except (ValueError, ParseException, AssertionError):
+                self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
+                return
 
             self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
             self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
@@ -228,7 +232,11 @@ class SldPanel(QtWidgets.QDialog):
             self.ui.editNeutronAbsXs.setEnabled(False)
 
         if xrayWavelength and float(xrayWavelength) > np.finfo(float).eps:
-            results = xraySldAlgorithm(str(formula), density, float(xrayWavelength))
+            try:
+                results = xraySldAlgorithm(str(formula), density, float(xrayWavelength))
+            except (ValueError, ParseException, AssertionError):
+                self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
+                return
 
             self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
             self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))
