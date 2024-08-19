@@ -1268,10 +1268,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         ''' Send a signal to the main thread for model update'''
         self.calculateSignal.emit((out, cov, pr, elapsed))
 
-    def 
-    
-    
-    (self, output_tuple):
+    def _calculateUpdate(self, output_tuple):
         """
         Method called with the results when the inversion is done
 
