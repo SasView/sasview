@@ -41,7 +41,7 @@ class Hd5Viewer(QWidget):
         new_selection = self.tree.selected_item
         if isinstance(new_selection, Dataset):
             if new_selection.shape == (1,):
-                new_selection_str = str(new_selection[0])
+                new_selection_str = str(new_selection[0], 'utf8')
                 if not search(r'{|}|\[|\]', new_selection_str) is None:
                     self.json_viewer.current_json_dict = loads(new_selection_str)
                     self.stacked_viewers.setCurrentIndex(2)
