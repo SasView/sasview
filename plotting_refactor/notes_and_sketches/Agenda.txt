@@ -1,16 +1,18 @@
-1 modifier colormap applicable on 2d data
 2 residuals subplot on left side for big one? how to do this?
 3 maybe have a look at the data links from lucas example
 4 dragging modifiers across the treewidget with scrolling
+    try with debugger and
+    start sasview normally and connect a debugger manually
 5 delete button for modifiers
-6 grey out the area that is docked out currently to generate some user feedback
-7 killing fitpage tabs
 
-
-what are future functionalities that can be built in to this?
+what are future functionalities that can be built in into this?
 slicers?
 publication ready plots? or close to?
 
+keep the dataviewer alive while transfering to sasview?
+
+keep a branch alive where everything is working properly and it is not
+destroyed :D
 
 explore how difficult it is to integrate the functionalities from now into the 
 existing sasview
@@ -20,7 +22,14 @@ have a look at colormap.py in sasview/src/sas/qtgui/Plotting/ColorMap.py
 
 revert back to the earlier state by button?
 kill a fittab with out prompt? maybe settings?
+    onProjectLoad, onApplicationExit
+    open Issue with this- settings option for are you sure you want to kill this fit tab
 
 
 Lionels request regarding this repository: 
 https://github.com/criosx/molgroups/tree/main
+
+https://doodle.com/meeting/participate/id/eZmlx5gd/
+
+how can the current functionality be processed in sasview? new perspective that is the tabbed plotwidget,
+which processes signals and plots by references to model indexes?
