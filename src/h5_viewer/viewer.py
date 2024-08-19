@@ -31,6 +31,7 @@ class Hd5Viewer(QWidget):
         self.stacked_viewers = QStackedWidget()
         self.stacked_viewers.addWidget(self.dataset_viewer)
         self.stacked_viewers.addWidget(self.str_viewer)
+        self.stacked_viewers.addWidget(self.json_viewer)
 
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.tree)
