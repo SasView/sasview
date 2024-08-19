@@ -30,7 +30,7 @@ class JsonViewWidget(QWidget):
     @property
     def formatted_json(self) -> str:
         if not self._json_dict is None:
-            return pformat(dumps(self._json_dict))
+            return dumps(self._json_dict, indent=4)
         else:
             return ''
 
