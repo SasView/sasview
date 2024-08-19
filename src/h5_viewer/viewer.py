@@ -40,8 +40,12 @@ class Hd5Viewer(QWidget):
     def change_selection(self):
         new_selection = self.tree.selected_item
         if isinstance(new_selection, Dataset):
-            self.dataset_viewer.current_dataset = new_selection
-            self.stacked_viewers.setCurrentIndex(0)
+            if new_selection.shape == (1,):
+                self.str_viewer.current_str = str(new_selection[0])
+                self.stacked_viewers.setCurrentIndex(1)
+            else:
+                self.dataset_viewer.current_dataset = new_selection
+                self.stacked_viewers.setCurrentIndex(0)
         elif isinstance(new_selection, str):
             # Do an incredibly simple check to guess whether the text is a JSON
             # file.
