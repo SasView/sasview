@@ -4,12 +4,14 @@ from PySide6.QtCore import Slot
 import h5py
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QSizePolicy, QStackedWidget, QWidget
 from h5py._hl.dataset import Dataset
-from h5_tree import Hd5TreeWidget
+from h5_viewer.h5_tree import Hd5TreeWidget
 from h5py import File as H5File
 from sys import argv
-
-from dataset_view import DatasetViewWidget
-from str_view import StrViewWidget
+from h5_viewer.dataset_view import DatasetViewWidget
+from h5_viewer.json_view import JsonViewWidget
+from h5_viewer.str_view import StrViewWidget
+from re import search
+from json import loads
 
 class Hd5Viewer(QWidget):
     def __init__(self, hd5_file: H5File):
@@ -25,6 +27,7 @@ class Hd5Viewer(QWidget):
         # Viewer widget
         self.dataset_viewer = DatasetViewWidget(None)
         self.str_viewer = StrViewWidget(None)
+        self.json_viewer = JsonViewWidget(None)
         self.stacked_viewers = QStackedWidget()
         self.stacked_viewers.addWidget(self.dataset_viewer)
         self.stacked_viewers.addWidget(self.str_viewer)
@@ -40,8 +43,14 @@ class Hd5Viewer(QWidget):
             self.dataset_viewer.current_dataset = new_selection
             self.stacked_viewers.setCurrentIndex(0)
         elif isinstance(new_selection, str):
-            self.str_viewer.current_str = new_selection
-            self.stacked_viewers.setCurrentIndex(1)
+            # Do an incredibly simple check to guess whether the text is a JSON
+            # file.
+            if not search(r'{|}|\[|\]', new_selection) is None:
+                self.json_viewer.current_json_dict = loads(new_selection)
+                self.stacked_viewers.setCurrentIndex(2)
+            else:
+                self.str_viewer.current_str = new_selection
+                self.stacked_viewers.setCurrentIndex(1)
         else:
             self.dataset_viewer.current_dataset = None
             self.stacked_viewers.setCurrentIndex(0)
