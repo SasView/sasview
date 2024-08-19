@@ -151,10 +151,15 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isBatch = False
         self.batchResultsWindow = None
         self._allowPlots = True
-
+        self.qmin = None    
+        self.qmax = None
 
         if self.logic.data_is_loaded:
-            self.qmin, self.qmax = self.logic.computeDataRange()
+            self.q_range_min, self.q_range_max = self.logic.computeDataRange()
+        else:
+            self.q_range_min = None
+            self.q_range_max = None
+
 
 
         # Add validators
@@ -242,7 +247,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.estimateSignal.connect(self._estimateUpdate)
         self.calculateSignal.connect(self._calculateUpdate)
         self.maxDistanceInput.textEdited.connect(self.performEstimateDynamic)
-        self.plotUpdateSignal.connect(lambda: print('Plot'))
+        self.plotUpdateSignal.connect(self._calculateUpdate)
 
 
 
@@ -423,9 +428,13 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def setQ(self):
         """calculate qmin and qmax values and update calculator accordingly"""
-        qmin, qmax = self.logic.computeDataRange()
-        self.updateMinQ(qmin)
-        self.updateMaxQ(qmax)
+        if self.logic.data_is_loaded:
+            self.q_range_min, self.q_range_max = self.logic.computeDataRange()
+        else:        
+            self.q_range_min = None
+            self.q_range_max = None    
+        self.updateMinQ()
+        self.updateMaxQ()
 
     def updateTab(self, data = None, tab_index=None):
         self.logic.data = GuiUtils.dataFromItem(data)
@@ -471,7 +480,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def updateCalculator(self):
         """Update all p(r) params"""
         self._calculator.set_x(self.logic.data.x)
-        self._calculator.set_y(self.logic.data.y)        
+        self._calculator.set_y(self.logic.data.y)   
         self.logic.add_errors()
         self.setQ()
         self._calculator.set_err(self.logic.data.dy)
@@ -594,10 +603,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
     def updateMinQ(self, q_value=None):
         """ Validate the low q value """
-        if not q_value:
+        if q_value is None:
             q_value = float(self.minQInput.text()) if isinstance(self.minQInput.text(), (float, str)) else 0.0
         q_value = float(q_value)    
-        qmin = float(self._calculator.get_qmin()) if self._calculator.get_qmin() is not None else 0.0
+        qmin = float(self.q_range_min) if self.q_range_min is not None else 0.0
         qmax = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf
         if q_value > qmax:
             # Value too high - coerce to max q
@@ -608,16 +617,20 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         # Valid Q - set model item     
         qmin = q_value
 
-        self.updateQRange(qmin, qmax)
+        self.qmin = str(qmin)
+        self._calculator.set_qmin(qmin)
+        self.minQInput.setText(f"{float(qmin):.3}") 
+        self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(qmin)))
 
 
-    def updateMaxQ(self, q_value=None):
+
+    def updateMaxQ(self, q_value=None ):
         """ Validate the value of high q """
-        if not q_value:
+        if q_value is None:
             q_value = float(self.maxQInput.text()) if isinstance(self.maxQInput.text(), (float, str)) else np.inf
         q_value = float(q_value)    
         qmin = float(self._calculator.get_qmin()) if self._calculator.get_qmin() is not None else 0.0
-        qmax = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf
+        qmax = float(self.q_range_max) if self.q_range_max is not None else np.inf
         if q_value > qmax:
             # Value too high - coerce to max q
             q_value =  qmax
@@ -625,9 +638,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             # Value too low - coerce to min q
             q_value=qmin
         # Valid Q - set model item   
-        qmax = q_value                   
+        qmax = q_value                
+        
+        self.qmax = str(qmax)
+        self._calculator.set_qmax(qmax)
+        self.maxQInput.setText(f"{float(qmax):.3}") 
+        self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(qmax)))
 
-        self.updateQRange(qmin, qmax)
+
 
     def updateQRange(self, q_range_min, q_range_max):
         """
@@ -636,7 +654,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.qmax = str(q_range_max)
         self.qmin = str(q_range_min)
         self._calculator.set_qmin(q_range_min)
-        self._calculator.set_qmax(q_range_max)
+        self._calculator.max(q_range_max)
         self.maxQInput.setText(f"{float(q_range_max):.3}") 
         self.minQInput.setText(f"{float(q_range_min):.3}") 
         self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(q_range_min)))
@@ -696,6 +714,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.regularizationConstantInput.setText(str(REGULARIZATION))
         self.maxDistanceInput.setText(str(MAX_DIST))
         self.backgroundInput.setText(str(BACKGROUND_INPUT))
+        self.computationTimeValue.setText("")
         self.minQInput.setText("0.0")
         self.maxQInput.setText("0.0")
         self.slitHeightInput.setText("")
@@ -1249,7 +1268,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         ''' Send a signal to the main thread for model update'''
         self.calculateSignal.emit((out, cov, pr, elapsed))
 
-    def _calculateUpdate(self, output_tuple):
+    def 
+    
+    
+    (self, output_tuple):
         """
         Method called with the results when the inversion is done
 
@@ -1285,7 +1307,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             dataPlot.slider_low_q_setter = ['updateMinQ']
             dataPlot.slider_high_q_input = ['maxQInput']
             dataPlot.slider_high_q_setter = ['updateMaxQ']
-        self.dataPlot = dataPlot 
+            self.dataPlot = dataPlot 
+
+            
             # Udpate internals and GUI
         self.updateDataList(self.data)  
         self._allowPlots = True
