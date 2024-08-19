@@ -54,23 +54,24 @@ def TEMPORARY():
         with gzip.open(SAVE_DATA_DIRECTORY / 'static.dat', 'wt', encoding="utf-8") as f:
             f.write(json.dumps(json_data, ensure_ascii=False, indent=4))
 
-def updateHash(filepath: Path):
+def updateHash(filepath: Path, database: str):
     """
-    Update the hash value of a given file stored in docdata.dat
-    :param filepath: os.path.Path object of the file to update
+    Update the hash value of a given file stored in docdata.dat\n
+    :param filepath: os.path.Path object of the file to update\n
+    :param database: str of the database to update ['active', 'base']
     """
     # Generate new hash
     new_hash = getHash(filepath)
 
     # Retrieve active data and update hash
-    active_data = readFromDat(SAVE_DATA_FILE)['active']
+    cur_data = readFromDat(SAVE_DATA_FILE)[database]
     try:
-        active_data[str(filepath)] = new_hash
+        cur_data[str(filepath)] = new_hash
     except KeyError:
-        logger.warning(f"Could not find hash for {filepath} in active data. Documentation may be impossible to upload.")
+        logger.warning(f"Could not find hash for {filepath} in {database} data. Documentation may be impossible to upload.")
     
     # Save active data
-    saveToDat(active_data, 'active')
+    saveToDat(cur_data, database)
 
 def checkDiffs():
     """
@@ -247,6 +248,9 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
 
         self.uploadURL = "http://127.0.0.1:5000/post" # Test server for development, TODO replace later
         self.parent = parent
+        self.files_to_upload = [] # list of files to upload
+        self.changed_files = [] # list of files that COULD be uploaded
+        self.files_sucessfully_uploaded = [] # list of files that were sucessfully uploaded to GitHub
 
         self.model = QtGui.QStandardItemModel()
 
@@ -263,7 +267,12 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         Connect signals to slots.
         """
         self.cmdSubmit.clicked.connect(self.apiInteraction)
+        self.cmdCancel.clicked.connect(self.close)
         self.docsUploadingSignal.connect(self.setWidgetEnabled)
+    
+    def closeEvent(self, event):
+        event.accept()
+        self.deleteLater()
     
     def apiInteraction(self):
         """
@@ -277,10 +286,10 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Check for updated diffs and update lstFiles
         """
-        changed_files = self.getDiffItems()
+        self.getDiffItems()
         self.model.clear()
 
-        for file in changed_files:
+        for file in self.changed_files:
             basename = os.path.basename(file)
             self.addItemToModel(basename)
         
@@ -299,11 +308,10 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Format POST request
         """
-        files_to_upload = []
 
-        for file in self.getDiffItems():
+        for file in self.changed_files:
             if self.isChecked(os.path.basename(file)):
-                files_to_upload.append(file)
+                self.files_to_upload.append(file)
 
         # Prepare json information for upload to API
         author_name = self.txtName.text()
@@ -311,7 +319,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
 
         # Check to see if the user has already submitted the file to a branch
         branches_exist = {}
-        for file in files_to_upload:
+        for file in self.files_to_upload:
             hashes = getHashes(file)
             if hashes['static'] != hashes['base']:
                 # User's submission is already submitted to a branch
@@ -321,11 +329,12 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         
         # Format files into a dictionary and open them as binary packets for upload
         rst_content = {}
-        for file in files_to_upload:
+        for file in self.files_to_upload:
             rst_content[file] = open(file, 'rb')
 
         #Format into a json request to send to DANSE-2 API
         json_packet = {'sasview_version': __version__,
+                       'hash': hashes['active'],
                        'author': author_name,
                        'changes': change_msg,
                        'branches_exist': branches_exist
@@ -359,9 +368,48 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Handle the response from the API
         """
+        self.docsUploadingSignal.emit(False) # Trigger the signal to re-enable the dialog
         if response.status_code == 200:
-            self.docsUploadingSignal.emit(False) # Trigger the signal to re-enable the dialog
-            self.parent.communicate.statusBarUpdateSignal.emit('Documentation uploaded successfully.')
+            self.return200(response)
+        elif response.status_code == 400:
+            self.parent.communicate.statusBarUpdateSignal.emit('Error: Bad request. Please check your submission and try again.')
+
+    def return200(self, response):
+        """
+        Handle a 200 response from the API, generating a dialog with the response text
+        which should be a link.
+        """
+        self.updateBaseDatabase()
+        self.refresh()
+
+        self.parent.communicate.statusBarUpdateSignal.emit('Documentation uploaded successfully.')
+
+        dialog = QtWidgets.QDialog()
+        dialog.setWindowTitle("Response")
+        dialog.setModal(True)
+        dialog.setLayout(QtWidgets.QVBoxLayout())
+
+        response_text = QtWidgets.QTextBrowser()
+        response_html = f'<a href="{response.text}">{response.text}</a>'
+        response_text.setHtml(response_html)  # Use setHtml instead of setPlainText
+        response_text.setReadOnly(True)
+        response_text.setOpenExternalLinks(True)
+        dialog.layout().addWidget(response_text)
+
+        copy_button = QtWidgets.QPushButton("Copy")
+        copy_button.clicked.connect(lambda: QtWidgets.QApplication.clipboard().setText(response.text))
+        dialog.layout().addWidget(copy_button)
+
+        dialog.exec_()
+
+    def updateBaseDatabase(self):
+        """
+        Register with hash databases that changes were sucessfully made
+        """
+        #TODO: In the future we will not assume that all files were uploaded sucessfully on a 200 response
+        self.files_sucessfully_uploaded = self.files_to_upload
+        for file in self.files_sucessfully_uploaded:
+            updateHash(file, 'base')
 
     def isChecked(self, basename):
         """
@@ -393,11 +441,11 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
     
     def getDiffItems(self):
         """
-        Returns a list of files that have been modified.
+        Update list of files that have been modified.
         """
         diff_dict = checkDiffs()
         diff_list = [filename for filename in diff_dict.keys()]
-        return diff_list
+        self.changed_files = diff_list
 
     def setWidgetEnabled(self, uploading: bool):
         """

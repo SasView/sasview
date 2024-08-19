@@ -462,7 +462,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
         if self.is_documentation:
-            updateHash(self.filename) #Update hash of file to mark that it has changed
+            updateHash(self.filename, 'active') #Update hash of file to mark that it has changed
             self.parent.communicate.refreshUpdatedDocsSignal.emit() #Refresh changes in patchuplaoder dialog
             self.regenerateDocumentation()
     
