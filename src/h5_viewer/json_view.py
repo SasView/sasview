@@ -6,9 +6,9 @@ from json import dumps
 from pprint import pformat
 
 class JsonViewWidget(QWidget):
-    def __init__(self, initial_json_dict: dict[str, object]):
+    def __init__(self, initial_json_dict: dict[str, object] | None):
         super().__init__()
-        self._json_dict: dict[str, object ] = initial_json_dict
+        self._json_dict: dict[str, object ] | None = initial_json_dict
 
         self.label = QLabel('JSON Data')
         self.text_box = QTextEdit()
@@ -29,7 +29,10 @@ class JsonViewWidget(QWidget):
 
     @property
     def formatted_json(self) -> str:
-        return pformat(dumps(self._json_dict))
+        if not self._json_dict is None:
+            return pformat(dumps(self._json_dict))
+        else:
+            return ''
 
     @Slot()
     def update_box(self):
