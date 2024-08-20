@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from PySide6.QtCore import Slot
+from PySide6.QtGui import QTextOption
 from PySide6.QtWidgets import QLabel, QTextEdit, QVBoxLayout, QWidget
 from json import dumps
 from pprint import pformat
@@ -13,6 +14,7 @@ class JsonViewWidget(QWidget):
         self.label = QLabel('JSON Data')
         self.text_box = QTextEdit()
         self.text_box.setReadOnly(True)
+        self.text_box.setWordWrapMode(QTextOption.WrapMode.NoWrap)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.label)
