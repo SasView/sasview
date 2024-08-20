@@ -481,9 +481,9 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """Update all p(r) params"""
         self._calculator.set_x(self.logic.data.x)
         self._calculator.set_y(self.logic.data.y)   
-        self.logic.add_errors()
-        self.setQ()
+        self.logic.data.dy = self.logic.add_errors()        
         self._calculator.set_err(self.logic.data.dy)
+        self.setQ()
         self.set_background(self.backgroundInput.text())
         self.set_nTermsSuggested(self.noOfTermsInput.text())
         self._calculator.set_alpha(is_float(self.regularizationConstantInput.text()))
@@ -604,7 +604,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
     def updateMinQ(self, q_value=None):
         """ Validate the low q value """
         if q_value is None:
-            q_value = float(self.minQInput.text()) if isinstance(self.minQInput.text(), (float, str)) else 0.0
+            q_value = float(self.minQInput.text()) if isinstance(self.minQInput.text(), (float, str)) else 0.0  
         q_value = float(q_value)    
         qmin = float(self.q_range_min) if self.q_range_min is not None else 0.0
         qmax = float(self._calculator.get_qmax()) if self._calculator.get_qmax() is not None else np.inf

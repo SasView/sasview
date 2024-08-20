@@ -142,12 +142,16 @@ class InversionLogic(object):
         Adds errors to data set is they are not available.
         Uses  $\Delta y = \sigma | y |$.
         """
-        if np.size(self._data.dy) == 0.0:
-            self._data.dy = np.sqrt(np.fabs(self._data.y))*sigma
-        elif self._data.dy is not None and np.any(self._data.dy) <= 0.0:
-            self._data.dy = np.where(self._data.dy <= 0.0, np.sqrt(np.fabs(self._data.y))*sigma, self._data.dy)
+        print(self.data.dy.size)
+        print(- 1e-16< np.any(self.data.dy) < 1e-16)
+        print(np.where(np.fabs(self.data.dy) < 1e-16, 1e16, self.data.dy))
+        if self.data.dy.size == 0.0:
+            self.data.dy = np.sqrt(np.fabs(self.data.y))*sigma
 
-        
+        if self.data.dy is not None:
+            self.data.dy = np.where(self.data.dy < 0.0, np.sqrt(np.fabs(self.data.y))*sigma, self.data.dy)
+            self.data.dy = np.where(np.fabs(self.data.dy) < 1e-16, 1e16, self.data.dy)
+        return self.data.dy
 
     def computeDataRange(self):
         """
