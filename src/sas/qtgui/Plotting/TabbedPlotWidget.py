@@ -15,9 +15,19 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
         self.setWindowTitle('TabbedPlotWidget')
 
         self.setMinimumSize(500, 500)
-        self.show()
+        self.hide()
 
     def _set_icon(self):
         icon = QtGui.QIcon()
         icon.addFile(u":/res/ball.ico", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
+
+    def show_or_activate(self):
+        """
+        Shows the widget itself, if it is hidden. Activates is, if already shown.
+        """
+        if self.isVisible():
+            self.activateWindow()
+        else:
+            self.show()
+            self.activateWindow()
