@@ -458,9 +458,28 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu' )}}
         # If sasview has crashed on its own, then this should return an error
         run: |
-          xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW &
-          sleep 60s
-          kill %1
+          (
+            echo "## START SASVIEW"
+            xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW 2>&1 |
+            tee sasview-test.log
+          ) &
+          svpid=$!
+          (
+            set -e
+            sleep 20s
+            echo "## PULSE CHECK"
+            kill -0 $svpid
+            echo "## PULSE OK"
+            sleep 40s
+            echo "## FINISHING SMOKE TEST"
+            kill $svpid
+            echo "## SMOKE TEST COMPLETE"
+            exit 0
+          ) &
+          pulsepid=$1
+          wait $pulsepid
+          # Check the log file for successful startup
+          grep "SasView session started" sasview-test.log
 
       ### Optionally attempt to work with the debug tarball from pyinstaller
 
