@@ -64,6 +64,8 @@ from sas.system import HELP_SYSTEM, web
 from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
 from sas.system.version import __version__ as SASVIEW_VERSION
+from sas.qtgui.Plotting.TabbedPlotWidget import TabbedPlotWidget
+
 
 logger = logging.getLogger(__name__)
 
@@ -194,6 +196,8 @@ class GuiManager:
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNew(self._parent)
+
+        self.tabbedPlotWidget = TabbedPlotWidget(self)
 
     def loadAllPerspectives(self):
         """ Load all the perspectives"""
