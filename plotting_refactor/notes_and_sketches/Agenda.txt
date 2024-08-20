@@ -61,3 +61,15 @@ GuiUtils Klasse Communicate erbt von QtCore.QObject. Hier sind alle Signale, die
 Was macht der manager in plotterwidget?
 Lässt auf den Communicator vom Manager zugreifen und diesen ein Signal aussenden
 Der Communicator kommt immer durch self.parent.communicator()
+
+how to show the window on plot signal. if it already shown, activate it. if not shown, show and activate
+    this needs the tabbed plot widget to not be a single window on top, but to be embedded into the canvas. how to
+    do that? :-)
+
+signal for plot goes to guimanager.showplotfromname or guimanager.showplot
+redirects to DataExplorerWidget.displaydata or dataexplorerwidget.displaydatabyname
+displaydata ends in either active_plots.showNormal() or plotData or updatePlot or appendOrUpdatePlot
+
+active_plots.showNormal ends in
+
+appendorupdateplot ends in Plotter2dWidget.replacePlot or plot.plot
