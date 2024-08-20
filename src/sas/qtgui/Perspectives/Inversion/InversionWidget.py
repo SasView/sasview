@@ -41,6 +41,8 @@ def is_float(value):
 NUMBER_OF_TERMS = 10
 REGULARIZATION = 0.0
 BACKGROUND_INPUT = 0.0
+QMIN_INPUT = 0.0
+QMAX_INPUT = 0.0
 MAX_DIST = 140.0
 
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
@@ -151,14 +153,14 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.isBatch = False
         self.batchResultsWindow = None
         self._allowPlots = True
-        self.qmin = None    
-        self.qmax = None
+        self.qmin = 0.0    
+        self.qmax = np.inf
 
         if self.logic.data_is_loaded:
             self.q_range_min, self.q_range_max = self.logic.computeDataRange()
         else:
-            self.q_range_min = None
-            self.q_range_max = None
+            self.q_range_min = 0.0
+            self.q_range_max = np.inf
 
 
 
@@ -306,10 +308,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         bgd_item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT, bgd_item)
-        blank_item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_QMIN, blank_item)
-        blank_item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_QMAX, blank_item)
+        qmin_item = QtGui.QStandardItem(str(QMIN_INPUT))
+        self.model.setItem(WIDGETS.W_QMIN, qmin_item)
+        qmax_item = QtGui.QStandardItem(str(QMAX_INPUT))
+        self.model.setItem(WIDGETS.W_QMAX, qmax_item)
         blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_SLIT_WIDTH, blank_item)
         blank_item = QtGui.QStandardItem("")
@@ -715,8 +717,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.maxDistanceInput.setText(str(MAX_DIST))
         self.backgroundInput.setText(str(BACKGROUND_INPUT))
         self.computationTimeValue.setText("")
-        self.minQInput.setText("0.0")
-        self.maxQInput.setText("0.0")
+        self.minQInput.setText(str(QMIN_INPUT))
+        self.maxQInput.setText(str(QMAX_INPUT))
         self.slitHeightInput.setText("")
         self.slitWidthInput.setText("")
 
