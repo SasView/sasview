@@ -33,3 +33,31 @@ https://doodle.com/meeting/participate/id/eZmlx5gd/
 
 how can the current functionality be processed in sasview? new perspective that is the tabbed plotwidget,
 which processes signals and plots by references to model indexes?
+
+
+
+
+
+sasview integration:
+where does the plotting widget live? can it be an extra window that is
+
+das fenster muss erstmal irgendwo erzeugt werden, wenn das erste mal gefittet wird. oder direkt mit dem
+
+zuerst: alles parallel laufen lassen und das fenster zusätzlich zu den normalen plots erzeugen
+die plots, die schon automatisch erstellt werden, kann man dann redirecten in das tabbed widget
+
+PlotterWidget erbt von PlotterBase (PlotterWidget ist in Klasse Plotter.py)
+PlotterBase erbt von QWidget
+PlotterBase hat den manager aus der Erzeugung von PlotterWidget
+PlotterWidget wird erzeugt in DataExplorer.py plotData new_plot = PlotterWidget(manager=self, parent=self)
+
+DataExplorerWidget ist der Manager von PlotterWidget
+GuiManager._data_manger is Manager von DataExplorerWidget und GuiManager ist guimanager von DataExplorerWidget
+GuiManager parent ist MainWindow
+GuiManager self.communicate kommt aus GuiUtils.Communicate()
+GuiUtils Klasse Communicate erbt von QtCore.QObject. Hier sind alle Signale, die gebraucht und verarbeitet werden.
+    in GuiManager werden die Signale dann verbunden mit slots unter addcallbacks?
+
+Was macht der manager in plotterwidget?
+Lässt auf den Communicator vom Manager zugreifen und diesen ein Signal aussenden
+Der Communicator kommt immer durch self.parent.communicator()
