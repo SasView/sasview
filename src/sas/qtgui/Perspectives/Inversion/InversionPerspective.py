@@ -322,13 +322,17 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         if not isinstance(data_item[0], QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
-
+        
+#        if is_batch:
+#            # Just create a new fit tab. No empty batchFit tabs
+#            self.addData(data_item, is_batch=is_batch)
+#            return
 
 
         items = [data_item] if (is_batch and len(data_item)>1) else data_item
         for data in items:
             logic_data = GuiUtils.dataFromItem(data)
-            if not isinstance(logic_data, Data1D):
+            if logic_data is not None and not isinstance(logic_data, Data1D):
                 msg = "Invariant cannot be computed with 2D data."
                 raise ValueError(msg)
 
