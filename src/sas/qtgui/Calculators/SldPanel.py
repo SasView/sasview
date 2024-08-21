@@ -191,7 +191,8 @@ class SldPanel(QtWidgets.QDialog):
         if not density and '@' not in formula:
             self.ui.editMassDensity.setStyleSheet("background-color: yellow")
             return
-        if density and '@' in formula:
+        if density and '//' in formula and np.all(["@" in part for part in formula.split("//")]):
+            # Ignore density input when all individual densities are specified
             self.ui.editMassDensity.setEnabled(False)
             density = None
 
