@@ -205,7 +205,7 @@ class SldPanel(QtWidgets.QDialog):
         if neutronWavelength and float(neutronWavelength) > np.finfo(float).eps:
             try:
                 results = neutronSldAlgorithm(str(formula), density, float(neutronWavelength))
-            except (ValueError, ParseException, AssertionError):
+            except (ValueError, ParseException, AssertionError, KeyError):
                 self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
                 return
 
@@ -235,7 +235,7 @@ class SldPanel(QtWidgets.QDialog):
         if xrayWavelength and float(xrayWavelength) > np.finfo(float).eps:
             try:
                 results = xraySldAlgorithm(str(formula), density, float(xrayWavelength))
-            except (ValueError, ParseException, AssertionError):
+            except (ValueError, ParseException, AssertionError, KeyError):
                 self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
                 return
 
