@@ -28,7 +28,7 @@ jobs = []
 os_release_list = [
     'ubuntu-20.04',
     'windows-latest',
-    'macos-latest-large',
+    'macos-14-large',
 ]
 
 # List of OS images to use for release tests
