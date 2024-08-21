@@ -56,16 +56,14 @@ begin
       Result := True;
 end;
 
-{delete all files in the installation directory prior to installation to prevent conflicts}
-function PrepareToInstall(var NeedsRestart: Boolean): String;
-begin
-    DelTree("{app}", True, True, True);
-end;
-
 [Files]
 Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
 Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[InstallDelete]
+; Delete all files in the directory prior to installation to prevent version conflicts
+Type: filesandordirs; Name: "{app}"
 
 [Icons]
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
