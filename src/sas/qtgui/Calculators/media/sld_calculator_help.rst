@@ -22,7 +22,7 @@ User Inputs
     This field defines the material for which you are calculating the SLD. The section "`Specifying Materials or Mixtures in the Molecular Formula Field`_" offers further guidance on how to enter molecules, biomolecules, and more complex mixtures.
 
 **Mass Density** (|g/cm^3|)
-    This field defines the density of the material for which you are calculating the SLD. Density uncertainty is likely the largest source of error in the SLD calculator.
+    This field defines the density of the material for which you are calculating the SLD. Density uncertainty is likely the largest source of error in the SLD calculator. This field may be excluded in cases where the mass density of each individual component is provided in the formula field.
 
 **Neutron Wavelength** (|Ang|)
     Wavelength is used to calculate the neutron scattering cross-section and 1/e length. It is required for neutron calculations and entered in units of |Ang|.
@@ -79,7 +79,7 @@ Specifying Materials or Mixtures in the Molecular Formula Field
 
     1%wtNaCl // 50%wtD2O // H2O
 
-**Volume Fraction** can be entered in the same way by substituting *%vol or vol%* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field will be calculated from the molecular formula when all individual densities are provided. Providing all individual densities in the formula field will cause the density field to be greyed out and ignored.
+**Volume Fraction** can be entered in the same way by substituting *%vol or vol%* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field will be calculated from the molecular formula when all individual densities are provided and the density field will  be greyed out and ignored.
 
     50%vol H2O@1 // D2O\@1.1
 
