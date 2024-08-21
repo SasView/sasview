@@ -1814,9 +1814,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if model_column not in delegate.columnDict():
                 return
             # Map the column to the poly param that was changed
-            associations = {1: "width", 4: "npts", 5: "nsigmas"}
-            self.poly_params[f"{parameter_name}.{associations.get(model_column, 'width')}"] = value
-            self.kernel_module.setParam(parameter_name_w, value)
+            associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
+            p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
+            self.poly_params[p_name] = value
+            self.kernel_module.setParam(p_name, value)
 
             # Update plot
             self.updateData()
