@@ -79,7 +79,7 @@ Specifying Materials or Mixtures in the Molecular Formula Field
 
     1%wtNaCl // 50%wtD2O // H2O
 
-**Volume Fraction** can be entered in the same way by substituting *%vol or vol%* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field must also be updated to specify the density of the mixture, or, if no density value is given, will be calculated from the molecular formula when all individual densities are provided.
+**Volume Fraction** can be entered in the same way by substituting *%vol or vol%* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field will be calculated from the molecular formula when all individual densities are provided. Providing all individual densities in the formula field will cause the density field to be greyed out and ignored.
 
     50%vol H2O@1 // D2O\@1.1
 
