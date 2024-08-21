@@ -51,7 +51,6 @@ from sas.qtgui.Calculators.SldPanel import SldPanel
 from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
-from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 
@@ -206,8 +205,8 @@ class GuiManager:
         self.DVCalculator = DensityPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
-        self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
+        self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNew(self)
@@ -293,7 +292,7 @@ class GuiManager:
         # create action for this plot
         action = self._workspace.menuWindow.addAction(name)
         # connect action to slot
-        action.triggered.connect(lambda chk, item=name: self.plotSelectedSlot(name))
+        action.triggered.connect(lambda: self.plotSelectedSlot(name))
         # add action to windows menu
         self._workspace.menuWindow.addAction(action)
 
@@ -1041,6 +1040,10 @@ class GuiManager:
         """
         """
         try:
+            # delayed import due to numba instantiation in GSC
+            from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
+            if self.GENSASCalculator is None:
+                self.GENSASCalculator = GenericScatteringCalculator(self)
             self.GENSASCalculator.show()
         except Exception as ex:
             logging.error(str(ex))

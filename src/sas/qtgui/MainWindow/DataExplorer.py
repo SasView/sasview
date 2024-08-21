@@ -1203,6 +1203,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if 'new_plot' not in locals():
                     new_plot = PlotterWidget(manager=self, parent=self)
                     new_plot.item = item
+                # Ensure new plots use the default transform, not the transform of any previous plots the data were in
+                # TODO: The transform should be part of the PLOT, NOT the data
+                plot_set.xtransform = None
+                plot_set.ytransform = None
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
