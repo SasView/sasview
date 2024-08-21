@@ -224,28 +224,14 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         try:
             current_path = re.search(r'//(.*?)\'\)', str(self.webEngineViewer.url()))
             current_path = current_path.group(1)
-            current_path = Path(current_path)
         except:
             self.setWindowTitle("Documentation")
             return
         
-        # Try to add the title of the HTML page to the window title
+        # Try to add the filepath to the window title
         try:
-            with open(current_path, 'r', encoding='utf-8') as file:
-                html_content = file.read()
-
-                # Find the first <h1> tag and extract its content
-                match = re.search(r'<h1[^>]*>(.*?)</h1>', html_content, re.IGNORECASE)
-                if match:
-                    h1_content = match.group(1)
-
-                    # Split the content by any HTML tags and keep only the text before any tags
-                    no_tags_title = re.split(r'<[^>]+>', h1_content)[0]
-                    # Set the window title with the extracted text
-                    self.setWindowTitle(f"Documentation—{no_tags_title.strip()}")
-                    return
-                else:
-                    pass
+            self.setWindowTitle(f"Documentation—{current_path.strip()}")
+            return
         except:
             self.setWindowTitle("Documentation")
 
