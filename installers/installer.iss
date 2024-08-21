@@ -48,6 +48,10 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Code]
 { If there is a command-line parameter "skiplicense=true", don't display license page }
+begin
+    // delete all files in the installation directory to prevent install conflicts
+    DelTree('{app}', True, True, True);
+end;
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
   Result := False
