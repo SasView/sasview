@@ -28,6 +28,7 @@ jobs = []
 os_release_list = [
     'ubuntu-20.04',
     'windows-latest',
+    'macos-13',
     'macos-latest',
 ]
 
