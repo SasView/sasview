@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
@@ -212,15 +214,33 @@ class FittingLogic:
         If return_data contains separated P(Q) and/or S(Q) data, create 1D plots for each and return as the tuple
         (pq_plot, sq_plot). If either are unavailable, the corresponding plot is None.
         """
+        logger = logging.getLogger(self.__class__.__name__)
+
         plots = []
         for name, result in return_data['intermediate_results'].items():
+
+
+            logger.debug(f"{name}: {result}")
+
+            # TODO: This seems pretty dodgy
+
             if isinstance(result, tuple) and len(result) > 1:
+                logger.debug(f"{name} - pulling second entry of tuple")
                 result = result[1]
+
             if not isinstance(result, np.ndarray):
+                logger.debug(f"{name} - skipping - not a 1D array")
                 continue
+
+            logger.debug(f"{name}: Creating plot")
             plots.append(self._create1DPlot(tab_id, return_data['x'], result,
                          return_data['model'], return_data['data'],
                          component=name))
+
+            import matplotlib.pyplot as plt
+            plt.loglog(return_data['x'], result)
+            plt.show()
+
         return plots
 
     def getScalarIntermediateResults(self, return_data):

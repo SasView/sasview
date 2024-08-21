@@ -2100,6 +2100,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Receive and display fitting results
         "result" is a tuple of actual result list and the fit time in seconds
         """
+
+
+        logger.debug(f"Completed signal: '{result}'")
+
         #re-enable the Fit button
         self.enableInteractiveElements()
 
@@ -3245,6 +3249,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 1D data
         """
+
+        # logger.debug(f"Completed. Return data: {return_data}")
+        logger.debug(f"Completed. Return data: {[key for key in return_data.keys()]}")
+
         # Bring the GUI to normal state
         self.enableInteractiveElements()
         if return_data is None:
@@ -3283,7 +3291,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # delete any plots associated with the data that were not updated
             # (e.g. to remove beta(Q), S_eff(Q))
             GuiUtils.deleteRedundantPlots(self.all_data[self.data_index], new_plots)
-            
+
         else:
             # delete theory items for the model, in order to get rid of any
             # redundant items, e.g. beta(Q), S_eff(Q)
@@ -3297,6 +3305,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             plot.symbol = "Line"
             self.createNewIndex(plot)
             new_plots.append(plot)
+
+        logger.debug(f"new1DProductPlots returned {len(plots)} plots")
 
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
