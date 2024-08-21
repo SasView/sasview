@@ -110,7 +110,8 @@ if platform.system() == 'Darwin':
           upx=True,
           icon=os.path.join("../src/sas/qtgui/images","ball.icns"),
           version="version.txt",
-          console=False )
+          target-arch="universal2",
+          console=False)
 else:
     exe = EXE(
         pyz,
