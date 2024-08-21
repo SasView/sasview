@@ -99,7 +99,7 @@ For even more complicated solutions, parenthesis can be nested and the number of
 
 *Reminder the solution density is the largest source of error for these calculations.* Measure the solution density for an accurate result. For example:
 
-    A brine solution containing 10.44 g Al(NO\ :sub:`3`\)\ :sub:`3`\ |cdot| 9H\ :sub:`2`\O and 27.51 g D\ :sub:`2`\O was prepared for a wormlike micelle experiments. The solution density was measured with a density meter and found to be 1.22 (|g/cm^3|). Using the scattering lenth density calculator we enter:
+    A brine solution containing 10.44 g Al(NO\ :sub:`3`\)\ :sub:`3`\ |cdot| 9H\ :sub:`2`\O and 27.51 g D\ :sub:`2`\O was prepared for a wormlike micelle experiments. The solution density was measured with a density meter and found to be 1.22 (|g/cm^3|). Using the scattering length density calculator we enter:
 
     10.44g Al(NO3)3(H2O)9 // 27.5126g D2O
 
