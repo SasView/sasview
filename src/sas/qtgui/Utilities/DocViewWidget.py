@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import time
+import re
 from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
@@ -86,6 +87,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
         self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
+        self.webEngineViewer.urlChanged.connect(self.updateTitle)
 
     def onEdit(self):
         """Open editor (TabbedModelEditor) window."""
@@ -207,8 +209,45 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessFileUrls, True)
         self.webEngineViewer.load(url)
 
+        # Set widget title to include the name of the document loaded
+        self.updateTitle()
+
         # Show widget
         self.onShow()
+    
+    def updateTitle(self):
+        """
+        Set the title of the window to include the name of the document,
+        found in the first <h1> tags.
+        """
+        # Convert QUrl to pathlib path
+        try:
+            current_path = re.search(r'//(.*?)\'\)', str(self.webEngineViewer.url()))
+            current_path = current_path.group(1)
+            current_path = Path(current_path)
+        except:
+            self.setWindowTitle("Documentation")
+            return
+        
+        # Try to add the title of the HTML page to the window title
+        try:
+            with open(current_path, 'r', encoding='utf-8') as file:
+                html_content = file.read()
+
+                # Find the first <h1> tag and extract its content
+                match = re.search(r'<h1[^>]*>(.*?)</h1>', html_content, re.IGNORECASE)
+                if match:
+                    h1_content = match.group(1)
+
+                    # Split the content by any HTML tags and keep only the text before any tags
+                    no_tags_title = re.split(r'<[^>]+>', h1_content)[0]
+                    # Set the window title with the extracted text
+                    self.setWindowTitle(f"Documentation—{no_tags_title.strip()}")
+                    return
+                else:
+                    pass
+        except:
+            self.setWindowTitle("Documentation")
 
     def load404(self):
         self.webEngineViewer.setHtml(HTML_404)
