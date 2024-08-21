@@ -48,16 +48,18 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Code]
 { If there is a command-line parameter "skiplicense=true", don't display license page }
-begin
-    // delete all files in the installation directory to prevent install conflicts
-    DelTree('{app}', True, True, True);
-end;
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
   Result := False
   if PageId = wpLicense then
     if ExpandConstant('{param:skiplicense|false}') = 'true' then
       Result := True;
+end;
+
+{delete all files in the installation directory prior to installation to prevent conflicts}
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+    DelTree("{app}", True, True, True);
 end;
 
 [Files]
