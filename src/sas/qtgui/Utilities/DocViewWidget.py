@@ -2,7 +2,6 @@ import sys
 import os
 import logging
 import time
-import re
 from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
@@ -208,9 +207,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessFileUrls, True)
         self.webEngineViewer.load(url)
-
-        # Set widget title to include the name of the document loaded
-        self.updateTitle()
 
         # Show widget
         self.onShow()
