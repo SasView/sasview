@@ -89,6 +89,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
         self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
+        self.webEngineViewer.urlChanged.connect(self.updateTitle)
 
     def onEdit(self):
         """Open editor (TabbedModelEditor) window."""
@@ -212,6 +213,19 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         # Show widget
         self.onShow()
+    
+    def updateTitle(self):
+        """
+        Set the title of the window to include the name of the document,
+        found in the first <h1> tags.
+        """
+        # Convert QUrl to pathlib path
+        try:
+            current_path = self.webEngineViewer.url().toLocalFile()
+            self.setWindowTitle(f"Documentation—{current_path.strip()}") # Try to add the filepath to the window title
+        except (AttributeError, TypeError, ValueError) as ex:
+            self.setWindowTitle("Documentation")
+            logging.warning(f"Error updating documentation window title: {ex}")
 
     def load404(self):
         self.webEngineViewer.setHtml(HTML_404)
