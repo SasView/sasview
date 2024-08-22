@@ -222,18 +222,11 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         # Convert QUrl to pathlib path
         try:
-            current_path = re.search(r'//(.*?)\'\)', str(self.webEngineViewer.url()))
-            current_path = current_path.group(1)
-        except:
+            current_path = self.webEngineViewer.url().toLocalFile()
+            self.setWindowTitle(f"Documentation—{current_path.strip()}") # Try to add the filepath to the window title
+        except (AttributeError, TypeError, ValueError) as ex:
             self.setWindowTitle("Documentation")
-            return
-        
-        # Try to add the filepath to the window title
-        try:
-            self.setWindowTitle(f"Documentation—{current_path.strip()}")
-            return
-        except:
-            self.setWindowTitle("Documentation")
+            logging.warning(f"Error updating documentation window title: {ex}")
 
     def load404(self):
         self.webEngineViewer.setHtml(HTML_404)
