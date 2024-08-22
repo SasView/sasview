@@ -79,6 +79,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         self.initializeSignals()  # Connect signals
 
+        # Hide editing button for 6.0.0 release
+        self.editButton.setVisible(False)
+
         self.regenerateIfNeeded()
 
     def initializeSignals(self):
