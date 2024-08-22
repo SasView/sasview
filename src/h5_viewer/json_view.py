@@ -3,6 +3,9 @@
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QTextOption
 from PySide6.QtWidgets import QLabel, QTextEdit, QVBoxLayout, QWidget
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import JsonLexer
 from json import dumps
 from pprint import pformat
 
@@ -38,4 +41,4 @@ class JsonViewWidget(QWidget):
 
     @Slot()
     def update_box(self):
-        self.text_box.setText(self.formatted_json)
+        self.text_box.setHtml(highlight(self.formatted_json, JsonLexer(), HtmlFormatter(noclasses=True)))
