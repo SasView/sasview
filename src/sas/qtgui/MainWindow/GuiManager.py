@@ -1148,7 +1148,7 @@ class GuiManager:
         Show bumps convergence plots
         """
         self.results_frame.setVisible(True)
-        if output_data:
+        if output_data and len(output_data) > 0 and len(output_data[0]) > 0:
             self.results_panel.onPlotResults(output_data, optimizer=self.perspective().optimizer)
 
     def actionAdd_Custom_Model(self):

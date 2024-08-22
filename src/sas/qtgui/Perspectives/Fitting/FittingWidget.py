@@ -2110,6 +2110,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Don't recalculate chi2 - it's in res.fitness already
         self.fitResults = True
+        if result is None or len(result) == 0 or len(result[0]) == 0:
+            msg = "Fitting failed."
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            return
         res_list = result[0][0]
         res = res_list[0]
         self.chi2 = res.fitness
