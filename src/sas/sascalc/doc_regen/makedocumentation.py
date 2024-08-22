@@ -107,7 +107,7 @@ def call_regenmodel(filepath: list[PATH_LIKE]):
     from sas.sascalc.doc_regen.regenmodel import run_sphinx, process_model
     filepaths = [Path(path) for path in filepath]
     rst_files = [Path(process_model(py_file, True)) for py_file in filepaths]
-    output_path = MAIN_BUILD_SRC / "user" / "models"
+    output_path = HELP_DIRECTORY_LOCATION / "user" / "models"
     run_sphinx(rst_files, output_path)
 
 

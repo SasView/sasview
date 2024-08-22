@@ -16,6 +16,11 @@ class DocRegenProgress(QtWidgets.QWidget, Ui_DocRegenProgress):
 
         self.textBrowser.setText("Placeholder Text.")
         self.file_watcher = QtCore.QFileSystemWatcher()
+
+        # Delete the current log file contents to ensure a fresh start.
+        with open(DOC_LOG, 'w') as f:
+            f.write("")
+
         self.addSignals()
 
     def addSignals(self):

@@ -413,7 +413,7 @@ def run_sphinx(rst_files: list[str], output: str):
         TARGET_DIR,
         output,
     ]
-    with open(DOC_LOG) as f:
+    with open(DOC_LOG, 'a+') as f:
         subprocess.Popen(command, shell=False, stdout=f)
 
 
