@@ -263,8 +263,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Utility variable to enable unselectable option in category combobox
         self._previous_category_index = 0
         # Utility variables for multishell display
-        self._n_shells_row = 0
-        self._num_shell_params = 0
+        self._n_shells_row = -1
+        self._num_shell_params = -1
         # Dictionary of {model name: model class} for the current category
         self.models = {}
         # Dictionary of QModels
@@ -518,6 +518,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.onSelectModel()
         # Smearing tab
         self.smearing_widget.updateData(self.data)
+        # Check if a model was already loaded when data is sent to the tab
+        self.cmdFit.setEnabled(self.haveParamsToFit())
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
@@ -1811,8 +1813,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             if model_column not in delegate.columnDict():
                 return
-            self.poly_params[parameter_name_w] = value
-            self.kernel_module.setParam(parameter_name_w, value)
+            # Map the column to the poly param that was changed
+            associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
+            p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
+            self.poly_params[p_name] = value
+            self.kernel_module.setParam(p_name, value)
 
             # Update plot
             self.updateData()
@@ -2106,6 +2111,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Don't recalculate chi2 - it's in res.fitness already
         self.fitResults = True
+        if result is None or len(result) == 0 or len(result[0]) == 0:
+            msg = "Fitting failed."
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            return
         res_list = result[0][0]
         res = res_list[0]
         self.chi2 = res.fitness
@@ -3629,8 +3638,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the load file dialog and loads requested data into state
         """
         datafile = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Choose a weight file", "", "All files (*.*)", None,
-            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+            self, "Choose a weight file", "", "All files (*.*)", None)[0]
 
         if not datafile:
             logger.info("No weight data chosen.")
@@ -4243,8 +4251,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         parent = self
         caption = 'Save Project'
         filter = 'Text (*.txt);;Excel (*.xls);;Latex (*.log)'
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
-        file_path = save_dialog.getSaveFileName(parent, caption, "", filter, "", options)
+        file_path = save_dialog.getSaveFileName(parent, caption, "", filter, "")
         filename = file_path[0]
 
         if not filename:

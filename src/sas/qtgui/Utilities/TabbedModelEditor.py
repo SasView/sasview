@@ -172,8 +172,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                                             'Open Plugin',
                                             plugin_location,
                                             'SasView Plugin Model (*.py)',
-                                            None,
-                                            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+                                            None)[0]
 
         # Load the file
         if not filename:
