@@ -14,6 +14,7 @@ import types
 import numpy
 from io import BytesIO
 from pathlib import Path
+from threading import Lock
 
 import numpy as np
 
@@ -58,6 +59,7 @@ theory_plot_ID_pattern = re.compile(r"^([0-9]+)\s+(\[(.*)\]\s+)?(.*)$")
 
 logger = logging.getLogger(__name__)
 
+documentation_lock = Lock() # Lock for preventing multiple documentation regenerations at once
 
 def get_sensible_default_open_directory():
     """

@@ -48,11 +48,18 @@ class DocGenThread(CalcThread):
         """
         Regen the docs in a separate thread
         """
+        from src.sas.qtgui.Utilities.GuiUtils import documentation_lock
         try:
-            if self.target.exists():
-                make_documentation(self.target)
+            if documentation_lock.acquire(blocking=False):
+                try:
+                    # Start a try/finally block to ensure that the lock is released if an exception is thrown
+                    if self.target.exists():
+                        make_documentation(self.target)
+                finally:
+                    documentation_lock.release()
             else:
-                return
+                logging.info('Documentation regeneration is already in process. '
+                            'Please wait for it to complete before attempting again.')
         except KeyboardInterrupt as msg:
             logging.log(0, msg)
 
