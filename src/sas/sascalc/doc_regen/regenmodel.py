@@ -382,7 +382,10 @@ def process_model(py_file: str, force=False) -> str:
     print("2: figure", end='')
     if force:
         print()
-        make_figure(model_info, PLOT_OPTS)
+        try:
+            make_figure(model_info, PLOT_OPTS)
+        except (RuntimeError, ValueError, TypeError):
+            print("Error generating figure for ", model_info.id, ". RST file created without figure.")
     else:
         print(" (cached)")
         make_figure_cached(model_info, PLOT_OPTS)

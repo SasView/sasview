@@ -1,6 +1,7 @@
 """
 Creates documentation from .py files
 """
+import logging
 import os
 import sys
 import subprocess
@@ -106,24 +107,30 @@ def call_regenmodel(filepath: list[PATH_LIKE]):
     create_user_files_if_needed()
     from sas.sascalc.doc_regen.regenmodel import run_sphinx, process_model
     filepaths = [Path(path) for path in filepath]
-    rst_files = [Path(process_model(py_file, True)) for py_file in filepaths]
-    output_path = HELP_DIRECTORY_LOCATION / "user" / "models"
-    run_sphinx(rst_files, output_path)
+    for py_file in filepaths:
+        process_model(py_file, True)
 
 
 def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False):
     """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
 
     :param single_file: A file name that needs the html regenerated.
+     NOTE: passing in this parameter will result in ONLY the specified file being regenerated.
+     The TOC will not be updated correctly, and as such, this arg should only be passed when 'preview'
+     documentation generation is supported in a later version.
     :param rst: Boolean to declare the rile an rst-like file.
     """
+    force_rebuild = "" # Empty if we are not forcing a full rebuild of docs
     # Clear existing log file
     if DOC_LOG.exists():
         with open(DOC_LOG, "r+") as f:
             f.truncate(0)
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
-    if rst is False:
+    if rst is False and single_file != "":
         single_rst = MAIN_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst')
+    elif single_file == "":
+        force_rebuild = "-E"
+        single_rst = ""
     else:
         single_rst = Path(single_file)
     os.environ['SAS_NO_HIGHLIGHT'] = '1'
@@ -131,6 +138,7 @@ def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool
         sys.executable,
         "-m",
         "sphinx",
+        force_rebuild, # If forcing a full rebuild: this is necessary to ensure that the TOC is updated
         "-d",
         DOCTREES,
         "-D",
@@ -139,17 +147,14 @@ def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool
         HELP_DIRECTORY_LOCATION,
         single_rst,
     ]
-    try:
-        # Try removing empty arguments
-        command.remove("")
-    except:
-        pass
+    # Try removing empty arguments
+    command = [arg for arg in command if arg]
     try:
         with open(DOC_LOG, "w") as f:
             subprocess.check_call(command, stdout=f)
     except Exception as e:
         # Logging debug
-        print(e)
+        logging.warning(f'Error in showing documentation regeneration stdout: {e}')
 
 
 def call_all_files():
@@ -201,7 +206,7 @@ def make_documentation(target: PATH_LIKE = "."):
             # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST
             # files. Time saving measure.
             call_one_file(target)
-            generate_html(target)
+            generate_html()
     except Exception as e:
         call_all_files()  # Regenerate all RSTs
         generate_html()  # Regenerate all HTML
