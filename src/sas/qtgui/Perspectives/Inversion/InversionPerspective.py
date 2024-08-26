@@ -57,6 +57,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Needed for Batch inversion
         self.parent = parent
         self.communicate = self.parent.communicate
+        #self.communicate = self.parent.communicator()
         self.tabCloseRequested.connect(self.tabCloses)
 
         # List of active Pr Tabs
@@ -433,6 +434,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
                 tab.logic.add_errors()
                 tab.setQ()
             tab.setCurrentData(data[0])
+            tab.setQ()
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         else:        
             if data is not None:               

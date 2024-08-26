@@ -175,12 +175,12 @@ class Invertor(Pinvertor):
             return self.set_dmax(value)
         elif name == 'q_min':
             if value is None:
-                return self.set_qmin(0.0)
-            return self.set_qmin(value)
+                return self.set_q_min(0.0)
+            return self.set_q_min(value)
         elif name == 'q_max':
             if value is None:
-                return self.set_qmax(np.inf)
-            return self.set_qmax(value)
+                return self.set_q_max(np.inf)
+            return self.set_q_max(value)
         elif name == 'alpha':
             return self.set_alpha(value)
         elif name == 'slit_height':
@@ -217,15 +217,15 @@ class Invertor(Pinvertor):
         elif name == 'd_max':
             return self.get_dmax()
         elif name == 'q_min':
-            qmin = self.get_qmin()
-            if qmin < 0:
+            q_min = self.get_q_min()
+            if q_min < 0:
                 return None
-            return qmin
+            return q_min
         elif name == 'q_max':
-            qmax = self.get_qmax()
-            if qmax < 0:
+            q_max = self.get_q_max()
+            if q_max < 0:
                 return None
-            return qmax
+            return q_max
         elif name == 'alpha':
             return self.get_alpha()
         elif name == 'slit_height':
@@ -656,8 +656,8 @@ class Invertor(Pinvertor):
         file.write("#alpha=%g\n" % self.alpha)
         file.write("#chi2=%g\n" % self.chi2)
         file.write("#elapsed=%g\n" % self.elapsed)
-        file.write("#qmin=%s\n" % str(self.q_min))
-        file.write("#qmax=%s\n" % str(self.q_max))
+        file.write("#q_min=%s\n" % str(self.q_min))
+        file.write("#q_max=%s\n" % str(self.q_max))
         file.write("#slit_height=%g\n" % self.slit_height)
         file.write("#slit_width=%g\n" % self.slit_width)
         file.write("#background=%g\n" % self.background)
@@ -719,13 +719,13 @@ class Invertor(Pinvertor):
                     elif line.startswith('#alpha_estimate='):
                         toks = line.split('=')
                         self.suggested_alpha = float(toks[1])
-                    elif line.startswith('#qmin='):
+                    elif line.startswith('#q_min='):
                         toks = line.split('=')
                         try:
                             self.q_min = float(toks[1])
                         except:
                             self.q_min = None
-                    elif line.startswith('#qmax='):
+                    elif line.startswith('#q_max='):
                         toks = line.split('=')
                         try:
                             self.q_max = float(toks[1])

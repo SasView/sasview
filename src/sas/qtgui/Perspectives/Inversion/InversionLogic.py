@@ -27,6 +27,8 @@ class InversionLogic(object):
         self.data_is_loaded = False
         if data is not None:
             self.data_is_loaded = True
+        self.qmin = 0.0    
+        self.qmax = np.inf    
 
     @property
     def data(self):
@@ -72,6 +74,8 @@ class InversionLogic(object):
             logger.info("Could not compute I(q) for q =", list((x[index])))
 
         new_plot = Data1D(x, y)
+        new_plot.is_data = False
+        new_plot.dy = np.zeros(len(y))
         new_plot.name = "%s [%s]" % (IQ_FIT_LABEL, self._data.name)
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
@@ -142,9 +146,6 @@ class InversionLogic(object):
         Adds errors to data set is they are not available.
         Uses  $\Delta y = \sigma | y |$.
         """
-        print(self.data.dy.size)
-        print(- 1e-16< np.any(self.data.dy) < 1e-16)
-        print(np.where(np.fabs(self.data.dy) < 1e-16, 1e16, self.data.dy))
         if self.data.dy.size == 0.0:
             self.data.dy = np.sqrt(np.fabs(self.data.y))*sigma
 
