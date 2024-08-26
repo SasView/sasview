@@ -48,7 +48,7 @@ class DocGenThread(CalcThread):
         """
         Regen the docs in a separate thread
         """
-        from src.sas.qtgui.Utilities.GuiUtils import documentation_lock
+        from sas.qtgui.Utilities.GuiUtils import documentation_lock
         try:
             if documentation_lock.acquire(blocking=False):
                 try:
