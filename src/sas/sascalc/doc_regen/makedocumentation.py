@@ -105,7 +105,7 @@ def call_regenmodel(filepath: list[PATH_LIKE]):
     :param filepath: A file-path like object or list of file-path like objects to regenerate.
     """
     create_user_files_if_needed()
-    from sas.sascalc.doc_regen.regenmodel import run_sphinx, process_model
+    from sas.sascalc.doc_regen.regenmodel import process_model
     filepaths = [Path(path) for path in filepath]
     for py_file in filepaths:
         process_model(py_file, True)
@@ -150,7 +150,7 @@ def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool
     # Try removing empty arguments
     command = [arg for arg in command if arg]
     try:
-        with open(DOC_LOG, "w") as f:
+        with open(DOC_LOG, "a+") as f:
             subprocess.check_call(command, stdout=f)
     except Exception as e:
         # Logging debug
