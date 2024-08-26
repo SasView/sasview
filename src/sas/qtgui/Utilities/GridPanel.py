@@ -10,7 +10,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.UI.GridPanelUI import Ui_GridPanelUI
 
-
+DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
@@ -161,10 +161,11 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
     def addFitResults(self, results):
         """
-        Create a new tab with batch fitting results
+        Create a new tab with batch results
         """
         # pull out page name from results
         page_name = None
+        results = results.get(DICT_KEYS[0])
         if len(results)>=2:
             if isinstance(results[-1], str):
                 page_name = results[-1]
@@ -206,7 +207,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # look for the 'Data' column and extract the filename
         for row in rows:
             try:
-                name = data['Data'][row]
+                name = data['Filename'][row]
                 # emit a signal so the plots are being shown
                 self.communicate.plotFromNameSignal.emit(name)
 
@@ -319,9 +320,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         Create tablewidget items and show them, based on params
         """
         # quietly leave is nothing to show
+
         if data is None or widget is None:
             return
-
+        data = data.get(DICT_KEYS[0])
         # Figure out the headers
         model = data[0][0]
 
@@ -469,8 +471,10 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                       'Background [cm^-1]', 'P+ Fraction', 'P+1-theta Fraction',
                       'Calc. Time [sec]', 'Q Min [Å^-1]', 'Q Max [Å^-1]']
 
+            
         if data is None:
             return
+        
         keys = data.keys()
         rows = len(keys)
         columns = len(param_list)
@@ -484,6 +488,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         failedCells = False
 
         for i_row, (filename, pr) in enumerate(data.items()):
+            pr = pr.get(DICT_KEYS[0])
             out = pr.out
             cov = pr.cov
             self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
@@ -548,12 +553,12 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 12, QtWidgets.QTableWidgetItem(
-                    "{:.2g}".format(pr.get_qmin())))
+                    "{:.2g}".format(pr.get_q_min())))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 13, QtWidgets.QTableWidgetItem(
-                    "{:.2g}".format(pr.get_qmax())))
+                    "{:.2g}".format(pr.get_q_max())))
             except TypeError:
                 failedCells = True
         if failedCells:
@@ -566,7 +571,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         self.tab_number += 1
         if tab_name is None:
             tab_name = "Batch Result " + str(self.tab_number)
-        tableItem = BatchInversionOutputPanel(parent=self, output_data=data).tblParams
+        tableItem = BatchInversionOutputPanel(parent=self, output_data=data.get(DICT_KEYS[0])).tblParams
         tableItem.customContextMenuRequested.connect(self.showContextMenu)
         self.tables.append(tableItem)
         self.tabWidget.addTab(tableItem, tab_name)
