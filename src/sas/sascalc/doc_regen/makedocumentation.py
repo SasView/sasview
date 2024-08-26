@@ -152,10 +152,6 @@ def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool
     try:
         with open(DOC_LOG, "a+") as f:
             subprocess.check_call(command, stdout=f)
-            
-            # Force changes to be written instead of staying on the buffer
-            f.flush()
-            os.fsync(f.fileno())
     except Exception as e:
         # Logging debug
         logging.warning(f'Error in showing documentation regeneration stdout: {e}')
