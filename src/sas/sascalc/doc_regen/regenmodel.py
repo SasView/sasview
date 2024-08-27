@@ -57,7 +57,7 @@ from sasmodels import generate, core
 from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.data import empty_data1D, empty_data2D
 
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, DOC_LOG
+from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, generate_html
 
 from typing import Dict, Any
 from sasmodels.kernel import KernelModel
@@ -393,33 +393,6 @@ def process_model(py_file: str, force=False) -> str:
 
     return rst_file
 
-
-def run_sphinx(rst_files: list[str], output: str):
-    """Use sphinx to build *rst_files*, storing the html in *output*.
-
-    :param rst_files: A list of ReST file names/paths to be processed into HTML.
-    :param output: A list of HTML names/paths mapping to the ReST file names.
-    """
-
-    print("Building index...")
-    conf_dir = MAIN_DOC_SRC
-    with open(joinpath(TARGET_DIR, 'index.rst'), 'w') as fid:
-        fid.write(".. toctree::\n\n")
-        for path in rst_files:
-            fid.write("    %s\n"%basename(path))
-
-    print("Running sphinx command...")
-    command = [
-        sys.executable,
-        "-m", "sphinx",
-        "-c", conf_dir,
-        TARGET_DIR,
-        output,
-    ]
-    with open(DOC_LOG, 'a+') as f:
-        subprocess.Popen(command, shell=False, stdout=f)
-
-
 def main():
     """Process files listed on the command line via :func:`process_model`."""
     import matplotlib
@@ -453,7 +426,7 @@ def main():
 
     if args.sphinx:
         print("running sphinx")
-        run_sphinx(rst_files, args.build)
+        generate_html(single_files=rst_files, output_path=args.build, rst=True)
 
 
 if __name__ == "__main__":

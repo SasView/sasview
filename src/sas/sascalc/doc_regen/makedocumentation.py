@@ -111,7 +111,7 @@ def call_regenmodel(filepath: list[PATH_LIKE]):
         process_model(py_file, True)
 
 
-def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False):
+def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False, output_path: PATH_LIKE = ""):
     """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
 
     :param single_file: A file name that needs the html regenerated.
@@ -120,19 +120,28 @@ def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool
      documentation generation is supported in a later version.
     :param rst: Boolean to declare the rile an rst-like file.
     """
+    if output_path:
+        html_directory = Path(output_path)
+    else:
+        html_directory = HELP_DIRECTORY_LOCATION 
     force_rebuild = "" # Empty if we are not forcing a full rebuild of docs
     # Clear existing log file
     if DOC_LOG.exists():
         with open(DOC_LOG, "r+") as f:
             f.truncate(0)
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
-    if rst is False and single_file != "":
-        single_rst = MAIN_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst')
-    elif single_file == "":
+
+    # Process the single_files parameter into a list of Path objects referring to rst files
+    if isinstance(single_files, str):
+        # User has passed in a single file as a string
+        single_files = [Path(single_files)]
+    elif rst is False and isinstance(single_files, list):
+        # User has passed in a list of python pathnames: we need to pass in the corresponding .rst file
+        single_files = [MAIN_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst') for single_file in single_files]
+    elif single_files == "":
+        # User wants a complete regeneration of documentation
         force_rebuild = "-E"
-        single_rst = ""
-    else:
-        single_rst = Path(single_file)
+        single_files = None
     os.environ['SAS_NO_HIGHLIGHT'] = '1'
     command = [
         sys.executable,
@@ -144,9 +153,11 @@ def generate_html(single_file: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool
         "-D",
         "latex_elements.papersize=letter",
         MAIN_DOC_SRC,
-        HELP_DIRECTORY_LOCATION,
-        single_rst,
+        html_directory,
     ]
+    if single_files:
+        # If the user has passed in a single file, we only want to regenerate that file
+        command.extend(single_files)
     # Try removing empty arguments
     command = [arg for arg in command if arg]
     try:
