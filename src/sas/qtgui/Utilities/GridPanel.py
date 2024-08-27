@@ -207,9 +207,15 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         for row in rows:
             try:
                 name = data['Filename'][row]
+                self.prPlot = self.parent.batchResults[name].get(DICT_KEYS[1])
+                self.dataPlot = self.parent.batchResults[name].get(DICT_KEYS[2])
                 # emit a signal so the plots are being shown
-                self.communicate.plotFromNameSignal.emit(name)
-
+                self.parent.allowPlots = True
+                self.parent.showPlot()
+                # This is an important processEvent.
+                # This allows charts to be properly updated in order
+                # of plots being applied.
+                QtWidgets.QApplication.processEvents()
             except (IndexError, AttributeError):
                 # data messed up.
                 return
@@ -459,6 +465,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
         self.parent = parent
+        
 
     def setupTable(self, widget=None,  data=None):
         """
@@ -473,7 +480,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             
         if data is None:
             return
-        
+
         keys = data.keys()
         rows = len(keys)
         columns = len(param_list)

@@ -152,7 +152,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self.batchComplete = []
         self.is_batch = False
         self.batchResultsWindow = None
-        self._allowPlots = False
+        self.allowPlots = False
         self.q_min = 0.0    
         self.q_max = np.inf
 
@@ -187,7 +187,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         Let Plots to be displayable - needed so batch mode is not clutter with plots
         """
         assert isinstance(value, bool)
-        self._allowPlots = value
+        self.allowPlots = value
 
     def isSerializable(self):
         """
@@ -816,7 +816,6 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         if index is not None and index>=0:
             self.logic.data = GuiUtils.dataFromItem(self.dataList.itemData(index))
             pr = self.batchResults[self.logic.data.name].get(DICT_KEYS[0])
-
         else:    
             pr = self._calculator
             
@@ -858,12 +857,17 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                                    QtGui.QStandardItem(
                                        "{:.3g}".format(
                                            pr.get_pos_err(out, cov))))
+        self.showPlot()
+        self.enableButtons()
+        
+    def showPlot(self):
         if self.prPlot is not None:        
             try:
                 title = self.prPlot.name
                 self.prPlot.plot_role = DataRole.ROLE_STAND_ALONE
                 GuiUtils.updateModelItemWithPlot(self.data, self.prPlot, title)
-                self.communicate.plotRequestedSignal.emit([self.data, self.prPlot], None)
+                if self.allowPlots:
+                    self.communicate.plotRequestedSignal.emit([self.data, self.prPlot], None)
             except AssertionError:
                 pass
         
@@ -874,10 +878,11 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
                 self.dataPlot.symbol = "Line"
                 self.dataPlot.show_errors = False
                 GuiUtils.updateModelItemWithPlot(self.data, self.dataPlot, title)
-                self.communicate.plotRequestedSignal.emit([self.data, self.dataPlot], None)
+                if self.allowPlots:
+                    self.communicate.plotRequestedSignal.emit([self.data, self.dataPlot], None)
             except AssertionError:
                 pass
-        self.enableButtons()
+
 
     def removeData(self, data_list=None):
         """Remove the existing data reference from the P(r) Persepective"""
@@ -886,7 +891,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.prPlot = None
             self.dataPlot = None
             self.dataList.removeItem(self.dataList.currentIndex())
-            self._allowPlots = True
+            self.allowPlots = True
         if not data_list:
             data_list = [self.data]
         self.closeDMax()
@@ -994,7 +999,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             
         self.isCalculating = True
         self.is_batch = True
-        self._allowPlots = False
+        self.allowPlots = False
         self.batchComplete = []
         self.calculateAllButton.setText("Calculating...")
         self.startThread()
@@ -1004,7 +1009,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         """
         Calculate the data for the Current Item in the prespective.
         """
-        self._allowPlots = True
+        self.allowPlots = True
         self.startThread()
 
     def startNextBatchItem(self):
@@ -1290,29 +1295,28 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         self._calculator = pr
 
         # Update P(r) and fit plots
-        # do not show/update plot if batch (Clutters and slows down interface)
-        if self._allowPlots:
-            self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
-            self.prPlot.show_yzero = True
-            self.prPlot.filename = self.logic.data.filename
-            dataPlot = self.logic.new1DPlot(self.tab_id, out, self._calculator)
-            dataPlot.filename = self.logic.data.filename
+        # do not show/update plot if batch (Clutters and slows down interface)        
+        self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
+        self.prPlot.show_yzero = True
+        self.prPlot.filename = self.logic.data.filename
+        dataPlot = self.logic.new1DPlot(self.tab_id, out, self._calculator)
+        dataPlot.filename = self.logic.data.filename
 
-            dataPlot.show_q_range_sliders = True
-            dataPlot.slider_update_on_move = False
-            dataPlot.slider_perspective_name = "Inversion"
-            dataPlot.slider_tab_name = self.currentTabName()
-            dataPlot.slider_low_q_input = ['minQInput']
-            dataPlot.slider_low_q_setter = ['updateMinQ']
-            dataPlot.slider_high_q_input = ['maxQInput']
-            dataPlot.slider_high_q_setter = ['updateMaxQ']
-            self.dataPlot = dataPlot 
-            #new_plots = [dataPlot]
-            #for plot in new_plots:
-            #    self.communicate.plotUpdateSignal.emit([plot])
-            #    QtWidgets.QApplication.processEvents()
+        dataPlot.show_q_range_sliders = True
+        dataPlot.slider_update_on_move = False
+        dataPlot.slider_perspective_name = "Inversion"
+        dataPlot.slider_tab_name = self.currentTabName()
+        dataPlot.slider_low_q_input = ['minQInput']
+        dataPlot.slider_low_q_setter = ['updateMinQ']
+        dataPlot.slider_high_q_input = ['maxQInput']
+        dataPlot.slider_high_q_setter = ['updateMaxQ']
+        self.dataPlot = dataPlot 
+        #new_plots = [dataPlot]
+        #for plot in new_plots:
+        #    self.communicate.plotUpdateSignal.emit([plot])
+        #    QtWidgets.QApplication.processEvents()
             
-            # Udpate internals and GUI
+        # Udpate internals and GUI
         self.updateDataList(self.data)  
         
         
