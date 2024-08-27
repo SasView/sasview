@@ -132,7 +132,7 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
 
     # Process the single_files parameter into a list of Path objects referring to rst files
-    if isinstance(single_files, str):
+    if isinstance(single_files, str) and single_files:
         # User has passed in a single file as a string
         single_files = [Path(single_files)]
     elif rst is False and isinstance(single_files, list):
