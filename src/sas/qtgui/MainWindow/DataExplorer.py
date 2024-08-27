@@ -281,12 +281,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setText(msg)
             msgbox.setWindowTitle("Project Load")
             # custom buttons
-            button_yes = QtWidgets.QPushButton("Yes")
-            msgbox.addButton(button_yes, QtWidgets.QMessageBox.YesRole)
-            button_no = QtWidgets.QPushButton("No")
-            msgbox.addButton(button_no, QtWidgets.QMessageBox.RejectRole)
-            retval = msgbox.exec_()
-            if retval == QtWidgets.QMessageBox.RejectRole:
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes |
+                                      QtWidgets.QMessageBox.StandardButton.No)
+            retval = msgbox.exec()
+            if retval == QtWidgets.QMessageBox.StandardButton.No:
                 # cancel fit
                 return
 
