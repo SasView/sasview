@@ -161,8 +161,8 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
     # Try removing empty arguments
     command = [arg for arg in command if arg]
     try:
-        with open(DOC_LOG, "a+") as f:
-            subprocess.check_call(command, stdout=f)
+        with open(DOC_LOG, "a") as f:
+            subprocess.run(command, check=True, stdout=f, stderr=f)
     except Exception as e:
         # Logging debug
         logging.warning(f'Error in showing documentation regeneration stdout: {e}')

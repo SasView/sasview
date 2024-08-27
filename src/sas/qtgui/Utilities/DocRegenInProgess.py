@@ -14,12 +14,8 @@ class DocRegenProgress(QtWidgets.QWidget, Ui_DocRegenProgress):
         self.setupUi(self)
         self.parent = parent
 
-        self.textBrowser.setText("Placeholder Text.")
+        self.textBrowser.setText("Generating Plugin Documentation...")
         self.file_watcher = QtCore.QFileSystemWatcher()
-
-        # Delete the current log file contents to ensure a fresh start.
-        with open(DOC_LOG, 'w') as f:
-            f.write("")
 
         self.addSignals()
 
