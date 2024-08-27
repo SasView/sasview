@@ -15,6 +15,8 @@ from sas.sascalc.fit import models
 from sas.system.version import __version__
 from sas.system.user import get_user_dir
 
+from sasmodels.core import list_models
+
 PATH_LIKE = Union[Path, str, os.PathLike]
 
 # Path constants related to the directories and files used in documentation regeneration processes
@@ -98,18 +100,33 @@ def get_main_docs() -> list[PATH_LIKE]:
 
     return TARGETS
 
+def sync_plugin_models():
+    """
+    Remove deleted plugin models from source-temp/user/models/src/
+    """
+    removed_files = []
+    list_of_models = list_models()
+    for file in [Path(path) for path in get_py(MAIN_PY_SRC)]:
+        if file.stem not in list_of_models:
+            # Remove the model from the source-temp/user/models/src/ directory
+            os.remove(file)
+            removed_files.append(file)
+    return removed_files
 
-def call_regenmodel(filepath: list[PATH_LIKE]):
+def call_regenmodel(filepaths: list[PATH_LIKE]):
     """Runs regenmodel.py or regentoc.py (specified in parameter regen_py) with all found PY_FILES.
 
     :param filepath: A file-path like object or list of file-path like objects to regenerate.
+
+    :return removed_files: A list of src files that were removed during the regeneration process.
     """
     create_user_files_if_needed()
     from sas.sascalc.doc_regen.regenmodel import process_model
-    filepaths = [Path(path) for path in filepath]
+    filepaths = [Path(path) for path in filepaths]
+    removed_files = sync_plugin_models()
     for py_file in filepaths:
         process_model(py_file, True)
-
+    return removed_files
 
 def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False, output_path: PATH_LIKE = ""):
     """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
@@ -174,7 +191,11 @@ def call_all_files():
     TARGETS = get_main_docs()
     for file in TARGETS:
         #  easiest for regenmodel.py if files are passed in individually
-        call_regenmodel([file])
+        removed_files = call_regenmodel([file])
+        # Don't try to add user files to the TOC if they were deleted
+        for file in removed_files:
+            if file in TARGETS:
+                TARGETS.remove(file)
     # regentoc.py requires files to be passed in bulk or else LOTS of unexpected behavior
     generate_toc(TARGETS)
 
@@ -196,7 +217,14 @@ def call_one_file(file: PATH_LIKE):
         file_call_path = MODEL_TARGET
     else:
         file_call_path = PLUGIN_TARGET
-    call_regenmodel([file_call_path])
+    removed_files = call_regenmodel([file_call_path])
+
+    # Don't try to add user files to the TOC if they were deleted
+    for file in removed_files:
+        if file in TARGETS:
+            TARGETS.remove(file)
+
+    # Generate the TOC
     generate_toc(TARGETS)
 
 
@@ -219,6 +247,7 @@ def make_documentation(target: PATH_LIKE = "."):
             call_one_file(target)
             generate_html()
     except Exception as e:
+        logging.warning(f"Error in generating documentation for {target}: {e}\nRegenerating all model documentation...")
         call_all_files()  # Regenerate all RSTs
         generate_html()  # Regenerate all HTML
 
