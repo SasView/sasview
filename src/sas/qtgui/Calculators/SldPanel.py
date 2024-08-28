@@ -180,9 +180,12 @@ class SldPanel(QtWidgets.QDialog):
             self.recalculateSLD()
 
     def recalculateSLD(self):
+        self.ui.editMolecularFormula.setStyleSheet("background-color: white")
+        self.ui.editMassDensity.setStyleSheet("background-color: white; color: black")
         formula = self.ui.editMolecularFormula.text()
         density = float(self.ui.editMassDensity.text()) if self.ui.editMassDensity.text() else None
-        self.ui.editMassDensity.setEnabled(True)
+        self.ui.editMassDensity.setToolTip("The density can either be specified here or will be calculated if all "
+                                           "component densities are included in the formula.")
         neutronWavelength = self.ui.editNeutronWavelength.text()
         xrayWavelength = self.ui.editXrayWavelength.text()
 
@@ -191,13 +194,12 @@ class SldPanel(QtWidgets.QDialog):
         if not density and '@' not in formula:
             self.ui.editMassDensity.setStyleSheet("background-color: yellow")
             return
-        if density and '//' in formula and np.all(["@" in part for part in formula.split("//")]):
+        if density and '//' in formula and '@' in formula:
             # Ignore density input when all individual densities are specified
-            self.ui.editMassDensity.setEnabled(False)
-            density = None
-
-        self.ui.editMolecularFormula.setStyleSheet("background-color: white")
-        self.ui.editMassDensity.setStyleSheet("background-color: white")
+            self.ui.editMassDensity.setStyleSheet("color: orange")
+            self.ui.editMassDensity.setToolTip("The input density is overriding the density calculated from the "
+                                               "individual components. Clear the density field if you want the "
+                                               "calculation to take precedence.")
 
         def format(value):
             return ("%-5.3g" % value).strip()
