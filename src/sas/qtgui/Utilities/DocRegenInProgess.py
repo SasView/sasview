@@ -24,6 +24,7 @@ class DocRegenProgress(QtWidgets.QWidget, Ui_DocRegenProgress):
         if self.parent:
             self.parent.communicate.documentationRegenInProgressSignal.connect(self.show)
             self.parent.communicate.documentationRegeneratedSignal.connect(self.close)
+            self.parent.communicate.documentationUpdateLogSignal.connect(self.updateLog)
         # Trigger the file watcher when the documentation log changes on disk.
         self.file_watcher.addPath(str(DOC_LOG.absolute()))
         self.file_watcher.fileChanged.connect(self.updateLog)
