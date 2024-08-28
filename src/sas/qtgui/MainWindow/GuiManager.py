@@ -369,7 +369,8 @@ class GuiManager:
         """
         pass
 
-    def showHelp(self, url):
+    @classmethod
+    def showHelp(cls, url):
         """
         Open a local url in the default browser
         """
@@ -383,7 +384,9 @@ class GuiManager:
             url_abs = Path(url)
         try:
             # Help window shows itself
-            self.helpWindow = DocViewWindow(parent=self, source=url_abs)
+            #NOTE: Needs to be a class attribute to keep from garbage collection
+            print(url_abs)
+            cls.helpWindow = GuiUtils.showHelp(url_abs)
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
 
