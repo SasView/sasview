@@ -374,6 +374,8 @@ class GuiManager:
         """
         Open a local url in the default browser
         """
+        counter = 1
+        window_name = "help_window"
         # Remove leading forward slashes from relative paths to allow easy Path building
         if isinstance(url, str):
             url = url.lstrip("//")
@@ -383,9 +385,25 @@ class GuiManager:
         else:
             url_abs = Path(url)
         try:
-            # Help window shows itself
-            #NOTE: Needs to be a class attribute to keep from garbage collection
-            cls.helpWindow = GuiUtils.showHelp(url_abs)
+            # In order to have multiple help windows open simultaneously, we need to create a new class variable
+            # If we just reassign the old one, the old window will be destroyed
+            name_found = False # Have we found an available class variable to assign the help window to?
+            while name_found is False:
+                potential_help_window = getattr(cls, window_name, None) # A potential variable
+                if potential_help_window == None:
+                    # Create a new help window
+                    name_found = True
+                elif potential_help_window.isVisible():
+                    window_name = f"help_window_{counter}"
+                    counter += 1
+                    continue
+                else:
+                    name_found = True
+            
+            # Assign new variable to the GuiManager
+            setattr(cls, window_name, DocViewWindow(url_abs))
+            counter = 1 # Reset for future use of this method
+
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
 
