@@ -177,12 +177,10 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
         command.extend(single_files)
     # Try removing empty arguments
     command = [arg for arg in command if arg]
-    try:
-        with open(DOC_LOG, "a") as f:
-            subprocess.run(command, check=True, stdout=f, stderr=f)
-    except Exception as e:
-        # Logging debug
-        logging.warning(f'Error in showing documentation regeneration stdout: {e}')
+    f = open(DOC_LOG, "w")
+    runner = subprocess.Popen(command, stdout=f, stderr=f)
+    f.close()
+    return runner
 
 
 def call_all_files():
@@ -228,7 +226,7 @@ def call_one_file(file: PATH_LIKE):
     generate_toc(TARGETS)
 
 
-def make_documentation(target: PATH_LIKE = "."):
+def make_documentation(target: PATH_LIKE = ".") -> subprocess.Popen:
     """Similar to call_one_file, but will fall back to calling all files and regenerating everything if an error occurs.
 
     :param target: A file name that needs the html regenerated.
@@ -240,16 +238,16 @@ def make_documentation(target: PATH_LIKE = "."):
     try:
         if ".rst" in target.name:
             # Generate only HTML if passed in file is an RST
-            generate_html(target, rst=True)
+            return generate_html(target, rst=True)
         else:
             # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST
             # files. Time saving measure.
             call_one_file(target)
-            generate_html()
+            return generate_html()
     except Exception as e:
         logging.warning(f"Error in generating documentation for {target}: {e}\nRegenerating all model documentation...")
         call_all_files()  # Regenerate all RSTs
-        generate_html()  # Regenerate all HTML
+        return generate_html()  # Regenerate all HTML
 
 
 if __name__ == "__main__":
