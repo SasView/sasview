@@ -582,6 +582,7 @@ class GuiManager:
 
             # save the paths etc.
             self.saveCustomConfig()
+            self.communicate.closeSignal.emit()
             reactor.callFromThread(reactor.stop)
             return True
 
