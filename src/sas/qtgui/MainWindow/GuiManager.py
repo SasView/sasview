@@ -385,7 +385,6 @@ class GuiManager:
         try:
             # Help window shows itself
             #NOTE: Needs to be a class attribute to keep from garbage collection
-            print(url_abs)
             cls.helpWindow = GuiUtils.showHelp(url_abs)
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
