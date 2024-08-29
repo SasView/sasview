@@ -34,7 +34,6 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
@@ -387,22 +386,16 @@ class GuiManager:
         try:
             # In order to have multiple help windows open simultaneously, we need to create a new class variable
             # If we just reassign the old one, the old window will be destroyed
-            name_found = False # Have we found an available class variable to assign the help window to?
-            while name_found is False:
-                potential_help_window = getattr(cls, window_name, None) # A potential variable
-                if potential_help_window == None:
-                    # Create a new help window
-                    name_found = True
-                elif potential_help_window.isVisible():
-                    window_name = f"help_window_{counter}"
-                    counter += 1
-                    continue
-                else:
-                    name_found = True
+            
+            # Have we found a name not assigned to a window?
+            potential_help_window = getattr(cls, window_name, None) 
+            while potential_help_window and potential_help_window.isVisible():
+                window_name = f"help_window_{counter}"
+                potential_help_window = getattr(cls, window_name, None)
+                counter += 1
             
             # Assign new variable to the GuiManager
-            setattr(cls, window_name, DocViewWindow(url_abs))
-            counter = 1 # Reset for future use of this method
+            setattr(cls, window_name, GuiUtils.showHelp(url_abs))
 
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)

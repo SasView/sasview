@@ -32,7 +32,7 @@ from sas.qtgui.Plotting.Plottables import Plottable
 from sasdata.dataloader.data_info import Sample, Source, Vector
 from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
 from sasdata.dataloader.data_info import Aperture, Collimation
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, PATH_LIKE
 from sas.qtgui.Plotting.Plottables import View
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
@@ -1455,7 +1455,7 @@ def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)
 
-def showHelp(url: str | Path | os.PathLike):
+def showHelp(url: PATH_LIKE):
     if isinstance(url, str):
         url = url.lstrip("//")
     url = Path(url)
