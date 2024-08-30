@@ -209,7 +209,7 @@ class GuiManager:
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
-        self.WhatsNew = WhatsNew(self)
+        self.WhatsNew = WhatsNew(self._parent)
         self.regenProgress = DocRegenProgress(self)
 
     def loadAllPerspectives(self):
@@ -661,7 +661,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
-        self.WhatsNew = WhatsNew(strictly_newer=False)
+        self.WhatsNew = WhatsNew(self._parent, strictly_newer=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
