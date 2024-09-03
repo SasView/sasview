@@ -170,6 +170,16 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         # Get selected item
         selected_item = self.newParamTree.currentItem() # The item that the user selected (could be a sub-item)
+        if not selected_item:
+            # User has no current selection in newParamTree. Throw a warning dialog and return.
+            msg = "No parameter selected. Please select a parameter to edit."
+            msgBox = QtWidgets.QMessageBox(self)
+            msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgBox.setWindowTitle("No Parameter Selected")
+            msgBox.setText(msg)
+            msgBox.addButton("OK", QtWidgets.QMessageBox.AcceptRole)
+            return msgBox.exec_()
+            
         param_to_open = self.getParameterSelection(selected_item) # The top-level item to open
         
         highlighted_property = selected_item.text(0) # What the user wants to edit specifically
