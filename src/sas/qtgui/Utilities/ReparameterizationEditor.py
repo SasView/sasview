@@ -33,6 +33,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.onLoad()
 
         self.is_modified = False
+        self.loaded_model_name = None # Name of model loaded into oldParamTree
     
     def addSignals(self):
         self.selectModelButton.clicked.connect(self.onSelectModel)
@@ -45,6 +46,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.txtFunction.textChanged.connect(self.editorModelModified)
         self.newParamTree.doubleClicked.connect(self.editSelected)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdModelHelp.clicked.connect(self.onModelHelp)
     
     def onLoad(self):
 
@@ -101,6 +103,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         if tree == self.oldParamTree:
             tree.clear() # Clear the tree widget
+            self.loaded_model_name = model_name
         
         if not tree.isEnabled():
             # Enable tree if necessary
@@ -588,6 +591,18 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Show the "Reparameterization" section of help
         """
         tree_location = "/user/qtgui/Perspectives/Fitting/plugin.html#reparameterized-models"
+        self.parent.showHelp(tree_location)
+    
+    def onModelHelp(self):
+        """
+        Show the help page of the loaded model in the OldParamTree
+        """
+        tree_base = "/user/models/"
+        if self.loaded_model_name is not None:
+            tree_location = tree_base + f"{self.loaded_model_name}.html"
+        else:
+            logging.info("No model detected to have been loaded. Showing default help page.")
+            tree_location = "/user/qtgui/Perspectives/Fitting/plugin.html#reparameterized-models"
         self.parent.showHelp(tree_location)
 
     ### CLASS METHODS ###
