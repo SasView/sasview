@@ -1163,6 +1163,9 @@ class PDBReader(object):
     """
     PDB reader class: limited for reading the lines starting with 'ATOM'
     """
+
+    logger = logging.getLogger("sas_gen.PDBReader")
+
     type_name = "PDB"
     ## Wildcards
     type = ["pdb files (*.PDB, *.pdb)|*.pdb"]
@@ -1186,13 +1189,10 @@ class PDBReader(object):
         sld_mz = []
         vol_pix = []
         pix_symbol = []
-        x_line = []
-        y_line = []
-        z_line = []
-        x_lines = []
-        y_lines = []
-        z_lines = []
+        connected_pairs = set()
+
         atom_value_dict = {}
+
         try:
             input_f = open(path, 'rb')
             buff = decode(input_f.read())
@@ -1238,52 +1238,66 @@ class PDBReader(object):
                                 atom_value_dict[atom_name] = [val, vol]
 
                         except Exception:
-                            logging.warning("Warning: set the sld of %s to zero"% atom_name)
+                            self.logger.warning("Warning: set the sld of %s to zero"% atom_name)
                             sld_n.append(0.0)
+
                         sld_mx.append(0)
                         sld_my.append(0)
                         sld_mz.append(0)
                         pix_symbol.append(atom_name)
 
                     elif line[0:6] == 'CONECT':
-                        toks = line.split()
-                        num = int(toks[1]) - 1
-                        val_list = []
-                        for val in toks[2:]:
+                        # Interpret the bonding section of the PDB
+
+                        # split remainder of line into 5 character sections
+                        rest = line[6:]
+                        parts = [rest[i:i+5] for i in range(0, len(rest), 5)]
+
+                        # Convert to indices
+                        bonded_indices = []
+                        for part in parts:
+
                             try:
-                                int_val = int(val)
-                            except Exception:
-                                break
-                            if int_val == 0:
-                                break
-                            val_list.append(int_val)
-                        # need val_list ordered
-                        for val in val_list:
-                            index = val - 1
-                            if (pos_x[index], pos_x[num]) in x_line and \
-                               (pos_y[index], pos_y[num]) in y_line and \
-                               (pos_z[index], pos_z[num]) in z_line:
-                                continue
-                            x_line.append((pos_x[num], pos_x[index]))
-                            y_line.append((pos_y[num], pos_y[index]))
-                            z_line.append((pos_z[num], pos_z[index]))
-                    if len(x_line) > 0:
-                        x_lines.append(x_line)
-                        y_lines.append(y_line)
-                        z_lines.append(z_line)
+                                index = int(part) - 1
+                                bonded_indices.append(index)
+
+                            except ValueError as ve:
+                                pass
+
+                        # Store pairs in canonical order
+                        a = bonded_indices[0]
+                        for b in bonded_indices[1:]:
+                            if a > b:
+                                a, b = b, a
+                            connected_pairs.add((a, b))
+
                 except Exception as exc:
-                    logging.error(exc)
-            pos_x = np.reshape(pos_x, (len(pos_x),))
-            pos_y = np.reshape(pos_y, (len(pos_y),))
-            pos_z = np.reshape(pos_z, (len(pos_z),))    
-            sld_n = np.reshape(sld_n, (len(sld_n),)) 
-            sld_mx = np.reshape(sld_mx, (len(sld_mx),))    
-            sld_my = np.reshape(sld_my, (len(sld_my),)) 
-            sld_mz = np.reshape(sld_mz, (len(sld_mz),))  
-            vol_pix = np.reshape(vol_pix, (len(vol_pix),))   
-            pix_symbol = np.reshape(pix_symbol, (len(pix_symbol),))                                                             
+                    self.logger.error(f"Failed to read line: {line}")
+                    self.logger.exception(exc)
+
+            # Reshape stuff for file
+
+            pos_x = np.reshape(pos_x, (-1, ))
+            pos_y = np.reshape(pos_y, (-1, ))
+            pos_z = np.reshape(pos_z, (-1, ))
+
+            n_atoms = len(pos_x)
+            ordered_pairs = sorted([(a, b) for a, b in connected_pairs if a < n_atoms and b < n_atoms])  # Why *not* sort
+            x_lines = [(pos_x[a], pos_x[b]) for a, b in ordered_pairs]
+            y_lines = [(pos_y[a], pos_y[b]) for a, b in ordered_pairs]
+            z_lines = [(pos_z[a], pos_z[b]) for a, b in ordered_pairs]
+
+            sld_n = np.reshape(sld_n, (-1, ))
+
+            sld_mx = np.reshape(sld_mx, (-1, ))
+            sld_my = np.reshape(sld_my, (-1, ))
+            sld_mz = np.reshape(sld_mz, (-1, ))
+
+            vol_pix = np.reshape(vol_pix, (-1, ))
+            pix_symbol = np.reshape(pix_symbol, (-1, ))
+
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
-            output.set_conect_lines(x_line, y_line, z_line)
+            output.set_conect_lines(x_lines, y_lines, z_lines)
             output.filename = os.path.basename(path)
             output.set_pix_type('atom')
             output.set_pixel_symbols(pix_symbol)
@@ -1291,8 +1305,9 @@ class PDBReader(object):
             output.set_pixel_volumes(vol_pix)
             output.sld_unit = '1/A^(2)'
             return output
-        except Exception:
-            logging.error("%s is not a pdb file" % path)
+
+        except Exception as e:
+            self.logger.exception(e)
             return None
 
     def write(self, path, data):
@@ -1383,7 +1398,7 @@ class SLDReader(object):
             np.savetxt(out, columns)
 
 
-class OMFData(object):
+class OMFData:
     """
     OMF Data.
     """
@@ -1488,32 +1503,42 @@ class MagSLD(object):
         self.is_data = True
         self.is_elements = False # is this a finite-element based mesh
         self.are_elements_array = False # are all elements of the same type
+
         self.elements = []
         self.filename = ''
+
         self.xstepsize = 6.0
         self.ystepsize = 6.0
         self.zstepsize = 6.0
+
         self.xnodes = 10.0
         self.ynodes = 10.0
         self.znodes = 10.0
+
         self.has_stepsize = False
         self.has_conect = False
         self.pos_unit = self._pos_unit
         self.sld_unit = self._sld_unit
         self.pix_type = 'pixel' if vol_pix is None else 'atom'
+
         self.pos_x = np.asarray(pos_x, 'd')
         self.pos_y = np.asarray(pos_y, 'd')
         self.pos_z = np.asarray(pos_z, 'd')
+
         self.sld_n = np.asarray(sld_n, 'd')
-        self.line_x = None
-        self.line_y = None
-        self.line_z = None
+
+        self.line_x: list[tuple[float, float]] | None = None
+        self.line_y: list[tuple[float, float]] | None = None
+        self.line_z: list[tuple[float, float]] | None = None
+
         self.sld_mx = sld_mx
         self.sld_my = sld_my
         self.sld_mz = sld_mz
+
         self.vol_pix = vol_pix
         self.data_length = len(pos_x)
         self.pix_symbol = None
+
         if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
         if vol_pix is None:
@@ -1699,16 +1724,13 @@ class MagSLD(object):
             self.has_stepsize = True
         return self.xstepsize, self.ystepsize, self.zstepsize
 
-    def set_conect_lines(self, line_x, line_y, line_z):
+    def set_conect_lines(self,
+                         line_x: list[tuple[float, float]],
+                         line_y: list[tuple[float, float]],
+                         line_z: list[tuple[float, float]]):
         """
         Set bonding line data if taken from pdb
         """
-        if line_x.__class__.__name__ != 'list' or len(line_x) < 1:
-            return
-        if line_y.__class__.__name__ != 'list' or len(line_y) < 1:
-            return
-        if line_z.__class__.__name__ != 'list' or len(line_z) < 1:
-            return
         self.has_conect = True
         self.line_x = line_x
         self.line_y = line_y

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SasView"
-#define MyAppVersion "5.0.5"
+#define MyAppVersion "6.0.0"
 #define MyAppPublisher "(c) 2009 - 2021, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
 #define MyAppURL "http://www.sasview.org"
 #define MyAppExeName "sasview.exe"
@@ -19,6 +19,9 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName=c:\{#MyAppName}-{#MyAppVersion}
+UsePreviousAppDir=no
+UninstallDisplayName={#MyAppName}-{#MyAppVersion}
+DirExistsWarning=yes
 DefaultGroupName={#MyAppName}-{#MyAppVersion}
 DisableProgramGroupPage=yes
 DisableDirPage=no
@@ -26,7 +29,7 @@ UsedUserAreasWarning=no
 LicenseFile=license.txt
 ArchitecturesInstallIn64BitMode=x64
 OutputBaseFilename=setupSasView
-SetupIconFile=dist\sasview\_internal\images\ball.ico
+SetupIconFile=dist\sasview\images\ball.ico
 
 
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
@@ -38,6 +41,9 @@ WizardStyle=modern
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Messages]
+DirExists=The folder:%n%n%1%n%nalready exists. All files and folders in the directory will be deleted. Would you like to install to that folder anyway?
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -55,9 +61,12 @@ end;
 
 [Files]
 Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
 Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\sasview\_internal\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
-Source: "dist\sasview\_internal\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[InstallDelete]
+; Delete all files in the directory prior to installation to prevent version conflicts
+Type: filesandordirs; Name: "{app}"
 
 [Icons]
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon

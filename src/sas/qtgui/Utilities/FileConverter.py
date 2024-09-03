@@ -8,6 +8,8 @@ import logging
 import numpy as np
 
 from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
 
 from sasdata.file_converter.ascii2d_loader import ASCII2DLoader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
@@ -43,6 +45,11 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.setupUi(self)
 
         self.setWindowTitle("File Converter")
+
+        icon = QIcon()
+        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
+
 
         # i,q file fields are not editable
         self.txtIFile.setEnabled(False)
@@ -293,9 +300,8 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         caption = 'Save As'
         filter = wildcard
         parent = None
-        options = QtWidgets.QFileDialog.DontUseNativeDialog
         # Query user for filename.
-        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, "", filter, "", options)
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent, caption, "", filter, "")
         filename = filename_tuple[0]
 
         # User cancelled.
