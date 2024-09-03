@@ -124,6 +124,10 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             self.lblSelectModelInfo.setText("Model <b>%s</b> loaded successfully" % self.old_model_name)
             self.selectModelButton.setText("Change...")
         
+        # Resize all columns to fit loaded content
+        for i in range(tree.columnCount()):
+            tree.resizeColumnToContents(i)
+        
         self.editorModelModified()
 
         # Check for duplicate parameter names
