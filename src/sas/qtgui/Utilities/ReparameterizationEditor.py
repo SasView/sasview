@@ -60,6 +60,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         self.addTooltips()
 
+        #TODO: Set the default text for the function editor
         text = \
 """"""
         self.txtFunction.insertPlainText(text)
