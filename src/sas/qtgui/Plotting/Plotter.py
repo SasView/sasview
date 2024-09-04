@@ -331,15 +331,13 @@ class PlotterWidget(PlotterBase):
 
         return False
 
-    def _plot_bounds(self, offset=0.01) -> tuple[tuple[float, float], tuple[float, float]]:
+    def _plot_bounds(self, offset=0.05) -> tuple[tuple[float, float], tuple[float, float]]:
         """ Get the appropriate bounds for the plots
 
         :param offset: add a small fraction of the absolute value of each end to each end
         :returns:
         """
 
-        min_scale = 1-offset
-        max_scale = 1+offset
 
         x_min, x_max = np.inf, -np.inf
         y_min, y_max = np.inf, -np.inf
@@ -359,13 +357,22 @@ class PlotterWidget(PlotterBase):
                     y_min = min(np.min(plot_data.y), y_min)
                     y_max = max(np.max(plot_data.y), y_max)
                 else:
-                    y_min = min(np.min(np.array(plot_data.y) - np.array(dy)), y_min)
-                    y_max = max(np.max(np.array(plot_data.y) + np.array(dy)), y_max)
+                    try:
+                        y_min = min(np.min(np.array(plot_data.y) - np.array(dy)), y_min)
+                        y_max = max(np.max(np.array(plot_data.y) + np.array(dy)), y_max)
+                    except ValueError:
+                        # Ignore error term if it doesn't match y scale and causes an error
+                        
+                        y_min = min(np.min(plot_data.y), y_min)
+                        y_max = max(np.max(plot_data.y), y_max)
 
-        return ((float(x_min*min_scale),
-                 float(x_max*max_scale)),
-                (float(y_min*min_scale),
-                 float(y_max*max_scale)))
+        x_pad = offset*(x_max - x_min)
+        y_pad = offset*(y_max - y_min)
+
+        return ((float(x_min - x_pad),
+                 float(x_max + x_pad)),
+                (float(y_min - y_pad),
+                 float(y_max + y_pad)))
 
 
     def createContextMenu(self):
