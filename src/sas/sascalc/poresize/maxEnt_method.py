@@ -55,12 +55,13 @@ def SphereVol(Bins):
 
 class matrix_operation():
     # Transformation matrix
+    # TODO: Use sasmodels kernel to make this function more generalized
     def G_matrix(self, Q, Bins, contrast, choice, resolution):
         '''
-        Defined as (form factor)^2 times volume times some scaling
+        Defined as (form factor)^2 times volume times some scaling (including the contrast and volume)
         The integrand for Iq technically requires volume^2
         The size distribution obtained from this code takes care of the missing volume
-        Therefore, it is IMPORTANT to not that the size distribution from this code is technically P(r) multiplied by something
+        Therefore, it is IMPORTANT to not that the size distribution from this code is technically P(r) (what's obtained from inversion) multiplied by something
         Converting to the size distribution back to P(r) isn't super straightforward and needs work (a TODO)
         '''
         Gmat = np.array([])
@@ -73,11 +74,24 @@ class matrix_operation():
         return Gmat
     
     def matrix_transform(self, m1, m2):
+        '''
+        Transform data-space -> solution-space or transform solution-space -> data-space
+        n = len(first_bins)
+        npt = len(Iq) = len(Q)
+        If data-space -> solution-space:
+        param float[npt] m1: intensity data, ndarray of shape (npt)
+        param float[n][npt] m2: G(Q,r), the response matrix, ndarray of shape (n,npt)
+        :returns float[n]: calculated size distribution, ndarray of shape (n)
+        If data-space -> solution-space:
+        param float[n] m1: solution, ndarray of shape (n)
+        param float[npt][n] m2: G(Q,r).transposed, the response matrix, ndarray of shape (npt,n)
+        returns float[npt]: calculated intensities, ndarray of shape (npt)
+        '''
         out = np.dot(m2,m1)
         return out
         
-
-    def calculate_solution(self, data, G):
+    # The following section should be deprecated. Not deleted for now in case there is a need to go back.
+    """ def calculate_solution(self, data, G):
         # orginally named tropus in GSASIIsasd.py (comments also mostly from original code)
         '''
         Transform data-space -> solution-space:  [G] * data
@@ -87,7 +101,7 @@ class matrix_operation():
         
         Definition according to SB: solution = image = a set of positive numbers which are to be determined and on which entropy is defined
         
-        :param float[npt] data: related to distribution, ndarray of shape (npt)
+        :param float[npt] data: observations, ndarray of shape (npt)
         :param float[n][npt] G: transformation matrix, ndarray of shape (n,npt)
         :returns float[n]: calculated solution, ndarray of shape (n)
         '''
@@ -102,12 +116,12 @@ class matrix_operation():
         n = len(first_bins)
         npt = len(Iq) = len(Q)
         
-        :param float[n] solution: related to Iq, ndarray of shape (n)
-        :param float[n][npt] G: transformation matrix, ndarray of shape (n,npt)
-        :returns float[npt]: calculated data, ndarray of shape (npt)
+        :param float[n]: solution, ndarray of shape (n)
+        :param float[n][npt]: G transformation matrix, ndarray of shape (n,npt)
+        :returns float[npt]: calculated observations, ndarray of shape (npt)
         '''
         data = np.dot(G.transpose(),solution)
-        return data   
+        return data    """
 
 class decision_helper():
     class MaxEntException(Exception): 
@@ -143,7 +157,7 @@ class decision_helper():
 
     def ChoSol(self, a, b):
         '''
-        ChoSol: ? Chop the solution vectors ?
+        ChoSol: Chop the solution vectors
         
         :returns: new vector beta
         '''
@@ -191,10 +205,12 @@ class decision_helper():
             beta[i] = (bl[i] - z) / fl[i][i]
 
         return beta
+    
 class maxEntMethod():
     def MaxEntMove(self,fSum, blank, chisq, chizer, c1, c2, s1, s2):
         '''
-        Goal is to choose the next target Chi^2
+        Implementing the maximum entropy move for feature size distribution
+        The goal of this function is to calculate distance and choose the next target Chi^2
         And to move beta one step closer towards the solution (see SB eq. 12 and the text below for the definition of beta)
         '''
         helper = decision_helper()
@@ -238,7 +254,21 @@ class maxEntMethod():
 
     def MaxEnt_SB(self,Iq,sigma,Gqr,first_bins,IterMax=5000,report=True):
         '''
-        Do the complete Maximum Entropy algorithm of Skilling and Bryan
+        This function does the complete Maximum Entropy algorithm of Skilling and Bryan
+         
+        The scattering intensity, I(Q), is related to the histogram size distribution, Np(r) by the following equation:
+        .. math::
+            I_{Q}=|\Delta\rho^2|\int|F(Q,r)^2|(V(r))^2N_{P}(r)dr
+        Np(r) is a histogram size distribution where a fixed number of bins are defined over a given range of diameter with either constant diameter bins or constant proportional diameter bins. 
+        Solution of the histogram size distribution to the scattering equation above is obtained by fitting the scattering calculated from trial distributions to the measured data and then revising the amplitudes of the trial histogram distribution based upon the applied constraints. 
+        The trial histogram size distribution is not forced to adhere to a particular functional form, such as Gaussian or log-normal. 
+        However, in the current formulation, all sizes of the scatterer are expected to have the same scattering contrast and morphology (shape, degree of interaction, aspect ratio, orientation, etc.)
+
+        The maximum entropy method seeks solution of the functional, Ξ:
+        .. math::
+            \equiv =\chi-\alpha S
+        Where chi^2 indicates the goodness of fit, S is the applied constraint, and alpha is a Lagrange multiplier used to ensure that the solution fits the measured data to some extent.
+        But compared to a regular regularization method, maximum entropy method also forces all histograms in the size distribution to have a positive amplitude
         
         :param float Iq: background-subtracted scattering intensity data
         :param float sigma: normalization factor obtained using scale, weights, and weight factors
@@ -353,6 +383,7 @@ class maxEntMethod():
 
 def sizeDistribution(input):
     '''
+    This function packages all the inputs that MaxEnt_SB needs (including initial values) into a dictionary and executes the MaxEnt_SB function
     :param dict input:
         input must have the following keys, each corresponding to their specified type of values:
         Key                          | Value
