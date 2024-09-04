@@ -330,7 +330,7 @@ class maxEntMethod():
         
         :param float Iq: background-subtracted scattering intensity data
         :param float sigma: normalization factor obtained using scale, weights, and weight factors
-        :param float[][] G: transformation matrix
+        :param float[][] G: transformation matrix 
         :param float first_bins[]: initial guess for distribution
         :param int IterMax: maximum iterations allowed
         :param obj resolution: resolution object providing information about smearing
