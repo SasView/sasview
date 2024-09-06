@@ -273,10 +273,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         :param target: A file-path like object that needs regeneration.
         """
-        thread = DocGenThread(target=target)
-        thread.queue()
-        thread.ready(2.5)
-        while not thread.isrunning():
         self.thread = DocGenThread()
         self.thread.queue(target)
         self.thread.ready(2.5)
