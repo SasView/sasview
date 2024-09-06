@@ -56,18 +56,20 @@ def SphereVol(Bins):
     Vol = (4./3.)*np.pi*Bins**3
     return Vol
 
-class dist_model():
+class DistModel():
     """
     This class is used to construct the matrix of I(q) curves at each value of
     the dimension whose distribution is being sought. For example the Radius of
     a sphere for the classic pore size distribution calculation. It uses the
     full sasmodels infrastructre including volume and resolution corrections.
 
-    For this to work, Q needs to be a data1D type object with y=none and dy=none.
-    see sasda or sasmodels.data.data1D
+    This replaces the following functions:
+    def SphereFF
+    def SpherVol
+    def matrix_operation.G_matrix
 
-    Q is a data1D object with q and simga q taken from the loaded data (y and
-    dy should be set to NONE)
+    data is the data1D object loaded widt dataloader. In other words the very data
+    which we will be fitting.
     model is a string cotaining the name of the model (e.g. 'sphere')
     pars is a dictionary of all parameters and their value for the given model
     dimension is a string containing the name of the parameter that is being
@@ -80,33 +82,19 @@ class dist_model():
     ..NOTE: this code is not yet ready to be used (clearly) but is meant as
        a base structure
     """
-    def __init__(self,Q, model, pars,dimension,bins):
-        self.q=Q
+    def __init__(self,data, model, pars,dimension,bins):
+        self.data=data
         self.model = load_model(model)
         self.params=pars
         self.dim_distr=dimension
         self.bins=bins
+        self.intensity[]
 
-
-    def FormFactor(self,value):
-        full_params = self.params
-        full_params[self.dim_distr]=value
-        # VERSION 1
-        # Iq = f(radius_polar=100) - this is from the example in script documentation
-        # This is probably the best choice?
-        f = DirectModel(self.q, self.model)
-        Iq = f(full_params)
-        # VERSION 2
-        # not sure this allows for passing the resolution function
-        # in other words the parameter is probably a q vector not a data1D object?
-        kernel = self.model.make_kernel([self.q])
-        Iq = call_kernel(kernel, full_params)
-        return Iq
 
     def base_matrix(self):
-        for i in self.bins:
-            intensity[i] = self.FormFactor(i)
-        return np.dstack(intensity,self.bins)
+        f = DirectModel(self.data, self.model)
+        for i in self.bins: self.intensity[i] = f(**self.pars, self_dist=i)
+        return np.vstack(self.intensity)
 
 
 class matrix_operation():
