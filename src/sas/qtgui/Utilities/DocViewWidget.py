@@ -3,6 +3,7 @@ import os
 import logging
 import time
 from pathlib import Path
+from typing import Optional
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
@@ -12,7 +13,6 @@ from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.qtgui.Utilities.GuiUtils import documentation_lock
 from sas.sascalc.doc_regen.makedocumentation import (make_documentation, create_user_files_if_needed,
                                                      HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE)
 
@@ -30,7 +30,6 @@ class DocGenThread(CalcThread):
     """Thread performing the fit """
 
     def __init__(self,
-                 target,
                  completefn=None,
                  updatefn=None,
                  yieldtime=0.03,
@@ -44,33 +43,17 @@ class DocGenThread(CalcThread):
         self.starttime = time.time()
         self.updatefn = updatefn
         self.reset_flag = reset_flag
-        self.target = Path(target)
+        self.target = None
         self.runner = None
         self._running = False
         self.communicate = Communicate()
         self.communicate.closeSignal.connect(self.close)
 
-    def compute(self):
+    def compute(self, target=None):
         """
         Regen the docs in a separate thread
         """
-        try:
-            if self.documentation_lock.acquire(blocking=False):
-                try:
-                    # Start a try/finally block to ensure that the lock is released if an exception is thrown
-                    if self.target.exists():
-                        self.runner = make_documentation(self.target)
-                        while self.runner.poll() is None:
-                            time.sleep(0.5)
-                            self.communicate.documentationUpdateLogSignal.emit()
-                finally:
-                    self.documentation_lock.release()
-                    self.runner.kill()
-                    self.runner = None
-            else:
-                logging.info('Documentation regeneration is already in process. '
-                            'Please wait for it to complete before attempting again.')
-        except KeyboardInterrupt as msg:
+        self.target = Path(target)
         try:
             # Start a try/finally block to ensure that the lock is released if an exception is thrown
             if not self.target.exists():
@@ -296,6 +279,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         while not thread.isrunning():
         self.thread = DocGenThread()
         self.thread.queue(target)
+        self.thread.ready(2.5)
         while not self.thread.isrunning():
             time.sleep(0.1)
         while self.thread.isrunning():
