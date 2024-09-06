@@ -8,10 +8,10 @@ class WarningLabel(QLabel):
     exists columns that are missing, or there are columns that are duplicated.
 
     """
-    def set_font_red(self):
+    def setFontRed(self):
         self.setStyleSheet("QLabel { color: red}")
 
-    def set_font_normal(self):
+    def setFontNormal(self):
         self.setStyleSheet('')
 
     def update(self, missing_columns, duplicate_columns):
@@ -19,13 +19,13 @@ class WarningLabel(QLabel):
         columns are missing, and how many columns are duplicated."""
         if len(missing_columns) != 0:
             self.setText(f'The following columns are missing: {missing_columns}')
-            self.set_font_red()
+            self.setFontRed()
         elif len(duplicate_columns) > 0:
             self.setText(f'There are duplicate columns.')
-            self.set_font_red()
+            self.setFontRed()
         else:
             self.setText('All is fine') # TODO: Probably want to find a more appropriate message.
-            self.set_font_normal()
+            self.setFontNormal()
 
     def __init__(self, initial_missing_columns, initial_duplicate_classes):
         super().__init__()
