@@ -15,14 +15,14 @@ class UnitPreferenceLine(QWidget):
 
         self.column_label = QLabel(column_name)
         self.unit_button = QPushButton(initial_unit.symbol)
-        self.unit_button.clicked.connect(self.on_unit_press)
+        self.unit_button.clicked.connect(self.onUnitPress)
 
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.column_label)
         self.layout.addWidget(self.unit_button)
 
     @Slot()
-    def on_unit_press(self):
+    def onUnitPress(self):
         picker = UnitSelector(self.group.name, False)
         picker.exec()
         self.current_unit = picker.selected_unit
