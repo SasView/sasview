@@ -46,7 +46,7 @@ class DocGenThread(CalcThread):
         self.reset_flag = reset_flag
         self.target = Path(target)
         self.runner = None
-        self.documentation_lock = documentation_lock
+        self._running = False
         self.communicate = Communicate()
         self.communicate.closeSignal.connect(self.close)
 
@@ -71,14 +71,23 @@ class DocGenThread(CalcThread):
                 logging.info('Documentation regeneration is already in process. '
                             'Please wait for it to complete before attempting again.')
         except KeyboardInterrupt as msg:
-            self.close()
+        try:
+            # Start a try/finally block to ensure that the lock is released if an exception is thrown
+            if not self.target.exists():
+                self.runner = make_documentation(self.target)
+                while self.runner.poll() is None:
+                    time.sleep(0.5)
+                    self.communicate.documentationUpdateLogSignal.emit()
+        except KeyboardInterrupt as msg:
             logging.log(0, msg)
+        finally:
+            self.close()
 
     def close(self):
         # Ensure the runner and locks are fully released when closing the main application
         if self.runner:
             self.runner.kill()
-        self.documentation_lock.release()
+        self.interrupt()
 
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
@@ -100,6 +109,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Necessary globals
         self.source: Path = Path(source)
         self.regen_in_progress: bool = False
+        self.thread: Optional[CalcThread] = None
 
         self.initializeSignals()  # Connect signals
 
@@ -275,8 +285,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         d.addCallback(self.docRegenComplete)
         self.regen_in_progress = True
 
-    @staticmethod
-    def regenerateDocs(target: PATH_LIKE = None):
+    def regenerateDocs(self, target: PATH_LIKE = None):
         """Regenerates documentation for a specific file (target) in a subprocess
 
         :param target: A file-path like object that needs regeneration.
@@ -285,8 +294,11 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         thread.queue()
         thread.ready(2.5)
         while not thread.isrunning():
+        self.thread = DocGenThread()
+        self.thread.queue(target)
+        while not self.thread.isrunning():
             time.sleep(0.1)
-        while thread.isrunning():
+        while self.thread.isrunning():
             time.sleep(0.1)
     
     def docRegenComplete(self, return_val):
