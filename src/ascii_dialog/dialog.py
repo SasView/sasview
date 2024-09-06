@@ -36,7 +36,7 @@ class AsciiDialog(QWidget):
 
         self.filename_label = QLabel("Click the button below to load a file.")
         self.filename_chooser = QComboBox()
-        self.filename_chooser.currentTextChanged.connect(self.update_current_file)
+        self.filename_chooser.currentTextChanged.connect(self.updateCurrentFile)
 
         self.load_button = QPushButton("Load File")
         self.load_button.clicked.connect(self.load)
@@ -59,7 +59,7 @@ class AsciiDialog(QWidget):
         for seperator_name, value in self.seperators.items():
             check_box = QCheckBox(seperator_name)
             check_box.setChecked(value)
-            check_box.clicked.connect(self.seperator_toggle)
+            check_box.clicked.connect(self.seperatorToggle)
             self.sep_widgets.append(check_box)
             self.sep_layout.addWidget(check_box)
 
@@ -67,7 +67,7 @@ class AsciiDialog(QWidget):
         self.startline_layout = QHBoxLayout()
         self.startline_label = QLabel('Starting Line')
         self.startline_entry = QSpinBox()
-        self.startline_entry.valueChanged.connect(self.update_startpos)
+        self.startline_entry.valueChanged.connect(self.updateStartpos)
         self.startline_layout.addWidget(self.startline_label)
         self.startline_layout.addWidget(self.startline_entry)
 
@@ -76,15 +76,15 @@ class AsciiDialog(QWidget):
         self.colcount_label = QLabel('Number of Columns')
         self.colcount_entry = QSpinBox()
         self.colcount_entry.setMinimum(1)
-        self.colcount_entry.valueChanged.connect(self.update_colcount)
+        self.colcount_entry.valueChanged.connect(self.updateColcount)
         self.colcount_layout.addWidget(self.colcount_label)
         self.colcount_layout.addWidget(self.colcount_entry)
 
         ## Column Editor
-        options =  self.dataset_options()
+        options =  self.datasetOptions()
         self.col_editor = ColEditor(self.colcount_entry.value(), options)
-        self.dataset_combobox.currentTextChanged.connect(self.change_dataset_type)
-        self.col_editor.column_changed.connect(self.update_column)
+        self.dataset_combobox.currentTextChanged.connect(self.changeDatasetType)
+        self.col_editor.column_changed.connect(self.updateColumn)
 
         ## Data Table
 
@@ -96,10 +96,10 @@ class AsciiDialog(QWidget):
         self.table.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
         # Add the context menu
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.table.customContextMenuRequested.connect(self.show_context_menu)
+        self.table.customContextMenuRequested.connect(self.showContextMenu)
 
         # Warning Label
-        self.warning_label = WarningLabel(self.required_missing(), self.duplicate_columns())
+        self.warning_label = WarningLabel(self.requiredMissing(), self.duplicateColumns())
 
         self.layout = QVBoxLayout(self)
 
@@ -127,7 +127,7 @@ class AsciiDialog(QWidget):
         return self.files_is_included[self.current_filename]
 
 
-    def split_line(self, line: str) -> list[str]:
+    def splitLine(self, line: str) -> list[str]:
         """Split a line in a CSV file based on which seperators the user has
         selected on the widget.
 
@@ -148,25 +148,25 @@ class AsciiDialog(QWidget):
 
         return re.split(expr, line)
 
-    def attempt_guesses(self) -> None:
+    def attemptGuesses(self) -> None:
         """Attempt to guess various parameters of the data to provide some
         default values. Uses the guess.py module
 
         """
-        split_csv = [self.split_line(line.strip()) for line in self.raw_csv]
+        split_csv = [self.splitLine(line.strip()) for line in self.raw_csv]
 
         self.initial_starting_pos = guess_starting_position(split_csv)
 
         guessed_colcount = guess_column_count(split_csv,
                                               self.initial_starting_pos)
-        self.col_editor.set_cols(guessed_colcount)
+        self.col_editor.setCols(guessed_colcount)
 
-        columns = guess_columns(guessed_colcount, self.current_dataset_type())
-        self.col_editor.set_col_order(columns)
+        columns = guess_columns(guessed_colcount, self.currentDatasetType())
+        self.col_editor.setColOrder(columns)
         self.colcount_entry.setValue(guessed_colcount)
         self.startline_entry.setValue(self.initial_starting_pos)
 
-    def fill_table(self) -> None:
+    def fillTable(self) -> None:
         """Write the data to the table based on the parameters the user has
         selected.
 
@@ -183,7 +183,7 @@ class AsciiDialog(QWidget):
 
         self.table.setRowCount(min(len(self.raw_csv), TABLE_MAX_ROWS + 1))
         self.table.setColumnCount(col_count + 1)
-        self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.col_names())
+        self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.colNames())
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         # Now fill the table with data
@@ -203,23 +203,23 @@ class AsciiDialog(QWidget):
                 self.rows_is_included.append(initial_state)
             if i >= starting_pos:
                 row_status = RowStatusWidget(initial_state, i)
-                row_status.status_changed.connect(self.update_row_status)
+                row_status.status_changed.connect(self.updateRowStatus)
                 self.table.setCellWidget(i, 0, row_status)
-            row_split = self.split_line(row)
+            row_split = self.splitLine(row)
             for j, col_value in enumerate(row_split):
                 if j >= col_count:
                     continue # Ignore rows that have extra columns.
                 item = QTableWidgetItem(col_value)
                 self.table.setItem(i, j + 1, item)
-            self.set_row_typesetting(i, self.rows_is_included[i])
+            self.setRowTypesetting(i, self.rows_is_included[i])
 
         self.table.show()
 
-    def current_dataset_type(self) -> DatasetType:
+    def currentDatasetType(self) -> DatasetType:
         """Get the dataset type that the user has currently selected."""
         return dataset_dictionary[self.dataset_combobox.currentText()]
 
-    def set_row_typesetting(self, row: int, item_checked: bool) -> None:
+    def setRowTypesetting(self, row: int, item_checked: bool) -> None:
         """Set the typesetting for the given role depending on whether it is to
         be included in the data being loaded, or not.
 
@@ -262,7 +262,7 @@ class AsciiDialog(QWidget):
             self.files_is_included[basename] = []
             # Attempt guesses when this is the first file that has been loaded.
             if len(self.files) == 1:
-                self.attempt_guesses()
+                self.attemptGuesses()
             # This will trigger the update current file event which will cause
             # the table to be drawn.
             self.filename_chooser.addItem(basename)
@@ -272,105 +272,105 @@ class AsciiDialog(QWidget):
             QMessageBox.critical(self, 'File Read Error', ' There was an error reading that file.')
 
     @Slot()
-    def update_colcount(self) -> None:
+    def updateColcount(self) -> None:
         """Triggered when the amount of columns the user has selected has
         changed.
 
         """
-        self.col_editor.set_cols(self.colcount_entry.value())
-        self.fill_table()
+        self.col_editor.setCols(self.colcount_entry.value())
+        self.fillTable()
 
     @Slot()
-    def update_startpos(self) -> None:
+    def updateStartpos(self) -> None:
         """Triggered when the starting position of the data has changed."""
-        self.fill_table()
+        self.fillTable()
 
     @Slot()
-    def update_seperator(self) -> None:
+    def updateSeperator(self) -> None:
         """Changed when the user modifies the set of seperators being used."""
-        self.fill_table()
+        self.fillTable()
 
     @Slot()
-    def update_column(self) -> None:
+    def updateColumn(self) -> None:
         """Triggered when any of the columns has been changed."""
-        self.fill_table()
-        required_missing = self.required_missing()
-        duplicates = self.duplicate_columns()
+        self.fillTable()
+        required_missing = self.requiredMissing()
+        duplicates = self.duplicateColumns()
         self.warning_label.update(required_missing, duplicates)
 
     @Slot()
-    def update_current_file(self) -> None:
+    def updateCurrentFile(self) -> None:
         """Triggered when the current file (choosen from the file chooser
         ComboBox) changes.
 
         """
         self.current_filename = self.filename_chooser.currentText()
-        self.fill_table()
+        self.fillTable()
 
     @Slot()
-    def seperator_toggle(self) -> None:
+    def seperatorToggle(self) -> None:
         """Triggered when one of the seperator check boxes has been toggled."""
         check_box = self.sender()
         self.seperators[check_box.text()] = check_box.isChecked()
-        self.fill_table()
+        self.fillTable()
 
     @Slot()
-    def change_dataset_type(self) -> None:
+    def changeDatasetType(self) -> None:
         """Triggered when the selected dataset type has changed."""
-        options = self.dataset_options()
-        self.col_editor.replace_options(options)
+        options = self.datasetOptions()
+        self.col_editor.replaceOptions(options)
 
         # Update columns as they'll be different now.
-        columns = guess_columns(self.colcount_entry.value(), self.current_dataset_type())
-        self.col_editor.set_col_order(columns)
+        columns = guess_columns(self.colcount_entry.value(), self.currentDatasetType())
+        self.col_editor.setColOrder(columns)
 
     @Slot()
-    def update_row_status(self, row: int) -> None:
+    def updateRowStatus(self, row: int) -> None:
         """Triggered when the status of row has changed."""
         new_status = self.table.cellWidget(row, 0).isChecked()
         self.rows_is_included[row] = new_status
-        self.set_row_typesetting(row, new_status)
+        self.setRowTypesetting(row, new_status)
 
     @Slot()
-    def show_context_menu(self, point: QPoint) -> None:
+    def showContextMenu(self, point: QPoint) -> None:
         """Show the context menu for the table."""
         context_menu = SelectionMenu(self)
-        context_menu.select_all_event.connect(self.select_items)
-        context_menu.deselect_all_event.connect(self.deselect_items)
+        context_menu.select_all_event.connect(self.selectItems)
+        context_menu.deselect_all_event.connect(self.deselectItems)
         context_menu.exec(QCursor.pos())
 
-    def change_inclusion(self, indexes: list[QModelIndex], new_value: bool):
+    def changeInclusion(self, indexes: list[QModelIndex], new_value: bool):
         for index in indexes:
             row = index.row()
             self.table.cellWidget(row, 0).setChecked(new_value)
-            self.update_row_status(row)
+            self.updateRowStatus(row)
 
     @Slot()
-    def select_items(self) -> None:
+    def selectItems(self) -> None:
         """Include all of the items that have been selected in the table."""
-        self.change_inclusion(self.table.selectedIndexes(), True)
+        self.changeInclusion(self.table.selectedIndexes(), True)
 
     @Slot()
-    def deselect_items(self) -> None:
+    def deselectItems(self) -> None:
         """Don't include all of the items that have been selected in the table."""
-        self.change_inclusion(self.table.selectedIndexes(), False)
+        self.changeInclusion(self.table.selectedIndexes(), False)
 
-    def required_missing(self) -> list[str]:
+    def requiredMissing(self) -> list[str]:
         """Returns all the columns that are required by the dataset type but
         have not currently been selected.
 
         """
-        dataset = self.current_dataset_type()
-        missing_columns = [col for col in dataset.required if col not in self.col_editor.col_names()]
+        dataset = self.currentDatasetType()
+        missing_columns = [col for col in dataset.required if col not in self.col_editor.colNames()]
         return missing_columns
 
-    def duplicate_columns(self) -> set[str]:
+    def duplicateColumns(self) -> set[str]:
         """Returns all of the columns which have been selected multiple times."""
-        col_names = self.col_editor.col_names()
+        col_names = self.col_editor.colNames()
         return set([col for col in col_names if not col == '<ignore>' and col_names.count(col) > 1])
 
-    def dataset_options(self) -> list[str]:
-        current_dataset_type = self.current_dataset_type()
+    def datasetOptions(self) -> list[str]:
+        current_dataset_type = self.currentDatasetType()
         return current_dataset_type.required + current_dataset_type.optional + ['<ignore>']
 
 if __name__ == "__main__":
