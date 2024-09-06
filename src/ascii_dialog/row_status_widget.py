@@ -10,11 +10,11 @@ class RowStatusWidget(QCheckBox):
         super().__init__()
         self.row = row
         self.setChecked(initial_value)
-        self.update_label()
-        self.stateChanged.connect(self.on_state_change)
+        self.updateLabel()
+        self.stateChanged.connect(self.onStateChange)
 
     status_changed = Signal(int)
-    def update_label(self):
+    def updateLabel(self):
         """Update the label of the check box depending on whether it is checked,
         or not."""
         if self.isChecked():
@@ -24,6 +24,6 @@ class RowStatusWidget(QCheckBox):
 
 
     @Slot()
-    def on_state_change(self):
-        self.update_label()
+    def onStateChange(self):
+        self.updateLabel()
         self.status_changed.emit(self.row)

@@ -7,36 +7,36 @@ from unit_list_widget import UnitListWidget
 all_unit_groups = list(unit_groups.values())
 
 class UnitSelector(QDialog):
-    def current_unit_group(self) -> UnitGroup:
+    def currentUnitGroup(self) -> UnitGroup:
         index = self.unit_type_selector.currentIndex()
         return all_unit_groups[index]
 
     @property
     def selected_unit(self) -> NamedUnit | None:
-        return self.unit_list_widget.selected_unit
+        return self.unit_list_widget.selectedUnit
 
     @Slot()
-    def on_search_changed(self):
+    def onSearchChanged(self):
         search_input = self.search_box.text()
-        current_group = self.current_unit_group()
+        current_group = self.currentUnitGroup()
         units = current_group.units
         if search_input != '':
             units = [unit for unit in units if search_input.lower() in unit.name]
-        self.unit_list_widget.populate_list(units)
+        self.unit_list_widget.populateList(units)
 
 
     @Slot()
-    def unit_group_changed(self):
-        new_group = self.current_unit_group()
+    def unitGroupChanged(self):
+        new_group = self.currentUnitGroup()
         self.search_box.setText('')
-        self.unit_list_widget.populate_list(new_group.units)
+        self.unit_list_widget.populateList(new_group.units)
 
     @Slot()
-    def select_unit(self):
+    def selectUnit(self):
         self.accept()
 
     @Slot()
-    def selection_changed(self):
+    def selectionChanged(self):
         self.select_button.setDisabled(False)
 
     def __init__(self, default_group='length', allow_group_edit=True):
@@ -47,19 +47,19 @@ class UnitSelector(QDialog):
         self.unit_type_selector.setCurrentText(default_group)
         if not allow_group_edit:
             self.unit_type_selector.setDisabled(True)
-        self.unit_type_selector.currentTextChanged.connect(self.unit_group_changed)
+        self.unit_type_selector.currentTextChanged.connect(self.unitGroupChanged)
 
         self.search_box = QLineEdit()
-        self.search_box.textChanged.connect(self.on_search_changed)
+        self.search_box.textChanged.connect(self.onSearchChanged)
         self.search_box.setPlaceholderText('Search for a unit...')
 
         self.unit_list_widget = UnitListWidget()
         # TODO: Are they all named units?
-        self.unit_list_widget.populate_list(self.current_unit_group().units)
-        self.unit_list_widget.itemSelectionChanged.connect(self.selection_changed)
+        self.unit_list_widget.populateList(self.currentUnitGroup().units)
+        self.unit_list_widget.itemSelectionChanged.connect(self.selectionChanged)
 
         self.select_button = QPushButton('Select Unit')
-        self.select_button.pressed.connect(self.select_unit)
+        self.select_button.pressed.connect(self.selectUnit)
         self.select_button.setDisabled(True)
 
         self.layout = QVBoxLayout(self)
