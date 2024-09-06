@@ -5,18 +5,18 @@ from sasdata.quantities.units import NamedUnit
 
 
 class UnitListWidget(QListWidget):
-    def repr_unit(self, unit: NamedUnit) -> str:
+    def reprUnit(self, unit: NamedUnit) -> str:
         return f"{unit.symbol} ({unit.name})"
 
-    def populate_list(self, units: list[NamedUnit]) -> None:
+    def populateList(self, units: list[NamedUnit]) -> None:
         self.clear()
         self.units = units
         for unit in units:
-            item = QListWidgetItem(self.repr_unit(unit))
+            item = QListWidgetItem(self.reprUnit(unit))
             self.addItem(item)
 
     @property
-    def selected_unit(self) -> NamedUnit | None:
+    def selectedUnit(self) -> NamedUnit | None:
         return self.units[self.currentRow()]
 
     def __init__(self):

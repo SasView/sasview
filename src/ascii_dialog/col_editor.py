@@ -10,7 +10,7 @@ class ColEditor(QWidget):
     column_changed = Signal()
 
     @Slot()
-    def on_column_update(self):
+    def onColumnUpdate(self):
         self.column_changed.emit()
 
 
@@ -23,11 +23,11 @@ class ColEditor(QWidget):
         self.option_widgets = []
         for _ in range(cols):
             new_widget = ColumnUnit(self.options)
-            new_widget.column_changed.connect(self.on_column_update)
+            new_widget.column_changed.connect(self.onColumnUpdate)
             self.layout.addWidget(new_widget)
             self.option_widgets.append(new_widget)
 
-    def set_cols(self, new_cols: int):
+    def setCols(self, new_cols: int):
         """Set the amount of columns for the user to edit."""
 
         # Decides whether we need to extend the current set of combo boxes, or
@@ -35,7 +35,7 @@ class ColEditor(QWidget):
         if self.cols < new_cols:
             for _ in range(new_cols - self.cols):
                 new_widget = ColumnUnit(self.options)
-                new_widget.column_changed.connect(self.on_column_update)
+                new_widget.column_changed.connect(self.onColumnUpdate)
                 self.layout.addWidget(new_widget)
                 self.option_widgets.append(new_widget)
 
@@ -51,7 +51,7 @@ class ColEditor(QWidget):
             self.cols = new_cols
         self.column_changed.emit()
 
-    def set_col_order(self, cols: list[str]):
+    def setColOrder(self, cols: list[str]):
         """Sets the series of currently selected columns to be cols, in that
         order. If there are not enough column widgets include as many of the
         columns in cols as possible.
@@ -63,11 +63,11 @@ class ColEditor(QWidget):
         except IndexError:
             pass # Can ignore because it means we've run out of widgets.
 
-    def col_names(self) -> list[str]:
+    def colNames(self) -> list[str]:
         """Get a list of all of the currently selected columns."""
         return [widget.current_column for widget in self.option_widgets]
 
-    def replace_options(self, new_options: list[str]) -> None:
+    def replaceOptions(self, new_options: list[str]) -> None:
         """Replace options from which the user can choose for each column."""
         self.options = new_options
         for widget in self.option_widgets:
