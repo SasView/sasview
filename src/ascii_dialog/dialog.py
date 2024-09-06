@@ -365,7 +365,7 @@ class AsciiDialog(QWidget):
         return missing_columns
 
     def duplicate_columns(self) -> set[str]:
-        """Returns all of the columns which have been sselected multiple times."""
+        """Returns all of the columns which have been selected multiple times."""
         col_names = self.col_editor.col_names()
         return set([col for col in col_names if not col == '<ignore>' and col_names.count(col) > 1])
 
