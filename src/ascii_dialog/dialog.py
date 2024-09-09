@@ -321,7 +321,10 @@ class AsciiDialog(QWidget):
 
         """
         self.current_filename = self.filename_chooser.currentText()
-        self.fillTable()
+        if self.current_filename == '':
+            self.table.clear()
+        else:
+            self.fillTable()
 
     @Slot()
     def seperatorToggle(self) -> None:
