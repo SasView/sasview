@@ -281,12 +281,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setText(msg)
             msgbox.setWindowTitle("Project Load")
             # custom buttons
-            button_yes = QtWidgets.QPushButton("Yes")
-            msgbox.addButton(button_yes, QtWidgets.QMessageBox.YesRole)
-            button_no = QtWidgets.QPushButton("No")
-            msgbox.addButton(button_no, QtWidgets.QMessageBox.RejectRole)
-            retval = msgbox.exec_()
-            if retval == QtWidgets.QMessageBox.RejectRole:
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes |
+                                      QtWidgets.QMessageBox.StandardButton.No)
+            retval = msgbox.exec()
+            if retval == QtWidgets.QMessageBox.StandardButton.No:
                 # cancel fit
                 return
 
@@ -685,8 +683,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete selected rows from the model
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will remove the checked data from the data explorer." +\
-                     "\nDo you want to continue?"
+        delete_msg = "This operation will remove the selected data sets " +\
+                "and all the dependents from SasView." +\
+                "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
                                                delete_msg,
@@ -709,12 +708,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Close result panel if results represent the deleted data item
                 # Results panel only stores Data1D/Data2D object
                 #   => QStandardItems must still exist for direct comparison
-                self.closeResultPanelOnDelete(GuiUtils.dataFromItem(item))
+                data = GuiUtils.dataFromItem(item)
+                self.closeResultPanelOnDelete(data)
 
                 # Let others know we deleted data, before we delete it
                 self.communicator.dataDeletedSignal.emit([item])
                 # update stored_data
-                self.manager.update_stored_data([item])
+                self.manager.update_stored_data([data.name])
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -1835,7 +1835,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Assure this is indeed wanted
         delete_msg = "This operation will remove the selected data sets " +\
-                     "and all the dependents from the data explorer." +\
+                     "and all the dependents from SasView." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
