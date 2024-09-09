@@ -286,6 +286,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         # Write the new model to the file
         model_text = self.generateModelText()
         self.writeModel(output_file_path, model_text)
+        self.parent.communicate.customModelDirectoryChanged.emit() # Refresh the list of custom models
 
         # Test the model for errors (file must be generated first)
         error_line = self.checkModel(output_file_path)
