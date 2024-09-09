@@ -278,7 +278,10 @@ class AsciiDialog(QWidget):
             self.filename_chooser.setCurrentText(basename)
 
         except OSError:
-            QMessageBox.critical(self, 'File Read Error', ' There was an error reading that file.')
+            QMessageBox.critical(self, 'File Read Error', 'There was an error accessing that file.')
+        except UnicodeDecodeError:
+            QMessageBox.critical(self, 'File Read Error', """There was an error reading that file.
+This could potentially be because the file is not an ASCII format.""")
 
     @Slot()
     def unload(self) -> None:
