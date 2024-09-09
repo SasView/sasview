@@ -41,6 +41,7 @@ class AsciiDialog(QWidget):
         self.filename_unload_layout = QHBoxLayout()
         self.filename_label = QLabel(NOFILE_TEXT)
         self.unloadButton = QPushButton("Unload")
+        self.unloadButton.setDisabled(True)
         self.unloadButton.clicked.connect(self.unload)
         self.filename_unload_layout.addWidget(self.filename_label)
         self.filename_unload_layout.addWidget(self.unloadButton)
@@ -330,8 +331,10 @@ This could potentially be because the file is not an ASCII format.""")
             self.table.clear()
             self.filename_label.setText(NOFILE_TEXT)
             self.table.setDisabled(True)
+            self.unloadButton.setDisabled(True)
         else:
             self.table.setDisabled(False)
+            self.unloadButton.setDisabled(False)
             self.fillTable()
 
     @Slot()
