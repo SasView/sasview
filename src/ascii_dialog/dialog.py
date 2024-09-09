@@ -368,7 +368,11 @@ This could potentially be because the file is not an ASCII format.""")
 
     def changeInclusion(self, indexes: list[QModelIndex], new_value: bool):
         for index in indexes:
+            # This will happen if the user has selected a point which exists before the starting line. To prevent an
+            # error, this code will skip that position.
             row = index.row()
+            if row < self.startline_entry.value():
+                continue
             self.table.cellWidget(row, 0).setChecked(new_value)
             self.updateRowStatus(row)
 
