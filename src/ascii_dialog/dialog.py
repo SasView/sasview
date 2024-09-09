@@ -324,6 +324,7 @@ This could potentially be because the file is not an ASCII format.""")
 
         """
         self.current_filename = self.filename_chooser.currentText()
+        self.filename_label.setText(self.current_filename)
         if self.current_filename == '':
             self.table.clear()
             self.table.setDisabled(True)
