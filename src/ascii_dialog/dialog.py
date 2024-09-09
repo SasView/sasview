@@ -36,6 +36,8 @@ class AsciiDialog(QWidget):
         }
 
         self.filename_label = QLabel("Click the button below to load a file.")
+        self.unloadButton = QPushButton("Unload")
+        self.unloadButton.clicked.connect(self.unload)
         self.filename_chooser = QComboBox()
         self.filename_chooser.currentTextChanged.connect(self.updateCurrentFile)
 
@@ -105,6 +107,7 @@ class AsciiDialog(QWidget):
         self.layout = QVBoxLayout(self)
 
         self.layout.addWidget(self.filename_label)
+        self.layout.addWidget(self.unloadButton)
         self.layout.addWidget(self.filename_chooser)
         self.layout.addWidget(self.load_button)
         self.layout.addLayout(self.dataset_layout)
@@ -270,6 +273,13 @@ class AsciiDialog(QWidget):
 
         except OSError:
             QMessageBox.critical(self, 'File Read Error', ' There was an error reading that file.')
+
+    @Slot()
+    def unload(self) -> None:
+        del self.files[self.current_filename]
+        self.filename_chooser.removeItem(self.filename_chooser.currentIndex())
+        # Filename chooser should now revert back to a different file.
+        self.updateCurrentFile()
 
     @Slot()
     def updateColcount(self) -> None:
