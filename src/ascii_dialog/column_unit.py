@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QComboBox, QCompleter, QHBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QCompleter, QHBoxLayout, QSizePolicy, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 from sasdata.dataset_types import unit_kinds
 from sasdata.quantities.units import symbol_lookup
 
 from unit_selector import UnitSelector
+
+def configure_size_policy(combo_box: QComboBox) -> None:
+    policy = combo_box.sizePolicy()
+    policy.setHorizontalPolicy(QSizePolicy.Policy.Ignored)
+    combo_box.setSizePolicy(policy)
 
 class ColumnUnit(QWidget):
     """Widget with 2 combo boxes: one allowing the user to pick a column, and
@@ -25,6 +30,7 @@ class ColumnUnit(QWidget):
         """Create the combo box for specifying the column based on the given
         options."""
         new_combo_box = QComboBox()
+        configure_size_policy(new_combo_box)
         for option in options:
             new_combo_box.addItem(option)
         new_combo_box.setEditable(True)
@@ -36,6 +42,7 @@ class ColumnUnit(QWidget):
     def createUnitComboBox(self, selected_option: str) -> QComboBox:
         """Create the combo box for specifying the unit for selected_option"""
         new_combo_box = QComboBox()
+        configure_size_policy(new_combo_box)
         new_combo_box.setEditable(True)
         # word_list = ['alpha', 'omega', 'omicron', 'zeta']
         # completer = QCompleter(word_list, self)
