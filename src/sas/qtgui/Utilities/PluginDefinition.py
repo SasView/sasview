@@ -142,6 +142,12 @@ return intensity
         self.sendNewIqSignal.connect(lambda iq: self.txtFunction.setPlainText(iq))
         self.sendNewFormVolumeSignal.connect(lambda form_volume: self.txtFormVolumeFunction.setPlainText(form_volume))
 
+        #Boolean flags
+        self.chkSingle.clicked.connect(self.modelModified.emit)
+        self.chkOpenCL.clicked.connect(self.modelModified.emit)
+        self.chkStructure.clicked.connect(self.modelModified.emit)
+        self.chkFQ.clicked.connect(self.modelModified.emit)
+
     def onPluginNameChanged(self):
         """
         Respond to changes in plugin name
