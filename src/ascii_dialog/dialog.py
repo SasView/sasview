@@ -35,9 +35,16 @@ class AsciiDialog(QWidget):
             'Tab': True
         }
 
+        # Filename, and unload button
+
+        self.filename_unload_layout = QHBoxLayout()
         self.filename_label = QLabel("Click the button below to load a file.")
         self.unloadButton = QPushButton("Unload")
         self.unloadButton.clicked.connect(self.unload)
+        self.filename_unload_layout.addWidget(self.filename_label)
+        self.filename_unload_layout.addWidget(self.unloadButton)
+
+        # Filename chooser
         self.filename_chooser = QComboBox()
         self.filename_chooser.currentTextChanged.connect(self.updateCurrentFile)
 
@@ -106,8 +113,7 @@ class AsciiDialog(QWidget):
 
         self.layout = QVBoxLayout(self)
 
-        self.layout.addWidget(self.filename_label)
-        self.layout.addWidget(self.unloadButton)
+        self.layout.addLayout(self.filename_unload_layout)
         self.layout.addWidget(self.filename_chooser)
         self.layout.addWidget(self.load_button)
         self.layout.addLayout(self.dataset_layout)
