@@ -1,6 +1,7 @@
 import sys
 import os
 import logging
+import time
 from pathlib import Path
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
@@ -9,7 +10,9 @@ from twisted.internet import threads
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
-from sas.sascalc.doc_regen.makedocumentation import make_documentation, HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE
+from sas.sascalc.data_util.calcthread import CalcThread
+from sas.sascalc.doc_regen.makedocumentation import (make_documentation, create_user_files_if_needed,
+                                                     HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE)
 
 HTML_404 = '''
 <html>
@@ -19,6 +22,39 @@ HTML_404 = '''
 </body>
 </html>
 '''
+
+
+class DocGenThread(CalcThread):
+    """Thread performing the fit """
+
+    def __init__(self,
+                 target,
+                 completefn=None,
+                 updatefn=None,
+                 yieldtime=0.03,
+                 worktime=0.03,
+                 reset_flag=False):
+        CalcThread.__init__(self,
+                            completefn,
+                            updatefn,
+                            yieldtime,
+                            worktime)
+        self.starttime = time.time()
+        self.updatefn = updatefn
+        self.reset_flag = reset_flag
+        self.target = Path(target)
+
+    def compute(self):
+        """
+        Regen the docs in a separate thread
+        """
+        try:
+            if self.target.exists():
+                make_documentation(self.target)
+            else:
+                return
+        except KeyboardInterrupt as msg:
+            logging.log(0, msg)
 
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
@@ -43,6 +79,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         self.initializeSignals()  # Connect signals
 
+        # Hide editing button for 6.0.0 release
+        self.editButton.setVisible(False)
+
         self.regenerateIfNeeded()
 
     def initializeSignals(self):
@@ -50,6 +89,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
         self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
+        self.webEngineViewer.urlChanged.connect(self.updateTitle)
 
     def onEdit(self):
         """Open editor (TabbedModelEditor) window."""
@@ -102,6 +142,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         rst_path = MAIN_DOC_SRC
         base_path = self.source.parent.parts
         url_str = str(self.source)
+        create_user_files_if_needed()
 
         if not MAIN_DOC_SRC.exists() and not HELP_DIRECTORY_LOCATION.exists():
             # The user docs were never built - disable edit button and do not attempt doc regen
@@ -172,6 +213,19 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         # Show widget
         self.onShow()
+    
+    def updateTitle(self):
+        """
+        Set the title of the window to include the name of the document,
+        found in the first <h1> tags.
+        """
+        # Convert QUrl to pathlib path
+        try:
+            current_path = self.webEngineViewer.url().toLocalFile()
+            self.setWindowTitle(f"Documentation—{current_path.strip()}") # Try to add the filepath to the window title
+        except (AttributeError, TypeError, ValueError) as ex:
+            self.setWindowTitle("Documentation")
+            logging.warning(f"Error updating documentation window title: {ex}")
 
     def load404(self):
         self.webEngineViewer.setHtml(HTML_404)
@@ -220,7 +274,13 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         :param target: A file-path like object that needs regeneration.
         """
-        make_documentation(target)
+        thread = DocGenThread(target=target)
+        thread.queue()
+        thread.ready(2.5)
+        while not thread.isrunning():
+            time.sleep(0.1)
+        while thread.isrunning():
+            time.sleep(0.1)
     
     def docRegenComplete(self, return_val):
         """Tells Qt that regeneration of docs is done and emits signal tied to opening documentation viewer window.

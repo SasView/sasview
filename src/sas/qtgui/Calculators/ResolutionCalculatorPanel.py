@@ -319,8 +319,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         if self.cbCustomSpectrum.currentText() == 'Add New':
             datafile = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Choose a spectral distribution file","",
-                "All files (*.*)", None,
-                QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+                "All files (*.*)", None)[0]
 
             if datafile is None or str(datafile) == '':
                 logging.info("No spectral distribution data chosen.")
