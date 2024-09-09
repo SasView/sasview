@@ -323,7 +323,9 @@ class AsciiDialog(QWidget):
         self.current_filename = self.filename_chooser.currentText()
         if self.current_filename == '':
             self.table.clear()
+            self.table.setDisabled(True)
         else:
+            self.table.setDisabled(False)
             self.fillTable()
 
     @Slot()
