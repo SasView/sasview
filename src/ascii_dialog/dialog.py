@@ -12,6 +12,7 @@ from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, 
 import re
 
 TABLE_MAX_ROWS = 1000
+NOFILE_TEXT = "Click the button below to load a file."
 
 dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
 
@@ -38,7 +39,7 @@ class AsciiDialog(QWidget):
         # Filename, and unload button
 
         self.filename_unload_layout = QHBoxLayout()
-        self.filename_label = QLabel("Click the button below to load a file.")
+        self.filename_label = QLabel(NOFILE_TEXT)
         self.unloadButton = QPushButton("Unload")
         self.unloadButton.clicked.connect(self.unload)
         self.filename_unload_layout.addWidget(self.filename_label)
@@ -327,6 +328,7 @@ This could potentially be because the file is not an ASCII format.""")
         self.filename_label.setText(self.current_filename)
         if self.current_filename == '':
             self.table.clear()
+            self.filename_label.setText(NOFILE_TEXT)
             self.table.setDisabled(True)
         else:
             self.table.setDisabled(False)
