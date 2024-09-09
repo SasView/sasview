@@ -59,16 +59,16 @@ class ColEditor(QWidget):
         """
         try:
             for i, col_name in enumerate(cols):
-                self.option_widgets[i].set_current_column(col_name)
+                self.option_widgets[i].setCurrentColumn(col_name)
         except IndexError:
             pass # Can ignore because it means we've run out of widgets.
 
     def colNames(self) -> list[str]:
         """Get a list of all of the currently selected columns."""
-        return [widget.current_column for widget in self.option_widgets]
+        return [widget.currentColumn for widget in self.option_widgets]
 
     def replaceOptions(self, new_options: list[str]) -> None:
         """Replace options from which the user can choose for each column."""
         self.options = new_options
         for widget in self.option_widgets:
-            widget.replace_options(new_options)
+            widget.replaceOptions(new_options)
