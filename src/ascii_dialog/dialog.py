@@ -1,5 +1,6 @@
 from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, Qt
-from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
+from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, \
+    QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import QModelIndex, QPoint, Slot
 from selection_menu import SelectionMenu
 from warning_label import WarningLabel
