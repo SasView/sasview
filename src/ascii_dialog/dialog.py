@@ -36,6 +36,8 @@ class AsciiDialog(QWidget):
             'Tab': True
         }
 
+        self.setWindowTitle('ASCII File Reader')
+
         # Filename, and unload button
 
         self.filename_unload_layout = QHBoxLayout()
