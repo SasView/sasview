@@ -269,7 +269,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         self.cmdSubmit.clicked.connect(self.apiInteraction)
         self.cmdCancel.clicked.connect(self.close)
-        self.docsUploadingSignal.connect(lambda uploading: self.setWidgetEnabled(False, uploading=uploading))
+        self.docsUploadingSignal.connect(lambda uploading: self.setWidgetEnabled(uploading, uploading=uploading))
     
     def closeEvent(self, event):
         event.accept()
