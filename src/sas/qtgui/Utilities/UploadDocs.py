@@ -7,7 +7,7 @@ import json # Use json to process data to avoid security vulnerabilities of pick
 import logging
 import os
 import requests
-import time
+import socket
 
 from hashlib import sha224 # Use hashlib to create hashes of files to compare
 from pathlib import Path
@@ -242,12 +242,15 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
     """
 
     docsUploadingSignal = QtCore.Signal(bool)
+    serverReachedSignal = QtCore.Signal(bool)
 
     def __init__(self, parent=None):
         super(PatchUploader, self).__init__(parent._parent)
         self.setupUi(self)
-
-        self.uploadURL = "http://127.0.0.1:5000/post" # Test server for development, TODO replace later
+        self.hostname = "127.0.0.1"
+        self.protocol = "http://"
+        self.extensions = '/post'
+        self.uploadURL = self.protocol + self.hostname + self.extensions # Test server for development, TODO replace later
         self.parent = parent
         self.files_to_upload = [] # list of files to upload
         self.changed_files = [] # list of files that COULD be uploaded
@@ -261,15 +264,50 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         self.lstFiles.setDelegate(self.delegate) # NOTE: Use setDelegate() instead of setItemDelegate()
 
         self.addSignals()
-        self.refresh() # Populate lstFiles with changed files
-    
+
+        self.setEnabled(False)
+        self.delegate.disableTable(True, "Pinging server...")
+        # Check to see if the user can reach the server
+        self.pingServer()
+
     def addSignals(self):
         """
         Connect signals to slots.
         """
         self.cmdSubmit.clicked.connect(self.apiInteraction)
         self.cmdCancel.clicked.connect(self.close)
-        self.docsUploadingSignal.connect(lambda uploading: self.setWidgetEnabled(uploading, uploading=uploading))
+        self.docsUploadingSignal.connect(self.setWidgetEnabled)
+        self.serverReachedSignal.connect(self.onServerResponse)
+    
+    def pingServer(self):
+        """
+        Ping the server in different thread to see if it is reachable.
+        :return: True if the server is reachable, False otherwise 
+        """
+        def ping():
+            timeout = 5
+            port = 5000
+            try:
+                sock = socket.create_connection((self.hostname, port), timeout)
+                sock.close()
+                return True
+            except (socket.timeout, socket.error):
+                return False
+
+        thread = threads.deferToThread(ping)
+        thread.addCallback(self.serverReachedSignal.emit)
+    
+    def onServerResponse(self, server_reached: bool):
+        """
+        Enable, disable, or close the PatchUploader based on server response
+        """
+        if server_reached:
+            self.refresh()
+        else:
+            self.setWidgetEnabled(False)
+            self.delegate.disableTable(True, "")
+            self.throwConnectionError()
+            self.close()
     
     def closeEvent(self, event):
         event.accept()
@@ -305,6 +343,16 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
             self.txtName.setEnabled(True)
             self.delegate.disableTable(False, "")
     
+    def throwConnectionError(self):
+        """
+        Throw modal dialog that the server could not be reached.
+        """
+        dialog = QtWidgets.QMessageBox()
+        dialog.setWindowTitle("Connection Error")
+        dialog.setText("Could not reach server. Please check your internet connection and try again.")
+        dialog.setIcon(QtWidgets.QMessageBox.Critical)
+        return dialog.exec_()
+
     def genPostRequest(self):
         """
         Format POST request
@@ -449,12 +497,15 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         diff_list = [filename for filename in diff_dict.keys()]
         self.changed_files = diff_list
 
-    def setWidgetEnabled(self, enabled: bool, uploading: bool=False):
+    def setWidgetEnabled(self, enabled: bool=True, uploading: bool=False):
         """
         Enable/disable the PatchUploader dialog with altered behavior when uploading.
         :param enabled: True to enable, False to disable
         :param uploading: True if uploading, False otherwise
         """
+        if uploading:
+            # If uploading, table must be disabled
+            enabled = False
         self.cmdSubmit.setEnabled(enabled)
         self.txtChanges.setEnabled(enabled)
         self.txtName.setEnabled(enabled)
