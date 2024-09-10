@@ -269,7 +269,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         self.cmdSubmit.clicked.connect(self.apiInteraction)
         self.cmdCancel.clicked.connect(self.close)
-        self.docsUploadingSignal.connect(self.setWidgetEnabled)
+        self.docsUploadingSignal.connect(lambda uploading: self.setWidgetEnabled(False, uploading=uploading))
     
     def closeEvent(self, event):
         event.accept()
@@ -449,11 +449,12 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         diff_list = [filename for filename in diff_dict.keys()]
         self.changed_files = diff_list
 
-    def setWidgetEnabled(self, uploading: bool):
+    def setWidgetEnabled(self, enabled: bool, uploading: bool=False):
         """
-        Enable/disable the PatchUploader dialog during upload.
+        Enable/disable the PatchUploader dialog with altered behavior when uploading.
+        :param enabled: True to enable, False to disable
+        :param uploading: True if uploading, False otherwise
         """
-        enabled = not uploading # If uploading, dialog is DISabled
         self.cmdSubmit.setEnabled(enabled)
         self.txtChanges.setEnabled(enabled)
         self.txtName.setEnabled(enabled)
