@@ -47,7 +47,7 @@ class Hd5Viewer(QWidget):
                     self.json_viewer.current_json_dict = loads(new_selection_str)
                     self.stacked_viewers.setCurrentIndex(2)
                 else:
-                    self.str_viewer.current_str = str(new_selection[0])
+                    self.str_viewer.current_str = new_selection_str
                     self.stacked_viewers.setCurrentIndex(1)
             else:
                 self.dataset_viewer.current_dataset = new_selection
