@@ -316,8 +316,7 @@ class BumpsFit(FitEngine):
         # Check if uncertainty is missing for any parameter
         uncertainty_warning = False
 
-        for fitting_module in problem.models:
-            fitness = fitting_module.fitness
+        for fitness in problem.models:
             pars = fitness.fitted_pars + fitness.computed_pars
             par_names = fitness.fitted_par_names + fitness.computed_par_names
 
