@@ -41,12 +41,18 @@ class Hd5Viewer(QWidget):
     def change_selection(self):
         new_selection = self.tree.selected_item
         if isinstance(new_selection, Dataset):
-            if new_selection.shape == (1,) and new_selection.dtype.char == "S":
-                new_selection_str = str(new_selection[0], 'utf8')
-                if not search(r'{|}|\[|\]', new_selection_str) is None:
-                    self.json_viewer.current_json_dict = loads(new_selection_str)
-                    self.stacked_viewers.setCurrentIndex(2)
-                else:
+            if new_selection.shape == (1,):
+                try:
+                    new_selection_str = str(new_selection[0], 'utf8')
+                    if not search(r'{|}|\[|\]', new_selection_str) is None:
+                        self.json_viewer.current_json_dict = loads(new_selection_str)
+                        self.stacked_viewers.setCurrentIndex(2)
+                    else:
+                        self.str_viewer.current_str = new_selection_str
+                        self.stacked_viewers.setCurrentIndex(1)
+                except UnicodeDecodeError:
+                    # Doesn't appear to be a unicode string. It may be a float et cetera. Convert it some other way
+                    new_selection_str = str(new_selection[0])
                     self.str_viewer.current_str = new_selection_str
                     self.stacked_viewers.setCurrentIndex(1)
             else:
