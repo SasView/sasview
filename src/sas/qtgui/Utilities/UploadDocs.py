@@ -8,6 +8,7 @@ import logging
 import os
 import requests
 import socket
+from typing import Callable, Any
 
 from hashlib import sha224 # Use hashlib to create hashes of files to compare
 from pathlib import Path
@@ -257,6 +258,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         self.files_sucessfully_uploaded = [] # list of files that were sucessfully uploaded to GitHub
 
         self.model = QtGui.QStandardItemModel()
+        self.edited = False
 
         self.lstFiles.setModel(self.model)
         self.delegate = CheckBoxTextDelegate(self.lstFiles)
@@ -264,9 +266,6 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         self.lstFiles.setDelegate(self.delegate) # NOTE: Use setDelegate() instead of setItemDelegate()
 
         self.addSignals()
-
-        self.setEnabled(False)
-        self.delegate.disableTable(True, "Pinging server...")
         # Check to see if the user can reach the server
         self.pingServer()
 
@@ -276,12 +275,16 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         self.cmdSubmit.clicked.connect(self.apiInteraction)
         self.cmdCancel.clicked.connect(self.close)
-        self.docsUploadingSignal.connect(self.setWidgetEnabled)
+        self.docsUploadingSignal.connect(self.setInputEnabled)
         self.serverReachedSignal.connect(self.onServerResponse)
+        self.txtName.textChanged.connect(self.onEdit)
+        self.txtChanges.textChanged.connect(self.onEdit)
     
-    def pingServer(self):
+    def pingServer(self, callback: Callable[[bool], Any] = None):
         """
-        Ping the server in different thread to see if it is reachable.
+        Ping the server in different thread to see if it is reachable.\n
+        :param callback: Callback function to call after the server is pinged. If none,
+        the serverReachedSignal will be emitted. Must take a bool as input.\n
         :return: True if the server is reachable, False otherwise 
         """
         def ping():
@@ -294,32 +297,63 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
             except (socket.timeout, socket.error):
                 return False
 
+        self.setEnabled(False)
+        self.delegate.disableTable(True, "Pinging server...")
         thread = threads.deferToThread(ping)
-        thread.addCallback(self.serverReachedSignal.emit)
+        if callback:
+            thread.addCallback(callback)
+        else:
+            thread.addCallback(self.serverReachedSignal.emit)
+    
+    def onEdit(self):
+        """
+        Slot for when the user edits the text fields.
+        """
+        self.edited = True
+        self.setWindowTitle(self.windowTitle() + "*")
+
+        # Disconnect signals to prevent unnecessary calls
+        self.txtChanges.textChanged.disconnect()
+        self.txtName.textChanged.disconnect()
     
     def onServerResponse(self, server_reached: bool):
         """
         Enable, disable, or close the PatchUploader based on server response
         """
+        # Signal to the user that the dialog has recieved a response,
+        # but keep individual boxes disabled
+        self.setEnabled(True)
+
         if server_reached:
             self.refresh()
         else:
-            self.setWidgetEnabled(False)
+            self.parent.communicate.statusBarUpdateSignal.emit('Could not reach documentation upload server.')
+            self.setInputEnabled(False)
             self.delegate.disableTable(True, "")
             self.throwConnectionError()
-            self.close()
-    
+            if not self.edited:
+                self.close()
+            else:
+                # Re-enable widget
+                self.setInputEnabled(True) # Enable all boxes in the dialog
+
     def closeEvent(self, event):
         event.accept()
         self.deleteLater()
     
     def apiInteraction(self):
         """
-        Upload documentation to DANSE API and handle response.
+        Ping server with callback that starts documentation upload
+        to DANSE API.
         """
-        files = self.genPostRequest()
-        self.createThread(files)
-        # TODO: Handle response
+        def initiate_api(server_reached: bool):
+            self.serverReachedSignal.emit(server_reached)
+            if not server_reached:
+                return
+            files = self.genPostRequest()
+            self.createThread(files)
+
+        self.pingServer(callback=initiate_api)
     
     def refresh(self):
         """
@@ -429,6 +463,11 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         Handle a 200 response from the API, generating a dialog with the response text
         which should be a link.
         """
+        self.txtName.textChanged.connect(self.onEdit)
+        self.txtChanges.textChanged.connect(self.onEdit)
+        self.setWindowTitle(self.windowTitle().rstrip("*"))
+        self.edited = False
+
         self.updateBaseDatabase()
         self.refresh()
 
@@ -497,7 +536,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         diff_list = [filename for filename in diff_dict.keys()]
         self.changed_files = diff_list
 
-    def setWidgetEnabled(self, enabled: bool=True, uploading: bool=False):
+    def setInputEnabled(self, enabled: bool=True, uploading: bool=False):
         """
         Enable/disable the PatchUploader dialog with altered behavior when uploading.
         :param enabled: True to enable, False to disable
@@ -506,6 +545,8 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         if uploading:
             # If uploading, table must be disabled
             enabled = False
+
+        self.setEnabled(enabled)
         self.cmdSubmit.setEnabled(enabled)
         self.txtChanges.setEnabled(enabled)
         self.txtName.setEnabled(enabled)
@@ -514,7 +555,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
             self.cmdSubmit.setStyleSheet("color: red")
             self.delegate.disableTable(True, "Upload in progress...")
         else:
-            self.cmdSubmit.setText("Submit")
+            self.cmdSubmit.setText("Submit Edits to Developers")
             self.cmdSubmit.setStyleSheet("color: black")
             self.delegate.disableTable(False, "")
 
