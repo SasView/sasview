@@ -332,6 +332,8 @@ This could potentially be because the file is not an ASCII format.""")
             self.filename_label.setText(NOFILE_TEXT)
             self.table.setDisabled(True)
             self.unloadButton.setDisabled(True)
+            # Set this to None because other methods are expecting this.
+            self.current_filename = None
         else:
             self.table.setDisabled(False)
             self.unloadButton.setDisabled(False)
