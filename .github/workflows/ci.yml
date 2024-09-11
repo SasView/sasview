@@ -119,7 +119,7 @@ jobs:
           cd ../sasdata
           rm -rf build
           rm -rf dist
-          mv build/lib/sasdata/example_data/* ../sasview/src/sas/example_data/
+          mv sasdata/example_data/* ../sasview/src/sas/example_data/
           python -m pip install --no-deps .
 
       - name: Build and install sasmodels
