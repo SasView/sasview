@@ -275,7 +275,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         self.cmdSubmit.clicked.connect(self.apiInteraction)
         self.cmdCancel.clicked.connect(self.close)
-        self.docsUploadingSignal.connect(self.setInputEnabled)
+        self.docsUploadingSignal.connect(lambda uploading: self.setInputEnabled(uploading=uploading))
         self.serverReachedSignal.connect(self.onServerResponse)
         self.txtName.textChanged.connect(self.onEdit)
         self.txtChanges.textChanged.connect(self.onEdit)
@@ -351,7 +351,8 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
             if not server_reached:
                 return
             files = self.genPostRequest()
-            self.createThread(files)
+            if files is not None:
+                self.createThread(files)
 
         self.pingServer(callback=initiate_api)
     
@@ -391,10 +392,19 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Format POST request
         """
-
         for file in self.changed_files:
             if self.isChecked(os.path.basename(file)):
                 self.files_to_upload.append(file)
+        
+        if self.files_to_upload == []:
+            # Throw popup dialog informing user that no files were selected
+            self.parent.communicate.statusBarUpdateSignal.emit('Document upload canceled.')
+            dialog = QtWidgets.QMessageBox()
+            dialog.setWindowTitle("No Files Selected")
+            dialog.setText("No files were selected for upload. Please select files to upload.")
+            dialog.setIcon(QtWidgets.QMessageBox.Warning)
+            dialog.exec_()
+            return None
 
         # Prepare json information for upload to API
         author_name = self.txtName.text()
@@ -453,7 +463,16 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         Handle the response from the API
         """
         self.docsUploadingSignal.emit(False) # Trigger the signal to re-enable the dialog
-        if response.status_code == 200:
+        if not hasattr(response, 'status_code'):
+            # Response is an error
+            self.parent.communicate.statusBarUpdateSignal.emit('Documentation upload failed.')
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setWindowTitle("Upload Error")
+            msgbox.setText(f"An unexpected error occurred while uploading the documentation:\n\n{response}")
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.exec_()
+            self.setInputEnabled(True)
+        elif response.status_code == 200:
             self.return200(response)
         elif response.status_code == 400:
             self.parent.communicate.statusBarUpdateSignal.emit('Error: Bad request. Please check your submission and try again.')
@@ -673,14 +692,17 @@ class DocsUploadThread():
         Upload the docs in a separate thread
         """
         try:
-            response = requests.post(self.url, files=self.files)
+            try:
+                response = requests.post(self.url, files=self.files)
 
-            # Close the file bytestreams after the request is sent
-            for key, file in self.files.items():
-                if file[1] is not None and key != 'json':
-                    file[1].close()
-                
-            self.response = response
-            return
+                # Close the file bytestreams after the request is sent
+                for key, file in self.files.items():
+                    if file[1] is not None and key != 'json':
+                        file[1].close()
+                    
+                self.response = response
+                return
+            except requests.exceptions.ConnectionError as e:
+                self.response = e
         except KeyboardInterrupt as msg:
             logging.log(0, msg)
