@@ -249,6 +249,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         super(PatchUploader, self).__init__(parent._parent)
         self.setupUi(self)
         self.hostname = "127.0.0.1"
+        #self.port = "5000"
         self.protocol = "http://"
         self.extensions = '/post'
         self.uploadURL = self.protocol + self.hostname + self.extensions # Test server for development, TODO replace later
@@ -266,6 +267,8 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         self.lstFiles.setDelegate(self.delegate) # NOTE: Use setDelegate() instead of setItemDelegate()
 
         self.addSignals()
+        # Refresh list of files
+        self.refresh()
         # Check to see if the user can reach the server
         self.pingServer()
 
@@ -323,10 +326,9 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         # Signal to the user that the dialog has recieved a response,
         # but keep individual boxes disabled
         self.setEnabled(True)
+        self.delegate.disableTable(False)
 
-        if server_reached:
-            self.refresh()
-        else:
+        if not server_reached:
             self.parent.communicate.statusBarUpdateSignal.emit('Could not reach documentation upload server.')
             self.setInputEnabled(False)
             self.delegate.disableTable(True, "")
