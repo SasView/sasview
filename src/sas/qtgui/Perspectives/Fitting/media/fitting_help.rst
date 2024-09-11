@@ -12,7 +12,7 @@ Fitting
 
 Preparing to fit data
 ---------------------
-Change.
+Hopefully last change.
 To fit some data you must first load some data, activate one or more data sets,
 send those data sets to fitting, and select a model to fit to each data set.
 
