@@ -249,10 +249,10 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         super(PatchUploader, self).__init__(parent._parent)
         self.setupUi(self)
         self.hostname = "127.0.0.1"
-        #self.port = "5000"
+        self.port = "5000"
         self.protocol = "http://"
         self.extensions = '/post'
-        self.uploadURL = self.protocol + self.hostname + self.extensions # Test server for development, TODO replace later
+        self.uploadURL = self.protocol + self.hostname + f":{self.port}" + self.extensions # Test server for development, TODO replace later
         self.parent = parent
         self.files_to_upload = [] # list of files to upload
         self.changed_files = [] # list of files that COULD be uploaded
