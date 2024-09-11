@@ -326,7 +326,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         # Signal to the user that the dialog has recieved a response,
         # but keep individual boxes disabled
         self.setEnabled(True)
-        self.delegate.disableTable(False)
+        self.refresh()
 
         if not server_reached:
             self.parent.communicate.statusBarUpdateSignal.emit('Could not reach documentation upload server.')
@@ -363,11 +363,19 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         Check for updated diffs and update lstFiles
         """
         self.getDiffItems()
+
+        # Find all checked files
+        checked_files = []
+        for i in range(self.model.rowCount()):
+            if self.model.item(i, 0).checkState() == QtCore.Qt.Checked:
+                checked_files.append(self.model.item(i, 1).text())
+
         self.model.clear()
 
         for file in self.changed_files:
             basename = os.path.basename(file)
-            self.addItemToModel(basename)
+            checked = True if basename in checked_files else False
+            self.addItemToModel(basename, checked)
         
         if self.model.rowCount() == 0:
             self.cmdSubmit.setEnabled(False)
@@ -446,10 +454,16 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Create a thread to send the request to the API
         """
+        def refreshWidget():
+            """Callback to refresh widget; twisted overrides this if it is included in first callback"""
+            self.updateBaseDatabase()
+            self.refresh()
+
         self.parent.communicate.statusBarUpdateSignal.emit('Beginning documentation upload...')
         self.docsUploadingSignal.emit(True)
         d = threads.deferToThread(self.sendRequest, self.uploadURL, files)
         d.addCallback(self.docUploadComplete)
+        d.addCallback(lambda _: refreshWidget())
         
     @staticmethod
     def sendRequest(url, files):
@@ -464,7 +478,6 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         """
         Handle the response from the API
         """
-        self.docsUploadingSignal.emit(False) # Trigger the signal to re-enable the dialog
         if not hasattr(response, 'status_code'):
             # Response is an error
             self.parent.communicate.statusBarUpdateSignal.emit('Documentation upload failed.')
@@ -472,23 +485,27 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
             msgbox.setWindowTitle("Upload Error")
             msgbox.setText(f"An unexpected error occurred while uploading the documentation:\n\n{response}")
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
-            msgbox.exec_()
-            self.setInputEnabled(True)
+            msgbox.exec()
         elif response.status_code == 200:
             self.return200(response)
         elif response.status_code == 400:
             self.parent.communicate.statusBarUpdateSignal.emit('Error: Bad request. Please check your submission and try again.')
+        self.docsUploadingSignal.emit(False) # Trigger the signal to re-enable the dialog
 
     def return200(self, response):
         """
         Handle a 200 response from the API, generating a dialog with the response text
         which should be a link.
         """
+        self.txtChanges.clear()
         self.txtName.textChanged.connect(self.onEdit)
         self.txtChanges.textChanged.connect(self.onEdit)
         self.setWindowTitle(self.windowTitle().rstrip("*"))
         self.edited = False
 
+        # These changes are not permanent but will only be reflected in the editor while
+        # the modal dialog is open due to issues with threading. The persistant refresh is
+        # implemented as a callback in createThread()
         self.updateBaseDatabase()
         self.refresh()
 
@@ -509,8 +526,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         copy_button = QtWidgets.QPushButton("Copy")
         copy_button.clicked.connect(lambda: QtWidgets.QApplication.clipboard().setText(response.text))
         dialog.layout().addWidget(copy_button)
-
-        dialog.exec_()
+        dialog.exec()
 
     def updateBaseDatabase(self):
         """
@@ -531,13 +547,14 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
                 return self.model.item(i, 0).checkState() == QtCore.Qt.Checked
         raise ValueError(f"File {basename} not found in model.")
 
-    def addItemToModel(self, text):
+    def addItemToModel(self, text, checked: bool = False):
         """
         Add an item to the lstFiles model.
         """
         # Create the checkbox item
         checkbox_item = QtGui.QStandardItem()
         checkbox_item.setCheckable(True)
+        checkbox_item.setCheckState(QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)
         checkbox_item.setEditable(False)
 
         # Create the text item with the Courier New font
@@ -566,8 +583,7 @@ class PatchUploader(QtWidgets.QDialog, Ui_PatchUploader):
         if uploading:
             # If uploading, table must be disabled
             enabled = False
-
-        self.setEnabled(enabled)
+        self.setEnabled(enabled) 
         self.cmdSubmit.setEnabled(enabled)
         self.txtChanges.setEnabled(enabled)
         self.txtName.setEnabled(enabled)
