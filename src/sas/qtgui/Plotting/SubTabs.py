@@ -18,13 +18,38 @@ class SubTabs(QtWidgets.QTabWidget):
         self.parent = parent
         self.counter = 1
 
-        # The idea is: To use the existing infrastructure of the Plotter but not create multiple instances of them
-        # just to use the plot() function, that the number of Axes that is needed is already created here and
+        # The idea is: I want to use the Axes that are created by the Plotter.plot function and copy them over to the
+        # TabbedPlotWidget. But since matplotlib does not allow copying of Axes between figures straight away, the Axes
+        # in the TabbedPlotWidget need to be created straight away and then given to the Plotter so that it can
+        # populate these Axes with the same Data, Labels, Titles that the QWidgets for every single plot were
+        # populated with.
         self.ax = None
 
         self.add_subtab(plots)
 
     def add_subtab(self, plots):
+        """
+        Function to add a sub tab with the desired functionality to instances of this class (which are: docking,
+            multiple subplots, interactive subplots for clicking)
+        The widget that the QTabWidget that is extended by this class looks like this:
+        QTabWidget stores a Widget in one of its tabs.
+        This Widget is a QMainWindow (the DockContainer) that can function as a container for the docking function,
+            so that the window that will have the plot can be docked out, moved around and docked in again.
+        The QMainWindow (DockContainer) is filled with a DockWidget, which will be able to dock in and out itself.
+        The content of this DockWidget is a CanvasWidget(QWidget) with a stored layout, where the further widgets can
+            be added into.
+        The layout of the CanvasWidget is populated with the canvas that the matplotlib figure with the final number
+            of subplots will be in. The matplotlib navigation toolbar can also be added to this layout later.
+        The canvas added to the layout of the CanvasWidget is the ClickableCanvas and extends the FigureCanvasQtAgg
+            in a way that subplots from the figure of this FigureCanvas can be clicked and will change their position
+            with the first (big) subplot
+
+        As a flowchart (?): QTabWidget->QMainWindow->QDockWidget->QWidget->QLayout of former QWidget->FigureCanvasQtAgg
+        """
+
+        # The idea behind creating the figure here already is to feed it to the creation of the canvas right away,
+        # because otherwise it can be quite tricky to navigate through all the layers in between to add the figure
+        # or manipulate all the axes for example
         self.figure = Figure(figsize=(5, 5))
 
 
@@ -66,10 +91,15 @@ class SubTabs(QtWidgets.QTabWidget):
 
 
 class DockContainer(QtWidgets.QMainWindow):
+    """
+    Container for docking purposes. Carries a
+    """
     def __init__(self, figure):
         super().__init__()
         # TODO: identifier needs to be added to the objectname string --
         # otherwise changing the stylesheet could potentially change the stylesheets of all existing dockcontainers
+        # a combination of the tab_id from the TabbedPlotWidget and the subtab index of the DockContainer would be a
+        # sensible approach
         self.setObjectName("DockContainer")
 
         # add the dockable widget and set the widget where the canvas will be in and
@@ -95,6 +125,9 @@ class DockContainer(QtWidgets.QMainWindow):
             dock_container.setStyleSheet("QMainWindow#" + name + " { background-color: white }")
 
 class CanvasWidget(QtWidgets.QWidget):
+    """
+    QWidget that can be added into the DockWidget in the MainWindow. The layout of this carries the
+    """
     def __init__(self, figure):
         super().__init__()
 
