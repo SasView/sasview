@@ -1254,6 +1254,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
+                print("from DataExplorer.plotData: self.active_plots", self.active_plots)
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
             else:

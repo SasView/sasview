@@ -233,6 +233,7 @@ class PlotterWidget(PlotterBase):
             ax.axhline(y=-1, color='gray', linestyle='--')
         # Update the list of data sets (plots) in chart
         self.plot_dict[data.name] = data
+        print("from Plotter: self.plot_dict:", self.plot_dict)
 
         self.plot_lines[data.name] = line
 
