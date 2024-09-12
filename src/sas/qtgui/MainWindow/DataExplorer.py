@@ -1112,7 +1112,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # data_list = [QStandardItem, [Axes] Data1D/Data2D]
         plots_to_show = data_list[2:]
-        tpw_axes = data_list[1]
+        tpw_ax = data_list[1]
         plot_item = data_list[0]
 
         # plots to show
@@ -1133,7 +1133,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if self.isPlotShown(main_data):
                     self.active_plots[main_data.name].showNormal()
                 else:
-                    self.plotData([(plot_item, tpw_axes, main_data)])
+                    self.plotData([(plot_item, tpw_ax, main_data)])
 
         append = False
         plot_to_append_to = None
@@ -1159,7 +1159,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 continue
             elif role in stand_alone_types:
                 # Stand-alone plots should always be separate
-                self.plotData([(plot_item, tpw_axes, plot_to_show)])
+                self.plotData([(plot_item, tpw_ax, plot_to_show)])
             elif append:
                 # Assume all other plots sent together should be on the same chart if a previous plot exists
                 if not plot_to_append_to:
@@ -1177,8 +1177,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     and not isinstance(main_data, Data2D)
                     and role != DataRole.ROLE_SIZE_DISTRIBUTION
                 ):
-                    new_plots.append((plot_item, main_data))
-                new_plots.append((plot_item, tpw_axes, plot_to_show))
+                    new_plots.append((plot_item, tpw_ax, main_data))
+                new_plots.append((plot_item, tpw_ax, plot_to_show))
 
         if append:
             # Append any plots handled in loop before an existing plot was found

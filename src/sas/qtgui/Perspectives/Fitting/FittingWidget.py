@@ -2189,16 +2189,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # send this information to the TabbedPlotWidget so that it can unpack and show the plots as well
         self.parent.tabbedPlotWidget.add_tab(item_name, item_model, self.tab_id)
-        tpw_axes = self.parent.tabbedPlotWidget.widget(0).ax[0]
+        tab_index = self.parent.tabbedPlotWidget.tab_fitpage_dict[self.tab_id]
+        tpw_axes = self.parent.tabbedPlotWidget.widget(tab_index).ax
+
         print("axes received in FittingWidget:", tpw_axes)
         plots = GuiUtils.plotsFromDisplayName(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False
         item = None
-        for item, plot in plots.items():
+        for i, item_plot in enumerate(plots.items()):
+            item, plot = item_plot
             if plot.plot_role != DataRole.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
-                self.communicate.plotRequestedSignal.emit([item, tpw_axes, plot], self.tab_id)
+                self.communicate.plotRequestedSignal.emit([item, tpw_axes[i], plot], self.tab_id)
         # return the last data item seen, if nothing was plotted; supposed to be just data)
         return None if data_shown else item
 
