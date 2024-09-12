@@ -29,7 +29,7 @@ class SubTabs(QtWidgets.QTabWidget):
         # in the TabbedPlotWidget need to be created straight away and then given to the Plotter so that it can
         # populate these Axes with the same Data, Labels, Titles that the QWidgets for every single plot were
         # populated with.
-        self.ax = None
+        self.ax = []
 
         self.add_subtab(plots)
 
@@ -66,8 +66,9 @@ class SubTabs(QtWidgets.QTabWidget):
 
         # filling the slots for the plots temporary to try out the functionalities of the dock container and the
         # clickable canvas
+        print("subplot_count len(plots)", len(plots))
         subplot_count = len(plots)
-        if subplot_count == 1:
+        if subplot_count <= 1:
             self.ax = self.figure.subplots(subplot_count)
             # putting the axes object in a list so that the access can be generic for both cases with multiple
             # subplots and without
@@ -79,10 +80,10 @@ class SubTabs(QtWidgets.QTabWidget):
             # region for the small side plots in sub_gridspec
             sub_gridspec = gridspec[1].subgridspec(ncols=1, nrows=subplot_count-1)
 
-            ax = [self.figure.add_subplot(gridspec[0])]
+            self.ax = [self.figure.add_subplot(gridspec[0])]
             # add small plots to axes list, so it can be accessed that way
             for idx in range(subplot_count - 1):
-                ax.append(self.figure.add_subplot(sub_gridspec[idx]))
+                self.ax.append(self.figure.add_subplot(sub_gridspec[idx]))
 
         print("axes created in SubTabs:", self.ax[0])
 
