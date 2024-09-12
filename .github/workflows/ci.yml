@@ -81,7 +81,6 @@ jobs:
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
-          sudo apt-get update
           sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
 
       - name: Install Python dependencies
@@ -200,7 +199,6 @@ jobs:
       ### Build the installer (if enabled)
 
       - name: Install utilities to build installer
-        if: ${{ matrix.installer }}
         run: |
           python -m pip install pyinstaller
 
@@ -250,6 +248,8 @@ jobs:
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_ISA }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_ISA_PWD }}
+          APP-NAME: SasView6-${{ matrix.os }}.app
+          DMG-NAME: SasView6-${{ matrix.os }}.dmg
         run: |
           echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p DloaAcYP build.keychain
@@ -260,17 +260,17 @@ jobs:
           security find-identity -p codesigning
           
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py $APP-NAME
           python  ../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.app
-          hdiutil create SasView6.dmg -srcfolder SasView6.app -ov -format UDZO
-          codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.dmg
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $APP-NAME
+          hdiutil create $DMG-NAME -srcfolder $APP-NAME -ov -format UDZO
+          codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $DMG-NAME
 
       - name: Notarize Release Build (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: lando/notarize-action@v2
         with:
-          product-path: "installers/dist/SasView6.dmg"
+          product-path: "installers/dist/SasView6-${{ matrix.os }}.dmg"
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
@@ -281,7 +281,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
-          product-path: "installers/dist/SasView6.dmg"
+          product-path: "installers/dist/SasView6-${{ matrix.os }}.dmg"
 
       - name: Sign binary
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
@@ -301,38 +301,10 @@ jobs:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
-            installers/dist/SasView6.dmg
+            installers/dist/SasView6-${{ matrix.os }}.dmg"
             installers/dist/sasview6.tar.gz
           if-no-files-found: ignore
 
-      - name: Rename artifacts (Windows)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
-        run: |
-          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
-
-      - name: Rename artifacts (MacOS)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        run: |    
-          mv installers/dist/SasView6.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
-
-      - name: Rename artifacts (Linux)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
-        run: |    
-          mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
-
-      - name: Upload Release Installer to GitHub
-        if: ${{ matrix.installer }}
-        uses: ncipollo/release-action@v1
-        with:
-          draft: false
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/*SasView-6.0.0-*"
-          name: "Release 6.0.0-alpha"
-          bodyFile: "build_tools/release_notes/6.0.0_notes.txt"
-          tag: "v6.0.0-alpha"
 
   test-installer:
     needs: [ build-matrix ]
@@ -457,17 +429,37 @@ jobs:
 
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
-          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
+          sudo apt install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
 
       - name: Try running the installation (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu' )}}
         # If sasview has crashed on its own, then this should return an error
         run: |
-          xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW &
-          sleep 60s
-          kill %1
+          (
+            echo "## START SASVIEW"
+            xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW 2>&1 |
+            tee sasview-test.log
+          ) &
+          svpid=$!
+          (
+            set -e
+            sleep 20s
+            echo "## PULSE CHECK"
+            kill -0 $svpid
+            echo "## PULSE OK"
+            sleep 40s
+            echo "## FINISHING SMOKE TEST"
+            kill $svpid
+            echo "## SMOKE TEST COMPLETE"
+            exit 0
+          ) &
+          pulsepid=$1
+          wait $pulsepid
+          # Check the log file for successful startup
+          grep "SasView session started" sasview-test.log
 
       ### Optionally attempt to work with the debug tarball from pyinstaller
 
