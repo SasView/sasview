@@ -146,7 +146,7 @@
         <item>
          <widget class="QCheckBox" name="chkGenC">
           <property name="text">
-           <string>Generate C model</string>
+           <string>Generate C model template</string>
           </property>
          </widget>
         </item>
