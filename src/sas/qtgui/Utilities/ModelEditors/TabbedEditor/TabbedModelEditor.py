@@ -14,9 +14,9 @@ from sas.sascalc.fit import models
 from sas.sascalc.fit.models import find_plugins_dir
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
-from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
-from sas.qtgui.Utilities.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """

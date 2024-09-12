@@ -361,7 +361,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <customwidget>
    <class>QParameterTreeWidget</class>
    <extends>QWidget</extends>
-   <header location="global">sas.qtgui.Utilities.ParameterTree.h</header>
+   <header location="global">sas.qtgui.Utilities.CustomGUI.ParameterTree.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

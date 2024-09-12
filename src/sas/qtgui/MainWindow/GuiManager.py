@@ -28,9 +28,9 @@ from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
-from sas.qtgui.Utilities.ReparameterizationEditor import ReparameterizationEditor
+from sas.qtgui.Utilities.ModelEditors.ReparamEditor.ReparameterizationEditor import ReparameterizationEditor
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
@@ -69,7 +69,7 @@ from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindo
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
-from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
+from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
