@@ -52,9 +52,6 @@ class SubTabs(QtWidgets.QTabWidget):
         # or manipulate all the axes for example
         self.figure = Figure(figsize=(5, 5))
 
-
-        print("from SubTabs: add_subtab plots", plots)
-        print("from SubTabs: add_subtab len(plots)", len(plots))
         # filling the slots for the plots temporary to try out the functionalities of the dock container and the
         # clickable canvas
         subplot_count = len(plots)
@@ -80,8 +77,6 @@ class SubTabs(QtWidgets.QTabWidget):
             # [item, plot]
             # data = GuiUtils.dataFromItem(item)
             # ax[i].plot(data.x, data.y)
-            print("from SubTabs in the plotting for loop: plotting")
-
 
             i += 1
 

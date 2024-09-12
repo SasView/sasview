@@ -2188,9 +2188,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fitpage_name = self.logic.kernel_module.name
 
         # send this information to the TabbedPlotWidget so that it can unpack and show the plots as well
-        print("send to tabbedPlotWidget")
         self.parent.tabbedPlotWidget.add_tab(item_name, item_model, self.tab_id)
-
         plots = GuiUtils.plotsFromDisplayName(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False

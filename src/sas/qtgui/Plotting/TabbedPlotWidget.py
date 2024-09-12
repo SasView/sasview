@@ -82,17 +82,6 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
             self.setCurrentIndex(current_tab_index)
 
 
-        print("item_name", item_name)
-        print("item_model", item_model)
-        print("tab_id", tab_id)
-
-        for i, _ in enumerate(plots.items()):
-            item, plot = _
-            print("i", i)
-            print("forloop item", item)
-            # print("forloop plot", plot)  # gives the long information about the File, Title, Instrument stuff etc.
-            i += 1
-
     def get_subtab_by_tab_id(self, tab_id: int):
         if tab_id in self.tab_fitpage_dict.keys():
             return self.widget(self.tab_fitpage_dict[tab_id])
