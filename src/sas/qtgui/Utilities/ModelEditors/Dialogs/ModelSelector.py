@@ -10,7 +10,7 @@ from sasmodels import modelinfo
 from sasmodels.sasview_model import load_standard_models
 
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
-from sas.qtgui.Utilities.UI.ModelSelectorUI import Ui_ModelSelector
+from sas.qtgui.Utilities.ModelEditors.Dialogs.UI.ModelSelectorUI import Ui_ModelSelector
 
 from sas.sascalc.fit import models
 

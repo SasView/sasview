@@ -158,32 +158,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </layout>
       </item>
       <item row="3" column="0">
-       <widget class="QParameterTreeWidget" name="newParamTree">
+       <widget class="QParameterTreeWidget" name="newParamTree" native="true">
         <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="alternatingRowColors">
+        <property name="alternatingRowColors" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="textElideMode">
-         <enum>Qt::ElideNone</enum>
-        </property>
-        <property name="headerHidden">
+        <property name="headerHidden" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="columnCount">
+        <property name="columnCount" stdset="0">
          <number>2</number>
         </property>
-        <column>
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string notr="true">2</string>
-         </property>
-        </column>
        </widget>
       </item>
      </layout>
@@ -192,7 +179,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <item row="3" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="helpButton">
+      <widget class="QPushButton" name="cmdHelp">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -340,35 +327,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="1" column="0">
-       <widget class="QParameterTreeWidget" name="oldParamTree">
+       <widget class="QParameterTreeWidget" name="oldParamTree" native="true">
         <property name="enabled">
          <bool>true</bool>
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
-        <property name="alternatingRowColors">
+        <property name="alternatingRowColors" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="textElideMode">
-         <enum>Qt::ElideNone</enum>
-        </property>
-        <property name="headerHidden">
+        <property name="headerHidden" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="columnCount">
+        <property name="columnCount" stdset="0">
          <number>2</number>
         </property>
-        <column>
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string notr="true">2</string>
-         </property>
-        </column>
        </widget>
       </item>
       <item row="2" column="0">
@@ -385,9 +359,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
  </widget>
  <customwidgets>
   <customwidget>
-    <class>QParameterTreeWidget</class>
-    <extends>QWidget</extends>
-    <header location="global">sas.qtgui.Utilities.ParameterTree.h</header>
+   <class>QParameterTreeWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">sas.qtgui.Utilities.CustomGUI.ParameterTree.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

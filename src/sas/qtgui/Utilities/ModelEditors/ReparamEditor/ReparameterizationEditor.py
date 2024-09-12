@@ -11,9 +11,9 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from sas.sascalc.fit.models import find_plugins_dir
 
 from sas.qtgui.Utilities import GuiUtils
-from sas.qtgui.Utilities.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
-from sas.qtgui.Utilities.ModelSelector import ModelSelector
-from sas.qtgui.Utilities.ParameterEditDialog import ParameterEditDialog
+from sas.qtgui.Utilities.ModelEditors.ReparamEditor.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
+from sas.qtgui.Utilities.ModelEditors.Dialogs.ModelSelector import ModelSelector
+from sas.qtgui.Utilities.ModelEditors.Dialogs.ParameterEditDialog import ParameterEditDialog
 
 from sasmodels.modelinfo import Parameter
 

@@ -3,7 +3,7 @@ from numpy import inf
 
 from PySide6 import QtWidgets, QtCore, QtGui
 
-from sas.qtgui.Utilities.UI.ParameterEditDialogUI import Ui_ParameterEditDialog
+from sas.qtgui.Utilities.ModelEditors.Dialogs.UI.ParameterEditDialogUI import Ui_ParameterEditDialog
 
 from sasmodels.modelinfo import Parameter
 

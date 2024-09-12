@@ -9,7 +9,7 @@ from PySide6.QtWidgets import *
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
-from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
 
 
