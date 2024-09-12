@@ -781,14 +781,20 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 param_names.append('double ' + pname)
         for pd_pname, _, _ in self.getParamHelper(pd_param_str):
                 pd_param_names.append('double ' + pd_pname)
-        
+
+        #Format Python into comments to be put into I(Q) section
+        iq_text: str = model['func_text']
+        iq_lines = iq_text.splitlines()
+        commented_lines = ["//" + line for line in iq_lines]
+        commented_iq_function = "\n    ".join(commented_lines)
+
         # Add polydisperse-dependent functions if polydisperse parameters are present
         if pd_param_names != []:
             model_text += C_PD_TEMPLATE.format(poly_args = ', '.join(pd_param_names),
                                               poly_arg1 = pd_param_names[0].split(' ')[1]) # Remove 'double' from the first argument
         # Add all other function templates
-        model_text += C_TEMPLATE.format(args = ',\n\t'.join(param_names))
-        
+        model_text += C_TEMPLATE.format(args = ',\n'.join(param_names),
+                                        Iq = commented_iq_function)
         return model_text
         
 
@@ -1052,9 +1058,12 @@ Model = make_model_from_info(model_info)
 """
 
 LINK_C_MODEL_TEMPLATE = '''\
-# Note: removing the "source = []" line will unlink the C model from the Python model, 
+# To Enable C model, uncomment the line defining `source` and
+# delete the I(Q) function in this Python model after converting your code to C
+# Note: removing or commenting the "source = []" line will unlink the C model from the Python model, 
 # which means the C model will not be checked for errors when edited.
-source = ['{c_model_name}']
+
+# source = ['{c_model_name}']
 '''
 
 C_COMMENT_TEMPLATE = '''\
@@ -1137,6 +1146,10 @@ Iq(double q,
     // Define I(Q) calculations here for models independent of shape orientation
     // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, or Iqabc;
     //    remove others.
+    // TO USE: Convert your copied Python code to C below and uncomment it
+    // Ensure that you delete the I(Q) function in the corresponding Python file.
+
+    {Iq}
     return 1.0;
 }}
 
