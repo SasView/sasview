@@ -1110,8 +1110,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Forces display of charts for the given data set
         """
-        # data_list = [QStandardItem, Data1D/Data2D]
-        plots_to_show = data_list[1:]
+        # data_list = [QStandardItem, [Axes] Data1D/Data2D]
+        plots_to_show = data_list[2:]
+        tpw_axes = data_list[1]
         plot_item = data_list[0]
 
         # plots to show
@@ -1132,7 +1133,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if self.isPlotShown(main_data):
                     self.active_plots[main_data.name].showNormal()
                 else:
-                    self.plotData([(plot_item, main_data)])
+                    self.plotData([(plot_item, tpw_axes, main_data)])
 
         append = False
         plot_to_append_to = None
@@ -1158,7 +1159,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 continue
             elif role in stand_alone_types:
                 # Stand-alone plots should always be separate
-                self.plotData([(plot_item, plot_to_show)])
+                self.plotData([(plot_item, tpw_axes, plot_to_show)])
             elif append:
                 # Assume all other plots sent together should be on the same chart if a previous plot exists
                 if not plot_to_append_to:
@@ -1177,7 +1178,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     and role != DataRole.ROLE_SIZE_DISTRIBUTION
                 ):
                     new_plots.append((plot_item, main_data))
-                new_plots.append((plot_item, plot_to_show))
+                new_plots.append((plot_item, tpw_axes, plot_to_show))
 
         if append:
             # Append any plots handled in loop before an existing plot was found
@@ -1231,13 +1232,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Call show on requested plots
         # All same-type charts in one plot
-        for item, plot_set in plots:
+        for item, tpw_ax, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 if 'new_plot' not in locals():
                     # Create only one PlotterWidget(QWidget) for a number of datasets that are supposed to be shown in
                     # the same Widget
                     print("created PlotterWidget for:", item)
-                    new_plot = PlotterWidget(manager=self, parent=self)
+                    new_plot = PlotterWidget(manager=self, parent=self, tpw_ax=tpw_ax)
                     new_plot.item = item
                 # Ensure new plots use the default transform, not the transform of any previous plots the data were in
                 # TODO: The transform should be part of the PLOT, NOT the data

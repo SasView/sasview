@@ -84,16 +84,9 @@ class SubTabs(QtWidgets.QTabWidget):
             for idx in range(subplot_count - 1):
                 ax.append(self.figure.add_subplot(sub_gridspec[idx]))
 
-        i = 0
-        for item, plot in plots.items():
-            # [item, plot]
-            # data = GuiUtils.dataFromItem(item)
-            # ax[i].plot(data.x, data.y)
-
-            i += 1
+        print("axes created in SubTabs:", self.ax[0])
 
         self.addTab(DockContainer(self.figure), str(self.counter))
-
         self.counter += 1
 
 
