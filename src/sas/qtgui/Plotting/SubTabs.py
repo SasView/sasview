@@ -3,21 +3,24 @@ from PySide6 import QtCore
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
 
 from sas.qtgui.Utilities import GuiUtils
+
+from sas.qtgui.Plotting import TabbedPlotWidget
 
 class SubTabs(QtWidgets.QTabWidget):
     """
     This class is for keeping all the subtabs for Plots that are displayed in these. One SubTabs item should
     always be associated with one QStandardItem plot_item
     """
-    def __init__(self, parent, plots):
+    def __init__(self, parent: TabbedPlotWidget, plots: list):
         super().__init__(parent=parent)
         # keep track of the parent to access the index of the fitpage?
         self.parent = parent
         self.counter = 1
 
+        self.parent_tab_index = -1
+        self.tab_id = -1
         # The idea is: I want to use the Axes that are created by the Plotter.plot function and copy them over to the
         # TabbedPlotWidget. But since matplotlib does not allow copying of Axes between figures straight away, the Axes
         # in the TabbedPlotWidget need to be created straight away and then given to the Plotter so that it can
@@ -26,6 +29,12 @@ class SubTabs(QtWidgets.QTabWidget):
         self.ax = None
 
         self.add_subtab(plots)
+
+    def set_parent_tab_index(self):
+        self.parent_tab_index = self.parent.indexOf(self)
+        self.tab_id = self.parent.inv_tab_fitpage_dict[self.parent_tab_index]
+        print(self.parent_tab_index)
+        print(self.tab_id)
 
     def add_subtab(self, plots):
         """

@@ -17,7 +17,14 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
         self.manager = parent
 
         # use this dictionary to keep track of the tab that the plots of a certain fitpage are saved in
+        # works like: {"1": "2"}, where 1 is the tab_id (the number associated to the Fitpage from the FittingWidget)
+        # and 2 is the index of the corresponding tab to that fitpage in this widget.
         self.tab_fitpage_dict = {}
+
+        # since this correlation should be unambiguous in both directions, this dict can be inverted, so that the
+        # subtabs of a certain tab can find out, which fitpage they belong to by finding out about the index of their
+        # parent tab in this widget
+        self.inv_tab_fitpage_dict = {}
 
         self._set_icon()
         self.setWindowTitle('TabbedPlotWidget')
@@ -52,7 +59,12 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
         if tab_id not in self.tab_fitpage_dict.keys():
             self.tab_fitpage_dict[tab_id] = self.count()
 
+        self.update_inv_dict(tab_id, self.count())
+
         return self.tab_fitpage_dict[tab_id]
+
+    def update_inv_dict(self, tab_id: int, tab_index: int):
+        self.inv_tab_fitpage_dict[tab_index] = tab_id
 
     def tab_exists(self, tab_id: int) -> bool:
         """
@@ -72,14 +84,18 @@ class TabbedPlotWidget(QtWidgets.QTabWidget):
 
         current_tab_index = self.add_tab_to_dict(tab_id)
 
+        new_tab = SubTabs(self, plots)
+
         if not self.tab_exists(tab_id):
-            self.addTab(SubTabs(self, plots), f"Fitpage {tab_id}")
+            self.addTab(new_tab, f"Fitpage {tab_id}")
+
         else:
             self.removeTab(current_tab_index)
-
-            self.insertTab(current_tab_index, SubTabs(self, plots), f"Fitpage {tab_id}")
-
+            self.insertTab(current_tab_index, new_tab, f"Fitpage {tab_id}")
             self.setCurrentIndex(current_tab_index)
+
+        # Set the tab_id and the parent tab index of this SubTabs index so that it knows these values.
+        new_tab.set_parent_tab_index()
 
 
     def get_subtab_by_tab_id(self, tab_id: int):
