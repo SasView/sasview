@@ -19,8 +19,11 @@ class SubTabs(QtWidgets.QTabWidget):
         self.parent = parent
         self.counter = 1
 
+        # Set the object parameters after creating this subtab in the tabbedplotwidget. Then this subtab knows
+        # the tab_id of the parent and the tab index of itself in the parent tab widget.
         self.parent_tab_index = -1
         self.tab_id = -1
+
         # The idea is: I want to use the Axes that are created by the Plotter.plot function and copy them over to the
         # TabbedPlotWidget. But since matplotlib does not allow copying of Axes between figures straight away, the Axes
         # in the TabbedPlotWidget need to be created straight away and then given to the Plotter so that it can
