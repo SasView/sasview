@@ -23,6 +23,7 @@ pytest
 pytest_qt
 pytest-mock
 pytools
+requests
 qtconsole
 six
 sphinx
