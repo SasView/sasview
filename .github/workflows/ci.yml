@@ -155,7 +155,7 @@ jobs:
           # BUILD SASVIEW
           python setup.py clean
           python setup.py build
-          python -m uv pip install --system --no-deps .
+          python -m pip install --no-deps .
 
       ### Run tests (if enabled)
 
