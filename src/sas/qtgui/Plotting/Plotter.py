@@ -279,25 +279,20 @@ class PlotterWidget(PlotterBase):
             default_y_range = self.setRange.defaultYRange
             x_range = self.setRange.xrange()
             y_range = self.setRange.yrange()
+
         elif isinstance(data, Data1D):
             # Get default ranges from data
-            # factors of .99 and 1.01 provides a small gap so end points not shown right at edge
-            pad_delta = 0.01
 
-            default_x_range = self.ax.get_xlim() if not len(x) else ((1-pad_delta)*np.min(x), (1+pad_delta)*np.max(x))
+            if self.has_nonempty_plots():
+                x_range, y_range = self._plot_bounds()
 
-            # Need to make space for error bars
-            dy = data.view.dy
-            if not len(y):
-                default_y_range = self.ax.get_ylim()
             else:
-                if dy is None:
-                    default_y_range = ((1-pad_delta) * np.min(y), (1+pad_delta) * np.max(y))
-                else:
-                    default_y_range = ((1-pad_delta)*np.min(np.array(y) - np.array(dy)),
-                                    (1+pad_delta)*np.max(np.array(y) + np.array(dy)))
-            x_range = default_x_range
-            y_range = default_y_range
+
+                x_range = self.ax.get_xlim()
+                y_range = self.ax.get_ylim()
+
+            default_x_range, default_y_range = x_range, y_range
+
             modified = False
         else:
             # Use default ranges given by matplotlib
@@ -327,6 +322,57 @@ class PlotterWidget(PlotterBase):
 
         # refresh canvas
         self.canvas.draw_idle()
+
+    def has_nonempty_plots(self) -> bool:
+
+        for key in self.plot_dict:
+            if len(self.plot_dict[key].x) > 0:
+                return True
+
+        return False
+
+    def _plot_bounds(self, offset=0.05) -> tuple[tuple[float, float], tuple[float, float]]:
+        """ Get the appropriate bounds for the plots
+
+        :param offset: add a small fraction of the absolute value of each end to each end
+        :returns:
+        """
+
+
+        x_min, x_max = np.inf, -np.inf
+        y_min, y_max = np.inf, -np.inf
+
+        for key in self.plot_dict:
+
+            plot_data = self.plot_dict[key]
+
+            if len(plot_data.x) > 0:
+                x_min = min(np.min(plot_data.x), x_min)
+                x_max = max(np.max(plot_data.x), x_max)
+
+            if len(plot_data.y) > 0:
+
+                dy = plot_data.view.dy
+                if dy is None:
+                    y_min = min(np.min(plot_data.y), y_min)
+                    y_max = max(np.max(plot_data.y), y_max)
+                else:
+                    try:
+                        y_min = min(np.min(np.array(plot_data.y) - np.array(dy)), y_min)
+                        y_max = max(np.max(np.array(plot_data.y) + np.array(dy)), y_max)
+                    except ValueError:
+                        # Ignore error term if it doesn't match y scale and causes an error
+                        
+                        y_min = min(np.min(plot_data.y), y_min)
+                        y_max = max(np.max(plot_data.y), y_max)
+
+        x_pad = offset*(x_max - x_min)
+        y_pad = offset*(y_max - y_min)
+
+        return ((float(x_min - x_pad),
+                 float(x_max + x_pad)),
+                (float(y_min - y_pad),
+                 float(y_max + y_pad)))
 
 
     def createContextMenu(self):
