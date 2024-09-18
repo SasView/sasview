@@ -230,6 +230,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         """
         Show the "Fitting options" section of help
         """
+        from sas.qtgui.MainWindow.GuiManager import GuiManager
         tree_location = "/user/qtgui/Perspectives/Fitting/"
 
         # Actual file anchor will depend on the combo box index
@@ -239,7 +240,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         fitter_id = [n.id for n in fitters.FITTERS if n.name == selected_fit_algorithm][0]
         helpfile = "optimizer.html#fit-" + fitter_id
         help_location = tree_location + helpfile
-        GuiUtils.showHelp(help_location)
+        GuiManager.showHelp(help_location)
 
     def widgetFromOption(self, option_id, current_fitter=None):
         """
