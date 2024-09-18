@@ -62,14 +62,18 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
 
-    def __init__(self, parent=None, source: Path = None):
+    def __init__(self, source: Path = None):
         """The DocViewWindow class is an HTML viewer built into SasView.
 
         :param parent: Any Qt object with a communicator that can trigger events.
         :param source: The Path to the html file.
         """
-        super(DocViewWindow, self).__init__(parent._parent)
-        self.parent = parent
+        # Avoid circular imports by importing the communicate class as a class attribute
+        #from sas.qtgui.Utilities.GuiUtils import Communicate
+        from sas.qtgui.Utilities.GuiUtils import Communicate
+        self.communicate = Communicate()
+
+        super(DocViewWindow, self).__init__(None)
         self.setupUi(self)
         self.setWindowTitle("Documentation Viewer")
 
@@ -88,7 +92,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """Initialize all external signals that will trigger events for the window."""
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
-        self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
+        self.communicate.documentationRegeneratedSignal.connect(self.refresh)
         self.webEngineViewer.urlChanged.connect(self.updateTitle)
 
     def onEdit(self):
@@ -263,7 +267,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         :param file_name: A file-path like object that needs regeneration.
         """
         logging.info("Starting documentation regeneration...")
-        self.parent.communicate.documentationRegenInProgressSignal.emit()
+        self.communicate.documentationRegenInProgressSignal.emit()
         d = threads.deferToThread(self.regenerateDocs, target=file_name)
         d.addCallback(self.docRegenComplete)
         self.regen_in_progress = True
@@ -287,6 +291,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         This method is likely called as a thread call back, but no value is used from that callback return.
         """
         self.loadHtml()
-        self.parent.communicate.documentationRegeneratedSignal.emit()
+        self.communicate.documentationRegeneratedSignal.emit()
         logging.info("Documentation regeneration completed.")
         self.regen_in_progress = False
