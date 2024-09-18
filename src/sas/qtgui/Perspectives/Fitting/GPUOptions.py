@@ -275,9 +275,9 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         """
         Open the help menu when the help button is clicked
         """
-        from sas.qtgui.MainWindow.GuiManager import GuiManager
+        import sas.qtgui.Utilities.GuiUtils
         help_location = "user/qtgui/Perspectives/Fitting/gpu_setup.html#device-selection"
-        GuiManager.showHelp(help_location)
+        GuiUtils.showHelp(help_location)
 
     def reject(self):
         """
