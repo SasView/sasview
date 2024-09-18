@@ -275,11 +275,9 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         """
         Open the help menu when the help button is clicked
         """
-
-        # TODO - in future this should be linked to the local documentation, once there is a robust way of doing that
-        
-        # Display the page in default browser
-        webbrowser.open("https://www.sasview.org/docs/user/qtgui/Perspectives/Fitting/gpu_setup.html#device-selection")
+        from sas.qtgui.MainWindow.GuiManager import GuiManager
+        help_location = "user/qtgui/Perspectives/Fitting/gpu_setup.html#device-selection"
+        GuiManager.showHelp(help_location)
 
     def reject(self):
         """

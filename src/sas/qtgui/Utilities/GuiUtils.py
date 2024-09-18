@@ -32,12 +32,14 @@ from sas.qtgui.Plotting.Plottables import Plottable
 from sasdata.dataloader.data_info import Sample, Source, Vector
 from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
 from sasdata.dataloader.data_info import Aperture, Collimation
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, PATH_LIKE
 from sas.qtgui.Plotting.Plottables import View
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
 from sas.qtgui.Plotting.Plottables import Text
 from sas.qtgui.Plotting.Plottables import Chisq
 from sas.qtgui.MainWindow.DataState import DataState
+from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 
 from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
@@ -1456,3 +1458,19 @@ def enum(*sequential, **named):
     """Create an enumeration object from a list of strings"""
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)
+
+def showHelp(url: PATH_LIKE):
+    if isinstance(url, str):
+        url = url.lstrip("//")
+    url = Path(url)
+    url_abs = HELP_DIRECTORY_LOCATION / url if str(HELP_DIRECTORY_LOCATION.resolve()) not in str(url.absolute()) else url
+
+    try:
+        help_window = DocViewWindow(source=url_abs)
+        help_window.show()
+        help_window.activateWindow()
+        help_window.setFocus()
+        # Return the window so the caller can keep it in scope to prevent garbage collection
+        return help_window
+    except Exception as ex:
+        logging.warning(f"Cannot display help: {ex}")

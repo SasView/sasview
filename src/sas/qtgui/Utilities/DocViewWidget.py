@@ -78,14 +78,18 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     Instantiates a window to view documentation using a QWebEngineViewer widget
     """
 
-    def __init__(self, parent=None, source: Path = None):
+    def __init__(self, source: Path = None):
         """The DocViewWindow class is an HTML viewer built into SasView.
 
         :param parent: Any Qt object with a communicator that can trigger events.
         :param source: The Path to the html file.
         """
-        super(DocViewWindow, self).__init__(parent._parent)
-        self.parent = parent
+        # Avoid circular imports by importing the communicate class as a class attribute
+        #from sas.qtgui.Utilities.GuiUtils import Communicate
+        from sas.qtgui.Utilities.GuiUtils import Communicate
+        self.communicate = Communicate()
+
+        super(DocViewWindow, self).__init__(None)
         self.setupUi(self)
         self.setWindowTitle("Documentation Viewer")
 
@@ -96,13 +100,17 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         self.initializeSignals()  # Connect signals
 
+        # Hide editing button for 6.0.0 release
+        self.editButton.setVisible(False)
+
         self.regenerateIfNeeded()
 
     def initializeSignals(self):
         """Initialize all external signals that will trigger events for the window."""
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
-        self.parent.communicate.documentationRegeneratedSignal.connect(self.refresh)
+        self.communicate.documentationRegeneratedSignal.connect(self.refresh)
+        self.webEngineViewer.urlChanged.connect(self.updateTitle)
 
     def onEdit(self):
         """Open editor (TabbedModelEditor) window."""
@@ -226,6 +234,19 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         # Show widget
         self.onShow()
+    
+    def updateTitle(self):
+        """
+        Set the title of the window to include the name of the document,
+        found in the first <h1> tags.
+        """
+        # Convert QUrl to pathlib path
+        try:
+            current_path = self.webEngineViewer.url().toLocalFile()
+            self.setWindowTitle(f"Documentation—{current_path.strip()}") # Try to add the filepath to the window title
+        except (AttributeError, TypeError, ValueError) as ex:
+            self.setWindowTitle("Documentation")
+            logging.warning(f"Error updating documentation window title: {ex}")
 
     def load404(self):
         self.webEngineViewer.setHtml(HTML_404)
@@ -263,7 +284,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         :param file_name: A file-path like object that needs regeneration.
         """
         logging.info("Starting documentation regeneration...")
-        self.parent.communicate.documentationRegenInProgressSignal.emit()
+        self.communicate.documentationRegenInProgressSignal.emit()
         d = threads.deferToThread(self.regenerateDocs, target=file_name)
         d.addCallback(self.docRegenComplete)
         self.regen_in_progress = True
@@ -286,6 +307,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         This method is likely called as a thread call back, but no value is used from that callback return.
         """
         self.loadHtml()
-        self.parent.communicate.documentationRegeneratedSignal.emit()
+        self.communicate.documentationRegeneratedSignal.emit()
         logging.info("Documentation regeneration completed.")
         self.regen_in_progress = False
