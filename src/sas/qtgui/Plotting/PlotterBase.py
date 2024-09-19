@@ -28,7 +28,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.quickplot = quickplot
 
         # Set auto layout so x/y axis captions don't get cut off
-        rcParams.update({'figure.autolayout': True})
+        # rcParams.update({'figure.autolayout': True})
 
         #plt.style.use('ggplot')
         #plt.style.use('seaborn-darkgrid')

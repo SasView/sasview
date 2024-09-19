@@ -2,7 +2,7 @@ from PySide6 import QtWidgets
 from PySide6 import QtCore
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 from sas.qtgui.Utilities import GuiUtils
 
@@ -36,8 +36,6 @@ class SubTabs(QtWidgets.QTabWidget):
     def set_parent_tab_index(self):
         self.parent_tab_index = self.parent.indexOf(self)
         self.tab_id = self.parent.inv_tab_fitpage_dict[self.parent_tab_index]
-        print(self.parent_tab_index)
-        print(self.tab_id)
 
     def add_subtab(self, plots):
         """
@@ -62,33 +60,47 @@ class SubTabs(QtWidgets.QTabWidget):
         # The idea behind creating the figure here already is to feed it to the creation of the canvas right away,
         # because otherwise it can be quite tricky to navigate through all the layers in between to add the figure
         # or manipulate all the axes for example
-        self.figure = Figure(figsize=(5, 5))
-
-        # filling the slots for the plots temporary to try out the functionalities of the dock container and the
-        # clickable canvas
-        print("subplot_count len(plots)", len(plots))
-        subplot_count = len(plots)
-        if subplot_count <= 1:
-            self.ax = self.figure.subplots(subplot_count)
-            # putting the axes object in a list so that the access can be generic for both cases with multiple
-            # subplots and without
-            self.ax = [self.ax]
-        else:
-            # for multiple subplots: decide on the ratios for the bigger, central plot and the smaller, side plots
-            # region for the big central plot in gridspec
-            gridspec = self.figure.add_gridspec(ncols=2, width_ratios=[3, 1])
-            # region for the small side plots in sub_gridspec
-            sub_gridspec = gridspec[1].subgridspec(ncols=1, nrows=subplot_count-1)
-
-            self.ax = [self.figure.add_subplot(gridspec[0])]
-            # add small plots to axes list, so it can be accessed that way
-            for idx in range(subplot_count - 1):
-                self.ax.append(self.figure.add_subplot(sub_gridspec[idx]))
-
-        print("axes created in SubTabs:", self.ax[0])
+        self.figure = plt.figure()
 
         self.addTab(DockContainer(self.figure), str(self.counter))
         self.counter += 1
+
+    def add_more_axes(self):
+        """
+        Simply adds a new subplot to the figure.
+        """
+        self.figure.add_subplot()
+
+    def last_axes(self):
+        """
+        Get the last axes that was created by add_more_axes
+        """
+        return self.figure.get_axes()[-1]
+
+    def rearrange_plots(self):
+        """
+        This method is called after plotting the results for this tab. It arranges the plots in two columns with the
+        big plot on the left side and all the other plots on the right side.
+        """
+        print("rearrange_plots")
+        axes = self.figure.get_axes()
+        if len(axes) > 2:
+            pass # nothing to do, just one plot needs to be shown in the middle
+        elif len(axes) == 2:
+            # two column gridspec needs to be applied
+            self.gs = self.figure.add_gridspec(nrows=1, ncols=2)
+
+            # this for loop cannot be replaced by for ax in axes, because the ax is modified in the list :)
+            for i in range(len(axes)):
+                axes[i].set_position(self.gs[i].get_position(self.figure))
+        else:
+            # subgridspec needs to be applied
+            self.gs = self.figure.add_gridspec(nrows=1, ncols=2)
+            self.sub_gs = self.gs[1].subgridspec(ncols=1, nrows=len(axes)-1)
+
+            axes[0].set_position(self.gs[0].get_position(self.figure))
+            for i in range(len(axes)-1):
+                axes[i+1].set_position(self.gs[i].get_position(self.figure))
 
 
 class DockContainer(QtWidgets.QMainWindow):

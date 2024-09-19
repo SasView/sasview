@@ -2125,10 +2125,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdPlot.setText("Compute/Plot")
         # Force data recalculation so existing charts are updated
         if not self.data_is_loaded:
-            print("showTheoryPlot from FittingWidget")
             self.showTheoryPlot()
         else:
-            print("showPlot from FittingWidget")
             self.showPlot()
         # This is an important processEvent.
         # This allows charts to be properly updated in order
@@ -2189,10 +2187,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # send this information to the TabbedPlotWidget so that it can unpack and show the plots as well
         self.parent.tabbedPlotWidget.add_tab(item_name, item_model, self.tab_id)
-        tab_index = self.parent.tabbedPlotWidget.tab_fitpage_dict[self.tab_id]
-        tpw_axes = self.parent.tabbedPlotWidget.widget(tab_index).ax
-
-        print("axes received in FittingWidget:", tpw_axes)
         plots = GuiUtils.plotsFromDisplayName(item_name, item_model)
         # Has the fitted data been shown?
         data_shown = False
@@ -2201,8 +2195,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             item, plot = item_plot
             if plot.plot_role != DataRole.ROLE_DATA and fitpage_name in plot.name:
                 data_shown = True
-                self.communicate.plotRequestedSignal.emit([item, tpw_axes[i], plot], self.tab_id)
+                self.communicate.plotRequestedSignal.emit([item, plot], self.tab_id)
         # return the last data item seen, if nothing was plotted; supposed to be just data)
+        tab_index = self.parent.tabbedPlotWidget.tab_fitpage_dict[self.tab_id]
+        self.parent.tabbedPlotWidget.widget(tab_index).rearrange_plots()
         return None if data_shown else item
 
     def onOptionsUpdate(self) -> None:
