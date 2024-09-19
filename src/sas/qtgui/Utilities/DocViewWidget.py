@@ -9,7 +9,6 @@ from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
-from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
@@ -46,6 +45,8 @@ class DocGenThread(CalcThread):
         self.target = None
         self.runner = None
         self._running = False
+        # Avoid circular imports by importing the communicate class as a class attribute
+        from sas.qtgui.Utilities.GuiUtils import Communicate
         self.communicate = Communicate()
         self.communicate.closeSignal.connect(self.close)
 
@@ -85,7 +86,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         :param source: The Path to the html file.
         """
         # Avoid circular imports by importing the communicate class as a class attribute
-        #from sas.qtgui.Utilities.GuiUtils import Communicate
         from sas.qtgui.Utilities.GuiUtils import Communicate
         self.communicate = Communicate()
 
