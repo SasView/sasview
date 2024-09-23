@@ -151,7 +151,7 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
     elif rst is False and isinstance(single_files, list):
         # User has passed in a list of python pathnames: we need to pass in the corresponding .rst file
         single_files = [MAIN_DOC_SRC / "user" / "models" / single_file.name.replace('.py', '.rst') for single_file in single_files]
-    elif single_files == "":
+    elif not single_files:
         # User wants a complete regeneration of documentation
         force_rebuild = "-E"
         single_files = None
