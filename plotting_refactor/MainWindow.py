@@ -21,8 +21,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setFixedSize(700, 560)
 
         self.fitPageCounter = 1
-        self.newFitPage = FitPage(identifier=self.fitPageCounter)
-        self.fittingTabs.addTab(self.newFitPage, "Fit Page "+str(self.fitPageCounter))
+        self.fittingTabs.addTab(FitPage(self.fitPageCounter), "Fit Page "+str(self.fitPageCounter))
 
         self.dataviewer = DataViewer(self)
 
@@ -56,8 +55,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Creates a new fitpage by the button in the menubar of the mainwindow on top.
         """
         self.fitPageCounter += 1
-        self.newFitPage = FitPage(self.fitPageCounter)
-        self.fittingTabs.addTab(self.newFitPage, "Fit Page " + str(self.fitPageCounter))
+        self.fittingTabs.addTab(FitPage(self.fitPageCounter), "Fit Page " + str(self.fitPageCounter))
         self.fittingTabs.setCurrentIndex(self.fitPageCounter-1)
 
     def closeEvent(self, event):
