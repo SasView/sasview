@@ -142,10 +142,6 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
     else:
         html_directory = HELP_DIRECTORY_LOCATION 
     force_rebuild = "" # Empty if we are not forcing a full rebuild of docs
-    # Clear existing log file
-    if DOC_LOG.exists():
-        with open(DOC_LOG, "r+") as f:
-            f.truncate(0)
     DOCTREES = MAIN_BUILD_SRC / "doctrees"
 
     # Process the single_files parameter into a list of Path objects referring to rst files
@@ -232,6 +228,10 @@ def make_documentation(target: PATH_LIKE = ".") -> subprocess.Popen:
     :param target: A file name that needs the html regenerated.
     """
     create_user_files_if_needed()
+    # Clear existing log file
+    if DOC_LOG.exists():
+        with open(DOC_LOG, "r+") as f:
+            f.truncate(0)
     # Ensure target is a path object
     if target:
         target = Path(target)
