@@ -73,6 +73,8 @@ from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 
+from sas.qtgui.Plotting.TabbedPlotWidget import TabbedPlotWidget
+
 import sas
 from sas import config
 from sas.system import web
@@ -211,6 +213,8 @@ class GuiManager:
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNew(self._parent)
         self.regenProgress = DocRegenProgress(self)
+
+        self.tabbedPlotWidget = TabbedPlotWidget(self)
 
     def loadAllPerspectives(self):
         """ Load all the perspectives"""
