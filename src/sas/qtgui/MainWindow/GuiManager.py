@@ -690,7 +690,7 @@ class GuiManager:
         """
         Method defining all signal connections for the gui manager
         """
-        self.communicate = GuiUtils.Communicate()
+        self.communicate = GuiUtils.communicate
         self.communicate.fileDataReceivedSignal.connect(self.fileWasRead)
         self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
         self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)

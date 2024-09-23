@@ -187,6 +187,9 @@ class Communicate(QtCore.QObject):
     closeSignal = QtCore.Signal()
 
 
+communicate = Communicate()
+
+
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
     Adds a checkboxed row named "name" to QStandardItem

@@ -45,9 +45,8 @@ class DocGenThread(CalcThread):
         self.target = None
         self.runner = None
         self._running = False
-        # Avoid circular imports by importing the communicate class as a class attribute
-        from sas.qtgui.Utilities.GuiUtils import Communicate
-        self.communicate = Communicate()
+        from sas.qtgui.Utilities.GuiUtils import communicate
+        self.communicate = communicate
         self.communicate.closeSignal.connect(self.close)
 
     def compute(self, target=None):
@@ -85,10 +84,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         :param parent: Any Qt object with a communicator that can trigger events.
         :param source: The Path to the html file.
         """
-        # Avoid circular imports by importing the communicate class as a class attribute
-        from sas.qtgui.Utilities.GuiUtils import Communicate
-        self.communicate = Communicate()
-
         super(DocViewWindow, self).__init__(None)
         self.setupUi(self)
         self.setWindowTitle("Documentation Viewer")
@@ -98,6 +93,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.regen_in_progress: bool = False
         self.thread: Optional[CalcThread] = None
 
+        from sas.qtgui.Utilities.GuiUtils import communicate
+        self.communicate = communicate
         self.initializeSignals()  # Connect signals
 
         # Hide editing button for 6.0.0 release
