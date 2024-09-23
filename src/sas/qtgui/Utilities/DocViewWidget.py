@@ -174,7 +174,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             # Test if this is a user defined model, and if its HTML does not exist or is older than python source file
             if os.path.isfile(user_model_name):
                 if self.newer(user_model_name, url_str):
-                    self.regenerateHtml(user_model_name)
+                    self.regenerateHtml(self.source.name)
 
             # Test to see if HTML does not exist or is older than python file
             elif self.newer(self.source, url_str):
@@ -292,7 +292,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         :param target: A file-path like object that needs regeneration.
         """
         self.thread = DocGenThread()
-        self.thread.queue(target)
+        self.thread.queue(target=target)
         self.thread.ready(2.5)
         while not self.thread.isrunning():
             time.sleep(0.1)
