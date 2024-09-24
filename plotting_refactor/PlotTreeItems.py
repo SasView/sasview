@@ -64,6 +64,12 @@ class PlottableItem(QTreeWidgetItem):
 
     @property
     def type_num(self):
+        # type_num = 1: 1d data,
+        # type_num = 2: 1d fit,
+        # type_num = 3: 1d residuals,
+        # type_num = 4 : 2d data,
+        # type_num = 5 : 2d fit,
+        # type_num = 6 : 2d residuals
         return self._type_num
 
 
