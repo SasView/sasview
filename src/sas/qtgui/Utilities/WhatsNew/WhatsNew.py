@@ -97,7 +97,7 @@ class WhatsNew(QDialog):
 
     """
     def __init__(self, parent=None, strictly_newer=True):
-        super().__init__()
+        super().__init__(parent)
 
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
