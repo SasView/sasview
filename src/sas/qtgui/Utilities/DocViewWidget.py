@@ -47,7 +47,6 @@ class DocGenThread(CalcThread):
         self._running = False
         from sas.qtgui.Utilities.GuiUtils import communicate
         self.communicate = communicate
-        self.communicate.closeSignal.connect(self.close)
 
     def compute(self, target=None):
         """
@@ -70,7 +69,8 @@ class DocGenThread(CalcThread):
         # Ensure the runner and locks are fully released when closing the main application
         if self.runner:
             self.runner.kill()
-        self.interrupt()
+            self.runner = None
+        self.stop()
 
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
@@ -107,6 +107,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
         self.communicate.documentationRegeneratedSignal.connect(self.refresh)
+        self.communicate.closeSignal.connect(self.onClose)
         self.webEngineViewer.urlChanged.connect(self.updateTitle)
 
     def onEdit(self):
@@ -139,6 +140,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Close window
         Keep as a separate method to allow for additional functionality when closing
         """
+        if self.thread:
+            self.thread.close()
         self.close()
 
     def onShow(self):
@@ -291,15 +294,17 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         :param target: A file-path like object that needs regeneration.
         """
-        self.thread = DocGenThread()
+        self.thread = DocGenThread(completefn=self.docRegenComplete)
         self.thread.queue(target=target)
         self.thread.ready(2.5)
         while not self.thread.isrunning():
             time.sleep(0.1)
         while self.thread.isrunning():
+            if self.thread.runner and self.thread.runner.poll() is not None:
+                self.thread.close()
             time.sleep(0.1)
     
-    def docRegenComplete(self, return_val):
+    def docRegenComplete(self, *args):
         """Tells Qt that regeneration of docs is done and emits signal tied to opening documentation viewer window.
         This method is likely called as a thread call back, but no value is used from that callback return.
         """
