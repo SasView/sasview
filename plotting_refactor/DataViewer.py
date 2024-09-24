@@ -34,7 +34,7 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
 
         self.cmdClose.clicked.connect(self.onShowDataViewer)
         self.cmdAddModifier.clicked.connect(self.onAddModifier)
-        self.plotTreeWidget.dropSignal.connect(self.redrawAll)
+        self.plotTreeWidget.dropSignal.connect(self.redraw)
 
         self.setupMofifierCombobox()
         self.plot_widget = PlotWidget(self, self.datacollector)
@@ -164,9 +164,9 @@ class DataViewer(QtWidgets.QWidget, Ui_DataViewer):
                 plottable_res = PlottableItem(subplot_res, ["Plottable Residuals"], fitpage_id, 3)
 
         self.plotTreeWidget.expandAll()
-        self.redrawAll(fitpage_index, 0)
+        self.redraw(fitpage_index, 0)
 
-    def redrawAll(self, redraw_fitpage_index, redraw_subtab_index):
+    def redraw(self, redraw_fitpage_index, redraw_subtab_index):
         """
         Redraws all tabs in the plotTreeWidget. parameters redraw_fitpage_index and redraw_subtab_index are used to show
         the subtab for which the redrawAll was invoked, because a modifier was dragged onto a child plot or plottable
