@@ -57,7 +57,7 @@ class DocGenThread(CalcThread):
             # Start a try/finally block to ensure that the lock is released if an exception is thrown
             if not self.target.exists():
                 self.runner = make_documentation(self.target)
-                while self.runner.poll() is None:
+                while self.runner and self.runner.poll() is None:
                     time.sleep(0.5)
                     self.communicate.documentationUpdateLogSignal.emit()
         except KeyboardInterrupt as msg:
@@ -294,16 +294,14 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         :param target: A file-path like object that needs regeneration.
         """
-        self.thread = DocGenThread(completefn=self.docRegenComplete)
+        self.thread = DocGenThread()
         self.thread.queue(target=target)
         self.thread.ready(2.5)
         while not self.thread.isrunning():
             time.sleep(0.1)
         while self.thread.isrunning():
-            if self.thread.runner and self.thread.runner.poll() is not None:
-                self.thread.close()
             time.sleep(0.1)
-    
+
     def docRegenComplete(self, *args):
         """Tells Qt that regeneration of docs is done and emits signal tied to opening documentation viewer window.
         This method is likely called as a thread call back, but no value is used from that callback return.
