@@ -17,6 +17,9 @@ class PlotTreeWidget(QTreeWidget):
         self.setHeaderLabels(["Plot Names"])
 
     def startDrag(self, supportedActions):
+        """
+        Function for starting the drag of modifiers across the PlotTreeWidget.
+        """
         item = self.currentItem()
 
         if item:
@@ -33,6 +36,12 @@ class PlotTreeWidget(QTreeWidget):
 
 
     def dragMoveEvent(self, event):
+        """
+        Function for checking if a drop should be accepted or not. DataItems from the DataTreeWidget are allowed and
+        the drop is accepted, if they are dropped onto a plot item.
+        Drops of modifiers are allowed if the modifier is dragged onto a PlotItem or a PlottableItem
+        TODO: This needs some change, since 1d modifiers should only be droppable onto Plottables and 2d only on Plots.
+        """
         targetItem = self.itemAt(event.position().toPoint())
         if targetItem is not None:
             if event.mimeData().hasFormat('ID'):
@@ -53,12 +62,24 @@ class PlotTreeWidget(QTreeWidget):
             event.ignore()
 
     def dropEvent(self, event):
+        """
+        Processing of the drop of either a modifier from this widget or a data item from the DataTreeWidget.
+        """
 
+        # Check, if the drag item contains "ID", then we can be sure that this comes from the DataTreeWidget
+        # (this might not be best practice, but with the serialization of the pointer as it is now, is seemed to me
+        # like it was the easiest method to achieve this)
         if event.mimeData().data('ID'):
+
+            # Re-collect the data from these streams in the drop
             data_id = event.mimeData().data('ID').data()
             data_type = event.mimeData().data('Type').data()
 
+            # get the targetItem from the drop position
             targetItem = self.itemAt(event.position().toPoint())
+
+            # if the target is a PlotItem, we deserialize the address of the pointer and create a new item from the
+            # object that is behind the pointer.
             if isinstance(targetItem.data(0, 1), PlotItem):
                 new_plottable = PlottableItem(targetItem, [str(data_id.decode('utf-8'))],
                                               int(data_id), int(data_type))
@@ -71,9 +92,12 @@ class PlotTreeWidget(QTreeWidget):
                 # as soon as plottable slots are there, they can be filled in here
                 pass
 
+            # the drop signal can be emitted now so that the tab where something was dragged onto can be redrawn.
             self.dropSignal.emit(redraw_fitpage_index, redraw_subtab_index)
             event.acceptProposedAction()
 
+        # if the drag object is a modifier, the tab also needs to be redrawn. Here, no serialization of a pointer is
+        # included.
         elif event.mimeData().data('Modifier'):
             data_address = int(event.mimeData().data('Modifier').data())
             data = ctypes.cast(data_address, ctypes.py_object).value
