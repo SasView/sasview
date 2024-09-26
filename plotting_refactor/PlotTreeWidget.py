@@ -96,8 +96,8 @@ class PlotTreeWidget(QTreeWidget):
             self.dropSignal.emit(redraw_fitpage_index, redraw_subtab_index)
             event.acceptProposedAction()
 
-        # if the drag object is a modifier, the tab also needs to be redrawn. Here, no serialization of a pointer is
-        # included.
+        # Here, the serialization also plays a role, because the modifier is cloned in the process and used to create
+        # a new child that the modifier will be for the target item.
         elif event.mimeData().data('Modifier'):
             data_address = int(event.mimeData().data('Modifier').data())
             data = ctypes.cast(data_address, ctypes.py_object).value
