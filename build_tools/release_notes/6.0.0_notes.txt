@@ -98,4 +98,4 @@
 * @gdrosos made their first contribution in https://github.com/SasView/sasview/pull/2585
 * @astellhorn made their first contribution in https://github.com/SasView/sasview/pull/2610
 
-**Full Changelog**: https://github.com/SasView/sasview/compare/nightly-build...v6.0.0-alpha
+**Full Changelog**: https://github.com/SasView/sasview/compare/nightly-build...v6.0.0-rc1
