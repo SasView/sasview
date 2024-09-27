@@ -3,6 +3,7 @@ import os
 import logging
 import time
 from pathlib import Path
+from typing import Optional
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
@@ -28,7 +29,6 @@ class DocGenThread(CalcThread):
     """Thread performing the fit """
 
     def __init__(self,
-                 target,
                  completefn=None,
                  updatefn=None,
                  yieldtime=0.03,
@@ -42,19 +42,35 @@ class DocGenThread(CalcThread):
         self.starttime = time.time()
         self.updatefn = updatefn
         self.reset_flag = reset_flag
-        self.target = Path(target)
+        self.target = None
+        self.runner = None
+        self._running = False
+        from sas.qtgui.Utilities.GuiUtils import communicate
+        self.communicate = communicate
 
-    def compute(self):
+    def compute(self, target=None):
         """
         Regen the docs in a separate thread
         """
+        self.target = Path(target)
         try:
-            if self.target.exists():
-                make_documentation(self.target)
-            else:
-                return
+            # Start a try/finally block to ensure that the lock is released if an exception is thrown
+            if not self.target.exists():
+                self.runner = make_documentation(self.target)
+                while self.runner and self.runner.poll() is None:
+                    time.sleep(0.5)
+                    self.communicate.documentationUpdateLogSignal.emit()
         except KeyboardInterrupt as msg:
             logging.log(0, msg)
+        finally:
+            self.close()
+
+    def close(self):
+        # Ensure the runner and locks are fully released when closing the main application
+        if self.runner:
+            self.runner.kill()
+            self.runner = None
+        self.stop()
 
 
 class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
@@ -68,11 +84,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         :param parent: Any Qt object with a communicator that can trigger events.
         :param source: The Path to the html file.
         """
-        # Avoid circular imports by importing the communicate class as a class attribute
-        #from sas.qtgui.Utilities.GuiUtils import Communicate
-        from sas.qtgui.Utilities.GuiUtils import Communicate
-        self.communicate = Communicate()
-
         super(DocViewWindow, self).__init__(None)
         self.setupUi(self)
         self.setWindowTitle("Documentation Viewer")
@@ -80,7 +91,10 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Necessary globals
         self.source: Path = Path(source)
         self.regen_in_progress: bool = False
+        self.thread: Optional[CalcThread] = None
 
+        from sas.qtgui.Utilities.GuiUtils import communicate
+        self.communicate = communicate
         self.initializeSignals()  # Connect signals
 
         # Hide editing button for 6.0.0 release
@@ -93,6 +107,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.editButton.clicked.connect(self.onEdit)
         self.closeButton.clicked.connect(self.onClose)
         self.communicate.documentationRegeneratedSignal.connect(self.refresh)
+        self.communicate.closeSignal.connect(self.onClose)
         self.webEngineViewer.urlChanged.connect(self.updateTitle)
 
     def onEdit(self):
@@ -125,6 +140,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Close window
         Keep as a separate method to allow for additional functionality when closing
         """
+        if self.thread:
+            self.thread.close()
         self.close()
 
     def onShow(self):
@@ -160,7 +177,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             # Test if this is a user defined model, and if its HTML does not exist or is older than python source file
             if os.path.isfile(user_model_name):
                 if self.newer(user_model_name, url_str):
-                    self.regenerateHtml(user_model_name)
+                    self.regenerateHtml(self.source.name)
 
             # Test to see if HTML does not exist or is older than python file
             elif self.newer(self.source, url_str):
@@ -272,21 +289,20 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         d.addCallback(self.docRegenComplete)
         self.regen_in_progress = True
 
-    @staticmethod
-    def regenerateDocs(target: PATH_LIKE = None):
+    def regenerateDocs(self, target: PATH_LIKE = None):
         """Regenerates documentation for a specific file (target) in a subprocess
 
         :param target: A file-path like object that needs regeneration.
         """
-        thread = DocGenThread(target=target)
-        thread.queue()
-        thread.ready(2.5)
-        while not thread.isrunning():
+        self.thread = DocGenThread()
+        self.thread.queue(target=target)
+        self.thread.ready(2.5)
+        while not self.thread.isrunning():
             time.sleep(0.1)
-        while thread.isrunning():
+        while self.thread.isrunning():
             time.sleep(0.1)
-    
-    def docRegenComplete(self, return_val):
+
+    def docRegenComplete(self, *args):
         """Tells Qt that regeneration of docs is done and emits signal tied to opening documentation viewer window.
         This method is likely called as a thread call back, but no value is used from that callback return.
         """

@@ -79,7 +79,6 @@ if config.DEFAULT_OPEN_FOLDER == "" or not os.path.isdir(config.DEFAULT_OPEN_FOL
     config.DEFAULT_OPEN_FOLDER = get_sensible_default_open_directory()
 
 
-
 class Communicate(QtCore.QObject):
     """
     Utility class for tracking of the Qt signals
@@ -179,9 +178,17 @@ class Communicate(QtCore.QObject):
     # Update the masked ranges in fitting
     updateMaskedDataSignal = QtCore.Signal()
 
-    # Triggers refresh of all documentation windows
+    # Triggers to refresh documentation
     documentationRegenInProgressSignal = QtCore.Signal()
     documentationRegeneratedSignal = QtCore.Signal()
+    documentationUpdateLogSignal = QtCore.Signal()
+
+    # Global close to help kill active threads
+    closeSignal = QtCore.Signal()
+
+
+communicate = Communicate()
+
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
