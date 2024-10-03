@@ -277,6 +277,10 @@ jobs:
         with:
           product-path: "installers/dist/SasView6.dmg"
 
+      - name: Setup Android SDK
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        uses: android-actions/setup-android@v3
+
       - name: Sign binary
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         uses: lando/code-sign-action@v2
