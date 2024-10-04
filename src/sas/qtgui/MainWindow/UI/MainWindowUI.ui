@@ -117,6 +117,7 @@
     <addaction name="actionAdd_Custom_Model"/>
     <addaction name="actionEdit_Custom_Model"/>
     <addaction name="actionManage_Custom_Models"/>
+    <addaction name="actionReparameterize_Model"/>
     <addaction name="actionAddMult_Models"/>
     <addaction name="separator"/>
     <addaction name="actionEditMask"/>
@@ -623,6 +624,11 @@
   <action name="actionWhat_s_New">
    <property name="text">
     <string>What's New</string>
+   </property>
+  </action>
+  <action name="actionReparameterize_Model">
+   <property name="text">
+    <string>Reparameterize Model</string>
    </property>
   </action>
  </widget>
