@@ -152,9 +152,12 @@ class ConfigBase:
 
         try:
             file_version = data["sasview_version"]
-            # Use the distutils strict version module regex to check if the version string is valid
+            # This is based on distutils strict version module regex to check if the version string is valid
             #  ref: https://epydoc.sourceforge.net/stdlib/distutils.version.StrictVersion-class.html
-            matcher = re.compile(r'(?x)^(\d+)\.(\d+)(\.(\d+))?([ab](\d+))?$')
+            #
+            # We've decided not to be strict, so it has been modified to include rc and RC
+            #
+            matcher = re.compile(r'(?x)^(\d+)\.(\d+)(\.(\d+))?((a|b|rc|RC)(\d+))?$')
             if not matcher.match(file_version):
                 raise Exception
 
