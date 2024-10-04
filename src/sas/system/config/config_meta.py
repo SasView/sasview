@@ -162,7 +162,7 @@ class ConfigBase:
                 raise Exception
 
         except Exception:
-            raise MalformedFile("Malformed version in config file, should be a string of the form 'X.Y.Z'")
+            raise MalformedFile("Malformed version in config file, should be a string of the form 'X.Y.Z[(a|b|rc)n]'")
 
         if "config_data" not in data:
             raise MalformedFile("Malformed config file - no 'config_data' key")
