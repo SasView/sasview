@@ -83,6 +83,7 @@ if not hasattr(SasviewModel, 'get_weights'):
 
 logger = logging.getLogger(__name__)
 
+
 class ToolTippedItemModel(QtGui.QStandardItemModel):
     """
     Subclass from QStandardItemModel to allow displaying tooltips in
@@ -3116,6 +3117,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Create a QStandardModelIndex containing model data
         """
         name = self.nameFromData(fitted_data)
+        # TODO: Temporary Hack to fix NaNs in generated theory data
+        #  This is usually from GSC models that are calculated outside the Q range they were created for
+        #  The 'remove_nans_in_data' should become its own function in a data utility class, post-6.0.0 release.
+        from sasdata.dataloader.filereader import FileReader
+        temp_reader = FileReader()
+        fitted_data = temp_reader._remove_nans_in_data(fitted_data)
         # Modify the item or add it if new
         theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
         self.communicate.updateTheoryFromPerspectiveSignal.emit(theory_item)

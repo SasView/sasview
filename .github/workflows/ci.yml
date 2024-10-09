@@ -105,8 +105,8 @@ jobs:
 
       - name: Fetch sources for sibling projects
         run: |
-          git clone --depth=50 --branch=release_0.9.0 https://github.com/SasView/sasdata.git ../sasdata
-          git clone --depth=50 --branch=release_1.0.8 https://github.com/SasView/sasmodels.git ../sasmodels
+          git clone --depth=50 --branch=v0.9.0 https://github.com/SasView/sasdata.git ../sasdata
+          git clone --depth=50 --branch=v1.0.8 https://github.com/SasView/sasmodels.git ../sasmodels
           git clone --depth=50 --branch=v0.9.2 https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
