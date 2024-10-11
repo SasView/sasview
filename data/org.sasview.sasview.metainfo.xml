@@ -9,12 +9,17 @@
     <name>SasView Developers</name>
   </developer_name>
 
+  <url type="bugtracker">https://github.com/SasView/sasview/issues</url>
   <url type="homepage">https://www.sasview.org</url>
+  <url type="contact">https://www.sasview.org/people/</url>
+  <url type="faq">https://www.sasview.org/faq/</url>
+  <url type="contribute">https://www.sasview.org/contribute/</url>
+  <url type="vcs-browser">https://github.com/SasView/sasview</url>
 
   <launchable type="desktop-id">org.sasview.sasview.desktop</launchable>
   <provides>org.sasview.sasview.desktop</provides>
 
-  <description>to write......</description>>
+  <description>SasView is an open source Small Angle Scattering (SAS) analysis package used to analyze 1D and 2D scattering data in inverse space. Originally focused on neutron data (SANS), tha package has been extended for X-ray scattering and correlation space methods such as SESANS and Interferometry. SasView includes a number of other features, include PrView to invert SAS data to P(r), a resolution calculator, and a scattering length density calculator, to name a few. The package also has a simple plugin mechanism for users to add custom models.</description>
 
   <supports>
     <control>keyboard</control>
