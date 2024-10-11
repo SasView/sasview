@@ -1063,6 +1063,8 @@ class GuiManager:
             if self.GENSASCalculator is None:
                 self.GENSASCalculator = GenericScatteringCalculator(self)
             self.GENSASCalculator.show()
+            self.updateStatusBar("The Generic Scattering Calculator is open, but it sometimes opens behind the main "
+                                 "window.")
         except Exception as ex:
             logging.error(str(ex))
             return
