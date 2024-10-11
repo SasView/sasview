@@ -715,8 +715,12 @@ class GuiManager:
         self._workspace.actionStartup_Settings.setVisible(False)
         #self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
-        # orientation viewer set to invisible SASVIEW-1132
-        self._workspace.actionOrientation_Viewer.setVisible(True)
+
+        # Show orientation viewer menu item only if not running Linux/Wayland
+        if "XDG_SESSION_TYPE" in os.environ and os.environ["XDG_SESSION_TYPE"] == "wayland":
+            self._workspace.actionOrientation_Viewer.setVisible(False)
+        else:
+            self._workspace.actionOrientation_Viewer.setVisible(True)
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
