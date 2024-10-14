@@ -9,6 +9,8 @@
   <developer_name id="org.sasview">
     <name>SasView Developers</name>
   </developer_name>
+  <content_rating type="oars-1.0" />
+
 
   <url type="bugtracker">https://github.com/SasView/sasview/issues</url>
   <url type="homepage">https://www.sasview.org</url>
