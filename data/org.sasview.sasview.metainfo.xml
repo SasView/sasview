@@ -20,7 +20,7 @@
   <provides>org.sasview.sasview.desktop</provides>
 
   <description>
-    <p>  SasView is an open source Small Angle Scattering (SAS) analysis package used to analyze 1D and 2D scattering data in inverse space. Originally focused on neutron data (SANS), tha package has been extended for X-ray scattering and correlation space methods such as SESANS and Interferometry. SasView includes a number of other features, include PrView to invert SAS data to P(r), a resolution calculator, and a scattering length density calculator, to name a few. The package also has a simple plugin mechanism for users to add custom models.</p>
+    <p>SasView is an open source Small Angle Scattering (SAS) analysis package used to analyze 1D and 2D scattering data in inverse space. Originally focused on neutron data (SANS), tha package has been extended for X-ray scattering and correlation space methods such as SESANS and Interferometry. SasView includes a number of other features, include PrView to invert SAS data to P(r), a resolution calculator, and a scattering length density calculator, to name a few. The package also has a simple plugin mechanism for users to add custom models.</p>
   </description>
 
   <supports>
