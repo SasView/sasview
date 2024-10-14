@@ -6,9 +6,9 @@
   <project_license>BSD-3-Clause</project_license>
   <metadata_license>CC0</metadata_license>
   <summary> SasView is a Small Angle Scattering Analysis Software Package</summary>
-  <developer_name id="org.sasview">
+  <developer id="org.sasview">
     <name>SasView Developers</name>
-  </developer_name>
+  </developer>
   <content_rating type="oars-1.0" />
 
 
