@@ -4,7 +4,7 @@
   <id>org.sasview.sasview</id>
   <name>SasViw</name>
   <project_license>BSD-3-Clause</project_license>
-  <summary> SasView is a Small Angle Scattering Analysis Software Package, originally developed as part of the NSF DANSE project under the name SansView, now managed by an international collaboration of facilities. Feedback and contributions are welcome and encouraged. </summary>
+  <summary> SasView is a Small Angle Scattering Analysis Software Package.</summary>
   <developer_name id="org.sasview">
     <name>SasView Developers</name>
   </developer_name>
