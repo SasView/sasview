@@ -32,7 +32,16 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/SasView/sasview/blob/files-for-flatpak/build_tools/application_metadata/Screenshots/basic_fit.png?raw=true</image>
+      <image>https://github.com/SasView/sasview.github.io/blob/42f0ba11fc0265c702e8c38f375f24c2a61545b6/img/basic_fit.png</image>
+      <caption>SasView basic fitting</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/SasView/sasview.github.io/blob/42f0ba11fc0265c702e8c38f375f24c2a61545b6/img/SVwelcome.png</image>
+      <caption>SasView welcome screen</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/SasView/sasview.github.io/blob/42f0ba11fc0265c702e8c38f375f24c2a61545b6/img/sasview_logo_v6.png</image>
+      <caption>SasView logo</caption>
     </screenshot>
   </screenshots>
 
