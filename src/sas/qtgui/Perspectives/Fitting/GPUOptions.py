@@ -57,6 +57,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.add_options()
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")
+        self._staged_open_cl = None
 
         self.testButton.clicked.connect(self.testButtonClicked)
         self.helpButton.clicked.connect(self.helpButtonClicked)
@@ -76,7 +77,9 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
 
     def applyNonConfigValues(self):
         """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
-        self.set_sas_open_cl()
+        if self._staged_open_cl:
+            self.set_sas_open_cl()
+            self._staged_open_cl = None
 
     def add_options(self):
         """
@@ -108,6 +111,10 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
 
         self.openCLCheckBoxGroup.setMinimumWidth(self.optionsLayout.sizeHint().width()+10)
 
+    def _unStageChange(self, key: str):
+        self._staged_open_cl = None
+        super()._unStageChange(key)
+
     def _stage_sas_open_cl(self, checked):
         checked = None
         for box in self.radio_buttons:
@@ -115,9 +122,10 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
                 checked = box
         if checked:
             sas_open_cl = self.cl_options[str(checked.text())]
+            self._staged_open_cl = sas_open_cl
             self._stageChange('SAS_OPENCL', sas_open_cl)
 
-    def set_sas_open_cl(self):
+    def get_sas_open_cl(self):
         """
         Set SAS_OPENCL value when tests run or OK button clicked
         """
@@ -131,17 +139,25 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
             raise RuntimeError("Error: No radio button selected somehow")
 
         sas_open_cl = self.cl_options[str(checked.text())]
-        no_opencl_msg = sas_open_cl.lower() == "none"
+        return sas_open_cl
+
+    def set_sas_open_cl(self):
+        sas_open_cl = self.get_sas_open_cl()
         lib.reset_sasmodels(sas_open_cl)
 
-        return no_opencl_msg
+        return sas_open_cl
 
     def testButtonClicked(self):
         """
         Run sasmodels check from here and report results from
         """
         # Set the SAS_OPENCL value prior to running to ensure proper value is used
-        no_opencl_msg = self.set_sas_open_cl()
+        if self._staged_open_cl is not None:
+            sas_open_cl = self.set_sas_open_cl()
+            self._staged_open_cl = None
+        else:
+            sas_open_cl = self.get_sas_open_cl()
+        no_opencl_msg = sas_open_cl.lower() == "none"
         self._unStageChange('SAS_OPENCL')
         self.model_tests = sasmodels.model_test.make_suite('opencl', ['all'])
         number_of_tests = len(self.model_tests._tests)
@@ -292,7 +308,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         """
         Close the window after modifying the SAS_OPENCL value
         """
-        self.set_sas_open_cl()
+        self.applyNonConfigValues()
         self.closeEvent(None)
 
     def closeEvent(self, event):
