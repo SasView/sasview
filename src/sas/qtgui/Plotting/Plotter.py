@@ -531,10 +531,7 @@ class PlotterWidget(PlotterBase):
         # MPL style names
         styles = ['normal', 'italic', 'oblique']
         # QFont::Style maps directly onto the above
-        try:
-            mpl_font.set_style(styles[extra_font.style()])
-        except:
-            pass
+        mpl_font.set_style(styles[extra_font.style().value])
 
         if len(extra_text) > 0:
             new_text = self.ax.text(pos_x,
