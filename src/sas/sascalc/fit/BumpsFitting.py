@@ -274,6 +274,9 @@ class BumpsFit(FitEngine):
         # Run the fit
         result = run_bumps(problem, handler, curr_thread)
         if handler is not None:
+            if result['errors']:
+                handler.error(result['errors'])
+                return []
             handler.update_fit(last=True)
 
         # TODO: shouldn't reference internal parameters of fit problem
