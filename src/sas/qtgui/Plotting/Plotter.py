@@ -531,10 +531,7 @@ class PlotterWidget(PlotterBase):
         # MPL style names
         styles = ['normal', 'italic', 'oblique']
         # QFont::Style maps directly onto the above
-        try:
-            mpl_font.set_style(styles[extra_font.style()])
-        except:
-            pass
+        mpl_font.set_style(styles[extra_font.style().value])
 
         if len(extra_text) > 0:
             new_text = self.ax.text(pos_x,
@@ -919,6 +916,11 @@ class PlotterWidget(PlotterBase):
         """
         Left button down and ready to drag
         """
+        try:
+            self.x_click = float(event.xdata)  # / size_x
+            self.y_click = float(event.ydata)  # / size_y
+        except:
+            self.position = None
         # Check that the LEFT button was pressed
         if event.button != 1:
             return
@@ -930,11 +932,6 @@ class PlotterWidget(PlotterBase):
                 return
         if event.inaxes is None:
             return
-        try:
-            self.x_click = float(event.xdata)  # / size_x
-            self.y_click = float(event.ydata)  # / size_y
-        except:
-            self.position = None
 
         x_str = GuiUtils.formatNumber(self.x_click)
         y_str = GuiUtils.formatNumber(self.y_click)
