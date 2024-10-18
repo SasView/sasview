@@ -34,6 +34,9 @@ New Features
 * Add command line interface to allow scripts to be run from sasview.exe by @pkienzle in https://github.com/SasView/sasview/pull/2280
 * Local documentation generation by @tsole0 in https://github.com/SasView/sasview/pull/2576
 * What's new dialog by @lucas-wilkins in https://github.com/SasView/sasview/pull/2608
+* Flatpak release for Linux by @jamescrake-merani in https://github.com/SasView/sasview/pull/3121
+* Separate MacOS releases for both Silicon and Intel architectures by @wpotrzebowski in https://github.com/SasView/sasview/pull/2917
+* A new logo and welcome screen by @wpotrzebowski in https://github.com/SasView/sasview/pull/2920
 
 Feature Enhancements
 ^^^^^^^^^^^^^^^^^^^^
@@ -47,6 +50,7 @@ Tool Enhancements
 _________________
 * Tool[s] menu reorganised and renamed by @lucas-wilkins in https://github.com/SasView/sasview/pull/2430
 * SLD calculator tool buttons by @rozyczko in https://github.com/SasView/sasview/pull/2302
+* SLD calculation allows density to be calculated from component weight fractions by @krzywon in https://github.com/SasView/sasview/pull/2986
 * Update sas_gen.py to speed up data loading by @timsnow in https://github.com/SasView/sasview/pull/2617
 * Read oommf v2 files by @wpotrzebowski in https://github.com/SasView/sasview/pull/2116
 
@@ -116,6 +120,7 @@ ___________
 * Cherry-picked new_numpy_behaviour by @wpotrzebowski in https://github.com/SasView/sasview/pull/2655
 * Fit report save fix by @rozyczko in https://github.com/SasView/sasview/pull/2684
 * Fix for empty save format for grid files by @rozyczko in https://github.com/SasView/sasview/pull/2683
+* The installer warns the user if the chosen installation directory is already populated by @krzywon in https://github.com/SasView/sasview/pull/3042
 
 Documentation Changes
 ^^^^^^^^^^^^^^^^^^^^^
@@ -155,7 +160,6 @@ ______________________
 * Run.py: Prioritize sibling modules over installed modules by @krzywon in https://github.com/SasView/sasview/pull/2772
 * Use sasdata package in place of sas.sascalc.dataloader by @krzywon in https://github.com/SasView/sasview/pull/2141
 * Clean up sas.sasview by @lucas-wilkins in https://github.com/SasView/sasview/pull/2154, https://github.com/SasView/sasview/pull/2159, and https://github.com/SasView/sasview/pull/2161
-
 
 New in Version 5.0.6
 --------------------
@@ -222,8 +226,15 @@ New Models
 ^^^^^^^^^^
 The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.5 was released:
 
-* Pringle-Schmidt Helices (documentation update)
-* Lamellar Slab Partition Constant
+* [Superball](https://marketplace.sasview.org/models/154/)
+* [core_multi_shell_cylinder](https://marketplace.sasview.org/models/155/)
+* [fuzzy_sphere_extended](https://marketplace.sasview.org/models/156/)
+* [Spherical Micelle](https://marketplace.sasview.org/models/157/)
+* [Cylindrical Micelle](https://marketplace.sasview.org/models/158/)
+* [Long Cylindrical Micelle](https://marketplace.sasview.org/models/159/)
+* [Enhanced Cylinder Models for SasView](https://marketplace.sasview.org/models/161/)
+* [Enhanced Ellipsoid Models for SasView](https://marketplace.sasview.org/models/163/)
+* [Supercylinder](https://marketplace.sasview.org/models/164/)
 
 Known Issues
 ^^^^^^^^^^^^
