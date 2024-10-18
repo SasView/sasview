@@ -274,6 +274,9 @@ class BumpsFit(FitEngine):
         # Run the fit
         result = run_bumps(problem, handler, curr_thread)
         if handler is not None:
+            if result['errors']:
+                handler.error(result['errors'])
+                return []
             handler.update_fit(last=True)
 
         # TODO: shouldn't reference internal parameters of fit problem
@@ -412,8 +415,14 @@ def run_bumps(problem, handler, curr_thread):
     success = best is not None
     try:
         stderr = fitdriver.stderr() if success else None
-        cov = (fitdriver.cov() if not hasattr(fitdriver.fitter, 'state') else
-               np.cov(fitdriver.fitter.state.draw().points.T))
+        if not hasattr(fitdriver.fitter, 'state'):
+            cov = fitdriver.cov()
+        else:
+            x = fitdriver.fitter.state.draw().points
+            if x.shape[1] > 1:
+                cov = np.cov(x.T, bias=1)
+            else:
+                cov = np.array([[np.var(x.T, ddof=1)]])
     except Exception as exc:
         errors.append(str(exc))
         errors.append(traceback.format_exc())
