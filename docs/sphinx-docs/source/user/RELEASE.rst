@@ -161,6 +161,24 @@ ______________________
 * Use sasdata package in place of sas.sascalc.dataloader by @krzywon in https://github.com/SasView/sasview/pull/2141
 * Clean up sas.sasview by @lucas-wilkins in https://github.com/SasView/sasview/pull/2154, https://github.com/SasView/sasview/pull/2159, and https://github.com/SasView/sasview/pull/2161
 
+New Models
+^^^^^^^^^^
+One new model has been added to SasView since v5.0.6 was released.
+
+* SANS in bulk ferromagnets by @stellhorn in https://github.com/SasView/sasmodels/pull/592
+
+The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.6 was released:
+
+* [Superball](https://marketplace.sasview.org/models/154/)
+* [core_multi_shell_cylinder](https://marketplace.sasview.org/models/155/)
+* [fuzzy_sphere_extended](https://marketplace.sasview.org/models/156/)
+* [Spherical Micelle](https://marketplace.sasview.org/models/157/)
+* [Cylindrical Micelle](https://marketplace.sasview.org/models/158/)
+* [Long Cylindrical Micelle](https://marketplace.sasview.org/models/159/)
+* [Enhanced Cylinder Models for SasView](https://marketplace.sasview.org/models/161/)
+* [Enhanced Ellipsoid Models for SasView](https://marketplace.sasview.org/models/163/)
+* [Supercylinder](https://marketplace.sasview.org/models/164/)
+
 New in Version 5.0.6
 --------------------
 This is a point release which fixes a number of issues reported in earlier versions
@@ -226,15 +244,8 @@ New Models
 ^^^^^^^^^^
 The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.5 was released:
 
-* [Superball](https://marketplace.sasview.org/models/154/)
-* [core_multi_shell_cylinder](https://marketplace.sasview.org/models/155/)
-* [fuzzy_sphere_extended](https://marketplace.sasview.org/models/156/)
-* [Spherical Micelle](https://marketplace.sasview.org/models/157/)
-* [Cylindrical Micelle](https://marketplace.sasview.org/models/158/)
-* [Long Cylindrical Micelle](https://marketplace.sasview.org/models/159/)
-* [Enhanced Cylinder Models for SasView](https://marketplace.sasview.org/models/161/)
-* [Enhanced Ellipsoid Models for SasView](https://marketplace.sasview.org/models/163/)
-* [Supercylinder](https://marketplace.sasview.org/models/164/)
+* Pringle-Schmidt Helices (documentation update)
+* Lamellar Slab Partition Constant
 
 Known Issues
 ^^^^^^^^^^^^
