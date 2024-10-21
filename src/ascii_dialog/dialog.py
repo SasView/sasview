@@ -28,6 +28,7 @@ class AsciiDialog(QDialog):
         super().__init__()
 
         self.files: dict[str, list[str]] = {}
+        self.files_full_path: dict[str, str] = {}
         self.files_is_included: dict[str, list[bool]] = {}
         self.current_filename: str | None = None
 
@@ -281,6 +282,7 @@ class AsciiDialog(QDialog):
             # TODO: This assumes that no two files will be loaded with the same
             # name. This might not be a reasonable assumption.
             self.files[basename] = file_csv
+            self.files_full_path[basename] = filename
             self.current_filename = basename
             # Reset checkboxes
             self.files_is_included[basename] = []
