@@ -115,6 +115,11 @@ class AsciiDialog(QWidget):
         # Warning Label
         self.warning_label = WarningLabel(self.requiredMissing(), self.duplicateColumns())
 
+        # Done button
+        # TODO: Not entirely sure what to call/label this. Just going with 'done' for now.
+
+        self.done_button = QPushButton('Done')
+
         self.layout = QVBoxLayout(self)
 
         self.layout.addLayout(self.filename_unload_layout)
@@ -127,6 +132,7 @@ class AsciiDialog(QWidget):
         self.layout.addWidget(self.col_editor)
         self.layout.addWidget(self.table)
         self.layout.addWidget(self.warning_label)
+        self.layout.addWidget(self.done_button)
 
     @property
     def raw_csv(self) -> list[str] | None:
