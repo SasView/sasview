@@ -44,9 +44,6 @@ class ColumnUnit(QWidget):
         new_combo_box = QComboBox()
         configure_size_policy(new_combo_box)
         new_combo_box.setEditable(True)
-        # word_list = ['alpha', 'omega', 'omicron', 'zeta']
-        # completer = QCompleter(word_list, self)
-        # new_combo_box.setCompleter(completer)
         self.updateUnits(new_combo_box, selected_option)
         new_combo_box.currentTextChanged.connect(self.onUnitChange)
         return new_combo_box
