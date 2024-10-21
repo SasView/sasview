@@ -120,7 +120,7 @@ class AsciiDialog(QWidget):
         # TODO: Not entirely sure what to call/label this. Just going with 'done' for now.
 
         self.done_button = QPushButton('Done')
-        self.done_button.connect(self.onDoneButton)
+        self.done_button.clicked.connect(self.onDoneButton)
 
         self.layout = QVBoxLayout(self)
 
