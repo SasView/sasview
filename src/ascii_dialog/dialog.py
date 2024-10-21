@@ -439,7 +439,8 @@ if __name__ == "__main__":
 
     dialog = AsciiDialog()
     status = dialog.exec()
-    if status == QDialog.accepted:
+    # 1 means the dialog was accepted.
+    if status == 1:
         print(dialog.params)
 
     exit()
