@@ -29,7 +29,8 @@ def get_ausaxs():
     elif _os == OS.LINUX:
         lib = "libausaxs.so"
     elif _os == OS.MAC:
-        lib = "libausaxs-" + platform.machine() + ".dylib"
+        lib = "libausaxs.dylib"
+        # lib = "libausaxs-" + platform.machine() + ".dylib"
     if lib is not None:
         # we have to use a relative path since the package is not installed yet
         base_loc = "src/sas/sascalc/calculator/ausaxs/lib/"
@@ -41,9 +42,6 @@ def get_ausaxs():
 
         with open(base_loc+lib, "wb") as f:
             f.write(response.content)
-            print("Downloaded AUSAXS library:", lib)
-            import os
-            print(f"Location: {base_loc+lib}, found by path: {'yes' if os.path.exists(base_loc+lib) else 'no'}")
 
 def fetch_external_dependencies(): 
     #surround with try/except to avoid breaking the build if the download fails
