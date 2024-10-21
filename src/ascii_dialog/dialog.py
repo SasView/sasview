@@ -1,6 +1,6 @@
 from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, Qt
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, \
-    QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication
+    QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication, QDialog
 from PySide6.QtCore import QModelIndex, QPoint, Slot
 from selection_menu import SelectionMenu
 from warning_label import WarningLabel
@@ -17,7 +17,7 @@ NOFILE_TEXT = "Click the button below to load a file."
 
 dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
 
-class AsciiDialog(QWidget):
+class AsciiDialog(QDialog):
     """A dialog window allowing the user to adjust various properties regarding
     how an ASCII file should be interpreted. This widget allows the user to
     visualise what the data will look like with the parameter the user has
@@ -436,8 +436,8 @@ This could potentially be because the file is not an ASCII format.""")
 if __name__ == "__main__":
     app = QApplication([])
 
-    widget = AsciiDialog()
-    widget.show()
+    dialog = AsciiDialog()
+    dialog.exec()
 
 
     exit(app.exec())
