@@ -431,13 +431,15 @@ This could potentially be because the file is not an ASCII format.""")
             self.excluded_lines,
             self.seperators.items()
         )
-        # TODO: This value needs to be returned somehow.
+        self.params = params
+        self.accept()
 
 if __name__ == "__main__":
     app = QApplication([])
 
     dialog = AsciiDialog()
-    dialog.exec()
+    status = dialog.exec()
+    if status == QDialog.accepted:
+        print(dialog.params)
 
-
-    exit(app.exec())
+    exit()
