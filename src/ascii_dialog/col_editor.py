@@ -68,6 +68,7 @@ class ColEditor(QWidget):
         """Get a list of all of the currently selected columns."""
         return [widget.currentColumn for widget in self.option_widgets]
 
+    @property
     def columns(self) -> list[tuple[str, NamedUnit]]:
         return [(widget.currentColumn, widget.currentUnit) for widget in self.option_widgets]
 
