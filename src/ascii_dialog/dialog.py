@@ -443,6 +443,7 @@ if __name__ == "__main__":
     status = dialog.exec()
     # 1 means the dialog was accepted.
     if status == 1:
-        print(dialog.params)
+        loaded = load_data(dialog.params)
+        print(loaded.summary())
 
     exit()
