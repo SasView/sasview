@@ -4,7 +4,7 @@ from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QComboBox, QCompleter, QHBoxLayout, QSizePolicy, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 from sasdata.dataset_types import unit_kinds
-from sasdata.quantities.units import symbol_lookup
+from sasdata.quantities.units import symbol_lookup, NamedUnit
 
 from unit_selector import UnitSelector
 
@@ -23,6 +23,7 @@ class ColumnUnit(QWidget):
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.col_widget)
         self.layout.addWidget(self.unit_widget)
+        self.current_option: str
 
     column_changed = Signal()
 
@@ -50,6 +51,7 @@ class ColumnUnit(QWidget):
 
     def updateUnits(self, unit_box: QComboBox, selected_option: str):
         unit_box.clear()
+        self.current_option = selected_option
         options = [unit.symbol for unit in unit_kinds[selected_option].units]
         # We don't have preferred units yet. In order to simulate this, just
         # take the first 5 options to display.
@@ -98,6 +100,11 @@ class ColumnUnit(QWidget):
         return self.col_widget.currentText()
 
     @property
-    def currentUnit(self):
+    def currentUnit(self) -> NamedUnit:
         """The currently selected unit."""
-        return symbol_lookup[self.unit_widget.currentText()]
+        current_unit_symbol = self.unit_widget.currentText()
+        for unit in unit_kinds[self.current_option].units:
+            if current_unit_symbol == unit.symbol:
+                return unit.symbol
+        # This error shouldn't really happen so if it does, it indicates there is a bug in the code.
+        raise ValueError("Current unit doesn't seem to exist")
