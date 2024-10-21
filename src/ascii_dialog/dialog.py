@@ -427,7 +427,7 @@ This could potentially be because the file is not an ASCII format.""")
     # TODO: Only works for one single file at the moment
     def onDoneButton(self):
         params = AsciiReaderParams(
-            self.filename_label.text(),
+            self.files_full_path[self.current_filename],
             self.startline_entry.value(),
             self.col_editor.columns,
             self.excluded_lines,
