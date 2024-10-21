@@ -9,6 +9,7 @@ from row_status_widget import RowStatusWidget
 from guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
 from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
+from sasdata.temp_ascii_reader import load_data, AsciiReaderParams
 import re
 
 TABLE_MAX_ROWS = 1000
@@ -119,6 +120,7 @@ class AsciiDialog(QWidget):
         # TODO: Not entirely sure what to call/label this. Just going with 'done' for now.
 
         self.done_button = QPushButton('Done')
+        self.done_button.connect(self.onDoneButton)
 
         self.layout = QVBoxLayout(self)
 
@@ -419,6 +421,17 @@ This could potentially be because the file is not an ASCII format.""")
     def datasetOptions(self) -> list[str]:
         current_dataset_type = self.currentDatasetType()
         return current_dataset_type.required + current_dataset_type.optional + ['<ignore>']
+
+    # TODO: Only works for one single file at the moment
+    def onDoneButton(self):
+        params = AsciiReaderParams(
+            self.filename_label.text(),
+            self.startline_entry.value(),
+            self.col_editor.columns,
+            self.excluded_lines,
+            self.seperators.items()
+        )
+        # TODO: This value needs to be returned somehow.
 
 if __name__ == "__main__":
     app = QApplication([])
