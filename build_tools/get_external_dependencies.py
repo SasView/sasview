@@ -43,7 +43,7 @@ def get_ausaxs():
             f.write(response.content)
             print("Downloaded AUSAXS library:", lib)
             import os
-            print(f"Location: {base_loc+lib}, found by path: {"yes" if os.path.exists(base_loc+lib) else "no"}")
+            print(f"Location: {base_loc+lib}, found by path: {'yes' if os.path.exists(base_loc+lib) else 'no'}")
 
 def fetch_external_dependencies(): 
     #surround with try/except to avoid breaking the build if the download fails
