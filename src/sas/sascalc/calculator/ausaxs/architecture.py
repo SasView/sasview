@@ -1,4 +1,5 @@
 from enum import Enum
+import platform
 
 class OS(Enum):
     WIN = 0
@@ -32,3 +33,17 @@ def get_shared_lib_extension():
     elif _os == OS.MAC:
         return ".dylib"
     return ""
+
+def get_ausaxs_filename():
+    """
+    Get the AUSAXS shared library filename for the current operating system.
+    """
+    _os = get_os()
+    lib = None
+    if _os == OS.WIN:
+        lib = "libausaxs.dll"
+    elif _os == OS.LINUX:
+        lib = "libausaxs.so"
+    elif _os == OS.MAC:
+        lib = "libausaxs-" + platform.machine() + ".dylib"
+    return lib
