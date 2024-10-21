@@ -78,7 +78,9 @@ if platform.system() == 'Windows':
     ])
 
 import os
-print(f"Library location: sas/sascalc/calculator/ausaxs/lib, found by path: {'yes' if os.path.exists('sas/sascalc/calculator/ausaxs/lib/libausaxs.dylib') else 'no'}")
+print(f"Library location: sas/sascalc/calculator/ausaxs/lib/libausaxs.dylib, found by path: {'yes' if os.path.exists('sas/sascalc/calculator/ausaxs/lib/libausaxs.dylib') else 'no'}")
+print(f"Library location: ../src/sas/sascalc/calculator/ausaxs/lib/libausaxs.dylib, found by path: {'yes' if os.path.exists('../src/sas/sascalc/calculator/ausaxs/lib/libausaxs.dylib') else 'no'}")
+print(f"Current location: {os.getcwd()}")
 a = Analysis(
     ['sasview.py'],
     pathex=[],
