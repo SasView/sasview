@@ -92,6 +92,8 @@ class ColumnUnit(QWidget):
         if self.unit_widget.currentText() == 'Select More':
             selector = UnitSelector(unit_kinds[self.col_widget.currentText()].name, False)
             selector.exec()
+            # We need the selection unit in the list of options, or else QT has some dodgy behaviour.
+            self.unit_widget.insertItem(-1, selector.selected_unit.symbol)
             self.unit_widget.setCurrentText(selector.selected_unit.symbol)
 
     @property
