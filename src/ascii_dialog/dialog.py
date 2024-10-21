@@ -150,7 +150,7 @@ class AsciiDialog(QDialog):
 
     @property
     def excluded_lines(self) -> set[int]:
-        return set([i for i, included in self.files_is_included if not included])
+        return set([i for i, included in self.files_is_included.items() if not included])
 
     def splitLine(self, line: str) -> list[str]:
         """Split a line in a CSV file based on which seperators the user has
