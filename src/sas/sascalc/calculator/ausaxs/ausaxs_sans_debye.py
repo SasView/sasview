@@ -15,17 +15,18 @@ class lib_state(Enum):
 def _attach_hooks():
     ausaxs = None
     ausaxs_state = lib_state.UNINITIALIZED
-    from sas.sascalc.calculator.ausaxs.architecture import get_ausaxs_filename
+    from sas.sascalc.calculator.ausaxs.architecture import get_shared_lib_extension
 
     # as_file extracts the dll if it is in a zip file and probably deletes it afterwards,
     # so we have to do all operations on the dll inside the with statement
     with resources.as_file(resources.files("sas.sascalc.calculator.ausaxs.lib")) as loc:
-        file = get_ausaxs_filename()
-        if (not file):
+        ext = get_shared_lib_extension()
+        if (ext == ""):
             logging.log("AUSAXS: Unsupported OS. Using default Debye implementation.")
             return None, lib_state.FAILED
 
-        path = loc.joinpath(file)
+        path = loc.joinpath("libausaxs" + ext)
+
         ausaxs_state = lib_state.READY
         try:
             # evaluate_sans_debye func

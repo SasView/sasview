@@ -77,6 +77,8 @@ if platform.system() == 'Windows':
         'win32.win32console',
     ])
 
+import os
+print(f"Library location: sas/sascalc/calculator/ausaxs/lib, found by path: {"yes" if os.path.exists(sas/sascalc/calculator/ausaxs/lib/libausaxs.dylib) else "no"}")
 a = Analysis(
     ['sasview.py'],
     pathex=[],
