@@ -1,6 +1,7 @@
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtCore import Slot, Signal
+from sasdata.quantities.units import NamedUnit
 from column_unit import ColumnUnit
 
 
@@ -66,6 +67,9 @@ class ColEditor(QWidget):
     def colNames(self) -> list[str]:
         """Get a list of all of the currently selected columns."""
         return [widget.currentColumn for widget in self.option_widgets]
+
+    def columns(self) -> list[tuple[str, NamedUnit]]:
+        return [(widget.currentColumn, widget.currentUnit) for widget in self.option_widgets]
 
     def replaceOptions(self, new_options: list[str]) -> None:
         """Replace options from which the user can choose for each column."""
