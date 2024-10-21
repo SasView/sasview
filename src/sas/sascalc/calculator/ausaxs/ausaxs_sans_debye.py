@@ -25,7 +25,7 @@ def _attach_hooks():
             logging.log("AUSAXS: Unsupported OS. Using default Debye implementation.")
             return None, lib_state.FAILED
 
-        loc.joinpath(file)
+        path = loc.joinpath(file)
         ausaxs_state = lib_state.READY
         try:
             # evaluate_sans_debye func
