@@ -22,11 +22,11 @@ def _attach_hooks():
     with resources.as_file(resources.files("sas.sascalc.calculator.ausaxs.lib")) as loc:
         ext = get_shared_lib_extension()
         if (ext == ""):
-            logging.log("AUSAXS: Unsupported OS. Using default Debye implementation.")
+            logging.info("AUSAXS: Unsupported OS. Using default Debye implementation.")
             return None, lib_state.FAILED
 
         path = loc.joinpath("libausaxs" + ext)
-        logging.log(f"AUSAXS: Library is {'present' if path.exists() else 'not present'}. Attempting to load library from {path}.")
+        logging.info(f"AUSAXS: Library is {'present' if path.exists() else 'not present'}. Attempting to load library from {path}.")
 
         ausaxs_state = lib_state.READY
         try:
@@ -45,10 +45,10 @@ def _attach_hooks():
             ]
             ausaxs.evaluate_sans_debye.restype = None # don't expect a return value
             ausaxs_state = lib_state.READY
-            logging.log("Successfully hooked into AUSAXS library.")
+            logging.info("AUSAXS: Successfully hooked into external library.")
         except Exception as e:
             ausaxs_state = lib_state.FAILED
-            logging.warning("Failed to hook into AUSAXS library, using default Debye implementation")
+            logging.warning("AUSAXS: Failed to hook into external library; using default Debye implementation")
             print(e)
     return ausaxs, ausaxs_state
 
@@ -121,7 +121,7 @@ def evaluate_sans_debye(q, coords, w):
             status = queue.get_nowait()
             first_time = False
         else:
-            logging.warning(f"External AUSAXS library seems to have crashed (exit code \"{p.exitcode}\"). Using default Debye implementation instead.")
+            logging.warning(f"AUSAXS: External library seems to have crashed (exit code \"{p.exitcode}\"). Using default Debye implementation instead.")
             ausaxs_state = lib_state.FAILED
             return sasview_sans_debye(q, coords, w)
 
@@ -135,7 +135,7 @@ def evaluate_sans_debye(q, coords, w):
         Iq, status = _invoke(q, coords, w)
 
     if (status != 0):
-        logging.warning(f"External AUSAXS library evaluation terminated unexpectedly (error code \"{status}\"). Using default Debye implementation instead.")
+        logging.warning(f"AUSAXS: External library evaluation terminated unexpectedly (error code \"{status}\"). Using default Debye implementation instead.")
         return sasview_sans_debye(q, coords, w)
 
     return Iq

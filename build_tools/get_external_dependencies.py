@@ -29,8 +29,8 @@ def get_ausaxs():
     elif _os == OS.LINUX:
         lib = "libausaxs.so"
     elif _os == OS.MAC:
-        lib = "libausaxs.dylib"
-        # lib = "libausaxs-" + platform.machine() + ".dylib"
+        # lib = "libausaxs.dylib"
+        lib = "libausaxs-" + platform.machine() + ".dylib"
     if lib is not None:
         # we have to use a relative path since the package is not installed yet
         base_loc = "src/sas/sascalc/calculator/ausaxs/lib/"
