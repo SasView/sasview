@@ -419,7 +419,6 @@ def run_bumps(problem, handler, curr_thread):
             x = fitdriver.fitter.state.draw().points
             n_parameters = x.shape[1]
             cov = np.cov(x.T, bias=True).reshape((n_parameters, n_parameters))
-            print(cov)
         else:
             cov = fitdriver.cov()
     except Exception as exc:
