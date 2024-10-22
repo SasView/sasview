@@ -415,14 +415,13 @@ def run_bumps(problem, handler, curr_thread):
     success = best is not None
     try:
         stderr = fitdriver.stderr() if success else None
-        if not hasattr(fitdriver.fitter, 'state'):
-            cov = fitdriver.cov()
-        else:
+        if hasattr(fitdriver.fitter, 'state'):
             x = fitdriver.fitter.state.draw().points
-            if x.shape[1] > 1:
-                cov = np.cov(x.T, bias=1)
-            else:
-                cov = np.array([[np.var(x.T, ddof=1)]])
+            n_parameters = x.shape[1]
+            cov = np.cov(x.T, bias=True).reshape((n_parameters, n_parameters))
+            print(cov)
+        else:
+            cov = fitdriver.cov()
     except Exception as exc:
         errors.append(str(exc))
         errors.append(traceback.format_exc())
