@@ -180,16 +180,16 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                     self.regenerateHtml(self.source.name)
 
             # Test to see if HTML does not exist or is older than python file
-            elif self.newer(self.source, url_str):
-                self.regenerateHtml(self.source.name)
+            elif not os.path.exists(url_str):
+                self.load404()
             # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
 
         elif "index" in url_str:
             # Regenerate if HTML is older than RST -- for index.html, which gets passed in differently because it is located in a different folder
             regen_string = rst_path / str(self.source.name).replace(".html", ".rst")
                 # Test to see if HTML does not exist or is older than python file
-            if self.newer(regen_string, self.source.absolute()):
-                self.regenerateHtml(regen_string)
+            if not os.path.exists(self.source.absolute()):
+                self.load404()
 
         else:
             # Regenerate if HTML is older than RST
@@ -199,8 +199,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             html_path = html_path / model_local_path.split('#')[0]  # Remove jump links
             regen_string = rst_path / model_local_path.replace('.html', '.rst').split('#')[0] #Remove jump links
                 # Test to see if HTML does not exist or is older than python file
-            if self.newer(regen_string, html_path):
-                self.regenerateHtml(regen_string)
+            if not os.path.exists(html_path):
+                self.load404()
         
         if self.regen_in_progress is False:
             self.loadHtml() #loads the html file specified in the source url to the QWebViewer
