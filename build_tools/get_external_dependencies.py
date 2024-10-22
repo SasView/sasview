@@ -30,15 +30,10 @@ def get_ausaxs():
         lib = "libausaxs.so"
     elif _os == OS.MAC:
         lib = "libausaxs.dylib"
-        # lib = "libausaxs-" + platform.machine() + ".dylib"
     if lib is not None:
         # we have to use a relative path since the package is not installed yet
         base_loc = "src/sas/sascalc/calculator/ausaxs/lib/"
         response = requests.get(url+lib)
-
-        # rename macos lib to a generic name without the architecture suffix
-        if _os is OS.MAC:
-            lib = "libausaxs.dylib"
 
         with open(base_loc+lib, "wb") as f:
             f.write(response.content)

@@ -26,8 +26,6 @@ def _attach_hooks():
             return None, lib_state.FAILED
 
         path = loc.joinpath("libausaxs" + ext)
-        logging.info(f"AUSAXS: Library is {'present' if path.exists() else 'not present'}. Attempting to load library from {path}.")
-
         ausaxs_state = lib_state.READY
         try:
             # evaluate_sans_debye func
@@ -45,7 +43,6 @@ def _attach_hooks():
             ]
             ausaxs.evaluate_sans_debye.restype = None # don't expect a return value
             ausaxs_state = lib_state.READY
-            logging.info("AUSAXS: Successfully hooked into external library.")
         except Exception as e:
             ausaxs_state = lib_state.FAILED
             logging.warning("AUSAXS: Failed to hook into external library; using default Debye implementation")
