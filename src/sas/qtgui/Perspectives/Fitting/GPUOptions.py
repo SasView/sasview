@@ -57,6 +57,9 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.add_options()
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")
+
+        # A local flag to know if opencl options have been staged or not. This is to prevent an OpenCL context refresh
+        #  when no refresh is required.
         self._staged_open_cl = None
 
         self.testButton.clicked.connect(self.testButtonClicked)
@@ -77,6 +80,8 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
 
     def applyNonConfigValues(self):
         """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
+        # This is called anytime *any* preference change is made, not only from this widget, but any other preferences
+        #  widget. Track if openCL is changed locally to be sure the setter should be invoked.
         if self._staged_open_cl:
             self.set_sas_open_cl()
             self._staged_open_cl = None
@@ -112,6 +117,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.openCLCheckBoxGroup.setMinimumWidth(self.optionsLayout.sizeHint().width()+10)
 
     def _unStageChange(self, key: str):
+        # The only staged change in this panel is the OpenCL selection. If any change is being unstaged, reset the flag.
         self._staged_open_cl = None
         super()._unStageChange(key)
 
