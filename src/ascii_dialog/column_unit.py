@@ -107,6 +107,6 @@ class ColumnUnit(QWidget):
         current_unit_symbol = self.unit_widget.currentText()
         for unit in unit_kinds[self.current_option].units:
             if current_unit_symbol == unit.symbol:
-                return unit.symbol
+                return unit
         # This error shouldn't really happen so if it does, it indicates there is a bug in the code.
         raise ValueError("Current unit doesn't seem to exist")
