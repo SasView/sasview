@@ -24,6 +24,7 @@ New Features
 ^^^^^^^^^^^^
 * Improvements to Corfunc by @lucas-wilkins in https://github.com/SasView/sasview/pull/2450
 * Corfunc perspective needs export and report capabilities by @lucas-wilkins in https://github.com/SasView/sasview/pull/2065
+* Replace the custom_config.py system with a more robust configuration system by @lucas-wilkins in https://github.com/SasView/sasview/pull/2168
 * Add a preferences window by @krzywon in https://github.com/SasView/sasview/pull/2167
 * Debye efficiency by @klytje in https://github.com/SasView/sasview/pull/2859
 * Rog and beta q by @smalex-z in https://github.com/SasView/sasview/pull/2535
