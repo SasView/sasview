@@ -140,13 +140,15 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         """
         Run sasmodels check from here and report results from
         """
+        # Set the SAS_OPENCL value prior to running to ensure proper value is used
+        no_opencl_msg = self.set_sas_open_cl()
+        self._unStageChange('SAS_OPENCL')
         self.model_tests = sasmodels.model_test.make_suite('opencl', ['all'])
         number_of_tests = len(self.model_tests._tests)
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(number_of_tests)
         self.progressBar.setVisible(True)
         self.testButton.setEnabled(False)
-        no_opencl_msg = self.set_sas_open_cl()
 
         test_thread = threads.deferToThread(self.testThread, no_opencl_msg)
         test_thread.addCallback(self.testComplete)
@@ -275,11 +277,9 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         """
         Open the help menu when the help button is clicked
         """
-
-        # TODO - in future this should be linked to the local documentation, once there is a robust way of doing that
-        
-        # Display the page in default browser
-        webbrowser.open("https://www.sasview.org/docs/user/qtgui/Perspectives/Fitting/gpu_setup.html#device-selection")
+        from sas.qtgui.MainWindow.GuiManager import GuiManager
+        help_location = "user/qtgui/Perspectives/Fitting/gpu_setup.html#device-selection"
+        GuiManager.showHelp(help_location)
 
     def reject(self):
         """
