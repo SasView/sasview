@@ -164,7 +164,7 @@ ______________________
 
 New Models
 ^^^^^^^^^^
-One new model has been added to SasView since v5.0.6 was released.
+One new model has been added to SasView since v5.0.6 was released:
 
 * SANS in bulk ferromagnets by @stellhorn in https://github.com/SasView/sasmodels/pull/592
 
@@ -179,6 +179,16 @@ The following models have been added to the `[Model Marketplace] <https://market
 * [Enhanced Cylinder Models for SasView](https://marketplace.sasview.org/models/161/)
 * [Enhanced Ellipsoid Models for SasView](https://marketplace.sasview.org/models/163/)
 * [Supercylinder](https://marketplace.sasview.org/models/164/)
+
+Known Issues
+^^^^^^^^^^^^
+All the known bugs/feature requests can be found in the issues on github.
+Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
+
+`[sasview] <https://github.com/SasView/sasview/milestones>`_
+
+`[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
+
 
 New in Version 5.0.6
 --------------------
