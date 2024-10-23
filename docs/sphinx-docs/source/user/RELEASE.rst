@@ -24,6 +24,7 @@ New Features
 ^^^^^^^^^^^^
 * Improvements to Corfunc by @lucas-wilkins in https://github.com/SasView/sasview/pull/2450
 * Corfunc perspective needs export and report capabilities by @lucas-wilkins in https://github.com/SasView/sasview/pull/2065
+* Allow for user adjusted relative weighting of different data sets in constrained fits by @Caddy-Jones in https://github.com/SasView/sasview/pull/1973
 * Replace the custom_config.py system with a more robust configuration system by @lucas-wilkins in https://github.com/SasView/sasview/pull/2168
 * Add a preferences window by @krzywon in https://github.com/SasView/sasview/pull/2167
 * Debye efficiency by @klytje in https://github.com/SasView/sasview/pull/2859
@@ -79,7 +80,6 @@ ________________________
 
 Fitting Enhancements
 ____________________
-* Allow for user adjusted relative weighting of different data sets in constrained fits by @Caddy-Jones in https://github.com/SasView/sasview/pull/1973
 * Improved/fixed category manager by @rozyczko in https://github.com/SasView/sasview/pull/2649
 * Handling of constraints for polydisperse parameters by @gonzalezma in https://github.com/SasView/sasview/pull/2348
 
