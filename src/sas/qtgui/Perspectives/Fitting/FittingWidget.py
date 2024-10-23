@@ -1888,10 +1888,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        regen_in_progress = False
         help_location = self.getHelpLocation(HELP_DIRECTORY_LOCATION)
-        if regen_in_progress is False:
-            self.parent.showHelp(help_location)
+        self.parent.showHelp(help_location)
 
     def getHelpLocation(self, tree_base) -> Path:
         # Actual file will depend on the current tab
@@ -1901,7 +1899,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         match tab_id:
             case 0:
                 # Look at the model and if set, pull out its help page
-                if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
+                # TODO: Disable plugin model documentation generation until issues can be resolved
+                plugin_names = [name for name, enabled in self.master_category_dict[CATEGORY_CUSTOM]]
+                if (self.kernel_module is not None
+                        and hasattr(self.kernel_module, 'name')
+                        and self.kernel_module.id not in plugin_names):
                     tree_location = tree_base / "user" / "models"
                     return tree_location / f"{self.kernel_module.id}.html"
                 else:
