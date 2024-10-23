@@ -166,7 +166,7 @@ New Models
 ^^^^^^^^^^
 One new model has been added to SasView since v5.0.6 was released:
 
-* SANS in bulk ferromagnets by @stellhorn in https://github.com/SasView/sasmodels/pull/592
+* [spin_structure_ferromagnets_3D](https://marketplace.sasview.org/models/140/) SANS in bulk ferromagnets by @stellhorn in https://github.com/SasView/sasmodels/pull/592
 
 The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.6 was released:
 
