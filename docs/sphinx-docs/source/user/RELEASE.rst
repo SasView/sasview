@@ -34,6 +34,7 @@ New Features
 * Slicer extension by @butlerpd in https://github.com/SasView/sasview/pull/1919
 * Wedge slicer by @ehewins in https://github.com/SasView/sasview/pull/2566
 * Add command line interface to allow scripts to be run from sasview.exe by @pkienzle in https://github.com/SasView/sasview/pull/2280
+* Documentation displayed in a SasView window by @tsole0 in https://github.com/SasView/sasview/pull/2576
 * What's new dialog by @lucas-wilkins in https://github.com/SasView/sasview/pull/2608
 * Flatpak release for Linux by @jamescrake-merani in https://github.com/SasView/sasview/pull/3121
 * Separate MacOS releases for both Silicon and Intel architectures by @wpotrzebowski in https://github.com/SasView/sasview/pull/2917
