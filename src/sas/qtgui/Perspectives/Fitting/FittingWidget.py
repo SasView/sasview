@@ -1903,7 +1903,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 plugin_names = [name for name, enabled in self.master_category_dict[CATEGORY_CUSTOM]]
                 if (self.kernel_module is not None
                         and hasattr(self.kernel_module, 'name')
-                        and self.kernel_module.id not in plugin_names):
+                        and self.kernel_module.id not in plugin_names
+                        and not re.match("[A-Za-z0-9_-]+[+*@][A-Za-z0-9_-]+", self.kernel_module.id)):
                     tree_location = tree_base / "user" / "models"
                     return tree_location / f"{self.kernel_module.id}.html"
                 else:
