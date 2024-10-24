@@ -1274,6 +1274,8 @@ class PDBReader(object):
                 except Exception as exc:
                     self.logger.error(f"Failed to read line: {line}")
                     self.logger.exception(exc)
+                    self.logger.error(f"Aborting reading of file {path}.")
+                    return None
 
             # Reshape stuff for file
 

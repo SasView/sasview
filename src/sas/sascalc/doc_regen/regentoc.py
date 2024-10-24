@@ -67,6 +67,9 @@ def generate_toc(model_files: list[str]):
         model_info = load_model_info(item)
         if model_info.category is None:
             print("Missing category for", item, file=sys.stderr)
+            category.setdefault('custom', []).append(model_name)
+        elif 'plugin_models' in item:
+            category.setdefault('custom', []).append(model_name)
         else:
             category.setdefault(model_info.category, []).append(model_name)
 
@@ -95,8 +98,8 @@ def generate_toc(model_files: list[str]):
         'Shape-Independent Functions')
     struct_toc = _make_category(
         'structure-factor', 'Structure-factor', 'Structure Factors')
-    #custom_toc = _make_category(
-    #    'custom-models', 'Custom-models', 'Custom Models')
+    custom_toc = _make_category(
+        'custom-models', 'Custom-models', 'Custom Models')
 
     # remember to top level categories
     cat_files = {
@@ -104,7 +107,7 @@ def generate_toc(model_files: list[str]):
         'shape':model_toc,
         'shape-independent':free_toc,
         'structure-factor': struct_toc,
-        #'custom': custom_toc,
+        'custom': custom_toc,
         }
 
     # Process the model lists
@@ -129,7 +132,7 @@ def generate_toc(model_files: list[str]):
     #_add_subcategory('shape', model_toc)
     _add_subcategory('shape-independent', model_toc)
     _add_subcategory('structure-factor', model_toc)
-    #_add_subcategory('custom-models', model_toc)
+    _add_subcategory('custom-models', model_toc)
 
     # Close the top-level category files
     #model_toc.close()

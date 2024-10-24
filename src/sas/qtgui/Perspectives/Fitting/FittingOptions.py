@@ -66,6 +66,10 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         # Assign appropriate validators
         self.assignValidators()
 
+        # Assign signals
+        self.addSignals()
+        self.cmdHelp.setText(f'Help: {self.cbAlgorithm.currentText()}')
+
         # To prevent errors related to parent, connect the combo box changes once the widget is instantiated
         self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
         self.cbAlgorithmDefault.currentIndexChanged.connect(self.onDefaultAlgorithmChange)
@@ -87,6 +91,10 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         name = [n.name for n in fitters.FITTERS if n.id == self.current_fitter_id][0]
         self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(name))
         self._algorithm_change(self.cbAlgorithm.currentIndex())
+    
+    def addSignals(self):
+        self.cmdHelp.clicked.connect(self.onHelp)
+        self.cbAlgorithm.currentIndexChanged.connect(lambda: self.cmdHelp.setText(f"{self.cmdHelp.text().split(' ')[0]} {self.cbAlgorithm.currentText()}"))
 
     def assignValidators(self):
         """
@@ -222,15 +230,17 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         """
         Show the "Fitting options" section of help
         """
-        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION
-        tree_location += "/user/qtgui/Perspectives/Fitting/"
+        from sas.qtgui.MainWindow.GuiManager import GuiManager
+        tree_location = "/user/qtgui/Perspectives/Fitting/"
 
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id
         # will just make the page displayed from the top
-        helpfile = "optimizer.html#fit-" + self.current_fitter_id 
+        selected_fit_algorithm = self.cbAlgorithm.currentText()
+        fitter_id = [n.id for n in fitters.FITTERS if n.name == selected_fit_algorithm][0]
+        helpfile = "optimizer.html#fit-" + fitter_id
         help_location = tree_location + helpfile
-        webbrowser.open('file://' + os.path.realpath(help_location))
+        GuiManager.showHelp(help_location)
 
     def widgetFromOption(self, option_id, current_fitter=None):
         """

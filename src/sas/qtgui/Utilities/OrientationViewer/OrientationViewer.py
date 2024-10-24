@@ -306,9 +306,9 @@ class OrientationViewer(QtWidgets.QWidget):
 
     def onHelp(self):
         # Use a web link until document viewer is in a good enough state to use
-        url = "https://www.sasview.org/docs/user/qtgui/Perspectives/Fitting/orientation/orientation.html"
-
-        webbrowser.open(url)
+        from sas.qtgui.MainWindow.GuiManager import GuiManager
+        url = "/user/qtgui/Perspectives/Fitting/orientation/orientation.html"
+        GuiManager.showHelp(url)
 
 
 # Code for handling multiple orientation viewers

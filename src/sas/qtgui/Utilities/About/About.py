@@ -25,7 +25,8 @@ class About(QDialog):
         ("Australian Nuclear Science and Technology Organisation", "ansto.svg", web.ansto_url),
         ("Bundesanstalt für Materialforschung", "bam.png", web.bam_url),
         ("Technische Universiteit Delft", "delft.png", web.delft_url),
-        ("Diamond Light Source", "diamond.png", web.diamond_url)
+        ("Diamond Light Source", "diamond.png", web.diamond_url),
+        ("SciLifeLab", "scilifelab.png", web.scilifelab_url)
     ]
 
     def __init__(self, parent=None):
@@ -164,7 +165,7 @@ class About(QDialog):
                 <p>
                     This work originally developed as part of the DANSE project funded by the NSF under
                      grant DMR-0520547, and currently maintained by UTK, NIST, UMD, ORNL, ISIS, ESS, ILL,
-                     ANSTO, TU Delft, DLS, and the scattering community.
+                     ANSTO, TU Delft, DLS, SciLifeLab, and the scattering community.
                 </p>
                 <p>
                     SasView also contains code developed with funding from the EU Horizon 2020 programme under

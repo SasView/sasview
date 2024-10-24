@@ -8,7 +8,8 @@ from PySide6 import QtGui
 from PySide6 import QtWidgets
 
 from bumps import options
-from bumps import fitters
+
+from sas.system.config import config
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -50,9 +51,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 1
 
-        # The default optimizer
-        self.optimizer = 'Levenberg-Marquardt'
-
         # Dataset index -> Fitting tab mapping
         self.dataToFitTab = {}
 
@@ -79,7 +77,8 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
         self.fit_options_widget = FittingOptions(config=self.fit_options)
-        self.fit_options.selected_id = fitters.MPFit.id
+        self.fit_options.selected_id = config.config.FITTING_DEFAULT_OPTIMIZER
+        self.optimizer = self.fit_options.selected_name
 
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)

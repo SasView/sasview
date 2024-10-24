@@ -13,6 +13,7 @@ class WebLinks:
             "https://www.tudelft.nl/en/faculty-of-applied-sciences/business/facilities/reactor-institute-delft"
         self.inst_url = "https://www.utk.edu"
         self.diamond_url = "http://www.diamond.ac.uk"
+        self.scilifelab_url = "https://www.scilifelab.se"
 
         self.homepage_url = "https://www.sasview.org"
         self.download_url = 'https://github.com/SasView/sasview/releases/latest'

@@ -22,7 +22,7 @@ User Inputs
     This field defines the material for which you are calculating the SLD. The section "`Specifying Materials or Mixtures in the Molecular Formula Field`_" offers further guidance on how to enter molecules, biomolecules, and more complex mixtures.
 
 **Mass Density** (|g/cm^3|)
-    This field defines the density of the material for which you are calculating the SLD. Density uncertainty is likely the largest source of error in the SLD calculator.
+    This field defines the density of the material for which you are calculating the SLD. Density uncertainty is likely the largest source of error in the SLD calculator. This field may be excluded in cases where the mass density of each individual component is provided in the formula field.
 
 **Neutron Wavelength** (|Ang|)
     Wavelength is used to calculate the neutron scattering cross-section and 1/e length. It is required for neutron calculations and entered in units of |Ang|.
@@ -73,13 +73,13 @@ Specifying Materials or Mixtures in the Molecular Formula Field
 
 *For isotopic substitution you must also adjust the density for your mixture.* There is a density calculator in SASview that may be useful, but measurement with a density meter is recommended.
 
-**Mass Fraction** can be entered with each component of the mixture written as XX%wt "component" and each component separated with //. The mass fraction of the last component does not need to be specified as the sum of the fractions must add to 100. The mass density field must be updated to specify the density of the mixture. For example:
+**Mass Fraction** can be entered with each component of the mixture written as XX%wt *or* XXwt% "component" and each component separated with //. The mass fraction of the last component does not need to be specified as the sum of the fractions must add to 100. The mass density field must be updated to specify the density of the mixture. For example:
 
     50%wt Co // Ti
 
     1%wtNaCl // 50%wtD2O // H2O
 
-**Volume Fraction** can be entered in the same way by substituting *%vol* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field must also be updated to specify the density of the mixture. (Note: vol% and wt% will lead to syntax errors).
+**Volume Fraction** can be entered in the same way by substituting *%vol or vol%* for *%wt*. The density of each component must be specified using an @density notation, where density is in units of |g/cm^3|. The mass density field will be calculated from the molecular formula when all individual densities are provided and the density field will  be greyed out and ignored.
 
     50%vol H2O@1 // D2O\@1.1
 
@@ -99,7 +99,7 @@ For even more complicated solutions, parenthesis can be nested and the number of
 
 *Reminder the solution density is the largest source of error for these calculations.* Measure the solution density for an accurate result. For example:
 
-    A brine solution containing 10.44 g Al(NO\ :sub:`3`\)\ :sub:`3`\ |cdot| 9H\ :sub:`2`\O and 27.51 g D\ :sub:`2`\O was prepared for a wormlike micelle experiments. The solution density was measured with a density meter and found to be 1.22 (|g/cm^3|). Using the scattering lenth density calculator we enter:
+    A brine solution containing 10.44 g Al(NO\ :sub:`3`\)\ :sub:`3`\ |cdot| 9H\ :sub:`2`\O and 27.51 g D\ :sub:`2`\O was prepared for a wormlike micelle experiments. The solution density was measured with a density meter and found to be 1.22 (|g/cm^3|). Using the scattering length density calculator we enter:
 
     10.44g Al(NO3)3(H2O)9 // 27.5126g D2O
 

@@ -24,6 +24,8 @@ New Features
 ^^^^^^^^^^^^
 * Improvements to Corfunc by @lucas-wilkins in https://github.com/SasView/sasview/pull/2450
 * Corfunc perspective needs export and report capabilities by @lucas-wilkins in https://github.com/SasView/sasview/pull/2065
+* Allow for user adjusted relative weighting of different data sets in constrained fits by @Caddy-Jones in https://github.com/SasView/sasview/pull/1973
+* Replace the custom_config.py system with a more robust configuration system by @lucas-wilkins in https://github.com/SasView/sasview/pull/2168
 * Add a preferences window by @krzywon in https://github.com/SasView/sasview/pull/2167
 * Debye efficiency by @klytje in https://github.com/SasView/sasview/pull/2859
 * Rog and beta q by @smalex-z in https://github.com/SasView/sasview/pull/2535
@@ -32,8 +34,11 @@ New Features
 * Slicer extension by @butlerpd in https://github.com/SasView/sasview/pull/1919
 * Wedge slicer by @ehewins in https://github.com/SasView/sasview/pull/2566
 * Add command line interface to allow scripts to be run from sasview.exe by @pkienzle in https://github.com/SasView/sasview/pull/2280
-* Local documentation generation by @tsole0 in https://github.com/SasView/sasview/pull/2576
+* Documentation displayed in a SasView window by @tsole0 in https://github.com/SasView/sasview/pull/2576
 * What's new dialog by @lucas-wilkins in https://github.com/SasView/sasview/pull/2608
+* Flatpak release for Linux by @jamescrake-merani in https://github.com/SasView/sasview/pull/3121
+* Separate MacOS releases for both Silicon and Intel architectures by @wpotrzebowski in https://github.com/SasView/sasview/pull/2917
+* A new logo and welcome screen by @wpotrzebowski in https://github.com/SasView/sasview/pull/2920
 
 Feature Enhancements
 ^^^^^^^^^^^^^^^^^^^^
@@ -47,6 +52,7 @@ Tool Enhancements
 _________________
 * Tool[s] menu reorganised and renamed by @lucas-wilkins in https://github.com/SasView/sasview/pull/2430
 * SLD calculator tool buttons by @rozyczko in https://github.com/SasView/sasview/pull/2302
+* SLD calculation allows density to be calculated from component weight fractions by @krzywon in https://github.com/SasView/sasview/pull/2986
 * Update sas_gen.py to speed up data loading by @timsnow in https://github.com/SasView/sasview/pull/2617
 * Read oommf v2 files by @wpotrzebowski in https://github.com/SasView/sasview/pull/2116
 
@@ -74,7 +80,6 @@ ________________________
 
 Fitting Enhancements
 ____________________
-* Allow for user adjusted relative weighting of different data sets in constrained fits by @Caddy-Jones in https://github.com/SasView/sasview/pull/1973
 * Improved/fixed category manager by @rozyczko in https://github.com/SasView/sasview/pull/2649
 * Handling of constraints for polydisperse parameters by @gonzalezma in https://github.com/SasView/sasview/pull/2348
 
@@ -116,6 +121,7 @@ ___________
 * Cherry-picked new_numpy_behaviour by @wpotrzebowski in https://github.com/SasView/sasview/pull/2655
 * Fit report save fix by @rozyczko in https://github.com/SasView/sasview/pull/2684
 * Fix for empty save format for grid files by @rozyczko in https://github.com/SasView/sasview/pull/2683
+* The installer warns the user if the chosen installation directory is already populated by @krzywon in https://github.com/SasView/sasview/pull/3042
 
 Documentation Changes
 ^^^^^^^^^^^^^^^^^^^^^
@@ -155,6 +161,33 @@ ______________________
 * Run.py: Prioritize sibling modules over installed modules by @krzywon in https://github.com/SasView/sasview/pull/2772
 * Use sasdata package in place of sas.sascalc.dataloader by @krzywon in https://github.com/SasView/sasview/pull/2141
 * Clean up sas.sasview by @lucas-wilkins in https://github.com/SasView/sasview/pull/2154, https://github.com/SasView/sasview/pull/2159, and https://github.com/SasView/sasview/pull/2161
+
+New Models
+^^^^^^^^^^
+One new model has been added to SasView since v5.0.6 was released:
+
+* [micromagnetic_FF_3D](https://marketplace.sasview.org/models/140/) SANS of bulk ferromagnets by @stellhorn in https://github.com/SasView/sasmodels/pull/592
+
+The following models have been added to the `[Model Marketplace] <https://marketplace.sasview.org/>`_ since v5.0.6 was released:
+
+* [Superball](https://marketplace.sasview.org/models/154/)
+* [core_multi_shell_cylinder](https://marketplace.sasview.org/models/155/)
+* [fuzzy_sphere_extended](https://marketplace.sasview.org/models/156/)
+* [Spherical Micelle](https://marketplace.sasview.org/models/157/)
+* [Cylindrical Micelle](https://marketplace.sasview.org/models/158/)
+* [Long Cylindrical Micelle](https://marketplace.sasview.org/models/159/)
+* [Enhanced Cylinder Models for SasView](https://marketplace.sasview.org/models/161/)
+* [Enhanced Ellipsoid Models for SasView](https://marketplace.sasview.org/models/163/)
+* [Supercylinder](https://marketplace.sasview.org/models/164/)
+
+Known Issues
+^^^^^^^^^^^^
+All the known bugs/feature requests can be found in the issues on github.
+Note the sasmodels issues are now separate from the sasview issues (i.e. different repositories)
+
+`[sasview] <https://github.com/SasView/sasview/milestones>`_
+
+`[sasmodels] <https://github.com/SasView/sasmodels/milestones>`_
 
 
 New in Version 5.0.6

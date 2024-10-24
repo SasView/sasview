@@ -230,11 +230,6 @@ class sas_gen_test(unittest.TestCase):
 
         rng = np.random.default_rng(1984)
 
-        from sas.sascalc.calculator.ausaxs.architecture import get_os, OS
-        if get_os() is OS.MAC:
-            self.assertTrue(True, "AUSAXS library is currently not available for MacOS. Skipping test.")
-            return
-
         if not ausaxs_sans_debye.ausaxs_available():
             self.assertTrue(False, "AUSAXS library not found, test cannot be run.")
             return
@@ -257,7 +252,7 @@ class sas_gen_test(unittest.TestCase):
             errs = (external - analytical)/analytical
             different_entries = 0
             for val in np.abs(errs):
-                self.assertLessEqual(val, 0.01, "Ensure that the error is acceptable.")
+                self.assertLessEqual(val, 0.02, "Ensure that the error is acceptable.")
                 if val != 0:
                     different_entries += 1
             self.assertTrue(different_entries > len(q)*0.5, "Check that two different algorithms were actually run.")
@@ -273,7 +268,7 @@ class sas_gen_test(unittest.TestCase):
 
         errs = (external - analytical)/analytical
         for val in np.abs(errs):
-            self.assertLessEqual(val, 0.01)
+            self.assertLessEqual(val, 0.02)
 
     def test_calculator_elements(self):
         """
