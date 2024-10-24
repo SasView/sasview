@@ -1,7 +1,11 @@
 name: CI
 
 on:
-  [push, pull_request, workflow_call]
+  workflow_call:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
 
 defaults:
   run:
@@ -77,6 +81,7 @@ jobs:
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
+          sudo apt-get update
           sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
 
       - name: Install Python dependencies
@@ -105,9 +110,9 @@ jobs:
 
       - name: Fetch sources for sibling projects
         run: |
-          git clone --depth=50 --branch=v0.9.0 https://github.com/SasView/sasdata.git ../sasdata
-          git clone --depth=50 --branch=v1.0.8 https://github.com/SasView/sasmodels.git ../sasmodels
-          git clone --depth=50 --branch=v0.9.2 https://github.com/bumps/bumps.git ../bumps
+          git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
+          git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
+          git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
         run: |
@@ -195,6 +200,7 @@ jobs:
       ### Build the installer (if enabled)
 
       - name: Install utilities to build installer
+        if: ${{ matrix.installer }}
         run: |
           python -m pip install pyinstaller
 
@@ -299,6 +305,34 @@ jobs:
             installers/dist/sasview6.tar.gz
           if-no-files-found: ignore
 
+      - name: Rename artifacts (Windows)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        run: |
+          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
+
+      - name: Rename artifacts (MacOS)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        run: |    
+          mv installers/dist/SasView6.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
+
+      - name: Rename artifacts (Linux)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
+        run: |    
+          mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
+
+      - name: Upload Release Installer to GitHub
+        if: ${{ matrix.installer }}
+        uses: ncipollo/release-action@v1
+        with:
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "installers/dist/*SasView-6.0.0-*"
+          name: "Release 6.0.0-alpha"
+          bodyFile: "build_tools/release_notes/6.0.0_notes.txt"
+          tag: "v6.0.0-alpha"
 
   test-installer:
     needs: [ build-matrix ]

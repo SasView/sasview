@@ -748,16 +748,15 @@ class FormulaValidator(QtGui.QValidator):
     def validate(self, input, pos):
 
         self._setStyleSheet("")
-        return QtGui.QValidator.Acceptable, pos
 
-        #try:
-        #    Formula(str(input))
-        #    self._setStyleSheet("")
-        #    return QtGui.QValidator.Acceptable, pos
+        try:
+            Formula(str(input))
+            self._setStyleSheet("")
+            return QtGui.QValidator.Acceptable
 
-        #except Exception as e:
-        #    self._setStyleSheet("background-color:pink;")
-        #    return QtGui.QValidator.Intermediate, pos
+        except Exception as e:
+            self._setStyleSheet("background-color:pink;")
+            return QtGui.QValidator.Intermediate
 
     def _setStyleSheet(self, value):
         try:
