@@ -431,7 +431,8 @@ This could potentially be because the file is not an ASCII format.""")
             self.startline_entry.value(),
             self.col_editor.columns,
             self.excluded_lines,
-            self.seperators.items()
+            self.seperators.items(),
+            {}
         )
         self.params = params
         self.accept()
