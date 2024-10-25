@@ -37,7 +37,7 @@ class MetadataFilenameDialog(QDialog):
         self.update_filename_separation()
 
         self.save_button = QPushButton('Save')
-
+        self.save_button.clicked.connect(self.on_save)
 
         self.layout = QVBoxLayout(self)
         self.layout.addLayout(self.filename_separator_layout)
@@ -72,6 +72,10 @@ class MetadataFilenameDialog(QDialog):
     def update_filename_separation(self):
         self.filename_line_label.setText(f'Filename: {self.formatted_filename()}')
         self.metadata_tree.draw_tree(self.filename_components())
+
+    def on_save(self):
+        self.accept()
+        # Don't really need to do anything else. Anyone using this dialog can access the component_metadata dict.
 
 
 
