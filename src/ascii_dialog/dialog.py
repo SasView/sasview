@@ -31,6 +31,9 @@ class AsciiDialog(QDialog):
         self.files: dict[str, list[str]] = {}
         self.files_full_path: dict[str, str] = {}
         self.files_is_included: dict[str, list[bool]] = {}
+        # I'm not going to worry too much about deleting filenames from this dict below when they are unloaded. It
+        # shouldn't break anything.
+        self.filename_metadata: dict[str, dict[str, str]] = {}
         self.current_filename: str | None = None
 
         self.seperators: dict[str, bool] = {
@@ -49,6 +52,7 @@ class AsciiDialog(QDialog):
         self.unloadButton.setDisabled(True)
         self.editMetadataButton = QPushButton("Edit Metadata")
         self.editMetadataButton.setDisabled(True)
+        self.editMetadataButton.clicked.connect(self.editMetadata)
         self.unloadButton.clicked.connect(self.unload)
         self.filename_unload_layout.addWidget(self.filename_label)
         self.filename_unload_layout.addWidget(self.unloadButton)
@@ -442,6 +446,13 @@ This could potentially be because the file is not an ASCII format.""")
         )
         self.params = params
         self.accept()
+
+    def editMetadata(self):
+        dialog = MetadataFilenameDialog(self.current_filename)
+        status = dialog.exec()
+        if status == 1:
+            self.filename_metadata[self.current_filename] = dialog.component_metadata
+
 
 if __name__ == "__main__":
     app = QApplication([])
