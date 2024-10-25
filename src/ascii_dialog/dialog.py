@@ -10,6 +10,7 @@ from guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
 from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 from sasdata.temp_ascii_reader import load_data, AsciiReaderParams
+from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
 import re
 
 TABLE_MAX_ROWS = 1000
