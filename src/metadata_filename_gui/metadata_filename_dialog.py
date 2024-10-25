@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog
+from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog, QPushButton
 from metadata_tree_widget import MetadataTreeWidget
 from sys import argv
 import re
@@ -36,10 +36,13 @@ class MetadataFilenameDialog(QDialog):
         # Have to update this now because it relies on the value of the separator, and tree.
         self.update_filename_separation()
 
+        self.save_button = QPushButton('Save')
+
 
         self.layout = QVBoxLayout(self)
         self.layout.addLayout(self.filename_separator_layout)
         self.layout.addWidget(self.metadata_tree)
+        self.layout.addWidget(self.save_button)
 
     def split_filename(self) -> list[str]:
         return re.split(f'([{self.separator_chars.text()}])', self.filename)
