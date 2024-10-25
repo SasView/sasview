@@ -44,8 +44,12 @@ class MetadataFilenameDialog(QDialog):
         self.layout.addWidget(self.metadata_tree)
         self.layout.addWidget(self.save_button)
 
+    @property
+    def separator_text(self) -> str:
+        return self.separator_chars.text()
+
     def split_filename(self) -> list[str]:
-        return re.split(f'([{self.separator_chars.text()}])', self.filename)
+        return re.split(f'([{self.separator_text}])', self.filename)
 
     def filename_components(self) -> list[str]:
         splitted = re.split(f'{self.separator_chars.text()}', self.filename)
