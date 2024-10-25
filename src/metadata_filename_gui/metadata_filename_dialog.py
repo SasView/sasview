@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog, QPushButton
-from metadata_tree_widget import MetadataTreeWidget
+from metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
 from sys import argv
 import re
 
