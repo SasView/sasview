@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QLabel
 from PySide6.QtCore import QAbstractItemModel
-from sasdata.metadata_filename_gui.metadata_component_selector import MetadataComponentSelector
+from metadata_component_selector import MetadataComponentSelector
 
 class MetadataTreeWidget(QTreeWidget):
     def __init__(self, metadata_dict: dict[str, str]):
