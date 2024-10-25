@@ -86,7 +86,6 @@ if __name__ == "__main__":
     else:
         filename = argv[1]
     dialog = MetadataFilenameDialog(filename)
-    dialog.exec()
-
-
-    exit(app.exec())
+    status = dialog.exec()
+    if status == 1:
+        print(dialog.component_metadata)
