@@ -40,15 +40,18 @@ class AsciiDialog(QDialog):
 
         self.setWindowTitle('ASCII File Reader')
 
-        # Filename, and unload button
+        # Filename, unload button, and edit metadata button.
 
         self.filename_unload_layout = QHBoxLayout()
         self.filename_label = QLabel(NOFILE_TEXT)
         self.unloadButton = QPushButton("Unload")
         self.unloadButton.setDisabled(True)
+        self.editMetadataButton = QPushButton("Edit Metadata")
+        self.editMetadataButton.setDisabled(True)
         self.unloadButton.clicked.connect(self.unload)
         self.filename_unload_layout.addWidget(self.filename_label)
         self.filename_unload_layout.addWidget(self.unloadButton)
+        self.filename_unload_layout.addWidget(self.editMetadataButton)
 
         # Filename chooser
         self.filename_chooser = QComboBox()
@@ -347,11 +350,13 @@ This could potentially be because the file is not an ASCII format.""")
             self.filename_label.setText(NOFILE_TEXT)
             self.table.setDisabled(True)
             self.unloadButton.setDisabled(True)
+            self.editMetadataButton.setDisabled(True)
             # Set this to None because other methods are expecting this.
             self.current_filename = None
         else:
             self.table.setDisabled(False)
             self.unloadButton.setDisabled(False)
+            self.editMetadataButton.setDisabled(False)
             self.fillTable()
 
     @Slot()
