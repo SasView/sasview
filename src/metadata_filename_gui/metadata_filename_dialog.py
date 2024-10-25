@@ -14,16 +14,16 @@ def build_font(text: str, classname: str = '') -> str:
     return f'<span class="{classname}">{text}</span>'
 
 class MetadataFilenameDialog(QDialog):
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, initial_component_metadata: dict[str, str]={}, initial_separator_text=''):
         super().__init__()
 
         self.filename = filename
         # Key is the metadatum, value is the component selected for it.
-        self.component_metadata: dict[str, str] = {}
+        self.component_metadata = initial_component_metadata
 
         self.filename_line_label = QLabel()
         self.seperator_chars_label = QLabel('Seperators')
-        self.separator_chars = QLineEdit()
+        self.separator_chars = QLineEdit(initial_separator_text)
         self.separator_chars.textChanged.connect(self.update_filename_separation)
 
         self.filename_separator_layout = QHBoxLayout()
