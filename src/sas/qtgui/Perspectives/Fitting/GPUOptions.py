@@ -58,6 +58,10 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.progressBar.setVisible(False)
         self.progressBar.setFormat(" Test %v / %m")
 
+        # A local flag to know if opencl options have been staged or not. This is to prevent an OpenCL context refresh
+        #  when no refresh is required.
+        self._staged_open_cl = None
+
         self.testButton.clicked.connect(self.testButtonClicked)
         self.helpButton.clicked.connect(self.helpButtonClicked)
         self.testingDoneSignal.connect(self.testCompleted)
@@ -76,7 +80,11 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
 
     def applyNonConfigValues(self):
         """Applies values that aren't stored in config. Only widgets that require this need to override this method."""
-        self.set_sas_open_cl()
+        # This is called anytime *any* preference change is made, not only from this widget, but any other preferences
+        #  widget. Track if openCL is changed locally to be sure the setter should be invoked.
+        if self._staged_open_cl:
+            self.set_sas_open_cl()
+            self._staged_open_cl = None
 
     def add_options(self):
         """
@@ -108,6 +116,11 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
 
         self.openCLCheckBoxGroup.setMinimumWidth(self.optionsLayout.sizeHint().width()+10)
 
+    def _unStageChange(self, key: str):
+        # The only staged change in this panel is the OpenCL selection. If any change is being unstaged, reset the flag.
+        self._staged_open_cl = None
+        super()._unStageChange(key)
+
     def _stage_sas_open_cl(self, checked):
         checked = None
         for box in self.radio_buttons:
@@ -115,9 +128,10 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
                 checked = box
         if checked:
             sas_open_cl = self.cl_options[str(checked.text())]
+            self._staged_open_cl = sas_open_cl
             self._stageChange('SAS_OPENCL', sas_open_cl)
 
-    def set_sas_open_cl(self):
+    def get_sas_open_cl(self):
         """
         Set SAS_OPENCL value when tests run or OK button clicked
         """
@@ -131,22 +145,32 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
             raise RuntimeError("Error: No radio button selected somehow")
 
         sas_open_cl = self.cl_options[str(checked.text())]
-        no_opencl_msg = sas_open_cl.lower() == "none"
+        return sas_open_cl
+
+    def set_sas_open_cl(self):
+        sas_open_cl = self.get_sas_open_cl()
         lib.reset_sasmodels(sas_open_cl)
 
-        return no_opencl_msg
+        return sas_open_cl
 
     def testButtonClicked(self):
         """
         Run sasmodels check from here and report results from
         """
+        # Set the SAS_OPENCL value prior to running to ensure proper value is used
+        if self._staged_open_cl is not None:
+            sas_open_cl = self.set_sas_open_cl()
+            self._staged_open_cl = None
+        else:
+            sas_open_cl = self.get_sas_open_cl()
+        no_opencl_msg = sas_open_cl.lower() == "none"
+        self._unStageChange('SAS_OPENCL')
         self.model_tests = sasmodels.model_test.make_suite('opencl', ['all'])
         number_of_tests = len(self.model_tests._tests)
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(number_of_tests)
         self.progressBar.setVisible(True)
         self.testButton.setEnabled(False)
-        no_opencl_msg = self.set_sas_open_cl()
 
         test_thread = threads.deferToThread(self.testThread, no_opencl_msg)
         test_thread.addCallback(self.testComplete)
@@ -275,11 +299,9 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         """
         Open the help menu when the help button is clicked
         """
-        help_location = GuiUtils.HELP_DIRECTORY_LOCATION
-        help_location += "/user/qtgui/Perspectives/Fitting/gpu_setup.html"
-        help_location += "#device-selection"
-        # Display the page in default browser
-        webbrowser.open('file://' + os.path.realpath(help_location))
+        from sas.qtgui.MainWindow.GuiManager import GuiManager
+        help_location = "user/qtgui/Perspectives/Fitting/gpu_setup.html#device-selection"
+        GuiManager.showHelp(help_location)
 
     def reject(self):
         """
@@ -292,7 +314,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         """
         Close the window after modifying the SAS_OPENCL value
         """
-        self.set_sas_open_cl()
+        self.applyNonConfigValues()
         self.closeEvent(None)
 
     def closeEvent(self, event):

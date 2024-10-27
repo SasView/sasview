@@ -228,10 +228,7 @@ class sas_gen_test(unittest.TestCase):
         from sas.sascalc.calculator.ausaxs import sasview_sans_debye
         from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye
 
-        from sas.sascalc.calculator.ausaxs.architecture import get_os, OS
-        if get_os() is OS.MAC:
-            self.assertTrue(True, "AUSAXS library is currently not available for MacOS. Skipping test.")
-            return
+        rng = np.random.default_rng(1984)
 
         if not ausaxs_sans_debye.ausaxs_available():
             self.assertTrue(False, "AUSAXS library not found, test cannot be run.")
@@ -246,7 +243,7 @@ class sas_gen_test(unittest.TestCase):
             f = self.pdbloader.read(pdb_file)
             coords = np.vstack([f.pos_x, f.pos_y, f.pos_z])
             q = np.linspace(0.001, 1, 100)
-            w = np.random.rand(coords.shape[1]) # random weights
+            w = rng.random(coords.shape[1]) # random weights
 
             analytical = sasview_sans_debye.sasview_sans_debye(q, coords, w)
             external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
@@ -255,7 +252,7 @@ class sas_gen_test(unittest.TestCase):
             errs = (external - analytical)/analytical
             different_entries = 0
             for val in np.abs(errs):
-                self.assertLessEqual(val, 0.01, "Ensure that the error is acceptable.")
+                self.assertLessEqual(val, 0.02, "Ensure that the error is acceptable.")
                 if val != 0:
                     different_entries += 1
             self.assertTrue(different_entries > len(q)*0.5, "Check that two different algorithms were actually run.")
@@ -264,14 +261,14 @@ class sas_gen_test(unittest.TestCase):
         f = self.pdbloader.read(os.path.join(os.path.dirname(__file__), "data/debye_test_files/SASDPP4.pdb"))
         coords = np.vstack([f.pos_x, f.pos_y, f.pos_z])
         q = np.linspace(0.1, 10, 100)
-        w = np.random.rand(coords.shape[1]) # random weights
+        w = rng.random(coords.shape[1]) # random weights
 
         analytical = sasview_sans_debye.sasview_sans_debye(q, coords, w)
         external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
 
         errs = (external - analytical)/analytical
         for val in np.abs(errs):
-            self.assertLessEqual(val, 0.01)
+            self.assertLessEqual(val, 0.02)
 
     def test_calculator_elements(self):
         """

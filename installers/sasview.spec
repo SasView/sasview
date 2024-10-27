@@ -11,12 +11,14 @@ PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
 datas = [
     ('../src/sas/qtgui/images', 'images'),
+    ('../src/sas/qtgui/images', "sas/qtgui/images"),
     ('../src/sas/sasview/media', 'media'),
     ('../src/sas/example_data', 'example_data'),
-    ('../src/sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib'),    
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
     ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
+    ('../src/sas/qtgui/Utilities/WhatsNew/css/style.css', 'sas/qtgui/Utilities/WhatsNew/css'),
+    ('../src/sas/qtgui/Utilities/About/images', 'sas/qtgui/Utilities/About/images'),
     ('../src/sas/system/log.ini', 'sas/system/'),
     ('../../sasmodels/sasmodels','sasmodels'),
     ('../docs/sphinx-docs/build','doc/build'),
@@ -78,7 +80,7 @@ if platform.system() == 'Windows':
 a = Analysis(
     ['sasview.py'],
     pathex=[],
-    binaries=[],
+    binaries=[('../src/sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib')],
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
@@ -102,11 +104,12 @@ if platform.system() == 'Darwin':
           a.scripts,
           exclude_binaries=True,
           name='sasview',
+          contents_directory='.',
           debug=False,
           upx=True,
           icon=os.path.join("../src/sas/qtgui/images","ball.icns"),
           version="version.txt",
-          console=False )
+          console=False)
 else:
     exe = EXE(
         pyz,
@@ -114,12 +117,14 @@ else:
         [],
         exclude_binaries=True,
         name='sasview',
+        contents_directory='.',
         debug=False,
         bootloader_ignore_signals=False,
         icon=os.path.join("../src/sas/qtgui/images","ball.ico"),
         strip=False,
         upx=True,
-        console=False)
+        console=True,
+        hide_console='hide-early')
 
 coll = COLLECT(
     exe,

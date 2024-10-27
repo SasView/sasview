@@ -32,12 +32,14 @@ from sas.qtgui.Plotting.Plottables import Plottable
 from sasdata.dataloader.data_info import Sample, Source, Vector
 from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
 from sasdata.dataloader.data_info import Aperture, Collimation
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, PATH_LIKE
 from sas.qtgui.Plotting.Plottables import View
 from sas.qtgui.Plotting.Plottables import PlottableTheory1D
 from sas.qtgui.Plotting.Plottables import PlottableFit1D
 from sas.qtgui.Plotting.Plottables import Text
 from sas.qtgui.Plotting.Plottables import Chisq
 from sas.qtgui.MainWindow.DataState import DataState
+from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 
 from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
@@ -75,7 +77,6 @@ def get_sensible_default_open_directory():
 # custom open_path
 if config.DEFAULT_OPEN_FOLDER == "" or not os.path.isdir(config.DEFAULT_OPEN_FOLDER):
     config.DEFAULT_OPEN_FOLDER = get_sensible_default_open_directory()
-
 
 
 class Communicate(QtCore.QObject):
@@ -177,9 +178,17 @@ class Communicate(QtCore.QObject):
     # Update the masked ranges in fitting
     updateMaskedDataSignal = QtCore.Signal()
 
-    # Triggers refresh of all documentation windows
+    # Triggers to refresh documentation
     documentationRegenInProgressSignal = QtCore.Signal()
     documentationRegeneratedSignal = QtCore.Signal()
+    documentationUpdateLogSignal = QtCore.Signal()
+
+    # Global close to help kill active threads
+    closeSignal = QtCore.Signal()
+
+
+communicate = Communicate()
+
 
 def updateModelItemWithPlot(item, update_data, name="", checkbox_state=None):
     """
@@ -694,14 +703,12 @@ def saveAnyData(data, wildcard_dict=None):
     caption = 'Save As'
     filter = wildcards
     parent = None
-    options = QtWidgets.QFileDialog.DontUseNativeDialog
     # Query user for filename.
     filename_tuple = QtWidgets.QFileDialog.getSaveFileName(parent,
                                                            caption,
                                                            "",
                                                            filter,
-                                                           "",
-                                                           options)
+                                                           "")
     filename = filename_tuple[0]
 
     # User cancelled or did not enter a filename
@@ -792,12 +799,12 @@ def xyTransform(data, xLabel="", yLabel=""):
         xLabel = "%s(%s)" % (xname, xunits)
     if xLabel == "x^(2)":
         data.transformX(DataTransform.toX2, DataTransform.errToX2)
-        xunits = convertUnit(2, xunits)
-        xLabel = "%s^{2}(%s)" % (xname, xunits)
+        new_xunits = convertUnit(2, xunits)
+        xLabel = "%s^{2}(%s)" % (xname, new_xunits)
     if xLabel == "x^(4)":
         data.transformX(DataTransform.toX4, DataTransform.errToX4)
-        xunits = convertUnit(4, xunits)
-        xLabel = "%s^{4}(%s)" % (xname, xunits)
+        new_xunits = convertUnit(4, xunits)
+        xLabel = "%s^{4}(%s)" % (xname, new_xunits)
     if xLabel == "ln(x)":
         data.transformX(DataTransform.toLogX, DataTransform.errToLogX)
         xLabel = r"\ln{(%s)}(%s)" % (xname, xunits)
@@ -807,8 +814,8 @@ def xyTransform(data, xLabel="", yLabel=""):
         xLabel = "%s(%s)" % (xname, xunits)
     if xLabel == "log10(x^(4))":
         data.transformX(DataTransform.toX4, DataTransform.errToX4)
-        xunits = convertUnit(4, xunits)
-        xLabel = "%s^{4}(%s)" % (xname, xunits)
+        new_xunits = convertUnit(4, xunits)
+        xLabel = "%s^{4}(%s)" % (xname, new_xunits)
         xscale = 'log'
 
     # Y
@@ -824,40 +831,40 @@ def xyTransform(data, xLabel="", yLabel=""):
         yLabel = "%s(%s)" % (yname, yunits)
     if yLabel == "y^(2)":
         data.transformY(DataTransform.toX2, DataTransform.errToX2)
-        yunits = convertUnit(2, yunits)
-        yLabel = "%s^{2}(%s)" % (yname, yunits)
+        new_yunits = convertUnit(2, yunits)
+        yLabel = "%s^{2}(%s)" % (yname, new_yunits)
     if yLabel == "1/y":
         data.transformY(DataTransform.toOneOverX, DataTransform.errOneOverX)
-        yunits = convertUnit(-1, yunits)
-        yLabel = "1/%s(%s)" % (yname, yunits)
+        new_yunits = convertUnit(-1, yunits)
+        yLabel = "1/%s(%s)" % (yname, new_yunits)
     if yLabel == "y*x^(2)":
         data.transformY(DataTransform.toYX2, DataTransform.errToYX2)
-        xunits = convertUnit(2, xunits)
-        yLabel = r"%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
+        new_xunits = convertUnit(2, xunits)
+        yLabel = r"%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, new_xunits)
     if yLabel == "y*x^(4)":
         data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
-        xunits = convertUnit(4, xunits)
-        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+        new_xunits = convertUnit(4, xunits)
+        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, new_xunits)
     if yLabel == "1/sqrt(y)":
         data.transformY(DataTransform.toOneOverSqrtX, DataTransform.errOneOverSqrtX)
-        yunits = convertUnit(-0.5, yunits)
-        yLabel = r"1/\sqrt{%s}(%s)" % (yname, yunits)
+        new_yunits = convertUnit(-0.5, yunits)
+        yLabel = r"1/\sqrt{%s}(%s)" % (yname, new_yunits)
     if yLabel == "ln(y*x)":
         data.transformY(DataTransform.toLogXY, DataTransform.errToLogXY)
         yLabel = r"\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "ln(y*x^(2))":
         data.transformY(DataTransform.toLogYX2, DataTransform.errToLogYX2)
-        xunits = convertUnit(2, xunits)
-        yLabel = r"\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
+        new_xunits = convertUnit(2, xunits)
+        yLabel = r"\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, new_xunits)
     if yLabel == "ln(y*x^(4))":
         data.transformY(DataTransform.toLogYX4, DataTransform.errToLogYX4)
-        xunits = convertUnit(4, xunits)
-        yLabel = r"\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
+        new_xunits = convertUnit(4, xunits)
+        yLabel = r"\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, new_xunits)
     if yLabel == "log10(y*x^(4))":
         data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
-        xunits = convertUnit(4, xunits)
+        new_xunits = convertUnit(4, xunits)
         yscale = 'log'
-        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+        yLabel = r"%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, new_xunits)
 
     # Perform the transformation of data in data1d->View
     data.transformView()
@@ -1162,6 +1169,9 @@ def saveData(fp, data):
         if isinstance(o, numbers.Real):
             return float(o)
 
+        if isinstance(o, DataRole):
+            return o.value
+
         # not supported
         logging.info("data cannot be serialized to json: %s" % type(o))
         return None
@@ -1450,3 +1460,19 @@ def enum(*sequential, **named):
     """Create an enumeration object from a list of strings"""
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)
+
+def showHelp(url: PATH_LIKE):
+    if isinstance(url, str):
+        url = url.lstrip("//")
+    url = Path(url)
+    url_abs = HELP_DIRECTORY_LOCATION / url if str(HELP_DIRECTORY_LOCATION.resolve()) not in str(url.absolute()) else url
+
+    try:
+        help_window = DocViewWindow(source=url_abs)
+        help_window.show()
+        help_window.activateWindow()
+        help_window.setFocus()
+        # Return the window so the caller can keep it in scope to prevent garbage collection
+        return help_window
+    except Exception as ex:
+        logging.warning(f"Cannot display help: {ex}")
