@@ -83,6 +83,7 @@ if not hasattr(SasviewModel, 'get_weights'):
 
 logger = logging.getLogger(__name__)
 
+
 class ToolTippedItemModel(QtGui.QStandardItemModel):
     """
     Subclass from QStandardItemModel to allow displaying tooltips in
@@ -1887,10 +1888,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        regen_in_progress = False
         help_location = self.getHelpLocation(HELP_DIRECTORY_LOCATION)
-        if regen_in_progress is False:
-            self.parent.showHelp(help_location)
+        self.parent.showHelp(help_location)
 
     def getHelpLocation(self, tree_base) -> Path:
         # Actual file will depend on the current tab
@@ -1900,7 +1899,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         match tab_id:
             case 0:
                 # Look at the model and if set, pull out its help page
-                if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
+                # TODO: Disable plugin model documentation generation until issues can be resolved
+                plugin_names = [name for name, enabled in self.master_category_dict[CATEGORY_CUSTOM]]
+                if (self.kernel_module is not None
+                        and hasattr(self.kernel_module, 'name')
+                        and self.kernel_module.id not in plugin_names
+                        and not re.match("[A-Za-z0-9_-]+[+*@][A-Za-z0-9_-]+", self.kernel_module.id)):
                     tree_location = tree_base / "user" / "models"
                     return tree_location / f"{self.kernel_module.id}.html"
                 else:
@@ -2940,8 +2944,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
             # doesn't contain multiplicity parameter
-            if self.kernel_module.params.get(parameter_name, None):
-                self.kernel_module.setParam(parameter_name, value)
+            self.kernel_module.setParam(parameter_name, value)
         elif model_column == min_column:
             # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
             self.kernel_module.details[parameter_name][1] = value
@@ -3117,6 +3120,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Create a QStandardModelIndex containing model data
         """
         name = self.nameFromData(fitted_data)
+        # TODO: Temporary Hack to fix NaNs in generated theory data
+        #  This is usually from GSC models that are calculated outside the Q range they were created for
+        #  The 'remove_nans_in_data' should become its own function in a data utility class, post-6.0.0 release.
+        from sasdata.dataloader.filereader import FileReader
+        temp_reader = FileReader()
+        fitted_data = temp_reader._remove_nans_in_data(fitted_data)
         # Modify the item or add it if new
         theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
         self.communicate.updateTheoryFromPerspectiveSignal.emit(theory_item)

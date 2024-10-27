@@ -14,7 +14,6 @@ datas = [
     ('../src/sas/qtgui/images', "sas/qtgui/images"),
     ('../src/sas/sasview/media', 'media'),
     ('../src/sas/example_data', 'example_data'),
-    ('../src/sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib'),    
     ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
     ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
     ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
@@ -81,7 +80,7 @@ if platform.system() == 'Windows':
 a = Analysis(
     ['sasview.py'],
     pathex=[],
-    binaries=[],
+    binaries=[('../src/sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib')],
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
