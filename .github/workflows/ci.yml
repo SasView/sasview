@@ -113,7 +113,6 @@ jobs:
           git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
           git clone --depth=50 --branch=v0.9.3 https://github.com/bumps/bumps.git ../bumps
-          git clone --depth=50 --branch=master https://github.com/pkienzle/periodictable.git ../periodictable
 
       - name: Build and install sasdata
         run: |
@@ -133,13 +132,6 @@ jobs:
       - name: Build and install bumps
         run: |
           cd ../bumps
-          rm -rf build
-          rm -rf dist
-          python -m pip install --no-deps .
-
-      - name: Build and install periodictable
-        run: |
-          cd ../periodictable
           rm -rf build
           rm -rf dist
           python -m pip install --no-deps .
