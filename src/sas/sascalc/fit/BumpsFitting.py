@@ -346,8 +346,8 @@ class BumpsFit(FitEngine):
 
            # TODO: Let the GUI decided how to handle success/failure.
             if not fitting_result.success:
-                fitting_result.stderr[:] = np.NaN
-                fitting_result.fitness = np.NaN
+                fitting_result.stderr[:] = np.nan
+                fitting_result.fitness = np.nan
 
             all_results.append(fitting_result)
 
@@ -398,7 +398,7 @@ def run_bumps(problem, handler, curr_thread):
     try:
         best, fbest = fitdriver.fit()
     except Exception as exc:
-        best, fbest = None, np.NaN
+        best, fbest = None, np.nan
         errors.extend([str(exc), traceback.format_exc()])
     finally:
         mapper.stop_mapper(fitdriver.mapper)
