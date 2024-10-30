@@ -289,11 +289,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         Returns the index of the next available tab
         """
-        max1 = max([tab.tab_id for tab in self.tabs], default=0)
-        if self.lastTabClosed is None:
-            return max1 + 1
-        max2 = self.lastTabClosed.tab_id
-        return max(max1, max2) + 1
+        return max((tab.tab_id for tab in self.tabs), default=0) + 1
 
     def addClosedTab(self):
         """
