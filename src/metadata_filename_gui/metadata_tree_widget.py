@@ -10,7 +10,7 @@ class MetadataTreeWidget(QTreeWidget):
         self.metadata_dict = metadata_dict
 
 
-    def draw_tree(self, options: list[str]):
+    def draw_tree(self, options: list[str], metadata_dict: dict[str, str]):
         self.clear()
         # TODO: This is placeholder data that'll need to be replaced by the real metadata.
         metadata = {'Instrument': ['Slit width', 'Other']}
@@ -19,7 +19,7 @@ class MetadataTreeWidget(QTreeWidget):
             for metadatum in items:
                 selector = MetadataComponentSelector(metadatum, self.metadata_dict)
                 metadatum_item = QTreeWidgetItem([metadatum])
-                selector.draw_options(options)
+                selector.draw_options(options, metadata_dict.get(metadatum))
                 top_level_item.addChild(metadatum_item)
                 self.setItemWidget(metadatum_item, 1, selector)
             self.insertTopLevelItem(0, top_level_item)
