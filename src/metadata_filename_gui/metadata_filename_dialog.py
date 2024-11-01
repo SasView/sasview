@@ -75,7 +75,7 @@ class MetadataFilenameDialog(QDialog):
 
     def update_filename_separation(self):
         self.filename_line_label.setText(f'Filename: {self.formatted_filename()}')
-        self.metadata_tree.draw_tree(self.filename_components())
+        self.metadata_tree.draw_tree(self.filename_components(), self.component_metadata)
 
     def on_save(self):
         self.accept()
