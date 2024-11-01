@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout
 
-class MetadataCustomEntry(QWidget):
+class MetadataCustomSelector(QWidget):
     def __init__(self):
         super().__init__()
 
