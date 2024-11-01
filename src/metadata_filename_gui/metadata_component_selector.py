@@ -24,6 +24,9 @@ class MetadataComponentSelector(QWidget):
             option_button.setChecked(option == selected_option)
             self.layout.addWidget(option_button)
             self.option_buttons.append(option_button)
+        # This final button is to convert to use custom entry instead of this.
+        self.custom_entry_button = QPushButton('Custom')
+        self.layout.addWidget(self.custom_entry_button)
 
     def selection_changed(self):
         selected_button: QPushButton = self.sender()
