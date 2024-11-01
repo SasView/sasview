@@ -13,7 +13,14 @@ class MetadataTreeWidget(QTreeWidget):
     def draw_tree(self, options: list[str], metadata_dict: dict[str, str]):
         self.clear()
         # TODO: This is placeholder data that'll need to be replaced by the real metadata.
-        metadata = {'Instrument': ['Slit width', 'Other']}
+        # metadata = {'Instrument': ['Slit width', 'Other']}
+        metadata = {
+            'sasdata': ['aperture', 'collimation', 'detector', 'source'],
+            'process': ['name', 'date', 'description', 'term', 'notes'],
+            'sample': ['name', 'sample_id', 'thickness', 'transmission', 'temperature', 'position', 'orientation', 'details'],
+            'transmission_spectrum': ['name', 'timestamp', 'transmission', 'transmission_deviation'],
+            'other': ['title', 'run', 'definition']
+        }
         for top_level, items in metadata.items():
             top_level_item = QTreeWidgetItem([top_level])
             for metadatum in items:
