@@ -13,7 +13,7 @@ class MetadataComponentSelector(QWidget):
         for i in reversed(range(self.layout.count() - 1)):
             self.layout.takeAt(i).widget().deleteLater()
 
-    def draw_options(self, new_options: list[str]):
+    def draw_options(self, new_options: list[str], selected_option: str | None):
         self.clear_options()
         self.options = new_options
         self.option_buttons = []
@@ -21,6 +21,7 @@ class MetadataComponentSelector(QWidget):
             option_button = QPushButton(option)
             option_button.setCheckable(True)
             option_button.clicked.connect(self.selection_changed)
+            option_button.setChecked(option == selected_option)
             self.layout.addWidget(option_button)
             self.option_buttons.append(option_button)
 
