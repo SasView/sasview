@@ -186,12 +186,8 @@ class PlotterWidget(PlotterBase):
             self.yscale = 'linear'
 
         # Include scaling (log vs. linear)
-        if version.parse(mpl.__version__) < version.parse("3.3"):
-            ax.set_xscale(self.xscale, nonposx='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
-            ax.set_yscale(self.yscale, nonposy='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
-        else:
-            ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
-            ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
+        ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
+        ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
 
         # Draw non-standard markers
         l_width = markersize * 0.4
