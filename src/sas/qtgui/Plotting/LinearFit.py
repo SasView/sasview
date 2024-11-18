@@ -78,10 +78,11 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtBerr.setText("0")
         self.txtChi2.setText("0")
 
-
         # Initial ranges
-        self.txtRangeMin.setText(str(max_range[0]))
-        self.txtRangeMax.setText(str(max_range[1]))
+        tr_min = GuiUtils.formatNumber(max_range[0])
+        tr_max = GuiUtils.formatNumber(max_range[1])
+        self.txtRangeMin.setText(str(tr_min))
+        self.txtRangeMax.setText(str(tr_max))
         # Assure nice display of ranges
         fr_min = GuiUtils.formatNumber(fit_range[0])
         fr_max = GuiUtils.formatNumber(fit_range[1])
@@ -134,10 +135,6 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         A and B parameters of the best linear fit y=Ax +B
         Push a plottable to the caller
         """
-        tempx = []
-        tempy = []
-        tempdy = []
-
         # Checks to assure data correctness
         if len(self.data.view.x) < 2:
             return
