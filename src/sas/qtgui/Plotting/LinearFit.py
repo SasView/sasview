@@ -2,9 +2,7 @@
 Adds a linear fit plot to the chart
 """
 import re
-import numpy
-from numbers import Number
-from typing import Optional
+import numpy as np
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
@@ -164,12 +162,12 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         # Find the fitting parameters
         self.cstA = Fittings.Parameter(self.model, 'A', self.default_A)
         self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
-        tempdy = numpy.asarray(tempdy)
+        tempdy = np.asarray(tempdy)
         tempdy[tempdy == 0] = 1
 
         if self.x_is_log:
-            xmin = numpy.log10(xmin)
-            xmax = numpy.log10(xmax)
+            xmin = np.log10(xmin)
+            xmax = np.log10(xmax)
 
         chisqr, out, cov = Fittings.sasfit(self.model,
                                            [self.cstA, self.cstB],
@@ -180,8 +178,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
             chisqr = chisqr / len(tempx)
 
         # Check that cov and out are iterable before displaying them
-        errA = numpy.sqrt(cov[0][0]) if cov is not None else 0
-        errB = numpy.sqrt(cov[1][1]) if cov is not None else 0
+        errA = np.sqrt(cov[0][0]) if cov is not None else 0
+        errB = np.sqrt(cov[1][1]) if cov is not None else 0
         cstA = out[0] if out is not None else 0.0
         cstB = out[1] if out is not None else 0.0
 
@@ -196,12 +194,12 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         # load tempy with the minimum transformation
         y_model = self.model.run(xmin)
         tempx.append(xminView)
-        tempy.append(numpy.power(10.0, y_model) if self.y_is_log else y_model)
+        tempy.append(np.power(10.0, y_model) if self.y_is_log else y_model)
 
         # load tempy with the maximum transformation
         y_model = self.model.run(xmax)
         tempx.append(xmaxView)
-        tempy.append(numpy.power(10.0, y_model) if self.y_is_log else y_model)
+        tempy.append(np.power(10.0, y_model) if self.y_is_log else y_model)
 
         # Set the fit parameter display when  FitDialog is opened again
         self.Avalue = cstA
@@ -218,21 +216,21 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtChi2.setText(formatNumber(self.Chivalue))
 
         # Possibly Guinier analysis
-        i0 = numpy.exp(cstB)
+        i0 = np.exp(cstB)
         self.txtGuinier_1.setText(formatNumber(i0))
-        err = numpy.abs(numpy.exp(cstB) * errB)
+        err = np.abs(np.exp(cstB) * errB)
         self.txtGuinier1_Err.setText(formatNumber(err))
 
         if self.rg_yx:
-            rg = numpy.sqrt(-2 * float(cstA))
-            diam = 4 * numpy.sqrt(-float(cstA))
+            rg = np.sqrt(-2 * float(cstA))
+            diam = 4 * np.sqrt(-float(cstA))
             value = formatNumber(diam)
             if rg is not None and rg != 0:
                 err = formatNumber(8 * float(errA) / diam)
             else:
                 err = ''
         else:
-            rg = numpy.sqrt(-3 * float(cstA))
+            rg = np.sqrt(-3 * float(cstA))
             value = formatNumber(rg)
 
             if rg is not None and rg != 0:
@@ -248,8 +246,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         value = formatNumber(rg * self.floatInvTransform(self.xmaxFit))
         self.txtGuinier_3.setText(value)
 
-        tempx = numpy.array(tempx)
-        tempy = numpy.array(tempy)
+        tempx = np.array(tempx)
+        tempy = np.array(tempy)
 
         self.clearSliders()
         self.updatePlot.emit((tempx, tempy))
@@ -257,7 +255,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
     def origData(self):
         # Store the transformed values of view x, y and dy before the fit
-        xmin_check = numpy.log10(self.xminFit)
+        xmin_check = np.log10(self.xminFit)
         # Local shortcuts
         x = self.data.view.x
         y = self.data.view.y
@@ -265,23 +263,23 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         if self.y_is_log:
             if self.x_is_log:
-                tempy  = [numpy.log10(y[i])
+                tempy  = [np.log10(y[i])
                          for i in range(len(x)) if x[i] >= xmin_check]
                 tempdy = [DataTransform.errToLogX(y[i], 0, dy[i], 0)
                          for i in range(len(x)) if x[i] >= xmin_check]
             else:
-                tempy = list(map(numpy.log10, y))
+                tempy = list(map(np.log10, y))
                 tempdy = list(map(lambda t1,t2:DataTransform.errToLogX(t1,0,t2,0),y,dy))
         else:
             tempy = y
             tempdy = dy
 
         if self.x_is_log:
-            tempx = [numpy.log10(x) for x in self.data.view.x if x > xmin_check]
+            tempx = [np.log10(x) for x in self.data.view.x if x > xmin_check]
         else:
             tempx = x
 
-        return numpy.array(tempx), numpy.array(tempy), numpy.array(tempdy)
+        return np.array(tempx), np.array(tempy), np.array(tempdy)
 
     def checkFitValues(self, item):
         """
