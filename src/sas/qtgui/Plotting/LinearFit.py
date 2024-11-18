@@ -33,8 +33,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         self.setupUi(self)
 
-        assert(isinstance(max_range, tuple))
-        assert(isinstance(fit_range, tuple))
+        assert isinstance(max_range, tuple)
+        assert isinstance(fit_range, tuple)
 
         self.data = data
         self.parent = parent
@@ -88,10 +88,12 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         fr_max = GuiUtils.formatNumber(fit_range[1])
         self.txtFitRangeMin.setText(str(fr_min))
         self.txtFitRangeMax.setText(str(fr_max))
+        self.xminFit = None
+        self.xmaxFit = None
 
         # cast xLabel into html
         label = re.sub(r'\^\((.)\)(.*)', r'<span style=" vertical-align:super;">\1</span>\2',
-                      str(self.xLabel).rstrip())
+                       str(self.xLabel).rstrip())
         self.lblRange.setText('Fit range of ' + label)
 
         self.model = LineModel()
