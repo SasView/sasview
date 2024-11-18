@@ -306,22 +306,21 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         panel.
 
         """
-        # TODO: refactor this. This is just a hack to make the
-        # functionality work without rewritting the whole code
-        # with good design (which really should be done...).
-        if self.xLabel == "x":
-            return x
-        elif self.xLabel == "x^(2)":
-            return numpy.sqrt(x)
-        elif self.xLabel == "x^(4)":
-            return numpy.sqrt(numpy.sqrt(x))
-        elif self.xLabel == "log10(x)":
-            return numpy.power(10.0, x)
-        elif self.xLabel == "ln(x)":
-            return numpy.exp(x)
-        elif self.xLabel == "log10(x^(4))":
-            return numpy.sqrt(numpy.sqrt(numpy.power(10.0, x)))
-        return x
+        from sas.qtgui.Utilities.GuiUtils import xyTransform
+        label_tuple = xyTransform(self.data, self.xLabel, self.yLabel)
+        match self.xLabel:
+            case "x^(2)":
+                return np.sqrt(x)
+            case "x^(4)":
+                return np.sqrt(np.sqrt(x))
+            case "log10(x)":
+                return np.power(10.0, x)
+            case "ln(x)":
+                return np.exp(x)
+            case "log10(x^(4))":
+                return np.sqrt(np.sqrt(np.power(10.0, x)))
+            case _:
+                return x
 
     def drawSliders(self):
         """Show new Q-range sliders"""
