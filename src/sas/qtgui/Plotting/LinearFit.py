@@ -326,15 +326,18 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
     def drawSliders(self):
         """Show new Q-range sliders"""
+        existing_slider = self.parent.sliders.pop(self.data.name, None)
+        self.clearSliders()
         self.data.show_q_range_sliders = True
         self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
         self.q_sliders.line_min.input = self.txtFitRangeMin
         self.q_sliders.line_max.input = self.txtFitRangeMax
         self.q_sliders.line_min.connect_markers([self.q_sliders.line_min.line, self.q_sliders.line_min.inner_marker])
         self.q_sliders.line_max.connect_markers([self.q_sliders.line_max.line, self.q_sliders.line_max.inner_marker])
-        # Ensure values are updated on redraw of plots
-        self.q_sliders.line_min.inputChanged()
-        self.q_sliders.line_max.inputChanged()
+        # New sliders should be visible but existing sliders that were turned off should remain off
+        if existing_slider is not None and not existing_slider.is_visible:
+            self.q_sliders.toggle()
+        self.parent.sliders[self.data.name] = self.q_sliders
 
     def clearSliders(self):
         """Clear existing sliders"""
