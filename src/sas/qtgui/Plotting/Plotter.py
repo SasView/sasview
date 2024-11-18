@@ -778,17 +778,15 @@ class PlotterWidget(PlotterBase):
 
         pass # debug hook
 
-    def onFitDisplay(self, fit_data):
+    def onFitDisplay(self, temp_x, temp_y):
         """
         Add a linear fitting line to the chart
         """
         # Create new data structure with fitting result
-        tempx = fit_data[0]
-        tempy = fit_data[1]
         self.fit_result.x = []
         self.fit_result.y = []
-        self.fit_result.x = tempx
-        self.fit_result.y = tempy
+        self.fit_result.x = temp_x
+        self.fit_result.y = temp_y
         self.fit_result.dx = None
         self.fit_result.dy = None
 

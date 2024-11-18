@@ -21,7 +21,8 @@ from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
 
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
-    updatePlot = QtCore.Signal(tuple)
+    updatePlot = QtCore.Signal(np.ndarray, np.ndarray)
+
     def __init__(self, parent=None,
                  data=None,
                  max_range=(0.0, 0.0),
@@ -249,9 +250,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         tempx = np.array(tempx)
         tempy = np.array(tempy)
 
-        self.clearSliders()
-        self.updatePlot.emit((tempx, tempy))
         self.drawSliders()
+        self.updatePlot.emit(tempx, tempy)
 
     def origData(self):
         # Store the transformed values of view x, y and dy before the fit
