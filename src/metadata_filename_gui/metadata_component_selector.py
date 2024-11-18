@@ -32,7 +32,7 @@ class MetadataComponentSelector(QWidget):
             self.option_buttons.append(option_button)
         # This final button is to convert to use custom entry instead of this.
         self.custom_entry_button = QPushButton('Custom')
-        self.custom_entry_button.clicked.connect(self.custom_entry_button)
+        self.custom_entry_button.clicked.connect(self.custom_button_pressed)
         self.layout.addWidget(self.custom_entry_button)
 
     def selection_changed(self):
