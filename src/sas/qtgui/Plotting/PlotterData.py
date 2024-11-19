@@ -48,8 +48,6 @@ class Data1D(PlottableData1D, LoadData1D):
         self.group_id = None
         self.is_data = True
         self.path = None
-        self.xtransform = None
-        self.ytransform = None
         self.title = ""
         self.scale = None
         # plot_role:
@@ -218,8 +216,6 @@ class Data2D(PlottableData2D, LoadData2D):
         self.group_id = None
         self.is_data = True
         self.path = None
-        self.xtransform = None
-        self.ytransform = None
         self.title = ""
         self.scale = None
         # Always default
