@@ -2,7 +2,7 @@ import numpy
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from .BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Utilities.GuiUtils import formatNumber
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
@@ -133,16 +133,13 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{\phi}", 'degrees')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
-        if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.data.name.count("Residuals") > 0:
-            new_plot.ytransform = 'y'
+        if hasattr(data, "scale") and data.scale == 'linear' and self.data.name.count("Residuals") > 0:
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
         new_plot.id = "AnnulusPhi" + self.data.name
         new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed
         new_plot.is_data = True
-        new_plot.xtransform = "x"
-        new_plot.ytransform = "y"
+        new_plot.plot_role = DataRole.ROLE_LIN_LIN
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
