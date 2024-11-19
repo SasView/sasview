@@ -112,23 +112,23 @@ class PlotterWidget(PlotterBase):
 
         if not is_fit:
             # make sure we have some function to operate on
-            if data.xtransform is None:
+            if self.xLogLabel is None:
                 if data.isSesans:
-                    data.xtransform='x'
+                    self.xLogLabel = 'x'
                 else:
-                    data.xtransform = 'log10(x)'
-            if data.ytransform is None:
+                    self.xLogLabel = 'log10(x)'
+            if self.yLogLabel is None:
                 if data.isSesans:
-                    data.ytransform='y'
+                    self.yLogLabel = 'y'
                 else:
-                    data.ytransform = 'log10(y)'
+                    self.yLogLabel = 'log10(y)'
             #Added condition to Dmax explorer from P(r) perspective
             if data._xaxis == 'D_{max}':
                 self.xscale = 'linear'
             # Transform data if required.
-            if transform and (data.xtransform is not None or data.ytransform is not None):
+            if transform:
                 self.xLabel, self.yLabel, xscale, yscale = \
-                    GuiUtils.xyTransform(data, data.xtransform, data.ytransform)
+                    GuiUtils.xyTransform(data, self.xLogLabel, self.yLogLabel)
                 if xscale != 'log' and xscale != self.xscale:
                     self.xscale = xscale
                 if yscale != 'log' and yscale != self.yscale:
@@ -136,8 +136,8 @@ class PlotterWidget(PlotterBase):
 
                 # Redefine the Scale properties dialog
                 self.properties = ScaleProperties(self,
-                                        init_scale_x=data.xtransform,
-                                        init_scale_y=data.ytransform)
+                                        init_scale_x=self.xLogLabel,
+                                        init_scale_y=self.yLogLabel)
 
         # Shortcuts
         ax = self.ax
@@ -505,9 +505,6 @@ class PlotterWidget(PlotterBase):
         """
         if self.properties.exec_() == QtWidgets.QDialog.Accepted:
             self.xLogLabel, self.yLogLabel = self.properties.getValues()
-            for d in self.data:
-                d.xtransform = self.xLogLabel
-                d.ytransform = self.yLogLabel
             self.xyTransform(self.xLogLabel, self.yLogLabel)
 
     def onAddText(self):
@@ -685,8 +682,6 @@ class PlotterWidget(PlotterBase):
 
         # Pull the current transform settings from the old plot
         selected_plot = self.plot_dict[id]
-        new_plot.xtransform = selected_plot.xtransform
-        new_plot.ytransform = selected_plot.ytransform
         #Adding few properties ftom ModifyPlot to preserve them in future changes
         new_plot.title = selected_plot.title
         new_plot.custom_color = selected_plot.custom_color
