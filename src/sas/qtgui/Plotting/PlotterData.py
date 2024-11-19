@@ -18,21 +18,25 @@ from sasdata.dataloader.data_info import Data2D as LoadData2D
 class DataRole(Enum):
     """Labels to apply to different plot types."""
     # Data is for imported data
-    ROLE_DATA = auto()
+    ROLE_DATA = ("log", "log")
     # Default is for fits of the imported data
-    ROLE_DEFAULT = auto()
+    ROLE_DEFAULT = ("log", "log")
     # Deletable is for orphaned plots
-    ROLE_DELETABLE = auto()
+    ROLE_DELETABLE = (None, None)
     # Residual is for stand-alone residual plots
-    ROLE_RESIDUAL = auto()
+    ROLE_RESIDUAL = ("log", "linear")
     # Residual sesans is for stand-alone sesans residual plots
-    ROLE_RESIDUAL_SESANS = auto()
+    ROLE_RESIDUAL_SESANS = ("linear", "linear")
     # Stand alone is for plots that should be plotted separately
-    ROLE_STAND_ALONE = auto()
+    ROLE_STAND_ALONE = ("linear", "linear")
     # LIN_LIN is for stand-alone plots on a linear-linear scale
-    ROLE_LIN_LIN = auto()
+    ROLE_LIN_LIN = ("linear", "linear")
     # POLYDISPERSITY role is to tag polydispersity plots to be able to suppress auto displaying them
-    ROLE_POLYDISPERSITY = auto()
+    ROLE_POLYDISPERSITY = ("linear", "linear")
+
+    def __init__(self, x_scale, y_scale):
+        self.x_scale = x_scale
+        self.y_scale = y_scale
 
 
 class Data1D(PlottableData1D, LoadData1D):

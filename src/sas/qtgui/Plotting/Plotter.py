@@ -179,11 +179,8 @@ class PlotterWidget(PlotterBase):
         markersize = data.markersize
 
         # Use the plot role to define the x and y scales
-        if data.plot_role in [DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]:
-            self.xscale = 'linear'
-        # X and Y are separate to accommodate future plot roles that might only need one axis on a linear scale
-        if data.plot_role in [DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE]:
-            self.yscale = 'linear'
+        self.xscale = data.plot_role.x_scale
+        self.yscale = data.plot_role.y_scale
 
         # Include scaling (log vs. linear)
         ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
