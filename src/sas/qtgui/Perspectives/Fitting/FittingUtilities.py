@@ -547,12 +547,12 @@ def residualsData1D(reference_data, current_data, weights):
     residuals.dx = None
     residuals.dxl = None
     residuals.dxw = None
-    residuals.ytransform = 'y'
     if reference_data.isSesans:
-        residuals.xtransform = 'x'
+        residuals.plot_role = DataRole.ROLE_RESIDUAL_SESANS
         residuals.xaxis('\\delta ', 'A')
     # For latter scale changes
     else:
+        residuals.plot_role = DataRole.ROLE_RESIDUAL
         residuals.xaxis('\\rm{Q} ', 'A^{-1}')
     residuals.yaxis('\\rm{Residuals} ', 'normalized')
 
@@ -636,8 +636,6 @@ def plotPolydispersities(model):
         # similar to FittingLogic._create1DPlot() but different data/axes
         data1d = Data1D(x=xarr, y=yarr)
         xunit = model.details[name][0]
-        data1d.xtransform = 'x'
-        data1d.ytransform = 'y'
         data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
         data1d.yaxis(r'\rm{probability}', 'normalized')
         data1d.scale = 'linear'

@@ -3267,8 +3267,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Fits of Sesans data are in real space
         if return_data["data"].isSesans:
-            fitted_data.xtransform="x"
-            fitted_data.ytransform="y"
+            fitted_data.plot_role = DataRole.ROLE_LIN_LIN
 
         # assure the current index is set properly for batch
         if len(self._logic) > 1:
@@ -3922,8 +3921,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         profile_data._xunit = "\AA"
         profile_data._yaxis = "SLD"
         profile_data._yunit = "10^{-6}\AA^{-2}"
-        profile_data.ytransform='y'
-        profile_data.xtransform='x'
+        profile_data.data_role = DataRole.ROLE_LIN_LIN
 
         profile_data.id = "sld"
 
