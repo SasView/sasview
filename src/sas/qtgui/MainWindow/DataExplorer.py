@@ -1123,15 +1123,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
-            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY]
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE,
+                                 DataRole.ROLE_LIN_LIN, DataRole.ROLE_POLYDISPERSITY]
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
-            elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUAL_PLOT:
+            elif role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS] and config.DISABLE_RESIDUAL_PLOT:
                 # Nothing to do if residuals are not plotted
                 continue
-            elif role == DataRole.ROLE_POLYDISPERSITY and config.DISABLE_POLYDISPERSITY_PLOT:
+            elif role in [DataRole.ROLE_POLYDISPERSITY] and config.DISABLE_POLYDISPERSITY_PLOT:
                 # Nothing to do if polydispersity plot is not plotted
                 continue
             elif role in stand_alone_types:
@@ -1205,10 +1206,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if 'new_plot' not in locals():
                     new_plot = PlotterWidget(manager=self, parent=self)
                     new_plot.item = item
-                # Ensure new plots use the default transform, not the transform of any previous plots the data were in
-                # TODO: The transform should be part of the PLOT, NOT the data
-                plot_set.xtransform = None
-                plot_set.ytransform = None
+                # Ensure new plots use the default transform, not the transform of any previous plots
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
