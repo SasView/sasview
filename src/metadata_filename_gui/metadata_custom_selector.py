@@ -7,6 +7,6 @@ class MetadataCustomSelector(QWidget):
         self.entry_box = QLineEdit()
         self.from_filename_button = QPushButton('From Filename')
 
-        self.layout = QHBoxLayout()
+        self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.entry_box)
         self.layout.addWidget(self.from_filename_button)
