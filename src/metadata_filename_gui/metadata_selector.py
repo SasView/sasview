@@ -30,3 +30,5 @@ class MetadataSelector(QWidget):
             # Shouldn't happen as selector widget should be either of the above.
             return
         self.layout.replaceWidget(self.selector_widget, new_widget)
+        self.selector_widget.deleteLater()
+        self.selector_widget = new_widget
