@@ -14,7 +14,7 @@ class MetadataSelector(QWidget):
         self.selector_widget.draw_options(self.options, metadata_dict.get(metadatum))
 
         # I can't seem to find any layou that just has one widgt in so this will do for now.
-        self.layout = QHBoxLayout()
+        self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.selector_widget)
 
     def handle_selector_change(self):
