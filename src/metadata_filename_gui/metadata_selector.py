@@ -19,11 +19,11 @@ class MetadataSelector(QWidget):
 
     def handle_selector_change(self):
         # Need to keep this for when we delete it.
-        if self.selector_widget is MetadataComponentSelector:
+        if isinstance(self.selector_widget, MetadataComponentSelector):
             # TODO: Will eventually have args
             new_widget = MetadataCustomSelector()
             new_widget.from_filename_button.connect(self.handle_selector_change)
-        elif self.selector_widget is MetadataCustomSelector():
+        elif isinstance(self.selector_widget, MetadataCustomSelector):
             new_widget = MetadataComponentSelector(self.metadatum, self.metadata_dict)
             self.selector_widget = new_widget
         else:
