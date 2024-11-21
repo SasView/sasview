@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QLabel
 from PySide6.QtCore import QAbstractItemModel
 from metadata_filename_gui.metadata_component_selector import MetadataComponentSelector
+from metadata_filename_gui.metadata_selector import MetadataSelector
 
 class MetadataTreeWidget(QTreeWidget):
     def __init__(self, metadata_dict: dict[str, str]):
@@ -24,9 +25,10 @@ class MetadataTreeWidget(QTreeWidget):
         for top_level, items in metadata.items():
             top_level_item = QTreeWidgetItem([top_level])
             for metadatum in items:
-                selector = MetadataComponentSelector(metadatum, self.metadata_dict)
+                # selector = MetadataComponentSelector(metadatum, self.metadata_dict)
+                selector = MetadataSelector(metadatum, options, self.metadata_dict)
                 metadatum_item = QTreeWidgetItem([metadatum])
-                selector.draw_options(options, metadata_dict.get(metadatum))
+                # selector.draw_options(options, metadata_dict.get(metadatum))
                 top_level_item.addChild(metadatum_item)
                 self.setItemWidget(metadatum_item, 1, selector)
             self.insertTopLevelItem(0, top_level_item)
