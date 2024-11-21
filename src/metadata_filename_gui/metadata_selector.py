@@ -3,12 +3,14 @@ from metadata_filename_gui.metadata_component_selector import MetadataComponentS
 from metadata_filename_gui.metadata_custom_selector import MetadataCustomSelector
 
 class MetadataSelector(QWidget):
-    def __init__(self, metadatum: str, metadata_dict: dict[str, str]):
+    def __init__(self, metadatum: str, options: list[str], metadata_dict: dict[str, str]):
         self.metadatum = metadatum
         self.metadata_dict = metadata_dict
+        self.options = options
         # Default to the name selector
         self.selector_widget: QWidget = MetadataComponentSelector(metadatum, metadata_dict)
         self.selector_widget.custom_button_pressed.connect(self.handle_selector_change)
+        self.selector_widget.draw_options(self.options, metadata_dict.get(metadatum))
 
         # I can't seem to find any layou that just has one widgt in so this will do for now.
         self.layout = QHBoxLayout()
