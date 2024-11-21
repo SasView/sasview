@@ -17,14 +17,24 @@ class MetadataSelector(QWidget):
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.selector_widget)
 
+    def new_component_selector(self) -> MetadataComponentSelector:
+        new_selector = MetadataComponentSelector(self.metadatum, self.metadata_dict)
+        new_selector.custom_button_pressed.connect(self.handle_selector_change)
+        new_selector.draw_options(self.options, self.metadata_dict.get(self.metadatum))
+        return new_selector
+
+    def new_custom_selector(self) -> MetadataCustomSelector:
+        new_selector = MetadataCustomSelector()
+        new_selector.from_filename_button.clicked.connect(self.handle_selector_change)
+        return new_selector
+
     def handle_selector_change(self):
         # Need to keep this for when we delete it.
         if isinstance(self.selector_widget, MetadataComponentSelector):
             # TODO: Will eventually have args
-            new_widget = MetadataCustomSelector()
-            new_widget.from_filename_button.clicked.connect(self.handle_selector_change)
+            new_widget = self.new_custom_selector()
         elif isinstance(self.selector_widget, MetadataCustomSelector):
-            new_widget = MetadataComponentSelector(self.metadatum, self.metadata_dict)
+            new_widget = self.new_component_selector()
         else:
             # Shouldn't happen as selector widget should be either of the above.
             return
