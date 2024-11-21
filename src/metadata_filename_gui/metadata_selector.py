@@ -25,7 +25,6 @@ class MetadataSelector(QWidget):
             new_widget.from_filename_button.clicked.connect(self.handle_selector_change)
         elif isinstance(self.selector_widget, MetadataCustomSelector):
             new_widget = MetadataComponentSelector(self.metadatum, self.metadata_dict)
-            self.selector_widget = new_widget
         else:
             # Shouldn't happen as selector widget should be either of the above.
             return
