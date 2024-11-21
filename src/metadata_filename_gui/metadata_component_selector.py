@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QPushButton, QHBoxLayout
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtCore import Signal, Qt, Slot
 
 class MetadataComponentSelector(QWidget):
     # Creating a separate signal for this because the custom button may be destroyed/recreated whenever the options are
@@ -32,8 +32,12 @@ class MetadataComponentSelector(QWidget):
             self.option_buttons.append(option_button)
         # This final button is to convert to use custom entry instead of this.
         self.custom_entry_button = QPushButton('Custom')
-        self.custom_entry_button.clicked.connect(self.custom_button_pressed)
+        # self.custom_entry_button.clicked.connect(self.custom_button_pressed)
+        self.custom_entry_button.clicked.connect(self.handle_custom_button)
         self.layout.addWidget(self.custom_entry_button)
+
+    def handle_custom_button(self):
+        self.custom_button_pressed.emit()
 
     def selection_changed(self):
         selected_button: QPushButton = self.sender()
