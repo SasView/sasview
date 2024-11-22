@@ -6,7 +6,9 @@ class MetadataCustomSelector(QWidget):
         self.metadata_dict = metadata_dict
         self.metadatum = metadatum
 
-        self.entry_box = QLineEdit()
+        prexisting_value = metadata_dict.get(metadatum)
+        initial_value = prexisting_value if prexisting_value is not None else ''
+        self.entry_box = QLineEdit(initial_value)
         self.entry_box.textChanged.connect(self.selection_changed)
         self.from_filename_button = QPushButton('From Filename')
 
