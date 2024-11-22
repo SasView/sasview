@@ -17,7 +17,7 @@ class MetadataCustomSelector(QWidget):
         self.layout.addWidget(self.from_filename_button)
 
     def selection_changed(self):
-        new_value = self.from_filename_button.text()
+        new_value = self.entry_box.text()
         if new_value != '':
             self.metadata_dict[self.metadatum] = new_value
         elif self.metadatum in self.metadata_dict:
