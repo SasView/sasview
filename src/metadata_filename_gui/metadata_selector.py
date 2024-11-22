@@ -11,7 +11,7 @@ class MetadataSelector(QWidget):
         # Default to the name selector
         self.selector_widget = self.new_component_selector()
 
-        # I can't seem to find any layou that just has one widgt in so this will do for now.
+        # I can't seem to find any layout that just has one widget in so this will do for now.
         self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.selector_widget)
 
