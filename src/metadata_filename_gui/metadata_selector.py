@@ -8,8 +8,11 @@ class MetadataSelector(QWidget):
         self.metadatum = metadatum
         self.metadata_dict = metadata_dict
         self.options = options
-        # Default to the name selector
-        self.selector_widget = self.new_component_selector()
+        current_option = metadata_dict.get(metadatum)
+        if current_option is None or current_option in options:
+            self.selector_widget = self.new_component_selector()
+        else:
+            self.selector_widget = self.new_custom_selector()
 
         # I can't seem to find any layout that just has one widget in so this will do for now.
         self.layout = QHBoxLayout(self)
