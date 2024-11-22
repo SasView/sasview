@@ -22,7 +22,7 @@ class MetadataSelector(QWidget):
         return new_selector
 
     def new_custom_selector(self) -> MetadataCustomSelector:
-        new_selector = MetadataCustomSelector()
+        new_selector = MetadataCustomSelector(self.metadatum, self.metadata_dict)
         new_selector.from_filename_button.clicked.connect(self.handle_selector_change)
         return new_selector
 
