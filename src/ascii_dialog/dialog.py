@@ -11,6 +11,7 @@ from os import path
 from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 from sasdata.temp_ascii_reader import load_data, AsciiReaderParams
 from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
+from metadata_filename_gui.metadata_tree_data import initial_metadata_dict
 import re
 
 TABLE_MAX_ROWS = 1000
@@ -451,7 +452,7 @@ This could potentially be because the file is not an ASCII format.""")
 
     def editMetadata(self):
         # current_metadata = self.filename_metadata[self.current_filename]
-        current_metadata = self.filename_metadata.get(self.current_filename, {})
+        current_metadata = self.filename_metadata.get(self.current_filename, initial_metadata_dict.copy())
         current_separator = self.filename_metadata_separator.get(self.current_filename, '')
         dialog = MetadataFilenameDialog(self.current_filename, current_metadata, current_separator)
         status = dialog.exec()
