@@ -13,8 +13,12 @@ class MetadataTreeWidget(QTreeWidget):
 
     def draw_tree(self, options: list[str], metadata_dict: dict[str, str]):
         self.clear()
+        # TODO: I'm not sure whether I like this approach. Maybe use some reflection from the Metadata class instead.
         metadata = {
-            'sasdata': ['aperture', 'collimation', 'detector', 'source'],
+            'source': ['name', 'radiation', 'type', 'probe_particle', 'beam_size_name', 'beam_size', 'beam_shape', 'wavelength', 'wavelength_min', 'wavelength_max', 'wavelength_spread'],
+            'detector': ['name', 'distance', 'offset', 'orientation', 'beam_center', 'pixel_size', 'slit_length'],
+            'aperture': ['name', 'type', 'size_name', 'size', 'distance'],
+            'collimation': ['name', 'lengths'],
             'process': ['name', 'date', 'description', 'term', 'notes'],
             'sample': ['name', 'sample_id', 'thickness', 'transmission', 'temperature', 'position', 'orientation', 'details'],
             'transmission_spectrum': ['name', 'timestamp', 'transmission', 'transmission_deviation'],
