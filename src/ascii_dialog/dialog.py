@@ -444,7 +444,7 @@ This could potentially be because the file is not an ASCII format.""")
             self.col_editor.columns,
             self.excluded_lines,
             self.seperators.items(),
-            {}
+            self.filename_metadata[self.current_filename]
         )
         self.params = params
         self.accept()
