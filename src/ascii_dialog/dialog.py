@@ -290,6 +290,7 @@ class AsciiDialog(QDialog):
         try:
             with open(filename) as file:
                 file_csv = file.readlines()
+            file_csv = [line.strip() for line in file_csv]
             # TODO: This assumes that no two files will be loaded with the same
             # name. This might not be a reasonable assumption.
             self.files[basename] = file_csv
