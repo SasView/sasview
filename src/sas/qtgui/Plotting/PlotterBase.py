@@ -28,7 +28,7 @@ from sas import config
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
 
-    def __init__(self, parent=None, manager=None, quickplot=False):
+    def __init__(self, parent=None, manager=None, quickplot=False, tpw_ax=None):
         super(PlotterBase, self).__init__(parent)
 
         # Required for the communicator
@@ -36,7 +36,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.quickplot = quickplot
 
         # Set auto layout so x/y axis captions don't get cut off
-        rcParams.update({'figure.autolayout': True})
+        # rcParams.update({'figure.autolayout': True})
 
         #plt.style.use('ggplot')
         #plt.style.use('seaborn-darkgrid')
@@ -102,6 +102,7 @@ class PlotterBase(QtWidgets.QWidget):
         # TODO: self.ax will have to be tracked and exposed
         # to enable subplot specific operations
         self.ax = self.figure.add_subplot(self.current_plot)
+        self.tpw_ax = tpw_ax
 
         # Remove this, DAMMIT
         self.axes = [self.ax]
@@ -190,10 +191,11 @@ class PlotterBase(QtWidgets.QWidget):
     @yscale.setter
     def yscale(self, scale='linear'):
         """ Y-axis scale setter """
-        if version.parse(mpl.__version__) < version.parse("3.3"):
-            self.ax.set_yscale(scale, nonposy='clip') if scale != 'linear' else self.ax.set_yscale(scale)
-        else:
-            self.ax.set_yscale(scale, nonpositive='clip') if scale != 'linear' else self.ax.set_yscale(scale)
+        for placeholder_ax in [self.ax, self.tpw_ax]:
+            if version.parse(mpl.__version__) < version.parse("3.3"):
+                placeholder_ax.set_yscale(scale, nonposy='clip') if scale != 'linear' else placeholder_ax.set_yscale(scale)
+            else:
+                placeholder_ax.set_yscale(scale, nonpositive='clip') if scale != 'linear' else placeholder_ax.set_yscale(scale)
         self._yscale = scale
 
     @property
@@ -204,11 +206,12 @@ class PlotterBase(QtWidgets.QWidget):
     @xscale.setter
     def xscale(self, scale='linear'):
         """ X-axis scale setter """
-        self.ax.cla()
-        if version.parse(mpl.__version__) < version.parse("3.3"):
-            self.ax.set_xscale(scale, nonposx='clip') if scale != 'linear' else self.ax.set_xscale(scale)
-        else:
-            self.ax.set_xscale(scale, nonpositive='clip') if scale != 'linear' else self.ax.set_xscale(scale)
+        for placeholder_ax in [self.ax, self.tpw_ax]:
+            placeholder_ax.cla()
+            if version.parse(mpl.__version__) < version.parse("3.3"):
+                placeholder_ax.set_xscale(scale, nonposx='clip') if scale != 'linear' else placeholder_ax.set_xscale(scale)
+            else:
+                placeholder_ax.set_xscale(scale, nonpositive='clip') if scale != 'linear' else placeholder_ax.set_xscale(scale)
         self._xscale = scale
 
     @property
