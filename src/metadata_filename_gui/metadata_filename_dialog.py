@@ -14,7 +14,8 @@ def build_font(text: str, classname: str = '') -> str:
     return f'<span class="{classname}">{text}</span>'
 
 class MetadataFilenameDialog(QDialog):
-    def __init__(self, filename: str, initial_component_metadata: dict[str, str]={}, initial_separator_text=''):
+    def __init__(self, filename: str, initial_component_metadata: dict[str, str]={},
+                 master_metadata: dict[str, dict[int, str]]={}, initial_separator_text=''):
         super().__init__()
 
         self.setWindowTitle('Metadata')
@@ -22,6 +23,7 @@ class MetadataFilenameDialog(QDialog):
         self.filename = filename
         # Key is the metadatum, value is the component selected for it.
         self.component_metadata = initial_component_metadata
+        self.master_metadata = master_metadata
 
         self.filename_line_label = QLabel()
         self.seperator_chars_label = QLabel('Seperators')
