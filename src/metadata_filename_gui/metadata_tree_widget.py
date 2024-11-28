@@ -4,7 +4,7 @@ from metadata_filename_gui.metadata_component_selector import MetadataComponentS
 from metadata_filename_gui.metadata_selector import MetadataSelector
 
 class MetadataTreeWidget(QTreeWidget):
-    def __init__(self, metadata_dict: dict[str, str], master_metadata: dict[str, dict[str, int]]):
+    def __init__(self, metadata_dict: dict[str, dict[str, str]], master_metadata: dict[str, dict[str, int]]):
         super().__init__()
         self.setColumnCount(2)
         self.setHeaderLabels(['Name', 'Filename Components'])
