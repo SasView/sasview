@@ -7,12 +7,13 @@ class MetadataComponentSelector(QWidget):
 
     custom_button_pressed = Signal(Qt.MouseButton())
 
-    def __init__(self, metadatum: str, metadata_dict: dict[str, str]):
+    def __init__(self, metadatum: str, metadata_dict: dict[str, str], master_metadata: dict[str, dict[str, int]]):
         super().__init__()
         self.options: list[str]
         self.option_buttons: list[QPushButton]
         self.layout = QHBoxLayout(self)
         self.metadata_dict = metadata_dict
+        self.master_metadata = master_metadata
         self.metadatum = metadatum
 
     def clear_options(self):
