@@ -7,7 +7,7 @@ class MetadataComponentSelector(QWidget):
 
     custom_button_pressed = Signal(Qt.MouseButton())
 
-    def __init__(self, metadatum: str, metadata_dict: dict[str, str], master_metadata: dict[str, dict[str, int]]):
+    def __init__(self, metadatum: str, metadata_dict: dict[str, str], master_metadata: dict[str, int]):
         super().__init__()
         self.options: list[str]
         self.option_buttons: list[QPushButton]
