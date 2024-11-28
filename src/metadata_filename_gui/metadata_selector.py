@@ -3,8 +3,8 @@ from metadata_filename_gui.metadata_component_selector import MetadataComponentS
 from metadata_filename_gui.metadata_custom_selector import MetadataCustomSelector
 
 class MetadataSelector(QWidget):
-    def __init__(self, metadatum: str, options: list[str], metadata_dict: dict[str, dict[str, str]],
-                 master_metadata: dict[str, dict[str, int]]):
+    def __init__(self, metadatum: str, options: list[str], metadata_dict: dict[str, str],
+                 master_metadata: dict[str, int]):
         super().__init__()
         self.metadatum = metadatum
         self.metadata_dict = metadata_dict
