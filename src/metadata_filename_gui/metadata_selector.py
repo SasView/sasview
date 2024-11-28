@@ -3,10 +3,12 @@ from metadata_filename_gui.metadata_component_selector import MetadataComponentS
 from metadata_filename_gui.metadata_custom_selector import MetadataCustomSelector
 
 class MetadataSelector(QWidget):
-    def __init__(self, metadatum: str, options: list[str], metadata_dict: dict[str, dict[str, str]]):
+    def __init__(self, metadatum: str, options: list[str], metadata_dict: dict[str, dict[str, str]],
+                 master_metadata: dict[str, dict[str, int]]):
         super().__init__()
         self.metadatum = metadatum
         self.metadata_dict = metadata_dict
+        self.master_metadata = master_metadata
         self.options = options
         current_option = metadata_dict.get(metadatum)
         if current_option is None or current_option in options:
@@ -19,13 +21,13 @@ class MetadataSelector(QWidget):
         self.layout.addWidget(self.selector_widget)
 
     def new_component_selector(self) -> MetadataComponentSelector:
-        new_selector = MetadataComponentSelector(self.metadatum, self.metadata_dict)
+        new_selector = MetadataComponentSelector(self.metadatum, self.metadata_dict, self.master_metadata)
         new_selector.custom_button_pressed.connect(self.handle_selector_change)
         new_selector.draw_options(self.options, self.metadata_dict.get(self.metadatum))
         return new_selector
 
     def new_custom_selector(self) -> MetadataCustomSelector:
-        new_selector = MetadataCustomSelector(self.metadatum, self.metadata_dict)
+        new_selector = MetadataCustomSelector(self.metadatum, self.metadata_dict, self.master_metadata)
         new_selector.from_filename_button.clicked.connect(self.handle_selector_change)
         return new_selector
 
