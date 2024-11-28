@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout
 
 class MetadataCustomSelector(QWidget):
-    def __init__(self, metadatum: str, metadata_dict: dict[str, str], master_metadata: dict[str, dict[str, int]]):
+    def __init__(self, metadatum: str, metadata_dict: dict[str, str], master_metadata: dict[str, int]):
         super().__init__()
         self.metadata_dict = metadata_dict
         self.master_metadata = master_metadata
