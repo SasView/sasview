@@ -4,11 +4,12 @@ from metadata_filename_gui.metadata_component_selector import MetadataComponentS
 from metadata_filename_gui.metadata_selector import MetadataSelector
 
 class MetadataTreeWidget(QTreeWidget):
-    def __init__(self, metadata_dict: dict[str, str]):
+    def __init__(self, metadata_dict: dict[str, str], master_metadata: dict[str, dict[str, int]]):
         super().__init__()
         self.setColumnCount(2)
         self.setHeaderLabels(['Name', 'Filename Components'])
         self.metadata_dict = metadata_dict
+        self.master_metadata = master_metadata
 
 
     def draw_tree(self, options: list[str], metadata_dict: dict[str, str]):
@@ -28,7 +29,7 @@ class MetadataTreeWidget(QTreeWidget):
             top_level_item = QTreeWidgetItem([top_level])
             for metadatum in items:
                 # selector = MetadataComponentSelector(metadatum, self.metadata_dict)
-                selector = MetadataSelector(metadatum, options, self.metadata_dict[top_level])
+                selector = MetadataSelector(metadatum, options, self.metadata_dict[top_level], self.master_metadata[top_level])
                 metadatum_item = QTreeWidgetItem([metadatum])
                 # selector.draw_options(options, metadata_dict.get(metadatum))
                 top_level_item.addChild(metadatum_item)
