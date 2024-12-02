@@ -28,3 +28,11 @@ class InternalMetadata:
         if value in target_category:
             return target_category[value]
         raise ValueError('value does not exist in metadata.')
+
+    def update_metadata(self, category: str, key: str, filename: str, new_value: str | int):
+        if isinstance(new_value, str):
+            self.filename_specific_metadata[filename][category].values[key] = new_value
+            # TODO: What about the master metadata? Until that's gone, that still takes precedence.
+        elif isinstance(new_value, int):
+            self.master_metadata[category].values[key] = new_value
+        raise TypeError('Invalid type for new_value')
