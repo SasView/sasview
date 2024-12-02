@@ -15,7 +15,7 @@ def build_font(text: str, classname: str = '') -> str:
 
 class MetadataFilenameDialog(QDialog):
     def __init__(self, filename: str, initial_component_metadata: dict[str, str]={},
-                 master_metadata: dict[str, dict[int, str]]={}, initial_separator_text=''):
+                 master_metadata: dict[str, dict[str, int]]={}, initial_separator_text=''):
         super().__init__()
 
         self.setWindowTitle('Metadata')
