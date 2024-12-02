@@ -1,19 +1,20 @@
 from dataclasses import dataclass
 from typing import TypeVar
 from re import split as re_split
+from metadata_filename_gui.metadata_tree_data import metadata as initial_metadata
 
 T = TypeVar('T')
 
 
 @dataclass
 class InternalMetadataCategory[T]:
-    values: dict[str, T]
+    values: dict[str, T] = {}
 
 @dataclass
 class InternalMetadata:
     # Key is the filename.
-    filename_specific_metadata: dict[str, dict[str, InternalMetadataCategory[str]]]
-    master_metadata: dict[str, InternalMetadataCategory[int]]
+    filename_specific_metadata: dict[str, dict[str, InternalMetadataCategory[str]]] = {}
+    master_metadata: dict[str, InternalMetadataCategory[int]] = {}
 
     def get_metadata(self, category: str, value: str, filename: str, separator_pattern: str) -> str:
         filename_components = re_split(filename, separator_pattern)
