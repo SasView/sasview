@@ -12,7 +12,7 @@ class MetadataTreeWidget(QTreeWidget):
         self.master_metadata = master_metadata
 
 
-    def draw_tree(self, options: list[str], metadata_dict: dict[str, str]):
+    def draw_tree(self, options: list[str]):
         self.clear()
         # TODO: I'm not sure whether I like this approach. Maybe use some reflection from the Metadata class instead.
         metadata = {
