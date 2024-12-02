@@ -35,7 +35,7 @@ class AsciiDialog(QDialog):
         # I'm not going to worry too much about deleting filenames from this dict below when they are unloaded. It
         # shouldn't break anything.
         self.filename_metadata: dict[str, dict[str, str]] = {}
-        self.master_metadata_dict: dict[str, str] = {}
+        self.master_metadata_dict: dict[str, str] = initial_metadata_dict.copy()
         # This is useful for whenever the user wants to reopen the metadata editor.
         self.filename_metadata_separator = {}
         self.current_filename: str | None = None
