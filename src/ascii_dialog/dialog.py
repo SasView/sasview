@@ -12,6 +12,7 @@ from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, 
 from sasdata.temp_ascii_reader import load_data, AsciiReaderParams
 from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
 from metadata_filename_gui.metadata_tree_data import initial_metadata_dict
+from metadata_filename_gui.internal_metadata import InternalMetadata
 import re
 
 TABLE_MAX_ROWS = 1000
@@ -32,12 +33,8 @@ class AsciiDialog(QDialog):
         self.files: dict[str, list[str]] = {}
         self.files_full_path: dict[str, str] = {}
         self.files_is_included: dict[str, list[bool]] = {}
-        # I'm not going to worry too much about deleting filenames from this dict below when they are unloaded. It
-        # shouldn't break anything.
-        self.filename_metadata: dict[str, dict[str, str]] = {}
-        self.master_metadata_dict: dict[str, str] = initial_metadata_dict.copy()
         # This is useful for whenever the user wants to reopen the metadata editor.
-        self.filename_metadata_separator: dict[str, str] = {}
+        self.internal_metadata = InternalMetadata()
         self.current_filename: str | None = None
 
         self.seperators: dict[str, bool] = {
@@ -456,7 +453,7 @@ This could potentially be because the file is not an ASCII format.""")
         # current_metadata = self.filename_metadata[self.current_filename]
         current_metadata = self.filename_metadata.get(self.current_filename, initial_metadata_dict.copy())
         current_separator = self.filename_metadata_separator.get(self.current_filename, '')
-        dialog = MetadataFilenameDialog(self.current_filename, current_metadata, self.master_metadata_dict, current_separator)
+        dialog = MetadataFilenameDialog(self.current_filename, self.internal_metadata, current_separator)
         status = dialog.exec()
         if status == 1:
             self.filename_metadata[self.current_filename] = dialog.component_metadata
