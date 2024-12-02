@@ -10,11 +10,14 @@ T = TypeVar('T')
 class InternalMetadataCategory[T]:
     values: dict[str, T] = {}
 
+def default_categories() -> dict[str, InternalMetadataCategory[str | int]]:
+    return {key: InternalMetadataCategory() for key in initial_metadata.keys()}
+
 @dataclass
 class InternalMetadata:
     # Key is the filename.
     filename_specific_metadata: dict[str, dict[str, InternalMetadataCategory[str]]] = {}
-    master_metadata: dict[str, InternalMetadataCategory[int]] = {}
+    master_metadata: dict[str, InternalMetadataCategory[int]] = default_categories()
 
     def get_metadata(self, category: str, value: str, filename: str, separator_pattern: str) -> str:
         filename_components = re_split(filename, separator_pattern)
@@ -38,9 +41,6 @@ class InternalMetadata:
             self.master_metadata[category].values[key] = new_value
         raise TypeError('Invalid type for new_value')
 
-    def _default_categories(self) -> dict[str, InternalMetadataCategory[str | int]]:
-        return {key: InternalMetadataCategory() for key in initial_metadata.keys()}
-
     def add_file(self, new_filename: str):
         # TODO: Fix typing here. Pyright is showing errors.
-        self.filename_specific_metadata[new_filename] = self._default_categories()
+        self.filename_specific_metadata[new_filename] = default_categories()
