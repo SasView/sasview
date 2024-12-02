@@ -37,7 +37,7 @@ class AsciiDialog(QDialog):
         self.filename_metadata: dict[str, dict[str, str]] = {}
         self.master_metadata_dict: dict[str, str] = initial_metadata_dict.copy()
         # This is useful for whenever the user wants to reopen the metadata editor.
-        self.filename_metadata_separator = {}
+        self.filename_metadata_separator: dict[str, str] = {}
         self.current_filename: str | None = None
 
         self.seperators: dict[str, bool] = {
