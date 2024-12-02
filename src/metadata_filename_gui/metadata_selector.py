@@ -1,16 +1,16 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout
+from metadata_filename_gui.internal_metadata import InternalMetadata
 from metadata_filename_gui.metadata_component_selector import MetadataComponentSelector
 from metadata_filename_gui.metadata_custom_selector import MetadataCustomSelector
 
 class MetadataSelector(QWidget):
-    def __init__(self, metadatum: str, options: list[str], metadata_dict: dict[str, str],
-                 master_metadata: dict[str, int]):
+    def __init__(self, category: str, metadatum: str, options: list[str], metadata: InternalMetadata, filename: str, separator_pattern: str):
         super().__init__()
+        self.category = category
         self.metadatum = metadatum
-        self.metadata_dict = metadata_dict
-        self.master_metadata = master_metadata
+        self.metadata: InternalMetadata = metadata
         self.options = options
-        current_option = metadata_dict.get(metadatum)
+        current_option = self.metadata.get_metadata(self.category, metadatum, options)
         if current_option is None or current_option in options:
             self.selector_widget = self.new_component_selector()
         else:

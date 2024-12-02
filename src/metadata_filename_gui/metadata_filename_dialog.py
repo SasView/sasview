@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog, QPushButton
 from metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
+from metadata_filename_gui.internal_metadata import InternalMetadata
 from sys import argv
 import re
 
@@ -14,16 +15,14 @@ def build_font(text: str, classname: str = '') -> str:
     return f'<span class="{classname}">{text}</span>'
 
 class MetadataFilenameDialog(QDialog):
-    def __init__(self, filename: str, initial_component_metadata: dict[str, str]={},
-                 master_metadata: dict[str, dict[str, int]]={}, initial_separator_text=''):
+    def __init__(self, filename: str, initial_metadata: InternalMetadata, initial_separator_text=''):
         super().__init__()
 
         self.setWindowTitle('Metadata')
 
         self.filename = filename
         # Key is the metadatum, value is the component selected for it.
-        self.component_metadata = initial_component_metadata
-        self.master_metadata = master_metadata
+        self.initial_metadata = initial_metadata
 
         self.filename_line_label = QLabel()
         self.seperator_chars_label = QLabel('Seperators')
