@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TypeVar
 from re import split as re_split
 from metadata_filename_gui.metadata_tree_data import metadata as initial_metadata
@@ -8,7 +8,7 @@ T = TypeVar('T')
 
 @dataclass
 class InternalMetadataCategory[T]:
-    values: dict[str, T] = {}
+    values: dict[str, T] = field(default_factory=dict)
 
 def default_categories() -> dict[str, InternalMetadataCategory[str | int]]:
     return {key: InternalMetadataCategory() for key in initial_metadata.keys()}
@@ -16,8 +16,8 @@ def default_categories() -> dict[str, InternalMetadataCategory[str | int]]:
 @dataclass
 class InternalMetadata:
     # Key is the filename.
-    filename_specific_metadata: dict[str, dict[str, InternalMetadataCategory[str]]] = {}
-    master_metadata: dict[str, InternalMetadataCategory[int]] = default_categories()
+    filename_specific_metadata: dict[str, dict[str, InternalMetadataCategory[str]]] = field(default_factory=dict)
+    master_metadata: dict[str, InternalMetadataCategory[int]] = field(default_factory=default_categories)
 
     def get_metadata(self, category: str, value: str, filename_components: list[str] = []) -> str:
         # We prioritise the master metadata.
