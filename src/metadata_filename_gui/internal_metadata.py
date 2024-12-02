@@ -19,8 +19,7 @@ class InternalMetadata:
     filename_specific_metadata: dict[str, dict[str, InternalMetadataCategory[str]]] = {}
     master_metadata: dict[str, InternalMetadataCategory[int]] = default_categories()
 
-    def get_metadata(self, category: str, value: str, filename: str, separator_pattern: str) -> str:
-        filename_components = re_split(filename, separator_pattern)
+    def get_metadata(self, category: str, value: str, filename_components: list[str] = []) -> str:
         # We prioritise the master metadata.
 
         # TODO: Assumes category in master_metadata exists. Is this a reasonable assumption? May need to make sure it is
