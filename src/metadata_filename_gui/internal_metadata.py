@@ -37,3 +37,10 @@ class InternalMetadata:
         elif isinstance(new_value, int):
             self.master_metadata[category].values[key] = new_value
         raise TypeError('Invalid type for new_value')
+
+    def _default_categories(self) -> dict[str, InternalMetadataCategory[str | int]]:
+        return {key: InternalMetadataCategory() for key in initial_metadata.keys()}
+
+    def add_file(self, new_filename: str):
+        # TODO: Fix typing here. Pyright is showing errors.
+        self.filename_specific_metadata[new_filename] = self._default_categories()
