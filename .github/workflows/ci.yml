@@ -112,16 +112,14 @@ jobs:
         run: |
           git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-          git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+          git clone --depth=50 --branch=v0.9.3 https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
         run: |
           cd ../sasdata
           rm -rf build
           rm -rf dist
-          python setup.py clean
-          python setup.py build
-          mv build/lib/sasdata/example_data/* ../sasview/src/sas/example_data/
+          mv sasdata/example_data/* ../sasview/src/sas/example_data/
           python -m pip install --no-deps .
 
       - name: Build and install sasmodels
@@ -129,8 +127,6 @@ jobs:
           cd ../sasmodels
           rm -rf build
           rm -rf dist
-          python setup.py clean
-          python setup.py build
           python -m pip install --no-deps .
 
       - name: Build and install bumps
@@ -138,8 +134,6 @@ jobs:
           cd ../bumps
           rm -rf build
           rm -rf dist
-          python setup.py clean
-          python setup.py build
           python -m pip install --no-deps .
 
       ### Document the build environment
@@ -156,8 +150,6 @@ jobs:
           githash=$( git rev-parse HEAD )
           sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
           # BUILD SASVIEW
-          python setup.py clean
-          python setup.py build
           python -m pip install --no-deps .
 
       ### Run tests (if enabled)

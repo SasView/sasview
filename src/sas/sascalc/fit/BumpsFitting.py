@@ -320,7 +320,13 @@ class BumpsFit(FitEngine):
         uncertainty_warning = False
 
         for fitting_module in problem.models:
-            fitness = fitting_module.fitness
+            # CRUFT: This makes BumpsFitting compatible with bumps v0.9 and v1.0
+            if isinstance(fitting_module, SasFitness):
+                # Bumps v1.x+ - A Fitness object is returned
+                fitness = fitting_module
+            else:
+                # Bumps v0.x - A module is returned that holds the Fitness object
+                fitness = fitting_module.fitness
             pars = fitness.fitted_pars + fitness.computed_pars
             par_names = fitness.fitted_par_names + fitness.computed_par_names
 
@@ -350,8 +356,8 @@ class BumpsFit(FitEngine):
 
            # TODO: Let the GUI decided how to handle success/failure.
             if not fitting_result.success:
-                fitting_result.stderr[:] = np.NaN
-                fitting_result.fitness = np.NaN
+                fitting_result.stderr[:] = np.nan
+                fitting_result.fitness = np.nan
 
             all_results.append(fitting_result)
 
@@ -402,7 +408,7 @@ def run_bumps(problem, handler, curr_thread):
     try:
         best, fbest = fitdriver.fit()
     except Exception as exc:
-        best, fbest = None, np.NaN
+        best, fbest = None, np.nan
         errors.extend([str(exc), traceback.format_exc()])
     finally:
         mapper.stop_mapper(fitdriver.mapper)
