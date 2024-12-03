@@ -455,8 +455,7 @@ This could potentially be because the file is not an ASCII format.""")
         dialog = MetadataFilenameDialog(self.current_filename, self.internal_metadata)
         status = dialog.exec()
         if status == 1:
-            self.filename_metadata[self.current_filename] = dialog.component_metadata
-            self.filename_metadata_separator[self.current_filename] = dialog.separator_text
+            self.internal_metadata = dialog.internal_metadata
 
 
 if __name__ == "__main__":
