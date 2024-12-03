@@ -1,13 +1,16 @@
 from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout
 
-class MetadataCustomSelector(QWidget):
-    def __init__(self, metadatum: str, metadata_dict: dict[str, str], master_metadata: dict[str, int]):
-        super().__init__()
-        self.metadata_dict = metadata_dict
-        self.master_metadata = master_metadata
-        self.metadatum = metadatum
+from metadata_filename_gui.internal_metadata import InternalMetadata
 
-        prexisting_value = metadata_dict.get(metadatum)
+class MetadataCustomSelector(QWidget):
+    def __init__(self, category:str, metadatum: str, internal_metadata: InternalMetadata, filename: str):
+        super().__init__()
+        self.internal_metadata = internal_metadata
+        self.metadatum = metadatum
+        self.category = category
+        self.filename = filename
+
+        prexisting_value = self.internal_metadata.get_metadata(category, metadatum, filename)
         initial_value = prexisting_value if prexisting_value is not None else ''
         self.entry_box = QLineEdit(initial_value)
         self.entry_box.textChanged.connect(self.selection_changed)
@@ -20,6 +23,6 @@ class MetadataCustomSelector(QWidget):
     def selection_changed(self):
         new_value = self.entry_box.text()
         if new_value != '':
-            self.metadata_dict[self.metadatum] = new_value
-        elif self.metadatum in self.metadata_dict:
-            del self.metadata_dict[self.metadatum]
+            self.internal_metadata.update_metadata(self.category, self.metadatum, self.filename, new_value)
+        else:
+            self.internal_metadata.clear_metadata(self.category, self.metadatum, self.filename)
