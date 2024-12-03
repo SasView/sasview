@@ -1,0 +1,85 @@
+(sasview_dev) C:\Users\Qerne\OneDrive\Documents\VSCode\Projects\Thesis\SasVIew_dev_version\sasview\src\sas\qtgui\Perspectives\Shape2SAS>python DesignWindow.py
+        1470 points for subunit 0: Sphere
+             Point density     : 2.807e-03 (points per volume)
+             Scattering density: 2.807e-03 (density times scattering length)
+             Excluded points   : 0 (overlap region)
+             Remaining points  : 1470 (non-overlapping region)
+        1522 points for subunit 1: Sphere
+             Point density     : 2.907e-03 (points per volume)
+             Scattering density: 2.907e-03 (density times scattering length)
+             Excluded points   : 1522 (overlap region)
+             Remaining points  : 0 (non-overlapping region)
+        Total points in model 1: 1470
+        Total volume of model 1: 5.236e+05 A^3
+
+Entering setPlot
+Trying to delete series
+[]
+0
+Deleted! []
+1
+2
+3
+4
+5
+6
+7
+8
+9
+[<PySide6.QtDataVisualization.QScatter3DSeries(0x1ab457e7d30) at 0x000001AB46045D80>]
+1
+2
+3
+4
+5
+6
+7
+8
+9
+[<PySide6.QtDataVisualization.QScatter3DSeries(0x1ab457e7d30) at 0x000001AB46045D80>, <PySide6.QtDataVisualization.QScatter3DSeries(0x1ab4f9c4300) at 0x000001AB473E3B00>]
+Exiting setPlot
+
+
+
+
+
+
+        1486 points for subunit 0: Sphere
+             Point density     : 2.838e-03 (points per volume)
+             Scattering density: 2.838e-03 (density times scattering length)
+             Excluded points   : 0 (overlap region)
+             Remaining points  : 1486 (non-overlapping region)
+        1559 points for subunit 1: Sphere
+             Point density     : 2.977e-03 (points per volume)
+             Scattering density: 2.977e-03 (density times scattering length)
+             Excluded points   : 1559 (overlap region)
+             Remaining points  : 0 (non-overlapping region)
+        Total points in model 1: 1486
+        Total volume of model 1: 5.236e+05 A^3
+
+Entering setPlot
+Trying to delete series
+[<PySide6.QtDataVisualization.QScatter3DSeries(0x1ab457e7d30) at 0x000001AB46045D80>, <PySide6.QtDataVisualization.QScatter3DSeries(0x1ab4f9c4300) at 0x000001AB473E3B00>]
+2
+Deleted! [<PySide6.QtDataVisualization.QScatter3DSeries(0x1ab4f9c4300) at 0x000001AB473E3B00>]
+1
+2
+3
+4
+5
+6
+7
+8
+9
+[<PySide6.QtDataVisualization.QScatter3DSeries(0x1ab4f9c4300) at 0x000001AB473E3B00>, <PySide6.QtDataVisualization.QScatter3DSeries(0x1ab459a5630) at 0x000001AB46045D80>]
+1
+2
+3
+4
+5
+6
+7
+8
+9
+[<PySide6.QtDataVisualization.QScatter3DSeries(0x1ab459a5630) at 0x000001AB46045D80>, <PySide6.QtDataVisualization.QScatter3DSeries(0x1ab4fb1f990) at 0x000001AB473E1780>]
+Exiting setPlot
