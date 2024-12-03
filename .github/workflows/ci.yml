@@ -27,7 +27,7 @@ jobs:
 
     #if: false    # uncomment to prevent the rest of the workflow running
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     # Stop existing workflows for matching branches and pull requests
     concurrency:
