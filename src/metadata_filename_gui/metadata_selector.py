@@ -24,7 +24,6 @@ class MetadataSelector(QWidget):
     def new_component_selector(self) -> MetadataComponentSelector:
         new_selector = MetadataComponentSelector(self.category, self.metadatum, self.filename, self.metadata)
         new_selector.custom_button_pressed.connect(self.handle_selector_change)
-        new_selector.draw_options(self.options, self.metadata_dict.get(self.metadatum))
         new_selector.draw_options(self.options, self.metadata.get_metadata(self.category, self.metadatum, self.filename))
         return new_selector
 
