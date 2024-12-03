@@ -47,7 +47,8 @@ class InternalMetadata:
             # TODO: What about the master metadata? Until that's gone, that still takes precedence.
         elif isinstance(new_value, int):
             self.master_metadata[category].values[key] = new_value
-        raise TypeError('Invalid type for new_value')
+        else:
+            raise TypeError('Invalid type for new_value')
 
     def clear_metadata(self, category: str, key: str, filename: str):
         category_obj = self.filename_specific_metadata[filename][category]
