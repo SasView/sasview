@@ -23,7 +23,7 @@ class InternalMetadata:
     def filename_components(self, filename: str) -> list[str]:
         return re_split(self.filename_separator[filename], filename)
 
-    def get_metadata(self, category: str, value: str, filename: str) -> str:
+    def get_metadata(self, category: str, value: str, filename: str, error_on_not_found=False) -> str | None:
         components = self.filename_components(filename)
 
         # We prioritise the master metadata.
@@ -36,7 +36,10 @@ class InternalMetadata:
         target_category = self.filename_specific_metadata[filename][category].values
         if value in target_category:
             return target_category[value]
-        raise ValueError('value does not exist in metadata.')
+        if error_on_not_found:
+            raise ValueError('value does not exist in metadata.')
+        else:
+            return None
 
     def update_metadata(self, category: str, key: str, filename: str, new_value: str | int):
         if isinstance(new_value, str):
