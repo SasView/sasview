@@ -451,9 +451,7 @@ This could potentially be because the file is not an ASCII format.""")
 
     def editMetadata(self):
         # current_metadata = self.filename_metadata[self.current_filename]
-        current_metadata = self.filename_metadata.get(self.current_filename, initial_metadata_dict.copy())
-        current_separator = self.filename_metadata_separator.get(self.current_filename, '')
-        dialog = MetadataFilenameDialog(self.current_filename, self.internal_metadata, current_separator)
+        dialog = MetadataFilenameDialog(self.current_filename, self.internal_metadata)
         status = dialog.exec()
         if status == 1:
             self.filename_metadata[self.current_filename] = dialog.component_metadata
