@@ -17,6 +17,7 @@ def default_categories() -> dict[str, InternalMetadataCategory[str | int]]:
 class InternalMetadata:
     # Key is the filename.
     filename_specific_metadata: dict[str, dict[str, InternalMetadataCategory[str]]] = field(default_factory=dict)
+    filename_separator: dict[str, str] = field(default_factory=dict)
     master_metadata: dict[str, InternalMetadataCategory[int]] = field(default_factory=default_categories)
 
     def get_metadata(self, category: str, value: str, filename_components: list[str] = []) -> str:
