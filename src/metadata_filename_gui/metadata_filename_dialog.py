@@ -15,8 +15,12 @@ def build_font(text: str, classname: str = '') -> str:
     return f'<span class="{classname}">{text}</span>'
 
 class MetadataFilenameDialog(QDialog):
-    def __init__(self, filename: str, initial_metadata: InternalMetadata, initial_separator_text=''):
+    def __init__(self, filename: str, initial_metadata: InternalMetadata):
         super().__init__()
+
+        # TODO: Will probably change this default later (or a more sophisticated way of getting this default from the
+        # filename.)
+        initial_separator_text = initial_metadata.filename_separator.get(filename, '_')
 
         self.setWindowTitle('Metadata')
 
