@@ -26,7 +26,7 @@ class MetadataFilenameDialog(QDialog):
 
         self.filename = filename
         # Key is the metadatum, value is the component selected for it.
-        self.initial_metadata = initial_metadata
+        self.internal_metadata = initial_metadata
 
         self.filename_line_label = QLabel()
         self.seperator_chars_label = QLabel('Seperators')
@@ -38,7 +38,7 @@ class MetadataFilenameDialog(QDialog):
         self.filename_separator_layout.addWidget(self.seperator_chars_label)
         self.filename_separator_layout.addWidget(self.separator_chars)
 
-        self.metadata_tree = MetadataTreeWidget(self.component_metadata)
+        self.metadata_tree = MetadataTreeWidget(self.internal_metadata)
 
         # Have to update this now because it relies on the value of the separator, and tree.
         self.update_filename_separation()
@@ -82,7 +82,7 @@ class MetadataFilenameDialog(QDialog):
 
     def update_filename_separation(self):
         self.filename_line_label.setText(f'Filename: {self.formatted_filename()}')
-        self.metadata_tree.draw_tree(self.filename_components(), self.component_metadata)
+        self.metadata_tree.draw_tree(self.filename_components(), self.filename)
 
     def on_save(self):
         self.accept()
