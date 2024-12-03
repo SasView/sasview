@@ -10,7 +10,7 @@ class MetadataSelector(QWidget):
         self.metadatum = metadatum
         self.metadata: InternalMetadata = metadata
         self.options = options
-        current_option = self.metadata.get_metadata(self.category, metadatum, options)
+        current_option = self.metadata.get_metadata(self.category, metadatum, filename)
         if current_option is None or current_option in options:
             self.selector_widget = self.new_component_selector()
         else:
