@@ -34,7 +34,7 @@ class AsciiDialog(QDialog):
         self.files_full_path: dict[str, str] = {}
         self.files_is_included: dict[str, list[bool]] = {}
         # This is useful for whenever the user wants to reopen the metadata editor.
-        self.internal_metadata = InternalMetadata()
+        self.internal_metadata: InternalMetadata = InternalMetadata()
         self.current_filename: str | None = None
 
         self.seperators: dict[str, bool] = {
