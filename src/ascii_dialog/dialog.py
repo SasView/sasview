@@ -303,6 +303,7 @@ class AsciiDialog(QDialog):
             # the table to be drawn.
             self.filename_chooser.addItem(basename)
             self.filename_chooser.setCurrentText(basename)
+            self.internal_metadata.add_file(basename)
 
         except OSError:
             QMessageBox.critical(self, 'File Read Error', 'There was an error accessing that file.')
