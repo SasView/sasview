@@ -21,6 +21,7 @@ class MetadataFilenameDialog(QDialog):
         # TODO: Will probably change this default later (or a more sophisticated way of getting this default from the
         # filename.)
         initial_separator_text = initial_metadata.filename_separator.get(filename, '_')
+        initial_metadata.filename_separator[filename] = initial_separator_text
 
         self.setWindowTitle('Metadata')
 
