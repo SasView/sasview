@@ -317,12 +317,12 @@ class BumpsFit(FitEngine):
         uncertainty_warning = False
 
         for fitting_module in problem.models:
-            # This makes BumpsFitting compatible with both bumps v0.9 and v1.0
+            # CRUFT: This makes BumpsFitting compatible with bumps v0.9 and v1.0
             if isinstance(fitting_module, SasFitness):
-                # Bumps v1+ - A Fitness object is returned
+                # Bumps v1.x+ - A Fitness object is returned
                 fitness = fitting_module
             else:
-                # Bumps v0 - A module is returned that holds the Fitness object
+                # Bumps v0.x - A module is returned that holds the Fitness object
                 fitness = fitting_module.fitness
             pars = fitness.fitted_pars + fitness.computed_pars
             par_names = fitness.fitted_par_names + fitness.computed_par_names
