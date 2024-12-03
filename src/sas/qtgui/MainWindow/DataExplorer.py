@@ -1199,10 +1199,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Call show on requested plots
         # All same-type charts in one plot
+        new_plot = PlotterWidget(manager=self, parent=self)
+        new_plot.item = None
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
-                if 'new_plot' not in locals():
-                    new_plot = PlotterWidget(manager=self, parent=self)
+                if not new_plot.item:
                     new_plot.item = item
                 # Ensure new plots use the default transform, not the transform of any previous plots
                 new_plot.plot(plot_set, transform=transform)
@@ -1214,9 +1215,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError(msg)
 
-        if 'new_plot' in locals() and \
-            hasattr(new_plot, 'data') and \
-            isinstance(new_plot.data[0], Data1D):
+        if hasattr(new_plot, 'data') and isinstance(new_plot.data[0], Data1D):
             self.addPlot(new_plot)
 
     def newPlot(self):
