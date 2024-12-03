@@ -50,7 +50,11 @@ class InternalMetadata:
         raise TypeError('Invalid type for new_value')
 
     def clear_metadata(self, category: str, key: str, filename: str):
-        del self.filename_specific_metadata[filename][category].values[key]
+        category_obj = self.filename_specific_metadata[filename][category]
+        if key in category_obj.values:
+            del category_obj.values[key]
+        if key in self.master_metadata[category].values:
+            del self.master_metadata[category].values[key]
 
     def add_file(self, new_filename: str):
         # TODO: Fix typing here. Pyright is showing errors.
