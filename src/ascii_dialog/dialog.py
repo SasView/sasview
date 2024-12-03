@@ -64,7 +64,7 @@ class AsciiDialog(QDialog):
         self.filename_chooser.currentTextChanged.connect(self.updateCurrentFile)
 
         self.load_button = QPushButton("Load File")
-        self.load_button.clicked.connect(self.load)
+        self.load_button.clicked.connect(self.load_file)
 
         ## Dataset type selection
         self.dataset_layout = QHBoxLayout()
@@ -274,7 +274,7 @@ class AsciiDialog(QDialog):
 
 
     @Slot()
-    def load(self) -> None:
+    def load_file(self) -> None:
         """Open the file loading dialog, and load the file the user selects."""
         result = QFileDialog.getOpenFileName(self)
         # Happens when the user cancels without selecting a file. There isn't a
