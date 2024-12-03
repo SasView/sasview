@@ -10,6 +10,7 @@ class MetadataSelector(QWidget):
         self.metadatum = metadatum
         self.metadata: InternalMetadata = metadata
         self.options = options
+        self.filename = filename
         current_option = self.metadata.get_metadata(self.category, metadatum, filename)
         if current_option is None or current_option in options:
             self.selector_widget = self.new_component_selector()
@@ -21,13 +22,14 @@ class MetadataSelector(QWidget):
         self.layout.addWidget(self.selector_widget)
 
     def new_component_selector(self) -> MetadataComponentSelector:
-        new_selector = MetadataComponentSelector(self.metadatum, self.metadata_dict, self.master_metadata)
+        new_selector = MetadataComponentSelector(self.category, self.metadatum, self.filename, self.metadata)
         new_selector.custom_button_pressed.connect(self.handle_selector_change)
         new_selector.draw_options(self.options, self.metadata_dict.get(self.metadatum))
+        new_selector.draw_options(self.options, self.metadata.get_metadata(self.category, self.metadatum, self.filename))
         return new_selector
 
     def new_custom_selector(self) -> MetadataCustomSelector:
-        new_selector = MetadataCustomSelector(self.metadatum, self.metadata_dict, self.master_metadata)
+        new_selector = MetadataCustomSelector(self.category, self.metadatum, self.metadata, self.filename)
         new_selector.from_filename_button.clicked.connect(self.handle_selector_change)
         return new_selector
 
