@@ -1,20 +1,23 @@
 from PySide6.QtWidgets import QWidget, QPushButton, QHBoxLayout
 from PySide6.QtCore import Signal, Qt, Slot
 
+from metadata_filename_gui.internal_metadata import InternalMetadata
+
 class MetadataComponentSelector(QWidget):
     # Creating a separate signal for this because the custom button may be destroyed/recreated whenever the options are
     # redrawn.
 
     custom_button_pressed = Signal(Qt.MouseButton())
 
-    def __init__(self, metadatum: str, metadata_dict: dict[str, str], master_metadata: dict[str, int]):
+    def __init__(self, category: str, metadatum: str, filename: str, internal_metadata: InternalMetadata):
         super().__init__()
         self.options: list[str]
         self.option_buttons: list[QPushButton]
         self.layout = QHBoxLayout(self)
-        self.metadata_dict = metadata_dict
-        self.master_metadata = master_metadata
+        self.internal_metadata = internal_metadata
         self.metadatum = metadatum
+        self.category = category
+        self.filename = filename
 
     def clear_options(self):
         for i in reversed(range(self.layout.count() - 1)):
@@ -42,11 +45,13 @@ class MetadataComponentSelector(QWidget):
 
     def selection_changed(self):
         selected_button: QPushButton = self.sender()
-        selected_component = selected_button.text()
-        for button in self.option_buttons:
+        button_index = -1
+        for i, button in enumerate(self.option_buttons):
             if button != selected_button:
                 button.setChecked(False)
+            else:
+                button_index = i
         if selected_button.isChecked():
-            self.metadata_dict[self.metadatum] = selected_component
+            self.internal_metadata.update_metadata(self.category, self.metadatum, self.filename, button_index)
         else:
-            del self.metadata_dict[self.metadatum]
+            self.internal_metadata.clear_metadata(self.category, self.metadatum, self.filename)
