@@ -331,7 +331,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-20.04 ]
+        os: [ windows-latest, ubuntu-24.04 ]
         python-version: [ 3.11 ]
       fail-fast: false
 
