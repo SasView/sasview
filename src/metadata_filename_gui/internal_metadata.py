@@ -20,14 +20,19 @@ class InternalMetadata:
     filename_separator: dict[str, str] = field(default_factory=dict)
     master_metadata: dict[str, InternalMetadataCategory[int]] = field(default_factory=default_categories)
 
-    def get_metadata(self, category: str, value: str, filename_components: list[str] = []) -> str:
+    def filename_components(self, filename: str) -> list[str]:
+        return re_split(self.filename_separator[filename], filename)
+
+    def get_metadata(self, category: str, value: str, filename: str) -> str:
+        components = self.filename_components(filename)
+
         # We prioritise the master metadata.
 
         # TODO: Assumes category in master_metadata exists. Is this a reasonable assumption? May need to make sure it is
         # definitely in the dictionary.
         if value in self.master_metadata[category].values:
             index = self.master_metadata[category].values[value]
-            return filename_components[index]
+            return components[index]
         target_category = self.filename_specific_metadata[filename][category].values
         if value in target_category:
             return target_category[value]
