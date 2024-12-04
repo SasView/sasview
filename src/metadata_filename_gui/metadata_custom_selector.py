@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout
 
-from metadata_filename_gui.internal_metadata import InternalMetadata
+from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 
 class MetadataCustomSelector(QWidget):
     def __init__(self, category:str, metadatum: str, internal_metadata: InternalMetadata, filename: str):
