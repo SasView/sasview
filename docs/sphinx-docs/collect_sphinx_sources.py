@@ -5,8 +5,6 @@ Script to collect sphinx sources for building
 import os
 from pathlib import Path
 import shutil
-from distutils.dir_util import copy_tree
-# from shutil import copytree as copy_tree
 
 
 # sphinx paths for the document
@@ -110,13 +108,13 @@ def retrieve_user_docs():
             dest_dir = SPHINX_SOURCE / "user" / relative
 
             print(f"Found sasview docs folder at \"{relative}\".")
-            copy_tree(source_dir, dest_dir)
+            shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
 
     print("=== Sasmodels Docs ===")
     shutil.copy(SASMODELS_DOCS / "rst_prolog", SPHINX_SOURCE)
-    copy_tree(SASMODELS_MODEL_SOURCE, SASMODELS_MODEL_TARGET)
-    copy_tree(SASMODELS_DEV_SOURCE, SASMODELS_DEV_TARGET)
-    copy_tree(SASMODELS_GUIDE_SOURCE, SASMODELS_GUIDE_TARGET)
+    shutil.copytree(SASMODELS_MODEL_SOURCE, SASMODELS_MODEL_TARGET, dirs_exist_ok=True)
+    shutil.copytree(SASMODELS_DEV_SOURCE, SASMODELS_DEV_TARGET, dirs_exist_ok=True)
+    shutil.copytree(SASMODELS_GUIDE_SOURCE, SASMODELS_GUIDE_TARGET, dirs_exist_ok=True)
     for filename in SASMODELS_GUIDE_EXCLUDE:
         (SASMODELS_GUIDE_TARGET / filename).unlink()
 
@@ -132,8 +130,8 @@ def retrieve_sasdata_docs():
         Copies select files from the bumps documentation into fitting perspective
     """
     print("=== Sasdata Docs ===")
-    copy_tree(SASDATA_DEV_SOURCE, SASDATA_DEV_TARGET)
-    copy_tree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET)
+    shutil.copytree(SASDATA_DEV_SOURCE, SASDATA_DEV_TARGET, dirs_exist_ok=True)
+    shutil.copytree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET, dirs_exist_ok=True)
 
 
 def collect():
