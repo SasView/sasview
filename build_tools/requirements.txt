@@ -14,7 +14,6 @@ mako
 matplotlib
 numba
 numpy
-periodictable
 pybind11
 pylint
 pyopengl
