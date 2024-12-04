@@ -72,3 +72,4 @@ tests.log
 /installers/build
 /installers/dist
 *.exe
+docs/tmp

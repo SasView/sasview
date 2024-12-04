@@ -1,0 +1,166 @@
+[build-system]
+requires = [
+    "hatchling",
+    "hatch-build-scripts",
+    "hatch-requirements-txt",
+    "hatch-sphinx",
+    "pyside6",
+]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "sasview"
+dynamic = [
+    "version",
+    "dependencies",
+]
+description = "SasView application"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "BSD-3-Clause" }
+authors = [
+    {name = "SasView Team", email = "developers@sasview.org"},
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+]
+keywords = [
+  "small-angle",
+  "scattering",
+  "data analysis",
+  "neutron",
+  "X-ray",
+]
+
+
+[project.urls]
+homepage = "http://sasview.org"
+
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+
+[project.scripts]
+sasview = "sas.qtgui.MainWindow.MainWindow:run_sasview"
+
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = [ "build_tools/requirements.txt" ]
+
+
+[tool.hatch.version]
+path = "src/sas/system/version.py"
+
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "build_tools",
+  "build/lib/doc/build",
+  "docs/sphinx-docs/source",
+  "src",
+  "test",
+]
+exclude = [
+  "docs/sphinx-docs/source-temp",
+  "downloads",
+]
+ignore-vcs = true
+
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
+packages = ["src/sas"]
+artifacts = [
+    "**/UI/*py",
+    "/**",
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+"build/lib/doc/build/" = "sas/docs"
+"build/lib/doc/source-temp/" = "sas/docs-source"
+
+[[tool.hatch.build.wheel.hooks.build-scripts.scripts]]
+# Perform Qt UI conversion steps (uic, rcc etc)
+commands = [
+    "python3 src/sas/qtgui/convertUI.py",
+]
+# out_dir = "GUI-output"
+artifacts = [
+    # "**/UI/*py",
+]
+
+# [[tool.hatch.build.hooks.build-scripts.scripts]]
+# # Build documentation with sphinx
+# commands = [
+#     "mkdir -p build/lib",
+#     "[ ! -f docs/sphinx-docs/build_sphinx.py ] || PYTHONPATH=src python3 docs/sphinx-docs/build_sphinx.py",
+# ]
+# # work_dir = "docs/sphinx-docs"
+# # out_dir = "GUI-output"
+# artifacts = [
+#     # "**/UI/*py",
+# ]
+
+[[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+tool = "custom"
+out_dir = "tmp"
+commands = [
+  # sphinx commands work within the "docs" directory
+  "{python} fetch-doc-source.py sasmodels docs-source tmp/sasmodels/docs",
+  "{python} fetch-doc-source.py sasdata docs-source tmp/sasdata/docs",
+  "{python} fetch-doc-source.py bumps docs-source tmp/bumps/docs",
+]
+
+[[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+tool = "custom"
+environment = { PYTHONPATH = "../src" }
+out_dir = "../build/lib/doc"
+commands = [
+  # sphinx commands work within the "docs" directory
+  "{python} sphinx-docs/build_sphinx.py",
+]
+
+# FIXME: currently builds with custom tool above
+# [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+# tool = "build"
+# format = "html"
+# source = "."
+# out_dir = "../build/doc"
+# warnings = true
+# keep_going = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+python_files = [
+    "u*py",
+    "*Test*py",
+]
+python_classes = [
+    "*Test",
+    "Test*",
+]
+qt_api = "pyside6"
+addopts = [
+    "--ignore", "test/utest_sasview.py",
+    "-v",
+    "-rsx",
+]
+log_level = "DEBUG"
+filterwarnings = [
+]
+testpaths = [
+    "src",
+    "tests",
+]
+pythonpath = "src"
+norecursedirs = [
+    "test/sasrealspace",
+    "test/calculatorview",
+]

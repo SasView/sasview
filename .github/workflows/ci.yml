@@ -86,9 +86,15 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install wheel setuptools
           python -m pip install -r build_tools/requirements.txt
+          python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs
+          python -m pip install git+https://github.com/llimeht/hatch-sphinx.git
+
+      - name: Install correct versions of sibling projects
+        run: |
+          python -m pip install --no-build-isolation --verbose git+https://github.com/llimeht/sasdata.git@tmp/pyproject
+          python -m pip install --no-build-isolation --verbose git+https://github.com/llimeht/sasmodels.git@tmp/pyproject
+          python -m pip install --no-build-isolation --verbose git+https://github.com/llimeht/bumps.git@tmp/docs-source
 
       - name: Install pywin32 (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
@@ -108,26 +114,6 @@ jobs:
         run: |
           python -m pip install pyopencl
 
-      - name: Fetch sources for sibling projects
-        run: |
-          git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
-          git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-
-      - name: Build and install sasdata
-        run: |
-          cd ../sasdata
-          rm -rf build
-          rm -rf dist
-          mv sasdata/example_data/* ../sasview/src/sas/example_data/
-          python -m pip install --no-deps .
-
-      - name: Build and install sasmodels
-        run: |
-          cd ../sasmodels
-          rm -rf build
-          rm -rf dist
-          python -m pip install --no-deps .
-
       ### Document the build environment
 
       - name: Python package version list
@@ -142,7 +128,8 @@ jobs:
           githash=$( git rev-parse HEAD )
           sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
           # BUILD SASVIEW
-          python -m pip install --no-deps .
+          python -m build --no-isolation --sdist --wheel
+          python -m pip install dist/sasview*whl
 
       ### Run tests (if enabled)
 
@@ -164,24 +151,6 @@ jobs:
       #     if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
       #     exit $retval
 
-      ### Build documentation (if enabled)
-
-      - name: Build sasmodels and sasdata docs
-        if: ${{ matrix.docs }}
-        env:
-          SAS_OPENCL: NONE
-        run: |
-          # TODO: supress sasmodels cache for the doc build
-          mkdir -p ~/.sasmodels/compiled_models
-          make -j4 -C ../sasmodels/doc html || true
-          make -C ../sasdata/docs html || true
-
-      - name: Build sasview docs
-        if: ${{ matrix.docs }}
-        run: |
-          mkdir -p build/lib
-          cd docs/sphinx-docs/
-          python build_sphinx.py || true
 
       ### Build the installer (if enabled)
 
@@ -436,7 +405,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
+          sudo apt-get -y install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
 
       - name: Try running the installation (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu' )}}
