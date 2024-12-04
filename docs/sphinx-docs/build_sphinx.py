@@ -30,9 +30,6 @@ SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
 # sasview paths
 SASVIEW_ROOT = abspath(joinpath(SPHINX_ROOT, '..', '..'))
 SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
-# 'platform' descriptor vanished from the main build,
-# so we need to update the location.
-#SASVIEW_BUILD = abspath(joinpath(SASVIEW_ROOT, "build", "lib"+platform))
 SASVIEW_BUILD = joinpath(SASVIEW_ROOT, "build", "lib")
 SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
 SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
@@ -41,9 +38,9 @@ SASVIEW_DOC_BUILD = joinpath(SASVIEW_DOC_TARGET, "build")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
 
 # sasmodels paths
-SASMODELS_ROOT = joinpath(SASVIEW_ROOT, "..", "sasmodels")
-SASMODELS_DOCS = joinpath(SASMODELS_ROOT, "doc")
-SASMODELS_BUILD = joinpath(SASMODELS_ROOT, "build", "lib")
+SASMODELS_ROOT = joinpath(SPHINX_ROOT, "..", "tmp", "sasmodels")
+SASMODELS_DOCS = joinpath(SASMODELS_ROOT, "docs")
+# SASMODELS_BUILD = joinpath(SASMODELS_ROOT, "build", "lib")
 SASMODELS_MODEL_SOURCE = joinpath(SASMODELS_DOCS, "model")
 SASMODELS_MODEL_TARGET = joinpath(SPHINX_SOURCE, "user", "models")
 #SASMODELS_API_SOURCE = joinpath(SASMODELS_DOCS, "api")
@@ -57,16 +54,16 @@ SASMODELS_GUIDE_EXCLUDE = [
 ]
 
 # sasdata paths
-SASDATA_ROOT = joinpath(SASVIEW_ROOT, "..", "sasdata")
+SASDATA_ROOT = joinpath(SPHINX_ROOT, "..", "tmp", "sasdata")
 SASDATA_DOCS = joinpath(SASDATA_ROOT, "docs")
-SASDATA_BUILD = joinpath(SASDATA_ROOT, "build", "lib")
-SASDATA_DEV_SOURCE = joinpath(SASDATA_DOCS, "source", "dev")
+# SASDATA_BUILD = joinpath(SASDATA_ROOT, "build", "lib")
+SASDATA_DEV_SOURCE = joinpath(SASDATA_DOCS, "dev")
 SASDATA_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasdata-dev")
-SASDATA_GUIDE_SOURCE = joinpath(SASDATA_DOCS, "source", "user")
+SASDATA_GUIDE_SOURCE = joinpath(SASDATA_DOCS, "user")
 SASDATA_GUIDE_TARGET = joinpath(SPHINX_SOURCE, "user", "data")
 
-run = SourceFileLoader('run', joinpath(SASVIEW_ROOT, 'run.py')).load_module()
-run.prepare()
+# run = SourceFileLoader('run', joinpath(SASVIEW_ROOT, 'run.py')).load_module()
+# run.prepare()
 
 
 
@@ -182,22 +179,22 @@ def apidoc():
         "-H", "SasView", # Package header
         SASVIEW_BUILD,
         # omit the following documents from the API documentation
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "UnitTesting"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "Utilities", "UnitTesting"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "MainWindow", "UnitTesting"),
-        joinpath(SASVIEW_BUILD, "sas", "qtgui", "Plotting", "UnitTesting"),
+        joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "UnitTesting"),
+        joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "Utilities", "UnitTesting"),
+        joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "MainWindow", "UnitTesting"),
+        joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "Plotting", "UnitTesting"),
 
     ])
 
-    subprocess.check_call([
-        "sphinx-apidoc",
-        "-o", SASMODELS_API_TARGET, # Output dir.
-        "-d", "8", # Max depth of TOC.
-        "-H", "sasmodels", # Package header
-        SASMODELS_BUILD,
-        # omit the following documents from the API documentation
-        joinpath(SASMODELS_BUILD, "sasmodels", "models"),
-    ])
+    # subprocess.check_call([
+    #     "sphinx-apidoc",
+    #     "-o", SASMODELS_API_TARGET, # Output dir.
+    #     "-d", "8", # Max depth of TOC.
+    #     "-H", "sasmodels", # Package header
+    #     SASMODELS_BUILD,
+    #     # omit the following documents from the API documentation
+    #     joinpath(SASMODELS_BUILD, "sasmodels", "models"),
+    # ])
 
 
 def build_pdf():
