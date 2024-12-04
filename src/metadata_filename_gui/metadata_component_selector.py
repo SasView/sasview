@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QPushButton, QHBoxLayout
 from PySide6.QtCore import Signal, Qt, Slot
 
-from metadata_filename_gui.internal_metadata import InternalMetadata
+from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 
 class MetadataComponentSelector(QWidget):
     # Creating a separate signal for this because the custom button may be destroyed/recreated whenever the options are
@@ -9,7 +9,7 @@ class MetadataComponentSelector(QWidget):
 
     custom_button_pressed = Signal(Qt.MouseButton())
 
-    def __init__(self, category: str, metadatum: str, filename: str, internal_metadata: InternalMetadata):
+    def __init__(self, category: str, metadatum: str, filename: str, internal_metadata: AsciiReaderMetadata):
         super().__init__()
         self.options: list[str]
         self.option_buttons: list[QPushButton]
