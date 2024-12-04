@@ -59,16 +59,6 @@ class MetadataFilenameDialog(QDialog):
     def split_filename(self) -> list[str]:
         return re.split(f'([{self.separator_text}])', self.filename)
 
-    def filename_components(self) -> list[str]:
-        splitted = re.split(f'{self.separator_chars.text()}', self.filename)
-        # If the last component has a file extensions, remove it.
-        last_component = splitted[-1]
-        if '.' in last_component:
-            pos = last_component.index('.')
-            last_component = last_component[:pos]
-            splitted[-1] = last_component
-        return splitted
-
     def formatted_filename(self) -> str:
         sep_str = self.separator_chars.text()
         if sep_str == '':
@@ -83,7 +73,7 @@ class MetadataFilenameDialog(QDialog):
 
     def update_filename_separation(self):
         self.filename_line_label.setText(f'Filename: {self.formatted_filename()}')
-        self.metadata_tree.draw_tree(self.filename_components(), self.filename)
+        self.metadata_tree.draw_tree(self.internal_metadata.filename_components(self.filename), self.filename)
 
     def on_save(self):
         self.accept()
