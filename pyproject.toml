@@ -86,7 +86,7 @@ artifacts = [
 "build/doc/html/" = "sas/docs"
 "docs/sphinx-docs/source-temp/" = "sas/docs-source"
 
-[[tool.hatch.build.wheel.hooks.build-scripts.scripts]]
+[[tool.hatch.build.targets.wheel.hooks.build-scripts.scripts]]
 # Perform Qt UI conversion steps (uic, rcc etc)
 commands = [
     "python3 src/sas/qtgui/convertUI.py",
