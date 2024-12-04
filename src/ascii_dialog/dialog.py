@@ -465,6 +465,7 @@ if __name__ == "__main__":
     # 1 means the dialog was accepted.
     if status == 1:
         loaded = load_data(dialog.params)
-        print(loaded.summary())
+        for datum in loaded:
+            print(datum.summary())
 
     exit()
