@@ -12,7 +12,7 @@ from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, 
 from sasdata.temp_ascii_reader import load_data, AsciiReaderParams
 from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
 from metadata_filename_gui.metadata_tree_data import initial_metadata_dict
-from metadata_filename_gui.internal_metadata import InternalMetadata
+from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 import re
 
 TABLE_MAX_ROWS = 1000
@@ -34,7 +34,7 @@ class AsciiDialog(QDialog):
         self.files_full_path: dict[str, str] = {}
         self.files_is_included: dict[str, list[bool]] = {}
         # This is useful for whenever the user wants to reopen the metadata editor.
-        self.internal_metadata: InternalMetadata = InternalMetadata()
+        self.internal_metadata: AsciiReaderMetadata = AsciiReaderMetadata()
         self.current_filename: str | None = None
 
         self.seperators: dict[str, bool] = {
