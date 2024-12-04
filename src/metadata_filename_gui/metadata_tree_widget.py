@@ -2,7 +2,6 @@ from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QLabel
 from PySide6.QtCore import QAbstractItemModel
 from metadata_filename_gui.metadata_component_selector import MetadataComponentSelector
 from metadata_filename_gui.metadata_selector import MetadataSelector
-from metadata_filename_gui.internal_metadata import AsciiReaderMetadata
 from metadata_filename_gui.metadata_tree_data import metadata as metadata_categories
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 
