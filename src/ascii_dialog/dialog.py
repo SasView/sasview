@@ -301,6 +301,10 @@ class AsciiDialog(QDialog):
                 self.attemptGuesses()
             # This will trigger the update current file event which will cause
             # the table to be drawn.
+            # TODO: Will probably change this default later (or a more sophisticated way of getting this default from the
+            # filename.)
+            initial_separator_text = '_'
+            self.internal_metadata.filename_separator[basename] = initial_separator_text
             self.filename_chooser.addItem(basename)
             self.filename_chooser.setCurrentText(basename)
             self.internal_metadata.add_file(basename)
