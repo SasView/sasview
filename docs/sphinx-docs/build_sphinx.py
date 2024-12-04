@@ -16,35 +16,40 @@ from importlib.machinery import SourceFileLoader
 
 from glob import glob
 from distutils.dir_util import copy_tree
+# from shutil import copytree as copy_tree
 from distutils.util import get_platform
-from distutils.spawn import find_executable
+# from distutils.spawn import find_executable
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
 # sphinx paths
-SPHINX_ROOT = dirname(abspath(__file__))
-SPHINX_BUILD = joinpath(SPHINX_ROOT, "build")
-SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
+BASE = dirname(abspath(__file__))
+SPHINX_BUILD = joinpath(BASE, "build")
+SPHINX_SOURCE = joinpath(BASE, "source-temp")
+
+
+
 SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "Perspectives")
 
 # sasview paths
-SASVIEW_ROOT = abspath(joinpath(SPHINX_ROOT, '..', '..'))
-SASVIEW_DOCS = joinpath(SPHINX_ROOT, "source")
-SASVIEW_BUILD = joinpath(SASVIEW_ROOT, "build", "lib")
-SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_ROOT, "src", "sas")
-SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
-SASVIEW_DOC_SOURCE = joinpath(SASVIEW_DOC_TARGET, "source-temp")
-SASVIEW_DOC_BUILD = joinpath(SASVIEW_DOC_TARGET, "build")
+SASVIEW_SRC = abspath(joinpath(BASE, '..', '..', "src"))
+SASVIEW_DOCS = joinpath(BASE, "source")
+# SASVIEW_BUILD = joinpath(SASVIEW_ROOT, "build", "lib")
+SASVIEW_MEDIA_SOURCE = joinpath(SASVIEW_SRC, "sas")
+# SASVIEW_DOC_TARGET = joinpath(SASVIEW_BUILD, "doc")
+
+# SASVIEW_DOC_SOURCE = joinpath(BASE, "source-temp")
+# SASVIEW_DOC_BUILD = joinpath(SASVIEW_DOC_TARGET, "build")
 SASVIEW_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasview-api")
 
 # sasmodels paths
-SASMODELS_ROOT = joinpath(SPHINX_ROOT, "..", "tmp", "sasmodels")
-SASMODELS_DOCS = joinpath(SASMODELS_ROOT, "docs")
+# SASMODELS_ROOT = joinpath(BASE, "tmp", "sasmodels")
+SASMODELS_DOCS = joinpath(BASE, "tmp", "sasmodels", "docs")
 # SASMODELS_BUILD = joinpath(SASMODELS_ROOT, "build", "lib")
 SASMODELS_MODEL_SOURCE = joinpath(SASMODELS_DOCS, "model")
 SASMODELS_MODEL_TARGET = joinpath(SPHINX_SOURCE, "user", "models")
 #SASMODELS_API_SOURCE = joinpath(SASMODELS_DOCS, "api")
-SASMODELS_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasmodels-api")
+# SASMODELS_API_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasmodels-api")
 SASMODELS_DEV_SOURCE = joinpath(SASMODELS_DOCS, "developer")
 SASMODELS_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasmodels-dev")
 SASMODELS_GUIDE_SOURCE = joinpath(SASMODELS_DOCS, "guide")
@@ -54,8 +59,8 @@ SASMODELS_GUIDE_EXCLUDE = [
 ]
 
 # sasdata paths
-SASDATA_ROOT = joinpath(SPHINX_ROOT, "..", "tmp", "sasdata")
-SASDATA_DOCS = joinpath(SASDATA_ROOT, "docs")
+# SASDATA_ROOT = joinpath(BASE, "tmp", "sasdata")
+SASDATA_DOCS = joinpath(BASE, "tmp", "sasdata", "docs")
 # SASDATA_BUILD = joinpath(SASDATA_ROOT, "build", "lib")
 SASDATA_DEV_SOURCE = joinpath(SASDATA_DOCS, "dev")
 SASDATA_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasdata-dev")
@@ -96,7 +101,7 @@ def clean():
     Clean the sphinx build directory.
     """
     print("=== Cleaning Sphinx Build ===")
-    _remove_dir(SASVIEW_DOC_TARGET)
+    # _remove_dir(SASVIEW_DOC_TARGET)
     _remove_dir(SPHINX_BUILD)
     _remove_dir(SPHINX_SOURCE)
 
@@ -162,105 +167,105 @@ def retrieve_sasdata_docs():
     copy_tree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET)
 
 
-def apidoc():
-    """
-    Runs sphinx-apidoc to generate .rst files from the docstrings in .py files
-    in the SasView build directory.
-    """
-    print("=== Generate API Rest Files ===")
-
-    # Clean directory before generating a new version.
-    #_remove_dir(SASVIEW_API_TARGET)
-
-    subprocess.check_call([
-        "sphinx-apidoc",
-        "-o", SASVIEW_API_TARGET, # Output dir.
-        "-d", "8", # Max depth of TOC.
-        "-H", "SasView", # Package header
-        SASVIEW_BUILD,
-        # omit the following documents from the API documentation
-        joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "UnitTesting"),
-        joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "Utilities", "UnitTesting"),
-        joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "MainWindow", "UnitTesting"),
-        joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "Plotting", "UnitTesting"),
-
-    ])
-
-    # subprocess.check_call([
-    #     "sphinx-apidoc",
-    #     "-o", SASMODELS_API_TARGET, # Output dir.
-    #     "-d", "8", # Max depth of TOC.
-    #     "-H", "sasmodels", # Package header
-    #     SASMODELS_BUILD,
-    #     # omit the following documents from the API documentation
-    #     joinpath(SASMODELS_BUILD, "sasmodels", "models"),
-    # ])
-
-
-def build_pdf():
-    """
-    Runs sphinx-build for pdf.  Reads in all .rst files and spits out the final html.
-    """
-    print("=== Build PDF Docs from ReST Files ===")
-    subprocess.check_call([
-        "sphinx-build",
-        "-b", "latex", # Builder name. TODO: accept as arg to setup.py.
-        "-d", joinpath(SPHINX_BUILD, "doctrees"),
-        SPHINX_SOURCE,
-        joinpath(SPHINX_BUILD, "latex")
-    ])
-
-    LATEXDIR = joinpath(SPHINX_BUILD, "latex")
-
-    def pdflatex():
-        subprocess.call(["pdflatex", "SasView.tex"], cwd=LATEXDIR)
-
-    # Note: pdflatex requires multiple passes to resolve cross-references correctly
-    pdflatex()
-    pdflatex()
-    pdflatex()
-    subprocess.call(["makeindex", "-s", "python.ist", "SasView.idx"], cwd=LATEXDIR)
-    pdflatex()
-    pdflatex()
-
-    print("=== Copy PDF to HTML Directory ===")
-    source = joinpath(LATEXDIR, "SasView.pdf")
-    target = joinpath(SASVIEW_DOC_TARGET, "SasView.pdf")
-    shutil.copyfile(source, target)
+# def apidoc():
+#     """
+#     Runs sphinx-apidoc to generate .rst files from the docstrings in .py files
+#     in the SasView build directory.
+#     """
+#     print("=== Generate API Rest Files ===")
+#
+#     # Clean directory before generating a new version.
+#     #_remove_dir(SASVIEW_API_TARGET)
+#
+#     subprocess.check_call([
+#         "sphinx-apidoc",
+#         "-o", SASVIEW_API_TARGET, # Output dir.
+#         "-d", "8", # Max depth of TOC.
+#         "-H", "SasView", # Package header
+#         SASVIEW_BUILD,
+#         # omit the following documents from the API documentation
+#         joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "UnitTesting"),
+#         joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "Utilities", "UnitTesting"),
+#         joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "MainWindow", "UnitTesting"),
+#         joinpath(SASVIEW_ROOT, "src", "sas", "qtgui", "Plotting", "UnitTesting"),
+#
+#     ])
+#
+#     # subprocess.check_call([
+#     #     "sphinx-apidoc",
+#     #     "-o", SASMODELS_API_TARGET, # Output dir.
+#     #     "-d", "8", # Max depth of TOC.
+#     #     "-H", "sasmodels", # Package header
+#     #     SASMODELS_BUILD,
+#     #     # omit the following documents from the API documentation
+#     #     joinpath(SASMODELS_BUILD, "sasmodels", "models"),
+#     # ])
 
 
-def build():
-    """
-    Runs sphinx-build.  Reads in all .rst files and spits out the final html.
-    """
-    copy_tree(SPHINX_SOURCE, SASVIEW_DOC_SOURCE)
-    print("=== Build HTML Docs from ReST Files ===")
-    try:
-        subprocess.check_call([
-            "sphinx-build",
-            "-v",
-            "-b", "html", # Builder name. TODO: accept as arg to setup.py.
-            "-d", joinpath(SPHINX_BUILD, "doctrees"),
-            "-W", "--keep-going",
-            SPHINX_SOURCE,
-            joinpath(SPHINX_BUILD, "html")
-        ])
-    except Exception as e:
-        print(e)
+# def build_pdf():
+#     """
+#     Runs sphinx-build for pdf.  Reads in all .rst files and spits out the final html.
+#     """
+#     print("=== Build PDF Docs from ReST Files ===")
+#     subprocess.check_call([
+#         "sphinx-build",
+#         "-b", "latex", # Builder name. TODO: accept as arg to setup.py.
+#         "-d", joinpath(SPHINX_BUILD, "doctrees"),
+#         SPHINX_SOURCE,
+#         joinpath(SPHINX_BUILD, "latex")
+#     ])
+#
+#     LATEXDIR = joinpath(SPHINX_BUILD, "latex")
+#
+#     def pdflatex():
+#         subprocess.call(["pdflatex", "SasView.tex"], cwd=LATEXDIR)
+#
+#     # Note: pdflatex requires multiple passes to resolve cross-references correctly
+#     pdflatex()
+#     pdflatex()
+#     pdflatex()
+#     subprocess.call(["makeindex", "-s", "python.ist", "SasView.idx"], cwd=LATEXDIR)
+#     pdflatex()
+#     pdflatex()
+#
+#     print("=== Copy PDF to HTML Directory ===")
+#     source = joinpath(LATEXDIR, "SasView.pdf")
+#     target = joinpath(SASVIEW_DOC_TARGET, "SasView.pdf")
+#     shutil.copyfile(source, target)
+#
 
-    print("=== Copy HTML Docs to Build Directory ===")
-    html = joinpath(SPHINX_BUILD, "html")
-    copy_tree(html, SASVIEW_DOC_BUILD)
+# def build():
+#     """
+#     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
+#     """
+#     copy_tree(SPHINX_SOURCE, SASVIEW_DOC_SOURCE)
+#     print("=== Build HTML Docs from ReST Files ===")
+#     try:
+#         subprocess.check_call([
+#             "sphinx-build",
+#             "-v",
+#             "-b", "html", # Builder name. TODO: accept as arg to setup.py.
+#             "-d", joinpath(SPHINX_BUILD, "doctrees"),
+#             "-W", "--keep-going",
+#             SPHINX_SOURCE,
+#             joinpath(SPHINX_BUILD, "html")
+#         ])
+#     except Exception as e:
+#         print(e)
+#
+#     print("=== Copy HTML Docs to Build Directory ===")
+#     html = joinpath(SPHINX_BUILD, "html")
+#     copy_tree(html, SASVIEW_DOC_BUILD)
 
 def rebuild():
     clean()
     setup_source_temp()
     retrieve_user_docs()
     retrieve_sasdata_docs()
-    apidoc()
-    build()
-    if find_executable('latex'):
-        build_pdf()
+    # apidoc()
+    # build()
+    # if find_executable('latex'):
+    #     build_pdf()
 
     print("=== Done ===")
 
