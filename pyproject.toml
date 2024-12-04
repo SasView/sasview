@@ -126,7 +126,7 @@ doc_dir = "docs/sphinx-docs"
 out_dir = "source-temp"
 environment = { PYTHONPATH = "../../src" }
 commands = [
-  "{python} build_sphinx.py",
+  "{python} collect_sphinx_sources.py",
 ]
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
