@@ -2,15 +2,16 @@ from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QLabel
 from PySide6.QtCore import QAbstractItemModel
 from metadata_filename_gui.metadata_component_selector import MetadataComponentSelector
 from metadata_filename_gui.metadata_selector import MetadataSelector
-from metadata_filename_gui.internal_metadata import InternalMetadata
+from metadata_filename_gui.internal_metadata import AsciiReaderMetadata
 from metadata_filename_gui.metadata_tree_data import metadata as metadata_categories
+from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 
 class MetadataTreeWidget(QTreeWidget):
-    def __init__(self, metadata: InternalMetadata):
+    def __init__(self, metadata: AsciiReaderMetadata):
         super().__init__()
         self.setColumnCount(2)
         self.setHeaderLabels(['Name', 'Filename Components'])
-        self.metadata: InternalMetadata = metadata
+        self.metadata: AsciiReaderMetadata = metadata
 
     def draw_tree(self, options: list[str], full_filename: str):
         self.clear()

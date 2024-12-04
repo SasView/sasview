@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog, QPushButton
 from metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
-from metadata_filename_gui.internal_metadata import InternalMetadata
+from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 from sys import argv
 import re
 
@@ -15,7 +15,7 @@ def build_font(text: str, classname: str = '') -> str:
     return f'<span class="{classname}">{text}</span>'
 
 class MetadataFilenameDialog(QDialog):
-    def __init__(self, filename: str, initial_metadata: InternalMetadata):
+    def __init__(self, filename: str, initial_metadata: AsciiReaderMetadata):
         super().__init__()
 
         # TODO: Will probably change this default later (or a more sophisticated way of getting this default from the
