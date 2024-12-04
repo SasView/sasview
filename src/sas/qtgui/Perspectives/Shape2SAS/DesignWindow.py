@@ -32,6 +32,8 @@ from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame
 #     pyside2-uic form.ui -o ui_form.py
 from UI.DesignWindowUI import Ui_DesignWindow
 
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+
 from sas.qtgui.Perspectives.Shape2SAS.ViewerModel import ViewerModel
 from sas.qtgui.Perspectives.Shape2SAS.ButtonOptions import ButtonOptions
 from sas.qtgui.Perspectives.Shape2SAS.Tables.subunitTable import SubunitTable, OPTIONLAYOUT
@@ -42,6 +44,7 @@ from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (getTheoreti
                                                                      SimulatedScattering, SimulateScattering)
 from sas.qtgui.Perspectives.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
 from sas.qtgui.Perspectives.Shape2SAS.genPlugin import generatePlugin
+
 
 class DesignWindow(QDialog, Ui_DesignWindow):
     """Main window for the Shape2SAS fitting tool"""
@@ -275,10 +278,14 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         model_str, full_path = generatePlugin(modelProfile, dim_names, name)
 
         print(model_str, full_path)
+        
+        #Write file to plugin model folder
+        path = "C:\\Users\\Qerne\\OneDrive\\Documents\\VSCode\\Projects\\Thesis\\SasVIew_dev_version\\sasview\\src\\sas\\qtgui\\Perspectives\\Shape2SAS\\TEST.py"
+        TabbedModelEditor.writeFile(path, model_str)
 
 
     def onCheckingInput(self, input: str, default: str) -> str:
-        """Check if the input is valid. Otherwise, return default value"""
+        """Check if the input not None. Otherwise, return default value"""
 
         if not input.text():
             return default
