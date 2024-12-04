@@ -83,8 +83,8 @@ artifacts = [
 ]
 
 [tool.hatch.build.targets.wheel.force-include]
-"build/lib/doc/build/" = "sas/docs"
-"build/lib/doc/source-temp/" = "sas/docs-source"
+"build/doc/html/" = "sas/docs"
+"docs/sphinx-docs/source-temp/" = "sas/docs-source"
 
 [[tool.hatch.build.wheel.hooks.build-scripts.scripts]]
 # Perform Qt UI conversion steps (uic, rcc etc)
@@ -110,31 +110,43 @@ artifacts = [
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
 tool = "custom"
+doc_dir = "docs/sphinx-docs"
 out_dir = "tmp"
 commands = [
-  # sphinx commands work within the "docs" directory
-  "{python} fetch-doc-source.py sasmodels docs-source tmp/sasmodels/docs",
-  "{python} fetch-doc-source.py sasdata docs-source tmp/sasdata/docs",
-  "{python} fetch-doc-source.py bumps docs-source tmp/bumps/docs",
+  # sphinx commands work within the "doc_dir" directory
+  "{python} extract-module-resource.py sasmodels docs-source tmp/sasmodels/docs",
+  "{python} extract-module-resource.py sasdata docs-source tmp/sasdata/docs",
+  "{python} extract-module-resource.py bumps docs-source tmp/bumps/docs",
 ]
+
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
 tool = "custom"
-environment = { PYTHONPATH = "../src" }
-out_dir = "../build/lib/doc"
+doc_dir = "docs/sphinx-docs"
+out_dir = "source-temp"
+environment = { PYTHONPATH = "../../src" }
 commands = [
-  # sphinx commands work within the "docs" directory
-  "{python} sphinx-docs/build_sphinx.py",
+  "{python} build_sphinx.py",
 ]
 
-# FIXME: currently builds with custom tool above
-# [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
-# tool = "build"
-# format = "html"
-# source = "."
-# out_dir = "../build/doc"
-# warnings = true
-# keep_going = true
+[[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+tool = "apidoc"
+doc_dir = "docs/sphinx-docs"
+source = "../../src"
+out_dir = "source-temp/dev/sasview-api"
+depth = 8
+private = false
+separate = false
+header = "SasView"
+
+[[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+tool = "build"
+format = "html"
+doc_dir = "docs/sphinx-docs/source-temp"
+out_dir = "../../../build/doc/html"
+warnings = false
+keep_going = true
+environment = { PYTHONPATH = "../../../src" }
 
 [tool.pytest.ini_options]
 minversion = "6.0"
