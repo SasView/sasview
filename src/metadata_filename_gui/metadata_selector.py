@@ -4,11 +4,11 @@ from metadata_filename_gui.metadata_component_selector import MetadataComponentS
 from metadata_filename_gui.metadata_custom_selector import MetadataCustomSelector
 
 class MetadataSelector(QWidget):
-    def __init__(self, category: str, metadatum: str, options: list[str], metadata: InternalMetadata, filename: str):
+    def __init__(self, category: str, metadatum: str, options: list[str], metadata: AsciiReaderMetadata, filename: str):
         super().__init__()
         self.category = category
         self.metadatum = metadatum
-        self.metadata: InternalMetadata = metadata
+        self.metadata: AsciiReaderMetadata = metadata
         self.options = options
         self.filename = filename
         current_option = self.metadata.get_metadata(self.category, metadatum, filename)
