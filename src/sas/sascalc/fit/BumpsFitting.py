@@ -295,17 +295,17 @@ class BumpsFit(FitEngine):
             # Use the standard error as the error in the parameter
             for param, val, err in zip(varying, values, errs):
                 # Convert all varying parameters to uncertainties objects
-                param.value = uncertainties.ufloat(val, err)
+                param.slot = uncertainties.ufloat(val, err)
         else:
             try:
                 # Use the covariance matrix to calculate error in the parameter
                 fitted = uncertainties.correlated_values(values, cov)
                 for param, val in zip(varying, fitted):
-                    param.value = val
+                    param.slot = val
             except Exception:
                 # No convergence. Convert all varying parameters to uncertainties objects
                 for param, val, err in zip(varying, values, errs):
-                    param.value = uncertainties.ufloat(val, err)
+                    param.slot = uncertainties.ufloat(val, err)
 
         # Propagate correlated uncertainty through constraints.
         problem.setp_hook()
@@ -338,14 +338,14 @@ class BumpsFit(FitEngine):
             if result['uncertainty'] is not None:
                 fitting_result.uncertainty_state = result['uncertainty']
 
-            fitting_result.pvec = np.array([getattr(p.value, 'n', p.value) for p in pars])
-            fitting_result.stderr = np.array([getattr(p.value, 's', 0) for p in pars])
+            fitting_result.pvec = np.array([getattr(p.slot, 'n', p.slot) for p in pars])
+            fitting_result.stderr = np.array([getattr(p.slot, 's', 0) for p in pars])
             DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
             fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
 
             # Warn user about any parameter that is not an uncertainty object
-            miss_uncertainty = [p for p in pars if not isinstance(p.value,
-                              (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))]
+            miss_uncertainty = [p for p in pars if not isinstance(p.slot,
+                                (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))]
             if miss_uncertainty:
                 uncertainty_warning = True
                 for p in miss_uncertainty:
