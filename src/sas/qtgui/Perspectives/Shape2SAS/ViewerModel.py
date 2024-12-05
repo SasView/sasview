@@ -62,17 +62,17 @@ class ViewerModel(QWidget):
 
         #2D plot of P(q)
         self.scattering = QGraphicsView()
-        self.scattering.setMinimumSize(QSize(271, 200))  
-        self.scattering.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+        self.scattering.setMinimumSize(QSize(271, 250))  
+        self.scattering.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.scattering.setBackgroundBrush(QColor(255, 255, 255))
         self.scene = QGraphicsScene()
         self.scattering.setScene(self.scene)
 
         ###Layout for GUI
         layout = QVBoxLayout()
-        layout.setContentsMargins(0,10,0,0)#remove margins
+        layout.setContentsMargins(0, 10, 0, 0)#remove margins
 
-        spacer = QSpacerItem(271, 20, QSizePolicy.Minimum)
+        spacer = QSpacerItem(271, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         subunitTableLabel = QLabel("Scattering of P(q)")
 
         layout.addWidget(self.scatterContainer)
