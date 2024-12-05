@@ -1,0 +1,6 @@
+pytest
+pytest_qt
+pytest-mock
+# todo: wrap this in a simple python module?
+# ausaxs @ git+https://github.com/SasView/AUSAXS/
+unittest-xml-reporting

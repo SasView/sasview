@@ -133,6 +133,12 @@ jobs:
 
       ### Run tests (if enabled)
 
+      - name: Install test dependencies
+        if: ${{ matrix.tests }}
+        run: |
+          python -m pip install -r build_tools/requirements-test.txt
+          python build_tools/get_external_dependencies.py
+
       - name: Test with pytest
         if: ${{ matrix.tests }}
         env:

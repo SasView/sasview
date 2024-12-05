@@ -7,7 +7,7 @@ dominate
 h5py
 html2text
 html5lib
-importlib-resources
+importlib-resources;python_version<"3.9"
 ipython
 jsonschema
 lxml
@@ -22,9 +22,6 @@ pylint
 pyopengl
 pyparsing
 PySide6
-pytest
-pytest_qt
-pytest-mock
 pytools
 qtconsole
 scipy
@@ -34,7 +31,6 @@ superqt
 tccbox
 twisted
 uncertainties
-unittest-xml-reporting
 xhtml2pdf
 zope
 

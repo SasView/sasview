@@ -14,6 +14,7 @@ name = "sasview"
 dynamic = [
     "version",
     "dependencies",
+    "optional-dependencies",
 ]
 description = "SasView application"
 readme = "README.md"
@@ -40,24 +41,20 @@ keywords = [
 [project.urls]
 homepage = "http://sasview.org"
 
-
-[project.optional-dependencies]
-test = [
-    "pytest",
-]
-
-
 [project.scripts]
 sasview = "sas.qtgui.MainWindow.MainWindow:run_sasview"
 
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.metadata.hooks.requirements_txt]
 files = [ "build_tools/requirements.txt" ]
 
+[tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
+test = [ "build_tools/requirements-test.txt" ]
 
 [tool.hatch.version]
 path = "src/sas/system/version.py"
-
 
 [tool.hatch.build.targets.sdist]
 include = [
