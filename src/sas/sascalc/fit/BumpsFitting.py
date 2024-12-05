@@ -3,6 +3,7 @@ BumpsFitting module runs the bumps optimizer.
 """
 import logging
 import os
+from copy import deepcopy
 from datetime import timedelta, datetime
 import traceback
 import uncertainties
@@ -324,6 +325,7 @@ class BumpsFit(FitEngine):
             else:
                 # Bumps v0.x - A module is returned that holds the Fitness object
                 fitness = fitting_module.fitness
+            fitness = deepcopy(fitness)
             pars = fitness.fitted_pars + fitness.computed_pars
             par_names = fitness.fitted_par_names + fitness.computed_par_names
 
