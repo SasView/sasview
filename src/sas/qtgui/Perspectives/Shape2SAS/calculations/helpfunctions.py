@@ -531,18 +531,39 @@ class Superellipsoid:
 
 
 class Qsampling:
-    def __init__(self, qmin: float, qmax: float, Nq: int):
-        self.qmin = qmin
-        self.qmax = qmax
-        self.Nq = Nq
 
+    def onQsampling(qmin: float, qmax: float, Nq: int) -> np.ndarray:
+        """Returns uniform q sampling"""
 
-    def onQsampling(self) -> np.ndarray:
-        """Returns the q sampling"""
-
-        q = np.linspace(self.qmin, self.qmax, self.Nq)
+        q = np.linspace(qmin, qmax, Nq)
 
         return q
+    
+
+    def onUserSampledQ(q: np.ndarray) -> np.ndarray:
+        """Returns user sampled q"""
+
+        if isinstance(q, list):
+            q = np.array(q)
+
+        return q
+    
+
+    def qMethodsNames(name: str):
+        methods = {
+            "Uniform": Qsampling.onQsampling,
+            "User_sampled": Qsampling.onUserSampledQ
+        }
+
+        return methods[name]
+    
+    def qMethodsInput(name: str):
+        inputs = {
+            "Uniform": {"qmin": 0.001, "qmax": 0.5, "Nq": 400},
+            "User_sampled": {"q": Qsampling.onQsampling(0.001, 0.5, 400)} #if the user does not input q
+        }
+
+        return inputs[name]
 
 
 class Rotation:
@@ -1325,7 +1346,7 @@ class StructureFactor:
     def getparname(name: str) -> List[str]:
         """Return the name of the parameters"""
         pars = {
-            'HS': {'conc': 0.02,'rhs': 50},
+            'HS': {'conc': 0.02,'r_hs': 50},
             'aggregation': {'R_eff': 50, 'N_aggr': 80, 'frac': 0.1},
             'None': {}
         }

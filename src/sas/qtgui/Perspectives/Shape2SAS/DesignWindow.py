@@ -40,8 +40,8 @@ from sas.qtgui.Perspectives.Shape2SAS.Tables.subunitTable import SubunitTable, O
 
 from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering, 
                                                                      ModelProfile, ModelSystem, SimulationParameters, 
-                                                                     ModelPointDistribution, TheoreticalScatteringCalculation, 
-                                                                     SimulatedScattering, SimulateScattering)
+                                                                     Qsampling, TheoreticalScatteringCalculation, 
+                                                                     SimulateScattering)
 from sas.qtgui.Perspectives.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
 from sas.qtgui.Perspectives.Shape2SAS.genPlugin import generatePlugin
 
@@ -283,7 +283,6 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         path = "C:\\Users\\Qerne\\OneDrive\\Documents\\VSCode\\Projects\\Thesis\\SasVIew_dev_version\\sasview\\src\\sas\\qtgui\\Perspectives\\Shape2SAS\\TEST.py"
         TabbedModelEditor.writeFile(path, model_str)
 
-
     def onCheckingInput(self, input: str, default: str) -> str:
         """Check if the input not None. Otherwise, return default value"""
 
@@ -315,7 +314,8 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         exposure = float(self.onCheckingInput(self.lineEdit_2, "500"))
 
         #Generate simulated data
-        Sim_par = SimulationParameters(qmin=qmin, qmax=qmax, Nq=Nq, prpoints=Np, Npoints=N)
+        q = Qsampling.onQsampling(qmin, qmax, Nq)
+        Sim_par = SimulationParameters(q=q, prpoints=Np, Npoints=N)
         Profile = self.getModelProfile()
 
         Distr = getPointDistribution(Profile, N)
