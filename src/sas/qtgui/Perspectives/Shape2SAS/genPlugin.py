@@ -5,7 +5,7 @@ from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import ModelProfile
 from numpy import inf
 
 ###TODO: add constraints as an input argument
-def generatePlugin(prof: ModelProfile, dim_names: list[list[str]], file_name: str) -> tuple[str, Path]:
+def generatePlugin(prof: ModelProfile, Npoints: int, pr_points: int, file_name: str, dim_names: list[list[str]]) -> tuple[str, Path]:
     """Generates a theoretical scattering plugin model"""
 
     plugin_location = Path(models.find_plugins_dir())
@@ -13,7 +13,7 @@ def generatePlugin(prof: ModelProfile, dim_names: list[list[str]], file_name: st
         file_name += '.py'
     full_path = plugin_location / file_name
 
-    model_str = generateModel(prof, dim_names, file_name)
+    model_str = generateModel(prof, Npoints, pr_points, file_name, dim_names)
 
     return model_str, full_path
 
@@ -55,7 +55,7 @@ def onAddParameterList(parameters: list[list[any]], vars: list[str], pars: list[
 
 
 ###TODO: add constraints as an input argument
-def generateModel(prof: ModelProfile, dim_names: list[list[str]], model_name: str) -> str:
+def generateModel(prof: ModelProfile, Npoints: int, pr_points: int, model_name: str, dim_names: list[list[str]]) -> str:
     """Generates a theoretical model"""
 
     ##list of check marks from the GUI on whether a parameter is constant or not
@@ -180,8 +180,8 @@ def Iq(q, {', '.join(vars)}):
     modelProfile = ModelProfile(subunits={prof.subunits}, p_s=[{', '.join(ps)}], dimensions=[{', '.join(dims)}], com=[{','.join(coms)}], 
                                 rotation_points=[{','.join(rot_points)}], rotation=[{', '.join(rots)}], exclude_overlap={prof.exclude_overlap})
     
-    simPar = SimulationParameters(qmin={"MISSING"}, qmax={"MISSING"}, Nq={"MISSING"}, prpoints={"MISSING"}, Npoints={"MISSING"})
-    dist = getPointDistribution(modelProfile, {"MISSING"})
+    simPar = SimulationParameters(q, prpoints={pr_points}, Npoints={Npoints}, model_name={model_name.replace('.py', '')})
+    dist = getPointDistribution(modelProfile, {Npoints})
 
     scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=dist, 
                                                                         Stype="None", par=[], 

@@ -273,15 +273,19 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         name = "model_1"
 
         modelProfile = self.getModelProfile()
+        Npoints = 3000 ###TODO: get these inputs from the new GUI window
+        pr_points = 100
+        model_name = "Model_1"
         dim_names = self.getDimensionNames()
 
-        model_str, full_path = generatePlugin(modelProfile, dim_names, name)
+        model_str, full_path = generatePlugin(modelProfile, Npoints, pr_points, model_name, dim_names)
 
         print(model_str, full_path)
         
         #Write file to plugin model folder
         path = "C:\\Users\\Qerne\\OneDrive\\Documents\\VSCode\\Projects\\Thesis\\SasVIew_dev_version\\sasview\\src\\sas\\qtgui\\Perspectives\\Shape2SAS\\TEST.py"
         TabbedModelEditor.writeFile(path, model_str)
+
 
     def onCheckingInput(self, input: str, default: str) -> str:
         """Check if the input not None. Otherwise, return default value"""
@@ -290,6 +294,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
             return default
         else:
             return input.text()
+
 
     def getSimulatedSAXSData(self):
         """Generating simulated data and sends it to
