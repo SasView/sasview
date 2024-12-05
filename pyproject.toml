@@ -117,6 +117,7 @@ commands = [
   "{python} extract-module-resource.py sasmodels docs-source tmp/sasmodels/docs",
   "{python} extract-module-resource.py sasdata docs-source tmp/sasdata/docs",
   "{python} extract-module-resource.py bumps docs-source tmp/bumps/docs",
+  "{python} extract-module-resource.py sasdata example_data ../../src/sas/example_data/",
 ]
 
 
