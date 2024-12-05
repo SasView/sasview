@@ -351,7 +351,7 @@ class BumpsFit(FitEngine):
             if miss_uncertainty:
                 uncertainty_warning = True
                 for p in miss_uncertainty:
-                    logging.warn(p.name + " uncertainty could not be calculated.")
+                    logging.warning(p.name + " uncertainty could not be calculated.")
 
            # TODO: Let the GUI decided how to handle success/failure.
             if not fitting_result.success:
@@ -363,7 +363,7 @@ class BumpsFit(FitEngine):
         all_results[0].mesg = result['errors']
 
         if uncertainty_warning:
-            logging.warn("Consider checking related constraint definitions and status of parameters used there.")
+            logging.warning("Consider checking related constraint definitions and status of parameters used there.")
 
         if q is not None:
             q.put(all_results)
