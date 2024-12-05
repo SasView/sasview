@@ -138,6 +138,9 @@ depth = 8
 private = false
 separate = false
 header = "SasView"
+exclude = [
+    "*/UnitTesting/*",
+]
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
 tool = "build"
