@@ -81,3 +81,6 @@ When you load data the `data` plot will be populated. When you click `fit` the r
 values of A (currently mean squared). This plot is useful to checking your problem is well conditioned.
     * :math:`I_res` - The *residual intensity* - the part of the scattering that doesn't respond to
 applied field changes, inferred from the data (see above for details)
+    * :math:`S_H` - Anisotropy field scattering function
+    * :math:`S_M` - Scattering function of the longitudinal magnetization
+* `Comparison` -
