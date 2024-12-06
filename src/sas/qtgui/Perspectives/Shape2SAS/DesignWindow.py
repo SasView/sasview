@@ -96,8 +96,8 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         self.model.setLayout(modelVbox)
         
         #Building Calculations tab
-        self.calculationButtons = ButtonOptions()
-        self.gridLayout_4.addWidget(self.calculationButtons, 0, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        #self.calculationButtons = ButtonOptions()
+        #self.gridLayout_4.addWidget(self.calculationButtons, 0, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         
 
         #Building Virtual SAXS Experiment tab
@@ -108,11 +108,11 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         self.SAXSbuttons.horizontalLayout_5.insertWidget(1, self.simulate)
         self.simulate.clicked.connect(self.getSimulatedSAXSData)
 
-        self.gridLayout_5.addWidget(self.SAXSbuttons, 0, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        self.gridLayout_5.addWidget(self.SAXSbuttons, 0, 0, 1, 1, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         self.SAXSExperiment.setLayout(self.gridLayout_5)
 
         #Building Virtual SANS Experiment tab
-        #TODO: A future project to implement this tab
+        #TODO: implement in a future project
 
 
     def getModelProfileRow(self, name: str, default: float, column: int) -> list:
@@ -283,7 +283,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         print(model_str, full_path)
         
         #Write file to plugin model folder
-        path = "C:\\Users\\Qerne\\OneDrive\\Documents\\VSCode\\Projects\\Thesis\\SasVIew_dev_version\\sasview\\src\\sas\\qtgui\\Perspectives\\Shape2SAS\\TEST.py"
+        path = "C:\\Users\\Qerne\\OneDrive\\Documents\\VSCode\\Projects\\Thesis\\SasVIew_dev_version\\sasview\\src\\sas\\qtgui\\Perspectives\\Shape2SAS\\TEST_plugin.py"
         TabbedModelEditor.writeFile(path, model_str)
 
 

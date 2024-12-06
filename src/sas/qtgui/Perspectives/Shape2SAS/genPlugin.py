@@ -149,6 +149,7 @@ def generateModel(prof: ModelProfile, Npoints: int, pr_points: int, model_name: 
         
     model_str = (f'''
 r"""
+###TODO: Rewrite this description
 This plugin model uses Shape2SAS to generate theoretical small-angle scattering data. Shape2SAS is a program build by Larsen and Brookes
 (doi: https://doi.org/10.1107/S1600576723005848) to calculate small-angle scattering data and pair distance distributions
 from a user built model. The user builds this model by combining pre-defined geometrical subunits. Each subunit may be rotated and translated to the
@@ -157,19 +158,22 @@ Besides calculating theoretical scattering, Shape2SAS is also able to simulate s
 
 ###TODO: maybe add a method description on how Shape2SAS generates the scattering data??? bead model                 
 
-
 Model {model_name.replace('.py', '')} was built from the following subunits:
 {', '.join(prof.subunits)}
-                 
+
 """
-from numpy import inf
+from numpy import inf                 
+from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (ModelProfile, SimulationParameters, 
+                                                        ModelSystem, getPointDistribution, 
+                                                        TheoreticalScatteringCalculation, 
+                                                        getTheoreticalScattering)
 
 name = "{model_name.replace('.py', '')}"
 title = "Shape2SAS Model"
 description = """
 Theoretical generation of P(q) using Shape2SAS
 """
-category = "plugin"
+category = "shape:Plugin Models"
 
 #   ["name", "units", default, [lower, upper], "type","description"],
 parameters = {parameters}
@@ -180,7 +184,7 @@ def Iq(q, {', '.join(vars)}):
     modelProfile = ModelProfile(subunits={prof.subunits}, p_s=[{', '.join(ps)}], dimensions=[{', '.join(dims)}], com=[{','.join(coms)}], 
                                 rotation_points=[{','.join(rot_points)}], rotation=[{', '.join(rots)}], exclude_overlap={prof.exclude_overlap})
     
-    simPar = SimulationParameters(q, prpoints={pr_points}, Npoints={Npoints}, model_name={model_name.replace('.py', '')})
+    simPar = SimulationParameters(q, prpoints={pr_points}, Npoints={Npoints}, model_name="{model_name.replace('.py', '')}")
     dist = getPointDistribution(modelProfile, {Npoints})
 
     scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=dist, 
@@ -191,6 +195,8 @@ def Iq(q, {', '.join(vars)}):
     theoreticalScattering = getTheoreticalScattering(scattering)
 
     return theoreticalScattering.I
+
+Iq.vectorized = True
 
 ''').lstrip().rstrip()
     
