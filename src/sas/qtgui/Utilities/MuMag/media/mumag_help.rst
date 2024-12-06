@@ -38,24 +38,24 @@ Form of Data Files
 The experimental magnetic SANS data for a given analysis is expected to be stored as CSV files in a single folder.
 Information about each SANS scattering curve  must be given through the file names, like in the following example:
 
-	expected filenames:
+Example filenames:
 
-		- 1_0_1340_10.csv
-		- 2_20_1340_10.csv
-		- 3_35_1340_10.csv
-		- 4_50_1340_10.csv
-		- ...
+- 1_0_1340_10.csv
+- 2_20_1340_10.csv
+- 3_35_1340_10.csv
+- 4_50_1340_10.csv
+- ...
 
-    The fields separated by underscores have the following meaning
+The fields separated by underscores have the following meaning
 
-   1. Identifier: Index of the files (e.g. 1, 2, 3, 4, ...) - (not needed by MuMag)
-   2. Identifier: Externally applied magnetic field :math:`μ_0 H_0` in mT (e.g. 0, 20, 25, 50, ...)
-   3. Identifier: Saturation magnetization :math:`μ_0 M_s` in mT (e.g. 1340, 1340, 1340, 1340, ...)
-   4. Identifier: Demagnetization field :math:`μ_0 H_d` in mT (e.g. 10, 10, 10, 10, 10, ...)
+1. Index of the files (e.g. 1, 2, 3, 4, ...) - (not used by SasView's MuMag, but is used by the MATLAB version)
+2. Externally applied magnetic field :math:`μ_0 H_0` in mT (e.g. 0, 20, 25, 50, ...)
+3. Saturation magnetization :math:`μ_0 M_s` in mT (e.g. 1340, 1340, 1340, 1340, ...)
+4. Demagnetization field :math:`μ_0 H_d` in mT (e.g. 10, 10, 10, 10, 10, ...)
 
-	(All these values could also be written as float number with dot separator e.g. 10.4345)
+(All these values could also be written as float number with dot separator e.g. 10.4345)
 
-The CSV files are expected have three columns: momentum transfer :math:`q` in nm:math:`^{-1}`,
+The CSV files are expected have three columns: momentum transfer :math:`q` in nm :math:`^{-1}`,
 scattering intensity :math:`I(q)`, and the standard error corresponding to `I(q)`.
 
 Each of the files must have the same length and got to be sorted from the lowest to the highest q-value.
@@ -69,23 +69,16 @@ To run MuMag, load the data, set the parameters below, and click `Fit`.
 Parameters
 ..........
 
-* `Analysis method` - This chooses one of two experiment types. Perpendicular is where the applied
-field is perpendicular to the beam (e.g. beam in x direction and field in z), and parallel where the applied field is parallel.
-
-* `Maximum q` - MuMag has the ability to exclude q values beyond a given value, specified here
-* `Applied field` - MuMag will use only data with applied field strengths above this value.
-MuMag requires the sample to be at (or close to) saturation, use this field to specify where this is.
-* `Scan range` - When calculating the exchange stiffness constant A,
-MuMag's minimisation step has two components.
-(1) A brute for search, then (2) a refinement.
-These three connected values that describe the values for which the brute force search will
-take place, as well as the values that will appear on any plots.
+* **Analysis method** - This chooses one of two experiment types. Perpendicular is where the applied field is perpendicular to the beam (e.g. beam in x direction and field in z), and parallel where the applied field is parallel.
+* **Maximum q** - MuMag has the ability to exclude q values beyond a given value, specified here
+* **Applied field** - MuMag will use only data with applied field strengths above this value. MuMag requires the sample to be at (or close to) saturation, use this field to specify where this is.
+* **Scan range** - When calculating the exchange stiffness constant A, MuMag's minimisation step has two components. (1) A brute for search, then (2) a refinement. These three connected values that describe the values for which the brute force search will take place, as well as the values that will appear on any plots.
 
 Results
 .......
 
-* `A value` - The estimated exchange stiffness constant (A)
-* `A uncertainty` - An estimate of the uncertainty associated with it
+* **A value** - The estimated exchange stiffness constant (A)
+* **A uncertainty** - An estimate of the uncertainty associated with it
 
 Plots
 .....
@@ -93,13 +86,10 @@ Plots
 
 When you load data the `data` plot will be populated. When you click `fit` the rest will be.
 
-* `Data` - A plot of all the loaded data
-* `Fit Results`
-    * :math:`\chi^2` - figure of merit used by MuMag to calculate the best A value, across different
-values of A (currently mean squared). This plot is useful to checking your problem is well conditioned.
-    * :math:`I_res` - The *residual intensity* - the part of the scattering that doesn't respond to
-applied field changes, inferred from the data (see above for details)
+* **Data** - A plot of all the loaded data
+* **Fit Results**
+    * :math:`\chi^2` - figure of merit used by MuMag to calculate the best A value, across different values of A (currently mean squared). This plot is useful to checking your problem is well conditioned.
+    * :math:`I_res` - The *residual intensity* - the part of the scattering that doesn't respond to applied field changes, inferred from the data (see above for details)
     * :math:`S_H` - Anisotropy field scattering function
     * :math:`S_M` - Scattering function of the longitudinal magnetization
-* `Comparison` - Crosses show original data, lines show scattering curves reconstructed based on :math:`I_res`,
-:math:`S_H` and :math:`S_M`
+* **Comparison** - Crosses show original data, lines show scattering curves reconstructed based on :math:`I_res`, :math:`S_H` and :math:`S_M`
