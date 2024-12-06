@@ -279,11 +279,11 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             self.comparison_axes.loglog(
                 datum.scattering_curve.x,
                 datum.scattering_curve.y,
-                linestyle='dotted', color=colors[k], linewidth=0.3, markersize=1)
+                linestyle='None', color=colors[k], marker='x')
 
         # Show the fitted curves
         n_sim = self.fit_data.refined_fit_data.I_simulated.shape[0]
-        colors = pl.cm.YlGn(np.linspace(0, 1, n_sim))
+        colors = pl.cm.jet(np.linspace(0, 1, n_sim))
         for k in range(n_sim):
             self.comparison_axes.loglog(
                 self.fit_data.refined_fit_data.q * 1e-9,
