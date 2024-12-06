@@ -6,6 +6,24 @@ MuMag Tool
 Introduction
 ------------
 
+MuMag is an analysis tool for calculating exchange stiffness constants, residual scattering, anisotropy field
+and longitudinal magnetization based on unpolarized 1D SANS experiments with applied magnetic fields. The theory
+behind this has been published `here <https://doi.org/10.1107/S1600576722005349>`_.
+
+Given some scattering curve recorded at different applied field intensities, :math:`I(q, H)`, MuMag will break
+the down these curves into two (in the case of parallel magnetic fields) and three, components (
+for perpendicular fields relative to the beam). In the perpendicular case, the resulting linear
+decomposition has the following form:
+
+:math:`I(q, H) = I_res(q) + S_H(q) R_H(q, H) + S_M(q) R_M(q, H)`
+
+Where :math:`R_H` and :math:`R_M` are known magnetic response functions (see the paper above), and :math:`I_res`,
+:math:`S_H` and :math:`S_M` are non-field dependent terms: the residual scattering function,
+the anisotropy field scattering function and the longitudinal magnetisation scattering function respectively.
+
+In the parallel case :math:`S_M` and :math:`R_M` are zero.
+
+
 Loading data
 ------------
 
@@ -83,4 +101,5 @@ values of A (currently mean squared). This plot is useful to checking your probl
 applied field changes, inferred from the data (see above for details)
     * :math:`S_H` - Anisotropy field scattering function
     * :math:`S_M` - Scattering function of the longitudinal magnetization
-* `Comparison` -
+* `Comparison` - Crosses show original data, lines show scattering curves reconstructed based on :math:`I_res`,
+:math:`S_H` and :math:`S_M`
