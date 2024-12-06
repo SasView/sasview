@@ -276,44 +276,47 @@ class AsciiDialog(QDialog):
     @Slot()
     def load_file(self) -> None:
         """Open the file loading dialog, and load the file the user selects."""
-        result = QFileDialog.getOpenFileName(self)
+        filenames, result = QFileDialog.getOpenFileNames(self)
         # Happens when the user cancels without selecting a file. There isn't a
         # file to load in this case.
-        if result[1] == '':
+        if result == '':
             return
-        filename = result[0]
-        basename = path.basename(filename)
-        self.filename_label.setText(basename)
+        for filename in filenames:
 
-        try:
-            with open(filename) as file:
-                file_csv = file.readlines()
-            file_csv = [line.strip() for line in file_csv]
-            # TODO: This assumes that no two files will be loaded with the same
-            # name. This might not be a reasonable assumption.
-            self.files[basename] = file_csv
-            self.files_full_path[basename] = filename
-            self.current_filename = basename
-            # Reset checkboxes
-            self.files_is_included[basename] = []
-            # Attempt guesses when this is the first file that has been loaded.
-            if len(self.files) == 1:
-                self.attemptGuesses()
-            # This will trigger the update current file event which will cause
-            # the table to be drawn.
-            # TODO: Will probably change this default later (or a more sophisticated way of getting this default from the
-            # filename.)
-            initial_separator_text = '_'
-            self.internal_metadata.filename_separator[basename] = initial_separator_text
-            self.filename_chooser.addItem(basename)
-            self.filename_chooser.setCurrentText(basename)
-            self.internal_metadata.add_file(basename)
+            basename = path.basename(filename)
+            self.filename_label.setText(basename)
 
-        except OSError:
-            QMessageBox.critical(self, 'File Read Error', 'There was an error accessing that file.')
-        except UnicodeDecodeError:
-            QMessageBox.critical(self, 'File Read Error', """There was an error reading that file.
-This could potentially be because the file is not an ASCII format.""")
+            try:
+                with open(filename) as file:
+                    file_csv = file.readlines()
+                file_csv = [line.strip() for line in file_csv]
+                # TODO: This assumes that no two files will be loaded with the same
+                # name. This might not be a reasonable assumption.
+                self.files[basename] = file_csv
+                self.files_full_path[basename] = filename
+                # Reset checkboxes
+                self.files_is_included[basename] = []
+                if len(self.files) == 1:
+                    # Default behaviour is going to be to set this to the first file we load. This seems sensible but
+                    # may provoke further discussion.
+                    self.current_filename = basename
+                # This will trigger the update current file event which will cause
+                # the table to be drawn.
+                # TODO: Will probably change this default later (or a more sophisticated way of getting this default from the
+                # filename.)
+                initial_separator_text = '_'
+                self.internal_metadata.filename_separator[basename] = initial_separator_text
+                self.filename_chooser.addItem(basename)
+                self.filename_chooser.setCurrentText(basename)
+                self.internal_metadata.add_file(basename)
+
+            except OSError:
+                QMessageBox.critical(self, 'File Read Error', f'There was an error reading {basename}')
+            except UnicodeDecodeError:
+                QMessageBox.critical(self, 'File Read Error', f"""There was an error decoding {basename}.
+This could potentially be because the file {basename} an ASCII format.""")
+        # Attempt guesses on the first file that was loaded.
+        self.attemptGuesses()
 
     @Slot()
     def unload(self) -> None:
