@@ -24,7 +24,7 @@ import re
 from PySide6.QtWidgets import QApplication, QDialog, QHBoxLayout, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt
 
-from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame
+from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
@@ -94,11 +94,6 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         modelVbox.addWidget(modelSection)
         modelVbox.addWidget(self.modelButtonOptions)
         self.model.setLayout(modelVbox)
-        
-        #Building Calculations tab
-        #self.calculationButtons = ButtonOptions()
-        #self.gridLayout_4.addWidget(self.calculationButtons, 0, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
-        
 
         #Building Virtual SAXS Experiment tab
         self.SAXSbuttons = ButtonOptions()
@@ -107,6 +102,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         self.simulate.setMaximumSize(110, 24)
         self.SAXSbuttons.horizontalLayout_5.insertWidget(1, self.simulate)
         self.simulate.clicked.connect(self.getSimulatedSAXSData)
+        self.comboBox.currentIndexChanged.connect(self.showStructureFactorOptions)
 
         self.gridLayout_5.addWidget(self.SAXSbuttons, 0, 0, 1, 1, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         self.SAXSExperiment.setLayout(self.gridLayout_5)
@@ -114,6 +110,32 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         #Building Virtual SANS Experiment tab
         #TODO: implement in a future project
 
+    def showStructureFactorOptions(self):
+        """Show options for structure factor"""
+        index = self.comboBox.currentIndex()
+        self.stackedWidget.setCurrentIndex(index)
+
+
+    def getStructureFactorValues(self):
+        """Read QLineEdit values from each index of the stackedWidget"""
+        S_vals = []
+
+        index = self.comboBox.currentIndex()
+        self.stackedWidget.setCurrentIndex(index)
+        currentWidget = self.stackedWidget.currentWidget()
+        lineEdits = currentWidget.findChildren(QLineEdit)
+
+        #get concentration value for Hardsphere case
+        if index == 1:
+            conc = self.lineEdit_3
+            S_vals.append(float(conc.text()))
+
+
+        for val in lineEdits:
+            S_vals.append(float(val.text()))
+
+
+        return S_vals
 
     def getModelProfileRow(self, name: str, default: float, column: int) -> list:
         """Get model data from a single row in a column and convert to float"""
@@ -209,7 +231,6 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         self.viwerModel.setPlot(modelDistribution, plotDesign)
 
         #on being checked, plot theoretical scattering
-        #TODO: Get Structure factor to work
         if self.checkTheoreticalScattering.isChecked():
             scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=modelDistribution, 
                                                                         Stype="None", par=[], 
@@ -300,6 +321,11 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         """Generating simulated data and sends it to
         the Data Explorer in SasView"""
         
+        modelProfile = self.getModelProfile()
+        if not modelProfile:
+            #No columns in the subunit table
+            return
+
         #Calculations
         qmin = float(self.onCheckingInput(self.lineEdit, "0.001"))
         qmax = float(self.onCheckingInput(self.lineEdit_14, "0.5"))
@@ -309,6 +335,8 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         N = int(self.onCheckingInput(self.lineEdit_17, "3000"))
 
         name = self.onCheckingInput(self.lineEdit_19, "Model_1")
+
+        par = self.getStructureFactorValues()
 
         #SAXS parameters
         Stype = self.comboBox.currentText()
@@ -324,8 +352,9 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         Profile = self.getModelProfile()
 
         Distr = getPointDistribution(Profile, N)
+
         Theo_calc = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=Distr, 
-                                                                        Stype=Stype, par=[], 
+                                                                        Stype=Stype, par=par, 
                                                                         polydispersity=polydispersity, 
                                                                         conc=conc, 
                                                                         sigma_r=sigma_r), 
@@ -337,7 +366,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         print(Sim_SAXS)
 
         #Send data to SasView Data Explorer
-        #IExperimental.save_Iexperimental
+        #IExperimental.save_Iexperimental(name=name, q=q, I=Sim_SAXS.I, error=Sim_SAXS.error)
 
 
 if __name__ == "__main__":

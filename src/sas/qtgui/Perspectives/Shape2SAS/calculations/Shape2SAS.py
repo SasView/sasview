@@ -136,6 +136,7 @@ def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> Theoret
     I0, Pq = I_theory.calc_Pq(r, pr, sys.conc, prof.volume_total)
 
     S_class = StructureFactor(q, x, y, z, p, sys.Stype, sys.par)
+
     S_eff = S_class.getStructureFactor().structure_eff(Pq)
 
     I = I_theory.calc_Iq(Pq, S_eff, sys.sigma_r)

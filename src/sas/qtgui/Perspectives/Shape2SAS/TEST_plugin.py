@@ -12,7 +12,7 @@ Model Model_1 was built from the following subunits:
 Sphere
 
 """
-from numpy import inf                 
+from numpy import inf
 from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (ModelProfile, SimulationParameters, 
                                                         ModelSystem, getPointDistribution, 
                                                         TheoreticalScatteringCalculation, 

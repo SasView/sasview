@@ -1336,7 +1336,9 @@ class StructureFactor:
         """Available structure factors"""
         self.structureFactor = {
             'HS': HardSphereStructure,
+            'Hard Sphere': HardSphereStructure,
             'aggregation': Aggregation,
+            'Aggregation': Aggregation,
             'None': NoStructure
         }
 
@@ -1347,6 +1349,8 @@ class StructureFactor:
         """Return the name of the parameters"""
         pars = {
             'HS': {'conc': 0.02,'r_hs': 50},
+            'Hard Sphere': {'conc': 0.02,'r_hs': 50},
+            'Aggregation': {'R_eff': 50, 'N_aggr': 80, 'frac': 0.1},
             'aggregation': {'R_eff': 50, 'N_aggr': 80, 'frac': 0.1},
             'None': {}
         }
