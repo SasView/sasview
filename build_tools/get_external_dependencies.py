@@ -45,3 +45,7 @@ def fetch_external_dependencies():
     except Exception as e:
         print("Download of external dependencies failed.", e)
     return
+
+
+if __name__ == "__main__":
+    fetch_external_dependencies()
