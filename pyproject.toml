@@ -44,6 +44,10 @@ homepage = "http://sasview.org"
 [project.scripts]
 sasview = "sas.qtgui.MainWindow.MainWindow:run_sasview"
 
+[project.entry-points.pyinstaller40]
+hook-dirs = "sas.__pyinstaller:get_hook_dirs"
+
+
 [tool.hatch.metadata]
 allow-direct-references = true
 
