@@ -45,8 +45,43 @@ jobs:
       - id: set-matrix
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
+
+  builddeps:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [
+          ["sasdata", "git+https://github.com/llimeht/sasdata.git@tmp/pyproject"],
+          ["sasmodels", "git+https://github.com/llimeht/sasmodels.git@tmp/pyproject"],
+          ["bumps", "git+https://github.com/llimeht/bumps.git@tmp/docs-source"],
+        ]
+
+    name: Build wheel "${{ matrix.package[0] }}"
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      ### Installation of some build-dependencies
+
+      - name: Build wheel of ${{ matrix.package[0] }}
+        run: |
+          python -m pip wheel --verbose ${{ matrix.package[1] }}
+
+      - name: Store wheel for use
+        uses: actions/upload-artifact@v4
+        with:
+          name: sasview-wheel-${{ matrix.package[0] }}
+          path: |
+            ${{ matrix.package[0] }}*whl
+          if-no-files-found: ignore
+
   build-matrix:
-    needs: [matrix]
+    needs: [matrix, builddeps]
 
     strategy:
       fail-fast: false
@@ -84,17 +119,22 @@ jobs:
           sudo apt-get update
           sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
 
-      - name: Install Python dependencies
-        run: |
-          python -m pip install -r build_tools/requirements.txt
-          python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs
-          python -m pip install git+https://github.com/llimeht/hatch-sphinx.git
+      - name: Fetch wheels of sibling projects
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/
+          pattern: sasview-wheel-*
+          merge-multiple: true
 
       - name: Install correct versions of sibling projects
         run: |
-          python -m pip install --no-build-isolation --verbose git+https://github.com/llimeht/sasdata.git@tmp/pyproject
-          python -m pip install --no-build-isolation --verbose git+https://github.com/llimeht/sasmodels.git@tmp/pyproject
-          python -m pip install --no-build-isolation --verbose git+https://github.com/llimeht/bumps.git@tmp/docs-source
+          python -m pip install dist/*whl
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install -r build_tools/requirements.txt
+          python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
+
 
       - name: Install pywin32 (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
