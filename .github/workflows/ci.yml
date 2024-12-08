@@ -131,6 +131,16 @@ jobs:
           python -m build --no-isolation --sdist --wheel
           python -m pip install dist/sasview*whl
 
+      - name: Publish sdist and wheel package
+        uses: actions/upload-artifact@v4
+        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
+        with:
+          name: sasview-wheel
+          path: |
+            dist/sasview*whl
+            dist/sasview*tar*
+          if-no-files-found: ignore
+
       ### Run tests (if enabled)
 
       - name: Install test dependencies
