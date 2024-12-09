@@ -14,7 +14,7 @@ class WarningLabel(QLabel):
     def setFontNormal(self):
         self.setStyleSheet('')
 
-    def update_warning(self, missing_columns: list[str], duplicate_columns: list[str], lines: list[list[str]] | None = None, rows_is_included: list[bool] | None = None):
+    def update_warning(self, missing_columns: list[str], duplicate_columns: list[str], lines: list[list[str]] | None = None, rows_is_included: list[bool] | None = None, starting_pos: int = 0):
         """Determine, and set the appropriate warning messages given how many
         columns are missing, and how many columns are duplicated."""
         unparsable = 0
@@ -22,11 +22,11 @@ class WarningLabel(QLabel):
             # FIXME: I feel like I am repeating a lot of logic from the table filling. Is there a way I can abstract
             # this?
             for i, line in enumerate(lines):
-                if rows_is_included[i]:
+                if rows_is_included[i] and i >= starting_pos:
                     # TODO: Is there really no builtin function for this? I don't like using try/except like this.
                     for item in line:
                         try:
-                            _ = int(item)
+                            _ = float(item)
                         except:
                             unparsable += 1
         if len(missing_columns) != 0:
