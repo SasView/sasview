@@ -386,6 +386,7 @@ This could potentially be because the file {basename} an ASCII format.""")
         check_box = self.sender()
         self.seperators[check_box.text()] = check_box.isChecked()
         self.fillTable()
+        self.updateWarningLabel()
 
     @Slot()
     def changeDatasetType(self) -> None:
