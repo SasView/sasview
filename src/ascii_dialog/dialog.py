@@ -337,16 +337,19 @@ This could potentially be because the file {basename} an ASCII format.""")
         """
         self.col_editor.setCols(self.colcount_entry.value())
         self.fillTable()
+        self.updateWarningLabel()
 
     @Slot()
     def updateStartpos(self) -> None:
         """Triggered when the starting position of the data has changed."""
         self.fillTable()
+        self.updateWarningLabel()
 
     @Slot()
     def updateSeperator(self) -> None:
         """Changed when the user modifies the set of seperators being used."""
         self.fillTable()
+        self.updateWarningLabel()
 
     @Slot()
     def updateColumn(self) -> None:
@@ -375,6 +378,7 @@ This could potentially be because the file {basename} an ASCII format.""")
             self.unloadButton.setDisabled(False)
             self.editMetadataButton.setDisabled(False)
             self.fillTable()
+            self.updateWarningLabel()
 
     @Slot()
     def seperatorToggle(self) -> None:
