@@ -89,6 +89,8 @@ jobs:
         include: ${{ fromJson(needs.matrix.outputs.matrix-json) }}
     env:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
+      # Only sign/notarize if the secrets will be available
+      SIGN_INSTALLER: ${{ (github.repository == 'SasView/sasview') && 'true' || '' }}
 
     name: "${{ matrix.job_name }}"
 
@@ -257,7 +259,7 @@ jobs:
           tar zcf SasView6.tar.gz sasview
 
       - name: Sign executable and create dmg (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') && env.SIGN_INSTALLER }}
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_ISA }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_ISA_PWD }}
@@ -278,7 +280,7 @@ jobs:
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-latest' }}
+        if: ${{ matrix.installer && matrix.os == 'macos-latest' && env.SIGN_INSTALLER }}
         uses: lando/notarize-action@v2
         with:
           product-path: installers/dist/SasView6-macos-latest.dmg
@@ -289,7 +291,7 @@ jobs:
           verbose: True
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-13' }}
+        if: ${{ matrix.installer && matrix.os == 'macos-13' && env.SIGN_INSTALLER }}
         uses: lando/notarize-action@v2
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
@@ -300,19 +302,19 @@ jobs:
           verbose: True
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-latest' }}
+        if: ${{ matrix.installer && matrix.os == 'macos-latest' && env.SIGN_INSTALLER }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: installers/dist/SasView6-macos-latest.dmg
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-13' }}
+        if: ${{ matrix.installer && matrix.os == 'macos-13' && env.SIGN_INSTALLER }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
 
       - name: Sign binary
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         uses: lando/code-sign-action@v2
         with:
           file: installers/dist/setupSasView.exe
