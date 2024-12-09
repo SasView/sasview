@@ -11,6 +11,9 @@ class WarningLabel(QLabel):
     def setFontRed(self):
         self.setStyleSheet("QLabel { color: red}")
 
+    def setFontOrange(self):
+        self.setStyleSheet("QLabel { color: orange}")
+
     def setFontNormal(self):
         self.setStyleSheet('')
 
@@ -39,7 +42,7 @@ class WarningLabel(QLabel):
         elif unparsable > 0:
             # FIXME: This error message could perhaps be a bit clearer.
             self.setText(f'{unparsable} lines cannot be parsed. They will be ignored.')
-            self.setFontRed()
+            self.setFontOrange()
         else:
             self.setText('All is fine') # TODO: Probably want to find a more appropriate message.
             self.setFontNormal()
