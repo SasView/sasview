@@ -229,6 +229,15 @@ jobs:
           command -v ldconfig >/dev/null 2>&1 && ldconfig -n sasview
           tar zcf sasview-pyinstaller-dist.tar.gz sasview
 
+      - name: Collect a debug tarball of the installer package
+        if: ${{ matrix.installer }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            installers/dist/sasview-pyinstaller-dist.tar.gz
+          if-no-files-found: ignore
+
       - name: Build sasview installer with INNO (Windows)
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
@@ -245,16 +254,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
         run: |
           cd installers/dist
-          tar zcf sasview6.tar.gz sasview
-
-      - name: Collect a debug tarball of the installer package
-        if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
-          path: |
-            installers/dist/sasview-pyinstaller-dist.tar.gz
-          if-no-files-found: ignore
+          tar zcf SasView6.tar.gz sasview
 
       - name: Sign executable and create dmg (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
@@ -322,17 +322,19 @@ jobs:
           keylocker-api-key: ${{ secrets.KEYLOCKER_API_KEY }}
           keylocker-cert-sha1-hash: ${{ secrets.KEYLOCKER_CERT_SHA1_HASH }}
 
+
       - name: Publish installer package
         if: ${{ matrix.installer }}
         uses: actions/upload-artifact@v4
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
-            installers/dist/setupSasView.exe
+            installers/dist/setupSasView*.exe
             installers/dist/SasView6-macos-13.dmg
             installers/dist/SasView6-macos-latest.dmg
-            installers/dist/sasview6.tar.gz
+            installers/dist/SasView*.tar.gz
           if-no-files-found: ignore
+
 
   test-installer:
     needs: [ build-matrix ]
@@ -440,7 +442,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           # $INSTALL_PATH is already the base directory
-          tar xf "$DL_PATH/sasview6.tar.gz"
+          tar xf "$DL_PATH/SasView6.tar.gz"
 
       - name: Check installation files
         if: ${{ !startsWith(matrix.os, 'macos') }}
