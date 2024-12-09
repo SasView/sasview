@@ -272,6 +272,10 @@ class AsciiDialog(QDialog):
                 item_font.setStrikeOut(False)
             item.setFont(item_font)
 
+    def updateWarningLabel(self):
+        required_missing = self.requiredMissing()
+        duplicates = self.duplicateColumns()
+        self.warning_label.update_warning(required_missing, duplicates, [self.splitLine(line) for line in self.raw_csv], self.rows_is_included, self.startline_entry.value())
 
     @Slot()
     def load_file(self) -> None:
@@ -348,9 +352,7 @@ This could potentially be because the file {basename} an ASCII format.""")
     def updateColumn(self) -> None:
         """Triggered when any of the columns has been changed."""
         self.fillTable()
-        required_missing = self.requiredMissing()
-        duplicates = self.duplicateColumns()
-        self.warning_label.update_warning(required_missing, duplicates, [self.splitLine(line) for line in self.raw_csv], self.rows_is_included, self.startline_entry.value())
+        self.updateWarningLabel()
 
     @Slot()
     def updateCurrentFile(self) -> None:
