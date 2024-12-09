@@ -350,7 +350,7 @@ This could potentially be because the file {basename} an ASCII format.""")
         self.fillTable()
         required_missing = self.requiredMissing()
         duplicates = self.duplicateColumns()
-        self.warning_label.update_warning(required_missing, duplicates)
+        self.warning_label.update_warning(required_missing, duplicates, [self.splitLine(line) for line in self.raw_csv], self.rows_is_included)
 
     @Slot()
     def updateCurrentFile(self) -> None:
