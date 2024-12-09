@@ -24,11 +24,12 @@ class WarningLabel(QLabel):
             for i, line in enumerate(lines):
                 if rows_is_included[i] and i >= starting_pos:
                     # TODO: Is there really no builtin function for this? I don't like using try/except like this.
-                    for item in line:
-                        try:
+                    try:
+                        for item in line:
                             _ = float(item)
-                        except:
-                            unparsable += 1
+                    except:
+                        unparsable += 1
+
         if len(missing_columns) != 0:
             self.setText(f'The following columns are missing: {missing_columns}')
             self.setFontRed()
