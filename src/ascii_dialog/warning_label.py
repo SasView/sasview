@@ -14,7 +14,7 @@ class WarningLabel(QLabel):
     def setFontNormal(self):
         self.setStyleSheet('')
 
-    def update_warning(self, missing_columns, duplicate_columns):
+    def update_warning(self, missing_columns: list[str], duplicate_columns: list[str]):
         """Determine, and set the appropriate warning messages given how many
         columns are missing, and how many columns are duplicated."""
         if len(missing_columns) != 0:
