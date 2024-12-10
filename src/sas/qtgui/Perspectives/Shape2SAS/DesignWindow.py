@@ -296,16 +296,14 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         modelProfile = self.getModelProfile()
         Npoints = 3000 ###TODO: get these inputs from the new GUI window
         pr_points = 100
-        model_name = "Model_1"
+        model_name = "new_sphere" #attach to a QLineEdit in the GUI
         dim_names = self.getDimensionNames()
 
         model_str, full_path = generatePlugin(modelProfile, Npoints, pr_points, model_name, dim_names)
-
-        print(model_str, full_path)
-        
+        print(full_path)
         #Write file to plugin model folder
-        path = "C:\\Users\\Qerne\\OneDrive\\Documents\\VSCode\\Projects\\Thesis\\SasVIew_dev_version\\sasview\\src\\sas\\qtgui\\Perspectives\\Shape2SAS\\TEST_plugin.py"
-        TabbedModelEditor.writeFile(path, model_str)
+        #path = "C:\\Users\\Qerne\\OneDrive\\Documents\\VSCode\\Projects\\Thesis\\SasVIew_dev_version\\sasview\\src\\sas\\qtgui\\Perspectives\\Shape2SAS\\TEST_plugin.py"
+        TabbedModelEditor.writeFile(full_path, model_str)
 
 
     def onCheckingInput(self, input: str, default: str) -> str:

@@ -83,7 +83,7 @@ def generateModel(prof: ModelProfile, Npoints: int, pr_points: int, model_name: 
                             [""],
                             [prof.p_s[i]],
                             [[-inf, inf]],
-                            ["ΔSLD"],
+                            ["sld"],
                             description,
                             onAppending)
 
@@ -95,10 +95,10 @@ def generateModel(prof: ModelProfile, Npoints: int, pr_points: int, model_name: 
                            checked,
                            checks,
                            dim_name, 
-                            ["Å"] * len(prof.dimensions[i]),
+                            ["Ang"] * len(prof.dimensions[i]),
                             prof.dimensions[i],
                             [[0, inf]] * len(prof.dimensions[i]), 
-                            ["Length"] * len(prof.dimensions[i]), 
+                            [""] * len(prof.dimensions[i]), 
                             description_dim,
                             onAppendingList)
         
@@ -110,10 +110,10 @@ def generateModel(prof: ModelProfile, Npoints: int, pr_points: int, model_name: 
                             checked,
                             checks,
                             com_name,
-                            ["Å", "Å", "Å"],
+                            ["Ang", "Ang", "Ang"],
                             prof.com[i],
                             [[-inf, inf], [-inf, inf], [-inf, inf]],
-                            ["Length", "Length", "Length"],
+                            ["", "", ""],
                             com_name + [" for column {num_col}"] * 3,
                             onAppendingList)
         
@@ -125,10 +125,10 @@ def generateModel(prof: ModelProfile, Npoints: int, pr_points: int, model_name: 
                             checked,
                             checks,
                             rot_points_name,
-                            ["Å", "Å", "Å"],
+                            ["Ang", "Ang", "Ang"],
                             prof.rotation_points[i],
                             [[-inf, inf], [-inf, inf], [-inf, inf]],
-                            ["Length", "Length", "Length"],
+                            ["", "", ""],
                             description_rot_points,
                             onAppendingList)
 
@@ -140,10 +140,10 @@ def generateModel(prof: ModelProfile, Npoints: int, pr_points: int, model_name: 
                             checked,
                             checks,
                             rot_name,
-                            ["Degree", "Degree", "Degree"],
+                            ["", "", ""],
                             prof.rotation[i],
                             [[-inf, inf], [-inf, inf], [-inf, inf]],
-                            ["Angle", "Angle", "Angle"],
+                            ["", "", ""],
                             description_rot,
                             onAppendingList)
         
@@ -173,7 +173,7 @@ title = "Shape2SAS Model"
 description = """
 Theoretical generation of P(q) using Shape2SAS
 """
-category = "shape:Plugin Models"
+category = "plugin"
 
 #   ["name", "units", default, [lower, upper], "type","description"],
 parameters = {parameters}
