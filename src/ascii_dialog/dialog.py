@@ -275,7 +275,11 @@ class AsciiDialog(QDialog):
     def updateWarningLabel(self):
         required_missing = self.requiredMissing()
         duplicates = self.duplicateColumns()
-        self.warning_label.update_warning(required_missing, duplicates, [self.splitLine(line) for line in self.raw_csv], self.rows_is_included, self.startline_entry.value())
+        if self.raw_csv is None:
+            # We don't have any actual data yet so we're just updating the warning based on the column.
+            self.warning_label.update_warning(required_missing, duplicates)
+        else:
+            self.warning_label.update_warning(required_missing, duplicates, [self.splitLine(line) for line in self.raw_csv], self.rows_is_included, self.startline_entry.value())
 
     @Slot()
     def load_file(self) -> None:
