@@ -7,6 +7,7 @@ from sasdata.dataset_types import unit_kinds
 from sasdata.quantities.units import symbol_lookup, NamedUnit
 
 from unit_selector import UnitSelector
+from default_units import default_units
 
 def configure_size_policy(combo_box: QComboBox) -> None:
     policy = combo_box.sizePolicy()
@@ -52,10 +53,10 @@ class ColumnUnit(QWidget):
     def updateUnits(self, unit_box: QComboBox, selected_option: str):
         unit_box.clear()
         self.current_option = selected_option
-        options = [unit.symbol for unit in unit_kinds[selected_option].units]
-        # We don't have preferred units yet. In order to simulate this, just
-        # take the first 5 options to display.
-        for option in options[:5]:
+        # Use the list of preferred units but fallback to the first 5 if there aren't any for this particular column.
+        unit_options = default_units.get(self.current_option, unit_kinds[selected_option].units)
+        option_symbols = [unit.symbol for unit in unit_options]
+        for option in option_symbols[:5]:
             unit_box.addItem(option)
         unit_box.addItem('Select More')
 
