@@ -1,6 +1,5 @@
-
-
 from PySide6.QtWidgets import QLabel
+from constants import TABLE_MAX_ROWS
 
 
 class WarningLabel(QLabel):
@@ -25,7 +24,10 @@ class WarningLabel(QLabel):
             # FIXME: I feel like I am repeating a lot of logic from the table filling. Is there a way I can abstract
             # this?
             for i, line in enumerate(lines):
-                if rows_is_included[i] and i >= starting_pos:
+                # Right now, rows_is_included only includes a limited number of rows as there is a maximum that can be
+                # shown in the table without it being really laggy. We're just going to assume the lines after it should
+                # be included.
+                if (i >= TABLE_MAX_ROWS or rows_is_included[i]) and i >= starting_pos:
                     # TODO: Is there really no builtin function for this? I don't like using try/except like this.
                     try:
                         for item in line:
