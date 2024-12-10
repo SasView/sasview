@@ -124,7 +124,7 @@ class AsciiDialog(QDialog):
         self.table.customContextMenuRequested.connect(self.showContextMenu)
 
         # Warning Label
-        self.warning_label = WarningLabel(self.requiredMissing(), self.duplicateColumns())
+        self.warning_label: WarningLabel = WarningLabel(self.requiredMissing(), self.duplicateColumns())
 
         # Done button
         # TODO: Not entirely sure what to call/label this. Just going with 'done' for now.
