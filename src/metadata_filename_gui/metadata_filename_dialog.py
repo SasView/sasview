@@ -39,6 +39,9 @@ class MetadataFilenameDialog(QDialog):
         self.separate_on_layout.addWidget(self.character_radio)
         self.separate_on_layout.addWidget(self.casing_radio)
 
+        # Right now, we're going to assume we're separating by character but we need to detect this later.
+        self.character_radio.setChecked(True)
+
         self.seperator_chars_label = QLabel('Seperators')
         self.separator_chars = QLineEdit(initial_separator_text)
         self.separator_chars.textChanged.connect(self.update_filename_separation)
