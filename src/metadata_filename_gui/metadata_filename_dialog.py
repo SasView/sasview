@@ -68,8 +68,12 @@ class MetadataFilenameDialog(QDialog):
     def separator_text(self) -> str:
         return self.separator_chars.text()
 
+    @property
+    def separator_expr(self) -> str:
+        return f'([{self.separator_text}])'
+
     def split_filename(self) -> list[str]:
-        return re.split(f'([{self.separator_text}])', self.filename)
+        return re.split(self.separator_expr, self.filename)
 
     def formatted_filename(self) -> str:
         sep_str = self.separator_chars.text()
