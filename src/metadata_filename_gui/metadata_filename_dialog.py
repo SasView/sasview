@@ -71,7 +71,7 @@ class MetadataFilenameDialog(QDialog):
 
     @property
     def separator_expr(self) -> str:
-        return f'([{self.separator_text}])'
+        return f'[{self.separator_text}]'
 
     def split_filename(self) -> list[str]:
         # This is assuming one of these radios is checked. This *should* be the case since it will have a default value.
