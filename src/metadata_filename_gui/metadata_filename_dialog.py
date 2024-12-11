@@ -73,7 +73,12 @@ class MetadataFilenameDialog(QDialog):
         return f'([{self.separator_text}])'
 
     def split_filename(self) -> list[str]:
-        return re.split(self.separator_expr, self.filename)
+        # This is assuming one of these radios is checked. This *should* be the case since it will have a default value.
+        if self.character_radio.isChecked():
+            return re.split(self.separator_expr, self.filename)
+        elif self.casing_radio.isChecked():
+            return re.findall(r'[A-Z][a-z]*', self.filename)
+        raise ValueError('Neither character, nor casing is selected.')
 
     def formatted_filename(self) -> str:
         sep_str = self.separator_chars.text()
