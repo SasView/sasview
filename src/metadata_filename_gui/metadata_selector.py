@@ -4,15 +4,15 @@ from metadata_filename_gui.metadata_component_selector import MetadataComponentS
 from metadata_filename_gui.metadata_custom_selector import MetadataCustomSelector
 
 class MetadataSelector(QWidget):
-    def __init__(self, category: str, metadatum: str, options: list[str], metadata: AsciiReaderMetadata, filename: str):
+    def __init__(self, category: str, metadatum: str, metadata: AsciiReaderMetadata, filename: str):
         super().__init__()
         self.category = category
         self.metadatum = metadatum
         self.metadata: AsciiReaderMetadata = metadata
-        self.options = options
         self.filename = filename
+        self.options = self.metadata.filename_components(filename)
         current_option = self.metadata.get_metadata(self.category, metadatum, filename)
-        if current_option is None or current_option in options:
+        if current_option is None or current_option in self.options:
             self.selector_widget = self.new_component_selector()
         else:
             self.selector_widget = self.new_custom_selector()
