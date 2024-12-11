@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog, QPushButton
+from PySide6.QtWidgets import QBoxLayout, QButtonGroup, QRadioButton, QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog, QPushButton
 from metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 from sys import argv
@@ -29,12 +29,21 @@ class MetadataFilenameDialog(QDialog):
         self.internal_metadata = initial_metadata
 
         self.filename_line_label = QLabel()
+        self.separate_on_group = QButtonGroup()
+        self.character_radio = QRadioButton("Character")
+        self.separate_on_group.addButton(self.character_radio)
+        self.casing_radio = QRadioButton("Casing")
+        self.separate_on_group.addButton(self.casing_radio)
+        self.separate_on_layout = QHBoxLayout()
+        self.separate_on_layout.addWidget(self.filename_line_label)
+        self.separate_on_layout.addWidget(self.character_radio)
+        self.separate_on_layout.addWidget(self.casing_radio)
+
         self.seperator_chars_label = QLabel('Seperators')
         self.separator_chars = QLineEdit(initial_separator_text)
         self.separator_chars.textChanged.connect(self.update_filename_separation)
 
         self.filename_separator_layout = QHBoxLayout()
-        self.filename_separator_layout.addWidget(self.filename_line_label)
         self.filename_separator_layout.addWidget(self.seperator_chars_label)
         self.filename_separator_layout.addWidget(self.separator_chars)
 
@@ -47,6 +56,7 @@ class MetadataFilenameDialog(QDialog):
         self.save_button.clicked.connect(self.on_save)
 
         self.layout = QVBoxLayout(self)
+        self.layout.addLayout(self.separate_on_layout)
         self.layout.addLayout(self.filename_separator_layout)
         self.layout.addWidget(self.metadata_tree)
         self.layout.addWidget(self.save_button)
