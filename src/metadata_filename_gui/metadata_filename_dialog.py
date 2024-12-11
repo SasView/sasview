@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QBoxLayout, QButtonGroup, QRadioButton, QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog, QPushButton
 from metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
-from sasdata.ascii_reader_metadata import AsciiReaderMetadata
+from sasdata.ascii_reader_metadata import AsciiReaderMetadata, CASING_REGEX
 from sys import argv
 import re
 
@@ -77,7 +77,8 @@ class MetadataFilenameDialog(QDialog):
         if self.character_radio.isChecked():
             return re.split(self.separator_expr, self.filename)
         elif self.casing_radio.isChecked():
-            return re.findall(r'[A-Z][a-z]*', self.filename)
+            return re.findall(CASING_REGEX, self.filename)
+
         raise ValueError('Neither character, nor casing is selected.')
 
     def formatted_filename(self) -> str:
