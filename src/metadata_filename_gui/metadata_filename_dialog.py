@@ -87,7 +87,6 @@ class MetadataFilenameDialog(QDialog):
         if sep_str == '':
             return f'<span>{self.filename}</span>'
         # TODO: Won't escape characters; I'll handle that later.
-        separated = self.split_filename()
         separated = self.internal_metadata.filename_components(self.filename, False, True)
         font_elements = ''
         for i, token in enumerate(separated):
