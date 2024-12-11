@@ -12,13 +12,13 @@ class MetadataTreeWidget(QTreeWidget):
         self.setHeaderLabels(['Name', 'Filename Components'])
         self.metadata: AsciiReaderMetadata = metadata
 
-    def draw_tree(self, options: list[str], full_filename: str):
+    def draw_tree(self, full_filename: str):
         self.clear()
         for top_level, items in metadata_categories.items():
             top_level_item = QTreeWidgetItem([top_level])
             for metadatum in items:
                 # selector = MetadataComponentSelector(metadatum, self.metadata_dict)
-                selector = MetadataSelector(top_level, metadatum, options, self.metadata, full_filename)
+                selector = MetadataSelector(top_level, metadatum, self.metadata, full_filename)
                 metadatum_item = QTreeWidgetItem([metadatum])
                 # selector.draw_options(options, metadata_dict.get(metadatum))
                 top_level_item.addChild(metadatum_item)
