@@ -88,6 +88,7 @@ class MetadataFilenameDialog(QDialog):
             return f'<span>{self.filename}</span>'
         # TODO: Won't escape characters; I'll handle that later.
         separated = self.split_filename()
+        separated = self.internal_metadata.filename_components(self.filename, False, True)
         font_elements = ''
         for i, token in enumerate(separated):
             classname = 'token' if i % 2 == 0 else 'separator'
@@ -96,7 +97,7 @@ class MetadataFilenameDialog(QDialog):
 
     def update_filename_separation(self):
         self.filename_line_label.setText(f'Filename: {self.formatted_filename()}')
-        self.metadata_tree.draw_tree(self.split_filename(), self.filename)
+        self.metadata_tree.draw_tree(self.filename)
 
     def on_save(self):
         self.accept()
