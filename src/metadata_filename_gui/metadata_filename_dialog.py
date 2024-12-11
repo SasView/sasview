@@ -35,6 +35,7 @@ class MetadataFilenameDialog(QDialog):
         self.casing_radio = QRadioButton("Casing")
         self.separate_on_group.addButton(self.casing_radio)
         self.separate_on_layout = QHBoxLayout()
+        self.separate_on_group.buttonPressed.connect(self.update_filename_separation)
         self.separate_on_layout.addWidget(self.filename_line_label)
         self.separate_on_layout.addWidget(self.character_radio)
         self.separate_on_layout.addWidget(self.casing_radio)
