@@ -437,11 +437,13 @@ This could potentially be because the file {basename} an ASCII format.""")
     def selectItems(self) -> None:
         """Include all of the items that have been selected in the table."""
         self.changeInclusion(self.table.selectedIndexes(), True)
+        self.updateWarningLabel()
 
     @Slot()
     def deselectItems(self) -> None:
         """Don't include all of the items that have been selected in the table."""
         self.changeInclusion(self.table.selectedIndexes(), False)
+        self.updateWarningLabel()
 
     def requiredMissing(self) -> list[str]:
         """Returns all the columns that are required by the dataset type but
