@@ -67,7 +67,7 @@ class MetadataFilenameDialog(QDialog):
 
     def formatted_filename(self) -> str:
         sep_str = self.separator_chars.text()
-        if sep_str == '':
+        if sep_str == '' or self.casing_radio.isChecked():
             return f'<span>{self.filename}</span>'
         # TODO: Won't escape characters; I'll handle that later.
         separated = self.internal_metadata.filename_components(self.filename, False, True)
