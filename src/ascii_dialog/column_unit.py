@@ -111,3 +111,7 @@ class ColumnUnit(QWidget):
                 return unit
         # This error shouldn't really happen so if it does, it indicates there is a bug in the code.
         raise ValueError("Current unit doesn't seem to exist")
+
+    @currentUnit.setter
+    def currentUnit(self, new_value: NamedUnit):
+        self.unit_widget.setCurrentText(new_value.symbol)
