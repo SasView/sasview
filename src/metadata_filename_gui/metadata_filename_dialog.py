@@ -42,6 +42,8 @@ class MetadataFilenameDialog(QDialog):
         self.separate_on_layout.addWidget(self.character_radio)
         self.separate_on_layout.addWidget(self.casing_radio)
 
+        if not any([char.isupper() for char in self.filename]):
+            self.casing_radio.setDisabled(True)
 
         self.seperator_chars_label = QLabel('Seperators')
         self.separator_chars = QLineEdit(initial_separator_text)
