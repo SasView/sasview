@@ -78,6 +78,10 @@ class MetadataFilenameDialog(QDialog):
         return font_elements
 
     def update_filename_separation(self):
+        if self.casing_radio.isChecked():
+            self.separator_chars.setDisabled(True)
+        else:
+            self.separator_chars.setDisabled(False)
         self.internal_metadata.filename_separator[self.filename] = self.separator_chars.text() if self.character_radio.isChecked() else True
         self.internal_metadata.purge_unreachable(self.filename)
         self.filename_line_label.setText(f'Filename: {self.formatted_filename()}')
