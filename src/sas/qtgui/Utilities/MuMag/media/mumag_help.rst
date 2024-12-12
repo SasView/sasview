@@ -11,7 +11,7 @@ and longitudinal magnetization based on unpolarized 1D SANS experiments with app
 behind this has been published `here <https://doi.org/10.1107/S1600576722005349>`_.
 
 Given some scattering curve recorded at different applied field intensities, :math:`I(q, H)`, MuMag will break
-the down these curves into two (in the case of parallel magnetic fields) and three, components (
+down these curves into two (in the case of parallel magnetic fields) and three, components (
 for perpendicular fields relative to the beam). In the perpendicular case, the resulting linear
 decomposition has the following form:
 
@@ -72,7 +72,7 @@ Parameters
 * **Analysis method** - This chooses one of two experiment types. Perpendicular is where the applied field is perpendicular to the beam (e.g. beam in x direction and field in z), and parallel where the applied field is parallel.
 * **Maximum q** - MuMag has the ability to exclude q values beyond a given value, specified here
 * **Applied field** - MuMag will use only data with applied field strengths above this value. MuMag requires the sample to be at (or close to) saturation, use this field to specify where this is.
-* **Scan range** - When calculating the exchange stiffness constant A, MuMag's minimisation step has two components. (1) A brute for search, then (2) a refinement. These three connected values that describe the values for which the brute force search will take place, as well as the values that will appear on any plots.
+* **Scan range** - When calculating the exchange stiffness constant A, MuMag's minimisation step has two components. (1) A brute for search, then (2) a refinement. These three values that describe the values for which the brute force search will take place (start, stop and step), as well as the values used for related plots.
 
 Results
 .......
