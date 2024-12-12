@@ -90,13 +90,17 @@ class ColumnUnit(QWidget):
 
     @Slot()
     def onUnitChange(self):
-        if self.unit_widget.currentText() == 'Select More':
+        new_text = self.unit_widget.currentText()
+        if new_text == 'Select More':
             selector = UnitSelector(unit_kinds[self.col_widget.currentText()].name, False)
             selector.exec()
             # We need the selection unit in the list of options, or else QT has some dodgy behaviour.
             self.unit_widget.insertItem(-1, selector.selected_unit.symbol)
             self.unit_widget.setCurrentText(selector.selected_unit.symbol)
-        self.column_changed.emit()
+        # This event could get triggered when the units have just been cleared, and not actually updated. We don't want
+        # to trigger it in this case.
+        elif not new_text == '':
+            self.column_changed.emit()
 
     @property
     def currentColumn(self):
