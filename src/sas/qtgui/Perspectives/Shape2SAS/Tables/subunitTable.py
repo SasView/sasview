@@ -4,7 +4,7 @@ from PySide6.QtGui import (QStandardItemModel, QStandardItem,
 from PySide6.QtWidgets import (QStyledItemDelegate, QLineEdit, QComboBox, 
                                QWidget, QSizePolicy)
 
-from sas.qtgui.Perspectives.Shape2SAS.UI.SubunitTableControllerUI import Ui_SubunitTableController
+from Tables.UI.subunitTableUI import Ui_SubunitTableController
 
 #Row option layout
 OPTIONLAYOUT = {"Subunit": 0,

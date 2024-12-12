@@ -51,7 +51,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
-        self.setWindowTitle("Placeholder title")
+        self.setWindowTitle("Shape2SAS")
         self.parent = parent
 
         ############Building GUI##############
@@ -65,6 +65,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
 
         self.subunitTable = SubunitTable()
         self.modelButtonOptions = ButtonOptions()
+        self.modelButtonOptions.horizontalLayout_5.setContentsMargins(0, 0, 10, 10)
 
         self.line1 = QFrame()
         self.line1.setFrameShape(QFrame.VLine)
@@ -234,7 +235,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         if self.checkTheoreticalScattering.isChecked():
             scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=modelDistribution, 
                                                                         Stype="None", par=[], 
-                                                                        polydispersity=0.0, conc=0.2, 
+                                                                        polydispersity=0.0, conc=0.02, 
                                                                         sigma_r=0.0), 
                                                                         Calculation=SimulationParameters())
             theoreticalScattering = getTheoreticalScattering(scattering)
@@ -296,7 +297,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         modelProfile = self.getModelProfile()
         Npoints = 3000 ###TODO: get these inputs from the new GUI window
         pr_points = 100
-        model_name = "new_sphere" #attach to a QLineEdit in the GUI
+        model_name = "Meeting_model" #TODO: attach to a QLineEdit in the GUI
         dim_names = self.getDimensionNames()
 
         model_str, full_path = generatePlugin(modelProfile, Npoints, pr_points, model_name, dim_names)

@@ -184,7 +184,7 @@ def Iq(q, {', '.join(vars)}):
     modelProfile = ModelProfile(subunits={prof.subunits}, p_s=[{', '.join(ps)}], dimensions=[{', '.join(dims)}], com=[{','.join(coms)}], 
                                 rotation_points=[{','.join(rot_points)}], rotation=[{', '.join(rots)}], exclude_overlap={prof.exclude_overlap})
     
-    simPar = SimulationParameters(q, prpoints={pr_points}, Npoints={Npoints}, model_name="{model_name.replace('.py', '')}")
+    simPar = SimulationParameters(q=q, prpoints={pr_points}, Npoints={Npoints}, model_name="{model_name.replace('.py', '')}")
     dist = getPointDistribution(modelProfile, {Npoints})
 
     scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=dist, 
