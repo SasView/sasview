@@ -90,6 +90,7 @@ class AsciiDialog(QDialog):
         self.startline_layout = QHBoxLayout()
         self.startline_label = QLabel('Starting Line')
         self.startline_entry = QSpinBox()
+        self.startline_entry.setMinimum(1)
         self.startline_entry.valueChanged.connect(self.updateStartpos)
         self.startline_layout.addWidget(self.startline_label)
         self.startline_layout.addWidget(self.startline_entry)
@@ -145,6 +146,14 @@ class AsciiDialog(QDialog):
         self.layout.addWidget(self.done_button)
 
     @property
+    def starting_pos(self) -> int:
+        return self.startline_entry.value() - 1
+
+    @starting_pos.setter
+    def starting_pos(self, value: int):
+        self.startline_entry.setValue(value + 1)
+
+    @property
     def raw_csv(self) -> list[str] | None:
         if self.current_filename is None:
             return None
@@ -188,6 +197,7 @@ class AsciiDialog(QDialog):
         """
         split_csv = [self.splitLine(line.strip()) for line in self.raw_csv]
 
+        # TODO: I'm not sure if there is any point in holding this initial value. Can possibly be refactored.
         self.initial_starting_pos = guess_starting_position(split_csv)
 
         guessed_colcount = guess_column_count(split_csv, self.initial_starting_pos)
@@ -196,7 +206,7 @@ class AsciiDialog(QDialog):
         columns = guess_columns(guessed_colcount, self.currentDatasetType())
         self.col_editor.setColOrder(columns)
         self.colcount_entry.setValue(guessed_colcount)
-        self.startline_entry.setValue(self.initial_starting_pos)
+        self.starting_pos = self.initial_starting_pos
 
     def fillTable(self) -> None:
         """Write the data to the table based on the parameters the user has
@@ -210,7 +220,6 @@ class AsciiDialog(QDialog):
 
         self.table.clear()
 
-        starting_pos = self.startline_entry.value()
         col_count = self.colcount_entry.value()
 
         self.table.setRowCount(min(len(self.raw_csv), TABLE_MAX_ROWS + 1))
@@ -233,7 +242,7 @@ class AsciiDialog(QDialog):
             else:
                 initial_state = True
                 self.rows_is_included.append(initial_state)
-            if i >= starting_pos:
+            if i >= self.starting_pos:
                 row_status = RowStatusWidget(initial_state, i)
                 row_status.status_changed.connect(self.updateRowStatus)
                 self.table.setCellWidget(i, 0, row_status)
@@ -256,13 +265,12 @@ class AsciiDialog(QDialog):
         be included in the data being loaded, or not.
 
         """
-        starting_pos = self.startline_entry.value()
         for column in range(1, self.table.columnCount() + 1):
             item = self.table.item(row, column)
             if item is None:
                 continue
             item_font = item.font()
-            if not item_checked or row < starting_pos:
+            if not item_checked or row < self.starting_pos:
                 item.setForeground(QColor.fromString('grey'))
                 item_font.setStrikeOut(True)
             else:
@@ -277,7 +285,7 @@ class AsciiDialog(QDialog):
             # We don't have any actual data yet so we're just updating the warning based on the column.
             self.warning_label.update_warning(required_missing, duplicates)
         else:
-            self.warning_label.update_warning(required_missing, duplicates, [self.splitLine(line) for line in self.raw_csv], self.rows_is_included, self.startline_entry.value())
+            self.warning_label.update_warning(required_missing, duplicates, [self.splitLine(line) for line in self.raw_csv], self.rows_is_included, self.starting_pos)
 
     @Slot()
     def load_file(self) -> None:
@@ -420,7 +428,7 @@ This could potentially be because the file {basename} an ASCII format.""")
             # This will happen if the user has selected a point which exists before the starting line. To prevent an
             # error, this code will skip that position.
             row = index.row()
-            if row < self.startline_entry.value():
+            if row < self.starting_pos:
                 continue
             self.table.cellWidget(row, 0).setChecked(new_value)
             self.updateRowStatus(row)
@@ -457,7 +465,7 @@ This could potentially be because the file {basename} an ASCII format.""")
     def onDoneButton(self):
         params = AsciiReaderParams(
             self.files_full_path.values(),
-            self.startline_entry.value(),
+            self.starting_pos,
             self.col_editor.columns,
             self.excluded_lines,
             self.seperators.items(),
