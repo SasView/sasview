@@ -25,6 +25,11 @@ def guess_starting_position(split_csv: list[list[str]]) -> int:
 
     """
     for i, row in enumerate(split_csv):
-        if row[0].replace('.', '').replace('-', '').isdigit():
-            return i
+        all_nums = True
+        for column in row:
+            if not column.replace('.', '').replace('-', '').isdigit():
+                all_nums = False
+                break
+            if all_nums:
+                return i
     return 0
