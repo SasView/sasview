@@ -1336,7 +1336,7 @@ class GuiManager:
         Catch the signal to delete items in the Theory item model which correspond to a model ID.
         Send the request to the DataExplorer for updating the theory model.
         """
-        self.filesWidget.deleteIntermediateTheoryPlotsByModelID(tab_id)
+        self.filesWidget.deleteIntermediateTheoryPlotsByTabId(tab_id)
 
     def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
         """
