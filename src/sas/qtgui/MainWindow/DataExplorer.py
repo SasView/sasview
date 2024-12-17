@@ -2069,7 +2069,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_model.appendRow(model_item)
         return model_item
 
-    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+    def deleteIntermediateTheoryPlotsByTabId(self, tab_id):
         """Given a model's ID, deletes all items in the theory item model which reference the same ID. Useful in the
         case of intermediate results disappearing when changing calculations (in which case you don't want them to be
         retained in the list)."""
