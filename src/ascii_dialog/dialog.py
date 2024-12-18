@@ -9,7 +9,7 @@ from row_status_widget import RowStatusWidget
 from guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
 from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
-from sasdata.temp_ascii_reader import load_data, AsciiReaderParams
+from sasdata.temp_ascii_reader import load_data, AsciiReaderParams, split_line
 from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
 from metadata_filename_gui.metadata_tree_data import initial_metadata_dict
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
@@ -174,21 +174,7 @@ class AsciiDialog(QDialog):
         selected on the widget.
 
         """
-        expr = ''
-        for seperator, isenabled in self.seperators.items():
-            if isenabled:
-                if expr != r'':
-                    expr += r'|'
-                match seperator:
-                    case 'Comma':
-                        seperator_text = r','
-                    case 'Whitespace':
-                        seperator_text = r'\s+'
-                    case 'Tab':
-                        seperator_text = r'\t'
-                expr += seperator_text
-
-        return re.split(expr, line)
+        return split_line(self.seperators, line)
 
     def attemptGuesses(self) -> None:
         """Attempt to guess various parameters of the data to provide some
