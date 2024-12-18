@@ -453,7 +453,7 @@ This could potentially be because the file {basename} an ASCII format.""")
             self.starting_pos,
             self.col_editor.columns,
             self.excluded_lines,
-            self.seperators.items(),
+            self.seperators,
             self.internal_metadata
         )
         self.params = params
