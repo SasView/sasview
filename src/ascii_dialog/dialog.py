@@ -446,7 +446,6 @@ This could potentially be because the file {basename} an ASCII format.""")
         current_dataset_type = self.currentDatasetType()
         return current_dataset_type.required + current_dataset_type.optional + ['<ignore>']
 
-    # TODO: Only works for one single file at the moment
     def onDoneButton(self):
         params = AsciiReaderParams(
             list(self.files_full_path.values()),
