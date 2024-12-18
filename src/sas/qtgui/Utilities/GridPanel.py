@@ -83,8 +83,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         Open file load dialog and load a .csv file
         """
         datafile = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Choose a file with results", "", "CSV files (*.csv)", None,
-            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+            self, "Choose a file with results", "", "CSV files (*.csv)", None)[0]
 
         if not datafile:
             logging.info("No data file chosen.")
