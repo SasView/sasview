@@ -204,12 +204,12 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         if self.averager.__name__ == 'SectorPhi':
             # angular plots usually require a linear x scale and better with
             # a linear y scale as well.
-            new_plot.xaxis("\\rm{\phi}", "degrees")
+            new_plot.xaxis(r"\rm{\phi}", "degrees")
             new_plot.xtransform = 'x'
             new_plot.ytransform = 'y'
         else:
-            new_plot.xaxis("\\rm{Q}", 'A^{-1}')
-        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+            new_plot.xaxis(r"\rm{Q}", 'A^{-1}')
+        new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
 
         new_plot.id = str(self.averager.__name__) + self.data.name
         new_plot.type_id = "Slicer" + self.data.name # Used to remove plots after changing slicer so they don't keep showing up after closed

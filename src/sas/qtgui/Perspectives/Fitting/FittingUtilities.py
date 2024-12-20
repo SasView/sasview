@@ -638,7 +638,7 @@ def plotPolydispersities(model):
         xunit = model.details[name][0]
         data1d.xtransform = 'x'
         data1d.ytransform = 'y'
-        data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', '\_')), xunit)
+        data1d.xaxis(r'\rm{{{}}}'.format(name.replace('_', r'\_')), xunit)
         data1d.yaxis(r'\rm{probability}', 'normalized')
         data1d.scale = 'linear'
         data1d.symbol = 'Line'
