@@ -14,6 +14,8 @@ import json
 import logging
 from collections import defaultdict, OrderedDict
 
+from sas.system.user import get_config_dir
+
 USER_FILE = 'categories.json'
 
 class CategoryInstaller:
@@ -31,7 +33,7 @@ class CategoryInstaller:
         """
         returns the users sasview config dir
         """
-        return os.path.join(os.path.expanduser("~"), ".sasview")
+        return get_config_dir()
 
     @staticmethod
     def _regenerate_model_dict(master_category_dict):
