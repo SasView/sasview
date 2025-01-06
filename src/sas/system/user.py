@@ -18,9 +18,9 @@ def get_dir_and_create_if_needed(create_if_nonexistent=True, dir='.'):
 
 def get_config_dir(create_if_nonexistent=True):
     """
-    The directory where the per-user configuration is stored.
+    The directory where os-specific configurations are stored.
 
-    Returns ~/.sasview, creating it if it does not already exist.
+    Returns the directory string, creating it if it does not already exist.
     """
     global _CONFIG_DIR
     return get_dir_and_create_if_needed(create_if_nonexistent, _CONFIG_DIR)
@@ -28,9 +28,9 @@ def get_config_dir(create_if_nonexistent=True):
 
 def get_app_dir(create_if_nonexistent=True):
     """
-    The directory where the per-user configuration is stored.
+    The directory where the os-specific app data is stored.
 
-    Returns ~/.sasview, creating it if it does not already exist.
+    Returns the directory string, creating it if it does not already exist.
     """
     global _APP_DATA_DIR
     return get_dir_and_create_if_needed(create_if_nonexistent, _APP_DATA_DIR)
@@ -38,9 +38,9 @@ def get_app_dir(create_if_nonexistent=True):
 
 def get_log_dir(create_if_nonexistent=True):
     """
-    The directory where the per-user configuration is stored.
+    The directory where the os-specific logs are stored.
 
-    Returns ~/.sasview, creating it if it does not already exist.
+    Returns the directory string, creating it if it does not already exist.
     """
     global _LOG_DIR
     return get_dir_and_create_if_needed(create_if_nonexistent, _LOG_DIR)
@@ -48,9 +48,9 @@ def get_log_dir(create_if_nonexistent=True):
 
 def get_cache_dir(create_if_nonexistent=True):
     """
-    The directory where the per-user configuration is stored.
+    The directory where the os-specific cache is stored.
 
-    Returns ~/.sasview, creating it if it does not already exist.
+    Returns the directory string, creating it if it does not already exist.
     """
     global _CACHE_DIR
     return get_dir_and_create_if_needed(create_if_nonexistent, _CACHE_DIR)
