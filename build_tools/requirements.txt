@@ -16,6 +16,7 @@ matplotlib
 numba
 numpy
 periodictable
+platformdirs
 pybind11
 pylint
 pyopengl
