@@ -3,7 +3,9 @@ from platformdirs import PlatformDirs
 from sas.system.version import __version__ as sasview_version
 
 PLATFORM_DIRS = PlatformDirs("SasView", "sasview", version=sasview_version)
-
+# Deprecated path
+_USER_DIR = os.path.join(os.path.expanduser("~"), '.sasview')
+# OS agnostic pathing
 _CONFIG_DIR = PLATFORM_DIRS.user_config_dir
 _APP_DATA_DIR = PLATFORM_DIRS.user_data_dir
 _LOG_DIR = PLATFORM_DIRS.user_log_dir
@@ -14,6 +16,14 @@ def get_dir_and_create_if_needed(create_if_nonexistent=True, dir='.'):
     if create_if_nonexistent and not os.path.exists(dir):
         os.makedirs(dir, mode=777, exist_ok=True)
     return dir
+
+
+def get_user_dir(create_if_nonexistent=False):
+    """**DEPRECATED** Do not use this function to create new files. This is only used to move files from previous
+    version locations to new locations
+    """
+    global _USER_DIR
+    return get_dir_and_create_if_needed(create_if_nonexistent, _USER_DIR)
 
 
 def get_config_dir(create_if_nonexistent=True):
