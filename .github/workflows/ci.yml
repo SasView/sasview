@@ -266,7 +266,7 @@ jobs:
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          appstore-connect-team-id: W2AG9MPZ43
+          appstore-connect-team-id: 8CX8K63BQM
           verbose: True
 
       - name: Staple Release Build (OSX)
