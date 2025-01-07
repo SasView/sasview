@@ -2,17 +2,18 @@ import os
 from platformdirs import PlatformDirs
 from sas.system.version import __version__ as sasview_version
 
-PLATFORM_DIRS = PlatformDirs("SasView", "sasview", version=sasview_version)
+PLATFORM_DIRS_VERSIONED = PlatformDirs("SasView", "sasview", version=sasview_version)
+PLATFORM_DIRS_UNVERSIONED = PlatformDirs("SasView", "sasview")
 # Deprecated path
 _USER_DIR = os.path.join(os.path.expanduser("~"), '.sasview')
 # OS agnostic pathing
-_CONFIG_DIR = PLATFORM_DIRS.user_config_dir
-_APP_DATA_DIR = PLATFORM_DIRS.user_data_dir
-_LOG_DIR = PLATFORM_DIRS.user_log_dir
-_CACHE_DIR = PLATFORM_DIRS.user_cache_dir
+_CONFIG_DIR = PLATFORM_DIRS_VERSIONED.user_config_dir
+_APP_DATA_DIR = PLATFORM_DIRS_VERSIONED.user_data_dir
+_LOG_DIR = PLATFORM_DIRS_UNVERSIONED.user_log_dir
+_CACHE_DIR = PLATFORM_DIRS_VERSIONED.user_cache_dir
 
 
-def get_dir_and_create_if_needed(create_if_nonexistent=True, dir='.'):
+def get_dir_and_create_if_needed(dir, create_if_nonexistent=True, ):
     if create_if_nonexistent and not os.path.exists(dir):
         os.makedirs(dir, mode=777, exist_ok=True)
     return dir
@@ -64,3 +65,13 @@ def get_cache_dir(create_if_nonexistent=True):
     """
     global _CACHE_DIR
     return get_dir_and_create_if_needed(create_if_nonexistent, _CACHE_DIR)
+
+
+def copy_old_user_files_to_new_locations():
+    # TODO: Should we copy previous items over? Also, should plugin and compiled models be
+    old_user_dir = get_user_dir()
+    if os.path.exists(old_user_dir):
+        log_location = get_log_dir()
+        config_location = get_config_dir()
+    # TODO: copy plugin models, config files, and
+    pass
