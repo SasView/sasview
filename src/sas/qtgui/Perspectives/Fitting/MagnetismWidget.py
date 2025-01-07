@@ -4,6 +4,7 @@ Widget/logic for magnetism.
 import os
 import numpy as np
 import logging
+from typing import Any, Tuple, Optional, List, Dict
 
 from PySide6 import QtCore
 from PySide6 import QtGui
@@ -23,7 +24,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
     updateDataSignal = QtCore.Signal()
     iterateOverModelSignal = QtCore.Signal()
 
-    def __init__(self, parent=None, logic=None):
+    def __init__(self, parent: Optional[QtWidgets.QWidget] = None, logic: Optional[Any] = None) -> None:
         super(MagnetismWidget, self).__init__()
 
         self.setupUi(self)
@@ -58,13 +59,13 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         labl.setPixmap(pixmap)
         self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
 
-    def onDisplayMagneticAngles(self):
+    def onDisplayMagneticAngles(self) -> None:
         """
         Display a simple image showing direction of magnetic angles
         """
         self.magneticAnglesWidget.show()
 
-    def setMagneticModel(self):
+    def setMagneticModel(self) -> None:
         """
         Set magnetism values on model
         """
@@ -85,7 +86,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
 
         FittingUtilities.addHeadersToModel(self._magnet_model)
 
-    def getParamNamesMagnet(self):
+    def getParamNamesMagnet(self) -> List[str]:
         """
         Return list of magnetic parameters for the current model
         """
@@ -94,7 +95,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
                             if self._magnet_model.item(row, 0).isCheckable()]
         return magnetic_model_params
 
-    def onMagnetModelChange(self, top, bottom):
+    def onMagnetModelChange(self, top: QtCore.QModelIndex, bottom: QtCore.QModelIndex) -> None:
         """
         Callback method for updating the sasmodel magnetic parameters with the GUI values
         """
@@ -139,14 +140,14 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             # Update plot
             self.updateDataSignal.emit()
 
-    def iterateOverMagnetModel(self, func):
+    def iterateOverMagnetModel(self, func: Any) -> None:
             """
             Take func and throw it inside the magnet model row loop
             """
             for row_i in range(self._magnet_model.rowCount()):
                 func(row_i)
 
-    def updateFullMagnetModel(self, param_dict):
+    def updateFullMagnetModel(self, param_dict: Dict[str, List[str]]) -> None:
         """
         Update the magnetism model with new parameters, create the errors column
         """
@@ -184,7 +185,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
 
         self.iterateOverMagnetModel(updateFittedValues)
 
-    def updateMagnetModelFromList(self, param_dict):
+    def updateMagnetModelFromList(self, param_dict: Dict[str, Tuple[float, float]]) -> None:
             """
             Update the magnetic model with new parameters, create the errors column
             """
@@ -241,7 +242,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
 
             self.has_magnet_error_column = True
 
-    def addCheckedMagneticListToModel(self, param, value):
+    def addCheckedMagneticListToModel(self, param: Any, value: float) -> None:
         """
         Wrapper for model update with a subset of magnetic parameters
         """

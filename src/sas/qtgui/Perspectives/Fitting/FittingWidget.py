@@ -2,7 +2,7 @@ import json
 import os
 import re
 from collections import defaultdict
-from typing import Any, Tuple, Optional
+from typing import Any, Tuple, Optional, Union, List, Dict
 from pathlib import Path
 
 import copy
@@ -97,7 +97,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     MAGNETIC_MODELS = ['sphere', 'core_shell_sphere', 'core_multi_shell', 'cylinder', 'parallelepiped']
 
-    def __init__(self, parent=None, data=None, tab_id=1):
+    def __init__(self, parent: Optional[QtWidgets.QWidget] = None, data: Optional[Any] = None, tab_id: int = 1) -> None:
 
         super(FittingWidget, self).__init__()
 
@@ -156,22 +156,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
 
-    def info(self, type, value, tb):
+    def info(self, type: Any, value: Any, tb: Any) -> None:
         logger.error("".join(traceback.format_exception(type, value, tb)))
 
     @property
-    def logic(self):
+    def logic(self) -> FittingLogic:
         # make sure the logic contains at least one element
         assert self._logic
         # logic connected to the currently shown data
         return self._logic[self.data_index]
 
     @property
-    def data(self):
+    def data(self) -> Union[Data1D, Data2D]:
         return self.logic.data
 
     @data.setter
-    def data(self, value):
+    def data(self, value: Union[QtGui.QStandardItem, List[QtGui.QStandardItem]]) -> None:
         """ data setter """
         # Value is either a list of indices for batch fitting or a simple index
         # for standard fitting. Assure we have a list, regardless.
@@ -216,7 +216,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Reinitialize model list for constrained/simult fitting
         self.newModelSignal.emit()
 
-    def initializeGlobals(self):
+    def initializeGlobals(self) -> None:
         """
         Initialize global variables used in this class
         """
@@ -309,7 +309,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # signal communicator
         self.communicate = self.parent.communicate
 
-    def initializeWidgets(self):
+    def initializeWidgets(self) -> None:
         """
         Initialize widgets for tabs
         """
@@ -356,7 +356,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.label.setText("No data loaded")
         self.lblFilename.setText("")
 
-    def initializeModels(self):
+    def initializeModels(self) -> None:
         """
         Set up models and views
         """
@@ -436,7 +436,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Initial status of the ordering tab - invisible
         self.tabFitting.removeTab(TAB_ORDERING)
 
-    def initializeCategoryCombo(self):
+    def initializeCategoryCombo(self) -> None:
         """
         Model category combo setup
         """
@@ -447,7 +447,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cbCategory.addItem(CATEGORY_STRUCTURE)
         self.cbCategory.setCurrentIndex(0)
 
-    def setEnablementOnDataLoad(self):
+    def setEnablementOnDataLoad(self) -> None:
         """
         Enable/disable various UI elements based on data loaded
         """
@@ -482,29 +482,29 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Check if a model was already loaded when data is sent to the tab
         self.cmdFit.setEnabled(self.haveParamsToFit())
 
-    def acceptsData(self):
+    def acceptsData(self) -> bool:
         """ Tells the caller this widget can accept new dataset """
         return not self.data_is_loaded
 
-    def disableModelCombo(self):
+    def disableModelCombo(self) -> None:
         """ Disable the combobox """
         self.cbModel.setEnabled(False)
         self.lblModel.setEnabled(False)
         self.enabled_cbmodel = False
 
-    def enableModelCombo(self):
+    def enableModelCombo(self) -> None:
         """ Enable the combobox """
         self.cbModel.setEnabled(True)
         self.lblModel.setEnabled(True)
         self.enabled_cbmodel = True
 
-    def disableStructureCombo(self):
+    def disableStructureCombo(self) -> None:
         """ Disable the combobox """
         self.cbStructureFactor.setEnabled(False)
         self.lblStructure.setEnabled(False)
         self.enabled_sfmodel = False
 
-    def enableBackgroundParameter(self, set_value: Optional[float] = None):
+    def enableBackgroundParameter(self, set_value: Optional[float] = None) -> None:
         """ Enable the background parameter. Optionally set at a specified value. """
         background_row = self.getRowFromName("background")
         if background_row is not None:
@@ -512,7 +512,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if set_value is not None:
                 self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(set_value, high=True))
 
-    def disableBackgroundParameter(self, set_value: Optional[float] = None):
+    def disableBackgroundParameter(self, set_value: Optional[float] = None) -> None:
         """ Disable the background parameter. Optionally set at a specified value. """
         background_row = self.getRowFromName("background")
         if background_row is not None:
@@ -520,26 +520,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if set_value is not None:
                 self._model_model.item(background_row, 1).setText(GuiUtils.formatNumber(set_value, high=True))
 
-    def enableStructureCombo(self):
+    def enableStructureCombo(self) -> None:
         """ Enable the combobox """
         self.cbStructureFactor.setEnabled(True)
         self.lblStructure.setEnabled(True)
         self.enabled_sfmodel = True
 
-    def togglePoly(self, isChecked):
+    def togglePoly(self, isChecked: bool) -> None:
         """ Enable/disable the polydispersity tab """
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
         self.polydispersity_widget.togglePoly(isChecked)
 
-    def toggleMagnetism(self, isChecked):
+    def toggleMagnetism(self, isChecked: bool) -> None:
         """ Enable/disable the magnetism tab """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
 
-    def toggleChainFit(self, isChecked):
+    def toggleChainFit(self, isChecked: bool) -> None:
         """ Enable/disable chain fitting """
         self.is_chain_fitting = isChecked
         # show/hide the ordering tab
@@ -548,7 +548,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             self.tabFitting.removeTab(TAB_ORDERING)
 
-    def toggle2D(self, isChecked):
+    def toggle2D(self, isChecked: bool) -> None:
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
@@ -557,7 +557,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.onSelectModel()
 
     @classmethod
-    def customModels(cls):
+    def customModels(cls) -> Dict[str, Any]:
         """ Reads in file names in the custom plugin directory """
         manager = models.ModelManager()
         # TODO: Cache plugin models instead of scanning the directory each time.
@@ -565,7 +565,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # TODO: Define plugin_models property in ModelManager.
         return manager.base.plugin_models
 
-    def initializeControls(self):
+    def initializeControls(self) -> None:
         """
         Set initial control enablement
         """
@@ -589,7 +589,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Line edits in the option tab
         self.updateQRange()
 
-    def initializeSignals(self):
+    def initializeSignals(self) -> None:
         """
         Connect GUI element signals
         """
@@ -640,11 +640,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Catch all key press events
         self.keyPressedSignal.connect(self.onKey)
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         super(FittingWidget, self).keyPressEvent(event)
         self.keyPressedSignal.emit(event)
 
-    def eventFilter(self, obj, event):
+    def eventFilter(self, obj: QtCore.QObject, event: QtCore.QEvent) -> bool:
         # Catch enter key presses when editing model params
         if obj in [self.lstParams, self.polydispersity_widget.lstPoly, self.magnetism_widget.lstMagnetic]:
             if event.type() == QtCore.QEvent.KeyPress and event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
@@ -652,13 +652,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return True
         return False
 
-    def modelName(self):
+    def modelName(self) -> str:
         """
         Returns model name, by default M<tab#>, e.g. M1, M2
         """
         return "M%i" % self.tab_id
 
-    def nameForFittedData(self, name):
+    def nameForFittedData(self, name: str) -> str:
         """
         Generate name for the current fit
         """
@@ -667,7 +667,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         name = "%s [%s]" % (self.modelName(), name)
         return name
 
-    def showModelContextMenu(self, position):
+    def showModelContextMenu(self, position: QtCore.QPoint) -> None:
         """
         Show context specific menu in the parameter table.
         When clicked on parameter(s): fitting/constraints options
@@ -685,7 +685,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             logger.error("Error generating context menu: %s" % ex)
         return
 
-    def modelContextMenu(self, rows):
+    def modelContextMenu(self, rows: List[int]) -> QtWidgets.QMenu:
         """
         Create context menu for the parameter selection
         """
@@ -752,7 +752,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.actionDeselect.triggered.connect(self.deselectParameters)
         return menu
 
-    def showMultiConstraint(self, current_list=None):
+    def showMultiConstraint(self, current_list: Optional[QtWidgets.QTreeView] = None) -> None:
         """
         Show the constraint widget and receive the expression
         """
@@ -804,7 +804,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create a new item and add the Constraint object as a child
         self.addConstraintToRow(constraint=constraint, row=row, model_key=model_key)
 
-    def getModelKeyFromName(self, name):
+    def getModelKeyFromName(self, name: str) -> str:
         """
         Given parameter name, get the model index.
         """
@@ -817,7 +817,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             return "standard"
 
-    def getRowFromName(self, name):
+    def getRowFromName(self, name: str) -> Optional[int]:
         """
         Given parameter name, get the row number in a model.
         The model is the main _model_model by default
@@ -833,7 +833,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return row
         return None
 
-    def getParamNames(self):
+    def getParamNames(self) -> List[str]:
         """
         Return list of all active parameters for the current model
         """
@@ -842,7 +842,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # magnet_model_params = self.getParamNamesMagnet()
         return main_model_params  + poly_model_params # + magnet_model_params
 
-    def getParamNamesMain(self):
+    def getParamNamesMain(self) -> List[str]:
         """
         Return list of main parameters for the current model
         """
@@ -851,7 +851,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                             if self.isCheckable(row, model_key="standard")]
         return main_model_params
 
-    def getParamNamesMagnet(self):
+    def getParamNamesMagnet(self) -> List[str]:
         """
         Return list of magnetic parameters for the current model
         """
@@ -859,7 +859,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return []
         return self.magnetism_widget.getParamNamesMagnet()
 
-    def modifyViewOnRow(self, row, font=None, brush=None, model_key="standard"):
+    def modifyViewOnRow(self, row: int, font: Optional[QtGui.QFont] = None, brush: Optional[QtGui.QBrush] = None, model_key: str = "standard") -> None:
         """
         Change how the given row of the main model is shown
         """
@@ -889,7 +889,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             model.item(row, 0).setEnabled(True)
         model.blockSignals(False)
 
-    def getModelKey(self, constraint):
+    def getModelKey(self, constraint: Constraint) -> Optional[str]:
         """
         Given parameter name get the model index.
         """
@@ -902,7 +902,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             return None
 
-    def addConstraintToRow(self, constraint=None, row=0, model_key="standard"):
+    def addConstraintToRow(self, constraint: Optional[Constraint] = None, row: int = 0, model_key: str = "standard") -> None:
         """
         Adds the constraint object to requested row. The constraint is first
         checked for errors, and a  message box interrupting flow is
@@ -959,7 +959,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # constraint tab that the constraint was accepted
             constraint_tab.constraint_accepted = True
 
-    def addSimpleConstraint(self):
+    def addSimpleConstraint(self) -> None:
         """
         Adds a constraint on a single parameter.
         """
@@ -995,7 +995,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.modifyViewOnRow(row, font=font, brush=brush, model_key=model_key)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
 
-    def editConstraint(self):
+    def editConstraint(self) -> None:
         """
         Edit constraints for selected parameters.
         """
@@ -1042,7 +1042,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create a new item and add the Constraint object as a child
         self.addConstraintToRow(constraint=constraint, row=row, model_key=model_key)
 
-    def deleteConstraint(self):
+    def deleteConstraint(self) -> None:
         """
         Delete constraints from selected parameters.
         """
@@ -1055,7 +1055,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 param = self.polydispersity_widget.polyNameToParam(param)
             self.deleteConstraintOnParameter(param=param, model_key=model_key)
 
-    def deleteConstraintOnParameter(self, param=None, model_key="standard"):
+    def deleteConstraintOnParameter(self, param: Optional[str] = None, model_key: str = "standard") -> None:
         """
         Delete the constraint on model parameter 'param'
         """
@@ -1096,7 +1096,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.communicate.statusBarUpdateSignal.emit('Constraint removed')
 
-    def getConstraintForRow(self, row, model_key="standard"):
+    def getConstraintForRow(self, row: int, model_key: str = "standard") -> Optional[Constraint]:
         """
         For the given row, return its constraint, if any (otherwise None)
         """
@@ -1109,7 +1109,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         except AttributeError:
             return None
 
-    def allParamNames(self):
+    def allParamNames(self) -> List[str]:
         """
         Returns a list of all parameter names defined on the current model
         """
@@ -1124,7 +1124,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #    all_param_names.append('background')
         return all_params
 
-    def paramHasConstraint(self, param=None):
+    def paramHasConstraint(self, param: Optional[str] = None) -> bool:
         """
         Finds out if the given parameter in all the models has a constraint child
         """
@@ -1145,7 +1145,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # nothing found
         return False
 
-    def rowHasConstraint(self, row, model_key="standard"):
+    def rowHasConstraint(self, row: int, model_key: str = "standard") -> bool:
         """
         Finds out if row of the main model has a constraint child
         """
@@ -1161,7 +1161,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
-    def rowHasActiveConstraint(self, row, model_key="standard"):
+    def rowHasActiveConstraint(self, row: int, model_key: str = "standard") -> bool:
         """
         Finds out if row of the main model has an active constraint child
         """
@@ -1176,7 +1176,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
-    def rowHasActiveComplexConstraint(self, row, model_key="standard"):
+    def rowHasActiveComplexConstraint(self, row: int, model_key: str = "standard") -> bool:
         """
         Finds out if row of the main model has an active, nontrivial constraint child
         """
@@ -1191,7 +1191,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
-    def selectParameters(self):
+    def selectParameters(self) -> None:
         """
         Selected parameter is chosen for fitting
         """
@@ -1201,7 +1201,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item = model.itemFromIndex(self.lstParams.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
-    def deselectParameters(self):
+    def deselectParameters(self) -> None:
         """
         Selected parameters are removed for fitting
         """
@@ -1211,12 +1211,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item = model.itemFromIndex(self.lstParams.currentIndex())
         self.setParameterSelection(status, item=item, model_key=model_key)
 
-    def selectedParameters(self, model_key="standard"):
+    def selectedParameters(self, model_key: str = "standard") -> List[int]:
         """ Returns list of selected (highlighted) parameters """
         return [s.row() for s in self.lst_dict[model_key].selectionModel().selectedRows()
                 if self.isCheckable(s.row(), model_key=model_key)]
 
-    def setParameterSelection(self, status=QtCore.Qt.Unchecked, item=None, model_key="standard"):
+    def setParameterSelection(self, status: QtCore.Qt.CheckState = QtCore.Qt.Unchecked, item: Optional[QtGui.QStandardItem] = None, model_key: str = "standard") -> None:
         """
         Selected parameters are chosen for fitting
         """
@@ -1232,7 +1232,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for row in self.selectedParameters(model_key=model_key):
             self.model_dict[model_key].item(row, 0).setCheckState(status)
 
-    def getConstraintsForAllModels(self):
+    def getConstraintsForAllModels(self) -> List[Tuple[str, str]]:
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
@@ -1252,7 +1252,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                            for s in range(param_number) if self.rowHasActiveConstraint(s, model_key=model_key)]
         return params
 
-    def getComplexConstraintsForAllModels(self):
+    def getComplexConstraintsForAllModels(self) -> List[Tuple[str, str]]:
         """
         Returns a list of tuples containing all the constraints defined
         for a given FitPage
@@ -1262,7 +1262,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             constraints += self.getComplexConstraintsForModel(model_key=model_key)
         return constraints
 
-    def getComplexConstraintsForModel(self, model_key):
+    def getComplexConstraintsForModel(self, model_key: str) -> List[Tuple[str, str]]:
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
@@ -1281,7 +1281,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 params.append((parameter_name, model.item(s, 1).child(0).data().func))
         return params
 
-    def getFullConstraintNameListForModel(self, model_key):
+    def getFullConstraintNameListForModel(self, model_key: str) -> List[Tuple[str, str]]:
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
@@ -1299,7 +1299,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 params.append((param_name, model.item(s, 1).child(0).data().func))
         return params
 
-    def getConstraintObjectsForAllModels(self):
+    def getConstraintObjectsForAllModels(self) -> List[Constraint]:
         """
         Returns a list of the constraint object for a given FitPage
         """
@@ -1308,7 +1308,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             constraints += self.getConstraintObjectsForModel(model_key=model_key)
         return constraints
 
-    def getConstraintObjectsForModel(self, model_key):
+    def getConstraintObjectsForModel(self, model_key: str) -> List[Constraint]:
         """
         Returns Constraint objects present on the whole model
         """
@@ -1318,7 +1318,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                        for s in range(param_number) if self.rowHasConstraint(s, model_key=model_key)]
         return constraints
 
-    def getConstraintsForFitting(self):
+    def getConstraintsForFitting(self) -> List[Tuple[str, str]]:
         """
         Return a list of constraints in format ready for use in fiting
         """
@@ -1365,7 +1365,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return constraints
 
-    def showModelDescription(self):
+    def showModelDescription(self) -> QtWidgets.QMenu:
         """
         Creates a window with model description, when right-clicked in the treeview
         """
@@ -1385,7 +1385,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         menu.addAction(action)
         return menu
 
-    def canHaveMagnetism(self):
+    def canHaveMagnetism(self) -> bool:
         """
         Checks if the current model has magnetic scattering implemented
         """
@@ -1394,7 +1394,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             has_mag_params = len(self.logic.kernel_module.magnetic_params) > 0
         return self.is2D and has_mag_params
 
-    def onSelectModel(self):
+    def onSelectModel(self) -> None:
         """
         Respond to select Model from list event
         """
@@ -1446,14 +1446,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set focus so it doesn't move up
         self.cbModel.setFocus()
 
-    def onSelectBatchFilename(self, data_index):
+    def onSelectBatchFilename(self, data_index: int) -> None:
         """
         Update the logic based on the selected file in batch fitting
         """
         self.data_index = data_index
         self.updateQRange()
 
-    def onSelectStructureFactor(self):
+    def onSelectStructureFactor(self) -> None:
         """
         Select Structure Factor from list
         """
@@ -1478,7 +1478,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # revert to the original clipboard
         cb.setText(cb_text)
 
-    def resetParametersToFit(self):
+    def resetParametersToFit(self) -> None:
         """
         Clears the list of parameters to be fitted
         """
@@ -1486,7 +1486,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.polydispersity_widget.resetParameters()
         self.magnetism_widget.magnet_params_to_fit = []
 
-    def onCustomModelChange(self):
+    def onCustomModelChange(self) -> None:
         """
         Reload the custom model combobox
         """
@@ -1511,7 +1511,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if new_index != -1:
             self.cbModel.setCurrentIndex(self.cbModel.findText(current_text))
 
-    def onSelectionChanged(self):
+    def onSelectionChanged(self) -> None:
         """
         React to parameter selection
         """
@@ -1539,7 +1539,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 return
             self.communicate.statusBarUpdateSignal.emit(update_text)
 
-    def onSesansData(self):
+    def onSesansData(self) -> None:
         """
         Updates the fitting widget format when SESANS data is loaded.
         """
@@ -1560,7 +1560,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.rbWeighting3.setText("Use |sqrt(P Data)|")
         self.options_widget.rbWeighting4.setText("Use |P Data|")
 
-    def replaceConstraintName(self, old_name, new_name=""):
+    def replaceConstraintName(self, old_name: str, new_name: str = "") -> None:
         """
         Replace names of models in defined constraints
         """
@@ -1573,7 +1573,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     new_func = func.replace(old_name, new_name)
                     self._model_model.item(row, 1).child(0).data().func = new_func
 
-    def isConstraintMultimodel(self, constraint):
+    def isConstraintMultimodel(self, constraint: str) -> bool:
         """
         Check if the constraint function text contains current model name
         """
@@ -1583,7 +1583,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             return True
 
-    def updateData(self):
+    def updateData(self) -> None:
         """
         Helper function for recalculation of data used in plotting
         """
@@ -1597,7 +1597,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.createDefaultDataset()
             self.theory_item = None # ensure theory is recalc. before plot, see showTheoryPlot()
 
-    def respondToModelStructure(self, model=None, structure_factor=None):
+    def respondToModelStructure(self, model: Optional[str] = None, structure_factor: Optional[str] = None) -> None:
         # Set enablement on calculate/plot
         self.cmdPlot.setEnabled(True)
 
@@ -1627,7 +1627,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Let others know
         self.newModelSignal.emit()
 
-    def onSelectCategory(self):
+    def onSelectCategory(self) -> None:
         """
         Select Category from list
         """
@@ -1674,7 +1674,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbModel.addItems(sorted(models_to_show))
         self.cbModel.blockSignals(False)
 
-    def onHelp(self):
+    def onHelp(self) -> None:
         """
         Show the "Fitting" section of help
         """
@@ -1683,7 +1683,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if regen_in_progress is False:
             self.parent.showHelp(help_location)
 
-    def getHelpLocation(self, tree_base) -> Path:
+    def getHelpLocation(self, tree_base: Path) -> Path:
         # Actual file will depend on the current tab
         tab_id = self.tabFitting.currentIndex()
         tree_location = tree_base / "user" / "qtgui" / "Perspectives" / "Fitting"
@@ -1707,7 +1707,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             case _:
                 return tree_location / "fitting.html"
 
-    def onFit(self):
+    def onFit(self) -> None:
         """
         Perform fitting on the current data
         """
@@ -1769,7 +1769,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Disable some elements
         self.disableInteractiveElements()
 
-    def stopFit(self):
+    def stopFit(self) -> None:
         """
         Attempt to stop the fitting thread
         """
@@ -1782,20 +1782,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         msg = "Fitting cancelled."
         self.communicate.statusBarUpdateSignal.emit(msg)
 
-    def updateFit(self):
+    def updateFit(self) -> None:
         """
         """
         print("UPDATE FIT")
         pass
 
-    def fitFailed(self, reason):
+    def fitFailed(self, reason: Any) -> None:
         """
         """
         self.enableInteractiveElements()
         msg = "Fitting failed with: "+ str(reason)
         self.communicate.statusBarUpdateSignal.emit(msg)
 
-    def batchFittingCompleted(self, result):
+    def batchFittingCompleted(self, result: Optional[Tuple]) -> None:
         """
         Send the finish message from calculate threads to main thread
         """
@@ -1803,7 +1803,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             result = tuple()
         self.batchFittingFinishedSignal.emit(result)
 
-    def batchFitComplete(self, result):
+    def batchFitComplete(self, result: Tuple) -> None:
         """
         Receive and display batch fitting results
         """
@@ -1847,7 +1847,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.logic.kernel_module is not None:
             self.logic.kernel_module = copy.deepcopy(self.kernel_module_copy)
 
-    def paramDictFromResults(self, results):
+    def paramDictFromResults(self, results: Any) -> Optional[Dict[str, Tuple[float, float]]]:
         """
         Given the fit results structure, pull out optimized parameters and return them as nicely
         formatted dict
@@ -1873,7 +1873,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return param_dict
 
-    def fittingCompleted(self, result):
+    def fittingCompleted(self, result: Optional[Tuple]) -> None:
         """
         Send the finish message from calculate threads to main thread
         """
@@ -1881,7 +1881,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             result = tuple()
         self.fittingFinishedSignal.emit(result)
 
-    def fitComplete(self, result):
+    def fitComplete(self, result: Tuple) -> None:
         """
         Receive and display fitting results
         "result" is a tuple of actual result list and the fit time in seconds
@@ -1931,7 +1931,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblChi2Value.setText(chi2_repr)
 
 
-    def prepareFitters(self, fitter=None, fit_id=0, weight_increase=1):
+    def prepareFitters(self, fitter: Optional[Fit] = None, fit_id: int = 0, weight_increase: int = 1) -> Tuple[List[Fit], int]:
         """
         Prepare the Fitter object for use in fitting
         """
@@ -1997,14 +1997,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return fitters, fit_id
 
-    def iterateOverModel(self, func):
+    def iterateOverModel(self, func: Any) -> None:
         """
         Take func and throw it inside the model row loop
         """
         for row_i in range(self._model_model.rowCount()):
             func(row_i)
 
-    def updateModelFromList(self, param_dict):
+    def updateModelFromList(self, param_dict: Dict[str, Tuple[float, float]]) -> None:
         """
         Update the model with new parameters, create the errors column
         """
@@ -2101,7 +2101,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverModel(updatePolyValues)
         self._model_model.dataChanged.connect(self.onMainParamsChange)
 
-    def onPlot(self):
+    def onPlot(self) -> None:
         """
         Plot the current set of data
         """
@@ -2118,7 +2118,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         QtWidgets.QApplication.processEvents()
         self.recalculatePlotData()  # recalc+plot theory again (2nd)
 
-    def onSmearingOptionsUpdate(self):
+    def onSmearingOptionsUpdate(self) -> None:
         """
         React to changes in the smearing widget
         """
@@ -2127,11 +2127,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblCurrentSmearing.setText(smearing)
         self.calculateQGridForModel()
 
-    def onKey(self, event):
+    def onKey(self, event: QtGui.QKeyEvent) -> None:
         if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] and self.cmdPlot.isEnabled():
             self.onPlot()
 
-    def recalculatePlotData(self):
+    def recalculatePlotData(self) -> None:
         """
         Generate a new dataset for model
         """
@@ -2140,7 +2140,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.smearing_widget.updateData(self.data)
         self.calculateQGridForModel()
 
-    def showTheoryPlot(self):
+    def showTheoryPlot(self) -> None:
         """
         Show the current theory plot in MPL
         """
@@ -2150,7 +2150,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elif self.model_data:
             self._requestPlots(self.model_data.name, self.theory_item.model())
 
-    def showPlot(self):
+    def showPlot(self) -> None:
         """
         Show the current plot in MPL
         """
@@ -2163,7 +2163,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # fit+data has not been shown - show just data
             self.communicate.plotRequestedSignal.emit([item, data_to_show], self.tab_id)
 
-    def _requestPlots(self, item_name, item_model):
+    def _requestPlots(self, item_name: str, item_model: Any) -> Optional[Any]:
         """
         Emits plotRequestedSignal for all plots found in the given model under the provided item name.
         """
@@ -2179,7 +2179,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # return the last data item seen, if nothing was plotted; supposed to be just data)
         return None if data_shown else item
 
-    def onOptionsUpdate(self):
+    def onOptionsUpdate(self) -> None:
         """
         Update local option values and replot
         """
@@ -2190,7 +2190,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.lblMaxRangeDef.setText(GuiUtils.formatNumber(self.q_range_max, high=True))
         self.recalculatePlotData()
 
-    def setDefaultStructureCombo(self):
+    def setDefaultStructureCombo(self) -> None:
         """
         Fill in the structure factors combo box with defaults
         """
@@ -2200,7 +2200,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.clear()
         self.cbStructureFactor.addItems(sorted(factors))
 
-    def createDefaultDataset(self):
+    def createDefaultDataset(self) -> None:
         """
         Generate default Dataset 1D/2D for the given model
         """
@@ -2219,7 +2219,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                    num=int(self.npts), endpoint=True)
         self.logic.createDefault1dData(interval, self.tab_id)
 
-    def readCategoryInfo(self):
+    def readCategoryInfo(self) -> None:
         """
         Reads the categories in from file
         """
@@ -2241,7 +2241,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.readCustomCategoryInfo()
 
-    def readCustomCategoryInfo(self):
+    def readCustomCategoryInfo(self) -> None:
         """
         Reads the custom model category
         """
@@ -2263,7 +2263,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if plugin_structure_list:
                 self.master_category_dict[CATEGORY_STRUCTURE].extend(plugin_structure_list)
 
-    def regenerateModelDict(self):
+    def regenerateModelDict(self) -> None:
         """
         Regenerates self.by_model_dict which has each model name as the
         key and the list of categories belonging to that model
@@ -2275,7 +2275,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self.by_model_dict[model].append(category)
                 self.model_enabled_dict[model] = enabled
 
-    def addBackgroundToModel(self, model):
+    def addBackgroundToModel(self, model: QtGui.QStandardItemModel) -> None:
         """
         Adds background parameter with default values to the model
         """
@@ -2288,7 +2288,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model.item(last_row,0).setData('background', role=QtCore.Qt.UserRole)
 
 
-    def addScaleToModel(self, model):
+    def addScaleToModel(self, model: QtGui.QStandardItemModel) -> None:
         """
         Adds scale parameter with default values to the model
         """
@@ -2300,7 +2300,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model.item(last_row, 4).setEditable(False)
         model.item(last_row,0).setData('scale', role=QtCore.Qt.UserRole)
 
-    def addWeightingToData(self, data):
+    def addWeightingToData(self, data: Union[Data1D, Data2D]) -> Union[Data1D, Data2D]:
         """
         Adds weighting contribution to fitting data
         """
@@ -2317,7 +2317,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return new_data
 
-    def updateQRange(self):
+    def updateQRange(self) -> None:
         """
         Updates Q Range display
         """
@@ -2330,7 +2330,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the options tab
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
 
-    def SASModelToQModel(self, model_name, structure_factor=None):
+    def SASModelToQModel(self, model_name: Optional[str], structure_factor: Optional[str] = None) -> None:
         """
         Setting model parameters into table based on selected category
         """
@@ -2376,7 +2376,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         FittingUtilities.addHeadersToModel(self._model_model)
         self.lstParams.header().setFont(self.boldFont)
 
-    def fromModelToQModel(self, model_name):
+    def fromModelToQModel(self, model_name: str) -> None:
         """
         Setting model parameters into QStandardItemModel based on selected model
         """
@@ -2450,7 +2450,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._model_model,
                 self.lstParams)
 
-    def fromStructureFactorToQModel(self, structure_factor):
+    def fromStructureFactorToQModel(self, structure_factor: str) -> None:
         """
         Setting model parameters into QStandardItemModel based on selected structure factor
         """
@@ -2494,7 +2494,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Since this all happens after shells are dealt with and we've inserted rows, fix this counter
             self._n_shells_row += len(prod_rows)
 
-    def _volfraction_hack(self, s_kernel):
+    def _volfraction_hack(self, s_kernel: Any) -> Tuple[modelinfo.ParameterTable, Optional[modelinfo.ParameterTable]]:
         """
         Only show volfraction once if it appears in both P and S models.
         Issues SV:1280, SV:1295, SM:219, SM:199, SM:101
@@ -2532,7 +2532,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         extras = []
         if interaction_mode_id >= 0:
             extras.append(info.parameters.kernel_parameters[interaction_mode_id])
-        if er_mode_id >= 0:
+        if (er_mode_id >= 0):
             extras.append(info.parameters.kernel_parameters[er_mode_id])
 
         s_params = modelinfo.ParameterTable(s_pars)
@@ -2540,7 +2540,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return (s_params, product_params)
 
-    def haveParamsToFit(self):
+    def haveParamsToFit(self) -> bool:
         """
         Finds out if there are any parameters ready to be fitted
         """
@@ -2554,7 +2554,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         return False
 
-    def onMainParamsChange(self, top, bottom):
+    def onMainParamsChange(self, top: QtCore.QModelIndex, bottom: QtCore.QModelIndex) -> None:
         """
         Callback method for updating the sasmodel parameters with the GUI values
         """
@@ -2615,7 +2615,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.updateUndo()
         self.page_parameters = self.getParameterDict()
 
-    def processEffectiveRadius(self):
+    def processEffectiveRadius(self) -> None:
         """
         Checks the value of radius_effective_mode, if existent, and processes radius_effective as necessary.
         * mode == 0: This means 'unconstrained'; ensure use can specify ER.
@@ -2647,7 +2647,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             logging.error("radius_effective_mode was set to an invalid value.")
 
-    def setParamEditableByRow(self, row, editable=True):
+    def setParamEditableByRow(self, row: int, editable: bool = True) -> None:
         """
         Sets whether the user can edit a parameter in the table. If they cannot, the parameter name's font is changed,
         the value itself cannot be edited if clicked on, and the parameter may not be fitted.
@@ -2675,13 +2675,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             item_name.setCheckState(QtCore.Qt.Unchecked)
             item_name.setCheckable(False)
 
-    def isCheckable(self, row, model_key="standard"):
+    def isCheckable(self, row: int, model_key: str = "standard") -> bool:
         model = self.model_dict[model_key]
         if model.item(row,0) is None:
             return False
         return model.item(row, 0).isCheckable()
 
-    def changeCheckboxStatus(self, row, checkbox_status, model_key="standard"):
+    def changeCheckboxStatus(self, row: int, checkbox_status: bool, model_key: str = "standard") -> None:
         """
         Checks/unchecks the checkbox at given row
         """
@@ -2695,7 +2695,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             item.setCheckState(QtCore.Qt.Unchecked)
 
-    def checkboxSelected(self, item, model_key="standard"):
+    def checkboxSelected(self, item: QtGui.QStandardItem, model_key: str = "standard") -> None:
         # Assure we're dealing with checkboxes
         if not item.isCheckable():
             return
@@ -2712,7 +2712,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.poly_params_to_fit = self.polydispersity_widget.checkedListFromModel()
         self.magnet_params_to_fit = self.checkedListFromModel("magnet")
 
-    def checkedListFromModel(self, model_key):
+    def checkedListFromModel(self, model_key: str) -> List[str]:
         """
         Returns list of checked parameters for given model
         """
@@ -2730,7 +2730,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return [str(model.item(row_index, 0).text())
                     for row_index in range(model.rowCount())
                     if isChecked(row_index)]
-    def createNewIndex(self, fitted_data):
+    def createNewIndex(self, fitted_data: Union[Data1D, Data2D]) -> None:
         """
         Create a model or theory index with passed Data1D/Data2D
         """
@@ -2754,7 +2754,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Switch to the theory tab for user's glee
             self.communicate.changeDataExplorerTabSignal.emit(1)
 
-    def updateModelIndex(self, fitted_data):
+    def updateModelIndex(self, fitted_data: Union[Data1D, Data2D]) -> None:
         """
         Update a QStandardModelIndex containing model data
         """
@@ -2765,7 +2765,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Notify the GUI manager so it can update the main model in DataExplorer
         GuiUtils.updateModelItemWithPlot(self.all_data[self.data_index], fitted_data, name)
 
-    def createTheoryIndex(self, fitted_data):
+    def createTheoryIndex(self, fitted_data: Union[Data1D, Data2D]) -> None:
         """
         Create a QStandardModelIndex containing model data
         """
@@ -2774,13 +2774,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
         self.communicate.updateTheoryFromPerspectiveSignal.emit(theory_item)
 
-    def setTheoryItem(self, item):
+    def setTheoryItem(self, item: Any) -> None:
         """
         Reset the theory item based on the data explorer update
         """
         self.theory_item = item
 
-    def nameFromData(self, fitted_data):
+    def nameFromData(self, fitted_data: Union[Data1D, Data2D]) -> str:
         """
         Return name for the dataset. Terribly impure function.
         """
@@ -2793,15 +2793,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             name = fitted_data.name
         return name
 
-    def methodCalculateForData(self):
+    def methodCalculateForData(self) -> Any:
         '''return the method for data calculation'''
         return Calc1D if isinstance(self.data, Data1D) else Calc2D
 
-    def methodCompleteForData(self):
+    def methodCompleteForData(self) -> Any:
         '''return the method for result parsin on calc complete '''
         return self.completed1D if isinstance(self.data, Data1D) else self.completed2D
 
-    def updateKernelModelWithExtraParams(self, model=None):
+    def updateKernelModelWithExtraParams(self, model: Optional[Any] = None) -> None:
         """
         Updates kernel model 'model' with extra parameters from
         the polydisp and magnetism tab, if the tabs are enabled
@@ -2815,7 +2815,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             for key, value in self.magnet_params.items():
                 model.setParam(key, value)
 
-    def calculateQGridForModelExt(self, data=None, model=None, completefn=None, use_threads=True):
+    def calculateQGridForModelExt(self, data: Optional[Union[Data1D, Data2D]] = None, model: Optional[Any] = None, completefn: Optional[Any] = None, use_threads: bool = True) -> None:
         """
         Wrapper for Calc1D/2D calls
         """
@@ -2861,7 +2861,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             results = calc_thread.compute()
             completefn(results)
 
-    def calculateQGridForModel(self):
+    def calculateQGridForModel(self) -> None:
         """
         Prepare the fitting data object, based on current ModelModel
         """
@@ -2869,7 +2869,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         self.calculateQGridForModelExt()
 
-    def calculateDataFailed(self, reason):
+    def calculateDataFailed(self, reason: Any) -> None:
         """
         Thread returned error
         """
@@ -2877,13 +2877,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.enableInteractiveElements()
         print("Calculate Data failed with ", reason)
 
-    def completed1D(self, return_data):
+    def completed1D(self, return_data: Dict) -> None:
         self.Calc1DFinishedSignal.emit(return_data)
 
-    def completed2D(self, return_data):
+    def completed2D(self, return_data: Dict) -> None:
         self.Calc2DFinishedSignal.emit(return_data)
 
-    def _appendPlotsPolyDisp(self, new_plots, return_data, fitted_data):
+    def _appendPlotsPolyDisp(self, new_plots: List[Any], return_data: Dict, fitted_data: Union[Data1D, Data2D]) -> None:
         """
         Internal helper for 1D and 2D for creating plots of the polydispersity distribution for
         parameters which have a polydispersity enabled
@@ -2896,7 +2896,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.createNewIndex(plot)
             new_plots.append(plot)
 
-    def complete1D(self, return_data):
+    def complete1D(self, return_data: Dict) -> None:
         """
         Plot the current 1D data
         """
@@ -2960,7 +2960,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update radius_effective if relevant
         self.updateEffectiveRadius(return_data)
 
-    def complete2D(self, return_data):
+    def complete2D(self, return_data: Dict) -> None:
         """
         Plot the current 2D data
         """
@@ -2989,7 +2989,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for plot in new_plots:
             self.communicate.plotUpdateSignal.emit([plot])
 
-    def updateEffectiveRadius(self, return_data):
+    def updateEffectiveRadius(self, return_data: Dict) -> None:
         """
         Given return data from sasmodels, update the effective radius parameter in the GUI table with the new
         calculated value as returned by sasmodels (if the value was returned).
@@ -3021,7 +3021,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # ensure the view is updated immediately
         self._model_model.layoutChanged.emit()
 
-    def calculateResiduals(self, fitted_data):
+    def calculateResiduals(self, fitted_data: Union[Data1D, Data2D]) -> Optional[Union[Data1D, Data2D]]:
         """
         Calculate and print Chi2 and display chart of residuals. Returns residuals plot object.
         """
@@ -3055,7 +3055,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.createNewIndex(residuals_plot)
         return residuals_plot
 
-    def onCategoriesChanged(self):
+    def onCategoriesChanged(self) -> None:
             """
             Reload the category/model comboboxes
             """
@@ -3083,7 +3083,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
             return
 
-    def calcException(self, etype, value, tb):
+    def calcException(self, etype: Any, value: Any, tb: Any) -> None:
         """
         Thread threw an exception.
         """
@@ -3092,13 +3092,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # TODO: remimplement thread cancellation
         logger.error("".join(traceback.format_exception(etype, value, tb)))
 
-    def onColumnWidthUpdate(self, index, old_size, new_size):
+    def onColumnWidthUpdate(self, index: int, old_size: int, new_size: int) -> None:
         """
         Simple state update of the current column widths in the  param list
         """
         self.lstParamHeaderSizes[index] = new_size
 
-    def shellNamesList(self):
+    def shellNamesList(self) -> List[str]:
         """
         Returns list of names of all multi-shell parameters
         E.g. for sld[n], radius[n], n=1..3 it will return
@@ -3112,7 +3112,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 shell_names.append(name+str(i))
         return shell_names
 
-    def enableStructureFactorControl(self, structure_factor):
+    def enableStructureFactorControl(self, structure_factor: Optional[str]) -> None:
         """
         Add structure factors to the list of parameters
         """
@@ -3121,7 +3121,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             self.disableStructureCombo()
 
-    def addExtraShells(self):
+    def addExtraShells(self) -> None:
         """
         Add a combobox for multiple shell display
         """
@@ -3221,7 +3221,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         func.setCurrentText(str(default_shell_count))
         self.modifyShellsInList(str(default_shell_count))
 
-    def modifyShellsInList(self, text):
+    def modifyShellsInList(self, text: str) -> None:
         """
         Add/remove additional multishell parameters
         """
@@ -3266,7 +3266,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.clipboard_paste()
 
-    def onShowSLDProfile(self):
+    def onShowSLDProfile(self) -> None:
         """
         Show a quick plot of SLD profile
         """
@@ -3304,7 +3304,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.plot_widget.setLayout(layout)
         self.plot_widget.show()
 
-    def setInteractiveElements(self, enabled=True):
+    def setInteractiveElements(self, enabled: bool = True) -> None:
         """
         Switch interactive GUI elements on/off
         """
@@ -3326,7 +3326,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.cmdPlot.setEnabled(enabled)
 
-    def enableInteractiveElements(self):
+    def enableInteractiveElements(self) -> None:
         """
         Set button caption on fitting/calculate finish
         Enable the param table(s)
@@ -3337,7 +3337,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.fit_started = False
         self.setInteractiveElements(True)
 
-    def disableInteractiveElements(self):
+    def disableInteractiveElements(self) -> None:
         """
         Set button caption on fitting/calculate start
         Disable the param table(s)
@@ -3348,7 +3348,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setText('Stop fit')
         self.setInteractiveElements(False)
 
-    def disableInteractiveElementsOnCalculate(self):
+    def disableInteractiveElementsOnCalculate(self) -> None:
         """
         Set button caption on fitting/calculate start
         Disable the param table(s)
@@ -3359,7 +3359,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.setText('Running...')
         self.setInteractiveElements(False)
 
-    def readFitPage(self, fp):
+    def readFitPage(self, fp: FitPage) -> None:
         """
         Read in state from a fitpage object and update GUI
         """
@@ -3400,7 +3400,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # TODO: add polidyspersity and magnetism
 
-    def saveToFitPage(self, fp):
+    def saveToFitPage(self, fp: FitPage) -> None:
         """
         Write current state to the given fitpage
         """
@@ -3454,14 +3454,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # TODO: add polydispersity and magnetism
 
-    def updateUndo(self):
+    def updateUndo(self) -> None:
         """
         Create a new state page and add it to the stack
         """
         if self.undo_supported:
             self.pushFitPage(self.currentState())
 
-    def currentState(self):
+    def currentState(self) -> FitPage:
         """
         Return fit page with current state
         """
@@ -3470,20 +3470,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return new_page
 
-    def pushFitPage(self, new_page):
+    def pushFitPage(self, new_page: FitPage) -> None:
         """
         Add a new fit page object with current state
         """
         self.page_stack.append(new_page)
 
-    def popFitPage(self):
+    def popFitPage(self) -> None:
         """
         Remove top fit page from stack
         """
         if self.page_stack:
             self.page_stack.pop()
 
-    def getReport(self):
+    def getReport(self) -> List[str]:
         """
         Create and return HTML report with parameters and charts
         """
@@ -3507,7 +3507,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return report_logic.reportList()
 
-    def loadPageStateCallback(self,state=None, datainfo=None, format=None):
+    def loadPageStateCallback(self, state: Optional[Any] = None, datainfo: Optional[Any] = None, format: Optional[Any] = None) -> None:
         """
         This is a callback method called from the CANSAS reader.
         We need the instance of this reader only for writing out a file,
@@ -3516,7 +3516,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         pass
 
-    def loadPageState(self, pagestate=None):
+    def loadPageState(self, pagestate: Optional[Any] = None) -> None:
         """
         Load the PageState object and update the current widget
         """
@@ -3531,7 +3531,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # convert into list of lists
         pass
 
-    def loadAnalysisFile(self):
+    def loadAnalysisFile(self) -> str:
         """
         Called when the "Open Project" menu item chosen.
         """
@@ -3546,7 +3546,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         return filename
 
-    def getParameterDict(self):
+    def getParameterDict(self) -> Dict[str, List[str]]:
         """
         Gather current fitting parameters as dict
         """
@@ -3564,11 +3564,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 line_dict[content[0]] = content[1:]
         return line_dict
 
-    def clipboard_copy(self):
+    def clipboard_copy(self) -> None:
         copy_data = self.full_copy_data()
         self.set_clipboard(copy_data)
 
-    def clipboard_paste(self):
+    def clipboard_paste(self) -> None:
         """
         Use the clipboard to update fit state
         """
@@ -3595,29 +3595,29 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.updatePageWithParameters(line_dict)
 
-    def clipboard_copy_excel(self):
+    def clipboard_copy_excel(self) -> None:
         self.set_clipboard(self.excel_copy_data())
 
-    def clipboard_copy_latex(self):
+    def clipboard_copy_latex(self) -> None:
         self.set_clipboard(self.latex_copy_data())
 
-    def full_copy_data(self):
+    def full_copy_data(self) -> str:
         """ Data destined for the clipboard when copy clicked"""
         param_list = self.getFitPage()
         param_list += self.getFitModel()
         return FittingUtilities.formatParameters(param_list)
 
-    def excel_copy_data(self):
+    def excel_copy_data(self) -> str:
         """ Excel format data destined for the clipboard"""
         param_list = self.getFitParameters()
         return FittingUtilities.formatParametersExcel(param_list[1:])
 
-    def latex_copy_data(self):
+    def latex_copy_data(self) -> str:
         """ Latex format data destined for the clipboard"""
         param_list = self.getFitParameters()
         return FittingUtilities.formatParametersLatex(param_list[1:])
 
-    def save_parameters(self):
+    def save_parameters(self) -> None:
         """ Save parameters to a file"""
         param_list = self.getFitParameters()
 
@@ -3646,13 +3646,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         with open(filename, 'w') as file:
             file.write(save_data)
 
-    def set_clipboard(self, data: str):
+    def set_clipboard(self, data: str) -> None:
         """ Set the data in the clipboard """
         cb = QtWidgets.QApplication.clipboard()
         cb.setText(data)
 
 
-    def getFitModel(self):
+    def getFitModel(self) -> List[List[str]]:
         """
         serializes combobox state
         """
@@ -3666,7 +3666,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return param_list
 
-    def getFitPage(self):
+    def getFitPage(self) -> List[List[str]]:
         """
         serializes full state of this fit page
         """
@@ -3717,7 +3717,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return param_list
 
-    def getFitParameters(self):
+    def getFitParameters(self) -> List[List[Union[str, Tuple]]]:
         """
         serializes current parameters
         """
@@ -3801,7 +3801,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return param_list
 
-    def createPageForParameters(self, line_dict):
+    def createPageForParameters(self, line_dict: Dict[str, List[str]]) -> None:
         """
         Sets up page with requested model/str factor
         and fills it up with sent parameters
@@ -3816,7 +3816,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Now that the page is ready for parameters, fill it up
         self.updatePageWithParameters(line_dict)
 
-    def updatePageWithParameters(self, line_dict, warn_user=True):
+    def updatePageWithParameters(self, line_dict: Dict[str, List[str]], warn_user: bool = True) -> None:
         """
         Update FitPage with parameters in line_dict
         """
@@ -3898,7 +3898,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.polydispersity_widget.updateFullPolyModel(context)
         self.updateFullMagnetModel(context)
 
-    def updateMultiplicityCombo(self, multip):
+    def updateMultiplicityCombo(self, multip: int) -> None:
         """
         Find and update the multiplicity combobox
         """
@@ -3908,7 +3908,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             widget.setCurrentIndex(widget.findText(str(multip)))
         self.logic.current_shell_displayed = multip
 
-    def updateFullModel(self, param_dict):
+    def updateFullModel(self, param_dict: Dict[str, List[str]]) -> None:
         """
         Update the model with new parameters
         """
@@ -3957,7 +3957,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.iterateOverModel(updateFittedValues)
 
-    def onMaskedData(self):
+    def onMaskedData(self) -> None:
         """
         A mask has been applied to current data.
         Update the Q ranges.
@@ -3965,7 +3965,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.updateQRange()
         self.updateData()
 
-    def getCurrentFitState(self, state=None):
+    def getCurrentFitState(self, state: Optional[Any] = None) -> None:
         """
         Store current state for fit_page
         """
@@ -3991,7 +3991,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         state.parameters = FittingUtilities.getStandardParam(self._model_model)
         state.orientation_params_disp = FittingUtilities.getOrientationParam(self.logic.kernel_module)
 
-    def getSymbolDict(self):
+    def getSymbolDict(self) -> Dict[str, float]:
         """
         Return a dict containing a list of all the symbols used for fitting
         and their values, e.g. {'M1.scale':1, 'M1.background': 0.001}
