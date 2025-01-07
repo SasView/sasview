@@ -1,8 +1,6 @@
 """
 Widget/logic for magnetism.
 """
-import os
-import numpy as np
 import logging
 from typing import Any, Tuple, Optional, List, Dict
 
@@ -15,7 +13,7 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
-from sas.sascalc.doc_regen.makedocumentation import IMAGES_DIRECTORY_LOCATION, HELP_DIRECTORY_LOCATION
+from sas.sascalc.doc_regen.makedocumentation import IMAGES_DIRECTORY_LOCATION
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +74,8 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         # default initial value
         m0 = 0.5
         for param in self.logic.model_parameters.call_parameters:
-            if param.type != 'magnetic': continue
+            if param.type != 'magnetic':
+                continue
             if "M0" in param.name:
                 m0 += 0.5
                 value = m0

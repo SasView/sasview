@@ -308,7 +308,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
 
         # Enable the row in case it was disabled by Array
         self.poly_model.blockSignals(True)
-        max_range = self.lstPoly.itemDelegate().poly_filename
         [self.poly_model.item(row_index, i).setEnabled(True) for i in range(7)]
         file_index = self.poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
         self.poly_model.setData(file_index, "")

@@ -10,7 +10,6 @@ import logging
 import traceback
 from twisted.internet import threads
 import numpy as np
-import webbrowser
 
 from PySide6 import QtCore
 from PySide6 import QtGui
@@ -21,12 +20,11 @@ from sasmodels import modelinfo
 from sasmodels.sasview_model import SasviewModel
 from sasmodels.sasview_model import load_standard_models
 from sasmodels.sasview_model import MultiplicationModel
-from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit import models
-from sas.sascalc.doc_regen.makedocumentation import IMAGES_DIRECTORY_LOCATION, HELP_DIRECTORY_LOCATION
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
@@ -1497,7 +1495,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.onCategoriesChanged()
 
         # See if we need to update the combo in-place
-        if self.cbCategory.currentText() != CATEGORY_CUSTOM: return
+        if self.cbCategory.currentText() != CATEGORY_CUSTOM:
+            return
 
         current_text = self.cbModel.currentText()
         self.cbModel.clear()
@@ -1716,7 +1715,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         # initialize fitter constants
-        fit_id = 0
         handler = None
         batch_inputs = {}
         batch_outputs = {}
@@ -1965,9 +1963,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             constraints = self.getConstraintsForFitting()
 
         smearer = self.smearing_widget.smearer()
-        handler = None
-        batch_inputs = {}
-        batch_outputs = {}
 
         fitters = []
         # order datasets if chain fit
@@ -2387,9 +2382,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             name = os.path.join(models.find_plugins_dir(), model_name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
-        except ModuleNotFoundError as ex:
+        except ModuleNotFoundError:
             pass
-        except FileNotFoundError as ex:
+        except FileNotFoundError:
             # can happen when name attribute not the same as actual filename
             pass
 
@@ -2499,7 +2494,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Only show volfraction once if it appears in both P and S models.
         Issues SV:1280, SV:1295, SM:219, SM:199, SM:101
         """
-        from sasmodels.product import VOLFRAC_ID, RADIUS_ID, RADIUS_MODE_ID, STRUCTURE_MODE_ID
+        from sasmodels.product import VOLFRAC_ID, RADIUS_MODE_ID, STRUCTURE_MODE_ID
 
         product_params = None
         p_kernel = self.logic.kernel_module
@@ -2806,8 +2801,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Updates kernel model 'model' with extra parameters from
         the polydisp and magnetism tab, if the tabs are enabled
         """
-        if model is None: return
-        if not hasattr(model, 'setParam'): return
+        if model is None:
+            return
+        if not hasattr(model, 'setParam'):
+            return
 
         self.polydispersity_widget.updateModel(model)
         # add magnetic params if asked
@@ -3190,7 +3187,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         try:
             shell_min = int(shell_par.limits[0])
             shell_max = int(shell_par.limits[1])
-        except IndexError as ex:
+        except IndexError:
             # no info about limits
             pass
         except OverflowError:
@@ -3520,15 +3517,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Load the PageState object and update the current widget
         """
-        filepath = self.loadAnalysisFile()
-        if filepath is None or filepath == "":
-            return
-
-        with open(filepath, 'r') as statefile:
-            #column_data = [line.rstrip().split() for line in statefile.readlines()]
-            lines = statefile.readlines()
-
-        # convert into list of lists
+        _ = self.loadAnalysisFile()
         pass
 
     def loadAnalysisFile(self) -> str:
@@ -3950,7 +3939,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             try:
                 self._model_model.item(row, 2+joffset).setText(param_dict[param_name][2+ioffset])
                 self._model_model.item(row, 3+joffset).setText(param_dict[param_name][3+ioffset])
-            except:
+            except: # noqa: E722
                 pass
 
             self.setFocus()
@@ -3986,7 +3975,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         state.qmax = self.q_range_max
         state.npts = self.npts
 
-        p = self.logic.model_parameters
         # save checkbutton state and txtcrtl values
         state.parameters = FittingUtilities.getStandardParam(self._model_model)
         state.orientation_params_disp = FittingUtilities.getOrientationParam(self.logic.kernel_module)
@@ -3998,7 +3986,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         sym_dict = {}
         # return an empty dict if no model has been selected
-        if self.logic.kernel_module == None:
+        if self.logic.kernel_module is None:
             return sym_dict
         model_name = self.logic.kernel_module.name
         for param in self.getParamNames():
