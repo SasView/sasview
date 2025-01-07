@@ -14,9 +14,12 @@ from sas.qtgui.Utilities.MuMag.datastructures import ExperimentalData, LoadFailu
 
 from sasdata.dataloader.loader import Loader
 
+import logging
 
 class MuMagLib:
     """ Library for methods supporting MuMag"""
+
+    logger = logging.getLogger("MuMag")
 
     mu_0 = 4 * np.pi * 1e-7
 
@@ -42,8 +45,13 @@ class MuMagLib:
 
             input_data = loader.load(input_paths)
 
+
             data = []
             for filename, data1d in zip(input_names, input_data):
+                # Check for error, and skip if necessary
+                if isinstance(data1d, Exception):
+                    MuMagLib.logger.error(f"Failed to load in data: {data1d}")
+                    continue
 
                 # Extract the metadata from the filename
                 filename_parts = filename.split(".")
