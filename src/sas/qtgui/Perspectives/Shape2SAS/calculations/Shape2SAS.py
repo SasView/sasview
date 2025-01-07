@@ -341,8 +341,6 @@ if __name__ == "__main__":
     q_method = Qsampling.qMethodsNames(args.q_method)
     q_input = Qsampling.qMethodsInput(args.q_method)
 
-    test = args.q
-
     q_par = []
 
     for name in q_input.keys():

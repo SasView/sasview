@@ -288,8 +288,7 @@ class Cube:
         """Check for points within a cube"""
 
         idx = np.where((abs(x_eff) >= self.a/2) | (abs(y_eff) >= self.a/2) | 
-            (abs(z_eff) >= self.a/2) | ((abs(x_eff) <= self.b/2) 
-            & (abs(y_eff) <= self.b/2) & (abs(z_eff) <= self.b/2)))
+            (abs(z_eff) >= self.a/2))
         
         return idx
 

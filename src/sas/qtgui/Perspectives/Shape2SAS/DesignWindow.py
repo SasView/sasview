@@ -20,10 +20,12 @@ for path in additional_path:
 # This Python file uses the following encoding: utf-8
 import sys
 import re
+from types import MethodType
+from typing import Union
 
 from PySide6.QtWidgets import QApplication, QDialog, QHBoxLayout, QVBoxLayout, QWidget
-from PySide6.QtCore import Qt
-
+from PySide6.QtCore import Qt, QRect, QTimer
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit
 
 # Important:
@@ -36,7 +38,8 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 
 from sas.qtgui.Perspectives.Shape2SAS.ViewerModel import ViewerModel
 from sas.qtgui.Perspectives.Shape2SAS.ButtonOptions import ButtonOptions
-from sas.qtgui.Perspectives.Shape2SAS.Tables.subunitTable import SubunitTable, OPTIONLAYOUT
+from sas.qtgui.Perspectives.Shape2SAS.Tables.subunitTable import SubunitTable, OptionLayout
+from sas.qtgui.Perspectives.Shape2SAS.Constraints import Constraints
 
 from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering, 
                                                                      ModelProfile, ModelSystem, SimulationParameters, 
@@ -85,7 +88,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         self.plugin.setMinimumSize(110, 24)
         self.plugin.setMaximumSize(110, 24)
         self.modelButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
-        self.plugin.clicked.connect(self.getPluginModel)
+        self.plugin.clicked.connect(self.showConstraintWindow)
         
         modelSection = QWidget()
         modelHbox.addWidget(self.subunitTable)
@@ -111,22 +114,134 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         #Building Virtual SANS Experiment tab
         #TODO: implement in a future project
 
+        #Building Constraint window
+        self.constraint = Constraints()
+        self.subunitTable.add.clicked.connect(self.addToVariableTable)
+        self.subunitTable.delete.clicked.connect(self.deleteFromVariableTable)
+        self.constraint.variableTable.pushButton.clicked.connect(self.setConstraintsToTextEditor)
+        self.constraint.createPlugin.clicked.connect(self.getPluginModel)
+
+        #create png of each tab
+        self.modelButtonOptions.pushButton_55.clicked.connect(self.export_widget_with_tabs_to_png)
+
+
+    def showConstraintWindow(self):
+        """Get the Constraint window"""
+
+        self.constraint.show()
+        QTimer.singleShot(500, self.capture_constraint_window)
+    
+
+    def checkedVariables(self):
+        """Get checked variables from the variable table
+        with inserted restricted rows"""
+
+        columns = self.constraint.variableTable.getCheckedVariables()
+        for column in range(len(columns)):
+            for row in range(len(self.subunitTable.restrictedRowsPos[column])):
+                columns[column].insert(self.subunitTable.restrictedRowsPos[column][row], False)
+
+        return columns
+
+
+    def setConstraintsToTextEditor(self):
+        """Set translation and parameters constraints to the text editor"""
+        columns = self.checkedVariables()
+
+        toTextEditor = ['# name, units, default, [min, max], type, description']
+
+        dimPos = [OptionLayout.x, OptionLayout.y, OptionLayout.z]
+        #create parameter lists for the text editor to be edited
+        for column in range(len(columns)):
+            for row in range(len(columns[column])):
+                if columns[column][row]:
+                    enumMember = list(OptionLayout)[row]
+
+                    if enumMember in dimPos:
+                        val = self.getSubunitTableCell(OptionLayout.get_position(OptionLayout.Subunit), column)
+                    else:
+                        val = enumMember.value
+
+                    #get units, bounds and types from method
+                    attr = getattr(OptionLayout, val)
+                    method = MethodType(attr, OptionLayout)
+                    _, _, units, _, types, bounds = method()
+
+                    #get inputted value from cell
+                    inputVal = self.getSubunitTableCell(row, column)
+                    inputName = self.getTableName(column, row)
+
+                    #create parameter list
+                    parameter = [inputName, units[enumMember], inputVal, bounds[enumMember], 
+                                 types[enumMember], f"{inputName} for column {column + 1}"]
+        
+                    toTextEditor.append(parameter)
+
+        formatted = "[\n " + ",\n ".join(str(pars) for pars in toTextEditor) + "\n]"
+        modelName = self.constraint.variableTable.lineEdit_3.text()
+        self.constraint.setConstraints(formatted, modelName)
+
+
+
+    def addToVariableTable(self):
+        """Set up parameters to the variable table"""
+        column = self.subunitTable.model.columnCount() - 1 #-1 to account for the added column
+        names = self.getTableNames(column)
+
+        #set variables in variable table
+        self.constraint.variableTable.setVariableTableData(names, column)
+
+
+    def deleteFromVariableTable(self):
+        """Delete parameters from the variable table"""
+        selected_column = self.subunitTable.selected_val - 1 #SubunitTable column index position
+        row_pos = self.constraint.variableTable.getAllTableColumnsPos()
+
+        #if no columns in the subunit table
+        if not self.subunitTable.model.columnCount():
+            numNames = self.constraint.variableTable.variableModel.rowCount()
+
+        #if selected column is the last column
+        elif row_pos[selected_column] == row_pos[-1]:
+            numNames = self.constraint.variableTable.variableModel.rowCount() - row_pos[-1]
+
+        else:
+            numNames = row_pos[selected_column + 1] - row_pos[selected_column]
+
+        #Delete rows associated with the subunit table column from variable table
+        for delete in [row_pos[selected_column] for _ in range(numNames)]:
+            self.constraint.variableTable.removeTableData(delete)
+        
+        #Update column number in table
+        columnNum = selected_column + 1 #column number name
+        for row in row_pos[selected_column + 1:]: #get all values after selected_column
+            row = row - numNames
+            self.constraint.variableTable.variableModel.item(row, 1).setText(str(columnNum))
+            columnNum += 1
+
+
     def showStructureFactorOptions(self):
         """Show options for structure factor"""
+        #get chosen structure factor
         index = self.comboBox.currentIndex()
+        #show options for chosen structure factor
         self.stackedWidget.setCurrentIndex(index)
 
 
     def getStructureFactorValues(self):
-        """Read QLineEdit values from each index of the stackedWidget"""
+        """Read structure factor options from chosen structure factor"""
         S_vals = []
 
+        #get chosen structure factor
         index = self.comboBox.currentIndex()
+        #find chosen widget containing the chosen structure factor options
         self.stackedWidget.setCurrentIndex(index)
         currentWidget = self.stackedWidget.currentWidget()
         lineEdits = currentWidget.findChildren(QLineEdit)
 
         #get concentration value for Hardsphere case
+        #TODO: concentration is already an input value. Maybe add 
+        #a texbox to explain that to the user if stackedWidget chosen?
         if index == 1:
             conc = self.lineEdit_3
             S_vals.append(float(conc.text()))
@@ -138,96 +253,172 @@ class DesignWindow(QDialog, Ui_DesignWindow):
 
         return S_vals
 
-    def getModelProfileRow(self, name: str, default: float, column: int) -> list:
-        """Get model data from a single row in a column and convert to float"""
 
-        val = self.subunitTable.model.item(name, column).data(Qt.EditRole)
+    def getSubunitTableCell(self, row: int, column: int) -> Union[float, str]:
+        """Get model data from a single cell."""
 
-        if val:
-            return val
-        else:
-            return default
+        val = self.subunitTable.model.item(row, column).data(Qt.EditRole)
 
-    def getModelProfile(self) -> ModelProfile:
-        """Get model profile"""
+        return val
+    
 
-        subunits = []
-        p_s = []
-        dimensions = []
-        com = []
-        rotation_points = []
-        rotation = []
+    def getSubunitTableRow(self, row: int) -> list[Union[float, str]]:
+        """Get model data from a single row"""
+
+        values = []
+        columns = self.subunitTable.model.columnCount()
+        for column in range(columns):
+            value = self.getSubunitTableCell(row, column)
+
+            if not value == "":
+                values.append(value)
+
+        return values
+    
+    def getConditionalSubunitTableRow(self, row: int, condition: list[list[bool]], 
+                                      conditionPar: list[Union[str, float]]) -> list[Union[float, str]]:
+        """Get model data from a single row with conditions"""
+
+        values = []
+        columns = self.subunitTable.model.columnCount()
+        for column in range(columns):
+            value = self.getSubunitTableCell(row, column)
+            if not value == "":
+                if condition[column][row]:
+                    values.append(conditionPar[column][row])
+                else:
+                    values.append(value)
+        return values
+
+
+    def getSubunitTableSets(self, rows: list[int]) -> list[list[Union[float, str]]]:
+        """Get a set of rows per column in subunit table"""
+
+        sets = []
         columns = self.subunitTable.model.columnCount()
 
+        for column in range(columns):
+            set = []
+            for row in rows:
+                value = self.getSubunitTableCell(row, column)
+                if not value == "":
+                    set.append(value)
+            sets.append(set)
+        return sets
+    
+    def getConditionalSubunitTableSets(self, rows: list[int], condition: list[list[bool]], 
+                                      conditionPar: list[Union[str, float]]) -> list[Union[float, str]]:
+        """Get model data from a set of rows with conditions"""
+
+        sets = []
+        columns = self.subunitTable.model.columnCount()
+
+        for column in range(columns):
+            set = []
+            for row in rows:
+                value = self.getSubunitTableCell(row, column)
+                if not value == "":
+                    if condition[column][row]:
+                        set.append(conditionPar[column][row])
+                    else:
+                        set.append(value)
+            sets.append(set)
+        return sets
+
+    def getModelData(self) -> list[list[Union[float, str]]]:
+        """Get all data in the subunit table"""
+
         #no subunits inputted
+        columns = self.subunitTable.model.columnCount()
         if not self.subunitTable.model.item(1, columns - 1):
             return
-            
-        default = self.subunitTable.defaultValue
 
-        #append inputted data to lists
-        for column in range(columns):
-            subunit = self.subunitTable.model.item(OPTIONLAYOUT["Subunit"], column).text()
-            subunits.append(subunit)
-            p_s.append(self.getModelProfileRow(OPTIONLAYOUT["ΔSLD"], default[OPTIONLAYOUT["ΔSLD"]], column))
+        subunit = self.getSubunitTableRow(OptionLayout.get_position(OptionLayout.Subunit))
+        dimensions = self.getSubunitTableSets([OptionLayout.get_position(OptionLayout.x), 
+                                               OptionLayout.get_position(OptionLayout.y), 
+                                               OptionLayout.get_position(OptionLayout.z)])
 
-            dims = []
-            if default[OPTIONLAYOUT["x"]][subunit]:
-                dim_x = self.getModelProfileRow(OPTIONLAYOUT["x"], default[OPTIONLAYOUT["x"]][subunit], column)
-                dims.append(dim_x)
-            if default[OPTIONLAYOUT["y"]][subunit]:
-                dim_y = self.getModelProfileRow(OPTIONLAYOUT["y"], default[OPTIONLAYOUT["y"]][subunit], column)
-                dims.append(dim_y)
-            if default[OPTIONLAYOUT["z"]][subunit]:
-                dim_z = self.getModelProfileRow(OPTIONLAYOUT["z"], default[OPTIONLAYOUT["z"]][subunit], column)
-                dims.append(dim_z)
-            dimensions.append(dims)
+        p_s = self.getSubunitTableRow(OptionLayout.get_position(OptionLayout.ΔSLD))
+        com = self.getSubunitTableSets([OptionLayout.get_position(OptionLayout.COM_x), 
+                                        OptionLayout.get_position(OptionLayout.COM_y), 
+                                        OptionLayout.get_position(OptionLayout.COM_z)])
+        rotation_points = self.getSubunitTableSets([OptionLayout.get_position(OptionLayout.RP_x),
+                                                    OptionLayout.get_position(OptionLayout.RP_y),
+                                                    OptionLayout.get_position(OptionLayout.RP_z)])
+        rotation = self.getSubunitTableSets([OptionLayout.get_position(OptionLayout.α),
+                                            OptionLayout.get_position(OptionLayout.β),
+                                            OptionLayout.get_position(OptionLayout.γ)])
+        
+        #set bool to checkbox
+        if self.subunitTable.overlap.isChecked():
+            exclude_overlap = True
+        else:
+            exclude_overlap = False
 
-            com_x = self.getModelProfileRow(OPTIONLAYOUT["COM_x"], default[OPTIONLAYOUT["COM_x"]], column)
-            com_y = self.getModelProfileRow(OPTIONLAYOUT["COM_y"], default[OPTIONLAYOUT["COM_y"]], column)
-            com_z = self.getModelProfileRow(OPTIONLAYOUT["COM_z"], default[OPTIONLAYOUT["COM_z"]], column)
-            com.append([com_x, com_y, com_z])
+        return [subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap]
+    
+    def getConditionalModelData(self, condition: list[list[bool]], conditionPar: list[Union[str, float]]) -> ModelProfile:
+        """Get all data in the subunit table with conditions"""
 
-            rot_x = self.getModelProfileRow(OPTIONLAYOUT["RP_x"], default[OPTIONLAYOUT["RP_x"]], column)
-            rot_y = self.getModelProfileRow(OPTIONLAYOUT["RP_y"], default[OPTIONLAYOUT["RP_y"]], column)
-            rot_z = self.getModelProfileRow(OPTIONLAYOUT["RP_z"], default[OPTIONLAYOUT["RP_z"]], column)
-            rotation_points.append([rot_x, rot_y, rot_z])
-
-            rot_alpha = self.getModelProfileRow(OPTIONLAYOUT["α"], default[OPTIONLAYOUT["α"]], column)
-            rot_beta = self.getModelProfileRow(OPTIONLAYOUT["β"], default[OPTIONLAYOUT["β"]], column)
-            rot_gamma = self.getModelProfileRow(OPTIONLAYOUT["γ"], default[OPTIONLAYOUT["γ"]], column)
-            rotation.append([rot_alpha, rot_beta, rot_gamma])
-
-        #set bool to checkbox  
+        #no subunits inputted
+        columns = self.subunitTable.model.columnCount()
+        if not self.subunitTable.model.item(1, columns - 1):
+            return
+        
+        subunit = self.getConditionalSubunitTableRow(OptionLayout.get_position(OptionLayout.Subunit), condition, conditionPar)
+        dimensions = self.getConditionalSubunitTableSets([OptionLayout.get_position(OptionLayout.x),
+                                                            OptionLayout.get_position(OptionLayout.y),
+                                                            OptionLayout.get_position(OptionLayout.z)], condition, conditionPar)
+        p_s = self.getConditionalSubunitTableRow(OptionLayout.get_position(OptionLayout.ΔSLD), condition, conditionPar)
+        com = self.getConditionalSubunitTableSets([OptionLayout.get_position(OptionLayout.COM_x),
+                                                    OptionLayout.get_position(OptionLayout.COM_y),
+                                                    OptionLayout.get_position(OptionLayout.COM_z)], condition, conditionPar)
+        rotation_points = self.getConditionalSubunitTableSets([OptionLayout.get_position(OptionLayout.RP_x),
+                                                    OptionLayout.get_position(OptionLayout.RP_y),
+                                                    OptionLayout.get_position(OptionLayout.RP_z)], condition, conditionPar)
+        rotation = self.getConditionalSubunitTableSets([OptionLayout.get_position(OptionLayout.α),
+                                                    OptionLayout.get_position(OptionLayout.β),
+                                                    OptionLayout.get_position(OptionLayout.γ)], condition, conditionPar)
+        
+        #set bool to checkbox
         if self.subunitTable.overlap.isChecked():
             exclude_overlap = True
         else:
             exclude_overlap = False
         
-        return ModelProfile(subunits=subunits, p_s=p_s, dimensions=dimensions, com=com, 
+        return ModelProfile(subunits=subunit, p_s=p_s, dimensions=dimensions, com=com, 
+                           rotation_points=rotation_points, rotation=rotation, exclude_overlap=exclude_overlap)
+
+
+    def getModelProfile(self) -> ModelProfile:
+        """Get model profile"""
+
+        subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap = self.getModelData()
+        
+        return ModelProfile(subunits=subunit, p_s=p_s, dimensions=dimensions, com=com, 
                            rotation_points=rotation_points, rotation=rotation, exclude_overlap=exclude_overlap)
     
 
-    def getViewPlotDesign(self) -> ViewerPlotDesign:
+    def getViewFeatures(self) -> ViewerPlotDesign:
         """Get values affecting the illustrative aspect of Viewer"""
         colour = []
 
         columns = self.subunitTable.model.columnCount()
         for column in range(columns):
-            colour.append(self.getModelProfileRow(OPTIONLAYOUT["Colour"], "Green", column))
+            colour.append(self.getSubunitTableCell(OptionLayout.get_position(OptionLayout.Colour), column))
         
         return ViewerPlotDesign(colour=colour)
     
 
     def onClickingPlot(self):
-        """Plotting the designed model in the Build model tab. 
-        If checked, plot theoretical scattering as well"""
+        """Get 3D plot of the designed model in the Build model tab. 
+        If checked, plot theoretical scattering from the designed model."""
 
         modelProfile = self.getModelProfile()
         if not modelProfile:
             return
         
-        plotDesign = self.getViewPlotDesign()
+        plotDesign = self.getViewFeatures()
         modelDistribution = getPointDistribution(modelProfile, 3000)
         self.viwerModel.setPlot(modelDistribution, plotDesign)
 
@@ -248,63 +439,79 @@ class DesignWindow(QDialog, Ui_DesignWindow):
     def onClickingReset(self):
         """Reset tab to default"""
         print("Saving")
-        #Do something
+        #TODO: make such that tab is set to default
 
 
     def onClickingClose(self):
         """Close Shape2SAS GUI"""
         print("closing")
-        #Do something
+        #TODO: make such that the GUI is closed and garbage collect
     
 
     def onClickingHelp(self):
         """Opening the help window"""
         print("Help")
-        #Do something
+        #TODO: creat HTML help file to be displayed
 
-    
-    def getDimensionNames(self):
-        """Get the names of the dimensions"""
 
-        dim_names = []
+    def getTableName(self, column: int, row: int) -> str:
+        """Get the parameter name of a cell in the subunit table"""
 
+        name = re.match(r'^[^\s=]+', self.subunitTable.model.item(row, column).text())
+        if name:
+            return name.group()
+        else:
+            return 
+
+
+    def getTableNames(self, column: int) -> list[str]:
+        """Get the parameter names of a column in the subunit table"""
+            
+        names = []
+        layout = list(OptionLayout)
+        layout.remove(OptionLayout.Colour)
+
+        for name in layout:
+            layoutName = self.getTableName(column, OptionLayout.get_position(name))
+            if layoutName:
+                names.append(layoutName)
+
+        return names
+
+
+    def getAllTableNames(self) -> list[list[str]]:
+        """Get all parameter names in the subunit table"""
+        names = []
         columns = self.subunitTable.model.columnCount()
 
         for column in range(columns):
-            
-            dim_name = []
+            names.append(self.getTableNames(column))
 
-            name_x = re.match(r'^[a-zA-Z]+', self.subunitTable.model.item(OPTIONLAYOUT["x"], column).text())
-            if name_x:
-                dim_name.append(name_x.group())
-            name_y = re.match(r'^[a-zA-Z]+', self.subunitTable.model.item(OPTIONLAYOUT["y"], column).text())
-            if name_y:
-                dim_name.append(name_y.group())
-            name_z = re.match(r'^[a-zA-Z]+', self.subunitTable.model.item(OPTIONLAYOUT["z"], column).text())
-            if name_z:
-                dim_name.append(name_z.group())
-
-            dim_names.append(dim_name)
-        
-        return dim_names
-
+        return names
+    
 
     def getPluginModel(self):
         """Generating a plugin model and sends it to
         the Plugin Models folder in SasView"""
-        name = "model_1"
 
-        modelProfile = self.getModelProfile()
-        Npoints = 3000 ###TODO: get these inputs from the new GUI window
-        pr_points = 100
-        model_name = "Meeting_model" #TODO: attach to a QLineEdit in the GUI
-        dim_names = self.getDimensionNames()
+        Npoints = int(self.constraint.variableTable.lineEdit.text())
+        pr_points = int(self.constraint.variableTable.lineEdit_2.text())
+        model_name = self.constraint.variableTable.lineEdit_3.text()
+        dim_names = self.getAllTableNames()
+        checkedVars = self.checkedVariables()
+        constrainParameters = self.constraint.getConstraints()
 
-        model_str, full_path = generatePlugin(modelProfile, Npoints, pr_points, model_name, dim_names)
-        print(full_path)
+        #conditional subunit table parameters
+        modelProfile = self.getConditionalModelData(checkedVars, dim_names)
+
+        print(modelProfile.p_s)
+
+        model_str, full_path = generatePlugin(modelProfile, constrainParameters, dim_names, Npoints, pr_points, model_name)
+
+        print(model_str)
+
         #Write file to plugin model folder
-        #path = "C:\\Users\\Qerne\\OneDrive\\Documents\\VSCode\\Projects\\Thesis\\SasVIew_dev_version\\sasview\\src\\sas\\qtgui\\Perspectives\\Shape2SAS\\TEST_plugin.py"
-        TabbedModelEditor.writeFile(full_path, model_str)
+        #TabbedModelEditor.writeFile(full_path, model_str)
 
 
     def onCheckingInput(self, input: str, default: str) -> str:
@@ -366,6 +573,47 @@ class DesignWindow(QDialog, Ui_DesignWindow):
 
         #Send data to SasView Data Explorer
         #IExperimental.save_Iexperimental(name=name, q=q, I=Sim_SAXS.I, error=Sim_SAXS.error)
+
+    ####CAPTURE IMAGE OF TABS
+    def capture_widget_with_tabs(self):
+        # Introduce a small delay before starting the capture process
+        QTimer.singleShot(500, lambda: self._capture_tab(0))
+
+    def _capture_tab(self, index):
+        if index >= self.tabWidget.count():
+            return
+
+        screen = QApplication.primaryScreen()
+        self.tabWidget.setCurrentIndex(index)
+        QApplication.processEvents()  # Ensure the tab is fully rendered
+        QTimer.singleShot(100, lambda: self._capture_and_save(screen, index))
+
+    def _capture_and_save(self, screen, index):
+        # Bring the window to the front
+        self.raise_()
+        self.activateWindow()
+        QApplication.processEvents()  # Ensure the window is fully rendered
+        # Capture the entire window, including the title bar
+        pixmap = screen.grabWindow(self.winId())
+        pixmap.save(f"widget_with_tab_{index+1}.png")
+        print(f"Saved widget with tab {index+1} as widget_with_tab_{index+1}.png")
+        # Capture the next tab
+        self._capture_tab(index + 1)
+
+    def export_widget_with_tabs_to_png(self):
+        self.capture_widget_with_tabs()
+
+    
+    def capture_constraint_window(self):
+        screen = QApplication.primaryScreen()
+        # Bring the constraint window to the front
+        self.constraint.raise_()
+        self.constraint.activateWindow()
+        QApplication.processEvents()  # Ensure the window is fully rendered
+        # Capture the entire constraint window, including the title bar
+        pixmap = screen.grabWindow(self.constraint.winId())
+        pixmap.save("constraint_window.png")
+        print("Saved constraint window as constraint_window.png")
 
 
 if __name__ == "__main__":
