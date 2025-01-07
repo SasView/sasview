@@ -28,9 +28,9 @@ Loading data
 ------------
 
 To load data click on the `Import Data` button. This will give you a file chooser that allows you to select a
-**directory**. This directory should contain multiple files for measurements take with different applied magnetic fields.
+**directory**. This directory should contain multiple files for measurements taken with different applied magnetic fields.
 
-Currently, *the magnetic field and other information is expected to be in filename with a format as described below*
+Currently, *the magnetic field and other information is expected to be in the filename with a format as described below*
 
 Form of Data Files
 ..................
@@ -58,7 +58,7 @@ The fields separated by underscores have the following meaning
 The CSV files are expected have three columns: momentum transfer :math:`q` in nm :math:`^{-1}`,
 scattering intensity :math:`I(q)`, and the standard error corresponding to `I(q)`.
 
-Each of the files must have the same length and got to be sorted from the lowest to the highest q-value.
+Each of the files must have the same length and be sorted from lowest to highest q-value.
 In the files only the numerical data is stored, no headers.
 
 Running MuMag
