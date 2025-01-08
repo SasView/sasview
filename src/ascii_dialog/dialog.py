@@ -449,8 +449,8 @@ This could potentially be because the file {basename} an ASCII format.""")
     def onDoneButton(self):
         params = AsciiReaderParams(
             list(self.files_full_path.values()),
-            self.internal_metadata,
             self.col_editor.columns,
+            self.internal_metadata,
             self.starting_pos,
             self.excluded_lines,
             self.seperators,
