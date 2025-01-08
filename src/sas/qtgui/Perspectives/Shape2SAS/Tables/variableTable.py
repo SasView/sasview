@@ -117,7 +117,7 @@ class VariableTable(QWidget, Ui_VariableTable):
 
 
     def getAllTableNamesVariables(self):
-        """Get all names from the table"""
+        """Get all names from the variable table"""
         names = []
 
         for row in range(self.variableModel.rowCount()):
@@ -125,6 +125,19 @@ class VariableTable(QWidget, Ui_VariableTable):
 
         return names
     
+    def getCheckedTableNamesVariables(self):
+        """Get checked names from the variable table"""
+        names = []
+
+        for row in range(self.variableModel.rowCount()):
+            itemCheck = self.variableModel.item(row, 1)
+            checkState = itemCheck.data(Qt.CheckStateRole)
+            is_checked = checkState == Qt.Checked.value
+
+            if is_checked:
+                names.append(self.variableModel.item(row, 0).text())
+
+        return names
 
     def getAllTableColumnsPos(self):
         """Get all columns from the variable table"""
@@ -138,7 +151,7 @@ class VariableTable(QWidget, Ui_VariableTable):
         return rows
 
 
-    def getCheckedVariables(self):
+    def getCheckedVariables(self) -> list[list[bool]]:
         """Get checked names and associated columns from variable table"""
         columns = []
         rows = []

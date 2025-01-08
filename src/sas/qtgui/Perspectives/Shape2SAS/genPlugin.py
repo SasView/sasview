@@ -3,9 +3,10 @@ from pathlib import Path
 from sas.sascalc.fit import models
 from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import ModelProfile
 from numpy import inf
+from typing import Union
 
 
-def generatePlugin(prof: ModelProfile, parameters: str, dim_names: list[str], Npoints: int, pr_points: int, file_name: str) -> tuple[str, Path]:
+def generatePlugin(prof: ModelProfile, parameters: str, fitPar: list[str], Npoints: int, pr_points: int, file_name: str) -> tuple[str, Path]:
     """Generates a theoretical scattering plugin model"""
 
     plugin_location = Path(models.find_plugins_dir())
@@ -13,12 +14,37 @@ def generatePlugin(prof: ModelProfile, parameters: str, dim_names: list[str], Np
         file_name += '.py'
     full_path = plugin_location / file_name
 
-    model_str = generateModel(prof, parameters, dim_names, Npoints, pr_points, file_name)
+    model_str = generateModel(prof, parameters, fitPar, Npoints, pr_points, file_name)
 
     return model_str, full_path
     
 
-def generateModel(prof: ModelProfile, parameters: str, dim_names: list[str], Npoints: int, pr_points: int, model_name: str) -> str:
+def parListsFormat(par: list[list[Union[str, float]]]) -> str:
+    """Format lists of parameters to the model string"""
+
+    #k = 5
+    for i in range(len(par)):
+        for j in range(len(par[i])):
+            if not isinstance(par[i][j], str):
+                par[i][j] = f'{par[i][j]}'
+        par[i] = f'[{", ".join(par[i])}]'
+        #if i > k:
+        #    par.insert("\n")
+        #    k += 5
+
+    return f"[{', '.join(par)}]"
+
+def parListFormat(par: list[Union[str, float]]) -> str:
+    """Format a list containing parameters to the model string"""
+
+    for i in range(len(par)):
+        if not isinstance(par[i], str):
+            par[i] = f'{par[i]}'
+
+    return f"[{', '.join(par)}]"    
+
+
+def generateModel(prof: ModelProfile, parameters: str, fitPar: list[str], Npoints: int, pr_points: int, model_name: str) -> str:
     """Generates a theoretical model"""
     
     model_str = (f'''
@@ -52,11 +78,16 @@ category = "plugin"
 #   ["name", "units", default, [lower, upper], "type","description"],
 parameters = {parameters}
 
-def Iq(q, {', '.join(dim_names[0])}):
+def Iq(q, {', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
     
-    modelProfile = ModelProfile(subunits={prof.subunits}, p_s=[{', '.join(prof.p_s)}], dimensions=[{', '.join(prof.dimensions)}], com=[{','.join(prof.com)}], 
-                                rotation_points=[{','.join(prof.rotation_points)}], rotation=[{', '.join(prof.rotation)}], exclude_overlap={prof.exclude_overlap})
+    modelProfile = ModelProfile(subunits=[{prof.subunits}], 
+                                    p_s=[{parListFormat(prof.p_s)}], 
+                                    dimensions=[{parListsFormat(prof.dimensions)}], 
+                                    com=[{parListsFormat(prof.com)}], 
+                                    rotation_points=[{parListsFormat(prof.rotation_points)}], 
+                                    rotation=[{parListsFormat(prof.rotation)}, 
+                                    exclude_overlap={prof.exclude_overlap}])
     
     simPar = SimulationParameters(q=q, prpoints={pr_points}, Npoints={Npoints}, model_name="{model_name.replace('.py', '')}")
     dist = getPointDistribution(modelProfile, {Npoints})

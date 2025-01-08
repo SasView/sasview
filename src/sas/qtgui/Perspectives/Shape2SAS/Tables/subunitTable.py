@@ -472,7 +472,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
 
 
     @staticmethod
-    def smallestInteger(numcolumn, columnEyeKeeper):
+    def smallestInteger(numcolumn, columnEyeKeeper: list) -> int:
         """Find the smallest integer not in columnEyeKeeper list"""
 
         if not columnEyeKeeper:

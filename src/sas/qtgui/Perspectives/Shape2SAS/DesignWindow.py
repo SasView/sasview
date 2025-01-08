@@ -262,36 +262,43 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         return val
     
 
-    def getSubunitTableRow(self, row: int) -> list[Union[float, str]]:
+    @staticmethod
+    def ifEmpty(value: Union[float, str], values: list[Union[float, str]], *args, **kwargs) -> None:
+        """condition method. Append if not empty"""
+        
+        if not value == "":
+            values.append(value)
+
+
+    @staticmethod
+    def ifFitPar(value: Union[float, str], values: list[Union[float, str]], *args, **kwargs) -> None:
+        """condition method. Append FitPar if condition. Otherwise append constant"""
+
+        conditionFitPar = kwargs['conditionFitPar'] #list[list[str]]
+        conditionBool = kwargs['conditionBool'] #list[list[bool]]
+        row, column = args #int, int
+        
+        if not value == "":
+            if conditionBool[column][row]:
+                values.append(conditionFitPar[column][row])
+            else:
+                values.append(value)
+    
+
+    def getSubunitTableRow(self, condition: MethodType, row: int, **kwargs) -> list[Union[float, str]]:
         """Get model data from a single row"""
 
         values = []
         columns = self.subunitTable.model.columnCount()
         for column in range(columns):
+            print("row", row, "column", column)
             value = self.getSubunitTableCell(row, column)
+            condition(value, values, row, column, **kwargs)
 
-            if not value == "":
-                values.append(value)
-
-        return values
-    
-    def getConditionalSubunitTableRow(self, row: int, condition: list[list[bool]], 
-                                      conditionPar: list[Union[str, float]]) -> list[Union[float, str]]:
-        """Get model data from a single row with conditions"""
-
-        values = []
-        columns = self.subunitTable.model.columnCount()
-        for column in range(columns):
-            value = self.getSubunitTableCell(row, column)
-            if not value == "":
-                if condition[column][row]:
-                    values.append(conditionPar[column][row])
-                else:
-                    values.append(value)
         return values
 
 
-    def getSubunitTableSets(self, rows: list[int]) -> list[list[Union[float, str]]]:
+    def getSubunitTableSets(self, condition: MethodType, rows: list[int], **kwargs) -> list[list[Union[float, str]]]:
         """Get a set of rows per column in subunit table"""
 
         sets = []
@@ -301,31 +308,12 @@ class DesignWindow(QDialog, Ui_DesignWindow):
             set = []
             for row in rows:
                 value = self.getSubunitTableCell(row, column)
-                if not value == "":
-                    set.append(value)
-            sets.append(set)
-        return sets
-    
-    def getConditionalSubunitTableSets(self, rows: list[int], condition: list[list[bool]], 
-                                      conditionPar: list[Union[str, float]]) -> list[Union[float, str]]:
-        """Get model data from a set of rows with conditions"""
-
-        sets = []
-        columns = self.subunitTable.model.columnCount()
-
-        for column in range(columns):
-            set = []
-            for row in rows:
-                value = self.getSubunitTableCell(row, column)
-                if not value == "":
-                    if condition[column][row]:
-                        set.append(conditionPar[column][row])
-                    else:
-                        set.append(value)
+                condition(value, set, row, column, **kwargs)
             sets.append(set)
         return sets
 
-    def getModelData(self) -> list[list[Union[float, str]]]:
+
+    def getModelData(self, condition: MethodType, **kwargs) -> list[list[Union[float, str]]]:
         """Get all data in the subunit table"""
 
         #no subunits inputted
@@ -333,21 +321,24 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         if not self.subunitTable.model.item(1, columns - 1):
             return
 
-        subunit = self.getSubunitTableRow(OptionLayout.get_position(OptionLayout.Subunit))
-        dimensions = self.getSubunitTableSets([OptionLayout.get_position(OptionLayout.x), 
-                                               OptionLayout.get_position(OptionLayout.y), 
-                                               OptionLayout.get_position(OptionLayout.z)])
+        subunit = self.getSubunitTableRow(condition, OptionLayout.get_position(OptionLayout.Subunit), **kwargs)
+        dimensions = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.x), 
+                                                        OptionLayout.get_position(OptionLayout.y), 
+                                                        OptionLayout.get_position(OptionLayout.z)], **kwargs)
 
-        p_s = self.getSubunitTableRow(OptionLayout.get_position(OptionLayout.ΔSLD))
-        com = self.getSubunitTableSets([OptionLayout.get_position(OptionLayout.COM_x), 
-                                        OptionLayout.get_position(OptionLayout.COM_y), 
-                                        OptionLayout.get_position(OptionLayout.COM_z)])
-        rotation_points = self.getSubunitTableSets([OptionLayout.get_position(OptionLayout.RP_x),
-                                                    OptionLayout.get_position(OptionLayout.RP_y),
-                                                    OptionLayout.get_position(OptionLayout.RP_z)])
-        rotation = self.getSubunitTableSets([OptionLayout.get_position(OptionLayout.α),
+        p_s = self.getSubunitTableRow(condition, OptionLayout.get_position(OptionLayout.ΔSLD), **kwargs)
+
+        com = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.COM_x), 
+                                                OptionLayout.get_position(OptionLayout.COM_y), 
+                                                OptionLayout.get_position(OptionLayout.COM_z)], **kwargs)
+        
+        rotation_points = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.RP_x),
+                                                OptionLayout.get_position(OptionLayout.RP_y),
+                                                OptionLayout.get_position(OptionLayout.RP_z)], **kwargs)
+        
+        rotation = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.α),
                                             OptionLayout.get_position(OptionLayout.β),
-                                            OptionLayout.get_position(OptionLayout.γ)])
+                                            OptionLayout.get_position(OptionLayout.γ)], **kwargs)
         
         #set bool to checkbox
         if self.subunitTable.overlap.isChecked():
@@ -356,45 +347,13 @@ class DesignWindow(QDialog, Ui_DesignWindow):
             exclude_overlap = False
 
         return [subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap]
-    
-    def getConditionalModelData(self, condition: list[list[bool]], conditionPar: list[Union[str, float]]) -> ModelProfile:
-        """Get all data in the subunit table with conditions"""
-
-        #no subunits inputted
-        columns = self.subunitTable.model.columnCount()
-        if not self.subunitTable.model.item(1, columns - 1):
-            return
-        
-        subunit = self.getConditionalSubunitTableRow(OptionLayout.get_position(OptionLayout.Subunit), condition, conditionPar)
-        dimensions = self.getConditionalSubunitTableSets([OptionLayout.get_position(OptionLayout.x),
-                                                            OptionLayout.get_position(OptionLayout.y),
-                                                            OptionLayout.get_position(OptionLayout.z)], condition, conditionPar)
-        p_s = self.getConditionalSubunitTableRow(OptionLayout.get_position(OptionLayout.ΔSLD), condition, conditionPar)
-        com = self.getConditionalSubunitTableSets([OptionLayout.get_position(OptionLayout.COM_x),
-                                                    OptionLayout.get_position(OptionLayout.COM_y),
-                                                    OptionLayout.get_position(OptionLayout.COM_z)], condition, conditionPar)
-        rotation_points = self.getConditionalSubunitTableSets([OptionLayout.get_position(OptionLayout.RP_x),
-                                                    OptionLayout.get_position(OptionLayout.RP_y),
-                                                    OptionLayout.get_position(OptionLayout.RP_z)], condition, conditionPar)
-        rotation = self.getConditionalSubunitTableSets([OptionLayout.get_position(OptionLayout.α),
-                                                    OptionLayout.get_position(OptionLayout.β),
-                                                    OptionLayout.get_position(OptionLayout.γ)], condition, conditionPar)
-        
-        #set bool to checkbox
-        if self.subunitTable.overlap.isChecked():
-            exclude_overlap = True
-        else:
-            exclude_overlap = False
-        
-        return ModelProfile(subunits=subunit, p_s=p_s, dimensions=dimensions, com=com, 
-                           rotation_points=rotation_points, rotation=rotation, exclude_overlap=exclude_overlap)
 
 
-    def getModelProfile(self) -> ModelProfile:
+    def getModelProfile(self, condition: MethodType, **kwargs) -> ModelProfile:
         """Get model profile"""
 
-        subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap = self.getModelData()
-        
+        subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap = self.getModelData(condition, **kwargs)
+
         return ModelProfile(subunits=subunit, p_s=p_s, dimensions=dimensions, com=com, 
                            rotation_points=rotation_points, rotation=rotation, exclude_overlap=exclude_overlap)
     
@@ -414,7 +373,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         """Get 3D plot of the designed model in the Build model tab. 
         If checked, plot theoretical scattering from the designed model."""
 
-        modelProfile = self.getModelProfile()
+        modelProfile = self.getModelProfile(self.ifEmpty)
         if not modelProfile:
             return
         
@@ -490,23 +449,30 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         return names
     
 
+    def getFitParameters(self) -> list[str]:
+        """return names of the chosen fit parameters"""
+
+        return self.constraint.variableTable.getCheckedTableNamesVariables()
+
+
     def getPluginModel(self):
         """Generating a plugin model and sends it to
         the Plugin Models folder in SasView"""
 
         Npoints = int(self.constraint.variableTable.lineEdit.text())
-        pr_points = int(self.constraint.variableTable.lineEdit_2.text())
-        model_name = self.constraint.variableTable.lineEdit_3.text()
-        dim_names = self.getAllTableNames()
+        prPoints = int(self.constraint.variableTable.lineEdit_2.text())
+        modelName = self.constraint.variableTable.lineEdit_3.text()
+        parNames = self.getAllTableNames()
         checkedVars = self.checkedVariables()
-        constrainParameters = self.constraint.getConstraints()
+        constrainParameters = self.constraint.getConstraints() #TODO: input to check if name is a valid name for the plugin model 
 
         #conditional subunit table parameters
-        modelProfile = self.getConditionalModelData(checkedVars, dim_names)
+        modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedVars, conditionFitPar=parNames)
 
-        print(modelProfile.p_s)
+        #get chosen fit parameters
+        fitPar = self.getFitParameters()
 
-        model_str, full_path = generatePlugin(modelProfile, constrainParameters, dim_names, Npoints, pr_points, model_name)
+        model_str, full_path = generatePlugin(modelProfile, constrainParameters, fitPar, Npoints, prPoints, modelName)
 
         print(model_str)
 
@@ -527,7 +493,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         """Generating simulated data and sends it to
         the Data Explorer in SasView"""
         
-        modelProfile = self.getModelProfile()
+        modelProfile = self.getModelProfile(self.ifEmpty)
         if not modelProfile:
             #No columns in the subunit table
             return
@@ -555,7 +521,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
         #Generate simulated data
         q = Qsampling.onQsampling(qmin, qmax, Nq)
         Sim_par = SimulationParameters(q=q, prpoints=Np, Npoints=N)
-        Profile = self.getModelProfile()
+        Profile = self.getModelProfile(self.ifEmpty)
 
         Distr = getPointDistribution(Profile, N)
 
@@ -573,6 +539,7 @@ class DesignWindow(QDialog, Ui_DesignWindow):
 
         #Send data to SasView Data Explorer
         #IExperimental.save_Iexperimental(name=name, q=q, I=Sim_SAXS.I, error=Sim_SAXS.error)
+
 
     ####CAPTURE IMAGE OF TABS
     def capture_widget_with_tabs(self):

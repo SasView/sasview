@@ -130,7 +130,7 @@ model_info = reparameterize({name}, parameters, translation, __file__)
             
             return importStatements
         
-        except SyntaxError as e: #should be send to the GUI text editor output
+        except SyntaxError as e: #TODO: should be send to the GUI text editor output
             error_line = text.splitlines()[e.lineno - 1]
             print(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")
             return
