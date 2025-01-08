@@ -239,7 +239,7 @@ def int_pr_square(pars, d_max, nslice):
     r = np.linspace(0., d_max - dx, nslice)
     values = pr(pars, d_max, r)
     total = np.sum(values ** 2)
-
+    
     return total * dx
 
 @njit('f8(f8[:], f8, u8)')
@@ -305,8 +305,10 @@ def positive_integral(pars, d_max, nslice):
 
     total = np.sum(np.fabs(values))
     total_pos = np.sum(values[values > 0.0])
-
-    return total_pos / total  # dx cancels
+    if total == 0:
+        return 0
+    else:
+        return total_pos / total  # dx cancels
 
 @njit('f8(f8[:], f8[:,:], f8, u8)')
 def positive_errors(pars, err, d_max, nslice):
@@ -333,8 +335,10 @@ def positive_errors(pars, err, d_max, nslice):
 
     index = pr_val > pr_val_err
     total_pos = np.sum(pr_val[index])
-
-    return total_pos / total  # dx cancels
+    if total == 0:
+        return 0
+    else:
+        return total_pos / total  # dx cancels
 
 @njit('f8(f8[:], f8, u8)')
 def rg(pars, d_max, nslice):
@@ -355,6 +359,7 @@ def rg(pars, d_max, nslice):
 
     total = np.sum(values)
     total_r2 = np.sum((r ** 2) * values)
-
+    if total == 0:
+        return 0
     return np.sqrt(total_r2 / (2.0*total))  # dx cancels
 

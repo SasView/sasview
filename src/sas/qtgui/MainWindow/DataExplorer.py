@@ -616,8 +616,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if 'pr_params' in value:
             self.cbFitting.setCurrentIndex(self.cbFitting.findText('Inversion'))
             params = value['pr_params']
-            self.sendItemToPerspective(items[0])
-            self._perspective().updateFromParameters(params)
+            # Make the perspective read the rest of the read data
+            if not isinstance(params, list):
+                params = [params]
+            for page in params:
+            # Check if this set of parameters is for a batch page
+                            # if so, skip the update
+                if page['is_batch'][0] == 'True':
+                    continue
+                tab_index = None
+                if 'tab_index' in page:
+                    tab_index = page['tab_index'][0]
+                    tab_index = int(tab_index)
+                # Send current model item to the perspective
+                self.sendItemToPerspective(items[0], tab_index=tab_index)
+                # Assign parameters to the most recent (current) page. 
+                self._perspective().updateFromParameters(page)
         if 'invar_params' in value:
             self.cbFitting.setCurrentIndex(self.cbFitting.findText('Invariant'))
             self.sendItemToPerspective(items[0])

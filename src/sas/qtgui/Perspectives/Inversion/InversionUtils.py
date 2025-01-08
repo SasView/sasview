@@ -4,8 +4,8 @@ WIDGETS = enum( 'W_FILENAME',               #0
                 'W_BACKGROUND_INPUT',             #1
                 'W_ESTIMATE',               #2
                 'W_MANUAL_INPUT',           #3
-                'W_QMIN',                   #4
-                'W_QMAX',                   #5
+                'W_Q_MIN',                   #4
+                'W_Q_MAX',                   #5
                 'W_SLIT_HEIGHT',            #6
                 'W_SLIT_WIDTH',             #7
                 'W_NO_TERMS',               #8
