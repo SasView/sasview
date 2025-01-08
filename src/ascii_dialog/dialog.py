@@ -449,11 +449,11 @@ This could potentially be because the file {basename} an ASCII format.""")
     def onDoneButton(self):
         params = AsciiReaderParams(
             list(self.files_full_path.values()),
-            self.starting_pos,
-            self.col_editor.columns,
-            self.excluded_lines,
             self.seperators,
-            self.internal_metadata
+            self.internal_metadata,
+            self.col_editor.columns,
+            self.starting_pos,
+            self.excluded_lines
         )
         self.params = params
         self.accept()
