@@ -1673,14 +1673,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.cbModel.addItems(sorted(models_to_show))
         self.cbModel.blockSignals(False)
 
-    def onHelp(self) -> None:
+    def onHelp(self):
         """
         Show the "Fitting" section of help
         """
-        regen_in_progress = False
         help_location = self.getHelpLocation(HELP_DIRECTORY_LOCATION)
-        if regen_in_progress is False:
-            self.parent.showHelp(help_location)
+        self.parent.showHelp(help_location)
 
     def getHelpLocation(self, tree_base: Path) -> Path:
         # Actual file will depend on the current tab
@@ -1690,9 +1688,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         match tab_id:
             case 0:
                 # Look at the model and if set, pull out its help page
-                if self.kernel_module is not None and hasattr(self.kernel_module, 'name'):
+                # TODO: Disable plugin model documentation generation until issues can be resolved
+                plugin_names = [name for name, enabled in self.master_category_dict[CATEGORY_CUSTOM]]
+                if (self.logic.kernel_module is not None
+                        and hasattr(self.logic.kernel_module, 'name')
+                        and self.logic.kernel_module.id not in plugin_names
+                        and not re.match("[A-Za-z0-9_-]+[+*@][A-Za-z0-9_-]+", self.logic.kernel_module.id)):
                     tree_location = tree_base / "user" / "models"
-                    return tree_location / f"{self.kernel_module.id}.html"
+                    return tree_location / f"{self.logic.kernel_module.id}.html"
                 else:
                     return tree_location / "fitting_help.html"
             case 1:
@@ -1894,6 +1897,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Don't recalculate chi2 - it's in res.fitness already
         self.fitResults = True
+        if result is None or len(result) == 0 or len(result[0]) == 0:
+            msg = "Fitting failed."
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            return
         res_list = result[0][0]
         res = res_list[0]
         self.chi2 = res.fitness
@@ -2590,6 +2597,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Note that this will fail for proper bad update where the model
             # doesn't contain multiplicity parameter
             self.logic.kernel_module.setParam(parameter_name, value)
+
         elif model_column == min_column:
             # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
             self.logic.kernel_module.details[parameter_name][1] = value
@@ -2765,6 +2773,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Create a QStandardModelIndex containing model data
         """
         name = self.nameFromData(fitted_data)
+        # TODO: Temporary Hack to fix NaNs in generated theory data
+        #  This is usually from GSC models that are calculated outside the Q range they were created for
+        #  The 'remove_nans_in_data' should become its own function in a data utility class, post-6.0.0 release.
+        from sasdata.dataloader.filereader import FileReader
+        temp_reader = FileReader()
+        fitted_data = temp_reader._remove_nans_in_data(fitted_data)
         # Modify the item or add it if new
         theory_item = GuiUtils.createModelItemWithPlot(fitted_data, name=name)
         self.communicate.updateTheoryFromPerspectiveSignal.emit(theory_item)
@@ -3148,7 +3162,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # cell 5: SLD button
         item5 = QtGui.QStandardItem()
         button = None
-        for p in self.kernel_module.params.keys():
+        for p in self.logic.kernel_module.params.keys():
             if re.search(r'^[\w]{0,3}sld.*[1-9]$', p):
                 # Only display the SLD Profile button for models with SLD parameters
                 button = QtWidgets.QPushButton()
@@ -3732,7 +3746,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Value of the parameter. In some cases this is the text of the combobox choice.
             param_value = str(model.item(row, 1).text())
             param_error = None
-            _, param_min, param_max = self.kernel_module.details.get(param_name, ('', None, None))
+            _, param_min, param_max = self.logic.kernel_module.details.get(param_name, ('', None, None))
             column_offset = 0
             if self.has_error_column:
                 column_offset = 1
@@ -3885,7 +3899,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.updateFullModel(context)
         self.polydispersity_widget.updateFullPolyModel(context)
-        self.updateFullMagnetModel(context)
+        self.magnetism_widget.updateFullMagnetModel(context)
 
     def updateMultiplicityCombo(self, multip: int) -> None:
         """
