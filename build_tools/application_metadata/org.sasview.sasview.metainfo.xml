@@ -2,7 +2,7 @@
 
 <component type="desktop-application">
   <id>org.sasview.sasview</id>
-  <name>SasViw</name>
+  <name>SasView</name>
   <project_license>BSD-3-Clause</project_license>
   <metadata_license>CC0</metadata_license>
   <summary> SasView is a Small Angle Scattering Analysis Software Package</summary>
