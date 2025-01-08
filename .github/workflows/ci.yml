@@ -112,7 +112,7 @@ jobs:
         run: |
           git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-          git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+          git clone --depth=50 --branch=v0.9.3 https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
         run: |
@@ -266,7 +266,7 @@ jobs:
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          appstore-connect-team-id: W2AG9MPZ43
+          appstore-connect-team-id: 8CX8K63BQM
           verbose: True
 
       - name: Staple Release Build (OSX)
@@ -296,35 +296,6 @@ jobs:
             installers/dist/SasView6.dmg
             installers/dist/sasview6.tar.gz
           if-no-files-found: ignore
-
-      - name: Rename artifacts (Windows)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
-        run: |
-          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
-
-      - name: Rename artifacts (MacOS)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        run: |    
-          mv installers/dist/SasView6.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
-
-      - name: Rename artifacts (Linux)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
-        run: |    
-          mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
-
-      - name: Upload Release Installer to GitHub
-        if: ${{ matrix.installer }}
-        uses: ncipollo/release-action@v1
-        with:
-          draft: false
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/*SasView-6.0.0-*"
-          name: "Release 6.0.0-alpha"
-          bodyFile: "build_tools/release_notes/6.0.0_notes.txt"
-          tag: "v6.0.0-alpha"
 
   test-installer:
     needs: [ build-matrix ]
