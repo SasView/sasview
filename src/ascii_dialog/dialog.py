@@ -106,7 +106,7 @@ class AsciiDialog(QDialog):
 
         ## Column Editor
         options =  self.datasetOptions()
-        self.col_editor = ColEditor(self.colcount_entry.value(), options)
+        self.col_editor: ColEditor = ColEditor(self.colcount_entry.value(), options)
         self.dataset_combobox.currentTextChanged.connect(self.changeDatasetType)
         self.col_editor.column_changed.connect(self.updateColumn)
 
