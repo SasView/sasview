@@ -34,7 +34,7 @@ class QCodeEditor(QPlainTextEdit):
             digits += 1
         # line number display width padded with extra pixels.
         # Chosen to "look nice", hence magic numbers
-        space = 3 + self.fontMetrics().width('9') * digits
+        space = 3 + self.fontMetrics().new_width('9') * digits
         return space
 
     def updateLineNumberAreaWidth(self):
