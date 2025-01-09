@@ -24,7 +24,7 @@ except ImportError:
     #Identity decorator for njit which ignores type signature.
     njit = lambda *args, **kw: (lambda x: x)
 
-@njit('f8[:](f8, u8, f8[:])')
+@njit('f8[:](f8, u8, f8[:])', cache=True)
 def ortho(d_max, n, r):
     """
     Orthogonal Functions:
@@ -37,21 +37,21 @@ def ortho(d_max, n, r):
     """
     return (2.0 * r) * np.sin((pi*n/d_max)*r)
 
-#TODO: unused?
-@njit('f8[:](f8, u8, f8[:])')
-def ortho_derived(d_max, n, r):
-    """
-    First derivative in of the orthogonal function dB(r)/dr.
+# #TODO: unused?
+# @njit('f8[:](f8, u8, f8[:])')
+# def ortho_derived(d_max, n, r):
+#     """
+#     First derivative in of the orthogonal function dB(r)/dr.
 
-    :param d_max: d_max.
-    :param n: n.
+#     :param d_max: d_max.
+#     :param n: n.
 
-    :return: First derivative in dB(r)/dr.
-    """
-    pinr = (pi * n / d_max) * r
-    return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
+#     :return: First derivative in dB(r)/dr.
+#     """
+#     pinr = (pi * n / d_max) * r
+#     return 2.0 * np.sin(pinr) + 2.0 * r * np.cos(pinr)
 
-@njit('f8[:](f8[:], f8, f8[:])')
+@njit('f8[:](f8[:], f8, f8[:])', cache=True)
 def pr(pars, d_max, r):
     """
     P(r) calculated from the expansion
@@ -67,7 +67,7 @@ def pr(pars, d_max, r):
         total += pars_i * ortho(d_max, i+1, r)
     return total
 
-@njit('f8[:, :](f8[:], f8[:,:], f8, f8[:])')
+@njit('f8[:, :](f8[:], f8[:,:], f8, f8[:])', cache=True)
 def pr_err(pars, err, d_max, r):
     """
     P(r) calculated from the expansion,
@@ -101,11 +101,11 @@ def pr_err(pars, err, d_max, r):
     ret[1, :] = pr_value_err
     return ret
 
-@njit('f8[:](f8, f8, f8[:])')
+@njit('f8[:](f8, f8, f8[:])', cache=True)
 def dprdr_calc(i, d_max, r):
     return 2.0*(np.sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * np.cos(pi*(i+1)*r/d_max))
 
-@njit('f8[:](f8[:], f8, f8[:])')
+@njit('f8[:](f8[:], f8, f8[:])', cache=True)
 def dprdr(pars, d_max, r):
     """
     dP(r)/dr calculated from the expansion.
@@ -122,7 +122,7 @@ def dprdr(pars, d_max, r):
     return total
 
 
-@njit('f8[:](f8[:], f8, i8)')
+@njit('f8[:](f8[:], f8, i8)', cache=True)
 def ortho_transformed(q, d_max, n):
     """
     Fourier transform of the nth orthogonal function.
@@ -136,7 +136,7 @@ def ortho_transformed(q, d_max, n):
     qd = q * (d_max/pi)
     return ( 8.0 * d_max**2 * n * (-1.0)**(n+1) ) * np.sinc(qd) / (n**2 - qd**2)
 
-@njit('f8[:](f8[:], f8, i8, f8, f8, u8)')
+@njit('f8[:](f8[:], f8, i8, f8, f8, u8)', cache=True)
 def ortho_transformed_smeared(q, d_max, n, height, width, npts):
     """
     Slit-smeared Fourier transform of the nth orthogonal function.
@@ -167,7 +167,7 @@ def ortho_transformed_smeared(q, d_max, n, height, width, npts):
 
     return total / (n_width*n_height)
 
-@njit('f8[:](f8[:], f8[:], f8, f8, f8, u8)')
+@njit('f8[:](f8[:], f8[:], f8, f8, f8, u8)', cache=True)
 def iq_smeared(p, q, d_max, height, width, npts):
     """
     Scattering intensity calculated from the expansion, slit-smeared.
@@ -188,7 +188,7 @@ def iq_smeared(p, q, d_max, height, width, npts):
 
     return total
 
-@njit('f8[:](f8[:], f8, f8[:])')
+@njit('f8[:](f8[:], f8, f8[:])', cache=True)
 def iq(pars, d_max, q):
     """
     Scattering intensity calculated from the expansion.
@@ -206,7 +206,7 @@ def iq(pars, d_max, q):
 
     return total
 
-@njit('f8(f8[:], f8, u8)')
+@njit('f8(f8[:], f8, u8)', cache=True)
 def reg_term(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
@@ -224,7 +224,7 @@ def reg_term(pars, d_max, nslice):
 
     return total*dx
 
-@njit('f8(f8[:], f8, u8)')
+@njit('f8(f8[:], f8, u8)', cache=True)
 def int_pr_square(pars, d_max, nslice):
     """
     Regularization term calculated from the expansion.
@@ -242,7 +242,7 @@ def int_pr_square(pars, d_max, nslice):
 
     return total * dx
 
-@njit('f8(f8[:], f8, u8)')
+@njit('f8(f8[:], f8, u8)', cache=True)
 def int_pr(pars, d_max, nslice):
     """
     Integral of P(r).
@@ -261,7 +261,7 @@ def int_pr(pars, d_max, nslice):
 
     return total * dx
 
-@njit('u8(f8[:], f8, u8)')
+@njit('u8(f8[:], f8, u8)', cache=True)
 def npeaks(pars, d_max, nslice):
     """
     Get the number of P(r) peaks.
@@ -285,7 +285,7 @@ def npeaks(pars, d_max, nslice):
 
     return count
 
-@njit('f8(f8[:], f8, u8)')
+@njit('f8(f8[:], f8, u8)', cache=True)
 def positive_integral(pars, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole
@@ -308,7 +308,7 @@ def positive_integral(pars, d_max, nslice):
 
     return total_pos / total  # dx cancels
 
-@njit('f8(f8[:], f8[:,:], f8, u8)')
+@njit('f8(f8[:], f8[:,:], f8, u8)', cache=True)
 def positive_errors(pars, err, d_max, nslice):
     """
     Get the fraction of the integral of P(r) over the whole range
@@ -336,7 +336,7 @@ def positive_errors(pars, err, d_max, nslice):
 
     return total_pos / total  # dx cancels
 
-@njit('f8(f8[:], f8, u8)')
+@njit('f8(f8[:], f8, u8)', cache=True)
 def rg(pars, d_max, nslice):
     """
     R_g radius of gyration calculation
