@@ -1,20 +1,23 @@
-# This Python file uses the following encoding: utf-8
+#Global
 import sys
 import ast
+import traceback
+import importlib.util
+import re
+import warnings
 
 from PySide6.QtWidgets import QApplication, QWidget
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
 
-# Important:
-# You need to run the following command to generate the ui_form.py file
-#     pyside6-uic form.ui -o ui_form.py, or
-#     pyside2-uic form.ui -o ui_form.py
+#Global SasView
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+
+#Local Perspectives
 from UI.ConstraintsUI import Ui_Constraints
 from Tables.variableTable import VariableTable
 from ButtonOptions import ButtonOptions
-
 
 
 class Constraints(QWidget, Ui_Constraints):
@@ -41,12 +44,11 @@ class Constraints(QWidget, Ui_Constraints):
         self.buttonOptions.horizontalLayout_5.insertWidget(1, self.createPlugin)
         self.buttonOptions.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
 
-        
+
         #self.createPlugin.clicked.connect(self.getPluginModel)
 
     def setConstraints(self, constraints: str, name: str):
         """Set text to QTextEdit containing constraints"""
-
 
         self.constraintTextEditor.txtEditor.setPlainText((f'''
 #Write libraries to be imported here.
@@ -64,32 +66,135 @@ model_info = reparameterize({name}, parameters, translation, __file__)
 
         ''').lstrip().rstrip())
 
+    def checkPythonSyntax(self, text: str) -> bool:
+        """Check if text is valid python syntax"""
+        
+        try:
+            ast.parse(text)
+            return True
+        
+        except SyntaxError as e:
+            msg = e.msg
+            if "detected at line" in msg:
+                msg = msg.split(" (detected at line")[0]
+            
+            print(f"{msg} at line {e.lineno}:") #Send to GUI output texteditor
 
-    def getConstraints(self):
+            all_lines = traceback.format_exc().split('\n')
+            last_lines = all_lines[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+
+            if "detected at line" in traceback_to_show:
+                traceback_to_show = traceback_to_show.split(" (detected at line")[0]
+
+            print(traceback_to_show) #Send to GUI output texteditor
+
+            return False
+
+
+    def getConstraints(self, fitPar: list[str]) -> tuple[list[str], str, str]:
         """Read inputs from text editor"""
-        constraints_text = self.constraintTextEditor.txtEditor.toPlainText()
-        print(self.checkImportStatement(constraints_text))
 
-        #TODO: Check if constraint button have been clicked. 
-        # otherwise return default constraints to checked parameters
-        # and return
+        constraintsStr = self.constraintTextEditor.txtEditor.toPlainText()
 
-        # if constraint button is clicked
-        #TODO: Check names
+        self.checkPythonSyntax(constraintsStr)
 
-        #TODO: Check python syntax
+        #Get and check import statements
+        importStatement = self.getImportStatements(constraintsStr)
 
-        # return
+        #Get and check parameters
+        parameters = self.getParameters(constraintsStr, fitPar)
 
-        return constraints_text
+        #Get and check translation
+        translation = self.getTranslation(constraintsStr, importStatement)
+
+        return importStatement, parameters, translation
     
+    def removeFromImport(self, importStatement: list[str], remove: str) -> list[str]:
+        """Remove import statement from list"""
 
-    def isImportFromStatement(self, node: ast.ImportFrom) -> list[str]:
+        if remove in importStatement:
+            importStatement.remove(remove)
+
+    def getTranslation(self, constraintsStr: str, importStatement: list[str]) -> str:
+        """Get translation from constraints"""
+
+
+        #see if translation is in constraints
+        if not re.search(r'translation\s*=', constraintsStr):
+            warnings.warn("No translation found in constraints")
+            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
+            return ""
+        
+        translation = re.search(r'translation\s*=\s*"""(.*\n(?:.*\n)*?)"""', constraintsStr, re.DOTALL)
+        translationInput = translation.group(1) if translation else ""
+
+        #Check if translation is empty
+        if not translationInput:
+            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
+            return ""
+        
+        #Check if translation is only whitespace
+        if not translationInput.strip():
+            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
+            return ""
+        
+        #Check if reparameterize is imported
+        if not re.search(r'from sasmodels.core import reparameterize', constraintsStr):
+            raise ValueError("Could not find from sasmodels.core import reparameterize in constraints")
+
+        #Check if translation is set
+        model_infoDescription = r'model_info\s*=\s*reparameterize\(\s*Model_1\s*,\s*parameters\s*,\s*translation\s*,\s*__file__\s*\)'
+        model_info = re.search(model_infoDescription, constraintsStr)
+        model_info = model_info.group(0) if model_info else ""
+
+        if not model_info:
+            raise ValueError("Could not find model_info in constraints")
+
+        translationText = translation.group(0) + "\n" + "\n" + model_info
+
+        return translationText
+    
+    def getParameters(self, constraintsStr: str, fitPar: list[str]) -> str:
+        """Get parameters from constraints"""
+
+        #see if name parameter is in constraints
+        if not re.search(r'parameters\s*=', constraintsStr):
+            raise ValueError("No parameter found in constraints")
+
+        parameterObject = re.search(r'parameters\s*=\s*\[(.*\n(?:.*\n)*?)\]', constraintsStr, re.DOTALL)
+        if not parameterObject:
+            raise ValueError("No valid parameters list found in constraints")
+
+        parameters = parameterObject.group(1)
+        parametersNames = re.findall(r'\[\s*\'(.*?)\'', parameters)
+
+        #Check parameters in constraints
+        if len(parametersNames) != len(fitPar):
+            raise ValueError("Number of parameters in constraints does not match checked parameters")
+
+        for name in parametersNames:
+            if name not in fitPar:
+                raise ValueError(f"{name} does not exists in checked parameters")
+
+        return parameterObject.group(0)
+
+    @staticmethod
+    def isImportFromStatement(node: ast.ImportFrom) -> list[str]:
         """Return list of ImportFrom statements"""
 
+        #Check if library exists
+        if not importlib.util.find_spec(node.module):
+            raise ModuleNotFoundError(f"No module named {node.module}")
+
         imports = []
+        module = importlib.import_module(node.module)
 
         for alias in node.names:
+            #check if library has the attribute
+            if not hasattr(module, f"{alias.name}"):
+                raise AttributeError(f"module {node.module} has no attribute {alias.name}")
+
             if alias.asname:
                 imports.append(f"{alias.name} as {alias.asname}")
             else:
@@ -97,12 +202,16 @@ model_info = reparameterize({name}, parameters, translation, __file__)
         
         return [f"from {node.module} import {', '.join(imports)}"]
 
-    def isImportStatement(self, node: ast.Import) -> list[str]:
+    @staticmethod
+    def isImportStatement(node: ast.Import) -> list[str]:
         """Return list of Import statements"""
 
         imports = []
-
         for alias in node.names:
+            #check if library exists
+            if not importlib.util.find_spec(alias.name):
+                raise ModuleNotFoundError(f"No module named {alias.name}")
+
             if alias.asname:
                 imports.append(f"{alias.name} as {alias.asname}")
             else:
@@ -110,8 +219,7 @@ model_info = reparameterize({name}, parameters, translation, __file__)
 
         return [f"import {', '.join(imports)}"]
     
-
-    def checkImportStatement(self, text: str) -> list[str]:
+    def getImportStatements(self, text: str) -> list[str]:
         """return all import statements that were 
         written in the text editor"""
 

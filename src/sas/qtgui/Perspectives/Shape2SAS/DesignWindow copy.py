@@ -17,8 +17,7 @@ for path in additional_path:
 #for path in sys.path:
 #    print(path)
 ##########################################################################################
-
-# Global
+# This Python file uses the following encoding: utf-8
 import sys
 import re
 from types import MethodType
@@ -29,41 +28,34 @@ from PySide6.QtCore import Qt, QRect, QTimer
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit
 
-# Local Perspectives
-from sas.qtgui.Perspectives.perspective import Perspective
-
+# Important:
+# You need to run the following command to generate the ui_form.py file
+#     pyside6-uic form.ui -o ui_form.py, or
+#     pyside2-uic form.ui -o ui_form.py
 from UI.DesignWindowUI import Ui_DesignWindow
-from ViewerModel import ViewerModel
-from ButtonOptions import ButtonOptions
-from Tables.subunitTable import SubunitTable, OptionLayout
-from Constraints import Constraints
 
-from calculations.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering, 
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+
+from sas.qtgui.Perspectives.Shape2SAS.ViewerModel import ViewerModel
+from sas.qtgui.Perspectives.Shape2SAS.ButtonOptions import ButtonOptions
+from sas.qtgui.Perspectives.Shape2SAS.Tables.subunitTable import SubunitTable, OptionLayout
+from sas.qtgui.Perspectives.Shape2SAS.Constraints import Constraints
+
+from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering, 
                                                                      ModelProfile, ModelSystem, SimulationParameters, 
                                                                      Qsampling, TheoreticalScatteringCalculation, 
                                                                      SimulateScattering)
-from PlotAspects.plotAspects import ViewerPlotDesign
-from genPlugin import generatePlugin
+from sas.qtgui.Perspectives.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
+from sas.qtgui.Perspectives.Shape2SAS.genPlugin import generatePlugin
 
 
-class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
+class DesignWindow(QDialog, Ui_DesignWindow):
     """Main window for the Shape2SAS fitting tool"""
-
-    name = "Shape2SAS"
-    ext = "data_file"
-
-    @property
-    def title(self) -> str:
-        """ Window title"""
-        return "Shape2SAS"
-
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle("Shape2SAS")
         self.parent = parent
-
-        self._manager = parent
 
         ############Building GUI##############
         #Building Build model tab
@@ -489,19 +481,19 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         parNames = self.getAllTableNames(self.ifNoCondition)
         checkedVars = self.checkedVariables()
 
-        #get chosen fit parameters
-        fitPar = self.getFitParameters()
-
         #TODO: Check if constraint button have been clicked. 
         # otherwise return default constraints to checked parameters
-        constrainParameters = self.constraint.getConstraints(fitPar)
+        constrainParameters = self.constraint.getConstraints(checkedVars, parNames)
 
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedVars, conditionFitPar=parNames)
 
+        #get chosen fit parameters
+        fitPar = self.getFitParameters()
+
         model_str, full_path = generatePlugin(modelProfile, constrainParameters, fitPar, Npoints, prPoints, modelName)
 
-        print(model_str)
+        #print(model_str)
 
         #Write file to plugin model folder
         #TabbedModelEditor.writeFile(full_path, model_str)

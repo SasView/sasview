@@ -1,21 +1,20 @@
-# This Python file uses the following encoding: utf-8
+# Global
 import sys
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+
 from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QSpacerItem, 
-    QSizePolicy, QLabel, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem)
+    QSizePolicy, QLabel, QGraphicsView, QGraphicsScene)
 from PySide6.QtCore import QSize 
 from PySide6.QtDataVisualization import (Q3DScatter, QScatterDataItem, 
 QScatter3DSeries, QValue3DAxis)
-from PySide6.QtGui import QVector3D, QColor, QImage, QPixmap
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-# Important:
-# You need to run the following command to generate the ui_form.py file
-#     pyside6-uic form.ui -o ui_form.py, or
-#     pyside2-uic form.ui -o ui_form.py
+from PySide6.QtGui import QVector3D, QColor
 
+
+# Local Perspectives
 from ViewerAllOptions import ViewerButtons, ViewerModelRadius
-from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import ModelPointDistribution, TheoreticalScattering
-from sas.qtgui.Perspectives.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
+from calculations.Shape2SAS import ModelPointDistribution, TheoreticalScattering
+from PlotAspects.plotAspects import ViewerPlotDesign
 
 class ViewerModel(QWidget):
     """Graphics view of designed model"""
@@ -113,18 +112,6 @@ class ViewerModel(QWidget):
         self.scene.addWidget(canvas)
         self.scattering.fitInView(self.scene.sceneRect())
         self.scatter.show()
-
-        """#old code
-        for i in range(len(theo.q) - 1):
-            start_point = QPointF(theo.q[i], theo.I[i])
-            end_point = QPointF(theo.q[i + 1], theo.I[i + 1])
-            line = QGraphicsLineItem(QLineF(start_point, end_point))
-            #line.setPen(pen)
-            self.scene.addItem(line)
-
-        self.scattering.fitInView(self.scene.sceneRect())
-        self.scattering.update()
-        """
 
 
     def setAxis(self, minx: float, maxx: float, miny: float, maxy: float, minz: float, maxz: float):

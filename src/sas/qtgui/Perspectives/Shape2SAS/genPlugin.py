@@ -1,12 +1,16 @@
-
+#Global
 from pathlib import Path
-from sas.sascalc.fit import models
-from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import ModelProfile
-from numpy import inf
 from typing import Union
 
+#Global SasView
+from sas.sascalc.fit import models
 
-def generatePlugin(prof: ModelProfile, parameters: str, fitPar: list[str], Npoints: int, pr_points: int, file_name: str) -> tuple[str, Path]:
+#Local Perspectives
+from calculations.Shape2SAS import ModelProfile
+
+
+
+def generatePlugin(prof: ModelProfile, constrainParameters: tuple[str], fitPar: list[str], Npoints: int, pr_points: int, file_name: str) -> tuple[str, Path]:
     """Generates a theoretical scattering plugin model"""
 
     plugin_location = Path(models.find_plugins_dir())
@@ -14,7 +18,7 @@ def generatePlugin(prof: ModelProfile, parameters: str, fitPar: list[str], Npoin
         file_name += '.py'
     full_path = plugin_location / file_name
 
-    model_str = generateModel(prof, parameters, fitPar, Npoints, pr_points, file_name)
+    model_str = generateModel(prof, constrainParameters, fitPar, Npoints, pr_points, file_name)
 
     return model_str, full_path
     
@@ -44,8 +48,11 @@ def parListFormat(par: list[Union[str, float]]) -> str:
     return f"[{', '.join(par)}]"    
 
 
-def generateModel(prof: ModelProfile, parameters: str, fitPar: list[str], Npoints: int, pr_points: int, model_name: str) -> str:
+def generateModel(prof: ModelProfile, constrainParameters: tuple[str], fitPar: list[str], Npoints: int, pr_points: int, model_name: str) -> str:
     """Generates a theoretical model"""
+    importStatement, parameters, translation = constrainParameters
+
+    nl = '\n'
     
     model_str = (f'''
 r"""
@@ -62,7 +69,8 @@ Model {model_name.replace('.py', '')} was built from the following subunits:
 {', '.join(prof.subunits)}
 
 """
-from numpy import inf                 
+
+{nl.join(importStatement)}
 from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (ModelProfile, SimulationParameters, 
                                                         ModelSystem, getPointDistribution, 
                                                         TheoreticalScatteringCalculation, 
@@ -75,8 +83,9 @@ Theoretical generation of P(q) using Shape2SAS
 """
 category = "plugin"
 
-#   ["name", "units", default, [lower, upper], "type","description"],
-parameters = {parameters}
+{parameters}
+
+{translation}
 
 def Iq(q, {', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""

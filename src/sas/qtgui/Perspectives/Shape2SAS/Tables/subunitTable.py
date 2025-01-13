@@ -1,3 +1,4 @@
+# Global
 from enum import Enum
 from types import MethodType
 from numpy import inf
@@ -7,7 +8,8 @@ from PySide6.QtGui import (QStandardItemModel, QStandardItem,
 from PySide6.QtWidgets import (QStyledItemDelegate, QLineEdit, QComboBox, 
                                QWidget, QSizePolicy)
 
-from Tables.UI.subunitTableUI import Ui_SubunitTableController
+#Local Perspectives
+from .UI.subunitTableUI import Ui_SubunitTableController
 
 #Row option layout
 class ExtendedEnum(Enum):

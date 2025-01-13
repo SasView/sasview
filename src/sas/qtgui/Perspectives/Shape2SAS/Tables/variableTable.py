@@ -1,15 +1,13 @@
-# This Python file uses the following encoding: utf-8
+# Global
 import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (QStandardItemModel, QStandardItem, QFont)
 from PySide6.QtWidgets import (QStyledItemDelegate, QApplication, QWidget, 
                                QWidget, QCheckBox)
-# Important:
-# You need to run the following command to generate the ui_form.py file
-#     pyside6-uic form.ui -o ui_form.py, or
-#     pyside2-uic form.ui -o ui_form.py
-from Tables.UI.variableTableUI import Ui_VariableTable
+
+# Local Perspectives
+from .UI.variableTableUI import Ui_VariableTable
 
 
 class CustomDelegate(QStyledItemDelegate):
