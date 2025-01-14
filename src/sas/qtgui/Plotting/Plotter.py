@@ -235,7 +235,7 @@ class PlotterWidget(PlotterBase):
             ax.axhline(color='black', linewidth=1)
 
         # Display +/- 3 sigma and +/- 1 sigma lines for residual plots
-        if data.plot_role == DataRole.ROLE_RESIDUAL:
+        if data.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS]:
             ax.axhline(y=3, color='red', linestyle='-')
             ax.axhline(y=-3, color='red', linestyle='-')
             ax.axhline(y=1, color='gray', linestyle='--')
