@@ -13,7 +13,7 @@ from sas.qtgui.Utilities.UI.GridPanelUI import Ui_GridPanelUI
 
 class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
-    Class for stateless grid-like printout of model parameters for mutiple models
+    Class for stateless grid-like printout of model parameters for multiple models
     """
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
@@ -242,13 +242,13 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             excel_app.Workbooks.Open(self.grid_filename)
             excel_app.Visible = 1
         except Exception as ex:
-            msg = "Error occured when calling Excel.\n"
+            msg = "Error occurred when calling Excel.\n"
             msg += ex
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
 
     def actionSaveFile(self):
         """
-        Generate a .csv file and dump it do disk
+        Generate a .csv file and dump it to disk
         """
         t = time.localtime(time.time())
         time_str = time.strftime("%b %d %H %M of %Y", t)
