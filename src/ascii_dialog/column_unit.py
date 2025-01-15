@@ -6,8 +6,8 @@ from PySide6.QtGui import QRegularExpressionValidator
 from sasdata.dataset_types import unit_kinds
 from sasdata.quantities.units import symbol_lookup, NamedUnit
 
-from unit_selector import UnitSelector
-from default_units import default_units
+from ascii_dialog.unit_selector import UnitSelector
+from ascii_dialog.default_units import default_units
 
 def configure_size_policy(combo_box: QComboBox) -> None:
     policy = combo_box.sizePolicy()

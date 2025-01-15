@@ -4,7 +4,7 @@ from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 from sasdata.quantities.units import NamedUnit, UnitGroup
 
-from unit_selector import UnitSelector
+from ascii_dialog.unit_selector import UnitSelector
 
 class UnitPreferenceLine(QWidget):
     def __init__(self, column_name: str, initial_unit: NamedUnit, group: UnitGroup):

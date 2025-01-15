@@ -2,7 +2,7 @@ from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QApplication, QComboBox, QDialog, QLineEdit, QPushButton, QVBoxLayout
 from sasdata.quantities.units import NamedUnit, UnitGroup, unit_group_names, unit_groups
 
-from unit_list_widget import UnitListWidget
+from ascii_dialog.unit_list_widget import UnitListWidget
 
 all_unit_groups = list(unit_groups.values())
 
