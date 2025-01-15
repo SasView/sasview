@@ -9,6 +9,9 @@ from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem, QTextCursor
 from PySide6.QtWidgets import QDockWidget, QLabel, QMessageBox, QProgressBar, QTextBrowser
 from shiboken6 import isValid
+
+from sasdata.temp_ascii_reader import load_data
+
 from twisted.internet import reactor
 
 import sas
@@ -1588,4 +1591,12 @@ class GuiManager:
 
 
     def asciiLoader(self):
-        pass
+        from ascii_dialog.dialog import AsciiDialog
+        dialog = AsciiDialog()
+        status = dialog.exec()
+        if status == 1:
+            loaded = load_data(dialog.params)
+            for datum in loaded:
+                logger.info(datum.summary())
+        else:
+            logger.error('ASCII Reader Closed')
