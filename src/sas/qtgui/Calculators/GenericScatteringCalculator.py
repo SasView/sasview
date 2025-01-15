@@ -1533,7 +1533,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
         self.hideWindow()
         # Clear the status bar
-        self.communicator.statusBarClearSignal.emit("")
+        self.communicator.statusBarUpdateSignal.emit("")
         event.ignore()
 
     def update_file_name(self):
