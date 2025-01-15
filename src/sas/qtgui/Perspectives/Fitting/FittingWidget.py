@@ -3306,7 +3306,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             # delete theory items for the model, in order to get rid of any
             # redundant items, e.g. beta(Q), S_eff(Q)
-            self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.kernel_module.id)
+            self.communicate.deleteIntermediateTheoryPlotsSignal.emit(str(self.tab_id))
 
         self._appendPlotsPolyDisp(new_plots, return_data, fitted_data)
 
