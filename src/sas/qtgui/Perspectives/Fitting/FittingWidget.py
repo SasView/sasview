@@ -147,7 +147,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.initializeSignals()
 
         if data is not None:
-            self.data = data
+            self.dataFromItems(data)
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
@@ -168,8 +168,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def data(self) -> Union[Data1D, Data2D]:
         return self.logic.data
 
-    @data.setter
-    def data(self, value: Union[QtGui.QStandardItem, List[QtGui.QStandardItem]]) -> None:
+    def dataFromItems(self, value: Union[QtGui.QStandardItem, List[QtGui.QStandardItem]]) -> None:
         """ data setter """
         # Value is either a list of indices for batch fitting or a simple index
         # for standard fitting. Assure we have a list, regardless.
@@ -248,7 +247,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Parameters to fit
         self.main_params_to_fit = []
-        self.poly_params_to_fit = []
+        #self.polydispersity_widget.poly_params_to_fit = []
         self.magnet_params_to_fit = []
 
         # Fit options
@@ -362,12 +361,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # We can't use a single model here, due to restrictions on flattening
         # the model tree with subclassed QAbstractProxyModel...
         self._model_model = FittingUtilities.ToolTippedItemModel()
-        self._poly_model = self.polydispersity_widget.poly_model
-        self._magnet_model = self.magnetism_widget._magnet_model
 
         self.model_dict["standard"] = self._model_model
-        self.model_dict["poly"] = self._poly_model
-        self.model_dict["magnet"] = self._magnet_model
+        self.model_dict["poly"] = self.polydispersity_widget.poly_model
+        self.model_dict["magnet"] = self.magnetism_widget._magnet_model
 
         self.lst_dict["standard"] = self.lstParams
         self.lst_dict["poly"] = self.lstPoly
@@ -1437,7 +1434,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.updatePageWithParameters(self.page_parameters, warn_user=False)
 
         # disable polydispersity if the model does not support it
-        has_poly = self._poly_model.rowCount() != 0
+        has_poly = self.polydispersity_widget.poly_model.rowCount() != 0
         self.chkPolydispersity.setEnabled(has_poly)
         # self.tabFitting.setTabEnabled(TAB_POLY, has_poly)
 
@@ -1951,7 +1948,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         params_to_fit = copy.deepcopy(self.main_params_to_fit)
         if self.chkPolydispersity.isChecked():
-            for p in self.poly_params_to_fit:
+            for p in self.polydispersity_widget.poly_params_to_fit:
                 if "Distribution of" in p:
                     params_to_fit += [self.polydispersity_widget.polyNameToParam(p)]
                 else:
@@ -2338,8 +2335,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Crete/overwrite model items
         self._model_model.clear()
-        self._poly_model.clear()
-        self._magnet_model.clear()
+        self.polydispersity_widget.poly_model.clear()
+        self.magnetism_widget._magnet_model.clear()
 
         if model_name is None:
             if structure_factor not in (None, "None"):
@@ -2550,7 +2547,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return False
         if self.main_params_to_fit:
             return True
-        if self.chkPolydispersity.isChecked() and self.poly_params_to_fit:
+        if self.chkPolydispersity.isChecked() and self.polydispersity_widget.poly_params_to_fit:
             return True
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnet_params_to_fit:
             return True
@@ -2712,7 +2709,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # update the list of parameters to fit
         self.main_params_to_fit = self.checkedListFromModel("standard")
-        self.poly_params_to_fit = self.polydispersity_widget.checkedListFromModel()
+        self.polydispersity_widget.poly_params_to_fit = self.checkedListFromModel("poly")
         self.magnet_params_to_fit = self.checkedListFromModel("magnet")
 
     def checkedListFromModel(self, model_key: str) -> List[str]:
@@ -2822,7 +2819,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.polydispersity_widget.updateModel(model)
         # add magnetic params if asked
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
             for key, value in self.magnet_params.items():
                 model.setParam(key, value)
 
@@ -3399,8 +3396,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Models
         self._model_model = fp.model_model
-        self._poly_model = fp.poly_model
-        self._magnet_model = fp.magnetism_model
+        self.polydispersity_widget.poly_model = fp.poly_model
+        self.magnetism_widget._magnet_model = fp.magnetism_model
 
         # Resolution tab
         smearing = fp.smearing_options[fp.SMEARING_OPTION]
@@ -3427,8 +3424,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Use current models - they contain all the required parameters
         fp.model_model = self._model_model
-        fp.poly_model = self._poly_model
-        fp.magnetism_model = self._magnet_model
+        fp.poly_model = self.polydispersity_widget.poly_model
+        fp.magnetism_model = self.magnetism_widget._magnet_model
 
         if self.cbCategory.currentIndex() != 0:
             fp.current_category = str(self.cbCategory.currentText())
@@ -3441,7 +3438,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         fp.chi2 = self.chi2
         fp.main_params_to_fit = self.main_params_to_fit
-        fp.poly_params_to_fit = self.poly_params_to_fit
+        fp.poly_params_to_fit = self.polydispersity_widget.poly_params_to_fit
         fp.magnet_params_to_fit = self.magnet_params_to_fit
         fp.kernel_module = self.logic.kernel_module
 
@@ -3506,10 +3503,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         params = FittingUtilities.getStandardParam(self._model_model)
         poly_params = []
         magnet_params = []
-        if self.chkPolydispersity.isChecked() and self._poly_model.rowCount() > 0:
-            poly_params = FittingUtilities.getStandardParam(self._poly_model)
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self._magnet_model.rowCount() > 0:
-            magnet_params = FittingUtilities.getStandardParam(self._magnet_model)
+        if self.chkPolydispersity.isChecked() and self.polydispersity_widget.poly_model.rowCount() > 0:
+            poly_params = FittingUtilities.getStandardParam(self.polydispersity_widget.poly_model)
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
+            magnet_params = FittingUtilities.getStandardParam(self.magnetism_widget._magnet_model)
         report_logic = ReportPageLogic(self,
                                        kernel_module=self.logic.kernel_module,
                                        data=self.data,
@@ -3780,16 +3777,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             Create list of magnetic parameters based on _magnet_model
             """
-            param_name = str(self._magnet_model.item(row, 0).text())
-            param_checked = str(self._magnet_model.item(row, 0).checkState() == QtCore.Qt.Checked)
-            param_value = str(self._magnet_model.item(row, 1).text())
+            param_name = str(self.magnetism_widget._magnet_model.item(row, 0).text())
+            param_checked = str(self.magnetism_widget._magnet_model.item(row, 0).checkState() == QtCore.Qt.Checked)
+            param_value = str(self.magnetism_widget._magnet_model.item(row, 1).text())
             param_error = None
             column_offset = 0
             if self.has_magnet_error_column:
                 column_offset = 1
-                param_error = str(self._magnet_model.item(row, 1+column_offset).text())
-            param_min = str(self._magnet_model.item(row, 2+column_offset).text())
-            param_max = str(self._magnet_model.item(row, 3+column_offset).text())
+                param_error = str(self.magnetism_widget._magnet_model.item(row, 1+column_offset).text())
+            param_min = str(self.magnetism_widget._magnet_model.item(row, 2+column_offset).text())
+            param_max = str(self.magnetism_widget._magnet_model.item(row, 3+column_offset).text())
             param_list.append([param_name, param_checked, param_value,
                                param_error, param_min, param_max])
 
@@ -3797,7 +3794,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.chkPolydispersity.isChecked():
             self.polydispersity_widget.iterateOverPolyModel(gatherPolyParams)
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
-            self.iterateOverMagnetModel(gatherMagnetParams)
+            self.magnetism_widget.iterateOverMagnetModel(gatherMagnetParams)
 
         if self.logic.kernel_module.is_multiplicity_model:
             param_list.append(['multiplicity', str(self.logic.kernel_module.multiplicity)])

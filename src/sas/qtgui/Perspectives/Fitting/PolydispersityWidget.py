@@ -67,6 +67,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         if not self.logic.model_parameters:
             return
         self.poly_model.clear()
+        self.poly_params = {}
 
         parameters = self.logic.model_parameters.form_volume_parameters
         if self.is2D:
