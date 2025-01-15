@@ -427,6 +427,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 if index_to_delete_str in tab_key:
                     for tab_name in orig_dict[tab_key]:
                         self.closeTabByName(tab_name)
+                        # assure that lastTabClosed is null if it references the deleted data
+                        if self.lastTabClosed and tab_name == "FitPage"+str(self.lastTabClosed.tab_id):
+                                self.lastTabClosed = None
                     self.dataToFitTab.pop(tab_key)
 
     def allowBatch(self):
