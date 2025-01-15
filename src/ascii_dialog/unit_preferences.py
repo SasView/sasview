@@ -4,7 +4,7 @@ from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QWidget
 from sasdata.quantities.units import NamedUnit
 from sasdata.dataset_types import unit_kinds
-from unit_preference_line import UnitPreferenceLine
+from ascii_dialog.unit_preference_line import UnitPreferenceLine
 import random
 
 class UnitPreferences(QWidget):
