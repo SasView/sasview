@@ -2,18 +2,18 @@ from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, Qt
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, \
     QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication, QDialog
 from PySide6.QtCore import QModelIndex, QPoint, Slot
-from selection_menu import SelectionMenu
-from warning_label import WarningLabel
-from col_editor import ColEditor
-from row_status_widget import RowStatusWidget
-from guess import guess_column_count, guess_columns, guess_starting_position
+from ascii_dialog.selection_menu import SelectionMenu
+from ascii_dialog.warning_label import WarningLabel
+from ascii_dialog.col_editor import ColEditor
+from ascii_dialog.row_status_widget import RowStatusWidget
+from ascii_dialog.guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
 from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 from sasdata.temp_ascii_reader import load_data, AsciiReaderParams, split_line
 from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
 from metadata_filename_gui.metadata_tree_data import initial_metadata_dict
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
-from constants import TABLE_MAX_ROWS, NOFILE_TEXT
+from ascii_dialog.constants import TABLE_MAX_ROWS, NOFILE_TEXT
 import re
 
 dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])

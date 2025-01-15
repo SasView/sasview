@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtCore import Slot, Signal
 from sasdata.quantities.units import NamedUnit
 from sasdata.ascii_reader_metadata import pairings
-from column_unit import ColumnUnit
+from ascii_dialog.column_unit import ColumnUnit
 from typing import cast
 
 class ColEditor(QWidget):
