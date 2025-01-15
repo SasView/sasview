@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<component type="desktop-application">
+  <id>org.sasview.sasview</id>
+  <name>SasView</name>
+  <project_license>BSD-3-Clause</project_license>
+  <metadata_license>CC0</metadata_license>
+  <summary> SasView is a Small Angle Scattering Analysis Software Package</summary>
+  <developer id="org.sasview">
+    <name>SasView Developers</name>
+  </developer>
+  <content_rating type="oars-1.0" />
+
+
+  <url type="bugtracker">https://github.com/SasView/sasview/issues</url>
+  <url type="homepage">https://www.sasview.org</url>
+  <url type="contact">https://www.sasview.org/people/</url>
+  <url type="faq">https://www.sasview.org/faq/</url>
+  <url type="contribute">https://www.sasview.org/contribute/</url>
+  <url type="vcs-browser">https://github.com/SasView/sasview</url>
+
+  <releases>
+    <release version="6.0.0" date="2024-10-14"></release>
+  </releases>
+
+  <launchable type="desktop-id">org.sasview.sasview.desktop</launchable>
+  <provides>org.sasview.sasview.desktop</provides>
+
+  <description>
+    <p>SasView is an open source Small Angle Scattering (SAS) analysis package used to analyze 1D and 2D scattering data in inverse space. Originally focused on neutron data (SANS), the package has been extended for X-ray scattering and correlation space methods such as SESANS and Interferometry. SasView includes a number of other features, include PrView to invert SAS data to P(r), a resolution calculator, and a scattering length density calculator, to name a few. The package also has a simple plugin mechanism for users to add custom models.</p>
+  </description>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://www.sasview.org/img/basic_fit.png</image>
+      <caption>SasView basic fitting</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://www.sasview.org/img/SVwelcome.png</image>
+      <caption>SasView welcome screen</caption>
+    </screenshot>
+  </screenshots>
+
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+</component>

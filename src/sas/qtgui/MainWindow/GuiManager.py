@@ -34,7 +34,6 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
@@ -209,7 +208,7 @@ class GuiManager:
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
-        self.WhatsNew = WhatsNew(self)
+        self.WhatsNew = WhatsNew(self._parent)
         self.regenProgress = DocRegenProgress(self)
 
     def loadAllPerspectives(self):
@@ -369,10 +368,13 @@ class GuiManager:
         """
         pass
 
-    def showHelp(self, url):
+    @classmethod
+    def showHelp(cls, url):
         """
         Open a local url in the default browser
         """
+        counter = 1
+        window_name = "help_window"
         # Remove leading forward slashes from relative paths to allow easy Path building
         if isinstance(url, str):
             url = url.lstrip("//")
@@ -382,8 +384,19 @@ class GuiManager:
         else:
             url_abs = Path(url)
         try:
-            # Help window shows itself
-            self.helpWindow = DocViewWindow(parent=self, source=url_abs)
+            # In order to have multiple help windows open simultaneously, we need to create a new class variable
+            # If we just reassign the old one, the old window will be destroyed
+            
+            # Have we found a name not assigned to a window?
+            potential_help_window = getattr(cls, window_name, None) 
+            while potential_help_window and potential_help_window.isVisible():
+                window_name = f"help_window_{counter}"
+                potential_help_window = getattr(cls, window_name, None)
+                counter += 1
+            
+            # Assign new variable to the GuiManager
+            setattr(cls, window_name, GuiUtils.showHelp(url_abs))
+
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
 
@@ -582,6 +595,7 @@ class GuiManager:
 
             # save the paths etc.
             self.saveCustomConfig()
+            self.communicate.closeSignal.emit()
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -661,7 +675,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
-        self.WhatsNew = WhatsNew(strictly_newer=False)
+        self.WhatsNew = WhatsNew(self._parent, strictly_newer=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
@@ -676,14 +690,14 @@ class GuiManager:
         """
         Method defining all signal connections for the gui manager
         """
-        self.communicate = GuiUtils.Communicate()
+        self.communicate = GuiUtils.communicate
         self.communicate.fileDataReceivedSignal.connect(self.fileWasRead)
         self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
         self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
-        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByModelID)
+        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
         self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
@@ -701,8 +715,12 @@ class GuiManager:
         self._workspace.actionStartup_Settings.setVisible(False)
         #self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
-        # orientation viewer set to invisible SASVIEW-1132
-        self._workspace.actionOrientation_Viewer.setVisible(True)
+
+        # Show orientation viewer menu item only if not running Linux/Wayland
+        if "XDG_SESSION_TYPE" in os.environ and os.environ["XDG_SESSION_TYPE"] == "wayland":
+            self._workspace.actionOrientation_Viewer.setVisible(False)
+        else:
+            self._workspace.actionOrientation_Viewer.setVisible(True)
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
@@ -1045,6 +1063,8 @@ class GuiManager:
             if self.GENSASCalculator is None:
                 self.GENSASCalculator = GenericScatteringCalculator(self)
             self.GENSASCalculator.show()
+            self.updateStatusBar("The Generic Scattering Calculator is open, but it sometimes opens behind the main "
+                                 "window.")
         except Exception as ex:
             logging.error(str(ex))
             return
@@ -1148,7 +1168,7 @@ class GuiManager:
         Show bumps convergence plots
         """
         self.results_frame.setVisible(True)
-        if output_data:
+        if output_data and len(output_data) > 0 and len(output_data[0]) > 0:
             self.results_panel.onPlotResults(output_data, optimizer=self.perspective().optimizer)
 
     def actionAdd_Custom_Model(self):
@@ -1311,12 +1331,12 @@ class GuiManager:
             return
         per.currentTab.setTheoryItem(item)
 
-    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+    def deleteIntermediateTheoryPlotsByTabId(self, tab_id):
         """
         Catch the signal to delete items in the Theory item model which correspond to a model ID.
         Send the request to the DataExplorer for updating the theory model.
         """
-        self.filesWidget.deleteIntermediateTheoryPlotsByModelID(model_id)
+        self.filesWidget.deleteIntermediateTheoryPlotsByTabId(tab_id)
 
     def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
         """
