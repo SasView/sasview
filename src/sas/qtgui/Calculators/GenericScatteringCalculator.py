@@ -1532,6 +1532,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Overwrite the close event and hide the window instead of closing it
         """
         self.hideWindow()
+        # Clear the status bar
+        self.communicator.statusBarClearSignal.emit("")
         event.ignore()
 
     def update_file_name(self):
