@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QLabel
-from constants import TABLE_MAX_ROWS
+from ascii_dialog.constants import TABLE_MAX_ROWS
 
 
 class WarningLabel(QLabel):
