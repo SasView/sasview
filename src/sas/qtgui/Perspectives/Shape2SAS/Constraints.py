@@ -62,7 +62,7 @@ parameters = {constraints}
 translation = """
 
 """
-model_info = reparameterize({name}, parameters, translation, __file__)
+model_info = reparameterize("{name}", parameters, translation, __file__)
 
         ''').lstrip().rstrip())
 
@@ -92,7 +92,7 @@ model_info = reparameterize({name}, parameters, translation, __file__)
             return False
 
 
-    def getConstraints(self, fitPar: list[str]) -> tuple[list[str], str, str]:
+    def getConstraints(self, fitPar: list[str], modelName: str) -> tuple[list[str], str, str]:
         """Read inputs from text editor"""
 
         constraintsStr = self.constraintTextEditor.txtEditor.toPlainText()
@@ -106,7 +106,7 @@ model_info = reparameterize({name}, parameters, translation, __file__)
         parameters = self.getParameters(constraintsStr, fitPar)
 
         #Get and check translation
-        translation = self.getTranslation(constraintsStr, importStatement)
+        translation = self.getTranslation(modelName, constraintsStr, importStatement)
 
         return importStatement, parameters, translation
     
@@ -116,14 +116,14 @@ model_info = reparameterize({name}, parameters, translation, __file__)
         if remove in importStatement:
             importStatement.remove(remove)
 
-    def getTranslation(self, constraintsStr: str, importStatement: list[str]) -> str:
+    def getTranslation(self, modelName: str, constraintsStr: str, importStatement: list[str]) -> str:
         """Get translation from constraints"""
 
 
         #see if translation is in constraints
         if not re.search(r'translation\s*=', constraintsStr):
             warnings.warn("No translation found in constraints")
-            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
+            self.removeFromImport(importStatement, "from sasmodels.sasmodels.core import reparameterize")
             return ""
         
         translation = re.search(r'translation\s*=\s*"""(.*\n(?:.*\n)*?)"""', constraintsStr, re.DOTALL)
@@ -131,20 +131,20 @@ model_info = reparameterize({name}, parameters, translation, __file__)
 
         #Check if translation is empty
         if not translationInput:
-            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
+            self.removeFromImport(importStatement, "from sasmodels.sasmodels.core import reparameterize")
             return ""
         
         #Check if translation is only whitespace
         if not translationInput.strip():
-            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
+            self.removeFromImport(importStatement, "from sasmodels.sasmodels.core import reparameterize")
             return ""
         
         #Check if reparameterize is imported
         if not re.search(r'from sasmodels.core import reparameterize', constraintsStr):
-            raise ValueError("Could not find from sasmodels.core import reparameterize in constraints")
+            raise ValueError("Could not find from sasmodels.sasmodels.core import reparameterize in constraints")
 
         #Check if translation is set
-        model_infoDescription = r'model_info\s*=\s*reparameterize\(\s*Model_1\s*,\s*parameters\s*,\s*translation\s*,\s*__file__\s*\)'
+        model_infoDescription = fr'model_info\s*=\s*reparameterize\(\s*"{modelName}"\s*,\s*parameters\s*,\s*translation\s*,\s*__file__\s*\)'
         model_info = re.search(model_infoDescription, constraintsStr)
         model_info = model_info.group(0) if model_info else ""
 
@@ -183,6 +183,7 @@ model_info = reparameterize({name}, parameters, translation, __file__)
     def isImportFromStatement(node: ast.ImportFrom) -> list[str]:
         """Return list of ImportFrom statements"""
 
+        print("TEST", node.module)
         #Check if library exists
         if not importlib.util.find_spec(node.module):
             raise ModuleNotFoundError(f"No module named {node.module}")

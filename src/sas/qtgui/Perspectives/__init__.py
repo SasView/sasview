@@ -5,12 +5,10 @@ from .Fitting.FittingPerspective import FittingWindow
 from .Invariant.InvariantPerspective import InvariantWindow
 from .Inversion.InversionPerspective import InversionWindow
 from .Corfunc.CorfuncPerspective import CorfuncWindow
-from .Shape2SAS.DesignWindow import DesignWindow
 
 PERSPECTIVES = {
     FittingWindow.name: FittingWindow,
     InvariantWindow.name: InvariantWindow,
     InversionWindow.name: InversionWindow,
     CorfuncWindow.name: CorfuncWindow,
-    DesignWindow.name: DesignWindow
 }

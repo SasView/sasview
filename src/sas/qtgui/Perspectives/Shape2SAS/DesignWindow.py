@@ -23,13 +23,15 @@ import sys
 import re
 from types import MethodType
 from typing import Union
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from PySide6.QtWidgets import QApplication, QDialog, QHBoxLayout, QVBoxLayout, QWidget
-from PySide6.QtCore import Qt, QRect, QTimer
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit
 
-# Local Perspectives
+# Local SasView
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Perspectives.perspective import Perspective
 
 from UI.DesignWindowUI import Ui_DesignWindow
@@ -113,13 +115,15 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.plotSAXS.setMinimumSize(110, 24)
         self.plotSAXS.setMaximumSize(110, 24)
         self.SAXSButtons.horizontalLayout_5.insertWidget(1, self.plotSAXS)
-        self.simulate = QPushButton("Simulate SAXS")
-        self.simulate.setMinimumSize(110, 24)
-        self.simulate.setMaximumSize(110, 24)
+        self.sendSimToSasView = QPushButton("Simulate SAXS")
+        self.sendSimToSasView.setMinimumSize(110, 24)
+        self.sendSimToSasView.setMaximumSize(110, 24)
         self.SAXSButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 10)
-        self.SAXSButtons.horizontalLayout_5.insertWidget(1, self.simulate)
-        self.simulate.clicked.connect(self.getSimulatedSAXSData)
+        self.SAXSButtons.horizontalLayout_5.insertWidget(1, self.sendSimToSasView)
+        self.sendSimToSasView.clicked.connect(self.getSimulatedSAXSData)
         self.comboBox.currentIndexChanged.connect(self.showStructureFactorOptions)
+        self.plotSAXS.clicked.connect(self.showSimulatedSAXSData)
+        self.sendSimToSasView.clicked.connect(self.sendSimulatedSAXSToDataExplorer)
 
         self.gridLayout_5.addWidget(self.SAXSButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         self.SAXSExperiment.setLayout(self.gridLayout_5)
@@ -385,9 +389,11 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         """Get 3D plot of the designed model in the Build model tab. 
         If checked, plot theoretical scattering from the designed model."""
 
-        modelProfile = self.getModelProfile(self.ifEmptyValue)
-        if not modelProfile:
+        columns = self.subunitTable.model.columnCount()
+        if not self.subunitTable.model.item(1, columns - 1):
             return
+
+        modelProfile = self.getModelProfile(self.ifEmptyValue)
         
         plotDesign = self.getViewFeatures()
         modelDistribution = getPointDistribution(modelProfile, 3000)
@@ -494,17 +500,16 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
         #TODO: Check if constraint button have been clicked. 
         # otherwise return default constraints to checked parameters
-        constrainParameters = self.constraint.getConstraints(fitPar)
+        constrainParameters = self.constraint.getConstraints(fitPar, modelName)
 
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedVars, conditionFitPar=parNames)
 
         model_str, full_path = generatePlugin(modelProfile, constrainParameters, fitPar, Npoints, prPoints, modelName)
 
-        print(model_str)
-
         #Write file to plugin model folder
-        #TabbedModelEditor.writeFile(full_path, model_str)
+        print(full_path)
+        TabbedModelEditor.writeFile(full_path, model_str)
 
 
     def onCheckingInput(self, input: str, default: str) -> str:
@@ -517,14 +522,15 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
     def plotSimulatedSAXSData(self):
         """Plotting simulated SAXS data in the Virtual SAXS Experiment tab"""
+        self.scatteringProf
+
 
     def getSimulatedSAXSData(self):
         """Generating simulated data and sends it to
         the Data Explorer in SasView"""
-        
-        modelProfile = self.getModelProfile(self.ifEmptyValue)
-        if not modelProfile:
-            #No columns in the subunit table
+
+        columns = self.subunitTable.model.columnCount()
+        if not self.subunitTable.model.item(1, columns - 1):
             return
 
         #Calculations
@@ -564,11 +570,51 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         Sim_calc = SimulateScattering(q=Theo_I.q, I0=Theo_I.I0, I=Theo_I.I, exposure=exposure)
         Sim_SAXS = getSimulatedScattering(Sim_calc)
 
-        print(Sim_SAXS)
 
+        return Sim_SAXS
+    
+
+    def showSimulatedSAXSData(self):
+        """Plotting simulated SAXS data in the Virtual SAXS Experiment tab"""
+
+        columns = self.subunitTable.model.columnCount()
+        if not self.subunitTable.model.item(1, columns - 1):
+            return
+ 
+        from PlotAspects.plotAspects import Canvas
+
+        #Clear layout for last plot
+        if self.scatteringScene.count():
+            widget = self.scatteringScene.takeAt(0).widget()
+            if widget:
+                widget.deleteLater()
+
+        self.canvas = Canvas(parent=self.scatteringProf)
+        self.setFig = self.canvas.fig.add_subplot(111)
+
+        self.canvas.fig.subplots_adjust(left=0.20, right=0.95, top=0.85, bottom=0.15) #TODO: find a better way to set this
+
+        simSAXS = self.getSimulatedSAXSData()
+        modelName = self.lineEdit_19.text()
+
+        self.setFig.set_title(f"Simulated SAXS for {modelName}")
+        self.setFig.set_xlabel("q")
+        self.setFig.set_ylabel("I(q)")
+        self.setFig.errorbar(simSAXS.q, simSAXS.I_sim, yerr=simSAXS.I_err, color="black", label="I(q)")
+
+        self.setFig.set_xscale('log')
+        self.setFig.set_yscale('log')
+
+        self.setFig.legend()
+        self.setFig.grid(True)
+
+        self.scatteringScene.addWidget(self.canvas)
+        self.scatteringProf.setLayout(self.scatteringScene)
+
+    def sendSimulatedSAXSToDataExplorer(self):
+        """Send simulated data to the Data Explorer in SasView"""
+        print("Send simulated data to Data Explorer")
         #Send data to SasView Data Explorer
-        #IExperimental.save_Iexperimental(name=name, q=q, I=Sim_SAXS.I, error=Sim_SAXS.error)
-
 
     ####CAPTURE IMAGE OF TABS
     def capture_widget_with_tabs(self):

@@ -90,13 +90,13 @@ category = "plugin"
 def Iq(q, {', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
     
-    modelProfile = ModelProfile(subunits=[{prof.subunits}], 
-                                    p_s=[{parListFormat(prof.p_s)}], 
-                                    dimensions=[{parListsFormat(prof.dimensions)}], 
-                                    com=[{parListsFormat(prof.com)}], 
-                                    rotation_points=[{parListsFormat(prof.rotation_points)}], 
-                                    rotation=[{parListsFormat(prof.rotation)}, 
-                                    exclude_overlap={prof.exclude_overlap}])
+    modelProfile = ModelProfile(subunits={prof.subunits}, 
+                                    p_s={parListFormat(prof.p_s)}, 
+                                    dimensions={parListsFormat(prof.dimensions)}, 
+                                    com={parListsFormat(prof.com)}, 
+                                    rotation_points={parListsFormat(prof.rotation_points)}, 
+                                    rotation={parListsFormat(prof.rotation)}, 
+                                    exclude_overlap={prof.exclude_overlap})
     
     simPar = SimulationParameters(q=q, prpoints={pr_points}, Npoints={Npoints}, model_name="{model_name.replace('.py', '')}")
     dist = getPointDistribution(modelProfile, {Npoints})

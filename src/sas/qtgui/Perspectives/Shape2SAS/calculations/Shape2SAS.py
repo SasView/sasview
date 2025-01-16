@@ -113,7 +113,7 @@ def getPointDistribution(prof: ModelProfile, Npoints):
     """Generate points for a given model profile."""
 
     x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits, 
-                                                  prof.dimensions, prof.rotation, 
+                                                  prof.dimensions, prof.rotation, prof.rotation_points, 
                                                   prof.p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()
     
     return ModelPointDistribution(x=x_new, y=y_new, z=z_new, p=p_new, volume_total=volume_total)
@@ -300,6 +300,8 @@ if __name__ == "__main__":
                         help='displacement for each subunits in each model.')
     parser.add_argument('-rotation', '--rotation', type=float_lists, nargs='+', action='append', 
                         help='rotation for each subunits in each model.')
+    parser.add_argument('-rotation_points', '--rotation_points', type=float_lists, nargs='+', action='append', 
+                        help='rotation points for each subunits in each model.')
     
     parser.add_argument('-poly', '--polydispersity', type=float, nargs='+', action='extend',
                         help='Polydispersity of subunits for each model.')
@@ -387,9 +389,10 @@ if __name__ == "__main__":
 
         com = check_3Dinput(args.com, [[0, 0, 0]], "COM", N_subunits, i)
         rotation = check_3Dinput(args.rotation, [[0, 0, 0]], "rotation", N_subunits, i)
+        rotation_points = check_3Dinput(args.rotation_points, [[0, 0, 0]], "rotation", N_subunits, i)
 
         Profile = ModelProfile(subunits=subunits, p_s=p_s, dimensions=dims, 
-                     com=com, rotation_points=com, rotation=rotation, 
+                     com=com, rotation_points=rotation_points, rotation=rotation, 
                      exclude_overlap=exclude_overlap)
 
         #Generate points

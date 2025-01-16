@@ -94,7 +94,7 @@ class ViewerModel(QWidget):
 
         self.scene.clear()
 
-        figure = Figure(dpi=600)
+        figure = Figure()
         ax = figure.add_subplot(111)
         ax.set_title("P(q) plot")
         ax.set_xlabel("q")

@@ -571,17 +571,27 @@ class Rotation:
                        z_add: np.ndarray, 
                        alpha: float, 
                        beta: float, 
-                       gam: float):
+                       gam: float,
+                       rotp_x: float,
+                       rotp_y: float,
+                       rotp_z: float):
         self.x_add = x_add
         self.y_add = y_add
         self.z_add = z_add
         self.alpha = alpha
         self.beta = beta
         self.gam = gam
+        self.rotp_x = rotp_x
+        self.rotp_y = rotp_y
+        self.rotp_z = rotp_z
 
     
     def onRotatingPoints(self) -> Vector3D:
         """Simple Euler rotation"""
+
+        self.x_add -= self.rotp_x
+        self.y_add -= self.rotp_y
+        self.z_add -= self.rotp_z
 
         x_rot = (self.x_add * np.cos(self.gam) * np.cos(self.beta) 
              + self.y_add * (np.cos(self.gam) * np.sin(self.beta) * np.sin(self.alpha) - np.sin(self.gam) * np.cos(self.alpha)) 
@@ -594,6 +604,10 @@ class Rotation:
         z_rot = (-self.x_add * np.sin(self.beta)
             + self.y_add * np.cos(self.beta) * np.sin(self.alpha)
             + self.z_add * np.cos(self.beta) * np.cos(self.alpha))
+        
+        self.x_add += self.rotp_x
+        self.y_add += self.rotp_y
+        self.z_add += self.rotp_z
 
         return x_rot, y_rot, z_rot
     
@@ -626,13 +640,15 @@ class GeneratePoints:
     def __init__(self, com: List[float], 
                     subunitClass: object, 
                     dimensions: List[float], 
-                    rotation: List[float], 
+                    rotation: List[float],
+                    rotation_point: list[float],
                     Npoints: int):
 
         self.com = com
         self.subunitClass = subunitClass
         self.dimensions = dimensions
         self.rotation = rotation
+        self.rotation_point = rotation_point
         self.Npoints = Npoints
         
 
@@ -649,12 +665,13 @@ class GeneratePoints:
                                    z: np.ndarray) -> Vector3D:
         """Transforms the points"""
         alpha, beta, gam = self.rotation
+        rotp_x, rotp_y, rotp_z = self.rotation_point
         alpha = np.radians(alpha)
         beta = np.radians(beta)
         gam = np.radians(gam)
         com_x, com_y, com_z = self.com
 
-        x, y, z = Rotation(x, y, z, alpha, beta, gam).onRotatingPoints()
+        x, y, z = Rotation(x, y, z, alpha, beta, gam, rotp_x, rotp_y, rotp_z).onRotatingPoints()
         x, y, z = Translation(x, y, z, com_x, com_y, com_z).onTranslatingPoints()
         return x, y, z
     
@@ -664,7 +681,8 @@ class GenerateAllPoints:
                             com: List[List[float]], 
                         subunits: List[List[float]], 
                         dimensions: List[List[float]], 
-                        rotation : List[List[float]], 
+                        rotation : List[List[float]],
+                        rotation_point: list[float],
                         p: List[float], 
                         exclude_overlap: bool):
         self.Npoints = Npoints
@@ -673,6 +691,7 @@ class GenerateAllPoints:
         self.Number_of_subunits = len(subunits)
         self.dimensions = dimensions
         self.rotation = rotation
+        self.rotation_point = rotation_point
         self.p_s = p
         self.exclude_overlap = exclude_overlap
         self.setAvailableSubunits()
@@ -750,6 +769,7 @@ class GenerateAllPoints:
                        z: np.ndarray, 
                        p: np.ndarray, 
                        rotation: List[float], 
+                       rotation_point: list[float],
                        com: List[float], 
                        subunitClass: object, 
                        dimensions: List[float]):
@@ -762,11 +782,12 @@ class GenerateAllPoints:
 
             #rotate backwards with minus rotation angles
             alpha, beta, gam = rotation
+            rotp_x, rotp_y, rotp_z = rotation_point
             alpha = np.radians(alpha)
             beta = np.radians(beta)
             gam = np.radians(gam)
 
-            x_eff, y_eff, z_eff = Rotation(x_eff, y_eff, z_eff, -alpha, -beta, -gam).onRotatingPoints()
+            x_eff, y_eff, z_eff = Rotation(x_eff, y_eff, z_eff, -alpha, -beta, -gam, -rotp_x, -rotp_y, -rotp_z).onRotatingPoints()
 
         else:
             ## effective coordinates, shifted by (x_com,y_com,z_com)
@@ -802,7 +823,7 @@ class GenerateAllPoints:
             Npoints = int(self.Npoints * volume[i] / sum_vol)
 
             x_add, y_add, z_add = GeneratePoints(self.com[i], self.subunitClasses[self.subunits[i]], self.dimensions[i], 
-                                                    self.rotation[i], Npoints).onGeneratingPoints()
+                                                    self.rotation[i], self.rotation_point[i], Npoints).onGeneratingPoints()
             
             #Remaining points
             N_subunit = len(x_add)
@@ -813,7 +834,7 @@ class GenerateAllPoints:
             N_x_sum = 0
             if self.exclude_overlap:
                 for j in range(i): 
-                    x_add, y_add, z_add, p_add, N_x = self.onCheckOverlap(x_add, y_add, z_add, p_add, self.rotation[j],  
+                    x_add, y_add, z_add, p_add, N_x = self.onCheckOverlap(x_add, y_add, z_add, p_add, self.rotation[j], self.rotation_point[j], 
                                                     self.com[j], self.subunitClasses[self.subunits[j]], self.dimensions[j])
                     N_x_sum += N_x
     
@@ -866,7 +887,7 @@ class GenerateAllPoints:
             Npoints = int(self.Npoints * volume[i] / sum_vol)
 
             x_add, y_add, z_add = GeneratePoints(self.com[i], self.subunitClasses[self.subunits[i]], self.dimensions[i], 
-                                                    self.rotation[i], Npoints).onGeneratingPoints()
+                                                    self.rotation[i], self.rotation_point, Npoints).onGeneratingPoints()
             
             #Remaining points
             N_subunit = len(x_add)
@@ -877,7 +898,7 @@ class GenerateAllPoints:
             N_x_sum = 0
             if self.exclude_overlap:
                 for j in range(i): 
-                    x_add, y_add, z_add, p_add, N_x = self.onCheckOverlap(x_add, y_add, z_add, p_add, self.rotation[j],  
+                    x_add, y_add, z_add, p_add, N_x = self.onCheckOverlap(x_add, y_add, z_add, p_add, self.rotation[j], self.rotation_point[j], 
                                                     self.com[j], self.subunitClasses[self.subunits[j]], self.dimensions[j])
                     N_x_sum += N_x
             

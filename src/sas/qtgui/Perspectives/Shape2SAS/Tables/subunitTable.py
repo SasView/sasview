@@ -375,7 +375,7 @@ class CustomDelegate(QStyledItemDelegate):
 
         else:
             editor = QLineEdit(widget)
-            validator = DoubleValidator(0.0, 10000.0, 99, editor)
+            validator = DoubleValidator(-10000.0, 10000.0, 99, editor)
             editor.setValidator(validator)
             return editor
     
