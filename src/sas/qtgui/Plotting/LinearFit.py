@@ -2,9 +2,7 @@
 Adds a linear fit plot to the chart
 """
 import re
-import numpy
-from numbers import Number
-from typing import Optional
+import numpy as np
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
@@ -23,7 +21,8 @@ from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
 
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
-    updatePlot = QtCore.Signal(tuple)
+    updatePlot = QtCore.Signal(np.ndarray, np.ndarray)
+
     def __init__(self, parent=None,
                  data=None,
                  max_range=(0.0, 0.0),
@@ -34,8 +33,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         self.setupUi(self)
 
-        assert(isinstance(max_range, tuple))
-        assert(isinstance(fit_range, tuple))
+        assert isinstance(max_range, tuple)
+        assert isinstance(fit_range, tuple)
 
         self.data = data
         self.parent = parent
@@ -79,19 +78,22 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtBerr.setText("0")
         self.txtChi2.setText("0")
 
-
         # Initial ranges
-        self.txtRangeMin.setText(str(max_range[0]))
-        self.txtRangeMax.setText(str(max_range[1]))
+        tr_min = GuiUtils.formatNumber(max_range[0])
+        tr_max = GuiUtils.formatNumber(max_range[1])
+        self.txtRangeMin.setText(str(tr_min))
+        self.txtRangeMax.setText(str(tr_max))
         # Assure nice display of ranges
         fr_min = GuiUtils.formatNumber(fit_range[0])
         fr_max = GuiUtils.formatNumber(fit_range[1])
         self.txtFitRangeMin.setText(str(fr_min))
         self.txtFitRangeMax.setText(str(fr_max))
+        self.xminFit = None
+        self.xmaxFit = None
 
         # cast xLabel into html
         label = re.sub(r'\^\((.)\)(.*)', r'<span style=" vertical-align:super;">\1</span>\2',
-                      str(self.xLabel).rstrip())
+                       str(self.xLabel).rstrip())
         self.lblRange.setText('Fit range of ' + label)
 
         self.model = LineModel()
@@ -109,6 +111,13 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         # connect Fit button
         self.cmdFit.clicked.connect(self.fit)
+        self.parent.installEventFilter(self)
+
+    def eventFilter(self, watched, event):
+        if watched is self.parent and event.type() == QtCore.QEvent.Close:
+            self.q_sliders = None
+            self.close()
+        return super(LinearFit, self).eventFilter(watched, event)
 
     def setRangeLabel(self, label=""):
         """
@@ -128,10 +137,6 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         A and B parameters of the best linear fit y=Ax +B
         Push a plottable to the caller
         """
-        tempx = []
-        tempy = []
-        tempdy = []
-
         # Checks to assure data correctness
         if len(self.data.view.x) < 2:
             return
@@ -157,12 +162,12 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         # Find the fitting parameters
         self.cstA = Fittings.Parameter(self.model, 'A', self.default_A)
         self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
-        tempdy = numpy.asarray(tempdy)
+        tempdy = np.asarray(tempdy)
         tempdy[tempdy == 0] = 1
 
         if self.x_is_log:
-            xmin = numpy.log10(xmin)
-            xmax = numpy.log10(xmax)
+            xmin = np.log10(xmin)
+            xmax = np.log10(xmax)
 
         chisqr, out, cov = Fittings.sasfit(self.model,
                                            [self.cstA, self.cstB],
@@ -173,8 +178,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
             chisqr = chisqr / len(tempx)
 
         # Check that cov and out are iterable before displaying them
-        errA = numpy.sqrt(cov[0][0]) if cov is not None else 0
-        errB = numpy.sqrt(cov[1][1]) if cov is not None else 0
+        errA = np.sqrt(cov[0][0]) if cov is not None else 0
+        errB = np.sqrt(cov[1][1]) if cov is not None else 0
         cstA = out[0] if out is not None else 0.0
         cstB = out[1] if out is not None else 0.0
 
@@ -189,12 +194,12 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         # load tempy with the minimum transformation
         y_model = self.model.run(xmin)
         tempx.append(xminView)
-        tempy.append(numpy.power(10.0, y_model) if self.y_is_log else y_model)
+        tempy.append(np.power(10.0, y_model) if self.y_is_log else y_model)
 
         # load tempy with the maximum transformation
         y_model = self.model.run(xmax)
         tempx.append(xmaxView)
-        tempy.append(numpy.power(10.0, y_model) if self.y_is_log else y_model)
+        tempy.append(np.power(10.0, y_model) if self.y_is_log else y_model)
 
         # Set the fit parameter display when  FitDialog is opened again
         self.Avalue = cstA
@@ -211,21 +216,21 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtChi2.setText(formatNumber(self.Chivalue))
 
         # Possibly Guinier analysis
-        i0 = numpy.exp(cstB)
+        i0 = np.exp(cstB)
         self.txtGuinier_1.setText(formatNumber(i0))
-        err = numpy.abs(numpy.exp(cstB) * errB)
+        err = np.abs(np.exp(cstB) * errB)
         self.txtGuinier1_Err.setText(formatNumber(err))
 
         if self.rg_yx:
-            rg = numpy.sqrt(-2 * float(cstA))
-            diam = 4 * numpy.sqrt(-float(cstA))
+            rg = np.sqrt(-2 * float(cstA))
+            diam = 4 * np.sqrt(-float(cstA))
             value = formatNumber(diam)
             if rg is not None and rg != 0:
                 err = formatNumber(8 * float(errA) / diam)
             else:
                 err = ''
         else:
-            rg = numpy.sqrt(-3 * float(cstA))
+            rg = np.sqrt(-3 * float(cstA))
             value = formatNumber(rg)
 
             if rg is not None and rg != 0:
@@ -241,16 +246,15 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         value = formatNumber(rg * self.floatInvTransform(self.xmaxFit))
         self.txtGuinier_3.setText(value)
 
-        tempx = numpy.array(tempx)
-        tempy = numpy.array(tempy)
+        tempx = np.array(tempx)
+        tempy = np.array(tempy)
 
-        self.clearSliders()
-        self.updatePlot.emit((tempx, tempy))
         self.drawSliders()
+        self.updatePlot.emit(tempx, tempy)
 
     def origData(self):
         # Store the transformed values of view x, y and dy before the fit
-        xmin_check = numpy.log10(self.xminFit)
+        xmin_check = np.log10(self.xminFit)
         # Local shortcuts
         x = self.data.view.x
         y = self.data.view.y
@@ -258,23 +262,23 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         if self.y_is_log:
             if self.x_is_log:
-                tempy  = [numpy.log10(y[i])
+                tempy  = [np.log10(y[i])
                          for i in range(len(x)) if x[i] >= xmin_check]
                 tempdy = [DataTransform.errToLogX(y[i], 0, dy[i], 0)
                          for i in range(len(x)) if x[i] >= xmin_check]
             else:
-                tempy = list(map(numpy.log10, y))
+                tempy = list(map(np.log10, y))
                 tempdy = list(map(lambda t1,t2:DataTransform.errToLogX(t1,0,t2,0),y,dy))
         else:
             tempy = y
             tempdy = dy
 
         if self.x_is_log:
-            tempx = [numpy.log10(x) for x in self.data.view.x if x > xmin_check]
+            tempx = [np.log10(x) for x in self.data.view.x if x > xmin_check]
         else:
             tempx = x
 
-        return numpy.array(tempx), numpy.array(tempy), numpy.array(tempdy)
+        return np.array(tempx), np.array(tempy), np.array(tempdy)
 
     def checkFitValues(self, item):
         """
@@ -304,32 +308,36 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         panel.
 
         """
-        # TODO: refactor this. This is just a hack to make the
-        # functionality work without rewritting the whole code
-        # with good design (which really should be done...).
-        if self.xLabel == "x":
-            return x
-        elif self.xLabel == "x^(2)":
-            return numpy.sqrt(x)
-        elif self.xLabel == "x^(4)":
-            return numpy.sqrt(numpy.sqrt(x))
-        elif self.xLabel == "log10(x)":
-            return numpy.power(10.0, x)
-        elif self.xLabel == "ln(x)":
-            return numpy.exp(x)
-        elif self.xLabel == "log10(x^(4))":
-            return numpy.sqrt(numpy.sqrt(numpy.power(10.0, x)))
-        return x
+        from sas.qtgui.Utilities.GuiUtils import xyTransform
+        label_tuple = xyTransform(self.data, self.xLabel, self.yLabel)
+        match self.xLabel:
+            case "x^(2)":
+                return np.sqrt(x)
+            case "x^(4)":
+                return np.sqrt(np.sqrt(x))
+            case "log10(x)":
+                return np.power(10.0, x)
+            case "ln(x)":
+                return np.exp(x)
+            case "log10(x^(4))":
+                return np.sqrt(np.sqrt(np.power(10.0, x)))
+            case _:
+                return x
 
     def drawSliders(self):
         """Show new Q-range sliders"""
+        existing_slider = self.parent.sliders.pop(self.data.name, None)
+        self.clearSliders()
         self.data.show_q_range_sliders = True
         self.q_sliders = QRangeSlider(self.parent, self.parent.ax, data=self.data)
         self.q_sliders.line_min.input = self.txtFitRangeMin
         self.q_sliders.line_max.input = self.txtFitRangeMax
-        # Ensure values are updated on redraw of plots
-        self.q_sliders.line_min.inputChanged()
-        self.q_sliders.line_max.inputChanged()
+        self.q_sliders.line_min.connect_markers([self.q_sliders.line_min.line, self.q_sliders.line_min.inner_marker])
+        self.q_sliders.line_max.connect_markers([self.q_sliders.line_max.line, self.q_sliders.line_max.inner_marker])
+        # New sliders should be visible but existing sliders that were turned off should remain off
+        if existing_slider is not None and not existing_slider.is_visible:
+            self.q_sliders.toggle()
+        self.parent.sliders[self.data.name] = self.q_sliders
 
     def clearSliders(self):
         """Clear existing sliders"""
