@@ -676,14 +676,13 @@ class PlotterWidget(PlotterBase):
     def replacePlot(self, id, new_plot, retain_dimensions=True):
         """
         Remove plot 'id' and add 'new_plot' to the chart.
-        This effectlvely refreshes the chart with changes to one of its plots
+        This effectively refreshes the chart with changes to one of its plots
         """
 
         # Pull the current transform settings from the old plot
         selected_plot = self.plot_dict[id]
-        new_plot.xtransform = selected_plot.xtransform
-        new_plot.ytransform = selected_plot.ytransform
-        #Adding few properties ftom ModifyPlot to preserve them in future changes
+        new_plot.plot_role = selected_plot.plot_role
+        # Adding few properties from ModifyPlot to preserve them in future changes
         new_plot.title = selected_plot.title
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
