@@ -69,15 +69,8 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self._manager = parent
 
         ############Building GUI##############
-        #Building Build model tab
-        modelVbox = QVBoxLayout()
-        modelHbox = QHBoxLayout()
-        
-        modelVbox.setContentsMargins(0,0,0,0)
-        modelHbox.setContentsMargins(10,0,10,0)
-        self.viwerModel = ViewerModel()
-
-        self.subunitTable = SubunitTable()
+        ###create build model tab
+        #Add buttons to the modelTabButtonOptions
         self.modelTabButtonOptions = ButtonOptions()
         self.modelTabButtonOptions.help.setToolTip("Go to help page")
         self.modelTabButtonOptions.closePage.setToolTip("Close Shape2SAS")
@@ -93,7 +86,6 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.checkTheoreticalScattering)
         self.plot = QPushButton("Plot")
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plot)
-        self.plot.clicked.connect(self.onClickingPlot)
         self.plot.setToolTip("Plot the model")
 
         self.line2 = QFrame()
@@ -105,22 +97,38 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.plugin.setMaximumSize(110, 24)
         self.plugin.setToolTip("Go to the plugin model page")
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
+
+        #connect buttons
+        self.modelTabButtonOptions.reset.clicked.connect(self.onSubunitTableReset)
+        self.modelTabButtonOptions.closePage.clicked.connect(self.onClickingClose)
+        self.plot.clicked.connect(self.onClickingPlot)
         self.plugin.clicked.connect(self.showConstraintWindow)
+
+        #create layout for build model tab
+        self.viewerModel = ViewerModel()
+        self.subunitTable = SubunitTable()
+
+        modelVbox = QVBoxLayout()
+        modelHbox = QHBoxLayout()
         
+        modelVbox.setContentsMargins(0,0,0,0)
+        modelHbox.setContentsMargins(10,0,10,0)
         modelSection = QWidget()
         modelHbox.addWidget(self.subunitTable)
-        modelHbox.addWidget(self.viwerModel.Viewmodel_modul)
+        modelHbox.addWidget(self.viewerModel.Viewmodel_modul)
         modelSection.setLayout(modelHbox)
 
         modelVbox.addWidget(modelSection)
         modelVbox.addWidget(self.modelTabButtonOptions)
         self.model.setLayout(modelVbox)
 
-        #Building Virtual SAXS Experiment tab
+        ###Building Virtual SAXS Experiment tab
+        #create and set layout for buttons
         self.SAXSTabButtons = ButtonOptions()
         self.SAXSTabButtons.help.setToolTip("Go to help page")
         self.SAXSTabButtons.closePage.setToolTip("Close Shape2SAS")
         self.SAXSTabButtons.reset.setToolTip("Reset this page to default")
+        self.SAXSTabButtons.reset.clicked.connect(self.onSAXSExperimentReset)
         self.plotSAXS = QPushButton("Plot SAXS")
         self.plotSAXS.setMinimumSize(110, 24)
         self.plotSAXS.setMaximumSize(110, 24)
@@ -132,23 +140,27 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
         self.SAXSTabButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 10)
         self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.sendSimToSasView)
-        self.sendSimToSasView.clicked.connect(self.getSimulatedSAXSData)
-        self.comboBox.currentIndexChanged.connect(self.showStructureFactorOptions)
-        self.plotSAXS.clicked.connect(self.showSimulatedSAXSData)
-        self.sendSimToSasView.clicked.connect(self.sendSimulatedSAXSToDataExplorer)
-
         self.gridLayout_5.addWidget(self.SAXSTabButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         self.SAXSExperiment.setLayout(self.gridLayout_5)
 
-        #Building Virtual SANS Experiment tab
+        #connect buttons
+        self.sendSimToSasView.clicked.connect(self.getSimulatedSAXSData)
+        self.structureFactor.currentIndexChanged.connect(self.showStructureFactorOptions)
+        self.plotSAXS.clicked.connect(self.showSimulatedSAXSData)
+        self.sendSimToSasView.clicked.connect(self.sendSimulatedSAXSToDataExplorer)
+        self.SAXSTabButtons.closePage.clicked.connect(self.onClickingClose)
+
+        ###Building Virtual SANS Experiment tab
         #TODO: implement in a future project
 
-        #Building Constraint window
+        ###Building Constraint window
         self.constraint = Constraints()
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
         self.subunitTable.delete.clicked.connect(self.deleteFromVariableTable)
         self.constraint.variableTable.setConstraints.clicked.connect(self.setConstraintsToTextEditor)
         self.constraint.createPlugin.clicked.connect(self.getPluginModel)
+        self.constraint.buttonOptions.reset.clicked.connect(self.onConstraintReset)
+        self.constraint.buttonOptions.closePage.clicked.connect(self.onClickingClose)
 
         #create png of each tab
         #self.modelTabButtonOptions.help.clicked.connect(self.export_widget_with_tabs_to_png)
@@ -207,7 +219,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
                     toTextEditor.append(parameter)
 
         formatted = "[\n " + ",\n ".join(str(pars) for pars in toTextEditor) + "\n]"
-        modelName = self.constraint.variableTable.lineEdit_3.text()
+        modelName = self.constraint.variableTable.pluginModelName.text()
         self.constraint.setConstraints(formatted, modelName)
 
 
@@ -252,7 +264,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
     def showStructureFactorOptions(self):
         """Show options for structure factor"""
         #get chosen structure factor
-        index = self.comboBox.currentIndex()
+        index = self.structureFactor.currentIndex()
         #show options for chosen structure factor
         self.stackedWidget.setCurrentIndex(index)
 
@@ -262,7 +274,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         S_vals = []
 
         #get chosen structure factor
-        index = self.comboBox.currentIndex()
+        index = self.structureFactor.currentIndex()
         #find chosen widget containing the chosen structure factor options
         self.stackedWidget.setCurrentIndex(index)
         currentWidget = self.stackedWidget.currentWidget()
@@ -272,7 +284,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         #TODO: concentration is already an input value. Maybe add 
         #a texbox to explain that to the user if stackedWidget chosen?
         if index == 1:
-            conc = self.lineEdit_3
+            conc = self.volumeFraction
             S_vals.append(float(conc.text()))
 
 
@@ -409,7 +421,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         
         plotDesign = self.getViewFeatures()
         modelDistribution = getPointDistribution(modelProfile, 3000)
-        self.viwerModel.setPlot(modelDistribution, plotDesign)
+        self.viewerModel.setPlot(modelDistribution, plotDesign)
 
         #on being checked, plot theoretical scattering
         if self.checkTheoreticalScattering.isChecked():
@@ -419,22 +431,60 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
                                                                         sigma_r=0.0), 
                                                                         Calculation=SimulationParameters())
             theoreticalScattering = getTheoreticalScattering(scattering)
-            self.viwerModel.setScatteringPlot(theoreticalScattering)
+            self.viewerModel.setScatteringPlot(theoreticalScattering)
 
         else:
-            self.viwerModel.setClearScatteringPlot()
+            self.viewerModel.setClearScatteringPlot()
 
 
-    def onClickingReset(self):
-        """Reset tab to default"""
-        print("Saving")
-        #TODO: make such that tab is set to default
+    def onSubunitTableReset(self):
+        """Reset subunit table to default"""
+        self.subunitTable.onClearSubunitTable()
+        self.constraint.variableTable.onClearTable()
+        self.viewerModel.setClearScatteringPlot()
+        self.viewerModel.setClearModelPlot()
+        self.checkTheoreticalScattering.setChecked(False)
+        self.subunitTable.overlap.setChecked(True)
+        self.subunitTable.subunit.setCurrentIndex(0)
 
+
+
+    def onSAXSExperimentReset(self):
+        """Reset Virtual SAXS Experiment tab to default"""
+        self.interfaceRoughness.setText("0.0")
+        self.polydispersity.setText("0.0")
+        self.volumeFraction.setText("0.02")
+        self.exposureTime.setText("500")
+        self.qMin.setText("0.001")
+        self.qMax.setText("0.5")
+        self.Nq.setText("400")
+        self.Npr.setText("100")
+        self.NSimPoints.setText("3000")
+        self.modelName.setText("Model_1")
+        self.structureFactor.setCurrentIndex(0)
+        self.hardSphereRadius.setText("50.0")
+        self.aggregateFrac.setText("0.1")
+        self.EffctiveRadius.setText("50.0")
+        self.particlePerAggregate.setText("80")
+
+        # Clear the plot in the Virtual SAXS Experiment tab
+        self.canvas.figure.clf()
+        self.canvas.draw()
+
+    def onConstraintReset(self):
+        """Reset Constraint window to default"""
+
+        self.constraint.clearConstraints()
+        self.constraint.variableTable.setUncheckToAllCheckBoxes()
+        self.constraint.variableTable.prPoints.setText("100")
+        self.constraint.variableTable.Npoints.setText("3000")
+        self.constraint.variableTable.pluginModelName.setText("Model_1")
 
     def onClickingClose(self):
         """Close Shape2SAS GUI"""
-        print("closing")
-        #TODO: make such that the GUI is closed and garbage collect
+
+        self.close()
+        self.constraint.onClosingConstraints()
     
 
     def onClickingHelp(self):
@@ -503,7 +553,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
         Npoints = int(self.constraint.variableTable.lineEdit.text())
         prPoints = int(self.constraint.variableTable.lineEdit_2.text())
-        modelName = self.constraint.variableTable.lineEdit_3.text()
+        modelName = self.constraint.variableTable.pluginModelName.text()
         parNames = self.getAllTableNames(self.ifNoCondition)
         checkedVars = self.checkedVariables()
 
@@ -546,28 +596,28 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
             return
 
         #Calculations
-        qmin = float(self.onCheckingInput(self.lineEdit, "0.001"))
-        qmax = float(self.onCheckingInput(self.lineEdit_14, "0.5"))
+        qmin = float(self.onCheckingInput(self.qMin, "0.001"))
+        qmax = float(self.onCheckingInput(self.qMax, "0.5"))
 
-        Nq = int(self.onCheckingInput(self.lineEdit_15, "400"))
-        Np = int(self.onCheckingInput(self.lineEdit_16, "100"))
-        N = int(self.onCheckingInput(self.lineEdit_17, "3000"))
+        Nq = int(self.onCheckingInput(self.Nq, "400"))
+        Npr = int(self.onCheckingInput(self.Npr, "100"))
+        N = int(self.onCheckingInput(self.NSimPoints, "3000"))
 
-        name = self.onCheckingInput(self.lineEdit_19, "Model_1")
+        name = self.onCheckingInput(self.modelName, "Model_1")
 
         par = self.getStructureFactorValues()
 
         #SAXS parameters
-        Stype = self.comboBox.currentText()
+        Stype = self.structureFactor.currentText()
 
-        sigma_r = float(self.onCheckingInput(self.lineEdit_5, "0.0"))
-        polydispersity = float(self.onCheckingInput(self.lineEdit_4, "0.0"))
-        conc = float(self.onCheckingInput(self.lineEdit_3, "0.2"))
-        exposure = float(self.onCheckingInput(self.lineEdit_2, "500"))
+        sigma_r = float(self.onCheckingInput(self.interfaceRoughness, "0.0"))
+        polydispersity = float(self.onCheckingInput(self.polydispersity, "0.0"))
+        conc = float(self.onCheckingInput(self.volumeFraction, "0.02"))
+        exposure = float(self.onCheckingInput(self.exposureTime, "500"))
 
         #Generate simulated data
         q = Qsampling.onQsampling(qmin, qmax, Nq)
-        Sim_par = SimulationParameters(q=q, prpoints=Np, Npoints=N)
+        Sim_par = SimulationParameters(q=q, prpoints=Npr, Npoints=N)
         Profile = self.getModelProfile(self.ifEmptyValue)
 
         Distr = getPointDistribution(Profile, N)
@@ -601,12 +651,12 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
                 widget.deleteLater()
 
         self.canvas = Canvas(parent=self.scatteringProf)
-        self.setFig = self.canvas.fig.add_subplot(111)
-
         self.canvas.fig.subplots_adjust(left=0.20, right=0.95, top=0.85, bottom=0.15) #TODO: find a better way to set this
 
+        self.setFig = self.canvas.fig.add_subplot(111)
+
         simSAXS = self.getSimulatedSAXSData()
-        modelName = self.lineEdit_19.text()
+        modelName = self.modelName.text()
 
         self.setFig.set_title(f"Simulated SAXS for {modelName}")
         self.setFig.set_xlabel("q")
@@ -626,6 +676,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         """Send simulated data to the Data Explorer in SasView"""
         print("Send simulated data to Data Explorer")
         #Send data to SasView Data Explorer
+
 
     ####CAPTURE IMAGE OF TABS
     def capture_widget_with_tabs(self):

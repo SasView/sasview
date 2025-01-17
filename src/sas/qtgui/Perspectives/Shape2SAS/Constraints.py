@@ -254,6 +254,11 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
 
         self.constraintTextEditor.txtEditor.clear()
 
+    def onClosingConstraints(self):
+        """Close constraints page"""
+
+        self.close()
+
 
 
 if __name__ == "__main__":

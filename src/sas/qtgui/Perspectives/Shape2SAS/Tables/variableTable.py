@@ -178,6 +178,18 @@ class VariableTable(QWidget, Ui_VariableTable):
                 i += 1
 
         return columns
+    
+    def setUncheckToAllCheckBoxes(self):
+        """Uncheck all checkboxes"""
+        for row in range(self.variableModel.rowCount()):
+            itemCheck = self.variableModel.item(row, 1)
+            if itemCheck and itemCheck.isCheckable():
+                itemCheck.setData(Qt.Unchecked, Qt.CheckStateRole)
+
+    def onClearTable(self):
+        """Clear the table"""
+        self.resetTable()
+        
         
 
 

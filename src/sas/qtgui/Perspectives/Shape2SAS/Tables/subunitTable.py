@@ -416,14 +416,15 @@ class ModelTableModel(QStandardItemModel):
     def __init__(self, parent=None):
         super(ModelTableModel, self).__init__(parent)
 
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        """
-        Displays model parameters in the header of the model table
-        """
-        if orientation == Qt.Vertical and role == Qt.DisplayRole:
-            return list(OptionLayout.__members__.keys())[section]
-        
-        return super(ModelTableModel, self).headerData(section, orientation, role)
+    #NOTE: The header may be added later but right now the names are a bit misleading...
+    #def headerData(self, section, orientation, role=Qt.DisplayRole):
+    #    """
+    #    Displays model parameters in the header of the model table
+    #    """
+    #    if orientation == Qt.Vertical and role == Qt.DisplayRole:
+    #        return list(OptionLayout.__members__.keys())[section]
+    #    
+    #    return super(ModelTableModel, self).headerData(section, orientation, role)
 
 
 class SubunitTable(QWidget, Ui_SubunitTableController):
@@ -440,6 +441,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.initializeSignals()
         self.setSubunitOptions()
         self.setButtonSpinboxBounds()
+        self.onClearSubunitTable()
     
 
     def setTableProperties(self):
@@ -551,6 +553,10 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.columnEyeKeeper.pop(self.selected_val - 1)
         del self.restrictedRowsPos[self.selected_val - 1]
 
+        #clear the table if no columns are left
+        if not self.model.columnCount():
+            self.onClearSubunitTable()
+
 
     def setButtonSpinboxBounds(self):
         """Set new bounds for the spinbox
@@ -592,4 +598,14 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                     item.setFlags(item.flags() | Qt.ItemIsEditable)
 
         self.restrictedRowsPos.append(restrictedRowPos)
+
+
+    def onClearSubunitTable(self):
+        """Clear the subunit table"""
+
+        self.model.clear()
+        self.columnEyeKeeper = []
+        self.restrictedRowsPos = []
+        self.selected.setValue(1)
+        self.setButtonSpinboxBounds()
 

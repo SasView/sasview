@@ -185,7 +185,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_3">
+          <widget class="QLineEdit" name="pluginModelName">
            <property name="minimumSize">
             <size>
              <width>130</width>
@@ -259,7 +259,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit">
+          <widget class="QLineEdit" name="Npoints">
            <property name="minimumSize">
             <size>
              <width>130</width>
@@ -333,7 +333,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_2">
+          <widget class="QLineEdit" name="prPoints">
            <property name="minimumSize">
             <size>
              <width>130</width>

@@ -48,6 +48,8 @@ class ViewerModel(QWidget):
         self.scatterContainer.setFixedHeight(200)
         self.scatterContainer.setFixedWidth(271)
 
+        self.initialiseAxis()
+
         #General controls
         ### xy, xz, yz buttons (Class ViewerButtons)
         self.viewerButtons = ViewerButtons()
@@ -113,37 +115,48 @@ class ViewerModel(QWidget):
         self.scattering.fitInView(self.scene.sceneRect())
         self.scatter.show()
 
+    def initialiseAxis(self):
+        """Initialise axis for the model"""
+
+        self.X_ax = QValue3DAxis()
+        self.X_ax.setTitle("X")
+        self.X_ax.setRange(-10, 10)
+
+        self.Y_ax = QValue3DAxis()
+        self.Y_ax.setTitle("Y")
+        self.Y_ax.setRange(-10, 10)
+
+        self.Z_ax = QValue3DAxis()
+        self.Z_ax.setTitle("Z")
+        self.Z_ax.setRange(-10, 10)
+
+        self.X_ax.setLabelFormat("%.2f")  # Set the label format
+        self.Y_ax.setLabelFormat("%.2f")
+        self.Z_ax.setLabelFormat("%.2f")
+
+        self.X_ax.setLabelAutoRotation(30)  # Set the label auto-rotation
+        self.Y_ax.setLabelAutoRotation(30)
+        self.Z_ax.setLabelAutoRotation(30)
+
+        self.X_ax.setTitleVisible(True)
+        self.Y_ax.setTitleVisible(True)
+        self.Z_ax.setTitleVisible(True)
+
+        self.scatter.setAxisX(self.X_ax)
+        self.scatter.setAxisY(self.Y_ax)
+        self.scatter.setAxisZ(self.Z_ax)
+
 
     def setAxis(self, minx: float, maxx: float, miny: float, maxy: float, minz: float, maxz: float):
         """Set axis for the model"""
 
-        X_ax = QValue3DAxis()
-        X_ax.setTitle("X")
-        X_ax.setRange(minx, maxx)
+        self.X_ax.setRange(minx, maxx)
+        self.Y_ax.setRange(miny, maxy)
+        self.Z_ax.setRange(minz, maxz)
 
-        Y_ax = QValue3DAxis()
-        Y_ax.setTitle("Y")
-        Y_ax.setRange(miny, maxy)
-
-        Z_ax = QValue3DAxis()
-        Z_ax.setTitle("Z")
-        Z_ax.setRange(minz, maxz)
-
-        X_ax.setLabelFormat("%.2f")  # Set the label format
-        Y_ax.setLabelFormat("%.2f")
-        Z_ax.setLabelFormat("%.2f")
-
-        X_ax.setLabelAutoRotation(30)  # Set the label auto-rotation
-        Y_ax.setLabelAutoRotation(30)
-        Z_ax.setLabelAutoRotation(30)
-
-        X_ax.setTitleVisible(True)
-        Y_ax.setTitleVisible(True)
-        Z_ax.setTitleVisible(True)
-
-        self.scatter.setAxisX(X_ax)
-        self.scatter.setAxisY(Y_ax)
-        self.scatter.setAxisZ(Z_ax)
+        self.scatter.setAxisX(self.X_ax)
+        self.scatter.setAxisY(self.Y_ax)
+        self.scatter.setAxisZ(self.Z_ax)
 
 
     def setPlot(self, distr: ModelPointDistribution, design: ViewerPlotDesign):
@@ -209,7 +222,18 @@ class ViewerModel(QWidget):
 
     def setClearModelPlot(self):
         """Clear the model plot"""
-        pass
+
+        #reset model
+        for series in self.dict_series.values():
+            data = []
+            series.dataProxy().resetArray(data)
+        
+        #reset view
+        self.scene.clear()
+        self.scatter.scene().activeCamera().setCameraPosition(0, 0, 110)
+
+        #reset axis
+        self.setAxis(-10, 10, -10, 10, -10, 10)
 
 
 
