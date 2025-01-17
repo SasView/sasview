@@ -33,6 +33,9 @@ class Constraints(QWidget, Ui_Constraints):
         self.verticalLayout.insertWidget(0, self.constraintTextEditor)
         self.variableTable = VariableTable()
         self.buttonOptions = ButtonOptions()
+        self.buttonOptions.help.setToolTip("Go to help page")
+        self.buttonOptions.closePage.setToolTip("Close Shape2SAS")
+        self.buttonOptions.reset.setToolTip("Reset this page to default")
 
         self.gridLayout_2.addWidget(self.variableTable, 0, 1, 1, 1)
         self.gridLayout_2.addWidget(self.buttonOptions, 1, 0, 1, 0, Qt.AlignmentFlag.AlignRight)
@@ -40,6 +43,7 @@ class Constraints(QWidget, Ui_Constraints):
         self.createPlugin = QPushButton("Create Plugin")
         self.createPlugin.setMinimumSize(110, 24)
         self.createPlugin.setMaximumSize(110, 24)
+        self.createPlugin.setToolTip("Create and send the plugin model to the Plugin Models Category in Fit panel")
 
         self.buttonOptions.horizontalLayout_5.insertWidget(1, self.createPlugin)
         self.buttonOptions.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)

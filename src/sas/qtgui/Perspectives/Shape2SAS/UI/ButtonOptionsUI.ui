@@ -27,7 +27,7 @@
      </spacer>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_56">
+     <widget class="QPushButton" name="reset">
       <property name="minimumSize">
        <size>
         <width>75</width>
@@ -40,7 +40,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_55">
+     <widget class="QPushButton" name="closePage">
       <property name="minimumSize">
        <size>
         <width>75</width>
@@ -52,7 +52,7 @@
       </property>
      </widget>
     </item>
-     <widget class="QPushButton" name="pushButton_57">
+     <widget class="QPushButton" name="help">
       <property name="minimumSize">
        <size>
         <width>75</width>

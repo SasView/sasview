@@ -39,6 +39,7 @@ from ViewerModel import ViewerModel
 from ButtonOptions import ButtonOptions
 from Tables.subunitTable import SubunitTable, OptionLayout
 from Constraints import Constraints
+from PlotAspects.plotAspects import Canvas
 
 from calculations.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering, 
                                                                      ModelProfile, ModelSystem, SimulationParameters, 
@@ -77,27 +78,33 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.viwerModel = ViewerModel()
 
         self.subunitTable = SubunitTable()
-        self.modelButtonOptions = ButtonOptions()
-        self.modelButtonOptions.horizontalLayout_5.setContentsMargins(0, 0, 10, 10)
+        self.modelTabButtonOptions = ButtonOptions()
+        self.modelTabButtonOptions.help.setToolTip("Go to help page")
+        self.modelTabButtonOptions.closePage.setToolTip("Close Shape2SAS")
+        self.modelTabButtonOptions.reset.setToolTip("Reset this page to default")
+        self.modelTabButtonOptions.horizontalLayout_5.setContentsMargins(0, 0, 10, 10)
 
         self.line1 = QFrame()
         self.line1.setFrameShape(QFrame.VLine)
-        self.modelButtonOptions.horizontalLayout_5.insertWidget(1, self.line1)
+        self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.line1)
 
         self.checkTheoreticalScattering = QCheckBox("Include Scattering")
-        self.modelButtonOptions.horizontalLayout_5.insertWidget(1, self.checkTheoreticalScattering)
+        self.checkTheoreticalScattering.setToolTip("Include a theoretical scattering profile when plotting the model")
+        self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.checkTheoreticalScattering)
         self.plot = QPushButton("Plot")
-        self.modelButtonOptions.horizontalLayout_5.insertWidget(1, self.plot)
+        self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plot)
         self.plot.clicked.connect(self.onClickingPlot)
+        self.plot.setToolTip("Plot the model")
 
         self.line2 = QFrame()
         self.line2.setFrameShape(QFrame.VLine)
-        self.modelButtonOptions.horizontalLayout_5.insertWidget(1, self.line2)
+        self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.line2)
 
-        self.plugin = QPushButton("Create Plugin")
+        self.plugin = QPushButton("To plugin model")
         self.plugin.setMinimumSize(110, 24)
         self.plugin.setMaximumSize(110, 24)
-        self.modelButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
+        self.plugin.setToolTip("Go to the plugin model page")
+        self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
         self.plugin.clicked.connect(self.showConstraintWindow)
         
         modelSection = QWidget()
@@ -106,26 +113,31 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         modelSection.setLayout(modelHbox)
 
         modelVbox.addWidget(modelSection)
-        modelVbox.addWidget(self.modelButtonOptions)
+        modelVbox.addWidget(self.modelTabButtonOptions)
         self.model.setLayout(modelVbox)
 
         #Building Virtual SAXS Experiment tab
-        self.SAXSButtons = ButtonOptions()
+        self.SAXSTabButtons = ButtonOptions()
+        self.SAXSTabButtons.help.setToolTip("Go to help page")
+        self.SAXSTabButtons.closePage.setToolTip("Close Shape2SAS")
+        self.SAXSTabButtons.reset.setToolTip("Reset this page to default")
         self.plotSAXS = QPushButton("Plot SAXS")
         self.plotSAXS.setMinimumSize(110, 24)
         self.plotSAXS.setMaximumSize(110, 24)
-        self.SAXSButtons.horizontalLayout_5.insertWidget(1, self.plotSAXS)
-        self.sendSimToSasView = QPushButton("Simulate SAXS")
+        self.plotSAXS.setToolTip("Plot simulated SAXS data")
+        self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.plotSAXS)
+        self.sendSimToSasView = QPushButton("Create SAXS file")
         self.sendSimToSasView.setMinimumSize(110, 24)
         self.sendSimToSasView.setMaximumSize(110, 24)
-        self.SAXSButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 10)
-        self.SAXSButtons.horizontalLayout_5.insertWidget(1, self.sendSimToSasView)
+        self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
+        self.SAXSTabButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 10)
+        self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.sendSimToSasView)
         self.sendSimToSasView.clicked.connect(self.getSimulatedSAXSData)
         self.comboBox.currentIndexChanged.connect(self.showStructureFactorOptions)
         self.plotSAXS.clicked.connect(self.showSimulatedSAXSData)
         self.sendSimToSasView.clicked.connect(self.sendSimulatedSAXSToDataExplorer)
 
-        self.gridLayout_5.addWidget(self.SAXSButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        self.gridLayout_5.addWidget(self.SAXSTabButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         self.SAXSExperiment.setLayout(self.gridLayout_5)
 
         #Building Virtual SANS Experiment tab
@@ -135,11 +147,11 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.constraint = Constraints()
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
         self.subunitTable.delete.clicked.connect(self.deleteFromVariableTable)
-        self.constraint.variableTable.pushButton.clicked.connect(self.setConstraintsToTextEditor)
+        self.constraint.variableTable.setConstraints.clicked.connect(self.setConstraintsToTextEditor)
         self.constraint.createPlugin.clicked.connect(self.getPluginModel)
 
         #create png of each tab
-        self.modelButtonOptions.pushButton_55.clicked.connect(self.export_widget_with_tabs_to_png)
+        #self.modelTabButtonOptions.help.clicked.connect(self.export_widget_with_tabs_to_png)
 
 
     def showConstraintWindow(self):
@@ -577,11 +589,10 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
     def showSimulatedSAXSData(self):
         """Plotting simulated SAXS data in the Virtual SAXS Experiment tab"""
 
+        #check if subunit table is empty
         columns = self.subunitTable.model.columnCount()
         if not self.subunitTable.model.item(1, columns - 1):
             return
- 
-        from PlotAspects.plotAspects import Canvas
 
         #Clear layout for last plot
         if self.scatteringScene.count():
