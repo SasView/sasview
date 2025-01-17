@@ -51,10 +51,10 @@ class Constraints(QWidget, Ui_Constraints):
 
         #self.createPlugin.clicked.connect(self.getPluginModel)
 
-    def setConstraints(self, constraints: str, name: str):
-        """Set text to QTextEdit containing constraints"""
-
-        self.constraintTextEditor.txtEditor.setPlainText((f'''
+    def getConstraintText(self, constraints: str, name: str) -> str:
+        """Get default text for constraints"""
+    
+        self.constraintText = (f'''
 #Write libraries to be imported here.
 from numpy import inf
 from sasmodels.core import reparameterize
@@ -68,7 +68,17 @@ translation = """
 """
 model_info = reparameterize("{name}", parameters, translation, __file__)
 
-        ''').lstrip().rstrip())
+        ''').lstrip().rstrip()
+
+        return self.constraintText
+
+ 
+    def setConstraints(self, constraints: str, name: str):
+        """Set text to QTextEdit"""
+
+        constraints = self.getConstraintText(constraints, name)
+        self.constraintTextEditor.txtEditor.setPlainText(constraints)
+
 
     def checkPythonSyntax(self, text: str) -> bool:
         """Check if text is valid python syntax"""
@@ -96,10 +106,8 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
             return False
 
 
-    def getConstraints(self, fitPar: list[str], modelName: str) -> tuple[list[str], str, str]:
+    def getConstraints(self, constraintsStr: str, fitPar: list[str], modelName: str) -> tuple[list[str], str, str]:
         """Read inputs from text editor"""
-
-        constraintsStr = self.constraintTextEditor.txtEditor.toPlainText()
 
         self.checkPythonSyntax(constraintsStr)
 
@@ -114,35 +122,36 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
 
         return importStatement, parameters, translation
     
+
     def removeFromImport(self, importStatement: list[str], remove: str) -> list[str]:
         """Remove import statement from list"""
 
         if remove in importStatement:
             importStatement.remove(remove)
 
+
     def getTranslation(self, modelName: str, constraintsStr: str, importStatement: list[str]) -> str:
         """Get translation from constraints"""
-
 
         #see if translation is in constraints
         if not re.search(r'translation\s*=', constraintsStr):
             warnings.warn("No translation found in constraints")
-            self.removeFromImport(importStatement, "from sasmodels.sasmodels.core import reparameterize")
+            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
             return ""
-        
+
         translation = re.search(r'translation\s*=\s*"""(.*\n(?:.*\n)*?)"""', constraintsStr, re.DOTALL)
         translationInput = translation.group(1) if translation else ""
 
         #Check if translation is empty
         if not translationInput:
-            self.removeFromImport(importStatement, "from sasmodels.sasmodels.core import reparameterize")
+            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
             return ""
-        
+
         #Check if translation is only whitespace
         if not translationInput.strip():
-            self.removeFromImport(importStatement, "from sasmodels.sasmodels.core import reparameterize")
+            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
             return ""
-        
+
         #Check if reparameterize is imported
         if not re.search(r'from sasmodels.core import reparameterize', constraintsStr):
             raise ValueError("Could not find from sasmodels.sasmodels.core import reparameterize in constraints")
@@ -159,6 +168,7 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
 
         return translationText
     
+
     def getParameters(self, constraintsStr: str, fitPar: list[str]) -> str:
         """Get parameters from constraints"""
 
@@ -171,7 +181,7 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
             raise ValueError("No valid parameters list found in constraints")
 
         parameters = parameterObject.group(1)
-        parametersNames = re.findall(r'\[\s*\'(.*?)\'', parameters)
+        parametersNames = re.findall(r'\[\s*\'(.*?)\'', parameters) #Get first element in list
 
         #Check parameters in constraints
         if len(parametersNames) != len(fitPar):
@@ -183,11 +193,11 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
 
         return parameterObject.group(0)
 
+
     @staticmethod
     def isImportFromStatement(node: ast.ImportFrom) -> list[str]:
         """Return list of ImportFrom statements"""
 
-        print("TEST", node.module)
         #Check if library exists
         if not importlib.util.find_spec(node.module):
             raise ModuleNotFoundError(f"No module named {node.module}")
@@ -207,6 +217,7 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
         
         return [f"from {node.module} import {', '.join(imports)}"]
 
+
     @staticmethod
     def isImportStatement(node: ast.Import) -> list[str]:
         """Return list of Import statements"""
@@ -224,6 +235,7 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
 
         return [f"import {', '.join(imports)}"]
     
+
     def getImportStatements(self, text: str) -> list[str]:
         """return all import statements that were 
         written in the text editor"""
@@ -253,6 +265,7 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
         """Clear text editor containing constraints"""
 
         self.constraintTextEditor.txtEditor.clear()
+
 
     def onClosingConstraints(self):
         """Close constraints page"""

@@ -53,6 +53,8 @@ def generateModel(prof: ModelProfile, constrainParameters: tuple[str], fitPar: l
     importStatement, parameters, translation = constrainParameters
 
     nl = '\n'
+
+    fitPar.insert(0, "q")
     
     model_str = (f'''
 r"""
@@ -87,7 +89,7 @@ category = "plugin"
 
 {translation}
 
-def Iq(q, {', '.join(fitPar)}):
+def Iq({', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
     
     modelProfile = ModelProfile(subunits={prof.subunits}, 

@@ -185,9 +185,17 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         return columns
 
 
-    def setConstraintsToTextEditor(self):
+    def getConstraintsToTextEditor(self):
         """Set translation and parameters constraints to the text editor"""
         columns = self.checkedVariables()
+
+        #no subunits inputted
+        if not columns:
+            return
+        
+        #no parameters inputted
+        if not any(any(column) for column in columns):
+            return
 
         toTextEditor = ['# name, units, default, [min, max], type, description']
 
@@ -219,10 +227,43 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
                     toTextEditor.append(parameter)
 
         formatted = "[\n " + ",\n ".join(str(pars) for pars in toTextEditor) + "\n]"
-        modelName = self.constraint.variableTable.pluginModelName.text()
-        self.constraint.setConstraints(formatted, modelName)
+
+        return formatted
+    
+
+    def setConstraintsToTextEditor(self):
+        """Set constraints to the text editor"""
+
+        constraints = self.getConstraintsToTextEditor()
+        if constraints:
+            formatted = constraints
+            modelName = self.constraint.variableTable.pluginModelName.text()
+            self.constraint.setConstraints(formatted, modelName)
 
 
+    def checkStateOfConstraints(self, fitPar: list[str], modelName: str):
+        """Check if the user has written constraints. Otherwise return Default"""
+
+        constraintsStr = self.constraint.constraintTextEditor.txtEditor.toPlainText()
+
+        #Has anything been written to the text editor
+        if constraintsStr:
+            #TODO: print to GUI output texteditor
+            return self.constraint.getConstraints(constraintsStr, fitPar, modelName)
+        
+        #Did the user only check parameters and click generate plugin
+        elif fitPar:
+            #Get default constraints
+            fitParLists = self.getConstraintsToTextEditor()
+            defaultConstraintsStr = self.constraint.getConstraintText(fitParLists, modelName)
+            #TODO: print to GUI output texteditor
+            return self.constraint.getConstraints(defaultConstraintsStr, fitPar, modelName)
+        
+        #If not, return empty
+        else:
+            #all parameters are constant
+            #TODO: print to GUI output texteditor
+            return "", "", ""
 
     def addToVariableTable(self):
         """Set up parameters to the variable table"""
@@ -551,8 +592,13 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         """Generating a plugin model and sends it to
         the Plugin Models folder in SasView"""
 
-        Npoints = int(self.constraint.variableTable.lineEdit.text())
-        prPoints = int(self.constraint.variableTable.lineEdit_2.text())
+        #no subunits inputted
+        columns = self.subunitTable.model.columnCount() #TODO: maybe give a warning to output texteditor
+        if not self.subunitTable.model.item(1, columns - 1):
+            return
+
+        Npoints = int(self.constraint.variableTable.Npoints.text())
+        prPoints = int(self.constraint.variableTable.prPoints.text())
         modelName = self.constraint.variableTable.pluginModelName.text()
         parNames = self.getAllTableNames(self.ifNoCondition)
         checkedVars = self.checkedVariables()
@@ -562,7 +608,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
         #TODO: Check if constraint button have been clicked. 
         # otherwise return default constraints to checked parameters
-        constrainParameters = self.constraint.getConstraints(fitPar, modelName)
+        constrainParameters = self.checkStateOfConstraints(fitPar, modelName)
 
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedVars, conditionFitPar=parNames)
