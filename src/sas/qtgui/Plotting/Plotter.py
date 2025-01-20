@@ -906,12 +906,12 @@ class PlotterWidget(PlotterBase):
             # self.ax.tick_params(axis='x', labelsize=fx.size, labelcolor=fx.color)
             from matplotlib.pyplot import gca
             a = gca()
-            a.set_xticklabels(a.get_xticks(), fx)
+            a.set_xticklabels(a.get_xticks(), **fx)
         if apply_y:
             # self.ay.tick_params(axis='y', labelsize=fy.size, labelcolor=fy.color)
             from matplotlib.pyplot import gca
             a = gca()
-            a.set_yticklabels(a.get_yticks(), fy)
+            a.set_yticklabels(a.get_yticks(), **fy)
         self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):
