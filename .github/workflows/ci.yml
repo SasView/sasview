@@ -317,8 +317,8 @@ jobs:
           echo "INSTALL_PATH=$PWD/sasview/" >> $GITHUB_ENV
           echo "RUN_SASVIEW=$PWD/sasview/sasview.exe" >> $GITHUB_ENV
 
-      - name: Set variables (Linux)
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - name: Set variables (Linux + macOS)
+        if: ${{ !startsWith(matrix.os, 'windows') }}
         run: |
           echo "INSTALL_PATH=$PWD/sasview/" >> $GITHUB_ENV
           echo "RUN_SASVIEW=$PWD/sasview/sasview" >> $GITHUB_ENV
