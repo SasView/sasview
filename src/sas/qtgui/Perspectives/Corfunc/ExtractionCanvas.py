@@ -34,7 +34,7 @@ class ExtractionCanvas(CorfuncCanvas):
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("linear")
         self.axes.set_yscale("linear")
-        self.axes.set_xlabel("Z [$\AA$]")
+        self.axes.set_xlabel(r"Z [$\AA$]")
         self.axes.set_ylabel("Correlation")
         self.axes.set_title("Real Space Correlations")
         self.fig.tight_layout()
