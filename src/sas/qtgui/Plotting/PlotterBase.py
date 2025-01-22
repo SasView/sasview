@@ -130,7 +130,7 @@ class PlotterBase(QtWidgets.QWidget):
             else:
                 self.toolbar.hide() # hide for the time being
             # Notify PlotHelper about the new plot
-            self.upatePlotHelper()
+            self.updatePlotHelper()
         else:
             self.toolbar.hide()
 
@@ -227,7 +227,7 @@ class PlotterBase(QtWidgets.QWidget):
     def draw(self):
         self.figure.canvas.draw()
 
-    def upatePlotHelper(self):
+    def updatePlotHelper(self):
         """
         Notify the plot helper about the new plot
         """
