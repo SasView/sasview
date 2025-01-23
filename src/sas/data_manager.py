@@ -24,6 +24,14 @@ class DataManager():
     def add_data(self, data: TrackedData):
         self._all_data_entries.add(data)
 
+    def remove_data(self, data: TrackedData):
+        # We shouldn't be able to remove tracked data if its in an association
+        # because it may be in a perspective etc.
+        # TODO: Is it still ok to delete data in a plot if that plot is removed as well?
+        if any([data in assoc for assoc in self._association]):
+            raise ValueError('Cannot remove data that is in an association.')
+        self._all_data_entries.remove(data)
+
     # TODO: May want more rules to prevent associations being made twice.
     def make_association(self, data_1: TrackedData, data_2: TrackedData):
         if not (data_1 in self._all_data_entries or data_2 in self._all_data_entries):
