@@ -32,3 +32,9 @@ class DataManager():
             # TODO: Clearer error message.
             raise ValueError('Invalid association.')
         self._association.append((data_1, data_2))
+
+    def get_association(self, data: TrackedData):
+        for assoc in self._association:
+            if data in assoc:
+                return assoc[0] if assoc[0] != data else assoc[1]
+        raise ValueError('Association not found.')
