@@ -452,6 +452,13 @@ jobs:
           # Check the log file for successful startup
           grep "SasView session started" sasview-test.log
 
+      - name: Try running the installation (macOS)
+        if: ${{ startsWith(matrix.os, 'macOS' )}}
+        run: |
+          hdiutil attach SasView6.dmg
+          /Volumes/SasView6/SasView6.app/Contents/MacOS/sasview
+          # See if this works for now.
+
       ### Optionally attempt to work with the debug tarball from pyinstaller
 
       - name: Retrieve installer debug tarball
