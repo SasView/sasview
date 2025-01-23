@@ -31,3 +31,4 @@ class DataManager():
         if not any([isinstance(data_1, x) and isinstance(data_2, y) for x, y in valid_associations]):
             # TODO: Clearer error message.
             raise ValueError('Invalid association.')
+        self._association.append((data_1, data_2))
