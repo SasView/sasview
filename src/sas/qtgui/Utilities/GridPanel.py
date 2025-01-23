@@ -240,9 +240,12 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             url = QUrl.fromLocalFile(self.grid_filename)
 
             if QDesktopServices.openUrl(url):
-                print("File opened successfully.")
+                self.parent.communicate.statusBarUpdateSignal.emit("Success: "
+                "The batch results CSV file successfully opened in your system CSV viewer.")
             else:
-                print("Failed to open file.")
+                self.parent.communicate.statusBarUpdateSignal.emit("Failure: A CSV viewer "
+                    "is required to view the batch results. Please set one in your default "
+                    "app settings to change this behavior.")
 
     def actionSaveFile(self):
         """
