@@ -31,6 +31,9 @@ class DataManager():
         if any([data in assoc for assoc in self._association]):
             raise ValueError('Cannot remove data that is in an association.')
         self._all_data_entries.remove(data)
+    # TODO: Remove data on a list. So that we could remove a perspective, and
+    # data at the same time. So it doesn't matter that the perspective is
+    # associated with the data becuase they will both be removed.
 
     # TODO: May want more rules to prevent associations being made twice.
     def make_association(self, data_1: TrackedData, data_2: TrackedData):
