@@ -302,7 +302,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-20.04 ]
+        os: [ windows-latest, macos-latest, ubuntu-20.04]
         python-version: [ 3.11 ]
       fail-fast: false
 
@@ -317,8 +317,8 @@ jobs:
           echo "INSTALL_PATH=$PWD/sasview/" >> $GITHUB_ENV
           echo "RUN_SASVIEW=$PWD/sasview/sasview.exe" >> $GITHUB_ENV
 
-      - name: Set variables (Linux)
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      - name: Set variables (Linux + macOS)
+        if: ${{ !startsWith(matrix.os, 'windows') }}
         run: |
           echo "INSTALL_PATH=$PWD/sasview/" >> $GITHUB_ENV
           echo "RUN_SASVIEW=$PWD/sasview/sasview" >> $GITHUB_ENV
@@ -451,6 +451,13 @@ jobs:
           wait $pulsepid
           # Check the log file for successful startup
           grep "SasView session started" sasview-test.log
+
+      - name: Try running the installation (macOS)
+        if: ${{ startsWith(matrix.os, 'macOS' )}}
+        run: |
+          hdiutil attach SasView6.dmg
+          /Volumes/SasView6/SasView6.app/Contents/MacOS/sasview
+          # See if this works for now.
 
       ### Optionally attempt to work with the debug tarball from pyinstaller
 
