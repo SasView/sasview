@@ -1652,7 +1652,6 @@ class GuiManager:
 
 
     def asciiLoader(self):
-<<<<<<< HEAD
         from ascii_dialog.dialog import AsciiDialog
         dialog = AsciiDialog()
         status = dialog.exec()
@@ -1662,17 +1661,3 @@ class GuiManager:
                 logger.info(datum.summary())
         else:
             logger.error('ASCII Reader Closed')
-
-||||||| parent of c48612232 (Add logic from starting the ascii reader from dev.)
-        pass
-=======
-        from ascii_dialog.dialog import AsciiDialog
-        dialog = AsciiDialog()
-        status = dialog.exec()
-        if status == 1:
-            loaded = load_data(dialog.params)
-            for datum in loaded:
-                logger.info(datum.summary())
-        else:
-            logger.error('ASCII Reader Closed')
->>>>>>> c48612232 (Add logic from starting the ascii reader from dev.)

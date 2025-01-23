@@ -1,39 +1,22 @@
 from abc import abstractmethod
-import logging
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialog, QWidget
 from sasdata.data import SasData
-
-# This is ugly but necessary to avoid a cyclic dependency
-from typing import TYPE_CHECKING, cast
-if TYPE_CHECKING:
-    from sas.data_manager import NewDataManager as DataManager
 
 # TODO: None of these classes belong in here. This is a temporary location of
 # them so I can sketch out what they should look like.
 
 # NOTE: The main difference in this class is that it takes in SasData objects
 # rather than QT Oobjects.
-class Perspective(QDialog):
-    def __init__(self, data_manager: "DataManager", parent : QWidget | None) -> None:
-        super().__init__(parent)
-        self._data_manager = data_manager
-        self.perspective_number: int = -1 # This gets reassigned by the data manager.
-        self.finished.connect(self.onDone)
-
+class Perspective():
+    @classmethod
     @property
     @abstractmethod
-    def name(self) -> str:
+    def name(cls) -> str:
         """ Name of the perspective"""
 
     @property
     @abstractmethod
-    def title(self) -> str:
+    def title(cls) -> str:
         """ Window title"""
-
-    @property
-    def formatName(self) -> str:
-        return f"{self.title} #{self.perspective_number}"
 
     @abstractmethod
     def setData(self, data_item: list[SasData], is_batch: bool=False):
@@ -54,24 +37,3 @@ class Perspective(QDialog):
     @property
     def allowSwap(self) -> bool:
         return False
-
-    def onDone(self):
-        self._data_manager.remove_data(self)
-        logging.info(f'Perspective {self.title} done.')
-
-    # TODO: Maybe we want to pass the new association. I was thinking that
-    # perhaps the perspective will need to do a full update, and then this won't
-    # be relevant.
-    @abstractmethod
-    def newAssocation(self):
-        pass
-
-    @property
-    def associatedData(self) -> list[SasData]:
-        return cast(list[SasData], self._data_manager.get_all_associations(self))
-
-class Theory():
-    # TODO: Need to put stuff here that is unique to Theory. Right now, looking
-    # at the current SasView codebase, it seems they are all just Data1Ds with
-    # nothing else special.
-    pass
