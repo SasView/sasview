@@ -67,6 +67,7 @@ from sas.system import HELP_SYSTEM, web
 from sas.system.user import create_user_files_if_needed
 from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
 from sas.system.version import __version__ as SASVIEW_VERSION
+from sas.data_manager import NewDataManager
 from sas.refactored_data_explorer import NewDataExplorer
 
 logger = logging.getLogger(__name__)
@@ -100,7 +101,8 @@ class GuiManager:
 
         # Create the data manager
         # TODO: pull out all required methods from DataManager and reimplement
-        self._data_manager = DataManager()
+        # self._data_manager = DataManager()
+        self._data_manager = NewDataManager()
 
         # Create action triggers
         self.addTriggers()
