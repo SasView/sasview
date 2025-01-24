@@ -5,6 +5,7 @@ import json
 import logging
 import django
 from glob import glob
+from sasdata import example_data
 
 # Initialise the Django environment. This must be done before importing anything
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
@@ -14,7 +15,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from data.models import Data
 
-EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", "../example_data")
+EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", os.path.dirname(example_data.__file__))
 
 def parse_1D():
     dir_1d = os.path.join(EXAMPLE_DATA_DIR, "1d_data")
