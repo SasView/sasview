@@ -12,7 +12,7 @@ valid_associations = [
 ]
 
 
-class DataManager():
+class NewDataManager():
     # Don't mutate these directly, or scary bad stuff will happen.
     _all_data_entries: set[TrackedData]
     _association: list[tuple[TrackedData, TrackedData]]
