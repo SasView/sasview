@@ -22,6 +22,7 @@ perspectives: dict[str, None | Perspective] = {
     'Dummy': DummyPerspective,
     'Mumag': None
 }
+from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 # TODO: Just using the word 'new' to avoid conflicts. The final version
 # shouldn't have that name.
