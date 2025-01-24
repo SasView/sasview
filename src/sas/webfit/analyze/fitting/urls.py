@@ -9,11 +9,11 @@ info_patterns = [
     path("", views.fit_info),
     path("status/", views.status, name = "get status using fit_id"),
     path("parameters/", views.view_parameters, name = "current parameters"),
-    #TODO impliment parameter trace
+    #TODO implement parameter trace
     #path("parameter_history/"),
     #TODO allow user to find specific parts of results
     path("results/", views.view_results, name = "current results"),
-    #TODO impliment results trace
+    #TODO implement results trace
     #path("results_history/")
 ]
 

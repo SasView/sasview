@@ -107,7 +107,7 @@ def download(request, data_id, version = None):
                 return HttpResponseBadRequest("data is private, must log in")
         #TODO add issues later
         try:
-            file = storage.open(serializer.file_name, 'rb')
+            file = storage.open(serializer.file.name, 'rb')
         except Exception as e:
             return HttpResponseBadRequest(str(e))
         if file is None:

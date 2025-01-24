@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 #TO DO: finalize version control
 
 #base urls 
-# no urls for pluggins currently
+# no urls for plugins currently
 urlpatterns = [
     #admin page
     path("admin/", admin.site.urls, name = "admin page"),

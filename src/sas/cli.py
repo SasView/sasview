@@ -110,7 +110,7 @@ def main(logging="production"):
 
     # I/O redirection for the windows console. Need to do this early so that
     # output will be displayed on the console. Presently not working for
-    # for production (it always opens the console even if it is not needed)
+    # production (it always opens the console even if it is not needed)
     # so require "sasview con ..." to open the console. Not an infamous
     # "temporary fix" I hope...
     if "-i" in sys.argv[1:] or "-o" in sys.argv[1:]:
