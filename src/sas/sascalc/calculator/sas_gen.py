@@ -56,15 +56,16 @@ def transform_center(pos_x, pos_y, pos_z):
     posz = pos_z - (min(pos_z) + max(pos_z)) / 2.0
     return posx, posy, posz
 
+class ComputationType(Enum):
+    SANS_2D = 0,
+    SANS_1D = 1,
+    SANS_1D_BETA = 2,
+    SAXS = 3
+
 class GenSAS(object):
     """
     Generic SAS computation Model based on sld (n & m) arrays
     """
-
-    class Type(Enum):
-        SANS = 0,
-        SAXS = 1
-
     def __init__(self):
         """
         Init
@@ -83,7 +84,7 @@ class GenSAS(object):
         self.data_vol = None # [A^3]
         self.is_avg = False
         self.is_elements = False
-        self.type = GenSAS.Type.SANS
+        self.type = ComputationType.SANS_2D
         ## Name of the model
         self.name = "GenSAS"
         ## Define parameters
@@ -115,17 +116,11 @@ class GenSAS(object):
         # fixed parameters
         self.fixed = []
 
-    def calculate_sans(self):
+    def set_calculation_type(self, computation_type : ComputationType):
         """
-        Perform SANS calculation
+        Set the computation type. This will determine which calculation is performed.
         """
-        self.type = GenSAS.Type.SANS
-
-    def calculate_saxs(self):
-        """
-        Perform SAXS calculation
-        """
-        self.type = GenSAS.Type.SAXS
+        self.type = computation_type
 
     def set_pixel_volumes(self, volume):
         """
@@ -1210,6 +1205,9 @@ class PDBReader(object):
         pos_x = []
         pos_y = []
         pos_z = []
+        atom_names = []
+        residues = []
+        elements = []
         sld_n = []
         sld_mx = []
         sld_my = []
@@ -1227,11 +1225,14 @@ class PDBReader(object):
             input_f.close()
             num = 0
             for line in lines:
+                line.ljust(80) # ensure we can index to 80
+
                 try:
                     # check if line starts with "ATOM"
                     if line[0:6] in ('ATM   ', 'ATOM  '):
-                        # define fields of interest
+                        # 12:16 ATOM NAME
                         atom_name = line[12:16].strip()
+                        atom_names.append(atom_name)
                         try:
                             float(line[12])
                             atom_name = atom_name[1].upper()
@@ -1243,12 +1244,27 @@ class PDBReader(object):
                                         atom_name[1].lower()
                             else:
                                 atom_name = atom_name[0].upper()
+                        
+                        # 17:20 RESIDUE NAME
+                        residue = line[17:20].strip()
+                        residues.append(residue)
+
+                        # 30:38 POS X
                         _pos_x = float(line[30:38].strip())
-                        _pos_y = float(line[38:46].strip())
-                        _pos_z = float(line[46:54].strip())
                         pos_x.append(_pos_x)
+
+                        # 38:46 POS Y
+                        _pos_y = float(line[38:46].strip())
                         pos_y.append(_pos_y)
+
+                        # 46:54 POS Z
+                        _pos_z = float(line[46:54].strip())
                         pos_z.append(_pos_z)
+
+                        # 76:78 ELEMENT
+                        element = line[76:78].strip()
+                        elements.append(element)
+
                         try:
                             if atom_name in atom_value_dict:
                                 sld_n.append(atom_value_dict[atom_name][0])
@@ -1310,6 +1326,10 @@ class PDBReader(object):
             pos_y = np.reshape(pos_y, (-1, ))
             pos_z = np.reshape(pos_z, (-1, ))
 
+            atom_names = np.reshape(atom_names, (-1, ))
+            residues = np.reshape(residues, (-1, ))
+            elements = np.reshape(elements, (-1, ))
+
             n_atoms = len(pos_x)
             ordered_pairs = sorted([(a, b) for a, b in connected_pairs if a < n_atoms and b < n_atoms])  # Why *not* sort
             x_lines = [(pos_x[a], pos_x[b]) for a, b in ordered_pairs]
@@ -1325,7 +1345,10 @@ class PDBReader(object):
             vol_pix = np.reshape(vol_pix, (-1, ))
             pix_symbol = np.reshape(pix_symbol, (-1, ))
 
-            output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
+            output = MagSLD(
+                pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz, 
+                atom_names=atom_names, residue_names=residues, atom_elements=elements
+            )
             output.set_conect_lines(x_lines, y_lines, z_lines)
             output.filename = os.path.basename(path)
             output.set_pix_type('atom')
@@ -1511,20 +1534,25 @@ class MagSLD(object):
     """
     Magnetic SLD.
     """
-    pos_x = None
-    pos_y = None
-    pos_z = None
-    sld_n = None
+    pos_x =  None
+    pos_y =  None
+    pos_z =  None
+    sld_n =  None
     sld_mx = None
     sld_my = None
     sld_mz = None
+    atom_names =    None
+    residue_names = None
+    atom_elements = None
+
     # Units
     _pos_unit = 'A'
     _sld_unit = '1/A^(2)'
     _pix_type = 'pixel'
 
     def __init__(self, pos_x, pos_y, pos_z, sld_n=None,
-                 sld_mx=None, sld_my=None, sld_mz=None, vol_pix=None):
+                 sld_mx=None, sld_my=None, sld_mz=None, vol_pix=None,
+                 atom_names=None, residue_names=None, atom_elements=None):
         """
         Init for mag SLD
         :params : All should be np 1D array
@@ -1553,6 +1581,10 @@ class MagSLD(object):
         self.pos_x = np.asarray(pos_x, 'd')
         self.pos_y = np.asarray(pos_y, 'd')
         self.pos_z = np.asarray(pos_z, 'd')
+
+        self.atom_names    = atom_names
+        self.residue_names = residue_names
+        self.atom_elements = atom_elements
 
         self.sld_n = np.asarray(sld_n, 'd')
 
