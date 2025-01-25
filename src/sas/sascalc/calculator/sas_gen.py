@@ -183,7 +183,7 @@ class GenSAS(object):
         s_phi = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
         self.transformed_angles = (s_theta, s_phi)
         return self.transformed_angles
-
+    
     def calculate_Iq(self, qx, qy=None):
         """
         Evaluate the function
@@ -196,41 +196,48 @@ class GenSAS(object):
         x, y, z = self.transform_positions()
         sld = self.data_sldn - self.params['solvent_SLD']
         vol = self.data_vol
-        if qy is not None and len(qy) > 0:
-            # 2-D calculation
-            qx, qy = _vec(qx), _vec(qy)
-            # MagSLD can have sld_m = None, although in practice usually a zero array
-            # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
-            mx, my, mz = self.transform_magnetic_slds()
-            in_spin = self.params['Up_frac_in']
-            out_spin = self.params['Up_frac_out']
-            # transform angles from environment to beamline coords
-            s_theta, s_phi = self.transform_angles()
 
-            if self.is_elements:
-                I_out = Iqxy(
-                    qx, qy, x, y, z, sld, vol, mx, my, mz,
-                    in_spin, out_spin, s_theta, s_phi,
-                    self.data_elements, self.is_elements)
-            else:
-                I_out = Iqxy(
-                    qx, qy, x, y, z, sld, vol, mx, my, mz,
-                    in_spin, out_spin, s_theta, s_phi,
-                    )
-        else:
-            q = _vec(qx)
-            if self.is_avg:
-                x, y, z = transform_center(x, y, z)
+        match self.type:
+            case ComputationType.SANS_2D:
+                if qy is None or len(qy) > 0:
+                    raise ValueError("Two-dimensional q-data must be used with the 2D SANS calculator.")
 
-            match self.type:
-                case GenSAS.Type.SAXS:
-                    raise ValueError("SAXS calculation not implemented.")
+                # 2-D calculation
+                qx, qy = _vec(qx), _vec(qy)
+                # MagSLD can have sld_m = None, although in practice usually a zero array
+                # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
+                mx, my, mz = self.transform_magnetic_slds()
+                in_spin = self.params['Up_frac_in']
+                out_spin = self.params['Up_frac_out']
+                # transform angles from environment to beamline coords
+                s_theta, s_phi = self.transform_angles()
 
-                case GenSAS.Type.SANS:
-                    I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+                if self.is_elements:
+                    I_out = Iqxy(
+                        qx, qy, x, y, z, sld, vol, mx, my, mz,
+                        in_spin, out_spin, s_theta, s_phi,
+                        self.data_elements, self.is_elements)
+                else:
+                    I_out = Iqxy(
+                        qx, qy, x, y, z, sld, vol, mx, my, mz,
+                        in_spin, out_spin, s_theta, s_phi,
+                        )
 
-                case _:
-                    raise ValueError(f"Unknown calculation type \"{self.type}\".")
+            case ComputationType.SANS_1D | ComputationType.SANS_1D_BETA:
+                q = _vec(qx)
+                if self.is_avg:
+                    x, y, z = transform_center(x, y, z)
+
+                I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+            
+            case ComputationType.SAXS:
+                data = np.loadtxt("test/sascalculator/data/saxs_test_files/1ubq.dat")
+                q = data[:, 0]
+                I = data[:, 1]
+                Ierr = data[:, 2]
+
+                from sas.sascalc.calculator.ausaxs.ausaxs_saxs_debye import evaluate_saxs_debye
+                I_out = evaluate_saxs_debye(q, I, Ierr, np.vstack((x, y, z)), self.sld_data.atom_names, self.sld_data.residue_names, self.sld_data.atom_elements)
 
         vol_correction = self.data_total_volume / self.params['total_volume']
         result = ((self.params['scale'] * vol_correction) * I_out

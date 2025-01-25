@@ -1394,6 +1394,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
+
             # TODO: implement fourier transform for meshes with multiple element or face types
             # The easy option is to simply convert all elements to tetrahedra - but this could rapidly
             # increase the calculation time.
@@ -1401,7 +1402,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 if not sld_data.are_elements_array:
                     logging.warning("SasView does not currently support computation of meshes with multiple element or face types")
                     return
-            self.model.set_sld_data(sld_data)
+            self.model.set_sld_data(sld_data) #? Why is sld_data being overwritten here? We're discarding file information
+
+            # this data should be present but is being deleted by the above line, so we have to manually copy it over
+            if self.model.type == ComputationType.SAXS:
+                self.model.sld_data.atom_names = self.nuc_sld_data.atom_names
+                self.model.sld_data.residue_names = self.nuc_sld_data.residue_names
+                self.model.sld_data.atom_elements = self.nuc_sld_data.atom_elements
+
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
             # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
             # and therefore xyz to UVW for the components of the vectors - as we desire
@@ -1480,7 +1488,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         match self.model.type:
             case ComputationType.SAXS:
-                raise Exception("Not implemented yet.")
+                self.data_to_plot = self.model.run(input)
 
             case ComputationType.SANS_1D | ComputationType.SANS_1D_BETA:
                 #? I removed this if statement when refactoring since I'm unsure if it's necessary. 

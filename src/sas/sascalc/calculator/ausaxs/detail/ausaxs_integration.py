@@ -71,13 +71,13 @@ class AUSAXSLIB:
                     ct.POINTER(ct.c_double), # atom weight vector
                     ct.c_int,                # nq (number of points in q)
                     ct.c_int,                # nc (number of points in x, y, z, w)
-                    ct.POINTER(ct.c_int),    # status (0 = success)
-                    ct.POINTER(ct.c_double)  # Iq vector for return value
+                    ct.POINTER(ct.c_double), # Iq vector for return value
+                    ct.POINTER(ct.c_int)     # status (0 = success)
                 ]
                 self.functions.evaluate_sans_debye.restype = None # returns void
 
                 # evaluate_saxs_debye
-                self.functions.evaluate_saxs_debye.argtypes = [
+                self.functions.fit_saxs.argtypes = [
                     ct.POINTER(ct.c_double), # data q vector
                     ct.POINTER(ct.c_double), # data I vector
                     ct.POINTER(ct.c_double), # data Ierr vector
@@ -85,12 +85,14 @@ class AUSAXSLIB:
                     ct.POINTER(ct.c_double), # pdb x vector
                     ct.POINTER(ct.c_double), # pdb y vector
                     ct.POINTER(ct.c_double), # pdb z vector
-                    ct.c_int,                # pdb atom form factor type
+                    ct.POINTER(ct.c_char_p), # pdb atom names
+                    ct.POINTER(ct.c_char_p), # pdb residue names
+                    ct.POINTER(ct.c_char_p), # pdb elements
                     ct.c_int,                # n_pdb (number of atoms)
                     ct.POINTER(ct.c_double), # return I vector for return value
                     ct.POINTER(ct.c_int)     # return status (0 = success)
                 ]
-                self.functions.evaluate_saxs_debye.restype = None # returns void
+                self.functions.fit_saxs.restype = None # returns void
 
                 self.state = self.STATE.READY
 

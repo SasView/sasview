@@ -22,7 +22,7 @@ def evaluate_sans_debye(q, coords, w):
         z = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
         w = w.ctypes.data_as(ct.POINTER(ct.c_double))
         status = ct.c_int()
-        ausaxslib.functions.evaluate_sans_debye(q, x, y, z, w, nq, nc, ct.byref(status), Iq)
+        ausaxslib.functions.evaluate_sans_debye(q, x, y, z, w, nq, nc, Iq, ct.byref(status))
 
         if (status.value == 0):
             return np.array(Iq)
