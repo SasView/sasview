@@ -654,7 +654,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # update the averaging option fromthe button on the GUI
         # required as the button may have been previously hidden with
         # any value, and preserves this - we must update the variable to match the GUI
-        self.is_avg = (self.cbOptionsCalc.currentIndex() in (1,2))
+        self.is_avg = (self.cbOptionsCalc.currentIndex() in (1,2,3))
         # did user request Beta(Q) calculation?
         self.is_beta = (self.cbOptionsCalc.currentIndex() == 2)
         # If averaging then set to 0 and diable the magnetic SLD textboxes
@@ -666,6 +666,11 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxLogSpace.setEnabled(self.is_avg)
         self.checkboxPluginModel.setEnabled(self.is_avg)
         
+        if (self.cbOptionsCalc.currentIndex() == 3):
+            self.model.calculate_saxs()
+        else:
+            self.model.calculate_sans()
+
         if self.is_avg:   
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")

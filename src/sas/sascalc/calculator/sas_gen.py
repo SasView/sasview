@@ -14,6 +14,7 @@ import logging
 import numpy as np
 from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
+from enum import Enum
 
 if sys.version_info[0] < 3:
     def decode(s):
@@ -59,6 +60,11 @@ class GenSAS(object):
     """
     Generic SAS computation Model based on sld (n & m) arrays
     """
+
+    class Type(Enum):
+        SANS = 0,
+        SAXS = 1
+
     def __init__(self):
         """
         Init
@@ -77,6 +83,7 @@ class GenSAS(object):
         self.data_vol = None # [A^3]
         self.is_avg = False
         self.is_elements = False
+        self.type = GenSAS.Type.SANS
         ## Name of the model
         self.name = "GenSAS"
         ## Define parameters
@@ -107,6 +114,18 @@ class GenSAS(object):
         self.details['Up_phi'] = ['[deg]', -180, 180]
         # fixed parameters
         self.fixed = []
+
+    def calculate_sans(self):
+        """
+        Perform SANS calculation
+        """
+        self.type = GenSAS.Type.SANS
+
+    def calculate_saxs(self):
+        """
+        Perform SAXS calculation
+        """
+        self.type = GenSAS.Type.SAXS
 
     def set_pixel_volumes(self, volume):
         """
@@ -204,11 +223,19 @@ class GenSAS(object):
                     in_spin, out_spin, s_theta, s_phi,
                     )
         else:
-            # 1-D calculation
             q = _vec(qx)
             if self.is_avg:
                 x, y, z = transform_center(x, y, z)
-            I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+
+            match self.type:
+                case GenSAS.Type.SAXS:
+                    raise ValueError("SAXS calculation not implemented.")
+
+                case GenSAS.Type.SANS:
+                    I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+
+                case _:
+                    raise ValueError(f"Unknown calculation type \"{self.type}\".")
 
         vol_correction = self.data_total_volume / self.params['total_volume']
         result = ((self.params['scale'] * vol_correction) * I_out
