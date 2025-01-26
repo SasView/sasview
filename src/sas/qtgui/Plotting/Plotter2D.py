@@ -334,7 +334,6 @@ class Plotter2DWidget(PlotterBase):
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         if hasattr(self.data0, "scale") and \
                     self.data0.scale == 'linear':
-            new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "normalized")
         else:
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")

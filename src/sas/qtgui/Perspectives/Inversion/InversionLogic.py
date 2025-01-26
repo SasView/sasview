@@ -2,7 +2,7 @@ import math
 import logging
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -129,8 +129,7 @@ class InversionLogic(object):
         new_plot.yaxis("\\rm{P(r)} ", "cm^{-3}")
         new_plot.title = "P(r) fit"
         new_plot.id = PR_FIT_LABEL
-        new_plot.xtransform = "x"
-        new_plot.ytransform = "y"
+        new_plot.data_role = DataRole.ROLE_LIN_LIN
         new_plot.group_id = GROUP_ID_PR_FIT
 
         return new_plot
