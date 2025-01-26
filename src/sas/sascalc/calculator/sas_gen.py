@@ -229,15 +229,19 @@ class GenSAS(object):
                     x, y, z = transform_center(x, y, z)
 
                 I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
-            
+
             case ComputationType.SAXS:
                 data = np.loadtxt("test/sascalculator/data/saxs_test_files/1ubq.dat")
-                q = data[:, 0]
-                I = data[:, 1]
-                Ierr = data[:, 2]
+                qd   = data[:, 0].astype(np.float64)
+                I    = data[:, 1].astype(np.float64)
+                Ierr = data[:, 2].astype(np.float64)
 
                 from sas.sascalc.calculator.ausaxs.ausaxs_saxs_debye import evaluate_saxs_debye
-                I_out = evaluate_saxs_debye(q, I, Ierr, np.vstack((x, y, z)), self.sld_data.atom_names, self.sld_data.residue_names, self.sld_data.atom_elements)
+                I_out = evaluate_saxs_debye(qd, I, Ierr, np.vstack((x, y, z)), self.sld_data.atom_names, self.sld_data.residue_names, self.sld_data.atom_elements)
+
+                # additional interpolation step; shouldn't be necessary with a better data integration
+                q = _vec(qx)
+                return np.interp(q, qd, I_out) # don't modify scale or background since it is a fit
 
         vol_correction = self.data_total_volume / self.params['total_volume']
         result = ((self.params['scale'] * vol_correction) * I_out

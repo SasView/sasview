@@ -18,22 +18,28 @@ def evaluate_saxs_debye(q, I, Ierr, coords, atom_names, residue_names, elements)
     if not ausaxslib.ready():
         raise NotImplementedError("AUSAXS is not available. Refer to previous log messages for more information.")
 
-    Iq = (ct.c_double * len(q))()
-    nq = ct.c_int(len(q))
-    nc = ct.c_int(coords.shape[1])
-    q = q.ctypes.data_as(ct.POINTER(ct.c_double))
-    I = I.ctypes.data_as(ct.POINTER(ct.c_double))
-    Ierr = Ierr.ctypes.data_as(ct.POINTER(ct.c_double))
-    x = coords[0:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-    y = coords[1:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-    z = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
-    atom_names = atom_names.ctypes.data_as(ct.POINTER(ct.c_char_p))
-    residue_names = residue_names.ctypes.data_as(ct.POINTER(ct.c_char_p))
-    elements = elements.ctypes.data_as(ct.POINTER(ct.c_char_p))
+    assert(len(q) == len(I) == len(Ierr))
+    assert(coords.shape[0] == 3)
+    assert(coords.shape[1] == len(atom_names) == len(residue_names) == len(elements))
+
+    I_out = (ct.c_double * len(q))()
+    nq    = ct.c_int(len(q))
+    nc    = ct.c_int(coords.shape[1])
+    q     = q.ctypes.data_as(ct.POINTER(ct.c_double))
+    I     = I.ctypes.data_as(ct.POINTER(ct.c_double))
+    Ierr  = Ierr.ctypes.data_as(ct.POINTER(ct.c_double))
+    x     = coords[0:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    y     = coords[1:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+    z     = coords[2:, :].ctypes.data_as(ct.POINTER(ct.c_double))
+
+    atom_names    = (ct.c_char_p * len(atom_names))(*[s.encode('utf-8') for s in atom_names])
+    residue_names = (ct.c_char_p * len(residue_names))(*[s.encode('utf-8') for s in residue_names])
+    elements      = (ct.c_char_p * len(elements))(*[s.encode('utf-8') for s in elements])
+
     status = ct.c_int()
-    ausaxslib.functions.fit_saxs(q, I, Ierr, nq, x, y, z, atom_names, residue_names, elements, nc, Iq, ct.byref(status))
+    ausaxslib.functions.fit_saxs(q, I, Ierr, nq, x, y, z, atom_names, residue_names, elements, nc, I_out, ct.byref(status))
 
     if (status.value == 0):
-        return np.array(Iq)
+        return np.array(I_out)
 
     logging.warning(f"AUSAXS: External library evaluation terminated unexpectedly (error code \"{status.value}\"). Using default Debye implementation instead.")
