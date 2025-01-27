@@ -1,4 +1,6 @@
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
+import logging
+from PySide6.QtCore import Slot
+from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
 
 # TODO: Just using the word 'new' to avoid conflicts. The final version
 # shouldn't have that name.
@@ -11,10 +13,19 @@ class NewDataExplorer(QWidget):
         self.add_data_row = QHBoxLayout(self)
 
         self.load_data_row = QPushButton("Load Data", self)
-        self.add_perspective = QPushButton("+ New Perspective", self)
+        # self.add_perspective = QPushButton("+ New Perspective", self)
+        #
+        # TODO: This list is temporary. We should have all the perspectives
+        # registered somewhere so its easy to add a new one.
+        perspectives = ['Corfunc', 'Fitting', 'Invariant', 'Inversion']
+        self.add_perspective_button = QComboBox(self)
+        self.add_perspective_button.addItem('+ New Perspectives')
+        for p in perspectives:
+            self.add_perspective_button.addItem(p)
+        self.add_perspective_button.currentTextChanged.connect(self.add_perspective)
 
         self.add_data_row.addWidget(self.load_data_row)
-        self.add_data_row.addWidget(self.add_perspective)
+        self.add_data_row.addWidget(self.add_perspective_button)
 
         self.filter_row = QHBoxLayout(self)
         filter_names = ['Data', 'Perspective', 'Theory', 'Plot']
@@ -42,3 +53,10 @@ class NewDataExplorer(QWidget):
         self.layout.addLayout(self.filter_row)
         self.layout.addWidget(self.tree_view)
         self.layout.addLayout(self.final_row)
+
+    @Slot()
+    def add_perspective(self):
+        to_add = self.add_perspective_button.currentText()
+        # TODO: Placeholder
+        logging.info(to_add)
+        self.add_perspective_button.setCurrentIndex(0)
