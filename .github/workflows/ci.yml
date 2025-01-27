@@ -112,7 +112,6 @@ jobs:
         run: |
           git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-          git clone --depth=50 --branch=v0.9.3 https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
         run: |
@@ -125,13 +124,6 @@ jobs:
       - name: Build and install sasmodels
         run: |
           cd ../sasmodels
-          rm -rf build
-          rm -rf dist
-          python -m pip install --no-deps .
-
-      - name: Build and install bumps
-        run: |
-          cd ../bumps
           rm -rf build
           rm -rf dist
           python -m pip install --no-deps .
@@ -174,10 +166,10 @@ jobs:
 
       ### Build documentation (if enabled)
 
-      - name: Build sasmodels, sasdata, and bumps docs
+      - name: Build sasmodels and sasdata docs
         if: ${{ matrix.docs }}
         run: |
-          make -C ../bumps/doc html || true
+          # TODO: supress sasmodels cache for the doc build
           mkdir -p ~/.sasmodels/compiled_models
           make -j4 -C ../sasmodels/doc html || true
           make -C ../sasdata/docs html || true
