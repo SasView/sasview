@@ -56,6 +56,10 @@ class NewDataExplorer(QWidget):
 
     @Slot()
     def add_perspective(self):
+        # This is here because, when we reset the index to 0, this evert gets
+        # triggered again which we don't want.
+        if self.add_perspective_button.currentIndex() == 0:
+            return
         to_add = self.add_perspective_button.currentText()
         # TODO: Placeholder
         logging.info(to_add)
