@@ -27,6 +27,8 @@ class NewDataExplorer(QWidget):
         self.add_data_row.addWidget(self.load_data_row)
         self.add_data_row.addWidget(self.add_perspective_button)
 
+        self.filter_label = QLabel('Filters')
+
         self.filter_row = QHBoxLayout(self)
         filter_names = ['Data', 'Perspective', 'Theory', 'Plot']
         self.filter_buttons: dict[str, QPushButton] = {name: QPushButton(name, self) for name in filter_names}
@@ -50,6 +52,7 @@ class NewDataExplorer(QWidget):
 
 
         self.layout.addLayout(self.add_data_row)
+        self.layout.addWidget(self.filter_label)
         self.layout.addLayout(self.filter_row)
         self.layout.addWidget(self.tree_view)
         self.layout.addLayout(self.final_row)
