@@ -258,7 +258,7 @@ class OptionLayout(ExtendedEnum):
         """Return α dimensions"""
         name = {self.α: "α"}
         units = {self.α: "°"}
-        types = {self.α: "orientation"}
+        types = {self.α: ""}
         bounds = {self.α: [-inf, inf]}
         tooltip = {self.α: "Angle around x-axis"}
         defaultVal = {self.α: 0.0}
@@ -269,7 +269,7 @@ class OptionLayout(ExtendedEnum):
         """Return β dimensions"""
         name = {self.β: "β"}
         units = {self.β: "°"}
-        types = {self.β: "orientation"}
+        types = {self.β: ""}
         bounds = {self.β: [-inf, inf]}
         tooltip = {self.β: "Angle around y-axis"}
         defaultVal = {self.β: 0.0}
@@ -280,7 +280,7 @@ class OptionLayout(ExtendedEnum):
         """Return γ dimensions"""
         name = {self.γ: "γ"}
         units = {self.γ: "°"}
-        types = {self.γ: "orientation"}
+        types = {self.γ: ""}
         bounds = {self.γ: [-inf, inf]}
         tooltip = {self.γ: "Angle around z-axis"}
         defaultVal = {self.γ: 0.0}

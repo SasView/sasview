@@ -23,8 +23,6 @@ import sys
 import re
 from types import MethodType
 from typing import Union
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from PySide6.QtWidgets import QApplication, QDialog, QHBoxLayout, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt, QTimer
@@ -45,6 +43,7 @@ from calculations.Shape2SAS import (getTheoreticalScattering, getPointDistributi
                                                                      ModelProfile, ModelSystem, SimulationParameters, 
                                                                      Qsampling, TheoreticalScatteringCalculation, 
                                                                      SimulateScattering)
+from calculations.helpfunctions import IExperimental
 from PlotAspects.plotAspects import ViewerPlotDesign
 from genPlugin import generatePlugin
 
@@ -237,11 +236,11 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         constraints = self.getConstraintsToTextEditor()
         if constraints:
             formatted = constraints
-            modelName = self.constraint.variableTable.pluginModelName.text()
-            self.constraint.setConstraints(formatted, modelName)
+            self.constraint.setConstraints(formatted)
 
 
-    def checkStateOfConstraints(self, fitPar: list[str], modelName: str):
+    def checkStateOfConstraints(self, fitPar: list[str], modelPars: list[list[str]], modelVals: list[list[float]], 
+                                checkedPars: list[list[bool]]) -> tuple[str, str, str]:
         """Check if the user has written constraints. Otherwise return Default"""
 
         constraintsStr = self.constraint.constraintTextEditor.txtEditor.toPlainText()
@@ -249,21 +248,21 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         #Has anything been written to the text editor
         if constraintsStr:
             #TODO: print to GUI output texteditor
-            return self.constraint.getConstraints(constraintsStr, fitPar, modelName)
+            return self.constraint.getConstraints(constraintsStr, fitPar, modelPars, modelVals, checkedPars)
         
         #Did the user only check parameters and click generate plugin
         elif fitPar:
             #Get default constraints
             fitParLists = self.getConstraintsToTextEditor()
-            defaultConstraintsStr = self.constraint.getConstraintText(fitParLists, modelName)
+            defaultConstraintsStr = self.constraint.getConstraintText(fitParLists)
             #TODO: print to GUI output texteditor
-            return self.constraint.getConstraints(defaultConstraintsStr, fitPar, modelName)
+            return self.constraint.getConstraints(defaultConstraintsStr, fitPar, modelPars, modelVals, checkedPars)
         
         #If not, return empty
         else:
             #all parameters are constant
             #TODO: print to GUI output texteditor
-            return "", "", ""
+            return "", "", "", checkedPars
 
     def addToVariableTable(self):
         """Set up parameters to the variable table"""
@@ -392,6 +391,29 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
                 condition(value, set, row, column, **kwargs)
             sets.append(set)
         return sets
+    
+    def getStandardReadOfTableData(self) -> list[list[Union[float, str]]]:
+        """Get a standard data read from subunit TableView"""
+
+        columns = self.subunitTable.model.columnCount()
+        if not self.subunitTable.model.item(1, columns - 1):
+            return
+        
+        model = self.subunitTable.model
+        layout = list(OptionLayout)
+        layout.remove(OptionLayout.Colour) #TODO: features may be in another Enum
+        rows = len(layout)
+        columns = model.columnCount()
+
+        data = []
+        for column in range(columns):
+            rowData = []
+            for row in range(rows):
+                val = self.getSubunitTableCell(row, column)
+                rowData.append(val)
+            data.append(rowData)
+
+        return data
 
 
     def getModelData(self, condition: MethodType, **kwargs) -> list[list[Union[float, str]]]:
@@ -489,7 +511,6 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.subunitTable.subunit.setCurrentIndex(0)
 
 
-
     def onSAXSExperimentReset(self):
         """Reset Virtual SAXS Experiment tab to default"""
         self.interfaceRoughness.setText("0.0")
@@ -562,7 +583,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
             
         names = []
         layout = list(OptionLayout)
-        layout.remove(OptionLayout.Colour)
+        layout.remove(OptionLayout.Colour) #TODO: features may be in another Enum
 
         for name in layout:
             layoutName = self.getTableName(column, OptionLayout.get_position(name))
@@ -601,22 +622,23 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         prPoints = int(self.constraint.variableTable.prPoints.text())
         modelName = self.constraint.variableTable.pluginModelName.text()
         parNames = self.getAllTableNames(self.ifNoCondition)
-        checkedVars = self.checkedVariables()
+        checkedPars = self.checkedVariables()
+        parVals = self.getStandardReadOfTableData()
 
         #get chosen fit parameters
         fitPar = self.getFitParameters()
 
-        #TODO: Check if constraint button have been clicked. 
-        # otherwise return default constraints to checked parameters
-        constrainParameters = self.checkStateOfConstraints(fitPar, modelName)
+        #get parameters constraints
+        importStatement, parameters, translation, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
         #conditional subunit table parameters
-        modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedVars, conditionFitPar=parNames)
+        modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
-        model_str, full_path = generatePlugin(modelProfile, constrainParameters, fitPar, Npoints, prPoints, modelName)
+        model_str, full_path = generatePlugin(modelProfile, [importStatement, parameters, translation], fitPar, Npoints, prPoints, modelName)
 
         #Write file to plugin model folder
-        print(full_path)
+        #print(full_path)
+        print(model_str)
         TabbedModelEditor.writeFile(full_path, model_str)
 
 
@@ -649,7 +671,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         Npr = int(self.onCheckingInput(self.Npr, "100"))
         N = int(self.onCheckingInput(self.NSimPoints, "3000"))
 
-        name = self.onCheckingInput(self.modelName, "Model_1")
+        #name = self.onCheckingInput(self.modelName, "Model_1")
 
         par = self.getStructureFactorValues()
 
@@ -720,6 +742,16 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
     def sendSimulatedSAXSToDataExplorer(self):
         """Send simulated data to the Data Explorer in SasView"""
+
+        name = self.onCheckingInput(self.modelName, "Model_1")
+        sim = self.getSimulatedSAXSData()
+        with open('Isim%s.dat' % name,'w') as f:
+            f.write('# Simulated data\n')
+            f.write('# sigma generated using Sedlak et al, k=100000, c=0.55, https://doi.org/10.1107/S1600576717003077, and rebinned with 10 per bin)\n')
+            f.write('# %-12s %-12s %-12s\n' % ('q','I','sigma'))
+            for i in range(len(sim.I_sim)):
+                f.write('  %-12.5e %-12.5e %-12.5e\n' % (sim.q[i], sim.I_sim[i], sim.I_err[i]))
+            
         print("Send simulated data to Data Explorer")
         #Send data to SasView Data Explorer
 

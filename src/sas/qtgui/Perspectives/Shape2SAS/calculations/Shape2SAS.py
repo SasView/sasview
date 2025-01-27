@@ -61,7 +61,7 @@ class ModelSystem:
 
     PointDistribution: ModelPointDistribution
     Stype: str = field(default_factory=lambda: "None") #structure factor
-    par: List[float] = field(default_factory=np.ndarray)#parameters for structure factor
+    par: List[float] = field(default_factory=lambda: np.array([]))#parameters for structure factor
     polydispersity: float = field(default_factory=lambda: 0.0)#polydispersity
     conc: float = field(default_factory=lambda: 0.02) #concentration
     sigma_r: float = field(default_factory=lambda: 0.0) #interface roughness
@@ -93,10 +93,10 @@ class SimulateScattering:
     """Class containing parameters for
     simulating scattering"""
 
-    q: np.ndarray = field(default_factory=np.ndarray)
-    I0: np.ndarray = field(default_factory=np.ndarray)
-    I: np.ndarray = field(default_factory=np.ndarray)
-    exposure: Optional[float] = field(default_factory=lambda:500)
+    q: np.ndarray
+    I0: np.ndarray
+    I: np.ndarray
+    exposure: Optional[float] = field(default_factory=lambda:500.0)
 
 @dataclass
 class SimulatedScattering:
@@ -137,7 +137,7 @@ def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> Theoret
 
     S_class = StructureFactor(q, x, y, z, p, sys.Stype, sys.par)
 
-    S_eff = S_class.getStructureFactor().structure_eff(Pq)
+    S_eff = S_class.getStructureFactorClass().structure_eff(Pq)
 
     I = I_theory.calc_Iq(Pq, S_eff, sys.sigma_r)
 

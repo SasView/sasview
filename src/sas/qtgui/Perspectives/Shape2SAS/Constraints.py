@@ -51,13 +51,12 @@ class Constraints(QWidget, Ui_Constraints):
 
         #self.createPlugin.clicked.connect(self.getPluginModel)
 
-    def getConstraintText(self, constraints: str, name: str) -> str:
+    def getConstraintText(self, constraints: str) -> str:
         """Get default text for constraints"""
     
         self.constraintText = (f'''
 #Write libraries to be imported here.
 from numpy import inf
-from sasmodels.core import reparameterize
 
 #Modify fit parameteres here.
 parameters = {constraints}
@@ -66,17 +65,16 @@ parameters = {constraints}
 translation = """
 
 """
-model_info = reparameterize("{name}", parameters, translation, __file__)
 
         ''').lstrip().rstrip()
 
         return self.constraintText
 
  
-    def setConstraints(self, constraints: str, name: str):
+    def setConstraints(self, constraints: str):
         """Set text to QTextEdit"""
 
-        constraints = self.getConstraintText(constraints, name)
+        constraints = self.getConstraintText(constraints)
         self.constraintTextEditor.txtEditor.setPlainText(constraints)
 
 
@@ -106,7 +104,8 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
             return False
 
 
-    def getConstraints(self, constraintsStr: str, fitPar: list[str], modelName: str) -> tuple[list[str], str, str]:
+    def getConstraints(self, constraintsStr: str, fitPar: list[str], modelPars: list[str], 
+                       modelVals: list[list[float]], checkedPars: list[str]) -> tuple[list[str], str, str, list[list[bool]]]:
         """Read inputs from text editor"""
 
         self.checkPythonSyntax(constraintsStr)
@@ -118,9 +117,9 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
         parameters = self.getParameters(constraintsStr, fitPar)
 
         #Get and check translation
-        translation = self.getTranslation(modelName, constraintsStr, importStatement)
+        translation, checkedPars = self.getTranslation(constraintsStr, modelPars, modelVals, checkedPars)
 
-        return importStatement, parameters, translation
+        return importStatement, parameters, translation, checkedPars
     
 
     def removeFromImport(self, importStatement: list[str], remove: str) -> list[str]:
@@ -129,44 +128,82 @@ model_info = reparameterize("{name}", parameters, translation, __file__)
         if remove in importStatement:
             importStatement.remove(remove)
 
+    @staticmethod
+    def findPosition(par: str, modelPars: list[list[str]]) -> tuple[int, int]:
+        """Find position of parameter in parameter lists"""
 
-    def getTranslation(self, modelName: str, constraintsStr: str, importStatement: list[str]) -> str:
+        for i, sublist in enumerate(modelPars):
+            if par in sublist:
+                return i, sublist.index(par)
+
+
+    def getTranslation(self, constraintsStr: str, modelPars: list[list[str]], modelVals: list[list[float]], checkedPars: list[list[str]]) -> tuple[str, list[list[bool]]]:
         """Get translation from constraints"""
 
         #see if translation is in constraints
         if not re.search(r'translation\s*=', constraintsStr):
-            warnings.warn("No translation found in constraints")
-            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
-            return ""
+            raise ValueError("No translation found in constraints")
 
         translation = re.search(r'translation\s*=\s*"""(.*\n(?:.*\n)*?)"""', constraintsStr, re.DOTALL)
         translationInput = translation.group(1) if translation else ""
 
-        #Check if translation is empty
-        if not translationInput:
-            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
-            return ""
+        #Check syntax
+        self.checkPythonSyntax(translationInput) #TODO: fix code line number output
+        lines = translationInput.split('\n')
 
-        #Check if translation is only whitespace
-        if not translationInput.strip():
-            self.removeFromImport(importStatement, "from sasmodels.core import reparameterize")
-            return ""
+        #remove empty lines
+        lines = [line for line in lines if line.strip()]
 
-        #Check if reparameterize is imported
-        if not re.search(r'from sasmodels.core import reparameterize', constraintsStr):
-            raise ValueError("Could not find from sasmodels.sasmodels.core import reparameterize in constraints")
+        #Check parameters and update checkedPars
+        for i in range(len(lines)):
+            
+            if '=' not in lines[i]:
+                raise ValueError("No '=' found in translation line")
 
-        #Check if translation is set
-        model_infoDescription = fr'model_info\s*=\s*reparameterize\(\s*"{modelName}"\s*,\s*parameters\s*,\s*translation\s*,\s*__file__\s*\)'
-        model_info = re.search(model_infoDescription, constraintsStr)
-        model_info = model_info.group(0) if model_info else ""
+            if lines[i].count('=') > 1:
+                raise ValueError("More than one '=' found in translation line")
+            
+            leftLine, rightLine = lines[i].split('=')
 
-        if not model_info:
-            raise ValueError("Could not find model_info in constraints")
+            #greek letters: \u0370-\u03FF
+            rightPars = re.findall(r'(?<=)[a-zA-Z_\u0370-\u03FF]\w*\b', rightLine)
+            leftPars = re.findall(r'(?<=)[a-zA-Z_\u0370-\u03FF]\w*\b', leftLine)
 
-        translationText = translation.group(0) + "\n" + "\n" + model_info
+            #TODO: check for functions inputs
 
-        return translationText
+            for par in rightPars + leftPars:
+                boolPar = any(par in sublist for sublist in modelPars)
+                if not boolPar:
+                    raise ValueError(f"{par} does not exist in model parameters")
+                
+            notes = ""
+            for par in rightPars:
+                j, k = self.findPosition(par, modelPars)
+                if checkedPars[j][k]:
+                    #if parameter is a fit parameter, don't remove it
+                    continue
+                else:
+                    #if parameter is a constant, set inputted value
+                    inputVal = modelVals[j][k]
+
+                    #update line with input value
+                    rightLine = re.sub(r'\b' + re.escape(par) + r'\b', str(inputVal), rightLine)
+                    notes += f" {par} = {inputVal},"
+            
+            if notes:
+                notes = f" #NOTE:{notes}"
+
+            for par in leftPars:
+                j, k = self.findPosition(par, modelPars)
+                #check if paramater are to be set in ModelProfile
+                checkedPars[j][k] = True
+            
+            lines[i] = leftLine + '=' + rightLine + notes
+
+        #return lines to string
+        translationInput = '\n'.join(lines)
+
+        return translationInput, checkedPars
     
 
     def getParameters(self, constraintsStr: str, fitPar: list[str]) -> str:

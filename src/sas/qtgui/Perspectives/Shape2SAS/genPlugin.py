@@ -1,6 +1,7 @@
 #Global
 from pathlib import Path
 from typing import Union
+import textwrap
 
 #Global SasView
 from sas.sascalc.fit import models
@@ -87,10 +88,10 @@ category = "plugin"
 
 {parameters}
 
-{translation}
-
 def Iq({', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
+
+{textwrap.indent(translation, '    ')}
     
     modelProfile = ModelProfile(subunits={prof.subunits}, 
                                     p_s={parListFormat(prof.p_s)}, 
