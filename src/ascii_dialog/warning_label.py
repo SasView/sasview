@@ -46,8 +46,7 @@ class WarningLabel(QLabel):
             self.setText(f'{unparsable} lines cannot be parsed. They will be ignored.')
             self.setFontOrange()
         else:
-            self.setText('All is fine') # TODO: Probably want to find a more appropriate message.
-            self.setFontNormal()
+            self.setText('')
 
     def __init__(self, initial_missing_columns, initial_duplicate_classes):
         super().__init__()
