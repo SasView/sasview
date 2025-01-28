@@ -612,7 +612,8 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
     def getPluginModel(self):
         """Generating a plugin model and sends it to
         the Plugin Models folder in SasView"""
-
+        
+        self.constraint.logInfo("Generating plugin model.")
         #no subunits inputted
         columns = self.subunitTable.model.columnCount() #TODO: maybe give a warning to output texteditor
         if not self.subunitTable.model.item(1, columns - 1):
@@ -628,9 +629,11 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         #get chosen fit parameters
         fitPar = self.getFitParameters()
 
+        self.constraint.logInfo(f"Retrieving and verifying constraints. . .")
         #get parameters constraints
         importStatement, parameters, translation, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
+        self.constraint.logInfo(f"Retrieving Model. . .")
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
@@ -640,6 +643,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         #print(full_path)
         print(model_str)
         TabbedModelEditor.writeFile(full_path, model_str)
+        self.constraint.logInfo(f"Succefully generated model {modelName}!")
 
 
     def onCheckingInput(self, input: str, default: str) -> str:
@@ -752,7 +756,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
             for i in range(len(sim.I_sim)):
                 f.write('  %-12.5e %-12.5e %-12.5e\n' % (sim.q[i], sim.I_sim[i], sim.I_err[i]))
             
-        print("Send simulated data to Data Explorer")
+        #print("Send simulated data to Data Explorer")
         #Send data to SasView Data Explorer
 
 

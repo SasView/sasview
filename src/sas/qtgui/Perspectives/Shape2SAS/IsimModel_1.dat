@@ -1,0 +1,3 @@
+# Simulated data
+# sigma generated using Sedlak et al, k=100000, c=0.55, https://doi.org/10.1107/S1600576717003077, and rebinned with 10 per bin)
+# q            I            sigma       

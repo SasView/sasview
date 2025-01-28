@@ -5,7 +5,7 @@ from typing import Optional, Tuple, List, Any
 #from dataclasses import dataclass
 
 
-################################ Data classes ################################
+################################ Type Hints ################################
 
 Vector2D = Tuple[np.ndarray, np.ndarray]
 Vector3D = Tuple[np.ndarray, np.ndarray, np.ndarray]
@@ -1431,7 +1431,6 @@ class StructureFactor:
     def getStructureFactorClass(self):
         """Return chosen structure factor"""
         if self.Stype in self.structureFactor:
-            print(f"        Structure factor: {self.Stype}")
             return self.structureFactor[self.Stype](self.q, self.x_new, self.y_new, self.z_new, self.p_new, self.par)
         
         else:
