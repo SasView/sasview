@@ -1,4 +1,4 @@
-from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, Qt
+from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, QPalette
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, \
     QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication, QDialog
 from PySide6.QtCore import QModelIndex, QPoint, Slot
@@ -263,7 +263,7 @@ class AsciiDialog(QDialog):
                 item.setForeground(QColor.fromString('grey'))
                 item_font.setStrikeOut(True)
             else:
-                item.setForeground(QColor.fromString('black'))
+                item.setForeground(QApplication.palette().text())
                 item_font.setStrikeOut(False)
             item.setFont(item_font)
 
