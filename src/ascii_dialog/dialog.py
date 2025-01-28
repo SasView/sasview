@@ -46,16 +46,10 @@ class AsciiDialog(QDialog):
         # Filename, unload button, and edit metadata button.
 
         self.filename_unload_layout = QHBoxLayout()
-        self.filename_label = QLabel(NOFILE_TEXT)
         self.unloadButton = QPushButton("Unload")
         self.unloadButton.setDisabled(True)
-        self.editMetadataButton = QPushButton("Edit Metadata")
-        self.editMetadataButton.setDisabled(True)
-        self.editMetadataButton.clicked.connect(self.editMetadata)
         self.unloadButton.clicked.connect(self.unload)
-        self.filename_unload_layout.addWidget(self.filename_label)
         self.filename_unload_layout.addWidget(self.unloadButton)
-        self.filename_unload_layout.addWidget(self.editMetadataButton)
 
         # Filename chooser
         self.filename_chooser = QComboBox()
@@ -128,8 +122,14 @@ class AsciiDialog(QDialog):
         # Done button
         # TODO: Not entirely sure what to call/label this. Just going with 'done' for now.
 
+        self.done_line = QHBoxLayout()
+        self.editMetadataButton = QPushButton("Edit Metadata")
+        self.editMetadataButton.setDisabled(True)
+        self.editMetadataButton.clicked.connect(self.editMetadata)
         self.done_button = QPushButton('Done')
         self.done_button.clicked.connect(self.onDoneButton)
+        self.done_line.addWidget(self.done_button)
+        self.done_line.addWidget(self.editMetadataButton)
 
         self.layout = QVBoxLayout(self)
 
@@ -143,7 +143,7 @@ class AsciiDialog(QDialog):
         self.layout.addWidget(self.col_editor)
         self.layout.addWidget(self.table)
         self.layout.addWidget(self.warning_label)
-        self.layout.addWidget(self.done_button)
+        self.layout.addLayout(self.done_line)
 
     @property
     def starting_pos(self) -> int:
@@ -284,7 +284,6 @@ class AsciiDialog(QDialog):
         for filename in filenames:
 
             basename = path.basename(filename)
-            self.filename_label.setText(basename)
 
             try:
                 with open(filename) as file:
@@ -357,10 +356,8 @@ This could potentially be because the file {basename} an ASCII format.""")
 
         """
         self.current_filename = self.filename_chooser.currentText()
-        self.filename_label.setText(self.current_filename)
         if self.current_filename == '':
             self.table.clear()
-            self.filename_label.setText(NOFILE_TEXT)
             self.table.setDisabled(True)
             self.unloadButton.setDisabled(True)
             self.editMetadataButton.setDisabled(True)
