@@ -128,8 +128,11 @@ class AsciiDialog(QDialog):
         self.editMetadataButton.clicked.connect(self.editMetadata)
         self.done_button = QPushButton('Done')
         self.done_button.clicked.connect(self.onDoneButton)
+        self.cancel_button = QPushButton('Cancel')
+        self.cancel_button.clicked.connect(self.onCancel)
         self.done_line.addWidget(self.done_button)
         self.done_line.addWidget(self.editMetadataButton)
+        self.done_line.addWidget(self.cancel_button)
 
         self.layout = QVBoxLayout(self)
 
@@ -454,6 +457,9 @@ This could potentially be because the file {basename} an ASCII format.""")
         )
         self.params = params
         self.accept()
+
+    def onCancel(self):
+        self.reject()
 
     def editMetadata(self):
         dialog = MetadataFilenameDialog(self.current_filename, self.internal_metadata)
