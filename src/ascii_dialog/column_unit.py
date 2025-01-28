@@ -54,11 +54,15 @@ class ColumnUnit(QWidget):
         unit_box.clear()
         self.current_option = selected_option
         # Use the list of preferred units but fallback to the first 5 if there aren't any for this particular column.
-        unit_options = default_units.get(self.current_option, unit_kinds[selected_option].units)
-        option_symbols = [unit.symbol for unit in unit_options]
-        for option in option_symbols[:5]:
-            unit_box.addItem(option)
-        unit_box.addItem('Select More')
+        if self.current_option == '<ignore>':
+            unit_box.setDisabled(True)
+        else:
+            unit_box.setDisabled(False)
+            unit_options = default_units.get(self.current_option, unit_kinds[selected_option].units)
+            option_symbols = [unit.symbol for unit in unit_options]
+            for option in option_symbols[:5]:
+                unit_box.addItem(option)
+            unit_box.addItem('Select More')
 
 
     def replaceOptions(self, new_options) -> None:
