@@ -1,4 +1,4 @@
-from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, QPalette
+from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, QPalette, Qt
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, \
     QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication, QDialog
 from PySide6.QtCore import QModelIndex, QPoint, Slot
