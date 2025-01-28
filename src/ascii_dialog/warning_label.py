@@ -39,7 +39,7 @@ class WarningLabel(QLabel):
             self.setText(f'The following columns are missing: {missing_columns}')
             self.setFontRed()
         elif len(duplicate_columns) > 0:
-            self.setText(f'There are duplicate columns.')
+            self.setText(f'There are columns which are repeated.')
             self.setFontRed()
         elif unparsable > 0:
             # FIXME: This error message could perhaps be a bit clearer.
