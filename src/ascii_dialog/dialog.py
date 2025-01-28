@@ -55,8 +55,8 @@ class AsciiDialog(QDialog):
         self.filename_chooser = QComboBox()
         self.filename_chooser.currentTextChanged.connect(self.updateCurrentFile)
 
-        self.load_button = QPushButton("Load File")
-        self.load_button.clicked.connect(self.load_file)
+        self.select_button = QPushButton("Select File")
+        self.select_button.clicked.connect(self.load_file)
 
         ## Dataset type selection
         self.dataset_layout = QHBoxLayout()
@@ -135,7 +135,7 @@ class AsciiDialog(QDialog):
 
         self.layout.addLayout(self.filename_unload_layout)
         self.layout.addWidget(self.filename_chooser)
-        self.layout.addWidget(self.load_button)
+        self.layout.addWidget(self.select_button)
         self.layout.addLayout(self.dataset_layout)
         self.layout.addLayout(self.sep_layout)
         self.layout.addLayout(self.startline_layout)
