@@ -112,16 +112,14 @@ jobs:
         run: |
           git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-          git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
+          git clone --depth=50 --branch=v0.9.3 https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
         run: |
           cd ../sasdata
           rm -rf build
           rm -rf dist
-          python setup.py clean
-          python setup.py build
-          mv build/lib/sasdata/example_data/* ../sasview/src/sas/example_data/
+          mv sasdata/example_data/* ../sasview/src/sas/example_data/
           python -m pip install --no-deps .
 
       - name: Build and install sasmodels
@@ -129,8 +127,6 @@ jobs:
           cd ../sasmodels
           rm -rf build
           rm -rf dist
-          python setup.py clean
-          python setup.py build
           python -m pip install --no-deps .
 
       - name: Build and install bumps
@@ -138,8 +134,6 @@ jobs:
           cd ../bumps
           rm -rf build
           rm -rf dist
-          python setup.py clean
-          python setup.py build
           python -m pip install --no-deps .
 
       ### Document the build environment
@@ -156,8 +150,6 @@ jobs:
           githash=$( git rev-parse HEAD )
           sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
           # BUILD SASVIEW
-          python setup.py clean
-          python setup.py build
           python -m pip install --no-deps .
 
       ### Run tests (if enabled)
@@ -274,7 +266,7 @@ jobs:
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          appstore-connect-team-id: W2AG9MPZ43
+          appstore-connect-team-id: 8CX8K63BQM
           verbose: True
 
       - name: Staple Release Build (OSX)
@@ -304,35 +296,6 @@ jobs:
             installers/dist/SasView6.dmg
             installers/dist/sasview6.tar.gz
           if-no-files-found: ignore
-
-      - name: Rename artifacts (Windows)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
-        run: |
-          mv installers/dist/setupSasView.exe installers/dist/setupSasView-6.0.0-alpha-Win64.exe
-
-      - name: Rename artifacts (MacOS)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
-        run: |    
-          mv installers/dist/SasView6.dmg  installers/dist/SasView-6.0.0-alpha-MacOSX.dmg
-
-      - name: Rename artifacts (Linux)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
-        run: |    
-          mv installers/dist/sasview6.tar.gz installers/dist/SasView-6.0.0-alpha-Linux.tar.gz
-
-      - name: Upload Release Installer to GitHub
-        if: ${{ matrix.installer }}
-        uses: ncipollo/release-action@v1
-        with:
-          draft: false
-          prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "installers/dist/*SasView-6.0.0-*"
-          name: "Release 6.0.0-alpha"
-          bodyFile: "build_tools/release_notes/6.0.0_notes.txt"
-          tag: "v6.0.0-alpha"
 
   test-installer:
     needs: [ build-matrix ]
@@ -392,7 +355,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -457,24 +420,44 @@ jobs:
 
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
-          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
+          sudo apt install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
 
       - name: Try running the installation (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu' )}}
         # If sasview has crashed on its own, then this should return an error
         run: |
-          xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW &
-          sleep 60s
-          kill %1
+          (
+            echo "## START SASVIEW"
+            xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW 2>&1 |
+            tee sasview-test.log
+          ) &
+          svpid=$!
+          (
+            set -e
+            sleep 20s
+            echo "## PULSE CHECK"
+            kill -0 $svpid
+            echo "## PULSE OK"
+            sleep 40s
+            echo "## FINISHING SMOKE TEST"
+            kill $svpid
+            echo "## SMOKE TEST COMPLETE"
+            exit 0
+          ) &
+          pulsepid=$1
+          wait $pulsepid
+          # Check the log file for successful startup
+          grep "SasView session started" sasview-test.log
 
       ### Optionally attempt to work with the debug tarball from pyinstaller
 
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
