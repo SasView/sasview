@@ -29,7 +29,7 @@ class RowStatusWidget(QWidget):
         self.status_changed.emit(self.row)
 
     def isChecked(self):
-        return self.checkbox.isChecked
+        return self.checkbox.isChecked()
 
     def setChecked(self, new_value: bool):
         self.checkbox.setChecked(new_value)
