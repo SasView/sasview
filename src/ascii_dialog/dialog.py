@@ -49,11 +49,13 @@ class AsciiDialog(QDialog):
         self.unloadButton = QPushButton("Unload")
         self.unloadButton.setDisabled(True)
         self.unloadButton.clicked.connect(self.unload)
-        self.filename_unload_layout.addWidget(self.unloadButton)
-
         # Filename chooser
         self.filename_chooser = QComboBox()
         self.filename_chooser.currentTextChanged.connect(self.updateCurrentFile)
+
+        self.filename_unload_layout.addWidget(self.filename_chooser)
+        self.filename_unload_layout.addWidget(self.unloadButton)
+
 
         self.select_button = QPushButton("Select File")
         self.select_button.clicked.connect(self.load_file)
@@ -137,7 +139,6 @@ class AsciiDialog(QDialog):
         self.layout = QVBoxLayout(self)
 
         self.layout.addLayout(self.filename_unload_layout)
-        self.layout.addWidget(self.filename_chooser)
         self.layout.addWidget(self.select_button)
         self.layout.addLayout(self.dataset_layout)
         self.layout.addLayout(self.sep_layout)
