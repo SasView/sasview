@@ -147,9 +147,11 @@ class ViewerModel(QWidget):
         self.scatter.setAxisZ(self.Z_ax)
 
 
-    def setAxis(self, minx: float, maxx: float, miny: float, maxy: float, minz: float, maxz: float):
+    def setAxis(self, minx: float, miny: float, minz: float, maxx: float, maxy: float, maxz: float):
         """Set axis for the model"""
 
+        #FIXME: even if min and max are the same for X, Y, Z, a sphere still looks like an ellipsoid
+        #Tried with global min and max, and by centering the model, but no success.
         self.X_ax.setRange(minx, maxx)
         self.Y_ax.setRange(miny, maxy)
         self.Z_ax.setRange(minz, maxz)
@@ -168,25 +170,25 @@ class ViewerModel(QWidget):
            data = []
            series.dataProxy().resetArray(data)
 
-        #due to inhomogeneous lists, np.min, np.max cannot be used
-        minx, maxx = [], []
-        miny, maxy = [], []
-        minz, maxz = [], []
+        minx, maxx = min(distr.x[0]), max(distr.x[0])
+        miny, maxy = min(distr.y[0]), max(distr.y[0])
+        minz, maxz = min(distr.z[0]), max(distr.z[0])
         for subunit in range(len(colours)):
             series = self.dict_series[colours[subunit]]
             data = []
             for index in range(len(distr.x[subunit])):
                 data.append(QScatterDataItem(QVector3D(distr.x[subunit][index], distr.y[subunit][index], distr.z[subunit][index])))
-            minx.append(min(distr.x[subunit]))
-            maxx.append(max(distr.x[subunit]))
-            miny.append(min(distr.y[subunit]))
-            maxy.append(max(distr.y[subunit]))
-            minz.append(min(distr.z[subunit]))
-            maxz.append(max(distr.z[subunit]))
+            
+            minx = min(minx, min(distr.x[subunit]))
+            maxx = max(maxx, max(distr.x[subunit]))
+            miny = min(miny, min(distr.y[subunit]))
+            maxy = max(maxy, max(distr.y[subunit]))
+            minz = min(minz, min(distr.z[subunit]))
+            maxz = max(maxz, max(distr.z[subunit]))
+            
             
             series.dataProxy().addItems(data)
-
-        self.setAxis(min(minx), max(maxx), min(miny), max(maxy), min(minz), max(maxz))
+        self.setAxis(minx, miny, minz, maxx, maxy, maxz)
 
 
     def onXYClicked(self):
