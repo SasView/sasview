@@ -19,7 +19,7 @@ def guess_columns(col_count: int, dataset_type: DatasetType) -> list[str]:
 
     return dataset_type.expected_orders[-1]
 
-symbols_to_ignore = ['.', '-', 'e', 'E']
+symbols_to_ignore = ['.', '-', '+', 'e', 'E']
 
 def guess_starting_position(split_csv: list[list[str]]) -> int:
     """Try to look for a line where the first item in the row can be converted
