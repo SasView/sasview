@@ -17,6 +17,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.LineModel import LineModel
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.GuiUtils import xyTransform
 
 # Local UI
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
@@ -310,7 +311,6 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         panel.
 
         """
-        from sas.qtgui.Utilities.GuiUtils import xyTransform
         xyTransform(self.data, self.xLabel, self.yLabel)
         match self.xLabel:
             case "x^(2)":
