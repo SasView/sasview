@@ -6,11 +6,14 @@ import numpy as np
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
+from typing import Optional
 
 from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 
 from sas.qtgui.Plotting import Fittings
 from sas.qtgui.Plotting import DataTransform
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.LineModel import LineModel
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -23,12 +26,12 @@ from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
     updatePlot = QtCore.Signal(np.ndarray, np.ndarray)
 
-    def __init__(self, parent=None,
-                 data=None,
-                 max_range=(0.0, 0.0),
-                 fit_range=(0.0, 0.0),
-                 xlabel="",
-                 ylabel=""):
+    def __init__(self, parent: Optional[PlotterBase] = None,
+                 data: Optional[Data1D] = None,
+                 max_range: tuple = (0.0, 0.0),
+                 fit_range: tuple = (0.0, 0.0),
+                 xlabel: str = "",
+                 ylabel: str = ""):
         super(LinearFit, self).__init__(parent)
 
         self.setupUi(self)
@@ -36,20 +39,20 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         assert isinstance(max_range, tuple)
         assert isinstance(fit_range, tuple)
 
-        self.data = data
-        self.parent = parent
+        self.data: Optional[Data1D] = data
+        self.parent: Optional[PlotterBase] = parent
 
-        self.max_range = max_range
+        self.max_range: tuple = max_range
         # Set fit minimum to 0.0 if below zero
         if fit_range[0] < 0.0:
             fit_range = (0.0, fit_range[1])
-        self.fit_range = fit_range
-        self.xLabel = xlabel
-        self.yLabel = ylabel
+        self.fit_range: tuple = fit_range
+        self.xLabel: str = xlabel
+        self.yLabel: str = ylabel
 
-        self.rg_on = False
-        self.rg_yx = False
-        self.bg_on = False
+        self.rg_on: bool = False
+        self.rg_yx: bool = False
+        self.bg_on: bool = False
 
         # Scale dependent content
         self.guinier_box.setVisible(False)
@@ -88,8 +91,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         fr_max = GuiUtils.formatNumber(fit_range[1])
         self.txtFitRangeMin.setText(str(fr_min))
         self.txtFitRangeMax.setText(str(fr_max))
-        self.xminFit = None
-        self.xmaxFit = None
+        self.xminFit: Optional[float] = None
+        self.xmaxFit: Optional[float] = None
 
         # cast xLabel into html
         label = re.sub(r'\^\((.)\)(.*)', r'<span style=" vertical-align:super;">\1</span>\2',
@@ -98,13 +101,13 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         self.model = LineModel()
         # Display the fittings values
-        self.default_A = self.model.getParam('A')
-        self.default_B = self.model.getParam('B')
-        self.cstA = Fittings.Parameter(self.model, 'A', self.default_A)
-        self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
+        self.default_A: float = self.model.getParam('A')
+        self.default_B: float = self.model.getParam('B')
+        self.cstA: float = Fittings.Parameter(self.model, 'A', self.default_A)
+        self.cstB: float = Fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = DataTransform
 
-        self.q_sliders = None
+        self.q_sliders: Optional[QRangeSlider] = None
         self.drawSliders()
 
         self.setFixedSize(self.minimumSizeHint())
@@ -113,24 +116,24 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.cmdFit.clicked.connect(self.fit)
         self.parent.installEventFilter(self)
 
-    def eventFilter(self, watched, event):
+    def eventFilter(self, watched: PlotterBase, event: QtCore.QEvent) -> bool:
         if watched is self.parent and event.type() == QtCore.QEvent.Close:
             self.q_sliders = None
             self.close()
         return super(LinearFit, self).eventFilter(watched, event)
 
-    def setRangeLabel(self, label=""):
+    def setRangeLabel(self, label: str = ""):
         """
         Overwrite default fit range label to correspond to actual unit
         """
         assert(isinstance(label, str))
         self.lblRange.setText(label)
 
-    def range(self):
+    def range(self) -> tuple:
         return (float(self.txtFitRangeMin.text()) if float(self.txtFitRangeMin.text()) > 0 else 0.0,
                 float(self.txtFitRangeMax.text()))
 
-    def fit(self, event):
+    def fit(self, event: QtCore.QEvent):
         """
         Performs the fit. Receive an event when clicking on
         the button Fit.Computes chisqr ,
@@ -202,11 +205,11 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         tempy.append(np.power(10.0, y_model) if self.y_is_log else y_model)
 
         # Set the fit parameter display when  FitDialog is opened again
-        self.Avalue = cstA
-        self.Bvalue = cstB
-        self.ErrAvalue = errA
-        self.ErrBvalue = errB
-        self.Chivalue = chisqr
+        self.Avalue: float = cstA
+        self.Bvalue: float = cstB
+        self.ErrAvalue: float = errA
+        self.ErrBvalue: float = errB
+        self.Chivalue: float = chisqr
 
         # Update the widget
         self.txtA.setText(formatNumber(self.Avalue))
@@ -252,7 +255,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.drawSliders()
         self.updatePlot.emit(tempx, tempy)
 
-    def origData(self):
+    def origData(self) -> (np.ndarray, np.ndarray, np.ndarray):
         # Store the transformed values of view x, y and dy before the fit
         xmin_check = np.log10(self.xminFit)
         # Local shortcuts
@@ -280,7 +283,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         return np.array(tempx), np.array(tempy), np.array(tempdy)
 
-    def checkFitValues(self, item):
+    def checkFitValues(self, item: QtWidgets.QLineEdit) -> bool:
         """
         Check the validity of input values
         """
@@ -300,7 +303,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
                 item.setPalette(p_pink)
         return flag
 
-    def floatInvTransform(self, x):
+    def floatInvTransform(self, x: float) -> float:
         """
         transform a float.It is used to determine the x.View min and x.View
         max for values not in x.  Also used to properly calculate RgQmin,
@@ -346,12 +349,12 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.data.show_q_range_sliders = False
         self.q_sliders = None
 
-    def closeEvent(self, ev):
+    def closeEvent(self, ev: QtCore.QEvent):
         self.clearSliders()
         self.parent.update()
 
-    def accept(self, ev):
+    def accept(self, ev: QtCore.QEvent):
         self.close()
 
-    def reject(self, ev):
+    def reject(self, ev: QtCore.QEvent):
         self.close()
