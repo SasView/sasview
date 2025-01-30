@@ -33,6 +33,8 @@ class DataRole(Enum):
     ROLE_LIN_LIN = auto()
     # POLYDISPERSITY role is to tag polydispersity plots to be able to suppress auto displaying them
     ROLE_POLYDISPERSITY = auto()
+    # ANGULAR_SLICE role is to ensure angular slices from 2D plots are on linear scale
+    ROLE_ANGULAR_SLICE = auto()
 
 
 class Data1D(PlottableData1D, LoadData1D):

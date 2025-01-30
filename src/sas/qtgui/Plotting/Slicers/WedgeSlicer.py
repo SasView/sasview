@@ -2,7 +2,7 @@ import numpy as np
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
@@ -200,6 +200,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
+        new_plot.plot_role = DataRole.ROLE_ANGULAR_SLICE
         # If the data file does not tell us what the axes are, just assume...
         if self.averager.__name__ == 'SectorPhi':
             # angular plots usually require a linear x scale and better with

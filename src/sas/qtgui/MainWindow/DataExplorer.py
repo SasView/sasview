@@ -1208,14 +1208,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     new_plot.item = item
                 # Ensure new plots use the default transform, not the transform of any previous plots the data were in
                 # TODO: The transform should be part of the PLOT, NOT the data
-                if plot_set.plot_role in [DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL_SESANS,
-                                          DataRole.ROLE_STAND_ALONE] or plot_set.isSesans:
+                if (plot_set.plot_role in [
+                    DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE,
+                    DataRole.ROLE_ANGULAR_SLICE] or plot_set.isSesans):
                     plot_set.xtransform = 'x'
                 else:
                     plot_set.xtransform = 'log10(x)'
-                if plot_set.plot_role in [DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL,
-                                          DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE]\
-                        or plot_set.isSesans:
+                if (plot_set.plot_role in [
+                    DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS,
+                    DataRole.ROLE_ANGULAR_SLICE, DataRole.ROLE_STAND_ALONE] or plot_set.isSesans):
                     plot_set.ytransform = 'y'
                 else:
                     plot_set.ytransform = 'log10(y)'
