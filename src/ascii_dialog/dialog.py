@@ -1,6 +1,6 @@
 from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, QPalette, Qt
 from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, \
-    QMessageBox, QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication, QDialog
+    QMessageBox, QPushButton, QSpacerItem, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication, QDialog
 from PySide6.QtCore import QModelIndex, QPoint, Slot
 from ascii_dialog.selection_menu import SelectionMenu
 from ascii_dialog.warning_label import WarningLabel
@@ -125,16 +125,18 @@ class AsciiDialog(QDialog):
         # TODO: Not entirely sure what to call/label this. Just going with 'done' for now.
 
         self.done_line = QHBoxLayout()
+        self.cancel_button = QPushButton('Cancel')
+        self.cancel_button.clicked.connect(self.onCancel)
+        self.done_line_spacer = QSpacerItem(70, 0)
         self.editMetadataButton = QPushButton("Edit Metadata")
         self.editMetadataButton.setDisabled(True)
         self.editMetadataButton.clicked.connect(self.editMetadata)
         self.done_button = QPushButton('Done')
         self.done_button.clicked.connect(self.onDoneButton)
-        self.cancel_button = QPushButton('Cancel')
-        self.cancel_button.clicked.connect(self.onCancel)
-        self.done_line.addWidget(self.done_button)
-        self.done_line.addWidget(self.editMetadataButton)
         self.done_line.addWidget(self.cancel_button)
+        self.done_line.addItem(self.done_line_spacer)
+        self.done_line.addWidget(self.editMetadataButton)
+        self.done_line.addWidget(self.done_button)
 
         self.layout = QVBoxLayout(self)
 
