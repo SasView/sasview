@@ -19,6 +19,8 @@ def guess_columns(col_count: int, dataset_type: DatasetType) -> list[str]:
 
     return dataset_type.expected_orders[-1]
 
+symbols_to_ignore = ['.', '-', 'e', 'E']
+
 def guess_starting_position(split_csv: list[list[str]]) -> int:
     """Try to look for a line where the first item in the row can be converted
     to a number. If such a line doesn't exist, try to look for a line where the
@@ -29,7 +31,10 @@ def guess_starting_position(split_csv: list[list[str]]) -> int:
     for i, row in enumerate(split_csv):
         all_nums = True
         for column in row:
-            if not column.replace('.', '').replace('-', '').isdigit():
+            amended_column = column
+            for symbol in symbols_to_ignore:
+                amended_column = amended_column.replace(symbol, '')
+            if not amended_column.isdigit():
                 all_nums = False
                 break
         if all_nums:
