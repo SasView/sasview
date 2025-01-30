@@ -334,13 +334,12 @@ class PlotterWidget(PlotterBase):
         :returns:
         """
 
-
         x_min, x_max = np.inf, -np.inf
         y_min, y_max = np.inf, -np.inf
 
         for key in self.plot_dict:
 
-            plot_data = self.plot_dict[key]
+            plot_data = self.plot_dict[key].view
 
             if len(plot_data.x) > 0:
                 x_min = min(np.min(plot_data.x), x_min)
@@ -348,7 +347,7 @@ class PlotterWidget(PlotterBase):
 
             if len(plot_data.y) > 0:
 
-                dy = plot_data.view.dy
+                dy = plot_data.dy
                 if dy is None:
                     y_min = min(np.min(plot_data.y), y_min)
                     y_max = max(np.max(plot_data.y), y_max)
