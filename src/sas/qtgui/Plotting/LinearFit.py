@@ -19,7 +19,6 @@ from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
-from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
 
@@ -126,7 +125,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         """
         Overwrite default fit range label to correspond to actual unit
         """
-        assert(isinstance(label, str))
+        assert isinstance(label, str)
         self.lblRange.setText(label)
 
     def range(self) -> tuple:
@@ -312,7 +311,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         """
         from sas.qtgui.Utilities.GuiUtils import xyTransform
-        label_tuple = xyTransform(self.data, self.xLabel, self.yLabel)
+        xyTransform(self.data, self.xLabel, self.yLabel)
         match self.xLabel:
             case "x^(2)":
                 return np.sqrt(x)
@@ -353,8 +352,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.clearSliders()
         self.parent.update()
 
-    def accept(self, ev: QtCore.QEvent):
+    def accept(self):
         self.close()
 
-    def reject(self, ev: QtCore.QEvent):
+    def reject(self):
         self.close()
