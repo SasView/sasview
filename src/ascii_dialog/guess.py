@@ -32,6 +32,6 @@ def guess_starting_position(split_csv: list[list[str]]) -> int:
             if not column.replace('.', '').replace('-', '').isdigit():
                 all_nums = False
                 break
-            if all_nums:
-                return i
+        if all_nums:
+            return i
     return 0
