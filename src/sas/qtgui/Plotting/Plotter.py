@@ -671,7 +671,8 @@ class PlotterWidget(PlotterBase):
                     xlabel=self.xLogLabel,
                     ylabel=self.yLogLabel)
         fit_dialog.updatePlot.connect(self.onFitDisplay)
-        fit_dialog.show()
+        if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
+            return
 
     def replacePlot(self, id, new_plot, retain_dimensions=True):
         """
