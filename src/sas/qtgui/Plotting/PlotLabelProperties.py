@@ -53,6 +53,23 @@ class PlotLabelPropertyHolder():
     @text.setter
     def text(self, value):
         self.__properties['text'] = value
+    
+    @property
+    def scientific_x(self):
+        return self.__properties.get('scientific_x', False)
+
+    @scientific_x.setter
+    def scientific_x(self, value):
+        self.__properties['scientific_x'] = value
+
+    @property
+    def scientific_y(self):
+        return self.__properties.get('scientific_y', False)
+
+    @scientific_y.setter
+    def scientific_y(self, value):
+        self.__properties['scientific_y'] = value
+
 
 
 class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
@@ -81,6 +98,9 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
         self._texty = y_props.text
         self._sizey = y_props.size
         self._familyy = y_props.font
+
+        self.scientific_x = x_props.get('scientific_x', False)
+        self.scientific_y = y_props.get('scientific_y', False)
 
         # Fill out the color comboboxes
         self.cbColor.addItems(list(COLORS.keys())[:-1])
@@ -150,6 +170,10 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
         self.txtLegend.setText(self._text)
         self.txtLegend_y.setText(self._texty)
 
+        # set the checkboxes
+        self.chkScientific_x.setChecked(self.scientific_x)
+        self.chkScientific_y.setChecked(self.scientific_y)
+
         # Size
         self.cbSize.setValue(self._size)
         self.cbSize_y.setValue(self._sizey)
@@ -175,6 +199,14 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
     def apply_to_ticks_y(self):
         ''' return status of the "Apply to ticks" checkbox for y-axis '''
         return self.chkTicks_y.isChecked()
+
+    def scientific_y(self):
+        ''' return status of the "Scientific" checkbox for y-axis '''
+        return self.chkScientific_y.isChecked()
+
+    def scientific_x(self):
+        ''' return status of the "Scientific" checkbox for x-axis '''
+        return self.chkScientific_x.isChecked()
 
     def fx(self):
         ''' return font parameters for x-axis '''
