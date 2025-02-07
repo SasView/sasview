@@ -81,6 +81,8 @@ class NewDataExplorer(QWidget):
             return
         to_add = self.add_perspective_button.currentText()
         # TODO: Placeholder
-        self.new_perspective.emit(perspectives[to_add])
+        # TODO: This needs to be added to the data manager.
+        new_perspective_dialog = perspectives[to_add]()
+        self.new_perspective.emit(new_perspective_dialog)
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
