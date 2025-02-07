@@ -1,10 +1,13 @@
 import logging
-from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
+from PySide6.QtCore import Signal, Slot
+from PySide6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
 
 # TODO: Just using the word 'new' to avoid conflicts. The final version
 # shouldn't have that name.
 class NewDataExplorer(QWidget):
+
+    new_perspective: Signal = Signal(QDialog)
+
     def __init__(self, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
 
@@ -65,5 +68,6 @@ class NewDataExplorer(QWidget):
             return
         to_add = self.add_perspective_button.currentText()
         # TODO: Placeholder
+        self.new_perspective.emit(self)
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
