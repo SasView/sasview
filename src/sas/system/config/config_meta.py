@@ -57,8 +57,9 @@ class ConfigBase:
 
     def config_filename(self, create_if_nonexistent=False):
         """Filename for saving config items"""
+        version_parts = sas.system.version.__version__.split(".")
         user_dir = user.get_config_dir(create_if_nonexistent)
-        return os.path.join(user_dir, f"config.json")
+        return os.path.join(user_dir, f"config-{version_parts[0]}.json")
 
     def finalise(self):
         """ Call this at the end of the config to make this class 'final'
