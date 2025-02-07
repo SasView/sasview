@@ -99,6 +99,6 @@ class FitParameterSerializer(ModelSerializer):
 
 class FitConstraintSerializer(ModelSerializer):
     class Meta:
-        model = FitConstriant
+        model = FitConstraint
         fields = "__all__"
 """

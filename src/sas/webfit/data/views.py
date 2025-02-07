@@ -2,7 +2,7 @@ import os
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, Http404
-from django.core.files.storage import FileSystemStorage 
+from django.core.files.storage import FileSystemStorage
 
 #TODO go over to see if token is needed for is_authenticated
 from rest_framework.authtoken.models import Token
@@ -107,7 +107,7 @@ def download(request, data_id, version = None):
                 return HttpResponseBadRequest("data is private, must log in")
         #TODO add issues later
         try:
-            file = storage.open(serializer.file_name, 'rb')
+            file = storage.open(serializer.file.name, 'rb')
         except Exception as e:
             return HttpResponseBadRequest(str(e))
         if file is None:
