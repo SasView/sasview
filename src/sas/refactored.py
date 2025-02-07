@@ -10,12 +10,12 @@ class Perspective():
     @classmethod
     @property
     @abstractmethod
-    def name(cls) -> str:
+    def name(self) -> str:
         """ Name of the perspective"""
 
     @property
     @abstractmethod
-    def title(cls) -> str:
+    def title(self) -> str:
         """ Window title"""
 
     @abstractmethod
