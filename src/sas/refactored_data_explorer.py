@@ -2,6 +2,20 @@ import logging
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
 
+from sas.dummy_perspective import DummyPerspective
+from sas.refactored import Perspective
+
+# TODO: Eventually, the values (should) never be None.
+# FIXME: Linter is complaining about DummyPew
+perspectives: dict[str, None | Perspective] = {
+    'Corfunc': None,
+    'Fitting': None,
+    'Invariant': None,
+    'Inversion': None,
+    'Dummy': DummyPerspective,
+    'Mumag': None
+}
+
 # TODO: Just using the word 'new' to avoid conflicts. The final version
 # shouldn't have that name.
 class NewDataExplorer(QWidget):
@@ -20,10 +34,9 @@ class NewDataExplorer(QWidget):
         #
         # TODO: This list is temporary. We should have all the perspectives
         # registered somewhere so its easy to add a new one.
-        perspectives = ['Corfunc', 'Fitting', 'Invariant', 'Inversion', 'Dummy', 'Mumag']
         self.add_perspective_button = QComboBox(self)
         self.add_perspective_button.addItem('+ New Perspectives')
-        for p in perspectives:
+        for p in perspectives.keys():
             self.add_perspective_button.addItem(p)
         self.add_perspective_button.currentTextChanged.connect(self.add_perspective)
 
@@ -68,6 +81,6 @@ class NewDataExplorer(QWidget):
             return
         to_add = self.add_perspective_button.currentText()
         # TODO: Placeholder
-        self.new_perspective.emit(self)
+        self.new_perspective.emit(perspectives[to_add])
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
