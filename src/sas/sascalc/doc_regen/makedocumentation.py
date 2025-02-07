@@ -12,14 +12,14 @@ from pathlib import Path
 from typing import Union
 
 from sas.sascalc.fit import models
-from sas.system.user import get_app_dir
+from sas.system.user import get_app_dir_versioned
 
 from sasmodels.core import list_models
 
 PATH_LIKE = Union[Path, str, os.PathLike]
 
 # Path constants related to the directories and files used in documentation regeneration processes
-APP_DIRECTORY = Path(get_app_dir())
+APP_DIRECTORY = Path(get_app_dir_versioned())
 USER_DOC_BASE = APP_DIRECTORY / "doc"
 USER_DOC_SRC = USER_DOC_BASE
 USER_DOC_LOG = USER_DOC_SRC / 'log'
