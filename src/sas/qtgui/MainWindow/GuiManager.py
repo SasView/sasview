@@ -247,6 +247,7 @@ class GuiManager:
     def new_perspective(self, new_perspective: QDialog):
         self._workspace.workspace.addSubWindow(new_perspective)
         new_perspective.show()
+        self._data_manager.add_data(new_perspective)
         # TODO: There is inevitably other stuff to put here.
 
     @staticmethod
