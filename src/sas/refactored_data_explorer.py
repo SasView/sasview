@@ -17,7 +17,7 @@ class NewDataExplorer(QWidget):
         #
         # TODO: This list is temporary. We should have all the perspectives
         # registered somewhere so its easy to add a new one.
-        perspectives = ['Corfunc', 'Fitting', 'Invariant', 'Inversion']
+        perspectives = ['Corfunc', 'Fitting', 'Invariant', 'Inversion', 'Dummy', 'Mumag']
         self.add_perspective_button = QComboBox(self)
         self.add_perspective_button.addItem('+ New Perspectives')
         for p in perspectives:
