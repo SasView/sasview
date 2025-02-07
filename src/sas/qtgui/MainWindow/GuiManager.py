@@ -1,3 +1,4 @@
+
 import logging
 import os
 import sys
@@ -270,14 +271,7 @@ class GuiManager:
     # NOTE: These perspective methods are from the refactor. They should eventually replace the old ones before it.
     @Slot(QDialog)
     def new_perspective(self, new_perspective: QDialog):
-        self._workspace.addSubwindow(new_perspective)
-        # TODO: There is inevitably other stuff to put here.
-
-    # NOTE: These perspective methods are from the refactor. They should eventually replace the old ones before it.
-    @Slot(QDialog)
-    def new_perspective(self, new_perspective: QDialog):
-        self._workspace.workspace.addSubWindow(new_perspective)
-        new_perspective.show()
+        self._workspace.workspace.addSubwindow(new_perspective)
         # TODO: There is inevitably other stuff to put here.
 
     @Slot(QDialog)
