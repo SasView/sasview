@@ -1475,9 +1475,6 @@ class ITheoretical:
         calculate form factor, P(q), and forward scattering, I(0), using pair distribution, p(r) 
         """
         ## calculate P(q) and I(0) from p(r)
-        sigma = 1.0 #Ang, size of dummy atom radius
-        atomic_f_ij = np.exp(-(self.q * sigma) ** 2 / 2) #dummy atom atomic form factor
-
         I0, Pq = 0, 0
         for (r_i, pr_i) in zip(r, pr):
             I0 += pr_i
@@ -1496,7 +1493,7 @@ class ITheoretical:
 
         I0 *= conc * volume_total * 1E-4
 
-        return I0, Pq * atomic_f_ij
+        return I0, Pq
     
 
     def calc_Iq(self, Pq: np.ndarray, 

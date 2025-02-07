@@ -1,23 +1,3 @@
-##########################################################################################
-"""My code to implement paths such that the modules can be found by Python and the program can run"""
-import sys
-import os
-
-additional_path = ['C:/Users/Qerne/OneDrive/Documents/VSCode/Projects/Thesis/SasView_dev_version/sasview/src', 
-                   'C:/Users/Qerne/OneDrive/Documents/VSCode/Projects/Thesis/SasView_dev_version/sasmodels', 
-                   'C:/Users/Qerne/OneDrive/Documents/VSCode/Projects/Thesis/SasView_dev_version/sasdata']
-
-# Add the directory to sys.path
-for path in additional_path:
-    absolute_path = os.path.abspath(path)
-    if absolute_path not in sys.path:
-        sys.path.append(absolute_path)
-
-#print("Python is searching for modules in the following directories:")
-#for path in sys.path:
-#    print(path)
-##########################################################################################
-
 # Global
 import sys
 import re
@@ -29,7 +9,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit
 
 # Local SasView
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+#from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Perspectives.perspective import Perspective
 
 from UI.DesignWindowUI import Ui_DesignWindow
@@ -43,7 +23,6 @@ from calculations.Shape2SAS import (getTheoreticalScattering, getPointDistributi
                                                                      ModelProfile, ModelSystem, SimulationParameters, 
                                                                      Qsampling, TheoreticalScatteringCalculation, 
                                                                      SimulateScattering)
-from calculations.helpfunctions import IExperimental
 from PlotAspects.plotAspects import ViewerPlotDesign
 from genPlugin import generatePlugin
 
@@ -162,14 +141,13 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.constraint.buttonOptions.closePage.clicked.connect(self.onClickingClose)
 
         #create png of each tab
-        #self.modelTabButtonOptions.help.clicked.connect(self.export_widget_with_tabs_to_png)
+        self.modelTabButtonOptions.help.clicked.connect(self.onClickingHelp)
 
 
     def showConstraintWindow(self):
         """Get the Constraint window"""
 
         self.constraint.show()
-        QTimer.singleShot(500, self.capture_constraint_window)
     
 
     def checkedVariables(self):
@@ -640,8 +618,6 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         model_str, full_path = generatePlugin(modelProfile, [importStatement, parameters, translation], fitPar, Npoints, prPoints, modelName)
 
         #Write file to plugin model folder
-        #print(full_path)
-        print(model_str)
         TabbedModelEditor.writeFile(full_path, model_str)
         self.constraint.logInfo(f"Succefully generated model {modelName}!")
 
@@ -761,20 +737,20 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
 
     ####CAPTURE IMAGE OF TABS
-    def capture_widget_with_tabs(self):
+    def captureWidgetWithTabs(self):
         # Introduce a small delay before starting the capture process
-        QTimer.singleShot(500, lambda: self._capture_tab(0))
+        QTimer.singleShot(500, lambda: self.captureTab(0))
 
-    def _capture_tab(self, index):
+    def captureTab(self, index):
         if index >= self.tabWidget.count():
             return
 
         screen = QApplication.primaryScreen()
         self.tabWidget.setCurrentIndex(index)
         QApplication.processEvents()  # Ensure the tab is fully rendered
-        QTimer.singleShot(100, lambda: self._capture_and_save(screen, index))
+        QTimer.singleShot(100, lambda: self.captureAndSave(screen, index))
 
-    def _capture_and_save(self, screen, index):
+    def captureAndSave(self, screen, index):
         # Bring the window to the front
         self.raise_()
         self.activateWindow()
@@ -784,13 +760,13 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         pixmap.save(f"widget_with_tab_{index+1}.png")
         print(f"Saved widget with tab {index+1} as widget_with_tab_{index+1}.png")
         # Capture the next tab
-        self._capture_tab(index + 1)
+        self.captureTab(index + 1)
 
-    def export_widget_with_tabs_to_png(self):
-        self.capture_widget_with_tabs()
+    def exportWidgetWithTabsToPng(self):
+        self.captureWidgetWithTabs()
 
     
-    def capture_constraint_window(self):
+    def captureConstraintWindow(self):
         screen = QApplication.primaryScreen()
         # Bring the constraint window to the front
         self.constraint.raise_()
