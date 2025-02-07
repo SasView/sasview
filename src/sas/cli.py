@@ -104,6 +104,10 @@ def parse_cli(argv):
     return opts
 
 def main(logging="production"):
+    # Copy files before loading config
+    from sas.system.user import copy_old_files_to_new_location
+    copy_old_files_to_new_location()
+
     from sas.system import log
     from sas.system import lib
     from sas.system import console
