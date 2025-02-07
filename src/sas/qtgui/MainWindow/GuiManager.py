@@ -10,7 +10,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
-from PySide6.QtCore import Qt, QLocale
+from PySide6.QtCore import Qt, QLocale, Slot
 
 import matplotlib as mpl
 from sasdata.temp_ascii_reader import load_data
@@ -175,6 +175,7 @@ class GuiManager:
         # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         # TODO: Is this a good opportunity to change this name? dataExplorer would be better I think.
         self.filesWidget = NewDataExplorer(self._parent)
+        self.filesWidget.new_perspective.connect(self.new_perspective)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
@@ -254,6 +255,12 @@ class GuiManager:
                     logger.warning(f"Unable to close {name} perspective\n{e}")
         self.loadedPerspectives = {}
         self._current_perspective = None
+
+    # NOTE: These perspective methods are from the refactor. They should eventually replace the old ones before it.
+    @Slot(QDialog)
+    def new_perspective(self, new_perspective: QDialog):
+        self._workspace.addSubwindow(new_perspective)
+        # TODO: There is inevitably other stuff to put here.
 
     @staticmethod
     def addCategories():
