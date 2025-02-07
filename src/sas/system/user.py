@@ -2,13 +2,16 @@ import os
 from platformdirs import PlatformDirs
 from sas.system.version import __version__ as sasview_version
 
+# Create separate versioned and unversioned file locations
 PLATFORM_DIRS_VERSIONED = PlatformDirs("SasView", "sasview", version=sasview_version)
 PLATFORM_DIRS_UNVERSIONED = PlatformDirs("SasView", "sasview")
 # Deprecated path
-_USER_DIR = os.path.join(os.path.expanduser("~"), '.sasview')
+_USER_DIR = Path(os.path.join(os.path.expanduser("~")))
 # OS agnostic pathing
-_CONFIG_DIR = PLATFORM_DIRS_VERSIONED.user_config_dir
-_APP_DATA_DIR = PLATFORM_DIRS_VERSIONED.user_data_dir
+_APP_DATA_DIR = PLATFORM_DIRS_UNVERSIONED.user_data_dir
+_APP_VERS_DIR = PLATFORM_DIRS_VERSIONED.user_data_dir
+_CACHE_DIR = PLATFORM_DIRS_VERSIONED.user_cache_dir
+_CONFIG_DIR = PLATFORM_DIRS_UNVERSIONED.user_config_dir
 _LOG_DIR = PLATFORM_DIRS_UNVERSIONED.user_log_dir
 _CACHE_DIR = PLATFORM_DIRS_VERSIONED.user_cache_dir
 
