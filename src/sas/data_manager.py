@@ -49,3 +49,6 @@ class NewDataManager():
             if data in assoc:
                 return assoc[0] if assoc[0] != data else assoc[1]
         raise ValueError('Association not found.')
+
+    def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
+        return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self._association if data in assoc]
