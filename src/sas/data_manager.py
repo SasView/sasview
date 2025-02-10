@@ -19,6 +19,7 @@ class NewDataManager(QObject):
     _all_data_entries: set[TrackedData]
     _association: list[tuple[TrackedData, TrackedData]]
     new_data: Signal = Signal()
+    new_association: Signal = Signal()
 
     def __init__(self):
         super().__init__()
@@ -48,6 +49,7 @@ class NewDataManager(QObject):
             # TODO: Clearer error message.
             raise ValueError('Invalid association.')
         self._association.append((data_1, data_2))
+        self.new_association.emit()
 
     def get_association(self, data: TrackedData) -> TrackedData:
         for assoc in self._association:
