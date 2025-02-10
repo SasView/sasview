@@ -59,3 +59,7 @@ class NewDataManager(QObject):
 
     def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
         return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self._association if data in assoc]
+
+    @property
+    def all_data(self) -> set[TrackedData]:
+        return self._all_data_entries
