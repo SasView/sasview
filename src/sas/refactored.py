@@ -7,7 +7,6 @@ from sasdata.data import SasData
 # NOTE: The main difference in this class is that it takes in SasData objects
 # rather than QT Oobjects.
 class Perspective():
-    @classmethod
     @property
     @abstractmethod
     def name(self) -> str:
