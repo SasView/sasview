@@ -58,7 +58,7 @@ class AsciiDialog(QDialog):
 
 
         self.select_button = QPushButton("Select File")
-        self.select_button.clicked.connect(self.load_file)
+        self.select_button.clicked.connect(self.loadFile)
 
         ## Dataset type selection
         self.dataset_layout = QHBoxLayout()
@@ -152,28 +152,28 @@ class AsciiDialog(QDialog):
         self.layout.addLayout(self.done_line)
 
     @property
-    def starting_pos(self) -> int:
+    def startingPos(self) -> int:
         return self.startline_entry.value() - 1
 
-    @starting_pos.setter
-    def starting_pos(self, value: int):
+    @startingPos.setter
+    def startingPos(self, value: int):
         self.startline_entry.setValue(value + 1)
 
     @property
-    def raw_csv(self) -> list[str] | None:
+    def rawCsv(self) -> list[str] | None:
         if self.current_filename is None:
             return None
         return self.files[self.current_filename]
 
     @property
-    def rows_is_included(self) -> list[bool] | None:
+    def rowsIsIncluded(self) -> list[bool] | None:
         if self.current_filename is None:
             return None
         return self.files_is_included[self.current_filename]
 
     @property
-    def excluded_lines(self) -> set[int]:
-        return set([i for i, included in enumerate(self.rows_is_included) if not included])
+    def excludedLines(self) -> set[int]:
+        return set([i for i, included in enumerate(self.rowsIsIncluded) if not included])
 
     def splitLine(self, line: str) -> list[str]:
         """Split a line in a CSV file based on which seperators the user has
@@ -187,7 +187,7 @@ class AsciiDialog(QDialog):
         default values. Uses the guess.py module
 
         """
-        split_csv = [self.splitLine(line.strip()) for line in self.raw_csv]
+        split_csv = [self.splitLine(line.strip()) for line in self.rawCsv]
 
         # TODO: I'm not sure if there is any point in holding this initial value. Can possibly be refactored.
         self.initial_starting_pos = guess_starting_position(split_csv)
@@ -198,7 +198,7 @@ class AsciiDialog(QDialog):
         columns = guess_columns(guessed_colcount, self.currentDatasetType())
         self.col_editor.setColOrder(columns)
         self.colcount_entry.setValue(guessed_colcount)
-        self.starting_pos = self.initial_starting_pos
+        self.startingPos = self.initial_starting_pos
 
     def fillTable(self) -> None:
         """Write the data to the table based on the parameters the user has
@@ -207,20 +207,20 @@ class AsciiDialog(QDialog):
         """
 
         # Don't try to fill the table if there's no data.
-        if self.raw_csv is None:
+        if self.rawCsv is None:
             return
 
         self.table.clear()
 
         col_count = self.colcount_entry.value()
 
-        self.table.setRowCount(min(len(self.raw_csv), TABLE_MAX_ROWS + 1))
+        self.table.setRowCount(min(len(self.rawCsv), TABLE_MAX_ROWS + 1))
         self.table.setColumnCount(col_count + 1)
         self.table.setHorizontalHeaderLabels(["Included"] + self.col_editor.colNames())
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         # Now fill the table with data
-        for i, row in enumerate(self.raw_csv):
+        for i, row in enumerate(self.rawCsv):
             if i == TABLE_MAX_ROWS:
                 #  Fill with elipsis to indicate there is more data.
                 for j in range(len(row_split)):
@@ -229,12 +229,12 @@ class AsciiDialog(QDialog):
                     self.table.setItem(i, j, elipsis_item)
                 break
 
-            if i < len(self.rows_is_included):
-                initial_state = self.rows_is_included[i]
+            if i < len(self.rowsIsIncluded):
+                initial_state = self.rowsIsIncluded[i]
             else:
                 initial_state = True
-                self.rows_is_included.append(initial_state)
-            if i >= self.starting_pos:
+                self.rowsIsIncluded.append(initial_state)
+            if i >= self.startingPos:
                 row_status = RowStatusWidget(initial_state, i)
                 row_status.status_changed.connect(self.updateRowStatus)
                 self.table.setCellWidget(i, 0, row_status)
@@ -244,7 +244,7 @@ class AsciiDialog(QDialog):
                     continue # Ignore rows that have extra columns.
                 item = QTableWidgetItem(col_value)
                 self.table.setItem(i, j + 1, item)
-            self.setRowTypesetting(i, self.rows_is_included[i])
+            self.setRowTypesetting(i, self.rowsIsIncluded[i])
 
         self.table.show()
 
@@ -262,7 +262,7 @@ class AsciiDialog(QDialog):
             if item is None:
                 continue
             item_font = item.font()
-            if not item_checked or row < self.starting_pos:
+            if not item_checked or row < self.startingPos:
                 item.setForeground(QColor.fromString('grey'))
                 item_font.setStrikeOut(True)
             else:
@@ -273,14 +273,14 @@ class AsciiDialog(QDialog):
     def updateWarningLabel(self):
         required_missing = self.requiredMissing()
         duplicates = self.duplicateColumns()
-        if self.raw_csv is None:
+        if self.rawCsv is None:
             # We don't have any actual data yet so we're just updating the warning based on the column.
-            self.warning_label.update_warning(required_missing, duplicates)
+            self.warning_label.updateWarning(required_missing, duplicates)
         else:
-            self.warning_label.update_warning(required_missing, duplicates, [self.splitLine(line) for line in self.raw_csv], self.rows_is_included, self.starting_pos)
+            self.warning_label.updateWarning(required_missing, duplicates, [self.splitLine(line) for line in self.rawCsv], self.rowsIsIncluded, self.startingPos)
 
     @Slot()
-    def load_file(self) -> None:
+    def loadFile(self) -> None:
         """Open the file loading dialog, and load the file the user selects."""
         filenames, result = QFileDialog.getOpenFileNames(self)
         # Happens when the user cancels without selecting a file. There isn't a
@@ -398,7 +398,7 @@ This could potentially be because the file {basename} an ASCII format.""")
     def updateRowStatus(self, row: int) -> None:
         """Triggered when the status of row has changed."""
         new_status = self.table.cellWidget(row, 0).isChecked()
-        self.rows_is_included[row] = new_status
+        self.rowsIsIncluded[row] = new_status
         self.setRowTypesetting(row, new_status)
 
     @Slot()
@@ -414,7 +414,7 @@ This could potentially be because the file {basename} an ASCII format.""")
             # This will happen if the user has selected a point which exists before the starting line. To prevent an
             # error, this code will skip that position.
             row = index.row()
-            if row < self.starting_pos:
+            if row < self.startingPos:
                 continue
             self.table.cellWidget(row, 0).setChecked(new_value)
             self.updateRowStatus(row)
@@ -454,8 +454,8 @@ This could potentially be because the file {basename} an ASCII format.""")
             list(self.files_full_path.values()),
             self.col_editor.columns,
             self.internal_metadata,
-            self.starting_pos,
-            self.excluded_lines,
+            self.startingPos,
+            self.excludedLines,
             self.seperators,
         )
         self.params = params
