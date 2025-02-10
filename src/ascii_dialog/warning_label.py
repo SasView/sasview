@@ -41,7 +41,7 @@ class WarningLabel(QLabel):
             self.setFontRed()
         elif unparsable > 0:
             # FIXME: This error message could perhaps be a bit clearer.
-            self.setText(f'{unparsable} lines cannot be parsed. They will be ignored.')
+            self.setText(f'{unparsable} lines failed to be read. They will be ignored.')
             self.setFontOrange()
         else:
             self.setText('')
