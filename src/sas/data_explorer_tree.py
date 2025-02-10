@@ -20,5 +20,5 @@ class DataExplorerTree(QTreeWidget):
                 name = datum.name
             else: # If perspective
                 name = datum.title
-            item = QTreeWidgetItem(name)
+            item = QTreeWidgetItem([name])
             self.addTopLevelItem(item)
