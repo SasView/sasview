@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, QPushButt
 
 from sas.dummy_perspective import DummyPerspective
 from sas.refactored import Perspective
+from sas.data_manager import NewDataManager as DataManager
 
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
@@ -22,8 +23,9 @@ class NewDataExplorer(QWidget):
 
     new_perspective: Signal = Signal(QDialog)
 
-    def __init__(self, parent: QWidget | None = ...) -> None:
+    def __init__(self, data_manager: DataManager, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
+        self._data_manager = data_manager
 
         self.layout = QVBoxLayout(self)
 
@@ -82,7 +84,7 @@ class NewDataExplorer(QWidget):
         to_add = self.add_perspective_button.currentText()
         # TODO: Placeholder
         # TODO: This needs to be added to the data manager.
-        new_perspective_dialog = perspectives[to_add]()
+        new_perspective_dialog = perspectives[to_add](self.data)
         self.new_perspective.emit(new_perspective_dialog)
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
