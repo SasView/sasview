@@ -2,6 +2,7 @@ import logging
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
 
+from sas.data_explorer_tree import DataExplorerTree
 from sas.dummy_perspective import DummyPerspective
 from sas.refactored import Perspective
 from sas.data_manager import NewDataManager as DataManager
@@ -56,7 +57,7 @@ class NewDataExplorer(QWidget):
 
         # TODO: I suspect this may end up being a separate widget. For now, just
         # use an empty tree view.
-        self.tree_view = QTreeView()
+        self.tree_view = DataExplorerTree(self._data_manager)
 
         # TODO: Is there a better name for this?
         self.final_row = QHBoxLayout(self)
