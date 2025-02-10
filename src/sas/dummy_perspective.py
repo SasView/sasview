@@ -4,10 +4,9 @@ from qtpy.QtWidgets import QLabel
 from sas.refactored import Perspective
 from sas.data_manager import NewDataManager as DataManager
 
-class DummyPerspective(QDialog, Perspective):
+class DummyPerspective(Perspective):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._data_manager = data_manager
+        super().__init__(data_manager, parent)
 
         self.current_data_label = QLabel('Placeholder Title Label')
 
