@@ -21,8 +21,6 @@ class WarningLabel(QLabel):
         columns are missing, and how many columns are duplicated."""
         unparsable = 0
         if lines is not None and rows_is_included is not None:
-            # FIXME: I feel like I am repeating a lot of logic from the table filling. Is there a way I can abstract
-            # this?
             for i, line in enumerate(lines):
                 # Right now, rows_is_included only includes a limited number of rows as there is a maximum that can be
                 # shown in the table without it being really laggy. We're just going to assume the lines after it should
