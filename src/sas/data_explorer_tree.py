@@ -9,6 +9,7 @@ class DataExplorerTree(QTreeWidget):
         super().__init__(parent)
         self._data_manager = data_manager
         _ = self._data_manager.new_data.connect(self.buildTable)
+        _ = self._data_manager.data_removed.connect(self.buildTable)
 
     def buildTable(self):
         # TODO: Right now we are ignoring associations.
