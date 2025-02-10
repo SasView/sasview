@@ -183,7 +183,7 @@ class GuiManager:
         # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
         # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         # TODO: Is this a good opportunity to change this name? dataExplorer would be better I think.
-        self.filesWidget = NewDataExplorer(self._parent)
+        self.filesWidget = NewDataExplorer(self._data_manager ,self._parent)
         self.filesWidget.new_perspective.connect(self.new_perspective)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
