@@ -4,9 +4,6 @@ import sasdata.quantities.units as unit
 
 # Based on the email Jeff sent me./
 default_units = {
-    'Q': [unit.per_nanometer, unit.per_angstrom],
-    # TODO: I think the unit group for scattering intensity may be wrong. Defaulting to nanometers for now but I know
-    # this isn't right
-    'I': [unit.per_nanometer]
+    'Q': [unit.per_nanometer, unit.per_angstrom, unit.per_meter],
+    'I': [unit.per_centimeter, unit.per_meter]
 }
-
