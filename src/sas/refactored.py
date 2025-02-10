@@ -50,7 +50,7 @@ class Perspective(QDialog):
         return False
 
     def onDone(self):
-        # TODO: Delete from data manager.
+        self._data_manager.remove_data(self)
         logging.info(f'Perspective {self.title} done.')
 
 class Theory():
