@@ -161,6 +161,8 @@ translation = """
         if not re.search(r'translation\s*=', constraintsStr):
             self.logWarning("No variable translation found in constraints")
 
+        #TODO: make getParametersFromConstraints general, so translation can be inputted
+        #NOTE: re.search() a bit slow, ast faster
         translation = re.search(r'translation\s*=\s*"""(.*\n(?:.*\n)*?)"""', constraintsStr, re.DOTALL)
         translationInput = translation.group(1) if translation else ""
 
@@ -173,7 +175,6 @@ translation = """
 
         #Check parameters and update checkedPars
         for i in range(len(lines)):
-            
             if '=' not in lines[i]:
                 self.logException("No '=' found in translation line")
                 raise ValueError("No '=' found in translation line")
@@ -181,7 +182,8 @@ translation = """
             if lines[i].count('=') > 1:
                 self.logException("More than one '=' found in translation line")
                 raise ValueError("More than one '=' found in translation line")
-            
+
+            #split line
             leftLine, rightLine = lines[i].split('=')
 
             #unicode greek letters: \u0370-\u03FF
@@ -208,7 +210,6 @@ translation = """
                     #update line with input value
                     rightLine = re.sub(r'\b' + re.escape(par) + r'\b', str(inputVal), rightLine)
                     notes += f"{par} = {inputVal},"
-            
             #any constants added to notes?
             if notes:
                 notes = f" #{notes}"
@@ -217,7 +218,6 @@ translation = """
                 j, k = self.getPosition(par, modelPars)
                 #check if paramater are to be set in ModelProfile
                 checkedPars[j][k] = True
-            
             lines[i] = leftLine + '=' + rightLine + notes
 
         #return lines to string
@@ -225,34 +225,73 @@ translation = """
 
         return translationInput, checkedPars
     
+    def extractValues(self, elt: ast.AST) -> Union[str, float, int]:
+        if isinstance(elt, ast.Constant):
+            return elt.value
+        elif isinstance(elt, ast.List):
+            return [self.extractValues(elt) for elt in elt.elts]
+        
+        #statements for the the boundary list:
+        elif isinstance(elt, ast.Name):
+            #special case for inf
+            if elt.id == 'inf':
+                return float('inf')
+            return elt.id
+        #check for negative values in boundary list
+        elif isinstance(elt.op, ast.USub):
+            operand = self.extractValues(elt.operand)
+            if operand == float('inf'):
+                return float('-inf')
+            elif isinstance(operand, (int, float)):
+                return -operand
+        return None
+
+    def getParametersFromConstraints(self, constraints_str: str, targetName: str) -> list:
+        """Extract parameters from constraints string"""
+        tree = ast.parse(constraints_str) #get abstract syntax tree
+        
+        parametersNode = None
+        for node in ast.walk(tree):
+            #is the node an assignment and does it have the target name?
+            if isinstance(node, ast.Assign) and node.targets[0].id == targetName:
+                parametersNode = node.value
+                break #if so break
+        
+        if parametersNode:
+            parameters = [self.extractValues(elt) for elt in parametersNode.elts]
+            return parameters
+
+        self.logException(f"ValueError: No {targetName} variable found in constraints")
+        raise ValueError(f"No {targetName} variable found in constraints")
+
 
     def getParameters(self, constraintsStr: str, fitPar: list[str]) -> str:
         """Get parameters from constraints"""
 
-        #See if name parameter is in constraints
-        if not re.search(r'parameters\s*=', constraintsStr):
-            self.logWarning("No parameters found in constraints")
 
         #Is anything in parameters?
-        parameterObject = re.search(r'parameters\s*=\s*\[(.*\n(?:.*\n)*?)\]', constraintsStr, re.DOTALL)
-        if not parameterObject:
+        parameters = self.getParametersFromConstraints(constraintsStr, 'parameters')
+        names = [parameter[0] for parameter in parameters]
+
+        if not parameters:
             self.logException("ValueError: No list of fit parameters found in variable parameters")
             raise ValueError("No list of fit parameters found in variable parameters")
 
-        parameters = parameterObject.group(1)
-        parametersNames = re.findall(r'\[\s*\'(.*?)\'', parameters) #Get first element in list
-
         #Check parameters in constraints
-        if len(parametersNames) != len(fitPar):
+        if len(names) != len(fitPar):
             self.logException("ValueError: Number of parameters in variable parameters does not match checked parameters in table")
             raise ValueError("Number of parameters in variable parameters does not match checked parameters in table")
 
-        for name in parametersNames:
+        #Check if parameter exists in checked parameters
+        for name in names:
             if name not in fitPar:
                 self.logException(f"ValueError: {name} does not exists in checked parameters")
                 raise ValueError(f"{name} does not exists in checked parameters")
+        
+        description = 'parameters =' + '[' + '\n' + '# name, units, default, [min, max], type, description,' + '\n'
+        parameters_str = description  + ',\n'.join(str(sublist) for sublist in parameters) + "\n]"
 
-        return parameterObject.group(0)
+        return parameters_str
 
 
     def isImportFromStatement(self, node: ast.ImportFrom) -> list[str]:

@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit
 
 # Local SasView
-#from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Perspectives.perspective import Perspective
 
 from UI.DesignWindowUI import Ui_DesignWindow

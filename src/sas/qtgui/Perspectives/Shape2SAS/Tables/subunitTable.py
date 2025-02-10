@@ -166,6 +166,19 @@ class OptionLayout(ExtendedEnum):
 
         return name, defaultVal, units, tooltip, types, bounds
 
+    def cyl_ring(self):
+        """Return the cylinder ring dimensions"""
+
+        name = {self.x: "R", self.y: "r", self.z: "l"}
+        units = {self.x: "Å", self.y: "Å", self.z: "Å"}
+        types = {self.x: "volume", self.y: "volume", self.z: "volume"}
+        bounds = {self.x: [0, inf], self.y: [0, inf], self.z: [0, inf]}
+        tooltip = {self.x: "Outer radius of the cylinder ring",
+                   self.y: "Inner radius of the cylinder ring",
+                   self.z: "Length of the cylinder ring"}
+        defaultVal = {self.x: 50.0, self.y: 40.0, self.z: 10.0}
+
+        return name, defaultVal, units, tooltip, types, bounds
 
     #Add new subunit methods here
 
@@ -456,7 +469,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         """Set the subunit options in the combobox"""
         #self.subunit.addItems(self.restricted.keys())
         self.subunit.addItems(["sphere", "cylinder", "ellipsoid", "elliptical_cylinder", "disc",
-                                "cube", "cuboid", "hollow_sphere", "hollow_cube"]) #TODO: automate this
+                                "cube", "cuboid", "hollow_sphere", "hollow_cube", "cyl_ring"]) #TODO: automate this
 
 
     def initializeModel(self):
