@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import logging
 from PySide6.QtWidgets import QDialog, QWidget
 from sasdata.data import SasData
 
@@ -16,6 +17,7 @@ class Perspective(QDialog):
     def __init__(self, data_manager: "DataManager", parent : QWidget | None) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
+        self.finished.connect(self.onDone)
 
     @property
     @abstractmethod
@@ -46,6 +48,10 @@ class Perspective(QDialog):
     @property
     def allowSwap(self) -> bool:
         return False
+
+    def onDone(self):
+        # TODO: Delete from data manager.
+        logging.info(f'Perspective {self.title} done.')
 
 class Theory():
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
