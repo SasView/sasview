@@ -19,6 +19,7 @@ class NewDataManager(QObject):
     _all_data_entries: set[TrackedData]
     _association: list[tuple[TrackedData, TrackedData]]
     new_data: Signal = Signal()
+    data_removed: Signal = Signal()
     new_association: Signal = Signal()
 
     def __init__(self):
@@ -37,6 +38,7 @@ class NewDataManager(QObject):
         if any([data in assoc for assoc in self._association]):
             raise ValueError('Cannot remove data that is in an association.')
         self._all_data_entries.remove(data)
+        self.data_removed.emit()
     # TODO: Remove data on a list. So that we could remove a perspective, and
     # data at the same time. So it doesn't matter that the perspective is
     # associated with the data becuase they will both be removed.
