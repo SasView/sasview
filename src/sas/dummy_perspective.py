@@ -2,10 +2,12 @@ from typing import override
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QWidget
 from qtpy.QtWidgets import QLabel
 from sas.refactored import Perspective
+from sas.data_manager import NewDataManager as DataManager
 
 class DummyPerspective(QDialog, Perspective):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self._data_manager = data_manager
 
         self.current_data_label = QLabel('Placeholder Title Label')
 
