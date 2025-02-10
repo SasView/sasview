@@ -1,7 +1,11 @@
 from abc import abstractmethod
 from PySide6.QtWidgets import QDialog, QWidget
 from sasdata.data import SasData
-from sas.data_manager import NewDataManager as DataManager
+
+# This is ugly but necessary to avoid a cyclic dependency
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from sas.data_manager import NewDataManager as DataManager
 
 # TODO: None of these classes belong in here. This is a temporary location of
 # them so I can sketch out what they should look like.
@@ -9,7 +13,7 @@ from sas.data_manager import NewDataManager as DataManager
 # NOTE: The main difference in this class is that it takes in SasData objects
 # rather than QT Oobjects.
 class Perspective(QDialog):
-    def __init__(self, data_manager: DataManager, parent : QWidget | None) -> None:
+    def __init__(self, data_manager: "DataManager", parent : QWidget | None) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
 
