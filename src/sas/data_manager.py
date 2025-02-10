@@ -1,3 +1,4 @@
+from PySide6.QtCore import QObject, Signal
 from sasdata.data import SasData
 
 from src.sas.refactored import Perspective
@@ -12,17 +13,21 @@ valid_associations = [
 ]
 
 
-class NewDataManager():
+# Making this a QObject so it'll support events.
+class NewDataManager(QObject):
     # Don't mutate these directly, or scary bad stuff will happen.
     _all_data_entries: set[TrackedData]
     _association: list[tuple[TrackedData, TrackedData]]
+    new_data: Signal = Signal()
 
     def __init__(self):
+        super().__init__()
         self._all_data_entries = set()
         self._association = []
 
     def add_data(self, data: TrackedData):
         self._all_data_entries.add(data)
+        self.new_data.emit()
 
     def remove_data(self, data: TrackedData):
         # We shouldn't be able to remove tracked data if its in an association
