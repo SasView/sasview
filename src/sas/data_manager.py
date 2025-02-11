@@ -38,7 +38,9 @@ class NewDataManager(QObject):
     def add_data(self, data: TrackedData):
         self._all_data_entries.add(data)
         self.new_data.emit()
-        if isinstance(data, Perspective):
+        # TODO: This is a bit of a dodgy way of checking for a perspective but isinstance won't work. I need to look
+        # into using ABC.
+        if hasattr(data, 'title'):
             self._number_perspective(data)
 
     def remove_data(self, data: TrackedData):
