@@ -64,6 +64,7 @@ class NewDataExplorer(QWidget):
 
         self.remove_button = QPushButton('Remove', self)
         self.remove_button.setToolTip('Remove the selected data from SasView')
+        self.remove_button.clicked.connect(self.onRemove)
         self.plot_button = QPushButton('Plot', self)
 
         self.final_row.addWidget(self.remove_button)
@@ -89,3 +90,10 @@ class NewDataExplorer(QWidget):
         self.new_perspective.emit(new_perspective_dialog)
         logging.info(to_add)
         self.add_perspective_button.setCurrentIndex(0)
+
+    @Slot()
+    def onRemove(self):
+        to_remove = self.tree_view.currentTrackedDatum
+        if isinstance(to_remove, Perspective):
+            to_remove.done(0)
+        # TODO: Handle when other data is deleted.
