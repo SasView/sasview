@@ -16,9 +16,4 @@ class DummyPerspective(Perspective):
     @property
     @override
     def title(self) -> str:
-        return "Dummy"
-
-    @property
-    @override
-    def title(self) -> str:
         return "Dummy Perspective"
