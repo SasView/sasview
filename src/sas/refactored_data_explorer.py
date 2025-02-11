@@ -23,6 +23,7 @@ perspectives: dict[str, None | Perspective] = {
 class NewDataExplorer(QWidget):
 
     new_perspective: Signal = Signal(QDialog)
+    removed_perspective: Signal = Signal(QDialog)
 
     def __init__(self, data_manager: DataManager, parent: QWidget | None = ...) -> None:
         super().__init__(parent)
@@ -96,4 +97,5 @@ class NewDataExplorer(QWidget):
         to_remove = self.tree_view.currentTrackedDatum
         if isinstance(to_remove, Perspective):
             to_remove.done(0)
+            self.removed_perspective.emit(to_remove)
         # TODO: Handle when other data is deleted.
