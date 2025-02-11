@@ -27,9 +27,19 @@ class NewDataManager(QObject):
         self._all_data_entries = set()
         self._association = []
 
+    def _number_perspective(self, to_number: Perspective):
+        number = 1
+        # TODO: Comparing titles might not be the best way to do this.
+        relevant_perspective_numbers = [p.perspective_number for p in self._all_data_entries if isinstance(p, Perspective) and p.title == to_number.title]
+        while not number in relevant_perspective_numbers:
+            number += 1
+        to_number.perspective_number = number
+
     def add_data(self, data: TrackedData):
         self._all_data_entries.add(data)
         self.new_data.emit()
+        if isinstance(data, Perspective):
+            self._number_perspective(data)
 
     def remove_data(self, data: TrackedData):
         # We shouldn't be able to remove tracked data if its in an association
