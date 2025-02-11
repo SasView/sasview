@@ -1,4 +1,5 @@
 
+
 import logging
 import os
 import sys
@@ -156,6 +157,10 @@ class GuiManager:
         self.filesWidget.tree_view.addAssociation(datum1, datum2)
 
 
+    def info(self, type, value, tb):
+        logger.error("".join(traceback.format_exception(type, value, tb)))
+
+
     def addWidgets(self):
         """
         Populate the main window with widgets
@@ -184,6 +189,7 @@ class GuiManager:
         # TODO: Is this a good opportunity to change this name? dataExplorer would be better I think.
         self.filesWidget = NewDataExplorer(self._data_manager ,self._parent)
         self.filesWidget.new_perspective.connect(self.new_perspective)
+        self.filesWidget.removed_perspective.connect(self.removed_perspective)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
@@ -229,6 +235,7 @@ class GuiManager:
         self.FileConverter = FileConverterWidget(self)
         self.WhatsNew = WhatsNewWidget(self._parent)
 
+
     def loadAllPerspectives(self):
         """ Load all the perspectives"""
         # Close any existing perspectives to prevent multiple open instances
@@ -254,6 +261,7 @@ class GuiManager:
         # attach loaded perspectives to this class
         self.loadedPerspectives = loaded_dict
 
+
     def closeAllPerspectives(self):
         # Close all perspectives if they are open
         if isinstance(self.loadedPerspectives, dict):
@@ -270,6 +278,7 @@ class GuiManager:
         self.loadedPerspectives = {}
         self._current_perspective = None
 
+
     # NOTE: These perspective methods are from the refactor. They should eventually replace the old ones before it.
     @Slot(QDialog)
     def new_perspective(self, new_perspective: QDialog):
@@ -277,6 +286,7 @@ class GuiManager:
         new_perspective.show()
         self._data_manager.add_data(new_perspective)
         # TODO: There is inevitably other stuff to put here.
+
 
     @Slot(QDialog)
     def removed_perspective(self, to_remove: QDialog):
@@ -286,11 +296,13 @@ class GuiManager:
                 self._workspace.workspace.removeSubWindow(sub_window)
                 break
 
+
     @Slot(QMdiSubWindow)
     def current_window_perspective_changed(self, perspective_window: QMdiSubWindow | None):
         if isinstance(perspective_window.widget(), NewPerspective):
             perspective = cast(Perspective, perspective_window.widget())
             self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
+
 
     @Slot()
     def current_index_perspective_changed(self):
@@ -301,6 +313,7 @@ class GuiManager:
             for sub_window in sub_window_list:
                 if sub_window.widget() == new_selected:
                     self._workspace.workspace.setActiveSubWindow(sub_window)
+
 
     @staticmethod
     def addCategories():
@@ -316,6 +329,7 @@ class GuiManager:
             logger.error("Category manager: could not load SasView models")
             logger.error(traceback.format_exc())
 
+
     def updatePlotItems(self, graphs):
         """
         Wrapper for adding/removing actions in the windows menu
@@ -327,6 +341,7 @@ class GuiManager:
             self.removePlotItemsInWindowsMenu(plot)
         else:
             self.addPlotItemsInWindowsMenu(plot)
+
 
     def addPlotItemsInWindowsMenu(self, plot):
         """
@@ -348,6 +363,7 @@ class GuiManager:
         # add action to windows menu
         self._workspace.menuWindow.addAction(action)
 
+
     def plotSelectedSlot(self, plot_name):
         """
         Set focus on the selected plot
@@ -359,6 +375,7 @@ class GuiManager:
                 # restore, raise and focus the plot, attached or detached
                 self.workspace_manager.activate(PlotHelper.plotById(plot))
                 return
+
 
     def removePlotItemsInWindowsMenu(self, plot):
         """
@@ -375,6 +392,7 @@ class GuiManager:
                 self._workspace.menuWindow.removeAction(action)
                 return
 
+
     def updateLogContextMenus(self, visible=False):
         """
         Modify the View/Data Explorer menu item text on widget visibility
@@ -384,6 +402,7 @@ class GuiManager:
         else:
             self._workspace.actionHide_LogExplorer.setText("Show Log Explorer")
 
+
     def updateContextMenus(self, visible=False):
         """
         Modify the View/Data Explorer menu item text on widget visibility
@@ -392,6 +411,7 @@ class GuiManager:
             self._workspace.actionHide_DataExplorer.setText("Hide Data Explorer")
         else:
             self._workspace.actionHide_DataExplorer.setText("Show Data Explorer")
+
 
     def statusBarSetup(self):
         """
@@ -412,16 +432,19 @@ class GuiManager:
         self.progress.setTextVisible(True)
         self.progress.setVisible(False)
 
+
     def fileWasRead(self, data):
         """
         Callback for fileDataReceivedSignal
         """
         pass
 
+
     @classmethod
     def showHelp(cls, url):
         """Open documentation in the default browser."""
         HELP_SYSTEM.show_help(url)
+
 
     def workspace(self):
         """
@@ -542,6 +565,7 @@ class GuiManager:
         self.workspace_manager.add(new_perspective, detached=detached)
         self._connect_undo_redo_hooks()
 
+
     def updatePerspective(self, data):
         """
         Update perspective with data sent.
@@ -553,9 +577,16 @@ class GuiManager:
             msg = "No perspective is currently active."
             logger.info(msg)
 
+
+    def communicator(self):
+        """ Accessor for the communicator """
+        return self.communicate
+
+
     def perspective(self):
         """ Accessor for the perspective """
         return self._current_perspective
+
 
     def updateProgressBar(self, value):
         """
@@ -572,11 +603,13 @@ class GuiManager:
 
         self.progress.setValue(value)
 
+
     def updateStatusBar(self, text):
         """
         Set the status bar text
         """
         self.statusLabel.setText(text)
+
 
     def appendLog(self, signal):
         """Appends a message to the list widget in the Log Explorer. Use this
@@ -605,11 +638,13 @@ class GuiManager:
         if record.levelno >= 30:
             self.logDockWidget.setVisible(True)
 
+
     def createGuiData(self, item, p_file=None):
         """
         Access the Data1D -> plottable Data1D conversion
         """
         return self._data_manager.create_gui_data(item, p_file)
+
 
     def setData(self, data):
         """
@@ -621,11 +656,13 @@ class GuiManager:
             msg = "Guiframe does not have a current perspective"
             logger.info(msg)
 
+
     def findItemFromFilename(self, filename):
         """
         Queries the data explorer for the index corresponding to the filename within
         """
         return self.filesWidget.itemFromFilename(filename)
+
 
     def quitApplication(self):
         """
@@ -653,6 +690,7 @@ class GuiManager:
 
         return False
 
+
     def checkUpdate(self):
         """
         Check with the deployment server whether a new version
@@ -665,17 +703,20 @@ class GuiManager:
             logger.info("Failed to connect to www.sasview.org:")
         self.processVersion(latest_version)
 
+
     def log_installed_packages(self):
         """
         Log version number of locally installed python packages
         """
         PackageGatherer().log_installed_modules()
 
+
     def log_imported_packages(self):
         """
         Log version number of python packages imported in this instance of SasView.
         """
         PackageGatherer().log_imported_packages()
+
 
     def processVersion(self, version_info: tuple[str, str, Version]):
         """
@@ -707,19 +748,23 @@ class GuiManager:
             msg += " Please try again later."
             self.communicator.statusBarUpdateSignal.emit(msg)
 
+
     def actionWelcome(self):
         """ Show the Welcome panel """
         self.welcomePanel = WelcomePanel()
         self.workspace_manager.add(self.welcomePanel)
 
+
     def actionWhatsNew(self):
         self.WhatsNew = WhatsNewWidget(self._parent, only_recent=False)
         self.WhatsNew.show()
+
 
     def showWelcomeMessage(self):
         """ Show the Welcome panel, when required """
         if config.SHOW_WELCOME_PANEL:
             self.actionWelcome()
+
 
     def addCallbacks(self):
         """
@@ -867,6 +912,7 @@ class GuiManager:
         """
         self.filesWidget.loadFile()
 
+
     def actionLoad_Data_Folder(self):
         """
         Menu File/Load Data Folder
@@ -893,6 +939,7 @@ class GuiManager:
         Menu Open Project
         """
         self.filesWidget.loadProject()
+
 
     def actionOpen_Analysis(self):
         """
@@ -934,6 +981,7 @@ class GuiManager:
             GuiUtils.saveData(outfile, final_data)
         return True
 
+
     def actionSave_Analysis(self):
         """
         Menu File/Save Analysis
@@ -956,14 +1004,17 @@ class GuiManager:
         else:
             logger.warning('No analysis was available to be saved.')
 
+
     def actionOpen_Preferences(self):
         self.preferences.show()
+
 
     def actionQuit(self):
         """
         Close the reactor, exit the application.
         """
         self.quitApplication()
+
 
     #============ EDIT =================
     def actionUndo(self):
@@ -972,6 +1023,7 @@ class GuiManager:
         stack = self._active_undo_stack()
         if stack is not None:
             stack.undo()
+
 
     def actionRedo(self):
         """
@@ -1051,6 +1103,7 @@ class GuiManager:
         self._workspace.actionUndo.setToolTip(stack.undo_text())
         self._workspace.actionRedo.setToolTip(stack.redo_text())
 
+
     def actionCopy(self):
         """
         Response to copy menu / button trigger
@@ -1058,12 +1111,14 @@ class GuiManager:
         if self._current_perspective is not None:
             self._current_perspective.clipboard_copy()
 
+
     def actionPaste(self):
         """
         Response to paste menu / button trigger
         """
         if self._current_perspective is not None:
             self._current_perspective.clipboard_paste()
+
 
     def actionReport(self):
         """
@@ -1077,7 +1132,6 @@ class GuiManager:
             else:
                 self.report_dialog = ReportDialog(report_data=report_data, parent=self._parent)
                 self.report_dialog.show()
-
 
 
     def actionReset(self):
@@ -1096,6 +1150,7 @@ class GuiManager:
         if self._current_perspective is not None:
             self._current_perspective.excel_clipboard_copy()
 
+
     def actionLatex(self):
         """
         Send a signal to the fitting perspective so parameters
@@ -1104,6 +1159,7 @@ class GuiManager:
         if self._current_perspective is not None:
             self._current_perspective.latex_clipboard_copy()
 
+
     def actionSaveParamsAs(self):
         """
         Menu Save Params
@@ -1111,11 +1167,13 @@ class GuiManager:
         if self._current_perspective is not None:
             self._current_perspective.save_parameters()
 
+
     #============ VIEW =================
     def actionShow_Grid_Window(self):
         """
         """
         self.showBatchOutput(None)
+
 
     def showBatchOutput(self, output_data):
         """
@@ -1125,6 +1183,7 @@ class GuiManager:
         self.workspace_manager.activate(self.grid_window)
         if output_data:
             self.grid_window.addFitResults(output_data)
+
 
     def actionHide_Toolbar(self):
         """
@@ -1137,6 +1196,7 @@ class GuiManager:
             self._workspace.actionHide_Toolbar.setText("Hide Toolbar")
             self._workspace.toolBar.setVisible(True)
 
+
     def actionHide_DataExplorer(self):
         """
         Toggle Data Explorer vsibility
@@ -1145,6 +1205,7 @@ class GuiManager:
             self.dockedFilesWidget.setVisible(False)
         else:
             self.dockedFilesWidget.setVisible(True)
+
 
     def actionHide_LogExplorer(self):
         """
@@ -1155,15 +1216,18 @@ class GuiManager:
         else:
             self.logDockWidget.setVisible(True)
 
+
     def actionStartup_Settings(self):
         """
         """
         print("actionStartup_Settings TRIGGERED")
 
+
     def actionCategory_Manager(self):
         """
         """
         self.categoryManagerWidget.show()
+
 
     #============ TOOLS =================
     def actionData_Operation(self):
@@ -1174,30 +1238,36 @@ class GuiManager:
 
         self.DataOperation.show()
 
+
     def actionSLD_Calculator(self):
         """
         """
         self.SLDCalculator.show()
+
 
     def actionDensity_Volume_Calculator(self):
         """
         """
         self.DVCalculator.show()
 
+
     def actionKiessig_Calculator(self):
         """
         """
         self.KIESSIGCalculator.show()
+
 
     def actionMuMag_Fitter(self):
         """
         """
         self.MuMag_Fitter.show()
 
+
     def actionSlit_Size_Calculator(self):
         """
         """
         self.SlitSizeCalculator.show()
+
 
     def actionSAS_Resolution_Estimator(self):
         """
@@ -1207,6 +1277,7 @@ class GuiManager:
         except Exception as ex:
             logger.error(str(ex))
             return
+
 
     def actionGeneric_Scattering_Calculator(self):
         """
@@ -1223,12 +1294,14 @@ class GuiManager:
             logger.error(str(ex))
             return
 
+
     def actionShape2SAS_Calculator(self):
         try:
             self.Shape2SASCalculator.show()
         except Exception as ex:
             logger.error(str(ex))
             return
+
 
     def actionPython_Shell_Editor(self):
         """
@@ -1244,17 +1317,20 @@ class GuiManager:
         self.ipDockWidget.setWidget(terminal)
         self._workspace.addDockWidget(Qt.RightDockWidgetArea, self.ipDockWidget)
 
+
     def actionFreeze_Theory(self):
         """
         Convert a child index with data into a separate top level dataset
         """
         self.filesWidget.freezeCheckedData()
 
+
     def actionOrientation_Viewer(self):
         """
         Make sasmodels orientation & jitter viewer available
         """
         show_orientation_viewer()
+
 
     def actionImage_Viewer(self):
         """
@@ -1268,6 +1344,7 @@ class GuiManager:
             logger.error(str(ex))
             return
 
+
     def actionFile_Converter(self):
         """
         Shows the File Converter widget.
@@ -1277,6 +1354,7 @@ class GuiManager:
         except Exception as ex:
             logger.error(str(ex))
             return
+
 
     #============ FITTING =================
     def actionNew_Fit_Page(self):
@@ -1289,6 +1367,7 @@ class GuiManager:
             return
         per.addFit(None)
 
+
     def actionConstrained_Fit(self):
         """
         Add a new Constrained and Simult. Fit page in the fitting perspective.
@@ -1297,6 +1376,7 @@ class GuiManager:
         if not isinstance(per, FittingWindow):
             return
         per.addConstraintTab()
+
 
     def actionCombine_Batch_Fit(self):
         """
@@ -1311,6 +1391,7 @@ class GuiManager:
             self.preferences.show()
             self.preferences.setMenuByName(self._current_perspective.fit_options_widget.name)
 
+
     def actionGPU_Options(self):
         """
         Load the OpenCL selection dialog if the fitting perspective is active
@@ -1319,10 +1400,12 @@ class GuiManager:
             self.preferences.show()
             self.preferences.setMenuByName(self._current_perspective.gpu_options_widget.name)
 
+
     def actionFit_Results(self):
         """
         """
         self.showFitResults(None)
+
 
     def showFitResults(self, output_data):
         """
@@ -1332,11 +1415,13 @@ class GuiManager:
         if output_data and len(output_data) > 0 and len(output_data[0]) > 0:
             self.results_panel.onPlotResults(output_data, optimizer=self.perspective().optimizer)
 
+
     def actionAdd_Custom_Model(self):
         """
         """
         self.model_editor = TabbedModelEditor(self)
         self.model_editor.show()
+
 
     def actionEdit_Custom_Model(self):
         """
@@ -1344,17 +1429,20 @@ class GuiManager:
         self.model_editor = TabbedModelEditor(self, edit_only=True)
         self.model_editor.show()
 
+
     def actionManage_Custom_Models(self):
         """
         """
         self.model_manager = PluginManager(self)
         self.model_manager.show()
 
+
     def actionReparameterize_Model(self):
         """
         """
         self.reparameterizer = ReparameterizationEditor(self)
         self.reparameterizer.show()
+
 
     def actionAddMult_Models(self):
         """
@@ -1363,9 +1451,11 @@ class GuiManager:
         self.add_mult_editor = AddMultEditor(self)
         self.add_mult_editor.show()
 
+
     def actionEditMask(self):
 
         self.communicator.extMaskEditorSignal.emit()
+
 
     #============ ANALYSIS =================
     def actionFitting(self):
@@ -1376,12 +1466,14 @@ class GuiManager:
         # Notify other widgets
         self.filesWidget.onAnalysisUpdate("Fitting")
 
+
     def actionInversion(self):
         """
         Change to the Inversion perspective
         """
         self.perspectiveChanged("Inversion")
         self.filesWidget.onAnalysisUpdate("Inversion")
+
 
     def actionInvariant(self):
         """
@@ -1390,6 +1482,7 @@ class GuiManager:
         self.perspectiveChanged("Invariant")
         self.filesWidget.onAnalysisUpdate("Invariant")
 
+
     def actionCorfunc(self):
         """
         Change to the Corfunc perspective
@@ -1397,12 +1490,14 @@ class GuiManager:
         self.perspectiveChanged("Corfunc")
         self.filesWidget.onAnalysisUpdate("Corfunc")
 
+
     def actionSizeDistribution(self):
         """
         Change to the Size perspective
         """
         self.perspectiveChanged("SizeDistribution")
         self.filesWidget.onAnalysisUpdate("SizeDistribution")
+
 
     #============ WINDOW =================
     def actionCascade(self):
@@ -1412,11 +1507,13 @@ class GuiManager:
         """
         self._workspace.workspace.cascadeSubWindows()
 
+
     def actionTile(self):
         """
         Tile workspace windows. Detached windows are not affected.
         """
         self._workspace.workspace.tileSubWindows()
+
 
     def actionArrange_Icons(self):
         """
@@ -1424,12 +1521,14 @@ class GuiManager:
         """
         self._workspace.workspace.arrangeIcons()
 
+
     def actionNext(self):
         """
         Gives the input focus to the next window in the list of child windows.
         Includes detached windows; hidden panels are skipped.
         """
         self._cycleWindows(1)
+
 
     def actionPrevious(self):
         """
@@ -1479,17 +1578,20 @@ class GuiManager:
         else:
             action.setText("Detach Window from Workspace")
 
+
     def actionClosePlots(self):
         """
         Closes all Plotters and Plotter2Ds.
         """
         self.filesWidget.closeAllPlots()
 
+
     def actionMinimizePlots(self):
         """
         Minimizes all Plotters and Plotter2Ds, attached or detached.
         """
         self.filesWidget.minimizeAllPlots()
+
 
     #============ HELP =================
     def actionDocumentation(self):
@@ -1501,6 +1603,7 @@ class GuiManager:
         helpfile = "/index.html"
         self.showHelp(helpfile)
 
+
     def actionTutorial(self):
         """
         Open the page with tutorial PDF links
@@ -1509,17 +1612,20 @@ class GuiManager:
         tutorialfile = "/user/tutorial.html"
         self.showHelp(tutorialfile)
 
+
     def actionAcknowledge(self):
         """
         Open the Acknowledgements widget
         """
         self.ackWidget.show()
 
+
     def actionMarketplace(self):
         """
         Open the marketplace link in default browser
         """
         webbrowser.open_new(web.marketplace_url)
+
 
     def actionAbout(self):
         """
@@ -1531,6 +1637,7 @@ class GuiManager:
         about = About()
         about.exec()
 
+
     def actionCredits(self):
         """
         Open the Credits/Licenses box
@@ -1538,6 +1645,7 @@ class GuiManager:
         # TODO: proper sizing
         credits = Credits()
         credits.exec()
+
 
     def actionClose_Project(self):
         """
@@ -1557,11 +1665,13 @@ class GuiManager:
             self.resetProject()
         # else Cancel, do nothing
 
+
     def actionCheck_for_update(self):
         """
         Menu Help/Check for Update
         """
         self.checkUpdate()
+
 
     def updateTheoryFromPerspective(self, index):
         """
@@ -1576,12 +1686,14 @@ class GuiManager:
             return
         per.currentTab.setTheoryItem(item)
 
+
     def deleteIntermediateTheoryPlotsByTabId(self, tab_id):
         """
         Catch the signal to delete items in the Theory item model which correspond to a model ID.
         Send the request to the DataExplorer for updating the theory model.
         """
         self.filesWidget.deleteIntermediateTheoryPlotsByTabId(tab_id)
+
 
     def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
         """
@@ -1596,12 +1708,14 @@ class GuiManager:
         self.filesWidget.model.appendRow(new_item)
         self._data_manager.add_data(new_datalist_item)
 
+
     def showPlotFromName(self, name):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayDataByName(name=name, is_data=True)
+
 
     def showPlot(self, plot):
         """
@@ -1612,6 +1726,7 @@ class GuiManager:
             # update windows menu
             self.addPlotItemsInWindowsMenu(plot)
 
+
     def uncheckAllMenuItems(self, menuObject):
         """
         Uncheck all options in a given menu
@@ -1620,6 +1735,7 @@ class GuiManager:
 
         for menuItem in menuObjects:
             menuItem.setChecked(False)
+
 
     def checkAnalysisOption(self, analysisMenuOption):
         """
@@ -1634,6 +1750,7 @@ class GuiManager:
         Save the config file based on current session values
         """
         config.save()
+
 
     def resetProject(self):
         """
