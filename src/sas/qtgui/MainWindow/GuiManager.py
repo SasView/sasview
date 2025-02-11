@@ -161,6 +161,7 @@ class GuiManager:
         # TODO: Is this a good opportunity to change this name? dataExplorer would be better I think.
         self.filesWidget = NewDataExplorer(self._data_manager ,self._parent)
         self.filesWidget.new_perspective.connect(self.new_perspective)
+        self.filesWidget.removed_perspective.connect(self.removed_perspective)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
@@ -249,6 +250,14 @@ class GuiManager:
         new_perspective.show()
         self._data_manager.add_data(new_perspective)
         # TODO: There is inevitably other stuff to put here.
+
+    @Slot(QDialog)
+    def removed_perspective(self, to_remove: QDialog):
+        # Need to find the subwindow that contains the perspective so we can remove that.
+        for sub_window in self._workspace.workspace.subWindowList():
+            if sub_window.widget() == to_remove:
+                self._workspace.workspace.removeSubWindow(sub_window)
+                break
 
     @staticmethod
     def addCategories():
