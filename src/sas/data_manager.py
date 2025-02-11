@@ -30,7 +30,7 @@ class NewDataManager(QObject):
     def _number_perspective(self, to_number: Perspective):
         number = 1
         # TODO: Comparing titles might not be the best way to do this.
-        relevant_perspective_numbers = [p.perspective_number for p in self._all_data_entries if isinstance(p, Perspective) and p.title == to_number.title]
+        relevant_perspective_numbers = [p.perspective_number for p in self._all_data_entries if hasattr(p, 'title') and p.title == to_number.title]
         while number in relevant_perspective_numbers:
             number += 1
         to_number.perspective_number = number
