@@ -29,3 +29,8 @@ class DataExplorerTree(QTreeWidget):
             self.table_values.append(datum)
             item = QTreeWidgetItem([name])
             self.addTopLevelItem(item)
+
+    @property
+    def currentTrackedDatum(self) -> TrackedData:
+        index = self.currentIndex().row()
+        return self.table_values[index]
