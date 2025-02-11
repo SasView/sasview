@@ -17,6 +17,7 @@ class Perspective(QDialog):
     def __init__(self, data_manager: "DataManager", parent : QWidget | None) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
+        self.perspective_number: int = -1 # This gets reassigned by the data manager.
         self.finished.connect(self.onDone)
 
     @property
