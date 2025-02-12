@@ -83,7 +83,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdHelp_2.clicked.connect(self.displayHelp)
         self.chkSwap.setVisible(False)
 
-        self.cmdFreeze.clicked.connect(self.freezeTheory)
         # Fill in the perspectives combo
         self.initPerspectives()
 
@@ -2081,8 +2080,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 return
             match = GuiUtils.theory_plot_ID_pattern.match(data.id)
             if match:
-                item_model_id = match.groups()[-1]
-                if item_model_id == model_id:
+                item_tab_id = match.groups()[0]
+                if item_tab_id == tab_id:
                     # Only delete those identified as an intermediate plot
                     if match.groups()[2] not in (None, ""):
                         items_to_delete.append(item)
