@@ -11,19 +11,6 @@ class ColEditor(QWidget):
     from a set of options based on which dataset type has been selected."""
     column_changed = Signal()
 
-    @Slot()
-    def onColumnUpdate(self):
-        column_changed = cast(ColumnUnit, self.sender())
-        pairing = pairings.get(column_changed.currentColumn)
-        if not pairing is None:
-            for col_unit in self.option_widgets:
-                # Second condition is important because otherwise, this event will keep being called, and the GUI will
-                # go into an infinite loop.
-                if col_unit.currentColumn == pairing and col_unit.currentUnit != column_changed.currentUnit:
-                    col_unit.currentUnit = column_changed.currentUnit
-        self.column_changed.emit()
-
-
     def __init__(self, cols: int, options: list[str]):
         super().__init__()
 
@@ -36,6 +23,18 @@ class ColEditor(QWidget):
             new_widget.column_changed.connect(self.onColumnUpdate)
             self.layout.addWidget(new_widget)
             self.option_widgets.append(new_widget)
+
+    @Slot()
+    def onColumnUpdate(self):
+        column_changed = cast(ColumnUnit, self.sender())
+        pairing = pairings.get(column_changed.currentColumn)
+        if not pairing is None:
+            for col_unit in self.option_widgets:
+                # Second condition is important because otherwise, this event will keep being called, and the GUI will
+                # go into an infinite loop.
+                if col_unit.currentColumn == pairing and col_unit.currentUnit != column_changed.currentUnit:
+                    col_unit.currentUnit = column_changed.currentUnit
+        self.column_changed.emit()
 
     def setCols(self, new_cols: int):
         """Set the amount of columns for the user to edit."""
