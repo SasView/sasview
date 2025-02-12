@@ -8,6 +8,7 @@ from sasdata.quantities.units import symbol_lookup, NamedUnit
 
 from ascii_dialog.unit_selector import UnitSelector
 from ascii_dialog.default_units import default_units
+from sasdata.default_units import default_or_fallback, defaults_or_fallback
 
 def configure_size_policy(combo_box: QComboBox) -> None:
     policy = combo_box.sizePolicy()
@@ -58,7 +59,7 @@ class ColumnUnit(QWidget):
             unit_box.setDisabled(True)
         else:
             unit_box.setDisabled(False)
-            unit_options = default_units.get(self.current_option, unit_kinds[selected_option].units)
+            unit_options = defaults_or_fallback(self.current_option)
             option_symbols = [unit.symbol for unit in unit_options]
             for option in option_symbols[:5]:
                 unit_box.addItem(option)
