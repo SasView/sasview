@@ -6,7 +6,7 @@ from ascii_dialog.selection_menu import SelectionMenu
 from ascii_dialog.warning_label import WarningLabel
 from ascii_dialog.col_editor import ColEditor
 from ascii_dialog.row_status_widget import RowStatusWidget
-from ascii_dialog.guess import guess_column_count, guess_columns, guess_starting_position
+from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
 from os import path
 from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
 from sasdata.temp_ascii_reader import load_data, AsciiReaderParams, split_line
