@@ -7,7 +7,7 @@ from sasdata.dataset_types import unit_kinds
 from sasdata.quantities.units import symbol_lookup, NamedUnit
 
 from ascii_dialog.unit_selector import UnitSelector
-from sasdata.default_units import default_or_fallback, defaults_or_fallback
+from sasdata.default_units import defaults_or_fallback
 
 def configure_size_policy(combo_box: QComboBox) -> None:
     policy = combo_box.sizePolicy()
