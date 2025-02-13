@@ -77,8 +77,8 @@ class ColEditor(QWidget):
         return [widget.currentColumn for widget in self.option_widgets]
 
     @property
-    def columns(self) -> list[tuple[str, NamedUnit]]:
-        return [(widget.currentColumn, widget.currentUnit) for widget in self.option_widgets]
+    def columns(self) -> list[tuple[str, NamedUnit | None]]:
+        return [(widget.currentColumn, widget.currentUnit if widget.currentColumn != "<ignore>" else None) for widget in self.option_widgets]
 
     def replaceOptions(self, new_options: list[str]) -> None:
         """Replace options from which the user can choose for each column."""
