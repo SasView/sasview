@@ -37,11 +37,11 @@ class NewDataManager(QObject):
 
     def add_data(self, data: TrackedData):
         self._all_data_entries.add(data)
-        self.new_data.emit()
         # TODO: This is a bit of a dodgy way of checking for a perspective but isinstance won't work. I need to look
         # into using ABC.
         if hasattr(data, 'title'):
             self._number_perspective(data)
+        self.new_data.emit()
 
     def remove_data(self, data: TrackedData):
         # We shouldn't be able to remove tracked data if its in an association
