@@ -3,13 +3,12 @@ from copy import copy
 from typing import Optional
 
 import json
-import logging
 import re
 
-from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QCheckBox, QPushButton, QSpacerItem
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QCheckBox, QPushButton, QSpacerItem, \
+    QApplication
 
 import logging
 
@@ -20,23 +19,19 @@ from sas.system import web
 from sas.system.version import __version__ as current_version_string
 
 logger = logging.getLogger("NewVersionAvailable")
-class DummyLogger:
-    def info(self, *stuff):
-        print(stuff)
-
-logger = DummyLogger()
 
 class NewVersionAvailable(QDialog):
     """
     Dialog to say that a new version is available
 
     """
-    def __init__(self, current_version: str, latest_version: str, parent=None):
+    def __init__(self, current_version: str, latest_version: str, url: str = 'http://www.sasview.org/#downloadsection', parent=None):
         super().__init__(parent)
 
         self.latest_version = latest_version
+        self.url = url
 
-        self.setWindowTitle(f"A new version is available")
+        self.setWindowTitle(f"SasView {latest_version} Is Out!")
 
         icon = QIcon()
         icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
@@ -46,11 +41,11 @@ class NewVersionAvailable(QDialog):
 
         self.setLayout(vertical_layout)
 
-        text1 = QLabel(f"A new version of sasview is available.")
-        text2 = QLabel(f"You are running {current_version}, would you like to go to the {latest_version} download?")
+        text = QLabel(f"<p>A new version of sasview is available.</p>"
+                       f""
+                       f"<p><center>Visit the download page?</centre></p><p/>")
 
-        vertical_layout.addWidget(text1)
-        vertical_layout.addWidget(text2)
+        vertical_layout.addWidget(text)
 
         # Buttons
 
@@ -64,6 +59,7 @@ class NewVersionAvailable(QDialog):
         cancel.clicked.connect(self.cancel)
 
         self.dont_show = QCheckBox("Keep reminding me")
+        self.dont_show.setChecked(True)
 
         accept = QPushButton("Take Me There", parent=button_panel)
         accept.clicked.connect(self.go)
@@ -71,11 +67,11 @@ class NewVersionAvailable(QDialog):
 
         button_layout.addWidget(cancel)
         button_layout.addWidget(self.dont_show)
-        button_layout.addSpacerItem(QSpacerItem(10,10))
+        button_layout.addSpacerItem(QSpacerItem(50,10))
         button_layout.addWidget(accept)
 
     def go(self):
-        webbrowser.open('http://www.sasview.org', new=2)
+        webbrowser.open(self.url, new=2)
 
     def cancel(self):
         if not self.dont_show.isChecked():
@@ -92,7 +88,7 @@ def parse_version(version_string: str) -> tuple[int, int, int]:
 
     return parts[0], parts[1], parts[2]
 
-def get_current_release_version() -> Optional[tuple[str, tuple[int, int, int]]]:
+def get_current_release_version() -> Optional[tuple[str, str, tuple[int, int, int]]]:
     """ Get the current version from the server """
 
     c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
@@ -109,8 +105,9 @@ def get_current_release_version() -> Optional[tuple[str, tuple[int, int, int]]]:
         version_info = json.loads(content)
 
         version_string = version_info["version"]
+        url = version_info["download_url"]
 
-        return version_string, parse_version(version_string)
+        return version_string, url, parse_version(version_string)
 
 
     except Exception as ex:
@@ -142,8 +139,8 @@ def maybe_prompt_new_version_download() -> Optional[QDialog]:
             config.LAST_UPDATE_DISMISSED_VERSION = copy(current_version_string)
             comparison = current
 
-            # check
-            comparison = (5,0,0)
+            # Uncomment this to check:
+            # comparison = (5, 0, 0)
 
         else:
             comparison = last_dismissed
@@ -156,33 +153,29 @@ def maybe_prompt_new_version_download() -> Optional[QDialog]:
         if latest_string_and_tuple is None:
             return
 
-        latest_string, latest = latest_string_and_tuple
-
-        print(comparison)
-        print(latest)
+        latest_string, url, latest = latest_string_and_tuple
 
         if a_newer_than_b(latest, comparison):
 
-            whats_new_window = NewVersionAvailable(current_version_string, latest_string)
-            whats_new_window.show()
+            app = QApplication([])
+            new_version = NewVersionAvailable(current_version_string, latest_string, url)
+            new_version.show()
 
-            return whats_new_window
+            app.exec()
+            app.shutdown() # Of course!
 
-        else:
 
-            return None
+
+
 
     except Exception as ex:
         logger.info("Error getting latest sasview version", ex)
         return None
+
 def main():
     """ Demo/testing window"""
 
-    app = QtWidgets.QApplication([])
-
-    window = maybe_prompt_new_version_download()
-
-    app.exec_()
+    maybe_prompt_new_version_download()
 
 
 if __name__ == "__main__":
