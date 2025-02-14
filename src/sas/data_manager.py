@@ -16,7 +16,7 @@ valid_associations = [
 # Making this a QObject so it'll support events.
 class NewDataManager(QObject):
     # Don't mutate these directly, or scary bad stuff will happen.
-    _all_data_entries: set[TrackedData]
+    _all_data_entries: list[TrackedData]
     _association: list[tuple[TrackedData, TrackedData]]
     new_data: Signal = Signal()
     data_removed: Signal = Signal()
@@ -24,7 +24,7 @@ class NewDataManager(QObject):
 
     def __init__(self):
         super().__init__()
-        self._all_data_entries = set()
+        self._all_data_entries = []
         self._association = []
 
     def _number_perspective(self, to_number: Perspective):
@@ -36,7 +36,7 @@ class NewDataManager(QObject):
         to_number.perspective_number = number
 
     def add_data(self, data: TrackedData):
-        self._all_data_entries.add(data)
+        self._all_data_entries.append(data)
         # TODO: This is a bit of a dodgy way of checking for a perspective but isinstance won't work. I need to look
         # into using ABC.
         if hasattr(data, 'title'):
@@ -75,5 +75,5 @@ class NewDataManager(QObject):
         return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self._association if data in assoc]
 
     @property
-    def all_data(self) -> set[TrackedData]:
+    def all_data(self) -> list[TrackedData]:
         return self._all_data_entries
