@@ -4,7 +4,7 @@ Adapters for fitting module
 import copy
 import numpy
 import math
-from enum import Enum
+from enum import Enum, auto
 
 from sasdata.data_util.uncertainty import Uncertainty
 
@@ -18,17 +18,25 @@ from sasdata.dataloader.data_info import Data2D as LoadData2D
 class DataRole(Enum):
     """Labels to apply to different plot types."""
     # Data is for imported data
-    ROLE_DATA = 0
+    ROLE_DATA = ("log", "log")
     # Default is for fits of the imported data
-    ROLE_DEFAULT = 1
+    ROLE_DEFAULT = ("log", "log")
     # Deletable is for orphaned plots
-    ROLE_DELETABLE = 2
+    ROLE_DELETABLE = (None, None)
     # Residual is for stand-alone residual plots
-    ROLE_RESIDUAL = 3
+    ROLE_RESIDUAL = ("log", "linear")
+    # Residual sesans is for stand-alone sesans residual plots
+    ROLE_RESIDUAL_SESANS = ("linear", "linear")
     # Stand alone is for plots that should be plotted separately
-    ROLE_STAND_ALONE = 4
-    # Polydispersity is for stand-alone polydispersity plot
-    ROLE_POLYDISPERSITY = 5
+    ROLE_STAND_ALONE = ("linear", "linear")
+    # LIN_LIN is for stand-alone plots on a linear-linear scale
+    ROLE_LIN_LIN = ("linear", "linear")
+    # POLYDISPERSITY role is to tag polydispersity plots to be able to suppress auto displaying them
+    ROLE_POLYDISPERSITY = ("linear", "linear")
+
+    def __init__(self, x_scale, y_scale):
+        self.x_scale = x_scale
+        self.y_scale = y_scale
 
 
 class Data1D(PlottableData1D, LoadData1D):
@@ -48,8 +56,6 @@ class Data1D(PlottableData1D, LoadData1D):
         self.group_id = None
         self.is_data = True
         self.path = None
-        self.xtransform = None
-        self.ytransform = None
         self.title = ""
         self.scale = None
         # plot_role:
@@ -218,8 +224,6 @@ class Data2D(PlottableData2D, LoadData2D):
         self.group_id = None
         self.is_data = True
         self.path = None
-        self.xtransform = None
-        self.ytransform = None
         self.title = ""
         self.scale = None
         # Always default
