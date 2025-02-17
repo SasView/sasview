@@ -34,7 +34,6 @@ class ColEditor(QWidget):
                 # go into an infinite loop.
                 if col_unit.currentColumn == pairing and col_unit.currentUnit != column_changed.currentUnit:
                     col_unit.currentUnit = column_changed.currentUnit
-        self.column_changed.emit()
 
     def setCols(self, new_cols: int):
         """Set the amount of columns for the user to edit."""
