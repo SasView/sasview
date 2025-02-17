@@ -596,16 +596,6 @@ To *paste* parameters, either:
 If either operation is successful a message will appear in the info line at the
 bottom of the SasView window.
 
-Bookmark
-^^^^^^^^
-
-To *Bookmark* a *Fit Page* either:
-
-*  Select a *Fit Page* and then click on *Bookmark* in the tool bar, or
-*  Right-click and select the *Bookmark* in the popup menu.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
 .. _Status_bar:
 
 Status Bar & Log Explorer
