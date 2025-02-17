@@ -2,7 +2,7 @@ from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtCore import Slot, Signal
 from sasdata.quantities.units import NamedUnit
-from sasdata.ascii_reader_metadata import pairings
+from sasdata.ascii_reader_metadata import bidirectional_pairings
 from ascii_dialog.column_unit import ColumnUnit
 from typing import cast
 
@@ -27,7 +27,7 @@ class ColEditor(QWidget):
     @Slot()
     def onColumnUpdate(self):
         column_changed = cast(ColumnUnit, self.sender())
-        pairing = pairings.get(column_changed.currentColumn)
+        pairing = bidirectional_pairings.get(column_changed.currentColumn)
         if not pairing is None:
             for col_unit in self.option_widgets:
                 # Second condition is important because otherwise, this event will keep being called, and the GUI will
