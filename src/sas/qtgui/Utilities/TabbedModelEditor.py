@@ -25,6 +25,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     Once the model is defined, it can be saved as a plugin.
     """
     # Signals for intertab communication plugin -> editor
+    applySignal = QtCore.Signal()
+
     def __init__(self, parent=None, edit_only=False, model=False, load_file=None):
         super(TabbedModelEditor, self).__init__(parent._parent)
 
@@ -93,6 +95,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.plugin_widget.modelModified.connect(self.editorModelModified)
         self.editor_widget.modelModified.connect(self.editorModelModified)
         self.plugin_widget.txtName.editingFinished.connect(self.pluginTitleSet)
+        # locally emitted signals
+        self.applySignal.connect(self._onApply)
 
     def setPluginActive(self, is_active=True):
         """
@@ -242,6 +246,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Write the plugin and update the model editor if plugin editor open
         Write/overwrite the plugin if model editor open
         """
+        # Ensure focus leaves any inputs currently being edited and allow their signals to trigger
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setFocus()
+        # Send out a new signal that is queued after input change signals from any input
+        self.applySignal.emit()
+
+    def _onApply(self):
         if isinstance(self.tabWidget.currentWidget(), PluginDefinition):
             self.updateFromPlugin()
         else:
