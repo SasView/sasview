@@ -3,6 +3,8 @@ import os
 import sys
 import traceback
 import webbrowser
+
+from typing import cast
 from pathlib import Path
 
 from packaging.version import Version
@@ -172,6 +174,7 @@ class GuiManager:
 
         self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
+        self._workspace.workspace.subWindowActivated.connect(self.current_perspective_changed)
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
@@ -257,6 +260,11 @@ class GuiManager:
             if sub_window.widget() == to_remove:
                 self._workspace.workspace.removeSubWindow(sub_window)
                 break
+
+    @Slot(QMdiSubWindow)
+    def current_perspective_changed(self, perspective_window: QMdiSubWindow | None):
+        perspective = cast(Perspective, perspective_window.widget())
+        self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
 
     @staticmethod
     def addCategories():
