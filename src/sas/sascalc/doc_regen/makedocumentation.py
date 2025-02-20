@@ -3,6 +3,7 @@ Creates documentation from .py files
 """
 import logging
 import os
+import platform
 import sys
 import subprocess
 import shutil
@@ -27,30 +28,39 @@ USER_DOC_LOG = USER_DOC_SRC / 'log'
 DOC_LOG = USER_DOC_LOG / 'output.log'
 MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
 MAIN_BUILD_SRC = USER_DOC_SRC / "build"
+if platform.system() == 'Linux':
+    MAIN_BUILD_SRC = USER_DOC_SRC / "build" / "html"
 MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
 ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
 PLUGIN_PY_SRC = Path(models.find_plugins_dir())
 
 HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
+if platform.system() == 'Linux':
+    HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC
 RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
 IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
 SAS_DIR = Path(sys.argv[0]).parent
 
 # Find the original documentation location, depending on where the files originate from
-if os.path.exists(SAS_DIR / "doc"):
+if platform.system() == 'Linux':
+    BASE_DIR = Path("/usr/share/doc/sasview/")
+    ORIGINAL_DOCS_SRC = BASE_DIR / "doc-source"
+    ORIGINAL_DOC_BUILD = BASE_DIR / "html"
+elif os.path.exists(SAS_DIR / "doc"):
     # This is the directory structure for the installed version of SasView (primary for times when both exist)
     BASE_DIR = SAS_DIR / "doc"
     ORIGINAL_DOCS_SRC = BASE_DIR / "source"
+    ORIGINAL_DOC_BUILD = BASE_DIR / "build"
 elif os.path.exists(SAS_DIR / '..' / 'Frameworks' / 'doc'):
     # In the MacOS bundle, the executable and packages are in parallel directories
     BASE_DIR = SAS_DIR / '..' / 'Frameworks' / 'doc'
     ORIGINAL_DOCS_SRC = BASE_DIR / "source"
+    ORIGINAL_DOC_BUILD = BASE_DIR / "build"
 else:
     # This is the directory structure for developers
     BASE_DIR = SAS_DIR / "docs" / "sphinx-docs"
     ORIGINAL_DOCS_SRC = BASE_DIR / "source-temp"
-
-ORIGINAL_DOC_BUILD = BASE_DIR / "build"
+    ORIGINAL_DOC_BUILD = BASE_DIR / "build"
 
 
 def create_user_files_if_needed():
@@ -142,7 +152,7 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
     else:
         html_directory = HELP_DIRECTORY_LOCATION 
     force_rebuild = "" # Empty if we are not forcing a full rebuild of docs
-    DOCTREES = MAIN_BUILD_SRC / "doctrees"
+    DOCTREES = MAIN_BUILD_SRC / "doctrees" if platform.system() != 'Linux' else MAIN_BUILD_SRC.parent / "doctrees"
 
     # Process the single_files parameter into a list of Path objects referring to rst files
     if isinstance(single_files, str) and single_files:
