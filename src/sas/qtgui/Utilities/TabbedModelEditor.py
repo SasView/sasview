@@ -408,9 +408,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # attempt to find the failing command line number, usually the last line with
         # `File ... line` syntax
-        reversed_error_text = list(reversed(all_lines))
-        for line in reversed_error_text:
-            if ('File' in line and 'line' in line):
+        for line in reversed(all_lines):
+            if re.match(r"[Ff]ile.*[Ll]ine ([0-9]+)", line):
                 # If model check fails (not syntax) then 'line' and 'File' will be in adjacent lines
                 error_line = re.split('line ', line)[1]
                 try:
