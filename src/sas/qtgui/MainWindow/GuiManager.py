@@ -59,6 +59,7 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
+from sas.refactored import Perspective as NewPerspective
 from sas.qtgui.Perspectives.perspective import Perspective
 
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
@@ -275,8 +276,9 @@ class GuiManager:
 
     @Slot(QMdiSubWindow)
     def current_perspective_changed(self, perspective_window: QMdiSubWindow | None):
-        perspective = cast(Perspective, perspective_window.widget())
-        self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
+        if isinstance(perspective_window.widget(), NewPerspective):
+            perspective = cast(Perspective, perspective_window.widget())
+            self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
 
     @staticmethod
     def addCategories():
