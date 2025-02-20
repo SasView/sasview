@@ -2108,9 +2108,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #re-enable the Fit button
         self.enableInteractiveElements()
 
-        if len(result) == 0:
+        if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
             self.communicate.statusBarUpdateSignal.emit(msg)
+            # reload the kernel_module in case it's corrupted
+            self.kernel_module = copy.deepcopy(self.kernel_module_copy)
             return
 
         # Don't recalculate chi2 - it's in res.fitness already
