@@ -17,6 +17,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
 from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.CodeEditor import QCodeEditor
+
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
@@ -391,12 +393,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
             self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
 
-            # Put a thick, red border around the editor.
-            from sas.qtgui.Utilities.CodeEditor import QCodeEditor
-
-            # Find all QTextBrowser and QCodeEditor children
-            text_browsers = self.tabWidget.currentWidget().findChildren(QtWidgets.QTextBrowser)
-            code_editors = self.tabWidget.currentWidget().findChildren(QCodeEditor)
+        # If syntax check fails, find the line number of the first failure
+        # Find all QTextBrowser and QCodeEditor children
+        text_browsers = self.tabWidget.currentWidget().findChildren(QtWidgets.QTextBrowser)
+        code_editors = self.tabWidget.currentWidget().findChildren(QCodeEditor)
+        error_line = -1
 
         # Combine the lists and apply the stylesheet
         for child in text_browsers + code_editors:
