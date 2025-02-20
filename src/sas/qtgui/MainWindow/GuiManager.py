@@ -308,6 +308,7 @@ class GuiManager:
             for sub_window in sub_window_list:
                 if sub_window.widget() == new_selected:
                     sub_window.activateWindow()
+                    break
 
 
     @staticmethod
