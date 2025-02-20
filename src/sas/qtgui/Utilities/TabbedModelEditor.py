@@ -202,8 +202,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Check the validity of loaded model if the model is python
         if self.is_python:
-            error_line = self.checkModel(self.filename)
-            if error_line > 0:
+            error_line = self.findFirstError(self.filename)
+            if error_line >= 0:
                 # select bad line
                 cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
                 self.editor_widget.txtEditor.setTextCursor(cursor)
@@ -340,8 +340,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
 
         # Run the model test in sasmodels and check model syntax. Returns error line if checks fail.
-        error_line = self.checkModel(full_path)
-        if error_line > 0:
+        error_line = self.findFirstError(full_path)
+        if error_line >= 0:
             return
 
         self.editor_widget.setEnabled(True)
@@ -363,29 +363,29 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
 
-    def checkModel(self, full_path):
+    def findFirstError(self, full_path):
         """
         Run ast and model checks
         Attempt to return the line number of the error if any
         :param full_path: full path to the model file
         """
-        # successfulCheck = True
-        error_line = 0
         try:
             with open(full_path, 'r', encoding="utf-8") as plugin:
                 model_str = plugin.read()
             ast.parse(model_str)
             GuiUtils.checkModel(full_path)
+            # If no errors occur, return early
+            return -1
 
         except Exception as ex:
-            msg = "Error building model: " + str(ex)
-            logging.error(msg)
             # print four last lines of the stack trace
             # this will point out the exact line failing
             all_lines = traceback.format_exc().split('\n')
             last_lines = all_lines[-4:]
             traceback_to_show = '\n'.join(last_lines)
             logging.error(traceback_to_show)
+            msg = "Error building model: " + str(ex)
+            logging.error(msg)
 
             # Set the status bar message
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
@@ -398,31 +398,30 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             text_browsers = self.tabWidget.currentWidget().findChildren(QtWidgets.QTextBrowser)
             code_editors = self.tabWidget.currentWidget().findChildren(QCodeEditor)
 
-            # Combine the lists and apply the stylesheet
-            for child in text_browsers + code_editors:
-                child.setStyleSheet("border: 5px solid red")
-                # last_lines = traceback.format_exc().split('\n')[-4:]
-                traceback_to_show = '\n'.join(last_lines)
-                child.setToolTip(traceback_to_show)
+        # Combine the lists and apply the stylesheet
+        for child in text_browsers + code_editors:
+            child.setStyleSheet("border: 5px solid red")
+            # last_lines = traceback.format_exc().split('\n')[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            child.setToolTip(traceback_to_show)
 
-            # attempt to find the failing command line number, usually the last line with
-            # `File ... line` syntax
-            reversed_error_text = list(reversed(all_lines))
-            for line in reversed_error_text:
-                if ('File' in line and 'line' in line):
-                    # If model check fails (not syntax) then 'line' and 'File' will be in adjacent lines
-                    error_line = re.split('line ', line)[1]
+        # attempt to find the failing command line number, usually the last line with
+        # `File ... line` syntax
+        reversed_error_text = list(reversed(all_lines))
+        for line in reversed_error_text:
+            if ('File' in line and 'line' in line):
+                # If model check fails (not syntax) then 'line' and 'File' will be in adjacent lines
+                error_line = re.split('line ', line)[1]
+                try:
+                    error_line = int(error_line)
+                    break
+                except ValueError:
+                    # Sometimes the line number is followed by more text
                     try:
-                        error_line = int(error_line)
+                        error_line = int(error_line.split(',')[0])
                         break
                     except ValueError:
-                        # Sometimes the line number is followed by more text
-                        try:
-                            error_line = error_line.split(',')[0]
-                            error_line = int(error_line)
-                            break
-                        except ValueError:
-                            error_line = 0
+                        error_line = -1
 
         return error_line
 
@@ -460,8 +459,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             check_model = True
         
         if check_model:
-            error_line = self.checkModel(full_path)
-            if error_line > 0:
+            error_line = self.findFirstError(full_path)
+            if error_line >= 0:
                 # select bad line
                 cursor = QtGui.QTextCursor(w.txtEditor.document().findBlockByLineNumber(error_line-1))
                 w.txtEditor.setTextCursor(cursor)
