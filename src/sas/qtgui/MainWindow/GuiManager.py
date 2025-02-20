@@ -278,8 +278,7 @@ class GuiManager:
             sub_window_list: list[QMdiSubWindow] = self._workspace.workspace.subWindowList()
             for sub_window in sub_window_list:
                 if sub_window.widget() == new_selected:
-                    sub_window.activateWindow()
-                    break
+                    self._workspace.workspace.setActiveSubWindow(sub_window)
 
     @staticmethod
     def addCategories():
