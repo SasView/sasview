@@ -436,7 +436,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             base, _ = os.path.splitext(filename)
             filename = base + '.c'
         # make sure we have the file handle ready
-        assert filename != ""
+        if not filename:
+            logging.error("No file name was provided for your plugin model. No file was written.")
+            return
 
         # Retrieve model string
         model_str = self.getModel()['text']
