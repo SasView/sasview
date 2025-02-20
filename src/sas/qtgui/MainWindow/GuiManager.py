@@ -177,7 +177,7 @@ class GuiManager:
         self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
         self._workspace.resizeDocks([self.dockedFilesWidget], [305], Qt.Horizontal)
         self._workspace.workspace.subWindowActivated.connect(self.current_window_perspective_changed)
-        self.filesWidget.tree_view.currentItemChanged(self.current_index_perspective_changed)
+        self.filesWidget.tree_view.currentItemChanged.connect(self.current_index_perspective_changed)
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
