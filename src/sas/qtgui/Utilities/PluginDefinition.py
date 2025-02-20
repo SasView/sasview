@@ -12,7 +12,7 @@ def remove_empty_table_rows(tbl: QtWidgets.QTableWidget):
 
     :param tbl: A QTableWidget on i rows and j columns.
     """
-    for i in range(0, tbl.rowCount()):
+    for i in range(tbl.rowCount() -1, -1 , -1):
         for j in range(0, tbl.columnCount()):
             cell_contents = tbl.item(i, j)
             if cell_contents is None or cell_contents.text() == "":
