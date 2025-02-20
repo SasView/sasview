@@ -1,4 +1,5 @@
 
+
 import logging
 import os
 import sys
@@ -290,8 +291,9 @@ class GuiManager:
 
     @Slot(QMdiSubWindow)
     def current_perspective_changed(self, perspective_window: QMdiSubWindow | None):
-        perspective = cast(Perspective, perspective_window.widget())
-        self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
+        if isinstance(perspective_window.widget(), NewPerspective):
+            perspective = cast(Perspective, perspective_window.widget())
+            self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
 
 
     @Slot(QMdiSubWindow)
