@@ -37,6 +37,8 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
+from sas.refactored import Perspective as NewPerspective
+
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
@@ -263,8 +265,9 @@ class GuiManager:
 
     @Slot(QMdiSubWindow)
     def current_perspective_changed(self, perspective_window: QMdiSubWindow | None):
-        perspective = cast(Perspective, perspective_window.widget())
-        self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
+        if isinstance(perspective_window.widget(), NewPerspective):
+            perspective = cast(Perspective, perspective_window.widget())
+            self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
 
     @staticmethod
     def addCategories():
