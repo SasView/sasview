@@ -3269,6 +3269,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Fits of Sesans data are in real space
         if return_data["data"].isSesans:
+            fitted_data.isSesans = True
             fitted_data.xtransform="x"
             fitted_data.ytransform="y"
 
@@ -3279,6 +3280,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     self.data_index = i
 
         residuals = self.calculateResiduals(fitted_data)
+
+        # SESANS residuals should be on lin-lin scale
+        if return_data["data"].isSesans:
+            residuals.plot_role = DataRole.ROLE_RESIDUAL_SESANS
 
         fitted_data.show_q_range_sliders = True
         # Suppress the GUI update until the move is finished to limit model calculations
