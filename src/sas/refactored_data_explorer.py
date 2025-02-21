@@ -102,7 +102,8 @@ class NewDataExplorer(QWidget):
         if isinstance(to_remove, Perspective):
             to_remove.done(0)
             self.removed_perspective.emit(to_remove)
-        # TODO: Handle when other data is deleted.
+        elif isinstance(to_remove, SasData):
+            self._data_manager.remove_data(to_remove)
 
     @Slot()
     def onLoadFile(self):
