@@ -83,7 +83,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdHelp_2.clicked.connect(self.displayHelp)
         self.chkSwap.setVisible(False)
 
-        self.cmdFreeze.clicked.connect(self.freezeTheory)
         # Fill in the perspectives combo
         self.initPerspectives()
 
