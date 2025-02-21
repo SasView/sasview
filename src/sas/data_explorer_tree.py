@@ -21,7 +21,7 @@ class DataExplorerTree(QTreeWidget):
         self.table_values = []
         self.setColumnCount(1)
         self.header().setStretchLastSection(True)
-        for datum in  self._data_manager.all_data:
+        for datum in self._data_manager.all_data:
             if isinstance(datum, SasData):
                 name = datum.name
             else: # If perspective
