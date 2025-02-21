@@ -3,6 +3,7 @@ from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
 from sasdata.data import Group, NamedQuantity, SasData
 import sasdata.quantities.units as units
+import numpy as np
 
 from sas.data_explorer_tree import DataExplorerTree
 from sas.dummy_perspective import DummyPerspective
@@ -108,6 +109,6 @@ class NewDataExplorer(QWidget):
         # TODO: At the moment, the readers are not hooked up properly. Just create some random dummy data for now.
         quantities: list[NamedQuantity] = []
         for column in ['Q', 'I']:
-            quantities.append(NamedQuantity(column, units.angstroms, units.per_centimeter))
+            quantities.append(NamedQuantity(column, 100 * np.random.rand(100),  units.angstroms))
         dummy = SasData('Dummy Data', quantities, Group('root', {}))
         self._data_manager.add_data(dummy)
