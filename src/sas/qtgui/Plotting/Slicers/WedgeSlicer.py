@@ -205,8 +205,6 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             # angular plots usually require a linear x scale and better with
             # a linear y scale as well.
             new_plot.xaxis("\\rm{\phi}", "degrees")
-            new_plot.xtransform = 'x'
-            new_plot.ytransform = 'y'
             new_plot.plot_role = DataRole.ROLE_ANGULAR_SLICE
         else:
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
