@@ -179,6 +179,8 @@ jobs:
 
       - name: Build sasmodels, sasdata, and bumps docs
         if: ${{ matrix.docs }}
+        env:
+          SAS_OPENCL: NONE
         run: |
           make -C ../bumps/doc html || true
           mkdir -p ~/.sasmodels/compiled_models
