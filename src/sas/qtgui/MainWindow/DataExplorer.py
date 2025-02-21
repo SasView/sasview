@@ -83,7 +83,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdHelp_2.clicked.connect(self.displayHelp)
         self.chkSwap.setVisible(False)
 
-        self.cmdFreeze.clicked.connect(self.freezeTheory)
         # Fill in the perspectives combo
         self.initPerspectives()
 
@@ -1123,12 +1122,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
-            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY]
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE,
+                                 DataRole.ROLE_POLYDISPERSITY]
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
-            elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUAL_PLOT:
+            elif role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS] and config.DISABLE_RESIDUAL_PLOT:
                 # Nothing to do if residuals are not plotted
                 continue
             elif role == DataRole.ROLE_POLYDISPERSITY and config.DISABLE_POLYDISPERSITY_PLOT:
@@ -1207,8 +1207,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     new_plot.item = item
                 # Ensure new plots use the default transform, not the transform of any previous plots the data were in
                 # TODO: The transform should be part of the PLOT, NOT the data
-                plot_set.xtransform = None
-                plot_set.ytransform = None
+                if (plot_set.plot_role in [
+                    DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE,
+                    DataRole.ROLE_ANGULAR_SLICE] or plot_set.isSesans):
+                    plot_set.xtransform = 'x'
+                else:
+                    plot_set.xtransform = 'log10(x)'
+                if (plot_set.plot_role in [
+                    DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS,
+                    DataRole.ROLE_ANGULAR_SLICE, DataRole.ROLE_STAND_ALONE] or plot_set.isSesans):
+                    plot_set.ytransform = 'y'
+                else:
+                    plot_set.ytransform = 'log10(y)'
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
@@ -2081,8 +2091,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 return
             match = GuiUtils.theory_plot_ID_pattern.match(data.id)
             if match:
-                item_model_id = match.groups()[-1]
-                if item_model_id == model_id:
+                item_tab_id = match.groups()[0]
+                if item_tab_id == tab_id:
                     # Only delete those identified as an intermediate plot
                     if match.groups()[2] not in (None, ""):
                         items_to_delete.append(item)

@@ -179,12 +179,8 @@ class PlotterWidget(PlotterBase):
         markersize = data.markersize
 
         # Include scaling (log vs. linear)
-        if version.parse(mpl.__version__) < version.parse("3.3"):
-            ax.set_xscale(self.xscale, nonposx='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
-            ax.set_yscale(self.yscale, nonposy='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
-        else:
-            ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
-            ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
+        ax.set_xscale(self.xscale, nonpositive='clip') if self.xscale != 'linear' else self.ax.set_xscale(self.xscale)
+        ax.set_yscale(self.yscale, nonpositive='clip') if self.yscale != 'linear' else self.ax.set_yscale(self.yscale)
 
         # Draw non-standard markers
         l_width = markersize * 0.4
@@ -231,7 +227,7 @@ class PlotterWidget(PlotterBase):
             ax.axhline(color='black', linewidth=1)
 
         # Display +/- 3 sigma and +/- 1 sigma lines for residual plots
-        if data.plot_role == DataRole.ROLE_RESIDUAL:
+        if data.plot_role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS]:
             ax.axhline(y=3, color='red', linestyle='-')
             ax.axhline(y=-3, color='red', linestyle='-')
             ax.axhline(y=1, color='gray', linestyle='--')
@@ -338,13 +334,12 @@ class PlotterWidget(PlotterBase):
         :returns:
         """
 
-
         x_min, x_max = np.inf, -np.inf
         y_min, y_max = np.inf, -np.inf
 
         for key in self.plot_dict:
 
-            plot_data = self.plot_dict[key]
+            plot_data = self.plot_dict[key].view
 
             if len(plot_data.x) > 0:
                 x_min = min(np.min(plot_data.x), x_min)
@@ -352,7 +347,7 @@ class PlotterWidget(PlotterBase):
 
             if len(plot_data.y) > 0:
 
-                dy = plot_data.view.dy
+                dy = plot_data.dy
                 if dy is None:
                     y_min = min(np.min(plot_data.y), y_min)
                     y_max = max(np.max(plot_data.y), y_max)
@@ -903,12 +898,12 @@ class PlotterWidget(PlotterBase):
             # self.ax.tick_params(axis='x', labelsize=fx.size, labelcolor=fx.color)
             from matplotlib.pyplot import gca
             a = gca()
-            a.set_xticklabels(a.get_xticks(), fx)
+            a.set_xticklabels(a.get_xticks(), **fx)
         if apply_y:
             # self.ay.tick_params(axis='y', labelsize=fy.size, labelcolor=fy.color)
             from matplotlib.pyplot import gca
             a = gca()
-            a.set_yticklabels(a.get_yticks(), fy)
+            a.set_yticklabels(a.get_yticks(), **fy)
         self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):

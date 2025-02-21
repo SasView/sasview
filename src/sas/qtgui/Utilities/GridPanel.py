@@ -5,6 +5,8 @@ import logging
 import webbrowser
 
 from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtCore import QMimeType, QMimeDatabase, QUrl
+from PySide6.QtGui import QDesktopServices
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -13,7 +15,7 @@ from sas.qtgui.Utilities.UI.GridPanelUI import Ui_GridPanelUI
 
 class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
-    Class for stateless grid-like printout of model parameters for mutiple models
+    Class for stateless grid-like printout of model parameters for multiple models
     """
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
@@ -38,10 +40,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
         # save state
         self.data_dict = {}
-
-        # System dependent menu items
-        if not self.IS_WIN:
-            self.actionOpen_with_Excel.setVisible(False)
 
         # list of QTableWidgets, indexed by tab number
         self.tables = []
@@ -236,19 +234,22 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             self.writeBatchToFile(data=data, tmpfile=tmpfile, details=details)
             tmpfile.close()
 
-        try:
-            from win32com.client import Dispatch
-            excel_app = Dispatch('Excel.Application')
-            excel_app.Workbooks.Open(self.grid_filename)
-            excel_app.Visible = 1
-        except Exception as ex:
-            msg = "Error occured when calling Excel.\n"
-            msg += ex
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        mime_type = QMimeDatabase().mimeTypeForFile(self.grid_filename)
+
+        if mime_type.isValid():
+            url = QUrl.fromLocalFile(self.grid_filename)
+
+            if QDesktopServices.openUrl(url):
+                self.parent.communicate.statusBarUpdateSignal.emit("Success: "
+                "The batch results CSV file successfully opened in your system CSV viewer.")
+            else:
+                self.parent.communicate.statusBarUpdateSignal.emit("Failure: A CSV viewer "
+                    "is required to view the batch results. Please set one in your default "
+                    "app settings to change this behavior.")
 
     def actionSaveFile(self):
         """
-        Generate a .csv file and dump it do disk
+        Generate a .csv file and dump it to disk
         """
         t = time.localtime(time.time())
         time_str = time.strftime("%b %d %H %M of %Y", t)
