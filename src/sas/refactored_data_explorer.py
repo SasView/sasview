@@ -1,6 +1,8 @@
 import logging
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
+from sasdata.data import Group, NamedQuantity, SasData
+import sasdata.quantities.units as units
 
 from sas.data_explorer_tree import DataExplorerTree
 from sas.dummy_perspective import DummyPerspective
@@ -34,6 +36,7 @@ class NewDataExplorer(QWidget):
         self.add_data_row = QHBoxLayout(self)
 
         self.load_data_row = QPushButton("Load Data", self)
+        _ = self.load_data_row.clicked.connect(self.onLoadFile)
         # self.add_perspective = QPushButton("+ New Perspective", self)
         #
         # TODO: This list is temporary. We should have all the perspectives
@@ -99,3 +102,12 @@ class NewDataExplorer(QWidget):
             to_remove.done(0)
             self.removed_perspective.emit(to_remove)
         # TODO: Handle when other data is deleted.
+
+    @Slot()
+    def onLoadFile(self):
+        # TODO: At the moment, the readers are not hooked up properly. Just create some random dummy data for now.
+        quantities: list[NamedQuantity] = []
+        for column in ['Q', 'I']:
+            quantities.append(NamedQuantity(column, units.angstroms, units.per_centimeter))
+        dummy = SasData('Dummy Data', quantities, Group('root', {}))
+        self._data_manager.add_data(dummy)
