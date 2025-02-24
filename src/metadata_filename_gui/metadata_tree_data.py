@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# TODO: This file can probably be deleted. Just want to make sure nothing else
+# depends on it.
 
 metadata = {
     'source': ['name', 'radiation', 'type', 'probe_particle', 'beam_size_name', 'beam_size', 'beam_shape', 'wavelength', 'wavelength_min', 'wavelength_max', 'wavelength_spread'],
