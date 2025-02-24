@@ -62,7 +62,8 @@ class NewDataExplorer(QWidget):
 
         # TODO: I suspect this may end up being a separate widget. For now, just
         # use an empty tree view.
-        self.tree_view = DataExplorerTree(self._data_manager)
+        self.tree_view = DataExplorerTree(self._data_manager, self)
+        self.tree_view.current_datum_removed.connect(self.onRemove)
 
         # TODO: Is there a better name for this?
         self.final_row = QHBoxLayout(self)
