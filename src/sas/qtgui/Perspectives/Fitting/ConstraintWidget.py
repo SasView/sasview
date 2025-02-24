@@ -658,7 +658,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
 
         # Assure the fitting succeeded
-        if result is None or not result:
+        if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
