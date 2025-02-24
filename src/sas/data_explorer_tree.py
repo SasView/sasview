@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget
 from sasdata.data import SasData
@@ -7,6 +7,8 @@ from sas.refactored import Perspective
 from src.sas.data_explorer_menu import DataExplorerMenu
 
 class DataExplorerTree(QTreeWidget):
+    current_datum_removed = Signal()
+
     def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
@@ -37,7 +39,14 @@ class DataExplorerTree(QTreeWidget):
 
     def showContextMenu(self):
         menu = DataExplorerMenu(self)
-        menu.exec(QCursor.pos())
+        result = menu.exec(QCursor.pos())
+        if result is None:
+            return
+        match result.text():
+            case "Remove":
+                self.current_datum_removed.emit()
+            case _:
+                pass
 
     @property
     def currentTrackedDatum(self) -> TrackedData:
