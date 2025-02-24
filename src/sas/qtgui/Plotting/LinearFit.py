@@ -103,8 +103,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         # Display the fittings values
         self.default_A: float = self.model.getParam('A')
         self.default_B: float = self.model.getParam('B')
-        self.cstA: float = Fittings.Parameter(self.model, 'A', self.default_A)
-        self.cstB: float = Fittings.Parameter(self.model, 'B', self.default_B)
+        self.cstA: Fittings.Parameter = Fittings.Parameter(self.model, 'A', self.default_A)
+        self.cstB: Fittings.Parameter = Fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = DataTransform
 
         self.q_sliders: Optional[QRangeSlider] = None
