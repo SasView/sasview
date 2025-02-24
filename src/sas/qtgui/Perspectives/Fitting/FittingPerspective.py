@@ -433,7 +433,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 return
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
-                self.tabs[first_good_tab].data = data
+                self.tabs[first_good_tab].dataFromItems(data)
                 tab_name = str(self.tabText(first_good_tab))
                 self.updateFitDict(data, tab_name)
             else:
@@ -455,7 +455,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             msg = "Data in Batch Fitting cannot be swapped"
             raise RuntimeError(msg)
 
-        self.currentTab.data = data
+        self.currentTab.dataFromItems(data)
         tab_name = str(self.tabText(self.currentIndex()))
         self.updateFitDict(data, tab_name)
 
