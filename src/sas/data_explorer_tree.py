@@ -1,8 +1,10 @@
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget
 from sasdata.data import SasData
 from sas.data_manager import NewDataManager as DataManager, TrackedData
 from sas.refactored import Perspective
-
+from src.sas.data_explorer_menu import DataExplorerMenu
 
 class DataExplorerTree(QTreeWidget):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:
@@ -10,6 +12,9 @@ class DataExplorerTree(QTreeWidget):
         self._data_manager = data_manager
         _ = self._data_manager.new_data.connect(self.buildTable)
         _ = self._data_manager.data_removed.connect(self.buildTable)
+
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        _ = self.customContextMenuRequested.connect(self.showContextMenu)
 
         # The idea of this list is so we can keep track of the index of each. Which is useful if we want to delete it
         # from the data manager, or create associations.
@@ -29,6 +34,10 @@ class DataExplorerTree(QTreeWidget):
             self.table_values.append(datum)
             item = QTreeWidgetItem([name])
             self.addTopLevelItem(item)
+
+    def showContextMenu(self):
+        menu = DataExplorerMenu(self)
+        menu.exec(QCursor.pos())
 
     @property
     def currentTrackedDatum(self) -> TrackedData:
