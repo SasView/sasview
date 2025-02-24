@@ -2,7 +2,7 @@ from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
 from PySide6.QtCore import Slot, Signal
 from sasdata.quantities.units import NamedUnit
-from sasdata.ascii_reader_metadata import pairings
+from sasdata.ascii_reader_metadata import bidirectional_pairings
 from ascii_dialog.column_unit import ColumnUnit
 from typing import cast
 
@@ -10,19 +10,6 @@ class ColEditor(QWidget):
     """An editor widget which allows the user to specify the columns of the data
     from a set of options based on which dataset type has been selected."""
     column_changed = Signal()
-
-    @Slot()
-    def onColumnUpdate(self):
-        column_changed = cast(ColumnUnit, self.sender())
-        pairing = pairings.get(column_changed.currentColumn)
-        if not pairing is None:
-            for col_unit in self.option_widgets:
-                # Second condition is important because otherwise, this event will keep being called, and the GUI will
-                # go into an infinite loop.
-                if col_unit.currentColumn == pairing and col_unit.currentUnit != column_changed.currentUnit:
-                    col_unit.currentUnit = column_changed.currentUnit
-        self.column_changed.emit()
-
 
     def __init__(self, cols: int, options: list[str]):
         super().__init__()
@@ -36,6 +23,17 @@ class ColEditor(QWidget):
             new_widget.column_changed.connect(self.onColumnUpdate)
             self.layout.addWidget(new_widget)
             self.option_widgets.append(new_widget)
+
+    @Slot()
+    def onColumnUpdate(self):
+        column_changed = cast(ColumnUnit, self.sender())
+        pairing = bidirectional_pairings.get(column_changed.currentColumn)
+        if not pairing is None:
+            for col_unit in self.option_widgets:
+                # Second condition is important because otherwise, this event will keep being called, and the GUI will
+                # go into an infinite loop.
+                if col_unit.currentColumn == pairing and col_unit.currentUnit != column_changed.currentUnit:
+                    col_unit.currentUnit = column_changed.currentUnit
 
     def setCols(self, new_cols: int):
         """Set the amount of columns for the user to edit."""
@@ -78,8 +76,8 @@ class ColEditor(QWidget):
         return [widget.currentColumn for widget in self.option_widgets]
 
     @property
-    def columns(self) -> list[tuple[str, NamedUnit]]:
-        return [(widget.currentColumn, widget.currentUnit) for widget in self.option_widgets]
+    def columns(self) -> list[tuple[str, NamedUnit | None]]:
+        return [(widget.currentColumn, widget.currentUnit if widget.currentColumn != "<ignore>" else None) for widget in self.option_widgets]
 
     def replaceOptions(self, new_options: list[str]) -> None:
         """Replace options from which the user can choose for each column."""

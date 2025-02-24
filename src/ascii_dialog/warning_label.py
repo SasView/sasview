@@ -16,13 +16,11 @@ class WarningLabel(QLabel):
     def setFontNormal(self):
         self.setStyleSheet('')
 
-    def update_warning(self, missing_columns: list[str], duplicate_columns: list[str], lines: list[list[str]] | None = None, rows_is_included: list[bool] | None = None, starting_pos: int = 0):
+    def updateWarning(self, missing_columns: list[str], duplicate_columns: list[str], lines: list[list[str]] | None = None, rows_is_included: list[bool] | None = None, starting_pos: int = 0):
         """Determine, and set the appropriate warning messages given how many
         columns are missing, and how many columns are duplicated."""
         unparsable = 0
         if lines is not None and rows_is_included is not None:
-            # FIXME: I feel like I am repeating a lot of logic from the table filling. Is there a way I can abstract
-            # this?
             for i, line in enumerate(lines):
                 # Right now, rows_is_included only includes a limited number of rows as there is a maximum that can be
                 # shown in the table without it being really laggy. We're just going to assume the lines after it should
@@ -43,11 +41,11 @@ class WarningLabel(QLabel):
             self.setFontRed()
         elif unparsable > 0:
             # FIXME: This error message could perhaps be a bit clearer.
-            self.setText(f'{unparsable} lines cannot be parsed. They will be ignored.')
+            self.setText(f'{unparsable} lines failed to be read. They will be ignored.')
             self.setFontOrange()
         else:
             self.setText('')
 
     def __init__(self, initial_missing_columns, initial_duplicate_classes):
         super().__init__()
-        self.update_warning(initial_missing_columns, initial_duplicate_classes)
+        self.updateWarning(initial_missing_columns, initial_duplicate_classes)

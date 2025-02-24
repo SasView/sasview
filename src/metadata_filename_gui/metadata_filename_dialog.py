@@ -34,8 +34,10 @@ class MetadataFilenameDialog(QDialog):
         self.separate_on_group.addButton(self.character_radio)
         self.casing_radio = QRadioButton("Casing")
         self.separate_on_group.addButton(self.casing_radio)
-        # Right now, we're going to assume we're separating by character but we need to detect this later.
-        self.character_radio.setChecked(True)
+        if isinstance(initial_separator_text, str):
+            self.character_radio.setChecked(True)
+        else: # if bool
+            self.casing_radio.setChecked(True)
         self.separate_on_layout = QHBoxLayout()
         self.separate_on_group.buttonToggled.connect(self.update_filename_separation)
         self.separate_on_layout.addWidget(self.filename_line_label)
@@ -46,7 +48,10 @@ class MetadataFilenameDialog(QDialog):
             self.casing_radio.setDisabled(True)
 
         self.seperator_chars_label = QLabel('Seperators')
-        self.separator_chars = QLineEdit(initial_separator_text)
+        if isinstance(initial_separator_text, str):
+            self.separator_chars = QLineEdit(initial_separator_text)
+        else:
+            self.separator_chars = QLineEdit()
         self.separator_chars.textChanged.connect(self.update_filename_separation)
 
         self.filename_separator_layout = QHBoxLayout()
