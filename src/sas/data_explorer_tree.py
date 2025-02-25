@@ -38,7 +38,7 @@ class DataExplorerTree(QTreeWidget):
             self.addTopLevelItem(item)
 
     def showContextMenu(self):
-        menu = DataExplorerMenu(self)
+        menu = DataExplorerMenu(self, self._data_manager)
         result = menu.exec(QCursor.pos())
         # Result will be None if the user exited the menu without selecting anything.
         if result is None:
