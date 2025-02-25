@@ -62,16 +62,16 @@ class PythonHighlighter (QSyntaxHighlighter):
         # Comparison
         '==', '!=', '<', '<=', '>', '>=',
         # Arithmetic
-        '\+', '-', '\*', '/', '//', '\%', '\*\*',
+        r'\+', '-', r'\*', '/', '//', r'\%', r'\*\*',
         # In-place
-        '\+=', '-=', '\*=', '/=', '\%=',
+        r'\+=', '-=', r'\*=', '/=', r'\%=',
         # Bitwise
-        '\^', '\|', '\&', '\~', '>>', '<<',
+        r'\^', r'\|', r'\&', r'\~', '>>', '<<',
     ]
 
     # Python braces
     braces = [
-        '\{', '\}', '\(', '\)', '\[', '\]',
+        r'\{', r'\}', r'\(', r'\)', r'\[', r'\]',
     ]
     def __init__(self, document, is_python=True):
         QSyntaxHighlighter.__init__(self, document)

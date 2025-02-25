@@ -128,7 +128,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
             text_edit.setStyleSheet(BG_WHITE)
             input_string = str(text_edit.text())
             if self.cbWaveColor.currentText() != 'TOF':
-                input_wavelength = re.match('\d+\.?\d*', input_string)
+                input_wavelength = re.match(r'\d+\.?\d*', input_string)
                 if input_wavelength is None:
                     text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
@@ -137,7 +137,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                     text_edit.setStyleSheet(BG_WHITE)
                     self.cmdCompute.setEnabled(True)
             else:
-                interval_wavelength = re.match('^\d+\.?\d*\s*-\s*\d+\.?\d*$',
+                interval_wavelength = re.match(r'^\d+\.?\d*\s*-\s*\d+\.?\d*$',
                                                input_string)
 
                 if interval_wavelength is None:
@@ -148,7 +148,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 else:
                     # check on min < max
                     [wavelength_min, wavelength_max] = \
-                        re.findall('\d+\.?\d*', interval_wavelength.group())
+                        re.findall(r'\d+\.?\d*', interval_wavelength.group())
 
                     if float(wavelength_min) >= float(wavelength_max):
                         text_edit.setStyleSheet(BG_RED)
@@ -167,7 +167,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         if text_edit.isModified():
             text_edit.setStyleSheet(BG_WHITE)
             if self.cbWaveColor.currentText() != 'TOF':
-                pattern = '^\d+\.?\d*(|;\s*\d+)$'
+                pattern = r'^\d+\.?\d*(|;\s*\d+)$'
                 input_string = str(text_edit.text())
                 wavelength_spread_input = re.match(pattern, input_string)
 
@@ -183,7 +183,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                     text_edit.setStyleSheet(BG_WHITE)
                     self.cmdCompute.setEnabled(True)
             else:
-                pattern = '^\d+\.?\d*\s*-\s*\d+\.?\d*(|;\s*\d+)$'
+                pattern = r'^\d+\.?\d*\s*-\s*\d+\.?\d*(|;\s*\d+)$'
                 input_string = str(text_edit.text())
                 wavelength_spread_input = re.match(pattern, input_string)
 
@@ -208,7 +208,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
 
         if text_edit.isModified():
             text_edit.setStyleSheet(BG_WHITE)
-            pattern = '^\d+\.?\d*,\s*\d+\.?\d*$'
+            pattern = r'^\d+\.?\d*,\s*\d+\.?\d*$'
             input_string = str(text_edit.text())
             pixels_input = re.match(pattern, input_string)
 
@@ -226,7 +226,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         """ Validator for qx and qy inputs """
         Q_modified = [self.txtQx.isModified(), self.txtQy.isModified()]
         if any(Q_modified):
-            pattern = '^-?\d+\.?\d*(,\s*-?\d+\.?\d*)*$'
+            pattern = r'^-?\d+\.?\d*(,\s*-?\d+\.?\d*)*$'
             text_edit = self.txtQx if Q_modified[0] else self.txtQy
             input_string = str(text_edit.text())
             q_input = re.match(pattern, input_string)
@@ -265,7 +265,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         if text_edit.isModified():
             text_edit.setStyleSheet(BG_WHITE)
             input_string = str(text_edit.text())
-            pattern = '^\d+\.?\d*(|,\s*\d+)$'
+            pattern = r'^\d+\.?\d*(|,\s*\d+)$'
             aperture_input = re.match(pattern, input_string)
 
             if aperture_input is None:
