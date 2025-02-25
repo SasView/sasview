@@ -1,3 +1,4 @@
+import logging
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget
@@ -48,7 +49,7 @@ class DataExplorerTree(QTreeWidget):
             case "Remove":
                 self.current_datum_removed.emit()
             case _:
-                pass
+                logging.warning(f"Unknown result: {result.text}")
 
     @property
     def currentTrackedDatum(self) -> TrackedData:
