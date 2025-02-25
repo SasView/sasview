@@ -210,6 +210,9 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # What's New variables
         self.LAST_WHATS_NEW_HIDDEN_VERSION = "5.0.0"
 
+        # Last version that the update prompt was dismissed for
+        self.LAST_UPDATE_DISMISSED_VERSION = "5.0.0"
+
         #
         # Lock the class down, this is necessary both for
         # securing the class, and for setting up reading/writing files
