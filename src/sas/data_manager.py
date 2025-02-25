@@ -77,3 +77,7 @@ class NewDataManager(QObject):
     @property
     def all_data(self) -> list[TrackedData]:
         return self._all_data_entries
+
+    @property
+    def all_perspectives(self) -> list[Perspective]:
+        return [item for item in self._all_data_entries if isinstance(item, Perspective)]
