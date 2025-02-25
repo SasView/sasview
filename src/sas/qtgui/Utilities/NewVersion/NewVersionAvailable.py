@@ -116,9 +116,8 @@ def get_current_release_version() -> Optional[tuple[str, str, tuple[int, int, in
 
 def a_newer_than_b(version_a: tuple[int, int, int], version_b: tuple[int, int, int]) -> bool:
     """ Check if version_a is strictly newer than version_b"""
-    return version_a[0] > version_b[0] \
-        or version_a[1] > version_b[1] \
-        or version_a[2] > version_b[2]
+    
+    return version_a > version_b
 
 def maybe_prompt_new_version_download() -> Optional[QDialog]:
     """ If a new version is available, and Show a dialog prompting the user to download """
