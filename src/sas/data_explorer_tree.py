@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget
 from sasdata.data import SasData
 from sas.data_manager import NewDataManager as DataManager, TrackedData
 from sas.refactored import Perspective
-from src.sas.data_explorer_menu import DataExplorerMenu
+from src.sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
 
 class DataExplorerTree(QTreeWidget):
     current_datum_removed = Signal()
@@ -46,8 +46,8 @@ class DataExplorerTree(QTreeWidget):
         # Result will be None if the user exited the menu without selecting anything.
         if action is None:
             return
-        result = action.data()
-        match result:
+        result: DataExplorerMenuAction = action.data()
+        match result.action:
             case 'remove':
                 self.current_datum_removed.emit()
             case 'send_to':
