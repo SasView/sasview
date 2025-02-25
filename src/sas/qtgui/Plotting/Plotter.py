@@ -672,14 +672,13 @@ class PlotterWidget(PlotterBase):
     def replacePlot(self, id, new_plot, retain_dimensions=True):
         """
         Remove plot 'id' and add 'new_plot' to the chart.
-        This effectlvely refreshes the chart with changes to one of its plots
+        This effectively refreshes the chart with changes to one of its plots
         """
 
         # Pull the current transform settings from the old plot
         selected_plot = self.plot_dict[id]
-        new_plot.xtransform = selected_plot.xtransform
-        new_plot.ytransform = selected_plot.ytransform
-        #Adding few properties ftom ModifyPlot to preserve them in future changes
+        new_plot.plot_role = selected_plot.plot_role
+        # Adding few properties from ModifyPlot to preserve them in future changes
         new_plot.title = selected_plot.title
         new_plot.custom_color = selected_plot.custom_color
         new_plot.markersize = selected_plot.markersize
@@ -822,17 +821,15 @@ class PlotterWidget(PlotterBase):
 
         pass # debug hook
 
-    def onFitDisplay(self, fit_data):
+    def onFitDisplay(self, temp_x, temp_y):
         """
         Add a linear fitting line to the chart
         """
         # Create new data structure with fitting result
-        tempx = fit_data[0]
-        tempy = fit_data[1]
         self.fit_result.x = []
         self.fit_result.y = []
-        self.fit_result.x = tempx
-        self.fit_result.y = tempy
+        self.fit_result.x = temp_x
+        self.fit_result.y = temp_y
         self.fit_result.dx = None
         self.fit_result.dy = None
 
