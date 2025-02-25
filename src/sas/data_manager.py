@@ -80,4 +80,6 @@ class NewDataManager(QObject):
 
     @property
     def all_perspectives(self) -> list[Perspective]:
-        return [item for item in self._all_data_entries if isinstance(item, Perspective)]
+        # TODO: This is a dodgy way of checking for a perspective but isinstance
+        # doesn't work. Will need to look into this.
+        return [item for item in self._all_data_entries if hasattr(item, 'title')]
