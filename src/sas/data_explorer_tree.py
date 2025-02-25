@@ -49,7 +49,7 @@ class DataExplorerTree(QTreeWidget):
             case "Remove":
                 self.current_datum_removed.emit()
             case _:
-                logging.warning(f"Unknown result: {result.text}")
+                logging.warning(f"Unknown result: {result}")
 
     @property
     def currentTrackedDatum(self) -> TrackedData:
