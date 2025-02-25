@@ -30,6 +30,10 @@ class Perspective(QDialog):
     def title(self) -> str:
         """ Window title"""
 
+    @property
+    def formatName(self) -> str:
+        return f"{self.title} #{self.perspective_number}"
+
     @abstractmethod
     def setData(self, data_item: list[SasData], is_batch: bool=False):
         pass
