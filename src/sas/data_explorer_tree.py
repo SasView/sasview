@@ -32,7 +32,7 @@ class DataExplorerTree(QTreeWidget):
             if isinstance(datum, SasData):
                 name = datum.name
             else: # If perspective
-                name = f"{datum.title} #{datum.perspective_number}"
+                name = datum.formatName
             self.table_values.append(datum)
             item = QTreeWidgetItem([name])
             self.addTopLevelItem(item)
