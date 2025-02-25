@@ -1,3 +1,4 @@
+from cgitb import reset
 import logging
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
@@ -41,15 +42,16 @@ class DataExplorerTree(QTreeWidget):
     def showContextMenu(self):
         send_to = isinstance(self.currentTrackedDatum, SasData)
         menu = DataExplorerMenu(self, self._data_manager, send_to)
-        result = menu.exec(QCursor.pos())
+        action = menu.exec(QCursor.pos())
         # Result will be None if the user exited the menu without selecting anything.
-        if result is None:
+        if action is None:
             return
-        match result.text():
-            case "Remove":
+        result = action.data()
+        match result:
+            case 'remove':
                 self.current_datum_removed.emit()
-            case _:
-                logging.warning(f"Unknown result: {result}")
+            case 'send_to':
+                pass # TODO: Implement
 
     @property
     def currentTrackedDatum(self) -> TrackedData:
