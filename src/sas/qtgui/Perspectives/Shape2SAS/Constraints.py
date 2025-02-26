@@ -1,0 +1,391 @@
+#Global
+import sys
+import ast
+import traceback
+import importlib.util
+import re
+from typing import Union
+
+from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QPushButton
+from PySide6.QtGui import QFont
+
+#Global SasView
+from sas.qtgui.Utilities.ModelEditor import ModelEditor
+
+#Local Perspectives
+from UI.ConstraintsUI import Ui_Constraints
+from Tables.variableTable import VariableTable
+from ButtonOptions import ButtonOptions
+
+
+class Constraints(QWidget, Ui_Constraints):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+
+        #Setup GUI for Constraints
+        self.constraintTextEditor = ModelEditor() #SasView's standard text editor
+        self.constraintTextEditor.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.constraintTextEditor.gridLayout_16.setContentsMargins(5, 5, 5, 5)
+        self.constraintTextEditor.groupBox_13.setTitle("Constraints") #override title
+        self.verticalLayout.insertWidget(0, self.constraintTextEditor)
+        self.variableTable = VariableTable()
+        self.buttonOptions = ButtonOptions()
+        self.buttonOptions.help.setToolTip("Go to help page")
+        self.buttonOptions.closePage.setToolTip("Close Shape2SAS")
+        self.buttonOptions.reset.setToolTip("Reset this page to default")
+
+        self.gridLayout_2.addWidget(self.variableTable, 0, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.buttonOptions, 1, 0, 1, 0, Qt.AlignmentFlag.AlignRight)
+
+        self.createPlugin = QPushButton("Create Plugin")
+        self.createPlugin.setMinimumSize(110, 24)
+        self.createPlugin.setMaximumSize(110, 24)
+        self.createPlugin.setToolTip("Create and send the plugin model to the Plugin Models Category in Fit panel")
+
+        self.buttonOptions.horizontalLayout_5.insertWidget(1, self.createPlugin)
+        self.buttonOptions.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
+
+        #Setup default logbook text
+        defaultText = "<span><b>Shape2SAS plugin constraints log</b></p></span>"
+        self.textEdit_2.append(defaultText)
+
+
+    def getConstraintText(self, constraints: str) -> str:
+        """Get default text for constraints"""
+    
+        self.constraintText = (f'''
+#Write libraries to be imported here.
+from numpy import inf
+
+#Modify fit parameteres here.
+parameters = {constraints}
+
+#Set constraints here.
+translation = """
+
+"""
+
+        ''').lstrip().rstrip()
+
+        return self.constraintText
+
+ 
+    def setConstraints(self, constraints: str):
+        """Set text to QTextEdit"""
+
+        constraints = self.getConstraintText(constraints)
+        self.constraintTextEditor.txtEditor.setPlainText(constraints)
+
+
+    def checkPythonSyntax(self, text: str) -> bool:
+        """Check if text is valid python syntax"""
+        
+        try:
+            ast.parse(text)
+            return True
+        
+        except SyntaxError as e:
+            #Get last line of traceback
+            all_lines = traceback.format_exc().split('\n')
+            last_lines = all_lines[-1:]
+            traceback_to_show = '\n'.join(last_lines)
+
+            #send to log
+            self.logException(traceback_to_show)
+
+            return False
+
+
+    def getConstraints(self, constraintsStr: str, fitPar: list[str], modelPars: list[str], 
+                       modelVals: list[list[float]], checkedPars: list[str]) -> tuple[list[str], str, str, list[list[bool]]]:
+        """Read inputs from text editor"""
+
+        self.checkPythonSyntax(constraintsStr)
+
+        #Get and check import statements
+        importStatement = self.getImportStatements(constraintsStr)
+
+        #Get and check parameters
+        parameters = self.getParameters(constraintsStr, fitPar)
+
+        #Get and check translation
+        translation, checkedPars = self.getTranslation(constraintsStr, importStatement, modelPars, modelVals, checkedPars)
+
+        return importStatement, parameters, translation, checkedPars
+
+    @staticmethod
+    def getPosition(item: Union[str, float, int], itemLists: list[list[Union[str, float, int]]]) -> tuple[int, int]:
+        """Find position of an item in lists"""
+
+        for i, sublist in enumerate(itemLists):
+            if item in sublist:
+                return i, sublist.index(item)
+
+    @staticmethod
+    def removeFromList(listItems: list[Union[str, float, int]], listToCompare: list[Union[str, float, int]]) -> list[str]:
+        """Remove items from a list if in another list"""
+
+        removedPars = []
+        for item in listItems:
+            for statement in listToCompare:
+                if item in statement:
+                    #NOTE: library names, "from" and "import" will also be removeds
+                    removedPars.append(item)
+
+        for remove in removedPars:
+            if remove in listItems:
+                listItems.remove(remove)
+
+    def ifParameterExists(self, lineNames: list[str], modelPars: list[list[str]]) -> bool:
+        """Check if parameter exists in model parameters"""
+
+        for par in lineNames:
+            boolPar = any(par in sublist for sublist in modelPars)
+            if not boolPar:
+                self.logException(f"{par} does not exist in parameter table")
+                raise ValueError(f"{par} does not exist in parameter table")
+
+        return False
+
+    def getTranslation(self, constraintsStr: str, 
+                       importStatement: list[str], 
+                       modelPars: list[list[str]], 
+                       modelVals: list[list[float]], 
+                       checkedPars: list[list[str]]) -> tuple[str, list[list[bool]]]:
+        """Get translation from constraints"""
+
+        #see if translation is in constraints
+        if not re.search(r'translation\s*=', constraintsStr):
+            self.logWarning("No variable translation found in constraints")
+
+        #TODO: make getParametersFromConstraints general, so translation can be inputted
+        #NOTE: re.search() a bit slow, ast faster
+        translation = re.search(r'translation\s*=\s*"""(.*\n(?:.*\n)*?)"""', constraintsStr, re.DOTALL)
+        translationInput = translation.group(1) if translation else ""
+
+        #Check syntax
+        self.checkPythonSyntax(translationInput) #TODO: fix wrong line number output for translation
+        lines = translationInput.split('\n')
+
+        #remove empty lines and tabs
+        lines = [line.replace('\t', '').strip() for line in lines if line.strip()]
+
+        #Check parameters and update checkedPars
+        for i in range(len(lines)):
+            if '=' not in lines[i]:
+                self.logException("No '=' found in translation line")
+                raise ValueError("No '=' found in translation line")
+
+            if lines[i].count('=') > 1:
+                self.logException("More than one '=' found in translation line")
+                raise ValueError("More than one '=' found in translation line")
+
+            #split line
+            leftLine, rightLine = lines[i].split('=')
+
+            #unicode greek letters: \u0370-\u03FF
+            rightPars = re.findall(r'(?<=)[a-zA-Z_\u0370-\u03FF]\w*\b', rightLine)
+            leftPars = re.findall(r'(?<=)[a-zA-Z_\u0370-\u03FF]\w*\b', leftLine)
+
+            #check for import statements (I can't imagine a case where it would be to the left)
+            self.removeFromList(rightPars, importStatement)
+
+            #check if parameters exist in model parameters
+            self.ifParameterExists(rightPars + leftPars, modelPars)
+            
+            #Translate
+            notes = ""
+            for par in rightPars:
+                j, k = self.getPosition(par, modelPars)
+                if checkedPars[j][k]:
+                    #if parameter is a fit parameter, don't remove it
+                    continue
+                else:
+                    #if parameter is a constant, set inputted value
+                    inputVal = modelVals[j][k]
+
+                    #update line with input value
+                    rightLine = re.sub(r'\b' + re.escape(par) + r'\b', str(inputVal), rightLine)
+                    notes += f"{par} = {inputVal},"
+            #any constants added to notes?
+            if notes:
+                notes = f" #{notes}"
+
+            for par in leftPars:
+                j, k = self.getPosition(par, modelPars)
+                #check if paramater are to be set in ModelProfile
+                checkedPars[j][k] = True
+            lines[i] = leftLine + '=' + rightLine + notes
+
+        #return lines to string
+        translationInput = '\n'.join(lines)
+
+        return translationInput, checkedPars
+    
+    def extractValues(self, elt: ast.AST) -> Union[str, float, int]:
+        if isinstance(elt, ast.Constant):
+            return elt.value
+        elif isinstance(elt, ast.List):
+            return [self.extractValues(elt) for elt in elt.elts]
+        
+        #statements for the the boundary list:
+        elif isinstance(elt, ast.Name):
+            #special case for inf
+            if elt.id == 'inf':
+                return float('inf')
+            return elt.id
+        #check for negative values in boundary list
+        elif isinstance(elt.op, ast.USub):
+            operand = self.extractValues(elt.operand)
+            if operand == float('inf'):
+                return float('-inf')
+            elif isinstance(operand, (int, float)):
+                return -operand
+        return None
+
+    def getParametersFromConstraints(self, constraints_str: str, targetName: str) -> list:
+        """Extract parameters from constraints string"""
+        tree = ast.parse(constraints_str) #get abstract syntax tree
+        
+        parametersNode = None
+        for node in ast.walk(tree):
+            #is the node an assignment and does it have the target name?
+            if isinstance(node, ast.Assign) and node.targets[0].id == targetName:
+                parametersNode = node.value
+                break #if so break
+        
+        if parametersNode:
+            parameters = [self.extractValues(elt) for elt in parametersNode.elts]
+            return parameters
+
+        self.logException(f"ValueError: No {targetName} variable found in constraints")
+        raise ValueError(f"No {targetName} variable found in constraints")
+
+
+    def getParameters(self, constraintsStr: str, fitPar: list[str]) -> str:
+        """Get parameters from constraints"""
+
+
+        #Is anything in parameters?
+        parameters = self.getParametersFromConstraints(constraintsStr, 'parameters')
+        names = [parameter[0] for parameter in parameters]
+
+        if not parameters:
+            self.logException("ValueError: No list of fit parameters found in variable parameters")
+            raise ValueError("No list of fit parameters found in variable parameters")
+
+        #Check parameters in constraints
+        if len(names) != len(fitPar):
+            self.logException("ValueError: Number of parameters in variable parameters does not match checked parameters in table")
+            raise ValueError("Number of parameters in variable parameters does not match checked parameters in table")
+
+        #Check if parameter exists in checked parameters
+        for name in names:
+            if name not in fitPar:
+                self.logException(f"ValueError: {name} does not exists in checked parameters")
+                raise ValueError(f"{name} does not exists in checked parameters")
+        
+        description = 'parameters =' + '[' + '\n' + '# name, units, default, [min, max], type, description,' + '\n'
+        parameters_str = description  + ',\n'.join(str(sublist) for sublist in parameters) + "\n]"
+
+        return parameters_str
+
+
+    def isImportFromStatement(self, node: ast.ImportFrom) -> list[str]:
+        """Return list of ImportFrom statements"""
+
+        #Check if library exists
+        if not importlib.util.find_spec(node.module):
+            raise ModuleNotFoundError(f"No module named {node.module}")
+
+        imports = []
+        module = importlib.import_module(node.module)
+
+        for alias in node.names:
+            #check if library has the attribute
+            if not hasattr(module, f"{alias.name}"):
+                self.logException(f"AttributeError: module {node.module} has no attribute {alias.name}")
+                raise AttributeError(f"module {node.module} has no attribute {alias.name}")
+            if alias.asname:
+                imports.append(f"{alias.name} as {alias.asname}")
+            else:
+                imports.append(f"{alias.name}")
+        
+        return [f"from {node.module} import {', '.join(imports)}"]
+
+
+    def isImportStatement(self, node: ast.Import) -> list[str]:
+        """Return list of Import statements"""
+
+        imports = []
+        for alias in node.names:
+            #check if library exists
+            if not importlib.util.find_spec(alias.name):
+                self.logException(f"ModuleNotFoundError: No module named {alias.name}")
+                raise ModuleNotFoundError(f"No module named {alias.name}")
+            #get name and asname
+            if alias.asname:
+                imports.append(f"{alias.name} as {alias.asname}")
+            else:
+                imports.append(f"{alias.name}")
+
+        return [f"import {', '.join(imports)}"]
+    
+
+    def getImportStatements(self, text: str) -> list[str]:
+        """return all import statements that were 
+        written in the text editor"""
+
+        importStatements = []
+
+        try:
+            tree = ast.parse(text)
+            #look for import statements
+            for node in ast.walk(tree):
+                #check statement type
+                if isinstance(node, ast.ImportFrom):
+                    importStatements.extend(self.isImportFromStatement(node))
+
+                elif isinstance(node, ast.Import):
+                    importStatements.extend(self.isImportStatement(node))
+            
+            return importStatements
+        
+        except SyntaxError as e:
+            error_line = text.splitlines()[e.lineno - 1]
+            self.logException(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")
+            raise SyntaxError(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")
+            return
+
+    
+    def logException(self, exception):
+        htmlise = "<br>".join(exception.split("\n"))
+        self.textEdit_2.append(f'<span style="color:Red;"><b>{htmlise}</b></span>')
+
+    def logWarning(self, message):
+        htmlise = "<br>".join(message.split("\n"))
+        self.textEdit_2.append(f'<span style="color:Orange;"><b>Warning: {htmlise}</b></span>')
+
+    def logInfo(self, message):
+        htmlise = "<br>".join(message.split("\n"))
+        self.textEdit_2.append(f'<span style="color:Black;"><b>Info: </b>{htmlise}</span>')
+
+    def clearConstraints(self):
+        """Clear text editor containing constraints"""
+        self.constraintTextEditor.txtEditor.clear()
+        self.textEdit_2.clear()
+
+    def onClosingConstraints(self):
+        """Close constraints page"""
+
+        self.close()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    widget = Constraints()
+    widget.show()
+    sys.exit(app.exec())
