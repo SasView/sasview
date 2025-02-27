@@ -1,4 +1,4 @@
-Copyright (c) 2009-2024, SasView Developers
+Copyright (c) 2009-2025, SasView Developers
 
 All rights reserved.
 
