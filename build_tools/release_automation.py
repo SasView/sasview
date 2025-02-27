@@ -123,7 +123,7 @@ for path in [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]:
             `python ./sasview/release_automation.py [options]
         """
         logging.error(msg)
-CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.csv'
+CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.tsv'
 
 
 class SplitArgs(argparse.Action):
@@ -146,15 +146,14 @@ def generate_sasview_data() -> dict:
             for line in lines:
                 values = line.split('\t')
                 record = {'name': values[0], 'affiliation': values[1]}
-                if values[5]:
-                    # TODO: Should we grab the latest affiliation information using the ORCID ID?
+                if len(values) > 5 and values[5]:
                     record['orcid'] = values[5]
                 if values[2]:
                     creators.append(record)
-                elif values[3]:
+                elif len(values) > 3 and values[3]:
                     record['type'] = 'Producer'
                     contributors.append(record)
-                elif values[4]:
+                elif len(values) > 4 and values[4]:
                     record['type'] = 'Other'
                     contributors.append(record)
         return {"creators": creators, "contributors": contributors}
