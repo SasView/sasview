@@ -145,16 +145,16 @@ def generate_sasview_data() -> dict:
             lines = f.readlines()[1:]
             for line in lines:
                 values = line.split('\t')
-                record = {'name': values[0], 'affiliation': values[1]}
+                record = {"name": values[0], "affiliation": values[1]}
                 if len(values) > 5 and values[5]:
                     record['orcid'] = values[5]
                 if values[2]:
                     creators.append(record)
                 elif len(values) > 3 and values[3]:
-                    record['type'] = 'Producer'
+                    record['type'] = "Producer"
                     contributors.append(record)
                 elif len(values) > 4 and values[4]:
-                    record['type'] = 'Other'
+                    record['type'] = "Other"
                     contributors.append(record)
         return {"creators": creators, "contributors": contributors}
     else:
@@ -331,7 +331,9 @@ def main(args=None):
     # Generate a list of contributors using a file, if that file exists, otherwise use the pre-defined list given here.
     contributors = generate_sasview_data()
     if contributors:
-        sasview_data.update(contributors)
+        # Overwrite existing contributors and use the TSV file list (if available)
+        sasview_data['metadata']['contributors'] = contributors['contributors']
+        sasview_data['metadata']['creators'] = contributors['creators']
 
     # Generates zenodo doi if zenodo api key is provided
     new_doi = ''
