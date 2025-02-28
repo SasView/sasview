@@ -7,11 +7,21 @@ from src.sas.refactored import Perspective
 TrackedData = SasData | Perspective
 
 # TODO: Probably want to handle order, if that is even relevant.
-valid_associations = [
-    (Perspective, SasData)
+valid_associations: list[tuple[str | type, str | type]] = [
+    ('Perspective', SasData)
     # TODO: Include plots
 ]
 
+# This is needed because the normal 'isinstance' builtin function annoyingly
+# doesn't work properly on QObjects. So we need this workaround.
+
+def isinstance_fix(obj: object, t: type | str) -> bool:
+    if isinstance(t, str) and hasattr(obj, 'inherits'):
+        return obj.inherits(t)
+    elif isinstance(t, type):
+        return isinstance(obj, t)
+    else:
+        return False
 
 # Making this a QObject so it'll support events.
 class NewDataManager(QObject):
@@ -59,7 +69,7 @@ class NewDataManager(QObject):
     def make_association(self, data_1: TrackedData, data_2: TrackedData):
         if not (data_1 in self._all_data_entries or data_2 in self._all_data_entries):
             raise ValueError('Both data_1, and data_2 need to be tracked in the data manager.')
-        if not any([isinstance(data_1, x) and isinstance(data_2, y) for x, y in valid_associations]):
+        if not any([isinstance_fix(data_1, x) and isinstance_fix(data_2, y) for x, y in valid_associations]):
             # TODO: Clearer error message.
             raise ValueError('Invalid association.')
         self._association.append((data_1, data_2))
