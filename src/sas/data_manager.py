@@ -27,7 +27,7 @@ def isinstance_fix(obj: object, t: type | str) -> bool:
 class NewDataManager(QObject):
     # Don't mutate these directly, or scary bad stuff will happen.
     _all_data_entries: list[TrackedData]
-    _association: list[tuple[TrackedData, TrackedData]]
+    associations: list[tuple[TrackedData, TrackedData]]
     new_data: Signal = Signal()
     data_removed: Signal = Signal()
     new_association: Signal = Signal()
@@ -35,7 +35,7 @@ class NewDataManager(QObject):
     def __init__(self):
         super().__init__()
         self._all_data_entries = []
-        self._association = []
+        self.associations = []
 
     def _number_perspective(self, to_number: Perspective):
         number = 1
@@ -57,7 +57,7 @@ class NewDataManager(QObject):
         # We shouldn't be able to remove tracked data if its in an association
         # because it may be in a perspective etc.
         # TODO: Is it still ok to delete data in a plot if that plot is removed as well?
-        if any([data in assoc for assoc in self._association]):
+        if any([data in assoc for assoc in self.associations]):
             raise ValueError('Cannot remove data that is in an association.')
         self._all_data_entries.remove(data)
         self.data_removed.emit()
@@ -72,17 +72,17 @@ class NewDataManager(QObject):
         if not any([isinstance_fix(data_1, x) and isinstance_fix(data_2, y) for x, y in valid_associations]):
             # TODO: Clearer error message.
             raise ValueError('Invalid association.')
-        self._association.append((data_1, data_2))
+        self.associations.append((data_1, data_2))
         self.new_association.emit()
 
     def get_association(self, data: TrackedData) -> TrackedData:
-        for assoc in self._association:
+        for assoc in self.associations:
             if data in assoc:
                 return assoc[0] if assoc[0] != data else assoc[1]
         raise ValueError('Association not found.')
 
     def get_all_associations(self, data: TrackedData) -> list[TrackedData]:
-        return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self._association if data in assoc]
+        return [assoc[0] if assoc[0] != data else assoc[1] for assoc in self.associations if data in assoc]
 
     @property
     def all_data(self) -> list[TrackedData]:
