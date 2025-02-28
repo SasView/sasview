@@ -54,7 +54,7 @@ class DataExplorerTree(QTreeWidget):
             case 'send_to':
                 # TODO: This cast might not be necessary.
                 to_perspective = cast(Perspective, result.action_data)
-                self._data_manager.make_association(self.currentTrackedDatum, to_perspective)
+                self._data_manager.make_association(to_perspective, self.currentTrackedDatum)
 
     @property
     def currentTrackedDatum(self) -> TrackedData:
