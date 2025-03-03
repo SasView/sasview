@@ -100,11 +100,12 @@ class NewDataExplorer(QWidget):
     @Slot()
     def onRemove(self):
         to_remove = self.tree_view.currentTrackedDatum
+        # We need to try to remove this from the data manager because there is a
+        # chance that operation may fail if we violate one of the association
+        # rules.
+        self._data_manager.remove_data(to_remove)
         if isinstance(to_remove, Perspective):
-            to_remove.done(0)
             self.removed_perspective.emit(to_remove)
-        elif isinstance(to_remove, SasData):
-            self._data_manager.remove_data(to_remove)
 
     @Slot()
     def onLoadFile(self):
