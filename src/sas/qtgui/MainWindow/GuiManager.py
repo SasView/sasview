@@ -150,7 +150,8 @@ class GuiManager:
         # messy.
         new_association = self._data_manager.associations[0]
         for perspective in self._data_manager.all_perspectives:
-            perspective.
+            if perspective in new_association:
+                perspective.newAssocation()
 
 
     def info(self, type, value, tb):
