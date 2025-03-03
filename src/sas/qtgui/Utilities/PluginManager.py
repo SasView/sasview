@@ -6,7 +6,7 @@ import logging
 from PySide6 import QtWidgets, QtCore
 
 from sas.sascalc.fit import models
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from sas.qtgui.Utilities.UI.PluginManagerUI import Ui_PluginManagerUI
