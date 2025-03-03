@@ -107,6 +107,7 @@ class GuiManager:
         # TODO: pull out all required methods from DataManager and reimplement
         # self._data_manager = DataManager()
         self._data_manager = NewDataManager()
+        self._data_manager.new_association.connect(self.handleNewAssociation)
 
         # Create action triggers
         self.addTriggers()
@@ -133,8 +134,24 @@ class GuiManager:
         # Set up the status bar
         self.statusBarSetup()
 
-        if self.WhatsNew.has_new_messages(): # Not a static method
-            self.WhatsNew.show()
+        # Current tutorial location
+        self._tutorialLocation = os.path.abspath(os.path.join(HELP_DIRECTORY_LOCATION,
+                                              "_downloads",
+                                              "Tutorial.pdf"))
+
+        if self.WhatsNew.has_new_messages():
+            self.actionWhatsNew()
+
+    def handleNewAssociation(self):
+        # If any perspectives have new data/lost data, then they need to be notified.
+
+        # TODO: Is it reasonable to assume that this new association is the last
+        # one? Alternative is passing it around as QObjects but this could get
+        # messy.
+        new_association = self._data_manager.associations[0]
+        for perspective in self._data_manager.all_perspectives:
+            perspective.
+
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
