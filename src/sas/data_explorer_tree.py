@@ -20,6 +20,7 @@ class DataExplorerTree(QTreeWidget):
 
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         _ = self.customContextMenuRequested.connect(self.showContextMenu)
+        self.headerItem().setHidden(True)
 
         # The idea of this list is so we can keep track of the index of each. Which is useful if we want to delete it
         # from the data manager, or create associations.
