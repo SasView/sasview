@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QDialog, QWidget
 from sasdata.data import SasData
 
 # This is ugly but necessary to avoid a cyclic dependency
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from sas.data_manager import NewDataManager as DataManager
 
@@ -65,6 +65,10 @@ class Perspective(QDialog):
     @abstractmethod
     def newAssocation(self):
         pass
+
+    @property
+    def associatedData(self) -> list[SasData]:
+        return cast(list[SasData], self._data_manager.get_all_associations(self))
 
 class Theory():
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
