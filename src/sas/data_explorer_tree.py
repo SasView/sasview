@@ -9,6 +9,13 @@ from sas.data_manager import NewDataManager as DataManager, TrackedData
 from sas.refactored import Perspective
 from src.sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
 
+# TODO: Is this the right place for this?
+def tracked_data_name(data: TrackedData) -> str:
+    if isinstance(data, SasData):
+        return data.name
+    else:
+        return data.formatName
+
 class DataExplorerTree(QTreeWidget):
     current_datum_removed = Signal()
 
@@ -33,12 +40,13 @@ class DataExplorerTree(QTreeWidget):
         self.setColumnCount(1)
         self.header().setStretchLastSection(True)
         for datum in self._data_manager.all_data:
-            if isinstance(datum, SasData):
-                name = datum.name
-            else: # If perspective
-                name = datum.formatName
             self.table_values.append(datum)
-            item = QTreeWidgetItem([name])
+            item = QTreeWidgetItem([tracked_data_name(datum)])
+            # TODO: Dodgy placeholder test for Perspective.
+            if hasattr(datum, 'title'):
+                for assoc_datum in datum.associatedData:
+                    assoc_item = QTreeWidgetItem([tracked_data_name(assoc_datum)])
+                    item.addChild(assoc_item)
             self.addTopLevelItem(item)
 
     def showContextMenu(self):
