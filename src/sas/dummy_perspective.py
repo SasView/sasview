@@ -19,3 +19,9 @@ class DummyPerspective(Perspective):
     @override
     def title(self) -> str:
         return "Dummy Perspective"
+
+    @override
+    def newAssocation(self):
+        self.data_list.clear()
+        for datum in self.associatedData:
+            self.data_list.addItem(datum.name)
