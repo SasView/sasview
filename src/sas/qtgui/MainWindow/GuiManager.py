@@ -153,6 +153,8 @@ class GuiManager:
             if perspective in new_association:
                 perspective.newAssocation()
 
+        self.filesWidget.tree_view.buildTable()
+
 
     def addWidgets(self):
         """
