@@ -148,7 +148,7 @@ class GuiManager:
         # TODO: Is it reasonable to assume that this new association is the last
         # one? Alternative is passing it around as QObjects but this could get
         # messy.
-        new_association = self._data_manager.associations[0]
+        new_association = self._data_manager.associations[-1]
         for perspective in self._data_manager.all_perspectives:
             if perspective in new_association:
                 perspective.newAssocation()
