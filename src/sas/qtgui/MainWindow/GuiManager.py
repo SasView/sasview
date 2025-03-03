@@ -1,6 +1,7 @@
 
 
 
+
 import logging
 import os
 import sys
@@ -151,21 +152,10 @@ class GuiManager:
         # TODO: Is it reasonable to assume that this new association is the last
         # one? Alternative is passing it around as QObjects but this could get
         # messy.
-        new_association = self._data_manager.associations[0]
+        new_association = self._data_manager.associations[-1]
         for perspective in self._data_manager.all_perspectives:
             if perspective in new_association:
                 perspective.newAssocation()
-
-
-    def handleNewAssociation(self, datum1: TrackedData, datum2: TrackedData):
-        # If any perspectives have new data/lost data, then they need to be notified.
-
-        new_association_tuple = (datum1, datum2)
-        for perspective in self._data_manager.all_perspectives:
-            if perspective in new_association_tuple:
-                perspective.newAssocation()
-
-        self.filesWidget.tree_view.addAssociation(datum1, datum2)
 
 
     def info(self, type, value, tb):
