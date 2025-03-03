@@ -111,8 +111,6 @@ class GuiManager:
         # self._data_manager = DataManager()
         self._data_manager = NewDataManager()
         self._data_manager.new_association.connect(self.handleNewAssociation)
-        self._data_manager.removed_perspective.connect(self.removed_perspective)
-        self._data_manager.new_perspective.connect(self.new_perspective)
 
         # Create action triggers
         self.addTriggers()
@@ -146,6 +144,17 @@ class GuiManager:
 
         if self.WhatsNew.has_new_messages():
             self.actionWhatsNew()
+
+    def handleNewAssociation(self):
+        # If any perspectives have new data/lost data, then they need to be notified.
+
+        # TODO: Is it reasonable to assume that this new association is the last
+        # one? Alternative is passing it around as QObjects but this could get
+        # messy.
+        new_association = self._data_manager.associations[0]
+        for perspective in self._data_manager.all_perspectives:
+            perspective.
+
 
     def handleNewAssociation(self, datum1: TrackedData, datum2: TrackedData):
         # If any perspectives have new data/lost data, then they need to be notified.
