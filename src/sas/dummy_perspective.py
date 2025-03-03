@@ -1,5 +1,5 @@
 from typing import override
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QDialog, QListView, QVBoxLayout, QWidget
 from qtpy.QtWidgets import QLabel
 from sas.refactored import Perspective
 from sas.data_manager import NewDataManager as DataManager
@@ -8,10 +8,12 @@ class DummyPerspective(Perspective):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:
         super().__init__(data_manager, parent)
 
-        self.current_data_label = QLabel('Placeholder Title Label')
+        self.data_list_label = QLabel('Current Loaded Data')
+        self.data_list = QListView()
 
         self.layout = QVBoxLayout(self)
-        self.layout.addWidget(self.current_data_label)
+        self.layout.addWidget(self.data_list_label)
+        self.layout.addWidget(self.data_list)
 
     @property
     @override
