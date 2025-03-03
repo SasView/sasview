@@ -70,9 +70,13 @@ class NewDataManager(QObject):
         if not (data_1 in self._all_data_entries or data_2 in self._all_data_entries):
             raise ValueError('Both data_1, and data_2 need to be tracked in the data manager.')
         if not any([isinstance_fix(data_1, x) and isinstance_fix(data_2, y) for x, y in valid_associations]):
-            # TODO: Clearer error message.
+            # TODO: Clearer error message. .
             raise ValueError('Invalid association.')
-        self.associations.append((data_1, data_2))
+        proposed_assoc = (data_1, data_2)
+        # We shouldn't have duplicate associations.
+        if any([assoc == proposed_assoc for assoc in self.associations]):
+            raise ValueError('An assocation of these types already exists.')
+        self.associations.append(proposed_assoc)
         self.new_association.emit()
 
     def get_association(self, data: TrackedData) -> TrackedData:
