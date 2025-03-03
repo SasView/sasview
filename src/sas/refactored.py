@@ -1,5 +1,6 @@
 from abc import abstractmethod
 import logging
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QWidget
 from sasdata.data import SasData
 
@@ -57,6 +58,13 @@ class Perspective(QDialog):
     def onDone(self):
         self._data_manager.remove_data(self)
         logging.info(f'Perspective {self.title} done.')
+
+    # TODO: Maybe we want to pass the new association. I was thinking that
+    # perhaps the perspective will need to do a full update, and then this won't
+    # be relevant.
+    @abstractmethod
+    def newAssocation(self):
+        pass
 
 class Theory():
     # TODO: Need to put stuff here that is unique to Theory. Right now, looking
