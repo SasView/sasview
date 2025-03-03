@@ -1,6 +1,6 @@
 import logging
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, QPushButton, QTreeView, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QDialog, QErrorMessage, QHBoxLayout, QLabel, QMessageBox, QPushButton, QTreeView, QVBoxLayout, QWidget
 from sasdata.data import Group, NamedQuantity, SasData
 import sasdata.quantities.units as units
 import numpy as np
@@ -103,9 +103,15 @@ class NewDataExplorer(QWidget):
         # We need to try to remove this from the data manager because there is a
         # chance that operation may fail if we violate one of the association
         # rules.
-        self._data_manager.remove_data(to_remove)
-        if isinstance(to_remove, Perspective):
-            self.removed_perspective.emit(to_remove)
+        try:
+            self._data_manager.remove_data(to_remove)
+            if isinstance(to_remove, Perspective):
+                self.removed_perspective.emit(to_remove)
+        except ValueError as err:
+            box = QMessageBox(self)
+            box.setIcon(QMessageBox.Icon.Critical)
+            box.setText(str(err))
+            box.show()
 
     @Slot()
     def onLoadFile(self):
