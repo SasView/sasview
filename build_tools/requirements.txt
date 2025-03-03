@@ -1,5 +1,6 @@
 # Alphabetized list of OS and version agnostic dependencies
 appdirs
+bumps
 cffi
 docutils
 dominate
@@ -37,6 +38,3 @@ zope
 
 # Alphabetized list of OS-specific packages
 pywin32; platform_system == "Windows"
-
-# Alphabetized list of version-pinned packages
-bumps==0.*  # v1.+ is very experimental
