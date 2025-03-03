@@ -25,15 +25,15 @@ class RealSpaceCanvas(CorfuncCanvas):
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("linear")
         self.axes.set_yscale("linear")
-        self.axes.set_xlabel("Z [$\AA$]")
+        self.axes.set_xlabel(r"Z [$\AA$]")
         self.axes.set_ylabel("Correlation")
         self.axes.set_title("Real Space Correlations")
         self.fig.tight_layout()
 
         if self.data is not None and len(self.data) == 2:
             data1, data3 = self.data[0], self.data[1]
-            self.axes.plot(data1.x, data1.y, label="$\Gamma_1(z)$")
-            self.axes.plot(data3.x, data3.y, label="$\Gamma_3(z)$")
+            self.axes.plot(data1.x, data1.y, label=r"$\Gamma_1(z)$")
+            self.axes.plot(data3.x, data3.y, label=r"$\Gamma_3(z)$")
 
             self.axes.set_xlim(0, max(data1.x) / 4)
             self.legend = self.axes.legend()
