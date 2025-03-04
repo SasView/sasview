@@ -9,6 +9,7 @@ from sas.data_explorer_tree import DataExplorerTree
 from sas.dummy_perspective import DummyPerspective
 from sas.refactored import Perspective
 from sas.data_manager import NewDataManager as DataManager
+from src.sas.data_explorer_error_message import DataExplorerErrorMessage
 
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
@@ -108,9 +109,7 @@ class NewDataExplorer(QWidget):
             if isinstance(to_remove, Perspective):
                 self.removed_perspective.emit(to_remove)
         except ValueError as err:
-            box = QMessageBox(self)
-            box.setIcon(QMessageBox.Icon.Critical)
-            box.setText(str(err))
+            box = DataExplorerErrorMessage(self, err)
             box.show()
 
     @Slot()
