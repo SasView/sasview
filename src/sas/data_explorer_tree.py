@@ -3,7 +3,7 @@ import logging
 from typing_extensions import cast
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget
+from PySide6.QtWidgets import QMessageBox, QTreeWidget, QTreeWidgetItem, QWidget
 from sasdata.data import SasData
 from sas.data_manager import NewDataManager as DataManager, TrackedData
 from sas.refactored import Perspective
@@ -57,13 +57,19 @@ class DataExplorerTree(QTreeWidget):
         if action is None:
             return
         result: DataExplorerMenuAction = action.data()
-        match result.action:
-            case 'remove':
-                self.current_datum_removed.emit()
-            case 'send_to':
-                # TODO: This cast might not be necessary.
-                to_perspective = cast(Perspective, result.action_data)
-                self._data_manager.make_association(to_perspective, self.currentTrackedDatum)
+        try:
+            match result.action:
+                case 'remove':
+                    self.current_datum_removed.emit()
+                case 'send_to':
+                    # TODO: This cast might not be necessary.
+                    to_perspective = cast(Perspective, result.action_data)
+                    self._data_manager.make_association(to_perspective, self.currentTrackedDatum)
+        except ValueError as err:
+            box = QMessageBox(self)
+            box.setIcon(QMessageBox.Icon.Critical)
+            box.setText(str(err))
+            box.show()
 
     @property
     def currentTrackedDatum(self) -> TrackedData:
