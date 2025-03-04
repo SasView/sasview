@@ -30,6 +30,7 @@ from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
 from sas.system.version import __version__
 from sas.sascalc.calculator import sas_gen
+from sas.sascalc.calculator.sas_gen import ComputationType
 from sas.sascalc.fit import models
 from sas.sascalc.calculator.geni import radius_of_gyration, create_beta_plot, f_of_q
 import sas.sascalc.calculator.gsc_model as gsc_model
@@ -87,7 +88,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.is_avg = False
         self.is_nuc = False
         self.is_mag = False
-        self.is_beta = False
         self.data_to_plot = None
         self.data_betaQ = None
         self.fQ = []
@@ -654,9 +654,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # update the averaging option fromthe button on the GUI
         # required as the button may have been previously hidden with
         # any value, and preserves this - we must update the variable to match the GUI
-        self.is_avg = (self.cbOptionsCalc.currentIndex() in (1,2))
-        # did user request Beta(Q) calculation?
-        self.is_beta = (self.cbOptionsCalc.currentIndex() == 2)
+        self.is_avg = (self.cbOptionsCalc.currentIndex() in (1,2,3))
+
         # If averaging then set to 0 and diable the magnetic SLD textboxes
         self.txtMx.setEnabled(not self.is_avg)
         self.txtMy.setEnabled(not self.is_avg)
@@ -665,7 +664,18 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxLogSpace.setChecked(self.is_avg)
         self.checkboxLogSpace.setEnabled(self.is_avg)
         self.checkboxPluginModel.setEnabled(self.is_avg)
-        
+
+        # set the type of calculation
+        match self.cbOptionsCalc.currentIndex():
+            case 0:
+                self.model.set_calculation_type(ComputationType.SANS_2D)
+            case 1:
+                self.model.set_calculation_type(ComputationType.SANS_1D)
+            case 2:
+                self.model.set_calculation_type(ComputationType.SANS_1D_BETA)
+            case 3:
+                self.model.set_calculation_type(ComputationType.SAXS)
+
         if self.is_avg:   
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
@@ -1119,7 +1129,6 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # reset all file data to its default empty state
             self.is_nuc = False
             self.is_mag = False
-            self.is_beta = False
             self.nuc_sld_data = None
             self.mag_sld_data = None
             self.beta_data = None
@@ -1385,6 +1394,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         try:
             # create the combined sld data and update from gui
             sld_data = self.create_full_sld_data()
+
             # TODO: implement fourier transform for meshes with multiple element or face types
             # The easy option is to simply convert all elements to tetrahedra - but this could rapidly
             # increase the calculation time.
@@ -1392,7 +1402,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 if not sld_data.are_elements_array:
                     logging.warning("SasView does not currently support computation of meshes with multiple element or face types")
                     return
-            self.model.set_sld_data(sld_data)
+            self.model.set_sld_data(sld_data) #? Why is sld_data being overwritten here? We're discarding file information
+
+            # this data should be present but is being deleted by the above line, so we have to manually copy it over
+            if self.model.type == ComputationType.SAXS:
+                self.model.sld_data.atom_names = self.nuc_sld_data.atom_names
+                self.model.sld_data.residue_names = self.nuc_sld_data.residue_names
+                self.model.sld_data.atom_elements = self.nuc_sld_data.atom_elements
+
             UVW_to_uvw, UVW_to_xyz = self.create_rotation_matrices()
             # We do NOT need to invert these matrices - they are UVW to xyz for the basis vectors
             # and therefore xyz to UVW for the components of the vectors - as we desire
@@ -1468,39 +1485,47 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         nq = len(input[0])
         chunk_size = 32 if self.is_avg else 256
         out = []
-        # the 1D AUSAXS calculator cannot be chunked
-        if self.is_avg and not len(input[1]):
-            self.data_to_plot = self.model.runXY(input)
 
-        # chunk the other calculations to allow cancellation        
-        else:
-            for ind in range(0, nq, chunk_size):
-                t = timer()
-                if t > next_update:
-                    update(time=t, percentage=100*ind/nq)
-                    time.sleep(0.01)
-                    next_update = t + update_rate
-                if self.is_avg:
-                    inputi = [input[0][ind:ind + chunk_size], []]
-                    outi = self.model.run(inputi)
+        match self.model.type:
+            case ComputationType.SAXS:
+                self.data_to_plot = self.model.run(input)
+
+            case ComputationType.SANS_1D | ComputationType.SANS_1D_BETA:
+                #? I removed this if statement when refactoring since I'm unsure if it's necessary. 
+                #? This should be removed after testing. 
+                if len(input[1]):
+                    raise Exception("This if-statement should not be reached.")
+                self.data_to_plot = self.model.runXY(input)
+
+            case ComputationType.SANS_2D:
+                # chunk to allow cancellation
+                for ind in range(0, nq, chunk_size):
+                    t = timer()
+                    if t > next_update:
+                        update(time=t, percentage=100*ind/nq)
+                        time.sleep(0.01)
+                        next_update = t + update_rate
+                    if self.is_avg:
+                        inputi = [input[0][ind:ind + chunk_size], []]
+                        outi = self.model.run(inputi)
+                    else:
+                        inputi = [input[0][ind:ind + chunk_size],
+                                input[1][ind:ind + chunk_size]]
+                        outi = self.model.runXY(inputi)
+                    out.append(outi)
+                    if self.cancelCalculation:
+                        update(time=t, percentage=100*(ind + chunk_size)/nq) # ensure final progress shown
+                        self.data_to_plot = numpy.full(nq, numpy.nan)
+                        self.data_to_plot[:ind + chunk_size] = numpy.hstack(out)
+                        logging.info('Gen computation cancelled.')
+                        break
                 else:
-                    inputi = [input[0][ind:ind + chunk_size],
-                            input[1][ind:ind + chunk_size]]
-                    outi = self.model.runXY(inputi)
-                out.append(outi)
-                if self.cancelCalculation:
-                    update(time=t, percentage=100*(ind + chunk_size)/nq) # ensure final progress shown
-                    self.data_to_plot = numpy.full(nq, numpy.nan)
-                    self.data_to_plot[:ind + chunk_size] = numpy.hstack(out)
-                    logging.info('Gen computation cancelled.')
-                    break
-            else:
-                out = numpy.hstack(out)
-                self.data_to_plot = out
-                logging.info('Gen computation completed.')
+                    out = numpy.hstack(out)
+                    self.data_to_plot = out
+                    logging.info('Gen computation completed.')
 
         # if Beta(Q) Calculation has been requested, run calculation
-        if self.is_beta:
+        if self.model.type == ComputationType.SANS_1D_BETA:
             self.data_betaQ  = create_beta_plot(self.xValues, self.nuc_sld_data, self.data_to_plot)
         
         if self.checkboxPluginModel.isChecked():
@@ -1631,7 +1656,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             data.id = data.title # required for serialization
 
             self.graph_num += 1
-            if self.is_beta:
+            if self.model.type == ComputationType.SANS_1D_BETA:
                 dataBetaQ = Data1D(x=self.data.x, y=self.data_betaQ)
                 dataBetaQ.title = "GenSAS {}  #{} BetaQ".format(self.file_name(),
                                                     int(self.graph_num))
@@ -1663,7 +1688,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         new_item = GuiUtils.createModelItemWithPlot(data, name=data.title)
         self.communicator.updateModelFromPerspectiveSignal.emit(new_item)
         self.communicator.forcePlotDisplaySignal.emit([new_item, data])
-        if self.is_beta:
+        if self.model.type == ComputationType.SANS_1D_BETA:
             new_item = GuiUtils.createModelItemWithPlot(dataBetaQ, name=dataBetaQ.title)
             self.communicator.updateModelFromPerspectiveSignal.emit(new_item)
             self.communicator.forcePlotDisplaySignal.emit([new_item, dataBetaQ])
