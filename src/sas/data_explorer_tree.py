@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QMessageBox, QTreeWidget, QTreeWidgetItem, QWidget
 from sasdata.data import SasData
 from sas.data_manager import NewDataManager as DataManager, TrackedData
 from sas.refactored import Perspective
+from src.sas.data_explorer_error_message import DataExplorerErrorMessage
 from src.sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
 
 # TODO: Is this the right place for this?
@@ -66,9 +67,7 @@ class DataExplorerTree(QTreeWidget):
                     to_perspective = cast(Perspective, result.action_data)
                     self._data_manager.make_association(to_perspective, self.currentTrackedDatum)
         except ValueError as err:
-            box = QMessageBox(self)
-            box.setIcon(QMessageBox.Icon.Critical)
-            box.setText(str(err))
+            box = DataExplorerErrorMessage(err)
             box.show()
 
     @property
