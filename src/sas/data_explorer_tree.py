@@ -67,7 +67,7 @@ class DataExplorerTree(QTreeWidget):
                     to_perspective = cast(Perspective, result.action_data)
                     self._data_manager.make_association(to_perspective, self.currentTrackedDatum)
         except ValueError as err:
-            box = DataExplorerErrorMessage(err)
+            box = DataExplorerErrorMessage(self, err)
             box.show()
 
     @property
