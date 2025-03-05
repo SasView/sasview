@@ -3,7 +3,7 @@ import logging
 from typing_extensions import cast
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import QMessageBox, QTreeWidget, QTreeWidgetItem, QWidget
+from PySide6.QtWidgets import QAbstractItemView, QMessageBox, QTreeWidget, QTreeWidgetItem, QWidget
 from sasdata.data import SasData
 from sas.data_manager import NewDataManager as DataManager, TrackedData
 from sas.refactored import Perspective
@@ -27,6 +27,7 @@ class DataExplorerTree(QTreeWidget):
         _ = self._data_manager.data_removed.connect(self.buildTable)
 
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         _ = self.customContextMenuRequested.connect(self.showContextMenu)
         self.headerItem().setHidden(True)
 
