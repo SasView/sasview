@@ -54,7 +54,7 @@ class DataExplorerTree(QTreeWidget):
             self.addTopLevelItem(item)
 
     def showContextMenu(self):
-        send_to = isinstance(self.currentTrackedDatum, SasData)
+        send_to = all([isinstance(datum, SasData) for datum in self.currentTrackedData])
         menu = DataExplorerMenu(self, self._data_manager, send_to)
         action = menu.exec(QCursor.pos())
         # Result will be None if the user exited the menu without selecting anything.
