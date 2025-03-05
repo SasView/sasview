@@ -44,10 +44,12 @@ class DataExplorerTree(QTreeWidget):
         for datum in self._data_manager.all_data:
             self.table_values.append(datum)
             item = QTreeWidgetItem([tracked_data_name(datum)])
+            item.setData(0, Qt.ItemDataRole.UserRole, datum)
             # TODO: Dodgy placeholder test for Perspective.
             if hasattr(datum, 'title'):
                 for assoc_datum in datum.associatedData:
                     assoc_item = QTreeWidgetItem([tracked_data_name(assoc_datum)])
+                    assoc_item.setData(0, Qt.ItemDataRole.UserRole, assoc_datum)
                     item.addChild(assoc_item)
             self.addTopLevelItem(item)
 
