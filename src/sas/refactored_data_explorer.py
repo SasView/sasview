@@ -1,7 +1,8 @@
 import logging
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QComboBox, QDialog, QErrorMessage, QHBoxLayout, QLabel, QMessageBox, QPushButton, QTreeView, QVBoxLayout, QWidget
-from sasdata.data import Group, NamedQuantity, SasData
+from sasdata.data import Group, NamedQuantity, Quantity, SasData
+from sasdata.dataset_types import one_dim
 import sasdata.quantities.units as units
 import numpy as np
 
@@ -115,8 +116,8 @@ class NewDataExplorer(QWidget):
     @Slot()
     def onLoadFile(self):
         # TODO: At the moment, the readers are not hooked up properly. Just create some random dummy data for now.
-        quantities: list[NamedQuantity] = []
+        quantities: dict[str, Quantity] = {}
         for column in ['Q', 'I']:
-            quantities.append(NamedQuantity(column, 100 * np.random.rand(100),  units.angstroms))
-        dummy = SasData('Dummy Data', quantities, Group('root', {}))
+            quantities[column] = Quantity(100 * np.random.rand(100), units.angstroms)
+        dummy = SasData('Dummy Data', quantities, one_dim, Group('root', {}))
         self._data_manager.add_data(dummy)
