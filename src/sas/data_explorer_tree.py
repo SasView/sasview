@@ -64,11 +64,13 @@ class DataExplorerTree(QTreeWidget):
         try:
             match result.action:
                 case 'remove':
+                    # TODO: Work for all data.
                     self.current_datum_removed.emit()
                 case 'send_to':
                     # TODO: This cast might not be necessary.
                     to_perspective = cast(Perspective, result.action_data)
-                    self._data_manager.make_association(to_perspective, self.currentTrackedDatum)
+                    for datum in self.currentTrackedData:
+                        self._data_manager.make_association(to_perspective, datum)
         except ValueError as err:
             box = DataExplorerErrorMessage(self, err)
             box.show()
