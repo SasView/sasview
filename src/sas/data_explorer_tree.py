@@ -78,6 +78,13 @@ class DataExplorerTree(QTreeWidget):
         index = self.currentIndex().row()
         return self.table_values[index]
 
+    @property
+    def currentTrackedData(self) -> list[TrackedData]:
+        # items = self.selectedItems()
+        # for item in items:
+        #     item.index
+        return [item.data(0, Qt.ItemDataRole.UserRole) for item in self.selectedItems()]
+
     def setCurrentTrackedDatum(self, datum: TrackedData):
         datum_index = self.table_values.index(datum)
         datum_item = self.topLevelItem(datum_index)
