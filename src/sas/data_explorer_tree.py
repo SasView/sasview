@@ -80,7 +80,15 @@ class DataExplorerTree(QTreeWidget):
         #     item.index
         return [item.data(0, Qt.ItemDataRole.UserRole) for item in self.selectedItems()]
 
-    def setCurrentTrackedDatum(self, datum: TrackedData):
-        datum_index = self.table_values.index(datum)
-        datum_item = self.topLevelItem(datum_index)
-        self.setCurrentItem(datum_item)
+    # Annoyingly, there is no way to get all the items in a tree. So we have to
+    # do this recursively instead.
+    def setCurrentTrackedDatum(self, datum: TrackedData, root: QTreeWidgetItem | None = None):
+        if root is None:
+            root = self.invisibleRootItem()
+        for i in range(root.childCount()):
+            item = root.child(i)
+            item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
+            if item_datum == datum:
+                self.setCurrentItem(item)
+                return
+            self.setCurrentTrackedDatum(datum, item)
