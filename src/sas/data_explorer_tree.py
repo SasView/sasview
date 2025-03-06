@@ -31,18 +31,12 @@ class DataExplorerTree(QTreeWidget):
         _ = self.customContextMenuRequested.connect(self.showContextMenu)
         self.headerItem().setHidden(True)
 
-        # The idea of this list is so we can keep track of the index of each. Which is useful if we want to delete it
-        # from the data manager, or create associations.
-        self.table_values: list[TrackedData]  = []
-
     def buildTable(self):
         # TODO: Right now we are ignoring associations.
         self.clear()
-        self.table_values = []
         self.setColumnCount(1)
         self.header().setStretchLastSection(True)
         for datum in self._data_manager.all_data:
-            self.table_values.append(datum)
             item = QTreeWidgetItem([tracked_data_name(datum)])
             item.setData(0, Qt.ItemDataRole.UserRole, datum)
             # TODO: Dodgy placeholder test for Perspective.
@@ -77,8 +71,7 @@ class DataExplorerTree(QTreeWidget):
 
     @property
     def currentTrackedDatum(self) -> TrackedData:
-        index = self.currentIndex().row()
-        return self.table_values[index]
+        return self.currentTrackedData[0]
 
     @property
     def currentTrackedData(self) -> list[TrackedData]:
