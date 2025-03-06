@@ -281,7 +281,7 @@ jobs:
 
       - name: Sign binary
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
-        uses: lando/code-sign-action@v2
+        uses: lando/code-sign-action@v3
         with:
           file: installers/dist/setupSasView.exe
           certificate-data: ${{ secrets.WINDOZE_CERT_DATA }}
@@ -289,6 +289,7 @@ jobs:
           keylocker-host: ${{ secrets.KEYLOCKER_HOST }}
           keylocker-api-key: ${{ secrets.KEYLOCKER_API_KEY }}
           keylocker-cert-sha1-hash: ${{ secrets.KEYLOCKER_CERT_SHA1_HASH }}
+          keylocker-keypair-alias: ${{ secrets.KEYLOCKER_KEYPAIR_ALIAS }}
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
