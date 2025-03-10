@@ -12,7 +12,6 @@ ipython
 jsonschema
 lxml
 mako
-matplotlib
 numba
 periodictable
 pybind11
@@ -42,3 +41,4 @@ pywin32; platform_system == "Windows"
 numpy==1.26.4  # 2.0.0 deprecates many functions used in the codebase (and potentially in dependencies)
 PySide6==6.4.3  # Later versions do not mesh well with pyinstaller < 6.0
 scipy==1.13.1  # 1.14 deprecates some functions used in the codebase (and potentially in dependencies)
+matplotlib==3.9.4 # 3.10 breaks how bumps generates the DREAM correlation plots - pin for *only* v6.0.1
