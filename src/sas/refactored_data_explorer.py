@@ -102,6 +102,7 @@ class NewDataExplorer(QWidget):
     @Slot()
     def onRemove(self):
         items_to_remove = self.tree_view.currentTrackedData
+        errors: list[ValueError] = []
         for item in items_to_remove:
             # We need to try to remove this from the data manager because there is a
             # chance that operation may fail if we violate one of the association
@@ -111,8 +112,10 @@ class NewDataExplorer(QWidget):
                 if hasattr(item, 'title'):
                     self.removed_perspective.emit(item)
             except ValueError as err:
-                box = DataExplorerErrorMessage(self, err)
-                box.show()
+                errors.append(err)
+        if len(errors) > 0:
+            box = DataExplorerErrorMessage(self, errors)
+            box.show()
 
     @Slot()
     def onLoadFile(self):
