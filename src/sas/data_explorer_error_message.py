@@ -10,7 +10,7 @@ class DataExplorerErrorMessage(QMessageBox):
             error = errors[0]
             self.setText(str(error))
         else:
-            full_error_msg = "Some data could not be removed due to the following errors"
+            full_error_msg = "Some data could not be removed due to the following errors:\n"
             error_msg_set = set([str(err) for err in errors])
             error_msg_str = '\n'.join(error_msg_set)
             full_error_msg += f"\n{error_msg_str}"
