@@ -70,7 +70,9 @@ class DataExplorerTree(QTreeWidget):
             box.show()
 
     @property
-    def currentTrackedDatum(self) -> TrackedData:
+    def currentTrackedDatum(self) -> TrackedData | None:
+        if len(self.currentTrackedData) == 0:
+            return None
         return self.currentTrackedData[0]
 
     @property
