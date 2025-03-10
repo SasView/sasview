@@ -1,7 +1,7 @@
 from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from sas.qtgui.Utilities.UI.ModelEditor import Ui_ModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.ModelEditor import Ui_ModelEditor
 from sas.qtgui.Utilities import GuiUtils
 
 class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
