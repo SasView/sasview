@@ -101,17 +101,18 @@ class NewDataExplorer(QWidget):
 
     @Slot()
     def onRemove(self):
-        to_remove = self.tree_view.currentTrackedDatum
-        # We need to try to remove this from the data manager because there is a
-        # chance that operation may fail if we violate one of the association
-        # rules.
-        try:
-            self._data_manager.remove_data(to_remove)
-            if isinstance(to_remove, Perspective):
-                self.removed_perspective.emit(to_remove)
-        except ValueError as err:
-            box = DataExplorerErrorMessage(self, err)
-            box.show()
+        items_to_remove = self.tree_view.currentTrackedData
+        for item in items_to_remove:
+            # We need to try to remove this from the data manager because there is a
+            # chance that operation may fail if we violate one of the association
+            # rules.
+            try:
+                self._data_manager.remove_data(item)
+                if hasattr(item, 'title'):
+                    self.removed_perspective.emit(item)
+            except ValueError as err:
+                box = DataExplorerErrorMessage(self, err)
+                box.show()
 
     @Slot()
     def onLoadFile(self):
