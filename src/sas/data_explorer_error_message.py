@@ -6,7 +6,7 @@ class DataExplorerErrorMessage(QMessageBox):
         super().__init__(parent)
         self.setIcon(QMessageBox.Icon.Critical)
         self.setWindowTitle('Data Error')
-        if len(errors) == 0:
+        if len(errors) == 1:
             error = errors[0]
             self.setText(str(error))
         else:
