@@ -14,3 +14,4 @@ class DataExplorerErrorMessage(QMessageBox):
             error_msg_set = set([str(err) for err in errors])
             error_msg_str = '\n'.join(error_msg_set)
             full_error_msg += f"\n{error_msg_str}"
+            self.setText(full_error_msg)
