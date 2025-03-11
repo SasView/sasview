@@ -1570,7 +1570,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
-        self.actionDelete.triggered.connect(self.deleteSelectedItem)
+        self.actionDelete.triggered.connect(self.deleteFile)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
         self.actionReplace.triggered.connect(self.onDataReplaced)
 
@@ -1884,7 +1884,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
                 # Delete corresponding open plots
                 self.closePlotsForItem(item_to_delete)
-
                 if item_to_delete.parent():
                     # We have a child item - delete from it
                     item_to_delete.parent().removeRow(row)
