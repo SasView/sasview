@@ -1900,7 +1900,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             case 0:
                 # Look at the model and if set, pull out its help page
                 # TODO: Disable plugin model documentation generation until issues can be resolved
-                plugin_names = [name for name, enabled in self.master_category_dict[CATEGORY_CUSTOM]]
+                plugin_names = [name for name, enabled in self.master_category_dict.get(CATEGORY_CUSTOM, {})]
                 if (self.kernel_module is not None
                         and hasattr(self.kernel_module, 'name')
                         and self.kernel_module.id not in plugin_names
