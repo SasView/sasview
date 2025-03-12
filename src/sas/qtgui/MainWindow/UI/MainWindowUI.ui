@@ -91,6 +91,7 @@
     <addaction name="actionSlit_Size_Calculator"/>
     <addaction name="actionKeissig_Calculator"/>
     <addaction name="actionSAS_Resolution_Estimator"/>
+    <addaction name="actionMuMag_Fitter"/>
     <addaction name="actionGeneric_Scattering_Calculator"/>
     <addaction name="separator"/>
     <addaction name="actionImage_Viewer"/>
@@ -606,6 +607,11 @@
    <property name="text">
     <string>Preferences...</string>
    </property>
+  </action>
+  <action name="actionMuMag_Fitter">
+   <property name="text">
+    <string>MuMag Fitter</string>
+      </property>
   </action>
   <action name="actionWhat_s_New">
    <property name="text">

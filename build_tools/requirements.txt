@@ -1,6 +1,5 @@
 # Alphabetized list of OS and version agnostic dependencies
 appdirs
-bumps
 cffi
 docutils
 dominate
@@ -12,17 +11,21 @@ ipython
 jsonschema
 lxml
 mako
+matplotlib
 numba
+numpy
 periodictable
 pybind11
 pylint
 pyopengl
 pyparsing
+PySide6
 pytest
 pytest_qt
 pytest-mock
 pytools
 qtconsole
+scipy
 siphash24
 six
 sphinx
@@ -38,7 +41,4 @@ zope
 pywin32; platform_system == "Windows"
 
 # Alphabetized list of version-pinned packages
-numpy==1.26.4  # 2.0.0 deprecates many functions used in the codebase (and potentially in dependencies)
-PySide6==6.4.3  # Later versions do not mesh well with pyinstaller < 6.0
-scipy==1.13.1  # 1.14 deprecates some functions used in the codebase (and potentially in dependencies)
-matplotlib==3.9.4 # 3.10 breaks how bumps generates the DREAM correlation plots - pin for *only* v6.0.1
+bumps==0.*  # v1.+ is very experimental

@@ -35,6 +35,8 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
@@ -204,6 +206,7 @@ class GuiManager:
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
+        self.MuMag_Fitter = MuMag(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.GENSASCalculator = None
@@ -755,6 +758,7 @@ class GuiManager:
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
         self._workspace.actionDensity_Volume_Calculator.triggered.connect(self.actionDensity_Volume_Calculator)
         self._workspace.actionKeissig_Calculator.triggered.connect(self.actionKiessig_Calculator)
+        self._workspace.actionMuMag_Fitter.triggered.connect(self.actionMuMag_Fitter)
         #self._workspace.actionKIESSING_Calculator.triggered.connect(self.actionKIESSING_Calculator)
         self._workspace.actionSlit_Size_Calculator.triggered.connect(self.actionSlit_Size_Calculator)
         self._workspace.actionSAS_Resolution_Estimator.triggered.connect(self.actionSAS_Resolution_Estimator)
@@ -1040,6 +1044,11 @@ class GuiManager:
         """
         """
         self.KIESSIGCalculator.show()
+
+    def actionMuMag_Fitter(self):
+        """
+        """
+        self.MuMag_Fitter.show()
 
     def actionSlit_Size_Calculator(self):
         """
