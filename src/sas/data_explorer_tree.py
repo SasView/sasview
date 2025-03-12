@@ -31,7 +31,6 @@ class DataExplorerTree(QTreeWidget):
         self.headerItem().setHidden(True)
 
     def buildTable(self):
-        # TODO: Right now we are ignoring associations.
         self.clear()
         self.setColumnCount(1)
         self.header().setStretchLastSection(True)
