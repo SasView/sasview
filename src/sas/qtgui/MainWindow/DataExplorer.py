@@ -1875,6 +1875,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Delete corresponding open plots
                 self.closePlotsForItem(item_to_delete)
 
+                # This needs to run before model.removeRow()
+                self.communicator.dataDeletedSignal.emit(deleted_items)
+
                 if item_to_delete.parent():
                     # We have a child item - delete from it
                     item_to_delete.parent().removeRow(row)
@@ -1882,9 +1885,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     # delete directly from model
                     model.removeRow(row)
             indices = self.current_view.selectedIndexes()
-
-        # Let others know we deleted data
-        self.communicator.dataDeletedSignal.emit(deleted_items)
 
         # update stored_data
         self.manager.update_stored_data(deleted_names)
