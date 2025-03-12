@@ -1,5 +1,4 @@
 from cgitb import reset
-import logging
 from typing_extensions import cast
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
