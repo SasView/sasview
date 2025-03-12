@@ -23,6 +23,7 @@ General GUI Fixes
 ^^^^^^^^^
 * Open a pop-up on start-up if a new version is available by @lucas-wilkins in https://github.com/SasView/sasview/pull/3216
 * Removed superfluous signal connection causing duplicate theories by @rozyczko in https://github.com/SasView/sasview/pull/3199
+* Removing data from the context menu now removes it from perspectives by @rozyczko in https://github.com/SasView/sasview/pull/3236
 
 Plotting Fixes
 ^^^^^^^^^
@@ -35,7 +36,8 @@ Fitting and Other Perspective Fixes
 ^^^^^^^^^
 * Status bar message does not clear on gsc exit by @rozyczko in https://github.com/SasView/sasview/pull/3185
 * Guard against bad fit results to ensure fit tabs can run new fits by @rozyczko in https://github.com/SasView/sasview/pull/3172
-* A number of model eiditor bug fixes by @tsole0 in https://github.com/SasView/sasview/pull/2901
+* A number of model editor bug fixes by @tsole0 in https://github.com/SasView/sasview/pull/2901
+* Fix model documentation not showing when plugin folder is empty by @krzywon in https://github.com/SasView/sasview/pull/3237
 * Added OpenCL support for the Flatpak release by @jamescrake-merani in https://github.com/flathub/org.sasview.sasview/pull/4
 
 Other Fixes
