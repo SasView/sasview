@@ -1,3 +1,4 @@
+from PyQt6.QtWidgets import QDialog
 from PySide6.QtCore import QObject, Signal
 from sasdata.data import SasData
 
@@ -31,6 +32,8 @@ class NewDataManager(QObject):
     new_data: Signal = Signal()
     data_removed: Signal = Signal()
     new_association: Signal = Signal()
+    new_perspective: Signal = Signal(QDialog)
+    removed_perspective: Signal = Signal(QDialog)
 
     def __init__(self):
         super().__init__()
@@ -51,6 +54,7 @@ class NewDataManager(QObject):
         # into using ABC.
         if hasattr(data, 'title'):
             self._number_perspective(data)
+            self.new_perspective.emit(data)
         self.new_data.emit()
 
     def remove_data(self, data: TrackedData):
@@ -71,6 +75,8 @@ class NewDataManager(QObject):
             self.remove_data(datum)
         self._all_data_entries.remove(data)
         self.data_removed.emit()
+        if hasattr(data, 'title'):
+            self.removed_perspective.emit(data)
     # TODO: Remove data on a list. So that we could remove a perspective, and
     # data at the same time. So it doesn't matter that the perspective is
     # associated with the data becuase they will both be removed.
