@@ -204,7 +204,7 @@ class PowerLaw(Transform):
         self.dpower = 0.0
 
     def linearize_q_value(self, value):
-        """
+        r"""
         Transform the input q-value for linearization
 
         :param value: q-value

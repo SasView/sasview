@@ -73,7 +73,7 @@ class QSpaceCanvas(CorfuncCanvas):
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("log")
         self.axes.set_yscale("log")
-        self.axes.set_xlabel("Q [$\AA^{-1}$]")
+        self.axes.set_xlabel(r"Q [$\AA^{-1}$]")
         self.axes.set_ylabel("I(Q) [cm$^{-1}$]")
         self.axes.set_title("Scattering data")
         self.fig.tight_layout()

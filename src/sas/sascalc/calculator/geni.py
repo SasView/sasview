@@ -148,7 +148,7 @@ else:
         Iq = [abs(np.sum(scale*np.exp(1j*(qx_k*x + qy_k*y))))**2
               for qx_k, qy_k in zip(qx.flat, qy.flat)]
         return np.asarray(Iq).reshape(qx.shape)
-_calc_Iqxy.__doc__ = """
+_calc_Iqxy.__doc__ = r"""
     Compute I(q) for a set of points (x, y).
     
     Uses: I(q) = \|sum V(r) rho(r) e^(1j q.r)\|^2 / sum V(r)
@@ -176,7 +176,7 @@ def _calc_Iqxy_elements(sld, x, y, z, elements, vol, qx, qy):
 def _calc_Iqxy_magnetic(
         qx, qy, x, y, rho, vol, rho_m,
         up_frac_i=1, up_frac_f=1, up_theta=0., up_phi=0.):
-    """Compute I(q) for a set of points (x, y), with magnetism on each point.
+    r"""Compute I(q) for a set of points (x, y), with magnetism on each point.
 
     Uses: I(q) = sum_xs w_xs \|sum V(r) rho(q, r, xs) e^(1j q.r)\|^2 / sum V(r)
     where rho is adjusted for the particular q and polarization cross section.
