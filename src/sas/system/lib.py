@@ -8,7 +8,7 @@ import os
 # TODO: Add api to control sasmodels rather than using environment variables
 def setup_sasmodels():
     """Initialize sasmodels settings from the sasview configuration."""
-    from .user import get_user_dir
+    from .user import get_app_dir
 
     # Don't need to set SAS_MODELPATH for gui because sascalc.fit uses the
     # full paths to models, but when using the sasview package as a python
@@ -21,7 +21,7 @@ def setup_sasmodels():
     # Both scripts and gui need to know the stored DLL path.
     if "SAS_DLL_PATH" not in os.environ:
         os.environ["SAS_DLL_PATH"] = os.path.join(
-            get_user_dir(), "compiled_models")
+            get_app_dir(), "compiled_models")
 
     # Set OpenCL config from environment variable if it is set otherwise
     # use the value from the sas config file.

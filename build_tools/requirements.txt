@@ -14,6 +14,7 @@ lxml
 mako
 numba
 periodictable
+platformdirs
 pybind11
 pylint
 pyopengl
