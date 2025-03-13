@@ -57,8 +57,18 @@ class NewDataManager(QObject):
         # We shouldn't be able to remove tracked data if its in an association
         # because it may be in a perspective etc.
         # TODO: Is it still ok to delete data in a plot if that plot is removed as well?
-        if any([data in assoc for assoc in self.associations]):
-            raise ValueError('Cannot remove data that is in an association.')
+        associations_to_remove: list[tuple[TrackedData, TrackedData]] = []
+        data_to_remove: list[TrackedData] = []
+        for assoc in self.associations:
+            if data in assoc:
+                other_datum = assoc[0] if assoc[1] == data else assoc[1]
+                # We can't remove data from a list that we're doing a for loop over so we need to defer this.
+                data_to_remove.append(other_datum)
+                associations_to_remove.append(assoc)
+        for assoc in associations_to_remove:
+            self.associations.remove(assoc)
+        for datum in data_to_remove:
+            self.remove_data(datum)
         self._all_data_entries.remove(data)
         self.data_removed.emit()
     # TODO: Remove data on a list. So that we could remove a perspective, and
