@@ -112,6 +112,7 @@ class GuiManager:
         # self._data_manager = DataManager()
         self._data_manager = NewDataManager()
         self._data_manager.new_association.connect(self.handleNewAssociation)
+        self._data_manager.removed_perspective.connect(self.removed_perspective)
 
         # Create action triggers
         self.addTriggers()
