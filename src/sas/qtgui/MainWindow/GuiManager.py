@@ -113,6 +113,7 @@ class GuiManager:
         self._data_manager = NewDataManager()
         self._data_manager.new_association.connect(self.handleNewAssociation)
         self._data_manager.removed_perspective.connect(self.removed_perspective)
+        self._data_manager.new_perspective.connect(self.new_perspective)
 
         # Create action triggers
         self.addTriggers()
@@ -190,8 +191,6 @@ class GuiManager:
         # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         # TODO: Is this a good opportunity to change this name? dataExplorer would be better I think.
         self.filesWidget = NewDataExplorer(self._data_manager ,self._parent)
-        self.filesWidget.new_perspective.connect(self.new_perspective)
-        self.filesWidget.removed_perspective.connect(self.removed_perspective)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
