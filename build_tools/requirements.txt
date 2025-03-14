@@ -27,7 +27,6 @@ pytools
 qtconsole
 scipy
 siphash24
-six
 sphinx
 superqt
 tinycc
