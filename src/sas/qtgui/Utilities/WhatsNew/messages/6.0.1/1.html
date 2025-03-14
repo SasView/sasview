@@ -1,0 +1,72 @@
+<html>
+<head>
+<!-- INJECT CSS HERE -->
+<style>
+ul {
+list-style: none;
+margin-left: 0;
+padding-left: 0;
+}
+
+li {
+padding-left: 1em;
+text-indent: -1em;
+}
+</style>
+</head>
+<body>
+
+<h2>New in Version 6.0.1</h2>
+<p>This is a bug fix release. All changes are described below.</p>
+<p>This version of SasView is built with Sasmodels v1.0.9, Sasdata v0.9.0, and bumps v0.9.3.</p>
+
+<h2>What's Changed</h2>
+
+<h3>General GUI Fixes</h3>
+<ul>
+<li>Open a pop-up on start-up if a new version is available by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/lucas-wilkins/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/lucas-wilkins">@lucas-wilkins</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2853980320" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3216" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3216/hovercard" href="https://github.com/SasView/sasview/pull/3216">#3216</a></li>
+<li>Removed superfluous signal connection causing duplicate theories by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/rozyczko/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/rozyczko">@rozyczko</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2817588371" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3199" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3199/hovercard" href="https://github.com/SasView/sasview/pull/3199">#3199</a></li>
+<li>Removing data from the context menu now removes it from perspectives by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/rozyczko/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/rozyczko">@rozyczko</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2817588371" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3236" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3236/hovercard" href="https://github.com/SasView/sasview/pull/3236">#3236</a></li>
+</ul>
+
+<h3>Plotting Fixes</h3>
+<ul>
+<li>Fix to ensure default plot scaling matches the plot type by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/krzywon/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/krzywon">@krzywon</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2788346515" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3184" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3184/hovercard" href="https://github.com/SasView/sasview/pull/3184">#3184</a></li>
+<li>Delete intermediate theory plots by tab id not model id. by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/jamescrake-merani/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/jamescrake-merani">@jamescrake-merani</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2744659117" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3160" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3160/hovercard" href="https://github.com/SasView/sasview/pull/3160">#3160</a></li>
+<li>Linear fit no longer causes graph rescaling by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/krzywon/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/krzywon">@krzywon</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2793880716" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3187" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3187/hovercard" href="https://github.com/SasView/sasview/pull/3187">#3187</a></li>
+<li>Fix for errors thrown when modifying tick labels by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/jamescrake-merani/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/jamescrake-merani">@jamescrake-merani</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2798955884" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3191" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3191/hovercard" href="https://github.com/SasView/sasview/pull/3191">#3191</a></li>
+</ul>
+
+<h3>Fitting and Other Perspective Fixes</h3>
+<ul>
+<li>Status bar message does not clear on gsc exit by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/rozyczko/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/rozyczko">@rozyczko</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2789026610" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3185" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3185/hovercard" href="https://github.com/SasView/sasview/pull/3185">#3185</a></li>
+<li>Guard against bad fit results to ensure fit tabs can run new fits by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/rozyczko/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/rozyczko">@rozyczko</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2775549940" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3172" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3172/hovercard" href="https://github.com/SasView/sasview/pull/3172">#3172</a></li>
+<li>A number of model editor bug fixes by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/tsole0/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/tsole0">@tsole0</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2366930577" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/2901" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/2901/hovercard" href="https://github.com/SasView/sasview/pull/2901">#2901</a></li>
+<li>Fix model documentation not showing when plugin folder is empty by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/tsole0/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/krzywon">@krzywon</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2366930577" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/pull/3237" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3237/hovercard" href="https://github.com/SasView/sasview/pull/3237">#3237</a></li>
+<li>Added OpenCL support for the Flatpak release by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/jamescrake-merani/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/jamescrake-merani">@jamescrake-merani</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2744659117" data-permission-text="Title is private" data-url="https://github.com/flathub/org.sasview.sasview/pull/4" data-hovercard-type="pull_request" data-hovercard-url="/flathub/org.sasview.sasview/pull/4/hovercard" href="https://github.com/flathub/org.sasview.sasview/pull/4">#3160</a></li>
+</ul>
+
+<h3>Other Fixes</h3>
+<ul>
+<li>Call the system default csv viewer to allow batch fit results output for any OS by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/summerhenson/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/summerhenson">@summerhenson</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2793159166" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3186" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3186/hovercard" href="https://github.com/SasView/sasview/pull/3186">#3186</a></li>
+<li>Remove a button that did nothing by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/jamescrake-merani/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/jamescrake-merani">@jamescrake-merani</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2858101120" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3217" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3217/hovercard" href="https://github.com/SasView/sasview/pull/3217">#3217</a></li>
+</ul>
+
+<h3>Infrastructure Fixes</h3>
+<ul>
+<li>Fixes to the flatpak metadata by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/jamescrake-merani/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/jamescrake-merani">@jamescrake-merani</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2682311950" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3150" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3150/hovercard" href="https://github.com/SasView/sasview/pull/3150">#3150</a></li>
+<li>Replace the expired OSX Notarization key by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/krzywon/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/krzywon">@krzywon</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2788037055" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3183" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3183/hovercard" href="https://github.com/SasView/sasview/pull/3183">#3183</a></li>
+<li>Include new contributors in the contributor file by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/krzywon/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/krzywon">@krzywon</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2805418583" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3192" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3192/hovercard" href="https://github.com/SasView/sasview/pull/3192">#3192</a></li>
+<li>Fix for sasmodel doc build by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/krzywon/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/krzywon">@krzywon</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2849465764" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3212" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3212/hovercard" href="https://github.com/SasView/sasview/pull/3212">#3212</a></li>
+</ul>
+
+<h2>New Contributors</h2>
+<ul>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/summerhenson/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/summerhenson">@summerhenson</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2793159166" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3186" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3186/hovercard" href="https://github.com/SasView/sasview/pull/3186">#3186</a></li>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/olihammond/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/olihammond">@olihammond</a> made their first contribution by reviewing <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2793159166" data-permission-text="Title is private" data-url="https://github.com/SasView/sasview/issues/3186" data-hovercard-type="pull_request" data-hovercard-url="/SasView/sasview/pull/3186/hovercard" href="https://github.com/SasView/sasview/pull/3186">#3186</a></li>
+</ul>
+
+<p><strong>Full Changelog</strong>: <a class="commit-link" href="https://github.com/SasView/sasview/compare/v6.0.0...v6.0.1">v6.0.0...v6.0.1</a></p>
+
+</body>
+</html>

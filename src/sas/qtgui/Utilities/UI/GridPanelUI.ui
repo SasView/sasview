@@ -118,7 +118,7 @@
   </action>
   <action name="actionOpen_with_Excel">
    <property name="text">
-    <string>Open with Excel</string>
+    <string>Open in CSV Viewer</string>
    </property>
   </action>
   <action name="actionSave">

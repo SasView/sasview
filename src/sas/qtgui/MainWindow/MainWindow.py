@@ -16,6 +16,9 @@ from importlib import resources
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_SasView
+from ..Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
+
+import sas.system.config as config
 
 logger = logging.getLogger(__name__)
 
@@ -75,10 +78,14 @@ def get_highdpi_scaling():
 
 def run_sasview():
 
+    # Check for updates
+    maybe_prompt_new_version_download()
+    config.save()
+
     # Make the event loop interruptable quickly
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    
+
     from PySide6.QtQuick import QSGRendererInterface, QQuickWindow
     QGuiApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     QQuickWindow.setGraphicsApi(QSGRendererInterface.OpenGLRhi)
@@ -88,6 +95,7 @@ def run_sasview():
     app.setAttribute(Qt.AA_ShareOpenGLContexts)
     app.setAttribute(Qt.AA_EnableHighDpiScaling)
     app.setStyleSheet("* {font-size: 11pt;}")
+
 
     splash = SplashScreen()
     splash.show()
