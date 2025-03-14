@@ -73,7 +73,10 @@ class NewDataManager(QObject):
             self.associations.remove(assoc)
         for datum in data_to_remove:
             self.remove_data(datum)
-        self._all_data_entries.remove(data)
+        # As this is a recursive function, its possible that the data could've already been deleted before we get to
+        # this point. This stops errors but I may need to verify this is correct.
+        if data in self._all_data_entries:
+            self._all_data_entries.remove(data)
         self.data_removed.emit()
         if hasattr(data, 'title'):
             self.removed_perspective.emit(data)
