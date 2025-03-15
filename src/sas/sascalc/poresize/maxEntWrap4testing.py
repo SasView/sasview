@@ -1,3 +1,9 @@
+"""
+This module is a temporary module used for Development of this perspective only
+It alows testing the module code without loading a notebook though not clear
+this is needed.
+"""
+
 from maxEnt_method import sizeDistribution
 import plottableHist
 from sasdata.dataloader import data_info
