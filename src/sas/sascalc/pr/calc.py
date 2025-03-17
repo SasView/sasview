@@ -305,10 +305,7 @@ def positive_integral(pars, d_max, nslice):
 
     total = np.sum(np.fabs(values))
     total_pos = np.sum(values[values > 0.0])
-    if total == 0:
-        return 0
-    else:
-        return total_pos / total  # dx cancels
+    return 0 if total == 0 else total_pos / total
 
 @njit('f8(f8[:], f8[:,:], f8, u8)')
 def positive_errors(pars, err, d_max, nslice):
@@ -356,7 +353,4 @@ def rg(pars, d_max, nslice):
 
     total = np.sum(values)
     total_r2 = np.sum((r ** 2) * values)
-    if total == 0:
-        return 0
-    return np.sqrt(total_r2 / (2.0*total))  # dx cancels
-
+    return 0 if total == 0 else np.sqrt(total_r2 / (2.0*total))  # dx cancels
