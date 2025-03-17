@@ -62,10 +62,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
         # Fill in the table from input data
         self.setupTable(widget=self.tblParams, data=output_data)
-        # if output_data is not None:
-        #     # Set a table tooltip describing the model
-        #     model_name = output_data[0][0].model.id
-        #     self.tabWidget.setTabToolTip(0, model_name)
 
     def closeEvent(self, event):
         """
