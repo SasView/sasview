@@ -335,10 +335,7 @@ def positive_errors(pars, err, d_max, nslice):
 
     index = pr_val > pr_val_err
     total_pos = np.sum(pr_val[index])
-    if total == 0:
-        return 0
-    else:
-        return total_pos / total  # dx cancels
+    return 0 if total == 0 else total_pos / total
 
 @njit('f8(f8[:], f8, u8)')
 def rg(pars, d_max, nslice):
