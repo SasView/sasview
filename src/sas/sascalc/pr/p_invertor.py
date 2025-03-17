@@ -455,11 +455,7 @@ class Pinvertor(object):
 
         oscill = calc.reg_term(pars, self.d_max, nslice)
         norm = calc.int_pr_square(pars, self.d_max, nslice)        
-        if norm == 0:
-            ret_val = 0
-        else:
-            ret_val = np.sqrt(oscill/norm) / np.pi * self.d_max
-        return ret_val
+        return 0 if norm == 0 else np.sqrt(oscill/norm) / np.pi * self.d_max
 
     def get_peaks(self, pars):
         """
