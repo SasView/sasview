@@ -950,7 +950,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         param_dict = self.getState()
         param_dict['data_name'] = str(self.logic.data.name)
         param_dict['data_id'] = str(self.logic.data.id)
-        param_dict['tab_id'] = self.currentTabDataId()
+        param_dict['tab_id'] = self.tab_id
         param_dict['tab_name'] = self.currentTabName()
         return param_dict
 
