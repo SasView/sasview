@@ -225,12 +225,13 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         assert(isinstance(table, QtWidgets.QTableWidget))
         params = {}
         for column in range(table.columnCount()):
-            value = list()
+            value = []
             key = table.horizontalHeaderItem(column).data(0)
             for row in range(table.rowCount()):
-                try:
-                    value.append(table.item(row, column).data(0))
-                except:
+                item = table.item(row, column)
+                if item is not None:
+                    value.append(item.data(0))
+                else:
                     value.append(" ")
             params[key] = value
         return params
