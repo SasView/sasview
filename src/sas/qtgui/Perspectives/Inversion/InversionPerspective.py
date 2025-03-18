@@ -173,17 +173,14 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         state = {}
         if index is None:
             index = self.currentIndex()
-        # If data on tab empty - do nothing
-        try:
-            tab = self.tabs[index]        
-            if tab.logic.data_is_loaded:
-                tab_data = tab.getPage()
-                data_id = tab_data.pop('data_id', '')
-                state[data_id] = {'pr_params': tab_data}
-            return state
-        except:
-             return
-            
+        # If data on tab empty - do nothing TODO: Reinstate this check.
+        tab = self.tabs[index]
+        if tab.logic.data_is_loaded:
+            tab_data = tab.getPage()
+            data_id = tab_data.pop('data_id', '')
+            state[data_id] = {'pr_params': tab_data}
+        return state
+
 
     ######################################################################
     # Base Perspective Class Definitions
