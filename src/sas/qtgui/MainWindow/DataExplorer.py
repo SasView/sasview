@@ -622,7 +622,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             for page in params:
             # Check if this set of parameters is for a batch page
                             # if so, skip the update
-                if page['is_batch'][0] == 'True':
+                if 'is_batch' in page and page['is_batch'][0] == 'True':
                     continue
                 tab_index = None
                 if 'tab_index' in page:
