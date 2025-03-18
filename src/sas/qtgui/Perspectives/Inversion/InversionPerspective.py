@@ -156,10 +156,10 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         a dictionary: {data-id: {self.name: {inversion-state}}}
         """
         state = {}
-        index = [tab.tab_id for tab in self.tabs]
+        tab_ids = [tab.tab_id for tab in self.tabs]
         try:          
-            for i in index:              
-                state.update(self.getSerializePage(i))
+            for index, _ in enumerate(tab_ids):
+                state.update(self.getSerializePage(index))
         except TypeError:
             return
         return state
