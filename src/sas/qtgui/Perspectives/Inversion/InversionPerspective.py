@@ -157,11 +157,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         state = {}
         tab_ids = [tab.tab_id for tab in self.tabs]
-        try:          
-            for index, _ in enumerate(tab_ids):
-                state.update(self.getSerializePage(index))
-        except TypeError:
-            return
+        for index, _ in enumerate(tab_ids):
+            state.update(self.getSerializePage(index))
         return state
 
     def serializeCurrentPage(self):
