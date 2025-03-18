@@ -719,7 +719,7 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
 
 
     def resetCalcPrams(self):
-        " resets the calibration prams """
+        """ resets the calibration prams """
         self._calculator.nfunc = self._calculator.nfunc
         self._calculator.set_alpha(self._calculator.regConst)
         self._calculator.set_dmax(self._calculator.d_max)
