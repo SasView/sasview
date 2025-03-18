@@ -160,11 +160,11 @@ class Invertor(Pinvertor):
         elif name == 'y':
             return self.set_y(value)
         elif name == 'err':
-            value2 = abs(value)
-            if None in value:
+            if value is None:
                 msg = "Invertor: Data has no uncertainty. "
                 msg += "Delete that entry before proceeding"
-            return self.set_err(value2)
+            else:
+                return self.set_err(abs(value))
         elif name == 'd_max':
             if value <= 0.0:
                 msg = "Invertor: d_max must be greater than zero."
