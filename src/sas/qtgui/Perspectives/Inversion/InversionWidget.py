@@ -1315,11 +1315,10 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
         #for plot in new_plots:
         #    self.communicate.plotUpdateSignal.emit([plot])
         #    QtWidgets.QApplication.processEvents()
-            
-        # Udpate internals and GUI
-        self.updateDataList(self.data)  
-        
-        
+
+        # TODO: This might break batch processing. Need to verify. But the idea here is that we need to update the GUI
+        # before we updated the data list, and otherwise we end up updating the data list with values from the GUI that
+        # are out of date.
         self.saveToBatchResults()
         if self.is_batch:
             self.batchComplete.append(self.dataList.currentIndex())
@@ -1328,6 +1327,8 @@ class InversionWidget(QtWidgets.QWidget, Ui_PrInversion):
             self.updateGuiValues()
             self.isCalculating = False
             self.enableButtons()
+        # Udpate internals and GUI
+        self.updateDataList(self.data)  
 
 
     def _threadError(self, error):
