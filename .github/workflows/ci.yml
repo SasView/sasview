@@ -302,7 +302,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-20.04 ]
+        os: [ windows-latest, ubuntu-22.04 ]
         python-version: [ 3.11 ]
       fail-fast: false
 
@@ -355,7 +355,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -420,24 +420,44 @@ jobs:
 
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
-          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
+          sudo apt install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
 
       - name: Try running the installation (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu' )}}
         # If sasview has crashed on its own, then this should return an error
         run: |
-          xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW &
-          sleep 60s
-          kill %1
+          (
+            echo "## START SASVIEW"
+            xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW 2>&1 |
+            tee sasview-test.log
+          ) &
+          svpid=$!
+          (
+            set -e
+            sleep 20s
+            echo "## PULSE CHECK"
+            kill -0 $svpid
+            echo "## PULSE OK"
+            sleep 40s
+            echo "## FINISHING SMOKE TEST"
+            kill $svpid
+            echo "## SMOKE TEST COMPLETE"
+            exit 0
+          ) &
+          pulsepid=$1
+          wait $pulsepid
+          # Check the log file for successful startup
+          grep "SasView session started" sasview-test.log
 
       ### Optionally attempt to work with the debug tarball from pyinstaller
 
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}

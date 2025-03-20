@@ -1,5 +1,6 @@
 import numpy
 import copy
+import re
 
 from typing import Optional
 
@@ -8,7 +9,8 @@ from PySide6 import QtGui
 from PySide6 import QtWidgets
 
 from bumps import options
-from bumps import fitters
+
+from sas.system.config import config
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -50,9 +52,6 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 1
 
-        # The default optimizer
-        self.optimizer = 'Levenberg-Marquardt'
-
         # Dataset index -> Fitting tab mapping
         self.dataToFitTab = {}
 
@@ -61,6 +60,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
 
         # The tabs need to be movabe
         self.setMovable(True)
+
+        # Remember the last tab closed
+        self.lastTabClosed = None
+        self.installEventFilter(self)
 
         self.communicate = self.parent.communicator()
 
@@ -79,7 +82,8 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         # Fit options - uniform for all tabs
         self.fit_options = options.FIT_CONFIG
         self.fit_options_widget = FittingOptions(config=self.fit_options)
-        self.fit_options.selected_id = fitters.MPFit.id
+        self.fit_options.selected_id = config.config.FITTING_DEFAULT_OPTIMIZER
+        self.optimizer = self.fit_options.selected_name
 
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
@@ -96,6 +100,14 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.plusButton.setToolTip("Add a new Fit Page")
         self.plusButton.clicked.connect(lambda: self.addFit(None))
 
+    def eventFilter(self, widget, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            key = event.key()
+            # check for Ctrl-T press
+            if key == QtCore.Qt.Key_T and event.modifiers() == QtCore.Qt.ControlModifier:
+                self.addClosedTab()
+                return True
+        return QtCore.QObject.eventFilter(self, widget, event)
 
     def updateWindowTitle(self):
         """
@@ -261,7 +273,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
-        self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
+        self.maxIndex = self.nextAvailableTabIndex()
 
         icon = QtGui.QIcon()
         if is_batch:
@@ -269,6 +281,34 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         self.addTab(tab, icon, tab_name)
         # Show the new tab
         self.setCurrentWidget(tab)
+        # Notify listeners
+        self.tabsModifiedSignal.emit()
+
+    def nextAvailableTabIndex(self):
+        """
+        Returns the index of the next available tab
+        """
+        return max((tab.tab_id for tab in self.tabs), default=0) + 1
+
+    def addClosedTab(self):
+        """
+        Recover the deleted tab.
+        The tab is held in self.lastTabClosed
+        """
+        if self.lastTabClosed is None:
+            return
+        tab = self.lastTabClosed
+        icon = QtGui.QIcon()
+        # tab_name = self.getTabName()
+        tab_name = "FitPage" + str(tab.tab_id)
+        ObjectLibrary.addObject(tab_name, tab)
+        self.addTab(tab, icon, tab_name)
+        # Update the list of tabs
+        self.tabs.append(tab)
+        # Show the new tab
+        self.setCurrentWidget(tab)
+        # lastTabClosed is no longer valid
+        self.lastTabClosed = None
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
@@ -326,7 +366,10 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         try:
             ObjectLibrary.deleteObjectByRef(self.tabs[index])
             self.removeTab(index)
-            del self.tabs[index]
+            # can't just delete the tab, since we still hold a reference to it
+            # del self.tabs[index]
+            # Instead, we just recreate self.tabs without the deleted tab
+            self.tabs = [tab for tab in self.tabs if tab is not self.tabs[index]]
             self.tabsModifiedSignal.emit()
         except IndexError:
             # The tab might have already been deleted previously
@@ -349,8 +392,15 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         Update local bookkeeping on tab close
         """
+        # update the last-tab closed information
+        # this should be done only for regular fitting
+        if not isinstance(self.tabs[index], ConstraintWidget) and \
+              not self.tabs[index].is_batch_fitting:
+            self.lastTabClosed = self.tabs[index]
+
         # don't remove the last tab
         if len(self.tabs) <= 1:
+            # remove the tab from the tabbed group
             self.resetTab(index)
             return
         self.closeTabByIndex(index)
@@ -377,6 +427,9 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 if index_to_delete_str in tab_key:
                     for tab_name in orig_dict[tab_key]:
                         self.closeTabByName(tab_name)
+                        # assure that lastTabClosed is null if it references the deleted data
+                        if self.lastTabClosed and tab_name == "FitPage"+str(self.lastTabClosed.tab_id):
+                                self.lastTabClosed = None
                     self.dataToFitTab.pop(tab_key)
 
     def allowBatch(self):
@@ -434,7 +487,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
                 return
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
-                self.tabs[first_good_tab].data = data
+                self.tabs[first_good_tab].dataFromItems(data)
                 tab_name = str(self.tabText(first_good_tab))
                 self.updateFitDict(data, tab_name)
             else:
@@ -456,7 +509,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             msg = "Data in Batch Fitting cannot be swapped"
             raise RuntimeError(msg)
 
-        self.currentTab.data = data
+        self.currentTab.dataFromItems(data)
         tab_name = str(self.tabText(self.currentIndex()))
         self.updateFitDict(data, tab_name)
 
@@ -574,7 +627,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         """
         assert isinstance(name, str)
         for tab in self.tabs:
-            if tab.modelName() == name:
+            if hasattr(tab, 'modelName') and tab.modelName() == name:
                 return tab
         return None
 

@@ -13,8 +13,6 @@ import py_compile
 import shutil
 import io
 
-from six import reraise
-
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
 from sas.system.user import get_user_dir
@@ -139,7 +137,7 @@ class ReportProblem(object):
         type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
             print("Problem with", repr(value))
-            reraise(type, value, tb)
+            raise value
         return 1
 
 report_problem = ReportProblem()

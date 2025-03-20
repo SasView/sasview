@@ -34,7 +34,8 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
@@ -204,6 +205,7 @@ class GuiManager:
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
+        self.MuMag_Fitter = MuMag(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.GENSASCalculator = None
@@ -369,10 +371,13 @@ class GuiManager:
         """
         pass
 
-    def showHelp(self, url):
+    @classmethod
+    def showHelp(cls, url):
         """
         Open a local url in the default browser
         """
+        counter = 1
+        window_name = "help_window"
         # Remove leading forward slashes from relative paths to allow easy Path building
         if isinstance(url, str):
             url = url.lstrip("//")
@@ -382,8 +387,19 @@ class GuiManager:
         else:
             url_abs = Path(url)
         try:
-            # Help window shows itself
-            self.helpWindow = DocViewWindow(parent=self, source=url_abs)
+            # In order to have multiple help windows open simultaneously, we need to create a new class variable
+            # If we just reassign the old one, the old window will be destroyed
+            
+            # Have we found a name not assigned to a window?
+            potential_help_window = getattr(cls, window_name, None) 
+            while potential_help_window and potential_help_window.isVisible():
+                window_name = f"help_window_{counter}"
+                potential_help_window = getattr(cls, window_name, None)
+                counter += 1
+            
+            # Assign new variable to the GuiManager
+            setattr(cls, window_name, GuiUtils.showHelp(url_abs))
+
         except Exception as ex:
             logging.warning("Cannot display help. %s" % ex)
 
@@ -582,6 +598,7 @@ class GuiManager:
 
             # save the paths etc.
             self.saveCustomConfig()
+            self.communicate.closeSignal.emit()
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -676,7 +693,7 @@ class GuiManager:
         """
         Method defining all signal connections for the gui manager
         """
-        self.communicate = GuiUtils.Communicate()
+        self.communicate = GuiUtils.communicate
         self.communicate.fileDataReceivedSignal.connect(self.fileWasRead)
         self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
         self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
@@ -701,8 +718,12 @@ class GuiManager:
         self._workspace.actionStartup_Settings.setVisible(False)
         #self._workspace.actionImage_Viewer.setVisible(False)
         self._workspace.actionCombine_Batch_Fit.setVisible(False)
-        # orientation viewer set to invisible SASVIEW-1132
-        self._workspace.actionOrientation_Viewer.setVisible(True)
+
+        # Show orientation viewer menu item only if not running Linux/Wayland
+        if "XDG_SESSION_TYPE" in os.environ and os.environ["XDG_SESSION_TYPE"] == "wayland":
+            self._workspace.actionOrientation_Viewer.setVisible(False)
+        else:
+            self._workspace.actionOrientation_Viewer.setVisible(True)
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
@@ -736,6 +757,7 @@ class GuiManager:
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
         self._workspace.actionDensity_Volume_Calculator.triggered.connect(self.actionDensity_Volume_Calculator)
         self._workspace.actionKeissig_Calculator.triggered.connect(self.actionKiessig_Calculator)
+        self._workspace.actionMuMag_Fitter.triggered.connect(self.actionMuMag_Fitter)
         #self._workspace.actionKIESSING_Calculator.triggered.connect(self.actionKIESSING_Calculator)
         self._workspace.actionSlit_Size_Calculator.triggered.connect(self.actionSlit_Size_Calculator)
         self._workspace.actionSAS_Resolution_Estimator.triggered.connect(self.actionSAS_Resolution_Estimator)
@@ -1022,6 +1044,11 @@ class GuiManager:
         """
         self.KIESSIGCalculator.show()
 
+    def actionMuMag_Fitter(self):
+        """
+        """
+        self.MuMag_Fitter.show()
+
     def actionSlit_Size_Calculator(self):
         """
         """
@@ -1045,6 +1072,8 @@ class GuiManager:
             if self.GENSASCalculator is None:
                 self.GENSASCalculator = GenericScatteringCalculator(self)
             self.GENSASCalculator.show()
+            self.updateStatusBar("The Generic Scattering Calculator is open, but it sometimes opens behind the main "
+                                 "window.")
         except Exception as ex:
             logging.error(str(ex))
             return
@@ -1148,7 +1177,7 @@ class GuiManager:
         Show bumps convergence plots
         """
         self.results_frame.setVisible(True)
-        if output_data:
+        if output_data and len(output_data) > 0 and len(output_data[0]) > 0:
             self.results_panel.onPlotResults(output_data, optimizer=self.perspective().optimizer)
 
     def actionAdd_Custom_Model(self):
