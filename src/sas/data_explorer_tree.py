@@ -42,7 +42,9 @@ class DataExplorerTree(QTreeWidget):
         pass
 
     def addToTable(self, datum: TrackedData):
-        pass
+        item = QTreeWidgetItem([tracked_data_name(datum)])
+        item.setData(0, Qt.ItemDataRole.UserRole, datum)
+        self.addTopLevelItem(item)
 
     def removeFromTable(self, datum: TrackedData):
         pass
