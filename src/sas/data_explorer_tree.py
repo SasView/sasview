@@ -30,6 +30,23 @@ class DataExplorerTree(QTreeWidget):
         _ = self.customContextMenuRequested.connect(self.showContextMenu)
         self.headerItem().setHidden(True)
 
+    def initTable(self):
+        self.clear()
+        self.setColumnCount(1)
+        self.header().setStretchLastSection(True)
+
+    # These methods are designed to listen to updates coming from the data explorer. They will eventually replace the
+    # 'buildTable' function.
+
+    def updateAssociation(self, datum1: TrackedData, datum2: TrackedData):
+        pass
+
+    def addToTable(self, datum: TrackedData):
+        pass
+
+    def removeFromTable(self, datum: TrackedData):
+        pass
+
     def buildTable(self):
         self.clear()
         self.setColumnCount(1)
