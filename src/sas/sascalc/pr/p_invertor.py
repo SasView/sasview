@@ -30,13 +30,14 @@ class Pinvertor(object):
     #Slit width in units of q [A-1]
     slit_width = 0.0
 
-    def __init__(self):
+    def __init__(self):            
+        
         #Maximum distance between any two points in the system
         self.set_dmax(180)
         #Minimum q to include in inversion
-        self.set_qmin(-1.0)
+        self.set_q_min(0)
         #Maximum q to include in inversion
-        self.set_qmax(-1.0)
+        self.set_q_max(np.inf)
         #Flag for whether or not to evaluate a constant background
         #while inverting
         self.set_est_bck(0)
@@ -189,7 +190,7 @@ class Pinvertor(object):
         """
         return self._d_max
 
-    def set_qmin(self, min_q):
+    def set_q_min(self, min_q):
         """
         Sets the minimum q.
 
@@ -199,7 +200,7 @@ class Pinvertor(object):
         self._q_min = np.float64(min_q)
         return self._q_min
 
-    def get_qmin(self):
+    def get_q_min(self):
         """
         Gets the minimum q.
 
@@ -207,7 +208,7 @@ class Pinvertor(object):
         """
         return self._q_min
 
-    def set_qmax(self, max_q):
+    def set_q_max(self, max_q):
         """
         Sets the maximum q.
 
@@ -217,12 +218,13 @@ class Pinvertor(object):
         self._q_max = np.float64(max_q)
         return self._q_max
 
-    def get_qmax(self):
+    def get_q_max(self):
         """
         Gets the maximum q.
 
         :return: q_max.
         """
+        
         return self._q_max
 
     def set_alpha(self, alpha):
@@ -452,10 +454,8 @@ class Pinvertor(object):
         pars = np.atleast_1d(pars)
 
         oscill = calc.reg_term(pars, self.d_max, nslice)
-        norm = calc.int_pr_square(pars, self.d_max, nslice)
-        ret_val = np.sqrt(oscill/norm) / np.pi * self.d_max
-
-        return ret_val
+        norm = calc.int_pr_square(pars, self.d_max, nslice)        
+        return 0 if norm == 0 else np.sqrt(oscill/norm) / np.pi * self.d_max
 
     def get_peaks(self, pars):
         """
@@ -543,9 +543,9 @@ class Pinvertor(object):
 
         :return: 1 if accepted, 0 if rejected.
         """
-        if self.get_qmin() <= 0 and self.get_qmax() <= 0:
+        if self.get_q_min() <= 0 and self.get_q_max() <= 0:
             return True
-        return (q >= self.get_qmin()) & (q <= self.get_qmax())
+        return (q >= self.get_q_min()) & (q <= self.get_q_max())
 
     def check_for_zero(self, x):
         return (x == 0).any()
@@ -567,7 +567,7 @@ class Pinvertor(object):
         a_obj = np.zeros([self.npoints + nr, nfunc])
         b_obj = np.zeros(self.npoints + nr)
 
-        sqrt_alpha = np.sqrt(self.alpha)
+        sqrt_alpha = np.sqrt(math.fabs(self.alpha))
         pi = np.pi
         offset = (1, 0)[self.est_bck == 1]
 

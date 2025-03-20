@@ -442,7 +442,7 @@ class TestBasicComponent(unittest.TestCase):
         self.assertEqual(self.invertor.q_min, 1.0)
 
         self.invertor.q_min = None
-        self.assertEqual(self.invertor.q_min, None)
+        self.assertEqual(self.invertor.q_min, 0.0)
 
 
     def test_qmax(self):
@@ -450,7 +450,7 @@ class TestBasicComponent(unittest.TestCase):
         self.assertEqual(self.invertor.q_max, 1.0)
 
         self.invertor.q_max = None
-        self.assertEqual(self.invertor.q_max, None)
+        self.assertEqual(self.invertor.q_max, numpy.inf)
 
 class TestErrorConditions(unittest.TestCase):
 

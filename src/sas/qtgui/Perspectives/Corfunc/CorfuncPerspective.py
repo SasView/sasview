@@ -468,6 +468,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
         self.data = data
+        if not isinstance(self.data, Data1D):
+            msg = "Invariant cannot be computed with 2D data."
+            raise ValueError(msg)
         self._model_item = model_item
 
         self.model.itemChanged.disconnect(self.model_changed)
