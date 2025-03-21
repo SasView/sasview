@@ -38,7 +38,10 @@ class DataExplorerTree(QTreeWidget):
     # These methods are designed to listen to updates coming from the data explorer. They will eventually replace the
     # 'buildTable' function.
 
-    def updateAssociation(self, datum1: TrackedData, datum2: TrackedData):
+    def addAssociation(self, datum1: TrackedData, datum2: TrackedData):
+        pass
+
+    def removeAssociation(self, datum1: TrackedData, datum2: TrackedData):
         pass
 
     def addToTable(self, datum: TrackedData):
