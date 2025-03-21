@@ -46,8 +46,17 @@ class DataExplorerTree(QTreeWidget):
         item.setData(0, Qt.ItemDataRole.UserRole, datum)
         self.addTopLevelItem(item)
 
-    def removeFromTable(self, datum: TrackedData):
-        pass
+    def removeFromTable(self, datum: TrackedData, starting_root: QTreeWidgetItem | None):
+        root = self.invisibleRootItem() if starting_root is None else starting_root
+        # TODO: This assumes that, if the root item is to be deleted, all of its children have already been deleted.
+        # This may be the right assumption to make but I need to verify this.
+        for i in range(root.childCount()):
+            item = root.child(i)
+            item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
+            if item_datum == datum:
+                root.removeChild(item)
+            elif item.childCount() != 0:
+                self.removeFromTable(datum, starting_root)
 
     def buildTable(self):
         self.clear()
