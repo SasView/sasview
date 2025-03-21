@@ -1,4 +1,3 @@
-from cgitb import reset
 from typing_extensions import cast
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
@@ -39,7 +38,18 @@ class DataExplorerTree(QTreeWidget):
     # 'buildTable' function.
 
     def addAssociation(self, datum1: TrackedData, datum2: TrackedData):
-        pass
+        # TODO: Order of data is assumed which may not be true.
+        root = self.invisibleRootItem()
+        for i in range(root.childCount()):
+            item = root.child(i)
+            # FIXME: Repetition
+            item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
+            if item_datum == datum1:
+                new_assoc_item = QTreeWidgetItem([tracked_data_name(datum2)])
+                new_assoc_item.setData(0, Qt.ItemDataRole.UserRole, datum2)
+                item.addChild(new_assoc_item)
+                # By breaking here, we are assuming there are no more top level datum1 items in the tree.
+                break
 
     def removeAssociation(self, datum1: TrackedData, datum2: TrackedData):
         pass
