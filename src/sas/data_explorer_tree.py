@@ -52,21 +52,25 @@ class DataExplorerTree(QTreeWidget):
                 break
 
     def removeAssociation(self, datum1: TrackedData, datum2: TrackedData):
-        pass
+        # TODO: Again, order.
+        self.removeFromTable(datum2, root_datum=datum1)
+
 
     def addToTable(self, datum: TrackedData):
         item = QTreeWidgetItem([tracked_data_name(datum)])
         item.setData(0, Qt.ItemDataRole.UserRole, datum)
         self.addTopLevelItem(item)
 
-    def removeFromTable(self, datum: TrackedData, starting_root: QTreeWidgetItem | None):
+    def removeFromTable(self, datum: TrackedData, starting_root: QTreeWidgetItem | None = None, root_datum: TrackedData | None = None):
+        """The root_datum param is needed when you want to delete something from the tree that has a certain root item.
+        This is mostly useful for getting rid of associations."""
         root = self.invisibleRootItem() if starting_root is None else starting_root
         # TODO: This assumes that, if the root item is to be deleted, all of its children have already been deleted.
         # This may be the right assumption to make but I need to verify this.
         for i in range(root.childCount()):
             item = root.child(i)
             item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
-            if item_datum == datum:
+            if item_datum == datum and (not root_datum is None or root_datum == root.data(0, Qt.ItemDataRole.UserRole)):
                 root.removeChild(item)
             elif item.childCount() != 0:
                 self.removeFromTable(datum, starting_root)
