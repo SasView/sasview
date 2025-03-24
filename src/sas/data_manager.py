@@ -56,7 +56,7 @@ class NewDataManager(QObject):
         if hasattr(data, 'title'):
             self._number_perspective(data)
             self.new_perspective.emit(data)
-        self.new_data.emit()
+        self.new_data.emit(data)
 
     def remove_data(self, data: TrackedData):
         # We shouldn't be able to remove tracked data if its in an association
