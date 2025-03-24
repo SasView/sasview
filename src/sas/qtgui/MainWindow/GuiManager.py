@@ -78,7 +78,7 @@ import sas
 from sas import config
 from sas.system import web
 from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
-from src.sas.data_manager import NewDataManager
+from src.sas.data_manager import NewDataManager, TrackedData
 from src.sas.refactored_data_explorer import NewDataExplorer
 
 logger = logging.getLogger(__name__)
@@ -151,18 +151,15 @@ class GuiManager:
         if self.WhatsNew.has_new_messages():
             self.actionWhatsNew()
 
-    def handleNewAssociation(self):
+    def handleNewAssociation(self, datum1: TrackedData, datum2: TrackedData):
         # If any perspectives have new data/lost data, then they need to be notified.
 
-        # TODO: Is it reasonable to assume that this new association is the last
-        # one? Alternative is passing it around as QObjects but this could get
-        # messy.
-        new_association = self._data_manager.associations[-1]
+        new_association_tuple = (datum1, datum2)
         for perspective in self._data_manager.all_perspectives:
-            if perspective in new_association:
+            if perspective in new_association_tuple:
                 perspective.newAssocation()
 
-        self.filesWidget.tree_view.buildTable()
+        self.filesWidget.tree_view.addAssociation(datum1, datum2)
 
 
     def info(self, type, value, tb):
