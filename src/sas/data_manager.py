@@ -29,9 +29,10 @@ class NewDataManager(QObject):
     # Don't mutate these directly, or scary bad stuff will happen.
     _all_data_entries: list[TrackedData]
     associations: list[tuple[TrackedData, TrackedData]]
-    new_data: Signal = Signal()
-    data_removed: Signal = Signal()
-    new_association: Signal = Signal()
+    # These all take in 'object' because PySide6 can't handle handle having
+    new_data: Signal = Signal(object)
+    data_removed: Signal = Signal(object)
+    new_association: Signal = Signal(object, object)
     new_perspective: Signal = Signal(QDialog)
     removed_perspective: Signal = Signal(QDialog)
 
@@ -96,7 +97,7 @@ class NewDataManager(QObject):
         if any([assoc == proposed_assoc for assoc in self.associations]):
             raise ValueError('An assocation of these types already exists.')
         self.associations.append(proposed_assoc)
-        self.new_association.emit()
+        self.new_association.emit(data_1, data_2)
 
     def get_association(self, data: TrackedData) -> TrackedData:
         for assoc in self.associations:
