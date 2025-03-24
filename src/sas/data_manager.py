@@ -78,7 +78,7 @@ class NewDataManager(QObject):
         # this point. This stops errors but I may need to verify this is correct.
         if data in self._all_data_entries:
             self._all_data_entries.remove(data)
-        self.data_removed.emit()
+        self.data_removed.emit(data)
         if hasattr(data, 'title'):
             self.removed_perspective.emit(data)
     # TODO: Remove data on a list. So that we could remove a perspective, and
