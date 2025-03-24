@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog
 from PySide6.QtCore import QObject, Signal
 from sasdata.data import SasData
 
