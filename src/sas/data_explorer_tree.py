@@ -73,7 +73,7 @@ class DataExplorerTree(QTreeWidget):
             if item_datum == datum and (not root_datum is None or root_datum == root.data(0, Qt.ItemDataRole.UserRole)):
                 root.removeChild(item)
             elif item.childCount() != 0:
-                self.removeFromTable(datum, starting_root)
+                self.removeFromTable(datum, item)
 
     def buildTable(self):
         self.clear()
