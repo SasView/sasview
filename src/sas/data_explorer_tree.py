@@ -21,8 +21,8 @@ class DataExplorerTree(QTreeWidget):
     def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
-        _ = self._data_manager.new_data.connect(self.buildTable)
-        _ = self._data_manager.data_removed.connect(self.buildTable)
+        _ = self._data_manager.new_data.connect(self.addToTable)
+        _ = self._data_manager.data_removed.connect(self.removeFromTable)
 
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
