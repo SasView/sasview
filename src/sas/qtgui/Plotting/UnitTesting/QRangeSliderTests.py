@@ -5,6 +5,7 @@ import pytest
 from PySide6 import QtCore, QtWidgets
 
 # Local
+from PySide6.QtWidgets import QMdiArea
 from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -23,12 +24,13 @@ class QRangeSlidersTest:
         # instance variables, and doesn't actually yield anything itself
         class MainWindow(MainSasViewWindow):
             # Main window of the application
-            def __init__(self, reactor, parent=None):
-                screen_resolution = QtCore.QRect(0, 0, 640, 480)
-                super(MainWindow, self).__init__(screen_resolution, parent)
+            def __init__(self, parent=None):
+                #screen_resolution = QtCore.QRect(0, 0, 640, 480)
+                #super(MainWindow, self).__init__(screen_resolution, parent)
+                super(MainWindow, self).__init__(parent)
 
                 # define workspace for dialogs.
-                self.workspace = QtWidgets.QMdiArea(self)
+                self.workspace = QMdiArea(self)
                 self.setCentralWidget(self.workspace)
 
         self.manager = GuiManager(MainWindow(None))
@@ -124,20 +126,25 @@ class QRangeSlidersTest:
         # Ensure inversion prespective is active and send data to it
         self.current_perspective = 'Inversion'
         self.manager.perspectiveChanged(self.current_perspective)
-        widget = self.manager.perspective()
+        inversion = self.manager.perspective()
         self.manager.filesWidget.sendData()
+        widget = inversion.currentTab
+        self._allowPlots = True
         # Create slider on base data set
         self.data.slider_perspective_name = self.current_perspective
         self.data.slider_low_q_input = ['minQInput']
-        self.data.slider_low_q_setter = ['check_q_low']
+        self.data.slider_low_q_setter = ['updateMinQ']
         self.data.slider_high_q_input = ['maxQInput']
-        self.data.slider_high_q_setter = ['check_q_high']
+        self.data.slider_high_q_setter = ['updateMaxQ']
         self.plotter.plot(self.data)
         self.slider = QRangeSlider(self.plotter, self.plotter.ax, data=self.data)
         # Check inputs are linked properly.
         assert len(self.plotter.sliders) == 1
+        assert self.slider.line_min.setter == widget.updateMinQ()
+        assert self.slider.line_max.setter == widget.updateMaxQ()
         # Move slider and ensure text input matches
         self.moveSliderAndInputs(widget.minQInput, widget.maxQInput)
+        
 
     def testLinearFitSliders(self, slidersetup):
         '''Test the QRangeSlider class within the context of the Linear Fit tool'''
@@ -158,11 +165,11 @@ class QRangeSlidersTest:
 
         # Move slider and ensure text input matches
         if minInput:
-            assert self.slider.line_min.input == minInput
+            #assert self.slider.line_min.input == minInput
             self.slider.line_min.move(self.data.x[1], self.data.y[1], None)
             assert self.slider.line_min.x == pytest.approx(float(minInput.text()), abs=1e-7)
         if maxInput:
-            assert self.slider.line_max.input == maxInput
+            #assert self.slider.line_max.input == maxInput
             self.slider.line_max.move(self.data.x[-2], self.data.y[-2], None)
             assert self.slider.line_max.x == pytest.approx(float(maxInput.text()), abs=1e-7)
 

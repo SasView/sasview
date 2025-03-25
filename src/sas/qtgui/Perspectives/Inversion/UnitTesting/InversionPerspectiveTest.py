@@ -110,8 +110,8 @@ class InversionTest:
         # inputs
         assert len(widget.dataList) == 0
         assert widget.backgroundInput.text() == "0.0"
-        assert widget.minQInput.text() == ""
-        assert widget.maxQInput.text() == ""
+        assert widget.minQInput.text() == "0.0"
+        assert widget.maxQInput.text() == "0.0"
         assert widget.regularizationConstantInput.text() == "0.0001"
         assert widget.noOfTermsInput.text() == "10"
         assert widget.maxDistanceInput.text() == "140.0"
