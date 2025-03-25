@@ -515,11 +515,11 @@ class GuiUtilsTest:
 
         s = ".. |Ang| unicode:: U+212B"
         assert rstToHtml(s) == ('Ang', 'Å')
-        s = ".. |Ang^-1| replace:: |Ang|\ :sup:`-1`"
+        s = r".. |Ang^-1| replace:: |Ang|\ :sup:`-1`"
         assert rstToHtml(s) == ('Ang^-1', 'Å<sup>-1</sup>')
-        s = ".. |1e-6Ang^-2| replace:: 10\ :sup:`-6`\ |Ang|\ :sup:`-2`"
+        s = r".. |1e-6Ang^-2| replace:: 10\ :sup:`-6`\ |Ang|\ :sup:`-2`"
         assert rstToHtml(s) == ('1e-6Ang^-2', '10<sup>-6</sup> Å<sup>-2</sup>')
-        s = ".. |cm^-1| replace:: cm\ :sup:`-1`"
+        s = r".. |cm^-1| replace:: cm\ :sup:`-1`"
         assert rstToHtml(s) == ('cm^-1', 'cm<sup>-1</sup>')
         s = ".. |deg| unicode:: U+00B0"
         assert rstToHtml(s) == ('deg', '°')
@@ -532,7 +532,7 @@ class GuiUtilsTest:
     def testConvertUnitToHTML(self):
         ''' test unit string replacement'''
         s = None
-        assert convertUnitToHTML(s) is ""
+        assert convertUnitToHTML(s) == ""
 
         s = ""
         assert convertUnitToHTML(s) == s
