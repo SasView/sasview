@@ -79,21 +79,6 @@ class DataExplorerTree(QTreeWidget):
         for item in to_remove:
             root.removeChild(item)
 
-    def buildTable(self):
-        self.clear()
-        self.setColumnCount(1)
-        self.header().setStretchLastSection(True)
-        for datum in self._data_manager.all_data:
-            item = QTreeWidgetItem([tracked_data_name(datum)])
-            item.setData(0, Qt.ItemDataRole.UserRole, datum)
-            # TODO: Dodgy placeholder test for Perspective.
-            if hasattr(datum, 'title'):
-                for assoc_datum in datum.associatedData:
-                    assoc_item = QTreeWidgetItem([tracked_data_name(assoc_datum)])
-                    assoc_item.setData(0, Qt.ItemDataRole.UserRole, assoc_datum)
-                    item.addChild(assoc_item)
-            self.addTopLevelItem(item)
-
     def showContextMenu(self):
         send_to = all([isinstance(datum, SasData) for datum in self.currentTrackedData])
         menu = DataExplorerMenu(self, self._data_manager, send_to)
