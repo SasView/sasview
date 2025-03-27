@@ -52,6 +52,15 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def currentResult(self) -> InversionResult:
         return self.results[self.currentDataIndex]
 
+    # TODO: I don't know if 'float' is the right type hint.
+    @property
+    def q_max(self) -> float:
+        return self.currentResult.calculator.q_max
+
+    @property
+    def q_min(self) -> float:
+        return self.currentResult.calculator.q_min
+
     def enableButtons(self):
         """
         Enable buttons when data is present, else disable them
@@ -74,3 +83,6 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.noOfTermsSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
+
+    def updateGuiValues(self):
+        # TODO: This won't work for batch at the moment.
