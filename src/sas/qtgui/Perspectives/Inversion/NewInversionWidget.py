@@ -36,6 +36,14 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def is_batch(self):
         return len(self.results) > 1
 
+    @property
+    def currentDataIndex(self):
+        return self.dataList.currentIndex()
+
+    @property
+    def currentResult(self):
+        return self.results[self.currentDataIndex]
+
     def enableButtons(self):
         """
         Enable buttons when data is present, else disable them
