@@ -57,6 +57,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
         self.showResultsButton.setEnabled(self.currentResult.logic.data_is_loaded
                                           and self.is_batch
+                                          # FIXME: I will probably change how
+                                          # batchResultsWindow is going to work.
+                                          # This will need to change.
                                           and not self.isCalculating and self.batchResultsWindow is not None)
         self.removeButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.explorerButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
