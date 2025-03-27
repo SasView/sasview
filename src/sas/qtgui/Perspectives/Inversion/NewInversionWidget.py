@@ -28,7 +28,12 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # We're going to use this structure even if we're just dealing with one
         # specific datum. Just that this dictionary would then have one item in
         # it.
-        self.results: list[InversionResult] = []
+        self.results: list[InversionResult] = [
+            InversionResult(logic=InversionLogic(),
+                            calculator=Invertor(),
+                            pr_plot=None,
+                            data_plot=None)
+        ]
 
         self.isCalculating: bool = False
 
