@@ -11,8 +11,8 @@ from src.sas.sascalc.pr.invertor import Invertor
 class InversionResult:
     logic: InversionLogic
     calculator: Invertor
-    pr_plot: Data1D
-    data_plot: Data1D
+    pr_plot: Data1D | None
+    data_plot: Data1D | None
 
 
 class NewInversionWidget(QWidget, Ui_PrInversion):
