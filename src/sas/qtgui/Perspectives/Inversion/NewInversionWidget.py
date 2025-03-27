@@ -24,6 +24,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
         self.parent = parent
         self.tab_name = tab_name
+        self.tab_id = tab_id
 
         # We're going to use this structure even if we're just dealing with one
         # specific datum. Just that this dictionary would then have one item in
