@@ -8,7 +8,7 @@ from src.sas.qtgui.Plotting.PlotterData import Data1D
 from src.sas.sascalc.pr.invertor import Invertor
 
 @dataclass
-class InversionBatchResult:
+class InversionResult:
     logic: InversionLogic
     calculator: Invertor
     pr_plot: Data1D
@@ -28,13 +28,13 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
        # We're going to use this structure even if we're just dealing with one
        # specific datum. Just that this dictionary would then have one item in
        # it.
-       self.batchResults: list[InversionBatchResult] = []
+       self.results: list[InversionResult] = []
 
        self.isCalculating: bool = False
 
     @property
     def is_batch(self):
-        return len(self.batchResults) > 1
+        return len(self.results) > 1
 
     def enableButtons(self):
         """
