@@ -20,17 +20,17 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     # perspective, I'm not convinced they are needed here.
 
     def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
-       super().__init__()
+        super().__init__()
 
-       self.parent = parent
-       self.tab_name = tab_name
+        self.parent = parent
+        self.tab_name = tab_name
 
-       # We're going to use this structure even if we're just dealing with one
-       # specific datum. Just that this dictionary would then have one item in
-       # it.
-       self.results: list[InversionResult] = []
+        # We're going to use this structure even if we're just dealing with one
+        # specific datum. Just that this dictionary would then have one item in
+        # it.
+        self.results: list[InversionResult] = []
 
-       self.isCalculating: bool = False
+        self.isCalculating: bool = False
 
     @property
     def is_batch(self):
