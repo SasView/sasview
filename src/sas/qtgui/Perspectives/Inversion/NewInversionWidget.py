@@ -32,6 +32,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
        self.isCalculating: bool = False
 
+    @property
+    def is_batch(self):
+        return len(self.batchResults) > 1
 
     def enableButtons(self):
         """
