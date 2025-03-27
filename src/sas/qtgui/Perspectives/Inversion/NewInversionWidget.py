@@ -20,7 +20,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     # perspective, I'm not convinced they are needed here.
 
     def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
-        super().__init__()
+        super(NewInversionWidget, self).__init__()
 
         self.parent = parent
         self.tab_name = tab_name
