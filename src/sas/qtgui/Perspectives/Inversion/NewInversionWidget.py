@@ -19,10 +19,11 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     # The old class had 'name' and 'ext'. Since this class doesn't inherit from
     # perspective, I'm not convinced they are needed here.
 
-    def __init__(self, parent=None, data=None, tab_id=1):
+    def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
        super().__init__()
 
        self.parent = parent
+       self.tab_name = tab_name
 
        # We're going to use this structure even if we're just dealing with one
        # specific datum. Just that this dictionary would then have one item in
