@@ -49,17 +49,17 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         Enable buttons when data is present, else disable them
         """
         self.calculateAllButton.setEnabled(not self.isCalculating
-                                           and self.logic.data_is_loaded and self.is_batch)
-        self.calculateThisButton.setEnabled(self.logic.data_is_loaded
+                                           and self.currentResult.logic.data_is_loaded and self.is_batch)
+        self.calculateThisButton.setEnabled(self.currentResult.logic.data_is_loaded
                                             and not self.isCalculating and not self.is_batch)
         self.calculateThisButton.setVisible(not self.is_batch and not self.isCalculating)
         self.calculateAllButton.setVisible(self.is_batch and not self.isCalculating)
 
-        self.showResultsButton.setEnabled(self.logic.data_is_loaded
+        self.showResultsButton.setEnabled(self.currentResult.logic.data_is_loaded
                                           and self.is_batch
                                           and not self.isCalculating and self.batchResultsWindow is not None)
-        self.removeButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
-        self.explorerButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.removeButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
+        self.explorerButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
         self.stopButton.setVisible(self.isCalculating)
-        self.regConstantSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
-        self.noOfTermsSuggestionButton.setEnabled(self.logic.data_is_loaded and not self.isCalculating)
+        self.regConstantSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
+        self.noOfTermsSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
