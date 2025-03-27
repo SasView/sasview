@@ -8,6 +8,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 # sas-global
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from src.sas.qtgui.Perspectives.Inversion.NewInversionWidget import NewInversionWidget
 
 # pr inversion GUI elements
 from .InversionUtils import WIDGETS
@@ -408,7 +409,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             self.maxIndex = tab_index
         
         # Create tab
-        tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
+        # tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
+        tab = NewInversionWidget(self.parent, data, tab_index)
         tab_name = self.getTabName(is_batch=is_batch)
         tab.tab_name=tab_name
         #ObjectLibrary.addObject(tab_name, tab)
