@@ -35,15 +35,15 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.setupUi(self)
 
     @property
-    def is_batch(self):
+    def is_batch(self) -> bool:
         return len(self.results) > 1
 
     @property
-    def currentDataIndex(self):
+    def currentDataIndex(self) -> int:
         return self.dataList.currentIndex()
 
     @property
-    def currentResult(self):
+    def currentResult(self) -> InversionResult:
         return self.results[self.currentDataIndex]
 
     def enableButtons(self):
