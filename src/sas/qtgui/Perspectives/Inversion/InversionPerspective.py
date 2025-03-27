@@ -430,7 +430,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             if data is not None:               
                 tab.updateTab(data = data, tab_index=tab_index)
                 
-        tab.is_batch = is_batch                
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)
