@@ -28,6 +28,8 @@ import numpy
 from .p_invertor import Pinvertor
 logger = logging.getLogger(__name__)
 
+# TODO: Could probably just get rid of this function. I'm not sure it needs to
+# be here now we have documentation compiled into HTML.
 def help():
     """
     Provide general online help text
@@ -145,6 +147,7 @@ class Invertor(Pinvertor):
                 )
         return (Invertor, tuple(), state, None, None)
 
+    # TODO: This is horrible. Make sure nothing depends on it, then delete it.
     def __setattr__(self, name, value):
         """
         Set the value of an attribute.
