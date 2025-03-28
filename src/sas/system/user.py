@@ -20,8 +20,10 @@ PATH_TYPE = [Path, os.path, str]
 
 
 def get_dir_and_create_if_needed(path: PATH_TYPE, create_if_nonexistent: bool = True):
+    path = Path(path)
     if create_if_nonexistent and not os.path.exists(path):
-        os.makedirs(path, mode=777, exist_ok=True)
+        path.mkdir(parents=True, exist_ok=True)
+        path.chmod(764)
     return path
 
 
