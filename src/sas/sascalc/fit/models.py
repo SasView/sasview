@@ -15,7 +15,7 @@ import io
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
-from sas.system.user import get_user_dir
+from sas.system.user import get_app_dir
 
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 PLUGIN_DIR = 'plugin_models'
-PLUGIN_LOG = os.path.join(get_user_dir(), PLUGIN_DIR, "plugins.log")
+PLUGIN_LOG = os.path.join(get_app_dir(), PLUGIN_DIR, "plugins.log")
 PLUGIN_NAME_BASE = '[plug-in] '
 
 
@@ -87,7 +87,7 @@ def find_plugins_dir():
     Find path of the plugins directory.
     The plugin directory is located in the user's home directory.
     """
-    path = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
+    path = os.path.join(get_app_dir(), PLUGIN_DIR)
 
     # TODO: trigger initialization of plugins dir from installer or startup
     # If the plugin directory doesn't exist, create it
