@@ -1,3 +1,5 @@
+import numpy as np
+
 # TODO: Add docstrings later
 
 class NewInvertor():
@@ -23,3 +25,16 @@ class NewInvertor():
         ## TODO: My suspicion is that this'll go.
         ## Information dictionary for application use
         self.info = {}
+
+        # Stuff that was on p_invertor
+
+        #Maximum distance between any two points in the system
+        self.dmax = 180
+        #Minimum q to include in inversion
+        self.q_min = 0
+        #Maximum q to include in inversion
+        self.q_max = np.inf
+        #Flag for whether or not to evaluate a constant background
+        #while inverting
+        self.est_bck = 0
+        self.alpha = 0.0
