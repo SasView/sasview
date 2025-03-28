@@ -45,8 +45,8 @@ class NewInvertor():
         self.q_max = np.inf
         #Flag for whether or not to evaluate a constant background
         #while inverting
-        self.est_bck = 0
-        self.alpha = 0.0
+        self.est_bck = True
+        self.alpha = REGULARIZATION
         #q data
         self.x = np.empty(0, dtype=np.float64)
         #I(q) data
