@@ -39,6 +39,22 @@ class NewInvertor():
         #while inverting
         self.est_bck = 0
         self.alpha = 0.0
+        #q data
+        self.x = np.empty(0, dtype=np.float64)
+        #I(q) data
+        self.y = np.empty(0, dtype=np.float64)
+        #dI(q) data
+        self.err = np.empty(0, dtype=np.float64)
+        #Number of q points
+        self.npoints = 0
+        #Number of I(q) points
+        self.ny = 0
+        #Number of dI(q) points
+        self.nerr = 0
+        #Slit height in units of q [A-1]
+        self.slit_height = 0.0
+        #Slit width in units of q [A-1]
+        self.slit_width = 0.0
 
     def lstsq(self, nfunc=5, nr=20):
         """
