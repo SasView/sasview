@@ -5,12 +5,25 @@ from PySide6 import QtWidgets
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.PluginDefinitionUI import Ui_PluginDefinition
 from sas.qtgui.Utilities import GuiUtils
 
-# txtName
-# txtDescription
-# chkOverwrite
-# tblParams
-# tblParamsPD
-# txtFunction
+
+def remove_empty_table_rows(tbl: QtWidgets.QTableWidget):
+    """A helper function to remove empty rows in a PySide Table, if there are more than two empty rows at the end.
+    This function ensures there is always an empty row in the table.
+
+    :param tbl: A QTableWidget on i rows and j columns.
+    """
+    for i in range(tbl.rowCount() -1, -1 , -1):
+        for j in range(0, tbl.columnCount()):
+            cell_contents = tbl.item(i, j)
+            if cell_contents is None or cell_contents.text() == "":
+                # cell_contents may be None: Ensure this check remains, otherwise the .text() call may throw an error
+                pass
+            else:
+                break
+        else:
+            tbl.removeRow(i)
+    tbl.insertRow(tbl.rowCount())
+
 
 class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     """
@@ -63,6 +76,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
 
 return y
 """
+        self.model['text'] = text
         self.txtFunction.insertPlainText(text)
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
@@ -131,15 +145,14 @@ return y
         self.parameter_dict[row] = (param, value)
         self.model['parameters'] = self.parameter_dict
 
-        # Check if the update was Value for last row. If so, add a new row
-        if column == 1 and row == self.tblParams.rowCount()-1:
-            # Add a row
-            self.tblParams.insertRow(self.tblParams.rowCount())
+        # Check if there are empty rows.
+        remove_empty_table_rows(self.tblParams)
+
         self.modelModified.emit()
 
     def onParamsPDChanged(self, row, column):
         """
-        Respond to changes in non-polydisperse parameter table
+        Respond to changes in polydisperse parameter table
         """
         param = value = None
         if self.tblParamsPD.item(row, 0):
@@ -151,10 +164,9 @@ return y
         self.pd_parameter_dict[row] = (param, value)
         self.model['pd_parameters'] = self.pd_parameter_dict
 
-        # Check if the update was Value for last row. If so, add a new row
-        if column == 1 and row == self.tblParamsPD.rowCount()-1:
-            # Add a row
-            self.tblParamsPD.insertRow(self.tblParamsPD.rowCount())
+        # Check if there are empty rows.
+        remove_empty_table_rows(self.tblParamsPD)
+
         self.modelModified.emit()
 
 
