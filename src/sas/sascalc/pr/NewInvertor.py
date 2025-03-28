@@ -3,6 +3,14 @@ import time
 
 # TODO: Add docstrings later
 
+# Default Values for inputs
+NUMBER_OF_TERMS = 10
+REGULARIZATION = 0.0
+BACKGROUND_INPUT = 0.0
+Q_MIN_INPUT = 0.0
+Q_MAX_INPUT = 0.0
+MAX_DIST = 140.0
+
 class NewInvertor():
 
     def __init__(self):
