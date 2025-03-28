@@ -56,6 +56,9 @@ class NewInvertor():
         #Slit width in units of q [A-1]
         self.slit_width = 0.0
 
+    def is_valid(self) -> bool:
+        return self.npoints == self.ny and self.npoints == self.nerr
+
     def lstsq(self, nfunc=5, nr=20):
         """
         The problem is solved by posing the problem as  Ax = b,
