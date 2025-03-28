@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QWidget
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from src.sas.qtgui.Plotting.PlotterData import Data1D
+from src.sas.sascalc.pr.NewInvertor import NewInvertor
 from src.sas.sascalc.pr.invertor import Invertor
 
 @dataclass
@@ -46,6 +47,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         ]
 
         self.isCalculating: bool = False
+        self.calculator  = NewInvertor()
 
         self.setupUi(self)
 
