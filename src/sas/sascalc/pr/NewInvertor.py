@@ -64,6 +64,9 @@ class NewInvertor():
         #Slit width in units of q [A-1]
         self.slit_width = 0.0
 
+        # Stuff I've added that wasn't previously in the calculator.
+        self.noOfTerms = NUMBER_OF_TERMS
+
     def is_valid(self) -> bool:
         return self.npoints == self.ny and self.npoints == self.nerr
 
