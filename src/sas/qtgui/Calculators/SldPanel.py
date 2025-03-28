@@ -120,7 +120,7 @@ class SldPanel(QtWidgets.QDialog):
         # Chemical formula is checked via periodictable.formula module.
         self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
 
-        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        rx = QtCore.QRegularExpression(r"[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
         self.ui.editNeutronWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editNeutronWavelength))
         self.ui.editXrayWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editXrayWavelength))

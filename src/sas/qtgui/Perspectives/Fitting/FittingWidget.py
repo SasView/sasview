@@ -3300,9 +3300,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         profile_data.symbol = 'Line'
         profile_data.hide_error = True
         profile_data._xaxis = "R"
-        profile_data._xunit = "\AA"
+        profile_data._xunit = r"\AA"
         profile_data._yaxis = "SLD"
-        profile_data._yunit = "10^{-6}\AA^{-2}"
+        profile_data._yunit = r"10^{-6}\AA^{-2}"
         profile_data.ytransform='y'
         profile_data.xtransform='x'
 
