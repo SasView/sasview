@@ -25,7 +25,7 @@ from twisted.internet import threads
 import periodictable
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
 from sas.system.version import __version__

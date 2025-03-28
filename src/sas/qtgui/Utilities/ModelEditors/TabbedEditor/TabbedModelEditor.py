@@ -14,9 +14,9 @@ from sas.sascalc.fit import models
 from sas.sascalc.fit.models import find_plugins_dir
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
-from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
-from sas.qtgui.Utilities.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.CodeEditor import QCodeEditor
 
 
@@ -468,7 +468,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Set full_path to the .py file so that we can run a model check on it (the .py model should link to the .c model)
             full_path = self.filename.with_suffix(".py")
             check_model = True
-        
+
         if check_model:
             error_line = self.findFirstError(full_path)
             if error_line >= 0:
