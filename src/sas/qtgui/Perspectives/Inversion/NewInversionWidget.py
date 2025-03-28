@@ -15,6 +15,15 @@ class InversionResult:
     data_plot: Data1D | None
 
 
+# Default Values for inputs
+NUMBER_OF_TERMS = 10
+REGULARIZATION = 0.0
+BACKGROUND_INPUT = 0.0
+Q_MIN_INPUT = 0.0
+Q_MAX_INPUT = 0.0
+MAX_DIST = 140.0
+
+
 class NewInversionWidget(QWidget, Ui_PrInversion):
     # The old class had 'name' and 'ext'. Since this class doesn't inherit from
     # perspective, I'm not convinced they are needed here.
