@@ -27,6 +27,7 @@ pytest-mock
 pytools
 qtconsole
 scipy
+siphash24
 sphinx
 superqt
 tinycc

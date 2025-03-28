@@ -2,7 +2,7 @@ import numpy as np
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
@@ -205,8 +205,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             # angular plots usually require a linear x scale and better with
             # a linear y scale as well.
             new_plot.xaxis(r"\rm{\phi}", "degrees")
-            new_plot.xtransform = 'x'
-            new_plot.ytransform = 'y'
+            new_plot.plot_role = DataRole.ROLE_ANGULAR_SLICE
         else:
             new_plot.xaxis(r"\rm{Q}", 'A^{-1}')
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")

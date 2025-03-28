@@ -1686,7 +1686,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             case 0:
                 # Look at the model and if set, pull out its help page
                 # TODO: Disable plugin model documentation generation until issues can be resolved
-                plugin_names = [name for name, enabled in self.master_category_dict[CATEGORY_CUSTOM]]
+                plugin_names = [name for name, enabled in self.master_category_dict.get(CATEGORY_CUSTOM, {})]
                 if (self.logic.kernel_module is not None
                         and hasattr(self.logic.kernel_module, 'name')
                         and self.logic.kernel_module.id not in plugin_names
@@ -1887,9 +1887,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #re-enable the Fit button
         self.enableInteractiveElements()
 
-        if len(result) == 0:
+        if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
             self.communicate.statusBarUpdateSignal.emit(msg)
+            # reload the kernel_module in case it's corrupted
+            self.kernel_module = copy.deepcopy(self.kernel_module_copy)
             return
 
         # Don't recalculate chi2 - it's in res.fitness already
@@ -2916,6 +2918,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Fits of Sesans data are in real space
         if return_data["data"].isSesans:
+            fitted_data.isSesans = True
             fitted_data.xtransform="x"
             fitted_data.ytransform="y"
 
@@ -2926,6 +2929,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     self.data_index = i
 
         residuals = self.calculateResiduals(fitted_data)
+
+        # SESANS residuals should be on lin-lin scale
+        if return_data["data"].isSesans:
+            residuals.plot_role = DataRole.ROLE_RESIDUAL_SESANS
 
         fitted_data.show_q_range_sliders = True
         # Suppress the GUI update until the move is finished to limit model calculations
@@ -2950,7 +2957,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             # delete theory items for the model, in order to get rid of any
             # redundant items, e.g. beta(Q), S_eff(Q)
-            self.communicate.deleteIntermediateTheoryPlotsSignal.emit(self.logic.kernel_module.id)
+            self.communicate.deleteIntermediateTheoryPlotsSignal.emit(str(self.tab_id))
 
         self._appendPlotsPolyDisp(new_plots, return_data, fitted_data)
 
