@@ -2,6 +2,9 @@
 
 class NewInvertor():
 
+    def __init__(self):
+        self.init_default_values()
+
     def init_default_values(self):
         ## Chisqr of the last computation
         self.chi2 = 0
