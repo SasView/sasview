@@ -49,6 +49,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.calculator  = NewInvertor()
 
         self.setupUi(self)
+        self.updateGuiValues()
 
     @property
     def is_batch(self) -> bool:
