@@ -40,7 +40,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # it.
         self.results: list[InversionResult] = [
             InversionResult(logic=InversionLogic(),
-                            calculator=Invertor(),
+                            calculator=NewInvertor(),
                             pr_plot=None,
                             data_plot=None)
         ]
