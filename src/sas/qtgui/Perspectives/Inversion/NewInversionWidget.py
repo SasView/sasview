@@ -6,12 +6,11 @@ from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from src.sas.qtgui.Plotting.PlotterData import Data1D
 from src.sas.sascalc.pr.NewInvertor import NewInvertor
-from src.sas.sascalc.pr.invertor import Invertor
 
 @dataclass
 class InversionResult:
     logic: InversionLogic
-    calculator: Invertor
+    calculator: NewInvertor
     pr_plot: Data1D | None
     data_plot: Data1D | None
 
