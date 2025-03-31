@@ -46,6 +46,7 @@ class NewInvertor():
         #Flag for whether or not to evaluate a constant background
         #while inverting
         self.est_bck = True
+        # TODO: Is there a reason this is called alpha, and not just regularization.
         self.alpha = REGULARIZATION
         #q data
         self.x = np.empty(0, dtype=np.float64)
