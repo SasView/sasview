@@ -324,7 +324,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         for data in items:
             logic_data = GuiUtils.dataFromItem(data)
             if logic_data is not None and not isinstance(logic_data, Data1D):
-                msg = "Invariant cannot be computed with 2D data."
+                msg = "Inversion cannot be computed with 2D data."
                 raise ValueError(msg)
 
    
