@@ -143,6 +143,7 @@
     <addaction name="actionFitting"/>
     <addaction name="actionInvariant"/>
     <addaction name="actionInversion"/>
+    <addaction name="actionSizeDistribution"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -492,6 +493,14 @@
    </property>
    <property name="text">
     <string>Invariant</string>
+   </property>
+  </action>
+  <action name="actionSizeDistribution">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Size Distribution</string>
    </property>
   </action>
   <action name="actionDocumentation">
