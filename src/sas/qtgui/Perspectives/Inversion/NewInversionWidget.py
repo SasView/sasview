@@ -96,3 +96,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     def updateGuiValues(self):
         # TODO: This won't work for batch at the moment.
+        current_calculator = self.currentResult.calculator
+
+        self.noOfTermsInput.setText(str(current_calculator.noOfTerms))
+        self.regularizationConstantInput.setText(str(current_calculator))
+        self.maxDistanceInput.setText(str(current_calculator.dmax))
+
+        # TODO: Maybe don't see the others until they've been calculated.
