@@ -34,6 +34,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.parent = parent
         self.tab_name = tab_name
         self.tab_id = tab_id
+        self.data = data
 
         # We're going to use this structure even if we're just dealing with one
         # specific datum. Just that this dictionary would then have one item in
@@ -50,6 +51,11 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
         self.setupUi(self)
         self.updateGuiValues()
+
+    # TODO: Need to verify type hint for data.
+    def updateTab(self, data: Data1D, tab_id: int):
+        self.data = data
+        self.tab_id = tab_id
 
     @property
     def is_batch(self) -> bool:
