@@ -100,7 +100,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         current_calculator = self.currentResult.calculator
 
         self.noOfTermsInput.setText(str(current_calculator.noOfTerms))
-        self.regularizationConstantInput.setText(str(current_calculator))
+        self.regularizationConstantInput.setText(str(current_calculator.alpha))
         self.maxDistanceInput.setText(str(current_calculator.dmax))
 
         # TODO: Maybe don't see the others until they've been calculated.
