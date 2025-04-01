@@ -98,6 +98,7 @@ class DistModel():
 
 
 class matrix_operation():
+    
     # Transformation matrix
     # TODO: Use sasmodels kernel to make this function more generalized
     def G_matrix(self, Q, Bins, contrast, choice, resolution):
@@ -170,6 +171,7 @@ class matrix_operation():
         return data    """
 
 class decision_helper():
+
     class MaxEntException(Exception): 
         '''Any exception from this module'''
         pass
@@ -427,55 +429,3 @@ class maxEntMethod():
         print (' No convergence! Try increasing Error multiplier.')
         return chisq,f,operation.matrix_transform(f, Gqr.transpose())             # no solution after IterMax iterations
 
-def sizeDistribution(input):
-    '''
-    This function packages all the inputs that MaxEnt_SB needs (including initial values) into a dictionary and executes the MaxEnt_SB function
-    :param dict input:
-        input must have the following keys, each corresponding to their specified type of values:
-        Key                          | Value
-        __________________________________________________________________________________________
-        Data                         | list[float[npt],float[npt]]: I and Q. The two arrays should both be length npt
-        Limits                       | float[2]: a length-2 array contains Qmin and Qmax
-        Scale                        | float:
-        DiamRange                    | float[3]: A length-3 array contains minimum and maximum diameters between which the 
-                                                 distribution will be constructed, and the thid number is the number of bins 
-                                                 (must be an integer) (TODO: maybe restructure that)
-        LogBin                       | boolean: Bins will be on a log scale if True; bins will be on a linear scale is False 
-        WeightFactors                | float[npt]: Factors on the weights
-        Contrast                     | float: The difference in SLD between the two phases
-        Sky                          | float: Should be small but non-zero (TODO: Check this statement)
-        Weights                      | float[npt]: Provide some sort of uncertainty. Examples include dI and 1/I
-        Background                   | float[npt]: Scattering background to be subtracted
-        Resolution                   | obj: resolution object
-        Model                        | string: model name, currently only supports 'Sphere'
-    '''
-    iterMax = input["IterMax"]      
-    Qmin = input["Limits"][0]
-    Qmax = input["Limits"][1]
-    scale = input["Scale"]
-    minDiam = input["DiamRange"][0]
-    maxDiam = input["DiamRange"][1]
-    Nbins = input["DiamRange"][2]
-    Q,I = input["Data"]
-    if input["Logbin"]:
-        Bins = np.logspace(np.log10(minDiam),np.log10(maxDiam),Nbins+1,True)/2        #make radii
-    else:
-        Bins = np.linspace(minDiam,maxDiam,Nbins+1,True)/2        #make radii
-    Dbins = np.diff(Bins)
-    Bins = Bins[:-1]+Dbins/2.
-    Ibeg = np.searchsorted(Q,Qmin)
-    Ifin = np.searchsorted(Q,Qmax)+1        #include last point
-    wtFactor = input["WeightFactors"][Ibeg:Ifin]
-    BinMag = np.zeros_like(Bins)
-    contrast = input["Contrast"]
-    Ic = np.zeros(len(I))
-    sky = input["Sky"]
-    wt = input["Weights"][Ibeg:Ifin]
-    Back = input["Background"][Ibeg:Ifin]
-    res = input["Resolution"]
-    Gmat = matrix_operation().G_matrix(Q[Ibeg:Ifin],Bins,contrast,input["Model"],res)
-    BinsBack = np.ones_like(Bins)*sky*scale/contrast
-    MethodCall = maxEntMethod()
-    chisq,BinMag,Ic[Ibeg:Ifin] = MethodCall.MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,iterMax,report=True)
-    BinMag = BinMag/(2.*Dbins)
-    return chisq,Bins,Dbins,BinMag,Q[Ibeg:Ifin],Ic[Ibeg:Ifin]
