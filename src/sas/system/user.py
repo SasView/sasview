@@ -116,6 +116,5 @@ def copy_old_files_to_new_location():
     config_name = f'config-{sasview_version.split(".")[0]}'
     old_config = old_sasview_usr_dir / config_name
     new_config = new_config_dir / config_name
-    print(old_config.exists())
     if not new_config.exists() and old_config.exists():
         shutil.copy2(old_config, new_config)
