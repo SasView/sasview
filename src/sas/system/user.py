@@ -23,7 +23,6 @@ def get_dir_and_create_if_needed(path: PATH_TYPE, create_if_nonexistent: bool = 
     path = Path(path)
     if create_if_nonexistent and not os.path.exists(path):
         path.mkdir(parents=True, exist_ok=True)
-        path.chmod(764)
     return path
 
 
