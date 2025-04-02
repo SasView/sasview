@@ -15,7 +15,7 @@ def setup_sasmodels():
     # distribution for running sasmodels scripts we need to set SAS_MODELPATH
     # to the path used by SasView to store models.
     from sas.sascalc.fit.models import find_plugins_dir
-    os.environ['SAS_MODELPATH'] = find_plugins_dir()
+    os.environ['SAS_MODELPATH'] = str(find_plugins_dir().stem)
 
     # TODO: Use same mechanism as OpenCL/CUDA to manage the cache file path
     # Both scripts and gui need to know the stored DLL path.
