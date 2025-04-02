@@ -88,7 +88,7 @@ class DistModel():
         self.params=pars
         self.dim_distr=dimension
         self.bins=bins
-        self.intensity[]
+        # self.intensity[]
 
 
     def base_matrix(self):

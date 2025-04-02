@@ -8,7 +8,8 @@ from sasmodels.direct_model import DirectModel
 
 from .maxEnt_method import matrix_operation, maxEntMethod
 
-class sizeDistribution:
+
+class SizeDistribution:
 
     def __init__(self):
 
@@ -108,7 +109,6 @@ def sizeDistribution(input):
     ### input data
     ##scat_data = Data1D() ## how to get this data in? ## Sent from the data_loader 
     Q, I = input["Data"]
-    wt = input["Weights"][Ibeg:Ifin]
 
     ### results data
     Ic = np.zeros(len(I))
@@ -131,12 +131,10 @@ def sizeDistribution(input):
     model = input["Model"]
 
     ## advanced
-    iterMax = input["IterMax"]
+    iterMax = input.get("IterMax", 5000)
     scale = input["Scale"]
     logbin = input["Logbin"] ## Boolean? 
     sky = input["Sky"]
-    wtFactor = input["WeightFactors"][Ibeg:Ifin]
-    Back = input["Background"][Ibeg:Ifin]
 
     res = input["Resolution"] ## dQ 
 
@@ -150,6 +148,9 @@ def sizeDistribution(input):
     Bins = Bins[:-1]+Dbins/2.
     Ibeg = np.searchsorted(Q,Qmin)
     Ifin = np.searchsorted(Q,Qmax)+1        #include last point
+    wt = input["Weights"][Ibeg:Ifin]
+    wtFactor = input["WeightFactors"][Ibeg:Ifin]
+    Back = input["Background"][Ibeg:Ifin]
     BinMag = np.zeros_like(Bins)
     
     ## setup MaxEnt
