@@ -19,90 +19,91 @@ _LOG_DIR = PLATFORM_DIRS_UNVERSIONED.user_log_dir
 PATH_TYPE = [Path, os.path, str]
 
 
-def get_dir_and_create_if_needed(path: PATH_TYPE, create_if_nonexistent: bool = True):
+def get_dir_and_create_if_needed(path: PATH_TYPE, create_if_nonexistent: bool = True) -> Path:
+    """Returns the requested directory as a pathlib.Path object, creating the directory if it does not already exist."""
     path = Path(path)
     if create_if_nonexistent and not os.path.exists(path):
         path.mkdir(parents=True, exist_ok=True)
     return path
 
 
-def _get_user_dir(create_if_nonexistent: bool = False) -> PATH_TYPE:
-    """**DEPRECATED** Do not use this function to create new files. This is only used to move files from previous
-    version locations to new locations
+def _get_user_dir(create_if_nonexistent: bool = False) -> Path:
+    """**DEPRECATED** Do not use this function to create new files.
+
+    v6.1.0: This is only used to move files from previous version locations to new locations
     """
     global _USER_DIR
     return get_dir_and_create_if_needed(_USER_DIR, create_if_nonexistent)
 
 
-def get_config_dir(create_if_nonexistent: bool = True) -> PATH_TYPE:
-    """
-    The directory where os-specific configurations are stored.
+def get_config_dir(create_if_nonexistent: bool = True) -> Path:
+    """The directory where os-specific configurations are stored.
 
-    Returns the directory string, creating it if it does not already exist.
+    Returns the directory as a pathlib.Path object, creating the directory if it does not already exist.
     """
     global _CONFIG_DIR
     return get_dir_and_create_if_needed(_CONFIG_DIR, create_if_nonexistent)
 
 
-def get_app_dir(create_if_nonexistent: bool = True) -> PATH_TYPE:
-    """
-    The directory where the os-specific app data is stored.
+def get_app_dir(create_if_nonexistent: bool = True) -> Path:
+    """The directory where the os-specific app data is stored.
 
-    Returns the directory string, creating it if it does not already exist.
+    Returns the directory as a pathlib.Path object, creating the directory if it does not already exist.
     """
     global _APP_DATA_DIR
     return get_dir_and_create_if_needed(_APP_DATA_DIR, create_if_nonexistent)
 
 
-def get_app_dir_versioned(create_if_nonexistent: bool = True) -> PATH_TYPE:
-    """
-    The directory where the os-specific app data is stored.
+def get_app_dir_versioned(create_if_nonexistent: bool = True) -> Path:
+    """The directory where the version-dependent, os-specific app data is stored.
 
-    Returns the directory string, creating it if it does not already exist.
+    Returns the directory as a pathlib.Path object, creating the directory if it does not already exist.
     """
     global _APP_VERS_DIR
     return get_dir_and_create_if_needed(_APP_VERS_DIR, create_if_nonexistent)
 
 
-def get_log_dir(create_if_nonexistent: bool = True) -> PATH_TYPE:
-    """
-    The directory where the os-specific logs are stored.
+def get_log_dir(create_if_nonexistent: bool = True) -> Path:
+    """The directory where the os-specific logs are stored.
 
-    Returns the directory string, creating it if it does not already exist.
+    Returns the directory as a pathlib.Path object, creating the directory if it does not already exist.
     """
     global _LOG_DIR
     return get_dir_and_create_if_needed(_LOG_DIR, create_if_nonexistent)
 
 
-def get_cache_dir(create_if_nonexistent: bool = True) -> PATH_TYPE:
-    """
-    The directory where the os-specific cache is stored.
+def get_cache_dir(create_if_nonexistent: bool = True) -> Path:
+    """The directory where the os-specific cache is stored.
 
-    Returns the directory string, creating it if it does not already exist.
+    Returns the directory as a pathlib.Path object, creating the directory if it does not already exist.
     """
     global _CACHE_DIR
     return get_dir_and_create_if_needed(_CACHE_DIR, create_if_nonexistent)
 
 
-def get_plugin_dir(create_if_nonexistent: bool = True) -> PATH_TYPE:
-    """
-    The directory where the os-specific cache is stored.
+def get_plugin_dir(create_if_nonexistent: bool = True) -> Path:
+    """The directory where the os-specific cache for plugin models is stored.
 
-    Returns the directory string, creating it if it does not already exist.
+    Returns the directory as a pathlib.Path object, creating the directory if it does not already exist.
     """
     app_dir = get_app_dir(create_if_nonexistent)
     return get_dir_and_create_if_needed(Path(app_dir, 'plugin_models'), create_if_nonexistent)
 
 
 def copy_old_files_to_new_location():
-    """Run at startup, check to see if files in the old locations exist and move them if they haven't already."""
-    # Copy the old log to the new location
+    """**Only run at app startup**
+    A check to see if files in the old user locations exist and move them if they haven't already been moved."""
+
+    # Get the user directory location and original .sasview directory
     user_dir = Path(_get_user_dir())
     old_sasview_usr_dir = user_dir / '.sasview'
+
+    # Copy the old log to the new location
     old_log = user_dir / 'sasview.log'
     new_log = Path(get_log_dir()) / 'sasview.log'
     if old_log.exists() and not new_log.exists():
         shutil.copy2(old_log, new_log)
+
     # Copy plugin models to new location
     old_plugins = old_sasview_usr_dir / 'plugin_models'
     new_plugins = Path(get_plugin_dir())
@@ -111,6 +112,7 @@ def copy_old_files_to_new_location():
         for file in files:
             if not Path(new_plugins, file).exists():
                 shutil.copy2(Path(old_plugins, file), Path(new_plugins, file))
+
     # Copy config file over
     new_config_dir = Path(get_config_dir())
     config_name = f'config-{sasview_version.split(".")[0]}'
