@@ -1,8 +1,6 @@
 """
     Utilities to manage models
 """
-from __future__ import print_function
-
 import os
 import sys
 import time
@@ -15,7 +13,7 @@ import io
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
-from sas.system.user import get_app_dir
+from sas.system.user import get_plugin_dir
 
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
@@ -26,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 PLUGIN_DIR = 'plugin_models'
-PLUGIN_LOG = os.path.join(get_app_dir(), PLUGIN_DIR, "plugins.log")
+PLUGIN_LOG = os.path.join(get_plugin_dir(), "plugins.log")
 PLUGIN_NAME_BASE = '[plug-in] '
 
 
@@ -87,24 +85,12 @@ def find_plugins_dir():
     Find path of the plugins directory.
     The plugin directory is located in the user's home directory.
     """
-    path = os.path.join(get_app_dir(), PLUGIN_DIR)
-
-    # TODO: trigger initialization of plugins dir from installer or startup
-    # If the plugin directory doesn't exist, create it
-    if not os.path.isdir(path):
-        os.makedirs(path)
-    # TODO: should we be checking for new default models every time?
-    # TODO: restore support for default plugins
-    #initialize_plugins_dir(path)
+    path = get_plugin_dir()
     return path
 
 
 def initialize_plugins_dir(path):
     # TODO: There are no default plugins
-    # TODO: Default plugins directory is in sasgui, but models.py is in sascalc
-    # TODO: Move default plugins beside sample data files
-    # TODO: Should not look for defaults above the root of the sasview install
-
     # Walk up the tree looking for default plugin_models directory
     base = os.path.abspath(os.path.dirname(__file__))
     for _ in range(12):
