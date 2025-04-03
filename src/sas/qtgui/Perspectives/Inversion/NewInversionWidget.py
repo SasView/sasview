@@ -145,6 +145,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         logger.error(error)
         # TODO: No function to stop calculation yet.
 
+    def calculationCompleted(self, out, cov, pr, elapsed):
+        # TODO: Placeholder. Just output the numbers for now.
+        logging.info(f'{out} {cov} {pr} {elapsed}')
+
     def startThread(self):
         self.isCalculating = True
         self.enableButtons()
@@ -156,7 +160,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.currentResult.calculator.noOfTerms,
             tab_id=[[self.tab_id]],
             error_func=self.threadError,
-            completefn=None, # TODO: Implement
+            completefn=self.calculationCompleted, # TODO: Implement
             updatefn=None
         )
 
