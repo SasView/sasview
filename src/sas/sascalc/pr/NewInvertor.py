@@ -2,6 +2,7 @@ import numpy as np
 import time
 import math
 from numpy.linalg import lstsq
+import numpy.typing as npt
 
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 
