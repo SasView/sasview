@@ -53,12 +53,6 @@ class NewInvertor():
         self.est_bck = True
         # TODO: Is there a reason this is called alpha, and not just regularization.
         self.alpha = REGULARIZATION
-        #q data
-        self.x = np.empty(0, dtype=np.float64)
-        #I(q) data
-        self.y = np.empty(0, dtype=np.float64)
-        #dI(q) data
-        self.err = np.empty(0, dtype=np.float64)
         #Number of q points
         self.npoints = 0
         #Number of I(q) points
