@@ -31,11 +31,11 @@ class InversionLogic(object):
         self.qmax = np.inf    
 
     @property
-    def data(self):
+    def data(self) -> Data1D:
         return self._data
 
     @data.setter
-    def data(self, value):
+    def data(self, value: Data1D):
         """ data setter """
         self._data = value
         self.data_is_loaded = (self._data is not None)
