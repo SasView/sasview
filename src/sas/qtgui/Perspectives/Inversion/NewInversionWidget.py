@@ -157,7 +157,19 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.regularizationConstantInput.setText(str(current_calculator.alpha))
         self.maxDistanceInput.setText(str(current_calculator.dmax))
 
-        # TODO: Maybe don't see the others until they've been calculated.
+        # This checks to see if there is a calculation available.
+        out = self.currentResult.outputs
+        if not out is None:
+            # TODO: It might be good to have a separate data class for these
+            # values that are calculated.
+            self.rgValue.setText(str(out.rg))
+            self.iQ0Value.setText(str(out.iq0))
+            self.backgroundValue.setText(str(out.background))
+            self.computationTimeValue.setText(str(out.calc_time))
+            self.chiDofValue.setText(str(out.chi2))
+            self.oscillationValue.setText(str(out.oscillations))
+            self.posFractionValue.setText(str(out.pos_frac))
+            self.sigmaPosFractionValue.setText(str(out.pos_err))
 
     def acceptsData(self) -> bool:
         # TODO: Temporary
