@@ -444,9 +444,9 @@ class NewInvertor():
 
         :return: 1 if accepted, 0 if rejected.
         """
-        if self.get_q_min() <= 0 and self.get_q_max() <= 0:
+        if self.q_min <= 0 and self.q_max <= 0:
             return True
-        return (q >= self.get_q_min()) & (q <= self.get_q_max())
+        return (q >= self.q_min) & (q <= self.q_max)
 
     def check_for_zero(self, x):
         return (x == 0).any()
