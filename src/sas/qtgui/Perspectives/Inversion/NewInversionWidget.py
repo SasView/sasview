@@ -1,8 +1,10 @@
 
 from dataclasses import dataclass
+import logging
 from PySide6.QtWidgets import QWidget
 
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
+from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from src.sas.qtgui.Plotting.PlotterData import Data1D
 from src.sas.qtgui.Utilities import GuiUtils
@@ -24,6 +26,7 @@ Q_MIN_INPUT = 0.0
 Q_MAX_INPUT = 0.0
 MAX_DIST = 140.0
 
+logger = logging.getLogger(__name__)
 
 class NewInversionWidget(QWidget, Ui_PrInversion):
     # The old class had 'name' and 'ext'. Since this class doesn't inherit from
@@ -117,11 +120,11 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     def updateGuiValues(self):
         self.dataList.clear()
-        if self.data is None:
+        if self.currentData is None:
             self.dataList.setCurrentText('')
         else:
             # TODO: Will have multiple values when batch is implemented.
-            self.dataList.addItem(self.data.name)
+            self.dataList.addItem(self.currentData.name)
             self.dataList.setCurrentIndex(0)
 
 
@@ -137,3 +140,26 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def acceptsData(self) -> bool:
         # TODO: Temporary
         return True
+
+    def threadError(self, error: str):
+        logger.error(error)
+        # TODO: No function to stop calculation yet.
+
+    def startThread(self):
+        self.isCalculating = True
+        self.enableButtons()
+
+        # TODO: Calc thread should be declared beforehand.
+        self.calcThread = CalcPr(
+            self.currentResult.calculator,
+            # TODO: no of terms should be somewhere else
+            self.currentResult.calculator.noOfTerms,
+            tab_id=[[self.tab_id]],
+            error_func=self.threadError,
+            completefn=None, # TODO: Implement
+            updatefn=None
+        )
+
+        self.calcThread.queue()
+        # TODO: Why are we doing this?
+        self.calcThread.ready(2.5)
