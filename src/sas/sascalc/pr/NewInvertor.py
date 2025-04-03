@@ -3,6 +3,8 @@ import time
 import math
 from numpy.linalg import lstsq
 
+from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
+
 # TODO: Add docstrings later
 
 # Default Values for inputs
@@ -15,8 +17,9 @@ MAX_DIST = 140.0
 
 class NewInvertor():
 
-    def __init__(self):
+    def __init__(self, logic: InversionLogic):
         self.init_default_values()
+        self.logic = logic
 
     def init_default_values(self):
         ## Chisqr of the last computation
@@ -69,6 +72,18 @@ class NewInvertor():
 
         # Stuff I've added that wasn't previously in the calculator.
         self.noOfTerms = NUMBER_OF_TERMS
+
+    @property
+    def x(self) -> np.float64:
+        return self.logic.data.x
+
+    @property
+    def y(self) -> np.float64:
+        return self.logic.data.y
+
+    @property
+    def err(self) -> np.float64:
+        return self.logic.data.dy
 
     def is_valid(self) -> bool:
         return self.npoints == self.ny and self.npoints == self.nerr
