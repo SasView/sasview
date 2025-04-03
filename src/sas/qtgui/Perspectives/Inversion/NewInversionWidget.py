@@ -68,7 +68,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     @data.setter
     def data(self, value: GuiUtils.HashableStandardItem):
-        self.data = GuiUtils.dataFromItem(value)
+        self._data = GuiUtils.dataFromItem(value)
 
     @property
     def is_batch(self) -> bool:
