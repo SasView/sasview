@@ -44,12 +44,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # We're going to use this structure even if we're just dealing with one
         # specific datum. Just that this dictionary would then have one item in
         # it.
-        self.results: list[InversionResult] = [
-            InversionResult(logic=InversionLogic(),
-                            calculator=NewInvertor(),
-                            pr_plot=None,
-                            data_plot=None)
-        ]
+        self.results: list[InversionResult] = [self.initResult()]
 
         self.setupUi(self)
 
@@ -58,6 +53,15 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
         self.updateGuiValues()
         self.events()
+
+    def initResult(self) -> InversionResult:
+        logic = InversionLogic()
+        return InversionResult(
+            logic=logic,
+            calculator=NewInvertor(logic),
+            pr_plot=None,
+            data_plot=None
+        )
 
     # TODO: What is this function normally called?
     def events(self):
