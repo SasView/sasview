@@ -91,6 +91,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def q_min(self) -> float:
         return self.currentResult.calculator.q_min
 
+    # TODO: Probably change this name.
     def enableButtons(self):
         """
         Enable buttons when data is present, else disable them
