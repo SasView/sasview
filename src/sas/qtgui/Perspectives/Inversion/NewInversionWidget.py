@@ -185,6 +185,18 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         logging.info(f'{out} {cov} {pr} {elapsed}')
         self.isCalculating = False
         self.enableButtons()
+        calculator = self.currentResult.calculator
+        # TODO: Some of these probably don't need to be here.
+        self.currentResult.outputs = CalculatedOutputs(
+            calculator.rg(out),
+            calculator.iq0(out),
+            calculator.background,
+            elapsed,
+            calculator.chi2,
+            calculator.oscillations(out),
+            calculator.get_positive(out),
+            calculator.get_pos_err(out, cov)
+        )
         # TODO: Update GUI values with calculation.
 
     def startThread(self):
