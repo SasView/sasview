@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import math
+from numpy.linalg import lstsq
 
 # TODO: Add docstrings later
 
