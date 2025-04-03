@@ -11,6 +11,17 @@ from src.sas.qtgui.Utilities import GuiUtils
 from src.sas.sascalc.pr.NewInvertor import NewInvertor
 
 @dataclass
+class CalculatedOutputs:
+    rg: float
+    iq0: float
+    background: float
+    calc_time: float
+    chi2: float
+    oscillations: float
+    pos_frac: float
+    pos_err: float
+
+@dataclass
 class InversionResult:
     logic: InversionLogic
     calculator: NewInvertor
