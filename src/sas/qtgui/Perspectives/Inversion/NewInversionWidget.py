@@ -56,6 +56,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def updateTab(self, data: Data1D, tab_id: int):
         self.data = data
         self.tab_id = tab_id
+        self.updateGuiValues()
 
     @property
     def is_batch(self) -> bool:
