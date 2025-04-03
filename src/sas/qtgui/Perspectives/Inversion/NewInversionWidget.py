@@ -35,8 +35,6 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.parent = parent
         self.tab_name = tab_name
         self.tab_id = tab_id
-        self._data: Data1D | None
-        self.data = data
 
 
 
@@ -49,6 +47,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
                             pr_plot=None,
                             data_plot=None)
         ]
+        self.currentData = data
 
         self.isCalculating: bool = False
         self.calculator  = NewInvertor()
@@ -58,17 +57,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: Data1D, tab_id: int):
-        self.data = data
+        self.currentData = data
         self.tab_id = tab_id
         self.updateGuiValues()
-
-    @property
-    def data(self) -> Data1D | None:
-        return self._data
-
-    @data.setter
-    def data(self, value: GuiUtils.HashableStandardItem):
-        self._data = GuiUtils.dataFromItem(value)
 
     @property
     def is_batch(self) -> bool:
@@ -81,6 +72,15 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     @property
     def currentResult(self) -> InversionResult:
         return self.results[self.currentDataIndex]
+
+    @property
+    def currentData(self) -> Data1D | None:
+        return self.currentResult.logic.data
+
+    @currentData.setter
+    def currentData(self, value: GuiUtils.HashableStandardItem):
+        self.currentResult.logic.data = GuiUtils.dataFromItem(value)
+
 
     # TODO: I don't know if 'float' is the right type hint.
     @property
