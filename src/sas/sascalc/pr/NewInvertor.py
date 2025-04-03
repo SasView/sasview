@@ -250,7 +250,7 @@ class NewInvertor():
         pars = np.atleast_1d(pars)
         q = np.atleast_1d(q)
 
-        iq_val = calc.iq(pars, self.d_max, q)
+        iq_val = calc.iq(pars, self.dmax, q)
         if iq_val.shape[0] == 1:
             return iq_val[0]
         return iq_val
@@ -272,7 +272,7 @@ class NewInvertor():
 
 
         npts = 21
-        iq_val = calc.iq_smeared(pars, q, self.d_max, self.slit_height, self.slit_width, npts)
+        iq_val = calc.iq_smeared(pars, q, self.dmax, self.slit_height, self.slit_width, npts)
         #If q was a scalar
         if iq_val.shape[0] == 1:
             return iq_val[0]
@@ -292,7 +292,7 @@ class NewInvertor():
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
         r = np.atleast_1d(r)
-        pr_val = calc.pr(pars, self.d_max, r)
+        pr_val = calc.pr(pars, self.dmax, r)
         if len(pr_val) == 1:
             #scalar
             return pr_val[0]
@@ -313,10 +313,10 @@ class NewInvertor():
         r = np.atleast_1d(np.float64(r))
 
         if pars_err is None:
-            return calc.pr(pars, self.d_max, r), 0.0
+            return calc.pr(pars, self.dmax, r), 0.0
         else:
             pars_err = np.float64(pars_err)
-            return calc.pr_err(pars, pars_err, self.d_max, r)
+            return calc.pr_err(pars, pars_err, self.dmax, r)
 
     def basefunc_ft(self, d_max, n, q):
         """
@@ -354,9 +354,9 @@ class NewInvertor():
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
 
-        oscill = calc.reg_term(pars, self.d_max, nslice)
-        norm = calc.int_pr_square(pars, self.d_max, nslice)
-        return 0 if norm == 0 else np.sqrt(oscill/norm) / np.pi * self.d_max
+        oscill = calc.reg_term(pars, self.dmax, nslice)
+        norm = calc.int_pr_square(pars, self.dmax, nslice)
+        return 0 if norm == 0 else np.sqrt(oscill/norm) / np.pi * self.dmax
 
     def get_peaks(self, pars):
         """
@@ -369,7 +369,7 @@ class NewInvertor():
         from . import calc
         nslice = 100
         pars = np.float64(pars)
-        count = calc.npeaks(pars, self.d_max, nslice)
+        count = calc.npeaks(pars, self.dmax, nslice)
 
         return count
 
@@ -385,7 +385,7 @@ class NewInvertor():
         nslice = 100
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
-        fraction = calc.positive_integral(pars, self.d_max, nslice)
+        fraction = calc.positive_integral(pars, self.dmax, nslice)
 
         return fraction
 
@@ -404,7 +404,7 @@ class NewInvertor():
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
         pars_err = np.float64(pars_err)
-        fraction = calc.positive_errors(pars, pars_err, self.d_max, nslice)
+        fraction = calc.positive_errors(pars, pars_err, self.dmax, nslice)
 
         return fraction
 
@@ -419,7 +419,7 @@ class NewInvertor():
         nslice = 101
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
-        val = calc.rg(pars, self.d_max, nslice)
+        val = calc.rg(pars, self.dmax, nslice)
 
         return val
 
@@ -434,7 +434,7 @@ class NewInvertor():
         nslice = 101
         pars = np.float64(pars)
         pars = np.atleast_1d(pars)
-        val = np.float64(4.0 * np.pi * calc.int_pr(pars, self.d_max, nslice))
+        val = np.float64(4.0 * np.pi * calc.int_pr(pars, self.dmax, nslice))
 
         return val
 
@@ -507,9 +507,9 @@ class NewInvertor():
             i_r = np.arange(nr, dtype=np.float64)
 
             #Implementing second stage A as a python vector operation with shape = [nr]
-            r = (self.d_max / nr) * i_r
-            tmp = pi * (j+offset) / self.d_max
-            res = (2.0 * sqrt_alpha * self.d_max/nr * tmp) * (2.0 * np.cos(tmp*r) + tmp * r * np.sin(tmp*r))
+            r = (self.dmax / nr) * i_r
+            tmp = pi * (j+offset) / self.dmax
+            res = (2.0 * sqrt_alpha * self.dmax/nr * tmp) * (2.0 * np.cos(tmp*r) + tmp * r * np.sin(tmp*r))
             #Res should now be np vector size i_r.
             a_obj[self.npoints:self.npoints+nr, j] = res
 
