@@ -496,10 +496,10 @@ class NewInvertor():
             if self.est_bck == 1 and j == 0:
                 a_use[q_accept_x, j] = 1.0/self.err[q_accept_x]
             elif smeared:
-                a_use[q_accept_x, j] = calc.ortho_transformed_smeared(x_use, self.d_max, j+offset,
+                a_use[q_accept_x, j] = calc.ortho_transformed_smeared(x_use, self.dmax, j+offset,
                                                                       self.slit_height, self.slit_width, npts)/self.err[q_accept_x]
             else:
-                a_use[q_accept_x, j] = calc.ortho_transformed(x_use, self.d_max, j+offset)/self.err[q_accept_x]
+                a_use[q_accept_x, j] = calc.ortho_transformed(x_use, self.dmax, j+offset)/self.err[q_accept_x]
 
         a_obj[0:self.npoints, :] = a_use
 
