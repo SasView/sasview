@@ -110,3 +110,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.maxDistanceInput.setText(str(current_calculator.dmax))
 
         # TODO: Maybe don't see the others until they've been calculated.
+
+    def acceptsData(self) -> bool:
+        # TODO: Temporary
+        return True
