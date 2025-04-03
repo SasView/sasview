@@ -156,8 +156,12 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # TODO: No function to stop calculation yet.
 
     def calculationCompleted(self, out, cov, pr, elapsed):
-        # TODO: Placeholder. Just output the numbers for now.
+        # TODO: Placeholder. Just output the numbers for now. Later the result
+        # should be plotted.
         logging.info(f'{out} {cov} {pr} {elapsed}')
+        self.isCalculating = False
+        self.enableButtons()
+        # TODO: Update GUI values with calculation.
 
     def startThread(self):
         self.isCalculating = True
