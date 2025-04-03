@@ -53,12 +53,6 @@ class NewInvertor():
         self.est_bck = True
         # TODO: Is there a reason this is called alpha, and not just regularization.
         self.alpha = REGULARIZATION
-        #Number of q points
-        self.npoints = 0
-        #Number of I(q) points
-        self.ny = 0
-        #Number of dI(q) points
-        self.nerr = 0
         #Slit height in units of q [A-1]
         self.slit_height = 0.0
         #Slit width in units of q [A-1]
@@ -78,6 +72,18 @@ class NewInvertor():
     @property
     def err(self) -> np.float64:
         return self.logic.data.dy
+
+    @property
+    def npoints(self) -> int:
+        return len(self.x)
+
+    @property
+    def ny(self) -> int:
+        return len(self.y)
+
+    @property
+    def nerr(self) -> int:
+        return len(self.nerr)
 
     def is_valid(self) -> bool:
         return self.npoints == self.ny and self.npoints == self.nerr
