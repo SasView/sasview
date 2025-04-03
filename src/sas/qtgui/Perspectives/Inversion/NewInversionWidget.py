@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QWidget
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from src.sas.qtgui.Plotting.PlotterData import Data1D
+from src.sas.qtgui.Utilities import GuiUtils
 from src.sas.sascalc.pr.NewInvertor import NewInvertor
 
 @dataclass
@@ -34,7 +35,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.parent = parent
         self.tab_name = tab_name
         self.tab_id = tab_id
+        self._data: Data1D | None
         self.data = data
+
+
 
         # We're going to use this structure even if we're just dealing with one
         # specific datum. Just that this dictionary would then have one item in
@@ -57,6 +61,14 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.data = data
         self.tab_id = tab_id
         self.updateGuiValues()
+
+    @property
+    def data(self) -> Data1D | None:
+        return self._data
+
+    @data.setter
+    def data(self, value: GuiUtils.HashableStandardItem):
+        self.data = GuiUtils.dataFromItem(value)
 
     @property
     def is_batch(self) -> bool:
@@ -103,6 +115,12 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.noOfTermsSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
 
     def updateGuiValues(self):
+        if self.data is None:
+            self.dataList.setCurrentText('')
+        else:
+            self.dataList.setCurrentText(self.data.name)
+
+
         # TODO: This won't work for batch at the moment.
         current_calculator = self.currentResult.calculator
 
