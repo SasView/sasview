@@ -62,15 +62,15 @@ class NewInvertor():
         self.noOfTerms = NUMBER_OF_TERMS
 
     @property
-    def x(self) -> np.float64:
+    def x(self) -> npt.NDArray[np.float64]:
         return self.logic.data.x
 
     @property
-    def y(self) -> np.float64:
+    def y(self) -> npt.NDArray[np.float64]:
         return self.logic.data.y
 
     @property
-    def err(self) -> np.float64:
+    def err(self) -> npt.NDArray[np.float64]:
         return self.logic.data.dy
 
     @property
