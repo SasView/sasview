@@ -343,7 +343,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             if not is_batch and np.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
                 self.tabs[first_good_tab].data = data
-                self.tabs[first_good_tab].updateTab(data = data, tab_index=first_good_tab) 
+                self.tabs[first_good_tab].updateTab(data = data, tab_id=first_good_tab)
 
             else:
                 self.addData(data = data, is_batch=is_batch, tab_index = tab_index)               
