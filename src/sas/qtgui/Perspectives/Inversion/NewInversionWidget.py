@@ -50,13 +50,14 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
                             pr_plot=None,
                             data_plot=None)
         ]
-        self.currentData = data
-
-        self.isCalculating: bool = False
 
         self.setupUi(self)
-        self.events()
+
+        self.currentData = data
+        self.isCalculating: bool = False
+
         self.updateGuiValues()
+        self.events()
 
     # TODO: What is this function normally called?
     def events(self):
