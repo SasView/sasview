@@ -83,7 +83,7 @@ class NewInvertor():
 
     @property
     def nerr(self) -> int:
-        return len(self.nerr)
+        return len(self.err)
 
     def is_valid(self) -> bool:
         return self.npoints == self.ny and self.npoints == self.nerr
