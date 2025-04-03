@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import math
 
 # TODO: Add docstrings later
 
