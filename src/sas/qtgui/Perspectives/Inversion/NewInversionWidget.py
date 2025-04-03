@@ -53,7 +53,6 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.currentData = data
 
         self.isCalculating: bool = False
-        self.calculator  = NewInvertor()
 
         self.setupUi(self)
         self.events()
