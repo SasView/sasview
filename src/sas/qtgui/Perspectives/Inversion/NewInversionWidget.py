@@ -27,6 +27,7 @@ class InversionResult:
     calculator: NewInvertor
     pr_plot: Data1D | None
     data_plot: Data1D | None
+    outputs: CalculatedOutputs | None
 
 
 # Default Values for inputs
