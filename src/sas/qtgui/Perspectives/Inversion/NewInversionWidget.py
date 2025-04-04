@@ -198,7 +198,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             calculator.get_positive(out),
             calculator.get_pos_err(out, cov)
         )
-        # TODO: Update GUI values with calculation.
+        self.updateGuiValues()
 
     def startThread(self):
         self.isCalculating = True
