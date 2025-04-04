@@ -209,7 +209,16 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # QT segfaulting.
         self.calculationComplete.emit()
 
+    def updateParams(self):
+        # TODO: No validators so this will break if they can't be converted to
+        # numbers.
+        current_calculator = self.currentResult.calculator
+        current_calculator.noOfTerms = int(self.noOfTermsInput.text())
+        current_calculator.alpha = float(self.regularizationConstantInput.text())
+        current_calculator.dmax = float(self.maxDistanceInput.text())
+
     def startThread(self):
+        self.updateParams()
         self.isCalculating = True
         self.enableButtons()
 
