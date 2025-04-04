@@ -80,12 +80,10 @@ def _check_plugin(model, name):
     return model
 
 
-def find_plugins_dir():
+def find_plugins_dir() -> str:
+    """A helper function that returns a string representation of the plugins directory as defined by sas.system.user.
     """
-    Find path of the plugins directory.
-    The plugin directory is located in the user's home directory.
-    """
-    path = get_plugin_dir()
+    path = str(get_plugin_dir().stem)
     return path
 
 
