@@ -29,6 +29,9 @@ class InversionResult:
     data_plot: Data1D | None
     outputs: CalculatedOutputs | None
 
+def format_float(f: float):
+    return f'{f:.2f}'
+
 
 # Default Values for inputs
 NUMBER_OF_TERMS = 10
@@ -163,14 +166,14 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         if not out is None:
             # TODO: It might be good to have a separate data class for these
             # values that are calculated.
-            self.rgValue.setText(str(out.rg))
-            self.iQ0Value.setText(str(out.iq0))
-            self.backgroundValue.setText(str(out.background))
-            self.computationTimeValue.setText(str(out.calc_time))
-            self.chiDofValue.setText(str(out.chi2[0]))
-            self.oscillationValue.setText(str(out.oscillations))
-            self.posFractionValue.setText(str(out.pos_frac))
-            self.sigmaPosFractionValue.setText(str(out.pos_err))
+            self.rgValue.setText(format_float(out.rg))
+            self.iQ0Value.setText(format_float(out.iq0))
+            self.backgroundValue.setText(format_float(out.background))
+            self.computationTimeValue.setText(format_float(out.calc_time))
+            self.chiDofValue.setText(format_float(out.chi2[0]))
+            self.oscillationValue.setText(format_float(out.oscillations))
+            self.posFractionValue.setText(format_float(out.pos_frac))
+            self.sigmaPosFractionValue.setText(format_float(out.pos_err))
 
     def acceptsData(self) -> bool:
         # TODO: Temporary
