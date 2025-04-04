@@ -31,7 +31,7 @@ class InversionResult:
     outputs: CalculatedOutputs | None
 
 def format_float(f: float):
-    return f'{f:.2f}'
+    return f'{f:.3f}'
 
 
 # Default Values for inputs
