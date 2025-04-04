@@ -167,7 +167,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.iQ0Value.setText(str(out.iq0))
             self.backgroundValue.setText(str(out.background))
             self.computationTimeValue.setText(str(out.calc_time))
-            self.chiDofValue.setText(str(out.chi2))
+            self.chiDofValue.setText(str(out.chi2[0]))
             self.oscillationValue.setText(str(out.oscillations))
             self.posFractionValue.setText(str(out.pos_frac))
             self.sigmaPosFractionValue.setText(str(out.pos_err))
