@@ -50,7 +50,7 @@ def setup_logging(level=logging.INFO):
     ch = logging.StreamHandler()
     handlers = [fh, ch] if fh else [ch]
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(name)s (%(filename)s:%(lineno)s) :: %(message)s',
-                        datefmt='%H:%M:%S', handlers=handlers)
+                        handlers=handlers)
     # print_config()
 
 def production():
