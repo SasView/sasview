@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass
 import logging
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
@@ -47,6 +48,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     # The old class had 'name' and 'ext'. Since this class doesn't inherit from
     # perspective, I'm not convinced they are needed here.
 
+    calculationComplete = Signal()
+
     def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
         super(NewInversionWidget, self).__init__()
 
@@ -82,6 +85,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     # TODO: What is this function normally called?
     def events(self):
         self.calculateThisButton.clicked.connect(self.startThread)
+        self.calculationComplete.connect(self.updateGuiValues)
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: Data1D, tab_id: int):
@@ -201,7 +205,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             calculator.get_positive(out),
             calculator.get_pos_err(out, cov)
         )
-        self.updateGuiValues()
+        # Previously called these events directly without a signal but it led to
+        # QT segfaulting.
+        self.calculationComplete.emit()
 
     def startThread(self):
         self.isCalculating = True
