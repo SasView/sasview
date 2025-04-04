@@ -22,6 +22,7 @@ class NewInvertor():
         self.init_default_values()
         self.logic = logic
 
+    # TODO: Add types.
     def init_default_values(self):
         ## Chisqr of the last computation
         self.chi2 = 0
