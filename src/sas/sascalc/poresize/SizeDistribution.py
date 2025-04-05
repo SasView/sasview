@@ -6,7 +6,7 @@ from sasmodels.core import load_model
 from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
 
-from maxEnt_method import matrix_operation, maxEntMethod
+from .maxEnt_method import matrix_operation, maxEntMethod
 
 
 class SizeDistribution:

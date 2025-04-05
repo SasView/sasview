@@ -93,7 +93,7 @@ class SizeDistributionTest:
                     for row in spamreader:
                         try:
                             bins = np.append(bins, float(row[0]))
-                            mags = np.append(mags, float(row[2]))
+                            mags = np.append(mags, float(row[1]))
                         except:
                             pass
                 return bins, mags
