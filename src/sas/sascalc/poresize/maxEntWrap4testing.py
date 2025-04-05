@@ -4,7 +4,7 @@ It alows testing the module code without loading a notebook though not clear
 this is needed.
 """
 
-from maxEnt_method import sizeDistribution
+from SizeDistribution import sizeDistribution
 import plottableHist
 from sasdata.dataloader import data_info
 from sasmodels import resolution as rst
