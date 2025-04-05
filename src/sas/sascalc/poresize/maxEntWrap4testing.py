@@ -4,7 +4,7 @@ It alows testing the module code without loading a notebook though not clear
 this is needed.
 """
 
-from maxEnt_method import sizeDistribution
+from SizeDistribution import sizeDistribution
 import plottableHist
 from sasdata.dataloader import data_info
 from sasmodels import resolution as rst
@@ -22,7 +22,7 @@ Q = np.array([])
 I = np.array([])
 dI = np.array([])
 
-file = "test_data/Alumina_usaxs_irena_input.csv"
+file = "data/Alumina_usaxs_irena_input.csv"
 
 with open(file) as fp:
     spamreader = csv.reader(fp, delimiter=',')
