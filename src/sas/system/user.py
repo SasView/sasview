@@ -98,25 +98,22 @@ def copy_old_files_to_new_location():
     user_dir = Path(_get_user_dir())
     old_sasview_usr_dir = user_dir / '.sasview'
 
-    # Copy the old log to the new location
-    old_log = user_dir / 'sasview.log'
-    new_log = Path(get_log_dir()) / 'sasview.log'
-    if old_log.exists() and not new_log.exists():
-        shutil.copy2(old_log, new_log)
-
-    # Copy plugin models to new location
-    old_plugins = old_sasview_usr_dir / 'plugin_models'
-    new_plugins = Path(get_plugin_dir())
-    if old_plugins.exists():
-        files = [f for f in os.listdir(old_plugins) if os.path.isfile(os.path.join(old_plugins, f))]
-        for file in files:
-            if not Path(new_plugins, file).exists():
-                shutil.copy2(Path(old_plugins, file), Path(new_plugins, file))
-
-    # Copy config file over
-    new_config_dir = Path(get_config_dir())
+    # Values used multiple times that need to be defined
     config_name = f'config-{sasview_version.split(".")[0]}'
-    old_config = old_sasview_usr_dir / config_name
-    new_config = new_config_dir / config_name
-    if not new_config.exists() and old_config.exists():
-        shutil.copy2(old_config, new_config)
+    old_plugins = old_sasview_usr_dir / 'plugin_models'
+    plugin_files = [f for f in os.listdir(old_plugins) if os.path.isfile(os.path.join(old_plugins, f))]
+
+    # Create a dictionary mapping old file locations to their respective new locations and populate it with
+    #  the log and config file locations.
+    location_map = {
+        user_dir / 'sasview.log': Path(get_log_dir()) / 'sasview.log',  # Log file
+        old_sasview_usr_dir / config_name: Path(get_config_dir()) / config_name  # Configuration file
+    }
+    # Add any existing plugin files
+    location_map.update({old_plugins / f_name: Path(get_plugin_dir()) / f_name for f_name in plugin_files})
+
+    # Iterate through dictionary, check if new files exist, and move files that haven't already been created
+    for old_path, new_path in location_map.items():
+        if old_path.exists() and not new_path.exists():
+            shutil.copy2(old_path, new_path)
+
