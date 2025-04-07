@@ -101,7 +101,10 @@ def copy_old_files_to_new_location():
     # Values used multiple times that need to be defined
     config_name = f'config-{sasview_version.split(".")[0]}'
     old_plugins = old_sasview_usr_dir / 'plugin_models'
-    plugin_files = [f for f in os.listdir(old_plugins) if os.path.isfile(os.path.join(old_plugins, f))]
+    if old_plugins.exists():
+        plugin_files = [f for f in os.listdir(old_plugins) if os.path.isfile(os.path.join(old_plugins, f))]
+    else:
+        plugin_files = []
 
     # Create a dictionary mapping old file locations to their respective new locations and populate it with
     #  the log and config file locations.
