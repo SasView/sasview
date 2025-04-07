@@ -1,7 +1,7 @@
 .. sasview_files.rst
 
 .. Initial Draft: J Krzywon, Apr 2025
-.. Last Updated: J Krzywon, Apr. r, 2025
+.. Last Updated: J Krzywon, Apr. 7, 2025
 
 .. _UserFiles:
 
@@ -31,7 +31,7 @@ into new categories, and not show certain models. More information on this featu
 
 OS-specific file locations for configuration files:
  - Windows: ~/AppData/Local/sasview/SasView/
- - MacOS: <TODO>
+ - MacOS: ~/Library/Application Support/SasView/
  - Linux: <TODO>
 
 .. _Log_Files:
@@ -43,7 +43,7 @@ other messages related to application startup and shutdown.
 
 OS-specific file locations for log files:
  - Windows: ~/AppData/Local/sasview/SasView/Logs/
- - MacOS: <TODO>
+ - MacOS: ~/Library/Logs/SasView/
  - Linux: <TODO>
 
 .. _Plugin_Files:
@@ -60,8 +60,8 @@ OS-specific file locations for plugin files:
     - Plugin Models: ~/AppData/Local/sasview/SasView/plugin_models/
     - Compiled Models: ~/AppData/Local/sasview/SasView/compiled_models/
  - MacOS:
-    - Plugin Models: <TODO>
-    - Compiled Models: <TODO>
+    - Plugin Models: ~/Library/Application Support/SasView/plugin_models/
+    - Compiled Models: ~/Library/Application Support/SasView/compiled_models/
  - Linux:
     - Plugin Models: <TODO>
     - Compiled Models: <TODO>
@@ -76,7 +76,7 @@ for each version of the doc files.
 
 OS-specific file locations for documentation:
  - Windows: ~/AppData/Local/sasview/SasView/<sasview.version>/doc/
- - MacOS: <TODO>
+ - MacOS: ~/Library/Application Support/SasView/<sasview.version>/doc/
  - Linux: <TODO>
 
 
@@ -89,5 +89,5 @@ on the included files is available at :ref:`example_data_help`. These files are 
 
 OS-specific file locations for example data:
  - Windows: ~/AppData/Local/sasview/SasView/example_data/
- - MacOS: <TODO>
+ - MacOS: ~/Library/Application Support/SasView/example_data/
  - Linux: <TODO>
