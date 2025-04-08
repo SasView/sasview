@@ -16,8 +16,42 @@ _CACHE_DIR = PLATFORM_DIRS_VERSIONED.user_cache_dir
 _CONFIG_DIR = PLATFORM_DIRS_UNVERSIONED.user_config_dir
 _LOG_DIR = PLATFORM_DIRS_UNVERSIONED.user_log_dir
 
-PATH_TYPE = [Path, os.path, str]
+PATH_LIKE = [Path, os.path, str]
 
+# Path constants related to the directories and files used in documentation regeneration processes
+USER_DOC_BASE = Path(_APP_DATA_DIR) / "doc"
+USER_DOC_SRC = USER_DOC_BASE
+USER_DOC_LOG = USER_DOC_SRC / 'log'
+DOC_LOG = USER_DOC_LOG / 'output.log'
+MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
+MAIN_BUILD_SRC = USER_DOC_SRC / "build"
+MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
+ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
+
+HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
+RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
+IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
+SAS_DIR = Path(sys.argv[0]).parent
+
+# Find the original documentation location, depending on where the files originate from
+if os.path.exists(SAS_DIR / "doc"):
+    # This is the directory structure for the installed version of SasView (primary for times when both exist)
+    BASE_DIR = SAS_DIR
+    BASE_DOC_DIR = SAS_DIR / "doc"
+    ORIGINAL_DOCS_SRC = BASE_DOC_DIR / "source"
+elif os.path.exists(SAS_DIR / '..' / 'Frameworks' / 'doc'):
+    # In the MacOS bundle, the executable and packages are in parallel directories
+    BASE_DIR = SAS_DIR / '..' / 'Frameworks'
+    BASE_DOC_DIR = SAS_DIR / "doc" / "sphinx-docs"
+    ORIGINAL_DOCS_SRC = BASE_DOC_DIR / "source"
+else:
+    # This is the directory structure for developers
+    BASE_DIR = SAS_DIR
+    BASE_DOC_DIR = SAS_DIR / "docs" / "sphinx-docs"
+    ORIGINAL_DOCS_SRC = BASE_DOC_DIR / "source-temp"
+
+ORIGINAL_DOC_BUILD = BASE_DIR / "build"
+ORIGINAL_EXAMPLE_DATA_DIR = BASE_DIR / "example_data"
 
 def get_dir_and_create_if_needed(path: PATH_TYPE, create_if_nonexistent: bool = True) -> Path:
     """Returns the requested directory as a pathlib.Path object, creating the directory if it does not already exist."""
