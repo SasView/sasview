@@ -54,12 +54,22 @@ else:
 ORIGINAL_DOC_BUILD = BASE_DIR / "build"
 ORIGINAL_EXAMPLE_DATA_DIR = BASE_DIR / "example_data"
 
-def get_dir_and_create_if_needed(path: PATH_TYPE, create_if_nonexistent: bool = True) -> Path:
+
+def get_dir_and_create_if_needed(path: PATH_LIKE, create_if_nonexistent: bool = True) -> Path:
     """Returns the requested directory as a pathlib.Path object, creating the directory if it does not already exist."""
     path = Path(path)
     if create_if_nonexistent and not os.path.exists(path):
         path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def copy_dir_to_new_path(install_path: PATH_LIKE, user_path: PATH_LIKE, create_if_nonexistent: bool = True) -> Path:
+    """Returns the requested directory as a pathlib.Path object, creating the directory if it does not already exist."""
+    path = Path(user_path)
+    if create_if_nonexistent and not os.path.exists(path):
+        path.mkdir(parents=True, exist_ok=True)
+    if Path(install_path).exists():
+        shutil.copytree(install_path, path)
 
 
 def _get_user_dir(create_if_nonexistent: bool = False) -> Path:
