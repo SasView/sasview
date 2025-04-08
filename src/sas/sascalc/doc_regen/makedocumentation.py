@@ -18,56 +18,7 @@ from sasmodels.core import list_models
 
 PATH_LIKE = Union[Path, str, os.PathLike]
 
-# Path constants related to the directories and files used in documentation regeneration processes
-APP_DIRECTORY = Path(get_app_dir_versioned())
-USER_DOC_BASE = APP_DIRECTORY / "doc"
-USER_DOC_SRC = USER_DOC_BASE
-USER_DOC_LOG = USER_DOC_SRC / 'log'
-DOC_LOG = USER_DOC_LOG / 'output.log'
-MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
-MAIN_BUILD_SRC = USER_DOC_SRC / "build"
-MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
-ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
 PLUGIN_PY_SRC = Path(models.find_plugins_dir())
-
-HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
-RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
-IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
-SAS_DIR = Path(sys.argv[0]).parent
-
-# Find the original documentation location, depending on where the files originate from
-if os.path.exists(SAS_DIR / "doc"):
-    # This is the directory structure for the installed version of SasView (primary for times when both exist)
-    BASE_DIR = SAS_DIR / "doc"
-    ORIGINAL_DOCS_SRC = BASE_DIR / "source"
-elif os.path.exists(SAS_DIR / '..' / 'Frameworks' / 'doc'):
-    # In the MacOS bundle, the executable and packages are in parallel directories
-    BASE_DIR = SAS_DIR / '..' / 'Frameworks' / 'doc'
-    ORIGINAL_DOCS_SRC = BASE_DIR / "source"
-else:
-    # This is the directory structure for developers
-    BASE_DIR = SAS_DIR / "docs" / "sphinx-docs"
-    ORIGINAL_DOCS_SRC = BASE_DIR / "source-temp"
-
-ORIGINAL_DOC_BUILD = BASE_DIR / "build"
-
-
-def create_user_files_if_needed():
-    """Create user documentation directories if necessary and copy built docs there."""
-    if not USER_DOC_BASE.exists():
-        os.mkdir(USER_DOC_BASE)
-    if not USER_DOC_SRC.exists():
-        os.mkdir(USER_DOC_SRC)
-    if not USER_DOC_LOG.exists():
-        os.mkdir(USER_DOC_LOG)
-    if not DOC_LOG.exists():
-        with open(DOC_LOG, "w") as f:
-            # Write an empty file to eliminate any potential future file creation conflicts
-            pass
-    if not MAIN_DOC_SRC.exists() and ORIGINAL_DOCS_SRC.exists():
-        shutil.copytree(ORIGINAL_DOCS_SRC, MAIN_DOC_SRC)
-    if not MAIN_BUILD_SRC.exists() and ORIGINAL_DOC_BUILD.exists():
-        shutil.copytree(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
 
 
 def get_py(directory: PATH_LIKE) -> list[PATH_LIKE]:
