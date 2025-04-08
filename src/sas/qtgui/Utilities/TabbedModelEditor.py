@@ -143,7 +143,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # If we are loading in a file at the launch of the editor instead of letting the user pick, we need to process the HTML location from
         # the documentation viewer into the filepath for its corresponding RST
         if at_launch:
-            from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
+            from sas.system.user import MAIN_DOC_SRC
             user_models = find_plugins_dir()
             user_model_name = user_models + self.load_file + ".py"
 

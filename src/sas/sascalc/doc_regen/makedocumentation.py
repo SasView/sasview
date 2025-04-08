@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Union
 
 from sas.sascalc.fit import models
-from sas.system.user import get_app_dir_versioned
+from sas.system.user import (create_user_files_if_needed, MAIN_PY_SRC, HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC,
+                             MAIN_BUILD_SRC, DOC_LOG)
 
 from sasmodels.core import list_models
 

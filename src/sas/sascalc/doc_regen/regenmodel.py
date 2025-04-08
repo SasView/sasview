@@ -57,7 +57,8 @@ from sasmodels import generate, core
 from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.data import empty_data1D, empty_data2D
 
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, generate_html
+from sas.sascalc.doc_regen.makedocumentation import generate_html
+from sas.system.user import MAIN_DOC_SRC
 
 from typing import Dict, Any
 from sasmodels.kernel import KernelModel

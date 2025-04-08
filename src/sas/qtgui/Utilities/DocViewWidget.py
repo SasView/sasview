@@ -12,8 +12,8 @@ from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.sascalc.doc_regen.makedocumentation import (make_documentation, create_user_files_if_needed,
-                                                     HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE)
+from sas.sascalc.doc_regen.makedocumentation import make_documentation
+from sas.system.user import create_user_files_if_needed, HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE
 
 HTML_404 = '''
 <html>
