@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 from pathlib import Path
 from platformdirs import PlatformDirs
 from sas.system.version import __version__ as sasview_version
@@ -122,6 +123,24 @@ def get_plugin_dir(create_if_nonexistent: bool = True) -> Path:
     """
     app_dir = get_app_dir(create_if_nonexistent)
     return get_dir_and_create_if_needed(Path(app_dir, 'plugin_models'), create_if_nonexistent)
+
+
+def create_user_files_if_needed():
+    """Create user documentation and example data directories if necessary and copy installation files to new dir."""
+    # User docs folder and file generation routines
+    get_dir_and_create_if_needed(USER_DOC_BASE)
+    get_dir_and_create_if_needed(USER_DOC_SRC)
+    get_dir_and_create_if_needed(USER_DOC_LOG)
+    if not DOC_LOG.exists():
+        with open(DOC_LOG, "w") as f:
+            # Write an empty file to eliminate any potential future file creation conflicts
+            pass
+    copy_dir_to_new_path(ORIGINAL_DOCS_SRC, MAIN_DOC_SRC)
+    copy_dir_to_new_path(ORIGINAL_DOC_BUILD, MAIN_BUILD_SRC)
+
+    # Example data generation routines
+    user_example_data = get_dir_and_create_if_needed(Path(get_app_dir() / 'example_data'))
+    copy_dir_to_new_path(ORIGINAL_EXAMPLE_DATA_DIR, user_example_data)
 
 
 def copy_old_files_to_new_location():
