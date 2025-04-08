@@ -27,3 +27,6 @@ Tools & Utilities
    Image Viewer <qtgui/Calculators/image_viewer_help>
 
    File Converter <qtgui/Calculators/file_converter_help>
+
+   MuMag Tool <qtgui/Utilities/MuMag/mumag_help>
+

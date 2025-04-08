@@ -83,7 +83,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdHelp_2.clicked.connect(self.displayHelp)
         self.chkSwap.setVisible(False)
 
-        self.cmdFreeze.clicked.connect(self.freezeTheory)
         # Fill in the perspectives combo
         self.initPerspectives()
 
@@ -281,12 +280,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setText(msg)
             msgbox.setWindowTitle("Project Load")
             # custom buttons
-            button_yes = QtWidgets.QPushButton("Yes")
-            msgbox.addButton(button_yes, QtWidgets.QMessageBox.YesRole)
-            button_no = QtWidgets.QPushButton("No")
-            msgbox.addButton(button_no, QtWidgets.QMessageBox.RejectRole)
-            retval = msgbox.exec_()
-            if retval == QtWidgets.QMessageBox.RejectRole:
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes |
+                                      QtWidgets.QMessageBox.StandardButton.No)
+            retval = msgbox.exec()
+            if retval == QtWidgets.QMessageBox.StandardButton.No:
                 # cancel fit
                 return
 
@@ -297,6 +294,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         }
         filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
+            self.communicator.statusBarUpdateSignal.emit(f"Loading Project... {os.path.basename(filename)}")
             self.default_project_location = os.path.dirname(filename)
             # Delete all data and initialize all perspectives
             self.deleteAllItems()
@@ -305,6 +303,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.cbFitting.blockSignals(False)
             self.initPerspectives()
             self.readProject(filename)
+            self.communicator.statusBarUpdateSignal.emit("Project loaded.")
 
     def loadAnalysis(self):
         """
@@ -683,8 +682,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete selected rows from the model
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will remove the checked data from the data explorer." +\
-                     "\nDo you want to continue?"
+        delete_msg = "This operation will remove the selected data sets " +\
+                "and all the dependents from SasView." +\
+                "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
                                                delete_msg,
@@ -707,12 +707,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Close result panel if results represent the deleted data item
                 # Results panel only stores Data1D/Data2D object
                 #   => QStandardItems must still exist for direct comparison
-                self.closeResultPanelOnDelete(GuiUtils.dataFromItem(item))
+                data = GuiUtils.dataFromItem(item)
+                self.closeResultPanelOnDelete(data)
 
                 # Let others know we deleted data, before we delete it
                 self.communicator.dataDeletedSignal.emit([item])
                 # update stored_data
-                self.manager.update_stored_data([item])
+                self.manager.update_stored_data([data.name])
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
@@ -1121,12 +1122,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
-            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY]
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE,
+                                 DataRole.ROLE_POLYDISPERSITY]
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
-            elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUAL_PLOT:
+            elif role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS] and config.DISABLE_RESIDUAL_PLOT:
                 # Nothing to do if residuals are not plotted
                 continue
             elif role == DataRole.ROLE_POLYDISPERSITY and config.DISABLE_POLYDISPERSITY_PLOT:
@@ -1203,6 +1205,20 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if 'new_plot' not in locals():
                     new_plot = PlotterWidget(manager=self, parent=self)
                     new_plot.item = item
+                # Ensure new plots use the default transform, not the transform of any previous plots the data were in
+                # TODO: The transform should be part of the PLOT, NOT the data
+                if (plot_set.plot_role in [
+                    DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE,
+                    DataRole.ROLE_ANGULAR_SLICE] or plot_set.isSesans):
+                    plot_set.xtransform = 'x'
+                else:
+                    plot_set.xtransform = 'log10(x)'
+                if (plot_set.plot_role in [
+                    DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS,
+                    DataRole.ROLE_ANGULAR_SLICE, DataRole.ROLE_STAND_ALONE] or plot_set.isSesans):
+                    plot_set.ytransform = 'y'
+                else:
+                    plot_set.ytransform = 'log10(y)'
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
@@ -1554,7 +1570,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
-        self.actionDelete.triggered.connect(self.deleteSelectedItem)
+        self.actionDelete.triggered.connect(self.deleteFile)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
         self.actionReplace.triggered.connect(self.onDataReplaced)
 
@@ -1829,7 +1845,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Assure this is indeed wanted
         delete_msg = "This operation will remove the selected data sets " +\
-                     "and all the dependents from the data explorer." +\
+                     "and all the dependents from SasView." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                                'Warning',
@@ -1869,6 +1885,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Delete corresponding open plots
                 self.closePlotsForItem(item_to_delete)
 
+                # This needs to run before model.removeRow()
+                self.communicator.dataDeletedSignal.emit(deleted_items)
+
                 if item_to_delete.parent():
                     # We have a child item - delete from it
                     item_to_delete.parent().removeRow(row)
@@ -1876,9 +1895,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     # delete directly from model
                     model.removeRow(row)
             indices = self.current_view.selectedIndexes()
-
-        # Let others know we deleted data
-        self.communicator.dataDeletedSignal.emit(deleted_items)
 
         # update stored_data
         self.manager.update_stored_data(deleted_names)
@@ -2065,7 +2081,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_model.appendRow(model_item)
         return model_item
 
-    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+    def deleteIntermediateTheoryPlotsByTabId(self, tab_id):
         """Given a model's ID, deletes all items in the theory item model which reference the same ID. Useful in the
         case of intermediate results disappearing when changing calculations (in which case you don't want them to be
         retained in the list)."""
@@ -2077,8 +2093,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 return
             match = GuiUtils.theory_plot_ID_pattern.match(data.id)
             if match:
-                item_model_id = match.groups()[-1]
-                if item_model_id == model_id:
+                item_tab_id = match.groups()[0]
+                if item_tab_id == tab_id:
                     # Only delete those identified as an intermediate plot
                     if match.groups()[2] not in (None, ""):
                         items_to_delete.append(item)

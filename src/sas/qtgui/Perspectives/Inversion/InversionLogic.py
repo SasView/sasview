@@ -136,7 +136,7 @@ class InversionLogic(object):
         return new_plot
 
     def add_errors(self, sigma=0.05):
-        """
+        r"""
         Adds errors to data set is they are not available.
         Uses  $\Delta y = \sigma | y |$.
         """

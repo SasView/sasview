@@ -9,12 +9,25 @@ from sas.qtgui.Utilities.UI.PluginDefinitionUI import Ui_PluginDefinition
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import find_plugins_dir
 
-# txtName
-# txtDescription
-# chkOverwrite
-# tblParams
-# tblParamsPD
-# txtFunction
+
+def remove_empty_table_rows(tbl: QtWidgets.QTableWidget):
+    """A helper function to remove empty rows in a PySide Table, if there are more than two empty rows at the end.
+    This function ensures there is always an empty row in the table.
+
+    :param tbl: A QTableWidget on i rows and j columns.
+    """
+    for i in range(tbl.rowCount() -1, -1 , -1):
+        for j in range(0, tbl.columnCount()):
+            cell_contents = tbl.item(i, j)
+            if cell_contents is None or cell_contents.text() == "":
+                # cell_contents may be None: Ensure this check remains, otherwise the .text() call may throw an error
+                pass
+            else:
+                break
+        else:
+            tbl.removeRow(i)
+    tbl.insertRow(tbl.rowCount())
+
 
 class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     """
@@ -179,10 +192,9 @@ return intensity
         self.parameter_dict[row] = (param, value)
         self.model['parameters'] = self.parameter_dict
 
-        # Check if the update was Value for last row. If so, add a new row
-        if column == 1 and row == self.tblParams.rowCount()-1:
-            # Add a row
-            self.tblParams.insertRow(self.tblParams.rowCount())
+        # Check if there are empty rows.
+        remove_empty_table_rows(self.tblParams)
+
         self.modelModified.emit()
 
     def onParamsPDChanged(self, row, column):
@@ -199,11 +211,9 @@ return intensity
         self.pd_parameter_dict[row] = (param, value)
         self.model['pd_parameters'] = self.pd_parameter_dict
 
-        # Check if the update was Value for last row. If so, add a new row
-        if column == 1 and row == self.tblParamsPD.rowCount() - 1:
-            # Add a row
-            self.tblParamsPD.insertRow(self.tblParamsPD.rowCount())
-        
+        # Check if there are empty rows.
+        remove_empty_table_rows(self.tblParamsPD)
+
         # Check to see if there is any polydisperse parameter text present
         any_text_present = False
         for row in range(self.tblParamsPD.rowCount()):
@@ -233,7 +243,7 @@ return volume
                 # Hide the Form Function box because there are no polydisperse parameters
                 self.formFunctionBox.setVisible(False)
                 self.omitPolydisperseFuncsSignal.emit()
-    
+
         self.modelModified.emit()
 
 
@@ -248,7 +258,7 @@ return volume
         if new_text != self.model['func_text']:
             self.model['func_text'] = new_text
             self.modelModified.emit()
-    
+
     def onFormVolumeFunctionChanged(self):
         """
         Respond to changes in form volume function body
@@ -267,21 +277,21 @@ return volume
         """
         self.model['overwrite'] = self.chkOverwrite.isChecked()
         self.modelModified.emit()
-    
+
     def onGenPython(self):
         """
         Respond to change in generate Python checkbox
         """
         self.model['gen_python'] = self.chkGenPython.isChecked()
         self.modelModified.emit()
-    
+
     def onGenC(self):
         """
         Respond to change in generate C checkbox
         """
         self.model['gen_c'] = self.chkGenC.isChecked()
         self.modelModified.emit()
-    
+
     def checkPyModelExists(self, filename):
         """
         Checks if a Python model exists in the user plugin directory and forces enabling Python checkbox if not

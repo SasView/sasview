@@ -21,6 +21,11 @@ class FittingLogic:
         if data is not None:
             self.data_is_loaded = True
             self.setDataProperties()
+        self.model_parameters = None
+        self.kernel_module = None
+        # List of all shell-unique parameters
+        self.shell_names = []
+        self.current_shell_displayed = 0
 
     @property
     def data(self):

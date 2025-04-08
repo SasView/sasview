@@ -3,6 +3,7 @@ BumpsFitting module runs the bumps optimizer.
 """
 import logging
 import os
+from copy import deepcopy
 from datetime import timedelta, datetime
 import traceback
 import uncertainties
@@ -274,6 +275,9 @@ class BumpsFit(FitEngine):
         # Run the fit
         result = run_bumps(problem, handler, curr_thread)
         if handler is not None:
+            if result['errors']:
+                handler.error(result['errors'])
+                return []
             handler.update_fit(last=True)
 
         # TODO: shouldn't reference internal parameters of fit problem
@@ -295,17 +299,17 @@ class BumpsFit(FitEngine):
             # Use the standard error as the error in the parameter
             for param, val, err in zip(varying, values, errs):
                 # Convert all varying parameters to uncertainties objects
-                param.value = uncertainties.ufloat(val, err)
+                param.slot = uncertainties.ufloat(val, err)
         else:
             try:
                 # Use the covariance matrix to calculate error in the parameter
                 fitted = uncertainties.correlated_values(values, cov)
                 for param, val in zip(varying, fitted):
-                    param.value = val
+                    param.slot = val
             except Exception:
                 # No convergence. Convert all varying parameters to uncertainties objects
                 for param, val, err in zip(varying, values, errs):
-                    param.value = uncertainties.ufloat(val, err)
+                    param.slot = uncertainties.ufloat(val, err)
 
         # Propagate correlated uncertainty through constraints.
         problem.setp_hook()
@@ -316,7 +320,15 @@ class BumpsFit(FitEngine):
         # Check if uncertainty is missing for any parameter
         uncertainty_warning = False
 
-        for fitness in problem.models:
+        for fitting_module in problem.models:
+            # CRUFT: This makes BumpsFitting compatible with bumps v0.9 and v1.0
+            if isinstance(fitting_module, SasFitness):
+                # Bumps v1.x+ - A Fitness object is returned
+                fitness = fitting_module
+            else:
+                # Bumps v0.x - A module is returned that holds the Fitness object
+                fitness = fitting_module.fitness
+            fitness = deepcopy(fitness)
             pars = fitness.fitted_pars + fitness.computed_pars
             par_names = fitness.fitted_par_names + fitness.computed_par_names
 
@@ -331,30 +343,30 @@ class BumpsFit(FitEngine):
             if result['uncertainty'] is not None:
                 fitting_result.uncertainty_state = result['uncertainty']
 
-            fitting_result.pvec = np.array([getattr(p.value, 'n', p.value) for p in pars])
-            fitting_result.stderr = np.array([getattr(p.value, 's', 0) for p in pars])
+            fitting_result.pvec = np.array([getattr(p.slot, 'n', p.slot) for p in pars])
+            fitting_result.stderr = np.array([getattr(p.slot, 's', 0) for p in pars])
             DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
             fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
 
             # Warn user about any parameter that is not an uncertainty object
-            miss_uncertainty = [p for p in pars if not isinstance(p.value,
-                              (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))]
+            miss_uncertainty = [p for p in pars if not isinstance(p.slot,
+                                (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))]
             if miss_uncertainty:
                 uncertainty_warning = True
                 for p in miss_uncertainty:
-                    logging.warn(p.name + " uncertainty could not be calculated.")
+                    logging.warning(p.name + " uncertainty could not be calculated.")
 
            # TODO: Let the GUI decided how to handle success/failure.
             if not fitting_result.success:
-                fitting_result.stderr[:] = np.NaN
-                fitting_result.fitness = np.NaN
+                fitting_result.stderr[:] = np.nan
+                fitting_result.fitness = np.nan
 
             all_results.append(fitting_result)
 
         all_results[0].mesg = result['errors']
 
         if uncertainty_warning:
-            logging.warn("Consider checking related constraint definitions and status of parameters used there.")
+            logging.warning("Consider checking related constraint definitions and status of parameters used there.")
 
         if q is not None:
             q.put(all_results)
@@ -398,7 +410,7 @@ def run_bumps(problem, handler, curr_thread):
     try:
         best, fbest = fitdriver.fit()
     except Exception as exc:
-        best, fbest = None, np.NaN
+        best, fbest = None, np.nan
         errors.extend([str(exc), traceback.format_exc()])
     finally:
         mapper.stop_mapper(fitdriver.mapper)
@@ -411,8 +423,12 @@ def run_bumps(problem, handler, curr_thread):
     success = best is not None
     try:
         stderr = fitdriver.stderr() if success else None
-        cov = (fitdriver.cov() if not hasattr(fitdriver.fitter, 'state') else
-               np.cov(fitdriver.fitter.state.draw().points.T))
+        if hasattr(fitdriver.fitter, 'state'):
+            x = fitdriver.fitter.state.draw().points
+            n_parameters = x.shape[1]
+            cov = np.cov(x.T, bias=True).reshape((n_parameters, n_parameters))
+        else:
+            cov = fitdriver.cov()
     except Exception as exc:
         errors.append(str(exc))
         errors.append(traceback.format_exc())

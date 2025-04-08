@@ -14,17 +14,20 @@ lxml
 mako
 matplotlib
 numba
+numpy
 periodictable
 pybind11
 pylint
 pyopengl
 pyparsing
+PySide6
 pytest
 pytest_qt
 pytest-mock
 pytools
 qtconsole
-six
+scipy
+siphash24
 sphinx
 superqt
 tinycc
@@ -36,8 +39,3 @@ zope
 
 # Alphabetized list of OS-specific packages
 pywin32; platform_system == "Windows"
-
-# Alphabetized list of version-pinned packages
-numpy==1.26.4  # 2.0.0 deprecates many functions used in the codebase (and potentially in dependencies)
-PySide6==6.4.3  # Later versions do not mesh well with pyinstaller < 6.0
-scipy==1.13.1  # 1.14 deprecates some functions used in the codebase (and potentially in dependencies)
