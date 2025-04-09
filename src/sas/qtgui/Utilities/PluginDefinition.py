@@ -10,6 +10,12 @@ from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import find_plugins_dir
 
 
+VOLUME_TEXT = """volume = {0} * 0.0
+
+return volume
+"""
+
+
 def remove_empty_table_rows(tbl: QtWidgets.QTableWidget):
     """A helper function to remove empty rows in a PySide Table, if there are more than two empty rows at the end.
     This function ensures there is always an empty row in the table.
@@ -221,28 +227,24 @@ return intensity
                 table_cell_contents = self.tblParamsPD.item(row, column)
                 if table_cell_contents and table_cell_contents.text():
                     # There is text in at least one cell
-                    any_text_present = True
+                    if not self.displayed_default_form_volume:
+                        text = VOLUME_TEXT.format(self.model['pd_parameters'][0][0])
+                        self.model['form_volume_text'] = text
+                        self.txtFormVolumeFunction.insertPlainText(text)
+                        self.displayed_default_form_volume = True
+
+                    self.formFunctionBox.setVisible(True)
+                    self.includePolydisperseFuncsSignal.emit()
                     break
-            if any_text_present:
-                # Display the Form Function box because there are polydisperse parameters
-                # First insert the first user-specified parameter into sample form volume function
-                if not self.displayed_default_form_volume:
-                    text = \
-"""volume = {0} * 0.0
-
-return volume
-""".format(self.model['pd_parameters'][0][0])
-                    self.model['form_volume_text'] = text
-                    self.txtFormVolumeFunction.insertPlainText(text)
-                    self.displayed_default_form_volume = True
-
-                self.formFunctionBox.setVisible(True)
-                self.includePolydisperseFuncsSignal.emit()
-                break
+                else:
+                    # Hide the Form Function box because there are no polydisperse parameters
+                    self.formFunctionBox.setVisible(False)
+                    self.omitPolydisperseFuncsSignal.emit()
             else:
-                # Hide the Form Function box because there are no polydisperse parameters
-                self.formFunctionBox.setVisible(False)
-                self.omitPolydisperseFuncsSignal.emit()
+                # If column loop finishes, continue to next row
+                continue
+            # If column loop was broken, break out again
+            break
 
         self.modelModified.emit()
 
