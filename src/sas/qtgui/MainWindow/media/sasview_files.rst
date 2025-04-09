@@ -1,7 +1,7 @@
 .. sasview_files.rst
 
 .. Initial Draft: J Krzywon, Apr 2025
-.. Last Updated: J Krzywon, Apr. 7, 2025
+.. Last Updated: J Krzywon, Apr. 9, 2025
 
 .. _UserFiles:
 
@@ -12,7 +12,7 @@ During the installation process and while running the app, SasView creates a num
 the install location on the end users computer. These files include configurations, plugin models, compiled plugins,
 documentation, and example files. Please refer to the specific section to find where each type of file is stored.
 
-File paths that start with the '~' character refer to the user directory, which is typically `C:\\Users\<username>` in
+File paths that start with the '~' character refer to the user directory, which is typically `C:\\\\Users\\<username>` in
 Windows, `/Users/<username>` in MacOS, and `/home/<username>` in most Linux distributions.
 
 This document is specific to v6.1.0 and beyond. Previous versions of SasView stored user documents in the
@@ -35,7 +35,7 @@ and a categories file that allows the end user to change how their models are or
 general configuration file, config-<v>.json is a json file that stores a mapping of config variables to their updated values.
 This file is only generated and stored locally if something in the :ref:`Preferences` panel has been modified. The categories
 file, categories.json, stores the user-preferred model organization, allowing a user to add model categories, move models
-into new categories, and not show certain models. More information on this feature is availabe in :ref:`Category_Manager`.
+into new categories, and not show certain models. More information on this feature is available in :ref:`Category_Manager`.
 
 OS-specific file locations for configuration files:
  - Windows: ~/AppData/Local/sasview/SasView/
