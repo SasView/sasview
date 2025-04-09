@@ -19,8 +19,6 @@ from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from distutils.spawn import find_executable
 
-from sas.system.user import get_user_dir
-
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
 # sphinx paths
