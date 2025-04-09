@@ -361,9 +361,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             return
 
         # If user has not specified an output file type, throw error message
-        if model['gen_python'] == False and model['gen_c'] == False:
-                msg = "No output model language specified.\n"
-                msg += "Please select which types of model (Python, C) to generate."
+        if not any([model['gen_python'], model['gen_c']]):
+                msg = "No output model language specified.\nPlease select which types of model (Python, C) to generate."
                 QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
                 return
 
