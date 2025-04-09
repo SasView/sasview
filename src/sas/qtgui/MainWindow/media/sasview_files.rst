@@ -32,7 +32,7 @@ into new categories, and not show certain models. More information on this featu
 OS-specific file locations for configuration files:
  - Windows: ~/AppData/Local/sasview/SasView/
  - MacOS: ~/Library/Application Support/SasView/
- - Linux: <TODO>
+ - Linux: ~/.config/SasView/
 
 .. _Log_Files:
 
@@ -44,7 +44,7 @@ other messages related to application startup and shutdown.
 OS-specific file locations for log files:
  - Windows: ~/AppData/Local/sasview/SasView/Logs/
  - MacOS: ~/Library/Logs/SasView/
- - Linux: <TODO>
+ - Linux: ~/.local/state/SasView/
 
 .. _Plugin_Files:
 
@@ -63,8 +63,8 @@ OS-specific file locations for plugin files:
     - Plugin Models: ~/Library/Application Support/SasView/plugin_models/
     - Compiled Models: ~/Library/Application Support/SasView/compiled_models/
  - Linux:
-    - Plugin Models: <TODO>
-    - Compiled Models: <TODO>
+    - Plugin Models: ~/.local/share/SasView/plugin_models
+    - Compiled Models: ~/.local/share/SasView/compiled_models
 
 .. _Documentation:
 
@@ -77,7 +77,7 @@ for each version of the doc files.
 OS-specific file locations for documentation:
  - Windows: ~/AppData/Local/sasview/SasView/<sasview.version>/doc/
  - MacOS: ~/Library/Application Support/SasView/<sasview.version>/doc/
- - Linux: <TODO>
+ - Linux: ~/.local/share/SasView/<sasview.version>/doc/
 
 
 .. _Example_Data:
