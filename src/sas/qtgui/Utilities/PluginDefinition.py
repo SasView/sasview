@@ -310,34 +310,38 @@ return intensity
             self.chkGenPython.setEnabled(True)
         return os.path.exists(os.path.join(find_plugins_dir(), filename + '.py'))
 
-    def updateParamTableFromEditor(self, param_list):
-        """
-        Add parameters sent from model editor to the parameter tables
+    def updateParamTableFromEditor(self, param_list: []):
+        """Add parameters sent from model editor to the parameter tables
+
         :param param_list: list of parameters to add to the parameter tables [name, default_value, type]
         """
         updated_params_non_pd = [param for param in param_list if param[2] != 'volume']
         updated_params_pd = [param for param in param_list if param[2] == 'volume']
 
         # Prepare the table for updating
-        self.tblParams.blockSignals(True)
-        self.tblParamsPD.blockSignals(True)
-        self.tblParams.clearContents()
-        self.tblParamsPD.clearContents()
-        self.tblParams.setRowCount(len(updated_params_non_pd) + 1)
-        self.tblParamsPD.setRowCount(len(updated_params_pd) + 1)
+        self._updateParamTable(updated_params_non_pd, self.tblParams)
+        self._updateParamTable(updated_params_pd, self.tblParamsPD)
+
+    def _updateParamTable(self, param_list: [], param_table: QTableWidget):
+        """Add subset of parameters sent from model editor to a specific parameter table
+
+        :param param_list: list of parameters to add to the parameter tables [name, default_value, type]
+        :param param_table: A QTableWidget that will be updated with the params from param_list
+        """
+        param_table.blockSignals(True)
+        param_table.clearContents()
+        param_table.setRowCount(len(param_list) + 1)
 
         # Iterate over cells and add the new parameters to them
-        for table, params in [[self.tblParams, updated_params_non_pd], [self.tblParamsPD, updated_params_pd]]:
-            for row, param in enumerate(params):
-                for column in range(2):
-                    if column < len(param):  # Check if the column index is within the bounds of param length
-                        item = QtWidgets.QTableWidgetItem(str(param[column]))
-                        table.setItem(row, column, item)
-                    else:
-                        logging.info(f"Missing data for Row {row}, Column {column}")
+        for row, param in enumerate(param_list):
+            for column in range(2):
+                if column < len(param):  # Check if the column index is within the bounds of param length
+                    item = QtWidgets.QTableWidgetItem(str(param[column]))
+                    param_table.setItem(row, column, item)
+                else:
+                    logging.info(f"Missing data for Row {row}, Column {column}")
 
-        self.tblParams.blockSignals(False)
-        self.tblParamsPD.blockSignals(False)
+        param_table.blockSignals(False)
 
     def getModel(self):
         """
