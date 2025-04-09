@@ -15,6 +15,11 @@ documentation, and example files. Please refer to the specific section to find w
 File paths that start with the '~' character refer to the user directory, which is typically `C:\\Users\<username>` in
 Windows, `/Users/<username>` in MacOS, and `/home/<username>` in most Linux distributions.
 
+This document is specific to v6.1.0 and beyond. Previous versions of SasView stored user documents in the
+`~/.sasview` directory.
+
+**For users who wish to use versions both newer and older than v6.1, do not delete the contents
+of the `~/.sasview` directory.**
 
 
 :ref:`Plugin_Files`, :ref:`Config_Files`, :ref:`Log_Files`, :ref:`Documentation`
