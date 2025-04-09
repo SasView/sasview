@@ -15,14 +15,14 @@ documentation, and example files. Please refer to the specific section to find w
 File paths that start with the '~' character refer to the user directory, which is typically `C:\\\\Users\\<username>` in
 Windows, `/Users/<username>` in MacOS, and `/home/<username>` in most Linux distributions.
 
-This document is specific to v6.1.0 and beyond. Previous versions of SasView stored user documents in the
+This document is specific to v6.1.0 and beyond. Previous versions of SasView stored user files in the
 `~/.sasview` directory.
 
 **For users who wish to use versions both newer and older than v6.1, do not delete the contents
 of the `~/.sasview` directory.**
 
 
-:ref:`Plugin_Files`, :ref:`Config_Files`, :ref:`Log_Files`, :ref:`Documentation`
+:ref:`Config_Files`, :ref:`Log_Files`, :ref:`Plugin_Files`, :ref:`Compiled_Files`, :ref:`Documentation`
 
 .. , :ref:`Example_Data`
 
@@ -58,21 +58,28 @@ OS-specific file locations for log files:
 
 Plugin Files
 ------------
-Plugin models, whether they be written by the user (:ref:`Writing_a_Plugin`), downloaded from the model marketplace
-(`Model Marketplace <https://marketplace.sasview.org/>`_), or sent from another SasView user, should be stored in a
-specific location to allow SasView to find them. During normal fitting operations, models are compiled and the compiled
-files are stored in a parallel location.
+Plugin models, whether they be written by the user (:ref:`Writing_a_Plugin`), downloaded from the
+`model marketplace <https://marketplace.sasview.org/>`_, or sent from another SasView user, should be stored in a
+specific location to allow SasView to find them.
 
 OS-specific file locations for plugin files:
- - Windows:
-    - Plugin Models: ~/AppData/Local/sasview/SasView/plugin_models/
-    - Compiled Models: ~/AppData/Local/sasview/SasView/compiled_models/
- - MacOS:
-    - Plugin Models: ~/Library/Application Support/SasView/plugin_models/
-    - Compiled Models: ~/Library/Application Support/SasView/compiled_models/
- - Linux:
-    - Plugin Models: ~/.local/share/SasView/plugin_models
-    - Compiled Models: ~/.local/share/SasView/compiled_models
+ - Windows: ~/AppData/Local/sasview/SasView/plugin_models/
+ - MacOS: ~/Library/Application Support/SasView/plugin_models/
+ - Linux: ~/.local/share/SasView/plugin_models
+
+.. _Compiled_Files:
+
+Complied Model Files
+------------
+The fitting module, when a model is selected, compiles each model in an on-demand process. The compiled file will include
+all form factors and structure factors used to create the model, and will be compiled based on the GPU optimization
+currently in use. These models are stored in a parallel directory to the plugin models, but end users do not need to add
+any files to this directory.
+
+OS-specific file locations for compiled model files:
+ - Windows: ~/AppData/Local/sasview/SasView/compiled_models/
+ - MacOS: ~/Library/Application Support/SasView/compiled_models/
+ - Linux: ~/.local/share/SasView/compiled_models
 
 .. _Documentation:
 
