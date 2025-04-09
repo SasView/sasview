@@ -226,7 +226,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Check the validity of loaded model if the model is python
         if self.is_python:
-            error_line = self.findFirstError(self.filename)
+            error_line = self.findFirstError(self.filename_py)
             if error_line >= 0:
                 # select bad line
                 cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
@@ -346,33 +346,24 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.setWindowTitle(current_text)
 
     def updateFromPlugin(self):
-        """
-        Write the plugin and update the model editor
-        """
+        """Write the plugin and update the model editor"""
         # get current model
         model = self.getModel()
-        if 'filename' not in model: return
 
         # get required filename
-        filename = model['filename']
-
-        if filename == "":
+        filename = model.get('filename', None)
+        if not filename:
+            # If No filename given
             QtWidgets.QMessageBox.critical(self, "Plugin Error", "Please specify a filename.")
             return
-
-        # If user has not specified an output file type, throw error message
-        if not any([model['gen_python'], model['gen_c']]):
-                msg = "No output model language specified.\nPlease select which types of model (Python, C) to generate."
-                QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
-                return
 
         # check if file exists
         plugin_location = models.find_plugins_dir()
 
-        # Generate the full path of the python path for the model
-        full_path_py = os.path.join(plugin_location, filename)
-        if os.path.splitext(full_path_py)[1] != ".py":
-            full_path_py += ".py"
+        # Generate the full path of the python path for the model and ensure the extension is .py
+        full_path = Path(plugin_location) / filename
+        full_path_py = full_path.with_suffix(".py")
+        full_path_c = full_path.with_suffix(".c")
 
         if model['gen_python'] == True:
             # Update the global path definition
@@ -383,17 +374,30 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             model_str = self.generatePyModel(model, full_path_py)
             self.writeFile(full_path_py, model_str)
 
+            # Add a tab to TabbedModelEditor for the Python model if not already open
+            self.createOrUpdateTab(self.filename_py, self.editor_widget)
+            self.populateWidgetTextBox(self.editor_widget, model_str)
+
         if model['gen_c'] == True:
-            c_path = os.path.join(plugin_location, filename)
-            if os.path.splitext(c_path)[1] != ".c":
-                c_path += ".c"
             # Update the global path definition
-            self.filename_c = c_path
-            if not self.canWriteModel(model, c_path):
+            self.filename_c = full_path_c
+            if not self.canWriteModel(model, self.filename_c):
                 return
             # generate the model representation as string
-            c_model_str = self.generateCModel(model, c_path)
-            self.writeFile(c_path, c_model_str)
+            c_model_str = self.generateCModel(model, self.filename_c)
+            self.writeFile(self.filename_c, c_model_str)
+
+            # Add a tab to TabbedModelEditor for the C model if not already open
+            self.createOrUpdateTab(self.filename_c, self.c_editor_widget)
+            self.populateWidgetTextBox(self.c_editor_widget, c_model_str)
+
+        # Run the model test in sasmodels and check model syntax. Returns error line if checks fail.
+        if full_path_py.exists():
+            if self.findFirstError(full_path_py) > 0:
+                return
+        elif self.showNoCompileWarning:
+            # Show message box that tells user no model checks will be run until a python file of the same name is created in the plugins directory.
+            self.noModelCheckWarning()
 
         # disable "Apply"
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
@@ -401,45 +405,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Allow user to toggle 'Generate Python model' checkbox
         self.plugin_widget.enablePyCheckboxSignal.emit()
 
-        # Run the model test in sasmodels and check model syntax. Returns error line if checks fail.
-        if os.path.exists(full_path_py):
-            error_line = self.findFirstError(full_path_py)
-            if error_line > 0:
-                return
-        else:
-            if self.showNoCompileWarning:
-                # Show message box that tells user no model checks will be run until a python file of the same name is created in the plugins directory.
-                self.noModelCheckWarning()
-
-
         self.editor_widget.setEnabled(True)
-
-        # Update the editor(s) here.
-        # Simple string forced into control.
-        if model['gen_python'] == True:
-            # Add a tab to TabbedModelEditor for the Python model if not already open
-            if not self.isWidgetInTab(self.tabWidget, self.editor_widget):
-                self.addTab("python", Path(self.filename_py).name)
-            elif self.tabWidget.tabText(self.tabWidget.indexOf(self.editor_widget)) != Path(self.filename_py).name:
-                # If title of tab is not what the filename is, update the tab title
-                self.tabWidget.setTabText(self.tabWidget.indexOf(self.editor_widget), Path(self.filename_py).name)
-
-            self.editor_widget.blockSignals(True)
-            self.editor_widget.txtEditor.setPlainText(model_str)
-            self.editor_widget.blockSignals(False)
-
-        if model['gen_c'] == True:
-            # Add a tab to TabbedModelEditor for the C model if not already open
-            if not self.isWidgetInTab(self.tabWidget, self.c_editor_widget):
-                self.addTab("c", Path(self.filename_c).name)
-            elif self.tabWidget.tabText(self.tabWidget.indexOf(self.c_editor_widget)) != Path(self.filename_c).name:
-                # If title of tab is not what the filename is, update the tab title
-                self.tabWidget.setTabText(self.tabWidget.indexOf(self.c_editor_widget), Path(self.filename_c).name)
-
-            # Update the editor
-            self.c_editor_widget.blockSignals(True)
-            self.c_editor_widget.txtEditor.setPlainText(c_model_str)
-            self.c_editor_widget.blockSignals(False)
 
         # Set the widget title
         self.setTabEdited(False)
@@ -451,6 +417,35 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msg = "Custom model "+filename + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
+
+    def createOrUpdateTab(self, filename: str | Path, widget: QtWidgets.QWidget):
+        """Check if the widget is already included in the list of tabs. Add it, if it isn't already present
+        otherwise update the tab.
+
+        :param filename: A file path like object where the file displayed in the widget was loaded
+        :param widget: A QWidget to either update or add to the tabbed structure
+        :param model_str: The model text to be added to the widget object
+        """
+        # Add a tab to TabbedModelEditor for the C model if not already open
+        file_path = Path(filename)
+        if not self.isWidgetInTab(self.tabWidget, widget):
+            self.addTab(file_path.suffix, file_path.name)
+        elif self.tabWidget.tabText(self.tabWidget.indexOf(widget)) != file_path.name:
+            # If title of tab is not what the filename is, update the tab title
+            self.tabWidget.setTabText(self.tabWidget.indexOf(widget), file_path.name)
+
+    def populateWidgetTextBox(self, widget: QtWidgets.QWidget, model_str: str):
+        """Populate a widget text editor without emitting signals.
+
+        **addTab() creates a fresh widget everytime it is called, so this cannot be combined with createOrUpdateTab()**
+
+        :param widget: A QWidget to either update or add to the tabbed structure
+        :param model_str: The model text to be added to the widget object
+        """
+        # Update the editor
+        widget.blockSignals(True)
+        widget.txtEditor.setPlainText(model_str)
+        widget.blockSignals(False)
 
     def findFirstError(self, full_path):
         """
@@ -723,12 +718,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         :param filetype: filetype of tab to add: "python" or "c"
         :param name: name to display on tab
         """
-        if filetype == "python":
+        if filetype in ["python", "py", ".py"]:
             #display_name = Path(self.filename_py).name
             self.editor_widget = ModelEditor(self, is_python=True)
             self.tabWidget.addTab(self.editor_widget, name)
             self.editor_widget.modelModified.connect(self.editorModelModified)
-        elif filetype == "c":
+        elif filetype in ["c", ".c"]:
             #display_name = Path(self.filename_c).name
             self.c_editor_widget = ModelEditor(self, is_python=False)
             self.tabWidget.addTab(self.c_editor_widget, name)
