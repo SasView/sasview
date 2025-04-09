@@ -501,18 +501,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             for line in reversed_error_text:
                 if ('File' in line and 'line' in line):
                     # If model check fails (not syntax) then 'line' and 'File' will be in adjacent lines
-                    error_line = re.split('line ', line)[1]
+                    error_line = re.match("(.*)line (?P<line_number>[0-9]*)(,?)(.*)", line)
                     try:
-                        error_line = int(error_line)
+                        error_line = int(error_line.group('line_number'))
                         break
                     except ValueError:
-                        # Sometimes the line number is followed by more text
-                        try:
-                            error_line = error_line.split(',')[0]
-                            error_line = int(error_line)
-                            break
-                        except ValueError:
-                            error_line = 0
+                        error_line = 0
 
         return error_line
 
