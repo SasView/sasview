@@ -146,10 +146,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         self.is_python = True # By default assume the file you load is python
 
-        if self.is_modified:
-            saveCancelled = self.saveClose()
-            if saveCancelled:
-                return
+        if self.is_modified and self.saveClose():
+            return
+        elif self.is_modified:
             self.is_modified = False
 
         # If we are loading in a file at the launch of the editor instead of letting the user pick, we need to process the HTML location from
@@ -161,10 +160,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
             if self.model is True:
                 # Find location of model .py files and load from that location
-                if os.path.isfile(user_model_name):
-                    filename = user_model_name
-                else:
-                    filename = MAIN_DOC_SRC / "user" / "models" / "src" / (self.load_file + ".py")
+                filename = user_model_name if os.path.isfile(user_model_name) \
+                    else filename = MAIN_DOC_SRC / "user" / "models" / "src" / (self.load_file + ".py")
             else:
                 filename = MAIN_DOC_SRC / self.load_file.replace(".html", ".rst")
                 self.is_python = False
@@ -258,10 +255,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Accept if document not modified, confirm intent otherwise.
         """
-        if self.is_modified:
-            saveCancelled = self.saveClose()
-            if saveCancelled:
-                return
+        if self.is_modified and self.saveClose():
+            return
         self.reject()
 
     def onApply(self):
