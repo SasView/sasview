@@ -112,7 +112,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     @currentData.setter
     def currentData(self, value: HashableStandardItem):
-        self.currentResult.logic.data = dataFromItem(value)
+        self.currentResult.logic.data = value
 
 
     # TODO: I don't know if 'float' is the right type hint.
