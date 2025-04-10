@@ -15,6 +15,18 @@ from sas.qtgui.Utilities import GuiUtils
 
 
 ASPECT_RATIO = 1.0
+DIAMETER_MIN = 10.0
+DIAMETER_MAX = 1000.0
+NUM_DIAMETER_BINS = 100
+LOG_BINNING = "true"
+CONTRAST = 1.0
+BACKGROUND = 0.0
+SKY_BACKGROUND = 1e-6
+SUBTRACT_LOW_Q = "false"
+POWER_LOW_Q = 4
+NUM_PTS_LOW_Q = 10
+SCALE_LOW_Q = 1.0
+NUM_ITERATIONS = 100
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +72,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Add validators
         self.setupValidators()
         # Link user interactions with methods
-        self.setupLinks()
+        self.setupSlots()
         # Set values
         self.setupModel()
         # Set up the Widget Map
@@ -123,9 +135,13 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     ######################################################################
     # Initialization routines
 
-    def setupLinks(self):
+    def setupSlots(self):
         """Connect the use controls to their appropriate methods"""
         self.helpButton.clicked.connect(self.help)
+        self.quickFitButton.clicked.connect(self.onQuickFit)
+        self.fullFitButton.clicked.connect(self.onFullFit)
+        self.cmdReset.clicked.connect(self.onRangeReset)
+        self.chkLowQ.stateChanged.connect(self.onLowQStateChanged)
 
     def setupMapper(self):
         # Set up the mapper.
@@ -136,8 +152,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.mapper.addMapping(self.txtName, WIDGETS.W_NAME)
 
         # Qmin/Qmax
-        self.mapper.addMapping(self.txtTotalQMin, WIDGETS.W_QMIN)
-        self.mapper.addMapping(self.txtTotalQMax, WIDGETS.W_QMAX)
+        self.mapper.addMapping(self.txtMinRange, WIDGETS.W_QMIN)
+        self.mapper.addMapping(self.txtMaxRange, WIDGETS.W_QMAX)
 
         # Model
         self.mapper.addMapping(self.txtAspectRatio, WIDGETS.W_ASPECT_RATIO)
@@ -146,6 +162,19 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.mapper.addMapping(self.txtMinDiameter, WIDGETS.W_DMIN)
         self.mapper.addMapping(self.txtMaxDiameter, WIDGETS.W_DMAX)
         self.mapper.addMapping(self.txtBinsDiameter, WIDGETS.W_DBINS)
+        self.mapper.addMapping(self.chkLogBinning, WIDGETS.W_LOG_BINNING)
+        self.mapper.addMapping(self.txtContrast, WIDGETS.W_CONTRAST)
+
+        # Method parameters
+        self.mapper.addMapping(self.txtSkyBackgd, WIDGETS.W_SKY_BACKGROUND)
+        self.mapper.addMapping(self.txtIterations, WIDGETS.W_NUM_ITERATIONS)
+
+        # Background
+        self.mapper.addMapping(self.txtBackgd, WIDGETS.W_BACKGROUND)
+        self.mapper.addMapping(self.chkLowQ, WIDGETS.W_SUBTRACT_LOW_Q)
+        self.mapper.addMapping(self.txtNptsLowQ, WIDGETS.W_NUM_PTS_LOW_Q)
+        self.mapper.addMapping(self.txtScaleLowQ, WIDGETS.W_SCALE_LOW_Q)
+        self.mapper.addMapping(self.txtPowerLowQ, WIDGETS.W_POWER_LOW_Q)
 
         self.mapper.toFirst()
 
@@ -170,23 +199,58 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.model.setItem(WIDGETS.W_ASPECT_RATIO, item)
 
         # Size distribution parameters
-        d_min = 10.0
-        item = QtGui.QStandardItem(str(d_min))
+        item = QtGui.QStandardItem(str(DIAMETER_MIN))
         self.model.setItem(WIDGETS.W_DMIN, item)
-        d_max = 100.0
-        item = QtGui.QStandardItem(str(d_max))
+        item = QtGui.QStandardItem(str(DIAMETER_MAX))
         self.model.setItem(WIDGETS.W_DMAX, item)
-        n_bins = 100.0
-        item = QtGui.QStandardItem(str(n_bins))
+        item = QtGui.QStandardItem(str(NUM_DIAMETER_BINS))
         self.model.setItem(WIDGETS.W_DBINS, item)
+        item = QtGui.QStandardItem(str(LOG_BINNING))
+        self.model.setItem(WIDGETS.W_LOG_BINNING, item)
+        item = QtGui.QStandardItem(str(CONTRAST))
+        self.model.setItem(WIDGETS.W_CONTRAST, item)
+
+        # Method parameters
+        item = QtGui.QStandardItem(str(SKY_BACKGROUND))
+        self.model.setItem(WIDGETS.W_SKY_BACKGROUND, item)
+        item = QtGui.QStandardItem(str(NUM_ITERATIONS))
+        self.model.setItem(WIDGETS.W_NUM_ITERATIONS, item)
+
+        # Background
+        item = QtGui.QStandardItem(str(BACKGROUND))
+        self.model.setItem(WIDGETS.W_BACKGROUND, item)
+        item = QtGui.QStandardItem(str(SUBTRACT_LOW_Q))
+        self.model.setItem(WIDGETS.W_SUBTRACT_LOW_Q, item)
+        item = QtGui.QStandardItem(str(NUM_PTS_LOW_Q))
+        self.model.setItem(WIDGETS.W_NUM_PTS_LOW_Q, item)
+        item = QtGui.QStandardItem(str(POWER_LOW_Q))
+        self.model.setItem(WIDGETS.W_POWER_LOW_Q, item)
+        item = QtGui.QStandardItem(str(SCALE_LOW_Q))
+        self.model.setItem(WIDGETS.W_SCALE_LOW_Q, item)
 
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
+        self.txtNptsLowQ.setEnabled(False)
+        self.txtPowerLowQ.setEnabled(False)
+        self.txtScaleLowQ.setEnabled(False)
+        self.rbFitLowQ.setEnabled(False)
+        self.rbFixLowQ.setEnabled(False)
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
         self.txtAspectRatio.setValidator(GuiUtils.DoubleValidator())
+        self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
+        self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
+        self.txtMinDiameter.setValidator(GuiUtils.DoubleValidator())
+        self.txtMaxDiameter.setValidator(GuiUtils.DoubleValidator())
+        self.txtBinsDiameter.setValidator(GuiUtils.DoubleValidator())
+        self.txtContrast.setValidator(GuiUtils.DoubleValidator())
+        self.txtSkyBackgd.setValidator(GuiUtils.DoubleValidator())
+        self.txtIterations.setValidator(GuiUtils.DoubleValidator())
+        self.txtNptsLowQ.setValidator(GuiUtils.DoubleValidator())
+        self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
+        self.txtScaleLowQ.setValidator(GuiUtils.DoubleValidator())
 
     ######################################################################
     # Methods for updating GUI
@@ -195,9 +259,18 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         Enable buttons when data is present, else disable them
         """
-        self.plotButton.setEnabled(self.logic.data_is_loaded)
         self.quickFitButton.setEnabled(self.logic.data_is_loaded)
         self.fullFitButton.setEnabled(self.logic.data_is_loaded)
+        self.boxWeighting.setEnabled(self.logic.data_is_loaded)
+        # Weighting controls
+        if self.logic.di_flag:
+            self.rbWeighting2.setEnabled(True)
+            self.rbWeighting2.setChecked(True)
+            # self.onWeightingChoice(self.rbWeighting2)
+        else:
+            self.rbWeighting2.setEnabled(False)
+            self.rbWeighting1.setChecked(True)
+            # self.onWeightingChoice(self.rbWeighting1)
 
     ######################################################################
     # GUI Interaction Events
@@ -210,6 +283,30 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             "/user/qtgui/Perspectives/SizeDistribution/sizedistribution_help.html"
         )
         self._manager.showHelp(tree_location)
+
+    def onQuickFit(self):
+        pass
+
+    def onFullFit(self):
+        pass
+
+    def onRangeReset(self):
+        """
+        Callback for resetting qmin/qmax
+        """
+        qmin = 0.0
+        qmax = 0.0
+        if self.logic.data_is_loaded:
+            qmin, qmax = self.logic.computeDataRange()
+        self.updateQRange(qmin, qmax)
+
+    def onLowQStateChanged(self, state):
+        is_checked = state == QtCore.Qt.CheckState.Checked.value
+        self.txtNptsLowQ.setEnabled(is_checked)
+        self.txtPowerLowQ.setEnabled(is_checked)
+        self.txtScaleLowQ.setEnabled(is_checked)
+        self.rbFitLowQ.setEnabled(is_checked)
+        self.rbFixLowQ.setEnabled(is_checked)
 
     ######################################################################
     # Response Actions
@@ -258,12 +355,21 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         :return: {name: value}
         """
         return {
-            "total_q_min": self.txtTotalQMin.text(),
-            "total_q_max": self.txtTotalQMax.text(),
+            "range_q_min": self.txtMinRange.text(),
+            "range_q_max": self.txtMaxRange.text(),
             "aspect_ratio": self.txtAspectRatio.text(),
             "d_min": self.txtMinDiameter.text(),
             "d_max": self.txtMaxDiameter.text(),
             "num_d_bins": self.txtBinsDiameter.text(),
+            "log_binning": self.chkLogBinning.isChecked(),
+            "contrast": self.txtContrast.text(),
+            "sky_background": self.txtSkyBackgd.text(),
+            "num_iterations": self.txtIterations.text(),
+            "background": self.txtBackgd.text(),
+            "subtract_low_q": self.chkLowQ.isChecked(),
+            "num_pts_low_q": self.txtNptsLowQ.text(),
+            "power_low_q": self.txtPowerLowQ.text(),
+            "scale_low_q": self.txtScaleLowQ.txt(),
         }
 
     def removeData(self, data_list=None):
@@ -323,9 +429,33 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             msg = "SizeDistribution.updateFromParameters expects a dictionary"
             raise TypeError(f"{msg}: {c_name} received")
         # Assign values to 'Parameters' tab inputs - use defaults if not found
-        self.txtTotalQMin.setText(str(params.get("total_q_min", "0.0")))
-        self.txtTotalQMax.setText(str(params.get("total_q_max", "0.0")))
-        self.txtAspectRatio.setText(str(params.get("aspect_ratio", "1.0")))
-        self.txtMinDiameter.setText(str(params.get("d_min", "10.0")))
-        self.txtMaxDiameter.setText(str(params.get("d_max", "100.0")))
-        self.txtBinsDiameter.setText(str(params.get("num_d_bins", "100")))
+        self.txtMinRange.setText(str(params.get("range_q_min", "0.0")))
+        self.txtMaxRange.setText(str(params.get("range_q_max", "0.0")))
+        self.txtAspectRatio.setText(str(params.get("aspect_ratio", str(ASPECT_RATIO))))
+        self.txtMinDiameter.setText(str(params.get("d_min", str(DIAMETER_MIN))))
+        self.txtMaxDiameter.setText(str(params.get("d_max", str(DIAMETER_MAX))))
+        self.txtBinsDiameter.setText(
+            str(params.get("num_d_bins", str(NUM_DIAMETER_BINS)))
+        )
+        self.chkLogBinning.setChecked(params.get("log_binning", True))
+        self.txtContrast.setText(str(params.get("contrast", str(CONTRAST))))
+        self.txtSkyBackgd.setText(
+            str(params.get("sky_background", str(SKY_BACKGROUND)))
+        )
+        self.txtIterations.setText(
+            str(params.get("num_iterations", str(NUM_ITERATIONS)))
+        )
+        self.txtBackgd.setText(str(params.get("background", str(BACKGROUND))))
+        self.chkLowQ.setChecked(params.get("subtract_low_q", False))
+        self.txtNptsLowQ.setText(str(params.get("num_pts_low_q", str(NUM_PTS_LOW_Q))))
+        self.txtPowerLowQ.setText(str(params.get("power_low_q", str(POWER_LOW_Q))))
+        self.txtScaleLowQ.setText(str(params.get("scale_low_q", str(SCALE_LOW_Q))))
+
+    def updateQRange(self, q_range_min, q_range_max):
+        """
+        Update the local model based on calculated values
+        """
+        q_max = str(q_range_max)
+        q_min = str(q_range_min)
+        self.model.item(WIDGETS.W_QMIN).setText(q_min)
+        self.model.item(WIDGETS.W_QMAX).setText(q_max)

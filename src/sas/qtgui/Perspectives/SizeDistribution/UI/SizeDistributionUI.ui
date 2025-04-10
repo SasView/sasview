@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>519</width>
-    <height>398</height>
+    <width>577</width>
+    <height>671</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -84,63 +84,6 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <widget class="QGroupBox" name="boxQrange">
-            <property name="title">
-             <string>Total Q range</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="0">
-              <layout class="QHBoxLayout" name="horizontalLayout">
-               <item>
-                <widget class="QLabel" name="lblTotalQMin">
-                 <property name="text">
-                  <string>Min:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="txtTotalQMin">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lblTotalQMax">
-                 <property name="text">
-                  <string>Max:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="txtTotalQMax">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lblTotalQUnits">
-                 <property name="text">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
-                   style=&quot;
-                   vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                  </string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -169,14 +112,14 @@
             </item>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="0" column="3">
            <widget class="QLabel" name="lblAspectRatio">
             <property name="text">
              <string>Aspect ratio:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="3">
+          <item row="0" column="4">
            <widget class="QLineEdit" name="txtAspectRatio">
             <property name="enabled">
              <bool>true</bool>
@@ -189,7 +132,7 @@
        <item row="2" column="0">
         <widget class="QGroupBox" name="boxParameters">
          <property name="title">
-          <string>Parameters</string>
+          <string>Distribution parameters</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
           <item row="0" column="0">
@@ -207,16 +150,34 @@
            </widget>
           </item>
           <item row="0" column="2">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
+              style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+             </string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
            <widget class="QLabel" name="lblMaxDiameter">
             <property name="text">
              <string>Maximum diameter:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="3">
+          <item row="0" column="4">
            <widget class="QLineEdit" name="txtMaxDiameter">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
+              style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+             </string>
             </property>
            </widget>
           </item>
@@ -234,7 +195,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="1" column="3" colspan="2">
            <widget class="QCheckBox" name="chkLogBinning">
             <property name="enabled">
              <bool>true</bool>
@@ -379,22 +340,95 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="cmdMaskEdit">
-            <property name="text">
-             <string>Mask Editor</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
        <item row="1" column="0">
+        <widget class="QGroupBox" name="boxAdvancedParameters">
+         <property name="title">
+          <string>Method parameters</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_21">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblSkyBackgd">
+            <property name="text">
+             <string>MaxEnt Sky Background:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="txtSkyBackgd"/>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Suggested: 1e-6&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblIterations">
+            <property name="text">
+             <string>Iterations:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="txtIterations"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="boxWeighting">
+         <property name="title">
+          <string>Weighting</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_20">
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QRadioButton" name="rbWeighting1">
+              <property name="text">
+               <string>None</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbWeighting2">
+              <property name="text">
+               <string>Use dI Data</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbWeighting3">
+              <property name="text">
+               <string>Use |sqrt(I Data)|</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbWeighting4">
+              <property name="text">
+               <string>Use |I Data|</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="0">
         <widget class="QGroupBox" name="boxBackground">
          <property name="title">
           <string>Background</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_21">
+         <layout class="QGridLayout" name="gridLayout_12">
           <item row="0" column="0">
            <widget class="QLabel" name="lblBackgd">
             <property name="text">
@@ -421,81 +455,17 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblSkyBackgd">
-            <property name="text">
-             <string>MaxEnt Sky Background:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="txtSkyBackgd"/>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Suggested: 1e-6&lt;span style=&quot;vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QGroupBox" name="boxWeighting">
-         <property name="title">
-          <string>Weighting</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_20">
-          <item row="0" column="0">
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-             <widget class="QRadioButton"
-                     name="rbWeighting1">
-              <property name="text">
-               <string>None</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton"
-                     name="rbWeighting2">
-              <property name="text">
-               <string>Use dI Data</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton"
-                     name="rbWeighting3">
-              <property name="text">
-               <string>Use |sqrt(I Data)|</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton"
-                     name="rbWeighting4">
-              <property name="text">
-               <string>Use |I Data|</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QGroupBox" name="boxLowQ">
-         <property name="title">
-          <string>Low Q</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_12">
           <item row="1" column="0" colspan="2">
+           <widget class="QCheckBox" name="chkLowQ">
+            <property name="toolTip">
+             <string>Check to subtract low-Q power law</string>
+            </property>
+            <property name="text">
+             <string>Subtract Low-Q power law</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
              <widget class="QLabel" name="lblNptsLowQ">
@@ -515,65 +485,7 @@
             </item>
            </layout>
           </item>
-          <item row="2" column="0">
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item>
-             <widget class="QRadioButton" name="rbGuinier">
-              <property name="text">
-               <string>Guinier</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="rbPowerLawLowQ">
-              <property name="text">
-               <string>Power law</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-              <property name="autoExclusive">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="3" column="0" colspan="2">
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QLabel" name="lblPowerLowQ">
-              <property name="text">
-               <string>Power:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="txtPowerLowQ">
-              <property name="toolTip">
-               <string>Exponent to apply to the Power_law function.</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QCheckBox" name="chkLowQ">
-            <property name="toolTip">
-             <string>Check to subtract low-Q power law</string>
-            </property>
-            <property name="text">
-             <string>Subtract Low-Q power law</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
+          <item row="3" column="0">
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
              <widget class="QRadioButton" name="rbFitLowQ">
@@ -612,10 +524,41 @@
             </item>
            </layout>
           </item>
+          <item row="3" column="1" colspan="3">
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QLabel" name="lblPowerLowQ">
+              <property name="text">
+               <string>Power:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtPowerLowQ">
+              <property name="toolTip">
+               <string>Exponent to apply to the Power_law function.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblScaleLowQ">
+              <property name="text">
+               <string>Scale:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtScaleLowQ">
+              <property name="toolTip">
+               <string>Scale to apply to the Power_law function.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
-
       </layout>
      </widget>
     </widget>
@@ -625,13 +568,6 @@
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
-     <item>
-      <widget class="QPushButton" name="plotButton">
-       <property name="text">
-        <string>Plot</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QPushButton" name="quickFitButton">
        <property name="text">

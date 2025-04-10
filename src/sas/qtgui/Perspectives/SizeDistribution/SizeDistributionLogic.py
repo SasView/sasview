@@ -1,3 +1,8 @@
+import numpy as np
+
+from sas.qtgui.Plotting.PlotterData import Data1D
+
+
 class SizeDistributionLogic:
     """
     All the data-related logic. This class deals exclusively with Data1D/2D
@@ -7,8 +12,11 @@ class SizeDistributionLogic:
     def __init__(self, data=None):
         self._data = data
         self.data_is_loaded = False
+        # di data presence in the dataset
+        self.di_flag = False
         if data is not None:
             self.data_is_loaded = True
+            self.setDataProperties()
 
     @property
     def data(self):
@@ -19,7 +27,54 @@ class SizeDistributionLogic:
         """data setter"""
         self._data = value
         self.data_is_loaded = self._data is not None
+        if self._data is not None:
+            self.setDataProperties()
 
     def isLoadedData(self):
         """accessor"""
         return self.data_is_loaded
+
+    def setDataProperties(self):
+        """
+        Analyze data and set up some properties important for
+        the Presentation layer
+        """
+        if self._data.__class__.__name__ == "Data2D":
+            if self._data.err_data is not None and np.any(self._data.err_data):
+                self.di_flag = True
+        else:
+            if self._data.dy is not None and np.any(self._data.dy):
+                self.di_flag = True
+
+    def computeDataRange(self):
+        """
+        Wrapper for calculating the data range based on local dataset
+        """
+        return self.computeRangeFromData(self.data)
+
+    def computeRangeFromData(self, data):
+        """
+        Compute the minimum and the maximum range of the data
+        return the npts contains in data
+        """
+        if isinstance(data, Data1D):
+            try:
+                qmin = min(data.x)
+                qmax = max(data.x)
+            except (ValueError, TypeError):
+                msg = (
+                    "Unable to find min/max/length of \n data named %s"
+                    % self.data.filename
+                )
+                raise ValueError(msg)
+
+        else:
+            qmin = 0
+            try:
+                x = max(np.fabs(data.xmin), np.fabs(data.xmax))
+                y = max(np.fabs(data.ymin), np.fabs(data.ymax))
+            except (ValueError, TypeError):
+                msg = "Unable to find min/max of \n data named %s" % self.data.filename
+                raise ValueError(msg)
+            qmax = np.sqrt(x * x + y * y)
+        return qmin, qmax
