@@ -30,7 +30,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     # Signals for intertab communication plugin -> editor
     applySignal = QtCore.Signal()
 
-    def __init__(self, parent=None, edit_only=False, model=False, load_file=None):
+    def __init__(self, parent: QtWidgets.QWidget = None, edit_only: bool = False, model: bool = False,
+                 load_file: str | None = None):
         super(TabbedModelEditor, self).__init__(parent._parent)
 
         self.parent = parent
@@ -113,13 +114,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # locally emitted signals
         self.applySignal.connect(self._onApply)
 
-    def setPluginActive(self, is_active=True):
+    def setPluginActive(self, is_active: bool = True):
         """
         Enablement control for all the controls on the simple plugin editor
         """
         self.plugin_widget.setEnabled(is_active)
 
-    def saveClose(self):
+    def saveClose(self) -> bool:
         """
         Check if file needs saving before closing or model reloading
         """
@@ -131,17 +132,15 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.updateFromEditor()
         return saveCancelled
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QtCore.QEvent):
         """
         Overwrite the close even to assure intent
         """
-        if self.is_modified:
-            saveCancelled = self.saveClose()
-            if saveCancelled:
-                return
+        if self.is_modified and self.saveClose():
+            return
         event.accept()
 
-    def onLoad(self, at_launch=False):
+    def onLoad(self, at_launch: bool = False):
         """
         Loads a model plugin file. at_launch is value of whether to attempt a load of a file from launch of the widget or not
         """
@@ -190,7 +189,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.file_to_regenerate = filename
         self.loadFile(str(filename))
 
-    def allBuiltinModels(self):
+    def allBuiltinModels(self) -> [str]:
         """
         create a list of all builtin models
         """
@@ -199,7 +198,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_names = [model.name for model in model_list]
         return model_names
 
-    def loadFile(self, filename):
+    def loadFile(self, filename: str | Path):
         """
         Performs the load operation and updates the view
         """
@@ -246,7 +245,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.c_editor_widget.txtEditor.setPlainText(plugin.read())
         self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
-    def onModifiedExit(self):
+    def onModifiedExit(self) -> int:
         msg_box = QtWidgets.QMessageBox(self)
         msg_box.setWindowTitle("SasView Model Editor")
         msg_box.setText("The document has been modified.")
@@ -329,7 +328,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.editor_widget.blockSignals(False)
             self.editor_widget.setEnabled(False)
 
-    def setTabEdited(self, is_edited):
+    def setTabEdited(self, is_edited: bool):
         """
         Change the widget name to indicate unsaved state
         Unsaved state: add "*" to filename display
@@ -447,7 +446,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         widget.txtEditor.setPlainText(model_str)
         widget.blockSignals(False)
 
-    def findFirstError(self, full_path):
+    def findFirstError(self, full_path: str | Path) -> int:
         """
         Run ast and model checks
         Attempt to return the line number of the error if any
@@ -593,7 +592,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Update flag to not show popup again while this instance of TabbedModelEditor is open
             self.showNoCompileWarning = False
 
-    def saveOverrideWarning(self, filename, model_str):
+    def saveOverrideWarning(self, filename: str | Path, model_str: str):
         """
         Throw popup asking user if they want to save the model despite a bad model check.
         Save model if user chooses to save, and do nothing if the user chooses to continue editing.
@@ -634,7 +633,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                     self.writeFile(c_file, self.c_editor_widget.getModel()['text'])
             return True
 
-    def canWriteModel(self, model=None, full_path=""):
+    def canWriteModel(self, model: dict = None, full_path: str | Path = "") -> bool:
         """
         Determine if the current plugin can be written to file
         """
@@ -694,7 +693,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         return self.tabWidget.currentWidget().getModel()
 
-    def addTab(self, filetype, name):
+    def addTab(self, filetype: str, name: str):
         """
         Add a tab to the tab widget
         :param filetype: filetype of tab to add: "python" or "c"
@@ -711,7 +710,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.tabWidget.addTab(self.c_editor_widget, name)
             self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
-    def removeTab(self, filetype):
+    def removeTab(self, filetype: str):
         """
         Remove a tab from the tab widget.
         Assume that the tab to remove exists.
@@ -722,7 +721,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         elif filetype == "c":
             self.tabWidget.removeTab(self.tabWidget.indexOf(self.c_editor_widget))
 
-    def updateToPlugin(self, full_path):
+    def updateToPlugin(self, full_path: str | Path):
         """
         Update the plugin tab with new info from the model editor
         """
@@ -751,7 +750,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.plugin_widget.sendNewFormVolumeSignal.emit(form_volume_text)
 
     @classmethod
-    def isWidgetInTab(cls, tabWidget, widget_to_check):
+    def isWidgetInTab(cls, tabWidget: QtWidgets.QTabWidget, widget_to_check: QtWidgets.QWidget) -> bool:
         """
         Check to see if a `widget_to_check` is a tab in the `tabWidget`
         """
@@ -761,14 +760,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         return False
 
     @classmethod
-    def writeFile(cls, fname, model_str=""):
+    def writeFile(cls, fname: str | Path, model_str: str = ""):
         """
         Write model content to file "fname"
         """
         with open(fname, 'w', encoding="utf-8") as out_f:
             out_f.write(model_str)
 
-    def generateCModel(self, model, fname):
+    def generateCModel(self, model: dict, fname: str | Path) -> str:
         """
         Generate C model from the current plugin state
         :param model: plugin model
@@ -802,12 +801,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         return model_text
 
 
-    def generatePyModel(self, model, fname):
+    def generatePyModel(self, model: dict, fname: str | Path) -> str:
         """
         generate model from the current plugin state
         """
 
-        def formatPythonFlags():
+        def formatPythonFlags() -> str:
             """Get python flags for model and format into text"""
             checkbox_values = {
                 'chkSingle': getattr(self.plugin_widget, 'chkSingle').isChecked(),
@@ -893,7 +892,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         return model_text
 
     @classmethod
-    def getParamHelper(cls, param_str):
+    def getParamHelper(cls, param_str: str) -> []:
         """
         yield a sequence of name, value pairs for the parameters in param_str
 
@@ -909,7 +908,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                     yield [v.strip() for v in (name, value, desc)]
 
     @classmethod
-    def strFromParamDict(cls, param_dict):
+    def strFromParamDict(cls, param_dict: dict) -> str:
         """
         Creates string from parameter dictionary
 
@@ -935,7 +934,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         return param_str
 
     @classmethod
-    def extractFunctionBody(cls, source_code, function_name):
+    def extractFunctionBody(cls, source_code: str, function_name: str) -> str:
         """
         Extract the body of a function from a model file
         """
