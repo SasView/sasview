@@ -209,6 +209,27 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # Previously called these events directly without a signal but it led to
         # QT segfaulting.
         self.calculationComplete.emit()
+        self.makePlots(out, cov, pr, elapsed)
+
+    def makePlots(self, out, cov, pr, elapsed):
+        # PR Plot
+        self.currentResult.pr_plot = self.currentResult.logic.newPRPlot(out, pr)
+        self.currentResult.pr_plot.show_yzero = True
+        self.currentResult.pr_plot.filename = self.currentResult.logic.data.filename
+
+        # Data Plot
+        data_plot = self.currentResult.logic.new1DPlot(self.tab_id, out, self.currentResult.calculator)
+        data_plot.filename = self.currentResult.logic.data.filename
+
+        data_plot.show_q_range_sliders = True
+        data_plot.slider_update_on_move = False
+        data_plot.slider_perspective_name = "Inversion"
+        data_plot.slider_tab_name = self.tab_name
+        data_plot.slider_low_q_input = ['minQInput']
+        data_plot.slider_low_q_setter = ['updateMinQ']
+        data_plot.slider_high_q_input = ['maxQInput']
+        data_plot.slider_high_q_setter = ['updateMaxQ']
+        self.currentResult.data_plot = data_plot
 
     def updateParams(self):
         # TODO: No validators so this will break if they can't be converted to
