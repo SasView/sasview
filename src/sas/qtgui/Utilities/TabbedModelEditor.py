@@ -21,18 +21,6 @@ from sas.qtgui.Utilities.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.CodeEditor import QCodeEditor
 
 
-FLAG_STRING = """
-\n# Optional flags (can be removed). Read documentation by pressing 'Help' for more information.\n
-# single = True indicates that the model can be run using single precision floating point values. Defaults to True.
-single = {chkSingle}\n\n
-# opencl = False indicates that the model should not be run using OpenCL. Defaults to False.
-opencl = {chkOpenCL}\n\n
-# structure_factor = False indicates that the model cannot be used as a structure factor to account for interactions between particles. Defaults to False.
-structure_factor = {chkStructure}\n\n
-# have_fq = False indicates that the model does not define F(Q) calculations in a linked C model. Note that F(Q) calculations are only necessary for accomadating beta approximation. Defaults to False.
-have_fq = {chkFQ}\n"""
-
-
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
     Model editor "container" class describing interaction between
@@ -831,7 +819,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 'chkFQ': getattr(self.plugin_widget, 'chkFQ').isChecked(),
             }
             # Get the values of the checkboxes
-            flag_string = FLAG_STRING.format(**checkbox_values)
+            flag_string = FLAG_TEMPLATE.format(**checkbox_values)
             return flag_string
 
         name = model['filename']
@@ -1037,6 +1025,17 @@ def form_volume({args}):
     and to weight polydisperse parameter contributions.
     """
 '''
+
+FLAG_TEMPLATE = """
+\n# Optional flags (can be removed). Read documentation by pressing 'Help' for more information.\n
+# single = True indicates that the model can be run using single precision floating point values. Defaults to True.
+single = {chkSingle}\n\n
+# opencl = False indicates that the model should not be run using OpenCL. Defaults to False.
+opencl = {chkOpenCL}\n\n
+# structure_factor = False indicates that the model cannot be used as a structure factor to account for interactions between particles. Defaults to False.
+structure_factor = {chkStructure}\n\n
+# have_fq = False indicates that the model does not define F(Q) calculations in a linked C model. Note that F(Q) calculations are only necessary for accomadating beta approximation. Defaults to False.
+have_fq = {chkFQ}\n"""
 
 SUM_TEMPLATE = """
 from sasmodels.core import load_model_info
