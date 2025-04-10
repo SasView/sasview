@@ -79,7 +79,7 @@ class InversionLogic(object):
         new_plot = Data1D(x, y)
         new_plot.is_data = False
         new_plot.dy = np.zeros(len(y))
-        new_plot.name = "%s [%s]" % (IQ_FIT_LABEL, self._data.name)
+        new_plot.name = "%s [%s]" % (IQ_FIT_LABEL, self.data.name)
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
         title = "I(q)"
@@ -133,7 +133,7 @@ class InversionLogic(object):
             (y, dy) = pr.pr_err(out, cov, x)
             new_plot = Data1D(x, y, dy=dy)
 
-        new_plot.name = "%s [%s]" % (PR_FIT_LABEL, self._data.name)
+        new_plot.name = "%s [%s]" % (PR_FIT_LABEL, self.data.name)
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ", "cm^{-3}")
         new_plot.title = "P(r) fit"
