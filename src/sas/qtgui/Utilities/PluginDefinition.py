@@ -322,7 +322,7 @@ return intensity
         self._updateParamTable(updated_params_non_pd, self.tblParams)
         self._updateParamTable(updated_params_pd, self.tblParamsPD)
 
-    def _updateParamTable(self, param_list: [], param_table: QTableWidget):
+    def _updateParamTable(self, param_list: [], param_table: QtWidgets.QTableWidget):
         """Add subset of parameters sent from model editor to a specific parameter table
 
         :param param_list: list of parameters to add to the parameter tables [name, default_value, type]
