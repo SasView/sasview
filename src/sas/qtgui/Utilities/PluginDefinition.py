@@ -50,7 +50,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
     sendNewIqSignal = QtCore.Signal(str)
     sendNewFormVolumeSignal = QtCore.Signal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QtWidgets.QWidget = None):
         super(PluginDefinition, self).__init__(parent)
 
         self.setupUi(self)
@@ -91,7 +91,6 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         hint_function += "volume = (4 / 3) * pi * R**3\n"
         hint_function += "return volume\n"
         self.txtFormVolumeFunction.setToolTip(hint_function)
-
 
     def addWidgets(self):
         """
@@ -184,7 +183,7 @@ return intensity
         self.model['description'] = self.txtDescription.text()
         self.modelModified.emit()
 
-    def onParamsChanged(self, row, column):
+    def onParamsChanged(self, row: int, column: int):
         """
         Respond to changes in non-polydisperse parameter table
         """
@@ -203,7 +202,7 @@ return intensity
 
         self.modelModified.emit()
 
-    def onParamsPDChanged(self, row, column):
+    def onParamsPDChanged(self, row: int, column: int):
         """
         Respond to changes in polydisperse parameter table
         """
@@ -297,7 +296,7 @@ return intensity
         self.model['gen_c'] = self.chkGenC.isChecked()
         self.modelModified.emit()
 
-    def checkPyModelExists(self, filename):
+    def checkPyModelExists(self, filename: str) -> bool:
         """
         Checks if a Python model exists in the user plugin directory and forces enabling Python checkbox if not
         :param filename: name of the file (without extension)
@@ -346,7 +345,7 @@ return intensity
 
         param_table.blockSignals(False)
 
-    def getModel(self):
+    def getModel(self) -> dict:
         """
         Return the current plugin model
         """
