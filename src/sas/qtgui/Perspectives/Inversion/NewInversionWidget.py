@@ -229,7 +229,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.currentResult.calculator.noOfTerms,
             tab_id=[[self.tab_id]],
             error_func=self.threadError,
-            completefn=self.calculationCompleted, # TODO: Implement
+            completefn=self.calculationCompleted,
             updatefn=None
         )
 
