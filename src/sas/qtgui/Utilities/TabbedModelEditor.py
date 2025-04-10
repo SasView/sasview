@@ -509,11 +509,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Save the current state of the Model Editor
         """
         clear_error_formatting = True # Assume we will clear error formating (if any) after saving
-        filename = self.filename_py
         w = self.tabWidget.currentWidget()
-        if not w.is_python:
-            base, _ = os.path.splitext(filename)
-            filename = base + '.c'
+        filename = self.filename_py if w.is_python else self.filename_c
         # make sure we have the file handle ready
         if not filename:
             logging.error("No file name was provided for your plugin model. No file was written.")
@@ -526,21 +523,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Get model filepath
         plugin_location = models.find_plugins_dir()
-        full_path = os.path.join(plugin_location, filename)
-        if not w.is_python and self.is_python:
-            pass
-        elif os.path.splitext(full_path)[1] != ".py":
-            full_path += ".py"
+        full_path = Path(plugin_location) / filename
 
-        # Check model as long as there is a .py file in one of the tabs
-        if w.is_python and self.is_python:
-            check_model = True
-        elif not w.is_python and self.is_python:
-            # Set full_path to the .py file so that we can run a model check on it (the .py model should link to the .c model)
-            full_path = self.filename.with_suffix(".py")
-            check_model = True
-
-        if check_model:
+        if self.is_python:
+            full_path = full_path.with_suffix(".py")
             error_line = self.findFirstError(full_path)
             if error_line >= 0:
                 # select bad line
@@ -548,8 +534,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 w.txtEditor.setTextCursor(cursor)
 
                 # Ask the user if they want to save the file with errors or continue editing
-                user_decision = self.saveOverrideWarning(filename, model_str)
-                if user_decision == False:
+                if not self.saveOverrideWarning(filename, model_str):
                     # If the user decides to continue editing without saving, return
                     return
                 else:
@@ -576,7 +561,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.updateToPlugin(full_path)
 
         # notify the user
-        msg = str(filename) + " successfully saved."
+        msg = f"{str(filename)} successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
         if self.is_documentation:
