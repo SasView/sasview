@@ -23,7 +23,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
 
 # Local UI
-from sas.qtgui.Utilities.UI.AddMultEditorUI import Ui_AddMultEditorUI
+from sas.qtgui.Utilities.ModelEditors.AddMultEditor.UI.AddMultEditorUI import Ui_AddMultEditorUI
 
 # Template for the output plugin file
 SUM_TEMPLATE = """
