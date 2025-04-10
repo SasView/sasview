@@ -26,7 +26,7 @@ class InversionLogic(object):
     _data_item: QStandardItem | None
 
     def __init__(self, data_item=None):
-        self._data_item = data
+        self._data_item = data_item
         self.data_is_loaded = False
         if data_item is not None:
             self.data_is_loaded = True
