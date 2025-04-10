@@ -248,7 +248,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         for plot in plots:
             if not plot is None:
                 updateModelItemWithPlot(self.currentDataItem, plot, plot.name)
-
+                self.communicator.plotRequestedSignal.emit([self.currentDataItem, plot], None)
 
     def updateParams(self):
         # TODO: No validators so this will break if they can't be converted to
