@@ -711,9 +711,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Assume that the tab to remove exists.
         :param filetype: filetype of tab to remove: "python" or "c"
         """
-        if filetype == "python":
+        if filetype in ["python", "py", ".py"]:
             self.tabWidget.removeTab(self.tabWidget.indexOf(self.editor_widget))
-        elif filetype == "c":
+        elif filetype in ["c", ".c"]:
             self.tabWidget.removeTab(self.tabWidget.indexOf(self.c_editor_widget))
 
     def updateToPlugin(self, full_path: str | Path):
