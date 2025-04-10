@@ -221,25 +221,10 @@ return intensity
         remove_empty_table_rows(self.tblParamsPD)
 
         # Check to see if there is any polydisperse parameter text present
-        any_text_present = False
         for row in range(self.tblParamsPD.rowCount()):
             for column in range(self.tblParamsPD.columnCount()):
-                table_cell_contents = self.tblParamsPD.item(row, column)
-                if table_cell_contents and table_cell_contents.text():
-                    # There is text in at least one cell
-                    if not self.displayed_default_form_volume:
-                        text = VOLUME_TEXT.format(self.model['pd_parameters'][0][0])
-                        self.model['form_volume_text'] = text
-                        self.txtFormVolumeFunction.insertPlainText(text)
-                        self.displayed_default_form_volume = True
-
-                    self.formFunctionBox.setVisible(True)
-                    self.includePolydisperseFuncsSignal.emit()
+                if self._checkCell(row, column):
                     break
-                else:
-                    # Hide the Form Function box because there are no polydisperse parameters
-                    self.formFunctionBox.setVisible(False)
-                    self.omitPolydisperseFuncsSignal.emit()
             else:
                 # If column loop finishes, continue to next row
                 continue
@@ -248,6 +233,24 @@ return intensity
 
         self.modelModified.emit()
 
+    def _checkCell(self, row: int, column: int) -> bool:
+        """Check the cell at the particular location (row, column) to see if it has any value."""
+        table_cell_contents = self.tblParamsPD.item(row, column)
+        if table_cell_contents and table_cell_contents.text():
+            # There is text in at least one cell
+            if not self.displayed_default_form_volume:
+                text = VOLUME_TEXT.format(self.model['pd_parameters'][0][0])
+                self.model['form_volume_text'] = text
+                self.txtFormVolumeFunction.insertPlainText(text)
+                self.displayed_default_form_volume = True
+
+            self.formFunctionBox.setVisible(True)
+            self.includePolydisperseFuncsSignal.emit()
+        else:
+            # Hide the Form Function box because there are no polydisperse parameters
+            self.formFunctionBox.setVisible(False)
+            self.omitPolydisperseFuncsSignal.emit()
+        return (table_cell_contents and table_cell_contents.text())
 
     def onFunctionChanged(self):
         """
