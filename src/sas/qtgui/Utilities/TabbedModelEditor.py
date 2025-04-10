@@ -636,38 +636,35 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         assert(full_path!="")
 
         # Make sure we can overwrite the file if it exists
-        if os.path.isfile(full_path):
-            # can we overwrite it?
-            if not model['overwrite']:
-                # notify the viewer
-                msg = "Plugin with specified name already exists.\n"
-                msg += "Please specify different filename or allow file overwrite."
-                QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
-                # Don't accept but return
-                return False
+        if os.path.isfile(full_path) and not model['overwrite']:
+            # notify the viewer
+            msg = "Plugin with specified name already exists.\n"
+            msg += "Please specify different filename or allow file overwrite."
+            QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
+            # Don't accept but return
+            return False
 
-        if model['filename'].casefold() in (model.casefold() for model in self.allBuiltinModels()):
+        if model['filename'].casefold() in (built_in.casefold() for built_in in self.allBuiltinModels()):
             # notify the viewer
             msg = "Built-in model with specified name already exists.\n"
             msg += "Please specify different filename."
             QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
             # Don't accept but return
             return False
+
         # Update model editor if plugin definition changed
         func_str = model['func_text']
         form_vol_str = model['form_volume_text']
         msg = None
-        if func_str:
-            if 'return' not in func_str:
-                msg = "Error: The func(x) must 'return' a value at least.\n"
-                msg += "For example: \n\nreturn 2*x"
-        elif form_vol_str:
-            if 'return' not in form_vol_str:
-                msg = "Error: The form_volume() must 'return' a value at least.\n"
-                msg += "For example: \n\nreturn 0.0"
-        else:
+        if func_str and 'return' not in func_str:
+            msg = "Error: The func(x) must 'return' a value at least.\n"
+            msg += "For example: \n\nreturn 2*x"
+        elif form_vol_str and 'return' not in form_vol_str:
+            msg = "Error: The form_volume() must 'return' a value at least.\n"
+            msg += "For example: \n\nreturn 0.0"
+        elif not func_str and not form_vol_str:
             msg = 'Error: Function is not defined.'
-        if msg is not None:
+        if msg:
             QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
             return False
         return True
