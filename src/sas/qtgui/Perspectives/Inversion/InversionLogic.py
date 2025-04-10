@@ -41,7 +41,7 @@ class InversionLogic(object):
     def data(self, value: QStandardItem):
         """ data setter """
         self._data_item = value
-        self.data_is_loaded = (self._data is not None)
+        self.data_is_loaded = (self._data_item is not None)
 
     def isLoadedData(self):
         """ accessor """
