@@ -247,7 +247,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.currentResult.pr_plot.plot_role
         for plot in plots:
             if not plot is None:
-                updateModelItemWithPlot(self.currentData, plot, plot.name)
+                updateModelItemWithPlot(self.currentDataItem, plot, plot.name)
 
 
     def updateParams(self):
