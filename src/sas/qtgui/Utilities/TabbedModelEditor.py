@@ -956,11 +956,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             if node.name == self.function_name:
                 body = node.body
                 # Check if the first statement is an Expr node containing a constant (docstring)
-                if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant):
+                if self._check_for_docstring(body):
                     body = body[1:]  # Exclude the docstring
                 self.function_body_source = ast.unparse(body)
             # Continue traversing to find nested functions or other function definitions
             self.generic_visit(node)
+
+        def _check_for_docstring(self, body: ast.AST) -> bool:
+            """A quick check to see if an ast node has a doc string."""
+            if body:
+                return isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant)
+            return False
+
 
 
 CUSTOM_TEMPLATE = '''\
