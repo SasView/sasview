@@ -21,6 +21,18 @@ from sas.qtgui.Utilities.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.CodeEditor import QCodeEditor
 
 
+FLAG_STRING = """
+\n# Optional flags (can be removed). Read documentation by pressing 'Help' for more information.\n
+# single = True indicates that the model can be run using single precision floating point values. Defaults to True.
+single = {chkSingle}\n\n
+# opencl = False indicates that the model should not be run using OpenCL. Defaults to False.
+opencl = {chkOpenCL}\n\n
+# structure_factor = False indicates that the model cannot be used as a structure factor to account for interactions between particles. Defaults to False.
+structure_factor = {chkStructure}\n\n
+# have_fq = False indicates that the model does not define F(Q) calculations in a linked C model. Note that F(Q) calculations are only necessary for accomadating beta approximation. Defaults to False.
+have_fq = {chkFQ}\n"""
+
+
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
     Model editor "container" class describing interaction between
@@ -812,44 +824,15 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         def formatPythonFlags():
             """Get python flags for model and format into text"""
-            header = "\n# Optional flags (can be removed). Read documentation by pressing 'Help' for more information.\n\n"
-            flag_string = header
-            checkbox_defaults = {
-                'chkSingle': True,
-                'chkOpenCL': False,
-                'chkStructure': False,
-                'chkFQ': False
+            checkbox_values = {
+                'chkSingle': getattr(self.plugin_widget, 'chkSingle').isChecked(),
+                'chkOpenCL': getattr(self.plugin_widget, 'chkOpenCL').isChecked(),
+                'chkStructure': getattr(self.plugin_widget, 'chkStructure').isChecked(),
+                'chkFQ': getattr(self.plugin_widget, 'chkFQ').isChecked(),
             }
             # Get the values of the checkboxes
-            checkbox_values = {}
-            for name in checkbox_defaults.keys():
-                checkbox_values[name] = getattr(self.plugin_widget, name).isChecked()
-            # Create output string
-            for name in checkbox_values.keys():
-                # Check to see if the checkbox is set to a non-default value
-                if checkbox_defaults[name] != checkbox_values[name]:
-                    match name:
-                        case 'chkSingle':
-                            flag_string += """\
-# single = True indicates that the model can be run using single precision floating point values. Defaults to True.
-single = True\n\n"""
-                        case 'chkOpenCL':
-                            flag_string += """\
-# opencl = False indicates that the model should not be run using OpenCL. Defaults to False.
-opencl = False\n\n"""
-                        case 'chkStructure':
-                            flag_string += """\
-# structure_factor = False indicates that the model cannot be used as a structure factor to account for interactions between particles. Defaults to False.
-structure_factor = False\n\n"""
-                        case 'chkFQ':
-                            flag_string += """\
-# have_fq = False indicates that the model does not define F(Q) calculations in a linked C model. Note that F(Q) calculations are only necessary for accomadating beta approximation. Defaults to False.
-have_fq = False\n\n"""
-
-            if flag_string == header:
-                # If no flags are set, do not include the header
-                flag_string = ""
-            return flag_string.rstrip() + "\n" # Remove trailing newline
+            flag_string = FLAG_STRING.format(**checkbox_values)
+            return flag_string
 
         name = model['filename']
         if not name:
@@ -864,7 +847,7 @@ have_fq = False\n\n"""
                                             title = 'User model for ' + name,
                                             description = desc_str,
                                             date = datetime.datetime.now().strftime('%Y-%m-%d'),
-                                            flags= formatPythonFlags()
+                                            flags = formatPythonFlags()
                                             )
 
         # Write out parameters
