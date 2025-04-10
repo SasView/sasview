@@ -525,20 +525,17 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         plugin_location = models.find_plugins_dir()
         full_path = Path(plugin_location) / filename
 
-        if self.is_python:
-            full_path = full_path.with_suffix(".py")
-            error_line = self.findFirstError(full_path)
-            if error_line >= 0:
-                # select bad line
-                cursor = QtGui.QTextCursor(w.txtEditor.document().findBlockByLineNumber(error_line-1))
-                w.txtEditor.setTextCursor(cursor)
+        if self.is_python and self.findFirstError(full_path.with_suffix(".py")) >= 0:
+            # select bad line
+            cursor = QtGui.QTextCursor(w.txtEditor.document().findBlockByLineNumber(error_line-1))
+            w.txtEditor.setTextCursor(cursor)
 
-                # Ask the user if they want to save the file with errors or continue editing
-                if not self.saveOverrideWarning(filename, model_str):
-                    # If the user decides to continue editing without saving, return
-                    return
-                else:
-                    clear_error_formatting = False
+            # Ask the user if they want to save the file with errors or continue editing
+            if not self.saveOverrideWarning(filename, model_str):
+                # If the user decides to continue editing without saving, return
+                return
+            else:
+                clear_error_formatting = False
 
         if clear_error_formatting:
         # change the frame colours back, if errors were fixed
@@ -843,10 +840,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         pd_params = []
         model_text += 'parameters = [ \n'
         model_text += '#   ["name", "units", default, [lower, upper], "type", "description"],\n'
-        if param_str:
-            for pname, pvalue, desc in self.getParamHelper(param_str):
-                param_names.append(pname)
-                model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
+        for pname, pvalue, desc in self.getParamHelper(param_str):
+            param_names.append(pname)
+            model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
         if pd_param_str:
             for pname, pvalue, desc in self.getParamHelper(pd_param_str):
                 param_names.append(pname)
