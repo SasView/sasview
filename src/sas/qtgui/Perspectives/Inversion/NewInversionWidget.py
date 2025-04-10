@@ -187,6 +187,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         logger.error(error)
         # TODO: No function to stop calculation yet.
 
+    # TODO: These parameters should really be type hinted (or rolled into a dataclass?)
     def calculationCompleted(self, out, cov, pr, elapsed):
         # TODO: Placeholder. Just output the numbers for now. Later the result
         # should be plotted.
