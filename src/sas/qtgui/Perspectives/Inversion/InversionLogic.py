@@ -31,7 +31,11 @@ class InversionLogic(object):
         if data_item is not None:
             self.data_is_loaded = True
         self.qmin = 0.0    
-        self.qmax = np.inf    
+        self.qmax = np.inf
+
+    @property
+    def data_item(self) -> QStandardItem | None:
+        return self._data_item
 
     @property
     def data(self) -> Data1D:
