@@ -121,7 +121,7 @@ class InversionLogic(object):
         """
         """
         # Show P(r)
-        x = np.arange(0.0, pr.d_max, pr.d_max / PR_PLOT_PTS)
+        x = np.arange(0.0, pr.dmax, pr.dmax / PR_PLOT_PTS)
 
         if cov is None:
             y = pr.pr(out, x)
