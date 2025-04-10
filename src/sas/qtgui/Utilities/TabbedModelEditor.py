@@ -161,7 +161,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             if self.model is True:
                 # Find location of model .py files and load from that location
                 filename = user_model_name if os.path.isfile(user_model_name) \
-                    else filename = MAIN_DOC_SRC / "user" / "models" / "src" / (self.load_file + ".py")
+                    else MAIN_DOC_SRC / "user" / "models" / "src" / (self.load_file + ".py")
             else:
                 filename = MAIN_DOC_SRC / self.load_file.replace(".html", ".rst")
                 self.is_python = False
