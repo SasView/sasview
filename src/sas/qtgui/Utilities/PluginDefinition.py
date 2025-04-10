@@ -9,6 +9,10 @@ from sas.qtgui.Utilities.UI.PluginDefinitionUI import Ui_PluginDefinition
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import find_plugins_dir
 
+MODEL_TEXT = """intensity = q
+
+return intensity
+"""
 
 VOLUME_TEXT = """volume = {0} * 0.0
 
@@ -99,11 +103,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         self.addTooltips()
 
         # Initial text in the function table
-        text = \
-"""intensity = q
-
-return intensity
-"""
+        text = MODEL_TEXT
         self.model['func_text'] = text
         self.txtFunction.insertPlainText(text)
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
