@@ -655,6 +655,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Update model editor if plugin definition changed
         func_str = model['func_text']
         form_vol_str = model['form_volume_text']
+        msg = self._checkForErrorsInModelStrs(func_str, form_vol_str)
+        if msg:
+            QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
+            return False
+        return True
+
+    def _checkForErrorsInModelStrs(self, func_str: str, form_vol_str: str) -> str | None:
+        """Helper method to check for errors and returns an error string, if necessary"""
         msg = None
         if func_str and 'return' not in func_str:
             msg = "Error: The func(x) must 'return' a value at least.\n"
@@ -664,10 +672,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             msg += "For example: \n\nreturn 0.0"
         elif not func_str and not form_vol_str:
             msg = 'Error: Function is not defined.'
-        if msg:
-            QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
-            return False
-        return True
+        return msg
 
     def onHelp(self):
         """
