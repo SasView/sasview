@@ -7,8 +7,8 @@ from PySide6.QtWidgets import QWidget
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
-from src.sas.qtgui.Plotting.PlotterData import Data1D
-from src.sas.qtgui.Utilities import GuiUtils
+from src.sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot
 from src.sas.sascalc.pr.NewInvertor import NewInvertor
 
 @dataclass
@@ -216,6 +216,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.currentResult.pr_plot = self.currentResult.logic.newPRPlot(out, pr)
         self.currentResult.pr_plot.show_yzero = True
         self.currentResult.pr_plot.filename = self.currentResult.logic.data.filename
+        self.currentResult.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
 
         # Data Plot
         data_plot = self.currentResult.logic.new1DPlot(self.tab_id, out, self.currentResult.calculator)
@@ -229,7 +230,19 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         data_plot.slider_low_q_setter = ['updateMinQ']
         data_plot.slider_high_q_input = ['maxQInput']
         data_plot.slider_high_q_setter = ['updateMaxQ']
+        data_plot.symbol = 'Line'
+        data_plot.show_errors = False
+        data_plot.plot_role = DataRole.ROLE_DEFAULT
         self.currentResult.data_plot = data_plot
+
+    def showCurrentPlots(self):
+        plots = [self.currentResult.pr_plot, self.currentResult.data_plot]
+        if not self.currentResult.pr_plot is None:
+            self.currentResult.pr_plot.plot_role
+        for plot in plots:
+            if not plot is None:
+                updateModelItemWithPlot(self.currentData, plot, plot.name)
+
 
     def updateParams(self):
         # TODO: No validators so this will break if they can't be converted to
