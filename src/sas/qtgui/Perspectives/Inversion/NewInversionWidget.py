@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import logging
 from PySide6.QtCore import Signal
+from PySide6.QtGui import QStandardItem
 from PySide6.QtWidgets import QWidget
 
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
@@ -109,6 +110,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     @property
     def currentData(self) -> Data1D | None:
         return self.currentResult.logic.data
+
+    @property
+    def currentDataItem(self) -> QStandardItem | None:
+        return self.currentResult.logic.data_item
 
     @currentData.setter
     def currentData(self, value: HashableStandardItem):
