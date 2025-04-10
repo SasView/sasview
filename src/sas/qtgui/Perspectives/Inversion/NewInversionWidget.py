@@ -8,7 +8,7 @@ from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from src.sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot
+from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem
 from src.sas.sascalc.pr.NewInvertor import NewInvertor
 
 @dataclass
@@ -57,7 +57,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.tab_name = tab_name
         self.tab_id = tab_id
 
-        self.communicator: GuiUtils.Communicate  = self.parent.communicator()
+        self.communicator: Communicate  = self.parent.communicator()
 
         # We're going to use this structure even if we're just dealing with one
         # specific datum. Just that this dictionary would then have one item in
@@ -111,8 +111,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         return self.currentResult.logic.data
 
     @currentData.setter
-    def currentData(self, value: GuiUtils.HashableStandardItem):
-        self.currentResult.logic.data = GuiUtils.dataFromItem(value)
+    def currentData(self, value: HashableStandardItem):
+        self.currentResult.logic.data = dataFromItem(value)
 
 
     # TODO: I don't know if 'float' is the right type hint.
@@ -210,6 +210,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # QT segfaulting.
         self.calculationComplete.emit()
         self.makePlots(out, cov, pr, elapsed)
+        self.showCurrentPlots()
 
     def makePlots(self, out, cov, pr, elapsed):
         # PR Plot
