@@ -1,8 +1,10 @@
 import math
 import logging
+from PySide6.QtGui import QStandardItem
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from src.sas.qtgui.Utilities.GuiUtils import dataFromItem
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -21,23 +23,24 @@ class InversionLogic(object):
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.
     """
+    _data_item: QStandardItem | None
 
-    def __init__(self, data=None):
-        self._data = data
+    def __init__(self, data_item=None):
+        self._data_item = data
         self.data_is_loaded = False
-        if data is not None:
+        if data_item is not None:
             self.data_is_loaded = True
         self.qmin = 0.0    
         self.qmax = np.inf    
 
     @property
     def data(self) -> Data1D:
-        return self._data
+        return dataFromItem(self._data_item)
 
     @data.setter
-    def data(self, value: Data1D):
+    def data(self, value: QStandardItem):
         """ data setter """
-        self._data = value
+        self._data_item = value
         self.data_is_loaded = (self._data is not None)
 
     def isLoadedData(self):
