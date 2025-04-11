@@ -56,47 +56,6 @@ def SphereVol(Bins):
     Vol = (4./3.)*np.pi*Bins**3
     return Vol
 
-class DistModel():
-    """
-    This class is used to construct the matrix of I(q) curves at each value of
-    the dimension whose distribution is being sought. For example the Radius of
-    a sphere for the classic pore size distribution calculation. It uses the
-    full sasmodels infrastructre including volume and resolution corrections.
-
-    This replaces the following functions:
-    def SphereFF
-    def SpherVol
-    def matrix_operation.G_matrix
-
-    data is the data1D object loaded widt dataloader. In other words the very data
-    which we will be fitting.
-    model is a string cotaining the name of the model (e.g. 'sphere')
-    pars is a dictionary of all parameters and their value for the given model
-    dimension is a string containing the name of the parameter that is being
-    varied (to find the distribution)
-    bins is an array of type float containing the various values of the
-    dimension variable that forms the distribution. Only the weights will be
-    changed.
-    QUESTION: is it required that the values in bins be sorted?
-
-    ..NOTE: this code is not yet ready to be used (clearly) but is meant as
-       a base structure
-    """
-    def __init__(self,data, model, pars,dimension,bins):
-        self.data=data
-        self.model = load_model(model)
-        self.params=pars
-        self.dim_distr=dimension
-        self.bins=bins
-        # self.intensity[]
-
-
-    def base_matrix(self):
-        f = DirectModel(self.data, self.model)
-        for i in self.bins: self.intensity[i] = f(**self.pars, self_dist=i)
-        return np.vstack(self.intensity)
-
-
 class matrix_operation():
     
     # Transformation matrix
@@ -104,7 +63,7 @@ class matrix_operation():
     def G_matrix(self, Q, Bins, contrast, choice, resolution):
         '''
         Defined as (form factor)^2 times volume times some scaling (including the contrast and volume)
-        The integrand for Iq technically requires volume^2
+        The integrand for Iq technically requires volume^2  
         The size distribution obtained from this code takes care of the missing volume
         Therefore, it is IMPORTANT to not that the size distribution from this code is technically P(r) (what's obtained from inversion) multiplied by something
         Converting to the size distribution back to P(r) isn't super straightforward and needs work (a TODO)
@@ -427,5 +386,5 @@ class maxEntMethod():
                 print (' Convergence achieved.')
                 return chisq,f,operation.matrix_transform(f, Gqr.transpose())     # solution FOUND returns here
         print (' No convergence! Try increasing Error multiplier.')
-        return chisq,f,operation.matrix_transform(f, Gqr.transpose())             # no solution after IterMax iterations
+        return chisq, f, operation.matrix_transform(f, Gqr.transpose())             # no solution after IterMax iterations
 
