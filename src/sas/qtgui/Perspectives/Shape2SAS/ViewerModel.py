@@ -115,6 +115,8 @@ class ViewerModel(QWidget):
         self.scattering.fitInView(self.scene.sceneRect())
         self.scatter.show()
 
+        #path="C:/Users/Qerne/OneDrive/Documents/VSCode/Projects/Thesis/SasVIew_dev_version/sasview/src/sas/qtgui/Perspectives/Shape2SAS/"
+
     def initialiseAxis(self):
         """Initialise axis for the model"""
 

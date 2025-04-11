@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Widget</class>
- <widget class="QWidget" name="Widget">
+ <class>VariableTable</class>
+ <widget class="QWidget" name="VariableTable">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>273</width>
+    <width>232</width>
     <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>271</width>
+    <width>232</width>
     <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>273</width>
+    <width>232</width>
     <height>16777215</height>
    </size>
   </property>
@@ -53,15 +53,18 @@
       <widget class="QTableView" name="tableView">
        <property name="minimumSize">
         <size>
-         <width>271</width>
+         <width>230</width>
          <height>300</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>271</width>
+         <width>230</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Check a parameter to include as a fit parameter in the plugin model.</string>
        </property>
       </widget>
      </item>
@@ -92,7 +95,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="setConstraints">
            <property name="minimumSize">
             <size>
              <width>150</width>
@@ -104,6 +107,9 @@
              <width>150</width>
              <height>30</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Set underlying constraints to the subunits</string>
            </property>
            <property name="text">
             <string>Set Constraints</string>
@@ -198,6 +204,12 @@
              <height>24</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Name to plugin model</string>
+           </property>
+           <property name="text">
+            <string>Model_1</string>
+           </property>
           </widget>
          </item>
          <item>
@@ -254,7 +266,7 @@
             </size>
            </property>
            <property name="text">
-            <string>N_points</string>
+            <string>N points</string>
            </property>
           </widget>
          </item>
@@ -271,6 +283,12 @@
              <width>130</width>
              <height>24</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Number of points in the model used to calculate a scattering profile.</string>
+           </property>
+           <property name="text">
+            <string>3000</string>
            </property>
           </widget>
          </item>
@@ -328,7 +346,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Pr_points</string>
+            <string>P(r) points</string>
            </property>
           </widget>
          </item>
@@ -345,6 +363,12 @@
              <width>130</width>
              <height>24</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Number of points in the pair distance distribution.</string>
+           </property>
+           <property name="text">
+            <string>100</string>
            </property>
           </widget>
          </item>

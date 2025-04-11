@@ -11,6 +11,8 @@ from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit
 # Local SasView
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Perspectives.perspective import Perspective
+from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
+from sas.qtgui.Plotting.PlotterData import Data1D
 
 from UI.DesignWindowUI import Ui_DesignWindow
 from ViewerModel import ViewerModel
@@ -45,6 +47,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         self.parent = parent
 
         self._manager = parent
+        self.communicator = self._manager.communicator()
 
         ############Building GUI##############
         ###create build model tab
@@ -288,7 +291,11 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
 
     def getStructureFactorValues(self):
-        """Read structure factor options from chosen structure factor"""
+        """
+        Read structure factor options from chosen structure 
+        factor in Virtual SAXS experiment tab
+        """
+
         S_vals = []
 
         #get chosen structure factor
@@ -464,6 +471,13 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         modelDistribution = getPointDistribution(modelProfile, 3000)
         self.viewerModel.setPlot(modelDistribution, plotDesign)
 
+        # Save the Q3DScatter plot to a PNG file
+        #NOTE: The resolution is very low for this image!
+        #scatter_plot = self.viewerModel.scatter  # Assuming scatter is the Q3DScatter instance
+        #dpi = 3000       
+        #image = scatter_plot.renderToImage(dpi)
+        #image.save("scatter_plot.png")
+
         #on being checked, plot theoretical scattering
         if self.checkTheoreticalScattering.isChecked():
             scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=modelDistribution, 
@@ -619,6 +633,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
         #Write file to plugin model folder
         TabbedModelEditor.writeFile(full_path, model_str)
+        self.communicator.customModelDirectoryChanged.emit()
         self.constraint.logInfo(f"Succefully generated model {modelName}!")
 
 
@@ -725,58 +740,11 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
 
         name = self.onCheckingInput(self.modelName, "Model_1")
         sim = self.getSimulatedSAXSData()
-        with open('Isim%s.dat' % name,'w') as f:
-            f.write('# Simulated data\n')
-            f.write('# sigma generated using Sedlak et al, k=100000, c=0.55, https://doi.org/10.1107/S1600576717003077, and rebinned with 10 per bin)\n')
-            f.write('# %-12s %-12s %-12s\n' % ('q','I','sigma'))
-            for i in range(len(sim.I_sim)):
-                f.write('  %-12.5e %-12.5e %-12.5e\n' % (sim.q[i], sim.I_sim[i], sim.I_err[i]))
-            
-        #print("Send simulated data to Data Explorer")
+        dataClass = Data1D(x=sim.q, y=sim.I_sim, dy=sim.I_err)
+
         #Send data to SasView Data Explorer
-
-
-    ####CAPTURE IMAGE OF TABS
-    def captureWidgetWithTabs(self):
-        # Introduce a small delay before starting the capture process
-        QTimer.singleShot(500, lambda: self.captureTab(0))
-
-    def captureTab(self, index):
-        if index >= self.tabWidget.count():
-            return
-
-        screen = QApplication.primaryScreen()
-        self.tabWidget.setCurrentIndex(index)
-        QApplication.processEvents()  # Ensure the tab is fully rendered
-        QTimer.singleShot(100, lambda: self.captureAndSave(screen, index))
-
-    def captureAndSave(self, screen, index):
-        # Bring the window to the front
-        self.raise_()
-        self.activateWindow()
-        QApplication.processEvents()  # Ensure the window is fully rendered
-        # Capture the entire window, including the title bar
-        pixmap = screen.grabWindow(self.winId())
-        pixmap.save(f"widget_with_tab_{index+1}.png")
-        print(f"Saved widget with tab {index+1} as widget_with_tab_{index+1}.png")
-        # Capture the next tab
-        self.captureTab(index + 1)
-
-    def exportWidgetWithTabsToPng(self):
-        self.captureWidgetWithTabs()
-
-    
-    def captureConstraintWindow(self):
-        screen = QApplication.primaryScreen()
-        # Bring the constraint window to the front
-        self.constraint.raise_()
-        self.constraint.activateWindow()
-        QApplication.processEvents()  # Ensure the window is fully rendered
-        # Capture the entire constraint window, including the title bar
-        pixmap = screen.grabWindow(self.constraint.winId())
-        pixmap.save("constraint_window.png")
-        print("Saved constraint window as constraint_window.png")
-
+        data = createModelItemWithPlot(dataClass, name)
+        self.communicator.updateModelFromPerspectiveSignal.emit(data)
 
 if __name__ == "__main__":
     app = QApplication([])

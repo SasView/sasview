@@ -309,12 +309,12 @@ class Cube:
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a cube"""
 
-        Volume = self.getVolume()
+        #Volume = self.getVolume()
 
         N = Npoints
-        x_add = np.random.uniform(-self.a, self.a, N)
-        y_add = np.random.uniform(-self.a, self.a, N)
-        z_add = np.random.uniform(-self.a, self.a, N)
+        x_add = np.random.uniform(-self.a / 2, self.a / 2, N)
+        y_add = np.random.uniform(-self.a / 2, self.a / 2, N)
+        z_add = np.random.uniform(-self.a / 2, self.a / 2, N)
 
         return x_add, y_add, z_add
 
