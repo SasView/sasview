@@ -258,7 +258,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: lando/notarize-action@v2
         with:
-          product-path: "installers/dist/$MACOS_DMG_NAME"
+          product-path: installers/dist/$MACOS_DMG_NAME
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
