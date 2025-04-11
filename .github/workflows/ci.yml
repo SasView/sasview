@@ -55,8 +55,8 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.matrix.outputs.matrix-json) }}
     env:
-      MACOS-APP-NAME: SasView6-${{ matrix.os }}.app
-      MACOS-DMG-NAME: SasView6-${{ matrix.os }}.dmg
+      MACOS_APP_NAME: SasView6-${{ matrix.os }}.app
+      MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
 
     name: "${{ matrix.job_name }}"
 
@@ -217,7 +217,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         run: |
           cd installers/dist
-          hdiutil create $MACOS-DMG-NAME -srcfolder $MACOS-APP-NAME -ov -format UDZO
+          hdiutil create $MACOS_DMG_NAME -srcfolder $MACOS_APP_NAME -ov -format UDZO
 
       - name: Build sasview installer tarball (Linux)
         if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
@@ -249,17 +249,17 @@ jobs:
           security find-identity -p codesigning
           
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py $MACOS-APP-NAME
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py $MACOS_APP_NAME
           python  ../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS-APP-NAME
-          hdiutil create $MACOS-DMG-NAME -srcfolder $MACOS-APP-NAME -ov -format UDZO
-          codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS-DMG-NAME
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_APP_NAME
+          hdiutil create $MACOS_DMG_NAME -srcfolder $MACOS_APP_NAME -ov -format UDZO
+          codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: lando/notarize-action@v2
         with:
-          product-path: "installers/dist/$MACOS-DMG-NAME"
+          product-path: "installers/dist/$MACOS_DMG_NAME"
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
@@ -270,7 +270,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
-          product-path: "installers/dist/$MACOS-DMG-NAME"
+          product-path: "installers/dist/$MACOS_DMG_NAME"
 
       - name: Sign binary
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
@@ -290,7 +290,7 @@ jobs:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
-            installers/dist/$MACOS-DMG-NAME
+            installers/dist/$MACOS_DMG_NAME
             installers/dist/sasview6.tar.gz
           if-no-files-found: ignore
 
