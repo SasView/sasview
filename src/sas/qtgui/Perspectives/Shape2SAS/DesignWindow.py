@@ -14,7 +14,7 @@ from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
 from sas.qtgui.Plotting.PlotterData import Data1D
 
-from UI.DesignWindowUI import Ui_DesignWindow
+from UI.DesignWindowUI import Ui_Shape2SAS
 from ViewerModel import ViewerModel
 from ButtonOptions import ButtonOptions
 from Tables.subunitTable import SubunitTable, OptionLayout
@@ -29,7 +29,7 @@ from PlotAspects.plotAspects import ViewerPlotDesign
 from genPlugin import generatePlugin
 
 
-class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
+class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     """Main window for the Shape2SAS fitting tool"""
 
     name = "Shape2SAS"
@@ -137,7 +137,7 @@ class DesignWindow(QDialog, Ui_DesignWindow, Perspective):
         ###Building Constraint window
         self.constraint = Constraints()
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
-        self.subunitTable.delete.clicked.connect(self.deleteFromVariableTable)
+        self.subunitTable.deleteButton.clicked.connect(self.deleteFromVariableTable)
         self.constraint.variableTable.setConstraints.clicked.connect(self.setConstraintsToTextEditor)
         self.constraint.createPlugin.clicked.connect(self.getPluginModel)
         self.constraint.buttonOptions.reset.clicked.connect(self.onConstraintReset)

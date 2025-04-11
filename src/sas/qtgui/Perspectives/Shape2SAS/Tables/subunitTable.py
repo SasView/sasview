@@ -485,7 +485,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
     def initializeSignals(self):
         """Setup signals for the subunit table"""
         self.add.clicked.connect(self.onAdding)
-        self.delete.clicked.connect(self.onDeleting)
+        self.deleteButton.clicked.connect(self.onDeleting)
 
 
     @staticmethod
@@ -578,11 +578,11 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         numcolumn = self.model.columnCount()
 
         if numcolumn == 0:
-            self.delete.setEnabled(False)
+            self.deleteButton.setEnabled(False)
             self.selected.setEnabled(False)
 
         else:
-            self.delete.setEnabled(True)
+            self.deleteButton.setEnabled(True)
             self.selected.setEnabled(True)
             self.selected.setMaximum(numcolumn)
         
