@@ -229,7 +229,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     def makePlots(self, out, cov, pr, elapsed):
         # PR Plot
-        self.currentResult.pr_plot = self.currentResult.logic.newPRPlot(out, pr)
+        self.currentResult.pr_plot = self.currentResult.logic.newPRPlot(out, pr, cov)
         self.currentResult.pr_plot.show_yzero = True
         self.currentResult.pr_plot.filename = self.currentResult.logic.data.filename
         self.currentResult.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
