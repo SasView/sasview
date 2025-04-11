@@ -9,7 +9,7 @@ from PySide6 import QtCore, QtWidgets, QtWebEngineCore
 from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+#from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.doc_regen.makedocumentation import (make_documentation, create_user_files_if_needed,
