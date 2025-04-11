@@ -336,6 +336,21 @@ class NewInvertor():
             pars_err = np.float64(pars_err)
             return calc.pr_err(pars, pars_err, self.dmax, r)
 
+    def pr_err(self, c, c_cov, r):
+        """
+        Returns the value of P(r) for a given r, and base function
+        coefficients, with error.
+
+        :param c: base function coefficients
+        :param c_cov: covariance matrice of the base function coefficients
+        :param r: r-value to evaluate P(r) at
+
+        :return: P(r)
+
+        """
+        c_cov = np.ascontiguousarray(c_cov)
+        return self.get_pr_err(c, c_cov, r)
+
     def basefunc_ft(self, d_max, n, q):
         """
         Returns the value of the nth Fourier transformed base function.
