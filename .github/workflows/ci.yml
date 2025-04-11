@@ -255,10 +255,21 @@ jobs:
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        if: ${{ matrix.installer && matrix.os == 'macos-latest') }}
         uses: lando/notarize-action@v2
         with:
-          product-path: installers/dist/$MACOS_DMG_NAME
+          product-path: installers/dist/SasView6-macos-latest.dmg
+          primary-bundle-id: "org.sasview.SasView6"
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+          appstore-connect-team-id: 8CX8K63BQM
+          verbose: True
+
+      - name: Notarize Release Build (OSX)
+        if: ${{ matrix.installer && matrix.os == 'macos-13') }}
+        uses: lando/notarize-action@v2
+        with:
+          product-path: installers/dist/SasView6-macos-13.dmg
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
@@ -266,10 +277,16 @@ jobs:
           verbose: True
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        if: ${{ matrix.installer && matrix.os == 'macos-latest') }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
-          product-path: "installers/dist/$MACOS_DMG_NAME"
+          product-path: installers/dist/SasView6-macos-latest.dmg
+
+      - name: Staple Release Build (OSX)
+        if: ${{ matrix.installer && matrix.os == 'macos-13') }}
+        uses: BoundfoxStudios/action-xcode-staple@v1
+        with:
+          product-path: installers/dist/SasView6-macos-13.dmg
 
       - name: Sign binary
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
