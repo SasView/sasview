@@ -1,3 +1,3 @@
-__version__ = "6.0.0b2"
-__release_date__ = "2024"
+__version__ = "6.0.1"
+__release_date__ = "2025"
 __build__ = "GIT_COMMIT"

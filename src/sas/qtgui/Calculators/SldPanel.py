@@ -1,6 +1,7 @@
 # global
 import numpy as np
 import logging
+from pyparsing.exceptions import ParseException
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
@@ -119,7 +120,7 @@ class SldPanel(QtWidgets.QDialog):
         # Chemical formula is checked via periodictable.formula module.
         self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
 
-        rx = QtCore.QRegularExpression("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
+        rx = QtCore.QRegularExpression(r"[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editMassDensity))
         self.ui.editNeutronWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editNeutronWavelength))
         self.ui.editXrayWavelength.setValidator(QtGui.QRegularExpressionValidator(rx, self.ui.editXrayWavelength))
@@ -171,19 +172,36 @@ class SldPanel(QtWidgets.QDialog):
             self.recalculateSLD()
 
     def recalculateSLD(self):
+        self.ui.editMolecularFormula.setStyleSheet("background-color: white")
+        self.ui.editMassDensity.setStyleSheet("background-color: white; color: black")
         formula = self.ui.editMolecularFormula.text()
-        density = self.ui.editMassDensity.text()
+        density = float(self.ui.editMassDensity.text()) if self.ui.editMassDensity.text() else None
+        self.ui.editMassDensity.setToolTip("The density can either be specified here or will be calculated if all "
+                                           "component densities are included in the formula.")
         neutronWavelength = self.ui.editNeutronWavelength.text()
         xrayWavelength = self.ui.editXrayWavelength.text()
 
-        if not formula or not density:
+        if not formula:
             return
+        if not density and '@' not in formula:
+            self.ui.editMassDensity.setStyleSheet("background-color: yellow")
+            return
+        if density and '//' in formula and '@' in formula:
+            # Ignore density input when all individual densities are specified
+            self.ui.editMassDensity.setStyleSheet("color: orange")
+            self.ui.editMassDensity.setToolTip("The input density is overriding the density calculated from the "
+                                               "individual components. Clear the density field if you want the "
+                                               "calculation to take precedence.")
 
         def format(value):
             return ("%-5.3g" % value).strip()
 
         if neutronWavelength and float(neutronWavelength) > np.finfo(float).eps:
-            results = neutronSldAlgorithm(str(formula), float(density), float(neutronWavelength))
+            try:
+                results = neutronSldAlgorithm(str(formula), density, float(neutronWavelength))
+            except (ValueError, ParseException, AssertionError, KeyError):
+                self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
+                return
 
             self.model.item(MODEL.NEUTRON_SLD_REAL).setText(format(results.neutron_sld_real))
             self.model.item(MODEL.NEUTRON_SLD_IMAG).setText(format(results.neutron_sld_imag))
@@ -209,7 +227,11 @@ class SldPanel(QtWidgets.QDialog):
             self.ui.editNeutronAbsXs.setEnabled(False)
 
         if xrayWavelength and float(xrayWavelength) > np.finfo(float).eps:
-            results = xraySldAlgorithm(str(formula), float(density), float(xrayWavelength))
+            try:
+                results = xraySldAlgorithm(str(formula), density, float(xrayWavelength))
+            except (ValueError, ParseException, AssertionError, KeyError):
+                self.ui.editMolecularFormula.setStyleSheet("background-color: yellow")
+                return
 
             self.model.item(MODEL.XRAY_SLD_REAL).setText(format(results.xray_sld_real))
             self.model.item(MODEL.XRAY_SLD_IMAG).setText(format(results.xray_sld_imag))

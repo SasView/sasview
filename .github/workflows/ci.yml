@@ -81,6 +81,7 @@ jobs:
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
+          sudo apt-get update
           sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
 
       - name: Install Python dependencies
@@ -111,16 +112,13 @@ jobs:
         run: |
           git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-          git clone --depth=50 --branch=master https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
         run: |
           cd ../sasdata
           rm -rf build
           rm -rf dist
-          python setup.py clean
-          python setup.py build
-          mv build/lib/sasdata/example_data/* ../sasview/src/sas/example_data/
+          mv sasdata/example_data/* ../sasview/src/sas/example_data/
           python -m pip install --no-deps .
 
       - name: Build and install sasmodels
@@ -128,17 +126,6 @@ jobs:
           cd ../sasmodels
           rm -rf build
           rm -rf dist
-          python setup.py clean
-          python setup.py build
-          python -m pip install --no-deps .
-
-      - name: Build and install bumps
-        run: |
-          cd ../bumps
-          rm -rf build
-          rm -rf dist
-          python setup.py clean
-          python setup.py build
           python -m pip install --no-deps .
 
       ### Document the build environment
@@ -155,8 +142,6 @@ jobs:
           githash=$( git rev-parse HEAD )
           sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
           # BUILD SASVIEW
-          python setup.py clean
-          python setup.py build
           python -m pip install --no-deps .
 
       ### Run tests (if enabled)
@@ -181,10 +166,12 @@ jobs:
 
       ### Build documentation (if enabled)
 
-      - name: Build sasmodels, sasdata, and bumps docs
+      - name: Build sasmodels and sasdata docs
         if: ${{ matrix.docs }}
+        env:
+          SAS_OPENCL: NONE
         run: |
-          make -C ../bumps/doc html || true
+          # TODO: supress sasmodels cache for the doc build
           mkdir -p ~/.sasmodels/compiled_models
           make -j4 -C ../sasmodels/doc html || true
           make -C ../sasdata/docs html || true
@@ -199,6 +186,7 @@ jobs:
       ### Build the installer (if enabled)
 
       - name: Install utilities to build installer
+        if: ${{ matrix.installer }}
         run: |
           python -m pip install pyinstaller
 
@@ -274,7 +262,7 @@ jobs:
           primary-bundle-id: "org.sasview.SasView6"
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-          appstore-connect-team-id: W2AG9MPZ43
+          appstore-connect-team-id: 8CX8K63BQM
           verbose: True
 
       - name: Staple Release Build (OSX)
@@ -305,13 +293,12 @@ jobs:
             installers/dist/sasview6.tar.gz
           if-no-files-found: ignore
 
-
   test-installer:
     needs: [ build-matrix ]
 
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-20.04 ]
+        os: [ windows-latest, ubuntu-22.04 ]
         python-version: [ 3.11 ]
       fail-fast: false
 
@@ -364,7 +351,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -432,7 +419,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb
+          sudo apt install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
 
       - name: Try running the installation (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu' )}}
@@ -466,7 +453,7 @@ jobs:
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}

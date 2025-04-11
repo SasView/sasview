@@ -170,7 +170,6 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         self.DEFAULT_OPEN_FOLDER = ""
         self.TOOLBAR_SHOW = True
         self.DEFAULT_PERSPECTIVE = "Fitting"
-        # self.DEFAULT_PERSPECTIVE = "Corfunc"
 
         # Default threading model
         self.USING_TWISTED = False
@@ -200,16 +199,19 @@ class Config(ConfigBase, metaclass=ConfigMeta):
 
         # Polydispersity plot management
         # If true, disables polydispersity plot display
-        self.DISABLE_POLYDISPERSITY_PLOT = False
+        self.DISABLE_POLYDISPERSITY_PLOT = True
 
         # Using Matplotlib Toolbar in Main Plotting Function
-        self.USE_MATPLOTLIB_TOOLBAR = False
+        self.USE_MATPLOTLIB_TOOLBAR = True
 
         # Default fitting optimizer
         self.FITTING_DEFAULT_OPTIMIZER = 'lm'
 
         # What's New variables
-        self.LAST_WHATS_NEW_HIDDEN_VERSION = "5.0.0"
+        self.LAST_WHATS_NEW_HIDDEN_VERSION = "6.0.0"
+
+        # Last version that the update prompt was dismissed for
+        self.LAST_UPDATE_DISMISSED_VERSION = "5.0.0"
 
         #
         # Lock the class down, this is necessary both for

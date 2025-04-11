@@ -19,7 +19,7 @@ class IDFCanvas(CorfuncCanvas):
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("linear")
         self.axes.set_yscale("linear")
-        self.axes.set_xlabel("Z [$\AA$]")
+        self.axes.set_xlabel(r"Z [$\AA$]")
         self.axes.set_ylabel("IDF")
         self.axes.set_title("Interface Distribution Function")
         self.fig.tight_layout()

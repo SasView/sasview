@@ -20,7 +20,7 @@ class AnalysisBase(models.Model):
                                         help_text="use GPU rather than CPU")
     #TODO create gpu_used
 
-    time_recieved = models.DateTimeField(auto_now_add=True, 
+    time_received = models.DateTimeField(auto_now_add=True,
                                          help_text="analysis requested")
     #TODO write in view to start these
     time_started = models.DateTimeField(auto_now=False, blank=True, 

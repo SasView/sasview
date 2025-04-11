@@ -158,7 +158,7 @@ Let :math:`u = -x` for the negative part, use the fact that :math:`f(-x)=f(x)` a
 recalculate the bounds of integration
 
 .. math::
-    = \int_0^\infty f(u) e^{-i u \xi} du + \int_{0}^\inf f(x) e^{i x \xi} dx
+    = \int_0^\infty f(u) e^{-i u \xi} du + \int_{0}^\infty f(x) e^{i x \xi} dx
 
 Note that :math:`u` only appears within the integral, so we can rename it to :math:`x`
 and recombine it with the positive part. We can also multiply the integral by two and

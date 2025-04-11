@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.5
+Name=SasView
+GenericName=Small Angle Scattering Analysis
+Comment=Small Angle Scattering Analysis
+Exec=sasview
+# TRANSLATORS: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
+Keywords=SAS;SANS;SAXS;scattering;neutron scattering;X-ray scattering;physics
+Icon=org.sasview.sasview
+Terminal=false
+Type=Application
+Categories=Science;Physics;
