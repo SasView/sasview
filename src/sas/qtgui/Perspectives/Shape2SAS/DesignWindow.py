@@ -5,8 +5,8 @@ from types import MethodType
 from typing import Union
 
 from PySide6.QtWidgets import QApplication, QDialog, QHBoxLayout, QVBoxLayout, QWidget
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit, QSizePolicy
 
 # Local SasView
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
@@ -93,7 +93,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         modelHbox = QHBoxLayout()
         
         modelVbox.setContentsMargins(0,0,0,0)
-        modelHbox.setContentsMargins(10,0,10,0)
+        modelHbox.setContentsMargins(10,10,10,0)
         modelSection = QWidget()
         modelHbox.addWidget(self.subunitTable)
         modelHbox.addWidget(self.viewerModel.Viewmodel_modul)
@@ -102,6 +102,19 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         modelVbox.addWidget(modelSection)
         modelVbox.addWidget(self.modelTabButtonOptions)
         self.model.setLayout(modelVbox)
+
+        #plot scene
+        self.scatteringProf = QWidget()
+        self.scatteringProf.setContentsMargins(0, 0, 0, 0)
+        self.scatteringProf.setObjectName(u"scatteringProf")
+        self.scatteringProf.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.scatteringScene = QVBoxLayout(self.scatteringProf)
+        self.scatteringScene.setContentsMargins(5, 5, 5, 5)
+        self.scatteringScene.setObjectName(u"scatteringScene")
+        self.plotBoxLayout = QHBoxLayout()
+        self.plotBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.plotBoxLayout.addWidget(self.scatteringProf)
+        self.group2.setLayout(self.plotBoxLayout)
 
         ###Building Virtual SAXS Experiment tab
         #create and set layout for buttons
@@ -119,10 +132,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.sendSimToSasView.setMinimumSize(110, 24)
         self.sendSimToSasView.setMaximumSize(110, 24)
         self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
-        self.SAXSTabButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 10)
+        self.SAXSTabButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.sendSimToSasView)
-        self.gridLayout_5.addWidget(self.SAXSTabButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
-        self.SAXSExperiment.setLayout(self.gridLayout_5)
+        self.gridLayout_2.addWidget(self.SAXSTabButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        self.SAXSExperiment.setLayout(self.gridLayout_2)
 
         #connect buttons
         self.sendSimToSasView.clicked.connect(self.getSimulatedSAXSData)
