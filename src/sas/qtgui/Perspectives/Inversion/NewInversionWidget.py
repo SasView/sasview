@@ -258,6 +258,18 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         current_calculator.alpha = float(self.regularizationConstantInput.text())
         current_calculator.dmax = float(self.maxDistanceInput.text())
 
+        # Options tab
+        if self.estimateBgd.isChecked():
+            current_calculator.est_bck = True
+        else:
+            current_calculator.est_bck = False
+            current_calculator.background = float(self.backgroundInput.text())
+        current_calculator.q_min = float(self.minQInput.text())
+        current_calculator.q_max = float(self.maxQInput.text())
+        current_calculator.slit_height = float(self.slitHeightInput.text())
+        current_calculator.slit_width = float(self.slitWidthInput.text())
+
+
     def startThread(self):
         self.updateParams()
         self.isCalculating = True
