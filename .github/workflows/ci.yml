@@ -55,7 +55,6 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.matrix.outputs.matrix-json) }}
     env:
-      MACOS_APP_NAME: SasView6-${{ matrix.os }}.app
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
 
     name: "${{ matrix.job_name }}"
@@ -217,7 +216,7 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
         run: |
           cd installers/dist
-          hdiutil create $MACOS_DMG_NAME -srcfolder $MACOS_APP_NAME -ov -format UDZO
+          hdiutil create $MACOS_DMG_NAME -srcfolder SasView6.app -ov -format UDZO
 
       - name: Build sasview installer tarball (Linux)
         if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
@@ -249,10 +248,10 @@ jobs:
           security find-identity -p codesigning
           
           cd installers/dist
-          python ../../build_tools/fix_qt_folder_names_for_codesign.py $MACOS_APP_NAME
+          python ../../build_tools/fix_qt_folder_names_for_codesign.py SasView6.app
           python  ../../build_tools/code_sign_osx.py
-          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_APP_NAME
-          hdiutil create $MACOS_DMG_NAME -srcfolder $MACOS_APP_NAME -ov -format UDZO
+          codesign --verify --options=runtime --entitlements ../../build_tools/entitlements.plist --timestamp --deep --verbose=4 --force --sign "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" SasView6.app
+          hdiutil create $MACOS_DMG_NAME -srcfolder SasView6.app -ov -format UDZO
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
