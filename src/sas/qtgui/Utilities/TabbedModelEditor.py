@@ -255,9 +255,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Accept if document not modified, confirm intent otherwise.
         """
-        if self.is_modified and self.saveClose():
-            return
-        self.reject()
+        if not (self.is_modified and self.saveClose()):
+            self.reject()
 
     def onApply(self):
         """
@@ -468,9 +467,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Set the status bar message
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
             self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
-
-            # Put a thick, red border around the editor.
-            from sas.qtgui.Utilities.CodeEditor import QCodeEditor
 
             # Find all QTextBrowser and QCodeEditor children
             text_browsers = self.tabWidget.currentWidget().findChildren(QtWidgets.QTextBrowser)
