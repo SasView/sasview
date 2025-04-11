@@ -576,7 +576,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         doNotShowAgainCheckbox = QtWidgets.QCheckBox("Do not show again")
         msgBox.setCheckBox(doNotShowAgainCheckbox)
 
-        msgBox.exec_()
+        msgBox.exec()
 
         if doNotShowAgainCheckbox.isChecked():
             # Update flag to not show popup again while this instance of TabbedModelEditor is open
@@ -601,7 +601,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msgBox.setDefaultButton(buttonContinue)
 
         # Execute the message box and wait for the user's response
-        userChoice = msgBox.exec_()
+        userChoice = msgBox.exec()
 
         # Check which button was clicked and execute the corresponding code
         if msgBox.clickedButton() == buttonContinue:
@@ -1179,5 +1179,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     sheet = TabbedModelEditor()
     sheet.show()
-    app.exec_()
+    app.exec()
     
