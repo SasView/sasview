@@ -479,7 +479,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Combine the lists and apply the stylesheet
             for child in text_browsers + code_editors:
                 child.setStyleSheet("border: 5px solid red")
-                # last_lines = traceback.format_exc().split('\n')[-4:]
                 traceback_to_show = '\n'.join(last_lines)
                 child.setToolTip(traceback_to_show)
 
@@ -697,12 +696,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         :param name: name to display on tab
         """
         if filetype in ["python", "py", ".py"]:
-            #display_name = Path(self.filename_py).name
             self.editor_widget = ModelEditor(self, is_python=True)
             self.tabWidget.addTab(self.editor_widget, name)
             self.editor_widget.modelModified.connect(self.editorModelModified)
         elif filetype in ["c", ".c"]:
-            #display_name = Path(self.filename_c).name
             self.c_editor_widget = ModelEditor(self, is_python=False)
             self.tabWidget.addTab(self.c_editor_widget, name)
             self.c_editor_widget.modelModified.connect(self.editorModelModified)

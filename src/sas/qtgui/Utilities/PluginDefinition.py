@@ -257,7 +257,6 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         """
         # keep in mind that this is called every time the text changes.
         # mind the performance!
-        #self.addTooltip()
         new_text = self.txtFunction.toPlainText().lstrip().rstrip()
         if new_text != self.model['func_text']:
             self.model['func_text'] = new_text
@@ -269,7 +268,6 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         """
         # keep in mind that this is called every time the text changes.
         # mind the performance!
-        #self.addTooltip()
         new_text = self.txtFormVolumeFunction.toPlainText().lstrip().rstrip()
         if new_text != self.model['form_volume_text']:
             self.model['form_volume_text'] = new_text
