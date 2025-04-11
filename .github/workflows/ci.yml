@@ -255,7 +255,7 @@ jobs:
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-latest') }}
+        if: ${{ matrix.installer && matrix.os == 'macos-latest' }}
         uses: lando/notarize-action@v2
         with:
           product-path: installers/dist/SasView6-macos-latest.dmg
@@ -266,7 +266,7 @@ jobs:
           verbose: True
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-13') }}
+        if: ${{ matrix.installer && matrix.os == 'macos-13' }}
         uses: lando/notarize-action@v2
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
@@ -277,13 +277,13 @@ jobs:
           verbose: True
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-latest') }}
+        if: ${{ matrix.installer && matrix.os == 'macos-latest' }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: installers/dist/SasView6-macos-latest.dmg
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-13') }}
+        if: ${{ matrix.installer && matrix.os == 'macos-13' }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
