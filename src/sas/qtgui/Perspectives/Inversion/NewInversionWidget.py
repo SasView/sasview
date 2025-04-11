@@ -170,6 +170,16 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.regularizationConstantInput.setText(str(current_calculator.alpha))
         self.maxDistanceInput.setText(str(current_calculator.dmax))
 
+        # Options tab
+        if current_calculator.est_bck:
+            self.estimateBgd.setChecked(True)
+        else:
+            self.manualBgd.setChecked(True)
+        self.minQInput.setText(str(current_calculator.q_min))
+        self.maxQInput.setText(str(current_calculator.q_max))
+        self.slitHeightInput.setText(str(current_calculator.slit_height))
+        self.slitWidthInput.setText(str(current_calculator.slit_width))
+
         # This checks to see if there is a calculation available.
         out = self.currentResult.outputs
         if not out is None:
