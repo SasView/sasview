@@ -97,6 +97,7 @@ if __name__ == "__main__":
     plt.xlabel('Q ['+I_result.x_unit+']')
     plt.ylabel('I(Q) ['+I_result.y_unit+']')
     plt.legend()
+    plt.bar(x=dist_result.x,height=dist_result.y/SphereVol(dist_result.x),width=dist_result.binWidth,label='fit_distribution')
 
     plt.figure()
     plt.semilogx(I_result.x,I_result.y-data_from_loader.y[25:94],'.')

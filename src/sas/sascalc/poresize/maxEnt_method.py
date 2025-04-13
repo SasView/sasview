@@ -304,13 +304,13 @@ class maxEntMethod():
         chizer, chtarg = npt*1.0, npt*1.0
         f = first_bins * 1.0                                 # starting distribution is the same as the inital distribution
         fSum  = sum(f)                                       # find the sum of the f-vector
-        z = (Iq - operation.matrix_transform(f, Gqr.transpose())) /sigma             # standardized residuals
+        z = (Iq - np.dot(f, Gqr.transpose())) /sigma             # standardized residuals
         chisq = sum(z*z)                                     # Chi^2
         
         for iter in range(IterMax):
             ox = -2 * z / sigma                                    
             
-            cgrad = operation.matrix_transform(ox, Gqr)  # cgrad[i] = del(C)/del(f[i]), SB eq. 8
+            cgrad = np.dot(ox, Gqr)  # cgrad[i] = del(C)/del(f[i]), SB eq. 8
             sgrad = -np.log(f/first_bins) / (blank*math.exp (1.0)) # sgrad[i] = del(S)/del(f[i])
             snorm = math.sqrt(sum(f * sgrad*sgrad))                # entropy, SB eq. 22
             cnorm = math.sqrt(sum(f * cgrad*cgrad))                # Chi^2, SB eq. 22
@@ -327,13 +327,13 @@ class maxEntMethod():
             xi[0] = f * cgrad / cnorm
             xi[1] = f * (a * sgrad - b * cgrad)
             
-            eta[0] = operation.matrix_transform(xi[0], Gqr.transpose());          # solution --> data
-            eta[1] = operation.matrix_transform(xi[1], Gqr.transpose());          # solution --> data
+            eta[0] = np.dot(xi[0], Gqr.transpose());          # solution --> data
+            eta[1] = np.dot(xi[1], Gqr.transpose());          # solution --> data
             ox = eta[1] / (sigma * sigma)
-            xi[2] = operation.matrix_transform(ox, Gqr);          # data --> solution
+            xi[2] = np.dot(ox, Gqr);          # data --> solution
             a = 1.0 / math.sqrt(sum(f * xi[2]*xi[2]))
             xi[2] = f * xi[2] * a
-            eta[2] = operation.matrix_transform(xi[2], Gqr.transpose())           # solution --> data
+            eta[2] = np.dot(xi[2], Gqr.transpose())           # solution --> data
 
             # prepare the search directions for the conjugate gradient technique
             c1 = xi.dot(cgrad) / chisq                          # C_mu, SB eq. 24
@@ -372,7 +372,7 @@ class maxEntMethod():
 
             # calculate the normalized entropy
             S = sum((f/fSum) * np.log(f/fSum))                     # normalized entropy, S&B eq. 1
-            z = (Iq - operation.matrix_transform(f, Gqr.transpose())) / sigma              # standardized residuals
+            z = (Iq - np.dot(f, Gqr.transpose())) / sigma              # standardized residuals
             chisq = sum(z*z)                                       # report this ChiSq
 
             if report:
@@ -384,7 +384,7 @@ class maxEntMethod():
             # do the hardest test first
             if (abs(chisq/chizer-1.0) < CHI_SQR_LIMIT) and  (test < TEST_LIMIT):
                 print (' Convergence achieved.')
-                return chisq,f,operation.matrix_transform(f, Gqr.transpose())     # solution FOUND returns here
+                return chisq,f,np.dot(f, Gqr.transpose())     # solution FOUND returns here
         print (' No convergence! Try increasing Error multiplier.')
-        return chisq, f, operation.matrix_transform(f, Gqr.transpose())             # no solution after IterMax iterations
+        return chisq, f, np.dot(f, Gqr.transpose())             # no solution after IterMax iterations
 

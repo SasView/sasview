@@ -1,5 +1,6 @@
 
 import numpy as np
+from scipy import stats
 
 from sasdata.dataloader.data_info import Data1D 
 from sasmodels.core import load_model
@@ -7,7 +8,82 @@ from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
 from sasmodels import resolution as rst
 
-from maxEnt_method import matrix_operation, maxEntMethod
+from .maxEnt_method import matrix_operation, maxEntMethod
+def add_gaussian_noise(x, dx):
+    """
+    Add Gaussian noise to data based on the sigma of the Guassian uncertainty
+    value associated with the data.
+
+    Args:
+        x (array-like): Input intensity values
+        dx (array-like): sigma of Guassian uncertainties associated with the
+        intensities
+
+    Returns:
+        array-like: Data with added Gaussian noise
+        """
+    # Convert inputs to numpy arrays
+    data = np.array(x)
+    std_dev = np.array(dx)
+
+    # Validate inputs
+    if len(data) != len(std_dev):
+        raise ValueError("Data and sigmas must have same length")
+    if np.any(std_dev <= 0):
+        raise ValueError("All sigma values must be positive")
+
+    # Generate and add noise
+    noise = np.random.normal(0, std_dev)
+    noisy_data = data + noise
+
+    return noisy_data
+
+ def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
+    """
+    THIS IS A WORK IN PROGRESS AND WILL NOT RUN
+    Fit data for $y = ax + b$  return $a$ and $b$
+
+    :param power: a fixed, otherwise None
+    :param qmin: Minimum Q-value
+    :param qmax: Maximum Q-value
+    """
+    if qmin is None:
+        qmin = self.qmin
+    if qmax is None:
+        qmax = self.qmax
+
+    # Identify the bin range for the fit
+    idx = (self.data.x >= qmin) & (self.data.x <= qmax)
+
+    fx = np.zeros(len(self.data.x))
+
+    # Uncertainty
+    if type(self.data.dy) == np.ndarray and \
+        len(self.data.dy) == len(self.data.x) and \
+            np.all(self.data.dy > 0):
+        sigma = self.data.dy
+    else:
+        sigma = np.ones(len(self.data.x))
+
+    # Compute theory data f(x)
+    fx[idx] = self.data.y[idx]
+
+    ##Get values of scale and if required power
+    if power is not None and power != 0:
+        # Linearize the data for a power law fit (log, log)
+        linearized_data = Data1D(np.log(self.data.x[idx]), np.log(fx[idx]), dy)
+    else:
+        linearized_data = Data1D(self.data.x[idx], fx[idx], dy=sigma[idx])
+
+    slope, intercept, _, _, _ = stats.linregress(linearized_data)
+    intercept = np.mean(y - slope * x)
+    n = len(x)
+    residuals = y - (slope * x + intercept)
+    sigma = np.sqrt(np.sum(residuals**2) / (n - 1))  # Sample standard deviation
+    std_dev_intercept = sigma * np.sqrt(np.sum(x**2) / (n * np.sum((x - np.mean(x))**2)))
+    mean_value = np.mean(numbers)
+    std_dev = np.std(numbers)
+
 
 class DistModel(object):
     """
@@ -35,20 +111,23 @@ class DistModel(object):
     ..NOTE: this code is not yet ready to be used (clearly) but is meant as
        a base structure
     """
-    def __init__(self, data, model, pars, dimension, bins):
+    def __init__(self, data, model, dimension, bins, pars=None):
 
         self.data=data
         self.model = load_model(model)
         self.params=pars
         self.dim_distr=dimension
         self.bins=bins
-        # self.intensity[]
+        self.intensity()
+        self.pars=pars
+        self.pars["scale"]=1.0
+        self.pars["background"]=0.0
 
 
     def base_matrix(self):
         f = DirectModel(self.data, self.model)
-        for i in self.bins: self.intensity[i] = f(**self.pars, self_dist=i)
-        return np.vstack(self.intensity)
+        for i in self.bins: self.intensity[i] = f(self.dim_distr = i, **self.pars)
+        return np.array(self.intensity)
 
 
 class sizeDistribution(object):
@@ -261,6 +340,10 @@ class sizeDistribution(object):
         pass
 
     def prep_maxEnt(self):
+        # after setting up the details for the fit run run_maxEnt.
+        # Then, if full fit is selected set up loop with a callable number of
+        # iterations that calls add_gaussian_noise(x, dx) before
+        # running run_maxEnt for iter number of times
         pass
 
     def run_maxEnt(self):
