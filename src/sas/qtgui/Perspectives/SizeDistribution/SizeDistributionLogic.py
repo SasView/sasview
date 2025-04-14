@@ -2,6 +2,9 @@ import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 
+SIZE_DISTR_LABEL = "SizeDistr"
+GROUP_ID_SIZE_DISTR = "SizeDistr"
+
 
 class SizeDistributionLogic:
     """
@@ -78,3 +81,24 @@ class SizeDistributionLogic:
                 raise ValueError(msg)
             qmax = np.sqrt(x * x + y * y)
         return qmin, qmax
+
+    def new_1d_plot(self, data):
+        """
+        Create a new 1D data instance based on fitting results
+        """
+        # Create the new plot
+        x = data["x"]
+        y = data["y"]
+        new_plot = Data1D(x=x, y=y)
+        new_plot.is_data = False
+        new_plot.dy = np.zeros(len(y))
+
+        new_plot.id = SIZE_DISTR_LABEL
+        new_plot.group_id = GROUP_ID_SIZE_DISTR
+        new_plot.name = SIZE_DISTR_LABEL + f"[{self._data.name}]"
+
+        new_plot.title = new_plot.name
+        new_plot.xaxis("\\rm{Q}", "A^{-1}")
+        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+
+        return new_plot

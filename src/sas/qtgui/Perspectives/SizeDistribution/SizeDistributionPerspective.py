@@ -1,16 +1,20 @@
 import logging
+from typing import Optional
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
     SizeDistributionLogic,
 )
+from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionThread import (
+    SizeDistributionThread,
+)
 from sas.qtgui.Perspectives.SizeDistribution.UI.SizeDistributionUI import (
     Ui_SizeDistribution,
 )
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import WIDGETS
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Utilities import GuiUtils
 
 
@@ -44,6 +48,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Window title"""
         return "Size Distribution Perspective"
 
+    fittingFinishedSignal = QtCore.Signal(dict)
+
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
@@ -65,6 +71,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._data = None
         self._path = ""
         self._calculator = None
+        self.fit_thread = None
+        self.is_calculating = False
+        self.size_distr_plot = None
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
@@ -137,11 +146,17 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def setupSlots(self):
         """Connect the use controls to their appropriate methods"""
+        # Buttons
         self.helpButton.clicked.connect(self.help)
         self.quickFitButton.clicked.connect(self.onQuickFit)
         self.fullFitButton.clicked.connect(self.onFullFit)
         self.cmdReset.clicked.connect(self.onRangeReset)
+
+        # Checkboxes
         self.chkLowQ.stateChanged.connect(self.onLowQStateChanged)
+
+        # Local signals
+        self.fittingFinishedSignal.connect(self.fitComplete)
 
     def setupMapper(self):
         # Set up the mapper.
@@ -259,8 +274,12 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         Enable buttons when data is present, else disable them
         """
-        self.quickFitButton.setEnabled(self.logic.data_is_loaded)
-        self.fullFitButton.setEnabled(self.logic.data_is_loaded)
+        self.quickFitButton.setEnabled(
+            self.logic.data_is_loaded and not self.is_calculating
+        )
+        self.fullFitButton.setEnabled(
+            self.logic.data_is_loaded and not self.is_calculating
+        )
         self.boxWeighting.setEnabled(self.logic.data_is_loaded)
         # Weighting controls
         if self.logic.di_flag:
@@ -285,10 +304,16 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._manager.showHelp(tree_location)
 
     def onQuickFit(self):
-        pass
+        self.is_calculating = True
+        self.enableButtons()
+        self.fit_thread = SizeDistributionThread(completefn=self.fittingCompleted)
+        self.fit_thread.queue()
 
     def onFullFit(self):
-        pass
+        self.is_calculating = True
+        self.enableButtons()
+        self.fit_thread = SizeDistributionThread(completefn=self.fittingCompleted)
+        self.fit_thread.queue()
 
     def onRangeReset(self):
         """
@@ -377,12 +402,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         if not data_list or self._model_item not in data_list:
             return
         self._data = None
-        self._path = None
+        self._path = ""
         self.txtName.setText("")
         self._model_item = None
         self.logic.data = None
-        # Pass an empty dictionary to set all inputs to their default values
-        self.updateFromParameters({})
+        self.setupModel()
         self.enableButtons()
 
     def serializeAll(self):
@@ -459,3 +483,40 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         q_min = str(q_range_min)
         self.model.item(WIDGETS.W_QMIN).setText(q_min)
         self.model.item(WIDGETS.W_QMAX).setText(q_max)
+
+    def fittingCompleted(self, result: Optional[dict]) -> None:
+        """
+        Send the finish message from calculate threads to main thread
+        """
+        if result is None:
+            result = dict()
+        self.fittingFinishedSignal.emit(result)
+
+    def fitComplete(self, result) -> None:
+        """
+        Receive and display fitting results
+        "result" is a tuple of actual result list and the fit time in seconds
+        """
+        # re-enable the fit buttons
+        self.is_calculating = False
+        self.enableButtons()
+        if len(result) == 0:
+            msg = "Fitting failed."
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            return
+
+        # TODO: show results in the UI widget
+
+        # plot results
+        self.size_distr_plot = self.logic.new_1d_plot(result)
+        if self.size_distr_plot is not None:
+            title = self.size_distr_plot.name
+            self.size_distr_plot.plot_role = DataRole.ROLE_DEFAULT
+            self.size_distr_plot.symbol = "Line"
+            self.size_distr_plot.show_errors = False
+            GuiUtils.updateModelItemWithPlot(
+                self._model_item, self.size_distr_plot, title
+            )
+            self.communicate.plotRequestedSignal.emit(
+                [self._model_item, self.size_distr_plot], None
+            )
