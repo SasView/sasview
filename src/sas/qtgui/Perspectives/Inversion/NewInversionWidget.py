@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
-from src.sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem
 from src.sas.sascalc.pr.NewInvertor import NewInvertor
 
