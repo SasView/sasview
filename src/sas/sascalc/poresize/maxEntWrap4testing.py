@@ -4,7 +4,7 @@ It alows testing the module code without loading a notebook though not clear
 this is needed.
 """
 
-from SizeDistribution import sizeDistribution
+from SizeDistribution import sizeDistribution_func
 import plottableHist
 from sasdata.dataloader import data_info
 from sasmodels import resolution as rst
@@ -64,7 +64,7 @@ Ifin = np.searchsorted(Q,Qmax)+1
 input["Resolution"] = perfect1D
 
 # Call the sizeDistribution function and feed in the input
-chisq,Bins,Dbins,BinMag,Qc,Ic = sizeDistribution(input)
+chisq,Bins,Dbins,BinMag,Qc,Ic = sizeDistribution_func(input)
 
 # TODO: Change the distribution back to P(r) 
 # V = SphereVol(Bins)

@@ -2,7 +2,8 @@
 import numpy as np
 from scipy import stats
 
-from sasdata.dataloader.data_info import Data1D 
+from sasdata.dataloader.data_info import Data1D
+from sasmodels.data import empty_data1D
 from sasmodels.core import load_model
 from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
@@ -152,12 +153,12 @@ class sizeDistribution(object):
         self._model = "ellipsoid"
         self._aspectRatio = 1.0
 
-        self._contrast = 1.0
+        self._contrast = 1.0 ## sld - sld_solvent=0.0
         self._background = 0.0 ## Not For Model ! 
         self._scale = 1.0 ## Fix to 1.0 for models 
-        self._resolution = None ## Need resolution in the fitting. 
+        self._resolution = None ## For future implementation. For now, only use data with resolution information. 
 
-        self._target_model = None
+        self.model_matrix = None
 
         #advanced parameters for MaxEnt 
         self._iterMax = 5000
@@ -165,12 +166,20 @@ class sizeDistribution(object):
         self._useWeights = False
         self._weightType = 'dI'  
         self._weightFactor = 1.0
-        self._weights = self._data.dy
+        self._weights = self.data.dy
 
         ## Return Values after the MaxEnt should 
         self.BinMagnitude_maxEnt = np.zeros_like(self.bins)
         self.chiSq_maxEnt = np.inf
         self.Iq_maxEnt = np.zeros_like(self._data.y)
+
+    @property
+    def data(self):
+        return self._data
+    
+    @data.setter
+    def data(self, value:Data1D):
+        self._data = value
 
     @property
     def qMin(self):
@@ -261,7 +270,14 @@ class sizeDistribution(object):
 
         self._binDiff = np.diff(self._bins)
         self._bins = self._bins[:-1] + self._binDiff/2  
-            
+
+    @property
+    def model(self):
+        return self._model
+
+    @model.setter
+    def model(self, value:str):
+        self._model = value   
    
     @property
     def aspectRatio(self):
@@ -278,6 +294,14 @@ class sizeDistribution(object):
     @contrast.setter
     def contrast(self, value):
         self._contrast = value
+
+    @property
+    def resolution(self):
+        return self._resolution
+    
+    @resolution.setter
+    def resolution(self, value):
+        self._resolution = value
 
     @property
     def background(self):
@@ -318,7 +342,7 @@ class sizeDistribution(object):
     @useWeights.setter
     def useWeights(self, value:bool):
         self._useWeights = value
-    
+        self.update_weights()
     @property
     def weightFactor(self):
         return self._weightFactor
@@ -327,6 +351,43 @@ class sizeDistribution(object):
     def weightFactor(self, value):
         self._weightFactor = value
         
+    @property
+    def weightType(self):
+        return self._weightType
+    
+    @weightType.setter
+    def weightType(self, value):
+        self._weightType = value
+        self.update_weights()
+
+    @property
+    def weights(self):
+        return self._weights
+    
+    def update_weights(self, sigma=None):
+
+        if sigma is None:
+            wdata = self.data
+        else:
+            wdata = sigma
+        
+        if self._useWeights == False:
+            self._weights = np.ones_like(wdata.y)
+        else:
+            if (self.weightType == 'dI'):
+                self._weights = wdata.dy
+
+            elif (self.weightType == 'sqrt(I Data)'):
+                self._weights = np.sqrt(wdata.y)
+
+            elif (self.weightType == 'abs(I Data)'):
+                self._weights = np.abs(wdata.y)
+
+            elif self.weightType == 'None':
+                self._useWeights=False
+                self._weights = np.ones_like(wdata.y)
+        
+        return None
 
     def calculate_powerlaw(self):
         ## From invariant?
@@ -336,35 +397,64 @@ class sizeDistribution(object):
         ## From invariant? 
         return None
 
-    def generate_models(self):
-        pass
+    def generate_model_matrix(self, moddata:Data1D):
+        """
+        generate a matrix of intensities from a specific sasmodels model; probably should be generalized to a class to use maxent on
+        any parameter of interest w/in the model. For now, the pars are fixed. 
+        moddata :: Data1D object that has the data trimmed depending on background subtraction or powerlaw subtracted from the data. Also self.qMin and self.qMax. 
+
+        """
+        model = load_model(self.model)
+
+        pars = {'sld':self.contrast, 'sld_solvent':0.0, 'background':0.0, 'scale':1.0,
+                }
+        
+        kernel = DirectModel(moddata, model)
+        
+        intensities = []
+        for bin in self.bins:
+            pars['radius_equatorial'] = bin
+            pars['radius_polar'] = bin/self.aspectRatio
+            intensities.append(kernel(**pars))
+        
+        self.model_matrix = np.vstack(intensities)
+
+        ## For data with no resolution. Should be defined in moddata
+        #if self.resolution == 'Pinhole1D':
+        #    kernel.resolution = rst.Pinhole1D(moddata.x, moddata.dx)
+        #elif self.resolution == 'Slit1D':
+        #    kernel.resolution = rst.Slit1D(moddata.x, moddata.dx)
+        #else:
+        #    kernel.resolution = rst.Perfect1D(moddata.x)
+        
 
     def prep_maxEnt(self):
         # after setting up the details for the fit run run_maxEnt.
         # Then, if full fit is selected set up loop with a callable number of
         # iterations that calls add_gaussian_noise(x, dx) before
         # running run_maxEnt for iter number of times
+        
         pass
 
     def run_maxEnt(self):
         
-        BinsBack = np.ones_like(self._bins)*self._skyBackground*self._scale/self._contrast
+        BinsBack = np.ones_like(self._bins)*self.skyBackground*self.scale/self.contrast
         MethodCall = maxEntMethod()
         chisq = None
         BinMag = None
         ICalc = self.Iq_maxEnt
-        intensity = self.scale * self._data.y[self.ndx_qmin, self.ndx_qmax] - self.background
+        intensity = self.scale * self.data.y[self.ndx_qmin, self.ndx_qmax] - self.background
         
 
          ## run MaxEnt
-        chisq, BinMag, ICalc[self.ndx_qmin:self.ndx_qmax] = MethodCall.MaxEnt_SB(intensity,
-                                                             scale/np.sqrt(wtFactor*wt),
-                                                               Gmat,
+        chisq, BinMag, ICalc = MethodCall.MaxEnt_SB(intensity,
+                                                             self.scale/(self.weightFactor*self.weights),
+                                                               self.model_matrix,
                                                                  BinsBack,
-                                                                   iterMax, report=True)
+                                                                   self.iterMax, report=True)
         self.chiSq_maxEnt = chisq
-        self.BinMagnitude_maxEnt =  BinMag/(2.*self._binDiff)
-        self.Iq_maxEnt[self.ndx_qmin:self.ndx_qmax] = ICalc[self.ndx_qmin:self.ndx_qmax]
+        self.BinMagnitude_maxEnt = BinMag/(2.*self._binDiff)
+        self.Iq_maxEnt = ICalc
         
         return None
 
@@ -394,13 +484,13 @@ def sizeDistribution_func(input):
     ### input data
     ##scat_data = Data1D() ## how to get this data in? ## Sent from the data_loader 
     Q, I = input["Data"]
-    wt = input["Weights"][Ibeg:Ifin]
+    
 
     ### results data
     Ic = np.zeros(len(I))
 
     ##results_data = Data1D()
-    
+
     ### GUI Variables  
     ## standard
     Qmin = input["Limits"][0]
@@ -420,10 +510,7 @@ def sizeDistribution_func(input):
     scale = input["Scale"]
     logbin = input["Logbin"] ## Boolean? 
     sky = input["Sky"]
-    wtFactor = input["WeightFactors"][Ibeg:Ifin]
-    Back = input["Background"][Ibeg:Ifin]
-
-    res = input["Resolution"] ## dQ 
+ 
 
     ## Dependent
     if logbin:
@@ -436,7 +523,11 @@ def sizeDistribution_func(input):
     Ibeg = np.searchsorted(Q,Qmin)
     Ifin = np.searchsorted(Q,Qmax)+1        #include last point
     BinMag = np.zeros_like(Bins)
-    
+    wtFactor = input["WeightFactors"][Ibeg:Ifin]
+    Back = input["Background"][Ibeg:Ifin]
+
+    res = input["Resolution"] ## dQ 
+    wt = input["Weights"][Ibeg:Ifin]
     ## setup MaxEnt
     Gmat = matrix_operation().G_matrix(Q[Ibeg:Ifin],Bins,contrast,model,res)
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
