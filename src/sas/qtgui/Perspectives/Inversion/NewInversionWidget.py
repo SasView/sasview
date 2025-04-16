@@ -24,12 +24,18 @@ class CalculatedOutputs:
     pos_err: float
 
 @dataclass
+class EstimatedParameters:
+    reg_constant: float
+    nterms: int
+
+@dataclass
 class InversionResult:
     logic: InversionLogic
     calculator: NewInvertor
     pr_plot: Data1D | None
     data_plot: Data1D | None
     outputs: CalculatedOutputs | None
+    estimated_paramaters: EstimatedParameters | None
 
 def format_float(f: float):
     return f'{f:.3f}'
