@@ -6,7 +6,7 @@ from PySide6.QtGui import QStandardItem
 from PySide6.QtWidgets import QWidget
 
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
-from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr
+from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr, EstimateNT
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem
@@ -297,3 +297,16 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.calcThread.queue()
         # TODO: Why are we doing this?
         self.calcThread.ready(2.5)
+
+    def endEstimateParameters(self):
+        pass # TODO: Implement
+
+    def startEstimateParameters(self):
+        estimation_thread = EstimateNT(
+            self.currentResult.calculator,
+            self.currentResult.calculator.nfunc,
+            error_func=self.threadError,
+            updatefn=self.endEstimateParameters
+        )
+        estimation_thread.queue()
+        estimation_thread.ready(2.5)
