@@ -50,6 +50,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     # perspective, I'm not convinced they are needed here.
 
     calculationComplete = Signal()
+    estimationComplete = Signal()
 
     def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
         super(NewInversionWidget, self).__init__()
@@ -194,6 +195,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.posFractionValue.setText(format_float(out.pos_frac))
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
 
+    def updateGuiSuggested(self, nterms, alpha):
+        self.noOfTermsSuggestionButton.setText(str(nterms))
+        self.regConstantSuggestionButton.setText(str(alpha))
+
     def acceptsData(self) -> bool:
         # TODO: Temporary
         return True
@@ -298,8 +303,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # TODO: Why are we doing this?
         self.calcThread.ready(2.5)
 
-    def endEstimateParameters(self):
-        pass # TODO: Implement
+    def endEstimateParameters(self, nterms, alpha, message, elapsed):
+        self.estimationComplete.connect()
 
     def startEstimateParameters(self):
         estimation_thread = EstimateNT(
