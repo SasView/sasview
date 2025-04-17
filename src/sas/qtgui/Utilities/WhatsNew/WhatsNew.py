@@ -15,10 +15,10 @@ from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_vers
 
 
 
-def whats_new_messages(strictly_newer=True):
+def whats_new_messages(only_recent=True):
     """ Accumulate all files that are newer than the value in the config
 
-    :param strictly_newer: require strictly newer stuff, strictness is needed for showing new things
+    :param only_recent: require strictly newer stuff, strictness is needed for showing new things
                            when there is an update, non-strictness is needed for the menu access.
     """
 
@@ -31,11 +31,11 @@ def whats_new_messages(strictly_newer=True):
             newer = False
 
             try:
-                if strictly_newer:
+                if only_recent:
                     newer = strictly_newer_than(child_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
                 else:
                     # Include current version
-                    newer = not strictly_newer_than(config.LAST_WHATS_NEW_HIDDEN_VERSION, child_dir.name)
+                    newer = strictly_newer_than(child_dir.name, "0.0.0")
 
             except ValueError:
                 pass
@@ -96,7 +96,7 @@ class WhatsNew(QDialog):
     To add new messages, just dump a (self-contained) html file into the appropriate folder
 
     """
-    def __init__(self, parent=None, strictly_newer=True):
+    def __init__(self, parent=None, only_recent=True):
         super().__init__(parent)
 
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
@@ -148,13 +148,13 @@ class WhatsNew(QDialog):
         self.nextButton.clicked.connect(self.next_file)
 
         # # Gather new files
-        new_messages = whats_new_messages(strictly_newer=strictly_newer)
+        new_messages = whats_new_messages(only_recent=only_recent)
         new_message_directories = [key for key in new_messages.keys()]
         new_message_directories.sort(key=reduced_version)
 
         self.all_messages = []
-
-        for version in new_messages:
+        
+        for version in new_message_directories:
             self.all_messages += new_messages[version]
 
         self.max_index = len(self.all_messages)
