@@ -119,6 +119,7 @@ class WhatsNew(QDialog):
         self.buttonBar.setLayout(self.buttonLayout)
 
         self.closeButton = QPushButton("Close")
+        self.prevButton = QPushButton("Prev")
         self.nextButton = QPushButton("Next")
 
         # Only show the show on startup checkbox if we're not up-to-date
@@ -135,6 +136,7 @@ class WhatsNew(QDialog):
 
         # other buttons
         self.buttonLayout.addSpacerItem(QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+        self.buttonLayout.addWidget(self.prevButton)
         self.buttonLayout.addWidget(self.nextButton)
 
 
@@ -145,6 +147,7 @@ class WhatsNew(QDialog):
 
         # Callbacks
         self.closeButton.clicked.connect(self.close_me)
+        self.prevButton.clicked.connect(self.prev_file)
         self.nextButton.clicked.connect(self.next_file)
 
         # # Gather new files
@@ -169,6 +172,12 @@ class WhatsNew(QDialog):
         """ Show the next available file (increment counter, show)"""
         self.current_index += 1
         self.current_index %= self.max_index
+        self.show_file()
+
+    def prev_file(self):
+        self.current_index -= 1
+        if self.current_index < 0:
+            self.current_index = self.max_index - 1
         self.show_file()
 
     def show_file(self):
