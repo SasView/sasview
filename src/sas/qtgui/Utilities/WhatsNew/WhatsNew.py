@@ -150,10 +150,10 @@ class WhatsNew(QDialog):
         # # Gather new files
         new_messages = whats_new_messages(only_recent=only_recent)
         new_message_directories = [key for key in new_messages.keys()]
-        new_message_directories.sort(key=reduced_version)
+        new_message_directories.sort(key=reduced_version, reverse=True)
 
         self.all_messages = []
-        
+
         for version in new_message_directories:
             self.all_messages += new_messages[version]
 
