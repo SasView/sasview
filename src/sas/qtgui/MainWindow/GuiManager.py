@@ -143,8 +143,8 @@ class GuiManager:
                                               "_downloads",
                                               "Tutorial.pdf"))
 
-        if self.WhatsNew.has_new_messages():
-            self.actionWhatsNew()
+        if self.WhatsNew.has_new_messages(): # Not a static method
+            self.WhatsNew.show()
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
@@ -679,7 +679,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
-        self.WhatsNew = WhatsNew(self._parent, strictly_newer=False)
+        self.WhatsNew = WhatsNew(self._parent, only_recent=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):

@@ -15,35 +15,35 @@ from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_vers
 
 
 
-def whats_new_messages(strictly_newer=True):
+def whats_new_messages(only_recent=True):
     """ Accumulate all files that are newer than the value in the config
 
-    :param strictly_newer: require strictly newer stuff, strictness is needed for showing new things
+    :param only_recent: require strictly newer stuff, strictness is needed for showing new things
                            when there is an update, non-strictness is needed for the menu access.
     """
 
     out = defaultdict(list)
     message_dir = resources.files("sas.qtgui.Utilities.WhatsNew.messages")
-    for message_dir in message_dir.iterdir():
+    for child_dir in message_dir.iterdir():
         # Get short filename
-        if message_dir.is_dir():
+        if child_dir.is_dir():
 
             newer = False
 
             try:
-                if strictly_newer:
-                    newer = strictly_newer_than(message_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
+                if only_recent:
+                    newer = strictly_newer_than(child_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
                 else:
                     # Include current version
-                    newer = not strictly_newer_than(config.LAST_WHATS_NEW_HIDDEN_VERSION, message_dir.name)
+                    newer = strictly_newer_than(child_dir.name, "0.0.0")
 
             except ValueError:
                 pass
 
             if newer:
-                for file in message_dir.iterdir():
+                for file in child_dir.iterdir():
                     if file.name.endswith(".html"):
-                        out[message_dir.name].append(file)
+                        out[child_dir.name].append(file)
 
 
     return out
@@ -96,7 +96,7 @@ class WhatsNew(QDialog):
     To add new messages, just dump a (self-contained) html file into the appropriate folder
 
     """
-    def __init__(self, parent=None, strictly_newer=True):
+    def __init__(self, parent=None, only_recent=True):
         super().__init__(parent)
 
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
@@ -119,6 +119,7 @@ class WhatsNew(QDialog):
         self.buttonBar.setLayout(self.buttonLayout)
 
         self.closeButton = QPushButton("Close")
+        self.prevButton = QPushButton("Prev")
         self.nextButton = QPushButton("Next")
 
         # Only show the show on startup checkbox if we're not up-to-date
@@ -135,6 +136,7 @@ class WhatsNew(QDialog):
 
         # other buttons
         self.buttonLayout.addSpacerItem(QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+        self.buttonLayout.addWidget(self.prevButton)
         self.buttonLayout.addWidget(self.nextButton)
 
 
@@ -145,32 +147,58 @@ class WhatsNew(QDialog):
 
         # Callbacks
         self.closeButton.clicked.connect(self.close_me)
+        self.prevButton.clicked.connect(self.prev_file)
         self.nextButton.clicked.connect(self.next_file)
 
         # # Gather new files
-        new_messages = whats_new_messages(strictly_newer=strictly_newer)
+        new_messages = whats_new_messages(only_recent=only_recent)
         new_message_directories = [key for key in new_messages.keys()]
-        new_message_directories.sort(key=reduced_version)
+        new_message_directories.sort(key=reduced_version, reverse=True)
 
         self.all_messages = []
 
-        for version in new_messages:
+        for version in new_message_directories:
             self.all_messages += new_messages[version]
 
         self.max_index = len(self.all_messages)
         self.current_index = 0
 
         self.show_file()
+        self.set_enable_disable_prev_next()
 
         self.setFixedSize(800, 600)
         self.setModal(True)
 
     def next_file(self):
+        """ Show the next available file (increment counter, show)"""
         self.current_index += 1
         self.current_index %= self.max_index
         self.show_file()
+        self.set_enable_disable_prev_next()
+
+    def prev_file(self):
+        """ Go to next file"""
+        self.current_index -= 1
+        if self.current_index < 0:
+            self.current_index = self.max_index - 1
+        self.show_file()
+        self.set_enable_disable_prev_next()
+
+    def set_enable_disable_prev_next(self):
+        """ Set the appropriate enable state on the navigation buttons"""
+
+        if self.current_index == 0:
+            self.prevButton.setEnabled(False)
+        else:
+            self.prevButton.setEnabled(True)
+
+        if self.current_index >= self.max_index - 1:
+            self.nextButton.setEnabled(False)
+        else:
+            self.nextButton.setEnabled(True)
 
     def show_file(self):
+        """ Set the text of the window to the file with the current index"""
         if len(self.all_messages) > 0:
             filename = self.all_messages[self.current_index]
             with open(filename, 'r') as fid:
@@ -180,6 +208,7 @@ class WhatsNew(QDialog):
             self.browser.setHtml("<html><body><h1>You should not see this!!!</h1></body></html>")
 
     def close_me(self):
+        """ Close action, needs to save the state for showing """
         if self.showAgain is not None:
             if not self.showAgain.isChecked():
                 # We choose the newest, for backwards compatability, i.e. we never reduce the last version
