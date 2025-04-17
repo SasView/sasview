@@ -24,26 +24,26 @@ def whats_new_messages(strictly_newer=True):
 
     out = defaultdict(list)
     message_dir = resources.files("sas.qtgui.Utilities.WhatsNew.messages")
-    for message_dir in message_dir.iterdir():
+    for child_dir in message_dir.iterdir():
         # Get short filename
-        if message_dir.is_dir():
+        if child_dir.is_dir():
 
             newer = False
 
             try:
                 if strictly_newer:
-                    newer = strictly_newer_than(message_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
+                    newer = strictly_newer_than(child_dir.name, config.LAST_WHATS_NEW_HIDDEN_VERSION)
                 else:
                     # Include current version
-                    newer = not strictly_newer_than(config.LAST_WHATS_NEW_HIDDEN_VERSION, message_dir.name)
+                    newer = not strictly_newer_than(config.LAST_WHATS_NEW_HIDDEN_VERSION, child_dir.name)
 
             except ValueError:
                 pass
 
             if newer:
-                for file in message_dir.iterdir():
+                for file in child_dir.iterdir():
                     if file.name.endswith(".html"):
-                        out[message_dir.name].append(file)
+                        out[child_dir.name].append(file)
 
 
     return out
@@ -166,11 +166,13 @@ class WhatsNew(QDialog):
         self.setModal(True)
 
     def next_file(self):
+        """ Show the next available file (increment counter, show)"""
         self.current_index += 1
         self.current_index %= self.max_index
         self.show_file()
 
     def show_file(self):
+        """ Set the text of the window to the file with the current index"""
         if len(self.all_messages) > 0:
             filename = self.all_messages[self.current_index]
             with open(filename, 'r') as fid:
@@ -180,6 +182,7 @@ class WhatsNew(QDialog):
             self.browser.setHtml("<html><body><h1>You should not see this!!!</h1></body></html>")
 
     def close_me(self):
+        """ Close action, needs to save the state for showing """
         if self.showAgain is not None:
             if not self.showAgain.isChecked():
                 # We choose the newest, for backwards compatability, i.e. we never reduce the last version

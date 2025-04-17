@@ -143,7 +143,7 @@ class GuiManager:
                                               "_downloads",
                                               "Tutorial.pdf"))
 
-        if self.WhatsNew.has_new_messages():
+        if self.WhatsNew.has_new_messages(): # Not a static method
             self.actionWhatsNew()
 
     def info(self, type, value, tb):
