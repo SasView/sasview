@@ -2,14 +2,15 @@
 import numpy as np
 from scipy import stats
 
-from sasdata.dataloader.data_info import Data1D
+from sasdata.dataloader.data_info import Data1D, DataInfo
 from sasmodels.data import empty_data1D
 from sasmodels.core import load_model
 from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
 from sasmodels import resolution as rst
 
-from .maxEnt_method import matrix_operation, maxEntMethod
+from maxEnt_method import matrix_operation, maxEntMethod
+
 def add_gaussian_noise(x, dx):
     """
     Add Gaussian noise to data based on the sigma of the Guassian uncertainty
@@ -39,7 +40,7 @@ def add_gaussian_noise(x, dx):
 
     return noisy_data
 
- def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
+def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
     """
     THIS IS A WORK IN PROGRESS AND WILL NOT RUN
     Fit data for $y = ax + b$  return $a$ and $b$
@@ -119,7 +120,7 @@ class DistModel(object):
         self.params=pars
         self.dim_distr=dimension
         self.bins=bins
-        self.intensity()
+        self.intensity = []
         self.pars=pars
         self.pars["scale"]=1.0
         self.pars["background"]=0.0
@@ -127,7 +128,7 @@ class DistModel(object):
 
     def base_matrix(self):
         f = DirectModel(self.data, self.model)
-        for i in self.bins: self.intensity[i] = f(self.dim_distr = i, **self.pars)
+        for i in self.bins: self.intensity.append(f(**self.pars))
         return np.array(self.intensity)
 
 
@@ -171,7 +172,7 @@ class sizeDistribution(object):
         ## Return Values after the MaxEnt should 
         self.BinMagnitude_maxEnt = np.zeros_like(self.bins)
         self.chiSq_maxEnt = np.inf
-        self.Iq_maxEnt = np.zeros_like(self._data.y)
+        self.Iq_maxEnt = None
 
     @property
     def data(self):
@@ -226,6 +227,7 @@ class sizeDistribution(object):
     @diamMax.setter
     def diamMax(self, value):
         self._diamMax = value
+        self.set_bins()
 
     @property
     def diamMin(self):
@@ -234,6 +236,7 @@ class sizeDistribution(object):
     @diamMin.setter
     def diamMin(self, value):
         self._diamMin = value
+        self.set_bins()
 
     @property
     def nbins(self):
@@ -375,13 +378,13 @@ class sizeDistribution(object):
             self._weights = np.ones_like(wdata.y)
         else:
             if (self.weightType == 'dI'):
-                self._weights = wdata.dy
+                self._weights = 1/np.array(wdata.dy)
 
             elif (self.weightType == 'sqrt(I Data)'):
-                self._weights = np.sqrt(wdata.y)
+                self._weights = 1/np.sqrt(wdata.y)
 
             elif (self.weightType == 'abs(I Data)'):
-                self._weights = np.abs(wdata.y)
+                self._weights = 1/np.abs(wdata.y)
 
             elif self.weightType == 'None':
                 self._useWeights=False
@@ -417,7 +420,7 @@ class sizeDistribution(object):
             pars['radius_polar'] = bin/self.aspectRatio
             intensities.append(kernel(**pars))
         
-        self.model_matrix = np.vstack(intensities)
+        self.model_matrix = np.vstack(intensities).T
 
         ## For data with no resolution. Should be defined in moddata
         #if self.resolution == 'Pinhole1D':
@@ -428,35 +431,93 @@ class sizeDistribution(object):
         #    kernel.resolution = rst.Perfect1D(moddata.x)
         
 
-    def prep_maxEnt(self):
-        # after setting up the details for the fit run run_maxEnt.
+    def prep_maxEnt(self, sub_intensities:Data1D, full_fit:bool=False, nreps:int = 10):
+        """
+        1. Subtract intensities from the raw data. 
+        2. Trim the data to the correct q-range for maxEnt; Create new trimmed Data1D object to return after MaxEnt.
+        3. Generate Model Data based of the trimmed data 
+        4. Create a list of intensities for maxEnt, if full_fit == True , call add_gausisan_noise nreps times; pass just subtracted intensities
+        5. calculate initial bin weights, sigma, and return
+        """
+        # after setting up the details for the fit, run run_maxEnt.
         # Then, if full fit is selected set up loop with a callable number of
         # iterations that calls add_gaussian_noise(x, dx) before
         # running run_maxEnt for iter number of times
         
-        pass
+        ## subtract the background and powerlaw from the raw data
+        ## sub_intensities Data1D object with y=A*x^M + B; should have dy as well
 
-    def run_maxEnt(self):
-        
-        BinsBack = np.ones_like(self._bins)*self.skyBackground*self.scale/self.contrast
-        MethodCall = maxEntMethod()
-        chisq = None
-        BinMag = None
-        ICalc = self.Iq_maxEnt
-        intensity = self.scale * self.data.y[self.ndx_qmin, self.ndx_qmax] - self.background
-        
+        ## Loop through parameters for the 
+        pars_keys = ['x','y','dx','dy','dxw','dxl']
+        trim_data_pars = {}
 
+        assert len(sub_intensities.y) == len(self._data.y)
+
+        for pkey in pars_keys:
+            check_data = (pkey in list(self._data.__dict__.keys()))
+            
+            if check_data:
+                item = self._data.__dict__[pkey]
+                try:
+                    if pkey == 'y':
+                        item = item - sub_intensities.y
+                    elif pkey == 'dy':
+                        item = item + sub_intensities.dy
+
+                    data_vals = item[self.ndx_qmin:self.ndx_qmax]
+
+                except Exception as e:
+                    print(e)
+                trim_data_pars[pkey] = data_vals
+
+        
+        trim_data = Data1D(**trim_data_pars)
+        trim_data.__dict__['qmin'] = self.qMin
+        trim_data.__dict__['qmax'] = self.qMax
+
+        self.generate_model_matrix(trim_data)
+
+        intensities = []
+        if full_fit:
+            self.useWeights=True
+            for j in range(nreps):
+                intensities.append(add_gaussian_noise(trim_data.y, trim_data.dy))
+        else:
+            self.useWeights = False
+            self.weightFactor = 1.0
+            intensities.append(trim_data.y)
+
+        init_binsBack = np.ones_like(self.bins)*self.skyBackground*self.scale/self.contrast
+        sigma = self.scale/(self.weightFactor*self.weights[self.ndx_qmin:self.ndx_qmax])
+
+        return trim_data, intensities, init_binsBack, sigma
+
+    def run_maxEnt(self, maxentdata:Data1D, intensities:list, BinsBack:np.array, sigma:np.array):
+        
+        #MethodCall = maxEntMethod()
+        ChiSq = []
+        BinMag = []
+        IMaxEnt = []
          ## run MaxEnt
-        chisq, BinMag, ICalc = MethodCall.MaxEnt_SB(intensity,
-                                                             self.scale/(self.weightFactor*self.weights),
+        for nint, intensity in enumerate(intensities):
+            MethodCall = maxEntMethod()
+            chisq, bin_magnitude, icalc = MethodCall.MaxEnt_SB(intensity,
+                                                             sigma,
                                                                self.model_matrix,
                                                                  BinsBack,
                                                                    self.iterMax, report=True)
-        self.chiSq_maxEnt = chisq
-        self.BinMagnitude_maxEnt = BinMag/(2.*self._binDiff)
-        self.Iq_maxEnt = ICalc
+            ChiSq.append(chisq)
+            BinMag.append(bin_magnitude)
+            IMaxEnt.append(icalc)
+
+        self.chiSq_maxEnt = np.mean(ChiSq)
+        self.BinMagnitude_maxEnt = np.mean(BinMag)/(2.*self._binDiff)
+        BinErrs = np.std(BinMag)
+        maxentdata.y = np.mean(IMaxEnt)
+        maxentdata.dy = np.std(IMaxEnt)
+        self.Iq_maxEnt  = maxentdata
         
-        return None
+        return self.chiSq_maxEnt, self.bins, self._binDiff, self.BinMagnitude_maxEnt, BinErrs, maxentdata
 
 def sizeDistribution_func(input):
     '''
@@ -529,11 +590,13 @@ def sizeDistribution_func(input):
     res = input["Resolution"] ## dQ 
     wt = input["Weights"][Ibeg:Ifin]
     ## setup MaxEnt
-    Gmat = matrix_operation().G_matrix(Q[Ibeg:Ifin],Bins,contrast,model,res)
+    Gmat = matrix_operation().G_matrix(Q[Ibeg:Ifin],Bins,contrast,model,res).T
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
     MethodCall = maxEntMethod()
-
+    sigma = scale/np.sqrt(wtFactor*wt)
+    print(sigma)
     ## run MaxEnt
-    chisq,BinMag,Ic[Ibeg:Ifin] = MethodCall.MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,iterMax,report=True)
+    chisq,BinMag,Ic[Ibeg:Ifin] = MethodCall.MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,
+                                                      scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,iterMax,report=True)
     BinMag = BinMag/(2.*Dbins)
     return chisq,Bins,Dbins,BinMag,Q[Ibeg:Ifin],Ic[Ibeg:Ifin]

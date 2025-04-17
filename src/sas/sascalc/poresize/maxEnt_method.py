@@ -73,7 +73,7 @@ class matrix_operation():
         # TODO: See if we can make use of existing Sasmodels
         if choice == 'Sphere':
             Gmat = 1.e-4*(contrast*SphereVol(Bins)*SphereFF(Q,Bins)**2).transpose()
-        Gmat = resolution.apply(Gmat)
+        #Gmat = resolution.apply(Gmat)
         Gmat = Gmat.reshape((len(Bins),len(Q)))
         return Gmat
     
