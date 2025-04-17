@@ -144,7 +144,7 @@ class GuiManager:
                                               "Tutorial.pdf"))
 
         if self.WhatsNew.has_new_messages(): # Not a static method
-            self.actionWhatsNew()
+            self.WhatsNew.show()
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
