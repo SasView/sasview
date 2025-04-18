@@ -1,9 +1,11 @@
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 
-SIZE_DISTR_LABEL = "SizeDistr"
-GROUP_ID_SIZE_DISTR = "SizeDistr"
+DATA_PLOT_LABEL = "Background"
+GROUP_ID_SIZE_DISTR_DATA = "SizeDistrData"
+SIZE_DISTR_LABEL = "SizeDistrFit"
+GROUP_ID_SIZE_DISTR_FIT = "SizeDistrFit"
 
 
 class SizeDistributionLogic:
@@ -82,7 +84,26 @@ class SizeDistributionLogic:
             qmax = np.sqrt(x * x + y * y)
         return qmin, qmax
 
-    def new_1d_plot(self, data):
+    def new_data_plot(self, data):
+        """
+        Create a new 1D data instance
+        """
+        # Create the new plot
+        new_plot = Data1D(data[0], data[1])
+        new_plot.is_data = False
+        new_plot.plot_role = DataRole.ROLE_DATA
+
+        new_plot.id = DATA_PLOT_LABEL
+        new_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
+        new_plot.name = DATA_PLOT_LABEL + f"[{self._data.name}]"
+
+        new_plot.title = new_plot.name
+        new_plot.xaxis("\\rm{Q}", "A^{-1}")
+        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+
+        return new_plot
+
+    def new_size_distr_plot(self, data):
         """
         Create a new 1D data instance based on fitting results
         """
@@ -91,14 +112,15 @@ class SizeDistributionLogic:
         y = data["y"]
         new_plot = Data1D(x=x, y=y)
         new_plot.is_data = False
+        new_plot.plot_role = DataRole.ROLE_STAND_ALONE
         new_plot.dy = np.zeros(len(y))
 
         new_plot.id = SIZE_DISTR_LABEL
-        new_plot.group_id = GROUP_ID_SIZE_DISTR
+        new_plot.group_id = GROUP_ID_SIZE_DISTR_FIT
         new_plot.name = SIZE_DISTR_LABEL + f"[{self._data.name}]"
 
         new_plot.title = new_plot.name
-        new_plot.xaxis("\\rm{Q}", "A^{-1}")
-        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        new_plot.xaxis("\\rm{Diameter}", "A")
+        new_plot.yaxis("\\rm{VolumeDistribution} ", "")
 
         return new_plot

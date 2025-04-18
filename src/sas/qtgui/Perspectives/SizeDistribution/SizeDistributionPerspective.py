@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+import numpy as np
 from PySide6 import QtGui, QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
@@ -14,7 +15,7 @@ from sas.qtgui.Perspectives.SizeDistribution.UI.SizeDistributionUI import (
 )
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import WIDGETS
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
 
 
@@ -24,7 +25,7 @@ DIAMETER_MAX = 1000.0
 NUM_DIAMETER_BINS = 100
 LOG_BINNING = "true"
 CONTRAST = 1.0
-BACKGROUND = 0.0
+BACKGROUND = 1e-6
 SKY_BACKGROUND = 1e-6
 SUBTRACT_LOW_Q = "false"
 POWER_LOW_Q = 4
@@ -49,6 +50,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         return "Size Distribution Perspective"
 
     fittingFinishedSignal = QtCore.Signal(dict)
+    data_plot_signal = QtCore.Signal()
 
     def __init__(self, parent=None):
         super().__init__()
@@ -70,9 +72,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         self._data = None
         self._path = ""
-        self._calculator = None
         self.fit_thread = None
         self.is_calculating = False
+        self.data_plot = None
         self.size_distr_plot = None
 
         self.model = QtGui.QStandardItemModel(self)
@@ -243,6 +245,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         item = QtGui.QStandardItem(str(SCALE_LOW_Q))
         self.model.setItem(WIDGETS.W_SCALE_LOW_Q, item)
 
+        # Connect slot
+        self.model.dataChanged.connect(self.onModelChange)
+
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
@@ -333,6 +338,27 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.rbFitLowQ.setEnabled(is_checked)
         self.rbFixLowQ.setEnabled(is_checked)
 
+    def onModelChange(self, top, bottom):
+        """
+        Respond to model change by updating the plot
+        """
+        # "bottom" is unused
+        # update if there's something to update
+        item_text = self.model.item(top.row()).text()
+        if not item_text:
+            return
+        # Update plot of data and background
+        plot_update_widgets = [
+            WIDGETS.W_BACKGROUND,
+            WIDGETS.W_SUBTRACT_LOW_Q,
+            WIDGETS.W_POWER_LOW_Q,
+            WIDGETS.W_SCALE_LOW_Q,
+            WIDGETS.W_NUM_PTS_LOW_Q,
+        ]
+        if top.row() in plot_update_widgets:
+            # update the plot(s)
+            self.plot_data()
+
     ######################################################################
     # Response Actions
 
@@ -373,6 +399,31 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._path = self.logic.data.filename
 
         self.enableButtons()
+
+        self.plot_data()
+
+    def plot_data(self):
+        # plot data and background
+        qmin = float(self.txtMinRange.text())
+        qmax = float(self.txtMaxRange.text())
+        data_background = self.calculateBackground(qmin, qmax)
+        self.data_plot = self.logic.new_data_plot(data_background)
+        if self.data_plot is not None:
+            title = self.data_plot.name
+            self.data_plot.symbol = "Line"
+            self.data_plot.show_errors = False
+
+            self.data_plot.show_q_range_sliders = True
+            # Suppress the GUI update until the move is finished to limit model calculations
+            self.data_plot.slider_update_on_move = False
+            self.data_plot.slider_perspective_name = "SizeDistribution"
+            self.data_plot.slider_low_q_input = ["txtMinRange"]
+            self.data_plot.slider_high_q_input = ["txtMaxRange"]
+
+            GuiUtils.updateModelItemWithPlot(self._model_item, self.data_plot, title)
+            self.communicate.plotRequestedSignal.emit(
+                [self._model_item, self.data_plot], None
+            )
 
     def getState(self):
         """
@@ -508,15 +559,34 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # TODO: show results in the UI widget
 
         # plot results
-        self.size_distr_plot = self.logic.new_1d_plot(result)
+        self.size_distr_plot = self.logic.new_size_distr_plot(result)
         if self.size_distr_plot is not None:
             title = self.size_distr_plot.name
-            self.size_distr_plot.plot_role = DataRole.ROLE_DEFAULT
             self.size_distr_plot.symbol = "Line"
             self.size_distr_plot.show_errors = False
+
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.size_distr_plot, title
             )
             self.communicate.plotRequestedSignal.emit(
                 [self._model_item, self.size_distr_plot], None
             )
+
+    def calculateBackground(self, qmin, qmax):
+        # TODO: the background curve looks wrong
+        log_binning = self.chkLogBinning.isChecked()
+        if log_binning:
+            qmin = -10.0 if qmin < 1.0e-10 else np.log10(qmin)
+            qmax = 10.0 if qmax > 1.0e10 else np.log10(qmax)
+            x = np.logspace(start=qmin, stop=qmax, num=10, endpoint=True, base=10.0)
+        else:
+            x = np.linspace(start=qmin, stop=qmax, num=10, endpoint=True)
+
+        # calculate a*x^m + b
+        constant = float(self.txtBackgd.text())
+        power_law = self.chkLowQ.isChecked()
+        power = -1.0 * float(self.txtPowerLowQ.text()) if power_law else 0.0
+        scale = float(self.txtScaleLowQ.text()) if power_law else 0.0
+        y = scale * x**power + constant
+
+        return x, y

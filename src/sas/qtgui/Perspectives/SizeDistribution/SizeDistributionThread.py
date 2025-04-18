@@ -1,6 +1,8 @@
 import logging
 import time
 
+import numpy as np
+
 from sas.sascalc.data_util.calcthread import CalcThread
 
 logger = logging.getLogger(__name__)
@@ -13,8 +15,8 @@ class SizeDistributionThread(CalcThread):
         try:
             # TODO: replace this with call to sascalc function
             time.sleep(5)
-            x = [1, 2, 3, 4, 5]
-            y = [10, 8, 6, 4, 2]
+            x = np.logspace(start=1, stop=3, num=10, endpoint=True, base=10.0)
+            y = [4, 6, 8, 10, 11, 9, 8, 5, 4, 2]
             results = dict(
                 x=x,
                 y=y,
