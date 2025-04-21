@@ -528,7 +528,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 clear_error_formatting = False
 
         if clear_error_formatting:
-        # change the frame colours back, if errors were fixed
+            # change the frame colours back, if errors were fixed
             try:
                 self.c_editor_widget.txtEditor.setStyleSheet("")
                 self.c_editor_widget.txtEditor.setToolTip("")
@@ -605,9 +605,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         userChoice = msgBox.exec()
 
         # Check which button was clicked and execute the corresponding code
-        if msgBox.clickedButton() == buttonContinue:
-            return False
-        elif msgBox.clickedButton() == buttonSave:
+        if msgBox.clickedButton() == buttonSave:
             # Save files anyways
             py_file = os.path.splitext(filename)[0] + ".py"
             c_file = os.path.splitext(filename)[0] + ".c"
@@ -623,6 +621,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             elif c_tab_open:
                     self.writeFile(c_file, self.c_editor_widget.getModel()['text'])
             return True
+        else:
+            # Cancel button or Esc/Enter Keys pressed
+            return False
 
     def canWriteModel(self, model: dict = None, full_path: str | Path = "") -> bool:
         """
