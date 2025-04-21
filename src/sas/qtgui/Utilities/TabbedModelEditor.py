@@ -1162,10 +1162,3 @@ Iqxy(double qx,
     return 1.0;
 }}
 """
-
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    sheet = TabbedModelEditor()
-    sheet.show()
-    app.exec()
-    
