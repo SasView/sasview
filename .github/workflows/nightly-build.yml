@@ -31,9 +31,9 @@ jobs:
           
       - name: Rename artifacts
         run: |
-          mv SasView-Installer-*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
-          mv -i SasView-Installer-*/SasView6-"$f".dmg installers/dist/SasView-nightly-MacOSX-"${f%%.*}".dmg
-          mv SasView-Installer-*/sasview6.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
+          mv SasView-Installer-windows*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
+          mv -i SasView-Installer-macos*/SasView6-"$f".dmg installers/dist/SasView-nightly-MacOSX-"${f%%.*}".dmg
+          mv SasView-Installer-ubuntu*/sasview6.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
 
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
