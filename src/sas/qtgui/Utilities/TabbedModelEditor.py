@@ -514,7 +514,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         plugin_location = models.find_plugins_dir()
         full_path = Path(plugin_location) / filename
 
-        if self.is_python and self.findFirstError(full_path.with_suffix(".py")) >= 0:
+        error_line = self.findFirstError(full_path.with_suffix(".py"))
+        if self.is_python and error_line >= 0:
             # select bad line
             cursor = QtGui.QTextCursor(w.txtEditor.document().findBlockByLineNumber(error_line-1))
             w.txtEditor.setTextCursor(cursor)
