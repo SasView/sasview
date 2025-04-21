@@ -2,7 +2,8 @@ import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 
-DATA_PLOT_LABEL = "Background"
+BACKGD_PLOT_LABEL = "Background"
+BACKGD_SUBTR_PLOT_LABEL = "Intensity-Background"
 GROUP_ID_SIZE_DISTR_DATA = "SizeDistrData"
 SIZE_DISTR_LABEL = "SizeDistrFit"
 GROUP_ID_SIZE_DISTR_FIT = "SizeDistrFit"
@@ -88,20 +89,33 @@ class SizeDistributionLogic:
         """
         Create a new 1D data instance
         """
-        # Create the new plot
-        new_plot = Data1D(data[0], data[1])
-        new_plot.is_data = False
-        new_plot.plot_role = DataRole.ROLE_DATA
+        # Background plot
+        backgd_plot = Data1D(data[0], data[1])
+        backgd_plot.is_data = False
+        backgd_plot.plot_role = DataRole.ROLE_DATA
 
-        new_plot.id = DATA_PLOT_LABEL
-        new_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
-        new_plot.name = DATA_PLOT_LABEL + f"[{self._data.name}]"
+        backgd_plot.id = BACKGD_PLOT_LABEL
+        backgd_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
+        backgd_plot.name = BACKGD_PLOT_LABEL + f"[{self._data.name}]"
 
-        new_plot.title = new_plot.name
-        new_plot.xaxis("\\rm{Q}", "A^{-1}")
-        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        backgd_plot.title = backgd_plot.name
+        backgd_plot.xaxis("\\rm{Q}", "A^{-1}")
+        backgd_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        return new_plot
+        # Background subtracted plot
+        backgd_subtr_plot = Data1D(data[0], data[2], dy=self._data.dy)
+        backgd_subtr_plot.is_data = False
+        backgd_subtr_plot.plot_role = DataRole.ROLE_DATA
+
+        backgd_subtr_plot.id = BACKGD_SUBTR_PLOT_LABEL
+        backgd_subtr_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
+        backgd_subtr_plot.name = BACKGD_SUBTR_PLOT_LABEL + f"[{self._data.name}]"
+
+        backgd_subtr_plot.title = backgd_subtr_plot.name
+        backgd_subtr_plot.xaxis("\\rm{Q}", "A^{-1}")
+        backgd_subtr_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+
+        return backgd_plot, backgd_subtr_plot
 
     def new_size_distr_plot(self, data):
         """
