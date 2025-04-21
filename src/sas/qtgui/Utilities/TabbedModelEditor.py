@@ -1,5 +1,4 @@
 # global
-import sys
 import os
 import re
 import ast
@@ -233,7 +232,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # See if there is filename.c present
         self.filename_c = self.filename_py.parent / self.filename_py.name.replace(".py", ".c")
-        if not self.filename_c.exists() or ".rst" in self.filename_c.name: return
+        if not self.filename_c.exists() or ".rst" in self.filename_c.name:
+            return
         # add a tab with the same highlighting
         c_display_name = self.filename_c.name
         self.c_editor_widget = ModelEditor(self, is_python=False)
@@ -359,7 +359,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         full_path_py = full_path.with_suffix(".py")
         full_path_c = full_path.with_suffix(".c")
 
-        if model["gen_python"] == True:
+        if model["gen_python"]:
             # Update the global path definition
             self.filename_py = full_path_py
             if not self.canWriteModel(model, full_path_py):
@@ -372,7 +372,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.createOrUpdateTab(self.filename_py, self.editor_widget)
             self.populateWidgetTextBox(self.editor_widget, model_str)
 
-        if model["gen_c"] == True:
+        if model["gen_c"]:
             # Update the global path definition
             self.filename_c = full_path_c
             if not self.canWriteModel(model, self.filename_c):
@@ -574,7 +574,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msgBox.setIcon(QtWidgets.QMessageBox.Information)
         msgBox.setText("No model checks will be run on your C file until a python file of the same name is created in your plugin directory.")
         msgBox.setWindowTitle("No Python File Detected")
-        buttonContinue = msgBox.addButton("OK", QtWidgets.QMessageBox.AcceptRole)
         doNotShowAgainCheckbox = QtWidgets.QCheckBox("Do not show again")
         msgBox.setCheckBox(doNotShowAgainCheckbox)
 
@@ -603,7 +602,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msgBox.setDefaultButton(buttonContinue)
 
         # Execute the message box and wait for the user's response
-        userChoice = msgBox.exec()
+        msgBox.exec()
 
         # Check which button was clicked and execute the corresponding code
         if msgBox.clickedButton() == buttonSave:
@@ -864,7 +863,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_text += ER_VR_TEMPLATE.format(args=", ".join(param_names))
 
         # If polydisperse, create place holders for form_volume
-        if pd_params and self.include_polydisperse == True:
+        if pd_params and self.include_polydisperse:
             model_text += "\n"
             model_text += CUSTOM_TEMPLATE_PD.format(args=", ".join(pd_params))
             for func_line in form_vol_str.split("\n"):
