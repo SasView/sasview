@@ -787,10 +787,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         def formatPythonFlags() -> str:
             """Get python flags for model and format into text"""
             checkbox_values = {
-                'chkSingle': getattr(self.plugin_widget, 'chkSingle').isChecked(),
-                'chkOpenCL': getattr(self.plugin_widget, 'chkOpenCL').isChecked(),
-                'chkStructure': getattr(self.plugin_widget, 'chkStructure').isChecked(),
-                'chkFQ': getattr(self.plugin_widget, 'chkFQ').isChecked(),
+                'chkSingle': self.plugin_widget.chkSingle.isChecked(),
+                'chkOpenCL': self.plugin_widget.chkOpenCL.isChecked(),
+                'chkStructure': self.plugin_widget.chkStructure.isChecked(),
+                'chkFQ': self.plugin_widget.chkFQ.isChecked(),
             }
             # Get the values of the checkboxes
             flag_string = FLAG_TEMPLATE.format(**checkbox_values)
