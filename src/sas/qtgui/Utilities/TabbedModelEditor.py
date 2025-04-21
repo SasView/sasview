@@ -181,7 +181,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             return
 
         # remove c-plugin tab, if present.
-        if self.tabWidget.count()>1:
+        if self.tabWidget.count() > 1:
             self.tabWidget.removeTab(1)
         self.file_to_regenerate = filename
         self.loadFile(str(filename))
@@ -191,6 +191,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         create a list of all builtin models
         """
         from sas.sascalc.fit.models import ModelManager
+
         model_list = ModelManager().cat_model_list()
         model_names = [model.name for model in model_list]
         return model_names
@@ -201,7 +202,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         self.editor_widget.blockSignals(True)
         plugin_text = ""
-        with open(filename, 'r', encoding="utf-8") as plugin:
+        with open(filename, "r", encoding="utf-8") as plugin:
             plugin_text = plugin.read()
             self.editor_widget.txtEditor.setPlainText(plugin_text)
         self.editor_widget.setEnabled(True)
@@ -238,7 +239,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.c_editor_widget = ModelEditor(self, is_python=False)
         self.tabWidget.addTab(self.c_editor_widget, c_display_name)
         # Read in the file and set in on the widget
-        with open(self.filename_c, 'r', encoding="utf-8") as plugin:
+        with open(self.filename_c, "r", encoding="utf-8") as plugin:
             self.c_editor_widget.txtEditor.setPlainText(plugin.read())
         self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
@@ -309,8 +310,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         # Ensure plugin name is non-empty
         model = self.getModel()
-        if 'filename' in model and model['filename']:
-            self.setWindowTitle(self.window_title + " - " + model['filename'])
+        if "filename" in model and model["filename"]:
+            self.setWindowTitle(self.window_title + " - " + model["filename"])
             self.setTabEdited(True)
             self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
             self.is_modified = True
@@ -318,7 +319,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # the model name is empty - disable Apply and clear the editor
             self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
             self.editor_widget.blockSignals(True)
-            self.editor_widget.txtEditor.setPlainText('')
+            self.editor_widget.txtEditor.setPlainText("")
             self.editor_widget.blockSignals(False)
             self.editor_widget.setEnabled(False)
 
@@ -344,7 +345,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model = self.getModel()
 
         # get required filename
-        filename = model.get('filename', None)
+        filename = model.get("filename", None)
         if not filename:
             # If No filename given
             QtWidgets.QMessageBox.critical(self, "Plugin Error", "Please specify a filename.")
@@ -358,7 +359,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         full_path_py = full_path.with_suffix(".py")
         full_path_c = full_path.with_suffix(".c")
 
-        if model['gen_python'] == True:
+        if model["gen_python"] == True:
             # Update the global path definition
             self.filename_py = full_path_py
             if not self.canWriteModel(model, full_path_py):
@@ -371,7 +372,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.createOrUpdateTab(self.filename_py, self.editor_widget)
             self.populateWidgetTextBox(self.editor_widget, model_str)
 
-        if model['gen_c'] == True:
+        if model["gen_c"] == True:
             # Update the global path definition
             self.filename_c = full_path_c
             if not self.canWriteModel(model, self.filename_c):
@@ -407,7 +408,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent.communicate.customModelDirectoryChanged.emit()
 
         # Notify the user
-        msg = "Custom model "+filename + " successfully created."
+        msg = "Custom model " + filename + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
 
@@ -447,7 +448,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         :param full_path: full path to the model file
         """
         try:
-            with open(full_path, 'r', encoding="utf-8") as plugin:
+            with open(full_path, "r", encoding="utf-8") as plugin:
                 model_str = plugin.read()
             ast.parse(model_str)
             GuiUtils.checkModel(full_path)
@@ -459,9 +460,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             logging.error(msg)
             # print four last lines of the stack trace
             # this will point out the exact line failing
-            all_lines = traceback.format_exc().split('\n')
+            all_lines = traceback.format_exc().split("\n")
             last_lines = all_lines[-4:]
-            traceback_to_show = '\n'.join(last_lines)
+            traceback_to_show = "\n".join(last_lines)
             logging.error(traceback_to_show)
 
             # Set the status bar message
@@ -475,18 +476,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Combine the lists and apply the stylesheet
             for child in text_browsers + code_editors:
                 child.setStyleSheet("border: 5px solid red")
-                traceback_to_show = '\n'.join(last_lines)
+                traceback_to_show = "\n".join(last_lines)
                 child.setToolTip(traceback_to_show)
 
             # attempt to find the failing command line number, usually the last line with
             # `File ... line` syntax
             reversed_error_text = list(reversed(all_lines))
             for line in reversed_error_text:
-                if ('File' in line and 'line' in line):
+                if "File" in line and "line" in line:
                     # If model check fails (not syntax) then 'line' and 'File' will be in adjacent lines
                     error_line = re.match("(.*)line (?P<line_number>[0-9]*)(,?)(.*)", line)
                     try:
-                        error_line = int(error_line.group('line_number'))
+                        error_line = int(error_line.group("line_number"))
                         break
                     except ValueError:
                         error_line = 0
@@ -553,7 +554,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         logging.info(msg)
         if self.is_documentation:
             self.regenerateDocumentation()
-    
+
     def regenerateDocumentation(self):
         """
         Defer to subprocess the documentation regeneration process
@@ -561,7 +562,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # TODO: Move the doc regen methods out of the documentation window - this forces the window to remain open
         #  in order for the documentation regeneration process to run.
         # The regen method is part of the documentation window. If the window is closed, the method no longer exists.
-        if hasattr(self.parent, 'helpWindow'):
+        if hasattr(self.parent, "helpWindow"):
             self.parent.helpWindow.regenerateHtml(self.filename_py)
 
     def noModelCheckWarning(self):
@@ -614,9 +615,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
             # Check to see if we have a certain model type open, and if so, write models
             if py_tab_open:
-                    self.writeFile(py_file, self.editor_widget.getModel()['text'])
+                self.writeFile(py_file, self.editor_widget.getModel()["text"])
             if c_tab_open:
-                    self.writeFile(c_file, self.c_editor_widget.getModel()['text'])
+                self.writeFile(c_file, self.c_editor_widget.getModel()["text"])
             return True
         else:
             # Cancel button or Esc/Enter Keys pressed
@@ -626,11 +627,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Determine if the current plugin can be written to file
         """
-        assert(isinstance(model, dict))
-        assert(full_path!="")
+        assert isinstance(model, dict)
+        assert full_path != ""
 
         # Make sure we can overwrite the file if it exists
-        if os.path.isfile(full_path) and not model['overwrite']:
+        if os.path.isfile(full_path) and not model["overwrite"]:
             # notify the viewer
             msg = "Plugin with specified name already exists.\n"
             msg += "Please specify different filename or allow file overwrite."
@@ -638,7 +639,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Don't accept but return
             return False
 
-        if model['filename'].casefold() in (built_in.casefold() for built_in in self.allBuiltinModels()):
+        if model["filename"].casefold() in (
+            built_in.casefold() for built_in in self.allBuiltinModels()
+        ):
             # notify the viewer
             msg = "Built-in model with specified name already exists.\n"
             msg += "Please specify different filename."
@@ -647,8 +650,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             return False
 
         # Update model editor if plugin definition changed
-        func_str = model['func_text']
-        form_vol_str = model['form_volume_text']
+        func_str = model["func_text"]
+        form_vol_str = model["form_volume_text"]
         msg = self._checkForErrorsInModelStrs(func_str, form_vol_str)
         if msg:
             QtWidgets.QMessageBox.critical(self, "Plugin Error", msg)
@@ -658,14 +661,14 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     def _checkForErrorsInModelStrs(self, func_str: str, form_vol_str: str) -> str | None:
         """Helper method to check for errors and returns an error string, if necessary"""
         msg = None
-        if func_str and 'return' not in func_str:
+        if func_str and "return" not in func_str:
             msg = "Error: The func(x) must 'return' a value at least.\n"
             msg += "For example: \n\nreturn 2*x"
-        elif form_vol_str and 'return' not in form_vol_str:
+        elif form_vol_str and "return" not in form_vol_str:
             msg = "Error: The form_volume() must 'return' a value at least.\n"
             msg += "For example: \n\nreturn 0.0"
         elif not func_str and not form_vol_str:
-            msg = 'Error: Function is not defined.'
+            msg = "Error: Function is not defined."
         return msg
 
     def onHelp(self):
@@ -704,7 +707,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Update the plugin tab with new info from the model editor
         """
         self.model = self.getModel()
-        model_text = self.model['text']
+        model_text = self.model["text"]
 
         spec = importlib.util.spec_from_file_location("model", full_path) # Easier to import than use regex
         module = importlib.util.module_from_spec(spec)
@@ -742,7 +745,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Write model content to file "fname"
         """
-        with open(fname, 'w', encoding="utf-8") as out_f:
+        with open(fname, "w", encoding="utf-8") as out_f:
             out_f.write(model_str)
 
     def generateCModel(self, model: dict, fname: str | Path) -> str:
@@ -756,26 +759,29 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         param_names = []
         pd_param_names = []
-        param_str = self.strFromParamDict(model['parameters'])
-        pd_param_str = self.strFromParamDict(model['pd_parameters'])
+        param_str = self.strFromParamDict(model["parameters"])
+        pd_param_str = self.strFromParamDict(model["pd_parameters"])
         for pname, _, _ in self.getParamHelper(param_str):
-                param_names.append('double ' + pname)
+            param_names.append("double " + pname)
         for pd_pname, _, _ in self.getParamHelper(pd_param_str):
-                pd_param_names.append('double ' + pd_pname)
+            pd_param_names.append("double " + pd_pname)
 
-        #Format Python into comments to be put into I(Q) section
-        iq_text: str = model['func_text']
+        # Format Python into comments to be put into I(Q) section
+        iq_text: str = model["func_text"]
         iq_lines = iq_text.splitlines()
         commented_lines = ["//" + line for line in iq_lines]
         commented_iq_function = "\n    ".join(commented_lines)
 
         # Add polydisperse-dependent functions if polydisperse parameters are present
         if pd_param_names != []:
-            model_text += C_PD_TEMPLATE.format(poly_args = ', '.join(pd_param_names),
-                                              poly_arg1 = pd_param_names[0].split(' ')[1]) # Remove 'double' from the first argument
+            model_text += C_PD_TEMPLATE.format(
+                poly_args=", ".join(pd_param_names),
+                poly_arg1=pd_param_names[0].split(" ")[1],
+            )  # Remove 'double' from the first argument
         # Add all other function templates
-        model_text += C_TEMPLATE.format(args = ',\n'.join(param_names),
-                                        Iq = commented_iq_function)
+        model_text += C_TEMPLATE.format(
+            args=",\n".join(param_names), Iq=commented_iq_function
+        )
         return model_text
 
 
@@ -796,9 +802,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             flag_string = FLAG_TEMPLATE.format(**checkbox_values)
             return flag_string
 
-        name = model['filename']
+        name = model["filename"]
         if not name:
-            model['filename'] = fname
+            model["filename"] = fname
             name = fname
         desc_str = model['description']
         param_str = self.strFromParamDict(model['parameters'])
@@ -811,12 +817,18 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                                             date = datetime.datetime.now().strftime('%Y-%m-%d'),
                                             flags = formatPythonFlags()
                                             )
+        desc_str = model["description"]
+        param_str = self.strFromParamDict(model["parameters"])
+        pd_param_str = self.strFromParamDict(model["pd_parameters"])
+        func_str = model["func_text"]
+        form_vol_str = model["form_volume_text"]
 
         # Write out parameters
         param_names = []    # to store parameter names
         pd_params = []
         model_text += 'parameters = [ \n'
         model_text += '#   ["name", "units", default, [lower, upper], "type", "description"],\n'
+        model_text += "parameters = [ \n"
         for pname, pvalue, desc in self.getParamHelper(param_str):
             param_names.append(pname)
             model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
@@ -829,34 +841,34 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # If creating a C model, link it to the Python file
 
-        if model['gen_c']:
-            model_text += LINK_C_MODEL_TEMPLATE.format(c_model_name = name + '.c')
-            model_text += '\n\n'
+        if model["gen_c"]:
+            model_text += LINK_C_MODEL_TEMPLATE.format(c_model_name=name + ".c")
+            model_text += "\n\n"
 
         # Write out function definition
-        model_text += 'def Iq(%s):\n' % ', '.join(['q'] + param_names)
+        model_text += "def Iq(%s):\n" % ", ".join(["q"] + param_names)
         model_text += '    """Absolute scattering"""\n'
         if "scipy." in func_str:
-            model_text +="    import scipy\n"
+            model_text += "    import scipy\n"
         if "numpy." in func_str:
-            model_text +="    import numpy\n"
+            model_text += "    import numpy\n"
         if "np." in func_str:
-            model_text +="    import numpy as np\n"
-        for func_line in func_str.split('\n'):
-                model_text +='%s%s\n' % ("    ", func_line)
-        model_text +='\n## uncomment the following if Iq works for vector x\n'
-        model_text +='#Iq.vectorized = True\n'
+            model_text += "    import numpy as np\n"
+        for func_line in func_str.split("\n"):
+            model_text += "%s%s\n" % ("    ", func_line)
+        model_text += "\n## uncomment the following if Iq works for vector x\n"
+        model_text += "#Iq.vectorized = True\n"
 
         # Add parameters to ER and VR functions and include placeholder functions
         model_text += "\n"
-        model_text += ER_VR_TEMPLATE.format(args = ', '.join(param_names))
+        model_text += ER_VR_TEMPLATE.format(args=", ".join(param_names))
 
         # If polydisperse, create place holders for form_volume
         if pd_params and self.include_polydisperse == True:
-            model_text +="\n"
-            model_text +=CUSTOM_TEMPLATE_PD.format(args = ', '.join(pd_params))
-            for func_line in form_vol_str.split('\n'):
-                model_text +='%s%s\n' % ("    ", func_line)
+            model_text += "\n"
+            model_text += CUSTOM_TEMPLATE_PD.format(args=", ".join(pd_params))
+            for func_line in form_vol_str.split("\n"):
+                model_text += "%s%s\n" % ("    ", func_line)
 
         # Create place holder for Iqxy
         model_text +="\n"
@@ -866,6 +878,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_text +='#    return oriented_form(x, y, args)\n'
         model_text +='## uncomment the following if Iqxy works for vector x, y\n'
         model_text +='#Iqxy.vectorized = True\n'
+        model_text += "\n"
+        model_text += "#def Iqxy(%s):\n" % ", ".join(["x", "y"] + param_names)
+        model_text += '#    """Absolute scattering of oriented particles."""\n'
+        model_text += "#    ...\n"
+        model_text += "#    return oriented_form(x, y, args)\n"
+        model_text += "## uncomment the following if Iqxy works for vector x, y\n"
+        model_text += "#Iqxy.vectorized = True\n"
 
         return model_text
 
@@ -878,10 +897,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         on the same line by separating the pairs by semicolon or comma.  The
         value is optional and defaults to "1.0".
         """
-        for line in param_str.replace(';', ',').split('\n'):
-            for item in line.split(','):
-                defn, desc = item.split('#', 1) if '#' in item else (item, '')
-                name, value = defn.split('=', 1) if '=' in defn else (defn, '1.0')
+        for line in param_str.replace(";", ",").split("\n"):
+            for item in line.split(","):
+                defn, desc = item.split("#", 1) if "#" in item else (item, "")
+                name, value = defn.split("=", 1) if "=" in defn else (defn, "1.0")
                 if name:
                     yield [v.strip() for v in (name, value, desc)]
 
@@ -900,7 +919,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         param_str = ""
         for _, params in param_dict.items():
-            if not params[0]: continue
+            if not params[0]:
+                continue
             value = 1
             if params[1]:
                 try:
@@ -925,6 +945,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         Class to extract the body of a function from a model file
         """
+
         def __init__(self, function_name):
             self.function_name = function_name
             self.function_body_source = None
@@ -1026,16 +1047,16 @@ model_info.name = '{name}'{desc_line}
 Model = make_model_from_info(model_info)
 """
 
-LINK_C_MODEL_TEMPLATE = '''\
+LINK_C_MODEL_TEMPLATE = """\
 # To Enable C model, uncomment the line defining `source` and
 # delete the I(Q) function in this Python model after converting your code to C
 # Note: removing or commenting the "source = []" line will unlink the C model from the Python model, 
 # which means the C model will not be checked for errors when edited.
 
 # source = ['{c_model_name}']
-'''
+"""
 
-C_COMMENT_TEMPLATE = '''\
+C_COMMENT_TEMPLATE = """\
 // :::Custom C model template:::
 // This is a template for a custom C model.
 // C Models are used for a variety of reasons in SasView, including better
@@ -1069,15 +1090,15 @@ C_COMMENT_TEMPLATE = '''\
 // NOTE: It also has many common constants following the C99 standard, such as
 //       M_PI, M_SQRT1_2, and M_E. Check documentation for full list.
 
-'''
+"""
 
-C_PD_TEMPLATE = '''\
+C_PD_TEMPLATE = """\
 static double
 form_volume({poly_args}) // Remove arguments as needed
 {{
     return 0.0*{poly_arg1};
 }}
-'''
+"""
 
 C_TEMPLATE = """\
 static double
