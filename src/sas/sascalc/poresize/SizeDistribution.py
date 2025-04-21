@@ -115,15 +115,15 @@ class DistModel(object):
     """
     def __init__(self, data, model, dimension, bins, pars=None):
 
-        self.data=data
+        self.data = data  
         self.model = load_model(model)
-        self.params=pars
-        self.dim_distr=dimension
-        self.bins=bins
+        self.params = pars
+        self.dim_distr = dimension
+        self.bins = bins
         self.intensity = []
-        self.pars=pars
-        self.pars["scale"]=1.0
-        self.pars["background"]=0.0
+        self.pars = pars
+        self.pars["scale"] = 1.0
+        self.pars["background"] = 0.0
 
 
     def base_matrix(self):
@@ -484,8 +484,9 @@ class sizeDistribution(object):
         else:
             intensities.append(trim_data.y)
 
+        self.update_weights(trim_data)
         init_binsBack = np.ones_like(self.bins)*self.skyBackground*self.scale/self.contrast
-        sigma = self.scale/(self.weightFactor*self.weights[self.ndx_qmin:self.ndx_qmax])
+        sigma = self.scale/(self.weightFactor*self.weights)
         return trim_data, intensities, init_binsBack, sigma
 
     def run_maxEnt(self, maxentdata:Data1D, intensities:list, BinsBack:np.array, sigma:np.array):
