@@ -406,7 +406,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # plot data and background
         qmin = float(self.txtMinRange.text())
         qmax = float(self.txtMaxRange.text())
-        data_background = self.calculateBackground(qmin, qmax)
+#        data_background = self.calculateBackground(qmin, qmax)
+        data_background = self.calculateBackground()
         self.data_plot = self.logic.new_data_plot(data_background)
         if self.data_plot is not None:
             title = self.data_plot.name
@@ -572,21 +573,26 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 [self._model_item, self.size_distr_plot], None
             )
 
-    def calculateBackground(self, qmin, qmax):
-        # TODO: the background curve looks wrong
-        log_binning = self.chkLogBinning.isChecked()
-        if log_binning:
-            qmin = -10.0 if qmin < 1.0e-10 else np.log10(qmin)
-            qmax = 10.0 if qmax > 1.0e10 else np.log10(qmax)
-            x = np.logspace(start=qmin, stop=qmax, num=10, endpoint=True, base=10.0)
-        else:
-            x = np.linspace(start=qmin, stop=qmax, num=10, endpoint=True)
+#    def calculateBackground(self, qmin, qmax):
+    def calculateBackground(self):
+        # TODO: the background curve is correct however we also want the subtracted curve
+        #       The calculation is done but we still need to add to the plot
+        x = self.logic.data.x
+        y = self.logic.data.y
+#        log_binning = self.chkLogBinning.isChecked()
+#        if log_binning:
+#            qmin = -10.0 if qmin < 1.0e-10 else np.log10(qmin)
+#            qmax = 10.0 if qmax > 1.0e10 else np.log10(qmax)
+#            x = np.logspace(start=qmin, stop=qmax, num=100, endpoint=True, base=10.0)
+#        else:
+#            x = np.linspace(start=qmin, stop=qmax, num=100, endpoint=True)
 
         # calculate a*x^m + b
         constant = float(self.txtBackgd.text())
         power_law = self.chkLowQ.isChecked()
         power = -1.0 * float(self.txtPowerLowQ.text()) if power_law else 0.0
         scale = float(self.txtScaleLowQ.text()) if power_law else 0.0
-        y = scale * x**power + constant
+        y_back = scale * x**power + constant
+        y_sub = y - y_back
 
-        return x, y
+        return x, y_back, y_sub
