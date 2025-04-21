@@ -28,6 +28,11 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: .
+
+      - name: Make extraction directory
+        run: |
+          mkdir ./installers/
+          mkdir ./installers/dist/
           
       - name: Rename artifacts
         run: |
