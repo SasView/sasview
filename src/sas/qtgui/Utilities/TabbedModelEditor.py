@@ -613,12 +613,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             c_tab_open = self.isWidgetInTab(self.tabWidget, self.c_editor_widget)
 
             # Check to see if we have a certain model type open, and if so, write models
-            if py_tab_open and c_tab_open:
+            if py_tab_open:
                     self.writeFile(py_file, self.editor_widget.getModel()['text'])
-                    self.writeFile(c_file, self.c_editor_widget.getModel()['text'])
-            elif py_tab_open:
-                    self.writeFile(py_file, self.editor_widget.getModel()['text'])
-            elif c_tab_open:
+            if c_tab_open:
                     self.writeFile(c_file, self.c_editor_widget.getModel()['text'])
             return True
         else:
