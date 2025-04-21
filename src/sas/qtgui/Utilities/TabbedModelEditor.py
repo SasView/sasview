@@ -805,23 +805,17 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if not name:
             model["filename"] = fname
             name = fname
-        desc_str = model['description']
-        param_str = self.strFromParamDict(model['parameters'])
-        pd_param_str = self.strFromParamDict(model['pd_parameters'])
-        func_str = model['func_text']
-        form_vol_str = model['form_volume_text']
-        model_text = CUSTOM_TEMPLATE.format(name = name,
-                                            title = 'User model for ' + name,
-                                            description = desc_str,
-                                            date = datetime.datetime.now().strftime('%Y-%m-%d'),
-                                            flags = formatPythonFlags()
-                                            )
         desc_str = model["description"]
         param_str = self.strFromParamDict(model["parameters"])
         pd_param_str = self.strFromParamDict(model["pd_parameters"])
         func_str = model["func_text"]
         form_vol_str = model["form_volume_text"]
-
+        model_text = CUSTOM_TEMPLATE.format(name=name,
+                                            title='User model for ' + name,
+                                            description=desc_str,
+                                            date=datetime.datetime.now().strftime('%Y-%m-%d'),
+                                            flags=formatPythonFlags()
+                                            )
         # Write out parameters
         param_names = []    # to store parameter names
         pd_params = []
