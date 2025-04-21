@@ -699,17 +699,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.tabWidget.addTab(self.c_editor_widget, name)
             self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
-    def removeTab(self, filetype: str):
-        """
-        Remove a tab from the tab widget.
-        Assume that the tab to remove exists.
-        :param filetype: filetype of tab to remove: "python" or "c"
-        """
-        if filetype in ["python", "py", ".py"]:
-            self.tabWidget.removeTab(self.tabWidget.indexOf(self.editor_widget))
-        elif filetype in ["c", ".c"]:
-            self.tabWidget.removeTab(self.tabWidget.indexOf(self.c_editor_widget))
-
     def updateToPlugin(self, full_path: str | Path):
         """
         Update the plugin tab with new info from the model editor
