@@ -219,16 +219,10 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         # Check if there are empty rows.
         remove_empty_table_rows(self.tblParamsPD)
 
-        # Check to see if there is any polydisperse parameter text present
+        # Check to see if there is any polydisperse parameter text presen
         for row in range(self.tblParamsPD.rowCount()):
-            for column in range(self.tblParamsPD.columnCount()):
-                if self._checkCell(row, column):
-                    break
-            else:
-                # If column loop finishes, continue to next row
-                continue
-            # If column loop was broken, break out again
-            break
+            if any(self._checkCell(row, column) for column in range(self.tblParamsPD.columnCount())):
+                break
 
         self.modelModified.emit()
 
