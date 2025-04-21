@@ -28,17 +28,13 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: .
-
-      - name: Make extraction directory
-        run: |
-          mkdir ./installers/
-          mkdir ./installers/dist/
           
       - name: Rename artifacts
         run: |
-          mv SasView-Installer-windows*/setupSasView.exe installers/dist/setupSasView-nightly-Win64.exe
-          mv -i SasView-Installer-macos*/SasView6-"$f".dmg installers/dist/SasView-nightly-MacOSX-"${f%%.*}".dmg
-          mv SasView-Installer-ubuntu*/sasview6.tar.gz installers/dist/SasView-nightly-Linux.tar.gz
+          mv SasView-Installer-windows*/setupSasView.exe ./setupSasView-nightly-Win64.exe
+          mv SasView-Installer-macos*/SasView6-*.dmg ./
+          rename 's/SasView6-/SasView-nightly-MacOSX-' *.dmg
+          mv SasView-Installer-ubuntu*/sasview6.tar.gz ./SasView-nightly-Linux.tar.gz
 
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
