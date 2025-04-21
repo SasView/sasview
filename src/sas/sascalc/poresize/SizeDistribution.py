@@ -479,17 +479,13 @@ class sizeDistribution(object):
 
         intensities = []
         if full_fit:
-            self.useWeights=True
             for j in range(nreps):
                 intensities.append(add_gaussian_noise(trim_data.y, trim_data.dy))
         else:
-            self.useWeights = False
-            self.weightFactor = 1.0
             intensities.append(trim_data.y)
 
         init_binsBack = np.ones_like(self.bins)*self.skyBackground*self.scale/self.contrast
         sigma = self.scale/(self.weightFactor*self.weights[self.ndx_qmin:self.ndx_qmax])
-
         return trim_data, intensities, init_binsBack, sigma
 
     def run_maxEnt(self, maxentdata:Data1D, intensities:list, BinsBack:np.array, sigma:np.array):
@@ -594,7 +590,6 @@ def sizeDistribution_func(input):
     BinsBack = np.ones_like(Bins)*sky*scale/contrast
     MethodCall = maxEntMethod()
     sigma = scale/np.sqrt(wtFactor*wt)
-    print(sigma)
     ## run MaxEnt
     chisq,BinMag,Ic[Ibeg:Ifin] = MethodCall.MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,
                                                       scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,iterMax,report=True)

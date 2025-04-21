@@ -111,15 +111,17 @@ print(np.all(size_distribution.weights==1))
 size_distribution.aspectRatio = 1.0
 size_distribution.diamMin = 75
 size_distribution.diamMax = 5000
-size_distribution.skyBackground = 1e-2
+size_distribution.skyBackground = 1e-3
 size_distribution.weightType='dI'
+# when using Guaussian noise we need to increase the effective error bars (decrease WeightFactor)
 size_distribution.weightFactor = 1.0
+#size_distribution.weightFactor = 1.0/2.0
 
 
 background = np.ones(len(data_from_loader.y))*0.120605
 
 subdata = data_info.Data1D(x=Q, y=background, dx=None, dy=background*0.0001, lam=None, dlam=None, isSesans=False)
-trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=True)
+trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=False)
 
 print(sigma)
 operation = matrix_operation()
