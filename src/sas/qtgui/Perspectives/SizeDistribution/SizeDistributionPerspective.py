@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-import numpy as np
 from PySide6 import QtGui, QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
@@ -74,7 +73,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._path = ""
         self.fit_thread = None
         self.is_calculating = False
-        self.data_plot = None
+        self.backgd_plot = None
+        self.backgd_subtr_plot = None
         self.size_distr_plot = None
 
         self.model = QtGui.QStandardItemModel(self)
@@ -404,27 +404,35 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def plot_data(self):
         # plot data and background
-        qmin = float(self.txtMinRange.text())
-        qmax = float(self.txtMaxRange.text())
-#        data_background = self.calculateBackground(qmin, qmax)
+        plots = [self._model_item]
         data_background = self.calculateBackground()
-        self.data_plot = self.logic.new_data_plot(data_background)
-        if self.data_plot is not None:
-            title = self.data_plot.name
-            self.data_plot.symbol = "Line"
-            self.data_plot.show_errors = False
+        self.backgd_plot, self.backgd_subtr_plot = self.logic.new_data_plot(
+            data_background
+        )
 
-            self.data_plot.show_q_range_sliders = True
+        if self.backgd_plot is not None:
+            title = self.backgd_plot.name
+            self.backgd_plot.symbol = "Line"
+            self.backgd_plot.show_errors = False
+            GuiUtils.updateModelItemWithPlot(self._model_item, self.backgd_plot, title)
+            plots.append(self.backgd_plot)
+
+        if self.backgd_subtr_plot is not None:
+            title = self.backgd_subtr_plot.name
+            self.backgd_subtr_plot.symbol = "Circle"
+            self.backgd_subtr_plot.show_errors = True
+            self.backgd_subtr_plot.show_q_range_sliders = True
             # Suppress the GUI update until the move is finished to limit model calculations
-            self.data_plot.slider_update_on_move = False
-            self.data_plot.slider_perspective_name = "SizeDistribution"
-            self.data_plot.slider_low_q_input = ["txtMinRange"]
-            self.data_plot.slider_high_q_input = ["txtMaxRange"]
-
-            GuiUtils.updateModelItemWithPlot(self._model_item, self.data_plot, title)
-            self.communicate.plotRequestedSignal.emit(
-                [self._model_item, self.data_plot], None
+            self.backgd_subtr_plot.slider_update_on_move = False
+            self.backgd_subtr_plot.slider_perspective_name = "SizeDistribution"
+            self.backgd_subtr_plot.slider_low_q_input = ["txtMinRange"]
+            self.backgd_subtr_plot.slider_high_q_input = ["txtMaxRange"]
+            GuiUtils.updateModelItemWithPlot(
+                self._model_item, self.backgd_subtr_plot, title
             )
+            plots.append(self.backgd_subtr_plot)
+
+        self.communicate.plotRequestedSignal.emit(plots, None)
 
     def getState(self):
         """
@@ -573,19 +581,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 [self._model_item, self.size_distr_plot], None
             )
 
-#    def calculateBackground(self, qmin, qmax):
     def calculateBackground(self):
-        # TODO: the background curve is correct however we also want the subtracted curve
-        #       The calculation is done but we still need to add to the plot
         x = self.logic.data.x
         y = self.logic.data.y
-#        log_binning = self.chkLogBinning.isChecked()
-#        if log_binning:
-#            qmin = -10.0 if qmin < 1.0e-10 else np.log10(qmin)
-#            qmax = 10.0 if qmax > 1.0e10 else np.log10(qmax)
-#            x = np.logspace(start=qmin, stop=qmax, num=100, endpoint=True, base=10.0)
-#        else:
-#            x = np.linspace(start=qmin, stop=qmax, num=100, endpoint=True)
 
         # calculate a*x^m + b
         constant = float(self.txtBackgd.text())
