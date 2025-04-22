@@ -1,5 +1,5 @@
 # Global
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtWidgets import QWidget
 
 # Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.UI.ButtonOptionsUI import Ui_ButtonOptions

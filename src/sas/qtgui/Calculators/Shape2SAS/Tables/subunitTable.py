@@ -3,10 +3,8 @@ from enum import Enum
 from types import MethodType
 from numpy import inf
 from PySide6.QtCore import Qt, QLocale
-from PySide6.QtGui import (QStandardItemModel, QStandardItem, 
-                           QDoubleValidator, QBrush, QColor, QValidator)
-from PySide6.QtWidgets import (QStyledItemDelegate, QLineEdit, QComboBox, 
-                               QWidget, QSizePolicy)
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QDoubleValidator, QBrush, QColor, QValidator
+from PySide6.QtWidgets import QStyledItemDelegate, QLineEdit, QComboBox, QWidget, QSizePolicy
 
 #Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.Tables.UI.subunitTableUI import Ui_SubunitTableController
@@ -359,11 +357,10 @@ class CustomStandardItem(QStandardItem):
         """Set data for the model"""
 
         if role == Qt.EditRole:
-            ##TODO: try argument is sloppy Since an if statement could be made 
             # to solve for subunit and colour case
             try:
                 self.raw_value = float(value)
-            except:
+            except ValueError:
                 self.raw_value = value
             super().setData(value, Qt.DisplayRole)
         else:

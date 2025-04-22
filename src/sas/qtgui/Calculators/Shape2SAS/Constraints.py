@@ -9,7 +9,6 @@ from typing import Union
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
-from PySide6.QtGui import QFont
 
 #Global SasView
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
@@ -87,7 +86,7 @@ translation = """
             ast.parse(text)
             return True
         
-        except SyntaxError as e:
+        except SyntaxError:
             #Get last line of traceback
             all_lines = traceback.format_exc().split('\n')
             last_lines = all_lines[-1:]

@@ -634,11 +634,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #get chosen fit parameters
         fitPar = self.getFitParameters()
 
-        self.constraint.logInfo(f"Retrieving and verifying constraints. . .")
+        self.constraint.logInfo("Retrieving and verifying constraints. . .")
         #get parameters constraints
         importStatement, parameters, translation, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
-        self.constraint.logInfo(f"Retrieving Model. . .")
+        self.constraint.logInfo("Retrieving Model. . .")
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
