@@ -318,6 +318,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     def endEstimateParameters(self, nterms, alpha, message, elapsed):
         self.currentResult.estimated_parameters = EstimatedParameters(alpha, nterms)
+        self.updateGuiValues()
 
     def startEstimateParameters(self):
         estimation_thread = EstimateNT(
