@@ -87,7 +87,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             calculator=NewInvertor(logic),
             pr_plot=None,
             data_plot=None,
-            outputs=None
+            outputs=None,
+            estimated_paramaters=None
         )
 
     # TODO: What is this function normally called?
