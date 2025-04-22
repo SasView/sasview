@@ -2,7 +2,7 @@
 from PySide6.QtWidgets import QApplication, QWidget
 
 # Local Perspectives
-from UI.ButtonOptionsUI import Ui_ButtonOptions
+from sas.qtgui.Calculators.Shape2SAS.UI.ButtonOptionsUI import Ui_ButtonOptions
 
 class ButtonOptions(QWidget, Ui_ButtonOptions):
     """close, reset and help options"""

@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (QStyledItemDelegate, QApplication, QWidget,
                                QWidget, QCheckBox)
 
 # Local Perspectives
-from .UI.variableTableUI import Ui_VariableTable
+from sas.qtgui.Calculators.Shape2SAS.Tables.UI.variableTableUI import Ui_VariableTable
 
 
 class CustomDelegate(QStyledItemDelegate):

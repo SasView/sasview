@@ -12,9 +12,9 @@ from PySide6.QtGui import QVector3D, QColor
 
 
 # Local Perspectives
-from ViewerAllOptions import ViewerButtons, ViewerModelRadius
-from calculations.Shape2SAS import ModelPointDistribution, TheoreticalScattering
-from PlotAspects.plotAspects import ViewerPlotDesign
+from sas.qtgui.Calculators.Shape2SAS.ViewerAllOptions import ViewerButtons, ViewerModelRadius
+from sas.sascalc.shape2sas.Shape2SAS import ModelPointDistribution, TheoreticalScattering
+from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
 
 class ViewerModel(QWidget):
     """Graphics view of designed model"""

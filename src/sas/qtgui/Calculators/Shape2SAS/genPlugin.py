@@ -7,7 +7,7 @@ import textwrap
 from sas.sascalc.fit import models
 
 #Local Perspectives
-from calculations.Shape2SAS import ModelProfile
+from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
 
 
 

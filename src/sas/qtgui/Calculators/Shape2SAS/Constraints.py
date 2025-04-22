@@ -15,9 +15,9 @@ from PySide6.QtGui import QFont
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
 
 #Local Perspectives
-from UI.ConstraintsUI import Ui_Constraints
-from Tables.variableTable import VariableTable
-from ButtonOptions import ButtonOptions
+from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
+from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
+from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
 
 
 class Constraints(QWidget, Ui_Constraints):

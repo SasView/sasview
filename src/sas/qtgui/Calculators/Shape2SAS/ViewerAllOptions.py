@@ -2,8 +2,8 @@
 from PySide6.QtWidgets import QApplication, QWidget
 
 #Local Perspectives
-from UI.ViewerButtonsUI import Ui_ViewerButtons
-from UI.ViewerModelRadiusUI import Ui_ViewerModelRadius
+from sas.qtgui.Calculators.Shape2SAS.UI.ViewerButtonsUI import Ui_ViewerButtons
+from sas.qtgui.Calculators.Shape2SAS.UI.ViewerModelRadiusUI import Ui_ViewerModelRadius
 
 
 class ViewerButtons(QWidget, Ui_ViewerButtons):

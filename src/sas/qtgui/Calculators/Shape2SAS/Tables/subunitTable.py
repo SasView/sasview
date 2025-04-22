@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (QStyledItemDelegate, QLineEdit, QComboBox,
                                QWidget, QSizePolicy)
 
 #Local Perspectives
-from .UI.subunitTableUI import Ui_SubunitTableController
+from sas.qtgui.Calculators.Shape2SAS.Tables.UI.subunitTableUI import Ui_SubunitTableController
 
 #Row option layout
 class ExtendedEnum(Enum):
