@@ -174,6 +174,11 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # TODO: This won't work for batch at the moment.
         current_calculator = self.currentResult.calculator
 
+        # Checks if there is an estimation available.
+        if not self.currentResult.estimated_parameters is None:
+            self.noOfTermsSuggestionButton.setText(str(self.currentResult.estimated_parameters.nterms))
+            self.regConstantSuggestionButton.setText(str(self.currentResult.estimated_parameters.reg_constant))
+
         self.noOfTermsInput.setText(str(current_calculator.noOfTerms))
         self.regularizationConstantInput.setText(str(current_calculator.alpha))
         self.maxDistanceInput.setText(str(current_calculator.dmax))
