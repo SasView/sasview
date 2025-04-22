@@ -33,7 +33,9 @@ jobs:
         run: |
           mv SasView-Installer-windows*/setupSasView.exe ./setupSasView-nightly-Win64.exe
           mv SasView-Installer-macos*/SasView6-*.dmg ./
-          rename 's/SasView6-/SasView-nightly-MacOSX-' *.dmg
+          for file in $(ls *.dmg); do
+              mv $file ${file/SasView6-/SasView-nightly-MacOSX-}
+          done
           mv SasView-Installer-ubuntu*/sasview6.tar.gz ./SasView-nightly-Linux.tar.gz
 
       - name: Upload Nightly Build Installer to GitHub releases
