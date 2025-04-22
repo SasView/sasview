@@ -500,7 +500,7 @@ class NewInvertor():
 
         """
         from .num_term import NTermEstimator
-        estimator = NTermEstimator(self.clone())
+        estimator = NTermEstimator(self)
         try:
             return estimator.num_terms(isquit_func)
         except Exception as exc:
