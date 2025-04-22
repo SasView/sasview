@@ -35,7 +35,7 @@ class InversionResult:
     pr_plot: Data1D | None
     data_plot: Data1D | None
     outputs: CalculatedOutputs | None
-    estimated_paramaters: EstimatedParameters | None
+    estimated_parameters: EstimatedParameters | None
 
 def format_float(f: float):
     return f'{f:.3f}'
@@ -88,7 +88,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             pr_plot=None,
             data_plot=None,
             outputs=None,
-            estimated_paramaters=None
+            estimated_parameters=None
         )
 
     # TODO: What is this function normally called?
