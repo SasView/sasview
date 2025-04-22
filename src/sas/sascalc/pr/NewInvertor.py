@@ -1,4 +1,6 @@
+from copy import deepcopy
 import logging
+from typing import Self
 import numpy as np
 import time
 import math
@@ -92,6 +94,9 @@ class NewInvertor():
 
     def is_valid(self) -> bool:
         return self.npoints == self.ny and self.npoints == self.nerr
+
+    def clone(self) -> Self:
+        return deepcopy(self)
 
     def lstsq(self, nfunc=5, nr=20):
         """
