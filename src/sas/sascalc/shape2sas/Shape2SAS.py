@@ -7,7 +7,8 @@ import numpy as np
 from typing import Optional, List
 from dataclasses import dataclass, field
 
-from sas.qtgui.Perspectives.Shape2SAS.calculations.helpfunctions import (GenerateAllPoints, WeightedPairDistribution, StructureFactor, ITheoretical, IExperimental, Qsampling,
+from sas.sascalc.shape2sas.helpfunctions import (
+    GenerateAllPoints, WeightedPairDistribution, StructureFactor, ITheoretical, IExperimental, Qsampling,
     plot_2D, plot_results, generate_pdb
 )
 
