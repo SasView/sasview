@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import time
 import math
@@ -15,6 +16,8 @@ BACKGROUND_INPUT = 0.0
 Q_MIN_INPUT = 0.0
 Q_MAX_INPUT = 0.0
 MAX_DIST = 140.0
+
+logger = logging.getLogger(__name__)
 
 class NewInvertor():
 
@@ -483,6 +486,117 @@ class NewInvertor():
 
     def check_for_zero(self, x):
         return (x == 0).any()
+
+    def estimate_numterms(self, isquit_func=None):
+        """
+        Returns a reasonable guess for the
+        number of terms
+
+        :param isquit_func:
+          reference to thread function to call to check whether the computation needs to
+          be stopped.
+
+        :return: number of terms, alpha, message
+
+        """
+        from .num_term import NTermEstimator
+        estimator = NTermEstimator(self.clone())
+        try:
+            return estimator.num_terms(isquit_func)
+        except Exception as exc:
+            # If we fail, estimate alpha and return the default
+            # number of terms
+            best_alpha, _, _ = self.estimate_alpha(self.nfunc)
+            logger.warning("Invertor.estimate_numterms: %s" % exc)
+            return self.nfunc, best_alpha, "Could not estimate number of terms"
+
+    def estimate_alpha(self, nfunc):
+        """
+        Returns a reasonable guess for the
+        regularization constant alpha
+
+        :param nfunc: number of terms to use in the expansion.
+
+        :return: alpha, message, elapsed
+
+        where alpha is the estimate for alpha,
+        message is a message for the user,
+        elapsed is the computation time
+        """
+        #import time
+        try:
+            pr = self.clone()
+
+            # T_0 for computation time
+            starttime = time.time()
+            elapsed = 0
+
+            # If the current alpha is zero, try
+            # another value
+            if pr.alpha <= 0:
+                pr.alpha = 0.0001
+
+            # Perform inversion to find the largest alpha
+            out, _ = pr.invert(nfunc)
+
+            elapsed = time.time() - starttime
+            initial_alpha = pr.alpha
+            initial_peaks = pr.get_peaks(out)
+
+            # Try the inversion with the estimated alpha
+            pr.alpha = pr.suggested_alpha
+            out, _ = pr.invert(nfunc)
+
+            npeaks = pr.get_peaks(out)
+            # if more than one peak to start with
+            # just return the estimate
+            if npeaks > 1:
+                #message = "Your P(r) is not smooth,
+                #please check your inversion parameters"
+                message = None
+                return pr.suggested_alpha, message, elapsed
+            else:
+
+                # Look at smaller values
+                # We assume that for the suggested alpha, we have 1 peak
+                # if not, send a message to change parameters
+                alpha = pr.suggested_alpha
+                best_alpha = pr.suggested_alpha
+                found = False
+                for i in range(10):
+                    pr.alpha = (0.33) ** (i + 1) * alpha
+                    out, _ = pr.invert(nfunc)
+
+                    peaks = pr.get_peaks(out)
+                    if peaks > 1:
+                        found = True
+                        break
+                    best_alpha = pr.alpha
+
+                # If we didn't find a turning point for alpha and
+                # the initial alpha already had only one peak,
+                # just return that
+                if not found and initial_peaks == 1 and \
+                    initial_alpha < best_alpha:
+                    best_alpha = initial_alpha
+
+                # Check whether the size makes sense
+                message = ''
+
+                if not found:
+                    message = None
+                elif best_alpha >= 0.5 * pr.suggested_alpha:
+                    # best alpha is too big, return a
+                    # reasonable value
+                    message = "The estimated alpha for your system is too "
+                    message += "large. "
+                    message += "Try increasing your maximum distance."
+
+                return best_alpha, message, elapsed
+
+        except Exception as exc:
+            message = "Invertor.estimate_alpha: %s" % exc
+            return 0, message, elapsed
 
     def _get_matrix(self, nfunc, nr):
         """
