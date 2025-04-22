@@ -325,7 +325,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.currentResult.calculator,
             self.currentResult.calculator.nfunc,
             error_func=self.threadError,
-            updatefn=self.endEstimateParameters
+            completefn=self.endEstimateParameters
         )
         estimation_thread.queue()
         estimation_thread.ready(2.5)
