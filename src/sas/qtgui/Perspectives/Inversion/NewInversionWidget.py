@@ -102,6 +102,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.tab_id = tab_id
         self.updateGuiValues()
         self.enableButtons()
+        self.startEstimateParameters()
 
     @property
     def is_batch(self) -> bool:
