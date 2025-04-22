@@ -46,7 +46,7 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "setupSasView-nightly-Win64.exe, SasView-nightly-MacOSX.dmg, SasView-nightly-Linux.tar.gz"
+          artifacts: "setupSasView-nightly-Win64.exe, SasView-nightly-MacOSX-*.dmg, SasView-nightly-Linux.tar.gz"
           body: "Nightly build of main SasView branch"
           name: "nightly-build"
           tag: "nightly-build"
