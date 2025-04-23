@@ -149,14 +149,14 @@ class ViewerModel(QWidget):
         self.scatter.setAxisZ(self.Z_ax)
 
 
-    def setAxis(self, minx: float, miny: float, minz: float, maxx: float, maxy: float, maxz: float):
+    def setAxis(self, x_range: (float, float), y_range: (float, float), z_range: (float, float)):
         """Set axis for the model"""
 
         #FIXME: even if min and max are the same for X, Y, Z, a sphere still looks like an ellipsoid
         #Tried with global min and max, and by centering the model, but no success.
-        self.X_ax.setRange(minx, maxx)
-        self.Y_ax.setRange(miny, maxy)
-        self.Z_ax.setRange(minz, maxz)
+        self.X_ax.setRange(*x_range)
+        self.Y_ax.setRange(*y_range)
+        self.Z_ax.setRange(*z_range)
 
         self.scatter.setAxisX(self.X_ax)
         self.scatter.setAxisY(self.Y_ax)
@@ -190,8 +190,7 @@ class ViewerModel(QWidget):
             
             
             series.dataProxy().addItems(data)
-        self.setAxis(minx, miny, minz, maxx, maxy, maxz)
-
+        self.setAxis((minx, maxx), (miny, maxy), (minz, maxz))
 
     def onXYClicked(self):
         """XY view"""
@@ -237,7 +236,6 @@ class ViewerModel(QWidget):
         self.scatter.scene().activeCamera().setCameraPosition(0, 0, 110)
 
         #reset axis
-        self.setAxis(-10, 10, -10, 10, -10, 10)
 
 
 
