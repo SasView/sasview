@@ -153,6 +153,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def onNewData(self):
         # FIXME: This mutates the data even for other perspectives.
         self.currentResult.logic.add_errors()
+        self.currentResult.calculator.q_min = min(self.currentData.x)
+        self.currentResult.calculator.q_max = max(self.currentData.x)
 
     # TODO: Probably change this name.
     def enableButtons(self):
