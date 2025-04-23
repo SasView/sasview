@@ -352,7 +352,6 @@ if __name__ == "__main__":
 
     Sim_par = SimulationParameters(q=q, prpoints=Nbins, Npoints=Npoints)
 
-
     subunit_type = args.subunit_type
     if subunit_type is None:
         raise argparse.ArgumentError(subunit_type, "No subunit type was given as an input.")
@@ -364,7 +363,6 @@ if __name__ == "__main__":
     for subunit, dimension in zip(subunit_type, dimensions):
          if len(subunit) != len(dimension):
             raise argparse.ArgumentTypeError("Mismatch between subunit types and dimensions.")
-    
 
     r_list, pr_norm_list, I_list, Isim_list, sigma_list, S_eff_list = [], [], [], [], [], [] 
     x_list, y_list, z_list, p_list, Model_list, scale_list, name_list = [], [], [], [], [], [], []
@@ -430,7 +428,6 @@ if __name__ == "__main__":
         StructureFactor.save_S(Theo_I.q, Theo_I.S_eff, Model)
         ITheoretical(Theo_I.q).save_I(Theo_I.I, Model)
 
-
         ######################################### Simulate I(q) ##########################################
         exposure = args.exposure
         Sim_calc = SimulateScattering(q=Theo_I.q, I0=Theo_I.I0, I=Theo_I.I, exposure=exposure)
@@ -471,7 +468,6 @@ if __name__ == "__main__":
     #plot p(r) and I(q)
     plot_results(Theo_I.q, r_list, pr_norm_list, I_list, Isim_list, 
                  sigma_list, S_eff_list, name_list, scale_list, xscale_lin, high_res)
-    
 
     time_total = time.time() - start_total
     print(" ")
