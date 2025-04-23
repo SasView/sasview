@@ -10,11 +10,11 @@ from PySide6.QtDataVisualization import (Q3DScatter, QScatterDataItem,
 QScatter3DSeries, QValue3DAxis)
 from PySide6.QtGui import QVector3D, QColor
 
-
 # Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.ViewerAllOptions import ViewerButtons, ViewerModelRadius
 from sas.sascalc.shape2sas.Shape2SAS import ModelPointDistribution, TheoreticalScattering
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
+
 
 class ViewerModel(QWidget):
     """Graphics view of designed model"""
@@ -90,7 +90,6 @@ class ViewerModel(QWidget):
         self.Viewmodel_modul.setLayout(layout)
         self.Viewmodel_modul.setFixedWidth(271)
 
-
     def setScatteringPlot(self, theo: TheoreticalScattering):
         """Set the scattering plot"""
 
@@ -114,8 +113,6 @@ class ViewerModel(QWidget):
         self.scene.addWidget(canvas)
         self.scattering.fitInView(self.scene.sceneRect())
         self.scatter.show()
-
-        #path="C:/Users/Qerne/OneDrive/Documents/VSCode/Projects/Thesis/SasVIew_dev_version/sasview/src/sas/qtgui/Perspectives/Shape2SAS/"
 
     def initialiseAxis(self):
         """Initialise axis for the model"""
@@ -148,7 +145,6 @@ class ViewerModel(QWidget):
         self.scatter.setAxisY(self.Y_ax)
         self.scatter.setAxisZ(self.Z_ax)
 
-
     def setAxis(self, x_range: (float, float), y_range: (float, float), z_range: (float, float)):
         """Set axis for the model"""
 
@@ -161,7 +157,6 @@ class ViewerModel(QWidget):
         self.scatter.setAxisX(self.X_ax)
         self.scatter.setAxisY(self.Y_ax)
         self.scatter.setAxisZ(self.Z_ax)
-
 
     def setPlot(self, distr: ModelPointDistribution, design: ViewerPlotDesign):
         """Plot the model"""
@@ -180,48 +175,42 @@ class ViewerModel(QWidget):
             data = []
             for index in range(len(distr.x[subunit])):
                 data.append(QScatterDataItem(QVector3D(distr.x[subunit][index], distr.y[subunit][index], distr.z[subunit][index])))
-            
+
             minx = min(minx, min(distr.x[subunit]))
             maxx = max(maxx, max(distr.x[subunit]))
             miny = min(miny, min(distr.y[subunit]))
             maxy = max(maxy, max(distr.y[subunit]))
             minz = min(minz, min(distr.z[subunit]))
             maxz = max(maxz, max(distr.z[subunit]))
-            
-            
+
             series.dataProxy().addItems(data)
+
         self.setAxis((minx, maxx), (miny, maxy), (minz, maxz))
 
     def onXYClicked(self):
         """XY view"""
         self.scatter.scene().activeCamera().setCameraPosition(0, 0, 110)
-    
 
     def onYZClicked(self):
         """YZ view"""
         self.scatter.scene().activeCamera().setCameraPosition(-90, 0, 110)
-    
 
     def onZXClicked(self):
         """ZX view"""
         self.scatter.scene().activeCamera().setCameraPosition(0, -90, 110)
-        
 
     def setZoom(self):
         """Zoom in/out"""
         self.scatter.scene().activeCamera().setZoomLevel(self.viewerModelRadius.doubleSpinBox.value())
-    
 
     def onZoomChanged(self):
         """Change zoom value on doubleSpinBox"""
         zoom_val = self.scatter.scene().activeCamera().zoomLevel()
         self.viewerModelRadius.doubleSpinBox.setValue(zoom_val)
 
-
     def setClearScatteringPlot(self):
         """Clear the Scattering plot"""
         self.scene.clear()
-
 
     def setClearModelPlot(self):
         """Clear the model plot"""
@@ -236,12 +225,4 @@ class ViewerModel(QWidget):
         self.scatter.scene().activeCamera().setCameraPosition(0, 0, 110)
 
         #reset axis
-
-
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    widget = ViewerModel()
-    widget.show()
-    sys.exit(app.exec())
+        self.setAxis((-10, 10), (-10, 10), (-10, 10))
