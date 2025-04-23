@@ -45,12 +45,10 @@ class SizeDistributionLogic:
         Analyze data and set up some properties important for
         the Presentation layer
         """
-        if self._data.__class__.__name__ == "Data2D":
-            if self._data.err_data is not None and np.any(self._data.err_data):
-                self.di_flag = True
+        if isinstance(self._data, Data2D):
+            self.di_flag = self._data.err_data is not None and np.any(self._data.err_data)
         else:
-            if self._data.dy is not None and np.any(self._data.dy):
-                self.di_flag = True
+            self.di_flag = self._data.dy is not None and np.any(self._data.dy)
 
     def computeDataRange(self):
         """
