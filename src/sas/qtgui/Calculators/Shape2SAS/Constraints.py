@@ -71,20 +71,17 @@ translation = """
 
         return self.constraintText
 
- 
     def setConstraints(self, constraints: str):
         """Set text to QTextEdit"""
 
         constraints = self.getConstraintText(constraints)
         self.constraintTextEditor.txtEditor.setPlainText(constraints)
 
-
-    def checkPythonSyntax(self, text: str) -> bool:
+    def checkPythonSyntax(self, text: str):
         """Check if text is valid python syntax"""
         
         try:
             ast.parse(text)
-            return True
         
         except SyntaxError:
             #Get last line of traceback
@@ -94,9 +91,6 @@ translation = """
 
             #send to log
             self.logException(traceback_to_show)
-
-            return False
-
 
     def getConstraints(self, constraintsStr: str, fitPar: list[str], modelPars: list[str], 
                        modelVals: list[list[float]], checkedPars: list[str]) -> tuple[list[str], str, str, list[list[bool]]]:
