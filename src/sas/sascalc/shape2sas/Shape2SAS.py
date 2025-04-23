@@ -1,4 +1,3 @@
-
 import time
 import argparse
 import warnings
@@ -12,8 +11,8 @@ from sas.sascalc.shape2sas.helpfunctions import (
     plot_2D, plot_results, generate_pdb
 )
 
-
 Vectors = List[List[float]]
+
 
 @dataclass
 class ModelProfile:
@@ -32,6 +31,7 @@ class ModelProfile:
     rotation: Vectors = field(default_factory=lambda: [[0, 0, 0]])
     exclude_overlap: Optional[bool] = field(default_factory=lambda: True)
 
+
 @dataclass
 class ModelPointDistribution:
     """Point distribution of a model"""
@@ -41,6 +41,7 @@ class ModelPointDistribution:
     z: np.ndarray
     p: np.ndarray #scattering length density for each point
     volume_total: float
+
 
 @dataclass
 class SimulationParameters:
@@ -76,6 +77,7 @@ class TheoreticalScatteringCalculation:
     System: ModelSystem
     Calculation: SimulationParameters
 
+
 @dataclass
 class TheoreticalScattering:
     """Class containing parameters for
@@ -89,6 +91,7 @@ class TheoreticalScattering:
     pr: np.ndarray #pair distance distribution
     pr_norm: np.ndarray #normalized pair distance distribution
 
+
 @dataclass
 class SimulateScattering:
     """Class containing parameters for
@@ -98,6 +101,7 @@ class SimulateScattering:
     I0: np.ndarray
     I: np.ndarray
     exposure: Optional[float] = field(default_factory=lambda:500.0)
+
 
 @dataclass
 class SimulatedScattering:
@@ -112,7 +116,6 @@ class SimulatedScattering:
 ################################ Shape2SAS functions ################################
 def getPointDistribution(prof: ModelProfile, Npoints):
     """Generate points for a given model profile."""
-
     x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits, 
                                                   prof.dimensions, prof.rotation, prof.rotation_points, 
                                                   prof.p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()
@@ -169,12 +172,9 @@ if __name__ == "__main__":
         output:
             list of lists of floats
         """
-
         arg = arg.replace(' ', '')
         arg = re.findall(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", arg)
-
         return [float(i) for i in arg]
-    
 
     def float_list(arg):
         """
@@ -186,18 +186,13 @@ if __name__ == "__main__":
         output:
             list of floats
         """
-
         arg = arg.replace(' ', '')
         arg = re.findall(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", arg)
-
         return [float(i) for i in arg]
 
-
     def separate_string(arg):
-
         arg = re.split('[ ,]+', arg)
         return [str(i) for i in arg]
-
 
     def str2bool(v):
         """
@@ -229,12 +224,11 @@ if __name__ == "__main__":
             if len(inputted) != N_subunits:
                 warnings.warn(f"The number of subunits and {name} do not match. Using {default}")
                 inputted = default * N_subunits
-        except:
+        except IndexError:
             inputted = default * N_subunits
             warnings.warn(f"Could not find {name}. Using default {default}.")
 
         return inputted
-
 
     def check_input(input: float, default: float, name: str, i: int):
         """
@@ -251,8 +245,7 @@ if __name__ == "__main__":
         """
         try:
             inputted = input[i]
-
-        except:
+        except IndexError:
             inputted = default
             warnings.warn(f"Could not find {name}. Using default {default}.")
 
