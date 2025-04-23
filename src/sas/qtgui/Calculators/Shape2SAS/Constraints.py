@@ -1,6 +1,7 @@
 #Global
 import sys
 import ast
+import logging
 import traceback
 import importlib.util
 import re
@@ -16,6 +17,8 @@ from sas.qtgui.Utilities.ModelEditor import ModelEditor
 from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
 from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
 from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
+
+logger = logging.getLogger(__name__)
 
 VAL_TYPE = str | int | float
 
@@ -91,7 +94,7 @@ translation = """
             traceback_to_show = '\n'.join(last_lines)
 
             #send to log
-            self.logException(traceback_to_show)
+            logger.error(traceback_to_show)
 
     def getConstraints(self, constraintsStr: str, fitPar: [str], modelPars: [str], modelVals: [[float]],
                        checkedPars: [str]) -> ([str], str, str, [[bool]]):
@@ -137,8 +140,7 @@ translation = """
         for par in lineNames:
             boolPar = any(par in sublist for sublist in modelPars)
             if not boolPar:
-                self.logException(f"{par} does not exist in parameter table")
-                raise ValueError(f"{par} does not exist in parameter table")
+                logger.error(f"{par} does not exist in parameter table")
 
         return False
 
@@ -148,7 +150,7 @@ translation = """
 
         #see if translation is in constraints
         if not re.search(r'translation\s*=', constraintsStr):
-            self.logWarning("No variable translation found in constraints")
+            logger.warn("No variable translation found in constraints")
 
         #TODO: make getParametersFromConstraints general, so translation can be inputted
         #NOTE: re.search() a bit slow, ast faster
@@ -166,8 +168,7 @@ translation = """
         #Check parameters and update checkedPars
         for line in lines:
             if line.count('=') != 1:
-                self.logException(f"Constraints may only have a single '=' sign in them. Please fix {line}.")
-                raise ValueError(f"Constraints may only have a single '=' sign in them. Please fix {line}.")
+                logger.warn(f"Constraints may only have a single '=' sign in them. Please fix {line}.")
 
             #split line
             leftLine, rightLine = line.split('=')
@@ -235,8 +236,7 @@ translation = """
                 parameters = [self.extractValues(elt) for elt in parametersNode.elts]
                 return parameters
 
-        self.logException(f"ValueError: No {targetName} variable found in constraints")
-        raise ValueError(f"No {targetName} variable found in constraints")
+        logger.warn(f"No {targetName} variable found in constraints")
 
     def getParameters(self, constraintsStr: str, fitPar: [str]) -> str:
         """Get parameters from constraints"""
@@ -247,14 +247,12 @@ translation = """
 
         #Check parameters in constraints
         if len(names) != len(fitPar):
-            self.logException("ValueError: Number of parameters in variable parameters does not match checked parameters in table")
-            raise ValueError("Number of parameters in variable parameters does not match checked parameters in table")
+            logger.error("Number of parameters in variable parameters does not match checked parameters in table")
 
         #Check if parameter exists in checked parameters
         for name in names:
             if name not in fitPar:
-                self.logException(f"ValueError: {name} does not exists in checked parameters")
-                raise ValueError(f"{name} does not exists in checked parameters")
+                logger.error(f"{name} does not exists in checked parameters")
         
         description = 'parameters =' + '[' + '\n' + '# name, units, default, [min, max], type, description,' + '\n'
         parameters_str = description  + ',\n'.join(str(sublist) for sublist in parameters) + "\n]"
@@ -274,7 +272,6 @@ translation = """
         for alias in node.names:
             #check if library has the attribute
             if not hasattr(module, f"{alias.name}"):
-                self.logException(f"AttributeError: module {node.module} has no attribute {alias.name}")
                 raise AttributeError(f"module {node.module} has no attribute {alias.name}")
             if alias.asname:
                 imports.append(f"{alias.name} as {alias.asname}")
@@ -290,7 +287,6 @@ translation = """
         for alias in node.names:
             #check if library exists
             if not importlib.util.find_spec(alias.name):
-                self.logException(f"ModuleNotFoundError: No module named {alias.name}")
                 raise ModuleNotFoundError(f"No module named {alias.name}")
             #get name and asname
             if alias.asname:
@@ -321,21 +317,7 @@ translation = """
         
         except SyntaxError as e:
             error_line = text.splitlines()[e.lineno - 1]
-            self.logException(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")
             raise SyntaxError(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")
-            return
-    
-    def logException(self, exception):
-        htmlise = "<br>".join(exception.split("\n"))
-        self.textEdit_2.append(f'<span style="color:Red;"><b>{htmlise}</b></span>')
-
-    def logWarning(self, message):
-        htmlise = "<br>".join(message.split("\n"))
-        self.textEdit_2.append(f'<span style="color:Orange;"><b>Warning: {htmlise}</b></span>')
-
-    def logInfo(self, message):
-        htmlise = "<br>".join(message.split("\n"))
-        self.textEdit_2.append(f'<span style="color:Black;"><b>Info: </b>{htmlise}</span>')
 
     def clearConstraints(self):
         """Clear text editor containing constraints"""
@@ -344,5 +326,4 @@ translation = """
 
     def onClosingConstraints(self):
         """Close constraints page"""
-
         self.close()
