@@ -108,19 +108,20 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.manualBgd.pressed.connect(self.handleBackgroundModeChange)
 
     # TODO: Need to verify type hint for data.
-    def updateTab(self, data: Data1D | list[Data1D], tab_id: int):
+    def updateTab(self, data: HashableStandardItem | list[HashableStandardItem], tab_id: int):
         self.tab_id = tab_id
         if isinstance(data, list):
             self.results = []
             self.dataList.clear()
-            for datum in data:
+            for datum_item in data:
                 new_result = self.initResult()
-                new_result.logic.data = datum
+                new_result.logic.data = datum_item
+                datum = dataFromItem(datum_item)
                 self.dataList.addItem(datum.name)
         else:
             self.currentData = data
             self.dataList.clear()
-            self.dataList.addItem(data.name)
+            self.dataList.addItem(self.currentData.name)
         self.dataList.setCurrentIndex(0)
         self.updateGuiValues()
         self.enableButtons()
