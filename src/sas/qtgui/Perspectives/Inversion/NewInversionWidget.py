@@ -138,8 +138,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def currentData(self, value: HashableStandardItem | None):
         self.currentResult.logic.data = value
         if not value is None:
-            # FIXME: This mutates the data even for other perspectives.
-            self.currentResult.logic.add_errors()
+            self.onNewData()
 
 
     # TODO: I don't know if 'float' is the right type hint.
@@ -150,6 +149,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     @property
     def q_min(self) -> float:
         return self.currentResult.calculator.q_min
+
+    def onNewData(self):
+        # FIXME: This mutates the data even for other perspectives.
+        self.currentResult.logic.add_errors()
 
     # TODO: Probably change this name.
     def enableButtons(self):
