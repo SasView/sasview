@@ -112,11 +112,16 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.tab_id = tab_id
         if isinstance(data, list):
             self.results = []
+            self.dataList.clear()
             for datum in data:
                 new_result = self.initResult()
-                new_result.logic.data = data
+                new_result.logic.data = datum
+                self.dataList.addItem(datum.name)
         else:
             self.currentData = data
+            self.dataList.clear()
+            self.dataList.addItem(data.name)
+        self.dataList.setCurrentIndex(0)
         self.updateGuiValues()
         self.enableButtons()
         self.startEstimateParameters()
@@ -189,13 +194,13 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.noOfTermsSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
 
     def updateGuiValues(self):
-        self.dataList.clear()
-        if self.currentData is None:
-            self.dataList.setCurrentText('')
-        else:
-            # TODO: Will have multiple values when batch is implemented.
-            self.dataList.addItem(self.currentData.name)
-            self.dataList.setCurrentIndex(0)
+        # self.dataList.clear()
+        # if self.currentData is None:
+        #     self.dataList.setCurrentText('')
+        # else:
+        #     # TODO: Will have multiple values when batch is implemented.
+        #     self.dataList.addItem(self.currentData.name)
+        #     self.dataList.setCurrentIndex(0)
 
 
         # TODO: This won't work for batch at the moment.
