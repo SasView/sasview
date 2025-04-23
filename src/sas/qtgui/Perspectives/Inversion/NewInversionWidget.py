@@ -5,6 +5,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtGui import QStandardItem
 from PySide6.QtWidgets import QWidget
 
+from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr, EstimateNT
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
@@ -77,6 +78,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.currentData = data
         self.isCalculating: bool = False
 
+        self.dmaxWindow: DmaxWindow | None = None
+
         self.updateGuiValues()
         self.events()
 
@@ -98,6 +101,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.estimationComplete.connect(self.estimateAvailable)
         self.noOfTermsSuggestionButton.clicked.connect(self.applyNumTermsEstimate)
         self.regConstantSuggestionButton.clicked.connect(self.applyRegConstantEstimate)
+        self.explorerButton.clicked.connect(self.openExplorerWindow)
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: Data1D, tab_id: int):
@@ -346,3 +350,11 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         )
         estimation_thread.queue()
         estimation_thread.ready(2.5)
+
+    def openExplorerWindow(self):
+        self.dmaxWindow = DmaxWindow(
+            pr_state=self.currentResult.calculator,
+            nfunc=self.currentResult.calculator.nfunc,
+            parent=self
+        )
+        self.dmaxWindow.show()
