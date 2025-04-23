@@ -161,19 +161,20 @@ translation = """
 
         #remove empty lines and tabs
         lines = [line.replace('\t', '').strip() for line in lines if line.strip()]
+        translationInput = ''
 
         #Check parameters and update checkedPars
-        for i in range(len(lines)):
-            if '=' not in lines[i]:
+        for line in lines:
+            if '=' not in line:
                 self.logException("No '=' found in translation line")
                 raise ValueError("No '=' found in translation line")
 
-            if lines[i].count('=') > 1:
+            if line.count('=') > 1:
                 self.logException("More than one '=' found in translation line")
                 raise ValueError("More than one '=' found in translation line")
 
             #split line
-            leftLine, rightLine = lines[i].split('=')
+            leftLine, rightLine = line.split('=')
 
             #unicode greek letters: \u0370-\u03FF
             rightPars = re.findall(r'(?<=)[a-zA-Z_\u0370-\u03FF]\w*\b', rightLine)
@@ -207,10 +208,8 @@ translation = """
                 j, k = self.getPosition(par, modelPars)
                 #check if paramater are to be set in ModelProfile
                 checkedPars[j][k] = True
-            lines[i] = leftLine + '=' + rightLine + notes
-
-        #return lines to string
-        translationInput = '\n'.join(lines)
+            line = leftLine + '=' + rightLine + notes
+            translationInput += line + "\n"
 
         return translationInput, checkedPars
     
