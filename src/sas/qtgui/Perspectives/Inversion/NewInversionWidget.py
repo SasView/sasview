@@ -239,7 +239,6 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def calculationCompleted(self, out, cov, pr, elapsed):
         # TODO: Placeholder. Just output the numbers for now. Later the result
         # should be plotted.
-        logging.info(f'{out} {cov} {pr} {elapsed}')
         self.isCalculating = False
         self.enableButtons()
         calculator = self.currentResult.calculator
