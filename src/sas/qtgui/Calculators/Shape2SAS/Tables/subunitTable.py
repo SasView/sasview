@@ -509,7 +509,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                                             subunitTooltip[row], subunitDefault_value[row])
                 else:
                     #no input for this row
-                    item = CustomStandardItem("", "", "", None)
+                    item = CustomStandardItem("", "", "", "")
 
             elif row == OptionLayout.Subunit:
                 #paint name for colour set in delegate due to multiple names
