@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 import logging
 from PySide6.QtCore import Signal
-from PySide6.QtGui import QStandardItem
+from PySide6.QtGui import QStandardItem, QIntValidator
 from PySide6.QtWidgets import QWidget
 
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
@@ -10,7 +10,7 @@ from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr, EstimateNT
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem
+from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem, DoubleValidator
 from src.sas.sascalc.pr.NewInvertor import NewInvertor
 
 @dataclass
@@ -228,6 +228,16 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.oscillationValue.setText(format_float(out.oscillations))
             self.posFractionValue.setText(format_float(out.pos_frac))
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
+
+    def setupValidators(self):
+        """Apply validators to editable line edits"""
+        self.noOfTermsInput.setValidator(QIntValidator())
+        self.regularizationConstantInput.setValidator(DoubleValidator())
+        self.maxDistanceInput.setValidator(DoubleValidator())
+        self.minQInput.setValidator(DoubleValidator())
+        self.maxQInput.setValidator(DoubleValidator())
+        self.slitHeightInput.setValidator(DoubleValidator())
+        self.slitWidthInput.setValidator(DoubleValidator())
 
     def updateGuiSuggested(self, nterms, alpha):
         self.noOfTermsSuggestionButton.setText(str(nterms))
