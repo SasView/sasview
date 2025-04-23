@@ -96,6 +96,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.calculateThisButton.clicked.connect(self.startThread)
         self.calculationComplete.connect(self.updateGuiValues)
         self.estimationComplete.connect(self.estimateAvailable)
+        self.noOfTermsSuggestionButton.connect(self.applyNumTermsEstimate)
+        self.regConstantSuggestionButton.connect(self.applyRegConstantEstimate)
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: Data1D, tab_id: int):
@@ -323,6 +325,14 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def endEstimateParameters(self, nterms, alpha, message, elapsed):
         self.currentResult.estimated_parameters = EstimatedParameters(alpha, nterms)
         self.estimationComplete.emit()
+
+    def applyRegConstantEstimate(self):
+        self.currentResult.calculator.alpha = self.currentResult.estimated_parameters.reg_constant
+        self.updateGuiValues()
+
+    def applyNumTermsEstimate(self):
+        self.currentResult.calculator.noOfTerms = self.currentResult.estimated_parameters.nterms
+        self.updateGuiValues()
 
     def startEstimateParameters(self):
         estimation_thread = EstimateNT(
