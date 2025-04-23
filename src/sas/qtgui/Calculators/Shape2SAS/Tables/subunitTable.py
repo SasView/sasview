@@ -345,7 +345,6 @@ class CustomStandardItem(QStandardItem):
 
         value = super().data(role)
         if role == Qt.DisplayRole:
-
             return f"{self.prefix}{value}{self.unit}"
         elif role == Qt.ToolTipRole:
             return self.tooltip
@@ -376,18 +375,16 @@ class CustomDelegate(QStyledItemDelegate):
         """Create editor for the model table view"""
 
         if index.row() == OptionLayout.get_position(OptionLayout.Subunit): #subunit case
-            return None
-        
+            editor = None
         elif index.row() == OptionLayout.get_position(OptionLayout.Colour): #colour case
             editor = QComboBox(widget)
             editor.addItems(["Green", "Red", "Blue"])
-            return editor
-
         else:
             editor = QLineEdit(widget)
             validator = DoubleValidator(-10000.0, 10000.0, 99, editor)
             editor.setValidator(validator)
-            return editor
+
+        return editor
     
     def setEditorData(self, editor, index):
         """Set the editor data from the model"""
@@ -395,7 +392,6 @@ class CustomDelegate(QStyledItemDelegate):
         if isinstance(editor, QComboBox):
             value = index.model().data(index, Qt.EditRole)
             editor.setCurrentText(value)
-
         else:
             #QLineEdit case
             super().setEditorData(editor, index)
@@ -406,17 +402,12 @@ class CustomDelegate(QStyledItemDelegate):
 
         if isinstance(editor, QComboBox):
             model.setData(index, editor.currentText(), Qt.EditRole)
-
         elif isinstance(editor, QLineEdit):
             text = editor.text()
             float_value = float(text) #save as float
             model.setData(index, float_value, Qt.EditRole)
-
         else:
             super().setModelData(editor, model, index)
-
-
-    #NOTE: default paint method used
 
 
 class ModelTableModel(QStandardItemModel):
@@ -452,7 +443,6 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.setSubunitOptions()
         self.setButtonSpinboxBounds()
         self.onClearSubunitTable()
-    
 
     def setTableProperties(self):
         """Setting table properties"""
@@ -461,13 +451,10 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.table.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
         self.table.resizeColumnsToContents()
 
-
     def setSubunitOptions(self):
         """Set the subunit options in the combobox"""
-        #self.subunit.addItems(self.restricted.keys())
         self.subunit.addItems(["sphere", "cylinder", "ellipsoid", "elliptical_cylinder", "disc",
                                 "cube", "cuboid", "hollow_sphere", "hollow_cube", "cyl_ring"]) #TODO: automate this
-
 
     def initializeModel(self):
         """Setup the model for the subunit table"""
@@ -478,12 +465,10 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.setTableProperties() #general layout parameters
         self.table.show()
 
-
     def initializeSignals(self):
         """Setup signals for the subunit table"""
         self.add.clicked.connect(self.onAdding)
         self.deleteButton.clicked.connect(self.onDeleting)
-
 
     @staticmethod
     def smallestInteger(numcolumn, columnEyeKeeper: list) -> int:
@@ -500,7 +485,6 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                 return columnName
 
         return numcolumn + 1
-
 
     def onAdding(self):
         """Add a subunit to the model table"""
@@ -574,14 +558,9 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
 
         numcolumn = self.model.columnCount()
 
-        if numcolumn == 0:
-            self.deleteButton.setEnabled(False)
-            self.selected.setEnabled(False)
-
-        else:
-            self.deleteButton.setEnabled(True)
-            self.selected.setEnabled(True)
-            self.selected.setMaximum(numcolumn)
+        self.deleteButton.setEnabled(numcolumn > 0)
+        self.selected.setEnabled(numcolumn > 0)
+        self.selected.setMaximum(numcolumn)
         
     
     def setSubunitRestriction(self, dimensions):
@@ -595,17 +574,18 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
             index = self.model.index(row, column)
             item = self.model.itemFromIndex(index)
 
-            if item:
-                if dim not in dimensions:
-                    #no input allowed
-                    item.setText("")
-                    item.setBackground(QBrush(QColor('grey')))
-                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                    restrictedRowPos.append(row)
-                
-                else:
-                    item.setBackground(QBrush())
-                    item.setFlags(item.flags() | Qt.ItemIsEditable)
+            if not item:
+                continue
+
+            if dim not in dimensions:
+                #no input allowed
+                item.setText("")
+                item.setBackground(QBrush(QColor('grey')))
+                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                restrictedRowPos.append(row)
+            else:
+                item.setBackground(QBrush())
+                item.setFlags(item.flags() | Qt.ItemIsEditable)
 
         self.restrictedRowsPos.append(restrictedRowPos)
 

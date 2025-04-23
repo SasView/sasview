@@ -162,14 +162,10 @@ class VariableTable(QWidget, Ui_VariableTable):
             checkState = itemCheck.data(Qt.CheckStateRole)
             is_checked = checkState == Qt.Checked.value
 
+            rows.append(is_checked)
             if row == column_pos[i + 1] or row == self.variableModel.rowCount() - 1:
-                #exception for the last row
-                if self.variableModel.rowCount() - 1:
-                    rows.append(is_checked)
-
                 columns.append(rows)
                 rows = []
-            rows.append(is_checked)
             
             #check if row is greater than lenght of the column
             if not column_pos[i + 1] > row:
@@ -188,12 +184,3 @@ class VariableTable(QWidget, Ui_VariableTable):
     def onClearTable(self):
         """Clear the table"""
         self.resetTable()
-        
-        
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    widget = VariableTable()
-    widget.show()
-    sys.exit(app.exec())
