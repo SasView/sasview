@@ -420,6 +420,30 @@
             </item>
            </layout>
           </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="lblWgtFactor">
+            <property name="text">
+             <string>Weight factor:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="txtWgtFactor"/>
+          </item>
+          <item row="0" column="3">
+           <spacer name="horizontalSpacer_9">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>50</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+
          </layout>
         </widget>
        </item>
@@ -465,27 +489,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="lblNptsLowQ">
-              <property name="text">
-               <string>Npts:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="txtNptsLowQ">
-              <property name="toolTip">
-               <string>Number of Q points to consider
-                while extrapolating the low-Q region
-               </string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="3" column="0">
+          <item row="2" column="0">
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
              <widget class="QRadioButton" name="rbFitLowQ">
@@ -524,7 +528,7 @@
             </item>
            </layout>
           </item>
-          <item row="3" column="1" colspan="3">
+          <item row="2" column="1" colspan="3">
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
              <widget class="QLabel" name="lblPowerLowQ">
@@ -616,7 +620,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>plotButton</tabstop>
   <tabstop>quickFitButton</tabstop>
   <tabstop>fullFitButton</tabstop>
   <tabstop>helpButton</tabstop>

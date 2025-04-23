@@ -9,7 +9,7 @@ from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
 from sasmodels import resolution as rst
 
-from maxEnt_method import matrix_operation, maxEntMethod
+from sas.sascalc.poresize.maxEnt_method import matrix_operation, maxEntMethod
 
 def add_gaussian_noise(x, dx):
     """
@@ -448,7 +448,7 @@ class sizeDistribution(object):
         ## sub_intensities Data1D object with y=A*x^M + B; should have dy as well
 
         ## Loop through parameters for the 
-        pars_keys = ['x','y','dx','dy','dxw','dxl']
+        pars_keys = ['x','y','dx','dy'] #,'dxw','dxl']
         trim_data_pars = {}
 
         assert len(sub_intensities.y) == len(self._data.y)

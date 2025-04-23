@@ -1,4 +1,8 @@
+from dataclasses import dataclass
+from enum import StrEnum
+
 from sas.qtgui.Utilities.GuiUtils import enum
+from sasdata.dataloader.data_info import Data1D
 
 WIDGETS = enum(
     "W_NAME",
@@ -17,6 +21,41 @@ WIDGETS = enum(
     "W_SUBTRACT_LOW_Q",
     "W_POWER_LOW_Q",
     "W_SCALE_LOW_Q",
-    "W_NUM_PTS_LOW_Q",
     "W_NUM_ITERATIONS",
+    "W_WEIGHT_FACTOR",
 )
+
+
+class WeightType(StrEnum):
+    NONE = "None"
+    DI = "dI"
+    SQRT_I = "sqrtI"
+    I = "I"
+
+
+@dataclass
+class MaxEntParameters:
+    qmin: float = 0.0
+    qmax: float = 0.1
+    dmin: float = 10.0
+    dmax: float = 1000.0
+    num_bins: int = 100
+    log_binning: bool = True
+    model: str = "ellipsoid"
+    aspect_ratio: float = 1.0
+    contrast: float = 1.0
+    sky_background: float = 1.0e-6
+    max_iterations: int = 100
+    weight_type: WeightType = WeightType.DI
+    weight_factor: float = 1.0
+    full_fit: bool = True
+
+
+@dataclass
+class MaxEntResult:
+    chisq: float
+    bins: list[float]
+    bin_mag: list[float]
+    bin_diff: list[float]
+    bin_err: list[float]
+    data_max_ent: Data1D

@@ -1,6 +1,7 @@
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 BACKGD_PLOT_LABEL = "Background"
 BACKGD_SUBTR_PLOT_LABEL = "Intensity-Background"
@@ -20,6 +21,7 @@ class SizeDistributionLogic:
         self.data_is_loaded = False
         # di data presence in the dataset
         self.di_flag = False
+        self.background = None
         if data is not None:
             self.data_is_loaded = True
             self.setDataProperties()
@@ -45,50 +47,38 @@ class SizeDistributionLogic:
         Analyze data and set up some properties important for
         the Presentation layer
         """
-        if isinstance(self._data, Data2D):
-            self.di_flag = self._data.err_data is not None and np.any(self._data.err_data)
-        else:
-            self.di_flag = self._data.dy is not None and np.any(self._data.dy)
+        if self._data.dy is not None and np.any(self._data.dy):
+            self.di_flag = True
 
     def computeDataRange(self):
         """
-        Wrapper for calculating the data range based on local dataset
-        """
-        return self.computeRangeFromData(self.data)
-
-    def computeRangeFromData(self, data):
-        """
         Compute the minimum and the maximum range of the data
-        return the npts contains in data
         """
-        if isinstance(data, Data1D):
-            try:
-                qmin = min(data.x)
-                qmax = max(data.x)
-            except (ValueError, TypeError):
-                msg = (
-                    "Unable to find min/max/length of \n data named %s"
-                    % self.data.filename
-                )
-                raise ValueError(msg)
-
-        else:
-            qmin = 0
-            try:
-                x = max(np.fabs(data.xmin), np.fabs(data.xmax))
-                y = max(np.fabs(data.ymin), np.fabs(data.ymax))
-            except (ValueError, TypeError):
-                msg = "Unable to find min/max of \n data named %s" % self.data.filename
-                raise ValueError(msg)
-            qmax = np.sqrt(x * x + y * y)
+        try:
+            qmin = min(self.data.x)
+            qmax = max(self.data.x)
+        except (ValueError, TypeError):
+            msg = (
+                "Unable to find min/max/length of \n data named %s" % self.data.filename
+            )
+            raise ValueError(msg)
         return qmin, qmax
 
-    def new_data_plot(self, data):
+    def computeBackground(self, constant: float, scale: float, power: float):
+        x = self.data.x
+        # calculate a*x^m + b
+        y_back = scale * x**power + constant
+        # TODO: the dy is the same as in TestSizeDistribution.py, but is it needed?
+        self.background = LoadData1D(
+            x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False
+        )
+
+    def newDataPlot(self):
         """
         Create a new 1D data instance
         """
         # Background plot
-        backgd_plot = Data1D(data[0], data[1])
+        backgd_plot = Data1D(self.background.x, self.background.y)
         backgd_plot.is_data = False
         backgd_plot.plot_role = DataRole.ROLE_DATA
 
@@ -100,8 +90,12 @@ class SizeDistributionLogic:
         backgd_plot.xaxis("\\rm{Q}", "A^{-1}")
         backgd_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
+        backgd_plot.symbol = "Line"
+        backgd_plot.show_errors = False
+
         # Background subtracted plot
-        backgd_subtr_plot = Data1D(data[0], data[2], dy=self._data.dy)
+        y_sub = self.data.y - self.background.y
+        backgd_subtr_plot = Data1D(self.data.x, y_sub, dy=self._data.dy)
         backgd_subtr_plot.is_data = False
         backgd_subtr_plot.plot_role = DataRole.ROLE_DATA
 
@@ -113,9 +107,18 @@ class SizeDistributionLogic:
         backgd_subtr_plot.xaxis("\\rm{Q}", "A^{-1}")
         backgd_subtr_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
+        backgd_subtr_plot.symbol = "Circle"
+        backgd_subtr_plot.show_errors = True
+        backgd_subtr_plot.show_q_range_sliders = True
+        # Suppress the GUI update until the move is finished to limit model calculations
+        backgd_subtr_plot.slider_update_on_move = False
+        backgd_subtr_plot.slider_perspective_name = "SizeDistribution"
+        backgd_subtr_plot.slider_low_q_input = ["txtMinRange"]
+        backgd_subtr_plot.slider_high_q_input = ["txtMaxRange"]
+
         return backgd_plot, backgd_subtr_plot
 
-    def new_size_distr_plot(self, data):
+    def newSizeDistrPlot(self, data):
         """
         Create a new 1D data instance based on fitting results
         """

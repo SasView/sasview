@@ -13,7 +13,11 @@ from sas.qtgui.Perspectives.SizeDistribution.UI.SizeDistributionUI import (
     Ui_SizeDistribution,
 )
 from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import WIDGETS
+from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import (
+    WIDGETS,
+    MaxEntParameters,
+    WeightType,
+)
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
 
@@ -28,9 +32,9 @@ BACKGROUND = 1e-6
 SKY_BACKGROUND = 1e-6
 SUBTRACT_LOW_Q = "false"
 POWER_LOW_Q = 4
-NUM_PTS_LOW_Q = 10
 SCALE_LOW_Q = 1.0
 NUM_ITERATIONS = 100
+WEIGHT_FACTOR = 1.0
 
 logger = logging.getLogger(__name__)
 
@@ -189,9 +193,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Background
         self.mapper.addMapping(self.txtBackgd, WIDGETS.W_BACKGROUND)
         self.mapper.addMapping(self.chkLowQ, WIDGETS.W_SUBTRACT_LOW_Q)
-        self.mapper.addMapping(self.txtNptsLowQ, WIDGETS.W_NUM_PTS_LOW_Q)
         self.mapper.addMapping(self.txtScaleLowQ, WIDGETS.W_SCALE_LOW_Q)
         self.mapper.addMapping(self.txtPowerLowQ, WIDGETS.W_POWER_LOW_Q)
+
+        # Weighting
+        self.mapper.addMapping(self.txtWgtFactor, WIDGETS.W_WEIGHT_FACTOR)
 
         self.mapper.toFirst()
 
@@ -238,12 +244,14 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.model.setItem(WIDGETS.W_BACKGROUND, item)
         item = QtGui.QStandardItem(str(SUBTRACT_LOW_Q))
         self.model.setItem(WIDGETS.W_SUBTRACT_LOW_Q, item)
-        item = QtGui.QStandardItem(str(NUM_PTS_LOW_Q))
-        self.model.setItem(WIDGETS.W_NUM_PTS_LOW_Q, item)
         item = QtGui.QStandardItem(str(POWER_LOW_Q))
         self.model.setItem(WIDGETS.W_POWER_LOW_Q, item)
         item = QtGui.QStandardItem(str(SCALE_LOW_Q))
         self.model.setItem(WIDGETS.W_SCALE_LOW_Q, item)
+
+        # Weighting
+        item = QtGui.QStandardItem(str(WEIGHT_FACTOR))
+        self.model.setItem(WIDGETS.W_WEIGHT_FACTOR, item)
 
         # Connect slot
         self.model.dataChanged.connect(self.onModelChange)
@@ -251,7 +259,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
-        self.txtNptsLowQ.setEnabled(False)
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
         self.rbFitLowQ.setEnabled(False)
@@ -261,16 +268,15 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Apply validators to editable line edits"""
         self.txtAspectRatio.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
-        self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
         self.txtMinDiameter.setValidator(GuiUtils.DoubleValidator())
         self.txtMaxDiameter.setValidator(GuiUtils.DoubleValidator())
         self.txtBinsDiameter.setValidator(GuiUtils.DoubleValidator())
         self.txtContrast.setValidator(GuiUtils.DoubleValidator())
         self.txtSkyBackgd.setValidator(GuiUtils.DoubleValidator())
         self.txtIterations.setValidator(GuiUtils.DoubleValidator())
-        self.txtNptsLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtScaleLowQ.setValidator(GuiUtils.DoubleValidator())
+        self.txtWgtFactor.setValidator(GuiUtils.DoubleValidator())
 
     ######################################################################
     # Methods for updating GUI
@@ -309,15 +315,35 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._manager.showHelp(tree_location)
 
     def onQuickFit(self):
+        """
+        Perform a quick fit of the size distribution
+        """
         self.is_calculating = True
         self.enableButtons()
-        self.fit_thread = SizeDistributionThread(completefn=self.fittingCompleted)
+        params = self.getMaxEntParams()
+        params.full_fit = False
+        self.fit_thread = SizeDistributionThread(
+            data=self.logic.data,
+            background=self.logic.background,
+            params=params,
+            completefn=self.fittingCompleted,
+        )
         self.fit_thread.queue()
 
     def onFullFit(self):
+        """
+        Perform a full fit of the size distribution
+        """
         self.is_calculating = True
         self.enableButtons()
-        self.fit_thread = SizeDistributionThread(completefn=self.fittingCompleted)
+        params = self.getMaxEntParams()
+        params.full_fit = True
+        self.fit_thread = SizeDistributionThread(
+            data=self.logic.data,
+            background=self.logic.background,
+            params=params,
+            completefn=self.fittingCompleted,
+        )
         self.fit_thread.queue()
 
     def onRangeReset(self):
@@ -332,7 +358,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
     def onLowQStateChanged(self, state):
         is_checked = state == QtCore.Qt.CheckState.Checked.value
-        self.txtNptsLowQ.setEnabled(is_checked)
         self.txtPowerLowQ.setEnabled(is_checked)
         self.txtScaleLowQ.setEnabled(is_checked)
         self.rbFitLowQ.setEnabled(is_checked)
@@ -348,16 +373,18 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         if not item_text:
             return
         # Update plot of data and background
-        plot_update_widgets = [
+        # TODO: handle update upon data removed
+        background_update_widgets = [
             WIDGETS.W_BACKGROUND,
             WIDGETS.W_SUBTRACT_LOW_Q,
             WIDGETS.W_POWER_LOW_Q,
             WIDGETS.W_SCALE_LOW_Q,
-            WIDGETS.W_NUM_PTS_LOW_Q,
         ]
-        if top.row() in plot_update_widgets:
+        if top.row() in background_update_widgets:
+            # update background data
+            self.updateBackground()
             # update the plot(s)
-            self.plot_data()
+            self.plotData()
 
     ######################################################################
     # Response Actions
@@ -367,8 +394,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Obtain a QStandardItem object and parse it to get Data1D/2D
         Pass it over to the calculator
         """
-        assert data_item is not None
-
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the Size Distribution Perspective"
             raise AttributeError(msg)
@@ -376,6 +401,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._model_item = data_item[0]
         self.logic.data = GuiUtils.dataFromItem(self._model_item)
         self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
+        self.updateBackground()
 
         if not isinstance(self.logic.data, Data1D):
             msg = "Size Distribution cannot be computed with 2D data."
@@ -400,33 +426,22 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         self.enableButtons()
 
-        self.plot_data()
+        self.plotData()
 
-    def plot_data(self):
-        # plot data and background
+    def plotData(self):
+        """
+        Plot data, background and background subtracted data
+        """
         plots = [self._model_item]
-        data_background = self.calculateBackground()
-        self.backgd_plot, self.backgd_subtr_plot = self.logic.new_data_plot(
-            data_background
-        )
+        self.backgd_plot, self.backgd_subtr_plot = self.logic.newDataPlot()
 
         if self.backgd_plot is not None:
             title = self.backgd_plot.name
-            self.backgd_plot.symbol = "Line"
-            self.backgd_plot.show_errors = False
             GuiUtils.updateModelItemWithPlot(self._model_item, self.backgd_plot, title)
             plots.append(self.backgd_plot)
 
         if self.backgd_subtr_plot is not None:
             title = self.backgd_subtr_plot.name
-            self.backgd_subtr_plot.symbol = "Circle"
-            self.backgd_subtr_plot.show_errors = True
-            self.backgd_subtr_plot.show_q_range_sliders = True
-            # Suppress the GUI update until the move is finished to limit model calculations
-            self.backgd_subtr_plot.slider_update_on_move = False
-            self.backgd_subtr_plot.slider_perspective_name = "SizeDistribution"
-            self.backgd_subtr_plot.slider_low_q_input = ["txtMinRange"]
-            self.backgd_subtr_plot.slider_high_q_input = ["txtMaxRange"]
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.backgd_subtr_plot, title
             )
@@ -452,7 +467,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             "num_iterations": self.txtIterations.text(),
             "background": self.txtBackgd.text(),
             "subtract_low_q": self.chkLowQ.isChecked(),
-            "num_pts_low_q": self.txtNptsLowQ.text(),
             "power_low_q": self.txtPowerLowQ.text(),
             "scale_low_q": self.txtScaleLowQ.txt(),
         }
@@ -531,7 +545,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         )
         self.txtBackgd.setText(str(params.get("background", str(BACKGROUND))))
         self.chkLowQ.setChecked(params.get("subtract_low_q", False))
-        self.txtNptsLowQ.setText(str(params.get("num_pts_low_q", str(NUM_PTS_LOW_Q))))
         self.txtPowerLowQ.setText(str(params.get("power_low_q", str(POWER_LOW_Q))))
         self.txtScaleLowQ.setText(str(params.get("scale_low_q", str(SCALE_LOW_Q))))
 
@@ -568,7 +581,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # TODO: show results in the UI widget
 
         # plot results
-        self.size_distr_plot = self.logic.new_size_distr_plot(result)
+        self.size_distr_plot = self.logic.newSizeDistrPlot(result)
         if self.size_distr_plot is not None:
             title = self.size_distr_plot.name
             self.size_distr_plot.symbol = "Line"
@@ -581,16 +594,52 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 [self._model_item, self.size_distr_plot], None
             )
 
-    def calculateBackground(self):
-        x = self.logic.data.x
-        y = self.logic.data.y
+    def getWeightType(self):
+        """
+        Return the weight type based on the checked radio button
+        """
+        weight_type_map = {
+            self.rbWeighting1: WeightType.NONE,
+            self.rbWeighting2: WeightType.DI,
+            self.rbWeighting3: WeightType.SQRT_I,
+            self.rbWeighting4: WeightType.I,
+        }
+        for button, weight_type in weight_type_map.items():
+            if button.isChecked():
+                return weight_type
 
-        # calculate a*x^m + b
+    def getMaxEntParams(self):
+        """
+        Collect Max Ent parameters from the GUI state
+        """
+        return MaxEntParameters(
+            qmin=float(self.txtMinRange.text()),
+            qmax=float(self.txtMaxRange.text()),
+            dmin=float(self.txtMinDiameter.text()),
+            dmax=float(self.txtMaxDiameter.text()),
+            num_bins=int(self.txtBinsDiameter.text()),
+            log_binning=self.chkLogBinning.isChecked(),
+            aspect_ratio=float(self.txtAspectRatio.text()),
+            contrast=float(self.txtContrast.text()),
+            sky_background=float(self.txtSkyBackgd.text()),
+            max_iterations=int(self.txtIterations.text()),
+            weight_factor=float(self.txtWgtFactor.text()),
+            weight_type=self.getWeightType(),
+        )
+
+    def getBackgroundParams(self):
+        """
+        Collect background parameters from the GUI state
+        """
         constant = float(self.txtBackgd.text())
         power_law = self.chkLowQ.isChecked()
         power = -1.0 * float(self.txtPowerLowQ.text()) if power_law else 0.0
         scale = float(self.txtScaleLowQ.text()) if power_law else 0.0
-        y_back = scale * x**power + constant
-        y_sub = y - y_back
+        return constant, scale, power
 
-        return x, y_back, y_sub
+    def updateBackground(self):
+        """
+        Update the background data
+        """
+        constant, scale, power = self.getBackgroundParams()
+        self.logic.computeBackground(constant, scale, power)
