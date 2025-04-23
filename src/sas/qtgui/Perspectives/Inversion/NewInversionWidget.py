@@ -77,7 +77,6 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.setupUi(self)
         self.setupValidators()
 
-        self.currentData = data
         self.isCalculating: bool = False
 
         self.dmaxWindow: DmaxWindow | None = None
