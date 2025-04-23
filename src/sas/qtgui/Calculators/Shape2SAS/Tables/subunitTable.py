@@ -455,6 +455,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         """Set the subunit options in the combobox"""
         self.subunit.addItems(["sphere", "cylinder", "ellipsoid", "elliptical_cylinder", "disc",
                                 "cube", "cuboid", "hollow_sphere", "hollow_cube", "cyl_ring"]) #TODO: automate this
+        self.subunit.setContentsMargins(5, 5, 5, 5)
 
     def initializeModel(self):
         """Setup the model for the subunit table"""

@@ -74,7 +74,6 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         self.plugin = QPushButton("To plugin model")
         self.plugin.setMinimumSize(110, 24)
-        self.plugin.setMaximumSize(110, 24)
         self.plugin.setToolTip("Go to the plugin model page")
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
 
@@ -91,8 +90,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         modelVbox = QVBoxLayout()
         modelHbox = QHBoxLayout()
         
-        modelVbox.setContentsMargins(0,0,0,0)
-        modelHbox.setContentsMargins(10,10,10,0)
+        modelVbox.setContentsMargins(10,10,10,10)
+        modelHbox.setContentsMargins(10,10,10,10)
         modelSection = QWidget()
         modelHbox.addWidget(self.subunitTable)
         modelHbox.addWidget(self.viewerModel.Viewmodel_modul)
@@ -111,7 +110,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.scatteringScene.setContentsMargins(5, 5, 5, 5)
         self.scatteringScene.setObjectName(u"scatteringScene")
         self.plotBoxLayout = QHBoxLayout()
-        self.plotBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.plotBoxLayout.setContentsMargins(5, 5, 5, 5)
         self.plotBoxLayout.addWidget(self.scatteringProf)
         self.group2.setLayout(self.plotBoxLayout)
 
@@ -124,12 +123,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.SAXSTabButtons.reset.clicked.connect(self.onSAXSExperimentReset)
         self.plotSAXS = QPushButton("Plot SAXS")
         self.plotSAXS.setMinimumSize(110, 24)
-        self.plotSAXS.setMaximumSize(110, 24)
         self.plotSAXS.setToolTip("Plot simulated SAXS data")
         self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.plotSAXS)
         self.sendSimToSasView = QPushButton("Create SAXS file")
         self.sendSimToSasView.setMinimumSize(110, 24)
-        self.sendSimToSasView.setMaximumSize(110, 24)
         self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
         self.SAXSTabButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.sendSimToSasView)

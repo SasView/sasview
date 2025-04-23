@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>490</width>
+    <width>516</width>
     <height>240</height>
    </rect>
   </property>
@@ -32,13 +32,13 @@
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QPushButton" name="add">
-         <property name="minimumSize">
-          <size>
-           <width>60</width>
-           <height>24</height>
-          </size>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="maximumSize">
+         <property name="minimumSize">
           <size>
            <width>60</width>
            <height>24</height>
@@ -54,13 +54,13 @@
        </item>
        <item>
         <widget class="QComboBox" name="subunit">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>24</height>
-          </size>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="maximumSize">
+         <property name="minimumSize">
           <size>
            <width>120</width>
            <height>24</height>
@@ -83,13 +83,13 @@
        </item>
        <item>
         <widget class="QPushButton" name="deleteButton">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>24</height>
-          </size>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="maximumSize">
+         <property name="minimumSize">
           <size>
            <width>100</width>
            <height>24</height>
@@ -105,13 +105,13 @@
        </item>
        <item>
         <widget class="QSpinBox" name="selected">
-         <property name="minimumSize">
-          <size>
-           <width>40</width>
-           <height>24</height>
-          </size>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="maximumSize">
+         <property name="minimumSize">
           <size>
            <width>40</width>
            <height>24</height>
@@ -137,13 +137,13 @@
        </item>
        <item>
         <widget class="QCheckBox" name="overlap">
-         <property name="minimumSize">
-          <size>
-           <width>110</width>
-           <height>24</height>
-          </size>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="maximumSize">
+         <property name="minimumSize">
           <size>
            <width>110</width>
            <height>24</height>
