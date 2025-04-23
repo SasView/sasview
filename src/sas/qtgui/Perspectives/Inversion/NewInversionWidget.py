@@ -128,10 +128,11 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         return self.currentResult.logic.data_item
 
     @currentData.setter
-    def currentData(self, value: HashableStandardItem):
+    def currentData(self, value: HashableStandardItem | None):
         self.currentResult.logic.data = value
-        # FIXME: This mutates the data even for other perspectives.
-        self.currentResult.logic.add_errors()
+        if not value is None:
+            # FIXME: This mutates the data even for other perspectives.
+            self.currentResult.logic.add_errors()
 
 
     # TODO: I don't know if 'float' is the right type hint.
