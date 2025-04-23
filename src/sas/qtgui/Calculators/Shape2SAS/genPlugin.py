@@ -1,6 +1,5 @@
 #Global
 from pathlib import Path
-from typing import Union
 import textwrap
 
 #Global SasView
@@ -11,46 +10,34 @@ from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
 
 
 
-def generatePlugin(prof: ModelProfile, constrainParameters: tuple[str], fitPar: list[str], 
-                   Npoints: int, pr_points: int, file_name: str) -> tuple[str, Path]:
+def generatePlugin(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
+                   Npoints: int, pr_points: int, file_name: str) -> (str, Path):
     """Generates a theoretical scattering plugin model"""
 
     plugin_location = Path(models.find_plugins_dir())
-    if not file_name.endswith('.py'):
-        file_name += '.py'
     full_path = plugin_location / file_name
+    full_path.with_suffix('.py')
 
     model_str = generateModel(prof, constrainParameters, fitPar, Npoints, pr_points, file_name)
 
     return model_str, full_path
     
 
-def parListsFormat(par: list[list[Union[str, float]]]) -> str:
+def parListsFormat(par: [[str | float]]) -> str:
     """Format lists of parameters to the model string"""
 
-    #k = 5
     for i in range(len(par)):
-        for j in range(len(par[i])):
-            if not isinstance(par[i][j], str):
-                par[i][j] = f'{par[i][j]}'
-        par[i] = f'[{", ".join(par[i])}]'
-        #if i > k:
-        #    par.insert("\n")
-        #    k += 5
+        par[i] = parListFormat(par[i])
 
+    return parListFormat(par)
+
+
+def parListFormat(par: [str | float]) -> str:
+    """Format a list containing parameters to the model string"""
     return f"[{', '.join(par)}]"
 
-def parListFormat(par: list[Union[str, float]]) -> str:
-    """Format a list containing parameters to the model string"""
 
-    for i in range(len(par)):
-        if not isinstance(par[i], str):
-            par[i] = f'{par[i]}'
-
-    return f"[{', '.join(par)}]"    
-
-
-def generateModel(prof: ModelProfile, constrainParameters: tuple[str], fitPar: list[str], 
+def generateModel(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
                   Npoints: int, pr_points: int, model_name: str) -> str:
     """Generates a theoretical model"""
     importStatement, parameters, translation = constrainParameters
