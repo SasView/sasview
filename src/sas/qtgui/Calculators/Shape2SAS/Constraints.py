@@ -165,13 +165,9 @@ translation = """
 
         #Check parameters and update checkedPars
         for line in lines:
-            if '=' not in line:
-                self.logException("No '=' found in translation line")
-                raise ValueError("No '=' found in translation line")
-
-            if line.count('=') > 1:
-                self.logException("More than one '=' found in translation line")
-                raise ValueError("More than one '=' found in translation line")
+            if line.count('=') != 1:
+                self.logException(f"Constraints may only have a single '=' sign in them. Please fix {line}.")
+                raise ValueError(f"Constraints may only have a single '=' sign in them. Please fix {line}.")
 
             #split line
             leftLine, rightLine = line.split('=')
@@ -190,10 +186,7 @@ translation = """
             notes = ""
             for par in rightPars:
                 j, k = self.getPosition(par, modelPars)
-                if checkedPars[j][k]:
-                    #if parameter is a fit parameter, don't remove it
-                    continue
-                else:
+                if not checkedPars[j][k]:
                     #if parameter is a constant, set inputted value
                     inputVal = modelVals[j][k]
 
