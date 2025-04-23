@@ -206,25 +206,21 @@ translation = """
 
         return translationInput, checkedPars
     
-    def extractValues(self, elt: ast.AST) -> Union[str, float, int]:
+    def extractValues(self, elt: ast.AST) -> VAL_TYPE:
         if isinstance(elt, ast.Constant):
             return elt.value
         elif isinstance(elt, ast.List):
             return [self.extractValues(elt) for elt in elt.elts]
-        
         #statements for the the boundary list:
+        elif isinstance(elt, ast.Name) and elt.id == 'inf':
+            return float('inf')
         elif isinstance(elt, ast.Name):
-            #special case for inf
-            if elt.id == 'inf':
-                return float('inf')
             return elt.id
         #check for negative values in boundary list
-        elif isinstance(elt.op, ast.USub):
-            operand = self.extractValues(elt.operand)
-            if operand == float('inf'):
-                return float('-inf')
-            elif isinstance(operand, (int, float)):
-                return -operand
+        elif isinstance(elt.op, ast.USub) and self.extractValues(elt.operand) == float('inf'):
+            return float('-inf')
+        elif isinstance(elt.op, ast.USub) and isinstance(self.extractValues(elt.operand), (int, float)):
+            return -operand
         return None
 
     def getParametersFromConstraints(self, constraints_str: str, targetName: str) -> []:
@@ -236,11 +232,8 @@ translation = """
             #is the node an assignment and does it have the target name?
             if isinstance(node, ast.Assign) and node.targets[0].id == targetName:
                 parametersNode = node.value
-                break #if so break
-        
-        if parametersNode:
-            parameters = [self.extractValues(elt) for elt in parametersNode.elts]
-            return parameters
+                parameters = [self.extractValues(elt) for elt in parametersNode.elts]
+                return parameters
 
         self.logException(f"ValueError: No {targetName} variable found in constraints")
         raise ValueError(f"No {targetName} variable found in constraints")
