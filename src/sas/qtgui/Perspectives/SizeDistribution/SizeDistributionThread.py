@@ -39,6 +39,8 @@ class SizeDistributionThread(CalcThread):
     def compute(self, *args, **kwargs):
         try:
             sd = sizeDistribution(self.data)
+            sd.qMin = self.params.qmin
+            sd.qMax = self.params.qmax
             sd.diamMin = self.params.dmin
             sd.diamMax = self.params.dmax
             sd.aspectRatio = self.params.aspect_ratio
@@ -48,6 +50,7 @@ class SizeDistributionThread(CalcThread):
             sd.skyBackground = self.params.sky_background
             sd.weightType = self.params.weight_type
             sd.weightFactor = self.params.weight_factor
+            sd.nbins = self.params.num_bins
 
             trim_data, intensities, init_bins_back, sigma = sd.prep_maxEnt(
                 self.background, full_fit=self.params.full_fit

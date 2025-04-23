@@ -17,6 +17,7 @@ from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import (
     WIDGETS,
     MaxEntParameters,
     WeightType,
+    MaxEntResult,
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
@@ -52,7 +53,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Window title"""
         return "Size Distribution Perspective"
 
-    fittingFinishedSignal = QtCore.Signal(dict)
+    fittingFinishedSignal = QtCore.Signal(MaxEntResult)
     data_plot_signal = QtCore.Signal()
 
     def __init__(self, parent=None):
@@ -557,15 +558,13 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.model.item(WIDGETS.W_QMIN).setText(q_min)
         self.model.item(WIDGETS.W_QMAX).setText(q_max)
 
-    def fittingCompleted(self, result: Optional[dict]) -> None:
+    def fittingCompleted(self, result: Optional[MaxEntResult]) -> None:
         """
         Send the finish message from calculate threads to main thread
         """
-        if result is None:
-            result = dict()
         self.fittingFinishedSignal.emit(result)
 
-    def fitComplete(self, result) -> None:
+    def fitComplete(self, result: MaxEntResult) -> None:
         """
         Receive and display fitting results
         "result" is a tuple of actual result list and the fit time in seconds
@@ -573,7 +572,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # re-enable the fit buttons
         self.is_calculating = False
         self.enableButtons()
-        if len(result) == 0:
+        if result is None:
             msg = "Fitting failed."
             self.communicate.statusBarUpdateSignal.emit(msg)
             return

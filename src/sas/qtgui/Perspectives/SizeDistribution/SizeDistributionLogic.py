@@ -1,5 +1,6 @@
 import numpy as np
 
+from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import MaxEntResult
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 
@@ -118,14 +119,15 @@ class SizeDistributionLogic:
 
         return backgd_plot, backgd_subtr_plot
 
-    def newSizeDistrPlot(self, data):
+    def newSizeDistrPlot(self, result: MaxEntResult):
         """
         Create a new 1D data instance based on fitting results
         """
         # Create the new plot
-        x = data["x"]
-        y = data["y"]
-        new_plot = Data1D(x=x, y=y)
+        x = result.bins
+        y = result.bin_mag
+        dy = result.bin_err
+        new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.is_data = False
         new_plot.plot_role = DataRole.ROLE_STAND_ALONE
         new_plot.dy = np.zeros(len(y))
