@@ -215,6 +215,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.rgValue.setText(format_float(out.rg))
             self.iQ0Value.setText(format_float(out.iq0))
             self.backgroundValue.setText(format_float(out.background))
+            if current_calculator.est_bck:
+                self.backgroundInput.setText(format_float(out.background))
             self.computationTimeValue.setText(format_float(out.calc_time))
             self.chiDofValue.setText(format_float(out.chi2[0]))
             self.oscillationValue.setText(format_float(out.oscillations))
