@@ -95,6 +95,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     def events(self):
         self.calculateThisButton.clicked.connect(self.startThread)
         self.calculationComplete.connect(self.updateGuiValues)
+        self.estimationComplete.connect(self.estimateAvailable)
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: Data1D, tab_id: int):
