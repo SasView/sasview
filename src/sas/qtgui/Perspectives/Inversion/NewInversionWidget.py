@@ -117,6 +117,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
                 new_result.logic.data = datum_item
                 datum = dataFromItem(datum_item)
                 self.dataList.addItem(datum.name)
+                self.results.append(new_result)
         else:
             self.currentData = data
             self.dataList.clear()
