@@ -1,12 +1,11 @@
 #Global
-import sys
 import ast
 import logging
 import traceback
 import importlib.util
 import re
 
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
 
@@ -221,7 +220,7 @@ translation = """
         elif isinstance(elt.op, ast.USub) and self.extractValues(elt.operand) == float('inf'):
             return float('-inf')
         elif isinstance(elt.op, ast.USub) and isinstance(self.extractValues(elt.operand), (int, float)):
-            return -operand
+            return -1*self.extractValues(elt.operand)
         return None
 
     def getParametersFromConstraints(self, constraints_str: str, targetName: str) -> []:

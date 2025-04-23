@@ -1,9 +1,8 @@
 # Global
-import sys
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
-from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QSpacerItem, 
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSpacerItem, 
     QSizePolicy, QLabel, QGraphicsView, QGraphicsScene)
 from PySide6.QtCore import QSize 
 from PySide6.QtDataVisualization import (Q3DScatter, QScatterDataItem, 

@@ -1,10 +1,9 @@
 # Global
-import sys
 import re
 from types import MethodType
 from typing import Union
 
-from PySide6.QtWidgets import QApplication, QDialog, QHBoxLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit, QSizePolicy
 
