@@ -119,19 +119,17 @@ translation = """
                 return i, sublist.index(item)
 
     @staticmethod
-    def removeFromList(listItems: [VAL_TYPE], listToCompare: [VAL_TYPE]) -> [str]:
+    def removeFromList(listItems: [VAL_TYPE], listToCompare: [VAL_TYPE]):
         """Remove items from a list if in another list"""
 
-        removedPars = []
+        finalpars = []
         for item in listItems:
             for statement in listToCompare:
-                if item in statement:
+                if item not in statement:
                     #NOTE: library names, "from" and "import" will also be removeds
-                    removedPars.append(item)
-
-        for remove in removedPars:
-            if remove in listItems:
-                listItems.remove(remove)
+                    finalpars.append(item)
+        # Explicilty modify list sent to the method
+        listItems = finalpars
 
     def ifParameterExists(self, lineNames: [str], modelPars: [[str]]) -> bool:
         """Check if parameter exists in model parameters"""
