@@ -254,10 +254,10 @@ class NewInvertor():
         # Reset the background value before proceeding
         # self.background = 0.0
         if not self.est_bck:
-            self.y -= self.background
+            self.logic.data.y -= self.background
         out, cov = self.lstsq(nfunc, nr=nr)
         if not self.est_bck:
-            self.y += self.background
+            self.logic.data.y += self.background
         return out, cov
 
     def iq(self, pars, q):
