@@ -6,7 +6,6 @@ from typing import Optional, Tuple, List, Any
 
 
 ################################ Type Hints ################################
-
 Vector2D = Tuple[np.ndarray, np.ndarray]
 Vector3D = Tuple[np.ndarray, np.ndarray, np.ndarray]
 Vector4D = Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
@@ -58,21 +57,17 @@ class <NAME OF SUBUNIT HERE>:
           return idx
 '''
 
+
 class Sphere:
     def __init__(self, dimensions: List[float]):
         self.R = dimensions[0]
 
-
-
     def getVolume(self) -> float:
         """Returns the volume of a sphere"""
-
         return (4 / 3) * np.pi * self.R**3
-    
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a sphere"""
-
         Volume = self.getVolume()
         Volume_max = (2*self.R)**3 ###Box around sphere.
         Vratio = Volume_max/Volume
@@ -87,7 +82,6 @@ class Sphere:
         x_add,y_add,z_add = x[idx], y[idx], z[idx]
 
         return x_add, y_add, z_add
-
 
     def checkOverlap(self, 
                      x_eff: np.ndarray, 
@@ -105,19 +99,15 @@ class HollowSphere:
         self.R = dimensions[0]
         self.r = dimensions[1]
 
-
     def getVolume(self) -> float:
         """Returns the volume of a hollow sphere"""
-
         if self.r > self.R:
             self.R, self.r = self.r, self.R
 
         if self.r == self.R:
             return 4 * np.pi * self.R**2 #surface area of a sphere
-
         else: 
             return (4 / 3) * np.pi * (self.R**3 - self.r**3)
-
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a hollow sphere"""
@@ -147,7 +137,6 @@ class HollowSphere:
         x_add, y_add, z_add = x[idx], y[idx], z[idx]
         return x_add, y_add, z_add
 
-
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
@@ -170,17 +159,13 @@ class Cylinder:
     def __init__(self, dimensions: List[float]):
         self.R = dimensions[0]
         self.l = dimensions[1]
-    
 
     def getVolume(self) -> float:
         """Returns the volume of a cylinder"""
-
         return np.pi * self.R**2 * self.l
-    
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a cylinder"""
-
         Volume = self.getVolume()
         Volume_max = 2 * self.R * 2 * self.R * self.l
         Vratio = Volume_max / Volume
@@ -195,12 +180,10 @@ class Cylinder:
 
         return x_add, y_add, z_add
 
-
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a cylinder"""
-
         d = np.sqrt(x_eff**2+y_eff**2)
         idx = np.where((d > self.R) | (abs(z_eff) > self.l / 2))
         return idx
@@ -212,12 +195,9 @@ class Ellipsoid:
         self.b = dimensions[1]
         self.c = dimensions[2]
 
-
     def getVolume(self) -> float:
         """Returns the volume of an ellipsoid"""
-
         return (4 / 3) * np.pi * self.a * self.b * self.c
-
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of an ellipsoid"""
@@ -236,15 +216,12 @@ class Ellipsoid:
 
         return x_add, y_add, z_add
 
-
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
         """check for points within a ellipsoid"""
-
         d2 = x_eff**2 / self.a**2 + y_eff**2 / self.b**2 + z_eff**2 / self.c**2
         idx = np.where(d2 > 1)
-
         return idx
 
 
@@ -254,16 +231,12 @@ class EllipticalCylinder:
         self.b = dimensions[1]
         self.l = dimensions[2]
 
-
     def getVolume(self) -> float:
         """Returns the volume of an elliptical cylinder"""
-
         return np.pi * self.a * self.b * self.l
-
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of an elliptical cylinder"""
-
         Volume = self.getVolume()
         Volume_max = 2 * self.a * 2 * self.b * self.l
         Vratio = Volume_max / Volume
@@ -278,16 +251,13 @@ class EllipticalCylinder:
         x_add, y_add, z_add = x[idx], y[idx], z[idx]
 
         return x_add, y_add, z_add
-    
 
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a Elliptical cylinder"""
-
         d2 = x_eff**2 / self.a**2 + y_eff**2 / self.b**2
         idx = np.where((d2 > 1) | (abs(z_eff) > self.l / 2))
-
         return idx
 
 
@@ -299,34 +269,26 @@ class Cube:
     def __init__(self, dimensions: List[float]):
         self.a = dimensions[0]
 
-
     def getVolume(self) -> float:
         """Returns the volume of a cube"""
-
         return self.a**3
-    
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a cube"""
 
         #Volume = self.getVolume()
-
         N = Npoints
         x_add = np.random.uniform(-self.a / 2, self.a / 2, N)
         y_add = np.random.uniform(-self.a / 2, self.a / 2, N)
         z_add = np.random.uniform(-self.a / 2, self.a / 2, N)
-
         return x_add, y_add, z_add
-
 
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a cube"""
-
         idx = np.where((abs(x_eff) >= self.a/2) | (abs(y_eff) >= self.a/2) | 
             (abs(z_eff) >= self.a/2))
-        
         return idx
 
 
@@ -334,7 +296,6 @@ class HollowCube:
     def __init__(self, dimensions: List[float]):
         self.a = dimensions[0]
         self.b = dimensions[1]
-
 
     def getVolume(self) -> float:
         """Returns the volume of a hollow cube"""
@@ -347,7 +308,6 @@ class HollowCube:
 
         else: 
             return (self.a - self.b)**3
-    
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a hollow cube"""
@@ -390,7 +350,6 @@ class HollowCube:
 
         return x_add, y_add, z_add
 
-
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
@@ -417,32 +376,23 @@ class Cuboid:
         self.b = dimensions[1]
         self.c = dimensions[2]
 
-
     def getVolume(self) -> float:
         """Returns the volume of a cuboid"""
-
         return self.a * self.b * self.c
-    
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a cuboid"""
-
-        Volume = self.getVolume()
         x_add = np.random.uniform(-self.a, self.a, Npoints)
         y_add = np.random.uniform(-self.b, self.b, Npoints)
         z_add = np.random.uniform(-self.c, self.c, Npoints)
-
         return x_add, y_add, z_add
-    
 
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a Cuboid"""
-
         idx = np.where((abs(x_eff) >= self.a/2) 
         | (abs(y_eff) >= self.b/2) | (abs(z_eff) >= self.c/2))
-
         return idx
 
 
@@ -451,7 +401,6 @@ class CylinderRing:
         self.R = dimensions[0]
         self.r = dimensions[1]
         self.l = dimensions[2]
-    
 
     def getVolume(self) -> float:
         """Returns the volume of a cylinder ring"""
@@ -465,10 +414,8 @@ class CylinderRing:
         else: 
             return np.pi * (self.R**2 - self.r**2) * self.l
 
-
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a cylinder ring"""
-
         Volume = self.getVolume()
 
         if self.r == self.R:
@@ -491,12 +438,10 @@ class CylinderRing:
 
         return x_add, y_add, z_add
 
-
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a cylinder ring"""
-
         d = np.sqrt(x_eff**2 + y_eff**2)
         if self.r > self.R:
             self.R, self.r = self.r, self.R
@@ -526,17 +471,14 @@ class Superellipsoid:
 
         return gamma(a) * gamma(b) / gamma(a + b)
 
-
     def getVolume(self) -> float:
         """Returns the volume of a superellipsoid"""
 
         return (8 / (3 * self.t * self.s) * self.R**3 * self.eps * 
                 self.beta(1 / self.s, 1 / self.s) * self.beta(2 / self.t, 1 / self.t))
-    
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
         """Returns the point distribution of a superellipsoid"""
-
         Volume = self.getVolume()
         Volume_max = 2 * self.R * self.eps * 2 * self.R * 2 * self.R
         Vratio = Volume_max / Volume
@@ -552,13 +494,11 @@ class Superellipsoid:
         x_add, y_add, z_add = x[idx], y[idx], z[idx]
 
         return x_add, y_add, z_add
-    
 
     def checkOverlap(self, x_eff: np.ndarray, 
                            y_eff: np.ndarray, 
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a superellipsoid"""
-
         d = ((np.abs(x_eff)**self.s + np.abs(y_eff)**self.s)**(self.t / self.s) 
         + np.abs(z_eff / self.eps)**self.t)
         idx = np.where(d >= np.abs(self.R)**self.t)
@@ -567,30 +507,21 @@ class Superellipsoid:
 
 
 class Qsampling:
-
     def onQsampling(qmin: float, qmax: float, Nq: int) -> np.ndarray:
         """Returns uniform q sampling"""
-
-        q = np.linspace(qmin, qmax, Nq)
-
-        return q
-    
+        return np.linspace(qmin, qmax, Nq)
 
     def onUserSampledQ(q: np.ndarray) -> np.ndarray:
         """Returns user sampled q"""
-
         if isinstance(q, list):
             q = np.array(q)
-
         return q
-    
 
     def qMethodsNames(name: str):
         methods = {
             "Uniform": Qsampling.onQsampling,
             "User_sampled": Qsampling.onUserSampledQ
         }
-
         return methods[name]
     
     def qMethodsInput(name: str):
@@ -598,7 +529,6 @@ class Qsampling:
             "Uniform": {"qmin": 0.001, "qmax": 0.5, "Nq": 400},
             "User_sampled": {"q": Qsampling.onQsampling(0.001, 0.5, 400)} #if the user does not input q
         }
-
         return inputs[name]
 
 
@@ -621,15 +551,12 @@ class Rotation:
         self.rotp_x = rotp_x
         self.rotp_y = rotp_y
         self.rotp_z = rotp_z
-
     
     def onRotatingPoints(self) -> Vector3D:
         """Simple Euler rotation"""
-
         self.x_add -= self.rotp_x
         self.y_add -= self.rotp_y
         self.z_add -= self.rotp_z
-
 
         x_rot = (self.x_add * np.cos(self.gam) * np.cos(self.beta) 
              + self.y_add * (np.cos(self.gam) * np.sin(self.beta) * np.sin(self.alpha) - np.sin(self.gam) * np.cos(self.alpha)) 
@@ -666,11 +593,9 @@ class Translation:
         self.com_x = com_x
         self.com_y = com_y
         self.com_z = com_z
-        
     
     def onTranslatingPoints(self) -> Vector3D:
         """Translates points"""
-
         return self.x_add + self.com_x, self.y_add + self.com_y, self.z_add + self.com_z
 
 
@@ -688,15 +613,12 @@ class GeneratePoints:
         self.rotation = rotation
         self.rotation_point = rotation_point
         self.Npoints = Npoints
-        
 
     def onGeneratingPoints(self) -> Vector3D:
         """Generates the points"""
         x, y, z= self.subunitClass(self.dimensions).getPointDistribution(self.Npoints)
         x, y, z = self.onTransformingPoints(x, y, z)
-
         return x, y, z
-
     
     def onTransformingPoints(self, x: np.ndarray, 
                                    y: np.ndarray, 
@@ -734,7 +656,6 @@ class GenerateAllPoints:
         self.exclude_overlap = exclude_overlap
         self.setAvailableSubunits()
 
-
     def setAvailableSubunits(self):
         """Returns the available subunits"""
         self.subunitClasses = {
@@ -767,7 +688,6 @@ class GenerateAllPoints:
                 "Disc ring": DiscRing,
                 
                 "superellipsoid": Superellipsoid}
-    
 
     def getSubunitClass(self, key: str):
         if key in self.subunitClasses:
@@ -843,7 +763,6 @@ class GenerateAllPoints:
 
         return x_add, y_add, z_add, p_add, N_x
 
-
     def onGeneratingAllPointsSeparately(self) -> Vector3D:
         """Generating points for all subunits from each built model, but
         save them separately in their own list"""
@@ -908,7 +827,6 @@ class GenerateAllPoints:
 
         return x_new, y_new, z_new, p_new, volume_total
 
-
     def onGeneratingAllPoints(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
         """Generating points for all subunits from each built model"""
         volume = []
@@ -971,7 +889,6 @@ class GenerateAllPoints:
         return x_new, y_new, z_new, p_new, volume_total
 
 
-
 class WeightedPairDistribution:
     def __init__(self, x: np.ndarray, 
                        y: np.ndarray, 
@@ -993,7 +910,6 @@ class WeightedPairDistribution:
         dist = abs(m - n) 
         return dist
 
-
     def calc_all_dist(self) -> np.ndarray:
         """ 
         calculate all pairwise distances
@@ -1014,7 +930,6 @@ class WeightedPairDistribution:
         dist = dist.astype('float32')
 
         return dist
-
 
     def calc_all_contrasts(self) -> np.ndarray:
         """
@@ -1061,7 +976,6 @@ class WeightedPairDistribution:
         Rg = np.sqrt(abs(sum_pr_r2 / sum_pr) / 2)
 
         return Rg
-    
     
     def calc_hr(self, 
                 dist: np.ndarray, 
@@ -1114,7 +1028,6 @@ class WeightedPairDistribution:
         print(f"        Dmax: {Dmax:.3e} A")
 
         return r, hr
-    
 
     def calc_pr(self, Nbins: int, polydispersity: float) -> Vector3D:
         """
@@ -1159,7 +1072,6 @@ class WeightedPairDistribution:
         """
         save p(r) to textfile
         """
-
         with open('pr%s.dat' % Model,'w') as f:
             f.write('# %-17s %-17s\n' % ('r','p(r)'))
             for i in range(Nbins):
@@ -1178,7 +1090,6 @@ class StructureDecouplingApprox:
         self.z_new = z_new
         self.p_new = p_new
 
-
     def calc_com_dist(self) -> np.ndarray:
         """ 
         calc contrast-weighted com distance
@@ -1193,7 +1104,6 @@ class StructureDecouplingApprox:
         com_dist = np.sqrt(dx**2 + dy**2 + dz**2)
 
         return com_dist
-
 
     def calc_A00(self) -> np.ndarray:
         """
@@ -1210,7 +1120,6 @@ class StructureDecouplingApprox:
         A00 = A00 / A00[0] # normalise, A00[0] = 1
 
         return A00
-
     
     def decoupling_approx(self, Pq: np.ndarray, S: np.ndarray) -> np.ndarray:
         """
@@ -1236,7 +1145,6 @@ class StructureDecouplingApprox:
         S_eff = 1 + Beta * (S - 1)
 
         return S_eff
-    
 
 
 '''#template for the structure factor classes
@@ -1278,7 +1186,6 @@ class HardSphereStructure(StructureDecouplingApprox):
         self.p_new = p_new
         self.conc = par[0]
         self.R_HS = par[1]
-
 
     def calc_S_HS(self) -> np.ndarray:
         """
@@ -1329,7 +1236,6 @@ class HardSphereStructure(StructureDecouplingApprox):
         G = a * fa / A**2 + b * fb / A**3 + c * fc / A**5
 
         return G
-    
 
     def structure_eff(self, Pq: np.ndarray) -> np.ndarray:
         S = self.calc_S_HS()
@@ -1354,7 +1260,6 @@ class Aggregation(StructureDecouplingApprox):
         self.Naggr = par[1]
         self.fracs_aggr = par[2]
 
-
     def calc_S_aggr(self) -> np.ndarray:
         """
         calculates fractal aggregate structure factor with dimensionality 2
@@ -1374,7 +1279,6 @@ class Aggregation(StructureDecouplingApprox):
         S_aggr = 1 + (self.Naggr - 1)/(1 + qR**2 * self.Naggr / 3)
 
         return S_aggr
-    
 
     def structure_eff(self, Pq: np.ndarray) -> np.ndarray:
         """Return effective structure factor for aggregation"""
@@ -1416,7 +1320,6 @@ class StructureFactor:
         self.Stype = Stype
         self.par = par
         self.setAvailableStructureFactors()
-
 
     def setAvailableStructureFactors(self):
         """Available structure factors"""
@@ -1469,7 +1372,6 @@ class ITheoretical:
     def __init__(self, q: np.ndarray):
         self.q = q
 
-
     def calc_Pq(self, r: np.ndarray, pr: np.ndarray, conc: float, volume_total: float) -> Vector2D:
         """
         calculate form factor, P(q), and forward scattering, I(0), using pair distribution, p(r) 
@@ -1494,7 +1396,6 @@ class ITheoretical:
         I0 *= conc * volume_total * 1E-4
 
         return I0, Pq
-    
 
     def calc_Iq(self, Pq: np.ndarray, 
                 S_eff: np.ndarray, 
@@ -1515,7 +1416,6 @@ class ITheoretical:
             I *= roughness
 
         return I
-    
 
     def save_I(self, I: np.ndarray, Model: str):
         """Save theoretical intensity to file"""
@@ -1525,7 +1425,6 @@ class ITheoretical:
             f.write('# %-12s %-12s\n' % ('q','I'))
             for i in range(len(I)):
                 f.write('  %-12.5e %-12.5e\n' % (self.q[i], I[i]))
-
 
 
 class IExperimental:
@@ -1538,8 +1437,6 @@ class IExperimental:
         self.I0 = I0
         self.I = I
         self.exposure = exposure
-
-
 
     def simulate_data(self) -> Vector2D:
         """
@@ -1605,7 +1502,6 @@ class IExperimental:
         Isim = np.random.normal(mu, sigma)
 
         return Isim, sigma
-    
 
     def save_Iexperimental(self, Isim: np.ndarray, sigma: np.ndarray, Model: str):
         with open('Isim%s.dat' % Model,'w') as f:
