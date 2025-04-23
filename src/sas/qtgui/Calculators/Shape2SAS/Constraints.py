@@ -245,10 +245,6 @@ translation = """
         parameters = self.getParametersFromConstraints(constraintsStr, 'parameters')
         names = [parameter[0] for parameter in parameters]
 
-        if not parameters:
-            self.logException("ValueError: No list of fit parameters found in variable parameters")
-            raise ValueError("No list of fit parameters found in variable parameters")
-
         #Check parameters in constraints
         if len(names) != len(fitPar):
             self.logException("ValueError: Number of parameters in variable parameters does not match checked parameters in table")
