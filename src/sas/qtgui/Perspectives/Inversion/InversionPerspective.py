@@ -369,7 +369,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             raise RuntimeError(msg)
 
         self.currentTab.data = data
-        self.currentTab.updateTab(data = data, tab_index= tab_index)
+        self.currentTab.updateTab(data = data, tab_id= tab_index)
 
 
 
@@ -428,7 +428,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         else:        
             if data is not None:               
-                tab.updateTab(data = data, tab_index=tab_index)
+                tab.updateTab(data = data, tab_id=tab_index)
                 
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
