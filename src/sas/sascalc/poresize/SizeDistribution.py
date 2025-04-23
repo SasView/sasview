@@ -87,7 +87,7 @@ def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
     std_dev = np.std(numbers)
 
 
-class DistModel(object):
+class DistModel():
     """
     This class is used to construct the matrix of I(q) curves at each value of
     the dimension whose distribution is being sought. For example the Radius of
@@ -132,7 +132,7 @@ class DistModel(object):
         return np.array(self.intensity)
 
 
-class sizeDistribution(object):
+class sizeDistribution():
 
     def __init__(self, data:Data1D):
 
@@ -430,6 +430,9 @@ class sizeDistribution(object):
         #else:
         #    kernel.resolution = rst.Perfect1D(moddata.x)
         
+    def calc_volume_fraction(self):
+        pass
+
 
     def prep_maxEnt(self, sub_intensities:Data1D, full_fit:bool=False, nreps:int = 10):
         """
@@ -487,11 +490,11 @@ class sizeDistribution(object):
         self.update_weights(trim_data)
         init_binsBack = np.ones_like(self.bins)*self.skyBackground*self.scale/self.contrast
         sigma = self.scale/(self.weightFactor*self.weights)
+
         return trim_data, intensities, init_binsBack, sigma
 
     def run_maxEnt(self, maxentdata:Data1D, intensities:list, BinsBack:np.array, sigma:np.array):
         
-        #MethodCall = maxEntMethod()
         ChiSq = []
         BinMag = []
         IMaxEnt = []
@@ -507,12 +510,28 @@ class sizeDistribution(object):
             BinMag.append(bin_magnitude)
             IMaxEnt.append(icalc)
 
-        self.chiSq_maxEnt = np.mean(ChiSq)
-        self.BinMagnitude_maxEnt = np.mean(BinMag)/(2.*self._binDiff)
-        BinErrs = np.std(BinMag)
-        maxentdata.y = np.mean(IMaxEnt)
-        maxentdata.dy = np.std(IMaxEnt)
-        self.Iq_maxEnt  = maxentdata
+        ## Check len of intensities for full vs. quick fit
+        if len(intensities) == 1:
+            self.chiSq_maxEnt = np.mean(ChiSq)
+            self.BinMagnitude_maxEnt = np.mean(BinMag,axis=0)/(2.*self._binDiff)
+
+            BinErrs = None 
+            maxentdata.y = np.mean(IMaxEnt, axis=0)
+            maxentdata.dy = None
+            self.Iq_maxEnt  = maxentdata
+            
+        elif len(intensities) > 1:
+            self.chiSq_maxEnt = np.mean(ChiSq)
+            self.BinMagnitude_maxEnt = np.mean(BinMag, axis=0)/(2.*self._binDiff)
+
+            BinErrs = np.std(BinMag, axis=0)
+            maxentdata.y = np.mean(IMaxEnt, axis=0)
+            maxentdata.dy = np.std(IMaxEnt, axis=0)
+            self.Iq_maxEnt  = maxentdata
+
+        else:
+            print('How did I get here?')
+
         
         return self.chiSq_maxEnt, self.bins, self._binDiff, self.BinMagnitude_maxEnt, BinErrs, maxentdata
 

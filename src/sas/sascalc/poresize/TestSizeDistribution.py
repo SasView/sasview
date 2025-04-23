@@ -121,7 +121,7 @@ size_distribution.weightFactor = 1.0/2.0
 background = np.ones(len(data_from_loader.y))*0.120605
 
 subdata = data_info.Data1D(x=Q, y=background, dx=None, dy=background*0.0001, lam=None, dlam=None, isSesans=False)
-trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=True)
+trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=False)
 
 print(sigma)
 operation = matrix_operation()
@@ -136,7 +136,7 @@ plt.loglog(trim_data.x, size_distribution.model_matrix[:,0:200:10])
 #plt.loglog(trim_data.x, gqr[:,10])
 plt.show()
 chisq, Bins, Dbins, BinMag, BinErr, MaxEntData = size_distribution.run_maxEnt(trim_data, intensities, init_binsBack, sigma)
-print(chisq)
+print(BinMag, BinErr, MaxEntData.y)
 
 
 
