@@ -164,7 +164,7 @@ class sizeDistribution():
         #advanced parameters for MaxEnt 
         self._iterMax = 5000
         self._skyBackground = 1e-6
-        self._useWeights = False
+        self._useWeights = True
         self._weightType = 'dI'  
         self._weightFactor = 1.0
         self._weights = self.data.dy

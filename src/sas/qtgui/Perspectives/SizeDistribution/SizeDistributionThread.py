@@ -48,6 +48,7 @@ class SizeDistributionThread(CalcThread):
             sd.model = self.params.model
             sd.iterMax = self.params.max_iterations
             sd.skyBackground = self.params.sky_background
+            sd.useWeights = True
             sd.weightType = self.params.weight_type
             sd.weightFactor = self.params.weight_factor
             sd.nbins = self.params.num_bins
