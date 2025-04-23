@@ -75,6 +75,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.results: list[InversionResult] = [self.initResult()]
 
         self.setupUi(self)
+        self.setupValidators()
 
         self.currentData = data
         self.isCalculating: bool = False
