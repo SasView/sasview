@@ -245,8 +245,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.regConstantSuggestionButton.setText(str(alpha))
 
     def acceptsData(self) -> bool:
-        # TODO: Temporary
-        return True
+        return self.currentData is None
 
     def threadError(self, error: str):
         logger.error(error)
