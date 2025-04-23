@@ -158,7 +158,7 @@ class InversionLogic(object):
 
         if self.data.dy is not None:
             self.data.dy = np.where(self.data.dy < 0.0, np.sqrt(np.fabs(self.data.y))*sigma, self.data.dy)
-            self.data.dy = np.where(np.fabs(self.data.dy) < 1e-16, 1e16, self.data.dy)
+            self.data.dy = np.where(np.fabs(self.data.dy) < 1e-16, 1e-16, self.data.dy)
         return self.data.dy
 
     def computeDataRange(self):
