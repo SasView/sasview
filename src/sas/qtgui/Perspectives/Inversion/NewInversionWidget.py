@@ -58,6 +58,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     calculationComplete = Signal()
     estimationComplete = Signal()
+    changeBackgroundMode = Signal()
 
     def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
         super(NewInversionWidget, self).__init__()
@@ -102,6 +103,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.noOfTermsSuggestionButton.clicked.connect(self.applyNumTermsEstimate)
         self.regConstantSuggestionButton.clicked.connect(self.applyRegConstantEstimate)
         self.explorerButton.clicked.connect(self.openExplorerWindow)
+        self.estimateBgd.pressed.connect(self.handleBackgroundModeChange)
+        self.manualBgd.pressed.connect(self.handleBackgroundModeChange)
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: Data1D, tab_id: int):
@@ -358,3 +361,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             parent=self
         )
         self.dmaxWindow.show()
+
+    def handleBackgroundModeChange(self):
+        if self.estimateBgd.isChecked():
+            self.backgroundInput.setEnabled(True)
+        elif self.manualBgd.isChecked():
+            self.backgroundInput.setEnabled(False)
