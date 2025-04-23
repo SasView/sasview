@@ -416,19 +416,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         icon = QtGui.QIcon()
         # Setting UP batch Mode for 1D data
         if is_batch:
-            tab.setPlotable(False)
-            for element in data:
-                tab.logic.data = GuiUtils.dataFromItem(element)
-                tab.populateDataComboBox(name=tab.logic.data.name, data_ref=element)
-                tab.updateDataList(element)
-                tab.logic.add_errors()
-                tab.setQ()
-            tab.setCurrentData(data[0])
-            tab.setQ()
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
-        else:        
-            if data is not None:               
-                tab.updateTab(data = data, tab_id=tab_index)
+        if data is not None:
+            tab.updateTab(data = data, tab_id=tab_index)
                 
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
