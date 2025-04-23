@@ -4,7 +4,6 @@ import ast
 import traceback
 import importlib.util
 import re
-from typing import Union
 
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtCore import Qt
@@ -17,6 +16,8 @@ from sas.qtgui.Utilities.ModelEditor import ModelEditor
 from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
 from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
 from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
+
+VAL_TYPE = str | int | float
 
 
 class Constraints(QWidget, Ui_Constraints):
@@ -92,8 +93,8 @@ translation = """
             #send to log
             self.logException(traceback_to_show)
 
-    def getConstraints(self, constraintsStr: str, fitPar: list[str], modelPars: list[str], 
-                       modelVals: list[list[float]], checkedPars: list[str]) -> tuple[list[str], str, str, list[list[bool]]]:
+    def getConstraints(self, constraintsStr: str, fitPar: [str], modelPars: [str], modelVals: [[float]],
+                       checkedPars: [str]) -> ([str], str, str, [[bool]]):
         """Read inputs from text editor"""
 
         self.checkPythonSyntax(constraintsStr)
@@ -110,7 +111,7 @@ translation = """
         return importStatement, parameters, translation, checkedPars
 
     @staticmethod
-    def getPosition(item: Union[str, float, int], itemLists: list[list[Union[str, float, int]]]) -> tuple[int, int]:
+    def getPosition(item: VAL_TYPE, itemLists: [[VAL_TYPE]]) -> (int, int):
         """Find position of an item in lists"""
 
         for i, sublist in enumerate(itemLists):
@@ -118,7 +119,7 @@ translation = """
                 return i, sublist.index(item)
 
     @staticmethod
-    def removeFromList(listItems: list[Union[str, float, int]], listToCompare: list[Union[str, float, int]]) -> list[str]:
+    def removeFromList(listItems: [VAL_TYPE], listToCompare: [VAL_TYPE]) -> [str]:
         """Remove items from a list if in another list"""
 
         removedPars = []
@@ -132,7 +133,7 @@ translation = """
             if remove in listItems:
                 listItems.remove(remove)
 
-    def ifParameterExists(self, lineNames: list[str], modelPars: list[list[str]]) -> bool:
+    def ifParameterExists(self, lineNames: [str], modelPars: [[str]]) -> bool:
         """Check if parameter exists in model parameters"""
 
         for par in lineNames:
@@ -143,11 +144,8 @@ translation = """
 
         return False
 
-    def getTranslation(self, constraintsStr: str, 
-                       importStatement: list[str], 
-                       modelPars: list[list[str]], 
-                       modelVals: list[list[float]], 
-                       checkedPars: list[list[str]]) -> tuple[str, list[list[bool]]]:
+    def getTranslation(self, constraintsStr: str, importStatement: [str], modelPars: [[str]], modelVals: [[float]],
+                       checkedPars: [[str]]) -> (str, [[bool]]):
         """Get translation from constraints"""
 
         #see if translation is in constraints
@@ -239,7 +237,7 @@ translation = """
                 return -operand
         return None
 
-    def getParametersFromConstraints(self, constraints_str: str, targetName: str) -> list:
+    def getParametersFromConstraints(self, constraints_str: str, targetName: str) -> []:
         """Extract parameters from constraints string"""
         tree = ast.parse(constraints_str) #get abstract syntax tree
         
@@ -257,10 +255,8 @@ translation = """
         self.logException(f"ValueError: No {targetName} variable found in constraints")
         raise ValueError(f"No {targetName} variable found in constraints")
 
-
-    def getParameters(self, constraintsStr: str, fitPar: list[str]) -> str:
+    def getParameters(self, constraintsStr: str, fitPar: [str]) -> str:
         """Get parameters from constraints"""
-
 
         #Is anything in parameters?
         parameters = self.getParametersFromConstraints(constraintsStr, 'parameters')
@@ -286,8 +282,7 @@ translation = """
 
         return parameters_str
 
-
-    def isImportFromStatement(self, node: ast.ImportFrom) -> list[str]:
+    def isImportFromStatement(self, node: ast.ImportFrom) -> [str]:
         """Return list of ImportFrom statements"""
 
         #Check if library exists
@@ -309,8 +304,7 @@ translation = """
         
         return [f"from {node.module} import {', '.join(imports)}"]
 
-
-    def isImportStatement(self, node: ast.Import) -> list[str]:
+    def isImportStatement(self, node: ast.Import) -> [str]:
         """Return list of Import statements"""
 
         imports = []
@@ -326,9 +320,8 @@ translation = """
                 imports.append(f"{alias.name}")
 
         return [f"import {', '.join(imports)}"]
-    
 
-    def getImportStatements(self, text: str) -> list[str]:
+    def getImportStatements(self, text: str) -> [str]:
         """return all import statements that were 
         written in the text editor"""
 
@@ -352,7 +345,6 @@ translation = """
             self.logException(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")
             raise SyntaxError(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")
             return
-
     
     def logException(self, exception):
         htmlise = "<br>".join(exception.split("\n"))
@@ -375,10 +367,3 @@ translation = """
         """Close constraints page"""
 
         self.close()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    widget = Constraints()
-    widget.show()
-    sys.exit(app.exec())
