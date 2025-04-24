@@ -33,8 +33,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         self.onLoad()
 
+        # Initialize instance parameters
+        self.model_selector = None
+        self.param_editor = None
+        self.highlight = None
+        self.loaded_model_name = None
         self.is_modified = False
-        self.loaded_model_name = None # Name of model loaded into oldParamTree
+        self.old_model_name = None
     
     def addSignals(self):
         self.selectModelButton.clicked.connect(self.onSelectModel)
@@ -91,7 +96,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Launch model selection dialog
         """
         self.model_selector = ModelSelector(self)
-        self.model_selector.returnModelParamsSignal.connect(lambda model_name, params: self.loadParams(params, self.oldParamTree, model_name))
+        self.model_selector.returnModelParamsSignal.connect(
+            lambda model_name, params: self.loadParams(params, self.oldParamTree, model_name))
         self.model_selector.show()
 
     def loadParams(self, params, tree, model_name=None):
@@ -102,7 +108,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         :param model_name: the name of the model that the parameters are from
         """
         if tree == self.oldParamTree:
-            tree.clear() # Clear the tree widget
+            tree.clear()  # Clear the tree widget
             self.loaded_model_name = model_name
         
         if not tree.isEnabled():
@@ -140,15 +146,15 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         Add parameter to "New parameters box" by invoking parameter editor dialog
         """
-        self.param_creator = ParameterEditDialog(self)
-        self.param_creator.returnNewParamsSignal.connect(lambda params: self.loadParams(params, self.newParamTree))
-        self.param_creator.show()
+        self.param_editor = ParameterEditDialog(self)
+        self.param_editor.returnNewParamsSignal.connect(lambda params: self.loadParams(params, self.newParamTree))
+        self.param_editor.show()
     
     def onDeleteParam(self):
         """
         Delete the selected parameter from the newParamTree
         """
-        delete_sucessful = False # Track whether the delete action was sucessful or not
+        delete_sucessful = False  # Track whether the delete action was successful or not
 
         # Get selected item
         selected_item = self.newParamTree.currentItem()
@@ -176,7 +182,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Edit the selected parameter in a new parameter editor dialog
         """
         # Get selected item
-        selected_item = self.newParamTree.currentItem() # The item that the user selected (could be a sub-item)
+        selected_item = self.newParamTree.currentItem()  # The item that the user selected (could be a sub-item)
         if not selected_item:
             # User has no current selection in newParamTree. Throw a warning dialog and return.
             msg = "No parameter selected. Please select a parameter to edit."
@@ -193,10 +199,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         # Find the parameter item by using param_to_open and format as a dictionary
         param_properties = self.getParamProperties(param_to_open)
-        param_properties['highlighted_property'] = highlighted_property # TODO: Which property the cursor will start on
-        self.param_editor = ParameterEditDialog(self, param_properties, param_to_open)
-        self.param_editor.returnEditedParamSignal.connect(self.updateParam)
-        self.param_editor.show()
+        param_properties['highlighted_property'] = highlighted_property  # TODO: Which property the cursor will start on
+        self.onAddParam()
     
     def getParamProperties(self, param) -> dict:
         """
@@ -205,7 +209,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         properties = {}
         properties['name'] = param.text(0)
-        for property in range(param.childCount()): # Iterate over all properties (children) of the parameter and add them to dict
+        # Iterate over all properties (children) of the parameter and add them to dict
+        for property in range(param.childCount()):
             if param.child(property).text(0) == 'description':
                 # Access the description text, which is in another sub-item
                 prop_item = param.child(property).child(0)
@@ -221,7 +226,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         :param updated_param: Sasview Parameter class with updated properties
         :param qtree_item: the qtree_item to update
         """
-        unpacked_param = updated_param[0] # updated_param is sent as a list but will only have one item. Unpack it.
+        unpacked_param = updated_param[0]  # updated_param is sent as a list but will only have one item. Unpack it.
 
         # Delete all sub-items of the parameter
         while qtree_item.childCount() > 0:
@@ -232,8 +237,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.addSubItems(unpacked_param, qtree_item)
         # Make sure to update the name of the parameter
         qtree_item.setText(0, unpacked_param.name)
-        self.badPropsCheck(qtree_item) # Check for bad parameter properties
-        self.checkDuplicates(self.newParamTree) # Check for duplicate parameter names
+        self.badPropsCheck(qtree_item)  # Check for bad parameter properties
+        self.checkDuplicates(self.newParamTree)  # Check for duplicate parameter names
     
     def onApply(self):
         """
@@ -271,7 +276,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             msgBox = QtWidgets.QMessageBox(self)
             msgBox.setIcon(QtWidgets.QMessageBox.Warning)
             msgBox.setWindowTitle("Model Warning")
-            msgBox.setText("Some of your parameters contain warnings.\nThis could cause errors or unexpected behavior in the model.")
+            msgBox.setText("Some of your parameters contain warnings.\n"
+                           "This could cause errors or unexpected behavior in the model.")
             msgBox.addButton("Continue anyways", QtWidgets.QMessageBox.AcceptRole)
             cancelButton = msgBox.addButton(QtWidgets.QMessageBox.Cancel)
 
@@ -285,7 +291,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         # Write the new model to the file
         model_text = self.generateModelText()
         self.writeModel(output_file_path, model_text)
-        self.parent.communicate.customModelDirectoryChanged.emit() # Refresh the list of custom models
+        self.parent.communicate.customModelDirectoryChanged.emit()  # Refresh the list of custom models
 
         # Test the model for errors (file must be generated first)
         error_line = self.checkModel(output_file_path)
@@ -296,7 +302,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         self.addTooltips() # Reset the tooltips
 
         # Notify user that model was written sucessfully
-        msg = "Reparameterized model "+ model_name + " successfully created."
+        msg = "Reparameterized model " + model_name + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
     
@@ -309,10 +315,10 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         Generate the output model text
         """
-        output = "" # TODO: Define the output model text, this is just a placeholder function for now
         translation_text = self.txtFunction.toPlainText()
         old_model_name = self.old_model_name
         parameters_text = ""
+        # Order in this list MATTERS! Don't change or the order of properties in the output model will be wrong.
         output_properties = [
             "name",
             "units",
@@ -321,7 +327,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             "max",
             "type",
             "description"
-        ] # Order in this list MATTERS! Do not change it; it will change the order of parameter properties in the output model
+        ]
 
         # Format the parameters into text for the output file
         for i in range(self.newParamTree.topLevelItemCount()):
@@ -331,8 +337,9 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             for output_property in output_properties:
                 if output_property not in ('min', 'max'):
                     # Add the property to the output text
-                    parameters_text += f"{param_properties[output_property]}, " if output_property == "default" else f"'{param_properties[output_property]}', "
-                # 'min' and 'max' must be formatted together as a list in the output, so we need to handle them separately
+                    parameters_text += f"{param_properties[output_property]}, " if output_property == "default" \
+                        else f"'{param_properties[output_property]}', "
+                # min and max must be formatted together as a list in the output, so we need to handle them separately
                 elif output_property == 'min':
                     parameters_text += f"[{param_properties[output_property]}, "
                 elif output_property == 'max':
@@ -340,7 +347,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
             parameters_text = parameters_text[:-2] # Remove trailing comma and space
             parameters_text += "],"
-        output = REPARAMETARIZED_MODEL_TEMPLATE.format(parameters=parameters_text, translation=translation_text, old_model_name=old_model_name)
+        output = REPARAMETARIZED_MODEL_TEMPLATE.format(
+            parameters=parameters_text, translation=translation_text, old_model_name=old_model_name)
         return output
 
     def addSubItems(self, param, top_item):
@@ -348,16 +356,15 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Add sub-items to the given top-level item for the given parameter
         :param param: the Sasmodels Parameter class that contains properties to add
         :param top_item: the top-level item to add the properties to (QTreeWidgetItem)
-        :param append: Whether or not to include parameter when exporting to model file
         """
         # Create list of properties: (display name, property name)
-        properties_index = [ ("default", "default"),
-                    ("min", "limits[0]"),
-                    ("max", "limits[1]"),
-                    ("units", "units"),
-                    ("type", "type")
-                    ]
-        output_properties = {} # Dictionary of properties used in generating the output model text
+        properties_index = [("default", "default"),
+                            ("min", "limits[0]"),
+                            ("max", "limits[1]"),
+                            ("units", "units"),
+                            ("type", "type")
+                            ]
+        output_properties = {}  # Dictionary of properties used in generating the output model text
         for prop in properties_index:
             sub_item = QtWidgets.QTreeWidgetItem(top_item)
             sub_item.setText(0, prop[0]) # First column is display name
@@ -371,7 +378,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             else:
                 value = getattr(param, prop[1])
                 sub_item.setText(1, str(value))
-            output_properties[prop[0]] = value # Add property to output dictionary
+            output_properties[prop[0]] = value  # Add property to output dictionary
 
         # Now add the description as a collapsed item, separate from the other properties
         sub_item = QtWidgets.QTreeWidgetItem(top_item)
@@ -379,14 +386,14 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         sub_sub_item = QtWidgets.QTreeWidgetItem(sub_item)
         description = str(param.description)
         sub_sub_item.setText(1, description)
-        output_properties['name'] = param.name # Add name to output dictionary
-        output_properties['description'] = description # Add description to output dictionary
+        output_properties['name'] = param.name  # Add name to output dictionary
+        output_properties['description'] = description  # Add description to output dictionary
     
     def setWindowEdited(self, is_edited):
             """
             Change the widget name to indicate unsaved state
-            Unsaved state: add "*" to filename display
-            saved state: remove "*" from filename display
+            Unsaved state - add "*" to filename display
+            saved state - remove "*" from filename display
             """
             current_text = self.windowTitle()
             # Remove any asterisks from the end of the name
