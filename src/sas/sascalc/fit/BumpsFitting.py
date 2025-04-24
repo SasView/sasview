@@ -340,9 +340,9 @@ class BumpsFit(FitEngine):
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             fitting_result.success = result['success']
             fitting_result.convergence = result['convergence']
-            if result['uncertainty'] is not None:
-                fitting_result.uncertainty_state = result['uncertainty']
-
+            uncertainty = result['uncertainty']
+            if hasattr(uncertainty, "draw"):
+                fitting_result.uncertainty_state = uncertainty
             fitting_result.pvec = np.array([getattr(p.slot, 'n', p.slot) for p in pars])
             fitting_result.stderr = np.array([getattr(p.slot, 's', 0) for p in pars])
             DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
