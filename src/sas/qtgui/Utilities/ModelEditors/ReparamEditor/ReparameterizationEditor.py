@@ -100,10 +100,10 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             lambda model_name, params: self.loadParams(params, self.oldParamTree, model_name))
         self.model_selector.show()
 
-    def loadParams(self, params, tree, model_name=None):
+    def loadParams(self, params: [Parameter], tree: QtWidgets.QTreeWidget, model_name: str | None = None):
         """
         Load parameters from the selected model into a tree widget
-        :param param: sasmodels.modelinfo.Parameter class
+        :param params: sasmodels.modelinfo.Parameter class
         :param tree: the tree widget to load the parameters into
         :param model_name: the name of the model that the parameters are from
         """
@@ -154,7 +154,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         Delete the selected parameter from the newParamTree
         """
-        delete_sucessful = False  # Track whether the delete action was successful or not
+        delete_successful = False  # Track whether the delete action was successful or not
 
         # Get selected item
         selected_item = self.newParamTree.currentItem()
@@ -166,13 +166,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             if param == param_to_delete:
                 # Remove the parameter from the tree
                 self.newParamTree.takeTopLevelItem(i)
-                delete_sucessful = True
+                delete_successful = True
         
         if self.newParamTree.topLevelItemCount() == 0:
             # If there are no parameters left, disable the tree
             self.newParamTree.setEnabled(False)
         
-        if not delete_sucessful:
+        if not delete_successful:
             return logger.warning("Could not find parameter to delete: %s" % param_to_delete.text(0))
         else:
             self.editorModelModified()
@@ -202,25 +202,24 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         param_properties['highlighted_property'] = highlighted_property  # TODO: Which property the cursor will start on
         self.onAddParam()
     
-    def getParamProperties(self, param) -> dict:
+    def getParamProperties(self, param: QtWidgets.QTreeWidgetItem) -> dict:
         """
         Return a dictionary of property name: value pairs for the given parameter
         :param param: the parameter to get properties for (QTreeWidgetItem)
         """
-        properties = {}
-        properties['name'] = param.text(0)
+        properties = {'name': param.text(0)}
         # Iterate over all properties (children) of the parameter and add them to dict
-        for property in range(param.childCount()):
-            if param.child(property).text(0) == 'description':
+        for prop in range(param.childCount()):
+            if param.child(prop).text(0) == 'description':
                 # Access the description text, which is in another sub-item
-                prop_item = param.child(property).child(0)
+                prop_item = param.child(prop).child(0)
                 properties['description'] = prop_item.text(1)
             else:
-                prop_item = param.child(property)
+                prop_item = param.child(prop)
                 properties[prop_item.text(0)] = prop_item.text(1)
         return properties
     
-    def updateParam(self, updated_param: Parameter, qtree_item: QtWidgets.QTreeWidgetItem):
+    def updateParam(self, updated_param: [Parameter], qtree_item: QtWidgets.QTreeWidgetItem):
         """
         Update given parameter in the newParamTree with the updated properties
         :param updated_param: Sasview Parameter class with updated properties
@@ -351,7 +350,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             parameters=parameters_text, translation=translation_text, old_model_name=old_model_name)
         return output
 
-    def addSubItems(self, param, top_item):
+    def addSubItems(self, param: Parameter, top_item: QtWidgets.QTreeWidgetItem):
         """
         Add sub-items to the given top-level item for the given parameter
         :param param: the Sasmodels Parameter class that contains properties to add
@@ -367,7 +366,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         output_properties = {}  # Dictionary of properties used in generating the output model text
         for prop in properties_index:
             sub_item = QtWidgets.QTreeWidgetItem(top_item)
-            sub_item.setText(0, prop[0]) # First column is display name
+            sub_item.setText(0, prop[0])  # First column is display name
             if '[' in prop[1]:
                 # Limit properties have an index, so we need to extract it
                 prop_name, index = prop[1].split('[')
@@ -389,11 +388,11 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         output_properties['name'] = param.name  # Add name to output dictionary
         output_properties['description'] = description  # Add description to output dictionary
     
-    def setWindowEdited(self, is_edited):
+    def setWindowEdited(self, is_edited: bool):
             """
-            Change the widget name to indicate unsaved state
-            Unsaved state - add "*" to filename display
-            saved state - remove "*" from filename display
+            Change the widget name to indicate modified state
+            Modified - add "*" to filename display
+            saved - remove "*" from filename display
             """
             current_text = self.windowTitle()
             # Remove any asterisks from the end of the name
@@ -410,7 +409,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         User modified the model in the Model Editor.
         Disable the plugin editor and show that the model is changed.
         """
-        #Check to see if model was edited back into original state
+        # Check to see if model was edited back into original state
         f_box = True if self.txtFunction.toPlainText() == "" else False
         n_box = True if self.txtNewModelName.text() == "" else False
         p_boxes = True if not self.newParamTree.isEnabled() and not self.oldParamTree.isEnabled() else False
@@ -426,14 +425,11 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             self.cmdApply.setEnabled(True)
             self.is_modified = True
     
-    def checkModel(self, full_path):
+    def checkModel(self, full_path: str | pathlib.Path) -> int:
         """
-        Run ast and model checks
-        Attempt to return the line number of the error if any
+        Run ast and model checks and attempt to return the line number of the error if any
         :param full_path: full path to the model file
-        :param translation_text: the text within
         """
-        # successfulCheck = True
         error_line = 0
         try:
             with open(full_path, 'r', encoding="utf-8") as plugin:
@@ -477,7 +473,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         return error_line
     
-    def badPropsCheck(self, param_item):
+    def badPropsCheck(self, param_item: QtWidgets.QTreeWidgetItem):
         """
         Check a parameter for bad properties.
         :param param_item: the parameter to check (QTreeWidgetItem)
@@ -486,8 +482,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
         # Get dictionary form of properties for easy manipulation
         error_message = ""
-        properties = {}
-        properties['name'] = param_item.text(0)
+        properties = {'name': param_item.text(0)}
         for i in range(param_item.childCount()):
             prop = param_item.child(i)
             if prop.text(0) == "default":
@@ -573,7 +568,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                 updated_tooltip = current_tooltip + "\n" + duplicate_warning
                 self.parameterWarning(item, updated_tooltip)
     
-    def parameterWarning(self, table_item, tool_tip_text):
+    def parameterWarning(self, table_item: QtWidgets.QTreeWidgetItem, tool_tip_text: str):
         """
         Display a warning icon on a parameter and set tooltip.
         :param table_item: The QTreeWidgetItem to add the icon to
@@ -606,7 +601,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
     ### CLASS METHODS ###
 
     @classmethod
-    def removeParameterWarning(cls, table_item):
+    def removeParameterWarning(cls, table_item: QtWidgets.QTreeWidgetItem):
         """
         Remove the warning icon from a parameter
         :param table_item: The QTreeWidgetItem to remove the icon from
@@ -615,7 +610,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         table_item.setIcon(1, QtGui.QIcon())
     
     @classmethod
-    def getParameterSelection(cls, selected_item) -> QtWidgets.QTreeWidgetItem:
+    def getParameterSelection(cls, selected_item: QtWidgets.QTreeWidgetItem) -> QtWidgets.QTreeWidgetItem:
         """
         Return the QTreeWidgetItem of the parameter even if selected_item is a 'property' (sub) item
         :param selected_item: QTreeWidgetItem that represents either a parameter or a property
@@ -634,7 +629,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
     ### STATIC METHODS ###
 
     @staticmethod
-    def writeModel(output_file_path, model_text):
+    def writeModel(output_file_path: str | pathlib.Path, model_text: str):
         """
         Write the new model to the given file
         :param output_file_path: pathlib.Path object pointing to output file location
@@ -649,7 +644,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
     ### OVERRIDES ###
     # Functions that overwrite the default behavior of the parent class
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QtCore.QEvent):
 
         if self.is_modified:
             # Display a warning allowing the user to cancel or continue
