@@ -91,16 +91,16 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
         # Format minimum and maximum values into required format for Parameter object tuple(float, float)
         limits = [minimum_value, maximum_value]
         for i in range(len(limits)):
+            limit_str = limits[i]
+            if "inf" in limit_str and "-" in limit_str:
+                limits[i] = -inf
+            elif limits[i] == inf:
+                limits[i] = inf
             try:
                 limits[i] = float(limits[i])
             except ValueError:
-                if "inf" in limits[i]:
-                    limits[i] = inf
-                    if "-" in limits[i]:
-                        limits[i] = -inf
-                else:
-                    logger.error("Invalid limit value: %s" % limits[i])
-                    return None
+                logger.error("Invalid limit value: %s" % limits[i])
+                return None
         parameter.limits = tuple(limits)
         parameter.default = self.getValuesFromTable(self.valuesTable, "Default")
         parameter.units = self.getValuesFromTable(self.valuesTable, "Units")
