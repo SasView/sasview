@@ -119,6 +119,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         # errors.
         if len(self.results) != 0:
             self.updateGuiValues()
+            self.startEstimateParameters()
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: HashableStandardItem | list[HashableStandardItem], tab_id: int):
