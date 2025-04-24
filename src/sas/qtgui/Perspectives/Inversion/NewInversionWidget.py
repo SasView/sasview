@@ -110,6 +110,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.manualBgd.pressed.connect(self.handleBackgroundModeChange)
         self.dataList.currentIndexChanged.connect(self.handleCurrentDataChanged)
 
+        for input_box in [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput, self.minQInput,
+                          self.maxQInput, self.slitHeightInput, self.slitHeightInput]:
+            input_box.editingFinished.connect(self.startEstimateParameters)
+
     def handleCurrentDataChanged(self):
         # This event might get called before there is anything in the results list. But we can't update the GUI without
         # errors.
