@@ -1,6 +1,7 @@
 
 import numpy as np
-from scipy import stats
+import logging
+from scipy import stats, integrate 
 
 from sasdata.dataloader.data_info import Data1D, DataInfo
 from sasmodels.data import empty_data1D
@@ -10,6 +11,8 @@ from sasmodels.direct_model import DirectModel
 from sasmodels import resolution as rst
 
 from sas.sascalc.poresize.maxEnt_method import matrix_operation, maxEntMethod
+
+logger = logging.getLogger(__name__)
 
 def add_gaussian_noise(x, dx):
     """
@@ -86,6 +89,8 @@ def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
     mean_value = np.mean(numbers)
     std_dev = np.std(numbers)
 
+def ellipse_volume(rp,re):
+    return (4*np.pi/3)*rp*re**2
 
 class DistModel():
     """
@@ -171,8 +176,11 @@ class sizeDistribution():
 
         ## Return Values after the MaxEnt should 
         self.BinMagnitude_maxEnt = np.zeros_like(self.bins)
+        self.BinMagnitude_Errs = None
         self.chiSq_maxEnt = np.inf
         self.Iq_maxEnt = None
+
+        self.MaxEnt_statistics = {'volume':0., 'volume_err':0., 'mean':0., 'median':0., 'mode':0.}
 
     @property
     def data(self):
@@ -268,9 +276,12 @@ class sizeDistribution():
             self._bins = np.logspace(np.log10(self.diamMin),
                                       np.log10(self.diamMax), 
                                        self.nbins+1, True)/2
+            
         else: 
             self._bins = np.linspace(self.diamMin, self.diamMax, self.nbins+1,True)/2
 
+        #self._volume_bins = ellipse_volume(self._bins*self.aspectRatio, )
+        self._bin_edges = self._bins
         self._binDiff = np.diff(self._bins)
         self._bins = self._bins[:-1] + self._binDiff/2  
 
@@ -280,7 +291,11 @@ class sizeDistribution():
 
     @model.setter
     def model(self, value:str):
-        self._model = value   
+        if value != "ellipsoid":
+            logger.warning("model is hard coded to ellipsoid for the time being. Please only use ellipsoid.\n Setting model to ellipsoid.")
+            self._model = "ellipsoid"
+        else:
+            self._model = value   
    
     @property
     def aspectRatio(self):
@@ -346,6 +361,7 @@ class sizeDistribution():
     def useWeights(self, value:bool):
         self._useWeights = value
         self.update_weights()
+
     @property
     def weightFactor(self):
         return self._weightFactor
@@ -367,7 +383,7 @@ class sizeDistribution():
     def weights(self):
         return self._weights
     
-    def update_weights(self, sigma=None):
+    def update_weights(self, sigma=None, percent_value=0.01):
 
         if sigma is None:
             wdata = self.data
@@ -386,9 +402,11 @@ class sizeDistribution():
             elif (self.weightType == 'abs(I Data)'):
                 self._weights = 1/np.abs(wdata.y)
 
-            elif self.weightType == 'None':
+            elif self.weightType == 'percentI':
                 self._useWeights=False
-                self._weights = np.ones_like(wdata.y)
+                self._weights = 1/np.abs(percent_value*wdata.y)
+            else:
+                logger.warning("weightType doesn't match the possible strings for weight selection.\n Please check the value entered or use 'dI'.")
         
         return None
 
@@ -417,7 +435,7 @@ class sizeDistribution():
         intensities = []
         for bin in self.bins:
             pars['radius_equatorial'] = bin
-            pars['radius_polar'] = bin/self.aspectRatio
+            pars['radius_polar'] = bin*self.aspectRatio
             intensities.append(kernel(**pars))
         
         self.model_matrix = np.vstack(intensities).T
@@ -429,11 +447,31 @@ class sizeDistribution():
         #    kernel.resolution = rst.Slit1D(moddata.x, moddata.dx)
         #else:
         #    kernel.resolution = rst.Perfect1D(moddata.x)
+
+
+    def calc_volume_weighted_dist(self, binmag):
+        """
+        Calculate the volume weighted distribution. 
+        """
+        if self.logbin:
+
+            radbins = np.logspace(np.log10(self.diamMin),
+                                      np.log10(self.diamMax), 
+                                       self.nbins+1, True)/2
+            
+        else: 
+            radbins = np.linspace(self.diamMin, self.diamMax, self.nbins+1,True)/2
+
+        self.volume_bins = ellipse_volume(self.aspectRatio*radbins, radbins)
+        self.vbin_diff = np.diff(self.volume_bins)
+        self.volume_bins = self.volume_bins[:-1] + self.vbin_diff/2
+        self.volume_fraction = binmag*self.volume_bins/(2*self.vbin_diff)
+
+        if self.BinMagnitude_Errs is not None:
+            self.volume_fraction_errs = self.BinMagnitude_Errs*(self.volume_bins/(2*self.vbin_diff))
+        else: 
+            self.volume_fraction_errs = None
         
-    def calc_volume_fraction(self):
-        pass
-
-
     def prep_maxEnt(self, sub_intensities:Data1D, full_fit:bool=False, nreps:int = 10):
         """
         1. Subtract intensities from the raw data. 
@@ -498,10 +536,12 @@ class sizeDistribution():
         ChiSq = []
         BinMag = []
         IMaxEnt = []
+        convergence = []
+
          ## run MaxEnt
         for nint, intensity in enumerate(intensities):
             MethodCall = maxEntMethod()
-            chisq, bin_magnitude, icalc = MethodCall.MaxEnt_SB(intensity,
+            chisq, bin_magnitude, icalc, converged, conv_iter = MethodCall.MaxEnt_SB(intensity,
                                                              sigma,
                                                                self.model_matrix,
                                                                  BinsBack,
@@ -509,13 +549,14 @@ class sizeDistribution():
             ChiSq.append(chisq)
             BinMag.append(bin_magnitude)
             IMaxEnt.append(icalc)
+            convergence.append([converged, conv_iter])
 
         ## Check len of intensities for full vs. quick fit
         if len(intensities) == 1:
             self.chiSq_maxEnt = np.mean(ChiSq)
             self.BinMagnitude_maxEnt = np.mean(BinMag,axis=0)/(2.*self._binDiff)
 
-            BinErrs = None 
+            self.BinMagnitude_Errs = None 
             maxentdata.y = np.mean(IMaxEnt, axis=0)
             maxentdata.dy = None
             self.Iq_maxEnt  = maxentdata
@@ -524,16 +565,40 @@ class sizeDistribution():
             self.chiSq_maxEnt = np.mean(ChiSq)
             self.BinMagnitude_maxEnt = np.mean(BinMag, axis=0)/(2.*self._binDiff)
 
-            BinErrs = np.std(BinMag, axis=0)
+            self.BinMagnitude_Errs = np.std(BinMag, axis=0)
             maxentdata.y = np.mean(IMaxEnt, axis=0)
             maxentdata.dy = np.std(IMaxEnt, axis=0)
             self.Iq_maxEnt  = maxentdata
 
         else:
-            print('How did I get here?')
+            logging.error('The length of the intensity array is 0. Did you run prep_maxEnt before run_maxEnt? Check that intensities is an array of at least length 1.')
 
+        #self.calc_volume_weighted_dist(np.mean(BinMag, axis=0))
+        self.calculate_statistics(BinMag)
+
+        return self.chiSq_maxEnt, 2*self.bins, 2*self._binDiff, self.BinMagnitude_maxEnt, self.BinMagnitude_Errs, maxentdata, convergence
+
+    def calculate_statistics(self, bin_mag:list, 
+                             ):
         
-        return self.chiSq_maxEnt, self.bins, self._binDiff, self.BinMagnitude_maxEnt, BinErrs, maxentdata
+        maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag/(2*self._binDiff), 2*self.bins, axis=1)
+        print(maxent_cdf_array[:,-1])
+        self.BinMag_numberDist = self.BinMagnitude_maxEnt/ellipse_volume(self.aspectRatio*self.bins, self.bins)
+
+        rvdist = stats.rv_histogram((self.BinMag_numberDist, self._bin_edges*2))
+        print(rvdist.mean(), rvdist.median())
+        number_cdf = integrate.cumulative_trapezoid(self.BinMag_numberDist, 2*self.bins)
+        self.number_cdf = number_cdf/number_cdf[-1]
+
+        self.maxent_cdf = np.mean(maxent_cdf_array,axis=0)/np.mean(maxent_cdf_array[:,-1])
+        self.MaxEnt_statistics['volume'] = np.mean(maxent_cdf_array[:,-1])
+        self.MaxEnt_statistics['volume_err'] = np.std(maxent_cdf_array[:,-1])
+        self.MaxEnt_statistics['mode'] = 2*self.bins[np.argmax(self.BinMagnitude_maxEnt)]
+        ndx_med = np.where(self.maxent_cdf >= 0.5)[0][0]
+        self.MaxEnt_statistics['median'] = 2*self.bins[ndx_med]
+        self.MaxEnt_statistics['mean'] = rvdist.mean()
+
+
 
 def sizeDistribution_func(input):
     '''

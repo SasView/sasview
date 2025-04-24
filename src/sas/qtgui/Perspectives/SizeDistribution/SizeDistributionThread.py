@@ -56,17 +56,17 @@ class SizeDistributionThread(CalcThread):
             trim_data, intensities, init_bins_back, sigma = sd.prep_maxEnt(
                 self.background, full_fit=self.params.full_fit
             )
-            chisq, bins, bin_diff, bin_mag, bin_err, data_max_ent = sd.run_maxEnt(
+            convergence = sd.run_maxEnt(
                 trim_data, intensities, init_bins_back, sigma
             )
 
             results = MaxEntResult(
-                chisq=chisq,
-                bins=bins,
-                bin_diff=bin_diff,
-                bin_mag=bin_mag,
-                bin_err=bin_err,
-                data_max_ent=data_max_ent,
+                chisq=sd.chiSq_maxEnt,
+                bins=sd.bins*2,
+                bin_diff=sd._binDiff*2,
+                bin_mag=sd.BinMagnitude_maxEnt,
+                bin_err=sd.BinMagnitude_Errs,
+                data_max_ent=sd.Iq_maxEnt,
             )
 
             self.completefn(results)

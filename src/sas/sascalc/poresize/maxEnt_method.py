@@ -306,7 +306,8 @@ class maxEntMethod():
         fSum  = sum(f)                                       # find the sum of the f-vector
         z = (Iq - np.dot(f, Gqr.transpose())) /sigma             # standardized residuals
         chisq = sum(z*z)                                     # Chi^2
-        
+        converged = False
+
         for iter in range(IterMax):
             ox = -2 * z / sigma                                    
             
@@ -384,7 +385,8 @@ class maxEntMethod():
             # do the hardest test first
             if (abs(chisq/chizer-1.0) < CHI_SQR_LIMIT) and  (test < TEST_LIMIT):
                 print (' Convergence achieved.')
-                return chisq,f,np.dot(f, Gqr.transpose())     # solution FOUND returns here
+                converged = True
+                return chisq, f, np.dot(f, Gqr.transpose()), converged, iter     # solution FOUND returns here
         print (' No convergence! Try increasing Error multiplier.')
-        return chisq, f, np.dot(f, Gqr.transpose())             # no solution after IterMax iterations
+        return chisq, f, np.dot(f, Gqr.transpose()), converged, iter             # no solution after IterMax iterations
 
