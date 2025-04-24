@@ -375,6 +375,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.updateGuiValues()
 
     def startEstimateParameters(self):
+        self.updateParams()
         estimation_thread = EstimateNT(
             self.currentResult.calculator,
             self.currentResult.calculator.nfunc,
