@@ -599,7 +599,8 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Show the help page of the loaded model in the OldParamTree
         """
         tree_base = "/user/models/"
-        if self.loaded_model_name is not None:
+        if (self.loaded_model_name is not None
+                and self.loaded_model_name not in list(self.model_selector.custom_models.values())):
             tree_location = tree_base + f"{self.loaded_model_name}.html"
         else:
             logging.info("No model detected to have been loaded. Showing default help page.")
