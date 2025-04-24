@@ -46,6 +46,7 @@ class MaxEntParameters:
     contrast: float = 1.0
     sky_background: float = 1.0e-6
     max_iterations: int = 100
+    use_weights: bool = True
     weight_type: WeightType = WeightType.DI
     weight_factor: float = 1.0
     full_fit: bool = True

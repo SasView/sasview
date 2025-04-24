@@ -1,5 +1,5 @@
 import logging
-
+import sys
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import (
     MaxEntParameters,
@@ -73,4 +73,7 @@ class SizeDistributionThread(CalcThread):
         except KeyboardInterrupt:
             pass
         except Exception:
-            logger.exception("Size distribution fitting failed")
+            if self.error_func is not None:
+                self.error_func(
+                    "Error in size distribution fit: %s" % sys.exc_info()[1]
+                )

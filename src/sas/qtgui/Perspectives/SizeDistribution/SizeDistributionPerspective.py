@@ -328,6 +328,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             background=self.logic.background,
             params=params,
             completefn=self.fittingCompleted,
+            error_func=self.fittingError,
         )
         self.fit_thread.queue()
 
@@ -344,6 +345,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             background=self.logic.background,
             params=params,
             completefn=self.fittingCompleted,
+            error_func=self.fittingError,
         )
         self.fit_thread.queue()
 
@@ -563,6 +565,15 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Send the finish message from calculate threads to main thread
         """
         self.fittingFinishedSignal.emit(result)
+
+    def fittingError(self, error):
+        """
+        Handle error in the calculation thread
+        """
+        # re-enable the fit buttons
+        self.is_calculating = False
+        self.enableButtons()
+        logger.error(error)
 
     def fitComplete(self, result: MaxEntResult) -> None:
         """
