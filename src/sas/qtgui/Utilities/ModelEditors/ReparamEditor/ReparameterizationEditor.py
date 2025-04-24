@@ -238,12 +238,9 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         qtree_item.setText(0, unpacked_param.name)
         self.badPropsCheck(qtree_item)  # Check for bad parameter properties
         self.checkDuplicates(self.newParamTree)  # Check for duplicate parameter names
-    
-    def onApply(self):
-        """
-        Generate output reparameterized model and write to file
-        """
-        # Get the name of the new model
+
+    def _can_be_saved_or_give_error(self):
+        """Check to see if a model name exists and everything can be written"""
         model_name = self.txtNewModelName.text()
         overwrite_plugin = self.chkOverwrite.isChecked()
         user_plugin_dir = pathlib.Path(find_plugins_dir())
@@ -254,38 +251,44 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             msg = "File with specified name already exists.\n"
             msg += "Please specify different filename or allow file overwrite."
             QtWidgets.QMessageBox.critical(self, "Overwrite Error", msg)
-            return
-
+            return False
         # Check if the model name is empty
         if not model_name:
             msg = "No model name specified.\n"
             msg += "Please specify a name before continuing."
             QtWidgets.QMessageBox.critical(self, "Model Error", msg)
+            return False
+        return True
+    
+    def onApply(self):
+        """
+        Generate output reparameterized model and write to file
+        """
+        # Get the name of the new model
+        model_name = self.txtNewModelName.text()
+        user_plugin_dir = pathlib.Path(find_plugins_dir())
+        output_file_path = user_plugin_dir / (model_name + ".py")
+
+        # Check if the file already exists
+        if not self._can_be_saved_or_give_error():
             return
 
         # Check if there are model warnings
-        param_warnings = False
         for i in range(self.newParamTree.topLevelItemCount()):
             param = self.newParamTree.topLevelItem(i)
             if param.toolTip(1) != "":
-                param_warnings = True
-                break
-        if param_warnings:
-            # Display a warning allowing the user to cancel or continue
-            msgBox = QtWidgets.QMessageBox(self)
-            msgBox.setIcon(QtWidgets.QMessageBox.Warning)
-            msgBox.setWindowTitle("Model Warning")
-            msgBox.setText("Some of your parameters contain warnings.\n"
-                           "This could cause errors or unexpected behavior in the model.")
-            msgBox.addButton("Continue anyways", QtWidgets.QMessageBox.AcceptRole)
-            cancelButton = msgBox.addButton(QtWidgets.QMessageBox.Cancel)
-
-            msgBox.exec_()
-
-            # Check which button was clicked
-            if msgBox.clickedButton() == cancelButton:
-                # Cancel button clicked
-                return
+                msgBox = QtWidgets.QMessageBox(self)
+                msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+                msgBox.setWindowTitle("Model Warning")
+                msgBox.setText("Some of your parameters contain warnings.\n"
+                               "This could cause errors or unexpected behavior in the model.")
+                msgBox.addButton("Continue anyways", QtWidgets.QMessageBox.AcceptRole)
+                cancelButton = msgBox.addButton(QtWidgets.QMessageBox.Cancel)
+                msgBox.exec_()
+                # Check which button was clicked
+                if msgBox.clickedButton() == cancelButton:
+                    # Cancel button clicked
+                    return
     
         # Write the new model to the file
         model_text = self.generateModelText()
@@ -298,17 +301,16 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             return
 
         self.txtFunction.setStyleSheet("")
-        self.addTooltips() # Reset the tooltips
+        self.addTooltips()  # Reset the tooltips
 
         # Notify user that model was written sucessfully
-        msg = "Reparameterized model " + model_name + " successfully created."
+        msg = f"Reparameterized model {model_name} successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logger.info(msg)
     
-        if self.is_modified:
-            self.is_modified = False
-            self.setWindowEdited(False)
-            self.cmdApply.setEnabled(False)
+        self.is_modified = False
+        self.setWindowEdited(False)
+        self.cmdApply.setEnabled(False)
     
     def generateModelText(self) -> str:
         """
