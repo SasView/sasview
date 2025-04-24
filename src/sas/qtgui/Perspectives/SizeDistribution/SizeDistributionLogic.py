@@ -124,7 +124,8 @@ class SizeDistributionLogic:
         Create a new 1D data instance based on fitting results
         """
         # Create the new plot
-        x = result.bins
+        #bins are radius but plot is in diameter
+        x = 2 * result.bins
         y = result.bin_mag
         dy = result.bin_err
         new_plot = Data1D(x=x, y=y, dy=dy)
