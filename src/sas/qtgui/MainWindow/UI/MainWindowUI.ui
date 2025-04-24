@@ -118,6 +118,7 @@
     <addaction name="actionAdd_Custom_Model"/>
     <addaction name="actionEdit_Custom_Model"/>
     <addaction name="actionManage_Custom_Models"/>
+    <addaction name="actionReparameterize_Model"/>
     <addaction name="actionAddMult_Models"/>
     <addaction name="separator"/>
     <addaction name="actionEditMask"/>
@@ -529,6 +530,11 @@
   <action name="actionAdd_Custom_Model">
    <property name="text">
     <string>Add Custom Model</string>
+   </property>
+  </action>
+  <action name="actionReparameterize_Model">
+   <property name="text">
+    <string>Reparameterize Any Model</string>
    </property>
   </action>
   <action name="actionManage_Custom_Models">
