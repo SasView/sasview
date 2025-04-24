@@ -3,6 +3,7 @@ import logging
 import os.path
 from collections import defaultdict
 
+import sasmodels.modelinfo
 from PySide6 import QtWidgets, QtCore
 
 from sasmodels import generate
@@ -138,51 +139,42 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
         self.close()
         self.deleteLater()
 
-    def getParameters(self):
+    def getParameters(self) -> [sasmodels.modelinfo.Parameter]:
         """Get parameters for the selected model and return them as a list"""
         name = self.selection
-        kernel_module = None
 
         if self.modelTree.selectedItems()[0].parent() == CATEGORY_CUSTOM:
             # custom kernel load requires full path
             name = os.path.join(models.find_plugins_dir(), name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
-        except ModuleNotFoundError:
-            pass
-        except FileNotFoundError:
+        except (ModuleNotFoundError, FileNotFoundError):
             # can happen when name attribute not the same as actual filename
-            pass
-        
-        if kernel_module is None:
-            # mismatch between "name" attribute and actual filename.
             curr_model = self.models[self.selection]
             name, _ = os.path.splitext(os.path.basename(curr_model.filename))
             try:
                 kernel_module = generate.load_kernel_module(name)
             except ModuleNotFoundError as ex:
-                logger.error("Can't find the model "+ str(ex))
+                logger.error(f"Can't find the model {self.selection}\n{ex}")
                 return
-        
+
+        return self._find_parameters_from_kernel_module(kernel_module)
+
+    def _find_parameters_from_kernel_module(self, kernel_module: sasmodels.sasview_model.ModuleType) \
+            -> [sasmodels.modelinfo.Parameter]:
+        """Find the parameters for a kernel module, depending on the model type"""
         if hasattr(kernel_module, 'model_info'):
             # for sum/multiply models
             self.model_parameters = kernel_module.model_info.parameters
-
         elif hasattr(kernel_module, 'parameters'):
             # built-in and custom models
             self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
-
-        elif hasattr(kernel_module, 'model_info'):
-            # for sum/multiply models
-            self.model_parameters = kernel_module.model_info.parameters
-
         elif hasattr(kernel_module, 'Model') and hasattr(kernel_module.Model, "_model_info"):
             # this probably won't work if there's no model_info, but just in case
             self.model_parameters = kernel_module.Model._model_info.parameters
         else:
             # no parameters - default to blank table
-            msg = "No parameters found in model '{}'.".format(self.selection)
-            logger.warning(msg)
+            logger.warning(f"No parameters found in model '{self.selection}'.")
             self.model_parameters = modelinfo.ParameterTable([])
 
         return self.model_parameters.iq_parameters
