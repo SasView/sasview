@@ -19,6 +19,7 @@ from sasmodels.modelinfo import Parameter
 
 logger = logging.getLogger(__name__)
 
+
 class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
 
     def __init__(self, parent=None):
@@ -624,10 +625,10 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Return the QTreeWidgetItem of the parameter even if selected_item is a 'property' (sub) item
         :param selected_item: QTreeWidgetItem that represents either a parameter or a property
         """
-        if selected_item.parent() == None:
-            # User selected a parametery, not a property
+        if selected_item.parent() is None:
+            # User selected a parameter, not a property
             param_to_open = selected_item
-        elif selected_item.parent().parent() != None:
+        elif selected_item.parent().parent() is not None:
             # User selected the description text
             param_to_open = selected_item.parent().parent()
         else:

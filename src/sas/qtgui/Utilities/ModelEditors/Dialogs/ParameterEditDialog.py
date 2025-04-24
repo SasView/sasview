@@ -1,13 +1,14 @@
 import logging
 from numpy import inf
 
-from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore
 
 from sas.qtgui.Utilities.ModelEditors.Dialogs.UI.ParameterEditDialogUI import Ui_ParameterEditDialog
 
 from sasmodels.modelinfo import Parameter
 
 logger = logging.getLogger(__name__)
+
 
 class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
 

@@ -3,7 +3,7 @@ import logging
 import os.path
 from collections import defaultdict
 
-from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore
 
 from sasmodels import generate
 from sasmodels import modelinfo
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 CATEGORY_CUSTOM = "Plugin Models"
 CATEGORY_STRUCTURE = "Structure Factor"
+
 
 class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
     """
@@ -162,9 +163,9 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
             name = os.path.join(models.find_plugins_dir(), name+".py")
         try:
             kernel_module = generate.load_kernel_module(name)
-        except ModuleNotFoundError as ex:
+        except ModuleNotFoundError:
             pass
-        except FileNotFoundError as ex:
+        except FileNotFoundError:
             # can happen when name attribute not the same as actual filename
             pass
         
