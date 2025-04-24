@@ -198,15 +198,6 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.noOfTermsSuggestionButton.setEnabled(self.currentResult.logic.data_is_loaded and not self.isCalculating)
 
     def updateGuiValues(self):
-        # self.dataList.clear()
-        # if self.currentData is None:
-        #     self.dataList.setCurrentText('')
-        # else:
-        #     # TODO: Will have multiple values when batch is implemented.
-        #     self.dataList.addItem(self.currentData.name)
-        #     self.dataList.setCurrentIndex(0)
-
-
         # TODO: This won't work for batch at the moment.
         current_calculator = self.currentResult.calculator
 
