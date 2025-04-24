@@ -42,10 +42,7 @@ python_release_list = [
 ]
 
 # List of python versions to use for tests
-python_test_list = python_release_list + [
-    '3.10'
-]
-
+python_test_list = python_release_list
 
 def truthy(val):
     # the json importer in the github actions doesn't cope with true, false,
