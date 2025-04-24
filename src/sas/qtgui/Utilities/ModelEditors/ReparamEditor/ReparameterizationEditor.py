@@ -458,20 +458,15 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             # `File ... line` syntax
             reversed_error_text = list(reversed(all_lines))
             for line in reversed_error_text:
-                if ('File' in line and 'line' in line):
+                if "File" in line and "line" in line:
                     # If model check fails (not syntax) then 'line' and 'File' will be in adjacent lines
-                    error_line = re.split('line ', line)[1]
+                    error_line = re.match("(.*)line (?P<line_number>[0-9]*)(,?)(.*)", line)
                     try:
-                        error_line = int(error_line)
+                        error_line = int(error_line.group("line_number"))
                         break
                     except ValueError:
                         # Sometimes the line number is followed by more text
-                        try:
-                            error_line = error_line.split(',')[0]
-                            error_line = int(error_line)
-                            break
-                        except ValueError:
-                            error_line = 0
+                        error_line = 0
 
         return error_line
     
@@ -510,16 +505,16 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         for item in conversion_list:
             if item not in properties or properties[item] == "":
                 error_message += f"Missing '{item}' property\n"
-                conversion_list.remove(item) # Remove the property from the list of properties to convert
+                conversion_list.remove(item)  # Remove the property from the list of properties to convert
         
         # Try to convert min, max, and default to floats
         macro_set = {'M_PI', 'M_PI_2', 'M_PI_4', 'M_SQRT1_2', 'M_E', 'M_PI_180', 'M_4PI_3', inf, -inf}
         for to_convert in conversion_list:
             try:
-                properties[to_convert] = float(properties[to_convert])
+                properties[to_convert] = float(properties.get(to_convert))
             except ValueError:
                 if properties[to_convert] in macro_set:
-                    continue # Skip if the value is a macro
+                    continue  # Skip if the value is a macro
                 else:
                     error_message += f"'{to_convert}' contains invalid value\n"
         
@@ -537,7 +532,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
                 except ValueError:
                     pass
         
-        error_message = error_message.strip() # Remove trailing newline
+        error_message = error_message.strip()  # Remove trailing newline
         if error_message != "":
             # If there are any errors, display a warning icon
             self.parameterWarning(param_item, error_message)
