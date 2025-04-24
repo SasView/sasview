@@ -487,16 +487,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         properties = {'name': param_item.text(0)}
         for i in range(param_item.childCount()):
             prop = param_item.child(i)
-            if prop.text(0) == "default":
-                properties['default'] = prop.text(1)
-            elif prop.text(0) == "min":
-                properties['min'] = prop.text(1)
-            elif prop.text(0) == "max":
-                properties['max'] = prop.text(1)
-            elif prop.text(0) == "units":
-                properties['units'] = prop.text(1)
-            elif prop.text(0) == "type":
-                properties['type'] = prop.text(1)
+            properties[prop.text(0)] = prop.text(1)
         
         # Ensure the name is not empty
         if properties['name'] == "":
@@ -506,35 +497,30 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         conversion_list = ['min', 'max', 'default']
 
         # Ensure that there is at least min, max, and default properties
-        for item in conversion_list:
-            if item not in properties or properties[item] == "":
-                error_message += f"Missing '{item}' property\n"
-                conversion_list.remove(item)  # Remove the property from the list of properties to convert
-        
-        # Try to convert min, max, and default to floats
         macro_set = {'M_PI', 'M_PI_2', 'M_PI_4', 'M_SQRT1_2', 'M_E', 'M_PI_180', 'M_4PI_3', inf, -inf}
         for to_convert in conversion_list:
+            if to_convert not in properties or properties[to_convert] == "":
+                error_message += f"Missing '{to_convert}' property\n"
+                continue  # Do not convert this property
+            elif properties[to_convert] in macro_set:
+                # Skip if the value is a macro
+                continue
             try:
                 properties[to_convert] = float(properties.get(to_convert))
             except ValueError:
-                if properties[to_convert] in macro_set:
-                    continue  # Skip if the value is a macro
-                else:
-                    error_message += f"'{to_convert}' contains invalid value\n"
+                error_message += f"'{to_convert}' contains invalid value\n"
         
         # Check if min is less than max
-        if 'min' not in error_message and 'max' not in error_message:
-            if properties['min'] >= properties['max']:
-                error_message += "Minimum value must be less than maximum value\n"
+        if 'min' not in error_message and 'max' not in error_message and properties['min'] >= properties['max']:
+            error_message += "Minimum value must be less than maximum value\n"
         
         # Ensure that units and type are not numbers
         for item in ['units', 'type']:
-            if item in properties:
-                try:
-                    float(properties[item])
-                    error_message += f"'{item}' must be a string or left blank.\n"
-                except ValueError:
-                    pass
+            try:
+                float(properties.get(item, None))
+                error_message += f"'{item}' must be a string or left blank.\n"
+            except ValueError:
+                pass
         
         error_message = error_message.strip()  # Remove trailing newline
         if error_message != "":
