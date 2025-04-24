@@ -108,6 +108,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.explorerButton.clicked.connect(self.openExplorerWindow)
         self.estimateBgd.pressed.connect(self.handleBackgroundModeChange)
         self.manualBgd.pressed.connect(self.handleBackgroundModeChange)
+        self.dataList.currentIndexChanged.connect(self.handleCurrentDataChanged)
+
+    def handleCurrentDataChanged(self):
+        self.updateGuiValues()
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: HashableStandardItem | list[HashableStandardItem], tab_id: int):
