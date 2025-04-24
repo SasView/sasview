@@ -2,7 +2,7 @@ import numpy
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from .BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Utilities.GuiUtils import formatNumber
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
@@ -133,6 +133,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis(r"\rm{\phi}", 'degrees')
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
+        new_plot.plot_role = DataRole.ROLE_ANGULAR_SLICE
         if hasattr(data, "scale") and data.scale == 'linear' and \
                 self.data.name.count("Residuals") > 0:
             new_plot.ytransform = 'y'

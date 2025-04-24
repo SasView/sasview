@@ -168,6 +168,8 @@ jobs:
 
       - name: Build sasmodels and sasdata docs
         if: ${{ matrix.docs }}
+        env:
+          SAS_OPENCL: NONE
         run: |
           # TODO: supress sasmodels cache for the doc build
           mkdir -p ~/.sasmodels/compiled_models

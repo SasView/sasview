@@ -6,7 +6,7 @@ import os
 import sys
 import os.path
 
-import importlib.resources
+from sas.system.user import get_log_dir
 
 '''
 Module that manages the global logging
@@ -42,12 +42,16 @@ def setup_logging(level=logging.INFO):
 
     # Apply the logging config after setting the defaults
     try:
-        fd = importlib.resources.open_text('sas.system', 'log.ini')
-        logging.config.fileConfig(fd)
-    except FileNotFoundError:
-        print(f"ERROR: Log config '{fd.name}' not found...", file=sys.stderr)
-
-    #print_config()
+        filename = os.path.join(get_log_dir(), 'sasview.log')
+        fh = logging.FileHandler(filename=filename, mode="a")
+    except IOError:
+        print(f"ERROR: Log config '{filename}' not found...", file=sys.stderr)
+        fh = None
+    ch = logging.StreamHandler()
+    handlers = [fh, ch] if fh else [ch]
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(name)s (%(filename)s:%(lineno)s) :: %(message)s',
+                        handlers=handlers)
+    # print_config()
 
 def production():
     setup_logging('INFO')

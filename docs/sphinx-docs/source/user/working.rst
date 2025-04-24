@@ -25,3 +25,5 @@ Working with SasView
    Model Marketplace <marketplace>
 
    Preferences <qtgui/MainWindow/preferences_help.rst>
+
+   User Files <qtgui/MainWindow/sasview_files>

@@ -17,6 +17,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
 from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.CodeEditor import QCodeEditor
+
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
@@ -25,6 +27,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     Once the model is defined, it can be saved as a plugin.
     """
     # Signals for intertab communication plugin -> editor
+    applySignal = QtCore.Signal()
+
     def __init__(self, parent=None, edit_only=False, model=False, load_file=None):
         super(TabbedModelEditor, self).__init__(parent._parent)
 
@@ -93,6 +97,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.plugin_widget.modelModified.connect(self.editorModelModified)
         self.editor_widget.modelModified.connect(self.editorModelModified)
         self.plugin_widget.txtName.editingFinished.connect(self.pluginTitleSet)
+        # locally emitted signals
+        self.applySignal.connect(self._onApply)
 
     def setPluginActive(self, is_active=True):
         """
@@ -201,18 +207,19 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Name the tab with .py filename
         self.tabWidget.setTabText(0, display_name)
 
-        # Check the validity of loaded model if the model is python
-        if self.is_python:
-            error_line = self.checkModel(plugin_text)
-            if error_line > 0:
-                # select bad line
-                cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
-                self.editor_widget.txtEditor.setTextCursor(cursor)
-                return
-
         # In case previous model was incorrect, change the frame colours back
         self.editor_widget.txtEditor.setStyleSheet("")
         self.editor_widget.txtEditor.setToolTip("")
+
+        # Check the validity of loaded model if the model is python
+        if self.is_python:
+            error_line = self.findFirstError(self.filename)
+            if error_line >= 0:
+                # select bad line
+                cursor = QtGui.QTextCursor(self.editor_widget.txtEditor.document().findBlockByLineNumber(error_line-1))
+                self.editor_widget.txtEditor.setTextCursor(cursor)
+                # Do not return because we still want to load C file if it exists
+                QtWidgets.QMessageBox.warning(self, "Model check failed", "The loaded model contains errors. Please correct all errors before using model.")
 
         # See if there is filename.c present
         c_path = self.filename.parent / self.filename.name.replace(".py", ".c")
@@ -250,6 +257,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Write the plugin and update the model editor if plugin editor open
         Write/overwrite the plugin if model editor open
         """
+        # Ensure focus leaves any inputs currently being edited and allow their signals to trigger
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setFocus()
+        # Send out a new signal that is queued after input change signals from any input
+        self.applySignal.emit()
+
+    def _onApply(self):
         if isinstance(self.tabWidget.currentWidget(), PluginDefinition):
             self.updateFromPlugin()
         else:
@@ -314,6 +327,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # get required filename
         filename = model['filename']
 
+        if filename == "":
+            QtWidgets.QMessageBox.critical(self, "Plugin Error", "Please specify a filename.")
+            return
+
         # check if file exists
         plugin_location = models.find_plugins_dir()
         full_path = os.path.join(plugin_location, filename)
@@ -333,8 +350,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # disable "Apply"
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
 
-        # Run the model test in sasmodels
-        if not self.isModelCorrect(full_path):
+        # Run the model test in sasmodels and check model syntax. Returns error line if checks fail.
+        error_line = self.findFirstError(full_path)
+        if error_line >= 0:
             return
 
         self.editor_widget.setEnabled(True)
@@ -356,81 +374,65 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
 
-    def checkModel(self, model_str):
+    def findFirstError(self, full_path):
         """
-        Run the ast check
-        and return True if the model is good.
-        False otherwise.
+        Run ast and model checks
+        Attempt to return the line number of the error if any
+        :param full_path: full path to the model file
         """
-        # successfulCheck = True
-        error_line = 0
         try:
+            with open(full_path, 'r', encoding="utf-8") as plugin:
+                model_str = plugin.read()
             ast.parse(model_str)
+            GuiUtils.checkModel(full_path)
+            # If no errors occur, return early
+            return -1
 
-        except SyntaxError as ex:
-            msg = "Error building model: " + str(ex)
-            logging.error(msg)
+        except Exception as ex:
             # print four last lines of the stack trace
             # this will point out the exact line failing
             all_lines = traceback.format_exc().split('\n')
             last_lines = all_lines[-4:]
             traceback_to_show = '\n'.join(last_lines)
             logging.error(traceback_to_show)
+            msg = "Error building model: " + str(ex)
+            logging.error(msg)
 
             # Set the status bar message
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
             self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
-            # Put a thick, red border around the mini-editor
-            self.tabWidget.currentWidget().txtEditor.setStyleSheet("border: 5px solid red")
+
+        # If syntax check fails, find the line number of the first failure
+        # Find all QTextBrowser and QCodeEditor children
+        text_browsers = self.tabWidget.currentWidget().findChildren(QtWidgets.QTextBrowser)
+        code_editors = self.tabWidget.currentWidget().findChildren(QCodeEditor)
+        error_line = -1
+
+        # Combine the lists and apply the stylesheet
+        for child in text_browsers + code_editors:
+            child.setStyleSheet("border: 5px solid red")
             # last_lines = traceback.format_exc().split('\n')[-4:]
             traceback_to_show = '\n'.join(last_lines)
-            self.tabWidget.currentWidget().txtEditor.setToolTip(traceback_to_show)
-            # attempt to find the failing command line number, usually the last line with
-            # `File ... line` syntax
-            for line in reversed(all_lines):
-                if 'File' in line and 'line' in line:
-                    error_line = re.split('line ', line)[1]
+            child.setToolTip(traceback_to_show)
+
+        # attempt to find the failing command line number, usually the last line with
+        # `File ... line` syntax
+        for line in reversed(all_lines):
+            if re.match(r"[Ff]ile.*[Ll]ine ([0-9]+)", line):
+                # If model check fails (not syntax) then 'line' and 'File' will be in adjacent lines
+                error_line = re.split('line ', line)[1]
+                try:
+                    error_line = int(error_line)
+                    break
+                except ValueError:
+                    # Sometimes the line number is followed by more text
                     try:
-                        error_line = int(error_line)
+                        error_line = int(error_line.split(',')[0])
                         break
                     except ValueError:
-                        error_line = 0
+                        error_line = -1
+
         return error_line
-
-    def isModelCorrect(self, full_path):
-        """
-        Run the sasmodels method for model check
-        and return True if the model is good.
-        False otherwise.
-        """
-        successfulCheck = True
-        try:
-            model_results = GuiUtils.checkModel(full_path)
-            logging.info(model_results)
-        # We can't guarantee the type of the exception coming from
-        # Sasmodels, so need the overreaching general Exception
-        except Exception as ex:
-            msg = "Error building model: "+ str(ex)
-            logging.error(msg)
-            #print three last lines of the stack trace
-            # this will point out the exact line failing
-            last_lines = traceback.format_exc().split('\n')[-4:]
-            traceback_to_show = '\n'.join(last_lines)
-            logging.error(traceback_to_show)
-
-            # Set the status bar message
-            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
-
-            # Remove the file so it is not being loaded on refresh
-            os.remove(full_path)
-            # Put a thick, red border around the mini-editor
-            self.plugin_widget.txtFunction.setStyleSheet("border: 5px solid red")
-            # Use the last line of the traceback for the tooltip
-            last_lines = traceback.format_exc().split('\n')[-2:]
-            traceback_to_show = '\n'.join(last_lines)
-            self.plugin_widget.txtFunction.setToolTip(traceback_to_show)
-            successfulCheck = False
-        return successfulCheck
 
     def updateFromEditor(self):
         """
@@ -441,24 +443,49 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         if not w.is_python:
             base, _ = os.path.splitext(filename)
             filename = base + '.c'
-
         # make sure we have the file handle ready
-        assert(filename != "")
+        if not filename:
+            logging.error("No file name was provided for your plugin model. No file was written.")
+            return
+
         # Retrieve model string
         model_str = self.getModel()['text']
+        # Save the file
+        self.writeFile(filename, model_str)
+
+        # Get model filepath
+        plugin_location = models.find_plugins_dir()
+        full_path = os.path.join(plugin_location, filename)
+        if not w.is_python and self.is_python:
+            pass
+        elif os.path.splitext(full_path)[1] != ".py":
+            full_path += ".py"
+
+        # Check model as long as there is a .py file in one of the tabs
         if w.is_python and self.is_python:
-            error_line = self.checkModel(model_str)
-            if error_line > 0:
+            check_model = True
+        elif not w.is_python and self.is_python:
+            # Set full_path to the .py file so that we can run a model check on it (the .py model should link to the .c model)
+            full_path = self.filename.with_suffix(".py")
+            check_model = True
+        
+        if check_model:
+            error_line = self.findFirstError(full_path)
+            if error_line >= 0:
                 # select bad line
                 cursor = QtGui.QTextCursor(w.txtEditor.document().findBlockByLineNumber(error_line-1))
                 w.txtEditor.setTextCursor(cursor)
                 return
 
         # change the frame colours back
-        w.txtEditor.setStyleSheet("")
-        w.txtEditor.setToolTip("")
-        # Save the file
-        self.writeFile(filename, model_str)
+        try:
+            self.c_editor_widget.txtEditor.setStyleSheet("")
+            self.c_editor_widget.txtEditor.setToolTip("")
+        except AttributeError:
+            pass
+        self.editor_widget.txtEditor.setStyleSheet("")
+        self.editor_widget.txtEditor.setToolTip("")
+
         # Update the tab title
         self.setTabEdited(False)
 

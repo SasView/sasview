@@ -16,6 +16,7 @@ matplotlib
 numba
 numpy
 periodictable
+platformdirs
 pybind11
 pylint
 pyopengl
@@ -27,6 +28,7 @@ pytest-mock
 pytools
 qtconsole
 scipy
+siphash24
 sphinx
 superqt
 tinycc
