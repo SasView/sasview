@@ -61,9 +61,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         self.addTooltips()
 
-        #TODO: Set the default text for the function editor
-        text = \
-""""""
+        text = DEFAULT_EDITOR_TEXT
         self.txtFunction.insertPlainText(text)
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
@@ -692,3 +690,15 @@ translation = """
 model_info = reparameterize('{old_model_name}', parameters, translation, __file__)
 
 '''
+
+DEFAULT_EDITOR_TEXT = """
+# EXAMPLE TEXT
+# Change the ellipsoid model, replacing the polar and equatorial radii with the particle volume and eccentricity factor
+
+# Re - new equatorial radius calculation using new parameters - cbrt is the cube root
+Re = cbrt(volume/eccentricity/M_4PI_3)
+# Replace polar radius with eccentricity
+radius_polar = eccentricity*Re
+# Replace radius_equatorial with Re
+radius_equatorial = Re
+"""
