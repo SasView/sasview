@@ -550,31 +550,25 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         :param tree: the QTreeWidget to check for duplicates.
         """
         # If more than one parameter in the tree is the same, display warning icon
-        count_dict = {}
-        for i in range(tree.topLevelItemCount()):
-            item_name = tree.topLevelItem(i).text(0)
-            if item_name in count_dict:
-                count_dict[item_name] += 1
-            else:
-                count_dict[item_name] = 1
-        
-        duplicates = [key for key, value in count_dict.items() if value > 1]
-
+        name_list = []
+        duplicates = []
         for i in range(tree.topLevelItemCount()):
             item = tree.topLevelItem(i)
+            item_name = item.text(0)
             current_tooltip = item.toolTip(1)
+            if item_name not in name_list:
+                name_list.append(item_name)
+            else:
+                duplicates.append(item_name)
+
             duplicate_warning = "Cannot use duplicate parameter names"
             if current_tooltip == duplicate_warning:
-                # If tooltip is already displaying the warning, clear the warning and then check if it needs to be re-added
+                # If tooltip is already displaying the warning, clear it and then check if it needs to be re-added
                 # Therefore, we can avoid adding the same warning multiple times
                 self.removeParameterWarning(item)
 
             if item.text(0) in duplicates:
-                if current_tooltip == "":
-                    # If tooltip is empty, show only this warning
-                    updated_tooltip = duplicate_warning
-                else:
-                    updated_tooltip = current_tooltip + "\n" + duplicate_warning
+                updated_tooltip = current_tooltip + "\n" + duplicate_warning
                 self.parameterWarning(item, updated_tooltip)
     
     def parameterWarning(self, table_item, tool_tip_text):
