@@ -111,7 +111,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.dataList.currentIndexChanged.connect(self.handleCurrentDataChanged)
 
     def handleCurrentDataChanged(self):
-        self.updateGuiValues()
+        # This event might get called before there is anything in the results list. But we can't update the GUI without
+        # errors.
+        if len(self.results) != 0:
+            self.updateGuiValues()
 
     # TODO: Need to verify type hint for data.
     def updateTab(self, data: HashableStandardItem | list[HashableStandardItem], tab_id: int):
