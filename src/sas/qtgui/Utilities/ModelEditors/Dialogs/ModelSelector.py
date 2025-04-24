@@ -36,15 +36,17 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
         self.models = {}
         self.custom_models = self.customModels()
         self.selection = None
+        self.plugins = None
         self.model_parameters = None
+        self.master_category_dict = defaultdict(list)
+        self.by_model_dict = defaultdict(list)
+        self.model_enabled_dict = defaultdict(bool)
 
         self.addSignals()
         self.onLoad()
         
     def addSignals(self):
-        """
-        Connect signals to slots
-        """
+        """Connect signals to slots"""
         if self.parent:
             self.parent.destroyed.connect(self.onClose)
         self.modelTree.itemSelectionChanged.connect(self.onSelectionChanged)
@@ -57,13 +59,7 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
         self.populateModelTree()
     
     def setupModelDict(self):
-        """
-        Setup a dictionary of all available models and their categories
-        """
-        self.master_category_dict = defaultdict(list)
-        self.by_model_dict = defaultdict(list)
-        self.model_enabled_dict = defaultdict(bool)
-
+        """Set up a dictionary of all available models and their categories"""
         categorization_file = CategoryInstaller.get_user_file()
         if not os.path.isfile(categorization_file):
             categorization_file = CategoryInstaller.get_default_file()
@@ -79,10 +75,8 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
         self.readCustomCategoryInfo()
     
     def readCustomCategoryInfo(self):
-        """
-        Reads the custom model category
-        """
-        #Looking for plugins
+        """Reads the custom model category"""
+        # Looking for plugins
         self.plugins = list(self.custom_models.values())
         plugin_list = []
         for name, plug in self.custom_models.items():
@@ -101,8 +95,7 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
                 self.master_category_dict[CATEGORY_STRUCTURE].extend(plugin_structure_list)
     
     def regenerateModelDict(self):
-        """
-        Regenerates self.by_model_dict which has each model name as the
+        """Regenerates self.by_model_dict which has each model name as the
         key and the list of categories belonging to that model
         along with the enabled mapping
         """
@@ -113,9 +106,7 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
                 self.model_enabled_dict[model] = enabled
     
     def populateModelTree(self):
-        """
-        Populate the model tree with available models
-        """
+        """Populate the model tree with available models"""
         for category in self.master_category_dict:
             category_item = QtWidgets.QTreeWidgetItem(self.modelTree)
             category_item.setText(0, category)
@@ -124,9 +115,7 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
                 model_item.setText(0, model)
     
     def onSelectionChanged(self):
-        """
-        Update selected model and display user selection
-        """
+        """Update selected model and display user selection"""
         # Only one item can be selected at a time as per selectionMode = SingleSelection in the .ui file
         selected_items = self.modelTree.selectedItems()
         if selected_items:
@@ -143,18 +132,14 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
                 self.lblSelection.setText(self.selection)
     
     def onLoadModel(self):
-        """
-        Get parameters for selected model, convert to usable data, send to parent. Close dialog if sucessful.
-        """
+        """Get parameters for selected model, convert to usable data, send to parent. Close dialog if successful."""
         iq_parameters = self.getParameters()
         self.returnModelParamsSignal.emit(self.lblSelection.text(), iq_parameters)
         self.close()
         self.deleteLater()
 
     def getParameters(self):
-        """
-        Get parameters for the selected model and return them as a list
-        """
+        """Get parameters for the selected model and return them as a list"""
         name = self.selection
         kernel_module = None
 
@@ -204,9 +189,7 @@ class ModelSelector(QtWidgets.QDialog, Ui_ModelSelector):
     
     @classmethod
     def customModels(cls):
-        """
-        Read in file names in the custom plugin directory
-        """
+        """Read in file names in the custom plugin directory"""
         manager = models.ModelManager()
         # TODO: Cache plugin models instead of scanning the directory each time.
         manager.update()
