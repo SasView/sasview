@@ -389,13 +389,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             saved state: remove "*" from filename display
             """
             current_text = self.windowTitle()
+            # Remove any asterisks from the end of the name
+            current_text = current_text.rstrip("*")
 
+            # Add one if the model has been edited but not saved
             if is_edited:
-                if current_text[-1] != "*":
-                    current_text += "*"
-            else:
-                if current_text[-1] == "*":
-                    current_text = current_text[:-1]
+                current_text += "*"
+
             self.setWindowTitle(current_text)
     
     def editorModelModified(self):
