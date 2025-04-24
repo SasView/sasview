@@ -423,7 +423,7 @@ def run_bumps(problem, handler, curr_thread):
     success = best is not None
     try:
         stderr = fitdriver.stderr() if success else None
-        if hasattr(fitdriver.fitter, 'state'):
+        if hasattr(fitdriver.fitter, 'state') and hasattr(fitdriver.fitter.state, 'draw'):
             x = fitdriver.fitter.state.draw().points
             n_parameters = x.shape[1]
             cov = np.cov(x.T, bias=True).reshape((n_parameters, n_parameters))
