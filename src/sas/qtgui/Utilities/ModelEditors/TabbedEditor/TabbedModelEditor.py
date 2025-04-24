@@ -17,7 +17,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
-from sas.qtgui.Utilities.CodeEditor import QCodeEditor
+from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
 
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
