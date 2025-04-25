@@ -3,7 +3,6 @@ import time
 
 from dominate.tags import output
 from numpy.typing import NDArray
-from sas.sascal
 from numpy.typing import NDArrayc.data_util.calcthread import CalcThread
 from sas.sascalc.pr.NewInvertor import NewInvertor
 
