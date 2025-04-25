@@ -290,16 +290,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.enableButtons()
         calculator = self.currentResult.calculator
         # TODO: Some of these probably don't need to be here.
-        self.currentResult.outputs = CalculatedOutputs(
-            calculator.rg(out),
-            calculator.iq0(out),
-            calculator.background,
-            elapsed,
-            calculator.chi2,
-            calculator.oscillations(out),
-            calculator.get_positive(out),
-            calculator.get_pos_err(out, cov)
-        )
+        self.currentResult.outputs = get_outputs(calculator, elapsed)
         # Previously called these events directly without a signal but it led to
         # QT segfaulting.
         self.calculationComplete.emit()
