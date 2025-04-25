@@ -541,15 +541,21 @@ class sizeDistribution():
          ## run MaxEnt
         for nint, intensity in enumerate(intensities):
             MethodCall = maxEntMethod()
-            chisq, bin_magnitude, icalc, converged, conv_iter = MethodCall.MaxEnt_SB(intensity,
+            try:
+                chisq, bin_magnitude, icalc, converged, conv_iter = MethodCall.MaxEnt_SB(intensity,
                                                              sigma,
                                                                self.model_matrix,
                                                                  BinsBack,
                                                                    self.iterMax, report=True)
-            ChiSq.append(chisq)
-            BinMag.append(bin_magnitude)
-            IMaxEnt.append(icalc)
-            convergence.append([converged, conv_iter])
+            
+                ChiSq.append(chisq)
+                BinMag.append(bin_magnitude)
+                IMaxEnt.append(icalc)
+                convergence.append([converged, conv_iter])
+            except ZeroDivisionError as e:
+                logger.warning("Divide by Zero Error occured in maximum entropy fitting. Try lowering the weight factor to increase the error weighting")
+            
+
 
         ## Check len of intensities for full vs. quick fit
         if len(intensities) == 1:
@@ -569,12 +575,13 @@ class sizeDistribution():
             maxentdata.y = np.mean(IMaxEnt, axis=0)
             maxentdata.dy = np.std(IMaxEnt, axis=0)
             self.Iq_maxEnt  = maxentdata
+            self.calculate_statistics(BinMag)
 
         else:
             logging.error('The length of the intensity array is 0. Did you run prep_maxEnt before run_maxEnt? Check that intensities is an array of at least length 1.')
 
         #self.calc_volume_weighted_dist(np.mean(BinMag, axis=0))
-        self.calculate_statistics(BinMag)
+        
 
         return convergence
 
