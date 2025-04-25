@@ -44,11 +44,11 @@ class CalcBatchPr(CalcThread):
 
     # A lot of these aren't type hinted but that can be future work as I'm trying to closely follow the pre-existing
     # structure, and I don't want to mess with anything.
-    def __init__(self, prs: list[NewInvertor], nfunc=5, tab_id=None, error_func=None, completefn=None,
+    def __init__(self, prs: list[NewInvertor], nfuncs=None, tab_id=None, error_func=None, completefn=None,
                  updatefn=None, yieldtime=0.01, worktime=0.01):
         CalcThread.__init__(self, error_func, completefn, yieldtime, worktime)
         self.prs = prs
-        self.nfunc = nfunc
+        self.nfuncs = nfuncs
         self.error_func = error_func
         self.starttime = 0
 
@@ -56,8 +56,8 @@ class CalcBatchPr(CalcThread):
         try:
             self.starttime = time.time()
             outputs = []
-            for invertor in self.prs:
-                outputs.append(invertor.invert(self.nfunc))
+            for invertor, nfunc in zip(self.prs, self.nfuncs):
+                outputs.append(invertor.invert(nfunc))
                 self.isquit()
             self.complete(outputs=outputs)
         except KeyboardInterrupt:
