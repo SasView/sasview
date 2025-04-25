@@ -35,6 +35,32 @@ class CalcPr(CalcThread):
             if self.error_func is not None:
                 self.error_func("CalcPr.compute: %s" % sys.exc_info()[1])
 
+class CalcBatchPr(CalcThread):
+
+    # A lot of these aren't type hinted but that can be future work as I'm trying to closely follow the pre-existing
+    # structure, and I don't want to mess with anything.
+    def __init__(self, prs: list[NewInvertor], nfunc=5, tab_id=None, error_func=None, completefn=None,
+                 updatefn=None, yieldtime=0.01, worktime=0.01):
+        CalcThread.__init__(self, error_func, completefn, yieldtime, worktime)
+        self.prs = prs
+        self.nfunc = nfunc
+        self.error_func = error_func
+        self.starttime = 0
+
+    def compute(self):
+        try:
+            self.starttime = time.time()
+            outputs = []
+            for invertor in self.prs:
+                outputs.append(invertor.invert(self.nfunc))
+                self.isquit()
+            self.complete(outputs=outputs)
+        except KeyboardInterrupt:
+            pass
+        except:
+            if self.error_func is not None:
+                self.error_func("CalcBatchPr.compute: %s" % sys.exc_info()[1])
+
 
 class EstimatePr(CalcThread):
     """
