@@ -507,12 +507,12 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 failedCells = True
             try:
                 self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.regConst)))
+                    "{:.3g}".format(pr.alpha)))
             except TypeError:
                 failedCells = True
             try:
                 self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.maxDist)))
+                    "{:.3g}".format(pr.dmax)))
             except TypeError:
                 failedCells = True
             try:
@@ -557,12 +557,12 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 12, QtWidgets.QTableWidgetItem(
-                    "{:.2g}".format(pr.get_q_min())))
+                    "{:.2g}".format(pr.q_min)))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 13, QtWidgets.QTableWidgetItem(
-                    "{:.2g}".format(pr.get_q_max())))
+                    "{:.2g}".format(pr.q_max)))
             except TypeError:
                 failedCells = True
         if failedCells:
