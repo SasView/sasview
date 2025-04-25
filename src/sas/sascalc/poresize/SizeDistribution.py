@@ -576,17 +576,17 @@ class sizeDistribution():
         #self.calc_volume_weighted_dist(np.mean(BinMag, axis=0))
         self.calculate_statistics(BinMag)
 
-        return self.chiSq_maxEnt, 2*self.bins, 2*self._binDiff, self.BinMagnitude_maxEnt, self.BinMagnitude_Errs, maxentdata, convergence
+        return convergence
 
     def calculate_statistics(self, bin_mag:list, 
                              ):
         
         maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag/(2*self._binDiff), 2*self.bins, axis=1)
-        print(maxent_cdf_array[:,-1])
+        #print(maxent_cdf_array[:,-1])
         self.BinMag_numberDist = self.BinMagnitude_maxEnt/ellipse_volume(self.aspectRatio*self.bins, self.bins)
 
         rvdist = stats.rv_histogram((self.BinMag_numberDist, self._bin_edges*2))
-        print(rvdist.mean(), rvdist.median())
+        #print(rvdist.mean(), rvdist.median())
         number_cdf = integrate.cumulative_trapezoid(self.BinMag_numberDist, 2*self.bins)
         self.number_cdf = number_cdf/number_cdf[-1]
 

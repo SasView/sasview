@@ -10,6 +10,7 @@ import plottableHist
 #from sasmodels import resolution as rst
 import csv
 import numpy as np
+from scipy import integrate
 import matplotlib.pyplot as plt
 
 import sys
@@ -121,7 +122,7 @@ size_distribution.weightFactor = 1.0/2.0
 background = np.ones(len(data_from_loader.y))*0.120605
 
 subdata = data_info.Data1D(x=Q, y=background, dx=None, dy=background*0.0001, lam=None, dlam=None, isSesans=False)
-trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=False)
+trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=True)
 
 print(sigma)
 operation = matrix_operation()
@@ -135,9 +136,19 @@ plt.loglog(subdata.x, subdata.y, color='red', linestyle='--')
 plt.loglog(trim_data.x, size_distribution.model_matrix[:,0:200:10])
 #plt.loglog(trim_data.x, gqr[:,10])
 plt.show()
-chisq, Bins, Dbins, BinMag, BinErr, MaxEntData = size_distribution.run_maxEnt(trim_data, intensities, init_binsBack, sigma)
-print(BinMag, BinErr, MaxEntData.y)
 
+chisq, Bins, Dbins, BinMag, BinErr, MaxEntData, convergence = size_distribution.run_maxEnt(trim_data, intensities, init_binsBack, sigma)
+#print(BinMag, BinErr, MaxEntData.y)
+
+print(size_distribution.MaxEnt_statistics)
+print(size_distribution.maxent_cdf)
+
+plt.figure()
+plt.semilogx(Bins[1:], size_distribution.maxent_cdf)
+plt.semilogx(Bins[1:], size_distribution.number_cdf)
+axtwn = plt.gca().twinx()
+axtwn.semilogx(Bins,size_distribution.BinMag_numberDist)
+plt.show()
 
 
 
