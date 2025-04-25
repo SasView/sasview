@@ -585,18 +585,18 @@ class sizeDistribution():
         #print(maxent_cdf_array[:,-1])
         self.BinMag_numberDist = self.BinMagnitude_maxEnt/ellipse_volume(self.aspectRatio*self.bins, self.bins)
 
-        rvdist = stats.rv_histogram((self.BinMag_numberDist, self._bin_edges*2))
+        rvdist = stats.rv_histogram((self.BinMagnitude_maxEnt, self._bin_edges*2)) ## volume fraction weighted
         #print(rvdist.mean(), rvdist.median())
         number_cdf = integrate.cumulative_trapezoid(self.BinMag_numberDist, 2*self.bins)
         self.number_cdf = number_cdf/number_cdf[-1]
 
-        self.maxent_cdf = np.mean(maxent_cdf_array,axis=0)/np.mean(maxent_cdf_array[:,-1])
+        self.volumefrac_cdf = np.mean(maxent_cdf_array,axis=0)/np.mean(maxent_cdf_array[:,-1])
         self.MaxEnt_statistics['volume'] = np.mean(maxent_cdf_array[:,-1])
         self.MaxEnt_statistics['volume_err'] = np.std(maxent_cdf_array[:,-1])
-        self.MaxEnt_statistics['mode'] = 2*self.bins[np.argmax(self.BinMagnitude_maxEnt)]
-        ndx_med = np.where(self.maxent_cdf >= 0.5)[0][0]
-        self.MaxEnt_statistics['median'] = 2*self.bins[ndx_med]
-        self.MaxEnt_statistics['mean'] = rvdist.mean()
+        self.MaxEnt_statistics['mode'] = 2*self.bins[np.argmax(self.BinMag_numberDist)] ## number density
+        ndx_med = np.where(self.volumefrac_cdf >= 0.5)[0][0]
+        self.MaxEnt_statistics['median'] = 2*self.bins[ndx_med] ## volume fraction weighted Median
+        self.MaxEnt_statistics['mean'] = rvdist.mean() ## volume fraction weighted mean
 
 
 

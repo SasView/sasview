@@ -137,18 +137,20 @@ plt.loglog(trim_data.x, size_distribution.model_matrix[:,0:200:10])
 #plt.loglog(trim_data.x, gqr[:,10])
 plt.show()
 
-chisq, Bins, Dbins, BinMag, BinErr, MaxEntData, convergence = size_distribution.run_maxEnt(trim_data, intensities, init_binsBack, sigma)
+convergence = size_distribution.run_maxEnt(trim_data, intensities, init_binsBack, sigma)
 #print(BinMag, BinErr, MaxEntData.y)
 
 print(size_distribution.MaxEnt_statistics)
-print(size_distribution.maxent_cdf)
-
+print(size_distribution.volumefrac_cdf)
+print(size_distribution.bins[1:]*2)
 plt.figure()
-plt.semilogx(Bins[1:], size_distribution.maxent_cdf)
-plt.semilogx(Bins[1:], size_distribution.number_cdf)
+plt.semilogx(size_distribution.bins[1:]*2, size_distribution.volumefrac_cdf)
+plt.semilogx(size_distribution.bins[1:]*2, size_distribution.number_cdf)
 axtwn = plt.gca().twinx()
-axtwn.semilogx(Bins,size_distribution.BinMag_numberDist)
+axtwn.semilogx(size_distribution.bins*2,size_distribution.BinMagnitude_maxEnt)
+
 plt.show()
+
 
 
 

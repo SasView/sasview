@@ -62,8 +62,8 @@ class SizeDistributionThread(CalcThread):
 
             results = MaxEntResult(
                 chisq=sd.chiSq_maxEnt,
-                bins=sd.bins*2,
-                bin_diff=sd._binDiff*2,
+                bins=sd.bins,
+                bin_diff=sd._binDiff,
                 bin_mag=sd.BinMagnitude_maxEnt,
                 bin_err=sd.BinMagnitude_Errs,
                 data_max_ent=sd.Iq_maxEnt,
