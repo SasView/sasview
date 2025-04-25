@@ -51,6 +51,9 @@ def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
     :param power: a fixed, otherwise None
     :param qmin: Minimum Q-value
     :param qmax: Maximum Q-value
+
+    If performing a linear fit for background, then set power = 0.0 and type = "fixed"
+    Otherwise,
     """
     if qmin is None:
         qmin = self.qmin
@@ -76,18 +79,20 @@ def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
     ##Get values of scale and if required power
     if power is not None and power != 0:
         # Linearize the data for a power law fit (log, log)
-        linearized_data = Data1D(np.log(self.data.x[idx]), np.log(fx[idx]), )
+        linearized_data = Data1D(np.log(self.data.x[idx]), np.log(fx[idx]), dy=(1/np.log(10))*sigma[idx]/fx[idx])
     else:
-        linearized_data = Data1D(self.data.x[idx], fx[idx], dy=sigma[idx])
+        linearized_data = Data1D(self.data.x[idx], fx[idx], dy=None)
 
-    slope, intercept, _, _, _ = stats.linregress(linearized_data)
-    intercept = np.mean(y - slope * x)
-    n = len(x)
-    residuals = y - (slope * x + intercept)
+
+    slope, intercept, _, _, err_slope, err_int = stats.linregress(linearized_data)
+    intercept = np.mean(linearized_data.y - slope * linearized_data.x)
+    n = len(linearized_data.x)
+    residuals = linearized_data.y - (slope * linearized_data.x + intercept)
     sigma = np.sqrt(np.sum(residuals**2) / (n - 1))  # Sample standard deviation
-    std_dev_intercept = sigma * np.sqrt(np.sum(x**2) / (n * np.sum((x - np.mean(x))**2)))
-    mean_value = np.mean(numbers)
-    std_dev = np.std(numbers)
+    #std_dev_intercept = sigma * np.sqrt(np.sum(linearized_data.x**2) / (n * np.sum((linearized_data.x - np.mean(linearized_data.x))**2)))
+    #mean_value = np.mean(numbers)
+    #std_dev = np.std(numbers)
+    return np.exp(slope), err_slope, intercept, err_int
 
 def ellipse_volume(rp,re):
     return (4*np.pi/3)*rp*re**2
@@ -292,7 +297,7 @@ class sizeDistribution():
     @model.setter
     def model(self, value:str):
         if value != "ellipsoid":
-            logger.info("model is hard coded to ellipsoid for the time being. Please only use ellipsoid.\n Setting model to ellipsoid.")
+            logger.info("model is hard coded to ellipsoid for the time being. Please only use ellipsoid. Setting model to ellipsoid.")
             self._model = "ellipsoid"
         else:
             self._model = value   
@@ -406,7 +411,7 @@ class sizeDistribution():
                 self._useWeights=False
                 self._weights = 1/np.abs(percent_value*wdata.y)
             else:
-                logger.warning("weightType doesn't match the possible strings for weight selection.\n Please check the value entered or use 'dI'.")
+                logger.error("weightType doesn't match the possible strings for weight selection.\n Please check the value entered or use 'dI'.")
         
         return None
 
@@ -552,6 +557,8 @@ class sizeDistribution():
                 BinMag.append(bin_magnitude)
                 IMaxEnt.append(icalc)
                 convergence.append([converged, conv_iter])
+                if (not converged):
+                    logger.info("Maximum Entropy did not converge. Try lowering the weight factor to increase the weighting effect.")
             except ZeroDivisionError as e:
                 logger.error("Divide by Zero Error occured in maximum entropy fitting. Try lowering the weight factor to increase the error weighting")
             
