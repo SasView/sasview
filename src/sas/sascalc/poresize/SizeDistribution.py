@@ -14,7 +14,7 @@ from sas.sascalc.poresize.maxEnt_method import matrix_operation, maxEntMethod
 
 logger = logging.getLogger(__name__)
 
-def add_gaussian_noise(x, dx):
+def add_gaussian_noise(x, dx, seed=None):
     """
     Add Gaussian noise to data based on the sigma of the Guassian uncertainty
     value associated with the data.
@@ -38,7 +38,8 @@ def add_gaussian_noise(x, dx):
         raise ValueError("All sigma values must be positive")
 
     # Generate and add noise
-    noise = np.random.normal(0, std_dev)
+    rng = np.random.default_rng(seed)
+    noise = rng.normal(0, std_dev)
     noisy_data = data + noise
 
     return noisy_data
@@ -477,7 +478,7 @@ class sizeDistribution():
         else: 
             self.volume_fraction_errs = None
         
-    def prep_maxEnt(self, sub_intensities:Data1D, full_fit:bool=False, nreps:int = 10):
+    def prep_maxEnt(self, sub_intensities:Data1D, full_fit:bool=False, nreps:int = 10, rngseed=None):
         """
         1. Subtract intensities from the raw data. 
         2. Trim the data to the correct q-range for maxEnt; Create new trimmed Data1D object to return after MaxEnt.
@@ -526,7 +527,7 @@ class sizeDistribution():
         intensities = []
         if full_fit:
             for j in range(nreps):
-                intensities.append(add_gaussian_noise(trim_data.y, trim_data.dy))
+                intensities.append(add_gaussian_noise(trim_data.y, trim_data.dy, seed=rngseed))
         else:
             intensities.append(trim_data.y)
 

@@ -50,8 +50,8 @@ def fetch_answer():
 def test_noRes(data1):
     data_background = np.ones(len(data1.data.y)) * 0.120605
     subtracted_data = Data1D(data1.data.x, data_background, dy = data_background * 0.001, lam=None, dlam=None, isSesans=False)
-    trim_data, intensities, init_binsBack, sigma = data1.prep_maxEnt(subtracted_data, full_fit=True)
-    _, Bins, _, BinMag, _, _ = data1.run_maxEnt(trim_data, intensities,init_binsBack, sigma)
+    trim_data, intensities, init_binsBack, sigma = data1.prep_maxEnt(subtracted_data, full_fit=True, rngseed=0)
+    _, Bins, _, BinMag, _, _ = data1.run_maxEnt(trim_data, intensities, init_binsBack, sigma)
     answerBins, answerMags = fetch_answer()
     assert Bins == pytest.approx(answerBins, rel=100)
     assert BinMag == pytest.approx(answerMags, rel=100)

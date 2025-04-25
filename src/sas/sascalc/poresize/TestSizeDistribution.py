@@ -122,9 +122,9 @@ size_distribution.weightFactor = 0.5
 background = np.ones(len(data_from_loader.y))*0.120605
 
 subdata = data_info.Data1D(x=Q, y=background, dx=None, dy=background*0.0001, lam=None, dlam=None, isSesans=False)
-trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=True)
+trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=True, rngseed=0)
 
-print(sigma)
+#print(sigma)
 operation = matrix_operation()
 gqr = operation.G_matrix(trim_data.x, size_distribution.bins, size_distribution.contrast, 'Sphere', rst.Perfect1D).T
 
@@ -133,7 +133,7 @@ plt.loglog(data_from_loader.x, data_from_loader.y)
 plt.loglog(trim_data.x, trim_data.y)
 #plt.loglog(trim_data.x, intensities[0])
 plt.loglog(subdata.x, subdata.y, color='red', linestyle='--')
-plt.loglog(trim_data.x, size_distribution.model_matrix[:,0:200:10])
+plt.loglog(trim_data.x, size_distribution.model_matrix[:, 0:200:10])
 #plt.loglog(trim_data.x, gqr[:,10])
 plt.show()
 
