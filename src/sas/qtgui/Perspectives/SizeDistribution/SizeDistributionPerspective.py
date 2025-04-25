@@ -594,9 +594,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.size_distr_plot = self.logic.newSizeDistrPlot(result)
         if self.size_distr_plot is not None:
             title = self.size_distr_plot.name
-            self.size_distr_plot.symbol = "Line"
-            self.size_distr_plot.show_errors = False
-
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.size_distr_plot, title
             )

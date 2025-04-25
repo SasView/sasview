@@ -131,7 +131,7 @@ class SizeDistributionLogic:
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.is_data = False
         new_plot.plot_role = DataRole.ROLE_STAND_ALONE
-        new_plot.dy = np.zeros(len(y))
+        new_plot.symbol = "Line"
 
         new_plot.id = SIZE_DISTR_LABEL
         new_plot.group_id = GROUP_ID_SIZE_DISTR_FIT
