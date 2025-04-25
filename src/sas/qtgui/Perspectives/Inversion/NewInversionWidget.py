@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
-from src.sas.qtgui.Perspectives.Inversion.Thread import CalcPr, EstimateNT
+from src.sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, EstimateNT
 from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem, DoubleValidator
@@ -363,6 +363,21 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.calcThread.queue()
         # TODO: Why are we doing this?
         self.calcThread.ready(2.5)
+
+    def startThreadAll(self):
+        self.dataList.setCurrentIndex(0)
+        self.calcThread = CalcBatchPr(
+            prs=[result.calculator for result in self.results],
+            nfuncs=[result.calculator.noOfTerms for result in self.results],
+            error_func=self.threadError,
+            completefn=self.batchCalculationComplete
+        )
+        self.calcThread.queue()
+        self.calcThread.ready(2.5)
+
+    def batchCalculationComplete(self):
+
+
 
     def estimateAvailable(self):
         self.updateGuiValues()
