@@ -122,7 +122,7 @@ size_distribution.weightFactor = 0.5
 background = np.ones(len(data_from_loader.y))*0.120605
 
 subdata = data_info.Data1D(x=Q, y=background, dx=None, dy=background*0.0001, lam=None, dlam=None, isSesans=False)
-trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=False)
+trim_data, intensities, init_binsBack, sigma = size_distribution.prep_maxEnt(subdata, full_fit=True)
 
 print(sigma)
 operation = matrix_operation()
@@ -138,16 +138,17 @@ plt.loglog(trim_data.x, size_distribution.model_matrix[:,0:200:10])
 plt.show()
 
 convergence = size_distribution.run_maxEnt(trim_data, intensities, init_binsBack, sigma)
-#print(BinMag, BinErr, MaxEntData.y)
+print(size_distribution.BinMagnitude_Errs)
 
-print(size_distribution.MaxEnt_statistics)
-print(size_distribution.volumefrac_cdf)
-print(size_distribution.bins[1:]*2)
+#print(size_distribution.MaxEnt_statistics)
+#print(size_distribution.volumefrac_cdf)
+
 plt.figure()
 plt.semilogx(size_distribution.bins[1:]*2, size_distribution.volumefrac_cdf)
 plt.semilogx(size_distribution.bins[1:]*2, size_distribution.number_cdf)
 axtwn = plt.gca().twinx()
 axtwn.semilogx(size_distribution.bins*2,size_distribution.BinMagnitude_maxEnt)
+axtwn.errorbar(size_distribution.bins*2, size_distribution.BinMagnitude_maxEnt, size_distribution.BinMagnitude_Errs)
 
 plt.show()
 

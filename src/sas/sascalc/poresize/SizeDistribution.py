@@ -76,7 +76,7 @@ def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
     ##Get values of scale and if required power
     if power is not None and power != 0:
         # Linearize the data for a power law fit (log, log)
-        linearized_data = Data1D(np.log(self.data.x[idx]), np.log(fx[idx]), dy)
+        linearized_data = Data1D(np.log(self.data.x[idx]), np.log(fx[idx]), )
     else:
         linearized_data = Data1D(self.data.x[idx], fx[idx], dy=sigma[idx])
 
@@ -292,7 +292,7 @@ class sizeDistribution():
     @model.setter
     def model(self, value:str):
         if value != "ellipsoid":
-            logger.warning("model is hard coded to ellipsoid for the time being. Please only use ellipsoid.\n Setting model to ellipsoid.")
+            logger.info("model is hard coded to ellipsoid for the time being. Please only use ellipsoid.\n Setting model to ellipsoid.")
             self._model = "ellipsoid"
         else:
             self._model = value   
@@ -553,7 +553,7 @@ class sizeDistribution():
                 IMaxEnt.append(icalc)
                 convergence.append([converged, conv_iter])
             except ZeroDivisionError as e:
-                logger.warning("Divide by Zero Error occured in maximum entropy fitting. Try lowering the weight factor to increase the error weighting")
+                logger.error("Divide by Zero Error occured in maximum entropy fitting. Try lowering the weight factor to increase the error weighting")
             
 
 
@@ -571,14 +571,14 @@ class sizeDistribution():
             self.chiSq_maxEnt = np.mean(ChiSq)
             self.BinMagnitude_maxEnt = np.mean(BinMag, axis=0)/(2.*self._binDiff)
 
-            self.BinMagnitude_Errs = np.std(BinMag, axis=0)
+            self.BinMagnitude_Errs = np.std(BinMag, axis=0)/(2.*self._binDiff)
             maxentdata.y = np.mean(IMaxEnt, axis=0)
             maxentdata.dy = np.std(IMaxEnt, axis=0)
             self.Iq_maxEnt  = maxentdata
             self.calculate_statistics(BinMag)
 
         else:
-            logging.error('The length of the intensity array is 0. Did you run prep_maxEnt before run_maxEnt? Check that intensities is an array of at least length 1.')
+            logger.error('The length of the intensity array is 0. Did you run prep_maxEnt before run_maxEnt? Check that intensities is an array of at least length 1.')
 
         #self.calc_volume_weighted_dist(np.mean(BinMag, axis=0))
         
