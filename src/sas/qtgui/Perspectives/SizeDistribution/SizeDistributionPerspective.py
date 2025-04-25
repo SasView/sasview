@@ -21,6 +21,7 @@ from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import (
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
+from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 
 ASPECT_RATIO = 1.0
@@ -80,6 +81,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.is_calculating = False
         self.backgd_plot = None
         self.backgd_subtr_plot = None
+        self.fit_plot = None
         self.size_distr_plot = None
 
         self.model = QtGui.QStandardItemModel(self)
@@ -436,7 +438,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Plot data, background and background subtracted data
         """
         plots = [self._model_item]
-        self.backgd_plot, self.backgd_subtr_plot = self.logic.newDataPlot()
+        self.backgd_plot, self.backgd_subtr_plot, self.fit_plot = (
+            self.logic.newDataPlot()
+        )
 
         if self.backgd_plot is not None:
             title = self.backgd_plot.name
@@ -449,6 +453,11 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 self._model_item, self.backgd_subtr_plot, title
             )
             plots.append(self.backgd_subtr_plot)
+
+        if self.fit_plot is not None:
+            title = self.fit_plot.name
+            GuiUtils.updateModelItemWithPlot(self._model_item, self.fit_plot, title)
+            plots.append(self.fit_plot)
 
         self.communicate.plotRequestedSignal.emit(plots, None)
 
@@ -590,7 +599,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         # TODO: show results in the UI widget
 
-        # plot results
+        # plot size distribution
         self.size_distr_plot = self.logic.newSizeDistrPlot(result)
         if self.size_distr_plot is not None:
             title = self.size_distr_plot.name
@@ -600,6 +609,12 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.communicate.plotRequestedSignal.emit(
                 [self._model_item, self.size_distr_plot], None
             )
+
+        # add fit to data plot
+        if isinstance(result.data_max_ent, LoadData1D):
+            self.logic.data_fit = result.data_max_ent
+            # TODO: q range sliders should not be reset here
+            self.plotData()
 
     def getWeightType(self):
         """

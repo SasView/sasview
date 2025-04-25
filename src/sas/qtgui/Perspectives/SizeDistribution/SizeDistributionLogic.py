@@ -6,6 +6,7 @@ from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 BACKGD_PLOT_LABEL = "Background"
 BACKGD_SUBTR_PLOT_LABEL = "Intensity-Background"
+FIT_PLOT_LABEL = "Fit"
 GROUP_ID_SIZE_DISTR_DATA = "SizeDistrData"
 SIZE_DISTR_LABEL = "SizeDistrFit"
 GROUP_ID_SIZE_DISTR_FIT = "SizeDistrFit"
@@ -23,6 +24,7 @@ class SizeDistributionLogic:
         # di data presence in the dataset
         self.di_flag = False
         self.background = None
+        self.data_fit = None
         if data is not None:
             self.data_is_loaded = True
             self.setDataProperties()
@@ -117,14 +119,32 @@ class SizeDistributionLogic:
         backgd_subtr_plot.slider_low_q_input = ["txtMinRange"]
         backgd_subtr_plot.slider_high_q_input = ["txtMaxRange"]
 
-        return backgd_plot, backgd_subtr_plot
+        # Fit plot
+        fit_plot = None
+        if self.data_fit is not None:
+            fit_plot = Data1D(self.data_fit.x, self.data_fit.y, dy=self.data_fit.dy)
+            fit_plot.is_data = False
+            fit_plot.plot_role = DataRole.ROLE_DATA
+
+            fit_plot.id = FIT_PLOT_LABEL
+            fit_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
+            fit_plot.name = FIT_PLOT_LABEL + f"[{self._data.name}]"
+
+            fit_plot.title = fit_plot.name
+            fit_plot.xaxis("\\rm{Q}", "A^{-1}")
+            fit_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+
+            fit_plot.symbol = "Circle"
+            fit_plot.show_errors = True
+
+        return backgd_plot, backgd_subtr_plot, fit_plot
 
     def newSizeDistrPlot(self, result: MaxEntResult):
         """
         Create a new 1D data instance based on fitting results
         """
         # Create the new plot
-        #bins are radius but plot is in diameter
+        # bins are radius but plot is in diameter
         x = 2 * result.bins
         y = result.bin_mag
         dy = result.bin_err
