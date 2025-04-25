@@ -375,9 +375,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.calcThread.queue()
         self.calcThread.ready(2.5)
 
-    def batchCalculationComplete(self):
-
-
+    def batchCalculationComplete(self, outputs):
+        self.updateGuiValues()
+        # TODO: Calculated Outputs.
 
     def estimateAvailable(self):
         self.updateGuiValues()
