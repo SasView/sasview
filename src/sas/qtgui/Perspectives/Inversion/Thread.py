@@ -46,7 +46,7 @@ class CalcBatchPr(CalcThread):
     # structure, and I don't want to mess with anything.
     def __init__(self, prs: list[NewInvertor], nfuncs=None, tab_id=None, error_func=None, completefn=None,
                  updatefn=None, yieldtime=0.01, worktime=0.01):
-        CalcThread.__init__(self, error_func, completefn, yieldtime, worktime)
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.prs = prs
         self.nfuncs = nfuncs
         self.error_func = error_func
