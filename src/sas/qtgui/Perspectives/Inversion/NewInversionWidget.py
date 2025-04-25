@@ -381,7 +381,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     def batchCalculationComplete(self, outputs):
         self.calculationComplete.emit()
-        # TODO: Calculated Outputs.
+        for result in self.results:
+            # TODO: Calculate elapsed properly.
+            result.outputs = get_outputs(result.calculator, 0)
+
 
     def estimateAvailable(self):
         self.updateGuiValues()
