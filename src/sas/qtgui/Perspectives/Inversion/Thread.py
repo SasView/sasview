@@ -60,7 +60,7 @@ class CalcBatchPr(CalcThread):
                 outputs.append(invertor.invert(nfunc))
                 self.isquit()
             elapsed = time.time() - self.starttime
-            self.complete(outputs=outputs, totalElapsed=elapsed)
+            self.complete(totalElapsed=elapsed)
         except KeyboardInterrupt:
             pass
         except:
