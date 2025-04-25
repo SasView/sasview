@@ -25,6 +25,18 @@ class CalculatedOutputs:
     pos_frac: float
     pos_err: float
 
+def get_outputs(invertor: NewInvertor, elapsed: float):
+    return CalculatedOutputs(
+        invertor.rg(invertor.out),
+        invertor.iq0(invertor.out),
+        invertor.background,
+        elapsed,
+        invertor.chi2,
+        invertor.oscillations(invertor.out),
+        invertor.get_positive(invertor.out),
+        invertor.get_pos_err(invertor.out, invertor.cov)
+    )
+
 @dataclass
 class EstimatedParameters:
     reg_constant: float
