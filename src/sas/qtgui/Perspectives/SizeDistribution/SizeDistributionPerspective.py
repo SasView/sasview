@@ -378,7 +378,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         if not item_text:
             return
         # Update plot of data and background
-        # TODO: handle update upon data removed
+        if not self.logic.data_is_loaded:
+            return
         background_update_widgets = [
             WIDGETS.W_BACKGROUND,
             WIDGETS.W_SUBTRACT_LOW_Q,
@@ -492,6 +493,12 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtName.setText("")
         self._model_item = None
         self.logic.data = None
+        self.logic.data_fit = None
+        self.logic.background = None
+        self.backgd_subtr_plot = None
+        self.backgd_plot = None
+        self.fit_plot = None
+        self.size_distr_plot = None
         self.setupModel()
         self.enableButtons()
 
