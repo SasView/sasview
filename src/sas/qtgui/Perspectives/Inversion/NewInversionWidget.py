@@ -70,6 +70,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     # perspective, I'm not convinced they are needed here.
 
     calculationComplete = Signal()
+    batchCalculationOutput = Signal(object)
     estimationComplete = Signal()
     changeBackgroundMode = Signal()
 
@@ -381,9 +382,23 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
 
     def batchCalculationComplete(self, totalElapsed):
         self.calculationComplete.emit()
+        batch_dict = {}
         for result in self.results:
             # TODO: Calculate elapsed properly.
             result.outputs = get_outputs(result.calculator, totalElapsed)
+            batch_dict[result.logic.data.filename] = {
+                'Calculator': result.calculator,
+                'PrPlot': result.pr_plot,
+                'DataPlot': result.data_plot
+            }
+        self.batchCalculationOutput.emit(batch_dict)
+
+    def showBatchCalculationWindow(self, batch_dict):
+        self.batchResultsWindow = BatchInversionOutputPanel(
+            parent=self,
+            output_data=batch_dict
+        )
+        self.batchResultsWindow.show()
 
 
     def estimateAvailable(self):
