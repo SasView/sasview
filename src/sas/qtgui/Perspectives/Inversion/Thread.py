@@ -1,6 +1,11 @@
 import sys
 import time
-from sas.sascalc.data_util.calcthread import CalcThread
+
+from dominate.tags import output
+from numpy.typing import NDArray
+from sas.sascal
+from numpy.typing import NDArrayc.data_util.calcthread import CalcThread
+from sas.sascalc.pr.NewInvertor import NewInvertor
 
 
 class CalcPr(CalcThread):
