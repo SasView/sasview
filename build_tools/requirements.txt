@@ -1,5 +1,6 @@
 # Alphabetized list of OS and version agnostic dependencies
 appdirs
+bumps
 cffi
 docutils
 dominate
@@ -15,6 +16,7 @@ matplotlib
 numba
 numpy
 periodictable
+platformdirs
 pybind11
 pylint
 pyopengl
@@ -26,7 +28,7 @@ pytest-mock
 pytools
 qtconsole
 scipy
-six
+siphash24
 sphinx
 superqt
 tinycc
@@ -38,6 +40,3 @@ zope
 
 # Alphabetized list of OS-specific packages
 pywin32; platform_system == "Windows"
-
-# Alphabetized list of version-pinned packages
-bumps==0.*  # v1.+ is very experimental

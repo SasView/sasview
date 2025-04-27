@@ -13,10 +13,20 @@ def map_getattr(classInstance, classFunc, *args):
     Take an instance of a class and a function name as a string.
     Execute class.function and return result
     """
-    return  getattr(classInstance, classFunc)(*args)
+    try:
+        return_value = getattr(classInstance, classFunc)(*args)
+    except Exception as ex:
+        logger.error("Fitting failed: %s", traceback.format_exc())
+        return None
+    return  return_value
 
 def map_apply(arguments):
-    return arguments[0](*arguments[1:])
+    try:
+        return_value = arguments[0](*arguments[1:])
+    except Exception as ex:
+        logger.error("Fitting failed: %s", traceback.format_exc())
+        return None
+    return return_value
 
 class FitThread(CalcThread):
     """Thread performing the fit """

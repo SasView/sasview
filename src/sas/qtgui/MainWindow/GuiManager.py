@@ -15,6 +15,7 @@ from PySide6.QtCore import Qt, QLocale
 import matplotlib as mpl
 
 import sas.system.version
+from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
 
 #mpl.use("Qt5Agg")
 
@@ -34,6 +35,8 @@ from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
@@ -203,6 +206,7 @@ class GuiManager:
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
+        self.MuMag_Fitter = MuMag(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.GENSASCalculator = None
@@ -697,7 +701,7 @@ class GuiManager:
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
-        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByModelID)
+        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
         self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
@@ -754,6 +758,7 @@ class GuiManager:
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
         self._workspace.actionDensity_Volume_Calculator.triggered.connect(self.actionDensity_Volume_Calculator)
         self._workspace.actionKeissig_Calculator.triggered.connect(self.actionKiessig_Calculator)
+        self._workspace.actionMuMag_Fitter.triggered.connect(self.actionMuMag_Fitter)
         #self._workspace.actionKIESSING_Calculator.triggered.connect(self.actionKIESSING_Calculator)
         self._workspace.actionSlit_Size_Calculator.triggered.connect(self.actionSlit_Size_Calculator)
         self._workspace.actionSAS_Resolution_Estimator.triggered.connect(self.actionSAS_Resolution_Estimator)
@@ -1039,6 +1044,11 @@ class GuiManager:
         """
         """
         self.KIESSIGCalculator.show()
+
+    def actionMuMag_Fitter(self):
+        """
+        """
+        self.MuMag_Fitter.show()
 
     def actionSlit_Size_Calculator(self):
         """
@@ -1331,12 +1341,12 @@ class GuiManager:
             return
         per.currentTab.setTheoryItem(item)
 
-    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+    def deleteIntermediateTheoryPlotsByTabId(self, tab_id):
         """
         Catch the signal to delete items in the Theory item model which correspond to a model ID.
         Send the request to the DataExplorer for updating the theory model.
         """
-        self.filesWidget.deleteIntermediateTheoryPlotsByModelID(model_id)
+        self.filesWidget.deleteIntermediateTheoryPlotsByTabId(tab_id)
 
     def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
         """

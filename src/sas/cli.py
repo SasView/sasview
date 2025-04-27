@@ -104,13 +104,17 @@ def parse_cli(argv):
     return opts
 
 def main(logging="production"):
+    # Copy files before loading config
+    from sas.system.user import copy_old_files_to_new_location
+    copy_old_files_to_new_location()
+
     from sas.system import log
     from sas.system import lib
     from sas.system import console
 
     # I/O redirection for the windows console. Need to do this early so that
     # output will be displayed on the console. Presently not working for
-    # for production (it always opens the console even if it is not needed)
+    # production (it always opens the console even if it is not needed)
     # so require "sasview con ..." to open the console. Not an infamous
     # "temporary fix" I hope...
     if "-i" in sys.argv[1:] or "-o" in sys.argv[1:]:

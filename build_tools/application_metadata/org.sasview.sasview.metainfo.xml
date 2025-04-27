@@ -2,7 +2,7 @@
 
 <component type="desktop-application">
   <id>org.sasview.sasview</id>
-  <name>SasViw</name>
+  <name>SasView</name>
   <project_license>BSD-3-Clause</project_license>
   <metadata_license>CC0</metadata_license>
   <summary> SasView is a Small Angle Scattering Analysis Software Package</summary>
@@ -20,7 +20,7 @@
   <url type="vcs-browser">https://github.com/SasView/sasview</url>
 
   <releases>
-    <release version="6.0.0" date="2024-10-14"></release>
+    <release version="6.0.1" date="2025-03-14"></release>
   </releases>
 
   <launchable type="desktop-id">org.sasview.sasview.desktop</launchable>

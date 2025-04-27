@@ -413,7 +413,7 @@ def main():
         help="model files ")
     args = parser.parse_args()
 
-    TARGET_DIR = os.path.expanduser(args.rst)
+    TARGET_DIR = Path(TARGET_DIR / args.rst) if args.rst else TARGET_DIR
     if not os.path.exists(TARGET_DIR) and not args.sphinx:
         print("build directory %r does not exist"%TARGET_DIR)
         sys.exit(1)

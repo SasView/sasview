@@ -13,6 +13,52 @@ Release Notes
 Features
 ========
 
+New in Version 6.0.1
+--------------------
+This is a bug fix release and the issues fixed for this release are described below.
+
+This version of SasView is built with Sasmodels v1.0.9, Sasdata v0.9.0, and bumps v0.9.3.
+
+General GUI Fixes
+^^^^^^^^^
+* Open a pop-up on start-up if a new version is available by @lucas-wilkins in https://github.com/SasView/sasview/pull/3216
+* Removed superfluous signal connection causing duplicate theories by @rozyczko in https://github.com/SasView/sasview/pull/3199
+* Removing data from the context menu now removes it from perspectives by @rozyczko in https://github.com/SasView/sasview/pull/3236
+
+Plotting Fixes
+^^^^^^^^^
+* Fix to ensure default plot scaling matches the plot type by @krzywon in https://github.com/SasView/sasview/pull/3184
+* Delete intermediate theory plots by tab id not model id. by @jamescrake-merani in https://github.com/SasView/sasview/pull/3160
+* Linear fit no longer causes graph rescaling by @krzywon in https://github.com/SasView/sasview/pull/3187
+* Fix for errors thrown when modifying tick labels by @jamescrake-merani in https://github.com/SasView/sasview/pull/3191
+
+Fitting and Other Perspective Fixes
+^^^^^^^^^
+* Status bar message does not clear on gsc exit by @rozyczko in https://github.com/SasView/sasview/pull/3185
+* Guard against bad fit results to ensure fit tabs can run new fits by @rozyczko in https://github.com/SasView/sasview/pull/3172
+* A number of model editor bug fixes by @tsole0 in https://github.com/SasView/sasview/pull/2901
+* Fix model documentation not showing when plugin folder is empty by @krzywon in https://github.com/SasView/sasview/pull/3237
+* Added OpenCL support for the Flatpak release by @jamescrake-merani in https://github.com/flathub/org.sasview.sasview/pull/4
+
+Other Fixes
+^^^^^^^^^
+* Call the system default csv viewer to allow batch fit results output for any OS by @summerhenson in https://github.com/SasView/sasview/pull/3186
+* Remove a button that did nothing by @jamescrake-merani in https://github.com/SasView/sasview/pull/3217
+
+Infrastructure Fixes
+^^^^^^^^^
+* Fixes to the flatpak metadata by @jamescrake-merani in https://github.com/SasView/sasview/pull/3150
+* Replace the expired OSX Notarization key by @krzywon in https://github.com/SasView/sasview/pull/3183
+* Include new contributors in the contributor file by @krzywon in https://github.com/SasView/sasview/pull/3192
+* Fix for sasmodel doc build by @krzywon in https://github.com/SasView/sasview/pull/3212
+
+Known Issues
+^^^^^^^^^
+All known bugs and feature requests can be found in the issues on github.
+
+`sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
+
+
 New in Version 6.0.0
 --------------------
 This is a major release with a number of new features, enhancements, and bug fixes as described below. Many of the new
