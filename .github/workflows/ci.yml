@@ -399,10 +399,10 @@ jobs:
           # $INSTALL_PATH is already the base directory
           tar xf "$DL_PATH/sasview6.tar.gz"
 
-      - name: Check installation files
-        run: |
-          echo "File listing of SasView installed in '$INSTALL_PATH'"
-          find "$INSTALL_PATH"
+      #- name: Check installation files
+      #  run: |
+      #    echo "File listing of SasView installed in '$INSTALL_PATH'"
+      #    find "$INSTALL_PATH"
 
       - name: Try running the installation (Windows)
         if: ${{ startsWith(matrix.os, 'windows') }}
