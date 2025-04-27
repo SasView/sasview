@@ -455,7 +455,8 @@ jobs:
       - name: Try running the installation (macOS)
         if: ${{ startsWith(matrix.os, 'macOS' )}}
         run: |
-          hdiutil attach SasView6.dmg
+          ls $DL_PATH
+          hdiutil attach $DL_PATH/SasView6.dmg
           /Volumes/SasView6/SasView6.app/Contents/MacOS/sasview
           # See if this works for now.
 
