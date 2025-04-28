@@ -5,6 +5,8 @@ requires = [
     "hatch-requirements-txt",
     "hatch-sphinx",
     "pyside6",
+    "sasdata",
+    "sasmodels",
 ]
 build-backend = "hatchling.build"
 

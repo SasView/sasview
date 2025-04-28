@@ -24,6 +24,8 @@ pyparsing
 PySide6
 pytools
 qtconsole
+sasdata
+sasmodels
 scipy
 siphash24
 sphinx
