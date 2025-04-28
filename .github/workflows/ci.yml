@@ -450,8 +450,8 @@ jobs:
         if: ${{ startsWith(matrix.os, 'macOS' )}}
         run: |
           hdiutil attach $DL_PATH/SasView6.dmg
-          /Volumes/SasView6/SasView6.app/Contents/MacOS/sasview --help
-          # See if this works for now.
+          # Testing scripting interface
+          /Volumes/SasView6/SasView6.app/Contents/MacOS/sasview -m sasmodels.compare cylinder
 
       ### Optionally attempt to work with the debug tarball from pyinstaller
 
