@@ -299,16 +299,18 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.makePlots(out, cov, pr, elapsed)
         self.showCurrentPlots()
 
-    def makePlots(self, out, cov, pr, elapsed):
+    def makePlots(self, out, cov, pr, elapsed, result=None):
+        if result is None:
+            result = self.currentResult
         # PR Plot
-        self.currentResult.pr_plot = self.currentResult.logic.newPRPlot(out, pr, cov)
-        self.currentResult.pr_plot.show_yzero = True
-        self.currentResult.pr_plot.filename = self.currentResult.logic.data.filename
-        self.currentResult.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
+        result.pr_plot = self.currentResult.logic.newPRPlot(out, pr, cov)
+        result.pr_plot.show_yzero = True
+        result.pr_plot.filename = self.currentResult.logic.data.filename
+        result.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
 
         # Data Plot
-        data_plot = self.currentResult.logic.new1DPlot(self.tab_id, out, self.currentResult.calculator)
-        data_plot.filename = self.currentResult.logic.data.filename
+        data_plot = result.logic.new1DPlot(self.tab_id, out, self.currentResult.calculator)
+        data_plot.filename = result.logic.data.filename
 
         data_plot.show_q_range_sliders = True
         data_plot.slider_update_on_move = False
@@ -321,7 +323,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         data_plot.symbol = 'Line'
         data_plot.show_errors = False
         data_plot.plot_role = DataRole.ROLE_DEFAULT
-        self.currentResult.data_plot = data_plot
+        result.data_plot = data_plot
 
     def showCurrentPlots(self):
         plots = [self.currentResult.pr_plot, self.currentResult.data_plot]
