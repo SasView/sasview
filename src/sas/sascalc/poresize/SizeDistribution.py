@@ -559,7 +559,7 @@ class sizeDistribution():
                 IMaxEnt.append(icalc)
                 convergence.append([converged, conv_iter])
                 if (not converged):
-                    logger.info("Maximum Entropy did not converge. Try lowering the weight factor to increase the weighting effect.")
+                    logger.warning("Maximum Entropy did not converge. Try lowering the weight factor to increase the weighting effect.")
             except ZeroDivisionError as e:
                 logger.error("Divide by Zero Error occured in maximum entropy fitting. Try lowering the weight factor to increase the error weighting")
             
