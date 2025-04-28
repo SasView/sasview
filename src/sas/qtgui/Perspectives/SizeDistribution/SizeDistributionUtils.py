@@ -54,9 +54,12 @@ class MaxEntParameters:
 
 @dataclass
 class MaxEntResult:
+    convergences: list[bool]
+    num_iters: list[int]
     chisq: float
     bins: list[float]
     bin_mag: list[float]
     bin_diff: list[float]
     bin_err: list[float]
     data_max_ent: Data1D
+    statistics: dict

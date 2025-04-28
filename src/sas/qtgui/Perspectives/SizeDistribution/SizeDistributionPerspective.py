@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+import numpy as np
 from PySide6 import QtGui, QtCore, QtWidgets
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
@@ -501,6 +502,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.size_distr_plot = None
         self.setupModel()
         self.enableButtons()
+        self.clearStatistics()
 
     def serializeAll(self):
         """
@@ -589,7 +591,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # re-enable the fit buttons
         self.is_calculating = False
         self.enableButtons()
-        logger.error(error)
+        logger.exception(error)
 
     def fitComplete(self, result: MaxEntResult) -> None:
         """
@@ -604,7 +606,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.communicate.statusBarUpdateSignal.emit(msg)
             return
 
-        # TODO: show results in the UI widget
+        # update the output box
+        self.updateStatistics(result)
 
         # plot size distribution
         self.size_distr_plot = self.logic.newSizeDistrPlot(result)
@@ -672,3 +675,37 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         constant, scale, power = self.getBackgroundParams()
         self.logic.computeBackground(constant, scale, power)
+
+    def updateStatistics(self, result):
+        """
+        Update the output box with statistics
+        """
+        if all(result.convergences):
+            if len(result.convergences) == 1:
+                converge_msg = (
+                    f"Quick fit converged after {result.num_iters[0]} iterations"
+                )
+            else:
+                converge_msg = f"Full fit converged after on average {np.mean(result.num_iters):.1f} iterations"
+        else:
+            converge_msg = "Not converged"
+        self.lblConvergence.setText(converge_msg)
+        self.lblChiSq.setText(f"ChiSq: {result.chisq:.5g}")
+        stats = result.statistics
+        self.lblVolume.setText(
+            f"Volume of scatterers: {stats['volume']:.5g} +/- {stats['volume_err']:.5g}"
+        )
+        self.lblDiameterMean.setText(f"Mean diameter: {stats['mean']:.5g} \u212b")
+        self.lblDiameterMode.setText(f"Median diameter: {stats['median']:.5g} \u212b")
+        self.lblDiameterMedian.setText(f"Mode diameter: {stats['mode']:.5g} \u212b")
+
+    def clearStatistics(self):
+        """
+        Clear the output box
+        """
+        self.lblConvergence.setText("")
+        self.lblChiSq.setText("")
+        self.lblVolume.setText("")
+        self.lblDiameterMean.setText("")
+        self.lblDiameterMode.setText("")
+        self.lblDiameterMedian.setText("")
