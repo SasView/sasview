@@ -389,6 +389,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         for result in self.results:
             # TODO: Calculate elapsed properly.
             result.outputs = get_outputs(result.calculator, totalElapsed)
+            self.makePlots(result.calculator.out, result.calculator.cov, result.calculator, totalElapsed, result)
             batch_dict[result.logic.data.filename] = {
                 'Calculator': result.calculator,
                 'PrPlot': result.pr_plot,
