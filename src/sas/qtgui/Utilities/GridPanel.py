@@ -25,8 +25,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         self.setupUi(self)
 
         self.parent = parent
-        if hasattr(self.parent, "communicate"):
-            self.communicate = parent.communicate
+        if hasattr(self.parent, "commuicator"):
+            self.communicate = parent.communicator
 
         self.addToolbarActions()
 
