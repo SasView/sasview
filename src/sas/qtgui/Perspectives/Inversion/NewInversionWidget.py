@@ -325,12 +325,15 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         data_plot.plot_role = DataRole.ROLE_DEFAULT
         result.data_plot = data_plot
 
-    def showCurrentPlots(self):
-        plots = [self.currentResult.pr_plot, self.currentResult.data_plot]
+    def showPlots(self, result: InversionResult):
+        plots = [result.pr_plot, result.data_plot]
         for plot in plots:
             if not plot is None:
-                updateModelItemWithPlot(self.currentDataItem, plot, plot.name)
-                self.communicator.plotRequestedSignal.emit([self.currentDataItem, plot], None)
+                updateModelItemWithPlot(result.logic._data_item, plot, plot.name)
+                self.communicator.plotRequestedSignal.emit([result.logic._data_item, plot], None)
+
+    def showCurrentPlots(self):
+        self.showPlots(self.currentResult)
 
     def updateParams(self):
         # TODO: No validators so this will break if they can't be converted to
