@@ -207,7 +207,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
                 self.prPlot = self.parent.batchResults[name].get(DICT_KEYS[1])
                 self.dataPlot = self.parent.batchResults[name].get(DICT_KEYS[2])
                 # emit a signal so the plots are being shown
-                self.parent.allowPlots = True
                 self.parent.showPlot()
                 # This is an important processEvent.
                 # This allows charts to be properly updated in order
