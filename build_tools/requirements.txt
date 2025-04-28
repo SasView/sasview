@@ -19,6 +19,7 @@ periodictable
 platformdirs
 pybind11
 pylint
+pyopencl
 pyopengl
 pyparsing
 PySide6

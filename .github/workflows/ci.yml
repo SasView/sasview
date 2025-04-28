@@ -139,25 +139,6 @@ jobs:
           python -m pip install -r build_tools/requirements.txt
           python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
 
-
-      - name: Install pywin32 (Windows)
-        if: ${{ startsWith(matrix.os, 'windows') }}
-        run: |
-          python -m pip install pywin32
-
-      - name: Install pyopencl (Windows)
-        if: ${{ startsWith(matrix.os, 'windows') }}
-        run: |
-          python -m pip install pytools mako cffi
-          choco install opencl-intel-cpu-runtime
-          choco install innosetup
-          python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
-
-      - name: Install pyopencl (Linux + macOS)
-        if: ${{ !startsWith(matrix.os, 'windows') }}
-        run: |
-          python -m pip install pyopencl
-
       ### Document the build environment
 
       - name: Python package version list
