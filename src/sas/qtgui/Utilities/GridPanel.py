@@ -214,6 +214,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
                 QtWidgets.QApplication.processEvents()
             except (IndexError, AttributeError):
                 # data messed up.
+                logging.error('Issue with data')
                 return
 
     @classmethod
