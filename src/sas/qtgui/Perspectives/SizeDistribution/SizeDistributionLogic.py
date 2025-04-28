@@ -150,15 +150,16 @@ class SizeDistributionLogic:
         dy = result.bin_err
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.is_data = False
-        new_plot.plot_role = DataRole.ROLE_STAND_ALONE
-        new_plot.symbol = "Line"
+        #new_plot.plot_role = DataRole.ROLE_STAND_ALONE
+        #new_plot.symbol = "Line"
 
         new_plot.id = SIZE_DISTR_LABEL
         new_plot.group_id = GROUP_ID_SIZE_DISTR_FIT
         new_plot.name = SIZE_DISTR_LABEL + f"[{self._data.name}]"
 
+        new_plot.hide_error = False
         new_plot.title = new_plot.name
         new_plot.xaxis("\\rm{Diameter}", "A")
-        new_plot.yaxis("\\rm{VolumeDistribution} ", "")
+        new_plot.yaxis("\\rm{VolumeDistribution}", "")
 
         return new_plot
