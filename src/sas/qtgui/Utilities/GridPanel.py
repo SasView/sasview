@@ -204,8 +204,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         for row in rows:
             try:
                 name = data['Filename'][row]
-                self.prPlot = self.parent.batchResults[name].get(DICT_KEYS[1])
-                self.dataPlot = self.parent.batchResults[name].get(DICT_KEYS[2])
+                self.prPlot = self.batch_results[name].get(DICT_KEYS[1])
+                self.dataPlot = self.batch_results[name].get(DICT_KEYS[2])
                 # emit a signal so the plots are being shown
                 self.parent.showPlot()
                 # This is an important processEvent.
@@ -463,6 +463,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
         self.parent = parent
+        self.batch_results = output_data
         
 
     def setupTable(self, widget=None,  data=None):
