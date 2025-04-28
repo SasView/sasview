@@ -376,6 +376,10 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.calcThread.ready(2.5)
 
     def startThreadAll(self):
+        self.updateParams()
+        self.isCalculating = True
+        self.enableButtons()
+
         self.dataList.setCurrentIndex(0)
         self.calcThread = CalcBatchPr(
             prs=[result.calculator for result in self.results],
@@ -387,6 +391,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.calcThread.ready(2.5)
 
     def batchCalculationComplete(self, totalElapsed):
+        self.isCalculating = False
+        self.enableButtons()
+
         self.calculationComplete.emit()
         batch_dict = {}
         for result in self.results:
