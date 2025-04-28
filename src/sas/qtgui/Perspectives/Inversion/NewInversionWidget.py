@@ -396,7 +396,8 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             batch_dict[result.logic.data.filename] = {
                 'Calculator': result.calculator,
                 'PrPlot': result.pr_plot,
-                'DataPlot': result.data_plot
+                'DataPlot': result.data_plot,
+                'Result': result
             }
         self.batchCalculationOutput.emit(batch_dict)
 
