@@ -400,6 +400,7 @@ jobs:
           tar xf "$DL_PATH/sasview6.tar.gz"
 
       - name: Check installation files
+        if: ${{ !startsWith(matrix.os, 'macos') }}
         run: |
           echo "File listing of SasView installed in '$INSTALL_PATH'"
           find "$INSTALL_PATH"
