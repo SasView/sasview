@@ -44,11 +44,12 @@ def add_gaussian_noise(x, dx, seed=None):
 
     return noisy_data
 
-def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
+def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
     """
     THIS IS A WORK IN PROGRESS AND WILL NOT RUN
     Fit data for $y = ax + b$  return $a$ and $b$
 
+    :param Data1D data: data to fit
     :param power: a fixed, otherwise None
     :param qmin: Minimum Q-value
     :param qmax: Maximum Q-value
@@ -57,43 +58,44 @@ def backgroud_fit(self, power=None, qmin=None, qmax=None, type="fixed"):
     Otherwise,
     """
     if qmin is None:
-        qmin = self.qmin
+        qmin = min(data.x)
     if qmax is None:
-        qmax = self.qmax
+        qmax = max(data.x)
 
     # Identify the bin range for the fit
-    idx = (self.data.x >= qmin) & (self.data.x <= qmax)
+    idx = (data.x >= qmin) & (data.x <= qmax)
 
-    fx = np.zeros(len(self.data.x))
+    fx = np.zeros(len(data.x))
 
     # Uncertainty
-    if type(self.data.dy) == np.ndarray and \
-        len(self.data.dy) == len(self.data.x) and \
-            np.all(self.data.dy > 0):
-        sigma = self.data.dy
+    if isinstance(data.dy, np.ndarray) and \
+        len(data.dy) == len(data.x) and \
+            np.all(data.dy > 0):
+        sigma = data.dy
     else:
-        sigma = np.ones(len(self.data.x))
+        sigma = np.ones(len(data.x))
 
     # Compute theory data f(x)
-    fx[idx] = self.data.y[idx]
+    fx[idx] = data.y[idx]
 
     ##Get values of scale and if required power
     if power is not None and power != 0:
         # Linearize the data for a power law fit (log, log)
-        linearized_data = Data1D(np.log(self.data.x[idx]), np.log(fx[idx]), dy=(1/np.log(10))*sigma[idx]/fx[idx])
+        linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=(1/np.log(10))*sigma[idx]/fx[idx])
     else:
-        linearized_data = Data1D(self.data.x[idx], fx[idx], dy=None)
+        linearized_data = Data1D(data.x[idx], fx[idx], dy=None)
 
-
-    slope, intercept, _, _, err_slope, err_int = stats.linregress(linearized_data)
-    intercept = np.mean(linearized_data.y - slope * linearized_data.x)
+    # slope, intercept, _, _, err_slope, err_int = stats.linregress(linearized_data.x, linearized_data.y)
+    result = stats.linregress(linearized_data.x, linearized_data.y)
+    intercept = np.mean(linearized_data.y - result.slope * linearized_data.x)
     n = len(linearized_data.x)
-    residuals = linearized_data.y - (slope * linearized_data.x + intercept)
+    residuals = linearized_data.y - (result.slope * linearized_data.x + intercept)
     sigma = np.sqrt(np.sum(residuals**2) / (n - 1))  # Sample standard deviation
     #std_dev_intercept = sigma * np.sqrt(np.sum(linearized_data.x**2) / (n * np.sum((linearized_data.x - np.mean(linearized_data.x))**2)))
     #mean_value = np.mean(numbers)
     #std_dev = np.std(numbers)
-    return np.exp(slope), err_slope, intercept, err_int
+    return np.exp(result.slope), result.intercept
+
 
 def ellipse_volume(rp,re):
     return (4*np.pi/3)*rp*re**2

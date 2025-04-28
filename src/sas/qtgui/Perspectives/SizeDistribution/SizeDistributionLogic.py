@@ -2,6 +2,7 @@ import numpy as np
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import MaxEntResult
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.sascalc.poresize.SizeDistribution import background_fit
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 BACKGD_PLOT_LABEL = "Background"
@@ -75,6 +76,20 @@ class SizeDistributionLogic:
         self.background = LoadData1D(
             x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False
         )
+
+    def fitFlatBackground(self, qmin, qmax):
+        """
+        Estimate the flat background
+        """
+        background = background_fit(self.data, None, qmin, qmax)
+        return background[1]
+
+    def fitBackgroundScale(self, power, qmin, qmax):
+        """
+        Estimate the background scale
+        """
+        background = background_fit(self.data, power, qmin, qmax)
+        return background[0]
 
     def newDataPlot(self):
         """

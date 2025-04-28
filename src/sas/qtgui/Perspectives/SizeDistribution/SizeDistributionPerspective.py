@@ -161,6 +161,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.quickFitButton.clicked.connect(self.onQuickFit)
         self.fullFitButton.clicked.connect(self.onFullFit)
         self.cmdReset.clicked.connect(self.onRangeReset)
+        self.cmdFitFlatBackground.clicked.connect(self.onFitFlatBackground)
+        self.cmdFitPowerLaw.clicked.connect(self.onFitPowerLaw)
 
         # Checkboxes
         self.chkLowQ.stateChanged.connect(self.onLowQStateChanged)
@@ -265,8 +267,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.enableButtons()
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
-        self.rbFitLowQ.setEnabled(False)
-        self.rbFixLowQ.setEnabled(False)
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
@@ -281,6 +281,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtScaleLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtWgtFactor.setValidator(GuiUtils.DoubleValidator())
+        self.txtBackgdQMin.setValidator(GuiUtils.DoubleValidator())
+        self.txtBackgdQMax.setValidator(GuiUtils.DoubleValidator())
 
     ######################################################################
     # Methods for updating GUI
@@ -305,6 +307,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.rbWeighting2.setEnabled(False)
             self.rbWeighting1.setChecked(True)
             # self.onWeightingChoice(self.rbWeighting1)
+        self.cmdFitFlatBackground.setEnabled(self.logic.data_is_loaded)
+        self.cmdFitPowerLaw.setEnabled(
+            self.logic.data_is_loaded and self.chkLowQ.isChecked()
+        )
 
     ######################################################################
     # GUI Interaction Events
@@ -366,8 +372,30 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         is_checked = state == QtCore.Qt.CheckState.Checked.value
         self.txtPowerLowQ.setEnabled(is_checked)
         self.txtScaleLowQ.setEnabled(is_checked)
-        self.rbFitLowQ.setEnabled(is_checked)
-        self.rbFixLowQ.setEnabled(is_checked)
+        self.cmdFitPowerLaw.setEnabled(is_checked)
+
+    def onFitFlatBackground(self):
+        """
+        Fit flat background and update plot
+        """
+        qmin, qmax = self.getFlatBackgroundRange()
+        constant = self.logic.fitFlatBackground(qmin, qmax)
+        self.txtBackgd.setText(f"{constant:5g}")
+        # TODO: this is needed to trigger model change and plot update,
+        # but maybe there is a better way
+        self.mapper.submit()
+
+    def onFitPowerLaw(self):
+        """
+        Fit background power law and update plot
+        """
+        qmin, qmax = self.getPowerLawBackgroundRange()
+        _, _, power = self.getBackgroundParams()
+        scale = self.logic.fitBackgroundScale(power, qmin, qmax)
+        self.txtScaleLowQ.setText(f"{scale:5g}")
+        # TODO: this is needed to trigger model change and plot update,
+        # but maybe there is a better way
+        self.mapper.submit()
 
     def onModelChange(self, top, bottom):
         """
@@ -668,6 +696,32 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         power = -1.0 * float(self.txtPowerLowQ.text()) if power_law else 0.0
         scale = float(self.txtScaleLowQ.text()) if power_law else 0.0
         return constant, scale, power
+
+    def getFlatBackgroundRange(self):
+        """
+        Collect background range from the GUI state
+        """
+        qmin, qmax = self.logic.computeDataRange()
+        qmin_text = self.txtBackgdQMin.text()
+        if qmin_text:
+            qmin = float(qmin_text)
+        qmax_text = self.txtBackgdQMax.text()
+        if qmax_text:
+            qmax = float(qmax_text)
+        return qmin, qmax
+
+    def getPowerLawBackgroundRange(self):
+        """
+        Collect power law range from the GUI state
+        """
+        qmin, qmax = self.logic.computeDataRange()
+        qmin_text = self.txtPowerLawQMin.text()
+        if qmin_text:
+            qmin = float(qmin_text)
+        qmax_text = self.txtPowerLawQMax.text()
+        if qmax_text:
+            qmax = float(qmax_text)
+        return qmin, qmax
 
     def updateBackground(self):
         """
