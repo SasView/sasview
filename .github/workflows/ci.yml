@@ -55,7 +55,7 @@ jobs:
         package: [
           ["sasdata", "git+https://github.com/llimeht/sasdata.git@tmp/pyproject"],
           ["sasmodels", "git+https://github.com/llimeht/sasmodels.git@tmp/pyproject"],
-          ["bumps", "git+https://github.com/bumps/bumps/"],
+          ["bumps", "git+https://github.com/bumps/bumps/@v0.9.3"],
         ]
 
     name: Build wheel "${{ matrix.package[0] }}"
