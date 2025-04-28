@@ -41,7 +41,11 @@ keywords = [
 
 
 [project.urls]
-homepage = "http://sasview.org"
+Homepage = "http://sasview.org"
+Documentation = "https://www.sasview.org/docs/"
+Repository = "https://github.com/SasView/sasview/"
+Issues = "https://github.com/SasView/sasview/issues"
+Changelog = "https://github.com/SasView/sasview/releases"
 
 [project.scripts]
 sasview = "sas.qtgui.MainWindow.MainWindow:run_sasview"
