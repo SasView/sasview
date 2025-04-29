@@ -4,6 +4,7 @@ from typing import Optional
 
 import json
 import re
+from packaging.version import Version, parse
 
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
@@ -78,17 +79,8 @@ class NewVersionAvailable(QDialog):
             config.LAST_UPDATE_DISMISSED_VERSION = self.latest_version
         self.close()
 
-def parse_version(version_string: str) -> tuple[int, int, int]:
-    """ Convert a string into numerical version"""
-    # get parts, scrub non numerical stuff
-    parts = [int(re.sub("[^0-9.]", "", part)) for part in version_string.split(".")]
 
-    if len(parts) != 3:
-        raise ValueError("Expected three parts to version")
-
-    return parts[0], parts[1], parts[2]
-
-def get_current_release_version() -> Optional[tuple[str, str, tuple[int, int, int]]]:
+def get_current_release_version() -> Optional[tuple[str, str, Version]]:
     """ Get the current version from the server """
 
     c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
@@ -100,24 +92,19 @@ def get_current_release_version() -> Optional[tuple[str, str, tuple[int, int, in
 
     try:
         content = response.read().strip()
-        logger.info(f"Connected to www.sasview.org. Received: {content}")
+        logger.info("Connected to www.sasview.org. Received: %s", content)
 
         version_info = json.loads(content)
 
         version_string = version_info["version"]
         url = version_info["download_url"]
 
-        return version_string, url, parse_version(version_string)
+        return version_string, url, parse(version_string)
 
 
     except Exception as ex:
-        logging.info("Failed to get version number", ex)
+        logging.info("Failed to get version number %s", ex)
 
-
-def a_newer_than_b(version_a: tuple[int, int, int], version_b: tuple[int, int, int]) -> bool:
-    """ Check if version_a is strictly newer than version_b"""
-    
-    return version_a > version_b
 
 def maybe_prompt_new_version_download() -> Optional[QDialog]:
     """ If a new version is available, and Show a dialog prompting the user to download """
@@ -128,13 +115,13 @@ def maybe_prompt_new_version_download() -> Optional[QDialog]:
         # The last dismissed version needs to be at least as old as this version
         last_dismissed_string = config.LAST_UPDATE_DISMISSED_VERSION
 
-        last_dismissed = parse_version(last_dismissed_string)
-        current = parse_version(current_version_string)
+        last_dismissed = parse(last_dismissed_string)
+        current = parse(current_version_string)
 
         # Set the latest version in the config, if it is newer, this way, the prompt only
         # shows when a new version isn't installed - even if its not the version you're running right now
 
-        if a_newer_than_b(version_a=current, version_b=last_dismissed):
+        if current > last_dismissed:
             config.LAST_UPDATE_DISMISSED_VERSION = copy(current_version_string)
             comparison = current
 
@@ -154,7 +141,7 @@ def maybe_prompt_new_version_download() -> Optional[QDialog]:
 
         latest_string, url, latest = latest_string_and_tuple
 
-        if a_newer_than_b(latest, comparison):
+        if latest > comparison:
 
             app = QApplication([])
             new_version = NewVersionAvailable(current_version_string, latest_string, url)
@@ -168,7 +155,7 @@ def maybe_prompt_new_version_download() -> Optional[QDialog]:
 
 
     except Exception as ex:
-        logger.info("Error getting latest sasview version", ex)
+        logger.info("Error getting latest sasview version %s", ex)
         return None
 
 def main():

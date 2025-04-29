@@ -15,6 +15,7 @@ mako
 matplotlib
 numba
 numpy
+packaging
 periodictable
 platformdirs
 pybind11
