@@ -5,6 +5,8 @@ import logging
 import json
 from copy import deepcopy
 
+from packaging.version import parse, InvalidVersion
+
 import sas
 import sas.system.version
 from sas.system import user
@@ -152,14 +154,10 @@ class ConfigBase:
 
         try:
             file_version = data["sasview_version"]
-            # Use the distutils strict version module regex to check if the version string is valid
-            #  ref: https://epydoc.sourceforge.net/stdlib/distutils.version.StrictVersion-class.html
-            matcher = re.compile(r'(?x)^(\d+)\.(\d+)(\.(\d+))?([ab](\d+))?$')
-            if not matcher.match(file_version):
-                raise Exception
+            parse(file_version)
 
-        except Exception:
-            raise MalformedFile("Malformed version in config file, should be a string of the form 'X.Y.Z'")
+        except InvalidVersion:
+            raise MalformedFile("Malformed version in config file, should be a string matching PEP440 such as 'X.Y.Z'")
 
         if "config_data" not in data:
             raise MalformedFile("Malformed config file - no 'config_data' key")
