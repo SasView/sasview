@@ -20,6 +20,41 @@ MAX_DIST = 140.0
 
 logger = logging.getLogger(__name__)
 
+def help():
+    """
+    Provide general online help text
+    Future work: extend this function to allow topic selection
+    """
+    info_txt = "The inversion approach is based on Moore, J. Appl. Cryst. "
+    info_txt += "(1980) 13, 168-175.\n\n"
+    info_txt += "P(r) is set to be equal to an expansion of base functions "
+    info_txt += "of the type "
+    info_txt += "phi_n(r) = 2*r*sin(pi*n*r/D_max). The coefficient of each "
+    info_txt += "base functions "
+    info_txt += "in the expansion is found by performing a least square fit "
+    info_txt += "with the "
+    info_txt += "following fit function:\n\n"
+    info_txt += "chi**2 = sum_i[ I_meas(q_i) - I_th(q_i) ]**2/error**2 +"
+    info_txt += "Reg_term\n\n"
+    info_txt += "where I_meas(q) is the measured scattering intensity and "
+    info_txt += "I_th(q) is "
+    info_txt += "the prediction from the Fourier transform of the P(r) "
+    info_txt += "expansion. "
+    info_txt += "The Reg_term term is a regularization term set to the second"
+    info_txt += " derivative "
+    info_txt += "d**2P(r)/dr**2 integrated over r. It is used to produce "
+    info_txt += "a smooth P(r) output.\n\n"
+    info_txt += "The following are user inputs:\n\n"
+    info_txt += "   - Number of terms: the number of base functions in the P(r)"
+    info_txt += " expansion.\n\n"
+    info_txt += "   - Regularization constant: a multiplicative constant "
+    info_txt += "to set the size of "
+    info_txt += "the regularization term.\n\n"
+    info_txt += "   - Maximum distance: the maximum distance between any "
+    info_txt += "two points in the system.\n"
+
+    return info_txt
+
 class NewInvertor():
 
     def __init__(self, logic: InversionLogic):
