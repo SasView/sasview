@@ -73,3 +73,5 @@ tests.log
 /installers/dist
 *.exe
 docs/tmp
+src/sas/example_data/
+docs/sphinx-docs/tmp
