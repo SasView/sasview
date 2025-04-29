@@ -337,7 +337,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             background=self.logic.background,
             params=params,
             completefn=self.fittingCompleted,
-            error_func=self.fittingError,
+            exception_handler=self.fittingError,
         )
         self.fit_thread.queue()
 
@@ -354,7 +354,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             background=self.logic.background,
             params=params,
             completefn=self.fittingCompleted,
-            error_func=self.fittingError,
+            exception_handler=self.fittingError,
         )
         self.fit_thread.queue()
 
