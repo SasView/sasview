@@ -7,12 +7,12 @@ from PySide6.QtWidgets import QWidget
 
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
-from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
-from src.sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, EstimateNT
-from src.sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
+from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
+from sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, EstimateNT
+from sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from src.sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem, DoubleValidator
-from src.sas.sascalc.pr.NewInvertor import NewInvertor
+from sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem, DoubleValidator
+from sas.sascalc.pr.NewInvertor import NewInvertor
 
 @dataclass
 class CalculatedOutputs:
