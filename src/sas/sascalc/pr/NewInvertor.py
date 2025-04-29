@@ -6,7 +6,7 @@ import math
 from numpy.linalg import lstsq
 import numpy.typing as npt
 
-from src.sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
+from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 
 # TODO: Add docstrings later
 

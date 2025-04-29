@@ -4,7 +4,7 @@ from PySide6.QtGui import QStandardItem
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
-from src.sas.qtgui.Utilities.GuiUtils import dataFromItem
+from sas.qtgui.Utilities.GuiUtils import dataFromItem
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"

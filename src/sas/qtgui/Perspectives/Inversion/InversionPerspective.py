@@ -7,7 +7,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 # sas-global
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from src.sas.qtgui.Perspectives.Inversion.NewInversionWidget import NewInversionWidget
+from sas.qtgui.Perspectives.Inversion.NewInversionWidget import NewInversionWidget
 
 # pr inversion GUI elements
 from .InversionUtils import WIDGETS
