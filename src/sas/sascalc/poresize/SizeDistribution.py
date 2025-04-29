@@ -585,11 +585,12 @@ class sizeDistribution():
             maxentdata.y = np.mean(IMaxEnt, axis=0)
             maxentdata.dy = np.std(IMaxEnt, axis=0)
             self.Iq_maxEnt  = maxentdata
-            self.calculate_statistics(BinMag)
+            
 
         else:
             logger.error('The length of the intensity array is 0. Did you run prep_maxEnt before run_maxEnt? Check that intensities is an array of at least length 1.')
 
+        self.calculate_statistics(BinMag)
         #self.calc_volume_weighted_dist(np.mean(BinMag, axis=0))
         
 
