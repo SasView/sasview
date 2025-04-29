@@ -84,6 +84,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.backgd_subtr_plot = None
         self.fit_plot = None
         self.size_distr_plot = None
+        self.trust_plot = None
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
@@ -528,6 +529,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.backgd_plot = None
         self.fit_plot = None
         self.size_distr_plot = None
+        self.trust_plot = None
         self.setupModel()
         self.enableButtons()
         self.clearStatistics()
@@ -638,15 +640,23 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.updateStatistics(result)
 
         # plot size distribution
-        self.size_distr_plot = self.logic.newSizeDistrPlot(result)
+        plots = [self._model_item]
+        qmin_fit = float(self.txtMinRange.text())
+        qmax_fit = float(self.txtMaxRange.text())
+        self.size_distr_plot, self.trust_plot = self.logic.newSizeDistrPlot(
+            result, qmin_fit, qmax_fit
+        )
         if self.size_distr_plot is not None:
             title = self.size_distr_plot.name
             GuiUtils.updateModelItemWithPlot(
                 self._model_item, self.size_distr_plot, title
             )
-            self.communicate.plotRequestedSignal.emit(
-                [self._model_item, self.size_distr_plot], None
-            )
+            plots.append(self.size_distr_plot)
+        if self.trust_plot is not None:
+            title = self.trust_plot.name
+            GuiUtils.updateModelItemWithPlot(self._model_item, self.trust_plot, title)
+            plots.append(self.trust_plot)
+        self.communicate.plotRequestedSignal.emit(plots, None)
 
         # add fit to data plot
         if isinstance(result.data_max_ent, LoadData1D):

@@ -11,6 +11,7 @@ FIT_PLOT_LABEL = "Fit"
 GROUP_ID_SIZE_DISTR_DATA = "SizeDistrData"
 SIZE_DISTR_LABEL = "SizeDistrFit"
 GROUP_ID_SIZE_DISTR_FIT = "SizeDistrFit"
+TRUST_RANGE_LABEL = "SizeDistrTrustRange"
 
 
 class SizeDistributionLogic:
@@ -76,6 +77,14 @@ class SizeDistributionLogic:
         self.background = LoadData1D(
             x, y_back, dy=0.0001 * y_back, lam=None, dlam=None, isSesans=False
         )
+
+    def computeTrustRange(self, qmin: float, qmax: float):
+        """
+        Compute the trusted range (green area in Irena)
+        """
+        d_trust_min = 1.8 * np.pi / qmax
+        d_trust_max = 0.95 * np.pi / qmin
+        return [d_trust_min, d_trust_max]
 
     def fitFlatBackground(self, qmin, qmax):
         """
@@ -154,7 +163,7 @@ class SizeDistributionLogic:
 
         return backgd_plot, backgd_subtr_plot, fit_plot
 
-    def newSizeDistrPlot(self, result: MaxEntResult):
+    def newSizeDistrPlot(self, result: MaxEntResult, qmin: float, qmax: float):
         """
         Create a new 1D data instance based on fitting results
         """
@@ -165,8 +174,8 @@ class SizeDistributionLogic:
         dy = result.bin_err
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.is_data = False
-        #new_plot.plot_role = DataRole.ROLE_STAND_ALONE
-        #new_plot.symbol = "Line"
+        # new_plot.plot_role = DataRole.ROLE_STAND_ALONE
+        # new_plot.symbol = "Line"
 
         new_plot.id = SIZE_DISTR_LABEL
         new_plot.group_id = GROUP_ID_SIZE_DISTR_FIT
@@ -177,4 +186,17 @@ class SizeDistributionLogic:
         new_plot.xaxis("\\rm{Diameter}", "A")
         new_plot.yaxis("\\rm{VolumeDistribution}", "")
 
-        return new_plot
+        # Create vertical lines for trusted range
+        x_trust = self.computeTrustRange(qmin, qmax)
+        y_max_trust = np.full_like(x_trust, 1.0)  # lines start at 0.0 and end at y
+        trust_plot = Data1D(x=x_trust, y=y_max_trust)
+        trust_plot.is_data = False
+        trust_plot.symbol = "Vline"
+        trust_plot.xaxis("\\rm{Diameter}", "A")
+        trust_plot.yaxis("\\rm{VolumeDistribution}", "")
+
+        trust_plot.id = TRUST_RANGE_LABEL
+        trust_plot.group_id = GROUP_ID_SIZE_DISTR_FIT
+        trust_plot.name = TRUST_RANGE_LABEL + f"[{self._data.name}]"
+
+        return new_plot, trust_plot
