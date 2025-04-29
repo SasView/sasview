@@ -147,11 +147,10 @@ class InversionLogic(object):
         new_plot.group_id = GROUP_ID_PR_FIT
 
         return new_plot
-
-    def add_errors(self, sigma=1.0):
+      
+    def add_errors(self, sigma=0.05):
         """
         Adds errors to data set is they are not available.
-        Uses  $\Delta y = \sigma | y |$.
         """
         if self.data.dy.size == 0.0:
             self.data.dy = np.sqrt(np.fabs(self.data.y))*sigma

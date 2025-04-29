@@ -112,7 +112,6 @@ jobs:
         run: |
           git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
           git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-          git clone --depth=50 --branch=v0.9.3 https://github.com/bumps/bumps.git ../bumps
 
       - name: Build and install sasdata
         run: |
@@ -125,13 +124,6 @@ jobs:
       - name: Build and install sasmodels
         run: |
           cd ../sasmodels
-          rm -rf build
-          rm -rf dist
-          python -m pip install --no-deps .
-
-      - name: Build and install bumps
-        run: |
-          cd ../bumps
           rm -rf build
           rm -rf dist
           python -m pip install --no-deps .
@@ -174,10 +166,12 @@ jobs:
 
       ### Build documentation (if enabled)
 
-      - name: Build sasmodels, sasdata, and bumps docs
+      - name: Build sasmodels and sasdata docs
         if: ${{ matrix.docs }}
+        env:
+          SAS_OPENCL: NONE
         run: |
-          make -C ../bumps/doc html || true
+          # TODO: supress sasmodels cache for the doc build
           mkdir -p ~/.sasmodels/compiled_models
           make -j4 -C ../sasmodels/doc html || true
           make -C ../sasdata/docs html || true
@@ -302,7 +296,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-22.04 ]
+        os: [ windows-latest, macos-latest, ubuntu-22.04 ]
         python-version: [ 3.11 ]
       fail-fast: false
 
@@ -406,6 +400,7 @@ jobs:
           tar xf "$DL_PATH/sasview6.tar.gz"
 
       - name: Check installation files
+        if: ${{ !startsWith(matrix.os, 'macos') }}
         run: |
           echo "File listing of SasView installed in '$INSTALL_PATH'"
           find "$INSTALL_PATH"
@@ -451,6 +446,13 @@ jobs:
           wait $pulsepid
           # Check the log file for successful startup
           grep "SasView session started" sasview-test.log
+
+      - name: Try running the installation (macOS)
+        if: ${{ startsWith(matrix.os, 'macOS' )}}
+        run: |
+          hdiutil attach $DL_PATH/SasView6.dmg
+          # Testing scripting interface by running simple model generation through sasmodels compare
+          /Volumes/SasView6/SasView6.app/Contents/MacOS/sasview -m sasmodels.compare cylinder -noplot
 
       ### Optionally attempt to work with the debug tarball from pyinstaller
 
