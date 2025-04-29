@@ -75,3 +75,4 @@ tests.log
 docs/tmp
 src/sas/example_data/
 docs/sphinx-docs/tmp
+src/sas/system/_version.py

@@ -4,6 +4,7 @@ requires = [
     "hatch-build-scripts",
     "hatch-requirements-txt",
     "hatch-sphinx",
+    "hatch-vcs",
     "pyside6",
     "sasdata",
     "sasmodels",
@@ -63,8 +64,13 @@ files = [ "build_tools/requirements.txt" ]
 [tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
 test = [ "build_tools/requirements-test.txt" ]
 
+
 [tool.hatch.version]
-path = "src/sas/system/version.py"
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/sas/system/_version.py"
+
 
 [tool.hatch.build.targets.sdist]
 include = [
