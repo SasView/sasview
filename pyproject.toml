@@ -147,6 +147,11 @@ separate = false
 header = "SasView"
 exclude = [
     "*/UnitTesting/*",
+    "sas/webfit*",
+    "sas/qtgui/Perspectives/ParticleEditor/calculations*",
+    "sas/qtgui/Perspectives/ParticleEditor/Plots*",
+    "sas/qtgui/Utilities/WhatsNew/messages*",
+    "sas/sascalc/calculator/ausaxs*",
 ]
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
