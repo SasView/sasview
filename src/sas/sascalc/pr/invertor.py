@@ -28,8 +28,6 @@ import numpy
 from .p_invertor import Pinvertor
 logger = logging.getLogger(__name__)
 
-# TODO: Could probably just get rid of this function. I'm not sure it needs to
-# be here now we have documentation compiled into HTML.
 def help():
     """
     Provide general online help text
