@@ -109,17 +109,6 @@ artifacts = [
     # "**/UI/*py",
 ]
 
-# [[tool.hatch.build.hooks.build-scripts.scripts]]
-# # Build documentation with sphinx
-# commands = [
-#     "mkdir -p build/lib",
-#     "[ ! -f docs/sphinx-docs/build_sphinx.py ] || PYTHONPATH=src python3 docs/sphinx-docs/build_sphinx.py",
-# ]
-# # work_dir = "docs/sphinx-docs"
-# # out_dir = "GUI-output"
-# artifacts = [
-#     # "**/UI/*py",
-# ]
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
 tool = "custom"
@@ -168,6 +157,7 @@ out_dir = "../../../build/doc/html"
 warnings = false
 keep_going = true
 environment = { PYTHONPATH = "../../../src" }
+
 
 [tool.pytest.ini_options]
 minversion = "6.0"
