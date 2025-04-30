@@ -2,13 +2,8 @@
 FitPanel class contains fields allowing to fit  models and  data
 
 """
-import sys
-import datetime
-
 from PySide6 import QtCore
-from PySide6 import QtGui
 from PySide6 import QtWidgets
-
 
 class ResultPanel(QtWidgets.QTabWidget):
     """
@@ -31,27 +26,12 @@ class ResultPanel(QtWidgets.QTabWidget):
         self.setMinimumSize(400, 400)
         self.data_id = None
 
-        self.updateBumps() # patch bumps ## TEMPORARY ##
-
-        # the following two imports will move to the top once
-        # the monkeypatching is gone
-        from bumps.gui.convergence_view import ConvergenceView
-        from bumps.gui.uncertainty_view import UncertaintyView, CorrelationView, TraceView
-
-
+        from .PlotView import CorrelationView, ConvergenceView, TraceView, UncertaintyView
         self.convergenceView = ConvergenceView()
-        self.uncertaintyView = UncertaintyView()
         self.correlationView = CorrelationView()
+        self.uncertaintyView = UncertaintyView()
         self.traceView = TraceView()
         self.show()
-
-    def updateBumps(self):
-        """
-        Monkeypatching bumps plot viewer to allow Qt
-        """
-        from . import PlotView
-        import bumps.gui
-        sys.modules['bumps.gui.plot_view'] = PlotView
 
     def onPlotResults(self, results, optimizer="Unknown"):
         # import moved here due to its cost
@@ -64,24 +44,21 @@ class ResultPanel(QtWidgets.QTabWidget):
         self.data_id = result.data.sas_data.id
         self.setWindowTitle(self.window_name + " - " + name + " - " + current_optimizer)
         if hasattr(result, 'convergence') and len(result.convergence) > 0:
-            best, pop = result.convergence[:, 0], result.convergence[:, 1:]
-            self.convergenceView.update(best, pop)
+            self.convergenceView.update(result)
             self.addTab(self.convergenceView, "Convergence")
             self.convergenceView.show()
         else:
             self.convergenceView.close()
         if hasattr(result, 'uncertainty_state'):
-            stats = var_stats(result.uncertainty_state.draw())
-            msg = format_vars(stats)
-            self.correlationView.update(result.uncertainty_state)
+            self.correlationView.update(result)
             self.correlationView.show()
             self.addTab(self.correlationView, "Correlation")
 
-            self.uncertaintyView.update((result.uncertainty_state, stats))
+            self.uncertaintyView.update(result)
             self.uncertaintyView.show()
             self.addTab(self.uncertaintyView, "Uncertainty")
 
-            self.traceView.update(result.uncertainty_state)
+            self.traceView.update(result)
             self.traceView.show()
             self.addTab(self.traceView, "Parameter Trace")
         else:
@@ -118,4 +95,3 @@ class ResultPanel(QtWidgets.QTabWidget):
         # notify the parent so it hides this window
         self.windowClosedSignal.emit()
         event.ignore()
-

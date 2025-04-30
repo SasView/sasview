@@ -19,8 +19,6 @@ from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from distutils.spawn import find_executable
 
-from sas.system.user import get_user_dir
-
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
 # sphinx paths
@@ -66,12 +64,6 @@ SASDATA_DEV_SOURCE = joinpath(SASDATA_DOCS, "source", "dev")
 SASDATA_DEV_TARGET = joinpath(SPHINX_SOURCE, "dev", "sasdata-dev")
 SASDATA_GUIDE_SOURCE = joinpath(SASDATA_DOCS, "source", "user")
 SASDATA_GUIDE_TARGET = joinpath(SPHINX_SOURCE, "user", "data")
-
-# bumps paths
-BUMPS_DOCS = joinpath(SASVIEW_ROOT, "..", "bumps", "doc")
-BUMPS_SOURCE = joinpath(BUMPS_DOCS, "guide")
-BUMPS_TARGET = joinpath(SPHINX_PERSPECTIVES, "Fitting")
-
 
 run = SourceFileLoader('run', joinpath(SASVIEW_ROOT, 'run.py')).load_module()
 run.prepare()
@@ -166,33 +158,11 @@ def retrieve_user_docs():
 
 def retrieve_sasdata_docs():
     """
-        Copies select files from the bumps documentation into fitting perspective
+    Copies the sasdata documentation tree into sasview.
     """
     print("=== Sasdata Docs ===")
     copy_tree(SASDATA_DEV_SOURCE, SASDATA_DEV_TARGET)
     copy_tree(SASDATA_GUIDE_SOURCE, SASDATA_GUIDE_TARGET)
-
-
-def retrieve_bumps_docs():
-    """
-    Copies select files from the bumps documentation into fitting perspective
-    """
-    if exists(BUMPS_SOURCE):
-        print("=== Retrieve BUMPS Docs ===")
-        filenames = glob(joinpath(BUMPS_SOURCE, "dream-*.png"))
-        #filenames = [joinpath(BUMPS_SOURCE, "optimizer.rst")]
-        #filenames += glob(joinpath(BUMPS_SOURCE, "dream-*.png"))
-        #filenames += glob(joinpath(BUMPS_SOURCE, "fit-*.png"))
-        for f in filenames:
-            print("Copying file", f)
-            shutil.copy(f, BUMPS_TARGET)
-    else:
-        print("""
-======= Error =======
-missing directory %s
-The documentation will not include the optimizer selection section.
-Checkout the bumps source tree and rebuild the docs.
-""" % BUMPS_DOCS)
 
 
 def apidoc():
@@ -289,7 +259,6 @@ def rebuild():
     clean()
     setup_source_temp()
     retrieve_user_docs()
-    retrieve_bumps_docs()
     retrieve_sasdata_docs()
     apidoc()
     build()

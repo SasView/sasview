@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SasView"
-#define MyAppVersion "6.0.0"
+#define MyAppVersion "6.0.1"
 #define MyAppPublisher "(c) 2009 - 2024, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
 #define MyAppURL "http://www.sasview.org"
 #define MyAppExeName "sasview.exe"
@@ -61,7 +61,7 @@ end;
 
 [Files]
 Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
+Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\AppData\Local\sasview\SasView\plugin_models"
 Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [InstallDelete]

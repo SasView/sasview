@@ -218,7 +218,7 @@ class CorfuncSlider(QtWidgets.QWidget):
 
     @extrapolation_parameters.setter
     def extrapolation_parameters(self, params: ExtrapolationParameters):
-        if self.find_parameter_problems(params) is None:
+        if params is not None:
             self._min = params.data_q_min
             self._point_1 = params.point_1
             self._point_2 = params.point_2

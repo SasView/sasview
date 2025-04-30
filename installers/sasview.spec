@@ -19,7 +19,6 @@ datas = [
     ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
     ('../src/sas/qtgui/Utilities/WhatsNew/css/style.css', 'sas/qtgui/Utilities/WhatsNew/css'),
     ('../src/sas/qtgui/Utilities/About/images', 'sas/qtgui/Utilities/About/images'),
-    ('../src/sas/system/log.ini', 'sas/system/'),
     ('../../sasmodels/sasmodels','sasmodels'),
     ('../docs/sphinx-docs/build','doc/build'),
     ('../docs/sphinx-docs/source-temp','doc/source')
@@ -39,10 +38,10 @@ import sasmodels
 add_data(sasmodels.data_files())
 
 try:
-    import tinycc
-    add_data(tinycc.data_files())
+    import tccbox
+    datas.append((os.path.join(PYTHON_PACKAGES, 'tccbox'), 'tccbox'))
 except ImportError:
-    warnings.warn("TinyCC package is not available and will not be included")
+    warnings.warn("TCCbox package is not available and will not be included")
 
 import periodictable
 add_data(periodictable.data_files())
@@ -68,6 +67,7 @@ hiddenimports = [
     'debugpy',
     'debugpy._vendored',
     'uncertainties',
+    'tccbox',
 ]
 
 if platform.system() == 'Windows':

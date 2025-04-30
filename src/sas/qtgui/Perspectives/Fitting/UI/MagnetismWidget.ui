@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MagnetismWidgetUI</class>
+ <widget class="QWidget" name="MagnetismWidgetUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>571</width>
+    <height>515</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Magnetism</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox_10">
+     <property name="title">
+      <string>Polarisation/Magnetic Scattering </string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_21">
+      <item row="0" column="0" colspan="3">
+       <widget class="QTableView" name="lstMagnetic"/>
+      </item>
+      <item row="1" column="1">
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>498</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="cmdMagneticDisplay">
+        <property name="text">
+         <string>Display
+magnetic
+angles</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

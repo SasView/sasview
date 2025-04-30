@@ -5,15 +5,18 @@ import logging
 import webbrowser
 
 from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtCore import QMimeType, QMimeDatabase, QUrl
+from PySide6.QtGui import QDesktopServices
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.UI.GridPanelUI import Ui_GridPanelUI
 
+DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
-    Class for stateless grid-like printout of model parameters for mutiple models
+    Class for stateless grid-like printout of model parameters for multiple models
     """
     ERROR_COLUMN_CAPTION = " (Err)"
     IS_WIN = (sys.platform == 'win32')
@@ -24,8 +27,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         self.setupUi(self)
 
         self.parent = parent
-        if hasattr(self.parent, "communicate"):
-            self.communicate = parent.communicate
+        if hasattr(self.parent, "commuicator"):
+            self.communicate = parent.communicator
 
         self.addToolbarActions()
 
@@ -39,10 +42,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # save state
         self.data_dict = {}
 
-        # System dependent menu items
-        if not self.IS_WIN:
-            self.actionOpen_with_Excel.setVisible(False)
-
         # list of QTableWidgets, indexed by tab number
         self.tables = []
         self.tables.append(self.tblParams)
@@ -51,16 +50,16 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         self.tblParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tblParams.customContextMenuRequested.connect(self.showContextMenu)
 
+        self.tabWidget.tabCloseRequested.connect(self.closeTab)
+
+
         # Command buttons
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdPlot.clicked.connect(self.onPlot)
+        self.saveButton.clicked.connect(self.actionSaveFile)
 
         # Fill in the table from input data
         self.setupTable(widget=self.tblParams, data=output_data)
-        if output_data is not None:
-            # Set a table tooltip describing the model
-            model_name = output_data[0][0].model.id
-            self.tabWidget.setTabToolTip(0, model_name)
 
     def closeEvent(self, event):
         """
@@ -83,7 +82,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         Open file load dialog and load a .csv file
         """
         datafile = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Choose a file with results", "", "CSV files (*.csv)", None)[0]
+            self, "Choose a file with results", "", "CSV files (*.csv)", None,
+            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
 
         if not datafile:
             logging.info("No data file chosen.")
@@ -145,7 +145,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         if name is not None:
             tab_name = name
         else:
-            tab_name = "Tab " + str(self.tab_number)
+            tab_name = "Batch Result " + str(self.tab_number)
         # each table needs separate slots.
         tab_widget.customContextMenuRequested.connect(self.showContextMenu)
         self.tables.append(tab_widget)
@@ -155,10 +155,11 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
     def addFitResults(self, results):
         """
-        Create a new tab with batch fitting results
+        Create a new tab with batch results
         """
         # pull out page name from results
         page_name = None
+        results = results.get(DICT_KEYS[0])
         if len(results)>=2:
             if isinstance(results[-1], str):
                 page_name = results[-1]
@@ -200,11 +201,18 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # look for the 'Data' column and extract the filename
         for row in rows:
             try:
-                name = data['Data'][row]
+                name = data['Filename'][row]
+                self.prPlot = self.batch_results[name].get(DICT_KEYS[1])
+                self.dataPlot = self.batch_results[name].get(DICT_KEYS[2])
                 # emit a signal so the plots are being shown
-                self.communicate.plotFromNameSignal.emit(name)
+                self.parent.showPlots(self.batch_results[name]['Result'])
+                # This is an important processEvent.
+                # This allows charts to be properly updated in order
+                # of plots being applied.
+                QtWidgets.QApplication.processEvents()
             except (IndexError, AttributeError):
                 # data messed up.
+                logging.error('Issue with data')
                 return
 
     @classmethod
@@ -215,8 +223,14 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         assert(isinstance(table, QtWidgets.QTableWidget))
         params = {}
         for column in range(table.columnCount()):
-            value = [table.item(row, column).data(0) for row in range(table.rowCount())]
+            value = []
             key = table.horizontalHeaderItem(column).data(0)
+            for row in range(table.rowCount()):
+                item = table.item(row, column)
+                if item is not None:
+                    value.append(item.data(0))
+                else:
+                    value.append(" ")
             params[key] = value
         return params
 
@@ -236,19 +250,22 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             self.writeBatchToFile(data=data, tmpfile=tmpfile, details=details)
             tmpfile.close()
 
-        try:
-            from win32com.client import Dispatch
-            excel_app = Dispatch('Excel.Application')
-            excel_app.Workbooks.Open(self.grid_filename)
-            excel_app.Visible = 1
-        except Exception as ex:
-            msg = "Error occured when calling Excel.\n"
-            msg += ex
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        mime_type = QMimeDatabase().mimeTypeForFile(self.grid_filename)
+
+        if mime_type.isValid():
+            url = QUrl.fromLocalFile(self.grid_filename)
+
+            if QDesktopServices.openUrl(url):
+                self.parent.communicate.statusBarUpdateSignal.emit("Success: "
+                "The batch results CSV file successfully opened in your system CSV viewer.")
+            else:
+                self.parent.communicate.statusBarUpdateSignal.emit("Failure: A CSV viewer "
+                    "is required to view the batch results. Please set one in your default "
+                    "app settings to change this behavior.")
 
     def actionSaveFile(self):
         """
-        Generate a .csv file and dump it do disk
+        Generate a .csv file and dump it to disk
         """
         t = time.localtime(time.time())
         time_str = time.strftime("%b %d %H %M of %Y", t)
@@ -307,9 +324,10 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         Create tablewidget items and show them, based on params
         """
         # quietly leave is nothing to show
+
         if data is None or widget is None:
             return
-
+        data = data.get(DICT_KEYS[0])
         # Figure out the headers
         model = data[0][0]
 
@@ -429,30 +447,40 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             tmpfile.write('\n')
             index += 1
 
+    def closeTab(self, currentIndex):
+        self.tables.pop(currentIndex)
+        self.tabWidget.removeTab(currentIndex)
+
+
 
 class BatchInversionOutputPanel(BatchOutputPanel):
     """
         Class for stateless grid-like printout of P(r) parameters for any number
         of data sets
     """
-    def __init__(self, parent = None, output_data=None):
+    def __init__(self, parent=None, output_data=None):
 
-        super(BatchInversionOutputPanel, self).__init__(parent._parent, output_data)
+        super(BatchInversionOutputPanel, self).__init__(parent.parent, output_data)
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
         self.parent = parent
+        self.batch_results = output_data
+        
 
     def setupTable(self, widget=None,  data=None):
         """
         Create tablewidget items and show them, based on params
         """
         # headers
-        param_list = ['Filename', 'Rg [Å]', 'Chi^2/dof', 'I(Q=0)', 'Oscillations',
-                      'Background [Å^-1]', 'P+ Fraction', 'P+1-theta Fraction',
-                      'Calc. Time [sec]']
+        param_list = ['Filename','Number Of Terms','Reg. Const','Max Distance [Å]',
+                      'Rg [Å]', 'Chi^2/dof', 'I(Q=0) [cm^-1]', 'Oscillations',
+                      'Background [cm^-1]', 'P+ Fraction', 'P+1-theta Fraction',
+                      'Calc. Time [sec]', 'Q Min [Å^-1]', 'Q Max [Å^-1]']
 
+            
         if data is None:
             return
+
         keys = data.keys()
         rows = len(keys)
         columns = len(param_list)
@@ -463,39 +491,101 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             self.tblParams.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(param))
 
         # first - Chi2 and data filename
+        failedCells = False
+
         for i_row, (filename, pr) in enumerate(data.items()):
+            pr = pr.get(DICT_KEYS[0])
             out = pr.out
             cov = pr.cov
+            self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
+                "{}".format(filename)))
             if out is None:
                 logging.warning("P(r) for {} did not converge.".format(filename))
                 continue
-            self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
-                "{}".format(filename)))
-            self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.rg(out))))
-            self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
+            try:
+                self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.noOfTerms)))
+            except TypeError:
+                failedCells = True
+            try:
+                self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.alpha)))
+            except TypeError:
+                failedCells = True
+            try:
+                self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.dmax)))
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.rg(out))))
+            except TypeError:
+                failedCells = True
+            try:
+                self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.chi2[0])))
-            self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.iq0(out))))
-            self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.oscillations(out))))
-            self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.background)))
-            self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.get_positive(out))))
-            self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.get_pos_err(out, cov))))
-            self.tblParams.setItem(i_row, 8, QtWidgets.QTableWidgetItem(
-                "{:.2g}".format(pr.elapsed)))
-
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.iq0(out))))
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.oscillations(out))))
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 8, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.background)))
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 9, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.get_positive(out))))
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 10, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.get_pos_err(out, cov))))
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 11, QtWidgets.QTableWidgetItem(
+                    "{:.2g}".format(pr.elapsed)))
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 12, QtWidgets.QTableWidgetItem(
+                    "{:.2g}".format(pr.q_min)))
+            except TypeError:
+                failedCells = True
+            try:
+                    self.tblParams.setItem(i_row, 13, QtWidgets.QTableWidgetItem(
+                    "{:.2g}".format(pr.q_max)))
+            except TypeError:
+                failedCells = True
+        if failedCells:
+            GuiUtils.logger.warning("Some of the cells failed to receive outputs.")
         self.tblParams.resizeColumnsToContents()
 
+    def newTableTab(self, tab_name=None, data=None):
+        # creating a BatchInversionOutputPanel object and taking out the .tblParams is not the cleanest.
+        # this can be changed when setupTable is made more flexible
+        self.tab_number += 1
+        if tab_name is None:
+            tab_name = "Batch Result " + str(self.tab_number)
+        tableItem = BatchInversionOutputPanel(parent=self, output_data=data.get(DICT_KEYS[0])).tblParams
+        tableItem.customContextMenuRequested.connect(self.showContextMenu)
+        self.tables.append(tableItem)
+        self.tabWidget.addTab(tableItem, tab_name)
+        self.tabWidget.setCurrentIndex(self.tab_number-1)
+
     def onHelp(self):
-        """
-        Open a local url in the default browser
-        """
-        url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
-        self.parent.showHelp(url)
+        self.parent.onHelp()
+
 
     def closeEvent(self, event):
         """Tell the parent window the window closed"""
