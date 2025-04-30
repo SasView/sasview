@@ -2,12 +2,17 @@ import sys
 # make sure sasmodels is on the path
 sys.path.append('..')
 
+import os
 from os import mkdir
 from os.path import basename, exists, join as joinpath
+from pathlib import Path
 from sasmodels.core import load_model_info
 from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
 
-from typing import Optional, IO, BinaryIO, List, Dict
+from typing import Optional, IO, BinaryIO, Union
+
+PATH_LIKE = Union[Path, str, os.PathLike[str]]
+
 
 TEMPLATE = """\
 ..
@@ -51,24 +56,24 @@ def _maybe_make_category(category: str, models: list[str], cat_files: dict[str, 
         title = category.capitalize()+" Functions"
         cat_files[category] = _make_category(category, category, title, model_toc)
 
-def generate_toc(model_files: list[str]):
+def generate_toc(model_files: list[PATH_LIKE]):
     """Generate the doc tree and ReST files from a list of model files."""
     if not model_files:
         print("gentoc needs a list of model files", file=sys.stderr)
 
     # find all categories
-    category = {} # type: Dict[str, List[str]]
+    category: dict[str, list[str]] = {}
     for item in model_files:
         # assume model is in sasmodels/models/name.py, and ignore the full path
         # NOTE: No longer use shortened pathname for model because we also pull in models from .sasview/plugin_models
         model_name = basename(item)[:-3]
         if model_name.startswith('_'):
             continue
-        model_info = load_model_info(item)
+        model_info = load_model_info(str(item))
         if model_info.category is None:
             print("Missing category for", item, file=sys.stderr)
             category.setdefault('custom', []).append(model_name)
-        elif 'plugin_models' in item:
+        elif 'plugin_models' in str(item):
             category.setdefault('custom', []).append(model_name)
         else:
             category.setdefault(model_info.category, []).append(model_name)
