@@ -1,6 +1,11 @@
 import sys
 import time
+
+from dominate.tags import output
+from numpy.typing import NDArray
 from sas.sascalc.data_util.calcthread import CalcThread
+from numpy.typing import NDArray
+from sas.sascalc.pr.NewInvertor import NewInvertor
 
 
 class CalcPr(CalcThread):
@@ -8,12 +13,13 @@ class CalcPr(CalcThread):
     Compute P(r)
     """
 
-    def __init__(self, pr, nfunc=5, error_func=None, completefn=None,
+    def __init__(self, pr, nfunc=5, tab_id=None, error_func=None, completefn=None,
                  updatefn=None, yieldtime=0.01, worktime=0.01):
         """
         """
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.pr = pr
+        self.tab_id = tab_id
         self.nfunc = nfunc
         self.error_func = error_func
         self.starttime = 0
@@ -33,6 +39,33 @@ class CalcPr(CalcThread):
         except:
             if self.error_func is not None:
                 self.error_func("CalcPr.compute: %s" % sys.exc_info()[1])
+
+class CalcBatchPr(CalcThread):
+
+    # A lot of these aren't type hinted but that can be future work as I'm trying to closely follow the pre-existing
+    # structure, and I don't want to mess with anything.
+    def __init__(self, prs: list[NewInvertor], nfuncs=None, tab_id=None, error_func=None, completefn=None,
+                 updatefn=None, yieldtime=0.01, worktime=0.01):
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
+        self.prs = prs
+        self.nfuncs = nfuncs
+        self.error_func = error_func
+        self.starttime = 0
+
+    def compute(self):
+        try:
+            self.starttime = time.time()
+            outputs = []
+            for invertor, nfunc in zip(self.prs, self.nfuncs):
+                outputs.append(invertor.invert(nfunc))
+                self.isquit()
+            elapsed = time.time() - self.starttime
+            self.complete(totalElapsed=elapsed)
+        except KeyboardInterrupt:
+            pass
+        except:
+            if self.error_func is not None:
+                self.error_func("CalcBatchPr.compute: %s" % sys.exc_info()[1])
 
 
 class EstimatePr(CalcThread):

@@ -32,9 +32,9 @@ class GuiManagerTest:
         '''Create/Destroy the GUI Manager'''
         class MainWindow(MainSasViewWindow):
             # Main window of the application
-            def __init__(self, reactor, parent=None):
-                screen_resolution = QtCore.QRect(0,0,640,480)
-                super(MainWindow, self).__init__(screen_resolution, parent)
+
+            def __init__(self,  parent=None):
+                super(MainWindow, self).__init__( parent)
         
                 # define workspace for dialogs.
                 self.workspace = QMdiArea(self)
