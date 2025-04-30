@@ -125,6 +125,9 @@ class PlotterWidget(PlotterBase):
             #Added condition to Dmax explorer from P(r) perspective
             if data._xaxis == 'D_{max}':
                 self.xscale = 'linear'
+            # Added condition to volume distribution plot in size distribution perspective
+            if data._yaxis == '\\rm{VolumeDistribution}':
+                 self.yscale = 'linear'
             # Transform data if required.
             if transform and (data.xtransform is not None or data.ytransform is not None):
                 self.xLabel, self.yLabel, xscale, yscale = \

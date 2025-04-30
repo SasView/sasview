@@ -91,10 +91,10 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.model.setItem(W.NPTS, QtGui.QStandardItem(str(self.nfunc)))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
-        self.model.setItem(W.DMIN, QtGui.QStandardItem("{:.1f}".format(0.9*self.pr_state.d_max)))
+        self.model.setItem(W.DMIN, QtGui.QStandardItem("{:.1f}".format(0.9*self.pr_state.dmax)))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
-        self.model.setItem(W.DMAX, QtGui.QStandardItem("{:.1f}".format(1.1*self.pr_state.d_max)))
+        self.model.setItem(W.DMAX, QtGui.QStandardItem("{:.1f}".format(1.1*self.pr_state.dmax)))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
         self.model.setItem(W.VARIABLE, QtGui.QStandardItem( "χ²/dof"))
@@ -133,10 +133,10 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                    .format(e.message))
             logger.error(msg)
 
-        original = self.pr_state.d_max
+        original = self.pr_state.dmax
 
         for x in xs:
-            self.pr_state.d_max = x
+            self.pr_state.dmax = x
             try:
                 out, cov = self.pr_state.invert(self.pr_state.nfunc)
 
@@ -150,8 +150,11 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 plotable_xs.append(x)
             except Exception as ex:
                 # This inversion failed, skip this D_max value
-                msg = "ExploreDialog: inversion failed "
-                msg += "for D_max=%s\n%s" % (str(x), ex)
+
+                msg = (f"ExploreDialog: inversion failed for D_max={x}\n"
+                       f"{ex}\n"
+                       f"Please adapt Inversion parameters")
+
                 logger.error(msg)
 
         #Return the invertor to its original state

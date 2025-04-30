@@ -58,7 +58,7 @@ class ConfigBase:
     def config_filename(self, create_if_nonexistent=False):
         """Filename for saving config items"""
         version_parts = sas.system.version.__version__.split(".")
-        user_dir = user.get_user_dir(create_if_nonexistent)
+        user_dir = user.get_config_dir(create_if_nonexistent)
         return os.path.join(user_dir, f"config-{version_parts[0]}.json")
 
     def finalise(self):
