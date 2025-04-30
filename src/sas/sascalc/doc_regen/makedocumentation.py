@@ -16,6 +16,7 @@ from sas.system.user import get_app_dir_versioned
 
 from sasmodels.core import list_models
 
+
 PATH_LIKE = Union[Path, str, os.PathLike]
 
 # Path constants related to the directories and files used in documentation regeneration processes
@@ -61,7 +62,7 @@ def create_user_files_if_needed():
     if not USER_DOC_LOG.exists():
         os.mkdir(USER_DOC_LOG)
     if not DOC_LOG.exists():
-        with open(DOC_LOG, "w") as f:
+        with open(DOC_LOG, "wb") as f:
             # Write an empty file to eliminate any potential future file creation conflicts
             pass
     if not MAIN_DOC_SRC.exists() and ORIGINAL_DOCS_SRC.exists():
@@ -78,8 +79,8 @@ def get_py(directory: PATH_LIKE) -> list[PATH_LIKE]:
     """
     for root, dirs, files in os.walk(directory):
         # Only include python files not starting in '_' (pycache not included)
-        PY_FILES = [join(directory, string) for string in files if not string.startswith("_") and string.endswith(".py")]
-        return PY_FILES
+        py_files = [join(directory, string) for string in files if not string.startswith("_") and string.endswith(".py")]
+        return py_files
 
 
 def get_main_docs() -> list[PATH_LIKE]:
@@ -88,16 +89,16 @@ def get_main_docs() -> list[PATH_LIKE]:
 
     :return: A list of python files """
     # The order in which these are added is important. if ABSOLUTE_TARGET_PLUGINS goes first, then we're not compiling the .py file stored in .sasview/plugin_models
-    TARGETS = get_py(MAIN_PY_SRC) + get_py(PLUGIN_PY_SRC)
-    base_targets = [basename(string) for string in TARGETS]
+    targets = get_py(MAIN_PY_SRC) + get_py(PLUGIN_PY_SRC)
+    base_targets = [basename(string) for string in targets]
 
     # Removes duplicate instances of the same file copied from plugins folder to source-temp/user/models/src/
-    for file in TARGETS:
+    for file in targets:
         if base_targets.count(basename(file)) >= 2:
-            TARGETS.remove(file)
+            targets.remove(file)
             base_targets.remove(basename(file))
 
-    return TARGETS
+    return targets
 
 def sync_plugin_models():
     """
@@ -139,9 +140,9 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
     if output_path:
         html_directory = Path(output_path)
     else:
-        html_directory = HELP_DIRECTORY_LOCATION 
+        html_directory = HELP_DIRECTORY_LOCATION
     force_rebuild = "" # Empty if we are not forcing a full rebuild of docs
-    DOCTREES = MAIN_BUILD_SRC / "doctrees"
+    doctrees = MAIN_BUILD_SRC / "doctrees"
 
     # Process the single_files parameter into a list of Path objects referring to rst files
     if isinstance(single_files, str) and single_files:
@@ -161,7 +162,7 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
         "sphinx",
         force_rebuild, # If forcing a full rebuild: this is necessary to ensure that the TOC is updated
         "-d",
-        DOCTREES,
+        doctrees,
         "-D",
         "latex_elements.papersize=letter",
         MAIN_DOC_SRC,
@@ -172,25 +173,24 @@ def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: boo
         command.extend(single_files)
     # Try removing empty arguments
     command = [arg for arg in command if arg]
-    f = open(DOC_LOG, "w")
-    runner = subprocess.Popen(command, stdout=f, stderr=f)
-    f.close()
+    with open(DOC_LOG, "wb") as f:
+        runner = subprocess.Popen(command, stdout=f, stderr=f)
     return runner
 
 
 def call_all_files():
     """A master method to regenerate all known documentation."""
     from sas.sascalc.doc_regen.regentoc import generate_toc
-    TARGETS = get_main_docs()
-    for file in TARGETS:
+    targets = get_main_docs()
+    for file in targets:
         #  easiest for regenmodel.py if files are passed in individually
         removed_files = call_regenmodel([file])
         # Don't try to add user files to the TOC if they were deleted
         for file in removed_files:
-            if file in TARGETS:
-                TARGETS.remove(file)
+            if file in targets:
+                targets.remove(file)
     # regentoc.py requires files to be passed in bulk or else LOTS of unexpected behavior
-    generate_toc(TARGETS)
+    generate_toc(targets)
 
 
 def call_one_file(file: PATH_LIKE):
@@ -199,26 +199,26 @@ def call_one_file(file: PATH_LIKE):
     :param file: A file name that needs the html regenerated.
     """
     from sas.sascalc.doc_regen.regentoc import generate_toc
-    TARGETS = get_main_docs()
-    MODEL_TARGET = MAIN_PY_SRC / file
-    PLUGIN_TARGET = PLUGIN_PY_SRC / file
+    targets = get_main_docs()
+    model_target = MAIN_PY_SRC / file
+    plugin_target = PLUGIN_PY_SRC / file
     # Determines if a model's source .py file from /user/models/src/ should be used or if the file from /plugin-models/ should be used
-    if os.path.exists(MODEL_TARGET) and os.path.exists(PLUGIN_TARGET):
+    if os.path.exists(model_target) and os.path.exists(plugin_target):
         # Model name collision between built-in models and plugin models: Choose the most recent
-        file_call_path = MODEL_TARGET if os.path.getmtime(PLUGIN_TARGET) < os.path.getmtime(MODEL_TARGET) else PLUGIN_TARGET
-    elif not os.path.exists(PLUGIN_TARGET):
-        file_call_path = MODEL_TARGET
+        file_call_path = model_target if os.path.getmtime(plugin_target) < os.path.getmtime(model_target) else plugin_target
+    elif not os.path.exists(plugin_target):
+        file_call_path = model_target
     else:
-        file_call_path = PLUGIN_TARGET
+        file_call_path = plugin_target
     removed_files = call_regenmodel([file_call_path])
 
     # Don't try to add user files to the TOC if they were deleted
-    for file in removed_files:
-        if file in TARGETS:
-            TARGETS.remove(file)
+    for filename in removed_files:
+        if filename in targets:
+            targets.remove(filename)
 
     # Generate the TOC
-    generate_toc(TARGETS)
+    generate_toc(targets)
 
 
 def make_documentation(target: PATH_LIKE = ".") -> subprocess.Popen:
@@ -229,7 +229,7 @@ def make_documentation(target: PATH_LIKE = ".") -> subprocess.Popen:
     create_user_files_if_needed()
     # Clear existing log file
     if DOC_LOG.exists():
-        with open(DOC_LOG, "r+") as f:
+        with open(DOC_LOG, "rb+") as f:
             f.truncate(0)
     # Ensure target is a path object
     if target:
@@ -238,13 +238,13 @@ def make_documentation(target: PATH_LIKE = ".") -> subprocess.Popen:
         if ".rst" in target.name:
             # Generate only HTML if passed in file is an RST
             return generate_html(target, rst=True)
-        else:
-            # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST
-            # files. Time saving measure.
-            call_one_file(target)
-            return generate_html()
+
+        # Tries to generate reST file for only one doc, if no doc is specified then will try to regenerate all reST
+        # files. Time saving measure.
+        call_one_file(target)
+        return generate_html()
     except Exception as e:
-        logging.warning(f"Error in generating documentation for {target}: {e}\nRegenerating all model documentation...")
+        logging.warning("Error in generating documentation for %s: %s\nRegenerating all model documentation...", target, e)
         call_all_files()  # Regenerate all RSTs
         return generate_html()  # Regenerate all HTML
 
