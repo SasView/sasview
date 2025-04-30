@@ -12,9 +12,9 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
-from sas.qtgui.Utilities.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 
 
 
