@@ -1,8 +1,10 @@
 import math
 import logging
+from PySide6.QtGui import QStandardItem
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.GuiUtils import dataFromItem
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -21,28 +23,35 @@ class InversionLogic(object):
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.
     """
+    _data_item: QStandardItem | None
 
-    def __init__(self, data=None):
-        self._data = data
+    def __init__(self, data_item=None):
+        self._data_item = data_item
         self.data_is_loaded = False
-        if data is not None:
+        if data_item is not None:
             self.data_is_loaded = True
+        self.qmin = 0.0    
+        self.qmax = np.inf
 
     @property
-    def data(self):
-        return self._data
+    def data_item(self) -> QStandardItem | None:
+        return self._data_item
+
+    @property
+    def data(self) -> Data1D:
+        return dataFromItem(self._data_item)
 
     @data.setter
-    def data(self, value):
+    def data(self, value: QStandardItem):
         """ data setter """
-        self._data = value
-        self.data_is_loaded = (self._data is not None)
+        self._data_item = value
+        self.data_is_loaded = (self._data_item is not None)
 
     def isLoadedData(self):
         """ accessor """
         return self.data_is_loaded
 
-    def new1DPlot(self, out, pr, q=None):
+    def new1DPlot(self, tab_id=1, out=None, pr=None, q=None):
         """
         Create a new 1D data instance based on fitting results
         """
@@ -72,7 +81,9 @@ class InversionLogic(object):
             logger.info("Could not compute I(q) for q =", list((x[index])))
 
         new_plot = Data1D(x, y)
-        new_plot.name = IQ_FIT_LABEL + f"[{self._data.name}]"
+        new_plot.is_data = False
+        new_plot.dy = np.zeros(len(y))
+        new_plot.name = "%s [%s]" % (IQ_FIT_LABEL, self.data.name)
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
         title = "I(q)"
@@ -81,7 +92,7 @@ class InversionLogic(object):
         # If we have a group ID, use it
         if 'plot_group_id' in pr.info:
             new_plot.group_id = pr.info["plot_group_id"]
-        new_plot.id = IQ_FIT_LABEL
+        new_plot.id = str(tab_id) +IQ_FIT_LABEL
 
 
         # If we have used slit smearing, plot the smeared I(q) too
@@ -111,11 +122,13 @@ class InversionLogic(object):
 
         return new_plot
 
+
+
     def newPRPlot(self, out, pr, cov=None):
         """
         """
         # Show P(r)
-        x = np.arange(0.0, pr.d_max, pr.d_max / PR_PLOT_PTS)
+        x = np.arange(0.0, pr.dmax, pr.dmax / PR_PLOT_PTS)
 
         if cov is None:
             y = pr.pr(out, x)
@@ -124,7 +137,7 @@ class InversionLogic(object):
             (y, dy) = pr.pr_err(out, cov, x)
             new_plot = Data1D(x, y, dy=dy)
 
-        new_plot.name = PR_FIT_LABEL + f"[{self._data.name}]"
+        new_plot.name = "%s [%s]" % (PR_FIT_LABEL, self.data.name)
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ", "cm^{-3}")
         new_plot.title = "P(r) fit"
@@ -134,13 +147,18 @@ class InversionLogic(object):
         new_plot.group_id = GROUP_ID_PR_FIT
 
         return new_plot
-
+      
     def add_errors(self, sigma=0.05):
-        r"""
-        Adds errors to data set is they are not available.
-        Uses  $\Delta y = \sigma | y |$.
         """
-        self._data.dy = sigma * np.fabs(self._data.y)
+        Adds errors to data set is they are not available.
+        """
+        if self.data.dy.size == 0.0:
+            self.data.dy = np.sqrt(np.fabs(self.data.y))*sigma
+
+        if self.data.dy is not None:
+            self.data.dy = np.where(self.data.dy < 0.0, np.sqrt(np.fabs(self.data.y))*sigma, self.data.dy)
+            self.data.dy = np.where(np.fabs(self.data.dy) < 1e-16, 1e-16, self.data.dy)
+        return self.data.dy
 
     def computeDataRange(self):
         """
@@ -156,8 +174,13 @@ class InversionLogic(object):
         qmin, qmax = None, None
         if isinstance(data, Data1D):
             try:
-                qmin = min(data.x)
                 qmax = max(data.x)
+                #set q values where Intensity is zero, 
+                #to qmax and exclude from minimum accepted q
+                #to avoid dodgy points around beam stop
+                usable_qrange=np.where(data.y <= 0, qmax, data.x)
+                qmin = min(usable_qrange)
+                
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename

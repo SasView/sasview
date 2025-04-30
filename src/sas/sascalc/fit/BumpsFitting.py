@@ -340,9 +340,9 @@ class BumpsFit(FitEngine):
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             fitting_result.success = result['success']
             fitting_result.convergence = result['convergence']
-            if result['uncertainty'] is not None:
-                fitting_result.uncertainty_state = result['uncertainty']
-
+            uncertainty = result['uncertainty']
+            if hasattr(uncertainty, "draw"):
+                fitting_result.uncertainty_state = uncertainty
             fitting_result.pvec = np.array([getattr(p.slot, 'n', p.slot) for p in pars])
             fitting_result.stderr = np.array([getattr(p.slot, 's', 0) for p in pars])
             DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
@@ -423,7 +423,7 @@ def run_bumps(problem, handler, curr_thread):
     success = best is not None
     try:
         stderr = fitdriver.stderr() if success else None
-        if hasattr(fitdriver.fitter, 'state'):
+        if hasattr(fitdriver.fitter, 'state') and hasattr(fitdriver.fitter.state, 'draw'):
             x = fitdriver.fitter.state.draw().points
             n_parameters = x.shape[1]
             cov = np.cov(x.T, bias=True).reshape((n_parameters, n_parameters))

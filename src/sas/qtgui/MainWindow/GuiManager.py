@@ -68,6 +68,7 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
+from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
@@ -488,6 +489,8 @@ class GuiManager:
         elif type(new_perspective) == CorfuncWindow:
             self.checkAnalysisOption(self._workspace.actionCorfunc)
 
+        elif type(new_perspective) == SizeDistributionWindow:
+            self.checkAnalysisOption(self._workspace.actionSizeDistribution)
 
 
         #
@@ -796,6 +799,7 @@ class GuiManager:
         self._workspace.actionInversion.triggered.connect(self.actionInversion)
         self._workspace.actionInvariant.triggered.connect(self.actionInvariant)
         self._workspace.actionCorfunc.triggered.connect(self.actionCorfunc)
+        self._workspace.actionSizeDistribution.triggered.connect(self.actionSizeDistribution)
         # Help
         self._workspace.actionDocumentation.triggered.connect(self.actionDocumentation)
         self._workspace.actionTutorial.triggered.connect(self.actionTutorial)
@@ -1247,6 +1251,13 @@ class GuiManager:
         """
         self.perspectiveChanged("Corfunc")
         self.filesWidget.onAnalysisUpdate("Corfunc")
+
+    def actionSizeDistribution(self):
+        """
+        Change to the Size perspective
+        """
+        self.perspectiveChanged("SizeDistribution")
+        self.filesWidget.onAnalysisUpdate("SizeDistribution")
 
     #============ WINDOW =================
     def actionCascade(self):
