@@ -10,7 +10,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
 
 #Global SasView
-from sas.qtgui.Utilities.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 
 #Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints

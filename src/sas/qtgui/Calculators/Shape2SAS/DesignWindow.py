@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit, QSizePolicy
 
 # Local SasView
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
 from sas.qtgui.Plotting.PlotterData import Data1D
