@@ -15,3 +15,5 @@ Fitting & Other Analyses
    Invariant Calculation <qtgui/Perspectives/Invariant/invariant_help>
 
    Correlation Function <qtgui/Perspectives/Corfunc/corfunc_help>
+
+   Size Distribution <qtgui/Perspectives/SizeDistribution/sizedistribution_help>
