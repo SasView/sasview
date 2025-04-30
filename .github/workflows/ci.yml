@@ -478,7 +478,7 @@ jobs:
       - name: Try running the installation (macOS)
         if: ${{ startsWith(matrix.os, 'macOS' )}}
         run: |
-          hdiutil attach $DL_PATH/SasView6.dmg
+          hdiutil attach $DL_PATH/SasView6-${{ matrix.os }}.dmg
           # Testing scripting interface by running simple model generation through sasmodels compare
           /Volumes/SasView6/SasView6.app/Contents/MacOS/sasview -m sasmodels.compare cylinder -noplot
 
