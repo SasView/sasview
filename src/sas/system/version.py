@@ -1,3 +1,7 @@
-__version__ = "6.0.1"
+try:
+    from _version import __version__
+except ImportError:
+    __version__ = "6.1.0.dev"
+
 __release_date__ = "2025"
 __build__ = "GIT_COMMIT"

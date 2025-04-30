@@ -7,7 +7,7 @@ dominate
 h5py
 html2text
 html5lib
-importlib-resources
+importlib-resources;python_version<"3.9"
 ipython
 jsonschema
 lxml
@@ -15,18 +15,19 @@ mako
 matplotlib
 numba
 numpy
+packaging
 periodictable
 platformdirs
 pybind11
 pylint
+pyopencl
 pyopengl
 pyparsing
 PySide6
-pytest
-pytest_qt
-pytest-mock
 pytools
 qtconsole
+sasdata
+sasmodels
 scipy
 siphash24
 sphinx
@@ -34,7 +35,6 @@ superqt
 tccbox
 twisted
 uncertainties
-unittest-xml-reporting
 xhtml2pdf
 zope
 

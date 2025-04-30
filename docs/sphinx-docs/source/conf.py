@@ -16,10 +16,7 @@ import sys, os, datetime
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-from distutils.util import get_platform
-platform = '.%s-%s'%(get_platform(),sys.version[:3])
-build_lib = os.path.abspath('../../../build/lib'+platform)
-sys.path.insert(0, build_lib)
+sys.path.insert(0, "../../../src")
 sys.path.insert(0, os.path.abspath('_extensions')) # for sphinx extensions
 print ("-- path --")
 print ("\n".join(sys.path))
@@ -65,7 +62,7 @@ mathjax_css = STATIC_PATH + 'katex/katex.min.css'
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'

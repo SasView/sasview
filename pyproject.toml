@@ -1,0 +1,190 @@
+[build-system]
+requires = [
+    "hatchling",
+    "hatch-build-scripts",
+    "hatch-requirements-txt",
+    "hatch-sphinx",
+    "hatch-vcs",
+    "pyside6",
+    "sasdata",
+    "sasmodels",
+]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "sasview"
+dynamic = [
+    "version",
+    "dependencies",
+    "optional-dependencies",
+]
+description = "SasView application"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "BSD-3-Clause" }
+authors = [
+    {name = "SasView Team", email = "developers@sasview.org"},
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+]
+keywords = [
+  "small-angle",
+  "scattering",
+  "data analysis",
+  "neutron",
+  "X-ray",
+]
+
+
+[project.urls]
+Homepage = "http://sasview.org"
+Documentation = "https://www.sasview.org/docs/"
+Repository = "https://github.com/SasView/sasview/"
+Issues = "https://github.com/SasView/sasview/issues"
+Changelog = "https://github.com/SasView/sasview/releases"
+
+[project.scripts]
+sasview = "sas.qtgui.MainWindow.MainWindow:run_sasview"
+
+[project.entry-points.pyinstaller40]
+hook-dirs = "sas.__pyinstaller:get_hook_dirs"
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = [ "build_tools/requirements.txt" ]
+
+[tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
+test = [ "build_tools/requirements-test.txt" ]
+
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/sas/system/_version.py"
+
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "build_tools",
+  "build/lib/doc/build",
+  "docs/sphinx-docs/source",
+  "src",
+  "test",
+]
+exclude = [
+  "docs/sphinx-docs/source-temp",
+  "downloads",
+]
+ignore-vcs = true
+
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
+packages = ["src/sas"]
+artifacts = [
+    "**/UI/*py",
+    "/**",
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+"build/doc/html/" = "sas/docs"
+"docs/sphinx-docs/source-temp/" = "sas/docs-source"
+
+[[tool.hatch.build.targets.wheel.hooks.build-scripts.scripts]]
+# Perform Qt UI conversion steps (uic, rcc etc)
+commands = [
+    "python3 src/sas/qtgui/convertUI.py",
+]
+# out_dir = "GUI-output"
+artifacts = [
+    # "**/UI/*py",
+]
+
+
+[[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+tool = "custom"
+doc_dir = "docs/sphinx-docs"
+out_dir = "tmp"
+commands = [
+  # sphinx commands work within the "doc_dir" directory
+  "{python} extract-module-resource.py sasmodels docs-source tmp/sasmodels/docs",
+  "{python} extract-module-resource.py sasdata docs-source tmp/sasdata/docs",
+  "{python} extract-module-resource.py sasdata example_data ../../src/sas/example_data/",
+]
+
+
+[[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+tool = "custom"
+doc_dir = "docs/sphinx-docs"
+out_dir = "source-temp"
+environment = { PYTHONPATH = "../../src" }
+commands = [
+  "{python} collect_sphinx_sources.py",
+]
+
+[[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+tool = "apidoc"
+doc_dir = "docs/sphinx-docs"
+source = "../../src"
+out_dir = "source-temp/dev/sasview-api"
+depth = 8
+private = false
+separate = false
+header = "SasView"
+exclude = [
+    "*/UnitTesting/*",
+    "sas/webfit*",
+    "sas/qtgui/Perspectives/ParticleEditor/calculations*",
+    "sas/qtgui/Perspectives/ParticleEditor/Plots*",
+    "sas/qtgui/Utilities/WhatsNew/messages*",
+    "sas/sascalc/calculator/ausaxs*",
+]
+
+[[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
+tool = "build"
+format = "html"
+doc_dir = "docs/sphinx-docs/source-temp"
+out_dir = "../../../build/doc/html"
+warnings = false
+keep_going = true
+sphinx_opts = "-d ../../../build/doc/html/doctrees"
+environment = { PYTHONPATH = "../../../src" }
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+python_files = [
+    "u*py",
+    "*Test*py",
+]
+python_classes = [
+    "*Test",
+    "Test*",
+]
+qt_api = "pyside6"
+addopts = [
+    "--ignore", "test/utest_sasview.py",
+    "-v",
+    "-rsx",
+]
+log_level = "DEBUG"
+filterwarnings = [
+]
+testpaths = [
+    "src",
+    "tests",
+]
+pythonpath = "src"
+norecursedirs = [
+    "test/sasrealspace",
+    "test/calculatorview",
+]

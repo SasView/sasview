@@ -4,8 +4,6 @@ on:
   workflow_call:
   pull_request:
   push:
-    branches: [main]
-    tags: ['v*']
 
 defaults:
   run:
@@ -47,8 +45,43 @@ jobs:
       - id: set-matrix
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
+
+  builddeps:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [
+          ["sasdata", "git+https://github.com/llimeht/sasdata.git@tmp/pyproject"],
+          ["sasmodels", "git+https://github.com/llimeht/sasmodels.git@tmp/pyproject"],
+          ["bumps", "git+https://github.com/bumps/bumps/@v0.9.3"],
+        ]
+
+    name: Build wheel "${{ matrix.package[0] }}"
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      ### Installation of some build-dependencies
+
+      - name: Build wheel of ${{ matrix.package[0] }}
+        run: |
+          python -m pip wheel --verbose ${{ matrix.package[1] }}
+
+      - name: Store wheel for use
+        uses: actions/upload-artifact@v4
+        with:
+          name: sasview-wheel-${{ matrix.package[0] }}
+          path: |
+            ${{ matrix.package[0] }}*whl
+          if-no-files-found: ignore
+
   build-matrix:
-    needs: [matrix]
+    needs: [matrix, builddeps]
 
     strategy:
       fail-fast: false
@@ -56,6 +89,8 @@ jobs:
         include: ${{ fromJson(needs.matrix.outputs.matrix-json) }}
     env:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
+      # Only sign/notarize if the secrets will be available
+      SIGN_INSTALLER: ${{ (github.repository == 'SasView/sasview') && 'true' || '' }}
 
     name: "${{ matrix.job_name }}"
 
@@ -68,6 +103,8 @@ jobs:
 
       - name: Obtain SasView source from git
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -82,53 +119,27 @@ jobs:
 
       - name: Install X11 libraries (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update
-          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
+          sudo apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
+
+      - name: Fetch wheels of sibling projects
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/
+          pattern: sasview-wheel-*
+          merge-multiple: true
+
+      - name: Install correct versions of sibling projects
+        run: |
+          python -m pip install dist/*whl
 
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install wheel setuptools
           python -m pip install -r build_tools/requirements.txt
-
-      - name: Install pywin32 (Windows)
-        if: ${{ startsWith(matrix.os, 'windows') }}
-        run: |
-          python -m pip install pywin32
-
-      - name: Install pyopencl (Windows)
-        if: ${{ startsWith(matrix.os, 'windows') }}
-        run: |
-          python -m pip install pytools mako cffi
-          choco install opencl-intel-cpu-runtime
-          choco install innosetup
-          python -m pip install --only-binary=pyopencl --find-links http://www.silx.org/pub/wheelhouse/ --trusted-host www.silx.org pyopencl
-
-      - name: Install pyopencl (Linux + macOS)
-        if: ${{ !startsWith(matrix.os, 'windows') }}
-        run: |
-          python -m pip install pyopencl
-
-      - name: Fetch sources for sibling projects
-        run: |
-          git clone --depth=50 --branch=master https://github.com/SasView/sasdata.git ../sasdata
-          git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git ../sasmodels
-
-      - name: Build and install sasdata
-        run: |
-          cd ../sasdata
-          rm -rf build
-          rm -rf dist
-          mv sasdata/example_data/* ../sasview/src/sas/example_data/
-          python -m pip install --no-deps .
-
-      - name: Build and install sasmodels
-        run: |
-          cd ../sasmodels
-          rm -rf build
-          rm -rf dist
-          python -m pip install --no-deps .
+          python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
 
       ### Document the build environment
 
@@ -140,13 +151,26 @@ jobs:
 
       - name: Build sasview
         run: |
-          # SET SASVIEW GITHASH
-          githash=$( git rev-parse HEAD )
-          sed -i.bak s/GIT_COMMIT/$githash/g src/sas/sasview/__init__.py
-          # BUILD SASVIEW
-          python -m pip install --no-deps .
+          python -m build --no-isolation --sdist --wheel
+          python -m pip install dist/sasview*whl
+
+      - name: Publish sdist and wheel package
+        uses: actions/upload-artifact@v4
+        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
+        with:
+          name: sasview-wheel
+          path: |
+            dist/sasview*whl
+            dist/sasview*tar*
+          if-no-files-found: ignore
 
       ### Run tests (if enabled)
+
+      - name: Install test dependencies
+        if: ${{ matrix.tests }}
+        run: |
+          python -m pip install -r build_tools/requirements-test.txt
+          python build_tools/get_external_dependencies.py
 
       - name: Test with pytest
         if: ${{ matrix.tests }}
@@ -166,24 +190,6 @@ jobs:
       #     if [ $retval -eq 139 ]; then echo "WARNING: Python interpreter exited with Segmentation Fault. This normally indicates that Qt objects were not correctly deleted. This error is currently suppressed in SasView's test suite."; retval=0; fi
       #     exit $retval
 
-      ### Build documentation (if enabled)
-
-      - name: Build sasmodels and sasdata docs
-        if: ${{ matrix.docs }}
-        env:
-          SAS_OPENCL: NONE
-        run: |
-          # TODO: supress sasmodels cache for the doc build
-          mkdir -p ~/.sasmodels/compiled_models
-          make -j4 -C ../sasmodels/doc html || true
-          make -C ../sasdata/docs html || true
-
-      - name: Build sasview docs
-        if: ${{ matrix.docs }}
-        run: |
-          mkdir -p build/lib
-          cd docs/sphinx-docs/
-          python build_sphinx.py || true
 
       ### Build the installer (if enabled)
 
@@ -206,6 +212,15 @@ jobs:
           command -v ldconfig >/dev/null 2>&1 && ldconfig -n sasview
           tar zcf sasview-pyinstaller-dist.tar.gz sasview
 
+      - name: Collect a debug tarball of the installer package
+        if: ${{ matrix.installer }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            installers/dist/sasview-pyinstaller-dist.tar.gz
+          if-no-files-found: ignore
+
       - name: Build sasview installer with INNO (Windows)
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
@@ -222,19 +237,10 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
         run: |
           cd installers/dist
-          tar zcf sasview6.tar.gz sasview
-
-      - name: Collect a debug tarball of the installer package
-        if: ${{ matrix.installer }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Debug-SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
-          path: |
-            installers/dist/sasview-pyinstaller-dist.tar.gz
-          if-no-files-found: ignore
+          tar zcf SasView6.tar.gz sasview
 
       - name: Sign executable and create dmg (OSX)
-        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'macos') && env.SIGN_INSTALLER }}
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_ISA }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_ISA_PWD }}
@@ -255,7 +261,7 @@ jobs:
           codesign -s "Developer ID Application: The International Scattering Alliance (8CX8K63BQM)" $MACOS_DMG_NAME
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-latest' }}
+        if: ${{ matrix.installer && matrix.os == 'macos-latest' && env.SIGN_INSTALLER }}
         uses: lando/notarize-action@v2
         with:
           product-path: installers/dist/SasView6-macos-latest.dmg
@@ -266,7 +272,7 @@ jobs:
           verbose: True
 
       - name: Notarize Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-13' }}
+        if: ${{ matrix.installer && matrix.os == 'macos-13' && env.SIGN_INSTALLER }}
         uses: lando/notarize-action@v2
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
@@ -277,19 +283,19 @@ jobs:
           verbose: True
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-latest' }}
+        if: ${{ matrix.installer && matrix.os == 'macos-latest' && env.SIGN_INSTALLER }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: installers/dist/SasView6-macos-latest.dmg
 
       - name: Staple Release Build (OSX)
-        if: ${{ matrix.installer && matrix.os == 'macos-13' }}
+        if: ${{ matrix.installer && matrix.os == 'macos-13' && env.SIGN_INSTALLER }}
         uses: BoundfoxStudios/action-xcode-staple@v1
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
 
       - name: Sign binary
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         uses: lando/code-sign-action@v2
         with:
           file: installers/dist/setupSasView.exe
@@ -299,17 +305,19 @@ jobs:
           keylocker-api-key: ${{ secrets.KEYLOCKER_API_KEY }}
           keylocker-cert-sha1-hash: ${{ secrets.KEYLOCKER_CERT_SHA1_HASH }}
 
+
       - name: Publish installer package
         if: ${{ matrix.installer }}
         uses: actions/upload-artifact@v4
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
-            installers/dist/setupSasView.exe
+            installers/dist/setupSasView*.exe
             installers/dist/SasView6-macos-13.dmg
             installers/dist/SasView6-macos-latest.dmg
-            installers/dist/sasview6.tar.gz
+            installers/dist/SasView*.tar.gz
           if-no-files-found: ignore
+
 
   test-installer:
     needs: [ build-matrix ]
@@ -417,7 +425,7 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           # $INSTALL_PATH is already the base directory
-          tar xf "$DL_PATH/sasview6.tar.gz"
+          tar xf "$DL_PATH/SasView6.tar.gz"
 
       - name: Check installation files
         if: ${{ !startsWith(matrix.os, 'macos') }}
@@ -438,7 +446,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
+          sudo apt-get -y install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libxcb-cursor0
 
       - name: Try running the installation (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu' )}}
