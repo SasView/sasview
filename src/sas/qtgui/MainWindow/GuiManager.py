@@ -56,6 +56,7 @@ from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
+from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
 
 
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
@@ -211,6 +212,7 @@ class GuiManager:
         self.MuMag_Fitter = MuMag(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
+        self.Shape2SASCalculator =  Shape2SAS(self)
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
@@ -767,6 +769,7 @@ class GuiManager:
         self._workspace.actionSlit_Size_Calculator.triggered.connect(self.actionSlit_Size_Calculator)
         self._workspace.actionSAS_Resolution_Estimator.triggered.connect(self.actionSAS_Resolution_Estimator)
         self._workspace.actionGeneric_Scattering_Calculator.triggered.connect(self.actionGeneric_Scattering_Calculator)
+        self._workspace.actionShape2SAS_Calculator.triggered.connect(self.actionShape2SAS_Calculator)
         self._workspace.actionPython_Shell_Editor.triggered.connect(self.actionPython_Shell_Editor)
         self._workspace.actionImage_Viewer.triggered.connect(self.actionImage_Viewer)
         self._workspace.actionFile_Converter.triggered.connect(self.actionFile_Converter)
@@ -1081,6 +1084,13 @@ class GuiManager:
             self.GENSASCalculator.show()
             self.updateStatusBar("The Generic Scattering Calculator is open, but it sometimes opens behind the main "
                                  "window.")
+        except Exception as ex:
+            logging.error(str(ex))
+            return
+
+    def actionShape2SAS_Calculator(self):
+        try:
+            self.Shape2SASCalculator.show()
         except Exception as ex:
             logging.error(str(ex))
             return

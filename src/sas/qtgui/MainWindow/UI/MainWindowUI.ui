@@ -93,6 +93,7 @@
     <addaction name="actionSAS_Resolution_Estimator"/>
     <addaction name="actionMuMag_Fitter"/>
     <addaction name="actionGeneric_Scattering_Calculator"/>
+    <addaction name="actionShape2SAS_Calculator"/>
     <addaction name="separator"/>
     <addaction name="actionImage_Viewer"/>
     <addaction name="actionOrientation_Viewer"/>
@@ -359,6 +360,11 @@
   <action name="actionSAS_Resolution_Estimator">
    <property name="text">
     <string>Q Resolution Estimator</string>
+   </property>
+  </action>
+  <action name="actionShape2SAS_Calculator">
+   <property name="text">
+    <string>Shape2SAS Calculator</string>
    </property>
   </action>
   <action name="actionGeneric_Scattering_Calculator">
