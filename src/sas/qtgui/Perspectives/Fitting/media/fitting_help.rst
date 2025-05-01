@@ -236,7 +236,7 @@ syntax errors, a model file is still generated. When you then correct the errors
 and click 'Apply' again to re-compile you will get an error informing you that
 the model already exists if the 'Overwrite' box is not checked. In this case you
 will need to supply a new model function name. By default the 'Overwrite' box is
-*checked*\ .
+not *checked*\ .
 
 Also note that the 'Fit Parameters' have been split into two sections: those
 which can be polydisperse (shape and orientation parameters) and those which are
