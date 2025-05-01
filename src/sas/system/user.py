@@ -1,8 +1,12 @@
 import os
+from packaging.version import Version
 import shutil
 from pathlib import Path
 from platformdirs import PlatformDirs
-from sas.system.version import __version__ as sasview_version
+from sas.system.version import __version__
+
+
+sasview_version = Version(__version__).base_version
 
 # Create separate versioned and unversioned file locations
 PLATFORM_DIRS_VERSIONED = PlatformDirs("SasView", "sasview", version=sasview_version)
