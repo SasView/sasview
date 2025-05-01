@@ -22,6 +22,7 @@ try:
         ('sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
         ('sas/qtgui/Utilities/WhatsNew/css/style.css', 'sas/qtgui/Utilities/WhatsNew/css'),
         ('sas/qtgui/Utilities/About/images', 'sas/qtgui/Utilities/About/images'),
+        ('sas/docs-source/conf.py', 'sas/docs-source/'),
     ]:
         datas.append((str((base / f).absolute()), t))
 
