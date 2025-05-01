@@ -23,6 +23,6 @@ Please describe the tests that you ran to verify your changes. Provide instructi
   - [ ] **MacOSX** installer (GH artifact) has been tested (installed and worked)
   - [ ] **Wheels** installer (GH artifact) has been tested (installed and worked)
 
-**Licencing** (untick if necessary)
+**Licensing** (untick if necessary)
 - [x] The introduced changes comply with SasView license (BSD 3-Clause)
 
