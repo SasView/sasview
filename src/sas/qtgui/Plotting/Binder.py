@@ -3,7 +3,6 @@ Extension to MPL to support the binding of artists to key/mouse events.
 """
 import sys
 import logging
-import warnings
 
 class Selection(object):
     """
