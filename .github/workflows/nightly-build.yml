@@ -21,6 +21,10 @@ jobs:
         os: [ ubuntu-latest]
     needs: reuse_main_ci
 
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Retrieve saved artifacts
         uses: actions/download-artifact@v4
@@ -38,6 +42,10 @@ jobs:
           done
           mv SasView-Installer-ubuntu*/SasView6.tar.gz ./SasView-nightly-Linux.tar.gz
 
+      - name: Clean out old release
+        run: |
+          gh release delete nightly-build --cleanup-tag --yes || true
+
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
         with:
@@ -50,3 +58,4 @@ jobs:
           body: "Nightly build of main SasView branch"
           name: "nightly-build"
           tag: "nightly-build"
+          commit: ${{ github.sha }}
