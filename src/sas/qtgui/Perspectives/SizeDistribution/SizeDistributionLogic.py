@@ -174,7 +174,7 @@ class SizeDistributionLogic:
         dy = result.bin_err
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.is_data = False
-        # new_plot.plot_role = DataRole.ROLE_STAND_ALONE
+        new_plot.plot_role = DataRole.ROLE_SIZE_DISTRIBUTION
         # new_plot.symbol = "Line"
 
         new_plot.id = SIZE_DISTR_LABEL
@@ -188,12 +188,13 @@ class SizeDistributionLogic:
 
         # Create vertical lines for trusted range
         x_trust = self.computeTrustRange(qmin, qmax)
-        y_max_trust = np.full_like(x_trust, 1.0)  # lines start at 0.0 and end at y
+        y_max_trust = np.full_like(x_trust, max(y))  # lines start at 0.0 and end at y
         trust_plot = Data1D(x=x_trust, y=y_max_trust)
         trust_plot.is_data = False
         trust_plot.symbol = "Vline"
         trust_plot.xaxis("\\rm{Diameter}", "A")
         trust_plot.yaxis("\\rm{VolumeDistribution}", "")
+        trust_plot.plot_role = DataRole.ROLE_SIZE_DISTRIBUTION
 
         trust_plot.id = TRUST_RANGE_LABEL
         trust_plot.group_id = GROUP_ID_SIZE_DISTR_FIT
