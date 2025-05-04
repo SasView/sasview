@@ -36,7 +36,7 @@ jobs:
           for file in $(ls *.dmg); do
               mv $file ${file/SasView6-/SasView-nightly-MacOSX-}
           done
-          mv SasView-Installer-ubuntu*/sasview6.tar.gz ./SasView-nightly-Linux.tar.gz
+          mv SasView-Installer-ubuntu*/SasView6.tar.gz ./SasView-nightly-Linux.tar.gz
 
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
