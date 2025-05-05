@@ -1,7 +1,7 @@
 try:
-    from _version import __version__
+    from ._version import __version__
 except ImportError:
-    __version__ = "6.1.0.dev"
+    __version__ = "6.1.0a1"
 
 __release_date__ = "2025"
 __build__ = "GIT_COMMIT"

@@ -53,9 +53,8 @@ jobs:
       fail-fast: false
       matrix:
         package: [
-          ["sasdata", "git+https://github.com/llimeht/sasdata.git@tmp/pyproject"],
-          ["sasmodels", "git+https://github.com/llimeht/sasmodels.git@tmp/pyproject"],
-          ["bumps", "git+https://github.com/bumps/bumps/@v0.9.3"],
+          ["sasdata", "git+https://github.com/SasView/sasdata.git@sasdata_0.10.0"],
+          ["sasmodels", "git+https://github.com/SasView/sasmodels.git@sasmodels_1.0.10"]
         ]
 
     name: Build wheel "${{ matrix.package[0] }}"
@@ -141,12 +140,6 @@ jobs:
           python -m pip install -r build_tools/requirements.txt
           python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
 
-      ### Document the build environment
-
-      - name: Python package version list
-        run: |
-          python -m pip freeze
-
       ### Actual building of sasview
 
       - name: Build sasview
@@ -197,6 +190,12 @@ jobs:
         if: ${{ matrix.installer }}
         run: |
           python -m pip install pyinstaller
+
+      ### Document the build environment
+
+      - name: Python package version list
+        run: |
+          python -m pip freeze
 
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
@@ -478,7 +477,7 @@ jobs:
       - name: Try running the installation (macOS)
         if: ${{ startsWith(matrix.os, 'macOS' )}}
         run: |
-          hdiutil attach $DL_PATH/SasView6.dmg
+          hdiutil attach $DL_PATH/SasView6-${{ matrix.os }}.dmg
           # Testing scripting interface by running simple model generation through sasmodels compare
           /Volumes/SasView6/SasView6.app/Contents/MacOS/sasview -m sasmodels.compare cylinder -noplot
 
