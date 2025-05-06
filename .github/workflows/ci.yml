@@ -90,7 +90,7 @@ jobs:
     env:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
       # Only sign/notarize if the secrets will be available
-      SIGN_INSTALLER: ${{ (github.repository == 'SasView/sasview') && 'true' || '' }}
+      SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork) && 'true' || '' }}
 
     name: "${{ matrix.job_name }}"
 
