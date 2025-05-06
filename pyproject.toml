@@ -63,6 +63,7 @@ files = [ "build_tools/requirements.txt" ]
 
 [tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
 test = [ "build_tools/requirements-test.txt" ]
+dev = [ "build_tools/requirements-dev.txt" ]
 
 
 [tool.hatch.version]
