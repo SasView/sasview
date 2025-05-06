@@ -144,7 +144,7 @@ jobs:
       - name: Install Python dependencies for release branches
         if: contains(github.ref, 'release')
         run: |
-          python -m pip install -r build_tools/requirements-release-${{ matrix.os }}.txt
+          python -m pip install -r build_tools/requirements-release-${{ matrix.os }}-${{ matrix.python-version }}.txt
           python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
       ### Actual building of sasview
 
