@@ -57,14 +57,11 @@ from sasmodels import generate, core
 from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.data import empty_data1D, empty_data2D
 
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, generate_html
+from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, generate_html, PATH_LIKE
 
 from typing import Any, Dict, Union
 from sasmodels.kernel import KernelModel
 from sasmodels.modelinfo import ModelInfo
-
-
-PATH_LIKE = Union[Path, str, os.PathLike[str]]
 
 
 # Destination directory for model docs

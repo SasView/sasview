@@ -7,11 +7,9 @@ from os import mkdir
 from os.path import basename, exists, join as joinpath
 from pathlib import Path
 from sasmodels.core import load_model_info
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
+from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, PATH_LIKE
 
 from typing import Optional, IO, BinaryIO, Union
-
-PATH_LIKE = Union[Path, str, os.PathLike[str]]
 
 
 TEMPLATE = """\
