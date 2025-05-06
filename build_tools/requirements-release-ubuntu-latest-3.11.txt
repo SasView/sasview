@@ -124,9 +124,6 @@ RestrictedPython==8.1a1.dev0
 roman==5.0
 roman-numerals-py==3.1.0
 rpds-py==0.24.0
-sasdata
-sasmodels
-sasview
 scipy==1.15.2
 setuptools-scm==8.3.1
 shiboken6==6.9.0
