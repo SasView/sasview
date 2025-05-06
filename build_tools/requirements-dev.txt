@@ -1,3 +1,4 @@
+build
 hatchling
 hatch-build-scripts
 hatch-requirements-txt

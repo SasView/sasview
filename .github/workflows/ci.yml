@@ -137,8 +137,10 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          python -m pip install -r build_tools/requirements.txt
-          python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
+          # Don't try to reinstall sibling packages if already at right version
+          sed -i "/sasdata/d" build_tools/requirements.txt
+          sed -i "/sasmodels/d" build_tools/requirements.txt
+          python -m pip install -r build_tools/requirements.txt -r build_tools/requirements-dev.txt
 
       ### Actual building of sasview
 
