@@ -29,5 +29,8 @@ If applicable, add screenshots to help explain your problem.
 **Operating system (please complete the following information):**
  - OS: [e.g. Windows 10]
 
+**Installation method (please complete the following information):**
+ - Installed: [e.g. Windows installer, pip, pipenv, git checkout]
+
 **Additional context**
 Add any other context about the problem here.
