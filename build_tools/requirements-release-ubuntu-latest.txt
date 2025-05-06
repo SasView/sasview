@@ -1,9 +1,7 @@
 AccessControl==7.2
 Acquisition==6.1
 alabaster==1.0.0
-altgraph==0.17.4
 appdirs==1.4.4
-appnope==0.1.4
 arabic-reshaper==3.0.0
 asn1crypto==1.5.1
 astroid==3.3.9
@@ -16,7 +14,7 @@ beautifulsoup4==4.13.4
 BTrees==6.1
 build==1.2.2.post1
 bumps>=1.0.0a1
-certifi==2025.1.31
+certifi==2025.4.26
 cffi==1.17.1
 Chameleon==4.6.0
 chardet==5.2.0
@@ -52,6 +50,7 @@ hyperlink==21.0.0
 idna==3.10
 imagesize==1.4.1
 incremental==24.7.2
+iniconfig==2.1.0
 ipykernel==6.29.5
 ipython==9.2.0
 ipython_pygments_lexers==1.1.1
@@ -65,7 +64,6 @@ jupyter_core==5.7.2
 kiwisolver==1.4.8
 llvmlite==0.44.0
 lxml==5.4.0
-macholib==1.16.3
 Mako==1.3.10
 MarkupSafe==3.0.2
 matplotlib==3.10.1
@@ -97,8 +95,6 @@ pycparser==2.22
 Pygments==2.19.1
 pyHanko==0.26.0
 pyhanko-certvalidator==0.26.8
-pyinstaller==6.13.0
-pyinstaller-hooks-contrib==2025.3
 pylint==3.3.6
 pyopencl==2025.1
 PyOpenGL==3.1.9
@@ -108,6 +104,9 @@ pyproject_hooks==1.2.0
 PySide6==6.9.0
 PySide6_Addons==6.9.0
 PySide6_Essentials==6.9.0
+pytest==8.3.5
+pytest-mock==3.14.0
+pytest-qt==4.4.0
 python-bidi==0.6.6
 python-dateutil==2.9.0.post0
 python-gettext==5.0
@@ -125,6 +124,9 @@ RestrictedPython==8.1a1.dev0
 roman==5.0
 roman-numerals-py==3.1.0
 rpds-py==0.24.0
+sasdata
+sasmodels
+sasview
 scipy==1.15.2
 setuptools-scm==8.3.1
 shiboken6==6.9.0
@@ -153,6 +155,7 @@ Twisted==24.11.0
 typing_extensions==4.13.2
 tzlocal==5.3.1
 uncertainties==3.2.3
+unittest-xml-reporting==3.2.0
 uritools==4.0.3
 urllib3==2.4.0
 waitress==3.0.2
