@@ -83,11 +83,6 @@ def prepare():
     #    with cd(root):
     #        subprocess.call((sys.executable, "setup.py", "build"), shell=False)
 
-    # Notify the help menu that the Sphinx documentation is in a different
-    # place than it otherwise would be.
-    docpath = joinpath(root, 'docs', 'sphinx-docs', '_build', 'html')
-    os.environ['SASVIEW_DOC_PATH'] = docpath
-
 import multiprocessing
 if __name__ == "__main__":
     multiprocessing.freeze_support()
