@@ -453,6 +453,7 @@ jobs:
         # If sasview has crashed on its own, then this should return an error
         run: |
           (
+            export https_proxy=https://127.0.0.1:9
             echo "## START SASVIEW"
             xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW 2>&1 |
             tee sasview-test.log
