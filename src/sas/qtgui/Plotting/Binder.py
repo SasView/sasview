@@ -238,20 +238,21 @@ class BindArtist(object):
         """
         # TODO: sort by zorder of axes then by zorder within axes
         found = Selection()
-        self._artists.sort(key=lambda x: x.zorder, reverse=True)
-        for artist in self._artists:
-            # TODO: should contains() return false if invisible?
-            if not artist.get_visible():
-                continue
-            # TODO: optimization - exclude artists not inaxes
-            try:
-                inside, prop = artist.contains(event)
-            except:
-                # Probably an old version of matplotlib
-                inside = False
-            if inside:
-                found.artist, found.prop = artist, prop
-                break
+        inaxes = event.inaxes
+        if inaxes is not None:
+            self._artists.sort(key=lambda x: x.zorder, reverse=True)
+            for artist in self._artists:
+                # TODO: should contains() return false if invisible?
+                if not artist.get_visible() or inaxes != artist.axes:
+                    continue
+                try:
+                    inside, prop = artist.contains(event)
+                except:
+                    # Probably an old version of matplotlib
+                    inside = False
+                if inside:
+                    found.artist, found.prop = artist, prop
+                    break
 
         # TODO: how to check if prop is equal?
         if found != self._current:
