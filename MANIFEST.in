@@ -1,0 +1,1 @@
+recursive-include src/sas/qtgui *.png *.svg *.css
