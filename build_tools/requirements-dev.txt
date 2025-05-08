@@ -1,0 +1,6 @@
+build
+hatchling
+hatch-build-scripts
+hatch-requirements-txt
+hatch-sphinx
+hatch-vcs
