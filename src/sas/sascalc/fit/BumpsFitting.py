@@ -343,13 +343,13 @@ class BumpsFit(FitEngine):
             uncertainty = result['uncertainty']
             if hasattr(uncertainty, "draw"):
                 fitting_result.uncertainty_state = uncertainty
-            fitting_result.pvec = np.array([getattr(p.slot, 'n', p.slot) for p in pars])
-            fitting_result.stderr = np.array([getattr(p.slot, 's', 0) for p in pars])
+            fitting_result.pvec = np.array([getattr(p.slot, 'n', p.slot) for p in pars if hasattr(p, 'slot')])
+            fitting_result.stderr = np.array([getattr(p.slot, 's', 0) for p in pars if hasattr(p, 'slot')])
             DOF = max(1, fitness.numpoints() - len(fitness.fitted_pars))
             fitting_result.fitness = np.sum(fitting_result.residuals ** 2) / DOF
 
             # Warn user about any parameter that is not an uncertainty object
-            miss_uncertainty = [p for p in pars if not isinstance(p.slot,
+            miss_uncertainty = [p for p in pars if hasattr(p, 'slot') and not isinstance(p.slot,
                                 (uncertainties.core.Variable, uncertainties.core.AffineScalarFunc))]
             if miss_uncertainty:
                 uncertainty_warning = True

@@ -57,11 +57,12 @@ from sasmodels import generate, core
 from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.data import empty_data1D, empty_data2D
 
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, generate_html
+from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, generate_html, PATH_LIKE
 
-from typing import Dict, Any
+from typing import Any, Dict, Union
 from sasmodels.kernel import KernelModel
 from sasmodels.modelinfo import ModelInfo
+
 
 # Destination directory for model docs
 TARGET_DIR = MAIN_DOC_SRC / "user" / "models"
@@ -335,7 +336,7 @@ def copy_file(src: str, dst: str):
         shutil.copy2(src, dst)
 
 
-def process_model(py_file: str, force=False) -> str:
+def process_model(py_file: PATH_LIKE, force=False) -> str:
     """Generate doc file and image file for the given model definition file.
 
     Does nothing if the corresponding rst file is newer than *py_file*.
@@ -349,7 +350,7 @@ def process_model(py_file: str, force=False) -> str:
     :param force: Regardless of the ReST file age, relative to the python file, force the regeneration.
     """
     py_file = Path(py_file)
-    rst_file = TARGET_DIR / py_file.name.replace('.py', '.rst')
+    rst_file = (TARGET_DIR / py_file.name).with_suffix(".rst")
     if not (force or newer(py_file, rst_file) or newer(__file__, rst_file)):
         #print("skipping", rst_file)
         return rst_file

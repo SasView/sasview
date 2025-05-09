@@ -6,7 +6,7 @@ This utility extracts all the resources under a source name and saves the
 hierarchy to the nominated directory.
 
 Usage:
-    fetch-doc-source.py module source dest
+    extract-module-resource.py module source dest
 
 where
     module: the Python name of the module
@@ -67,7 +67,7 @@ def allowed(name: str):
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: fetch-doc-source.py module source dest")
+        print("Usage: extract-module-resource.py module source dest")
         sys.exit(1)
 
     modname = sys.argv[1]

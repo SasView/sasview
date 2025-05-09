@@ -454,9 +454,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
         """
-        if not isinstance(data_item, Data1D):
-            msg = "Invariant cannot be computed with 2D data."
-            raise ValueError(msg)
 
         if self.has_data:
             msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
@@ -471,6 +468,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         data = GuiUtils.dataFromItem(model_item)
         self.data = data
         self._model_item = model_item
+
+        if not isinstance(self.data, Data1D):
+            msg = "Corfunc cannot be computed using 2D data."
+            raise ValueError(msg)
 
         self.model.itemChanged.disconnect(self.model_changed)
 

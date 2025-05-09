@@ -53,7 +53,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Digs into self.tabs and pulls out relevant info
         """
-        self.tab_names = [tab.kernel_module.name for tab in self.tabs]
+        self.tab_names = [tab.logic.kernel_module.name for tab in self.tabs]
         self.params = [tab.getParamNames() for tab in self.tabs]
 
     def setupSignals(self):
@@ -105,10 +105,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # Populate the left combobox parameter arbitrarily with the parameters
         # from the first tab if `All` option is selected
         if self.cbModel1.currentText() == "All":
-            items1 = self.tabs[1].main_params_to_fit + self.tabs[1].poly_params_to_fit
+            items1 = self.tabs[1].main_params_to_fit + self.tabs[1].polydispersity_widget.poly_params_to_fit
         else:
             tab_index1 = self.cbModel1.currentIndex()
-            items1 = self.tabs[tab_index1].main_params_to_fit + self.tabs[tab_index1].poly_params_to_fit
+            items1 = self.tabs[tab_index1].main_params_to_fit + self.tabs[tab_index1].polydispersity_widget.poly_params_to_fit
         self.cbParam1.addItems(items1)
         # Show the previously selected parameter if available
         if previous_param1 in items1:
@@ -180,7 +180,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.txtConstraint.setText(self.cbModel2.currentText() + "." + param2)
         # Check if any of the parameters are polydisperse
         params_list = [param1, param2]
-        all_pars = [tab.model_parameters for tab in self.tabs]
+        all_pars = [tab.logic.model_parameters for tab in self.tabs]
         is2Ds = [tab.is2D for tab in self.tabs]
         txt = self.redefining_warning
         for pars, is2D in zip(all_pars, is2Ds):
@@ -309,7 +309,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         if self.cbModel1.currentText() == "All":
             # exclude the tab on the lhs
             tabs = [tab for tab in self.tabs if
-                    tab.kernel_module.name != self.cbModel2.currentText()]
+                    tab.logic.kernel_module.name != self.cbModel2.currentText()]
             self.applyAcrossTabs(tabs, self.cbParam1.currentText(),
                                  self.txtConstraint.text())
             self.setupParamWidgets()
@@ -338,16 +338,16 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         for tab in tabs:
             if hasattr(tab, "kernel_module"):
-                if (param in tab.kernel_module.params or
+                if (param in tab.logic.kernel_module.params or
                     param in tab.poly_params or
                     param in tab.magnet_params):
-                    value_ex = tab.kernel_module.name + "." +param
+                    value_ex = tab.logic.kernel_module.name + "." +param
                     constraint = Constraint(param=param,
                                             value=param,
                                             func=expr,
                                             value_ex=value_ex,
                                             operator="=")
-                    self.constraintReadySignal.emit((tab.kernel_module.name,
+                    self.constraintReadySignal.emit((tab.logic.kernel_module.name,
                                                      constraint))
 
     def onSetAll(self):
@@ -357,8 +357,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # loop over parameters in constrained model
         index1 = self.cbModel1.currentIndex()
         index2 = self.cbModel2.currentIndex()
-        items1 = self.tabs[index1].main_params_to_fit + self.tabs[index1].poly_params_to_fit
-        items2 = self.tabs[index2].main_params_to_fit + self.tabs[index2].poly_params_to_fit
+        items1 = self.tabs[index1].main_params_to_fit + self.tabs[index1].polydispersity_widget.poly_params_to_fit
+        items2 = self.tabs[index2].main_params_to_fit + self.tabs[index2].polydispersity_widget.poly_params_to_fit
         # create an empty list to store redefined constraints
         redefined_constraints = []
         for item in items1:
