@@ -1699,10 +1699,12 @@ Installing from Source
 
 Building and Installing
 -----------------------
-* To build the code
-  use 'python setup.py build'
+* To build and install the code
+  use 'pip install .'
+* To build a wheel for installation elsewhere
+  use 'hatchling build --wheel'
 * To build the documentation
-  use'python setup.py docs'
+  use 'hatchling build --hooks-only'
 
 Running SasView
 ---------------
