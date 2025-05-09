@@ -35,8 +35,10 @@ SetupIconFile=../src/sas/qtgui/images/ball.ico
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-Compression=lzma
+Compression=lzma2/normal
 SolidCompression=yes
+LZMAUseSeparateProcess=yes
+LZMANumBlockThreads=4
 WizardStyle=modern
 
 [Languages]
