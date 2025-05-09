@@ -821,7 +821,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         pd_params = []
         model_text += 'parameters = [ \n'
         model_text += '#   ["name", "units", default, [lower, upper], "type", "description"],\n'
-        model_text += "parameters = [ \n"
         for pname, pvalue, desc in self.getParamHelper(param_str):
             param_names.append(pname)
             model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
