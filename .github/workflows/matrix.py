@@ -42,7 +42,9 @@ python_release_list = [
 ]
 
 # List of python versions to use for tests
-python_test_list = python_release_list
+python_test_list = python_release_list + [
+    # No additional test versions - add more to this list as needed
+]
 
 
 def truthy(val):
