@@ -66,7 +66,7 @@ jobs:
         with:
           python-version: 3.11
 
-      ### Installation of some build-dependencies
+      ### Compilation of build-dependencies
 
       - name: Build wheel of ${{ matrix.package[0] }}
         run: |
@@ -91,6 +91,7 @@ jobs:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
       # Only sign/notarize if the secrets will be available
       SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork) && 'true' || '' }}
+      UV_SYSTEM_PYTHON: 1
 
     name: "${{ matrix.job_name }}"
 
@@ -110,10 +111,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: |
-            **/ci.yml
-            **/requirements*.txt
+
+      - name: Install uv utilities to speed up python module installation
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
 
       ### Installation of build-dependencies
 
@@ -134,12 +137,12 @@ jobs:
 
       - name: Install correct versions of sibling projects
         run: |
-          python -m pip install dist/*whl
+          uv pip install dist/*whl
 
       - name: Install Python dependencies
         run: |
-          python -m pip install -r build_tools/requirements.txt
-          python -m pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
+          uv pip install -r build_tools/requirements.txt
+          uv pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
 
       ### Document the build environment
 
@@ -152,7 +155,7 @@ jobs:
       - name: Build sasview
         run: |
           python -m build --no-isolation --sdist --wheel
-          python -m pip install dist/sasview*whl
+          uv pip install dist/sasview*whl
 
       - name: Publish sdist and wheel package
         uses: actions/upload-artifact@v4
@@ -169,7 +172,7 @@ jobs:
       - name: Install test dependencies
         if: ${{ matrix.tests }}
         run: |
-          python -m pip install -r build_tools/requirements-test.txt
+          uv pip install -r build_tools/requirements-test.txt
           python build_tools/get_external_dependencies.py
 
       - name: Test with pytest
@@ -196,7 +199,7 @@ jobs:
       - name: Install utilities to build installer
         if: ${{ matrix.installer }}
         run: |
-          python -m pip install pyinstaller
+          uv pip install pyinstaller
 
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
