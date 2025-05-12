@@ -74,7 +74,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     estimationComplete = Signal()
     changeBackgroundMode = Signal()
 
-    def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
+    def __init__(self, parent=None, logic=None, data=None, tab_id=1, tab_name=''):
         super(NewInversionWidget, self).__init__()
 
         self.parent = parent
@@ -82,6 +82,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.tab_id = tab_id
 
         self.communicator: Communicate  = self.parent.communicator()
+        self.logic = logic if logic is not None else InversionLogic()
 
         # We're going to use this structure even if we're just dealing with one
         # specific datum. Just that this dictionary would then have one item in
@@ -101,10 +102,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.events()
 
     def initResult(self) -> InversionResult:
-        logic = InversionLogic()
         return InversionResult(
-            logic=logic,
-            calculator=NewInvertor(logic),
+            logic=self.logic,
+            calculator=NewInvertor(self.logic),
             pr_plot=None,
             data_plot=None,
             outputs=None,
