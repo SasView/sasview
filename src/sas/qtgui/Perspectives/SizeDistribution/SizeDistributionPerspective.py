@@ -435,13 +435,15 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             raise AttributeError(msg)
 
         self._model_item = data_item[0]
-        self.logic.data = GuiUtils.dataFromItem(self._model_item)
-        self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
-        self.updateBackground()
+        logic_data = GuiUtils.dataFromItem(self._model_item)
 
-        if not isinstance(self.logic.data, Data1D):
+        if not isinstance(logic_data, Data1D):
             msg = "Size Distribution cannot be computed with 2D data."
             raise ValueError(msg)
+
+        self.logic.data = logic_data
+        self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
+        self.updateBackground()
 
         try:
             name = self.logic.data.name

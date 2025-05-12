@@ -819,8 +819,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Write out parameters
         param_names = []    # to store parameter names
         pd_params = []
+        model_text += 'parameters = [ \n'
         model_text += '#   ["name", "units", default, [lower, upper], "type", "description"],\n'
-        model_text += "parameters = [ \n"
         if self.plugin_widget.chkStructure.isChecked():
             # Structure factor models must have radius_effective and volfraction
             param_names.append('radius_effective')

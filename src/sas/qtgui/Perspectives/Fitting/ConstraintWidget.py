@@ -482,7 +482,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Remove the key from the dictionaries
             self.available_tabs.pop(self.current_cell, None)
             # Change the model name
-            model = temp_tab.kernel_module
+            model = temp_tab.logic.kernel_module
             model.name = new_moniker
             # Replace constraint name
             temp_tab.replaceConstraintName(self.current_cell, new_moniker)
@@ -694,7 +694,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 # No such tab. removed while job was running
                 return
             # Make sure result and target objects are the same (same model moniker)
-            if tab_object.kernel_module.name == results[i].model.name:
+            if tab_object.logic.kernel_module.name == results[i].model.name:
                 tab_object.fitComplete(([[results[i]]], elapsed))
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
@@ -935,7 +935,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Update a single line of the table widget with tab info
         """
         fit_page = ObjectLibrary.getObject(tab)
-        model = fit_page.kernel_module
+        model = fit_page.logic.kernel_module
 
         if model is None:
             logging.warning("No model selected")
@@ -1102,7 +1102,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             object = ObjectLibrary.getObject(object_name)
             if isinstance(object, FittingWidget):
                 try:
-                    if object.kernel_module.name == name:
+                    if object.logic.kernel_module.name == name:
                         return object
                 except AttributeError:
                     # Disregard atribute errors - empty fit widgets

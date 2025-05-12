@@ -128,7 +128,7 @@ class ConstraintWidgetTest:
         ''' tab checks for consistency '''
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
-        test_tab.kernel_module = None
+        test_tab.logic.kernel_module = None
         mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
         assert not widget.isTabImportable(None)
@@ -165,7 +165,7 @@ class ConstraintWidgetTest:
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         mocker.patch.object(test_tab, 'kernel_module', create=True)
-        test_tab.kernel_module.name = "M1"
+        test_tab.logic.kernel_module.name = "M1"
         mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
         # Add a tab without an constraint
@@ -190,7 +190,7 @@ class ConstraintWidgetTest:
         assert widget.tblConstraints.item(0, 0).checkState() == 2
         # Check the text
         assert widget.tblConstraints.item(0, 0).text() == \
-                         test_tab.kernel_module.name + \
+                         test_tab.logic.kernel_module.name + \
                          ":scale = " + \
                          self.constraint1.func
         # Add a tab with a non active constraint
@@ -283,7 +283,7 @@ class ConstraintWidgetTest:
         # test a successful fit
         result.success = True
         test_tab = MagicMock()
-        test_tab.kernel_module.name = 'M1'
+        test_tab.logic.kernel_module.name = 'M1'
         mocker.patch.object(test_tab, 'fitComplete')
         result.model.name = 'M1'
         widget.tabs_for_fitting = {"test_tab": test_tab}
@@ -328,7 +328,7 @@ class ConstraintWidgetTest:
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         mocker.patch.object(test_tab, 'kernel_module', create=True)
-        test_tab.kernel_module.name = "M1"
+        test_tab.logic.kernel_module.name = "M1"
         mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
         # Add a tab with an active constraint
@@ -360,7 +360,7 @@ class ConstraintWidgetTest:
         test_tab = MagicMock(spec=FittingWidget)
         test_tab.data_is_loaded = False
         mocker.patch.object(test_tab, 'kernel_module', create=True)
-        test_tab.kernel_module.name = "M1"
+        test_tab.logic.kernel_module.name = "M1"
         mocker.patch.object(test_tab, 'getRowFromName', return_value=0)
         mocker.patch.object(ObjectLibrary, 'getObject', return_value=test_tab)
 
