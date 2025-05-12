@@ -171,6 +171,15 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Local signals
         self.fittingFinishedSignal.connect(self.fitComplete)
 
+        # Event filters for plot background update
+        background_update_widgets = [
+            self.txtBackgd,
+            self.txtScaleLowQ,
+            self.txtPowerLowQ,
+        ]
+        for widget in background_update_widgets:
+            widget.installEventFilter(self)
+
     def setupMapper(self):
         # Set up the mapper.
         self.mapper.setOrientation(QtCore.Qt.Vertical)
@@ -259,9 +268,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Weighting
         item = QtGui.QStandardItem(str(WEIGHT_FACTOR))
         self.model.setItem(WIDGETS.W_WEIGHT_FACTOR, item)
-
-        # Connect slot
-        self.model.dataChanged.connect(self.onModelChange)
 
     def setupWindow(self):
         """Initialize base window state on init"""
@@ -369,11 +375,17 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             qmin, qmax = self.logic.computeDataRange()
         self.updateQRange(qmin, qmax)
 
-    def onLowQStateChanged(self, state):
+    def onLowQStateChanged(self, state: int):
+        """
+        Slot for state change of the subtract power law checkbox
+        """
         is_checked = state == QtCore.Qt.CheckState.Checked.value
         self.txtPowerLowQ.setEnabled(is_checked)
         self.txtScaleLowQ.setEnabled(is_checked)
         self.cmdFitPowerLaw.setEnabled(is_checked)
+        if self.logic.data_is_loaded:
+            self.updateBackground()
+            self.plotData()
 
     def onFitFlatBackground(self):
         """
@@ -382,9 +394,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         qmin, qmax = self.getFlatBackgroundRange()
         constant = self.logic.fitFlatBackground(qmin, qmax)
         self.txtBackgd.setText(f"{constant:5g}")
-        # TODO: this is needed to trigger model change and plot update,
-        # but maybe there is a better way
-        self.mapper.submit()
+        self.updateBackground()
+        self.plotData()
 
     def onFitPowerLaw(self):
         """
@@ -394,33 +405,25 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         _, _, power = self.getBackgroundParams()
         scale = self.logic.fitBackgroundScale(power, qmin, qmax)
         self.txtScaleLowQ.setText(f"{scale:5g}")
-        # TODO: this is needed to trigger model change and plot update,
-        # but maybe there is a better way
-        self.mapper.submit()
+        self.updateBackground()
+        self.plotData()
 
-    def onModelChange(self, top, bottom):
+    def eventFilter(self, widget: QtCore.QObject, event: QtCore.QEvent) -> bool:
         """
-        Respond to model change by updating the plot
+        Catch enter key presses and update data plot
         """
-        # "bottom" is unused
-        # update if there's something to update
-        item_text = self.model.item(top.row()).text()
-        if not item_text:
-            return
-        # Update plot of data and background
         if not self.logic.data_is_loaded:
-            return
-        background_update_widgets = [
-            WIDGETS.W_BACKGROUND,
-            WIDGETS.W_SUBTRACT_LOW_Q,
-            WIDGETS.W_POWER_LOW_Q,
-            WIDGETS.W_SCALE_LOW_Q,
-        ]
-        if top.row() in background_update_widgets:
-            # update background data
-            self.updateBackground()
-            # update the plot(s)
-            self.plotData()
+            return False
+        if widget.text() == "":
+            return False
+        # Update plot of data and background
+        if event.type() == QtCore.QEvent.KeyPress:
+            # check for Enter press
+            if event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
+                self.updateBackground()
+                self.plotData()
+                return True
+        return False
 
     ######################################################################
     # Response Actions
