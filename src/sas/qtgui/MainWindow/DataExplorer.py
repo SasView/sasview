@@ -1853,26 +1853,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.model.clear()
         self.theory_model.clear()
 
-    def deleteSelectedItem(self):
-        """
-        Delete the current item
-        """
-        # Assure this is indeed wanted
-        delete_msg = "This operation will remove the selected data sets " +\
-                     "and all the dependents from SasView." +\
-                     "\nDo you want to continue?"
-        reply = QtWidgets.QMessageBox.question(self,
-                                               'Warning',
-                                               delete_msg,
-                                               QtWidgets.QMessageBox.Yes,
-                                               QtWidgets.QMessageBox.No)
-
-        if reply == QtWidgets.QMessageBox.No:
-            return
-
-        indices = self.current_view.selectedIndexes()
-        self.deleteIndices(indices)
-
     def deleteIndices(self, indices):
         """
         Delete model idices from the current view
