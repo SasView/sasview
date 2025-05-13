@@ -36,6 +36,9 @@ from sas.sascalc.fit.AbstractFitEngine import FitEngine
 from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.expression import compile_constraints
 
+# patch uncertainties.core.AffineScalarFunc to work with float() conversion
+uncertainties.core.AffineScalarFunc.__float__ = lambda self: float(self.nominal_value)
+
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
         remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
