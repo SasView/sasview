@@ -3,7 +3,7 @@
 
 """
 Run sasview in place.  This allows sasview to use the python
-files in the source tree without having to call setup.py install
+files in the source tree without having to call install the module
 first.  A rebuild is still necessary when working on sas models
 or c modules.
 
