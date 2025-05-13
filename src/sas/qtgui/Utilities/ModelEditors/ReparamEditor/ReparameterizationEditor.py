@@ -199,8 +199,14 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         # Find the parameter item by using param_to_open and format as a dictionary
         param_properties = self.getParamProperties(param_to_open)
-        param_properties['highlighted_property'] = highlighted_property  # TODO: Which property the cursor will start on
+        param_properties['highlighted_property'] = highlighted_property
         self.onAddParam()
+        # Populate the editor with the parameter values
+        if self.param_editor:
+            self.param_editor.properties = param_properties
+            self.param_editor.qtree_item = selected_item
+            self.param_editor.onLoad()
+            self.param_editor.returnEditedParamSignal.connect(self.updateParam)
     
     def getParamProperties(self, param: QtWidgets.QTreeWidgetItem) -> dict:
         """
