@@ -30,7 +30,6 @@ sasdata
 sasmodels
 scipy
 siphash24
-sphinx
 superqt
 tccbox
 twisted
