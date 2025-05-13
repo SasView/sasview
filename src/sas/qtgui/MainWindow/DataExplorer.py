@@ -1128,7 +1128,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         append = False
         plot_to_append_to = None
-        for plot_to_show in plots_to_show:
+        for idx, plot_to_show in enumerate(plots_to_show):
             # Check if this plot already exists
             shown = self.updatePlot(plot_to_show)
             # Retain append status throughout loop
@@ -1159,8 +1159,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.appendOrUpdatePlot(self, plot_to_show, plot_to_append_to)
             else:
                 # Plots with main data points on the same chart
-                # Get the main data plot unless data is 2D which is plotted earlier
-                if main_data is not None and not isinstance(main_data, Data2D):
+                # If this is the first plot in the list (and ONLY if the first)
+                # get the main data plot unless data is 2D which is plotted earlier
+                # or the DataRole is ROLE_SIZE_DISTRIBUTION
+                if (
+                    idx == 0
+                    and main_data is not None
+                    and not isinstance(main_data, Data2D)
+                    and role != DataRole.ROLE_SIZE_DISTRIBUTION
+                ):
                     new_plots.append((plot_item, main_data))
                 new_plots.append((plot_item, plot_to_show))
 
@@ -1229,7 +1236,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     plot_set.xtransform = 'log10(x)'
                 if (plot_set.plot_role in [
                     DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS,
-                    DataRole.ROLE_ANGULAR_SLICE, DataRole.ROLE_STAND_ALONE] or plot_set.isSesans):
+                    DataRole.ROLE_ANGULAR_SLICE, DataRole.ROLE_STAND_ALONE,
+                    DataRole.ROLE_SIZE_DISTRIBUTION] or plot_set.isSesans):
                     plot_set.ytransform = 'y'
                 else:
                     plot_set.ytransform = 'log10(y)'
