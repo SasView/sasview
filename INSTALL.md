@@ -36,23 +36,37 @@ $ python run.py
 
 Step by step, that is:
 
- 1. Obtain the SasView source using `git`
- 1. Create a Python virtual environment in the `venv` directory
- 1. Activate the `venv` so that Python and its modules from the venv are used
+ 1. Obtain the SasView source using `git`.
+ 1. Create a Python virtual environment in the `venv` directory.
+ 1. Activate the `venv` so that Python and its modules from the venv are used.
+    Note that the particular syntax above works for the `bash` and `zsh` shells under Linux, Windows and macOS;
+    if you use `cmd` or PowerShell under windows, there are
+    [different ways](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments)
+    to activate the virtual environment.
  1. Install the necessary modules for building and running SasView. It will take a while to download and unpack all the dependencies.
  1. Build the GUI and the documentation using the `hatchling` builder.
  1. Run SasView!
 
 Almost all the modules that SasView needs are available as precompiled modules
 on PyPI, including numpy, scipy, h5py, pyside6. A handful of Python-only
-modules will get built into wheels on your local machine. Installing the
-dependencies should be a one-off event. If you're wanting to work on
-SasView again at a later date, you can:
+modules will be built into wheels on your local machine. Installing the
+dependencies should be a one-off task.
+
+When you want to work on SasView again at a later date, you can:
 
 ```
 $ . venv/bin/activate
 $ python run.py
 ```
+
+(or the [equivalent command](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments) for your shell to activate the venv)
+
+Note that many Python-focused integrated development environment programs have the
+ability to activate the venv for you as part of the process of starting and
+debugging software, e.g.:
+
+ - [VS Code](https://code.visualstudio.com/docs/python/environments)
+ - [PyCharm](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
 
 If you've altered the user interface or want the documentation to be rebuilt,
 then the `hatchling` step can be repeated.
