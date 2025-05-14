@@ -570,7 +570,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         Show the "Reparameterization" section of help
         """
-        tree_location = "/user/qtgui/Perspectives/Fitting/plugin.html#reparameterized-models"
+        tree_location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#reparameterization-editor"
         self.parent.showHelp(tree_location)
     
     def onModelHelp(self):
@@ -583,7 +583,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             tree_location = tree_base + f"{self.loaded_model_name}.html"
         else:
             logging.info("No model detected to have been loaded. Showing default help page.")
-            tree_location = "/user/qtgui/Perspectives/Fitting/plugin.html#reparameterized-models"
+            self.onHelp()
         self.parent.showHelp(tree_location)
 
     ### CLASS METHODS ###
