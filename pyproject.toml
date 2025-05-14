@@ -113,7 +113,7 @@ artifacts = [
 [[tool.hatch.build.targets.wheel.hooks.build-scripts.scripts]]
 # Perform Qt UI conversion steps (uic, rcc etc)
 commands = [
-    "python3 src/sas/qtgui/convertUI.py",
+    "python src/sas/qtgui/convertUI.py",
 ]
 # out_dir = "GUI-output"
 artifacts = [
