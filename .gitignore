@@ -25,6 +25,7 @@
 /.vs
 
 # Build and run files
+/src/sas/system/_version.py
 **/__pycache__
 *.pyc
 *.so
@@ -40,6 +41,9 @@ default_categories.json
 !**/UI/__init__.py
 config.json
 **/db.sqlite3
+# INSTALL.md recommends a venv that should not be committed
+venv
+.venv
 
 # doc build
 /docs/sphinx-docs/build
@@ -52,6 +56,9 @@ config.json
 /docs/sphinx-docs/katex*.zip
 /docs/sphinx-docs/node_modules
 /docs/sphinx-docs/node-package.json
+/docs/tmp
+/docs/sphinx-docs/tmp
+/src/sas/example_data/
 
 # test outputs
 /test/pr_inversion/data/test_output.txt
@@ -72,7 +79,3 @@ tests.log
 /installers/build
 /installers/dist
 *.exe
-docs/tmp
-src/sas/example_data/
-docs/sphinx-docs/tmp
-src/sas/system/_version.py
