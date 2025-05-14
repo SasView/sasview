@@ -66,8 +66,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         self.addTooltips()
 
-        text = DEFAULT_EDITOR_TEXT
-        self.txtFunction.insertPlainText(text)
+        self.txtFunction.setText(DEFAULT_EDITOR_TEXT)
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
         # Validators
@@ -412,7 +411,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Disable the plugin editor and show that the model is changed.
         """
         # Check to see if model was edited back into original state
-        f_box = True if self.txtFunction.toPlainText() == "" else False
+        f_box = True if self.txtFunction.toPlainText() in ["", DEFAULT_EDITOR_TEXT] else False
         n_box = True if self.txtNewModelName.text() == "" else False
         p_boxes = True if not self.newParamTree.isEnabled() and not self.oldParamTree.isEnabled() else False
         
