@@ -13,6 +13,56 @@ Release Notes
 Features
 ========
 
+New in Version 6.1.0
+--------------------
+
+This release comes with a number of new features, enhancements, and bug fixes as described below.
+
+This version of SasView is built with Sasmodels v1.0.10, Sasdata v0.10.0, and bumps v1.0.0beta4.
+
+New Features
+^^^^^^^^^^^^
+* Shape2SAS is now available as a Tool by @Qerneas in https://github.com/SasView/sasview/pull/3204
+* MuMag, a polSANS analysis method is now available as a Tool by @Funkmich008 in https://github.com/SasView/sasview/pull/2825
+* Poresize distribution is now available as an analysis perspective by @achicks15 in https://github.com/SasView/sasview/pull/3247
+* A model reparameterization editor is now available from the fitting menu by @tsole0 in https://github.com/SasView/sasview/pull/3136
+
+Feature Enhancements
+^^^^^^^^^^^^
+* P(r) analysis now allows multiple files and batch processing by @ru4en in https://github.com/SasView/sasview/pull/3137
+* Fitting widget refactor by @rozyczko in https://github.com/SasView/sasview/pull/3169
+* Initial implementation of the undelete mechanism for fitting tabs by @rozyczko in https://github.com/SasView/sasview/pull/3140
+* Use platformdirs package for all user-related file paths by @krzywon in https://github.com/SasView/sasview/pull/3166
+* Refactor bumps result views by @bmaranville in https://github.com/SasView/sasview/pull/3269
+* Update model editor (rebase) by @krzywon in https://github.com/SasView/sasview/pull/3135
+
+Bug Fixes
+^^^^^^^^^^^^
+* Fix LaTeX equation in corfunc docs by @llimeht in https://github.com/SasView/sasview/pull/3162
+* Allow webfit to run in Django v5.0 by @summerhenson in https://github.com/SasView/sasview/pull/3200
+* Bumps v1.* compatibility fixes by @krzywon in https://github.com/SasView/sasview/pull/3165 and @bmaranville in https://github.com/SasView/sasview/pull/3268
+* Whats new window no longer shows previous version information by @lucas-wilkins in https://github.com/SasView/sasview/pull/3261
+
+Infrastructure Changes
+^^^^^^^^^^^^
+* Bump dawidd6/action-download-artifact from 2 to 6 in /.github/workflows by @dependabot in https://github.com/SasView/sasview/pull/3151
+* Renabling the Ubuntu installer test by @jamescrake-merani in https://github.com/SasView/sasview/pull/3174
+* Remove Ubuntu 20.04 from CI by @jamescrake-merani in https://github.com/SasView/sasview/pull/3214
+* remove need for old "six" library by @a-detiste in https://github.com/SasView/sasview/pull/3203
+* Remove bumps dependence from doc build. by @pkienzle in https://github.com/SasView/sasview/pull/3195
+* Fix SyntaxWarning from tex/re strings by @llimeht in https://github.com/SasView/sasview/pull/3163
+* Replace tinycc with tccbox by @krzywon in https://github.com/SasView/sasview/pull/3265
+* Readd macos-latest to test installer matrix. by @jamescrake-merani in https://github.com/SasView/sasview/pull/3182
+* Fix nightly build issues by @krzywon in https://github.com/SasView/sasview/pull/3262
+* Auto generate wheels by @llimeht in https://github.com/SasView/sasview/pull/3281
+
+Known Issues
+^^^^^^^^^
+All known bugs and feature requests can be found in the issues on github.
+
+`sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
+
+
 New in Version 6.0.1
 --------------------
 This is a bug fix release and the issues fixed for this release are described below.
@@ -1649,10 +1699,12 @@ Installing from Source
 
 Building and Installing
 -----------------------
-* To build the code
-  use 'python setup.py build'
+* To build and install the code
+  use 'pip install .'
+* To build a wheel for installation elsewhere
+  use 'hatchling build --wheel'
 * To build the documentation
-  use'python setup.py docs'
+  use 'hatchling build --hooks-only'
 
 Running SasView
 ---------------

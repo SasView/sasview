@@ -1850,10 +1850,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Given the fit results structure, pull out optimized parameters and return them as nicely
         formatted dict
         """
+        pvec = [float(p) for p in results.pvec]
         if results.fitness is None or \
             not np.isfinite(results.fitness) or \
-            np.any(results.pvec is None) or \
-            not np.all(np.isfinite(results.pvec)):
+            np.any(pvec is None) or \
+            not np.all(np.isfinite(pvec)):
             msg = "Fitting did not converge!"
             self.communicate.statusBarUpdateSignal.emit(msg)
             msg += results.mesg
@@ -1864,7 +1865,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             logger.warning(results.mesg)
 
         param_list = results.param_list # ['radius', 'radius.width']
-        param_values = results.pvec     # array([ 0.36221662,  0.0146783 ])
+        param_values = pvec             # array([ 0.36221662,  0.0146783 ])
         param_stderr = results.stderr   # array([ 1.71293015,  1.71294233])
         params_and_errors = list(zip(param_values, param_stderr))
         param_dict = dict(zip(param_list, params_and_errors))

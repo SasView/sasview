@@ -56,8 +56,10 @@ class FitResultView(QtWidgets.QWidget):
 
 class ConvergenceView(FitResultView):
     def plot(self):
+        self.figure.clear()
         best, pop = self.state.convergence[:, 0], self.state.convergence[:, 1:]
         plot_convergence(pop, best, self.figure)
+        self.canvas.draw_idle()
 
 
 class CorrelationView(FitResultView):

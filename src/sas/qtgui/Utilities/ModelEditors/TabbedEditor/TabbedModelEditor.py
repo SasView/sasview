@@ -821,7 +821,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         pd_params = []
         model_text += 'parameters = [ \n'
         model_text += '#   ["name", "units", default, [lower, upper], "type", "description"],\n'
-        model_text += "parameters = [ \n"
+        if self.plugin_widget.chkStructure.isChecked():
+            # Structure factor models must have radius_effective and volfraction
+            param_names.append('radius_effective')
+            param_names.append('volfraction')
+            model_text += "    ['radius_effective', '', 1, [0.0, numpy.inf], 'volume', '']"
+            model_text += "    ['volfraction', '', 1, [0.0, 1.0], '', '']"
         for pname, pvalue, desc in self.getParamHelper(param_str):
             param_names.append(pname)
             model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
@@ -995,13 +1000,15 @@ description = """{description}"""
 '''
 
 ER_VR_TEMPLATE = '''\
-def ER({args}):
-    """
-    Effective radius of particles to be used when computing structure factors.
-
-    Input parameters are vectors ranging over the mesh of polydispersity values.
-    """
-    return 0.0
+# NOTE: If you want to couple this model with structure factors (S(Q)), please uncomment this section. This
+#     function will need to return a meaningful value to enable full structure factor compatibility.
+# def ER({args}):
+#     """
+#     Effective radius of particles to be used when computing structure factors.
+# 
+#     Input parameters are vectors ranging over the mesh of polydispersity values.
+#     """
+#     return 0.0
 
 def VR({args}):
     """
@@ -1089,7 +1096,7 @@ C_PD_TEMPLATE = """\
 static double
 form_volume({poly_args}) // Remove arguments as needed
 {{
-    return 0.0*{poly_arg1};
+    return 1.0*{poly_arg1};
 }}
 """
 
