@@ -10,8 +10,8 @@ from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
 from sasmodels import resolution as rst
 
-#from maxEnt_method import matrix_operation, maxEntMethod
-from sas.sascalc.poresize.maxEnt_method import matrix_operation, maxEntMethod
+from maxEnt_method import matrix_operation, maxEntMethod
+#from sas.sascalc.poresize.maxEnt_method import matrix_operation, maxEntMethod
 
 logger = logging.getLogger(__name__)
 
@@ -84,20 +84,25 @@ def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
 
     ##Get values of scale and if required power
     if power is not None:
-        # Linearize the data for a power law fit (log, log)
+        # Linearize the data for a linear or power law fit
         
-        linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=(1/np.log(10))*sigma[idx]/fx[idx])
+        linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=sigma[idx]/fx[idx])
         fit_func = lambda x,b:line_func(x, power, b)
         init_guess = (linearized_data.y[0])
 
     else:
-        linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=(1/np.log(10))*sigma[idx]/fx[idx])
+        # Fit both the power and scale 
+        linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=sigma[idx]/fx[idx])
         fit_func = line_func
         init_guess = (4, linearized_data.y[0])
 
     param_result, pcov = optimize.curve_fit(fit_func, linearized_data.x, linearized_data.y, init_guess, sigma = linearized_data.dy)
     param_err = np.sqrt(np.diag(pcov))
-
+    if len(param_err) > 1: 
+        param_err[1] = np.exp(param_result[1])*param_err[1]
+    else:
+        param_err[0] = np.exp(param_result[0])*param_err[0]
+    
     # slope, intercept, _, _, err_slope, err_int = stats.linregress(linearized_data.x, linearized_data.y)
     #result = stats.linregress(linearized_data.x, linearized_data.y)
     #intercept = np.mean(linearized_data.y - result.slope * linearized_data.x)
