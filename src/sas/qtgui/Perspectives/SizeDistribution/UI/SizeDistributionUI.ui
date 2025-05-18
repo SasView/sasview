@@ -153,7 +153,7 @@
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
-              style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+              style=&quot;
              </string>
             </property>
            </widget>
@@ -176,7 +176,7 @@
            <widget class="QLabel" name="label_3">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
-              style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+              style=&quot; 
              </string>
             </property>
            </widget>
