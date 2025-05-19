@@ -455,3 +455,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.backgroundInput.setEnabled(True)
         elif self.manualBgd.isChecked():
             self.backgroundInput.setEnabled(False)
+
+    def getPage(self):
+        """
+        Placeholder for state retrieval implementation.
+        """
+        return {}
