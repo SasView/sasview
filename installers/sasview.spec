@@ -9,21 +9,8 @@ import sysconfig
 block_cipher = None
 PYTHON_PACKAGES = sysconfig.get_path('platlib')
 
-datas = [
-    ('../src/sas/qtgui/images', 'images'),
-    ('../src/sas/qtgui/images', "sas/qtgui/images"),
-    ('../src/sas/sasview/media', 'media'),
-    ('../src/sas/example_data', 'example_data'),
-    ('../src/sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
-    ('../src/sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
-    ('../src/sas/qtgui/Utilities/WhatsNew/messages', 'sas/qtgui/Utilities/WhatsNew/messages'),
-    ('../src/sas/qtgui/Utilities/WhatsNew/css/style.css', 'sas/qtgui/Utilities/WhatsNew/css'),
-    ('../src/sas/qtgui/Utilities/About/images', 'sas/qtgui/Utilities/About/images'),
-    ('../src/sas/system/log.ini', 'sas/system/'),
-    ('../../sasmodels/sasmodels','sasmodels'),
-    ('../docs/sphinx-docs/build','doc/build'),
-    ('../docs/sphinx-docs/source-temp','doc/source')
-]
+datas = []
+
 #TODO: Hopefully we can get away from version specific packages
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
@@ -35,20 +22,16 @@ def add_data(data):
         for filename in component[1]:
            datas.append((filename, target))
 
-import sasmodels
-add_data(sasmodels.data_files())
-
 try:
-    import tinycc
-    add_data(tinycc.data_files())
+    import tccbox
+    datas.append((os.path.join(PYTHON_PACKAGES, 'tccbox'), 'tccbox'))
 except ImportError:
-    warnings.warn("TinyCC package is not available and will not be included")
+    warnings.warn("TCCbox package is not available and will not be included")
 
 import periodictable
 add_data(periodictable.data_files())
 
 hiddenimports = [
-    'pyopencl',
     'setuptools._distutils',
     'reportlab',
     'reportlab.graphics',
@@ -67,7 +50,7 @@ hiddenimports = [
     'xmlrpc.server',
     'debugpy',
     'debugpy._vendored',
-    'uncertainties',
+    'tccbox',
 ]
 
 if platform.system() == 'Windows':

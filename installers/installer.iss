@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SasView"
-#define MyAppVersion "6.0.0"
+#define MyAppVersion "6.1.0a1"
 #define MyAppPublisher "(c) 2009 - 2024, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
 #define MyAppURL "http://www.sasview.org"
 #define MyAppExeName "sasview.exe"
@@ -29,14 +29,16 @@ UsedUserAreasWarning=no
 LicenseFile=license.txt
 ArchitecturesInstallIn64BitMode=x64
 OutputBaseFilename=setupSasView
-SetupIconFile=dist\sasview\images\ball.ico
+SetupIconFile=../src/sas/qtgui/images/ball.ico
 
 
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-Compression=lzma
+Compression=lzma2/normal
 SolidCompression=yes
+LZMAUseSeparateProcess=yes
+LZMANumBlockThreads=4
 WizardStyle=modern
 
 [Languages]
@@ -61,7 +63,7 @@ end;
 
 [Files]
 Source: "dist\sasview\sasview.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\.sasview\plugin_models"
+Source: "dist\sasview\plugin_models\*"; DestDir: "{%USERPROFILE}\AppData\Local\sasview\SasView\plugin_models"
 Source: "dist\sasview\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [InstallDelete]

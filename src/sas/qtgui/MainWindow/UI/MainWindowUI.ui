@@ -91,7 +91,9 @@
     <addaction name="actionSlit_Size_Calculator"/>
     <addaction name="actionKeissig_Calculator"/>
     <addaction name="actionSAS_Resolution_Estimator"/>
+    <addaction name="actionMuMag_Fitter"/>
     <addaction name="actionGeneric_Scattering_Calculator"/>
+    <addaction name="actionShape2SAS_Calculator"/>
     <addaction name="separator"/>
     <addaction name="actionImage_Viewer"/>
     <addaction name="actionOrientation_Viewer"/>
@@ -117,6 +119,7 @@
     <addaction name="actionAdd_Custom_Model"/>
     <addaction name="actionEdit_Custom_Model"/>
     <addaction name="actionManage_Custom_Models"/>
+    <addaction name="actionReparameterize_Model"/>
     <addaction name="actionAddMult_Models"/>
     <addaction name="separator"/>
     <addaction name="actionEditMask"/>
@@ -142,6 +145,7 @@
     <addaction name="actionFitting"/>
     <addaction name="actionInvariant"/>
     <addaction name="actionInversion"/>
+    <addaction name="actionSizeDistribution"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -194,7 +198,6 @@
    <addaction name="actionRedo"/>
    <addaction name="actionCopy"/>
    <addaction name="actionPaste"/>
-   <addaction name="actionBookmarks"/>
    <addaction name="separator"/>
    <addaction name="actionPrevious"/>
    <addaction name="actionNext"/>
@@ -289,18 +292,6 @@
     <string>Save Params to File</string>
    </property>
   </action>
-  <action name="actionBookmarks">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>:/res/bookmark.png</normaloff>:/res/bookmark.png</iconset>
-   </property>
-   <property name="text">
-    <string>Bookmarks</string>
-   </property>
-  </action>
   <action name="actionPerspective">
    <property name="text">
     <string>Perspective</string>
@@ -369,6 +360,11 @@
   <action name="actionSAS_Resolution_Estimator">
    <property name="text">
     <string>Q Resolution Estimator</string>
+   </property>
+  </action>
+  <action name="actionShape2SAS_Calculator">
+   <property name="text">
+    <string>Shape2SAS Calculator</string>
    </property>
   </action>
   <action name="actionGeneric_Scattering_Calculator">
@@ -493,6 +489,14 @@
     <string>Invariant</string>
    </property>
   </action>
+  <action name="actionSizeDistribution">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Size Distribution</string>
+   </property>
+  </action>
   <action name="actionDocumentation">
    <property name="text">
     <string>Documentation</string>
@@ -541,6 +545,11 @@
   <action name="actionAdd_Custom_Model">
    <property name="text">
     <string>Add Custom Model</string>
+   </property>
+  </action>
+  <action name="actionReparameterize_Model">
+   <property name="text">
+    <string>Reparameterize Any Model</string>
    </property>
   </action>
   <action name="actionManage_Custom_Models">
@@ -619,6 +628,11 @@
    <property name="text">
     <string>Preferences...</string>
    </property>
+  </action>
+  <action name="actionMuMag_Fitter">
+   <property name="text">
+    <string>MuMag Fitter</string>
+      </property>
   </action>
   <action name="actionWhat_s_New">
    <property name="text">

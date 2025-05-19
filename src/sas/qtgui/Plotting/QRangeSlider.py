@@ -155,7 +155,8 @@ class LineInteractor(BaseInteractor):
             self.setter = self._get_input_or_callback(setter)
             self.getter = self._get_input_or_callback(getter)
         self.connect_markers([self.line, self.inner_marker])
-        self.update(draw=True)
+        # Get the linked input and draw
+        self.inputChanged()
 
     @property
     def input(self):

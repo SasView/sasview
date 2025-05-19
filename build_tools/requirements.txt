@@ -1,12 +1,13 @@
 # Alphabetized list of OS and version agnostic dependencies
 appdirs
+bumps
 cffi
 docutils
 dominate
 h5py
 html2text
 html5lib
-importlib-resources
+importlib-resources;python_version<"3.9"
 ipython
 jsonschema
 lxml
@@ -14,30 +15,28 @@ mako
 matplotlib
 numba
 numpy
+packaging
 periodictable
+platformdirs
 pybind11
 pylint
+pyopencl
 pyopengl
 pyparsing
 PySide6
-pytest
-pytest_qt
-pytest-mock
 pytools
 qtconsole
+sasdata @ git+https://github.com/SasView/sasdata.git@sasdata_0.10.0
+sasmodels @ git+https://github.com/SasView/sasmodels.git@sasmodels_1.0.10
 scipy
-six
+siphash24
 sphinx
 superqt
-tinycc
+tccbox
 twisted
 uncertainties
-unittest-xml-reporting
 xhtml2pdf
 zope
 
 # Alphabetized list of OS-specific packages
 pywin32; platform_system == "Windows"
-
-# Alphabetized list of version-pinned packages
-bumps==0.*  # v1.+ is very experimental

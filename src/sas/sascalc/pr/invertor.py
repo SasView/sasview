@@ -106,7 +106,7 @@ class Invertor(Pinvertor):
     ## Time elapsed for last computation
     elapsed = 0
     ## Alpha to get the reg term the same size as the signal
-    suggested_alpha = 0
+    suggested_alpha = 0.0
     ## Last number of base functions used
     nfunc = 10
     ## Last output values
@@ -145,6 +145,7 @@ class Invertor(Pinvertor):
                 )
         return (Invertor, tuple(), state, None, None)
 
+    # TODO: This is horrible. Make sure nothing depends on it, then delete it.
     def __setattr__(self, name, value):
         """
         Set the value of an attribute.
@@ -160,22 +161,27 @@ class Invertor(Pinvertor):
         elif name == 'y':
             return self.set_y(value)
         elif name == 'err':
-            value2 = abs(value)
-            return self.set_err(value2)
+            if value is None:
+                msg = "Invertor: Data has no uncertainty. "
+                msg += "Delete that entry before proceeding"
+            else:
+                return self.set_err(abs(value))
         elif name == 'd_max':
             if value <= 0.0:
                 msg = "Invertor: d_max must be greater than zero."
                 msg += "Correct that entry before proceeding"
+                value = 0.001
                 raise ValueError(msg)
+            
             return self.set_dmax(value)
         elif name == 'q_min':
             if value is None:
-                return self.set_qmin(-1.0)
-            return self.set_qmin(value)
+                return self.set_q_min(0.0)
+            return self.set_q_min(value)
         elif name == 'q_max':
             if value is None:
-                return self.set_qmax(-1.0)
-            return self.set_qmax(value)
+                return self.set_q_max(np.inf)
+            return self.set_q_max(value)
         elif name == 'alpha':
             return self.set_alpha(value)
         elif name == 'slit_height':
@@ -212,15 +218,15 @@ class Invertor(Pinvertor):
         elif name == 'd_max':
             return self.get_dmax()
         elif name == 'q_min':
-            qmin = self.get_qmin()
-            if qmin < 0:
+            q_min = self.get_q_min()
+            if q_min < 0:
                 return None
-            return qmin
+            return q_min
         elif name == 'q_max':
-            qmax = self.get_qmax()
-            if qmax < 0:
+            q_max = self.get_q_max()
+            if q_max < 0:
                 return None
-            return qmax
+            return q_max
         elif name == 'alpha':
             return self.get_alpha()
         elif name == 'slit_height':
@@ -297,7 +303,7 @@ class Invertor(Pinvertor):
         # Reset the background value before proceeding
         # self.background = 0.0
         if not self.est_bck:
-            self.y -= self.background
+            self.y -= self.background         
         out, cov = self.lstsq(nfunc, nr=nr)
         if not self.est_bck:
             self.y += self.background
@@ -345,7 +351,7 @@ class Invertor(Pinvertor):
         res = self.residuals(out)
         chisqr = 0
         for i in range(len(res)):
-            chisqr += res[i]
+            chisqr += math.fabs(res[i])
 
         self.chi2 = chisqr
 
@@ -373,13 +379,6 @@ class Invertor(Pinvertor):
         p = np.ones(nfunc)
         t_0 = time.time()
         out, cov_x, _, _, _ = optimize.leastsq(self.pr_residuals, p, full_output=1)
-
-        # Compute chi^2
-        res = self.pr_residuals(out)
-        chisqr = 0
-        chisq = np.sum(res)
-
-        self.chisqr = chisqr
 
         # Store computation time
         self.elapsed = time.time() - t_0
@@ -480,7 +479,10 @@ class Invertor(Pinvertor):
 
         # Perform the inversion (least square fit)
         # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
+
         rcond = np.finfo(float).eps * max(a.shape)
+        if rcond ==None:
+            rcond =-1
         c, chi2, _, _ = lstsq(a, b, rcond=rcond)
         # Sanity check
         try:
@@ -489,15 +491,13 @@ class Invertor(Pinvertor):
             chi2 = -1.0
         self.chi2 = chi2
 
-        inv_cov = np.zeros([nfunc, nfunc])
-
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
         inv_cov = self._get_invcov_matrix(nfunc, nr, a)
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
 
-        if math.fabs(self.alpha) > 0:
-            new_alpha = sum_sig / (sum_reg / self.alpha)
+        if self.alpha > 0:
+            new_alpha = self.alpha * sum_sig / sum_reg
         else:
             new_alpha = 0.0
         self.suggested_alpha = new_alpha
@@ -657,8 +657,8 @@ class Invertor(Pinvertor):
         file.write("#alpha=%g\n" % self.alpha)
         file.write("#chi2=%g\n" % self.chi2)
         file.write("#elapsed=%g\n" % self.elapsed)
-        file.write("#qmin=%s\n" % str(self.q_min))
-        file.write("#qmax=%s\n" % str(self.q_max))
+        file.write("#q_min=%s\n" % str(self.q_min))
+        file.write("#q_max=%s\n" % str(self.q_max))
         file.write("#slit_height=%g\n" % self.slit_height)
         file.write("#slit_width=%g\n" % self.slit_width)
         file.write("#background=%g\n" % self.background)
@@ -720,13 +720,13 @@ class Invertor(Pinvertor):
                     elif line.startswith('#alpha_estimate='):
                         toks = line.split('=')
                         self.suggested_alpha = float(toks[1])
-                    elif line.startswith('#qmin='):
+                    elif line.startswith('#q_min='):
                         toks = line.split('=')
                         try:
                             self.q_min = float(toks[1])
                         except:
                             self.q_min = None
-                    elif line.startswith('#qmax='):
+                    elif line.startswith('#q_max='):
                         toks = line.split('=')
                         try:
                             self.q_max = float(toks[1])

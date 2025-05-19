@@ -15,6 +15,7 @@ from PySide6.QtCore import Qt, QLocale
 import matplotlib as mpl
 
 import sas.system.version
+from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
 
 #mpl.use("Qt5Agg")
 
@@ -28,12 +29,15 @@ from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
+from sas.qtgui.Utilities.ModelEditors.ReparamEditor.ReparameterizationEditor import ReparameterizationEditor
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.HidableDialog import hidable_dialog
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
@@ -52,6 +56,7 @@ from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
+from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
 
 
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
@@ -64,10 +69,11 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
+from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
-from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
+from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
 from sas.qtgui.Utilities.ImageViewer import ImageViewer
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
@@ -140,8 +146,8 @@ class GuiManager:
                                               "_downloads",
                                               "Tutorial.pdf"))
 
-        if self.WhatsNew.has_new_messages():
-            self.actionWhatsNew()
+        if self.WhatsNew.has_new_messages(): # Not a static method
+            self.WhatsNew.show()
 
     def info(self, type, value, tb):
         logger.error("".join(traceback.format_exception(type, value, tb)))
@@ -203,8 +209,10 @@ class GuiManager:
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
+        self.MuMag_Fitter = MuMag(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
+        self.Shape2SASCalculator =  Shape2SAS(self)
         self.GENSASCalculator = None
         self.DataOperation = DataOperationUtilityPanel(self)
         self.FileConverter = FileConverterWidget(self)
@@ -483,6 +491,8 @@ class GuiManager:
         elif type(new_perspective) == CorfuncWindow:
             self.checkAnalysisOption(self._workspace.actionCorfunc)
 
+        elif type(new_perspective) == SizeDistributionWindow:
+            self.checkAnalysisOption(self._workspace.actionSizeDistribution)
 
 
         #
@@ -675,7 +685,7 @@ class GuiManager:
         self.welcomePanel.show()
 
     def actionWhatsNew(self):
-        self.WhatsNew = WhatsNew(self._parent, strictly_newer=False)
+        self.WhatsNew = WhatsNew(self._parent, only_recent=False)
         self.WhatsNew.show()
 
     def showWelcomeMessage(self):
@@ -697,7 +707,7 @@ class GuiManager:
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
-        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByModelID)
+        self.communicate.deleteIntermediateTheoryPlotsSignal.connect(self.deleteIntermediateTheoryPlotsByTabId)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
         self.communicate.plotFromNameSignal.connect(self.showPlotFromName)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
@@ -754,10 +764,12 @@ class GuiManager:
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
         self._workspace.actionDensity_Volume_Calculator.triggered.connect(self.actionDensity_Volume_Calculator)
         self._workspace.actionKeissig_Calculator.triggered.connect(self.actionKiessig_Calculator)
+        self._workspace.actionMuMag_Fitter.triggered.connect(self.actionMuMag_Fitter)
         #self._workspace.actionKIESSING_Calculator.triggered.connect(self.actionKIESSING_Calculator)
         self._workspace.actionSlit_Size_Calculator.triggered.connect(self.actionSlit_Size_Calculator)
         self._workspace.actionSAS_Resolution_Estimator.triggered.connect(self.actionSAS_Resolution_Estimator)
         self._workspace.actionGeneric_Scattering_Calculator.triggered.connect(self.actionGeneric_Scattering_Calculator)
+        self._workspace.actionShape2SAS_Calculator.triggered.connect(self.actionShape2SAS_Calculator)
         self._workspace.actionPython_Shell_Editor.triggered.connect(self.actionPython_Shell_Editor)
         self._workspace.actionImage_Viewer.triggered.connect(self.actionImage_Viewer)
         self._workspace.actionFile_Converter.triggered.connect(self.actionFile_Converter)
@@ -773,6 +785,7 @@ class GuiManager:
         self._workspace.actionAdd_Custom_Model.triggered.connect(self.actionAdd_Custom_Model)
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
         self._workspace.actionManage_Custom_Models.triggered.connect(self.actionManage_Custom_Models)
+        self._workspace.actionReparameterize_Model.triggered.connect(self.actionReparameterize_Model)
         self._workspace.actionAddMult_Models.triggered.connect(self.actionAddMult_Models)
         self._workspace.actionEditMask.triggered.connect(self.actionEditMask)
 
@@ -789,6 +802,7 @@ class GuiManager:
         self._workspace.actionInversion.triggered.connect(self.actionInversion)
         self._workspace.actionInvariant.triggered.connect(self.actionInvariant)
         self._workspace.actionCorfunc.triggered.connect(self.actionCorfunc)
+        self._workspace.actionSizeDistribution.triggered.connect(self.actionSizeDistribution)
         # Help
         self._workspace.actionDocumentation.triggered.connect(self.actionDocumentation)
         self._workspace.actionTutorial.triggered.connect(self.actionTutorial)
@@ -1040,6 +1054,11 @@ class GuiManager:
         """
         self.KIESSIGCalculator.show()
 
+    def actionMuMag_Fitter(self):
+        """
+        """
+        self.MuMag_Fitter.show()
+
     def actionSlit_Size_Calculator(self):
         """
         """
@@ -1065,6 +1084,13 @@ class GuiManager:
             self.GENSASCalculator.show()
             self.updateStatusBar("The Generic Scattering Calculator is open, but it sometimes opens behind the main "
                                  "window.")
+        except Exception as ex:
+            logging.error(str(ex))
+            return
+
+    def actionShape2SAS_Calculator(self):
+        try:
+            self.Shape2SASCalculator.show()
         except Exception as ex:
             logging.error(str(ex))
             return
@@ -1189,6 +1215,12 @@ class GuiManager:
         self.model_manager = PluginManager(self)
         self.model_manager.show()
 
+    def actionReparameterize_Model(self):
+        """
+        """
+        self.reparameterizer = ReparameterizationEditor(self)
+        self.reparameterizer.show()
+
     def actionAddMult_Models(self):
         """
         """
@@ -1229,6 +1261,13 @@ class GuiManager:
         """
         self.perspectiveChanged("Corfunc")
         self.filesWidget.onAnalysisUpdate("Corfunc")
+
+    def actionSizeDistribution(self):
+        """
+        Change to the Size perspective
+        """
+        self.perspectiveChanged("SizeDistribution")
+        self.filesWidget.onAnalysisUpdate("SizeDistribution")
 
     #============ WINDOW =================
     def actionCascade(self):
@@ -1331,12 +1370,12 @@ class GuiManager:
             return
         per.currentTab.setTheoryItem(item)
 
-    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+    def deleteIntermediateTheoryPlotsByTabId(self, tab_id):
         """
         Catch the signal to delete items in the Theory item model which correspond to a model ID.
         Send the request to the DataExplorer for updating the theory model.
         """
-        self.filesWidget.deleteIntermediateTheoryPlotsByModelID(model_id)
+        self.filesWidget.deleteIntermediateTheoryPlotsByTabId(tab_id)
 
     def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
         """

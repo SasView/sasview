@@ -12,7 +12,7 @@ from PySide6 import QtWidgets
 from sas.qtgui.Utilities.GuiUtils import Communicate
 
 # Local
-from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
+from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
 
 
 

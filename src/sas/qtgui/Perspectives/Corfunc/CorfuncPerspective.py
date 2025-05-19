@@ -455,7 +455,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         Pass it over to the calculator
         """
 
-
         if self.has_data:
             msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
             msg += f"will remove the Corfunc analysis for {self._path}. Continue?"
@@ -469,6 +468,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         data = GuiUtils.dataFromItem(model_item)
         self.data = data
         self._model_item = model_item
+
+        if not isinstance(self.data, Data1D):
+            msg = "Corfunc cannot be computed using 2D data."
+            raise ValueError(msg)
 
         self.model.itemChanged.disconnect(self.model_changed)
 

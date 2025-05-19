@@ -16,7 +16,7 @@ from sasmodels.bumps_model import Model, Experiment
 from sasmodels.direct_model import DirectModel
 from sas.sascalc.fit.models import ModelManager
 
-#TODO categoryinstallers should belong in SasView.Systen rather than in QTGUI
+#TODO categoryinstallers should belong in SasView.System rather than in QTGUI
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 
 from serializers import (

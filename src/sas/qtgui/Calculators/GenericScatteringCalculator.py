@@ -25,7 +25,7 @@ from twisted.internet import threads
 import periodictable
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
 from sas.system.version import __version__
@@ -1532,6 +1532,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         Overwrite the close event and hide the window instead of closing it
         """
         self.hideWindow()
+        # Clear the status bar
+        self.communicator.statusBarUpdateSignal.emit("")
         event.ignore()
 
     def update_file_name(self):

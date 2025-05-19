@@ -83,7 +83,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdHelp_2.clicked.connect(self.displayHelp)
         self.chkSwap.setVisible(False)
 
-        self.cmdFreeze.clicked.connect(self.freezeTheory)
         # Fill in the perspectives combo
         self.initPerspectives()
 
@@ -616,8 +615,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if 'pr_params' in value:
             self.cbFitting.setCurrentIndex(self.cbFitting.findText('Inversion'))
             params = value['pr_params']
-            self.sendItemToPerspective(items[0])
-            self._perspective().updateFromParameters(params)
+            # Make the perspective read the rest of the read data
+            if not isinstance(params, list):
+                params = [params]
+            for page in params:
+            # Check if this set of parameters is for a batch page
+                            # if so, skip the update
+                if 'is_batch' in page and page['is_batch'][0] == 'True':
+                    continue
+                tab_index = None
+                if 'tab_index' in page:
+                    tab_index = page['tab_index'][0]
+                    tab_index = int(tab_index)
+                # Send current model item to the perspective
+                self.sendItemToPerspective(items[0], tab_index=tab_index)
+                # Assign parameters to the most recent (current) page. 
+                self._perspective().updateFromParameters(page)
         if 'invar_params' in value:
             self.cbFitting.setCurrentIndex(self.cbFitting.findText('Invariant'))
             self.sendItemToPerspective(items[0])
@@ -1115,7 +1128,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         append = False
         plot_to_append_to = None
-        for plot_to_show in plots_to_show:
+        for idx, plot_to_show in enumerate(plots_to_show):
             # Check if this plot already exists
             shown = self.updatePlot(plot_to_show)
             # Retain append status throughout loop
@@ -1123,12 +1136,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
             plot_name = plot_to_show.name
             role = plot_to_show.plot_role
-            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_STAND_ALONE, DataRole.ROLE_POLYDISPERSITY]
+            stand_alone_types = [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE,
+                                 DataRole.ROLE_POLYDISPERSITY]
 
             if (role in stand_alone_types and shown) or role == DataRole.ROLE_DELETABLE:
                 # Nothing to do if stand-alone plot already shown or plot to be deleted
                 continue
-            elif role == DataRole.ROLE_RESIDUAL and config.DISABLE_RESIDUAL_PLOT:
+            elif role in [DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS] and config.DISABLE_RESIDUAL_PLOT:
                 # Nothing to do if residuals are not plotted
                 continue
             elif role == DataRole.ROLE_POLYDISPERSITY and config.DISABLE_POLYDISPERSITY_PLOT:
@@ -1145,8 +1159,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.appendOrUpdatePlot(self, plot_to_show, plot_to_append_to)
             else:
                 # Plots with main data points on the same chart
-                # Get the main data plot unless data is 2D which is plotted earlier
-                if main_data is not None and not isinstance(main_data, Data2D):
+                # If this is the first plot in the list (and ONLY if the first)
+                # get the main data plot unless data is 2D which is plotted earlier
+                # or the DataRole is ROLE_SIZE_DISTRIBUTION
+                if (
+                    idx == 0
+                    and main_data is not None
+                    and not isinstance(main_data, Data2D)
+                    and role != DataRole.ROLE_SIZE_DISTRIBUTION
+                ):
                     new_plots.append((plot_item, main_data))
                 new_plots.append((plot_item, plot_to_show))
 
@@ -1207,8 +1228,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     new_plot.item = item
                 # Ensure new plots use the default transform, not the transform of any previous plots the data were in
                 # TODO: The transform should be part of the PLOT, NOT the data
-                plot_set.xtransform = None
-                plot_set.ytransform = None
+                if (plot_set.plot_role in [
+                    DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL_SESANS, DataRole.ROLE_STAND_ALONE,
+                    DataRole.ROLE_ANGULAR_SLICE] or plot_set.isSesans):
+                    plot_set.xtransform = 'x'
+                else:
+                    plot_set.xtransform = 'log10(x)'
+                if (plot_set.plot_role in [
+                    DataRole.ROLE_POLYDISPERSITY, DataRole.ROLE_RESIDUAL, DataRole.ROLE_RESIDUAL_SESANS,
+                    DataRole.ROLE_ANGULAR_SLICE, DataRole.ROLE_STAND_ALONE,
+                    DataRole.ROLE_SIZE_DISTRIBUTION] or plot_set.isSesans):
+                    plot_set.ytransform = 'y'
+                else:
+                    plot_set.ytransform = 'log10(y)'
                 new_plot.plot(plot_set, transform=transform)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.name] = new_plot
@@ -1560,7 +1592,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
-        self.actionDelete.triggered.connect(self.deleteSelectedItem)
+        self.actionDelete.triggered.connect(self.deleteFile)
         self.actionFreezeResults.triggered.connect(self.freezeSelectedItems)
         self.actionReplace.triggered.connect(self.onDataReplaced)
 
@@ -1829,26 +1861,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.model.clear()
         self.theory_model.clear()
 
-    def deleteSelectedItem(self):
-        """
-        Delete the current item
-        """
-        # Assure this is indeed wanted
-        delete_msg = "This operation will remove the selected data sets " +\
-                     "and all the dependents from SasView." +\
-                     "\nDo you want to continue?"
-        reply = QtWidgets.QMessageBox.question(self,
-                                               'Warning',
-                                               delete_msg,
-                                               QtWidgets.QMessageBox.Yes,
-                                               QtWidgets.QMessageBox.No)
-
-        if reply == QtWidgets.QMessageBox.No:
-            return
-
-        indices = self.current_view.selectedIndexes()
-        self.deleteIndices(indices)
-
     def deleteIndices(self, indices):
         """
         Delete model idices from the current view
@@ -1875,6 +1887,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # Delete corresponding open plots
                 self.closePlotsForItem(item_to_delete)
 
+                # This needs to run before model.removeRow()
+                self.communicator.dataDeletedSignal.emit(deleted_items)
+
                 if item_to_delete.parent():
                     # We have a child item - delete from it
                     item_to_delete.parent().removeRow(row)
@@ -1882,9 +1897,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     # delete directly from model
                     model.removeRow(row)
             indices = self.current_view.selectedIndexes()
-
-        # Let others know we deleted data
-        self.communicator.dataDeletedSignal.emit(deleted_items)
 
         # update stored_data
         self.manager.update_stored_data(deleted_names)
@@ -2071,7 +2083,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.theory_model.appendRow(model_item)
         return model_item
 
-    def deleteIntermediateTheoryPlotsByModelID(self, model_id):
+    def deleteIntermediateTheoryPlotsByTabId(self, tab_id):
         """Given a model's ID, deletes all items in the theory item model which reference the same ID. Useful in the
         case of intermediate results disappearing when changing calculations (in which case you don't want them to be
         retained in the list)."""
@@ -2083,8 +2095,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 return
             match = GuiUtils.theory_plot_ID_pattern.match(data.id)
             if match:
-                item_model_id = match.groups()[-1]
-                if item_model_id == model_id:
+                item_tab_id = match.groups()[0]
+                if item_tab_id == tab_id:
                     # Only delete those identified as an intermediate plot
                     if match.groups()[2] not in (None, ""):
                         items_to_delete.append(item)

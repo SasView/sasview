@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ModelEditor</class>
+ <widget class="QWidget" name="ModelEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>549</width>
+    <height>632</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Model Editor</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox_13">
+     <property name="title">
+      <string>Model</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_16">
+      <item row="0" column="0">
+       <widget class="QCodeEditor" name="txtEditor" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCodeEditor</class>
+   <extends>QWidget</extends>
+   <header location="global">sas.qtgui.Utilities.CustomGUI.CodeEditor.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

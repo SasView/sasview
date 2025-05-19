@@ -5,6 +5,8 @@ import logging
 import json
 from copy import deepcopy
 
+from packaging.version import parse, InvalidVersion
+
 import sas
 import sas.system.version
 from sas.system import user
@@ -58,7 +60,7 @@ class ConfigBase:
     def config_filename(self, create_if_nonexistent=False):
         """Filename for saving config items"""
         version_parts = sas.system.version.__version__.split(".")
-        user_dir = user.get_user_dir(create_if_nonexistent)
+        user_dir = user.get_config_dir(create_if_nonexistent)
         return os.path.join(user_dir, f"config-{version_parts[0]}.json")
 
     def finalise(self):
@@ -152,14 +154,10 @@ class ConfigBase:
 
         try:
             file_version = data["sasview_version"]
-            # Use the distutils strict version module regex to check if the version string is valid
-            #  ref: https://epydoc.sourceforge.net/stdlib/distutils.version.StrictVersion-class.html
-            matcher = re.compile(r'(?x)^(\d+)\.(\d+)(\.(\d+))?([ab](\d+))?$')
-            if not matcher.match(file_version):
-                raise Exception
+            parse(file_version)
 
-        except Exception:
-            raise MalformedFile("Malformed version in config file, should be a string of the form 'X.Y.Z'")
+        except InvalidVersion:
+            raise MalformedFile("Malformed version in config file, should be a string matching PEP440 such as 'X.Y.Z'")
 
         if "config_data" not in data:
             raise MalformedFile("Malformed config file - no 'config_data' key")

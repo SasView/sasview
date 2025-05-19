@@ -36,9 +36,9 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': f'SasView version 6.0.0',
-    'description': f'6.0.0 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.0.0-beta-1',
+    'title': f'SasView version 6.1.0',
+    'description': f'6.1.0 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.0-alpha-1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
         {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
@@ -123,7 +123,7 @@ for path in [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]:
             `python ./sasview/release_automation.py [options]
         """
         logging.error(msg)
-CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.csv'
+CONTRIBUTORS_FILE = SASVIEW_PATH / 'build_tools' / 'contributors.tsv'
 
 
 class SplitArgs(argparse.Action):
@@ -145,17 +145,16 @@ def generate_sasview_data() -> dict:
             lines = f.readlines()[1:]
             for line in lines:
                 values = line.split('\t')
-                record = {'name': values[0], 'affiliation': values[1]}
-                if values[5]:
-                    # TODO: Should we grab the latest affiliation information using the ORCID ID?
+                record = {"name": values[0], "affiliation": values[1]}
+                if len(values) > 5 and values[5]:
                     record['orcid'] = values[5]
                 if values[2]:
                     creators.append(record)
-                elif values[3]:
-                    record['type'] = 'Producer'
+                elif len(values) > 3 and values[3]:
+                    record['type'] = "Producer"
                     contributors.append(record)
-                elif values[4]:
-                    record['type'] = 'Other'
+                elif len(values) > 4 and values[4]:
+                    record['type'] = "Other"
                     contributors.append(record)
         return {"creators": creators, "contributors": contributors}
     else:
@@ -332,7 +331,9 @@ def main(args=None):
     # Generate a list of contributors using a file, if that file exists, otherwise use the pre-defined list given here.
     contributors = generate_sasview_data()
     if contributors:
-        sasview_data.update(contributors)
+        # Overwrite existing contributors and use the TSV file list (if available)
+        sasview_data['metadata']['contributors'] = contributors['contributors']
+        sasview_data['metadata']['creators'] = contributors['creators']
 
     # Generates zenodo doi if zenodo api key is provided
     new_doi = ''

@@ -54,14 +54,14 @@ class ComplexConstraintTest:
         model_index = tab2.cbModel.findText("barbell")
         tab2.cbModel.setCurrentIndex(model_index)
         # set tab2 model name to M2
-        tab2.kernel_module.name = "M2"
+        tab2.logic.kernel_module.name = "M2"
 
         category_index = tab3.cbCategory.findText("Cylinder")
         tab3.cbCategory.setCurrentIndex(category_index)
         model_index = tab3.cbModel.findText("barbell")
         tab3.cbModel.setCurrentIndex(model_index)
         # set tab2 model name to M2
-        tab3.kernel_module.name = "M3"
+        tab3.logic.kernel_module.name = "M3"
 
         tabs = [tab1, tab2, tab3]
         w = ComplexConstraint(parent=None, tabs=tabs)

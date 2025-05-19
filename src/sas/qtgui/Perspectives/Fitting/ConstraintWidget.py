@@ -285,7 +285,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Returns list of tab names selected for fitting
         """
-        return [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
+        return [tab for tab in self.tabs_for_fitting if ObjectLibrary.getObject(tab) is not None]
 
     def onChainFit(self, is_checked):
         """
@@ -332,7 +332,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         weights = {}
         for tab in tabs_to_fit:
             tab_object = ObjectLibrary.getObject(tab)
-            #weight = FittingUtilities.getWeight(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
             weight = FittingUtilities.getRelativeError(tab_object.data, tab_object.is2D, flag=tab_object.weighting)
             weights[tab] = weight
 
@@ -483,7 +482,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # Remove the key from the dictionaries
             self.available_tabs.pop(self.current_cell, None)
             # Change the model name
-            model = temp_tab.kernel_module
+            model = temp_tab.logic.kernel_module
             model.name = new_moniker
             # Replace constraint name
             temp_tab.replaceConstraintName(self.current_cell, new_moniker)
@@ -658,7 +657,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
 
         # Assure the fitting succeeded
-        if result is None or not result:
+        if not result or not result[0] or not result[0][0]:
             msg = "Fitting failed."
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
             return
@@ -695,7 +694,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 # No such tab. removed while job was running
                 return
             # Make sure result and target objects are the same (same model moniker)
-            if tab_object.kernel_module.name == results[i].model.name:
+            if tab_object.logic.kernel_module.name == results[i].model.name:
                 tab_object.fitComplete(([[results[i]]], elapsed))
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
@@ -936,7 +935,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Update a single line of the table widget with tab info
         """
         fit_page = ObjectLibrary.getObject(tab)
-        model = fit_page.kernel_module
+        model = fit_page.logic.kernel_module
 
         if model is None:
             logging.warning("No model selected")
@@ -1103,7 +1102,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             object = ObjectLibrary.getObject(object_name)
             if isinstance(object, FittingWidget):
                 try:
-                    if object.kernel_module.name == name:
+                    if object.logic.kernel_module.name == name:
                         return object
                 except AttributeError:
                     # Disregard atribute errors - empty fit widgets

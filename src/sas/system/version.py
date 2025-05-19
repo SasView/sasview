@@ -1,4 +1,7 @@
-# Version must be of the form 'X.Y.Z'. No alpha/beta/rc versioning should be set here
-__version__ = "6.0.0"
-__release_date__ = "2024"
+try:
+    from ._version import __version__
+except ImportError:
+    __version__ = "6.1.0a1"
+
+__release_date__ = "2025"
 __build__ = "GIT_COMMIT"
