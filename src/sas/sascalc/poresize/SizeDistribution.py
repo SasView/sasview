@@ -10,8 +10,8 @@ from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
 from sasmodels import resolution as rst
 
-from maxEnt_method import matrix_operation, maxEntMethod
-#from sas.sascalc.poresize.maxEnt_method import matrix_operation, maxEntMethod
+#from maxEnt_method import matrix_operation, maxEntMethod
+from sas.sascalc.poresize.maxEnt_method import matrix_operation, maxEntMethod
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +98,7 @@ def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
 
     param_result, pcov = optimize.curve_fit(fit_func, linearized_data.x, linearized_data.y, init_guess, sigma = linearized_data.dy)
     param_err = np.sqrt(np.diag(pcov))
+
     if len(param_err) > 1: 
         param_err[1] = np.exp(param_result[1])*param_err[1]
     else:
