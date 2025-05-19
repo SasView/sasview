@@ -10,25 +10,25 @@ Principle
 
 Size distribution analysis is a technique for extracting information from
 scattering of a nominally two phase material where the shape of the domains
-of the minority size are assumed to be known, but the size distribution is
-completely unknown. Most often used in materials where the domain sizes have an
-extremely large variation such as pores in rocks hence the oft used term “pore
-size distribution” for this type of analysis. The scattered intensity in this
-case is given by the integral of the scattering intensity from every size
-present in the system. Basically a polydispersity integral of the monodisperse
-I(Q) but where the shape of the distribution can be anything and most likely
-not possible to put in a parameterized analytical form. Thus the equation
-to fit is:
+of the minority phase are assumed to be known, but the size distribution is
+completely unknown. It is most often used in materials where the domain sizes
+have an extremely large variation, such as pores in rocks, hence the oft used
+term “pore size distribution” for this type of analysis. The scattered
+intensity in this case is given by the integral of the scattering intensity
+from every size present in the system. Basically a polydispersity integral of
+the monodisperse I(Q) but where the shape of the distribution can be anything
+and is most likely not possible to put in a parameterized analytical form. Thus
+the equation to fit is:
 
-..math::
+.. math::
     I(Q)= \Delta \rho^2 \int N_p(r) P(Q,r) dr
 
 Where $N_p(r)$ is the number density of particles of characteristic dimension
 r, and P(Q,r) is the form factor for that characteristic dimension. For a
 sphere this translates as:
 
-..math::
-P(Q,r) = \left[
+.. math::
+    P(Q,r) = \left[
         3V_p(\Delta\rho) \cdot \frac{\sin(Qr) - Qr\cos(qr))}{(Qr)^3}
         \right]^2
 
@@ -36,7 +36,7 @@ SasView is using the sasmodels package and other shapes are expected to be
 added in the future. Also, sasmodels automatically scales to volume fraction
 rather than number density using
 
-..math::
+.. math::
     N_p = \phi/V_p
 
 The current implementation uses an ellipsoid of revolution. The default is an
@@ -50,17 +50,17 @@ integral equation with the following sum, where $r_{min}$ and $r_{max}$ should
 be within the range that will significantly affect the scattering in the $Q$
 range being used.
 
-..math::
+.. math::
     I(Q)= \Delta \rho^2 \sum_{r_{min}}^{r_{max}} N_p(r) P(Q,r)
 
 Even so, fitting is over determined, particularly given the noise in any real
-data and the very shallow. Essentially this is an ill posed problem. In order
+data. Essentially this is an ill posed problem. In order
 to provide a reasonably robust solution a regularization technique is generally
 used. Here we implement only the most common MaxEnt (Maximum Entropy) method
 used for example by the famous CONTIN algorithm used in light scattering.
 
-..note::
-    The assmumptions inherent in this method:
+.. note::
+    The assmumptions inherent in this method are:
     * The system can be approximated as a two phase system
     * The scattering length density of each phase is known
     * The minor phase is made up of domains of varying sizes but a fixed shape
@@ -78,10 +78,10 @@ correspondence between statistical mechanics and information theory. In this
 framework, the best solution to an optimization problem is the solution that
 leads to the **Maximum Entropy** where the Shannon Entropy is defined as:
 
-..math::
-    H(X) = - \sigma p(x_i) ln p(x_i)
+.. math::
+    H(X) = - \Sigma p(x_i) ln p(x_i)
 
-Where $p(x_i) is the probability of the ith distribution.
+Where $p(x_i)$ is the probability of the ith distribution.
 
 In a nutshell, the idea of the maximum entropy method is that the most probable
 distribution that satisfies all the known constraints is the best answer to the
@@ -92,10 +92,11 @@ fewest assumptions beyond what is known.
 Here, the known constraint is that $\chi^2$ between the scattering data and the
 scattered intensity expected from a system of the chosen shape with the
 solution distribution of sizes, must be minimized.  In other words, of all the
-distributions that would satisfy the $\chi^2$ constraint we find the one with
+distributions that would satisfy the $\chi^2$ constraint, we find the one with
 the maximum entropy. The size distribution problem however is too complex to be
 conducive to an analytical solution and so an iterative process is employed.
-Here we employ an  algorithm due to [#SkillingsAndBryan]_ as implemented in GSAS II[ref].
+Here we employ an  algorithm due to Skillings and Bryan [#SkillingsAndBryan]_
+as implemented in GSAS II [#GSAS]_.
 
 Using the Size Distribution Analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -132,7 +133,7 @@ prolate ellipsoid while a value smaller than 1 is for an oblate ellipsoid.
    ensure that the background subtraction is set correctly.
 
 At this point, one can run a fit.  There are two buttons at the bottom of the
-panel: *Qick fit* and *Full fit*. One should alwasys start with the
+panel: *Qick fit* and *Full fit*. One should always start with the
 *Quick fit*. The only difference between the two is that the first will only
 run the calculation once and produce the result.
 
@@ -160,11 +161,11 @@ well within the $Q$ range of the fit.
 
 .. note::
    This is usually a fairly ill posed problem and the fitting may not converge.
-   This will pop up a ``WARNING:`` in the log explorer warning this is the case
-   and the results panel will also note that the fitting did not converge. The
-   algorithm will return the values from the last iteration that was run but
-   should be viewed with suspicion. One should **never** report values from an
-   unconverged fit!
+   This will pop up a ``WARNING:`` in the log explorer warning that this is
+   the case. The results panel will also note that the fitting did not
+   converge. The algorithm will return the values from the last iteration that
+   was run but should be viewed with suspicion. One should **never** report
+   values from an unconverged fit!
 
 Once one is happy with the *Quick fit* results, it is recommended to finish by
 running a *Full fit*. This will run the same fit ten times over. However, each
@@ -182,16 +183,17 @@ will often be necessary to adjust the parameters on the *Options* tab.
 
 INSERT IMAGE OF OPTIONS TAB HERE
 
-The first thing to worry about as noted above is the subtracting the
-background. The usual high Q background can be entered if known. It can also
+The first thing to worry about, as noted above, is the background subtraction.
+The usual high Q background can be entered if known. It can also
 be estimated using a Porod Plot (available using the linearized fits in
 SasView). This is probably the most accurate way to determine the background
 if it is not known. Alternatively, if there are sufficient points in the data
 that are clearly in the flat background region, the background can be estimated
 by providing the minimum and maximum $Q$ where the data is flat and then
-pressing ``Fit flat backgroun`` button in the *Options* tab. The values to use
-can be read off the plot by moving the cursor over the points at the extremes
-and reading off the x value given in the bottom right of the plot.
+pressing the ``Fit flat background`` button in the *Options* tab. The values to
+use for the $Q$ limits can be read off the plot by moving the cursor over the
+points at the extremes and reading off the x value given in the bottom right of
+the plot.
 
 At times the data may also have a low $Q$ background due for example to the
 interface scattering from a powder sample. In most cases this should be a -4
@@ -224,7 +226,7 @@ discouraged to use data without uncertainties.
 
 That said, scattering data never accounts for anything but counting statistics.
 When the uncertainty is dominated by those this can be reasonable. However, if
-it is not then the uncertainties can be far too small. This will have a huge
+it is not, then the uncertainties can be far too small. This will have a huge
 impact on the ability of this analyis to converge. This is often a problem
 with X-ray data for example. A first order correction is made available here
 in the ``Weight factor`` box. The value entered here effectivly increases the
@@ -238,7 +240,7 @@ never adjusted unless one knows what one is doing. Basically it adds a level
 of *inherent* background.
 * ``Iterations``. This sets the maximum number of iterations the Maximum
 Entropy optimization routine before it stops and returns a "not converged"
-error. The maximum value of 5000 is hard coded, however that can take quite
+error. A maximum value of 5000 is hard coded, however that can take quite
 a long time to run, particularly for a ``Full fit``. In general, if the
 routine does not converge in 100 iterations it probably won't. Typical numbers
 of iterations for convergence range from 5 to 20.
@@ -268,6 +270,9 @@ Reference
    **211**, 111–124 (1984).
    `DOI: 10.1093/mnras/211.1.111 <https://doi.org/10.1093/mnras/211.1.111>`_
 
+.. [#GSAS] https://advancedphotonsource.github.io/GSAS-II-tutorials/. The size
+   distribution code is mostly in the `GSASIIsasd.py module <https://subversion.xray.aps.anl.gov/pyGSAS/trunk/GSASIIsasd.py>`_
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Paul Butler on May 10, 2025
+.. note::  This help document was last modified by Paul Butler on May 19, 2025
