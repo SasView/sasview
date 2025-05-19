@@ -70,6 +70,9 @@ class PlotterWidget(PlotterBase):
 
         self.legendVisible = True
 
+        self.x_label_is_scientific = False
+        self.y_label_is_scientific = False
+
         if parent is not None:
             parent.geometry()
 
@@ -881,7 +884,7 @@ class PlotterWidget(PlotterBase):
             color=xl.get_color(),
             weight=xl.get_weight(),
             text=xl.get_text(),
-            scientific_x = self.ax.xaxis.get_major_formatter().get_scientific())
+            is_scientific = self.x_label_is_scientific)
 
         font_y = PlotLabelPropertyHolder(
             size=yl.get_fontsize(),
@@ -889,7 +892,7 @@ class PlotterWidget(PlotterBase):
             color=yl.get_color(),
             weight=yl.get_weight(),
             text=yl.get_text(),
-            scientific_y = self.ax.yaxis.get_major_formatter().get_scientific())
+            is_scientific = self.y_label_is_scientific)
 
         labelWidget = PlotLabelProperties(self, x_props=font_x, y_props=font_y)
 
@@ -902,8 +905,10 @@ class PlotterWidget(PlotterBase):
         label_y = labelWidget.text_y()
         apply_x = labelWidget.apply_to_ticks_x()
         apply_y = labelWidget.apply_to_ticks_y()
-        x_is_scientific = labelWidget.scientific_x()
-        y_is_scientific = labelWidget.scientific_y()
+        x_is_scientific = labelWidget.is_scientific_x()
+        y_is_scientific = labelWidget.is_scientific_y()
+        self.x_label_is_scientific = bool(x_is_scientific)
+        self.y_label_is_scientific = bool(y_is_scientific)
 
         self.ax.set_xlabel(label_x, fontdict=fx)
         self.ax.set_ylabel(label_y, fontdict=fy)
