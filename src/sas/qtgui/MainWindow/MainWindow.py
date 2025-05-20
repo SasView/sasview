@@ -77,7 +77,9 @@ def get_highdpi_scaling():
     return 1.0
 
 def run_sasview():
-    # Force software rendering and disable GPU
+    # Disable GPU. This is a workaround for the issue with the QtWebEngine on some Win 10 systems
+    # https://github.com/SasView/sasview/issues/3384
+    # TODO: remove when the issue is fixed in QtWebEngine
     os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
     # Check for updates
