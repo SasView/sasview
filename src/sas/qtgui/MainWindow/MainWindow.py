@@ -77,6 +77,8 @@ def get_highdpi_scaling():
     return 1.0
 
 def run_sasview():
+    # Force software rendering and disable GPU
+    os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
     # Check for updates
     maybe_prompt_new_version_download()
