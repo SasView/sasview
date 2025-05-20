@@ -16,7 +16,6 @@ from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 
-from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
