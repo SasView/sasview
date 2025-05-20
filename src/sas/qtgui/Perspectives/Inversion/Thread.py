@@ -5,7 +5,7 @@ from dominate.tags import output
 from numpy.typing import NDArray
 from sas.sascalc.data_util.calcthread import CalcThread
 from numpy.typing import NDArray
-from sas.sascalc.pr.NewInvertor import NewInvertor
+from sas.sascalc.pr.Invertor import Invertor
 
 
 class CalcPr(CalcThread):
@@ -44,7 +44,7 @@ class CalcBatchPr(CalcThread):
 
     # A lot of these aren't type hinted but that can be future work as I'm trying to closely follow the pre-existing
     # structure, and I don't want to mess with anything.
-    def __init__(self, prs: list[NewInvertor], nfuncs=None, tab_id=None, error_func=None, completefn=None,
+    def __init__(self, prs: list[Invertor], nfuncs=None, tab_id=None, error_func=None, completefn=None,
                  updatefn=None, yieldtime=0.01, worktime=0.01):
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.prs = prs

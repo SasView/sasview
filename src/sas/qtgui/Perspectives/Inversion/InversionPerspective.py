@@ -7,7 +7,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 # sas-global
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Inversion.NewInversionWidget import NewInversionWidget
+from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
 # pr inversion GUI elements
 from .InversionUtils import WIDGETS
@@ -410,7 +410,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Create tab
         # tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab_name = self.getTabName(is_batch=is_batch)
-        tab = NewInversionWidget(self.parent, data, tab_index, tab_name)
+        tab = InversionWidget(self.parent, data, tab_index, tab_name)
         #ObjectLibrary.addObject(tab_name, tab)
         icon = QtGui.QIcon()
         # Setting UP batch Mode for 1D data
