@@ -20,7 +20,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget, DICT_KEYS, NUMBER_OF_TERMS, REGULARIZATION
+from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
 
 
