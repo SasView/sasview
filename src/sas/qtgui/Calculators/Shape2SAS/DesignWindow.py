@@ -153,7 +153,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.constraint.buttonOptions.closePage.clicked.connect(self.onClickingClose)
 
         #create png of each tab
-        self.modelTabButtonOptions.help.clicked.connect(self.onClickingHelp)
+        self.modelTabButtonOptions.help.clicked.connect(self.onHelp)
 
     def showConstraintWindow(self):
         """Get the Constraint window"""
@@ -522,10 +522,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.close()
         self.constraint.onClosingConstraints()
 
-    def onClickingHelp(self):
+    def onHelp(self):
         """Opening the help window"""
-        print("Help")
-        #TODO: creat HTML help file to be displayed
+        location = "/user/qtgui/Calculators/shape_2_sas_help.html"
+        self.parent.showHelp(location)
 
     @staticmethod
     def ifNoCondition(name: str, names: list[str], **kwargs):
