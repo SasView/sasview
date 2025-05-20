@@ -12,7 +12,7 @@ from sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, Estimat
 from sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem, DoubleValidator
-from sas.sascalc.pr.NewInvertor import NewInvertor
+from sas.sascalc.pr.NewInvertor import Invertor
 
 @dataclass
 class CalculatedOutputs:
@@ -25,7 +25,7 @@ class CalculatedOutputs:
     pos_frac: float
     pos_err: float
 
-def get_outputs(invertor: NewInvertor, elapsed: float):
+def get_outputs(invertor: Invertor, elapsed: float):
     return CalculatedOutputs(
         invertor.rg(invertor.out),
         invertor.iq0(invertor.out),
@@ -45,7 +45,7 @@ class EstimatedParameters:
 @dataclass
 class InversionResult:
     logic: InversionLogic
-    calculator: NewInvertor
+    calculator: Invertor
     pr_plot: Data1D | None
     data_plot: Data1D | None
     outputs: CalculatedOutputs | None
@@ -104,7 +104,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         logic = InversionLogic()
         return InversionResult(
             logic=logic,
-            calculator=NewInvertor(logic),
+            calculator=Invertor(logic),
             pr_plot=None,
             data_plot=None,
             outputs=None,
