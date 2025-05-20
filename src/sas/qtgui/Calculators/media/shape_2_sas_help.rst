@@ -43,24 +43,33 @@ as expected, modify the shape table and rerun the calculation until everything i
 shapes is ignored in the shape construction and scattering calculation. To change this, uncheck the 'Exclude overlap'
 option to account for any differences in SLD in the overlap region and visualize the particle overlap.
 
-Parameter list for each shape particle
-
-+----------------+-------------------+-------------------+
-| Row | Parameter | Description |
-+================+===================+===================+
-|| 1 || Particle name || The shape selected from the predefined shapes in the combobox |
-|| 2 || ΔSLD || The SLD of the particle relative to the medium surrounding it. Defaults to 1.0 |
-|| 3, 4, and 5 || Size Definitions || The sizes for each major axis of the particle, in Å. The actual values will vary based on the shape. |
-|| 6 || COMX || The relative offset along the X axis of the particle centroid from the coordinate origin, in Å. |
-|| 7 || COMY || The relative offset along the Y axis of the particle centroid from the coordinate origin, in Å. |
-|| 8 || COMZ || The relative offset along the Z axis of the particle centroid from the coordinate origin, in Å. |
-|| 9 || RPX || The center of rotation of the particle, along the X axis, relative to the coordinate origin, in Å. |
-|| 10 || RPY || The center of rotation of the particle, along the Y axis, relative to the coordinate origin, in Å. |
-|| 11 || RPZ || The center of rotation of the particle, along the Z axis, relative to the coordinate origin, in Å. |
-|| 12 || α || The rotation of the particle, around the X axis, relative to RPX, in degrees. |
-|| 13 || β || The rotation of the particle, around the Y axis, relative to RPX, in degrees. |
-|| 14 || γ || The rotation of the particle, around the Z axis, relative to RPX, in degrees. |
-
+Parameter list for each shape particle:
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| Row         | Parameter        | Description                                                                                          |
++=============+==================+======================================================================================================+
+| 1           | Particle name    | The shape selected from the predefined shapes in the combobox.                                       |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 2           | ΔSLD             | The SLD of the particle relative to the medium surrounding it. Defaults to 1.0                       |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 3, 4, and 5 | Size Definitions | The sizes for each major axis of the particle, in Å. The actual values will vary based on the shape. |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 6           | COMX             | The relative offset along the X axis of the particle centroid from the coordinate origin, in Å.      |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 7           | COMY             | The relative offset along the Y axis of the particle centroid from the coordinate origin, in Å.      |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 8           | COMZ             | The relative offset along the Z axis of the particle centroid from the coordinate origin, in Å.      |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 9           | RPX              | The center of rotation of the particle, along the X axis, relative to the coordinate origin, in Å.   |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 10          | RPY              | The center of rotation of the particle, along the Y axis, relative to the coordinate origin, in Å.   |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 11          | RPZ              | The center of rotation of the particle, along the Z axis, relative to the coordinate origin, in Å.   |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 12          | α                | The rotation of the particle, around the X axis, relative to RPX, in degrees.                        |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 13          | β                | The rotation of the particle, around the Y axis, relative to RPX, in degrees.                        |
++-------------+------------------+------------------------------------------------------------------------------------------------------+
+| 14          | γ                | The rotation of the particle, around the Z axis, relative to RPX, in degrees.                        |
 
 .. image:: saxs_virtual_experiment.png
 
