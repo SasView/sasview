@@ -31,7 +31,7 @@ DIAMETER_MAX = 1000.0
 NUM_DIAMETER_BINS = 100
 LOG_BINNING = "true"
 CONTRAST = 1.0
-BACKGROUND = 1e-6
+BACKGROUND = ""  # initially no background subtraction
 SKY_BACKGROUND = 1e-6
 SUBTRACT_LOW_Q = "false"
 POWER_LOW_Q = 4
@@ -446,7 +446,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         self.logic.data = logic_data
         self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
-        self.updateBackground()
 
         try:
             name = self.logic.data.name
