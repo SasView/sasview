@@ -65,7 +65,7 @@ MAX_DIST = 140.0
 
 logger = logging.getLogger(__name__)
 
-class NewInversionWidget(QWidget, Ui_PrInversion):
+class InversionWidget(QWidget, Ui_PrInversion):
     # The old class had 'name' and 'ext'. Since this class doesn't inherit from
     # perspective, I'm not convinced they are needed here.
 
@@ -75,7 +75,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
     changeBackgroundMode = Signal()
 
     def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
-        super(NewInversionWidget, self).__init__()
+        super(InversionWidget, self).__init__()
 
         self.parent = parent
         self.tab_name = tab_name
