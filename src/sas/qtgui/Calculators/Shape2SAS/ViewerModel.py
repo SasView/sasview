@@ -44,10 +44,10 @@ class ViewerModel(QWidget):
         self.dict_series = {"Red": self.seriesRed, "Green": self.seriesGreen, "Blue": self.seriesBlue}
        
         self.scatterContainer = QWidget.createWindowContainer(self.scatter)
-        self.scatterContainer.setFixedHeight(200)
-        self.scatterContainer.setFixedWidth(271)
+        self.scatter.setMinimumSize(QSize(271, 271))
         self.scatter.setHorizontalAspectRatio(1.0)
         self.scatter.setAspectRatio(1.0)
+        self.scatterContainer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.initialiseAxis()
 
@@ -64,8 +64,8 @@ class ViewerModel(QWidget):
 
         #2D plot of P(q)
         self.scattering = QGraphicsView()
-        self.scattering.setMinimumSize(QSize(271, 250))  
-        self.scattering.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.scattering.setMinimumSize(QSize(271, 271))
+        self.scattering.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.scattering.setBackgroundBrush(QColor(255, 255, 255))
         self.scene = QGraphicsScene()
         self.scattering.setScene(self.scene)
@@ -74,7 +74,7 @@ class ViewerModel(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 10, 0, 0)#remove margins
 
-        spacer = QSpacerItem(271, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+        spacer = QSpacerItem(271, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         subunitTableLabel = QLabel("Scattering of P(q)")
 
         layout.addWidget(self.scatterContainer)
@@ -85,11 +85,9 @@ class ViewerModel(QWidget):
         layout.addWidget(self.scattering)
 
         self.setLayout(layout)
-        self.setFixedWidth(271)
 
         self.Viewmodel_modul = QWidget()
         self.Viewmodel_modul.setLayout(layout)
-        self.Viewmodel_modul.setFixedWidth(271)
 
     def setScatteringPlot(self, theo: TheoreticalScattering):
         """Set the scattering plot"""
