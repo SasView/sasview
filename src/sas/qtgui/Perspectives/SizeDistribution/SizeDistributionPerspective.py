@@ -759,22 +759,20 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         else:
             converge_msg = "Not converged"
         self.lblConvergence.setText(converge_msg)
-        self.lblChiSq.setText(f"ChiSq: {result.chisq:.5g}")
+        self.txtChiSq.setText(f"{result.chisq:.5g}")
         stats = result.statistics
-        self.lblVolume.setText(
-            f"Volume of scatterers: {stats['volume']:.5g} +/- {stats['volume_err']:.5g}"
-        )
-        self.lblDiameterMean.setText(f"Mean diameter: {stats['mean']:.5g} \u212b")
-        self.lblDiameterMode.setText(f"Median diameter: {stats['median']:.5g} \u212b")
-        self.lblDiameterMedian.setText(f"Mode diameter: {stats['mode']:.5g} \u212b")
+        self.txtVolume.setText(f"{stats['volume']:.5g} +/- {stats['volume_err']:.5g}")
+        self.txtDiameterMean.setText(f"{stats['mean']:.5g}")
+        self.txtDiameterMedian.setText(f"{stats['median']:.5g}")
+        self.txtDiameterMode.setText(f"{stats['mode']:.5g}")
 
     def clearStatistics(self):
         """
         Clear the output box
         """
         self.lblConvergence.setText("")
-        self.lblChiSq.setText("")
-        self.lblVolume.setText("")
-        self.lblDiameterMean.setText("")
-        self.lblDiameterMode.setText("")
-        self.lblDiameterMedian.setText("")
+        self.txtChiSq.setText("")
+        self.txtVolume.setText("")
+        self.txtDiameterMean.setText("")
+        self.txtDiameterMode.setText("")
+        self.txtDiameterMedian.setText("")
