@@ -46,6 +46,8 @@ class ViewerModel(QWidget):
         self.scatterContainer = QWidget.createWindowContainer(self.scatter)
         self.scatterContainer.setFixedHeight(200)
         self.scatterContainer.setFixedWidth(271)
+        self.scatter.setHorizontalAspectRatio(1.0)
+        self.scatter.setAspectRatio(1.0)
 
         self.initialiseAxis()
 
