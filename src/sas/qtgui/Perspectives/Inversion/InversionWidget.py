@@ -66,9 +66,6 @@ MAX_DIST = 140.0
 logger = logging.getLogger(__name__)
 
 class InversionWidget(QWidget, Ui_PrInversion):
-    # The old class had 'name' and 'ext'. Since this class doesn't inherit from
-    # perspective, I'm not convinced they are needed here.
-
     calculationComplete = Signal()
     batchCalculationOutput = Signal(object)
     estimationComplete = Signal()
