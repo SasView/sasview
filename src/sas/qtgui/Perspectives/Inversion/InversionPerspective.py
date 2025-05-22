@@ -1,4 +1,5 @@
 import logging
+from typing_extensions import override
 import numpy as np
 
 
@@ -392,8 +393,15 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         return tab_id
 
-
-
+    def removeData(self, data_list: list[QtGui.QStandardItem]):
+        # We need this list because we can't modify the tabs list while looping over it.
+        tabs_to_remove: list[InversionWidget] = []
+        for datum in data_list:
+            for tab in self.tabs:
+                if any([result.logic.data_item == datum for result in tab.results]):
+                    tabs_to_remove.append(tab)
+        for to_remove in tabs_to_remove:
+            self.closeTabByName(to_remove.tab_name)
 
     def addData(self, data=None, is_batch=False, tab_index=None):
 
