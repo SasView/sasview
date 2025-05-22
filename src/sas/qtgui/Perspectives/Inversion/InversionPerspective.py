@@ -122,9 +122,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         Update local bookkeeping on tab close
         """
-        # don't remove the last tab
+        # If we're removing the last tab, create a new empty tab.
         if len(self.tabs) <= 1:
-            return
+            self.addData(None)
         self.closeTabByIndex(index)
 
     def closeTabByIndex(self, index):
