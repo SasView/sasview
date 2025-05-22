@@ -20,7 +20,7 @@
   <url type="vcs-browser">https://github.com/SasView/sasview</url>
 
   <releases>
-    <release version="6.1.0a1" date="2025-04-30"></release>
+    <release version="6.1.0a2" date="2025-05-22"></release>
   </releases>
 
   <launchable type="desktop-id">org.sasview.sasview.desktop</launchable>
