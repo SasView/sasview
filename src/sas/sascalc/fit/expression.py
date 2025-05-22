@@ -240,9 +240,22 @@ def compile_constraints(symtab, exprs, context={}):
     return retfn
 
 # Simple parameter class for checking constraints
-class _Parameter:
+class _Variable:
     def __init__(self, value=0):
         self.value = value
+
+class _Parameter:
+    slot = None
+    def __init__(self, value=0):
+        self.slot = _Variable(value)
+
+    @property
+    def value(self):
+        return self.slot.value
+    
+    @value.setter
+    def value(self, value):
+        self.slot.value = value
 
 def check_constraints(symtab, exprs, context={}, html=False):
     """
@@ -313,7 +326,7 @@ def _compile_constraints(symtab, exprs, context={}, html=False):
     # of the parameter in the expression.
     names = list(sorted(symtab.keys()))
     parameters = dict(('P%d'%i, symtab[k]) for i, k in enumerate(names))
-    mapping = dict((k, 'P%d.value'%i) for i, k in enumerate(names))
+    mapping = dict((k, 'P%d.slot'%i) for i, k in enumerate(names))
 
     # Add the parameters to the global context
     global_context = standard_symbols(context)

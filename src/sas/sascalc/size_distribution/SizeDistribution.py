@@ -10,7 +10,7 @@ from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
 from sasmodels import resolution as rst
 
-from sas.sascalc.poresize.maxEnt_method import matrix_operation, maxEntMethod
+from sas.sascalc.size_distribution.maxEnt_method import matrix_operation, maxEntMethod
 
 logger = logging.getLogger(__name__)
 

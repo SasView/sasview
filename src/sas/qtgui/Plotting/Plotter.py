@@ -5,6 +5,7 @@ import functools
 import copy
 import math
 import matplotlib as mpl
+import matplotlib.ticker as ticker
 import numpy as np
 import textwrap
 from matplotlib.font_manager import FontProperties
@@ -907,6 +908,15 @@ class PlotterWidget(PlotterBase):
             from matplotlib.pyplot import gca
             a = gca()
             a.set_yticklabels(a.get_yticks(), **fy)
+        if self.ax.xaxis.get_scale() == "log":
+            self.ax.xaxis.set_major_formatter(ticker.LogFormatterSciNotation(labelOnlyBase=True))
+        else:
+            self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
+        if self.ax.yaxis.get_scale() == "log":
+            self.ax.yaxis.set_major_formatter(ticker.LogFormatterSciNotation(labelOnlyBase=True))
+        else:
+            self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
+
         self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):

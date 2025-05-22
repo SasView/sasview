@@ -26,8 +26,8 @@ pyparsing
 PySide6
 pytools
 qtconsole
-sasdata
-sasmodels
+sasdata @ git+https://github.com/SasView/sasdata.git@sasdata_0.10.0
+sasmodels @ git+https://github.com/SasView/sasmodels.git@sasmodels_1.0.10
 scipy
 siphash24
 sphinx

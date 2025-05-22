@@ -2,7 +2,7 @@ import numpy as np
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import MaxEntResult
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.sascalc.poresize.SizeDistribution import background_fit
+from sas.sascalc.size_distribution.SizeDistribution import background_fit
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 BACKGD_PLOT_LABEL = "Background"
@@ -174,7 +174,7 @@ class SizeDistributionLogic:
         dy = result.bin_err
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.is_data = False
-        # new_plot.plot_role = DataRole.ROLE_STAND_ALONE
+        new_plot.plot_role = DataRole.ROLE_SIZE_DISTRIBUTION
         # new_plot.symbol = "Line"
 
         new_plot.id = SIZE_DISTR_LABEL
@@ -188,12 +188,13 @@ class SizeDistributionLogic:
 
         # Create vertical lines for trusted range
         x_trust = self.computeTrustRange(qmin, qmax)
-        y_max_trust = np.full_like(x_trust, 1.0)  # lines start at 0.0 and end at y
+        y_max_trust = np.full_like(x_trust, max(y))  # lines start at 0.0 and end at y
         trust_plot = Data1D(x=x_trust, y=y_max_trust)
         trust_plot.is_data = False
         trust_plot.symbol = "Vline"
         trust_plot.xaxis("\\rm{Diameter}", "A")
         trust_plot.yaxis("\\rm{VolumeDistribution}", "")
+        trust_plot.plot_role = DataRole.ROLE_SIZE_DISTRIBUTION
 
         trust_plot.id = TRUST_RANGE_LABEL
         trust_plot.group_id = GROUP_ID_SIZE_DISTR_FIT

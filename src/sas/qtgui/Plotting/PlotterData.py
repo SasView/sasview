@@ -35,6 +35,9 @@ class DataRole(Enum):
     ROLE_POLYDISPERSITY = auto()
     # ANGULAR_SLICE role is to ensure angular slices from 2D plots are on linear scale
     ROLE_ANGULAR_SLICE = auto()
+    # SIZE_DISTRIBUTION role is to allow for plotting the vol fraction results on a lin-log scale
+    # without plotting the parent data
+    ROLE_SIZE_DISTRIBUTION = auto()
 
 
 class Data1D(PlottableData1D, LoadData1D):
