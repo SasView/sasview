@@ -108,7 +108,6 @@ class InversionWidget(QWidget, Ui_PrInversion):
             estimated_parameters=None
         )
 
-    # TODO: What is this function normally called?
     def events(self):
         self.calculateThisButton.clicked.connect(self.startThread)
         self.calculateAllButton.clicked.connect(self.startThreadAll)
