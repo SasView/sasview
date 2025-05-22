@@ -61,7 +61,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.tabCloseRequested.connect(self.tabCloses)
 
         # List of active Pr Tabs
-        self.tabs = []
+        self.tabs: list[InversionWidget] = []
         self.setTabsClosable(True)
 
 
