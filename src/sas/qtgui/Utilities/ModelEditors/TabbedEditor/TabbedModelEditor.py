@@ -1002,6 +1002,12 @@ description = """{description}"""
 ER_VR_TEMPLATE = '''\
 # NOTE: If you want to couple this model with structure factors (S(Q)), please uncomment this section. This
 #     function will need to return a meaningful value to enable full structure factor compatibility.
+# 
+# The modes in which the effective radius can be applied. This list allows arbitrary values, but the index of the mode
+#    will be passed to the calculation, not the text. Ensure the radius_effective method reutrns the correct value
+#    based on the index.
+# radius_effective_modes = ["equivalent volume sphere", "radius", "half length", "half total length",]
+#
 # def ER({args}):
 #     """
 #     Effective radius of particles to be used when computing structure factors.
