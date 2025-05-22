@@ -82,6 +82,7 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.tab_id = tab_id
 
         self.communicator: Communicate  = self.parent.communicator()
+        self.logic = InversionLogic()
 
         # We're going to use this structure even if we're just dealing with one
         # specific datum. Just that this dictionary would then have one item in
@@ -101,10 +102,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
         self.events()
 
     def initResult(self) -> InversionResult:
-        logic = InversionLogic()
         return InversionResult(
-            logic=logic,
-            calculator=NewInvertor(logic),
+            self.logic,
+            calculator=NewInvertor(self.logic),
             pr_plot=None,
             data_plot=None,
             outputs=None,
@@ -455,3 +455,9 @@ class NewInversionWidget(QWidget, Ui_PrInversion):
             self.backgroundInput.setEnabled(True)
         elif self.manualBgd.isChecked():
             self.backgroundInput.setEnabled(False)
+
+    def getPage(self):
+        """
+        Placeholder for state retrieval implementation.
+        """
+        return {}

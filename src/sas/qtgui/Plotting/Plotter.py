@@ -917,20 +917,15 @@ class PlotterWidget(PlotterBase):
             from matplotlib.pyplot import gca
             a = gca()
             a.set_yticklabels(a.get_yticks(), **fy)
-        if x_is_scientific:
-            self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
-            self.ax.xaxis.get_major_formatter().set_scientific(True)
-            self.ax.xaxis.get_major_formatter().set_powerlimits((0, 0))
+        if self.ax.xaxis.get_scale() == "log":
+            self.ax.xaxis.set_major_formatter(ticker.LogFormatterSciNotation(labelOnlyBase=True))
         else:
             self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
-            self.ax.xaxis.get_major_formatter().set_scientific(False)
-        if y_is_scientific:
-            self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
-            self.ax.yaxis.get_major_formatter().set_scientific(True)
-            self.ax.yaxis.get_major_formatter().set_powerlimits((0, 0))
+        if self.ax.yaxis.get_scale() == "log":
+            self.ax.yaxis.set_major_formatter(ticker.LogFormatterSciNotation(labelOnlyBase=True))
         else:
             self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
-            self.ax.yaxis.get_major_formatter().set_scientific(False)
+
         self.canvas.draw_idle()
 
     def onMplMouseDown(self, event):
