@@ -59,6 +59,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.parent = parent
         self.communicate = self.parent.communicate
         #self.communicate = self.parent.communicator()
+        self.communicate.dataDeletedSignal.connect(self.removeData)
         self.tabCloseRequested.connect(self.tabCloses)
 
         # List of active Pr Tabs
