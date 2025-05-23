@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass
 import logging
+from typing import Any
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QStandardItem, QIntValidator
 from PySide6.QtWidgets import QWidget
@@ -452,7 +453,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         elif self.manualBgd.isChecked():
             self.backgroundInput.setEnabled(False)
 
-    def serialiseResult(self, result: InversionResult):
+    def serialiseResult(self, result: InversionResult) -> dict[str, Any]:
         return {
             'alpha': result.calculator.alpha,
             'background': result.calculator.background,
@@ -478,5 +479,5 @@ class InversionWidget(QWidget, Ui_PrInversion):
             'y': result.calculator.y
         }
 
-    def getPage(self):
+    def getPage(self) -> list[dict[str, Any]]:
         return [self.serialiseResult(result) for result in self.results]
