@@ -37,7 +37,7 @@ shapes, the sixth through eighth rows are to position the particle in space, the
 the center of rotation, the 12th through 15th rows define the angles of rotation about the center of rotation and the
 last row defines the particle color.
 
-The rotation of particles is requires further discussion. As mentioned, each particle can be rotated separately from all
+The rotation of particles requires further discussion. As mentioned, each particle can be rotated separately from all
 other particles, but the center of rotation does not need to be the center of the particle, or within the particle volume
 at all. The RP values define the center of particle rotation. When the alpha, beta, and gamma angles are changed, the
 individual particle is rotated about the center of rotation. If the center of rotation is the particle centroid, this will
