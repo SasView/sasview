@@ -494,6 +494,16 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             GuiUtils.updateModelItemWithPlot(self._model_item, self.fit_plot, title)
             plots.append(self.fit_plot)
 
+        if len(plots) == 1:
+            # only the data itself to plot, but need to append the Data1D object
+            main_data = GuiUtils.dataFromItem(plots[0])
+            main_data.show_q_range_sliders = True
+            main_data.slider_update_on_move = False
+            main_data.slider_perspective_name = "SizeDistribution"
+            main_data.slider_low_q_input = ["txtMinRange"]
+            main_data.slider_high_q_input = ["txtMaxRange"]
+            plots.append(main_data)
+
         self.communicate.plotRequestedSignal.emit(plots, None)
 
     def getState(self):
