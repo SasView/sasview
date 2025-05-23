@@ -421,7 +421,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Create tab
         # tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab_name = self.getTabName(is_batch=is_batch)
-        tab = InversionWidget(self.parent, data, tab_index, tab_name)
+        tab = InversionWidget(self, self.parent, data, tab_index, tab_name)
         #ObjectLibrary.addObject(tab_name, tab)
         icon = QtGui.QIcon()
         # Setting UP batch Mode for 1D data

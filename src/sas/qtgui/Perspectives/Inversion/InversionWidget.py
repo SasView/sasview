@@ -7,6 +7,7 @@ from PySide6.QtGui import QStandardItem, QIntValidator
 from PySide6.QtWidgets import QWidget
 
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
+from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, EstimateNT
@@ -72,10 +73,11 @@ class InversionWidget(QWidget, Ui_PrInversion):
     estimationComplete = Signal()
     changeBackgroundMode = Signal()
 
-    def __init__(self, parent=None, data=None, tab_id=1, tab_name=''):
+    def __init__(self, window: InversionWindow, parent=None, data=None, tab_id=1, tab_name=''):
         super(InversionWidget, self).__init__()
 
         self.parent = parent
+        self.window = window
         self.tab_name = tab_name
         self.tab_id = tab_id
 
