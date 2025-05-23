@@ -2,7 +2,7 @@ import numpy as np
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import MaxEntResult
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.sascalc.poresize.SizeDistribution import background_fit
+from sas.sascalc.size_distribution.SizeDistribution import background_fit
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 BACKGD_PLOT_LABEL = "Background"
