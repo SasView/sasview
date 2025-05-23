@@ -287,7 +287,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id
         # will just make the page displayed from the top
-        self._manager.showHelp(tree_location)
+        self.parent.showHelp(tree_location)
 
 
 
