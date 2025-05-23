@@ -530,6 +530,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.constraint.variableTable.prPoints.setText("100")
         self.constraint.variableTable.Npoints.setText("3000")
         self.constraint.variableTable.pluginModelName.setText("Model_1")
+        self.constraint.createPlugin.setEnabled(False)
 
     def onClickingClose(self):
         """Close Shape2SAS GUI"""
