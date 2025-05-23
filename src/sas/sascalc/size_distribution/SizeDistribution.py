@@ -1,7 +1,7 @@
 
 import numpy as np
 import logging
-from scipy import stats, integrate 
+from scipy import stats, integrate, optimize
 
 from sasdata.dataloader.data_info import Data1D, DataInfo
 from sasmodels.data import empty_data1D
@@ -44,6 +44,14 @@ def add_gaussian_noise(x, dx, seed=None):
 
     return noisy_data
 
+def line_func(x, b, m):
+    ## y=A*x^m
+    ## ln(y) = ln(A) + m*ln(x)
+    ## b = ln(A)
+    ## m = m
+
+    return b + m*x
+
 def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
     """
     THIS IS A WORK IN PROGRESS AND WILL NOT RUN
@@ -64,7 +72,7 @@ def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
 
     # Identify the bin range for the fit
     idx = (data.x >= qmin) & (data.x <= qmax)
-
+    
     fx = np.zeros(len(data.x))
 
     # Uncertainty
@@ -78,23 +86,31 @@ def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
     # Compute theory data f(x)
     fx[idx] = data.y[idx]
 
+    ## # Linearize the data 
+    linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=sigma[idx]/fx[idx])
     ##Get values of scale and if required power
-    if power is not None and power != 0:
-        # Linearize the data for a power law fit (log, log)
-        linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=(1/np.log(10))*sigma[idx]/fx[idx])
-    else:
-        linearized_data = Data1D(data.x[idx], fx[idx], dy=None)
+    if power is not None:
+        # Fit only scale 
+        fit_func = lambda x,b:line_func(x, b, power)
+        init_guess = (linearized_data.y[0])
 
-    # slope, intercept, _, _, err_slope, err_int = stats.linregress(linearized_data.x, linearized_data.y)
-    result = stats.linregress(linearized_data.x, linearized_data.y)
-    intercept = np.mean(linearized_data.y - result.slope * linearized_data.x)
-    n = len(linearized_data.x)
-    residuals = linearized_data.y - (result.slope * linearized_data.x + intercept)
-    sigma = np.sqrt(np.sum(residuals**2) / (n - 1))  # Sample standard deviation
-    #std_dev_intercept = sigma * np.sqrt(np.sum(linearized_data.x**2) / (n * np.sum((linearized_data.x - np.mean(linearized_data.x))**2)))
-    #mean_value = np.mean(numbers)
-    #std_dev = np.std(numbers)
-    return np.exp(result.slope), result.intercept
+    else:
+        # Fit both the power and scale 
+        
+        fit_func = line_func
+        init_guess = (linearized_data.y[0], 4)
+
+    param_result, pcov = optimize.curve_fit(fit_func, linearized_data.x, linearized_data.y, init_guess, sigma = linearized_data.dy)
+    param_err = np.sqrt(np.diag(pcov))
+
+
+    if len(param_err) > 1: 
+        param_err[0] = np.exp(param_result[0])*param_err[0]
+    else:
+        param_err[0] = np.exp(param_result[0])*param_err[0]
+    
+    
+    return param_result, param_err 
 
 
 def ellipse_volume(rp,re):
