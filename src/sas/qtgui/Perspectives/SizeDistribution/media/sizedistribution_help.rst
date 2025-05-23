@@ -24,25 +24,29 @@ the equation to fit is:
     I(Q)= \Delta \rho^2 \int N_p(r) P(Q,r) dr
 
 Where $N_p(r)$ is the number density of particles of characteristic dimension
-r, and P(Q,r) is the form factor for that characteristic dimension. For a
+$r$, and $P(Q,r)$ is the form factor for that characteristic dimension. The
+exact meaning of $r$ will of course depend on the model being used.For a
 sphere this translates as:
 
 .. math::
     P(Q,r) = \left[
-        3V_p(\Delta\rho) \cdot \frac{\sin(Qr) - Qr\cos(qr))}{(Qr)^3}
+        3V_p(\Delta\rho) \cdot \frac{\sin(Qr) - Qr\cos(Qr))}{(Qr)^3}
         \right]^2
 
-SasView is using the sasmodels package and other shapes are expected to be
-added in the future. Also, sasmodels automatically scales to volume fraction
-rather than number density using
+where in this case $r$ is the radius of the sphere. SasView is using the
+sasmodels package and other shapes are expected to be added in the future.
+Also, sasmodels automatically scales to volume fraction rather than number
+density using
 
 .. math::
     N_p = \phi/V_p
 
-The current implementation uses an ellipsoid of revolution. The default is an
-axial ratio of 1 which is a sphere. The equation for an ellipsoid of revolution
-is given in the sasmodels documentation and $r = R_{eq}$ with an eccentricity
-(aspect ratio) fixed by the user which is $Ecc = R_polar/R_eq$.
+The current implementation uses an ellipsoid of revolution. Here $r$ in the
+above equations is the equatorial radius. The default is for an ellipsoid with
+polar radius = equatorial radius and thus an axial ratio of 1 which is a
+sphere. The equation for an ellipsoid of revolution is given in the sasmodels
+documentation and $r = R_{eq}$ with an eccentricity (aspect ratio) fixed by the
+user which is $Ecc = R_{polar}/R_{eq}$.
 
 The “fitting parameter” in this approach then is the distribution function.
 In order to calculate this practically over a finite $Q$ range, we replace the
@@ -60,7 +64,7 @@ used. Here we implement only the most common MaxEnt (Maximum Entropy) method
 used for example by the famous CONTIN algorithm used in light scattering.
 
 .. note::
-    The assmumptions inherent in this method are:
+    The assumptions inherent in this method are:
     * The system can be approximated as a two phase system
     * The scattering length density of each phase is known
     * The minor phase is made up of domains of varying sizes but a fixed shape
@@ -79,7 +83,7 @@ framework, the best solution to an optimization problem is the solution that
 leads to the **Maximum Entropy** where the Shannon Entropy is defined as:
 
 .. math::
-    H(X) = - \Sigma p(x_i) ln p(x_i)
+    H(X) = - \sum_{i} p(x_i) ln p(x_i)
 
 Where $p(x_i)$ is the probability of the ith distribution.
 
@@ -110,10 +114,10 @@ INSERT IMAGE HERE!!!
 This will open the panel on the *Parameters* tab and plot the data to fit.
 The most important parameters to adjust at this point are the minimum and
 maximum diameters of the distribution. The calculation will only explore
-diameters in this range. It is important that the range not excessivly exceed
+diameters in this range. It is important that the range not excessively exceed
 the limits imposed by the $Q$ range being fit.
 
-If the data is on absolute scale and a quantitave volume fraction is desired the
+If the data is on absolute scale and a quantitative volume fraction is desired the
 contrast factor between the domain of interest and the matrix must be set
 correctly. Otherwise, the value is not important and can be left alone.
 
@@ -123,11 +127,11 @@ calculated.
 The models section default is usually appropriate. Currently only the ellipsoid
 model is implemented. This may be expanded in the future to include cylinders
 for example. The aspect ratio for the ellipsoid however can be changed. The
-default of 1 is for a sphere. An aspect ration greater than 1 will yield a
+default of 1 is for a sphere. An aspect ratio greater than 1 will yield a
 prolate ellipsoid while a value smaller than 1 is for an oblate ellipsoid.
 
 .. Warning::
-   The Size Distribution analyis assumes the data is properly background
+   The Size Distribution analysis assumes the data is properly background
    subtracted. The smaller sizes in particular will be very sensitive to that.
    If this is not the case proceed to the options tab as described below and
    ensure that the background subtraction is set correctly.
@@ -143,8 +147,8 @@ After a short time, the graph will be updated with the fit to the data using
 the resulting distribution, while a second plot will pop up showing the final
 distribution of sizes that are returned, giving the volume fraction (true or
 relative depending on whether the data are on absolute scale or not) of each
-size. Finally the *Ouput* section of the *Paremeters* tab will show the
-results including whether or not the fitting converged, the unormalized
+size. Finally the *Output* section of the *Parameters* tab will show the
+results including whether or not the fitting converged, the unnormalized
 $\Chi^2$, the percent volume fraction of domains (assuming absolute scaled
 data and correct contrast term) along with statistics on the diameter such
 as the mean and median.
@@ -230,8 +234,8 @@ it is not, then the uncertainties can be far too small. This will have a huge
 impact on the ability of this analyis to converge. This is often a problem
 with X-ray data for example. A first order correction is made available here
 in the ``Weight factor`` box. The value entered here effectivly increases the
-size of the uncertainties sent to the fitting routine thus relaxing the
-$\Chi^2$ constraint and allowing convergence.
+size of the uncertainties sent to the fitting routine by that factor. Larger
+error bars will decrease $\ch^2$ thus making convergence easier.
 
 Finally, there is a ``Method parameters`` box which contains two adjustable
 parameters:
