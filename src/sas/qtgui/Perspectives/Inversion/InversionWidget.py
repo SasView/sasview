@@ -121,6 +121,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.estimateBgd.pressed.connect(self.handleBackgroundModeChange)
         self.manualBgd.pressed.connect(self.handleBackgroundModeChange)
         self.dataList.currentIndexChanged.connect(self.handleCurrentDataChanged)
+        self.helpButton.clicked.connect(self.onHelp)
 
         for input_box in [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput, self.minQInput,
                           self.maxQInput, self.slitHeightInput, self.slitHeightInput]:
@@ -482,3 +483,6 @@ class InversionWidget(QWidget, Ui_PrInversion):
 
     def getPage(self) -> list[dict[str, Any]]:
         return [self.serialiseResult(result) for result in self.results]
+
+    def onHelp(self):
+        self.parent.help()
