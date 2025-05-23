@@ -487,4 +487,4 @@ class InversionWidget(QWidget, Ui_PrInversion):
         return [self.serialiseResult(result) for result in self.results]
 
     def onHelp(self):
-        self.parent.help()
+        self.window.help()
