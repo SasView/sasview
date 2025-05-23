@@ -169,7 +169,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
     def getSerializePage(self, index=None):
         """
-        Serialize and return a dictionary of {data_id: inversion-state}
+        Serialize and return a dictionary of {tab_id: inversion-state}
         Return original dictionary if no data
         """
         state = {}
@@ -178,10 +178,12 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # If data on tab empty - do nothing TODO: Reinstate this check.
         tab = self.tabs[index]
         if tab.currentResult.logic.data_is_loaded:
+            tab_state = {}
             tab_data = tab.getPage()
             for datum in tab_data:
                 data_id = datum.pop('data_id', '')
-                state[data_id] = {'pr_params': tab_data}
+                tab_state[data_id] = {'pr_params': tab_data}
+            state[tab.tab_id] = tab_state
         return state
 
 
