@@ -179,8 +179,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         tab = self.tabs[index]
         if tab.currentResult.logic.data_is_loaded:
             tab_data = tab.getPage()
-            data_id = tab_data.pop('data_id', '')
-            state[data_id] = {'pr_params': tab_data}
+            for datum in tab_data:
+                data_id = datum.pop('data_id', '')
+                state[data_id] = {'pr_params': tab_data}
         return state
 
 
