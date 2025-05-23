@@ -323,10 +323,10 @@ jobs:
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
-            installers/dist/setupSasView*.exe
+            installers/dist/setupSasView.exe
             installers/dist/SasView6-macos-13.dmg
             installers/dist/SasView6-macos-latest.dmg
-            installers/dist/SasView*.tar.gz
+            installers/dist/SasView6.tar.gz
           if-no-files-found: ignore
 
 
