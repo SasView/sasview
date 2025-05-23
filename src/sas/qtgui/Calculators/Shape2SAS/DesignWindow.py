@@ -119,6 +119,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #create and set layout for buttons
         self.SAXSTabButtons = ButtonOptions()
         self.SAXSTabButtons.help.setToolTip("Go to help page")
+        self.SAXSTabButtons.help.clicked.connect(self.onHelp)
         self.SAXSTabButtons.closePage.setToolTip("Close Shape2SAS")
         self.SAXSTabButtons.reset.setToolTip("Reset this page to default")
         self.SAXSTabButtons.reset.clicked.connect(self.onSAXSExperimentReset)
@@ -153,9 +154,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.constraint.createPlugin.clicked.connect(self.getPluginModel)
         self.constraint.buttonOptions.reset.clicked.connect(self.onConstraintReset)
         self.constraint.buttonOptions.closePage.clicked.connect(self.constraint.onClosingConstraints)
+        self.constraint.buttonOptions.help.clicked.connect(self.onHelp)
 
         #create png of each tab
-        self.modelTabButtonOptions.help.clicked.connect(self.onClickingHelp)
+        self.modelTabButtonOptions.help.clicked.connect(self.onHelp)
 
     def showConstraintWindow(self):
         """Get the Constraint window"""
@@ -538,10 +540,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.close()
         self.constraint.onClosingConstraints()
 
-    def onClickingHelp(self):
+    def onHelp(self):
         """Opening the help window"""
-        print("Help")
-        #TODO: creat HTML help file to be displayed
+        location = "/user/qtgui/Calculators/shape_2_sas_help.html"
+        self.parent.showHelp(location)
 
     @staticmethod
     def ifNoCondition(name: str, names: list[str], **kwargs):
