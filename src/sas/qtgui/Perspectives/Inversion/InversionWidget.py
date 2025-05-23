@@ -455,6 +455,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
 
     def serialiseResult(self, result: InversionResult) -> dict[str, Any]:
         return {
+            'data_id': result.logic.data.id,
             'alpha': result.calculator.alpha,
             'background': result.calculator.background,
             'chi2': result.calculator.chi2,
