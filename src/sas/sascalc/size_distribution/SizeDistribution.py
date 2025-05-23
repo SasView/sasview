@@ -44,8 +44,13 @@ def add_gaussian_noise(x, dx, seed=None):
 
     return noisy_data
 
-def line_func(x,m,b):
-    return b+m*x
+def line_func(x, b, m):
+    ## y=A*x^m
+    ## ln(y) = ln(A) + m*ln(x)
+    ## b = ln(A)
+    ## m = m
+
+    return b + m*x
 
 def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
     """
@@ -81,37 +86,30 @@ def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
     # Compute theory data f(x)
     fx[idx] = data.y[idx]
 
+    ## # Linearize the data 
+    linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=sigma[idx]/fx[idx])
     ##Get values of scale and if required power
     if power is not None:
-        # Linearize the data for a linear or power law fit
-        
-        linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=sigma[idx]/fx[idx])
-        fit_func = lambda x,b:line_func(x, power, b)
+        # Fit only scale 
+        fit_func = lambda x,b:line_func(x, b, power)
         init_guess = (linearized_data.y[0])
 
     else:
         # Fit both the power and scale 
-        linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=sigma[idx]/fx[idx])
+        
         fit_func = line_func
-        init_guess = (4, linearized_data.y[0])
+        init_guess = (linearized_data.y[0], 4)
 
     param_result, pcov = optimize.curve_fit(fit_func, linearized_data.x, linearized_data.y, init_guess, sigma = linearized_data.dy)
     param_err = np.sqrt(np.diag(pcov))
 
+
     if len(param_err) > 1: 
-        param_err[1] = np.exp(param_result[1])*param_err[1]
+        param_err[0] = np.exp(param_result[0])*param_err[0]
     else:
         param_err[0] = np.exp(param_result[0])*param_err[0]
     
-    # slope, intercept, _, _, err_slope, err_int = stats.linregress(linearized_data.x, linearized_data.y)
-    #result = stats.linregress(linearized_data.x, linearized_data.y)
-    #intercept = np.mean(linearized_data.y - result.slope * linearized_data.x)
-    #n = len(linearized_data.x)
-    #residuals = linearized_data.y - (result.slope * linearized_data.x + intercept)
-    #sigma = np.sqrt(np.sum(residuals**2) / (n - 1))  # Sample standard deviation
-    #std_dev_intercept = sigma * np.sqrt(np.sum(linearized_data.x**2) / (n * np.sum((linearized_data.x - np.mean(linearized_data.x))**2)))
-    #mean_value = np.mean(numbers)
-    #std_dev = np.std(numbers)
+    
     return param_result, param_err 
 
 
