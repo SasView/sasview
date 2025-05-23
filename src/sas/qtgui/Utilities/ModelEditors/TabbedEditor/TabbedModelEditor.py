@@ -825,8 +825,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Structure factor models must have radius_effective and volfraction
             param_names.append('radius_effective')
             param_names.append('volfraction')
-            model_text += "    ['radius_effective', '', 1, [0.0, numpy.inf], 'volume', '']"
-            model_text += "    ['volfraction', '', 1, [0.0, 1.0], '', '']"
+            model_text += "    ['radius_effective', '', 1, [0.0, inf], 'volume', ''],\n"
+            model_text += "    ['volfraction', '', 1, [0.0, 1.0], '', ''],\n"
         for pname, pvalue, desc in self.getParamHelper(param_str):
             param_names.append(pname)
             model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
