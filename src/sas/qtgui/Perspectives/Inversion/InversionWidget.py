@@ -451,3 +451,32 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.backgroundInput.setEnabled(True)
         elif self.manualBgd.isChecked():
             self.backgroundInput.setEnabled(False)
+
+    def serialiseResult(self, result: InversionResult):
+        return {
+            'alpha': result.calculator.alpha,
+            'background': result.calculator.background,
+            'chi2': result.calculator.chi2,
+            'cov': result.calculator.cov,
+            'd_max': result.calculator.dmax,
+            'elapsed': result.calculator.elapsed,
+            'err': result.calculator.err,
+            'est_bck': result.calculator.est_bck,
+            'iq0': result.calculator.iq0(result.calculator.out),
+            'out': result.calculator.out,
+            'oscillations': result.calculator.oscillations(result.calculator.out),
+            'pos_frac': result.calculator.get_positive(result.calculator.out),
+            'pos_err': result.calculator.get_pos_err(result.calculator.out,
+                                                     result.calculator.cov),
+            'q_max': result.calculator.q_max,
+            'q_min': result.calculator.q_min,
+            'rg': result.calculator.rg(result.calculator.out),
+            'slit_height': result.calculator.slit_height,
+            'slit_width': result.calculator.slit_width,
+            'suggested_alpha': result.calculator.suggested_alpha,
+            'x': result.calculator.x,
+            'y': result.calculator.y
+        }
+
+    def serialiseTab(self):
+        return [self.serialiseResult(result) for result in self.results]
