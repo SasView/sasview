@@ -859,7 +859,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Add parameters to ER and VR functions and include placeholder functions
         model_text += "\n"
-        model_text += ER_VR_TEMPLATE.format(args=", ".join(param_names))
+        model_text += ER_TEMPLATE + "\n"
+        model_text += ER_C_TEMPLATE if model['gen_c'] else ER_PY_TEMPLATE.format(args=", ".join(param_names))
+        model_text += "\n"
+        model_text += VR_TEMPLATE.format(args=", ".join(param_names))
 
         # If polydisperse, create place holders for form_volume
         if pd_params and self.include_polydisperse:
@@ -999,15 +1002,19 @@ description = """{description}"""
 {flags}
 '''
 
-ER_VR_TEMPLATE = '''\
+ER_TEMPLATE = '''\
 # NOTE: If you want to couple this model with structure factors (S(Q)), please uncomment this section. This
 #     function will need to return a meaningful value to enable full structure factor compatibility.
-# 
+'''
+
+ER_C_TEMPLATE = '''\
 # The modes in which the effective radius can be applied. This list allows arbitrary values, but the index of the mode
-#    will be passed to the calculation, not the text. Ensure the radius_effective method reutrns the correct value
+#    will be passed to the calculation, not the text. Ensure the radius_effective method returns the correct value
 #    based on the index.
 # radius_effective_modes = ["equivalent volume sphere", "radius", "half length", "half total length",]
-#
+'''
+
+ER_PY_TEMPLATE = '''\
 # def ER({args}):
 #     """
 #     Effective radius of particles to be used when computing structure factors.
@@ -1015,7 +1022,9 @@ ER_VR_TEMPLATE = '''\
 #     Input parameters are vectors ranging over the mesh of polydispersity values.
 #     """
 #     return 0.0
+'''
 
+VR_TEMPLATE = '''\
 def VR({args}):
     """
     Volume ratio of particles to be used when computing structure factors.
