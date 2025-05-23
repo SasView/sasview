@@ -69,7 +69,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.left_line.qmax = self.qmax
         # draw the sector
         self.update()
-        self._post_data(show_plots = False)
+        self._post_data()
         self.draw()
         self.setModelFromParams()
 
@@ -130,7 +130,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.right_line.save(ev)
         self.left_line.save(ev)
 
-    def _post_data(self, nbins=None, show_plots=True):
+    def _post_data(self, nbins=None):
         """
         compute sector averaging of data2D into data1D
         :param nbins: the number of point to plot for the average 1D data
@@ -182,20 +182,16 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot.id = "SectorQ" + self.data.name
         new_plot.is_data = True
 
+        item = self._item
+        if self._item.parent() is not None:
+            item = self._item.parent()
+        GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
+        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
+        self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
 
-        if show_plots:
-            item = self._item
-            if self._item.parent() is not None:
-                item = self._item.parent()
-            GuiUtils.updateModelItemWithPlot(item, new_plot, new_plot.id)
-            self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
-            self.base.manager.communicator.forcePlotDisplaySignal.emit([item, new_plot])
-
-            if self.update_model:
-                self.setModelFromParams()
-            self.draw()
-        else:
-            return new_plot
+        if self.update_model:
+            self.setModelFromParams()
+        self.draw()
 
 
     def validate(self, param_name, param_value):
@@ -283,7 +279,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.left_line.update(phi=phi, delta=None, mline=self.main_line,
                               side=True, left=True)
         # Post the new corresponding data
-        self._post_data(nbins=self.nbins, show_plots = False)
+        self._post_data(nbins=self.nbins)
         self.draw()
 
     def draw(self):
@@ -292,10 +288,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         """
         self.base.draw()
 
-    def captureSlice(self, nbins=None):
-        new_plot = self._post_data(nbins, show_plots = False)
-
-        return new_plot
 
 class SideInteractor(BaseInteractor):
     """
