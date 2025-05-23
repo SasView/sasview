@@ -233,7 +233,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.regConstantSuggestionButton.setText("{:-3.2g}".format(self.currentResult.estimated_parameters.reg_constant))
 
         self.noOfTermsInput.setText(str(current_calculator.noOfTerms))
-        self.regularizationConstantInput.setText(str(current_calculator.alpha))
+        self.regularizationConstantInput.setText("{:-3.2g}".format(current_calculator.alpha))
         self.maxDistanceInput.setText(str(current_calculator.dmax))
 
         # Options tab
