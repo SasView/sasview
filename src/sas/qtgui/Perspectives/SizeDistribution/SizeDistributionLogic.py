@@ -105,43 +105,47 @@ class SizeDistributionLogic:
         Create a new 1D data instance
         """
         # Background plot
-        backgd_plot = Data1D(self.background.x, self.background.y)
-        backgd_plot.is_data = False
-        backgd_plot.plot_role = DataRole.ROLE_DATA
+        backgd_plot = None
+        if self.background is not None:
+            backgd_plot = Data1D(self.background.x, self.background.y)
+            backgd_plot.is_data = False
+            backgd_plot.plot_role = DataRole.ROLE_DATA
 
-        backgd_plot.id = BACKGD_PLOT_LABEL
-        backgd_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
-        backgd_plot.name = BACKGD_PLOT_LABEL + f"[{self._data.name}]"
+            backgd_plot.id = BACKGD_PLOT_LABEL
+            backgd_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
+            backgd_plot.name = BACKGD_PLOT_LABEL + f"[{self._data.name}]"
 
-        backgd_plot.title = backgd_plot.name
-        backgd_plot.xaxis("\\rm{Q}", "A^{-1}")
-        backgd_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+            backgd_plot.title = backgd_plot.name
+            backgd_plot.xaxis("\\rm{Q}", "A^{-1}")
+            backgd_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        backgd_plot.symbol = "Line"
-        backgd_plot.show_errors = False
+            backgd_plot.symbol = "Line"
+            backgd_plot.show_errors = False
 
         # Background subtracted plot
-        y_sub = self.data.y - self.background.y
-        backgd_subtr_plot = Data1D(self.data.x, y_sub, dy=self._data.dy)
-        backgd_subtr_plot.is_data = False
-        backgd_subtr_plot.plot_role = DataRole.ROLE_DATA
+        backgd_subtr_plot = None
+        if self.background is not None:
+            y_sub = self.data.y - self.background.y
+            backgd_subtr_plot = Data1D(self.data.x, y_sub, dy=self._data.dy)
+            backgd_subtr_plot.is_data = False
+            backgd_subtr_plot.plot_role = DataRole.ROLE_DATA
 
-        backgd_subtr_plot.id = BACKGD_SUBTR_PLOT_LABEL
-        backgd_subtr_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
-        backgd_subtr_plot.name = BACKGD_SUBTR_PLOT_LABEL + f"[{self._data.name}]"
+            backgd_subtr_plot.id = BACKGD_SUBTR_PLOT_LABEL
+            backgd_subtr_plot.group_id = GROUP_ID_SIZE_DISTR_DATA
+            backgd_subtr_plot.name = BACKGD_SUBTR_PLOT_LABEL + f"[{self._data.name}]"
 
-        backgd_subtr_plot.title = backgd_subtr_plot.name
-        backgd_subtr_plot.xaxis("\\rm{Q}", "A^{-1}")
-        backgd_subtr_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+            backgd_subtr_plot.title = backgd_subtr_plot.name
+            backgd_subtr_plot.xaxis("\\rm{Q}", "A^{-1}")
+            backgd_subtr_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        backgd_subtr_plot.symbol = "Circle"
-        backgd_subtr_plot.show_errors = True
-        backgd_subtr_plot.show_q_range_sliders = True
-        # Suppress the GUI update until the move is finished to limit model calculations
-        backgd_subtr_plot.slider_update_on_move = False
-        backgd_subtr_plot.slider_perspective_name = "SizeDistribution"
-        backgd_subtr_plot.slider_low_q_input = ["txtMinRange"]
-        backgd_subtr_plot.slider_high_q_input = ["txtMaxRange"]
+            backgd_subtr_plot.symbol = "Circle"
+            backgd_subtr_plot.show_errors = True
+            backgd_subtr_plot.show_q_range_sliders = True
+            # Suppress the GUI update until the move is finished to limit model calculations
+            backgd_subtr_plot.slider_update_on_move = False
+            backgd_subtr_plot.slider_perspective_name = "SizeDistribution"
+            backgd_subtr_plot.slider_low_q_input = ["txtMinRange"]
+            backgd_subtr_plot.slider_high_q_input = ["txtMaxRange"]
 
         # Fit plot
         fit_plot = None
