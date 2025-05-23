@@ -561,6 +561,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
 
         self.deleteButton.setEnabled(numcolumn > 0)
         self.selected.setEnabled(numcolumn > 0)
+        self.selected.setMinimum(1)
         self.selected.setMaximum(numcolumn)
         
     

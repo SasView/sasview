@@ -16,7 +16,7 @@ def generatePlugin(prof: ModelProfile, constrainParameters: (str), fitPar: [str]
 
     plugin_location = Path(models.find_plugins_dir())
     full_path = plugin_location / file_name
-    full_path.with_suffix('.py')
+    full_path = full_path.with_suffix('.py')
 
     model_str = generateModel(prof, constrainParameters, fitPar, Npoints, pr_points, file_name)
 
@@ -34,7 +34,7 @@ def parListsFormat(par: [[str | float]]) -> str:
 
 def parListFormat(par: [str | float]) -> str:
     """Format a list containing parameters to the model string"""
-    return f"[{', '.join(par)}]"
+    return f"[{', '.join(str(par))}]"
 
 
 def generateModel(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
@@ -65,7 +65,7 @@ Model {model_name.replace('.py', '')} has been built from the following subunits
 """
 
 {nl.join(importStatement)}
-from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (ModelProfile, SimulationParameters, 
+from sas.sascalc.shape2sas.Shape2SAS import (ModelProfile, SimulationParameters, 
                                                         ModelSystem, getPointDistribution, 
                                                         TheoreticalScatteringCalculation, 
                                                         getTheoreticalScattering)
@@ -85,11 +85,11 @@ def Iq({', '.join(fitPar)}):
 {textwrap.indent(translation, '    ')}
     
     modelProfile = ModelProfile(subunits={prof.subunits}, 
-                                    p_s={parListFormat(prof.p_s)}, 
-                                    dimensions={parListsFormat(prof.dimensions)}, 
-                                    com={parListsFormat(prof.com)}, 
-                                    rotation_points={parListsFormat(prof.rotation_points)}, 
-                                    rotation={parListsFormat(prof.rotation)}, 
+                                    p_s={prof.p_s}, 
+                                    dimensions={prof.dimensions}, 
+                                    com={prof.com}, 
+                                    rotation_points={prof.rotation_points}, 
+                                    rotation={prof.rotation}, 
                                     exclude_overlap={prof.exclude_overlap})
     
     simPar = SimulationParameters(q=q, prpoints={pr_points}, Npoints={Npoints}, model_name="{model_name.replace('.py', '')}")
