@@ -812,7 +812,7 @@
               <item>
                <widget class="QLabel" name="label_10">
                 <property name="text">
-                 <string>Volumen fraction</string>
+                 <string>Volume fraction</string>
                 </property>
                </widget>
               </item>
@@ -837,7 +837,7 @@
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string>Volumen fraction (concentration)</string>
+                 <string>Volume fraction (concentration)</string>
                 </property>
                 <property name="text">
                  <string>0.02</string>
