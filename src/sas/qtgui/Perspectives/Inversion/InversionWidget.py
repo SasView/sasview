@@ -478,5 +478,5 @@ class InversionWidget(QWidget, Ui_PrInversion):
             'y': result.calculator.y
         }
 
-    def serialiseTab(self):
+    def getPage(self):
         return [self.serialiseResult(result) for result in self.results]
