@@ -857,16 +857,23 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_text += "\n## uncomment the following if Iq works for vector x\n"
         model_text += "#Iq.vectorized = True\n"
 
-        # Add parameters to ER and VR functions and include placeholder functions
+        # Add parameters to ER functions and include placeholder functions
         model_text += "\n"
-        model_text += ER_VR_TEMPLATE.format(args=", ".join(param_names))
+        if model["gen_c"]:
+            model_text += ER_C_MODEL_TEMPLATE
+            model_text += "\n\n"
+        else:
+            model_text += ER_TEMPLATE.format(args=", ".join(param_names))
 
         # If polydisperse, create place holders for form_volume
         if pd_params and self.include_polydisperse:
             model_text += "\n"
-            model_text += CUSTOM_TEMPLATE_PD.format(args=", ".join(pd_params))
+            model_text += CUSTOM_TEMPLATE_PD_FORM.format(args=", ".join(pd_params))
             for func_line in form_vol_str.split("\n"):
                 model_text += "%s%s\n" % ("    ", func_line)
+            model_text += CUSTOM_TEMPLATE_PD_SHELL.format(args=", ".join(pd_params))
+            for func_line in form_vol_str.split("\n"):
+                model_text += "%s%s\n" % ("#    ", func_line)
 
         # Create place holder for Iqxy
         model_text +="\n"
@@ -877,12 +884,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_text +='## uncomment the following if Iqxy works for vector x, y\n'
         model_text +='#Iqxy.vectorized = True\n'
         model_text += "\n"
-        model_text += "#def Iqxy(%s):\n" % ", ".join(["x", "y"] + param_names)
-        model_text += '#    """Absolute scattering of oriented particles."""\n'
-        model_text += "#    ...\n"
-        model_text += "#    return oriented_form(x, y, args)\n"
-        model_text += "## uncomment the following if Iqxy works for vector x, y\n"
-        model_text += "#Iqxy.vectorized = True\n"
 
         return model_text
 
@@ -999,49 +1000,66 @@ description = """{description}"""
 {flags}
 '''
 
-ER_VR_TEMPLATE = '''\
-# NOTE: If you want to couple this model with structure factors (S(Q)), please uncomment this section. This
-#     function will need to return a meaningful value to enable full structure factor compatibility.
+ER_TEMPLATE = '''\
+# NOTE: If you want to couple this model with structure factors (S(Q)),
+# please uncomment this section. This function will need to return a
+# meaningful value to enable full structure factor compatibility.
+# NOTE 2: If creating a C model uncomment the radius_effective_modes
+# function and NOT this one.
 # 
-# The modes in which the effective radius can be applied. This list allows arbitrary values, but the index of the mode
-#    will be passed to the calculation, not the text. Ensure the radius_effective method reutrns the correct value
-#    based on the index.
-# radius_effective_modes = ["equivalent volume sphere", "radius", "half length", "half total length",]
-#
 # def ER({args}):
-#     """
-#     Effective radius of particles to be used when computing structure factors.
-# 
-#     Input parameters are vectors ranging over the mesh of polydispersity values.
-#     """
+#    """
+#    Effective radius of particles to be used when computing structure
+#    factors. Input parameters are vectors ranging over the mesh of
+#    polydispersity values.
+#    """
 #     return 0.0
-
-def VR({args}):
-    """
-    Volume ratio of particles to be used when computing structure factors.
-
-    Input parameters are vectors ranging over the mesh of polydispersity values.
-    """
-    return 1.0
 '''
 
-CUSTOM_TEMPLATE_PD = '''\
+CUSTOM_TEMPLATE_PD_FORM = '''\
 def form_volume({args}):
     """
-    Volume of the particles used to compute absolute scattering intensity
-    and to weight polydisperse parameter contributions.
+    Volume of the TOTAL particle shape including all "shells" and
+    hollow portions (e.g. a hollow sphere like a vesicle). This is
+    used to compute absolute scattering intensity, to weight
+    polydisperse parameter contributions and when multiplying by
+    a structure factor. Note that for hollow particles you will
+    ALSO need to define a shell volume.
+    """
+'''
+
+CUSTOM_TEMPLATE_PD_SHELL = '''\
+
+# uncomment this function if it is needed
+#def shell_volume({args}):
+    """
+    Uncomment this function if you want the vol fraction (scale)
+    parameter to represent the volume of the "shell" only. For example
+    for a vesicle the volume fraction of lipid is entirely in the
+    shell surrounding the hollow interior. The form_volume will still
+    be required when multiplying by a structure factor.
     """
 '''
 
 FLAG_TEMPLATE = """
-\n# Optional flags (can be removed). Read documentation by pressing 'Help' for more information.\n
-# single = True indicates that the model can be run using single precision floating point values. Defaults to True.
+\n# Optional flags (can be removed). Read documentation by pressing
+# 'Help' for more information.\n
+# single = True indicates that the model can be run using single
+# precision floating point values.
+# Defaults to True.
 single = {chkSingle}\n\n
-# opencl = False indicates that the model should not be run using OpenCL. Defaults to False.
+# opencl = False indicates that the model should not be run using
+# OpenCL. Defaults to False.
 opencl = {chkOpenCL}\n\n
-# structure_factor = False indicates that the model cannot be used as a structure factor to account for interactions between particles. Defaults to False.
+# structure_factor = False indicates that the model is a form factor.
+# Set to true if this model is a structure factor (from the
+# interactions between particles). Defaults to False.
 structure_factor = {chkStructure}\n\n
-# have_fq = False indicates that the model does not define F(Q) calculations in a linked C model. Note that F(Q) calculations are only necessary for accomadating beta approximation. Defaults to False.
+# have_fq = False indicates that the model does not define the
+# amplitude factor, F(Q), calculation in the linked C model. Note that
+# F(Q) is currently only available for C models (defined in the C file)
+# and is currently only used (and is in fact required) for the beta
+# approximation calculation. Defaults to False.
 have_fq = {chkFQ}\n"""
 
 SUM_TEMPLATE = """
@@ -1053,11 +1071,27 @@ model_info.name = '{name}'{desc_line}
 Model = make_model_from_info(model_info)
 """
 
+ER_C_MODEL_TEMPLATE = """\
+# NOTE: If you want to couple this model with structure factors (S(Q)),
+# with your C model, please uncomment this section. This only works
+# with C files. This defines the modes in which the effective radius
+# can be applied. This list allows arbitrary values, but the index of
+# the mode will be passed to the calculation, not the text. Ensure that
+# the radius_effective method in the C file returns the correct value
+# based on the index.
+#radius_effective_modes = ["equivalent volume sphere", "radius", "half length",
+#                          "half total length",]
+"""
+
 LINK_C_MODEL_TEMPLATE = """\
-# To Enable C model, uncomment the line defining `source` and
-# delete the I(Q) function in this Python model after converting your code to C
-# Note: removing or commenting the "source = []" line will unlink the C model from the Python model, 
-# which means the C model will not be checked for errors when edited.
+# To Enable C model, uncomment the line defining `source` and delete
+# the I(Q) function in this Python model after converting your code
+# to C. you should also include any c library files your C code
+# will be using. eg: source = ['lib/sas_3j1x_x.c', 'my_model.c']
+#
+# Note: removing or commenting the "source = []" line will unlink the
+# C model from the Python model, which means the C model will not be
+# checked for errors when edited.
 
 # source = ['{c_model_name}']
 """
@@ -1065,36 +1099,41 @@ LINK_C_MODEL_TEMPLATE = """\
 C_COMMENT_TEMPLATE = """\
 // :::Custom C model template:::
 // This is a template for a custom C model.
-// C Models are used for a variety of reasons in SasView, including better
-//   performance and the ability to perform calculations not possible in Python.
-// For example, all oriented and magnetic models, as well as most models
-// using structure factor calculations, are written in C.
+// C Models are used for a variety of reasons in SasView, including
+//   better performance and the ability to perform calculations not
+//   possible in Python. For example, all oriented and magnetic models,
+//   as well as most models using structure factor calculations, are
+//   written in C.
 // HOW TO USE THIS TEMPLATE:
 // 1. Determine which functions you will need to perform your calculations;
 //    delete unused functions.
-//   1.1 Note that you must define either Iq, Fq, or one of Iqac, Iqabc:
-//     Iq if your model does not use orientation parameters or use structure
-//       factor calculations;
-//     Fq if your model uses structure factor calculations;
-//     Iqac or Iqabc if your model uses orientation parameters/is magnetic;
-//     Fq AND Iqac/Iqabc if your model uses orientation parameters or
-//       is magnetic and has structure factor calculations.
+//   1.1 Note that you must define at least one of Iq, Fq, Iqac, or Iqabc:
+//     Iq or Fq for 1D calculation (i.e. if your model does not use
+//       orientation parameters. NOTE: Fq is highly recommended and
+//       ALWAYS preferred if possible. It is required if your model
+//       will be used with the beta approximation when multiplying by a
+//       structure factor.
+//     Iqac or Iqabc if your model uses orientation parameters/is
+//       magnetic. Iqac is for particles with an axis of symmetry such
+//       as a cylinder or ellipsoid of revolution. Iqabc is required
+//       for particles with no symmetry such as a parallelipiped.
 // 2. Write C code independently of this editor and paste it into the
-//      appropriate functions.
+//    appropriate functions.
 //    2.1 Note that the C editor does not support C syntax checking, so
-//          writing C code directly into the SasView editor is not reccomended.
+//        be aware if writing C code directly into the SasView editor.
 // 3. Ensure a python file links to your C model (source = ['filename.c'])
 // 4. Press 'Apply' or 'Save' to save your model and run a model check
-//      (note that the model check will fail if there is no python file of the
-//      same name in your plugins directory)
+//      (note that the model check will fail if there is no python file
+//      of the same name in your plugins directory)
 // 
-// NOTE: SasView has many built-in functions that you can use in your C model--
-//       for example, spherical Bessel functions (lib/sas_3j1x_x.c), Gaussian
-//       quadrature (lib/sas_J1.c), and more.
-//       To include, add their filename to the `source = []` list in the python
-//       file linking to your C model.
-// NOTE: It also has many common constants following the C99 standard, such as
-//       M_PI, M_SQRT1_2, and M_E. Check documentation for full list.
+// NOTE: SasView has many built-in functions that you can use in your C
+//       model. For example, spherical Bessel functions
+//       (lib/sas_3j1x_x.c), Gaussian, quadrature (lib/sas_J1.c), and
+//       more. To include, add their filename to the `source = []`
+//       list in the python file linking to your C model.
+// NOTE: It also has many common constants following the C99 standard,
+//       such as M_PI, M_SQRT1_2, and M_E. Check documentation for
+//       a full list.
 
 """
 
@@ -1102,21 +1141,44 @@ C_PD_TEMPLATE = """\
 static double
 form_volume({poly_args}) // Remove arguments as needed
 {{
-    return 1.0*{poly_arg1};
+// Volume of the TOTAL particle shape including all "shells" and
+// hollow portions (e.g. a hollow sphere like a vesicle). This is
+// used to compute absolute scattering intensity, to weight
+// polydisperse parameter contributions and when multiplying by
+// a structure factor. Note that for hollow particles you will
+// ALSO need to define a shell volume.
+// IMPORTANT: Make sure to delete the corresponding function in the
+// python file
+    return M_4PI_3 * {poly_arg1} * {poly_arg1} * {poly_arg1};
 }}
+
+// Uncomment this function if you want the vol fraction (scale)
+// parameter to represent the volume of the "shell" only. For example
+// for a vesicle the volume fraction of lipid is entirely in the
+// shell surrounding the hollow interior.
+// IMPORTANT: Make sure to delete the corresponding function in the
+// python file
+//static double
+//shell_volume({poly_args}) // Remove arguments as needed
+//{{
+//    return M_4PI_3 * {poly_arg1} * {poly_arg1} * {poly_arg1};
+//}}
+
 """
 
 C_TEMPLATE = """\
-static double
-radius_effective(int mode) // Add arguments as needed
-{{
-    switch (mode) {{
-    default:
-    case 1:
-    // Define effective radius calculations here...
-    return 0.0;
-    }}
-}}
+// uncomment this and provide appropriate functions for the effective
+// radius to be used IF this is to be ussed with structure factors.
+//static double
+//radius_effective(int mode) // Add arguments as needed
+//{{
+//    switch (mode) {{
+//    default:
+//    case 1:
+//    // Define effective radius calculations here...
+//    return 0.0;
+//    }}
+//}}
 
 static void
 Fq(double q, 
@@ -1125,12 +1187,18 @@ Fq(double q,
    {args}) // Remove arguments as needed
 {{
     // Define F(Q) calculations here...
-    //IMPORTANT: You do not have to define Iq if your model uses Fq for
-    //    beta approximation; the *F2 value is F(Q)^2 and equivalent to
-    //    the output of Iq. You may use Fq instead of Iq even if you do
-    //    not need F(Q) (*F1) for beta approximation, but this is not recommended.
-    //    Additionally, you must still define Iqac or Iqabc if your
-    //    model has orientation parameters.
+    //IMPORTANT: You should NOT define Iq if your model uses Fq. This
+    //    is the preferred approach even if you do not want to use the
+    //    beta approximation. the *F2 value is F(Q)^2 and equivalent to
+    //    the output of Iq. While currently F(Q) is only used in the
+    //    beta approximation, it may be used for other things in the
+    //    future. You must still define Iqac or Iqabc if your model has 
+    //    orientation  parameters (i.e. fits data in 2D plots).
+    // TO USE: Convert your copied Python code to C below and uncomment
+    // it. Note that F2 is essentially F1^2.
+    //IMPORTANT: Ensure that you delete the I(Q) function in the
+    //    corresponding Python file.
+
     *F1 = 0.0;
     *F2 = 0.0;
 }}
@@ -1139,11 +1207,13 @@ static double
 Iq(double q,
    {args}) // Remove arguments as needed
 {{
-    // Define I(Q) calculations here for models independent of shape orientation
-    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, or Iqabc;
-    //    remove others.
-    // TO USE: Convert your copied Python code to C below and uncomment it
-    // Ensure that you delete the I(Q) function in the corresponding Python file.
+    // Define I(Q) calculations here for 1D models (i.e. independent
+    // of shape orientation) that cannot be expressed by F(Q).
+    // TO USE: Convert your copied Python code to C below and
+    //         uncomment it
+    //IMPORTANT: DO NOT define both an I(Q) and and F(Q)
+    //IMPORTANT: Ensure that you delete the I(Q) function in the
+    //           corresponding Python file.
 
     {Iq}
     return 1.0;
@@ -1154,11 +1224,14 @@ Iqac(double qab,
      double qc,
      {args}) // Remove arguments as needed
 {{
-    // Define I(Q) calculations here for models dependent on shape orientation in
+    // Define I(Q) calculations here for models dependent on shape
+    // orientation (i.e. models that compute (Qx, Qy)) in
     // which the shape is rotationally symmetric about *c* axis.
     // Note: *psi* angle not needed for shapes symmetric about *c* axis
-    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy;
-    //   remove others.
+    // IMPORTANT: Only define ONE calculation for 2D I(Q): either
+    //            Iqac or Iqabc.  Remove the other.
+    // IMPORTANT: Make sure to remove or comment out any Iqxy in the
+    //            python file
     return 1.0;
 }}
 
@@ -1168,10 +1241,12 @@ Iqabc(double qa,
       double qc,
       {args}) // Remove arguments as needed
 {{
-    // Define I(Q) calculations here for models dependent on shape orientation in
-    // all three axes.
-    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy;
-    //   remove others.
+    // Define I(Q) calculations here for models dependent on shape
+    //orientation in  all three axes.
+    // IMPORTANT: Only define ONE calculation for 2D I(Q): either
+    //            Iqac or Iqabc.  Remove the other.
+    // IMPORTANT: Make sure to remove or comment out any Iqxy in the
+    //            python file
     return 1.0;
 }}
 
@@ -1180,11 +1255,14 @@ Iqxy(double qx,
      double qy,
      {args}) // Remove arguments as needed
 {{
-    // Define I(Q) calculations here for 2D magnetic models.
-    // WARNING: The use of Iqxy is generally discouraged; Use Iqabc instead
-    //    for its better orientational averaging and documentation for details.
-    // IMPORTANT: Only define ONE calculation for I(Q): either Iq, Iqac, Iqabc, or Iqxy;
-    //    remove others.
+    // WARNING: The use of Iqxy is highly discouraged; Use Iqabc or
+    //    Iqac instead for their better orientational averaging. See
+    //    documentation for details.
+    //    NOTE: This is only supported for backward compatibility
+    // IMPORTANT: Only define ONE calculation for 2D I(Q): either
+    //            Iqac or Iqabc or Ixy.  Remove the others.
+    // IMPORTANT: Make sure to remove or comment out any Iqxy in the
+    //            python file
     
     return 1.0;
 }}
