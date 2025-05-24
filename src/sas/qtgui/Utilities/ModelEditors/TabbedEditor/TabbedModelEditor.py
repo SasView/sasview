@@ -825,8 +825,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             # Structure factor models must have radius_effective and volfraction
             param_names.append('radius_effective')
             param_names.append('volfraction')
-            model_text += "    ['radius_effective', '', 1, [0.0, numpy.inf], 'volume', '']"
-            model_text += "    ['volfraction', '', 1, [0.0, 1.0], '', '']"
+            model_text += "    ['radius_effective', '', 1, [0.0, inf], 'volume', ''],\n"
+            model_text += "    ['volfraction', '', 1, [0.0, 1.0], '', ''],\n"
         for pname, pvalue, desc in self.getParamHelper(param_str):
             param_names.append(pname)
             model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
@@ -859,11 +859,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Add parameters to ER functions and include placeholder functions
         model_text += "\n"
-        if model["gen_c"]:
-            model_text += ER_C_MODEL_TEMPLATE
-            model_text += "\n\n"
-        else:
-            model_text += ER_TEMPLATE.format(args=", ".join(param_names))
+        model_text += ER_TEMPLATE + "\n"
+        model_text += ER_C_TEMPLATE if model['gen_c'] else ER_PY_TEMPLATE.format(args=", ".join(param_names))
+        model_text += "\n"
 
         # If polydisperse, create place holders for form_volume
         if pd_params and self.include_polydisperse:
@@ -1001,12 +999,18 @@ description = """{description}"""
 '''
 
 ER_TEMPLATE = '''\
-# NOTE: If you want to couple this model with structure factors (S(Q)),
-# please uncomment this section. This function will need to return a
-# meaningful value to enable full structure factor compatibility.
-# NOTE 2: If creating a C model uncomment the radius_effective_modes
-# function and NOT this one.
-# 
+# NOTE: If you want to couple this model with structure factors (S(Q)), please uncomment this section. This
+#     function will need to return a meaningful value to enable full structure factor compatibility.
+'''
+
+ER_C_TEMPLATE = '''\
+# The modes in which the effective radius can be applied. This list allows arbitrary values, but the index of the mode
+#    will be passed to the calculation, not the text. Ensure the radius_effective method returns the correct value
+#    based on the index.
+# radius_effective_modes = ["equivalent volume sphere", "radius", "half length", "half total length",]
+'''
+
+ER_PY_TEMPLATE = '''\
 # def ER({args}):
 #    """
 #    Effective radius of particles to be used when computing structure
@@ -1069,18 +1073,6 @@ from sasmodels.sasview_model import make_model_from_info
 model_info = load_model_info('{model1}{operator}{model2}')
 model_info.name = '{name}'{desc_line}
 Model = make_model_from_info(model_info)
-"""
-
-ER_C_MODEL_TEMPLATE = """\
-# NOTE: If you want to couple this model with structure factors (S(Q)),
-# with your C model, please uncomment this section. This only works
-# with C files. This defines the modes in which the effective radius
-# can be applied. This list allows arbitrary values, but the index of
-# the mode will be passed to the calculation, not the text. Ensure that
-# the radius_effective method in the C file returns the correct value
-# based on the index.
-#radius_effective_modes = ["equivalent volume sphere", "radius", "half length",
-#                          "half total length",]
 """
 
 LINK_C_MODEL_TEMPLATE = """\
