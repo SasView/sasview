@@ -90,15 +90,15 @@ class SizeDistributionLogic:
         """
         Estimate the flat background
         """
-        background = background_fit(self.data, None, qmin, qmax)
-        return background[1]
+        background, background_err = background_fit(self.data, 0, qmin, qmax)
+        return np.exp(background)[0]
 
     def fitBackgroundScale(self, power, qmin, qmax):
         """
         Estimate the background scale
         """
-        background = background_fit(self.data, power, qmin, qmax)
-        return background[0]
+        background, background_err = background_fit(self.data, power, qmin, qmax)
+        return np.exp(background)[0]
 
     def newDataPlot(self):
         """

@@ -122,6 +122,8 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         self.highlightFunction = PythonHighlighter(self.txtFunction.document())
         self.highlightFormVolumeFunction = PythonHighlighter(self.txtFormVolumeFunction.document())
 
+        self.setModelTypeCheckBoxEnabledState("")
+
     def initializeModel(self):
         """
         Define the dictionary for internal data representation
@@ -288,11 +290,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         self.model['gen_c'] = self.chkGenC.isChecked()
         self.modelModified.emit()
 
-    def checkPyModelExists(self, filename: str) -> bool:
-        """
-        Checks if a Python model exists in the user plugin directory and forces enabling Python checkbox if not
-        :param filename: name of the file (without extension)
-        """
+    def setModelTypeCheckBoxEnabledState(self, filename: str):
         if not os.path.exists(os.path.join(find_plugins_dir(), filename + '.py')):
             # If the user has not yet created a Python file for a specific filename, then force them to create one
             self.chkGenPython.setChecked(True)
@@ -302,6 +300,13 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         else:
             self.infoLabel.setVisible(False)
             self.chkGenPython.setEnabled(True)
+
+    def checkPyModelExists(self, filename: str) -> bool:
+        """
+        Checks if a Python model exists in the user plugin directory and forces enabling Python checkbox if not
+        :param filename: name of the file (without extension)
+        """
+        self.setModelTypeCheckBoxEnabledState(filename)
         return os.path.exists(os.path.join(find_plugins_dir(), filename + '.py'))
 
     def updateParamTableFromEditor(self, param_list: []):
