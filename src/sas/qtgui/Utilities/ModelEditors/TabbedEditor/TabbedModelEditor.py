@@ -819,23 +819,23 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Write out parameters
         param_names = []    # to store parameter names
         pd_params = []
+        model_text += '#             ["name", "units", default, [lower, upper], "type", "description"],\n'
         model_text += 'parameters = [ \n'
-        model_text += '#   ["name", "units", default, [lower, upper], "type", "description"],\n'
         if self.plugin_widget.chkStructure.isChecked():
             # Structure factor models must have radius_effective and volfraction
             param_names.append('radius_effective')
             param_names.append('volfraction')
-            model_text += "    ['radius_effective', '', 1, [0.0, inf], 'volume', ''],\n"
-            model_text += "    ['volfraction', '', 1, [0.0, 1.0], '', ''],\n"
+            model_text += "              ['radius_effective', '', 1, [0.0, inf], 'volume', ''],\n"
+            model_text += "              ['volfraction', '', 1, [0.0, 1.0], '', ''],\n"
         for pname, pvalue, desc in self.getParamHelper(param_str):
             param_names.append(pname)
-            model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
+            model_text += "              ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
         if pd_param_str:
             for pname, pvalue, desc in self.getParamHelper(pd_param_str):
                 param_names.append(pname)
                 pd_params.append(pname)
-                model_text += "    ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n" % (pname, pvalue, desc)
-        model_text += '    ]\n\n'
+                model_text += "              ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n" % (pname, pvalue, desc)
+        model_text += '             ]\n\n'
 
         # If creating a C model, link it to the Python file
 
@@ -999,15 +999,21 @@ description = """{description}"""
 '''
 
 ER_TEMPLATE = '''\
-# NOTE: If you want to couple this model with structure factors (S(Q)), please uncomment this section. This
-#     function will need to return a meaningful value to enable full structure factor compatibility.
+# NOTE: If you want to couple this model with structure factors (S(Q)),
+# please uncomment this section. This unction will need to return a
+# meaningful value to enable full structure factor compatibility.
 '''
 
 ER_C_TEMPLATE = '''\
-# The modes in which the effective radius can be applied. This list allows arbitrary values, but the index of the mode
-#    will be passed to the calculation, not the text. Ensure the radius_effective method returns the correct value
-#    based on the index.
-# radius_effective_modes = ["equivalent volume sphere", "radius", "half length", "half total length",]
+# This is a list of the modes in which the effective radius can be
+# applied. The list allows arbitrary values, but the index of the mode
+# will be passed to the calculation, not the text. Ensure that the
+# radius_effective method in the C file returns the correct value
+# based on the index. The values are used by the GUI to allow the
+# user to chose which method they wish to apply.
+
+#radius_effective_modes = ["equivalent volume sphere", "radius",
+#                           "half length", "half total length",]
 '''
 
 ER_PY_TEMPLATE = '''\
