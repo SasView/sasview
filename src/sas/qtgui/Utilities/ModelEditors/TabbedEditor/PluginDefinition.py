@@ -14,7 +14,7 @@ MODEL_TEXT = """intensity = q
 return intensity
 """
 
-VOLUME_TEXT = """volume = {0} * 1.0
+VOLUME_TEXT = """volume = M_4PI_3 * {0}**3
 
 return volume
 """
