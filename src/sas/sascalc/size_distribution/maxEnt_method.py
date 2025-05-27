@@ -77,57 +77,6 @@ class matrix_operation():
         Gmat = Gmat.reshape((len(Bins),len(Q)))
         return Gmat
     
-    # this just looks like a matrix product. Why do we need a function to wrap
-    # a function? would not x=np.dot(m1,m2) be the same as x=matrix_transform(m1,m2)?
-    def matrix_transform(self, m1, m2):
-        '''
-        Transform data-space -> solution-space or transform solution-space -> data-space
-        n = len(first_bins)
-        npt = len(Iq) = len(Q)
-        If data-space -> solution-space:
-        param float[npt] m1: intensity data, ndarray of shape (npt)
-        param float[n][npt] m2: G(Q,r), the response matrix, ndarray of shape (n,npt)
-        :returns float[n]: calculated size distribution, ndarray of shape (n)
-        If data-space -> solution-space:
-        param float[n] m1: solution, ndarray of shape (n)
-        param float[npt][n] m2: G(Q,r).transposed, the response matrix, ndarray of shape (npt,n)
-        returns float[npt]: calculated intensities, ndarray of shape (npt)
-        '''
-        out = np.dot(m2,m1)
-        return out
-        
-    # The following section should be deprecated. Not deleted for now in case there is a need to go back.
-    """ def calculate_solution(self, data, G):
-        # orginally named tropus in GSASIIsasd.py (comments also mostly from original code)
-        '''
-        Transform data-space -> solution-space:  [G] * data
-        
-        n = len(first_bins)
-        npt = len(Iq) = len(Q)
-        
-        Definition according to SB: solution = image = a set of positive numbers which are to be determined and on which entropy is defined
-        
-        :param float[npt] data: observations, ndarray of shape (npt)
-        :param float[n][npt] G: transformation matrix, ndarray of shape (n,npt)
-        :returns float[n]: calculated solution, ndarray of shape (n)
-        '''
-        solution = np.dot(G,data)
-        return solution
-
-    def calculate_data(self, solution, G):
-        # orginally named opus in GSASIIsasd.py (comments also mostly from original code)
-        '''
-        Transform solution-space -> data-space:  [G]^tr * solution
-        
-        n = len(first_bins)
-        npt = len(Iq) = len(Q)
-        
-        :param float[n]: solution, ndarray of shape (n)
-        :param float[n][npt]: G transformation matrix, ndarray of shape (n,npt)
-        :returns float[npt]: calculated observations, ndarray of shape (npt)
-        '''
-        data = np.dot(G.transpose(),solution)
-        return data    """
 
 class decision_helper():
 
