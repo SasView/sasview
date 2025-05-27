@@ -448,8 +448,6 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
         self.setCurrentWidget(tab)
 
-    # FIXME: This is not an ideal solution, and I suspect requires a whole refactor of the
-    # InversionPerspective/InversionWidget design.
     def updateFromParameters(self, params):
         inversion_widget = self.currentWidget()
         if isinstance(inversion_widget, InversionWidget):
