@@ -165,8 +165,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             if not batch_warned and warn_batch:
                 batch_warned = True
                 _ = QtWidgets.QMessageBox.warning(self, "Batch Serialisation", """Saving of projects with batch inversion
-                tabs is currently not supported. Support will be added in a later version of SasView but please note
-                that in the meantime, these tabs will be excluded from the saved project.""")
+tabs is currently not supported. Support will be added in a later version of SasView but please note
+that in the meantime, these tabs will be excluded from the saved project.""")
             state.update(state)
         return state
 
