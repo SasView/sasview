@@ -483,8 +483,9 @@ class InversionWidget(QWidget, Ui_PrInversion):
             'y': result.calculator.y
         }
 
-    def getPage(self) -> list[dict[str, Any]]:
-        return [self.serialiseResult(result) for result in self.results]
+    def getPage(self) -> dict[str, Any]:
+        # FIXME: Doesn't work on batch.
+        return self.serialiseResult(self.currentResult)
 
     def onHelp(self):
         self.window.help()
