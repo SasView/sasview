@@ -145,6 +145,7 @@ class sizeDistribution():
         self._useWeights = True
         self._weightType = 'dI'  
         self._weightFactor = 1.0
+        self._weightPercent = 1.0
         self._weights = self.data.dy
 
         ## Return Values after the MaxEnt should 
@@ -342,7 +343,15 @@ class sizeDistribution():
     @weightFactor.setter
     def weightFactor(self, value):
         self._weightFactor = value
-        
+
+    @property
+    def weightPercent(self):
+        return self._weightPercent
+
+    @weightPercent.setter
+    def weightPercent(self, value):
+        self._weightPercent = value
+
     @property
     def weightType(self):
         return self._weightType
@@ -356,7 +365,7 @@ class sizeDistribution():
     def weights(self):
         return self._weights
     
-    def update_weights(self, sigma=None, percent_value=0.01):
+    def update_weights(self, sigma=None):
 
         if sigma is None:
             wdata = self.data
@@ -372,12 +381,9 @@ class sizeDistribution():
             elif (self.weightType == 'sqrt(I Data)'):
                 self._weights = 1/np.sqrt(wdata.y)
 
-            elif (self.weightType == 'abs(I Data)'):
-                self._weights = 1/np.abs(wdata.y)
-
             elif self.weightType == 'percentI':
-                self._useWeights=False
-                self._weights = 1/np.abs(percent_value*wdata.y)
+                weight_fraction = self.weightPercent / 100.0
+                self._weights = 1/np.abs(weight_fraction*wdata.y)
             else:
                 logger.error("weightType doesn't match the possible strings for weight selection.\n Please check the value entered or use 'dI'.")
         

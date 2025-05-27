@@ -38,6 +38,7 @@ POWER_LOW_Q = 4
 SCALE_LOW_Q = 1.0
 NUM_ITERATIONS = 100
 WEIGHT_FACTOR = 1.0
+WEIGHT_PERCENT = 1.0
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +215,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         # Weighting
         self.mapper.addMapping(self.txtWgtFactor, WIDGETS.W_WEIGHT_FACTOR)
+        self.mapper.addMapping(self.txtWgtPercent, WIDGETS.W_WEIGHT_PERCENT)
 
         self.mapper.toFirst()
 
@@ -268,10 +270,13 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Weighting
         item = QtGui.QStandardItem(str(WEIGHT_FACTOR))
         self.model.setItem(WIDGETS.W_WEIGHT_FACTOR, item)
+        item = QtGui.QStandardItem(str(WEIGHT_PERCENT))
+        self.model.setItem(WIDGETS.W_WEIGHT_PERCENT, item)
 
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
+        self.rbWeighting2.setChecked(True)
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
 
@@ -288,6 +293,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtScaleLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtWgtFactor.setValidator(GuiUtils.DoubleValidator())
+        self.txtWgtPercent.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgdQMin.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgdQMax.setValidator(GuiUtils.DoubleValidator())
 
@@ -308,12 +314,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Weighting controls
         if self.logic.di_flag:
             self.rbWeighting2.setEnabled(True)
-            self.rbWeighting2.setChecked(True)
-            # self.onWeightingChoice(self.rbWeighting2)
         else:
             self.rbWeighting2.setEnabled(False)
-            self.rbWeighting1.setChecked(True)
-            # self.onWeightingChoice(self.rbWeighting1)
         self.cmdFitFlatBackground.setEnabled(self.logic.data_is_loaded)
         self.cmdFitPowerLaw.setEnabled(
             self.logic.data_is_loaded and self.chkLowQ.isChecked()
@@ -677,7 +679,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.rbWeighting1: WeightType.NONE,
             self.rbWeighting2: WeightType.DI,
             self.rbWeighting3: WeightType.SQRT_I,
-            self.rbWeighting4: WeightType.I,
+            self.rbWeighting4: WeightType.PERCENT_I,
         }
         for button, weight_type in weight_type_map.items():
             if button.isChecked():
@@ -699,6 +701,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             sky_background=float(self.txtSkyBackgd.text()),
             max_iterations=int(self.txtIterations.text()),
             weight_factor=float(self.txtWgtFactor.text()),
+            weight_percent=float(self.txtWgtPercent.text()),
             weight_type=self.getWeightType(),
         )
 
