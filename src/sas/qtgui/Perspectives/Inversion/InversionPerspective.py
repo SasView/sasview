@@ -159,32 +159,42 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         state = {}
         tab_ids = [tab.tab_id for tab in self.tabs]
+        batch_warned = False
         for index, _ in enumerate(tab_ids):
-            state.update(self.getSerializePage(index))
+            state, warn_batch = self.getSerializePage(index)
+            if not batch_warned and warn_batch:
+                batch_warned = True
+                _ = QtWidgets.QMessageBox.warning(self, "Batch Serialisation", """Saving of projects with batch inversion
+                tabs is currently not supported. Support will be added in a later version of SasView but please note
+                that in the meantime, these tabs will be excluded from the saved project.""")
+            state.update(state)
         return state
 
     def serializeCurrentPage(self):
         # serialize current (active) page
         return self.getSerializePage(self.currentIndex())
 
-    def getSerializePage(self, index=None):
+    def getSerializePage(self, index=None) -> tuple[dict, bool]:
         """
         Serialize and return a dictionary of {tab_id: inversion-state}
         Return original dictionary if no data
         """
         state = {}
+        # If any tabs are batch tabs, these are not supported for serialisation so this needs to be true.
         if index is None:
             index = self.currentIndex()
         # If data on tab empty - do nothing TODO: Reinstate this check.
         tab = self.tabs[index]
         if tab.currentResult.logic.data_is_loaded:
+            if tab.is_batch:
+                return {}, True
             tab_state = {}
             tab_data = tab.getPage()
             for datum in tab_data:
                 data_id = datum.pop('data_id', '')
                 tab_state[data_id] = {'pr_params': tab_data}
             state[tab.tab_id] = tab_state
-        return state
+        return state, False
 
 
     ######################################################################
