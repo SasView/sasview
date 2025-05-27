@@ -264,8 +264,8 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def closeDMax(self):
-        if self.dmaxWindow is not None:
-            self.dmaxWindow.close()
+        if self.currentTab.dmaxWindow is not None:
+            self.currentTab.dmaxWindow.close()
 
     def closeBatchResults(self):
         if self.batchResultsWindow is not None:
