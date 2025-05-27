@@ -190,10 +190,8 @@ that in the meantime, these tabs will be excluded from the saved project.""")
                 return {}, True
             tab_state = {}
             tab_data = tab.getPage()
-            for datum in tab_data:
-                data_id = datum.pop('data_id', '')
-                tab_state[data_id] = {'pr_params': tab_data}
-            state[tab.currentData.name] = tab_state
+            data_id = tab_data.pop('data_id', '')
+            state[data_id] = {'pr_params': tab_data}
         return state, False
 
 
