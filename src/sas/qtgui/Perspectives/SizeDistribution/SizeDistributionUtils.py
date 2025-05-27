@@ -23,14 +23,15 @@ WIDGETS = enum(
     "W_SCALE_LOW_Q",
     "W_NUM_ITERATIONS",
     "W_WEIGHT_FACTOR",
+    "W_WEIGHT_PERCENT",
 )
 
 
 class WeightType(StrEnum):
     NONE = "None"
     DI = "dI"
-    SQRT_I = "sqrtI"
-    I = "I"
+    SQRT_I = "sqrt(I Data)"
+    PERCENT_I = "percentI"
 
 
 @dataclass
@@ -49,6 +50,7 @@ class MaxEntParameters:
     use_weights: bool = True
     weight_type: WeightType = WeightType.DI
     weight_factor: float = 1.0
+    weight_percent: float = 1.0
     full_fit: bool = True
 
 

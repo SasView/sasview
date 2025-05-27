@@ -55,6 +55,7 @@ class SizeDistributionThread(CalcThread):
         sd.useWeights = True
         sd.weightType = self.params.weight_type
         sd.weightFactor = self.params.weight_factor
+        sd.weightPercent = self.params.weight_percent
         sd.nbins = self.params.num_bins
 
         trim_data, intensities, init_bins_back, sigma = sd.prep_maxEnt(
