@@ -388,7 +388,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
 
 
     @property
-    def currentTab(self) -> InversionWidget: # TODO: More pythonic name
+    def currentTab(self) -> InversionWidget:
         """
         Returns the tab widget currently shown
         """
