@@ -483,6 +483,23 @@ class InversionWidget(QWidget, Ui_PrInversion):
             'y': result.calculator.y
         }
 
+    def updateFromParameters(self, params: dict[str, Any]):
+        result = self.currentResult
+        result.calculator.alpha = params['alpha']
+        result.calculator.background = params['background']
+        result.calculator.chi2 = params['chi2']
+        result.calculator.cov = params['cov']
+        result.calculator.dmax = params['d_max']
+        result.calculator.elapsed = params['elapsed']
+        result.calculator.est_bck = params['est_bck']
+        result.calculator.out = params['out']
+        result.calculator.q_max = params['q_max']
+        result.calculator.q_min = params['q_min']
+        result.calculator.slit_height = params['slit_height']
+        result.calculator.slit_width = params['slit_width']
+        result.calculator.suggested_alpha = params['suggested_alpha']
+        result.outputs = get_outputs(result.calculator, params['elapsed'])
+
     def getPage(self) -> dict[str, Any]:
         # FIXME: Doesn't work on batch.
         return self.serialiseResult(self.currentResult)
