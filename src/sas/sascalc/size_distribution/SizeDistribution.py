@@ -3,14 +3,10 @@ import numpy as np
 import logging
 from scipy import stats, integrate, optimize
 
-from sasdata.dataloader.data_info import Data1D, DataInfo
-from sasmodels.data import empty_data1D
+from sasdata.dataloader.data_info import Data1D
 from sasmodels.core import load_model
-from sasmodels.direct_model import call_kernel
 from sasmodels.direct_model import DirectModel
-from sasmodels import resolution as rst
-
-from sas.sascalc.size_distribution.maxEnt_method import matrix_operation, maxEntMethod
+from sas.sascalc.size_distribution.maxEnt_method import maxEntMethod
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +48,8 @@ def line_func(x, b, m):
 
     return b + m*x
 
-def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
+def background_fit(data, power=None, qmin=None, qmax=None):
     """
-    THIS IS A WORK IN PROGRESS AND WILL NOT RUN
     Fit data for $y = ax + b$  return $a$ and $b$
 
     :param Data1D data: data to fit
@@ -112,54 +107,8 @@ def background_fit(data, power=None, qmin=None, qmax=None, type="fixed"):
     
     return param_result, param_err 
 
-
-def ellipse_volume(rp,re):
+def ellipse_volume(rp, re):
     return (4*np.pi/3)*rp*re**2
-
-class DistModel():
-    """
-    This class is used to construct the matrix of I(q) curves at each value of
-    the dimension whose distribution is being sought. For example the Radius of
-    a sphere for the classic pore size distribution calculation. It uses the
-    full sasmodels infrastructre including volume and resolution corrections.
-
-    This replaces the following functions:
-    def SphereFF
-    def SpherVol
-    def matrix_operation.G_matrix
-
-    data is the data1D object loaded widt dataloader. In other words the very data
-    which we will be fitting.
-    model is a string cotaining the name of the model (e.g. 'sphere')
-    pars is a dictionary of all parameters and their value for the given model
-    dimension is a string containing the name of the parameter that is being
-    varied (to find the distribution)
-    bins is an array of type float containing the various values of the
-    dimension variable that forms the distribution. Only the weights will be
-    changed.
-    QUESTION: is it required that the values in bins be sorted?
-
-    ..NOTE: this code is not yet ready to be used (clearly) but is meant as
-       a base structure
-    """
-    def __init__(self, data, model, dimension, bins, pars=None):
-
-        self.data = data  
-        self.model = load_model(model)
-        self.params = pars
-        self.dim_distr = dimension
-        self.bins = bins
-        self.intensity = []
-        self.pars = pars
-        self.pars["scale"] = 1.0
-        self.pars["background"] = 0.0
-
-
-    def base_matrix(self):
-        f = DirectModel(self.data, self.model)
-        for i in self.bins: self.intensity.append(f(**self.pars))
-        return np.array(self.intensity)
-
 
 class sizeDistribution():
 
@@ -440,18 +389,12 @@ class sizeDistribution():
         
         return None
 
-    def calculate_powerlaw(self):
-        ## From invariant?
-        return None
-    
-    def calculate_background(self):
-        ## From invariant? 
-        return None
 
     def generate_model_matrix(self, moddata:Data1D):
         """
-        generate a matrix of intensities from a specific sasmodels model; probably should be generalized to a class to use maxent on
-        any parameter of interest w/in the model. For now, the pars are fixed. 
+        generate a matrix of intensities from a specific sasmodels model; 
+        probably should be generalized to a class to use maxent on any parameter of interest w/in the model. 
+        For now, the pars are fixed. 
         moddata :: Data1D object that has the data trimmed depending on background subtraction or powerlaw subtracted from the data. Also self.qMin and self.qMax. 
 
         """
@@ -481,6 +424,7 @@ class sizeDistribution():
 
     def calc_volume_weighted_dist(self, binmag):
         """
+        This is not used right now. 
         Calculate the volume weighted distribution. 
         """
         if self.logbin:
@@ -639,84 +583,3 @@ class sizeDistribution():
         self.MaxEnt_statistics['mean'] = rvdist.mean() ## volume fraction weighted mean
 
 
-
-def sizeDistribution_func(input):
-    '''
-    This function packages all the inputs that MaxEnt_SB needs (including initial values) into a dictionary and executes the MaxEnt_SB function
-    :param dict input:
-        input must have the following keys, each corresponding to their specified type of values:
-        Key                          | Value
-        __________________________________________________________________________________________
-        Data                         | list[float[npt],float[npt]]: I and Q. The two arrays should both be length npt
-        Limits                       | float[2]: a length-2 array contains Qmin and Qmax
-        Scale                        | float:
-        DiamRange                    | float[3]: A length-3 array contains minimum and maximum diameters between which the 
-                                                 distribution will be constructed, and the thid number is the number of bins 
-                                                 (must be an integer) (TODO: maybe restructure that)
-        LogBin                       | boolean: Bins will be on a log scale if True; bins will be on a linear scale is False 
-        WeightFactors                | float[npt]: Factors on the weights
-        Contrast                     | float: The difference in SLD between the two phases
-        Sky                          | float: Should be small but non-zero (TODO: Check this statement)
-        Weights                      | float[npt]: Provide some sort of uncertainty. Examples include dI and 1/I
-        Background                   | float[npt]: Scattering background to be subtracted
-        Resolution                   | obj: resolution object
-        Model                        | string: model name, currently only supports 'Sphere'
-    '''
-
-    ### input data
-    ##scat_data = Data1D() ## how to get this data in? ## Sent from the data_loader 
-    Q, I = input["Data"]
-    
-
-    ### results data
-    Ic = np.zeros(len(I))
-
-    ##results_data = Data1D()
-
-    ### GUI Variables  
-    ## standard
-    Qmin = input["Limits"][0]
-    Qmax = input["Limits"][1]
-
-    minDiam = input["DiamRange"][0]
-    maxDiam = input["DiamRange"][1]
-    Nbins = input["DiamRange"][2]
-
-    contrast = input["Contrast"] 
-
-    ## 
-    model = input["Model"]
-
-    ## advanced
-    iterMax = input["IterMax"]
-    scale = input["Scale"]
-    logbin = input["Logbin"] ## Boolean? 
-    sky = input["Sky"]
- 
-
-    ## Dependent
-    if logbin:
-        Bins = np.logspace(np.log10(minDiam),np.log10(maxDiam),Nbins+1,True)/2        #make radii
-    else:
-        Bins = np.linspace(minDiam, maxDiam, Nbins+1,True)/2        #make radii
-
-    Dbins = np.diff(Bins)
-    Bins = Bins[:-1]+Dbins/2.
-    Ibeg = np.searchsorted(Q,Qmin)
-    Ifin = np.searchsorted(Q,Qmax)+1        #include last point
-    BinMag = np.zeros_like(Bins)
-    wtFactor = input["WeightFactors"][Ibeg:Ifin]
-    Back = input["Background"][Ibeg:Ifin]
-
-    res = input["Resolution"] ## dQ 
-    wt = input["Weights"][Ibeg:Ifin]
-    ## setup MaxEnt
-    Gmat = matrix_operation().G_matrix(Q[Ibeg:Ifin],Bins,contrast,model,res).T
-    BinsBack = np.ones_like(Bins)*sky*scale/contrast
-    MethodCall = maxEntMethod()
-    sigma = scale/np.sqrt(wtFactor*wt)
-    ## run MaxEnt
-    chisq,BinMag,Ic[Ibeg:Ifin] = MethodCall.MaxEnt_SB(scale*I[Ibeg:Ifin]-Back,
-                                                      scale/np.sqrt(wtFactor*wt),Gmat,BinsBack,iterMax,report=True)
-    BinMag = BinMag/(2.*Dbins)
-    return chisq,Bins,Dbins,BinMag,Q[Ibeg:Ifin],Ic[Ibeg:Ifin]

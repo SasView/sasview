@@ -86,19 +86,19 @@ class SizeDistributionLogic:
         d_trust_max = 0.95 * np.pi / qmin
         return [d_trust_min, d_trust_max]
 
-    def fitFlatBackground(self, qmin, qmax):
-        """
-        Estimate the flat background
-        """
-        background, background_err = background_fit(self.data, 0, qmin, qmax)
-        return np.exp(background)[0]
-
     def fitBackgroundScale(self, power, qmin, qmax):
         """
         Estimate the background scale
         """
         background, background_err = background_fit(self.data, power, qmin, qmax)
         return np.exp(background)[0]
+    
+    def fitFlatBackground(self, qmin, qmax):
+        """
+        Estimate the flat background
+        """
+        #background, background_err = background_fit(self.data, 0, qmin, qmax)
+        return self.fitBackgroundScale(0, qmin, qmax)
 
     def newDataPlot(self):
         """
