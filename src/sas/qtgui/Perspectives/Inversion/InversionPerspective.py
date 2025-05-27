@@ -193,7 +193,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             for datum in tab_data:
                 data_id = datum.pop('data_id', '')
                 tab_state[data_id] = {'pr_params': tab_data}
-            state[tab.tab_id] = tab_state
+            state[tab.currentData.name] = tab_state
         return state, False
 
 
