@@ -107,54 +107,8 @@ def background_fit(data, power=None, qmin=None, qmax=None):
     
     return param_result, param_err 
 
-
 def ellipse_volume(rp, re):
     return (4*np.pi/3)*rp*re**2
-
-class DistModel():
-    """
-    This class is used to construct the matrix of I(q) curves at each value of
-    the dimension whose distribution is being sought. For example the Radius of
-    a sphere for the classic pore size distribution calculation. It uses the
-    full sasmodels infrastructre including volume and resolution corrections.
-
-    This replaces the following functions:
-    def SphereFF
-    def SpherVol
-    def matrix_operation.G_matrix
-
-    data is the data1D object loaded widt dataloader. In other words the very data
-    which we will be fitting.
-    model is a string cotaining the name of the model (e.g. 'sphere')
-    pars is a dictionary of all parameters and their value for the given model
-    dimension is a string containing the name of the parameter that is being
-    varied (to find the distribution)
-    bins is an array of type float containing the various values of the
-    dimension variable that forms the distribution. Only the weights will be
-    changed.
-    QUESTION: is it required that the values in bins be sorted?
-
-    ..NOTE: this code is not yet ready to be used (clearly) but is meant as
-       a base structure
-    """
-    def __init__(self, data, model, dimension, bins, pars=None):
-
-        self.data = data  
-        self.model = load_model(model)
-        self.params = pars
-        self.dim_distr = dimension
-        self.bins = bins
-        self.intensity = []
-        self.pars = pars
-        self.pars["scale"] = 1.0
-        self.pars["background"] = 0.0
-
-
-    def base_matrix(self):
-        f = DirectModel(self.data, self.model)
-        for i in self.bins: self.intensity.append(f(**self.pars))
-        return np.array(self.intensity)
-
 
 class sizeDistribution():
 

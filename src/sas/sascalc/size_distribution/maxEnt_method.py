@@ -1,9 +1,5 @@
 import numpy as np
 import math
-from sasmodels.core import load_model
-from sasmodels.direct_model import call_kernel
-from sasmodels.direct_model import DirectModel
-#from sasdata.dataloader import data_info
 
 # Constants (comments mostly copied from the original GSASIIsasd.py)
 TEST_LIMIT        = 0.05                    # for convergence
@@ -45,39 +41,7 @@ References:
 # Most comments are copied from GSASIIsasd.py
 # Currently, this code only works with spherical models
 
-# Spherical form factor
-def SphereFF(Q,Bins):
-    QR = Q[:,np.newaxis]*Bins
-    FF = (3./(QR**3))*(np.sin(QR)-(QR*np.cos(QR)))
-    return FF
-
-# Spherical volume
-def SphereVol(Bins):
-    Vol = (4./3.)*np.pi*Bins**3
-    return Vol
-
-class matrix_operation():
     
-    # Transformation matrix
-    # TODO: Use sasmodels kernel to make this function more generalized
-    def G_matrix(self, Q, Bins, contrast, choice, resolution):
-        '''
-        Defined as (form factor)^2 times volume times some scaling (including the contrast and volume)
-        The integrand for Iq technically requires volume^2  
-        The size distribution obtained from this code takes care of the missing volume
-        Therefore, it is IMPORTANT to not that the size distribution from this code is technically P(r) (what's obtained from inversion) multiplied by something
-        Converting to the size distribution back to P(r) isn't super straightforward and needs work (a TODO)
-        '''
-        Gmat = np.array([])
-        # TODO: Make this G_matrix function flexible for other form factors (currerntly only works for spheres)
-        # TODO: See if we can make use of existing Sasmodels
-        if choice == 'Sphere':
-            Gmat = 1.e-4*(contrast*SphereVol(Bins)*SphereFF(Q,Bins)**2).transpose()
-        #Gmat = resolution.apply(Gmat)
-        Gmat = Gmat.reshape((len(Bins),len(Q)))
-        return Gmat
-    
-
 class decision_helper():
 
     class MaxEntException(Exception): 
@@ -241,7 +205,7 @@ class maxEntMethod():
         n = len(first_bins)
         npt = len(Iq)
         
-        operation = matrix_operation()
+        #operation = matrix_operation()
         
         xi = np.zeros((SEARCH_DIRECTIONS, n))
         eta = np.zeros((SEARCH_DIRECTIONS, npt))
