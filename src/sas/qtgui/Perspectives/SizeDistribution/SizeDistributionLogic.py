@@ -158,7 +158,7 @@ class SizeDistributionLogic:
             fit_plot.xaxis("\\rm{Q}", "A^{-1}")
             fit_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-            fit_plot.symbol = "Circle"
+            fit_plot.symbol = "Line"
             fit_plot.show_errors = True
 
         return backgd_plot, backgd_subtr_plot, fit_plot
@@ -175,7 +175,7 @@ class SizeDistributionLogic:
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.is_data = False
         new_plot.plot_role = DataRole.ROLE_SIZE_DISTRIBUTION
-        # new_plot.symbol = "Line"
+        new_plot.symbol = "Circle"
 
         new_plot.id = SIZE_DISTR_LABEL
         new_plot.group_id = GROUP_ID_SIZE_DISTR_FIT
@@ -192,6 +192,7 @@ class SizeDistributionLogic:
         trust_plot = Data1D(x=x_trust, y=y_max_trust)
         trust_plot.is_data = False
         trust_plot.symbol = "Vline"
+        trust_plot.custom_color = "Red"
         trust_plot.xaxis("\\rm{Diameter}", "A")
         trust_plot.yaxis("\\rm{VolumeDistribution}", "")
         trust_plot.plot_role = DataRole.ROLE_SIZE_DISTRIBUTION
