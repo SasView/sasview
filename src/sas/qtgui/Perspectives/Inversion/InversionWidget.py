@@ -315,10 +315,10 @@ class InversionWidget(QWidget, Ui_PrInversion):
         data_plot.slider_update_on_move = False
         data_plot.slider_perspective_name = "Inversion"
         data_plot.slider_tab_name = self.tab_name
-        data_plot.slider_low_q_input = ['minQInput']
-        data_plot.slider_low_q_setter = ['updateMinQ']
-        data_plot.slider_high_q_input = ['maxQInput']
-        data_plot.slider_high_q_setter = ['updateMaxQ']
+        data_plot.slider_low_q_input = ['currentTab', 'minQInput']
+        data_plot.slider_low_q_setter = ['currentTab', 'updateMinQ']
+        data_plot.slider_high_q_input = ['currentTab', 'maxQInput']
+        data_plot.slider_high_q_setter = ['currentTab', 'updateMaxQ']
         data_plot.symbol = 'Line'
         data_plot.show_errors = False
         data_plot.plot_role = DataRole.ROLE_DEFAULT
