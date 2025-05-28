@@ -98,14 +98,15 @@ def background_fit(data, power=None, qmin=None, qmax=None):
     param_result, pcov = optimize.curve_fit(fit_func, linearized_data.x, linearized_data.y, init_guess, sigma = linearized_data.dy)
     param_err = np.sqrt(np.diag(pcov))
 
-
-    if len(param_err) > 1: 
+    if len(param_err) > 1:
         param_err[0] = np.exp(param_result[0])*param_err[0]
     else:
         param_err[0] = np.exp(param_result[0])*param_err[0]
-    
-    
-    return param_result, param_err 
+
+    # transform scale back to non-linearized
+    param_result[0] = np.exp(param_result[0])
+
+    return param_result, param_err
 
 def ellipse_volume(rp, re):
     return (4*np.pi/3)*rp*re**2

@@ -279,6 +279,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.rbWeighting2.setChecked(True)
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
+        self.rbFixPower.setChecked(True)
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
@@ -394,7 +395,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Fit flat background and update plot
         """
         qmin, qmax = self.getFlatBackgroundRange()
-        constant = self.logic.fitFlatBackground(qmin, qmax)
+        fit_params = self.logic.fitBackground(power=0.0, qmin=qmin, qmax=qmax)
+        constant = fit_params[0]
         self.txtBackgd.setText(f"{constant:5g}")
         self.updateBackground()
         self.plotData()
@@ -404,8 +406,20 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Fit background power law and update plot
         """
         qmin, qmax = self.getPowerLawBackgroundRange()
-        _, _, power = self.getBackgroundParams()
-        scale = self.logic.fitBackgroundScale(power, qmin, qmax)
+        if self.rbFitPower.isChecked():
+            # if the power should be fit, pass None
+            scale, power_fit = self.logic.fitBackground(
+                power=None, qmin=qmin, qmax=qmax
+            )
+            # by convention, the power is shown without a minus sign
+            power = -1.0 * power_fit
+            self.txtPowerLowQ.setText(f"{power:5g}")
+        else:
+            # if the power should be fixed, pass the value from the input box
+            _, _, power_fixed = self.getBackgroundParams()
+            fit_params = self.logic.fitBackground(power_fixed, qmin, qmax)
+            scale = fit_params[0]
+        # update the scale
         self.txtScaleLowQ.setText(f"{scale:5g}")
         self.updateBackground()
         self.plotData()
