@@ -123,10 +123,21 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.manualBgd.pressed.connect(self.handleBackgroundModeChange)
         self.dataList.currentIndexChanged.connect(self.handleCurrentDataChanged)
         self.helpButton.clicked.connect(self.onHelp)
+        self.removeButton.clicked.connect(self.handleRemove)
 
         for input_box in [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput, self.minQInput,
                           self.maxQInput, self.slitHeightInput, self.slitHeightInput]:
             input_box.editingFinished.connect(self.startEstimateParameters)
+
+    def handleRemove(self):
+        to_remove = self.dataList.currentIndex()
+        self.dataList.removeItem(to_remove)
+        _ = self.results.pop(to_remove)
+        # If there's no results left, we need an empty one.
+        if len(self.results) == 0:
+            self.results.append(self.initResult())
+        self.enableButtons()
+        self.updateGuiValues()
 
     def handleCurrentDataChanged(self):
         # This event might get called before there is anything in the results list. But we can't update the GUI without
