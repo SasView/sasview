@@ -310,7 +310,7 @@ class Invertor():
         pars = np.atleast_1d(pars)
         q = np.atleast_1d(q)
 
-        iq_val = calc.iq(pars, self.dmax, q)
+        iq_val = calc.iq(pars, self.dmax, q) + self.background
         if iq_val.shape[0] == 1:
             return iq_val[0]
         return iq_val
