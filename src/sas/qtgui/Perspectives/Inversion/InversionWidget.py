@@ -334,6 +334,16 @@ class InversionWidget(QWidget, Ui_PrInversion):
     def showCurrentPlots(self):
         self.showPlots(self.currentResult)
 
+    def updateMinQ(self, new_q_min: float):
+        calculator = self.currentResult.calculator
+        new_q_min = max([min(calculator.x), new_q_min])
+        calculator.q_min = new_q_min
+
+    def updateMaxQ(self, new_q_max: float):
+        calculator = self.currentResult.calculator
+        new_q_min = min([max(calculator.x), new_q_max])
+        calculator.q_max = new_q_max
+
     def updateParams(self):
         # TODO: No validators so this will break if they can't be converted to
         # numbers.
