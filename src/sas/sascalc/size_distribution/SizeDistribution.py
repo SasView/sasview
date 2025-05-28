@@ -371,7 +371,7 @@ class sizeDistribution():
         elif self.weightType == 'percentI':
             weight_fraction = self.weightPercent / 100.0
             self._weights = np.abs(weight_fraction*wdata.y)
-         else:
+        else:
             logger.error("weightType doesn't match the possible strings for weight selection.\n Please check the value entered or use 'dI'.")
         
         return None
