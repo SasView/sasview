@@ -150,8 +150,7 @@ class sizeDistribution():
         #advanced parameters for MaxEnt 
         self._iterMax = 5000
         self._skyBackground = 1e-6
-        self._useWeights = True
-        self._weightType = 'dI'  
+        self._weightType = 'dI'
         self._weightFactor = 1.0
         self._weightPercent = 1.0
         self._weights = self.data.dy
@@ -336,15 +335,6 @@ class sizeDistribution():
         self._skyBackground = value   
 
     @property
-    def useWeights(self):
-        return self._useWeights
-        
-    @useWeights.setter
-    def useWeights(self, value:bool):
-        self._useWeights = value
-        self.update_weights()
-
-    @property
     def weightFactor(self):
         return self._weightFactor
         
@@ -380,20 +370,17 @@ class sizeDistribution():
         else:
             wdata = sigma
         
-        if self._useWeights == False:
+        if self.weightType == 'None':
             self._weights = np.ones_like(wdata.y)
+        elif (self.weightType == 'dI'):
+            self._weights = np.array(wdata.dy)
+        elif (self.weightType == 'sqrt(I Data)'):
+            self._weights = np.sqrt(wdata.y)
+        elif self.weightType == 'percentI':
+            weight_fraction = self.weightPercent / 100.0
+            self._weights = np.abs(weight_fraction*wdata.y)
         else:
-            if (self.weightType == 'dI'):
-                self._weights = 1/np.array(wdata.dy)
-
-            elif (self.weightType == 'sqrt(I Data)'):
-                self._weights = 1/np.sqrt(wdata.y)
-
-            elif self.weightType == 'percentI':
-                weight_fraction = self.weightPercent / 100.0
-                self._weights = 1/np.abs(weight_fraction*wdata.y)
-            else:
-                logger.error("weightType doesn't match the possible strings for weight selection.\n Please check the value entered or use 'dI'.")
+            logger.error("weightType doesn't match the possible strings for weight selection.\n Please check the value entered or use 'dI'.")
         
         return None
 
@@ -509,7 +496,7 @@ class sizeDistribution():
 
         self.update_weights(trim_data)
         init_binsBack = np.ones_like(self.bins)*self.skyBackground*self.scale/self.contrast
-        sigma = self.scale/(self.weightFactor*self.weights)
+        sigma = self.weightFactor*self.weights
 
         return trim_data, intensities, init_binsBack, sigma
 
@@ -535,9 +522,9 @@ class sizeDistribution():
                 IMaxEnt.append(icalc)
                 convergence.append([converged, conv_iter])
                 if (not converged):
-                    logger.warning("Maximum Entropy did not converge. Try lowering the weight factor to increase the weighting effect.")
+                    logger.warning("Maximum Entropy did not converge. Try increasing the weight factor to increase the weighting effect.")
             except ZeroDivisionError as e:
-                logger.error("Divide by Zero Error occured in maximum entropy fitting. Try lowering the weight factor to increase the error weighting")
+                logger.error("Divide by Zero Error occured in maximum entropy fitting. Try increasing the weight factor to increase the error weighting")
             
 
 
@@ -574,11 +561,9 @@ class sizeDistribution():
                              ):
         
         maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag/(2*self._binDiff), 2*self.bins, axis=1)
-        #print(maxent_cdf_array[:,-1])
         self.BinMag_numberDist = self.BinMagnitude_maxEnt/ellipse_volume(self.aspectRatio*self.bins, self.bins)
 
         rvdist = stats.rv_histogram((self.BinMagnitude_maxEnt, self._bin_edges*2)) ## volume fraction weighted
-        #print(rvdist.mean(), rvdist.median())
         number_cdf = integrate.cumulative_trapezoid(self.BinMag_numberDist, 2*self.bins)
         self.number_cdf = number_cdf/number_cdf[-1]
 
