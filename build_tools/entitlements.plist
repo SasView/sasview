@@ -7,6 +7,9 @@
 		<true/>
 		<!-- Disable Library Validation Entitlement -->
 		<key>com.apple.security.cs.disable-library-validation</key>
+		<true/>	
+		<!-- Disable Executable Page Protection Entitlement -->
+		<key>com.apple.security.cs.disable-executable-page-protection</key>
 		<true/>
 	</dict>
 </plist>
