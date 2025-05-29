@@ -123,6 +123,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.dataList.currentIndexChanged.connect(self.handleCurrentDataChanged)
         self.helpButton.clicked.connect(self.onHelp)
         self.removeButton.clicked.connect(self.handleRemove)
+        self.showResultsButton.clicked.connect(self.handleShowResults)
 
         for input_box in [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput, self.minQInput,
                           self.maxQInput, self.slitHeightInput, self.slitHeightInput]:
@@ -440,6 +441,9 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.batchResultsWindow.show()
         self.enableButtons()
 
+    def handleShowResults(self):
+        if self.batchResultsWindow:
+            self.batchResultsWindow.show()
 
     def estimateAvailable(self):
         self.updateGuiValues()
