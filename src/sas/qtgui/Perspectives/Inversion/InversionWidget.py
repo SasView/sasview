@@ -82,9 +82,8 @@ class InversionWidget(QWidget, Ui_PrInversion):
 
         self.communicator: Communicate  = self.parent.communicator()
 
-        # We're going to use this structure even if we're just dealing with one
-        # specific datum. Just that this dictionary would then have one item in
-        # it.
+        # We're going to use this structure even if we're just dealing with one specific datum. Just that this list
+        # would then have one item in it.
         self.results: list[InversionResult] = [self.initResult()]
 
         self.setupUi(self)
