@@ -65,9 +65,16 @@ def background_fit(data, power=None, qmin=None, qmax=None):
     if qmax is None:
         qmax = max(data.x)
 
+    if not qmax > qmin:
+        raise ValueError("Fit range Qmin must be smaller than Qmax")
+
     # Identify the bin range for the fit
     idx = (data.x >= qmin) & (data.x <= qmax)
-    
+
+    # Check that the fit range contains enough data points
+    if (power is None and sum(idx) < 2) or (power is not None and sum(idx) < 1):
+        raise ValueError("Need more data points than fitting parameters")
+
     fx = np.zeros(len(data.x))
 
     # Uncertainty

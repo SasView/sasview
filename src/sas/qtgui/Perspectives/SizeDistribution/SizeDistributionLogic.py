@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import numpy as np
@@ -14,6 +15,9 @@ GROUP_ID_SIZE_DISTR_DATA = "SizeDistrData"
 SIZE_DISTR_LABEL = "SizeDistrFit"
 GROUP_ID_SIZE_DISTR_FIT = "SizeDistrFit"
 TRUST_RANGE_LABEL = "SizeDistrTrustRange"
+
+
+logger = logging.getLogger(__name__)
 
 
 class SizeDistributionLogic:
@@ -96,7 +100,11 @@ class SizeDistributionLogic:
         :param power: if a float is given, the power is fixed; if None, the power is fitted
         :return: fit parameters; [scale] if power is fixed, or [scale, power] if power is fitted
         """
-        background, _ = background_fit(self.data, power, qmin, qmax)
+        try:
+            background, _ = background_fit(self.data, power, qmin, qmax)
+        except ValueError:
+            logger.exception("Fitting failed")
+            return None
         return background
 
     def newDataPlot(self):

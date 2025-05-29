@@ -395,8 +395,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Fit flat background and update plot
         """
         qmin, qmax = self.getFlatBackgroundRange()
-        fit_params = self.logic.fitBackground(power=0.0, qmin=qmin, qmax=qmax)
-        constant = fit_params[0]
+        fit_result = self.logic.fitBackground(power=0.0, qmin=qmin, qmax=qmax)
+        if fit_result is None:
+            return
+        constant = fit_result[0]
         self.txtBackgd.setText(f"{constant:5g}")
         self.updateBackground()
         self.plotData()
@@ -408,17 +410,20 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         qmin, qmax = self.getPowerLawBackgroundRange()
         if self.rbFitPower.isChecked():
             # if the power should be fit, pass None
-            scale, power_fit = self.logic.fitBackground(
-                power=None, qmin=qmin, qmax=qmax
-            )
+            fit_result = self.logic.fitBackground(power=None, qmin=qmin, qmax=qmax)
+            if fit_result is None:
+                return
+            scale, power_fit = fit_result
             # by convention, the power is shown without a minus sign
             power = -1.0 * power_fit
             self.txtPowerLowQ.setText(f"{power:5g}")
         else:
             # if the power should be fixed, pass the value from the input box
             _, _, power_fixed = self.getBackgroundParams()
-            fit_params = self.logic.fitBackground(power_fixed, qmin, qmax)
-            scale = fit_params[0]
+            fit_result = self.logic.fitBackground(power_fixed, qmin, qmax)
+            if fit_result is None:
+                return
+            scale = fit_result[0]
         # update the scale
         self.txtScaleLowQ.setText(f"{scale:5g}")
         self.updateBackground()
