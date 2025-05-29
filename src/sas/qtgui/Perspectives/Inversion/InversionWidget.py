@@ -438,6 +438,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
             output_data=batch_dict
         )
         self.batchResultsWindow.show()
+        self.enableButtons()
 
 
     def estimateAvailable(self):
