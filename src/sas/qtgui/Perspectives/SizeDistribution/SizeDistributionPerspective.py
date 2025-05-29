@@ -458,6 +458,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             msg = "Incorrect type passed to the Size Distribution Perspective"
             raise AttributeError(msg)
 
+        if self.logic.data_is_loaded:
+            # remove existing data and reset GUI
+            self.resetWindow()
+
         self._model_item = data_item[0]
         logic_data = GuiUtils.dataFromItem(self._model_item)
 
@@ -544,9 +548,19 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Remove the existing data reference from the Size Distribution Perspective"""
         if not data_list or self._model_item not in data_list:
             return
+        self.resetWindow()
+
+    def resetWindow(self):
+        """
+        Reset the state of input widgets and data structures
+        """
         self._data = None
         self._path = ""
         self.txtName.setText("")
+        self.txtPowerLawQMin.setText("")
+        self.txtPowerLawQMax.setText("")
+        self.txtBackgdQMin.setText("")
+        self.txtBackgdQMax.setText("")
         self._model_item = None
         self.logic.data = None
         self.logic.data_fit = None
