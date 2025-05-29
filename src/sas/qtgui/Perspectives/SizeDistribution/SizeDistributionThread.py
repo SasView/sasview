@@ -5,7 +5,7 @@ from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import (
     MaxEntResult,
 )
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.sascalc.poresize.SizeDistribution import sizeDistribution
+from sas.sascalc.size_distribution.SizeDistribution import sizeDistribution
 from sasdata.dataloader.data_info import Data1D
 
 logger = logging.getLogger(__name__)
@@ -55,6 +55,7 @@ class SizeDistributionThread(CalcThread):
         sd.useWeights = True
         sd.weightType = self.params.weight_type
         sd.weightFactor = self.params.weight_factor
+        sd.weightPercent = self.params.weight_percent
         sd.nbins = self.params.num_bins
 
         trim_data, intensities, init_bins_back, sigma = sd.prep_maxEnt(

@@ -22,6 +22,8 @@ Tools & Utilities
 
    Generic SANS Calculator <qtgui/Calculators/sas_calculator_help>
 
+   Shape2SAS <qtgui/Calculators/shape_2_sas_help>
+
    Python Shell <qtgui/Calculators/python_shell_help>
 
    Image Viewer <qtgui/Calculators/image_viewer_help>

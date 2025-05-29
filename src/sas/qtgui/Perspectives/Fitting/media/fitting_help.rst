@@ -706,16 +706,31 @@ latter stages of a converging fit.
           be optimised if using an Array Distribution. See
           :ref:`polydispersityhelp`.
 
+.. _Reparameterization_Editor:
+
 Reparameterizing Models
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+It is possible to change model parameters of an existing model, without writing an entirely
+new model using the reparameterization editor available from the Fitting menu. The editor
+allows a user to select a model, plugins included, and to define a series of new parameters that are
+mathematically related to existing parameters.
+
+Within the editor, select the model you wish to modify, and its parameters will be displayed once the
+model is selected. A second input allows you to define new parameters that will replace existing
+parameters. The text box near the bottom of the window allows free-form inputs to redefine
+existing parameters as a function of new parameters.
+
+More information on reparameterization, the process to create a reparametereized model,
+and the model file that results from this editor can be found at :ref:`Reparameterized_Models`.
+
+.. image:: reparameterization_editor.png
+
 It is also possible to reparameterize a particle model, for instance, to give
-greater control over polydispersity due to intra-particle constraints, see
-:ref:`Reparameterized_Models`. For example, if the particles aspect ratio is
-constrained but not its volume, or if its volume must be preserved but a range
-of aspect ratios are permitted for each volume. This may require a User-Defined
-distribution function to fully describe the model (see
-:ref:`polydispersityhelp`).
+greater control over polydispersity due to intra-particle constraints.
+If the particles aspect ratio is constrained but not its volume, or if its volume must be
+preserved but a range of aspect ratios are permitted for each volume. This may require a
+User-Defined distribution function to fully describe the model (see :ref:`polydispersityhelp`).
 
 Using a GPU
 ^^^^^^^^^^^

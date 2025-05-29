@@ -90,7 +90,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.batchResultsWindow = None
         self.batchResults = {}
 
-
+        self.logic = InversionLogic()
 
 
         # The tabs need to be closeable

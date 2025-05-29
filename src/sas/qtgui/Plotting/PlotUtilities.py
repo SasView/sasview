@@ -294,8 +294,11 @@ def getValidColor(color):
     elif isinstance(color, str):
         # This could be a one letter code
         if len(color) == 1:
-            if not color in list (COLORS.values()):
+            if not color in list (COLORS_LETTER.keys()):
                 raise AttributeError
+        elif color in list(COLORS.keys()):
+            # or the full word
+            pass
         else:
             # or an RGB string
             assert(color[0]=="#" and len(color) == 7)
