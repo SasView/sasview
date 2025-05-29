@@ -1,3 +1,6 @@
+import logging
+from typing import List
+
 import numpy as np
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import MaxEntResult
@@ -12,6 +15,9 @@ GROUP_ID_SIZE_DISTR_DATA = "SizeDistrData"
 SIZE_DISTR_LABEL = "SizeDistrFit"
 GROUP_ID_SIZE_DISTR_FIT = "SizeDistrFit"
 TRUST_RANGE_LABEL = "SizeDistrTrustRange"
+
+
+logger = logging.getLogger(__name__)
 
 
 class SizeDistributionLogic:
@@ -86,19 +92,20 @@ class SizeDistributionLogic:
         d_trust_max = 0.95 * np.pi / qmin
         return [d_trust_min, d_trust_max]
 
-    def fitBackgroundScale(self, power, qmin, qmax):
+    def fitBackground(
+        self, power: float | None, qmin: float, qmax: float
+    ) -> List[float]:
         """
-        Estimate the background scale
+        Estimate the background power law, scale * q^(power)
+        :param power: if a float is given, the power is fixed; if None, the power is fitted
+        :return: fit parameters; [scale] if power is fixed, or [scale, power] if power is fitted
         """
-        background, background_err = background_fit(self.data, power, qmin, qmax)
-        return np.exp(background)[0]
-    
-    def fitFlatBackground(self, qmin, qmax):
-        """
-        Estimate the flat background
-        """
-        #background, background_err = background_fit(self.data, 0, qmin, qmax)
-        return self.fitBackgroundScale(0, qmin, qmax)
+        try:
+            background, _ = background_fit(self.data, power, qmin, qmax)
+        except ValueError:
+            logger.exception("Fitting failed")
+            return None
+        return background
 
     def newDataPlot(self):
         """
