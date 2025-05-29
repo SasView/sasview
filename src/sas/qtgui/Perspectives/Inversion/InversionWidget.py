@@ -129,7 +129,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
             input_box.editingFinished.connect(self.startEstimateParameters)
 
     def handleRemove(self):
-        if not self.currentResult.data_plot is None:
+        if self.currentResult.data_plot:
             self.currentResult.data_plot.slider_low_q_input = []
             self.currentResult.data_plot.slider_low_q_setter = []
             self.currentResult.data_plot.slider_high_q_input = []
