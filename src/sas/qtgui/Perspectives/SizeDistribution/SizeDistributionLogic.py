@@ -60,6 +60,8 @@ class SizeDistributionLogic:
         """
         if self._data.dy is not None and np.any(self._data.dy):
             self.di_flag = True
+        else:
+            self.di_flag = False
 
     def computeDataRange(self):
         """

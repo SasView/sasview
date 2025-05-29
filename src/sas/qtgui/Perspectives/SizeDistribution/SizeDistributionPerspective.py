@@ -276,7 +276,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
-        self.rbWeighting2.setChecked(True)
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
         self.rbFixPower.setChecked(True)
@@ -312,11 +311,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.logic.data_is_loaded and not self.is_calculating
         )
         self.boxWeighting.setEnabled(self.logic.data_is_loaded)
-        # Weighting controls
-        if self.logic.di_flag:
-            self.rbWeighting2.setEnabled(True)
-        else:
-            self.rbWeighting2.setEnabled(False)
         self.cmdFitFlatBackground.setEnabled(self.logic.data_is_loaded)
         self.cmdFitPowerLaw.setEnabled(
             self.logic.data_is_loaded and self.chkLowQ.isChecked()
@@ -489,6 +483,16 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.model.item(WIDGETS.W_QMIN).setText(str(qmin))
         self.model.item(WIDGETS.W_QMAX).setText(str(qmax))
         self._path = self.logic.data.filename
+
+        # Set up default weighting controls
+        if self.logic.di_flag:
+            print('have dI')
+            self.rbWeighting2.setEnabled(True)
+            self.rbWeighting2.setChecked(True)
+        else:
+            print('no dI')
+            self.rbWeighting2.setEnabled(False)
+            self.rbWeighting4.setChecked(True)
 
         self.enableButtons()
 
