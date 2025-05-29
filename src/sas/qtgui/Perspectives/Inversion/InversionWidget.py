@@ -94,6 +94,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.dmaxWindow: DmaxWindow | None = None
 
         self.batchResultsWindow: BatchInversionOutputPanel | None = None
+        self.batch_dict: dict[str, Any] | None = None
 
         self.updateGuiValues()
         self.events()
@@ -420,18 +421,18 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.enableButtons()
 
         self.calculationComplete.emit()
-        batch_dict = {}
+        self.batch_dict = {}
         for result in self.results:
             # TODO: Calculate elapsed properly.
             result.outputs = get_outputs(result.calculator, totalElapsed)
             self.makePlots(result.calculator.out, result.calculator.cov, result.calculator, totalElapsed, result)
-            batch_dict[result.logic.data.filename] = {
+            self.batch_dict[result.logic.data.filename] = {
                 'Calculator': result.calculator,
                 'PrPlot': result.pr_plot,
                 'DataPlot': result.data_plot,
                 'Result': result
             }
-        self.batchCalculationOutput.emit(batch_dict)
+        self.batchCalculationOutput.emit(self.batch_dict)
 
     def showBatchCalculationWindow(self, batch_dict):
         self.batchResultsWindow = BatchInversionOutputPanel(
@@ -442,8 +443,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.enableButtons()
 
     def handleShowResults(self):
-        if self.batchResultsWindow:
-            self.batchResultsWindow.show()
+        self.batchCalculationOutput.emit(self.batch_dict)
 
     def estimateAvailable(self):
         self.updateGuiValues()
