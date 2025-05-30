@@ -52,7 +52,11 @@ for sfile in itertools.chain(so_list, dylib_list,
                              pyside_QtWebEngineProcess_Helpers,
                              pyside_Qtlibs):
     sign_command.append(sfile)
-    subprocess.check_call(sign_command)
+    if sfile == pyside_QtWebEngineProcess_Helpers:
+        web_engine_sign = sign_command + ['--entitlements', 'SasView6.app/Contents/Frameworks/PySide6/Qt/lib/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/Resources/QtWebEngineProcess.entitlements']
+        subprocess.check_call(web_engine_sign)
+    else:
+        subprocess.check_call(sign_command)
     sign_command.pop()
 
 
