@@ -49,7 +49,6 @@ for sfile in itertools.chain(so_list, dylib_list,
                              dylib_list_resources,
                              zmq_dylib_list_resources,
                              pyside_QtWebEngineCore,
-                             pyside_QtWebEngineProcess_Helpers,
                              pyside_Qtlibs):
     sign_command.append(sfile)
     subprocess.check_call(sign_command)
