@@ -55,6 +55,11 @@ class InversionResult:
 def format_float(f: float):
     return f'{f:.3f}'
 
+def format_float_scientific(f: float):
+    """
+    Formats a float in scientific notation with 3 significant figures.
+    """
+    return f'{f:.3g}' if f != 0 else '0.0'  # Avoids showing '0e+00' for zero values
 
 # Default Values for inputs
 NUMBER_OF_TERMS = 10
@@ -272,7 +277,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
             if current_calculator.est_bck:
                 self.backgroundInput.setText(format_float(out.background))
             self.computationTimeValue.setText(format_float(out.calc_time))
-            self.chiDofValue.setText(format_float(out.chi2[0]))
+            self.chiDofValue.setText(format_float_scientific(out.chi2[0]))
             self.oscillationValue.setText(format_float(out.oscillations))
             self.posFractionValue.setText(format_float(out.pos_frac))
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
