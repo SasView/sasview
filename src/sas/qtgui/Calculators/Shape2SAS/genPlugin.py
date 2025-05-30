@@ -23,18 +23,24 @@ def generatePlugin(prof: ModelProfile, constrainParameters: (str), fitPar: [str]
     return model_str, full_path
     
 
-def parListsFormat(par: [[str | float]]) -> str:
-    """Format lists of parameters to the model string"""
+def parListFormat(par: [[str | float]]) -> str:
+    """
+    Format a list of parameters to the model string. In this case the list
+    is on element for each shape. For a single shape there will be only
+    a single value. Mainly for delta Rho.
+    """
+    return f"[{', '.join(str(x) for x in par)}]"
 
-    for i in range(len(par)):
-        par[i] = parListFormat(par[i])
 
-    return parListFormat(par)
-
-
-def parListFormat(par: [str | float]) -> str:
-    """Format a list containing parameters to the model string"""
-    return f"[{', '.join(str(par))}]"
+def parListsFormat(par: [str | float]) -> str:
+    """
+    Format a list of list containing parameters to the model string. This
+    is used for single shape parameter lists like the center of mass of the
+    object which will be an element of the list of such COM for each shape
+    in a multishape model.
+    """
+    sub_pars_join =[", ".join(map(str,sub_par)) for sub_par in par]
+    return f"[[{'],['.join(sub_pars_join)}]]"
 
 
 def generateModel(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
@@ -45,7 +51,7 @@ def generateModel(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
     nl = '\n'
 
     fitPar.insert(0, "q")
-    
+
     model_str = (f'''
 r"""
 This plugin model uses Shape2SAS to generate theoretical 1D small-angle scattering. 
@@ -85,11 +91,11 @@ def Iq({', '.join(fitPar)}):
 {textwrap.indent(translation, '    ')}
     
     modelProfile = ModelProfile(subunits={prof.subunits}, 
-                                    p_s={prof.p_s}, 
-                                    dimensions={prof.dimensions}, 
-                                    com={prof.com}, 
-                                    rotation_points={prof.rotation_points}, 
-                                    rotation={prof.rotation}, 
+                                    p_s={parListFormat(prof.p_s)}, 
+                                    dimensions={parListsFormat(prof.dimensions)}, 
+                                    com={parListsFormat(prof.com)}, 
+                                    rotation_points={parListsFormat(prof.rotation_points)}, 
+                                    rotation={parListsFormat(prof.rotation)}, 
                                     exclude_overlap={prof.exclude_overlap})
     
     simPar = SimulationParameters(q=q, prpoints={pr_points}, Npoints={Npoints}, model_name="{model_name.replace('.py', '')}")
