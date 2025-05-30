@@ -202,7 +202,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
     @currentData.setter
     def currentData(self, value: HashableStandardItem | None):
         self.currentResult.logic.data = value
-        if not value is None:
+        if value is not None:
             self.onNewData()
 
 
@@ -248,7 +248,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         current_calculator = self.currentResult.calculator
 
         # Checks if there is an estimation available.
-        if not self.currentResult.estimated_parameters is None:
+        if self.currentResult.estimated_parameters is not None:
             self.noOfTermsSuggestionButton.setText(str(self.currentResult.estimated_parameters.nterms))
             self.regConstantSuggestionButton.setText("{:.2g}".format(self.currentResult.estimated_parameters.reg_constant))
 
@@ -268,7 +268,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
 
         # This checks to see if there is a calculation available.
         out = self.currentResult.outputs
-        if not out is None:
+        if out is not None:
             # TODO: It might be good to have a separate data class for these
             # values that are calculated.
             self.rgValue.setText(format_float(out.rg))
@@ -347,7 +347,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
     def showPlots(self, result: InversionResult):
         plots = [result.pr_plot, result.data_plot]
         for plot in plots:
-            if not plot is None:
+            if plot is not None:
                 updateModelItemWithPlot(result.logic._data_item, plot, plot.name)
                 self.communicator.plotRequestedSignal.emit([result.logic._data_item, plot], None)
 
@@ -362,7 +362,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
 
     def updateMaxQ(self, new_q_max: float):
         calculator = self.currentResult.calculator
-        new_q_min = min([max(calculator.x), new_q_max])
+        new_q_max = min([max(calculator.x), new_q_max])
         calculator.q_max = new_q_max
         self.updateGuiValues()
 
@@ -507,7 +507,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
             'out': result.calculator.out,
             'oscillations': result.calculator.oscillations(result.calculator.out),
             'pos_frac': result.calculator.get_positive(result.calculator.out),
-            'pos_err': result.outputs.pos_err if not result.outputs is None else None,
+            'pos_err': result.outputs.pos_err if result.outputs is not None else None,
             'q_max': result.calculator.q_max,
             'q_min': result.calculator.q_min,
             'rg': result.calculator.rg(result.calculator.out),

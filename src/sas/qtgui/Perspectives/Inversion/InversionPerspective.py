@@ -1,5 +1,4 @@
 import logging
-from typing_extensions import override
 import numpy as np
 
 
@@ -11,17 +10,13 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
 # pr inversion GUI elements
-from .InversionUtils import WIDGETS
-from .UI.TabbedInversionUI import Ui_PrInversion
 from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
-from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
 
 
@@ -41,11 +36,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     @property
     def title(self):
         return "P(r) Inversion"
-
-    @property
-    def title(self):
-        return "P(r) Inversion"
-
 
     def __init__(self, parent=None,data=None):
         super().__init__()
@@ -188,7 +178,6 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         if tab.currentResult.logic.data_is_loaded:
             if tab.is_batch:
                 return {}, True
-            tab_state = {}
             tab_data = tab.getPage()
             data_id = tab_data.pop('data_id', '')
             state[data_id] = {'pr_params': tab_data}
