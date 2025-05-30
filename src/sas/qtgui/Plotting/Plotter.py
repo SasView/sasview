@@ -332,46 +332,98 @@ class PlotterWidget(PlotterBase):
         return False
 
     def _plot_bounds(self, offset=0.05) -> tuple[tuple[float, float], tuple[float, float]]:
-        """ Get the appropriate bounds for the plots
+        """
+        Get the appropriate bounds for the plots. This is a workaround for an
+        edge case bug in matplotlib's autoscale. Basically, data whose range is
+        tiny on a log scale (e.g. 0.9 to 1.1 on a log scale).
 
-        :param offset: add a small fraction of the absolute value of each end to each end
-        :returns:
+        This should be removed if and when matplotlib fixes the bug. In the
+        meantime this private method ensures that all plots are scaled such
+        that there is a small "white space" between the data extremes and the
+        plot edges.
+
+        In order to achieve this, the min and max of all the data on the plot
+        are computed, taking into account that will include the top, or bottom,
+        of any error bars present with the data. For log axes data that first
+        requires removing any negative values from the min max computation.
+
+        The min and max values for each scale are then converted from data
+        coordinates to axes coordinates before computing the range of the data
+        (max-min). A fraction of that range (default is 5%) is then added and
+        subtracted from the smallest (min) and largest (max) values of x and y,
+        still in axes space. This ensures that regardless of the plot scaling
+        10% of the plot space (5% on either end) will be empty.
+
+        Finally, those adjusted min and max values are converted back to data
+        coordinates to be used in setting the plot bounds in the usual fashion
+
+        :param offset: The fraction of the absolute value of the full
+         data range to add to each end of the data range
+        :returns: lower right (xmin,ymin) and upper left (xmax,ymax) corners of
+         where the plot (figure) bounds should be set.
         """
 
         x_min, x_max = np.inf, -np.inf
         y_min, y_max = np.inf, -np.inf
 
+        # First let's find the smallest xmin and ymin and largest xmax and ymax
+        # in all the data sets. if the data have error bars then we need to
+        # keep track of the data poing + (or -) the error bar height to make
+        # sure the error bars stay within the plot.
         for key in self.plot_dict:
 
             plot_data = self.plot_dict[key].view
 
+            # First find the x axes bounds
             if len(plot_data.x) > 0:
                 x_min = min(np.min(plot_data.x), x_min)
                 x_max = max(np.max(plot_data.x), x_max)
 
+            # and now the y axss. Note: here we need to ensure not only are the
+            # y value is in bounds we also need to make sure that the top (or
+            # bottom) of the error bars on the points are also within the plot
+            # bounds.
             if len(plot_data.y) > 0:
-
                 dy = plot_data.dy
                 if dy is None:
                     y_min = min(np.min(plot_data.y), y_min)
                     y_max = max(np.max(plot_data.y), y_max)
                 else:
                     try:
-                        y_min = min(np.min(np.array(plot_data.y) - np.array(dy)), y_min)
-                        y_max = max(np.max(np.array(plot_data.y) + np.array(dy)), y_max)
+                        # For log scales we need to worry about whether y-dy
+                        # will be negative. Note that only postive y and x
+                        # are available when ax.axis is in log scale
+                        if self.ax.yaxis.get_scale() == "log":
+                            y_min = min(np.min([i for i in (np.array(plot_data.y) - np.array(dy)) if i > 0]), y_min)
+                            y_max = max(np.max([i for i in (np.array(plot_data.y) + np.array(dy))if i > 0]), y_max)
+                        else:
+                            y_min = min(np.min(np.array(plot_data.y) - np.array(dy)), y_min)
+                            y_max = max(np.max(np.array(plot_data.y) + np.array(dy)), y_max)
                     except ValueError:
                         # Ignore error term if it doesn't match y scale and causes an error
-                        
                         y_min = min(np.min(plot_data.y), y_min)
                         y_max = max(np.max(plot_data.y), y_max)
 
-        x_pad = offset*(x_max - x_min)
-        y_pad = offset*(y_max - y_min)
+        # Now we move from data coordinates to axes coordinates.
+        # This allows us to provide even padding between all the data limits
+        # and their respective plot bounds in "image" space, regardless of the
+        # scale of the plot (e.g log vs. linear).
+        data_to_axis = self.ax.transData + self.ax.transAxes.inverted()
 
-        return ((float(x_min - x_pad),
-                 float(x_max + x_pad)),
-                (float(y_min - y_pad),
-                 float(y_max + y_pad)))
+        ax_xmin, ax_ymin = data_to_axis.transform((x_min,y_min))
+        ax_xmax, ax_ymax = data_to_axis.transform((x_max,y_max))
+
+        x_pad = offset*(ax_xmax - ax_xmin)
+        y_pad = offset*(ax_ymax - ax_ymin)
+
+        # Return the bounds in data coordinates now
+        re_xmin,re_ymin = data_to_axis.inverted().transform((ax_xmin-x_pad,ax_ymin-y_pad))
+        re_xmax,re_ymax = data_to_axis.inverted().transform((ax_xmax+x_pad,ax_ymax+y_pad))
+
+        return ((float(re_xmin),
+                 float(re_xmax)),
+                (float(re_ymin),
+                 float(re_ymax)))
 
 
     def createContextMenu(self):
