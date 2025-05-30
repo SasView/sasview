@@ -1000,7 +1000,7 @@ description = """{description}"""
 
 ER_TEMPLATE = '''\
 # NOTE: If you want to couple this model with structure factors (S(Q)),
-# please uncomment this section. This unction will need to return a
+# please uncomment this section. This function will need to return a
 # meaningful value to enable full structure factor compatibility.
 '''
 
@@ -1010,7 +1010,7 @@ ER_C_TEMPLATE = '''\
 # will be passed to the calculation, not the text. Ensure that the
 # radius_effective method in the C file returns the correct value
 # based on the index. The values are used by the GUI to allow the
-# user to chose which method they wish to apply.
+# user to choose which method they wish to apply.
 
 #radius_effective_modes = ["equivalent volume sphere", "radius",
 #                           "half length", "half total length",]
@@ -1166,7 +1166,7 @@ form_volume({poly_args}) // Remove arguments as needed
 
 C_TEMPLATE = """\
 // uncomment this and provide appropriate functions for the effective
-// radius to be used IF this is to be ussed with structure factors.
+// radius to be used IF this is to be used with structure factors.
 //static double
 //radius_effective(int mode) // Add arguments as needed
 //{{
