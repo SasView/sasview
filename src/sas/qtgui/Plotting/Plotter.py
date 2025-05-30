@@ -333,14 +333,14 @@ class PlotterWidget(PlotterBase):
 
     def _plot_bounds(self, offset=0.05) -> tuple[tuple[float, float], tuple[float, float]]:
         """
-        Get the appropriate bounds for the plots. This is a workaround for a
-        longstanding but edge case bug in matplotlib's autoscale. Basically,
-        data whose range is tiny on a log scale (e.g. 0.9 to 1.1 on a log
-        scale).
+        Get the appropriate bounds for the plots. This is a workaround for an
+        edge case bug in matplotlib's autoscale. Basically, data whose range is
+        tiny on a log scale (e.g. 0.9 to 1.1 on a log scale).
 
-        This should be removed when matplotlib fixes the bug. In the meantime
-        this private method ensures that all plots are scaled such that there
-        is a small "white space" between the data extremes and the plot edges.
+        This should be removed if and when matplotlib fixes the bug. In the
+        meantime this private method ensures that all plots are scaled such
+        that there is a small "white space" between the data extremes and the
+        plot edges.
 
         In order to achieve this, the min and max of all the data on the plot
         are computed, taking into account that will include the top, or bottom,
@@ -374,17 +374,14 @@ class PlotterWidget(PlotterBase):
 
             plot_data = self.plot_dict[key].view
 
-            # NOTE: we need to trim any negative values if the scale of the
-            # particular axis is log scale before looking for the minimum
-
-            # First the x axis
+            # First find the x axes bounds
             if len(plot_data.x) > 0:
                 x_min = min(np.min(plot_data.x), x_min)
                 x_max = max(np.max(plot_data.x), x_max)
 
-            # and now the y axis. Note: here we need to ensure not only that y
-            # value is in bounds we also need to make sure that the top (or
-            # bottom) of the error bar on that point is also within the plot
+            # and now the y axss. Note: here we need to ensure not only are the
+            # y value is in bounds we also need to make sure that the top (or
+            # bottom) of the error bars on the points are also within the plot
             # bounds.
             if len(plot_data.y) > 0:
                 dy = plot_data.dy
@@ -393,6 +390,9 @@ class PlotterWidget(PlotterBase):
                     y_max = max(np.max(plot_data.y), y_max)
                 else:
                     try:
+                        # For log scales we need to worry about whether y-dy
+                        # will be negative. Note that only postive y and x
+                        # are available when ax.axis is in log scale
                         if self.ax.yaxis.get_scale() == "log":
                             y_min = min(np.min([i for i in (np.array(plot_data.y) - np.array(dy)) if i > 0]), y_min)
                             y_max = max(np.max([i for i in (np.array(plot_data.y) + np.array(dy))if i > 0]), y_max)
