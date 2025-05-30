@@ -1,11 +1,8 @@
 import sys
 import time
 
-from dominate.tags import output
-from numpy.typing import NDArray
 from sas.sascalc.data_util.calcthread import CalcThread
-from numpy.typing import NDArray
-from sas.sascalc.pr.NewInvertor import NewInvertor
+from sas.sascalc.pr.Invertor import Invertor
 
 
 class CalcPr(CalcThread):
@@ -36,7 +33,7 @@ class CalcPr(CalcThread):
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed
             pass
-        except:
+        except Exception:
             if self.error_func is not None:
                 self.error_func("CalcPr.compute: %s" % sys.exc_info()[1])
 
@@ -44,7 +41,7 @@ class CalcBatchPr(CalcThread):
 
     # A lot of these aren't type hinted but that can be future work as I'm trying to closely follow the pre-existing
     # structure, and I don't want to mess with anything.
-    def __init__(self, prs: list[NewInvertor], nfuncs=None, tab_id=None, error_func=None, completefn=None,
+    def __init__(self, prs: list[Invertor], nfuncs=None, tab_id=None, error_func=None, completefn=None,
                  updatefn=None, yieldtime=0.01, worktime=0.01):
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.prs = prs
@@ -63,7 +60,7 @@ class CalcBatchPr(CalcThread):
             self.complete(totalElapsed=elapsed)
         except KeyboardInterrupt:
             pass
-        except:
+        except Exception:
             if self.error_func is not None:
                 self.error_func("CalcBatchPr.compute: %s" % sys.exc_info()[1])
 
@@ -92,7 +89,7 @@ class EstimatePr(CalcThread):
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed
             pass
-        except:
+        except Exception:
             if self.error_func is not None:
                 self.error_func("EstimatePr.compute: %s" % sys.exc_info()[1])
 
@@ -132,6 +129,6 @@ class EstimateNT(CalcThread):
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed
             pass
-        except:
+        except Exception:
             if self.error_func is not None:
                 self.error_func("EstimatePr2.compute: %s" % sys.exc_info()[1])
