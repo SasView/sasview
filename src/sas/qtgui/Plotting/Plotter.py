@@ -378,7 +378,6 @@ class PlotterWidget(PlotterBase):
             # particular axis is log scale before looking for the minimum
 
             # First the x axis
-            plot_data.x = [i for i in plot_data.x if i > 0] if self.ax.xaxis.get_scale() == "log" else plot_data.x
             if len(plot_data.x) > 0:
                 x_min = min(np.min(plot_data.x), x_min)
                 x_max = max(np.max(plot_data.x), x_max)
@@ -390,7 +389,6 @@ class PlotterWidget(PlotterBase):
             if len(plot_data.y) > 0:
                 dy = plot_data.dy
                 if dy is None:
-                    plot_data.y = [i for i in plot_data.y if i > 0] if self.ax.yaxes.get_scale() == "log" else plot_data.y
                     y_min = min(np.min(plot_data.y), y_min)
                     y_max = max(np.max(plot_data.y), y_max)
                 else:
@@ -403,7 +401,6 @@ class PlotterWidget(PlotterBase):
                             y_max = max(np.max(np.array(plot_data.y) + np.array(dy)), y_max)
                     except ValueError:
                         # Ignore error term if it doesn't match y scale and causes an error
-                        plot_data.y = [i for i in plot_data.y if i > 0] if self.ax.yaxis.get_scale() == "log" else plot_data.y
                         y_min = min(np.min(plot_data.y), y_min)
                         y_max = max(np.max(plot_data.y), y_max)
 
