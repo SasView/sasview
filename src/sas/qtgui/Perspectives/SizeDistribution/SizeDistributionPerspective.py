@@ -654,14 +654,14 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         self.fittingFinishedSignal.emit(result)
 
-    def fittingError(self, error):
+    def fittingError(self, etype, value, traceback):
         """
         Handle error in the calculation thread
         """
         # re-enable the fit buttons
         self.is_calculating = False
         self.enableButtons()
-        logger.exception(error)
+        logging.exception("Fitting failed", exc_info=(etype, value, traceback))
 
     def fitComplete(self, result: MaxEntResult) -> None:
         """
