@@ -40,10 +40,10 @@ sign_deep_command = ['codesign', '--timestamp', '--deep', '--options=runtime', '
                  '--sign',  'Developer ID Application: The International Scattering Alliance (8CX8K63BQM)']
 
 #Signing QtWebEngineProcess.app first as it is a helper app
-for sfile in itertools.chain(pyside_QtWebEngineProcessApp):
-    sign_deep_command.append(sfile)
-    subprocess.check_call(sign_deep_command)
-    sign_deep_command.pop()
+#for sfile in itertools.chain(pyside_QtWebEngineProcessApp):
+#    sign_deep_command.append(sfile)
+#    subprocess.check_call(sign_deep_command)
+#    sign_deep_command.pop()
 
 for sfile in itertools.chain(so_list, dylib_list,
                              dylib_list_resources,
