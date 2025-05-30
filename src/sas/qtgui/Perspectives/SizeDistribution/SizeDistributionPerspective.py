@@ -485,13 +485,9 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self._path = self.logic.data.filename
 
         # Set up default weighting controls
-        if self.logic.di_flag:
-            print('have dI')
-            self.rbWeighting2.setEnabled(True)
-            self.rbWeighting2.setChecked(True)
-        else:
-            print('no dI')
-            self.rbWeighting2.setEnabled(False)
+        self.rbWeighting2.setEnabled(self.logic.di_flag)
+        self.rbWeighting2.setChecked(self.logic.di_flag)
+        if not self.logic.di_flag:
             self.rbWeighting4.setChecked(True)
 
         self.enableButtons()
