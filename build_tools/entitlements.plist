@@ -8,6 +8,9 @@
 		<!-- Disable Library Validation Entitlement -->
 		<key>com.apple.security.cs.disable-library-validation</key>
 		<true/>	
+		<!-- Allow execution of JIT-compiled code entitlement -->
+		<key>com.apple.security.cs.allow-jit</key>
+		<true/>
 		<!-- Disable Executable Page Protection Entitlement -->
 		<key>com.apple.security.cs.disable-executable-page-protection</key>
 		<true/>
