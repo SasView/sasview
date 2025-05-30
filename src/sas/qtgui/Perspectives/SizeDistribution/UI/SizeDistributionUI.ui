@@ -152,8 +152,7 @@
           <item row="0" column="2">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
-              style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
              </string>
             </property>
            </widget>
@@ -175,8 +174,7 @@
           <item row="0" column="5">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span
-              style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
              </string>
             </property>
            </widget>
@@ -225,36 +223,157 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="2">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;10&lt;span
+              style=&quot; vertical-align:super;&quot;&gt;-6&lt;/span&gt;/Å&lt;span
+              style=&quot; vertical-align:super;&quot;&gt;-2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+             </string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="3" column="0" alignment="Qt::AlignTop">
         <widget class="QGroupBox" name="boxOutput">
          <property name="title">
           <string>Output</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
-          <item row="0" column="0">
+          <item row="0" column="0" colspan="4">
            <widget class="QLabel" name="lblConvergence">
             <property name="text">
-             <string></string>
+             <string/>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="lblChiSq"/>
+           <widget class="QLabel" name="lblChiSq">
+            <property name="text">
+             <string>ChiSq: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="txtChiSq">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="lblVolume"/>
+           <widget class="QLabel" name="lblVolume">
+            <property name="text">
+             <string>Total volume fraction: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="txtVolume">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>%</string>
+            </property>
+           </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="lblDiameterMean"/>
+           <widget class="QLabel" name="lblDiameterMean">
+            <property name="text">
+             <string>Mean diameter:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="txtDiameterMean">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
           <item row="4" column="0">
-           <widget class="QLabel" name="lblDiameterMode"/>
+           <widget class="QLabel" name="lblDiameterMedian">
+            <property name="text">
+             <string>Median diameter:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="txtDiameterMedian">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
           <item row="5" column="0">
-           <widget class="QLabel" name="lblDiameterMedian"/>
+           <widget class="QLabel" name="lblDiameterMode">
+            <property name="text">
+             <string>Mode diameter:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="txtDiameterMode">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3" rowspan="5">
+           <spacer name="horizontalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>200</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -409,8 +528,8 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_20">
           <item row="0" column="0">
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
+           <layout class="QGridLayout" name="verticalLayout">
+            <item row="0" column="0">
              <widget class="QRadioButton" name="rbWeighting1">
               <property name="text">
                <string>None</string>
@@ -420,26 +539,29 @@
               </property>
              </widget>
             </item>
-            <item>
+            <item row="1" column="0">
              <widget class="QRadioButton" name="rbWeighting2">
               <property name="text">
                <string>Use dI Data</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="2" column="0">
              <widget class="QRadioButton" name="rbWeighting3">
               <property name="text">
                <string>Use |sqrt(I Data)|</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="3" column="0">
              <widget class="QRadioButton" name="rbWeighting4">
               <property name="text">
-               <string>Use |I Data|</string>
+               <string>Use % |I Data|</string>
               </property>
              </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="txtWgtPercent"/>
             </item>
            </layout>
           </item>
@@ -466,7 +588,6 @@
             </property>
            </spacer>
           </item>
-
          </layout>
         </widget>
        </item>
@@ -486,7 +607,7 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="txtBackgd"/>
           </item>
-          <item row="0" column="2">
+          <item row="0" column="2" colspan="2">
            <widget class="QLabel" name="label_8">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cm&lt;span style=&quot;
@@ -506,29 +627,66 @@
            </widget>
           </item>
           <item row="3" column="0" colspan="3">
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
+           <layout class="QGridLayout" name="gridLayout_14">
+            <item row="0" column="0">
              <widget class="QLabel" name="lblPowerLowQ">
               <property name="text">
                <string>Power:</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="0" column="1">
              <widget class="QLineEdit" name="txtPowerLowQ">
               <property name="toolTip">
                <string>Exponent to apply to the Power_law function.</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="0" column="2">
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QRadioButton" name="rbFixPower">
+                <property name="text">
+                 <string>Fix</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="rbFitPower">
+                <property name="text">
+                 <string>Fit</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="3">
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>100</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="0">
              <widget class="QLabel" name="lblScaleLowQ">
               <property name="text">
                <string>Scale:</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="1" column="1">
              <widget class="QLineEdit" name="txtScaleLowQ">
               <property name="toolTip">
                <string>Scale to apply to the Power_law function.</string>

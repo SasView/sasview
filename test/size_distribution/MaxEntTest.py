@@ -4,7 +4,7 @@ import csv
 import numpy as np
 from sasdata.dataloader.loader import Loader
 from sasdata.dataloader.data_info import Data1D
-from src.sas.sascalc.poresize.SizeDistribution import sizeDistribution
+from src.sas.sascalc.size_distribution.SizeDistribution import sizeDistribution
 
 
 def find(filename):

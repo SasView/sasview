@@ -66,8 +66,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         self.addTooltips()
 
-        text = DEFAULT_EDITOR_TEXT
-        self.txtFunction.insertPlainText(text)
+        self.txtFunction.setText(DEFAULT_EDITOR_TEXT)
         self.txtFunction.setFont(GuiUtils.getMonospaceFont())
 
         # Validators
@@ -418,7 +417,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         Disable the plugin editor and show that the model is changed.
         """
         # Check to see if model was edited back into original state
-        f_box = True if self.txtFunction.toPlainText() == "" else False
+        f_box = True if self.txtFunction.toPlainText() in ["", DEFAULT_EDITOR_TEXT] else False
         n_box = True if self.txtNewModelName.text() == "" else False
         p_boxes = True if not self.newParamTree.isEnabled() and not self.oldParamTree.isEnabled() else False
         
@@ -576,7 +575,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         Show the "Reparameterization" section of help
         """
-        tree_location = "/user/qtgui/Perspectives/Fitting/plugin.html#reparameterized-models"
+        tree_location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#reparameterization-editor"
         self.parent.showHelp(tree_location)
     
     def onModelHelp(self):
@@ -589,7 +588,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
             tree_location = tree_base + f"{self.loaded_model_name}.html"
         else:
             logging.info("No model detected to have been loaded. Showing default help page.")
-            tree_location = "/user/qtgui/Perspectives/Fitting/plugin.html#reparameterized-models"
+            self.onHelp()
         self.parent.showHelp(tree_location)
 
     ### CLASS METHODS ###
