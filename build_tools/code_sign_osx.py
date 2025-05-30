@@ -39,7 +39,7 @@ sign_command = ['codesign', '--timestamp', '--options=runtime', '--verify', '--v
 sign_deep_command = ['codesign', '--timestamp', '--deep', '--options=runtime', '--verify', '--verbose=4', '--force',
                  '--sign',  'Developer ID Application: The International Scattering Alliance (8CX8K63BQM)']
 
-# Signing QtWebEngineProcess.app first as it is a helper app
+#Signing QtWebEngineProcess.app first as it is a helper app
 for sfile in itertools.chain(pyside_QtWebEngineProcessApp):
     sign_deep_command.append(sfile)
     subprocess.check_call(sign_deep_command)
