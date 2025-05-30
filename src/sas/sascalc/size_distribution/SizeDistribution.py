@@ -528,7 +528,7 @@ class sizeDistribution():
 
         # If all bin magnitudes are NaN, raise an error and let the caller handle it
         if np.isnan(BinMag).all():
-            raise ValueError("Maximum Entropy fitting failed.")
+            raise ValueError("Maximum Entropy fitting failed. Try different input values.")
 
         ## Check len of intensities for full vs. quick fit
         if len(intensities) == 1:
