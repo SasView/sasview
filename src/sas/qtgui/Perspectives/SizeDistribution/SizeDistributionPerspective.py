@@ -38,6 +38,7 @@ POWER_LOW_Q = 4
 SCALE_LOW_Q = 1.0
 NUM_ITERATIONS = 100
 WEIGHT_FACTOR = 1.0
+WEIGHT_PERCENT = 1.0
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +215,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         # Weighting
         self.mapper.addMapping(self.txtWgtFactor, WIDGETS.W_WEIGHT_FACTOR)
+        self.mapper.addMapping(self.txtWgtPercent, WIDGETS.W_WEIGHT_PERCENT)
 
         self.mapper.toFirst()
 
@@ -268,12 +270,16 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Weighting
         item = QtGui.QStandardItem(str(WEIGHT_FACTOR))
         self.model.setItem(WIDGETS.W_WEIGHT_FACTOR, item)
+        item = QtGui.QStandardItem(str(WEIGHT_PERCENT))
+        self.model.setItem(WIDGETS.W_WEIGHT_PERCENT, item)
 
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
+        self.rbWeighting2.setChecked(True)
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
+        self.rbFixPower.setChecked(True)
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
@@ -288,6 +294,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtScaleLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtWgtFactor.setValidator(GuiUtils.DoubleValidator())
+        self.txtWgtPercent.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgdQMin.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgdQMax.setValidator(GuiUtils.DoubleValidator())
 
@@ -308,12 +315,8 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Weighting controls
         if self.logic.di_flag:
             self.rbWeighting2.setEnabled(True)
-            self.rbWeighting2.setChecked(True)
-            # self.onWeightingChoice(self.rbWeighting2)
         else:
             self.rbWeighting2.setEnabled(False)
-            self.rbWeighting1.setChecked(True)
-            # self.onWeightingChoice(self.rbWeighting1)
         self.cmdFitFlatBackground.setEnabled(self.logic.data_is_loaded)
         self.cmdFitPowerLaw.setEnabled(
             self.logic.data_is_loaded and self.chkLowQ.isChecked()
@@ -392,7 +395,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Fit flat background and update plot
         """
         qmin, qmax = self.getFlatBackgroundRange()
-        constant = self.logic.fitFlatBackground(qmin, qmax)
+        fit_result = self.logic.fitBackground(power=0.0, qmin=qmin, qmax=qmax)
+        if fit_result is None:
+            return
+        constant = fit_result[0]
         self.txtBackgd.setText(f"{constant:5g}")
         self.updateBackground()
         self.plotData()
@@ -402,8 +408,23 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         Fit background power law and update plot
         """
         qmin, qmax = self.getPowerLawBackgroundRange()
-        _, _, power = self.getBackgroundParams()
-        scale = self.logic.fitBackgroundScale(power, qmin, qmax)
+        if self.rbFitPower.isChecked():
+            # if the power should be fit, pass None
+            fit_result = self.logic.fitBackground(power=None, qmin=qmin, qmax=qmax)
+            if fit_result is None:
+                return
+            scale, power_fit = fit_result
+            # by convention, the power is shown without a minus sign
+            power = -1.0 * power_fit
+            self.txtPowerLowQ.setText(f"{power:5g}")
+        else:
+            # if the power should be fixed, pass the value from the input box
+            _, _, power_fixed = self.getBackgroundParams()
+            fit_result = self.logic.fitBackground(power_fixed, qmin, qmax)
+            if fit_result is None:
+                return
+            scale = fit_result[0]
+        # update the scale
         self.txtScaleLowQ.setText(f"{scale:5g}")
         self.updateBackground()
         self.plotData()
@@ -436,6 +457,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the Size Distribution Perspective"
             raise AttributeError(msg)
+
+        if self.logic.data_is_loaded:
+            # remove existing data and reset GUI
+            self.resetWindow()
 
         self._model_item = data_item[0]
         logic_data = GuiUtils.dataFromItem(self._model_item)
@@ -523,9 +548,19 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Remove the existing data reference from the Size Distribution Perspective"""
         if not data_list or self._model_item not in data_list:
             return
+        self.resetWindow()
+
+    def resetWindow(self):
+        """
+        Reset the state of input widgets and data structures
+        """
         self._data = None
         self._path = ""
         self.txtName.setText("")
+        self.txtPowerLawQMin.setText("")
+        self.txtPowerLawQMax.setText("")
+        self.txtBackgdQMin.setText("")
+        self.txtBackgdQMax.setText("")
         self._model_item = None
         self.logic.data = None
         self.logic.data_fit = None
@@ -677,7 +712,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.rbWeighting1: WeightType.NONE,
             self.rbWeighting2: WeightType.DI,
             self.rbWeighting3: WeightType.SQRT_I,
-            self.rbWeighting4: WeightType.I,
+            self.rbWeighting4: WeightType.PERCENT_I,
         }
         for button, weight_type in weight_type_map.items():
             if button.isChecked():
@@ -699,6 +734,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             sky_background=float(self.txtSkyBackgd.text()),
             max_iterations=int(self.txtIterations.text()),
             weight_factor=float(self.txtWgtFactor.text()),
+            weight_percent=float(self.txtWgtPercent.text()),
             weight_type=self.getWeightType(),
         )
 
