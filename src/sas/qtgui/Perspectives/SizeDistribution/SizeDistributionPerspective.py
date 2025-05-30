@@ -794,7 +794,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 converge_msg = f"Full fit converged after on average {np.mean(result.num_iters):.1f} iterations"
             self.lblConvergence.setStyleSheet("color: black;")
         else:
-            converge_msg = "Not converged"
+            converge_msg = "Not converged! Try increasing the weight factor."
             self.lblConvergence.setStyleSheet("color: red; font-weight: bold;")
         self.lblConvergence.setText(converge_msg)
         self.txtChiSq.setText(f"{result.chisq:.5g}")
