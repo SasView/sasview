@@ -23,7 +23,7 @@ pylint
 pyopencl
 pyopengl
 pyparsing
-PySide6==6.4.3
+PySide6
 pytools
 qtconsole
 sasdata @ git+https://github.com/SasView/sasdata.git@sasdata_0.10.0
