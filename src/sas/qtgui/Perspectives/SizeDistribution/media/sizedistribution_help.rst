@@ -64,11 +64,13 @@ used. Here we implement only the most common MaxEnt (Maximum Entropy) method
 used for example by the famous CONTIN algorithm used in light scattering.
 
 .. note::
+
     The assumptions inherent in this method are:
     * The system can be approximated as a two phase system
     * The scattering length density of each phase is known
     * The minor phase is made up of domains of varying sizes but a fixed shape
-    * The minor phase is sufficiently “dilute” as to not have any interdomain interference terms (i.e. no S(Q)}
+    * The minor phase is sufficiently “dilute” as to not have any interdomain
+      interference terms (i.e. no S(Q)}
 
 
 Maximum Entropy
@@ -109,13 +111,17 @@ Load some data with the *Data Explorer.*
 Select a dataset and use the *Send To* button on the *Data Explorer* to load
 the dataset into the *Size Distribution* panel.
 
-INSERT IMAGE HERE!!!
+.. image:: ParametersTab.png
 
 This will open the panel on the *Parameters* tab and plot the data to fit.
 The most important parameters to adjust at this point are the minimum and
 maximum diameters of the distribution. The calculation will only explore
 diameters in this range. It is important that the range not excessively exceed
-the limits imposed by the $Q$ range being fit.
+the limits imposed by the $Q$ range being fit. On the other hand, too small
+a range will not allow the maximum entropy optimization to explore enough
+sizes to give a good fit. In other words, if you have data at low and high
+Q, the optimizer needs to be able to include small and large sizes in order
+to fit those regions.
 
 If the data is on absolute scale and a quantitative volume fraction is desired the
 contrast factor between the domain of interest and the matrix must be set
@@ -131,6 +137,7 @@ default of 1 is for a sphere. An aspect ratio greater than 1 will yield a
 prolate ellipsoid while a value smaller than 1 is for an oblate ellipsoid.
 
 .. Warning::
+
    The Size Distribution analysis assumes the data is properly background
    subtracted. The smaller sizes in particular will be very sensitive to that.
    If this is not the case proceed to the options tab as described below and
@@ -141,51 +148,56 @@ panel: *Qick fit* and *Full fit*. One should always start with the
 *Quick fit*. The only difference between the two is that the first will only
 run the calculation once and produce the result.
 
-IMAGE INSERTED HERE OF QUICK FIT
+.. image:: QuickFit.png
 
 After a short time, the graph will be updated with the fit to the data using
 the resulting distribution, while a second plot will pop up showing the final
 distribution of sizes that are returned, giving the volume fraction (true or
 relative depending on whether the data are on absolute scale or not) of each
 size. Finally the *Output* section of the *Parameters* tab will show the
-results including whether or not the fitting converged, the unnormalized
-$\Chi^2$, the percent volume fraction of domains (assuming absolute scaled
+results including whether or not the fitting converged, the reduced
+$\chi^2$, the percent volume fraction of domains (assuming absolute scaled
 data and correct contrast term) along with statistics on the diameter such
 as the mean and median.
 
 .. note::
+
    Currently the diameter averages are given in terms of the volume
    distribution not the number distribution. Thus the mean diameter
    is essentially weighted towards the largest sizes. The number
    distribution may be given in future versions.
 
-In the plot representing the distribution of sizes there are also two vertical
-lines. These lines represent a conservative estimate of the sizes that are
-well within the $Q$ range of the fit.
+.. image:: QuickFitFailed.png
+
+In the plot representing the distribution of sizes there are also two red
+vertical lines. These lines represent a conservative estimate of the sizes that
+are well within the $Q$ range of the fit and thus "trustable." Any amount of
+sizes outside that range should be considered highly suspect!
 
 .. note::
+
    This is usually a fairly ill posed problem and the fitting may not converge.
    This will pop up a ``WARNING:`` in the log explorer warning that this is
-   the case. The results panel will also note that the fitting did not
-   converge. The algorithm will return the values from the last iteration that
-   was run but should be viewed with suspicion. One should **never** report
-   values from an unconverged fit!
+   the case. The results panel will also note in **bold red font** that the
+   fitting did not converge. The algorithm will return the values from the last
+   iteration that was run but should be viewed with suspicion. One should
+   **never** report values from an unconverged fit!
 
 Once one is happy with the *Quick fit* results, it is recommended to finish by
 running a *Full fit*. This will run the same fit ten times over. However, each
 time the input data will be "randomized" within the data's error bars to
 account for the noise in the data. The sigma on the resulting distribution
 magnitudes provides an estimate of the uncertainties on those values and the
-resulting total volume fraction and average diameters.
+resulting total volume fraction.
 
-INSERT IMAGE HERE USING FULL FIT
+.. image:: FullFit.png
 
 Refining the fit
 ^^^^^^^^^^^^^^^^
 In order to get a more reasonable fit, and in particular one that converges, it
 will often be necessary to adjust the parameters on the *Options* tab.
 
-INSERT IMAGE OF OPTIONS TAB HERE
+.. image:: OptionsTab.png
 
 The first thing to worry about, as noted above, is the background subtraction.
 The usual high Q background can be entered if known. It can also
@@ -205,28 +217,31 @@ power law expected from sharp interfaces (the Porod Law for smooth surfaces
 at the length scales being probed) though there may be times when a different
 power law is appropriate. However the scale factor will certainly need
 adjusting. This can be done by first checking the ``Subtract Low-Q power law``
-check box. At this point, once again it can be done manually. The plot will updated each
-time enter is pressed after changing a background value to show both the
-background curve and the subtracted data. The user can then iterate to find
-the best values. Alternatively,  and again giving the minimum and maximum
-$Q$ values that are 100% dominated by the low $Q$ background term and pressing
-``Fit power law`` the program will estimate the values by fitting a power law
-to the region of data indicated.
+check box. At this point, once again it can be done manually. The plot will
+update each time enter is pressed after changing a background value to show
+both the background curve and the subtracted data. The user can then iterate
+to find the best values. Alternatively, and again giving the minimum and
+maximum $Q$ values that are 100% dominated by the low $Q$ background term and
+pressing ``Fit power law``, the program will estimate the values by fitting a
+power law to the region of data indicated. Here one can choose to fix the
+power law exponent to a known value (the default) and only the scale factor
+will be estimated, or, by checking the ``Fit`` radio button next to the
+``power`` text entry box, both the power law exponent and scale factor will
+be estimated.
 
 Once the backgrounds are subtracted properly, the range of $Q$ to be fit can
 also be limited using either the range sliders in the plot or entering the
 values in the ``Fitting range`` box of the *Options* tab.
 
-INSERT IMAGE WITH RANGES AND BACKGROUND SUBTRACTED
+.. image:: backSubtracted.png
 
 Next the ``Weighting`` box parameters can be adjusted. SasView automatically
 sets the fitting to use the uncertainty data associated with the data, or,
 if no uncertainties are given with the data (which should never be the case),
-will set it to none. No uncertainty on the data points will almost always
-fail to converge. There are a couple of other options, neither great choices,
-to mitigate this. A better option would be to use a percentage of the data
-which may be implemented later. But to be very clear, it is **HIGHLY**
-discouraged to use data without uncertainties.
+will set it to 1% of the intensity value for data each point. No uncertainty
+on the data points will almost always fail to converge. There are a couple of
+other options, neither great choices, to mitigate this. But to be very clear,
+it is **HIGHLY** discouraged to use data without uncertainties.
 
 That said, scattering data never accounts for anything but counting statistics.
 When the uncertainty is dominated by those this can be reasonable. However, if
@@ -235,7 +250,7 @@ impact on the ability of this analyis to converge. This is often a problem
 with X-ray data for example. A first order correction is made available here
 in the ``Weight factor`` box. The value entered here effectivly increases the
 size of the uncertainties sent to the fitting routine by that factor. Larger
-error bars will decrease $\ch^2$ thus making convergence easier.
+error bars will decrease $\chi^2$ thus making convergence easier.
 
 Finally, there is a ``Method parameters`` box which contains two adjustable
 parameters:
@@ -243,11 +258,11 @@ parameters:
 never adjusted unless one knows what one is doing. Basically it adds a level
 of *inherent* background.
 * ``Iterations``. This sets the maximum number of iterations the Maximum
-Entropy optimization routine before it stops and returns a "not converged"
-error. A maximum value of 5000 is hard coded, however that can take quite
-a long time to run, particularly for a ``Full fit``. In general, if the
-routine does not converge in 100 iterations it probably won't. Typical numbers
-of iterations for convergence range from 5 to 20.
+Entropy optimization routine will perform before it stops and returns a
+"not converged" error. In general, if the routine does not converge in 100
+iterations it probably won't. Typical numbers of iterations for convergence
+range from 5 to 30. It is possible to increase the limit to whatever number
+one has patience for.
 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -279,4 +294,4 @@ Reference
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Paul Butler on May 19, 2025
+.. note::  This help document was last modified by Paul Butler on May 30, 2025
