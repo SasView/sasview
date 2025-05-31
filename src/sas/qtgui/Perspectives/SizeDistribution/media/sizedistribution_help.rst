@@ -64,8 +64,8 @@ used. Here we implement only the most common MaxEnt (Maximum Entropy) method
 used for example by the famous CONTIN algorithm used in light scattering.
 
 .. note::
-
     The assumptions inherent in this method are:
+
     * The system can be approximated as a two phase system
     * The scattering length density of each phase is known
     * The minor phase is made up of domains of varying sizes but a fixed shape
@@ -116,12 +116,14 @@ the dataset into the *Size Distribution* panel.
 This will open the panel on the *Parameters* tab and plot the data to fit.
 The most important parameters to adjust at this point are the minimum and
 maximum diameters of the distribution. The calculation will only explore
-diameters in this range. It is important that the range not excessively exceed
-the limits imposed by the $Q$ range being fit. On the other hand, too small
-a range will not allow the maximum entropy optimization to explore enough
-sizes to give a good fit. In other words, if you have data at low and high
-Q, the optimizer needs to be able to include small and large sizes in order
-to fit those regions.
+diameters in this range. It is important that the range of diameters be
+sufficient to fit the full $Q$ range of the data (within the minimum and
+maximum bounds set if any). For example, if the largest diameter will be in the
+Guinier region in a $Q$ range where the data is stil showing growth, the fit
+will never be able to converge. Likewise, if the smallest diameter allowed
+is larger than can be "seen" at the highest $Q$ in the data, it may also be
+hard for the fit to converge. On the other hand, it is best not to excessively
+exceed the limits imposed by the $Q$ range being fit.
 
 If the data is on absolute scale and a quantitative volume fraction is desired the
 contrast factor between the domain of interest and the matrix must be set
@@ -231,7 +233,8 @@ be estimated.
 
 Once the backgrounds are subtracted properly, the range of $Q$ to be fit can
 also be limited using either the range sliders in the plot or entering the
-values in the ``Fitting range`` box of the *Options* tab.
+values in the ``Fitting range`` box of the *Options* tab. Remember that these
+$Q$ bounds define the range of diameters that can be probed using this method.
 
 .. image:: backSubtracted.png
 
@@ -247,10 +250,12 @@ That said, scattering data never accounts for anything but counting statistics.
 When the uncertainty is dominated by those this can be reasonable. However, if
 it is not, then the uncertainties can be far too small. This will have a huge
 impact on the ability of this analyis to converge. This is often a problem
-with X-ray data for example. A first order correction is made available here
-in the ``Weight factor`` box. The value entered here effectivly increases the
-size of the uncertainties sent to the fitting routine by that factor. Larger
-error bars will decrease $\chi^2$ thus making convergence easier.
+with X-ray data for example, but is true for most data and a particular problem
+here because one of the criteria for convergence is that \chi^2 be within 1\%
+of 1.0 (so 0.99 < \chi^2 < 1.01). A first order correction is made available
+here in the ``Weight factor`` box. The value entered here effectivly increases
+the size of the uncertainties sent to the fitting routine by that factor.
+Larger error bars will decrease $\chi^2$ thus making convergence easier.
 
 Finally, there is a ``Method parameters`` box which contains two adjustable
 parameters:
