@@ -177,16 +177,22 @@ class maxEntMethod():
         This function does the complete Maximum Entropy algorithm of Skilling and Bryan
          
         The scattering intensity, I(Q), is related to the histogram size distribution, Np(r) by the following equation:
+
         .. math::
-            I_{Q}=|\Delta\rho^2|\int|F(Q,r)^2|(V(r))^2N_{P}(r)dr
-        Np(r) is a histogram size distribution where a fixed number of bins are defined over a given range of diameter with either constant diameter bins or constant proportional diameter bins. 
+
+            I(Q)=\Delta \rho^{2} \int F(Q,r)^{2} (V(r))^{2} N_{P}(r)dr
+
+        Np(r) is a histogram size distribution where a fixed number of bins are defined over a given range of diameter with either constant diameter bins or constant proportional diameter bins.
         Solution of the histogram size distribution to the scattering equation above is obtained by fitting the scattering calculated from trial distributions to the measured data and then revising the amplitudes of the trial histogram distribution based upon the applied constraints. 
         The trial histogram size distribution is not forced to adhere to a particular functional form, such as Gaussian or log-normal. 
         However, in the current formulation, all sizes of the scatterer are expected to have the same scattering contrast and morphology (shape, degree of interaction, aspect ratio, orientation, etc.)
 
         The maximum entropy method seeks solution of the functional, Ξ:
+
         .. math::
+
             \equiv =\chi-\alpha S
+
         Where chi^2 indicates the goodness of fit, S is the applied constraint, and alpha is a Lagrange multiplier used to ensure that the solution fits the measured data to some extent.
         But compared to a regular regularization method, maximum entropy method also forces all histograms in the size distribution to have a positive amplitude
         

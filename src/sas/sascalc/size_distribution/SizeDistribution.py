@@ -565,7 +565,7 @@ class sizeDistribution():
         maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag/(2*self._binDiff), 2*self.bins, axis=1)
         self.BinMag_numberDist = self.BinMagnitude_maxEnt/ellipse_volume(self.aspectRatio*self.bins, self.bins)
 
-        rvdist = stats.rv_histogram((self.BinMagnitude_maxEnt, self._bin_edges*2)) ## volume fraction weighted
+        rvdist = stats.rv_histogram((self.BinMagnitude_maxEnt, self._bin_edges*2), density=True) ## volume fraction weighted
         number_cdf = integrate.cumulative_trapezoid(self.BinMag_numberDist, 2*self.bins)
         self.number_cdf = number_cdf/number_cdf[-1]
 
