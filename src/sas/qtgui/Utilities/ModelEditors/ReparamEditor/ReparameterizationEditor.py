@@ -198,8 +198,13 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         
         # Find the parameter item by using param_to_open and format as a dictionary
         param_properties = self.getParamProperties(param_to_open)
-        param_properties['highlighted_property'] = highlighted_property  # TODO: Which property the cursor will start on
         self.onAddParam()
+        # Populate the editor with the parameter values
+        if self.param_editor:
+            self.param_editor.properties = param_properties
+            self.param_editor.qtree_item = param_to_open # Item to edit is always the parent of the selected_item!
+            self.param_editor.onLoad()
+            self.param_editor.returnEditedParamSignal.connect(self.updateParam)
     
     def getParamProperties(self, param: QtWidgets.QTreeWidgetItem) -> dict:
         """
@@ -580,10 +585,10 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         if (self.loaded_model_name is not None
                 and self.loaded_model_name not in list(self.model_selector.custom_models.values())):
             tree_location = tree_base + f"{self.loaded_model_name}.html"
+            self.parent.showHelp(tree_location)
         else:
             logging.info("No model detected to have been loaded. Showing default help page.")
             self.onHelp()
-        self.parent.showHelp(tree_location)
 
     ### CLASS METHODS ###
 

@@ -276,7 +276,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
-        self.rbWeighting2.setChecked(True)
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
         self.rbFixPower.setChecked(True)
@@ -312,11 +311,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.logic.data_is_loaded and not self.is_calculating
         )
         self.boxWeighting.setEnabled(self.logic.data_is_loaded)
-        # Weighting controls
-        if self.logic.di_flag:
-            self.rbWeighting2.setEnabled(True)
-        else:
-            self.rbWeighting2.setEnabled(False)
         self.cmdFitFlatBackground.setEnabled(self.logic.data_is_loaded)
         self.cmdFitPowerLaw.setEnabled(
             self.logic.data_is_loaded and self.chkLowQ.isChecked()
@@ -490,6 +484,12 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.model.item(WIDGETS.W_QMAX).setText(str(qmax))
         self._path = self.logic.data.filename
 
+        # Set up default weighting controls
+        self.rbWeighting2.setEnabled(self.logic.di_flag)
+        self.rbWeighting2.setChecked(self.logic.di_flag)
+        if not self.logic.di_flag:
+            self.rbWeighting4.setChecked(True)
+
         self.enableButtons()
 
         self.plotData()
@@ -654,14 +654,14 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         self.fittingFinishedSignal.emit(result)
 
-    def fittingError(self, error):
+    def fittingError(self, etype, value, traceback):
         """
         Handle error in the calculation thread
         """
         # re-enable the fit buttons
         self.is_calculating = False
         self.enableButtons()
-        logger.exception(error)
+        logging.exception("Fitting failed", exc_info=(etype, value, traceback))
 
     def fitComplete(self, result: MaxEntResult) -> None:
         """
@@ -792,8 +792,10 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 )
             else:
                 converge_msg = f"Full fit converged after on average {np.mean(result.num_iters):.1f} iterations"
+            self.lblConvergence.setStyleSheet("color: black;")
         else:
-            converge_msg = "Not converged"
+            converge_msg = "Not converged! Try increasing the weight factor."
+            self.lblConvergence.setStyleSheet("color: red; font-weight: bold;")
         self.lblConvergence.setText(converge_msg)
         self.txtChiSq.setText(f"{result.chisq:.5g}")
         stats = result.statistics

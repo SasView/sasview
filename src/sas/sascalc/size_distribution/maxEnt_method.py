@@ -299,7 +299,7 @@ class maxEntMethod():
             if (abs(chisq/chizer-1.0) < CHI_SQR_LIMIT) and  (test < TEST_LIMIT):
                 print (' Convergence achieved.')
                 converged = True
-                return chisq, f, np.dot(f, Gqr.transpose()), converged, iter     # solution FOUND returns here
+                return chisq/chizer, f, np.dot(f, Gqr.transpose()), converged, iter     # solution FOUND returns here
         print (' No convergence! Try increasing Error multiplier.')
-        return chisq, f, np.dot(f, Gqr.transpose()), converged, iter             # no solution after IterMax iterations
+        return chisq/chizer, f, np.dot(f, Gqr.transpose()), converged, iter             # no solution after IterMax iterations
 

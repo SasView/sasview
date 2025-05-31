@@ -55,7 +55,7 @@ def help():
 
     return info_txt
 
-class NewInvertor():
+class Invertor():
 
     def __init__(self, logic: InversionLogic):
         self.init_default_values()
@@ -129,7 +129,7 @@ class NewInvertor():
     def is_valid(self) -> bool:
         return self.npoints == self.ny and self.npoints == self.nerr
 
-    def clone(self) -> "NewInvertor":
+    def clone(self) -> "Invertor":
         return copy(self)
 
     def lstsq(self, nfunc=5, nr=20):
@@ -310,7 +310,7 @@ class NewInvertor():
         pars = np.atleast_1d(pars)
         q = np.atleast_1d(q)
 
-        iq_val = calc.iq(pars, self.dmax, q)
+        iq_val = calc.iq(pars, self.dmax, q) + self.background
         if iq_val.shape[0] == 1:
             return iq_val[0]
         return iq_val
