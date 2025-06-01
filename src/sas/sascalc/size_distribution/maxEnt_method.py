@@ -36,10 +36,10 @@ References:
    J APPL CRYST 21 (1988) 891 - 897.
 
 '''
-# All SB eq. refers to equations in the J Skilling and RK Bryan; MNRAS 211 (1984) 111 - 124. paper
-# Overall idea is to maximize entropy S subject to constraint C<=C_aim, which is some Chi^2 target
-# Most comments are copied from GSASIIsasd.py
-# Currently, this code only works with spherical models
+# All SB eq. refers to equations in the J Skilling and RK Bryan; MNRAS 211
+# (1984) 111 - 124. paper. Overall idea is to maximize entropy S subject to
+# constraint C<=C_aim, which is some Chi^2 target. Most comments are copied
+# from GSASIIsasd.py. Currently, this code only works with spheroidal models
 
     
 class decision_helper():
@@ -130,8 +130,9 @@ class maxEntMethod():
     def MaxEntMove(self,fSum, blank, chisq, chizer, c1, c2, s1, s2):
         '''
         Implementing the maximum entropy move for feature size distribution
-        The goal of this function is to calculate distance and choose the next target Chi^2
-        And to move beta one step closer towards the solution (see SB eq. 12 and the text below for the definition of beta)
+        The goal of this function is to calculate distance and choose the next
+        target $\chi^2$ and to move beta one step closer towards the solution
+        (see SB eq. 12 and the text below for the definition of beta).
         '''
         helper = decision_helper()
         a_lower, a_upper = 0., 1.          # bracket  "a"
@@ -174,34 +175,47 @@ class maxEntMethod():
 
     def MaxEnt_SB(self,Iq,sigma,Gqr,first_bins,IterMax=5000,report=True):
         '''
-        This function does the complete Maximum Entropy algorithm of Skilling and Bryan
+        This function does the complete Maximum Entropy algorithm of Skilling
+        and Bryan
          
-        The scattering intensity, I(Q), is related to the histogram size distribution, Np(r) by the following equation:
+        The scattering intensity, I(Q), is related to the histogram size
+        distribution, Np(r) by the following equation:
 
         .. math::
+            I_{Q}=|\Delta\rho^2|\int|F(Q,r)^2|(V(r))^2N_{P}(r)dr
 
-            $I(Q)=\Delta \rho^{2} \int F(Q,r)^{2} (V(r))^{2} N_{P}(r)dr4
-
-        Np(r) is a histogram size distribution where a fixed number of bins are defined over a given range of diameter with either constant diameter bins or constant proportional diameter bins.
-        Solution of the histogram size distribution to the scattering equation above is obtained by fitting the scattering calculated from trial distributions to the measured data and then revising the amplitudes of the trial histogram distribution based upon the applied constraints. 
-        The trial histogram size distribution is not forced to adhere to a particular functional form, such as Gaussian or log-normal. 
-        However, in the current formulation, all sizes of the scatterer are expected to have the same scattering contrast and morphology (shape, degree of interaction, aspect ratio, orientation, etc.)
+        Np(r) is a histogram size distribution where a fixed number of bins are
+        defined over a given range of diameter with either constant diameter
+        bins or constant proportional diameter bins. Solution of the histogram
+        size distribution to the scattering equation above is obtained by
+        fitting the scattering calculated from trial distributions to the
+        measured data and then revising the amplitudes of the trial histogram
+        distribution based upon the applied constraints. The trial histogram
+        size distribution is not forced to adhere to a particular functional
+        form, such as Gaussian or log-normal. However, in the current
+        formulation, all sizes of the scatterer are expected to have the same
+        scattering contrast and morphology (shape, degree of interaction,
+        aspect ratio, orientation, etc.)
 
         The maximum entropy method seeks solution of the functional, Ξ:
 
         .. math::
+            \equiv =\chi-\alpha S
 
-            $\equiv =\chi-\alpha S$
-
-        Where chi^2 indicates the goodness of fit, S is the applied constraint, and alpha is a Lagrange multiplier used to ensure that the solution fits the measured data to some extent.
-        But compared to a regular regularization method, maximum entropy method also forces all histograms in the size distribution to have a positive amplitude
+        Where $\chi^2$ indicates the goodness of fit, S is the applied
+        constraint, and alpha is a Lagrange multiplier used to ensure that the
+        solution fits the measured data to some extent. But compared to a
+        regular regularization method, maximum entropy method also forces all
+        histograms in the size distribution to have a positive amplitude
         
         :param float Iq: background-subtracted scattering intensity data
-        :param float sigma: normalization factor obtained using scale, weights, and weight factors
+        :param float sigma: normalization factor obtained using scale, weights,
+               and weight factors
         :param float[][] G: transformation matrix 
         :param float first_bins[]: initial guess for distribution
         :param int IterMax: maximum iterations allowed
-        :param obj resolution: resolution object providing information about smearing
+        :param obj resolution: resolution object providing information about
+            smearing
         :param boolean report: print report if True; do not print if False
         
         :returns float[]: :math:`f(r) dr`
