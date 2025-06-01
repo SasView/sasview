@@ -261,14 +261,14 @@ Finally, there is a ``Method parameters`` box which contains two adjustable
 parameters:
 
 * ``MaxEnt Sky Background``. This is a value that should be small and probably
-never adjusted unless one knows what one is doing. Basically it adds a level
-of *inherent* background.
+  never adjusted unless one knows what one is doing. Basically it adds a level
+  of *inherent* background.
 * ``Iterations``. This sets the maximum number of iterations the Maximum
-Entropy optimization routine will perform before it stops and returns a
-"not converged" error. In general, if the routine does not converge in 100
-iterations it probably won't. Typical numbers of iterations for convergence
-range from 5 to 30. It is possible to increase the limit to whatever number
-one has patience for.
+  Entropy optimization routine will perform before it stops and returns a
+  "not converged" error. In general, if the routine does not converge in 100
+  iterations it probably won't. Typical numbers of iterations for convergence
+  range from 5 to 30. It is possible to increase the limit to whatever number
+  one has patience for.
 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
