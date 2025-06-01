@@ -79,6 +79,15 @@ The final results for all data sets are then presented in a savable data table.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+Batch inversion
+---------------
+
+P(r) inversion can be performed on a batch of data files at the same time. To do this, select multiple data files in the data explorer, and toggle the 'Batch mode' checkbox.
+
+.. image:: batch_inversion_file_selection.png
+
+Click 'Send to', and all the data you selected will be sent to a new batch tab in the perspective. Clicking 'calculate all' will start the calculation. When it is finished, the batch :ref:`Grid_Window` appears.
+
 Reference
 ---------
 
@@ -87,4 +96,4 @@ P.B. Moore
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Steve King, 26 Jan 2021
+.. note::  This help document was last modified by James Crake-Merani, 23 May 2025

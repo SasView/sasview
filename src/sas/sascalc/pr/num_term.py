@@ -5,7 +5,7 @@ import numpy as np
 import copy
 import sys
 import logging
-from sas.sascalc.pr.invertor import Invertor
+from sas.sascalc.pr.Invertor import Invertor
 
 logger = logging.getLogger(__name__)
 
