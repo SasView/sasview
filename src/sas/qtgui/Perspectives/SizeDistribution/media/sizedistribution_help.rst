@@ -26,17 +26,16 @@ the equation to fit is:
 Where $N_p(r)$ is the number density of particles of characteristic dimension
 $r$, and $P(Q,r)$ is the form factor for that characteristic dimension. The
 exact meaning of $r$ will of course depend on the model being used.For a
-sphere this translates as:
+sphere $r$ is simply the radius of the sphere and the $P(Q,r)$ in this case
+is given by:
 
 .. math::
     P(Q,r) = \left[
         3V_p(\Delta\rho) \cdot \frac{\sin(Qr) - Qr\cos(Qr))}{(Qr)^3}
         \right]^2
 
-where in this case $r$ is the radius of the sphere. SasView is using the
-sasmodels package and other shapes are expected to be added in the future.
-Also, sasmodels automatically scales to volume fraction rather than number
-density using
+SasView is using the sasmodels package which automatically scales to volume
+fraction rather than number density using:
 
 .. math::
     N_p = \phi/V_p
@@ -46,7 +45,8 @@ above equations is the equatorial radius. The default is for an ellipsoid with
 polar radius = equatorial radius and thus an axial ratio of 1 which is a
 sphere. The equation for an ellipsoid of revolution is given in the sasmodels
 documentation and $r = R_{eq}$ with an eccentricity (aspect ratio) fixed by the
-user which is $Ecc = R_{polar}/R_{eq}$.
+user which is $Ecc = R_{polar}/R_{eq}$. Other shapes are expected to be
+added in the future.
 
 The “fitting parameter” in this approach then is the distribution function.
 In order to calculate this practically over a finite $Q$ range, we replace the
@@ -58,10 +58,10 @@ range being used.
     I(Q)= \Delta \rho^2 \sum_{r_{min}}^{r_{max}} N_p(r) P(Q,r)
 
 Even so, fitting is over determined, particularly given the noise in any real
-data. Essentially this is an ill posed problem. In order
-to provide a reasonably robust solution a regularization technique is generally
-used. Here we implement only the most common MaxEnt (Maximum Entropy) method
-used for example by the famous CONTIN algorithm used in light scattering.
+data. Essentially, this is an ill posed problem. In order
+to provide a reasonably robust solution, a regularization technique is generally
+used. Here we implement only the most common MaxEnt (Maximum Entropy) method,
+used for example by the famous CONTIN algorithm employed in light scattering.
 
 .. note::
     The assumptions inherent in this method are:
@@ -76,9 +76,9 @@ used for example by the famous CONTIN algorithm used in light scattering.
 Maximum Entropy
 ^^^^^^^^^^^^^^^
 The concept of statistical entropy was first introduced by Claude Shannon in
-1948 in his famous treatise *A Mathematical Theory of Communication* considered
-the foundation of information theory [#Shannon1]_, [#Shannon2]_, [#Shannon3]_.
-Later, in 1957, E. T. Jaynes introduced the principle of **maximum entropy** in
+1948 in his famous treatise, *A Mathematical Theory of Communication*,
+considered the foundation of information theory [#Shannon1]_, [#Shannon2]_,
+[#Shannon3]_. Later, in 1957, E. T. Jaynes introduced the principle of **maximum entropy** in
 two key papers [#Jaynes1]_, [#Jaynes2]_ where he emphasized a natural
 correspondence between statistical mechanics and information theory. In this
 framework, the best solution to an optimization problem is the solution that
@@ -96,7 +96,7 @@ solution with the maximum “entropy.” In other words, the answer that makes t
 fewest assumptions beyond what is known.
 
 Here, the known constraint is that $\chi^2$ between the scattering data and the
-scattered intensity expected from a system of the chosen shape with the
+scattered intensity expected from a system of the chosen shape, with the
 solution distribution of sizes, must be minimized.  In other words, of all the
 distributions that would satisfy the $\chi^2$ constraint, we find the one with
 the maximum entropy. The size distribution problem however is too complex to be
@@ -118,7 +118,7 @@ The most important parameters to adjust at this point are the minimum and
 maximum diameters of the distribution. The calculation will only explore
 diameters in this range. It is important that the range of diameters be
 sufficient to fit the full $Q$ range of the data (within the minimum and
-maximum bounds set if any). For example, if the largest diameter will be in the
+maximum bounds set, if any). For example, if the largest diameter will be in the
 Guinier region in a $Q$ range where the data is stil showing growth, the fit
 will never be able to converge. Likewise, if the smallest diameter allowed
 is larger than can be "seen" at the highest $Q$ in the data, it may also be
@@ -132,7 +132,7 @@ correctly. Otherwise, the value is not important and can be left alone.
 The number of bins sets the number of sizes within the size range that will be
 calculated.
 
-The models section default is usually appropriate. Currently only the ellipsoid
+The models section default is usually appropriate. Currently, only the ellipsoid
 model is implemented. This may be expanded in the future to include cylinders
 for example. The aspect ratio for the ellipsoid however can be changed. The
 default of 1 is for a sphere. An aspect ratio greater than 1 will yield a
@@ -142,8 +142,8 @@ prolate ellipsoid while a value smaller than 1 is for an oblate ellipsoid.
 
    The Size Distribution analysis assumes the data is properly background
    subtracted. The smaller sizes in particular will be very sensitive to that.
-   If this is not the case proceed to the options tab as described below and
-   ensure that the background subtraction is set correctly.
+   If this is not the case for your data, proceed to the options tab as
+   described below and ensure that the background subtraction is set correctly.
 
 At this point, one can run a fit.  There are two buttons at the bottom of the
 panel: *Qick fit* and *Full fit*. One should always start with the
@@ -169,8 +169,6 @@ as the mean and median.
    is essentially weighted towards the largest sizes. The number
    distribution may be given in future versions.
 
-.. image:: QuickFitFailed.png
-
 In the plot representing the distribution of sizes there are also two red
 vertical lines. These lines represent a conservative estimate of the sizes that
 are well within the $Q$ range of the fit and thus "trustable." Any amount of
@@ -184,6 +182,8 @@ sizes outside that range should be considered highly suspect!
    fitting did not converge. The algorithm will return the values from the last
    iteration that was run but should be viewed with suspicion. One should
    **never** report values from an unconverged fit!
+
+.. image:: QuickFitFailed.png
 
 Once one is happy with the *Quick fit* results, it is recommended to finish by
 running a *Full fit*. This will run the same fit ten times over. However, each
@@ -241,7 +241,7 @@ $Q$ bounds define the range of diameters that can be probed using this method.
 Next the ``Weighting`` box parameters can be adjusted. SasView automatically
 sets the fitting to use the uncertainty data associated with the data, or,
 if no uncertainties are given with the data (which should never be the case),
-will set it to 1% of the intensity value for data each point. No uncertainty
+will set it to 1% of the intensity value for each data point. No uncertainty
 on the data points will almost always fail to converge. There are a couple of
 other options, neither great choices, to mitigate this. But to be very clear,
 it is **HIGHLY** discouraged to use data without uncertainties.
@@ -251,14 +251,15 @@ When the uncertainty is dominated by those this can be reasonable. However, if
 it is not, then the uncertainties can be far too small. This will have a huge
 impact on the ability of this analyis to converge. This is often a problem
 with X-ray data for example, but is true for most data and a particular problem
-here because one of the criteria for convergence is that \chi^2 be within 1\%
-of 1.0 (so 0.99 < \chi^2 < 1.01). A first order correction is made available
+here because one of the criteria for convergence is that $\chi^2$ be within 1\%
+of 1.0 (so 0.99 < $\chi^2$ < 1.01). A first order correction is made available
 here in the ``Weight factor`` box. The value entered here effectivly increases
 the size of the uncertainties sent to the fitting routine by that factor.
 Larger error bars will decrease $\chi^2$ thus making convergence easier.
 
 Finally, there is a ``Method parameters`` box which contains two adjustable
 parameters:
+
 * ``MaxEnt Sky Background``. This is a value that should be small and probably
 never adjusted unless one knows what one is doing. Basically it adds a level
 of *inherent* background.
