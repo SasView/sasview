@@ -180,7 +180,7 @@ class maxEntMethod():
 
         .. math::
 
-            I(Q)=\Delta \rho^{2} \int F(Q,r)^{2} (V(r))^{2} N_{P}(r)dr
+            $I(Q)=\Delta \rho^{2} \int F(Q,r)^{2} (V(r))^{2} N_{P}(r)dr4
 
         Np(r) is a histogram size distribution where a fixed number of bins are defined over a given range of diameter with either constant diameter bins or constant proportional diameter bins.
         Solution of the histogram size distribution to the scattering equation above is obtained by fitting the scattering calculated from trial distributions to the measured data and then revising the amplitudes of the trial histogram distribution based upon the applied constraints. 
@@ -191,7 +191,7 @@ class maxEntMethod():
 
         .. math::
 
-            \equiv =\chi-\alpha S
+            $\equiv =\chi-\alpha S$
 
         Where chi^2 indicates the goodness of fit, S is the applied constraint, and alpha is a Lagrange multiplier used to ensure that the solution fits the measured data to some extent.
         But compared to a regular regularization method, maximum entropy method also forces all histograms in the size distribution to have a positive amplitude

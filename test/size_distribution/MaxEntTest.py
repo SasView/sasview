@@ -34,7 +34,7 @@ def fetch_answer():
     bins = np.array([])
     mags = np.array([])
 
-    with open(find("Alumina_usaxs_irena_diameter_fit.csv")) as fp:
+    with open(find("AluminaUSAXS_IrenaTenShotsResults.csv")) as fp:
         spamreader = csv.reader(fp, delimiter=",")
 
         for row in spamreader:
@@ -64,8 +64,7 @@ def test_noRes(data1):
     # TODO: Need to understand how IRENA is reporting bins. It seems to be using bin 1 and last as the
     #       values input from the user while we are starting from the midpoint of what should be the
     #       the first bin if the min diameter is the bottom edge of the bin.
-    #assert data1.bins * 2 == pytest.approx(answerBins, rel=1e-1)
-    # TODO: need to get a results file from IRENA from a KNOWN set of parameters, preferably that converge quickly
     assert convergence[0][0] == True
-    # We converge but still not the right data set/parameter combo so turning off next test
-    # assert data1.BinMagnitude_maxEnt == pytest.approx(answerMags, rel=10)
+    assert data1.MaxEnt_statistics['volume'] == pytest.approx(4.84, abs=0.02)
+    assert data1.BinMagnitude_maxEnt == pytest.approx(answerMags, abs=1e-3)
+
