@@ -6,7 +6,6 @@ __pytest__ = False
 # pylint: disable-msg=C0111
 # Disable "too many methods" complaint
 # pylint: disable-msg=R0904
-from __future__ import print_function
 
 
 import os
