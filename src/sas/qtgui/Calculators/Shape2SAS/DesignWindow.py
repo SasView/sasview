@@ -644,7 +644,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #Write file to plugin model folder
         TabbedModelEditor.writeFile(full_path, model_str)
         self.communicator.customModelDirectoryChanged.emit()
-        logger.info(f"Succefully generated model {modelName}!")
+        logger.info(f"Successfully generated model {modelName}!")
 
     def onCheckingInput(self, input: str, default: str) -> str:
         """Check if the input not None. Otherwise, return default value"""
