@@ -16,25 +16,31 @@ def generatePlugin(prof: ModelProfile, constrainParameters: (str), fitPar: [str]
 
     plugin_location = Path(models.find_plugins_dir())
     full_path = plugin_location / file_name
-    full_path.with_suffix('.py')
+    full_path = full_path.with_suffix('.py')
 
     model_str = generateModel(prof, constrainParameters, fitPar, Npoints, pr_points, file_name)
 
     return model_str, full_path
     
 
-def parListsFormat(par: [[str | float]]) -> str:
-    """Format lists of parameters to the model string"""
+def parListFormat(par: [[str | float]]) -> str:
+    """
+    Format a list of parameters to the model string. In this case the list
+    is on element for each shape. For a single shape there will be only
+    a single value. Mainly for delta Rho.
+    """
+    return f"[{', '.join(str(x) for x in par)}]"
 
-    for i in range(len(par)):
-        par[i] = parListFormat(par[i])
 
-    return parListFormat(par)
-
-
-def parListFormat(par: [str | float]) -> str:
-    """Format a list containing parameters to the model string"""
-    return f"[{', '.join(par)}]"
+def parListsFormat(par: [str | float]) -> str:
+    """
+    Format a list of list containing parameters to the model string. This
+    is used for single shape parameter lists like the center of mass of the
+    object which will be an element of the list of such COM for each shape
+    in a multishape model.
+    """
+    sub_pars_join =[", ".join(map(str,sub_par)) for sub_par in par]
+    return f"[[{'],['.join(sub_pars_join)}]]"
 
 
 def generateModel(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
@@ -45,7 +51,7 @@ def generateModel(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
     nl = '\n'
 
     fitPar.insert(0, "q")
-    
+
     model_str = (f'''
 r"""
 This plugin model uses Shape2SAS to generate theoretical 1D small-angle scattering. 
@@ -65,7 +71,7 @@ Model {model_name.replace('.py', '')} has been built from the following subunits
 """
 
 {nl.join(importStatement)}
-from sas.qtgui.Perspectives.Shape2SAS.calculations.Shape2SAS import (ModelProfile, SimulationParameters, 
+from sas.sascalc.shape2sas.Shape2SAS import (ModelProfile, SimulationParameters, 
                                                         ModelSystem, getPointDistribution, 
                                                         TheoreticalScatteringCalculation, 
                                                         getTheoreticalScattering)
