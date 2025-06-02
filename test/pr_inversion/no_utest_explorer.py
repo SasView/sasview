@@ -1,3 +1,4 @@
+__pytest__ = False
 """
     Unit tests for DistExplorer class
 """
@@ -5,7 +6,7 @@
 import sys
 import os.path
 import unittest, math, numpy
-from sas.sascalc.pr.invertor import Invertor
+# from sas.sascalc.pr.invertor import Invertor
 from sas.sascalc.pr.distance_explorer import DistExplorer
 
 try:

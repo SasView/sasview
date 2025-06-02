@@ -1,3 +1,4 @@
+__pytest__ = False
 """
     Unit tests for Invertor class
 """
@@ -13,7 +14,7 @@ import os.path
 import unittest
 import math
 import numpy
-from sas.sascalc.pr.invertor import Invertor
+# from sas.sascalc.pr.invertor import Invertor
 
 
 def find(filename):
