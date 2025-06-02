@@ -63,7 +63,7 @@ class Constraints(QWidget, Ui_Constraints):
 #Write libraries to be imported here.
 from numpy import inf
 
-#Modify fit parameteres here.
+#Modify fit parameters here.
 parameters = {constraints}
 
 #Set constraints here.
