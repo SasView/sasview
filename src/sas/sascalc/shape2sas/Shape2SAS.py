@@ -116,9 +116,38 @@ class SimulatedScattering:
 ################################ Shape2SAS functions ################################
 def getPointDistribution(prof: ModelProfile, Npoints):
     """Generate points for a given model profile."""
-    x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits, 
-                                                  prof.dimensions, prof.rotation, prof.rotation_points, 
-                                                  prof.p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()
+    # Add validation before calling GenerateAllPoints
+    if not prof.subunits or not prof.dimensions:
+        raise ValueError("ModelProfile must have valid subunits and dimensions")
+    
+    # Check for empty or invalid subunits
+    valid_subunits = []
+    valid_dimensions = []
+    valid_com = []
+    valid_rotation = []
+    valid_rotation_points = []
+    valid_p_s = []
+    
+    for i, subunit in enumerate(prof.subunits):
+        # Check if subunit is valid and has positive dimensions
+        if (subunit and 
+            i < len(prof.dimensions) and 
+            prof.dimensions[i] and
+            all(d > 0 for d in prof.dimensions[i])):
+            
+            valid_subunits.append(subunit)
+            valid_dimensions.append(prof.dimensions[i])
+            valid_com.append(prof.com[i] if i < len(prof.com) else [0, 0, 0])
+            valid_rotation.append(prof.rotation[i] if i < len(prof.rotation) else [0, 0, 0])
+            valid_rotation_points.append(prof.rotation_points[i] if i < len(prof.rotation_points) else [0, 0, 0])
+            valid_p_s.append(prof.p_s[i] if i < len(prof.p_s) else 1.0)
+    
+    if not valid_subunits:
+        raise ValueError("No valid subunits found with positive dimensions")
+    
+    x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, valid_com, valid_subunits, 
+                                                  valid_dimensions, valid_rotation, valid_rotation_points, 
+                                                  valid_p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()
     
     return ModelPointDistribution(x=x_new, y=y_new, z=z_new, p=p_new, volume_total=volume_total)
 

@@ -203,18 +203,22 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
                     #get units, bounds and types from method
                     attr = getattr(OptionLayout, val)
-                    method = MethodType(attr, OptionLayout)
-                    _, _, units, _, types, bounds = method()
+                    # Only create MethodType if attr is callable
+                    if callable(attr):
+                        method = MethodType(attr, OptionLayout)
+                        _, _, units, _, types, bounds = method()
 
-                    #get inputted value from cell
-                    inputVal = self.getSubunitTableCell(row, column)
-                    inputName = self.getTableName(column, row)
+                        #get inputted value from cell
+                        inputVal = self.getSubunitTableCell(row, column)
+                        inputName = self.getTableName(column, row)
 
-                    #create parameter list
-                    parameter = [inputName, units[enumMember], inputVal, bounds[enumMember], 
-                                 types[enumMember], f"{inputName} for column {column + 1}"]
-        
-                    toTextEditor.append(parameter)
+                        # Check if enumMember exists in the dictionaries before accessing
+                        if (enumMember in units and enumMember in bounds and enumMember in types):
+                            #create parameter list
+                            parameter = [inputName, units[enumMember], inputVal, bounds[enumMember], 
+                                         types[enumMember], f"{inputName} for column {column + 1}"]
+            
+                            toTextEditor.append(parameter)
 
         formatted = "[\n " + ",\n ".join(str(pars) for pars in toTextEditor) + "\n]"
 
@@ -349,7 +353,12 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         row, column = args #int, int
         
         if not value == "":
-            if conditionBool[column][row]:
+            # Add bounds checking to prevent IndexError
+            if (column < len(conditionBool) and 
+                row < len(conditionBool[column]) and 
+                column < len(conditionFitPar) and 
+                row < len(conditionFitPar[column]) and
+                conditionBool[column][row]):
                 values.append(conditionFitPar[column][row])
             else:
                 values.append(value)
@@ -560,9 +569,13 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     def getTableName(self, column: int, row: int) -> str:
         """Get the parameter name of a cell in the subunit table"""
 
-        name = re.match(r'^[^\s=]+', self.subunitTable.model.item(row, column).text())
+        cell_text = self.subunitTable.model.item(row, column).text()
+        name = re.match(r'^[^\s=]+', cell_text)
         if name:
             return name.group()
+        else:
+            # Return a default name if regex doesn't match
+            return f"param_{row}_{column}"
 
     def getTableNames(self, condition: MethodType, column: int, **kwargs) -> list[str]:
         """Get the parameter names of a column in the subunit table"""
@@ -597,6 +610,15 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         the Plugin Models folder in SasView"""
         
         logger.info("Generating plugin model.")
+        
+        # Debug: Print the checked parameters
+        fitPar = self.getFitParameters()
+        logger.debug(f"Checked fit parameters: {fitPar}")
+        
+        # Debug: Print the parameter names being generated
+        parNames = self.getAllTableNames(self.ifNoCondition)
+        logger.debug(f"Generated parameter names: {parNames}")
+        
         #no subunits inputted
         columns = self.subunitTable.model.columnCount() #TODO: maybe give a warning to output texteditor
         if not self.subunitTable.model.item(1, columns - 1):
@@ -605,14 +627,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         Npoints = int(self.constraint.variableTable.Npoints.text())
         prPoints = int(self.constraint.variableTable.prPoints.text())
         modelName = self.constraint.variableTable.pluginModelName.text()
-        parNames = self.getAllTableNames(self.ifNoCondition)
-        checkedPars = self.checkedVariables()
         parVals = self.getStandardReadOfTableData()
 
-        #get chosen fit parameters
-        fitPar = self.getFitParameters()
+        # Define checkedPars before using it
+        checkedPars = self.checkedVariables()
 
-        logger.info("Retrieving and verifying constraints. . .")
         #get parameters constraints
         importStatement, parameters, translation, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
