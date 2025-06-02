@@ -162,7 +162,7 @@ class VariableTable(QWidget, Ui_VariableTable):
             is_checked = checkState == Qt.Checked.value
 
             rows.append(is_checked)
-            if row == column_pos[i + 1] or row == self.variableModel.rowCount() - 1:
+            if row == column_pos[i + 1] - 1 or row == self.variableModel.rowCount() - 1:
                 columns.append(rows)
                 rows = []
             

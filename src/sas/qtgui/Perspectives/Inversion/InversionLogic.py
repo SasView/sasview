@@ -1,9 +1,8 @@
-import math
 import logging
 from PySide6.QtGui import QStandardItem
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import dataFromItem
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"

@@ -1,0 +1,17 @@
+#Parameters used for both Irena and SasView to produce comparison output for SasView unit tests.,,,
+Filename,Alumina_usaxs_irena_input.csv,,
+Shape,ellipsoid,,
+aspect ratio,1,,
+Min D,25,,
+Max D,10000,,
+Num bins,100,,
+contrast,1,,
+Qmin,0.00068801,point #,13
+Qmax,0.10604,point #,94
+Sky Bkgd,1.94E-05,,
+iterations,100,,
+Weighting,use dI Data,,
+Weight Factor,1.9033,,
+Flat Bkgd,0.121176,,
+Power Bkgd,4,,
+Scale Bkgd,2.55E-07,,
