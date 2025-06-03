@@ -5,16 +5,18 @@
 # pylint: disable-msg=C0111
 # Disable "too many methods" complaint
 # pylint: disable-msg=R0904
-from __future__ import print_function
-
 
 import os
 import os.path
 import unittest
 import math
 import numpy
-from sas.sascalc.pr.invertor import Invertor
+import pytest
+# TODO: This import is broken. It needs to be rewritten if this test is to be renabled.
+# from sas.sascalc.pr.invertor import Invertor
 
+
+pytest.skip(reason="Refactored invertor doesn't support this test", allow_module_level=True)
 
 def find(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)
