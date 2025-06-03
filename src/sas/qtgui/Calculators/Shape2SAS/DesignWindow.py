@@ -42,7 +42,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
-        self.setWindowTitle("Shape2SAS")
+        self.setWindowTitle("Shape2SAS (Experimental)")
         self.parent = parent
 
         self._manager = parent
