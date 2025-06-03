@@ -631,7 +631,7 @@
   </action>
   <action name="actionMuMag_Fitter">
    <property name="text">
-    <string>MuMag Fitter</string>
+    <string>MuMag Fitter (Experimental)</string>
       </property>
   </action>
   <action name="actionWhat_s_New">
