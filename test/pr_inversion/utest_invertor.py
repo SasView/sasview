@@ -1,4 +1,3 @@
-__pytest__ = False
 """
     Unit tests for Invertor class
 """
