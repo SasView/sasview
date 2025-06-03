@@ -6,7 +6,6 @@
 # Disable "too many methods" complaint
 # pylint: disable-msg=R0904
 
-
 import os
 import os.path
 import unittest
@@ -16,6 +15,8 @@ import pytest
 # TODO: This import is broken. It needs to be rewritten if this test is to be renabled.
 # from sas.sascalc.pr.invertor import Invertor
 
+
+pytest.skip(reason="Refactored invertor doesn't support this test", allow_module_level=True)
 
 def find(filename):
     return os.path.join(os.path.dirname(__file__), 'data', filename)
@@ -48,14 +49,12 @@ class TestFiguresOfMerit(unittest.TestCase):
 
         self.out, self.cov = self.invertor.lstsq(10)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_positive(self):
         """
             Test whether P(r) is positive
         """
         self.assertAlmostEqual(self.invertor.get_positive(self.out), 1)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_positive_err(self):
         """
             Test whether P(r) is at least 1 sigma greater than zero
@@ -75,7 +74,6 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(self.ntest):
             self.x_in[i] = 1.0*(i+1)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_est_bck_flag(self):
         """
             Tests the est_bck flag operations
@@ -92,7 +90,6 @@ class TestBasicComponent(unittest.TestCase):
         self.assertRaises(ValueError, doit_str)
 
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def testset_dmax(self):
         """
             Set and read d_max
@@ -101,7 +98,6 @@ class TestBasicComponent(unittest.TestCase):
         self.invertor.d_max = value
         self.assertEqual(self.invertor.d_max, value)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def testset_alpha(self):
         """
             Set and read alpha
@@ -110,7 +106,6 @@ class TestBasicComponent(unittest.TestCase):
         self.invertor.alpha = value
         self.assertEqual(self.invertor.alpha, value)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def testset_x_1(self):
         """
             Setting and reading the x array the hard way
@@ -127,7 +122,6 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(self.ntest):
             self.assertEqual(self.x_in[i], x_out[i])
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def testset_x_2(self):
         """
             Setting and reading the x array the easy way
@@ -141,7 +135,6 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(self.ntest):
             self.assertEqual(self.x_in[i], x_out[i])
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def testset_y(self):
         """
             Setting and reading the y array the easy way
@@ -155,7 +148,6 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(self.ntest):
             self.assertEqual(self.x_in[i], y_out[i])
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def testset_err(self):
         """
             Setting and reading the err array the easy way
@@ -169,7 +161,6 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(self.ntest):
             self.assertEqual(self.x_in[i], err_out[i])
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_iq(self):
         """
             Test iq calculation
@@ -181,7 +172,6 @@ class TestBasicComponent(unittest.TestCase):
         pars = numpy.ones(1)
         self.assertAlmostEqual(self.invertor.iq(pars, q), v1, 2)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_pr(self):
         """
             Test pr calculation
@@ -191,14 +181,12 @@ class TestBasicComponent(unittest.TestCase):
         pars = numpy.ones(1)
         self.assertAlmostEqual(self.invertor.pr(pars, r), v1, 2)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_getsetters(self):
         self.invertor.new_data = 1.0
         self.assertEqual(self.invertor.new_data, 1.0)
 
         self.assertEqual(self.invertor.test_no_data, None)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_slitsettings(self):
         self.invertor.slit_width = 1.0
         self.assertEqual(self.invertor.slit_width, 1.0)
@@ -206,7 +194,6 @@ class TestBasicComponent(unittest.TestCase):
         self.assertEqual(self.invertor.slit_height, 2.0)
 
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_inversion(self):
         """
             Test an inversion for which we know the answer
@@ -262,7 +249,6 @@ class TestBasicComponent(unittest.TestCase):
             print("chi2 =", chi2/51.0)
             raise
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_lstsq(self):
         """
             Test an inversion for which we know the answer
@@ -328,7 +314,6 @@ class TestBasicComponent(unittest.TestCase):
         # Test the number of peaks
         self.assertEqual(self.invertor.get_peaks(out), 1)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_q_zero(self):
         """
             Test error condition where a point has q=0
@@ -346,7 +331,6 @@ class TestBasicComponent(unittest.TestCase):
         self.assertRaises(ValueError, doit)
 
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_q_neg(self):
         """
             Test error condition where a point has q<0
@@ -371,7 +355,6 @@ class TestBasicComponent(unittest.TestCase):
             print("Chi2 =", self.invertor.chi2)
             raise
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_Iq_zero(self):
         """
             Test error condition where a point has q<0
@@ -421,7 +404,6 @@ class TestBasicComponent(unittest.TestCase):
         t30s = t30/30.0**2
         self.assertTrue( (t30s-t16/16.0**2)/t30s <1.2 )
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_clone(self):
         self.invertor.x = self.x_in
         clone = self.invertor.clone()
@@ -429,7 +411,6 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(len(self.x_in)):
             self.assertEqual(self.x_in[i], clone.x[i])
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_save(self):
         x, y, err = load(find("sphere_80.txt"))
 
@@ -458,7 +439,6 @@ class TestBasicComponent(unittest.TestCase):
         if os.path.isfile(f_name):
             os.remove(f_name)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_qmin(self):
         self.invertor.q_min = 1.0
         self.assertEqual(self.invertor.q_min, 1.0)
@@ -467,7 +447,6 @@ class TestBasicComponent(unittest.TestCase):
         self.assertEqual(self.invertor.q_min, 0.0)
 
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_qmax(self):
         self.invertor.q_max = 1.0
         self.assertEqual(self.invertor.q_max, 1.0)
@@ -487,7 +466,6 @@ class TestErrorConditions(unittest.TestCase):
         for i in range(self.ntest):
             self.x_in[i] = 1.0*(i+1)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_negative_errs(self):
         """
             Test an inversion for which we know the answer
@@ -506,7 +484,6 @@ class TestErrorConditions(unittest.TestCase):
 
         out, cov = self.invertor.lstsq(10)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_zero_errs(self):
         """
             Have zero as an error should raise an exception
@@ -520,7 +497,6 @@ class TestErrorConditions(unittest.TestCase):
         # Perform inversion
         self.assertRaises(RuntimeError, self.invertor.invert, 10)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_invalid(self):
         """
             Test an inversion for which we know the answer
@@ -536,7 +512,6 @@ class TestErrorConditions(unittest.TestCase):
         self.assertRaises(RuntimeError, self.invertor.invert, 10)
 
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_zero_q(self):
         """
             One of the q-values is zero.
@@ -547,7 +522,6 @@ class TestErrorConditions(unittest.TestCase):
         # Set data
         self.assertRaises(ValueError, self.invertor.__setattr__, 'x', x)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_zero_Iq(self):
         """
             One of the I(q) points has a value of zero
@@ -562,7 +536,6 @@ class TestErrorConditions(unittest.TestCase):
         # Perform inversion
         out, cov = self.invertor.lstsq(10)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_negative_q(self):
         """
             One q value is negative.
@@ -577,7 +550,6 @@ class TestErrorConditions(unittest.TestCase):
         # Perform inversion
         out, cov = self.invertor.lstsq(10)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_negative_Iq(self):
         """
             One I(q) value is negative.
@@ -592,7 +564,6 @@ class TestErrorConditions(unittest.TestCase):
         # Perform inversion
         out, cov = self.invertor.lstsq(10)
 
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_nodata(self):
         """
              No data was loaded. Should not complain.

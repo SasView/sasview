@@ -10,6 +10,8 @@ import unittest, math, numpy
 import pytest
 from sas.sascalc.pr.distance_explorer import DistExplorer
 
+pytest.skip(reason="Refactored invertor doesn't support this test", allow_module_level=True)
+
 try:
     from utest_invertor import load
 except ImportError:
@@ -37,7 +39,6 @@ class TestExplorer(unittest.TestCase):
         
         self.explo = DistExplorer(self.invertor)
         
-    @pytest.mark.skip(reason="Refactored invertor doesn't support this test")
     def test_exploration(self):
         results = self.explo(120, 200, 25)
         self.assertEqual(len(results.errors), 0)
