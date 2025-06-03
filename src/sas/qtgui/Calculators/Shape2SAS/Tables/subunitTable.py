@@ -142,8 +142,8 @@ class OptionLayout(ExtendedEnum):
         """Return the hollow sphere dimensions"""
         name = {self.x: "R", self.y: "r"}
         units = {self.x: "Å", self.y: "Å"}
-        types = {self.x: "volume"}
-        bounds = {self.x: [0, inf]}
+        types = {self.x: "volume", self.y: "volume"}
+        bounds = {self.x: [0, inf], self.y: [0, inf]}
         tooltip = {self.x: "Outer radius of the hollow sphere",
                    self.y: "Inner radius of the hollow sphere"}
         defaultVal = {self.x: 50.0, self.y: 25.0}
