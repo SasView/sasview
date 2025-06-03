@@ -13,6 +13,7 @@ import unittest
 import math
 import numpy
 import pytest
+# TODO: This import is broken. It needs to be rewritten if this test is to be renabled.
 # from sas.sascalc.pr.invertor import Invertor
 
 
