@@ -78,6 +78,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plugin.setEnabled(False)
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
 
+        # TODO: Remove these lines to enable the plugin model generation window - hidden for v6.1.0
+        self.line2.setHidden(True)
+        self.plugin.setHidden(True)
+
         #connect buttons
         self.modelTabButtonOptions.reset.clicked.connect(self.onSubunitTableReset)
         self.modelTabButtonOptions.closePage.clicked.connect(self.onClickingClose)
