@@ -13,6 +13,8 @@ def metadata_as_dict(to_convert: object):
         return to_convert
     converted_dict = to_convert.__dict__
     for key, value in converted_dict.items():
+        # This if statement looks for a meta node that is a child node, and leaves it as is (i.e. it doesn't turn it
+        # into a dict). Some meta nodes contain other meta nodes, so we need to add a condition for this.
         if not (
             value is dict
             or (
