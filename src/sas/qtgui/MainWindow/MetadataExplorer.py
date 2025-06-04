@@ -1,6 +1,7 @@
+from sys import argv
+
 from PySide6.QtWidgets import QApplication, QDialog
 from sasdata.metadata import Metadata
-from sys import argv
 from sasdata.temp_xml_reader import load_data
 
 
