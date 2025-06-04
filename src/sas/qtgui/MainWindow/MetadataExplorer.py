@@ -9,6 +9,8 @@ class MetadataExplorer(QDialog):
         super().__init__()
         self.metadata = metadata
 
+        self.setWindowTitle("Metadata Explorer")
+
 
 if __name__ == "__main__":
     app = QApplication([])
