@@ -13,7 +13,7 @@ class MetadataExplorer(QDialog):
 if __name__ == "__main__":
     app = QApplication([])
 
-    filename = argv[0]
+    filename = argv[1]
     data_dict = load_data(filename)
     data = list(data_dict.items())[0][1]
     # This is only going to work on XML files for now.
