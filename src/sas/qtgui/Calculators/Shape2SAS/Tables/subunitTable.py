@@ -535,6 +535,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.model.insertColumn(numcolumn, items)
         self.model.setData(self.model.index(0, numcolumn), self.subunit.currentText())
         self.setSubunitRestriction(subunitName.keys())
+        self.table.resizeColumnsToContents()
         self.setButtonSpinboxBounds()
 
 
