@@ -37,7 +37,7 @@ class MetadataExplorer(QDialog):
         self.filenameLabel = QLabel(f"Filename: {filename_known}")
 
         self.layout = QVBoxLayout(self)
-        self.layout.addWidget(filename_known)
+        self.layout.addWidget(self.filenameLabel)
 
         self.setWindowTitle("Metadata Explorer")
 
