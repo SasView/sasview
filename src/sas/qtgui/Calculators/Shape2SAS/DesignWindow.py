@@ -154,6 +154,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.constraint = Constraints()
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
         self.subunitTable.deleteButton.clicked.connect(self.deleteFromVariableTable)
+        self.subunitTable.table.clicked.connect(self.updateDeleteButton)
+        self.subunitTable.table.horizontalHeader().sectionClicked.connect(self.updateDeleteButton)
         self.constraint.variableTable.setConstraints.clicked.connect(self.setConstraintsToTextEditor)
         self.constraint.createPlugin.clicked.connect(self.getPluginModel)
         self.constraint.buttonOptions.reset.clicked.connect(self.onConstraintReset)
@@ -271,6 +273,12 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         #set variables in variable table
         self.constraint.variableTable.setVariableTableData(names, column)
+
+    def updateDeleteButton(self):
+        selection_model = self.subunitTable.table.selectionModel()
+        selected_indexes = selection_model.selectedIndexes()
+        column = selected_indexes[0].column()
+        self.subunitTable.selected.setValue(int(column) + 1)
 
     def deleteFromVariableTable(self):
         """Delete parameters from the variable table"""
@@ -629,7 +637,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #Write file to plugin model folder
         TabbedModelEditor.writeFile(full_path, model_str)
         self.communicator.customModelDirectoryChanged.emit()
-        logger.info(f"Succefully generated model {modelName}!")
+        logger.info(f"Successfully generated model {modelName}!")
 
     def onCheckingInput(self, input: str, default: str) -> str:
         """Check if the input not None. Otherwise, return default value"""

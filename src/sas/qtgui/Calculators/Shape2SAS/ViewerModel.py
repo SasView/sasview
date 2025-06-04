@@ -166,10 +166,25 @@ class ViewerModel(QWidget):
            data = []
            series.dataProxy().resetArray(data)
 
+        # Check if we have any data at all
+        if not distr.x or len(distr.x) == 0:
+            return
+
         minx, maxx = min(distr.x[0]), max(distr.x[0])
         miny, maxy = min(distr.y[0]), max(distr.y[0])
         minz, maxz = min(distr.z[0]), max(distr.z[0])
+
         for subunit in range(len(colours)):
+            # Skip empty subunits - handle numpy arrays properly
+            try:
+                if (subunit >= len(distr.x)
+                        or not hasattr(distr.x[subunit], '__len__')
+                        or len(distr.x[subunit]) == 0):
+                    continue
+            except (ValueError, TypeError):
+                # Handle numpy array comparison issues
+                continue
+
             series = self.dict_series[colours[subunit]]
             data = []
             for index in range(len(distr.x[subunit])):
