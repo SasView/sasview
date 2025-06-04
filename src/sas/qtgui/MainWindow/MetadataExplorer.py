@@ -63,6 +63,7 @@ class MetadataExplorer(QDialog):
         current_dict: dict[str, object] | None = None,
     ):
         tree = self.metadataTreeWidget
+        tree.setColumnCount(2)
         if current_dict is None:
             current_dict = self.metadata_dict
         if table_root is None:
