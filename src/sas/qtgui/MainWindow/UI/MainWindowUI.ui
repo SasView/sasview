@@ -364,7 +364,7 @@
   </action>
   <action name="actionShape2SAS_Calculator">
    <property name="text">
-    <string>Shape2SAS Calculator</string>
+    <string>Shape2SAS Calculator (Experimental)</string>
    </property>
   </action>
   <action name="actionGeneric_Scattering_Calculator">
@@ -631,7 +631,7 @@
   </action>
   <action name="actionMuMag_Fitter">
    <property name="text">
-    <string>MuMag Fitter</string>
+    <string>MuMag Fitter (Experimental)</string>
       </property>
   </action>
   <action name="actionWhat_s_New">
