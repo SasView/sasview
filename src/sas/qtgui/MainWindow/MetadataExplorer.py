@@ -50,7 +50,7 @@ if __name__ == "__main__":
     data = list(data_dict.items())[0][1]
     # This is only going to work on XML files for now.
 
-    dialog = MetadataExplorer(data.metadata)
+    dialog = MetadataExplorer(data.metadata, data.name)
     status = dialog.exec()
 
     exit()
