@@ -1,7 +1,7 @@
 from sys import argv
 from pprint import pp
 
-from PySide6.QtWidgets import QApplication, QDialog
+from PySide6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
 from sasdata.metadata import MetaNode, Metadata
 from sasdata.temp_xml_reader import load_data
 
@@ -27,11 +27,17 @@ def metadata_as_dict(to_convert: object):
 
 
 class MetadataExplorer(QDialog):
-    def __init__(self, metadata: Metadata):
+    def __init__(self, metadata: Metadata, filename: str | None):
         super().__init__()
         self.metadata_dict = metadata_as_dict(metadata)
         # TODO: Temp get rid of later.
         pp(self.metadata_dict)
+
+        filename_known = filename if filename is not None else "Unknown"
+        self.filenameLabel = QLabel(f"Filename: {filename_known}")
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(filename_known)
 
         self.setWindowTitle("Metadata Explorer")
 
