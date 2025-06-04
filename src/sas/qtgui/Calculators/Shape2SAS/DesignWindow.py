@@ -151,6 +151,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
         self.subunitTable.deleteButton.clicked.connect(self.deleteFromVariableTable)
         self.subunitTable.table.clicked.connect(self.updateDeleteButton)
+        self.subunitTable.table.horizontalHeader().sectionClicked.connect(self.updateDeleteButton)
         self.constraint.variableTable.setConstraints.clicked.connect(self.setConstraintsToTextEditor)
         self.constraint.createPlugin.clicked.connect(self.getPluginModel)
         self.constraint.buttonOptions.reset.clicked.connect(self.onConstraintReset)
