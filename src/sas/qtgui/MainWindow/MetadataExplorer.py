@@ -1,4 +1,6 @@
 from sys import argv
+from dataclasses import asdict
+from pprint import pp
 
 from PySide6.QtWidgets import QApplication, QDialog
 from sasdata.metadata import Metadata
@@ -8,7 +10,9 @@ from sasdata.temp_xml_reader import load_data
 class MetadataExplorer(QDialog):
     def __init__(self, metadata: Metadata):
         super().__init__()
-        self.metadata = metadata
+        self.metadata_dict = asdict(metadata)
+        # TODO: Temp get rid of later.
+        pp(self.metadata_dict)
 
         self.setWindowTitle("Metadata Explorer")
 
