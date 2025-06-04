@@ -13,7 +13,13 @@ def metadata_as_dict(to_convert: object):
         return to_convert
     converted_dict = to_convert.__dict__
     for key, value in converted_dict.items():
-        if not (value is dict or isinstance(value, MetaNode)):
+        if not (
+            value is dict
+            or (
+                isinstance(value, MetaNode)
+                and [isinstance(content, MetaNode) for content in value.contents]
+            )
+        ):
             converted_dict[key] = metadata_as_dict(value)
     return converted_dict
 
