@@ -47,6 +47,7 @@ class MetadataExplorer(QDialog):
         self.buildTree()
 
         self.closeButton = QPushButton("Close")
+        self.closeButton.clicked.connect(self.onClose)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.filenameLabel)
@@ -58,6 +59,9 @@ class MetadataExplorer(QDialog):
     def buildTree(self):
         tree = self.metadataTreeWidget
         # TODO: Implement
+
+    def onClose(self):
+        self.close()
 
 
 if __name__ == "__main__":
