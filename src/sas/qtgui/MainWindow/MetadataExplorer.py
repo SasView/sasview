@@ -19,7 +19,7 @@ def metadata_as_dict(to_convert: object):
 class MetadataExplorer(QDialog):
     def __init__(self, metadata: Metadata):
         super().__init__()
-        self.metadata_dict = asdict(metadata)
+        self.metadata_dict = metadata_as_dict(metadata)
         # TODO: Temp get rid of later.
         pp(self.metadata_dict)
 
