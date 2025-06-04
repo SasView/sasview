@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QTreeWidget,
+    QTreeWidgetItem,
     QVBoxLayout,
 )
 from sasdata.metadata import MetaNode, Metadata
@@ -56,9 +57,26 @@ class MetadataExplorer(QDialog):
 
         self.setWindowTitle("Metadata Explorer")
 
-    def buildTree(self):
+    def buildTree(
+        self,
+        table_root: QTreeWidgetItem | None = None,
+        current_dict: dict[str, object] | None = None,
+    ):
         tree = self.metadataTreeWidget
-        # TODO: Implement
+        if current_dict is None:
+            current_dict = self.metadata_dict
+        if table_root is None:
+            table_root = QTreeWidgetItem(["Metadata"])
+            tree.addTopLevelItem(table_root)
+        for key, value in current_dict.items():
+            if isinstance(value, dict):
+                dict_root = QTreeWidgetItem([key])
+                table_root.addChild(dict_root)
+                self.buildTree(dict_root, value)
+            if isinstance(value, MetaNode):
+                # TODO: Implement. Just show the contents for now.
+                node_item = QTreeWidgetItem([key, str(value.contents)])
+                table_root.addChild(node_item)
 
     def onClose(self):
         self.close()
