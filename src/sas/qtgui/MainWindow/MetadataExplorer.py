@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QApplication, QDialog
-
 from sasdata.metadata import Metadata
+from sys import argv
+from sasdata.temp_xml_reader import load_data
 
 
 class MetadataExplorer(QDialog):
@@ -12,7 +13,12 @@ class MetadataExplorer(QDialog):
 if __name__ == "__main__":
     app = QApplication([])
 
-    dialog = MetadataExplorer()
+    filename = argv[0]
+    data_dict = load_data(filename)
+    data = list(data_dict.items())[0][1]
+    # This is only going to work on XML files for now.
+
+    dialog = MetadataExplorer(data.metadata)
     status = dialog.exec()
 
     exit()
