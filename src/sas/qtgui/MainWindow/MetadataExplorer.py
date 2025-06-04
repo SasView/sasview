@@ -1,7 +1,14 @@
 from sys import argv
 from pprint import pp
 
-from PySide6.QtWidgets import QApplication, QDialog, QLabel, QVBoxLayout
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QLabel,
+    QPushButton,
+    QTreeWidget,
+    QVBoxLayout,
+)
 from sasdata.metadata import MetaNode, Metadata
 from sasdata.temp_xml_reader import load_data
 
@@ -36,10 +43,21 @@ class MetadataExplorer(QDialog):
         filename_known = filename if filename is not None else "Unknown"
         self.filenameLabel = QLabel(f"Filename: {filename_known}")
 
+        self.metadataTreeWidget = QTreeWidget()
+        self.buildTree()
+
+        self.closeButton = QPushButton("Close")
+
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.filenameLabel)
+        self.layout.addWidget(self.metadataTreeWidget)
+        self.layout.addWidget(self.closeButton)
 
         self.setWindowTitle("Metadata Explorer")
+
+    def buildTree(self):
+        tree = self.metadataTreeWidget
+        # TODO: Implement
 
 
 if __name__ == "__main__":
