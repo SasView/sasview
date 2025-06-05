@@ -230,6 +230,8 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Allows QtWebEngine to access MathJax and code highlighting APIs
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessFileUrls, True)
+        settings.setAttribute(QtWebEngineCore.QWebEngineSettings.WebAttribute.PluginsEnabled, True)
+        settings.setAttribute(QtWebEngineCore.QWebEngineSettings.WebAttribute.PdfViewerEnabled, True)
         self.webEngineViewer.load(url)
 
         # Show widget
