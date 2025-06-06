@@ -109,6 +109,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.communicate.documentationRegeneratedSignal.connect(self.refresh)
         self.communicate.closeSignal.connect(self.onClose)
         self.webEngineViewer.urlChanged.connect(self.updateTitle)
+        self.webEngineViewer.page().profile().downloadRequested.connect(self.onDownload)
 
     def onEdit(self):
         """Open editor (TabbedModelEditor) window."""
@@ -150,6 +151,11 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         Keep as a separate method to allow for additional functionality when opening
         """
         self.show()
+
+    def onDownload(self, download_item):
+        _filename = download_item.url().fileName()
+        logging.warning(f"downloading your file: {_filename}")
+        download_item.accept()
     
     def regenerateIfNeeded(self):
         """
@@ -230,8 +236,6 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Allows QtWebEngine to access MathJax and code highlighting APIs
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
         settings.setAttribute(QtWebEngineCore.QWebEngineSettings.LocalContentCanAccessFileUrls, True)
-        settings.setAttribute(QtWebEngineCore.QWebEngineSettings.WebAttribute.PluginsEnabled, True)
-        settings.setAttribute(QtWebEngineCore.QWebEngineSettings.WebAttribute.PdfViewerEnabled, True)
         self.webEngineViewer.load(url)
 
         # Show widget
