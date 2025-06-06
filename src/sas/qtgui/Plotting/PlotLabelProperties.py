@@ -6,13 +6,14 @@ from sas.qtgui.Plotting.UI.PlotLabelPropertiesUI import Ui_PlotLabelPropertiesUI
 
 
 class PlotLabelPropertyHolder():
-    def __init__(self, font=None, color=None, weight=None, size=None, text="",):
+    def __init__(self, font=None, color=None, weight=None, size=None, text="",is_scientific=False):
         self.__properties = {}
         self.__properties['font'] = font
         self.__properties['color'] = color
         self.__properties['weight'] = weight
         self.__properties['size'] = size
         self.__properties['text'] = text
+        self.__properties['is_scientific'] = is_scientific
 
     @property
     def font(self):
@@ -53,6 +54,14 @@ class PlotLabelPropertyHolder():
     @text.setter
     def text(self, value):
         self.__properties['text'] = value
+    
+    @property
+    def is_scientific(self):
+        return self.__properties['is_scientific']
+
+    @is_scientific.setter
+    def is_scientific(self, value):
+        self.__properties['is_scientific'] = value
 
 
 class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
@@ -81,6 +90,9 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
         self._texty = y_props.text
         self._sizey = y_props.size
         self._familyy = y_props.font
+
+        self.scientific_x = x_props.is_scientific
+        self.scientific_y = y_props.is_scientific
 
         # Fill out the color comboboxes
         self.cbColor.addItems(list(COLORS.keys())[:-1])
@@ -120,14 +132,14 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
         self.cbWeight.addItems(WEIGHTS)
         try:
             self.cbWeight.setCurrentIndex(self._weight)
-        except TypeError:
+        except (TypeError, AttributeError):
             marker_index = self.cbWeight.findText(self._weight)
             self.cbWeight.setCurrentIndex(marker_index)
 
         self.cbWeight_y.addItems(WEIGHTS)
         try:
             self.cbWeight_y.setCurrentIndex(self._weighty)
-        except TypeError:
+        except (TypeError, AttributeError):
             marker_index = self.cbWeight_y.findText(self._weighty)
             self.cbWeight_y.setCurrentIndex(marker_index)
 
@@ -135,20 +147,24 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
         self.cbFont.addItems(FONTS)
         try:
             self.cbFont.setCurrentIndex(self._family)
-        except TypeError:
+        except (TypeError, AttributeError):
             marker_index = self.cbFont.findText(self._family)
             self.cbFont.setCurrentIndex(marker_index)
 
         self.cbFont_y.addItems(FONTS)
         try:
             self.cbFont_y.setCurrentIndex(self._familyy)
-        except TypeError:
+        except (TypeError, AttributeError):
             marker_index = self.cbFont_y.findText(self._familyy)
             self.cbFont_y.setCurrentIndex(marker_index)
 
 
         self.txtLegend.setText(self._text)
         self.txtLegend_y.setText(self._texty)
+
+        # set the checkboxes
+        self.chkScientific_x.setChecked(self.scientific_x)
+        self.chkScientific_y.setChecked(self.scientific_y)
 
         # Size
         self.cbSize.setValue(self._size)
@@ -175,6 +191,14 @@ class PlotLabelProperties(QtWidgets.QDialog, Ui_PlotLabelPropertiesUI):
     def apply_to_ticks_y(self):
         ''' return status of the "Apply to ticks" checkbox for y-axis '''
         return self.chkTicks_y.isChecked()
+
+    def is_scientific_y(self):
+        ''' return status of the "Scientific" checkbox for y-axis '''
+        return self.chkScientific_y.isChecked()
+
+    def is_scientific_x(self):
+        ''' return status of the "Scientific" checkbox for x-axis '''
+        return self.chkScientific_x.isChecked()
 
     def fx(self):
         ''' return font parameters for x-axis '''
