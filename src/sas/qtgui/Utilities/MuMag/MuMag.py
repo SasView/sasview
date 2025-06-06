@@ -322,7 +322,9 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             MuMagLib.save_data(self.fit_data, directory)
 
     def onHelp(self):
-        webbrowser.open("https://www.sasview.org/docs/user/qtgui/Utilities/MuMag/mumag_help.html")
+        from sas.qtgui.MainWindow.GuiManager import GuiManager
+        url = "/user/qtgui/Utilities/MuMag/mumag_help.html"
+        GuiManager.showHelp(url)
 
 def main():
     """ Show a demo of the slider """
