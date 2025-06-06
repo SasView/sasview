@@ -154,7 +154,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
     def onDownload(self, download_item):
         _filename = download_item.url().fileName()
-        logging.warning(f"downloading your file: {_filename}")
+        logging.warning(f"downloading your file: {_filename} to your default download directory")
         download_item.accept()
     
     def regenerateIfNeeded(self):
