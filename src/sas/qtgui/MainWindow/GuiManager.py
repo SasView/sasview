@@ -1327,7 +1327,8 @@ class GuiManager:
         Open the page with tutorial PDF links
         """
 
-        webbrowser.open("https://www.sasview.org/docs/user/tutorial.html")
+        tutorialfile = "/user/tutorial.html"
+        self.showHelp(tutorialfile)
 
     def actionAcknowledge(self):
         """
