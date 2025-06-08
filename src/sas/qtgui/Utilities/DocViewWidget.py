@@ -153,10 +153,16 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.show()
 
     def onDownload(self, download_item):
-        _filename = download_item.url().fileName()
-        logging.warning(f"downloading your file: {_filename} to your default download directory")
         download_item.accept()
-    
+        download_item.isFinishedChanged.connect(lambda: self.onDownloadFinished(download_item))
+
+    def onDownloadFinished(self, item):
+        _filename = item.downloadFileName()
+        if item.state() == item.DownloadState.DownloadCompleted:
+            logging.warning(f"your file: {_filename} was downloaded to your default download directory")
+        else:
+            logging.error(f"FAILED TO DOWNLOAD: {_filename} is unavailable")
+
     def regenerateIfNeeded(self):
         """
         Determines whether a file needs to be regenerated.
