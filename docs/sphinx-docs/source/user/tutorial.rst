@@ -19,4 +19,6 @@ Tutorials
 
 :download:`P(r) Inversion Analysis in Sasview <sasview/pr_inversion_analysis_in_sasview_v5.pdf>`
 
-:download:`Correlation Function Analysis in SasView <sasview/correlation_function_analysis_in_sasview_v5.pdf>`
+:download:`Correlation Function Analysis in SasView <sasview/correlation_function_analysis_in_sasview_v6.pdf>`
+
+:download:`Creating Custom Fitting Models in Sasview <sasview/creating_custom_fitting_models_in_sasview_v5.pdf>`
