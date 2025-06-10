@@ -25,6 +25,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
     def __init__(self, parent=None):
         super().__init__()
 
+        self.parent = parent
         self.setupUi(self)
 
         # Callbacks
@@ -322,7 +323,8 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
             MuMagLib.save_data(self.fit_data, directory)
 
     def onHelp(self):
-        webbrowser.open("https://www.sasview.org/docs/user/qtgui/Utilities/MuMag/mumag_help.html")
+        url = "/user/qtgui/Utilities/MuMag/mumag_help.html"
+        self.parent.showHelp(url)
 
 def main():
     """ Show a demo of the slider """
