@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h1>
+    What's New: <i>MuMag - Magnetic Small-Angle Neutron Scattering Analysis</i>
+</h1>
+
+
+<p><b>A sophisticated new experimental tool for analyzing magnetic SANS data is now available in SasView</b></p>
+<p><b>featuring advanced micromagnetic modeling and exchange stiffness parameter fitting capabilities</b></p>
+
+<p><img src="whatsnew/6.1.0/MuMagTool.png" width="600"/></p>
+
+<p>The MuMag Tool represents a significant advancement in magnetic scattering analysis, providing researchers with 
+   comprehensive capabilities for studying magnetic domain structures and exchange interactions. This specialized 
+   tool is designed for analyzing magnetic small-angle neutron scattering (SANS) data through sophisticated 
+   micromagnetic modeling approaches.</p>
+
+<p><b>Advanced Fitting Algorithms and Mathematical Framework</b></p>
+<p>The tool employs state-of-the-art numerical methods including non-negative least squares optimization and 
+   Jarratt's method of successive parabolic interpolation for parameter refinement. The underlying micromagnetic 
+   model accounts for applied magnetic fields, demagnetizing fields, and saturation magnetization effects, 
+   enabling precise determination of exchange stiffness constants (A) with rigorous uncertainty quantification 
+   using finite difference methods.</p>
+
+<p><b>Dual Geometry Support and Comprehensive Parameter Analysis</b></p>
+<p>MuMag supports both perpendicular and parallel scattering geometries, each utilizing different mathematical 
+   frameworks optimized for the specific experimental configuration. For perpendicular geometry, the tool fits 
+   three key parameters: residual intensity (I_residual), magnetic structure factor (S_H), and longitudinal 
+   magnetic scattering (S_M). The parallel geometry focuses on I_residual and S_H parameters, with the 
+   mathematical models automatically adapting to the selected configuration.</p>
+
+<p><b>Intelligent Data Import and Processing</b></p>
+<p>The tool features intelligent CSV data import capabilities that automatically extract experimental metadata 
+   from standardized filename conventions, including applied field values, saturation magnetization, and 
+   demagnetizing field parameters. Data filtering is performed based on user-defined q-range limits and 
+   minimum applied field thresholds, ensuring optimal fitting conditions.</p>
+
+<p><b>Multi-Tab Visualization and Analysis Interface</b></p>
+<p>The comprehensive plotting interface includes three specialized visualization tabs: Data visualization 
+   displays imported experimental curves with color-coded field values; Fit Results presents detailed 
+   analysis including chi-squared optimization plots, residual intensity distributions, S_H parameters, 
+   and (for perpendicular geometry) S_M longitudinal scattering data; and Comparison view overlays 
+   experimental data with fitted theoretical curves for validation.</p>
+
+<p><b>Comprehensive Data Export and Documentation</b></p>
+<p>Results can be exported in multiple formats including fitted intensity curves, original truncated data, 
+   chi-squared optimization parameters, S_H and S_M structure factors with uncertainties, and I_residual 
+   values. All exports include comprehensive metadata and timestamp information for complete experimental 
+   documentation and reproducibility.</p>
+
+<p><b>Experimental Status and Future Development</b></p>
+<p>Please note that MuMag is currently designated as experimental software. While the underlying algorithms 
+   are mathematically robust and have been extensively tested, the tool interface and some advanced features 
+   may evolve based on user feedback and ongoing development. We recommend careful validation of results 
+   against established methods and welcome feedback from the magnetic scattering community to guide future 
+   enhancements.</p>
+
+</body>
+</html> 
