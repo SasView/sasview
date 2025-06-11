@@ -14,6 +14,8 @@ Working with SasView
 
    Example Data <example_data/testdata_help>
 
+   Tutorials <tutorial>
+
    Writing a Plugin Model <qtgui/Perspectives/Fitting/plugin>
 
    Scripting Interface to Sasmodels <qtgui/Perspectives/Fitting/scripting>
