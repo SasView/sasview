@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
+from PySide6.QtGui import QCloseEvent
 from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
@@ -153,8 +154,11 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.show()
 
     def onDownload(self, download_item):
-        download_item.accept()
-        download_item.isFinishedChanged.connect(lambda: self.onDownloadFinished(download_item))
+        # There may be several active webEngineViewers. Only process the
+        # actual caller
+        if download_item.page() == self.webEngineViewer.page():
+            download_item.accept()
+            download_item.isFinishedChanged.connect(lambda: self.onDownloadFinished(download_item))
 
     def onDownloadFinished(self, item):
         _filename = item.downloadFileName()
