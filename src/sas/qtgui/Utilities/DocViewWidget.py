@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Optional
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
-from PySide6.QtGui import QCloseEvent
 from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
