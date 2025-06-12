@@ -232,7 +232,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
 
         self.chi_squared_axes.set_xlim([min(sweep_data.exchange_A_checked * 1e12), max(sweep_data.exchange_A_checked * 1e12)])
         self.chi_squared_axes.set_xlabel('$A$ [pJ/m]')
-        self.chi_squared_axes.set_ylabel('$\chi^2$')
+        self.chi_squared_axes.set_ylabel(r'$\chi^2$')
 
         # Residual intensity plot
         self.residual_axes.plot(q, refined.I_residual, label='fit')
@@ -240,7 +240,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         self.residual_axes.set_xscale('log')
         self.residual_axes.set_xlim([min(q), max(q)])
         self.residual_axes.set_xlabel('$q$ [1/nm]')
-        self.residual_axes.set_ylabel('$I_{\mathrm{res}}$')
+        self.residual_axes.set_ylabel(r'$I_{\mathrm{res}}$')
 
         # S_H parameter
         self.s_h_axes.plot(q, refined.S_H, label='fit')
