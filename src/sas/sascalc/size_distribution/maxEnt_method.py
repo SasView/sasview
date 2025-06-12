@@ -128,7 +128,7 @@ class decision_helper():
     
 class maxEntMethod():
     def MaxEntMove(self,fSum, blank, chisq, chizer, c1, c2, s1, s2):
-        '''
+        r'''
         Implementing the maximum entropy move for feature size distribution
         The goal of this function is to calculate distance and choose the next
         target $\chi^2$ and to move beta one step closer towards the solution
@@ -174,7 +174,7 @@ class maxEntMethod():
         return w, chtarg, loop, a_new, fx, beta
 
     def MaxEnt_SB(self,Iq,sigma,Gqr,first_bins,IterMax=5000,report=True):
-        '''
+        r'''
         This function does the complete Maximum Entropy algorithm of Skilling
         and Bryan
          
