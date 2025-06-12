@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from PySide6 import QtCore, QtWidgets, QtWebEngineCore
+from PySide6.QtGui import QCloseEvent
 from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
@@ -136,7 +137,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                                                   model=False)
         self.editorWindow.show()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent):
         """
         Close window
         Keep as a separate method to allow for additional functionality when closing
