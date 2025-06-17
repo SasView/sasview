@@ -7,6 +7,7 @@ import datetime
 import sys
 import os
 from pathlib import Path
+from csv import DictReader
 
 from sas.system.legal import legal
 
@@ -141,20 +142,18 @@ def generate_sasview_data() -> dict:
         contributors = []
         creators = []
         with open(CONTRIBUTORS_FILE) as f:
-            # Rear in the lines and ignore the first line
-            lines = f.readlines()[1:]
-            for line in lines:
-                values = line.split('\t')
-                record = {"name": values[0], "affiliation": values[1]}
-                if len(values) > 5 and values[5]:
-                    record['orcid'] = values[5]
-                if values[2]:
+            reader = DictReader(f)
+            for row in reader:
+                record = {"name": row["Name"], "affiliation": row["Affiliation"]}
+                if 'ORCID' in row:
+                    record['orcid'] = row['ORCID']
+                if row['Creator']:
                     creators.append(record)
-                elif len(values) > 3 and values[3]:
-                    record['type'] = "Producer"
+                elif row['Producer']:
+                    record['type'] = 'Producer'
                     contributors.append(record)
-                elif len(values) > 4 and values[4]:
-                    record['type'] = "Other"
+                else:
+                    record['type'] == 'Other'
                     contributors.append(record)
         return {"creators": creators, "contributors": contributors}
     else:
