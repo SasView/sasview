@@ -153,7 +153,7 @@ def generate_sasview_data() -> dict:
                     record['type'] = 'Producer'
                     contributors.append(record)
                 else:
-                    record['type'] == 'Other'
+                    record['type'] = 'Other'
                     contributors.append(record)
         return {"creators": creators, "contributors": contributors}
     else:
