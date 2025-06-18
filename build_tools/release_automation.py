@@ -346,12 +346,9 @@ def main(args=None):
 
     # Pull the license from a know location
     license_line = legal.copyright
-    subpackages = [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]
-    for subpackage in subpackages:
-        license_file = subpackage / 'LICENSE.txt'
-        update_file(license_file, license_line, 0)
-    license_file = SASVIEW_PATH / 'installers' / 'license.txt'
-    update_file(license_file, license_line, -1)
+    update_file(SASMODELS_PATH / 'LICENSE.txt', license_line, 0)
+    update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
+    update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
 
     sasview_issues_list = args.sasview_list
     sasmodels_issues_list = args.sasmodels_list
