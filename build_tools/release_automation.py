@@ -142,7 +142,7 @@ def generate_sasview_data() -> dict:
         contributors = []
         creators = []
         with open(CONTRIBUTORS_FILE) as f:
-            reader = DictReader(f)
+            reader = DictReader(f, delimiter="\t")
             for row in reader:
                 record = {"name": row["Name"], "affiliation": row["Affiliation"]}
                 if 'ORCID' in row:
