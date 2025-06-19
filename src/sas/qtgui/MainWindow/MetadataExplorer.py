@@ -44,8 +44,6 @@ class MetadataExplorer(QDialog):
     def __init__(self, metadata: Metadata, filename: str | None):
         super().__init__()
         self.metadata_dict = metadata_as_dict(metadata)
-        # TODO: Temp get rid of later.
-        pp(self.metadata_dict)
 
         filename_known = filename if filename is not None else "Unknown"
         self.filenameLabel = QLabel(f"Filename: {filename_known}")
