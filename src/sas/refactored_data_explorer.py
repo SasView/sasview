@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 from sasdata.data import Group, NamedQuantity, Quantity, SasData
+from sasdata.temp_xml_reader import load_data as load_xml_data
+from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
 from sasdata.dataset_types import one_dim
 import sasdata.quantities.units as units
 import numpy as np
@@ -133,4 +135,22 @@ class NewDataExplorer(QWidget):
             self,
             "Open Data File",
         )
+        # FIXME: This would probably break if there isn't an extension.
+
+        # TODO: The logic for deciding which reader to use is temporary. It
+        # won't work for all file extensions, and ultimately this logic probably
+        # needs to be moved in sasdata.
+        file_extension = filename.split(".")[-1].lower()
+        match file_extension:
+            case "xml":
+                loaded_data = load_xml_data(filename)
+            case "h5":
+                loaded_data = load_hdf5_data(filename)
+            case _:
+                QMessageBox.critical(
+                    self,
+                    "Data Loading Error",
+                    f"Error loading {filename}. Extension not recognised.",
+                )
+
         print(filename)
