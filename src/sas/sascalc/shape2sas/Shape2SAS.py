@@ -3,114 +3,14 @@ import argparse
 import warnings
 import re
 import numpy as np
-from typing import Optional, List
-from dataclasses import dataclass, field
 
 from sas.sascalc.shape2sas.StructureFactor import StructureFactor
-from sas.sascalc.shape2sas.TheoreticalScattering import ITheoretical, WeightedPairDistribution
-from sas.sascalc.shape2sas.ExperimentalScattering import IExperimental
-from sas.sascalc.shape2sas.helpfunctions import (
-    GenerateAllPoints, Qsampling,
+from sas.sascalc.shape2sas.TheoreticalScattering import *
+from sas.sascalc.shape2sas.ExperimentalScattering import *
+from sas.sascalc.shape2sas.Models import *
+from sas.sascalc.shape2sas.HelperFunctions import (
     plot_2D, plot_results, generate_pdb
 )
-
-Vectors = List[List[float]]
-
-
-@dataclass
-class ModelProfile:
-    """Class containing parameters for
-    creating a particle
-    
-    NOTE: Default values create a sphere with a 
-    radius of 50 Å at the origin.
-    """
-
-    subunits: List[str] = field(default_factory=lambda: ['sphere'])
-    p_s: List[float] = field(default_factory=lambda: [1.0]) # scattering length density
-    dimensions: Vectors = field(default_factory=lambda: [[50]])
-    com: Vectors = field(default_factory=lambda: [[0, 0, 0]])
-    rotation_points: Vectors = field(default_factory=lambda: [[0, 0, 0]])
-    rotation: Vectors = field(default_factory=lambda: [[0, 0, 0]])
-    exclude_overlap: Optional[bool] = field(default_factory=lambda: True)
-
-
-@dataclass
-class ModelPointDistribution:
-    """Point distribution of a model"""
-
-    x: np.ndarray
-    y: np.ndarray
-    z: np.ndarray
-    p: np.ndarray #scattering length density for each point
-    volume_total: float
-
-
-@dataclass
-class SimulationParameters:
-    """Class containing parameters for
-    the simulation itself"""
-
-    q: Optional[np.ndarray] = field(default_factory=lambda: Qsampling.onQsampling(0.001, 0.5, 400))
-    prpoints: Optional[int] = field(default_factory=lambda: 100)
-    Npoints: Optional[int] = field(default_factory=lambda: 3000)
-    #seed: Optional[int] #TODO:Add for future projects
-    #method: Optional[str] #generation of point method #TODO: Add for future projects
-    model_name: Optional[List[str]] = field(default_factory=lambda: ['Model_1'])
-
-
-@dataclass
-class ModelSystem:
-    """Class containing parameters for
-    the system"""
-
-    PointDistribution: ModelPointDistribution
-    Stype: str = field(default_factory=lambda: "None") #structure factor
-    par: List[float] = field(default_factory=lambda: np.array([]))#parameters for structure factor
-    polydispersity: float = field(default_factory=lambda: 0.0)#polydispersity
-    conc: float = field(default_factory=lambda: 0.02) #concentration
-    sigma_r: float = field(default_factory=lambda: 0.0) #interface roughness
-
-
-@dataclass
-class TheoreticalScatteringCalculation:
-    """Class containing parameters for simulating
-    scattering for a given model system"""
-
-    System: ModelSystem
-    Calculation: SimulationParameters
-
-
-@dataclass
-class TheoreticalScattering:
-    """Class containing parameters for
-    theoretical scattering"""
-
-    q: np.ndarray
-    I0: np.ndarray
-    I: np.ndarray
-    S_eff: np.ndarray
-
-
-@dataclass
-class SimulateScattering:
-    """Class containing parameters for
-    simulating scattering"""
-
-    q: np.ndarray
-    I0: np.ndarray
-    I: np.ndarray
-    exposure: Optional[float] = field(default_factory=lambda:500.0)
-
-
-@dataclass
-class SimulatedScattering:
-    """Class containing parameters for
-    simulated scattering"""
-
-    I_sim: np.ndarray
-    q: np.ndarray
-    I_err: np.ndarray
 
 
 ################################ Shape2SAS functions ################################
