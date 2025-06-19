@@ -7,8 +7,10 @@ from typing import Optional, List
 from dataclasses import dataclass, field
 
 from sas.sascalc.shape2sas.StructureFactor import StructureFactor
+from sas.sascalc.shape2sas.TheoreticalScattering import ITheoretical, WeightedPairDistribution
+from sas.sascalc.shape2sas.ExperimentalScattering import IExperimental
 from sas.sascalc.shape2sas.helpfunctions import (
-    GenerateAllPoints, WeightedPairDistribution, ITheoretical, IExperimental, Qsampling,
+    GenerateAllPoints, Qsampling,
     plot_2D, plot_results, generate_pdb
 )
 
