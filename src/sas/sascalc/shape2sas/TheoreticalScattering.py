@@ -1,6 +1,28 @@
 from sas.sascalc.shape2sas.Typing import *
-from sas.sascalc.shape2sas.Math import sinc
+from sas.sascalc.shape2sas.HelperFunctions import sinc
+
+from dataclasses import dataclass
+from sas.sascalc.shape2sas.Models import ModelSystem, SimulationParameters
 import numpy as np
+
+@dataclass
+class TheoreticalScatteringCalculation:
+    """Class containing parameters for simulating
+    scattering for a given model system"""
+
+    System: ModelSystem
+    Calculation: SimulationParameters
+
+
+@dataclass
+class TheoreticalScattering:
+    """Class containing parameters for
+    theoretical scattering"""
+
+    q: np.ndarray
+    I0: np.ndarray
+    I: np.ndarray
+    S_eff: np.ndarray
 
 class WeightedPairDistribution:
     def __init__(self, x: np.ndarray, 

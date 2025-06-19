@@ -1,6 +1,8 @@
 from sas.sascalc.shape2sas.Typing import *
 from sas.sascalc.shape2sas.structure_factors.StructureDecouplingApprox import StructureDecouplingApprox
+
 import numpy as np
+from typing import Any
 
 class NoStructure(StructureDecouplingApprox):
     def __init__(self, q: np.ndarray, 
