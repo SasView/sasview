@@ -4,18 +4,10 @@ import time
 import warnings
 from dataclasses import dataclass, field
 
-import numpy as np
-
+from sas.sascalc.shape2sas.StructureFactor import StructureFactor
 from sas.sascalc.shape2sas.helpfunctions import (
-    GenerateAllPoints,
-    IExperimental,
-    ITheoretical,
-    Qsampling,
-    StructureFactor,
-    WeightedPairDistribution,
-    generate_pdb,
-    plot_2D,
-    plot_results,
+    GenerateAllPoints, WeightedPairDistribution, ITheoretical, IExperimental, Qsampling,
+    plot_2D, plot_results, generate_pdb
 )
 
 Vectors = list[list[float]]
@@ -94,9 +86,6 @@ class TheoreticalScattering:
     I0: np.ndarray
     I: np.ndarray
     S_eff: np.ndarray
-    r: np.ndarray #pair distance distribution
-    pr: np.ndarray #pair distance distribution
-    pr_norm: np.ndarray #normalized pair distance distribution
 
 
 @dataclass
@@ -152,7 +141,7 @@ def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> Theoret
 
     I = I_theory.calc_Iq(Pq, S_eff, sys.sigma_r)
 
-    return TheoreticalScattering(q=q, I=I, I0=I0, S_eff=S_eff, r=r, pr=pr, pr_norm=pr_norm)
+    return TheoreticalScattering(q=q, I=I, I0=I0, S_eff=S_eff)
 
 
 def getSimulatedScattering(scalc: SimulateScattering) -> SimulatedScattering:
