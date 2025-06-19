@@ -1,5 +1,7 @@
 from sas.sascalc.shape2sas.Typing import *
 from sas.sascalc.shape2sas.structure_factors import *
+
+from typing import Optional
 import numpy as np
 
 class StructureFactor:
