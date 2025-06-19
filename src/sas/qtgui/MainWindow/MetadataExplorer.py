@@ -1,5 +1,4 @@
 from sys import argv
-from pprint import pp
 
 from PySide6.QtWidgets import (
     QApplication,
