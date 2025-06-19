@@ -1,5 +1,28 @@
 from sas.sascalc.shape2sas.Typing import *
+
+from dataclasses import dataclass, field
+from typing import Optional
 import numpy as np
+
+@dataclass
+class SimulateScattering:
+    """Class containing parameters for
+    simulating scattering"""
+
+    q: np.ndarray
+    I0: np.ndarray
+    I: np.ndarray
+    exposure: Optional[float] = field(default_factory=lambda:500.0)
+
+
+@dataclass
+class SimulatedScattering:
+    """Class containing parameters for
+    simulated scattering"""
+
+    I_sim: np.ndarray
+    q: np.ndarray
+    I_err: np.ndarray
 
 class IExperimental:
     def __init__(self, 
