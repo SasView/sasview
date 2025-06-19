@@ -11,50 +11,6 @@ from sas.sascalc.shape2sas.HelperFunctions import (
 )
 
 
-################################ Shape2SAS functions ################################
-def getPointDistribution(prof: ModelProfile, Npoints):
-    """Generate points for a given model profile."""
-    x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits,
-                                                  prof.dimensions, prof.rotation, prof.rotation_points,
-                                                  prof.p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()
-
-    return ModelPointDistribution(x=x_new, y=y_new, z=z_new, p=p_new, volume_total=volume_total)
-
-
-def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> TheoreticalScattering:
-    """Calculate theoretical scattering for a given model profile."""
-    sys = scalc.System
-    prof = sys.PointDistribution
-    calc = scalc.Calculation
-    x = np.concatenate(prof.x)
-    y = np.concatenate(prof.y)
-    z = np.concatenate(prof.z)
-    p = np.concatenate(prof.p)
-
-    r, pr, pr_norm = WeightedPairDistribution(x, y, z, p).calc_pr(calc.prpoints, sys.polydispersity)
-
-    q = calc.q
-    I_theory = ITheoretical(q)
-    I0, Pq = I_theory.calc_Pq(r, pr, sys.conc, prof.volume_total)
-
-    S_class = StructureFactor(q, x, y, z, p, sys.Stype, sys.par)
-
-    S_eff = S_class.getStructureFactorClass().structure_eff(Pq)
-
-    I = I_theory.calc_Iq(Pq, S_eff, sys.sigma_r)
-
-    return TheoreticalScattering(q=q, I=I, I0=I0, S_eff=S_eff)
-
-
-def getSimulatedScattering(scalc: SimulateScattering) -> SimulatedScattering:
-    """Simulate scattering for a given theoretical scattering."""
-
-    Isim_class = IExperimental(scalc.q, scalc.I0, scalc.I, scalc.exposure)
-    I_sim, I_err = Isim_class.simulate_data()
-
-    return SimulatedScattering(I_sim=I_sim, q=scalc.q, I_err=I_err)
-
-
 ################################ Shape2SAS batch version ################################
 if __name__ == "__main__":
     ################################ Read argparse input ################################
@@ -313,16 +269,26 @@ if __name__ == "__main__":
         sigma_r = check_input(args.sigma_r, 0.0, "sigma_r", i)
 
         #calculate theoretical scattering
-        Theo_calc = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=Distr,
-                                                                        Stype=Stype, par=par,
-                                                                        polydispersity=pd, conc=conc,
-                                                                        sigma_r=sigma_r),
-                                                                        Calculation=Sim_par)
-        Theo_I = getTheoreticalScattering(Theo_calc)
+        model = ModelSystem(
+            PointDistribution=Distr,
+            Stype=Stype, par=par,
+            polydispersity=pd, conc=conc,
+            sigma_r=sigma_r
+        )
+
+        Theo_I = getTheoreticalScattering(
+            TheoreticalScatteringCalculation(
+                System=model, 
+                Calculation=Sim_par
+            )
+        )
+
+        # calculate pair distance distribution function p(r) for plotting
+        r, pr, pr_norm = getTheoreticalHistogram(model, Sim_par)
 
         #save models
         Model = f'{i}'
-        WeightedPairDistribution.save_pr(Nbins, Theo_I.r, Theo_I.pr, Model)
+        WeightedPairDistribution.save_pr(Nbins, r, pr, Model)
         StructureFactor.save_S(Theo_I.q, Theo_I.S_eff, Model)
         ITheoretical(Theo_I.q).save_I(Theo_I.I, Model)
 
@@ -342,7 +308,7 @@ if __name__ == "__main__":
         p_list.append(np.concatenate(Distr.p))
 
         r_list.append(Theo_I.r)
-        pr_norm_list.append(Theo_I.pr_norm)
+        pr_norm_list.append(pr_norm)
         I_list.append(Theo_I.I)
         S_eff_list.append(Theo_I.S_eff)
 
