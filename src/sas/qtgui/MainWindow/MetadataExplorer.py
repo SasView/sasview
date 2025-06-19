@@ -19,19 +19,25 @@ def metadata_as_dict(to_convert: object):
     preserved, but everything else is converted into a dict. This makes it easier to iterate over."""
     if not hasattr(to_convert, "__dict__"):
         return to_convert
-    converted_dict = to_convert.__dict__
-    for key, value in converted_dict.items():
-        # This if statement looks for a meta node that is a child node, and leaves it as is (i.e. it doesn't turn it
-        # into a dict). Some meta nodes contain other meta nodes, so we need to add a condition for this.
-        if not (
-            value is dict
-            or (
-                isinstance(value, MetaNode)
-                and [isinstance(content, MetaNode) for content in value.contents]
-            )
-        ):
-            converted_dict[key] = metadata_as_dict(value)
-    return converted_dict
+    if isinstance(to_convert, list):
+        converted_dicts: list[dict[str, Any]] = []
+        for item in to_convert:
+            converted_dicts.append(item.__dict__)
+    else:
+        converted_dicts = [to_convert.__dict__]
+    for single_dict in converted_dicts:
+        for key, value in single_dict.items():
+            # This if statement looks for a meta node that is a child node, and leaves it as is (i.e. it doesn't turn it
+            # into a dict). Some meta nodes contain other meta nodes, so we need to add a condition for this.
+            if not (
+                value is dict
+                or (
+                    isinstance(value, MetaNode)
+                    and [isinstance(content, MetaNode) for content in value.contents]
+                )
+            ):
+                single_dict[key] = metadata_as_dict(value)
+        return converted_dicts[0] if len(converted_dicts) == 0 else converted_dicts
 
 
 class MetadataExplorer(QDialog):
@@ -60,28 +66,33 @@ class MetadataExplorer(QDialog):
     def buildTree(
         self,
         table_root: QTreeWidgetItem | None = None,
-        current_dict: dict[str, object] | None = None,
+        current_item: dict[str, object] | list[dict[str, object]] | None = None,
     ):
         tree = self.metadataTreeWidget
         tree.setColumnCount(2)
-        if current_dict is None:
-            current_dict = self.metadata_dict
+        if current_item is None:
+            current_item = self.metadata_dict
         if table_root is None:
             table_root = QTreeWidgetItem(["Metadata"])
             tree.addTopLevelItem(table_root)
-        for key, value in current_dict.items():
-            if isinstance(value, dict):
-                dict_root = QTreeWidgetItem([key])
-                table_root.addChild(dict_root)
-                self.buildTree(dict_root, value)
-            if isinstance(value, str):
-                node_item = QTreeWidgetItem([key, value])
-                table_root.addChild(node_item)
-            # TODO: May need to handle lists as well.
-            if isinstance(value, MetaNode):
-                # TODO: Implement. Just show the contents for now.
-                node_item = QTreeWidgetItem([key, str(value.contents)])
-                table_root.addChild(node_item)
+        if isinstance(current_item, list):
+            dicts = current_item
+        else:
+            dicts = [current_item]
+        for single_dict in dicts:
+            for key, value in single_dict.items():
+                if isinstance(value, dict):
+                    dict_root = QTreeWidgetItem([key])
+                    table_root.addChild(dict_root)
+                    self.buildTree(dict_root, value)
+                if isinstance(value, str):
+                    node_item = QTreeWidgetItem([key, value])
+                    table_root.addChild(node_item)
+                # TODO: May need to handle lists as well.
+                if isinstance(value, MetaNode):
+                    # TODO: Implement. Just show the contents for now.
+                    node_item = QTreeWidgetItem([key, str(value.contents)])
+                    table_root.addChild(node_item)
 
     def onClose(self):
         self.close()
