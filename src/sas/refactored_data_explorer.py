@@ -152,6 +152,7 @@ class NewDataExplorer(QWidget):
                     "Data Loading Error",
                     f"Error loading {filename}. Extension not recognised.",
                 )
+                return
 
         for _, datum in loaded_data.items():
             self._data_manager.add_data(datum)
