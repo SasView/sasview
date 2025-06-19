@@ -77,6 +77,7 @@ class MetadataExplorer(QDialog):
             if isinstance(value, str):
                 node_item = QTreeWidgetItem([key, value])
                 table_root.addChild(node_item)
+            # TODO: May need to handle lists as well.
             if isinstance(value, MetaNode):
                 # TODO: Implement. Just show the contents for now.
                 node_item = QTreeWidgetItem([key, str(value.contents)])
