@@ -22,6 +22,9 @@ class ViewerModel(QWidget):
         ###3D plot view of model
         self.scatter = Q3DScatter()
 
+        # remove shadows
+        self.scatter.setShadowQuality(Q3DScatter.ShadowQuality.ShadowQualityNone)
+
         """
         NOTE: Orignal intend was to create
         QScatter3DSeries() in setPlot() method. However,
