@@ -17,7 +17,7 @@ def metadata_as_dict(to_convert: object):
     """This is a custom implementation of asdict from dataclasses. The key difference is that MetaNode class objects are
     preserved, but everything else is converted into a dict. This makes it easier to iterate over."""
     if isinstance(to_convert, list) and all([hasattr(item, '__dict__') for item in to_convert]):
-        converted_dicts: list[dict[str, Any]] = []
+        converted_dicts: list[dict[str, object]] = []
         for item in to_convert:
             converted_dicts.append(item.__dict__)
     elif hasattr(to_convert, "__dict__"):
