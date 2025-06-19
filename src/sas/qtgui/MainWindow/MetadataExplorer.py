@@ -17,14 +17,14 @@ from sasdata.temp_xml_reader import load_data
 def metadata_as_dict(to_convert: object):
     """This is a custom implementation of asdict from dataclasses. The key difference is that MetaNode class objects are
     preserved, but everything else is converted into a dict. This makes it easier to iterate over."""
-    if not hasattr(to_convert, "__dict__"):
-        return to_convert
-    if isinstance(to_convert, list):
+    if isinstance(to_convert, list) and all([hasattr(item, '__dict__') for item in to_convert]):
         converted_dicts: list[dict[str, Any]] = []
         for item in to_convert:
             converted_dicts.append(item.__dict__)
-    else:
+    elif hasattr(to_convert, "__dict__"):
         converted_dicts = [to_convert.__dict__]
+    else:
+        return to_convert
     for single_dict in converted_dicts:
         for key, value in single_dict.items():
             # This if statement looks for a meta node that is a child node, and leaves it as is (i.e. it doesn't turn it
