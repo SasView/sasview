@@ -416,3 +416,12 @@ class GenerateAllPoints:
         print(" ")
 
         return x_new, y_new, z_new, p_new, volume_total
+
+
+def getPointDistribution(prof: ModelProfile, Npoints):
+    """Generate points for a given model profile."""
+    x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits, 
+                                                  prof.dimensions, prof.rotation, prof.rotation_points, 
+                                                  prof.p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()
+    
+    return ModelPointDistribution(x=x_new, y=y_new, z=z_new, p=p_new, volume_total=volume_total)

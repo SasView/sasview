@@ -1,5 +1,6 @@
 from sas.sascalc.shape2sas.Typing import *
 from sas.sascalc.shape2sas.HelperFunctions import sinc
+from sas.sascalc.shape2sas.StructureFactor import StructureFactor
 
 from dataclasses import dataclass
 from sas.sascalc.shape2sas.Models import ModelSystem, SimulationParameters
@@ -23,6 +24,7 @@ class TheoreticalScattering:
     I0: np.ndarray
     I: np.ndarray
     S_eff: np.ndarray
+
 
 class WeightedPairDistribution:
     def __init__(self, x: np.ndarray, 
@@ -207,6 +209,9 @@ class WeightedPairDistribution:
         """
         save p(r) to textfile
         """
+
+
+
         with open('pr%s.dat' % Model,'w') as f:
             f.write('# %-17s %-17s\n' % ('r','p(r)'))
             for i in range(Nbins):
@@ -270,3 +275,44 @@ class ITheoretical:
             f.write('# %-12s %-12s\n' % ('q','I'))
             for i in range(len(I)):
                 f.write('  %-12.5e %-12.5e\n' % (self.q[i], I[i]))
+
+
+def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> TheoreticalScattering:
+    """Calculate theoretical scattering for a given model profile."""
+    sys = scalc.System
+    prof = sys.PointDistribution
+    calc = scalc.Calculation
+    x = np.concatenate(prof.x)
+    y = np.concatenate(prof.y)
+    z = np.concatenate(prof.z)
+    p = np.concatenate(prof.p)
+
+    r, pr, pr_norm = WeightedPairDistribution(x, y, z, p).calc_pr(calc.prpoints, sys.polydispersity)
+
+    q = calc.q
+    I_theory = ITheoretical(q)
+    I0, Pq = I_theory.calc_Pq(r, pr, sys.conc, prof.volume_total)
+
+    S_class = StructureFactor(q, x, y, z, p, sys.Stype, sys.par)
+
+    S_eff = S_class.getStructureFactorClass().structure_eff(Pq)
+
+    I = I_theory.calc_Iq(Pq, S_eff, sys.sigma_r)
+
+    return TheoreticalScattering(q=q, I=I, I0=I0, S_eff=S_eff)
+
+def getTheoreticalHistogram(model: ModelSystem, sim_pars: SimulationParameters) -> Vector3D:
+    """
+    Get theoretical histogram for a given model system and simulation parameters.
+    This function is used to calculate the pair distribution function (p(r)).
+
+    :param model: ModelSystem object containing the model parameters.
+    :param sim_pars: SimulationParameters object containing the simulation parameters.
+    :return: r, pr, pr_norm - pair distance distribution function.
+    """
+    prof = model.PointDistribution
+    x = np.concatenate(prof.x)
+    y = np.concatenate(prof.y)
+    z = np.concatenate(prof.z)
+    p = np.concatenate(prof.p)
+    return WeightedPairDistribution(x, y, z, p).calc_pr(sim_pars.prpoints, model.polydispersity)

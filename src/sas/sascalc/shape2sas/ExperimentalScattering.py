@@ -108,3 +108,11 @@ class IExperimental:
             for i in range(len(Isim)):
                 f.write('  %-12.5e %-12.5e %-12.5e\n' % (self.q[i], Isim[i], sigma[i]))
 
+
+def getSimulatedScattering(scalc: SimulateScattering) -> SimulatedScattering:
+    """Simulate scattering for a given theoretical scattering."""
+
+    Isim_class = IExperimental(scalc.q, scalc.I0, scalc.I, scalc.exposure)
+    I_sim, I_err = Isim_class.simulate_data()
+
+    return SimulatedScattering(I_sim=I_sim, q=scalc.q, I_err=I_err)
