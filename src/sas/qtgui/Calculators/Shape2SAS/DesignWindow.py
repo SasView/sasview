@@ -695,13 +695,20 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         Distr = getPointDistribution(Profile, N)
 
-        Theo_calc = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=Distr,
-                                                                        Stype=Stype, par=par,
-                                                                        polydispersity=polydispersity,
-                                                                        conc=conc,
-                                                                        sigma_r=sigma_r),
-                                                                        Calculation=Sim_par)
-        Theo_I = getTheoreticalScattering(Theo_calc)
+        model = ModelSystem(
+            PointDistribution=Distr, 
+            Stype=Stype, par=par, 
+            polydispersity=polydispersity, 
+            conc=conc, 
+            sigma_r=sigma_r
+        )
+
+        Theo_I = getTheoreticalScattering(
+            TheoreticalScatteringCalculation(
+                System=model,
+                Calculation=Sim_par
+            )
+        )
         Sim_calc = SimulateScattering(q=Theo_I.q, I0=Theo_I.I0, I=Theo_I.I, exposure=exposure)
         Sim_SAXS = getSimulatedScattering(Sim_calc)
 
