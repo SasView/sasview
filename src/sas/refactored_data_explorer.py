@@ -1,6 +1,18 @@
 import logging
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QComboBox, QDialog, QErrorMessage, QHBoxLayout, QLabel, QMessageBox, QPushButton, QTreeView, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QErrorMessage,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QTreeView,
+    QVBoxLayout,
+    QWidget,
+)
 from sasdata.data import Group, NamedQuantity, Quantity, SasData
 from sasdata.dataset_types import one_dim
 import sasdata.quantities.units as units
@@ -15,14 +27,15 @@ from src.sas.data_explorer_error_message import DataExplorerErrorMessage
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
 perspectives: dict[str, None | Perspective] = {
-    'Corfunc': None,
-    'Fitting': None,
-    'Invariant': None,
-    'Inversion': None,
-    'Dummy': DummyPerspective,
-    'Mumag': None
+    "Corfunc": None,
+    "Fitting": None,
+    "Invariant": None,
+    "Inversion": None,
+    "Dummy": DummyPerspective,
+    "Mumag": None,
 }
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+
 
 # TODO: Just using the word 'new' to avoid conflicts. The final version
 # shouldn't have that name.
@@ -42,7 +55,7 @@ class NewDataExplorer(QWidget):
         # TODO: This list is temporary. We should have all the perspectives
         # registered somewhere so its easy to add a new one.
         self.add_perspective_button = QComboBox(self)
-        self.add_perspective_button.addItem('+ New Perspectives')
+        self.add_perspective_button.addItem("+ New Perspectives")
         for p in perspectives.keys():
             self.add_perspective_button.addItem(p)
         self.add_perspective_button.currentTextChanged.connect(self.add_perspective)
@@ -50,11 +63,13 @@ class NewDataExplorer(QWidget):
         self.add_data_row.addWidget(self.load_data_row)
         self.add_data_row.addWidget(self.add_perspective_button)
 
-        self.filter_label = QLabel('Filters')
+        self.filter_label = QLabel("Filters")
 
         self.filter_row = QHBoxLayout(self)
-        filter_names = ['Data', 'Perspective', 'Theory', 'Plot']
-        self.filter_buttons: dict[str, QPushButton] = {name: QPushButton(name, self) for name in filter_names}
+        filter_names = ["Data", "Perspective", "Theory", "Plot"]
+        self.filter_buttons: dict[str, QPushButton] = {
+            name: QPushButton(name, self) for name in filter_names
+        }
         for widget in self.filter_buttons.values():
             widget.setCheckable(True)
             self.filter_row.addWidget(widget)
@@ -67,14 +82,13 @@ class NewDataExplorer(QWidget):
         # TODO: Is there a better name for this?
         self.final_row = QHBoxLayout(self)
 
-        self.remove_button = QPushButton('Remove', self)
-        self.remove_button.setToolTip('Remove the selected data from SasView')
+        self.remove_button = QPushButton("Remove", self)
+        self.remove_button.setToolTip("Remove the selected data from SasView")
         self.remove_button.clicked.connect(self.onRemove)
-        self.plot_button = QPushButton('Plot', self)
+        self.plot_button = QPushButton("Plot", self)
 
         self.final_row.addWidget(self.remove_button)
         self.final_row.addWidget(self.plot_button)
-
 
         self.layout.addLayout(self.add_data_row)
         self.layout.addWidget(self.filter_label)
@@ -114,9 +128,9 @@ class NewDataExplorer(QWidget):
 
     @Slot()
     def onLoadFile(self):
-        # TODO: At the moment, the readers are not hooked up properly. Just create some random dummy data for now.
-        quantities: dict[str, Quantity] = {}
-        for column in ['Q', 'I']:
-            quantities[column] = Quantity(100 * np.random.rand(100), units.angstroms)
-        dummy = SasData('Dummy Data', quantities, one_dim, Group('root', {}))
-        self._data_manager.add_data(dummy)
+        # TODO: Probably want to add filters.
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open Data File",
+        )
+        print(filename)
