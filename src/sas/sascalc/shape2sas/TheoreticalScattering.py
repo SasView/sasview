@@ -246,6 +246,13 @@ class ITheoretical:
         I0 *= conc * volume_total * 1E-4
 
         return I0, Pq
+    
+    def calc_Pq_ausaxs(self, q: np.ndarray, x: np.ndarray, y: np.ndarray, z: np.ndarray, p: np.ndarray) -> np.ndarray:
+        """
+        calculate form factor, P(q), using ausaxs SANS Debye method
+        """
+        from sas.sascalc.calculator.ausaxs.ausaxs_sans_debye import evaluate_sans_debye
+        return evaluate_sans_debye(q, np.array([x, y, z]), p)
 
     def calc_Iq(self, Pq: np.ndarray, 
                 S_eff: np.ndarray, 
@@ -277,8 +284,10 @@ class ITheoretical:
                 f.write('  %-12.5e %-12.5e\n' % (self.q[i], I[i]))
 
 
+use_ausaxs = True
 def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> TheoreticalScattering:
     """Calculate theoretical scattering for a given model profile."""
+
     sys = scalc.System
     prof = sys.PointDistribution
     calc = scalc.Calculation
@@ -286,19 +295,20 @@ def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> Theoret
     y = np.concatenate(prof.y)
     z = np.concatenate(prof.z)
     p = np.concatenate(prof.p)
-
-    r, pr, pr_norm = WeightedPairDistribution(x, y, z, p).calc_pr(calc.prpoints, sys.polydispersity)
-
     q = calc.q
     I_theory = ITheoretical(q)
-    I0, Pq = I_theory.calc_Pq(r, pr, sys.conc, prof.volume_total)
+
+    if use_ausaxs:
+        Pq = I_theory.calc_Pq_ausaxs(q, x, y, z, p)
+        I0 = np.square(np.sum(p)) * sys.conc * prof.volume_total * 1E-4
+    
+    else: 
+        r, pr, _ = WeightedPairDistribution(x, y, z, p).calc_pr(calc.prpoints, sys.polydispersity)
+        I0, Pq = I_theory.calc_Pq(r, pr, sys.conc, prof.volume_total)
 
     S_class = StructureFactor(q, x, y, z, p, sys.Stype, sys.par)
-
     S_eff = S_class.getStructureFactorClass().structure_eff(Pq)
-
     I = I_theory.calc_Iq(Pq, S_eff, sys.sigma_r)
-
     return TheoreticalScattering(q=q, I=I, I0=I0, S_eff=S_eff)
 
 def getTheoreticalHistogram(model: ModelSystem, sim_pars: SimulationParameters) -> Vector3D:
