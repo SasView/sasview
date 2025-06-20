@@ -256,7 +256,7 @@ jobs:
       - name: Signing using keypair alias
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
-           smctl sign --keypair-alias ${{ secrets.KEYLOCKER_KEYPAIR_ALIAS }} --input installers/dist/setupSasView.exe
+           smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
         shell: cmd
 
       - name: Publish installer package
