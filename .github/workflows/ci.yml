@@ -217,6 +217,14 @@ jobs:
           iscc installers/installer.iss
           mv installers/Output/setupSasView.exe installers/dist
 
+      - name: List files in installers/Output
+        run: |
+            ls ${{ github.workspace }}/installers/Output
+
+      - name: List files in installers/dist
+        run: |
+            ls ${{ github.workspace }}/installers/dist
+
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         uses: digicert/ssm-code-signing@v1.0.1
