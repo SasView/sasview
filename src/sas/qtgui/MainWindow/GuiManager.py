@@ -77,6 +77,7 @@ import sas
 from sas import config
 from sas.system import web
 from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
+from src.sas.refactored_data_explorer import NewDataExplorer
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +170,9 @@ class GuiManager:
         self.loadAllPerspectives()
 
         # Add FileDialog widget as docked - Perspectives must be loaded to ensure default perspective is shown
-        self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
+        # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
+        # TODO: Is this a good opportunity to change this name? dataExplorer would be better I think.
+        self.filesWidget = NewDataExplorer(self._parent)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
