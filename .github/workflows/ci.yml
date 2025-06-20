@@ -231,7 +231,6 @@ jobs:
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
             ls -l installers
-            ls -l C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\smtools-windows-x64\\
 
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
@@ -257,7 +256,7 @@ jobs:
       - name: Signing using keypair alias
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
         run: |
-           smctl sign --keypair-alias ${{ secrets.KEYLOCKER_KEYPAIR_ALIAS }} --input installers/Output/setupSasView.exe --config-file "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\smtools-windows-x64\\pkcs11properties.cfg"
+           smctl sign --keypair-alias ${{ secrets.KEYLOCKER_KEYPAIR_ALIAS }} --input installers/dist/setupSasView.exe
         shell: cmd
 
       - name: Publish installer package
@@ -267,7 +266,4 @@ jobs:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
             installers/dist/setupSasView.exe
-            installers/dist/SasView6-macos-13.dmg
-            installers/dist/SasView6-macos-latest.dmg
-            installers/dist/SasView6.tar.gz
           if-no-files-found: ignore
