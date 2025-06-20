@@ -219,11 +219,11 @@ jobs:
 
       - name: List files in installers/Output
         run: |
-            ls ${{ github.workspace }}/installers/Output
+            ls installers/Output
 
       - name: List files in installers/dist
         run: |
-            ls ${{ github.workspace }}/installers/dist
+            ls installers/dist
 
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
