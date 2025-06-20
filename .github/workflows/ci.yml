@@ -217,13 +217,13 @@ jobs:
           iscc installers/installer.iss
           mv installers/Output/setupSasView.exe installers/dist
 
-      - name: List files in installers/Output
+      - name: List files in installers
         run: |
-            ls installers/Output
+            ls -l installers
 
-      - name: List files in installers/dist
+      - name: List files in current directory
         run: |
-            ls installers/dist
+            ls -l
 
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
