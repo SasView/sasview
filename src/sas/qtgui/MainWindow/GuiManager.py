@@ -289,8 +289,11 @@ class GuiManager:
 
     @Slot(QDialog)
     def removed_perspective(self, to_remove: QDialog):
-        # Need to find the subwindow that contains the perspective so we can remove that. for sub_window in self._workspace.workspace.subWindowList(): if sub_window.widget() == to_remove: self._workspace.workspace.removeSubWindow(sub_window) break @Slot(QMdiSubWindow) def current_window_perspective_changed(self, perspective_window: QMdiSubWindow | None): if isinstance(perspective_window.widget(), NewPerspective):
-        pass
+        # Need to find the subwindow that contains the perspective so we can remove that.
+        for sub_window in self._workspace.workspace.subWindowList():
+            if sub_window.widget() == to_remove:
+                self._workspace.workspace.removeSubWindow(sub_window)
+                break
 
 
     @Slot(QMdiSubWindow)
