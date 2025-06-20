@@ -149,7 +149,7 @@ class NewDataExplorer(QWidget):
                 loaded_data = load_xml_data(filename)
             case "h5":
                 loaded_data = load_hdf5_data(filename)
-            case ".txt":
+            case "txt":
                 dialog = AsciiDialog()
                 status = dialog.exec()
                 if status != 1:
