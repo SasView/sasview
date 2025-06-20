@@ -217,9 +217,9 @@ jobs:
           iscc installers/installer.iss
           mv installers/Output/setupSasView.exe installers/dist
 
-      - name: List files in installers
+      - name: List files in dist
         run: |
-            ls -l installers
+            ls -l dist
 
       - name: List files in current directory
         run: |
