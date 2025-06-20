@@ -294,6 +294,12 @@ class GuiManager:
             self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
 
 
+    @Slot(QMdiSubWindow)
+    def current_window_perspective_changed(self, perspective_window: QMdiSubWindow | None):
+        if isinstance(perspective_window.widget(), NewPerspective):
+            perspective = cast(Perspective, perspective_window.widget())
+            self.filesWidget.tree_view.setCurrentTrackedDatum(perspective)
+
     @Slot()
     def current_index_perspective_changed(self):
         new_selected  = self.filesWidget.tree_view.currentTrackedDatum
