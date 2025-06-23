@@ -13,6 +13,7 @@ from PySide6.QtGui import *
 from PySide6.QtCore import Qt, QLocale, Slot
 
 import matplotlib as mpl
+from sasdata.temp_ascii_reader import load_data
 
 import sas.system.version
 
@@ -1457,4 +1458,12 @@ class GuiManager:
 
 
     def asciiLoader(self):
-        pass
+        from ascii_dialog.dialog import AsciiDialog
+        dialog = AsciiDialog()
+        status = dialog.exec()
+        if status == 1:
+            loaded = load_data(dialog.params)
+            for datum in loaded:
+                logger.info(datum.summary())
+        else:
+            logger.error('ASCII Reader Closed')
