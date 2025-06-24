@@ -314,17 +314,32 @@ jobs:
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
 
-      - name: Sign binary
+      - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        uses: lando/code-sign-action@v2
-        with:
-          file: installers/dist/setupSasView.exe
-          certificate-data: ${{ secrets.WINDOZE_CERT_DATA }}
-          certificate-password: ${{ secrets.WINDOZE_CERT_PASSWORD }}
-          keylocker-host: ${{ secrets.KEYLOCKER_HOST }}
-          keylocker-api-key: ${{ secrets.KEYLOCKER_API_KEY }}
-          keylocker-cert-sha1-hash: ${{ secrets.KEYLOCKER_CERT_SHA1_HASH }}
+        uses: digicert/ssm-code-signing@v1.0.1
 
+      - name: Set up P12 certificate
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        run: |
+          echo "${{ secrets.WINDOZE_CERT_DATA }}" | base64 --decode > /d/Certificate_pkcs12.p12
+        shell: bash
+
+      - name: Set keylocker variables
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        id: variables
+        run: |
+          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          echo "SM_HOST=${{ secrets.KEYLOCKER_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ secrets.KEYLOCKER_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.WINDOZE_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Sign the binary using keypair alias
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        run: |
+           smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
+        shell: cmd
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
