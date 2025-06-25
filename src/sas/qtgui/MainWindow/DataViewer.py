@@ -8,5 +8,5 @@ class DataViewer(QDialog):
         self.to_view = to_view
         self.layout = QGridLayout()
 
-        self.filenameLabel = QLabel(f"Name: {self.to_view}")
-        self.layout.addWidget(self.filenameLabel, 0, 0, 1, 1)
+        self.nameLabel = QLabel(f"Name: {self.to_view}")
+        self.layout.addWidget(self.nameLabel, 0, 0, 1, 1)
