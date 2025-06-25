@@ -1,12 +1,19 @@
 from typing_extensions import cast
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import QAbstractItemView, QMessageBox, QTreeWidget, QTreeWidgetItem, QWidget
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QMessageBox,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QWidget,
+)
 from sasdata.data import SasData
 from sas.data_manager import NewDataManager as DataManager, TrackedData
 from sas.refactored import Perspective
 from src.sas.data_explorer_error_message import DataExplorerErrorMessage
 from src.sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
+
 
 # TODO: Is this the right place for this?
 def tracked_data_name(data: TrackedData) -> str:
@@ -15,10 +22,13 @@ def tracked_data_name(data: TrackedData) -> str:
     else:
         return data.formatName
 
+
 class DataExplorerTree(QTreeWidget):
     current_datum_removed = Signal()
 
-    def __init__(self, data_manager: DataManager, parent: QWidget | None = None) -> None:
+    def __init__(
+        self, data_manager: DataManager, parent: QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self._data_manager = data_manager
         _ = self._data_manager.new_data.connect(self.addToTable)
@@ -55,13 +65,17 @@ class DataExplorerTree(QTreeWidget):
         # TODO: Again, order.
         self.removeFromTable(datum2, root_datum=datum1)
 
-
     def addToTable(self, datum: TrackedData):
         item = QTreeWidgetItem([tracked_data_name(datum)])
         item.setData(0, Qt.ItemDataRole.UserRole, datum)
         self.addTopLevelItem(item)
 
-    def removeFromTable(self, datum: TrackedData, starting_root: QTreeWidgetItem | None = None, root_datum: TrackedData | None = None):
+    def removeFromTable(
+        self,
+        datum: TrackedData,
+        starting_root: QTreeWidgetItem | None = None,
+        root_datum: TrackedData | None = None,
+    ):
         """The root_datum param is needed when you want to delete something from the tree that has a certain root item.
         This is mostly useful for getting rid of associations."""
         root = self.invisibleRootItem() if starting_root is None else starting_root
@@ -71,7 +85,10 @@ class DataExplorerTree(QTreeWidget):
         for i in range(root.childCount()):
             item = root.child(i)
             item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
-            if item_datum == datum and (not root_datum is None or root_datum == root.data(0, Qt.ItemDataRole.UserRole)):
+            if item_datum == datum and (
+                not root_datum is None
+                or root_datum == root.data(0, Qt.ItemDataRole.UserRole)
+            ):
                 # Need to defer this to later so we don't delete data while we're doing a for loop over it.
                 to_remove.append(item)
             elif item.childCount() != 0:
@@ -89,10 +106,10 @@ class DataExplorerTree(QTreeWidget):
         result: DataExplorerMenuAction = action.data()
         errors: list[ValueError] = []
         match result.action:
-            case 'remove':
+            case "remove":
                 # TODO: Work for all data.
                 self.current_datum_removed.emit()
-            case 'send_to':
+            case "send_to":
                 # TODO: This cast might not be necessary.
                 to_perspective = cast(Perspective, result.action_data)
                 # TODO: I'm a bit worried about potential repetition if there are more actions here. Will need to
@@ -121,7 +138,9 @@ class DataExplorerTree(QTreeWidget):
 
     # Annoyingly, there is no way to get all the items in a tree. So we have to
     # do this recursively instead.
-    def setCurrentTrackedDatum(self, datum: TrackedData, root: QTreeWidgetItem | None = None):
+    def setCurrentTrackedDatum(
+        self, datum: TrackedData, root: QTreeWidgetItem | None = None
+    ):
         if root is None:
             root = self.invisibleRootItem()
         for i in range(root.childCount()):
