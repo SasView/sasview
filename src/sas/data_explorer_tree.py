@@ -3,7 +3,6 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import (
     QAbstractItemView,
-    QMessageBox,
     QTreeWidget,
     QTreeWidgetItem,
     QWidget,
