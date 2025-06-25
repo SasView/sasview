@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QLabel, QGridLayout
 from sasdata.data import SasData
 
 
@@ -6,3 +6,7 @@ class DataViewer(QDialog):
     def __init__(self, to_view: SasData):
         super().__init__()
         self.to_view = to_view
+        self.layout = QGridLayout()
+
+        self.filenameLabel = QLabel(f"Name: {self.to_view}")
+        self.layout.addWidget(self.filenameLabel, 0, 0, 1, 1)
