@@ -35,3 +35,4 @@ class DataExplorerMenu(QMenu):
                 new_action.setData(DataExplorerMenuAction("send_to", perspective))
                 send_to_menu.addAction(new_action)
         self.addAction(remove_data)
+        self.addAction(view_data)
