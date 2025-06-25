@@ -2,24 +2,17 @@ import logging
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import (
     QComboBox,
-    QDialog,
-    QErrorMessage,
     QFileDialog,
     QHBoxLayout,
     QLabel,
     QMessageBox,
     QPushButton,
-    QTreeView,
     QVBoxLayout,
     QWidget,
 )
-from sasdata.data import Group, NamedQuantity, Quantity, SasData
 from sasdata.temp_xml_reader import load_data as load_xml_data
 from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
 from sasdata.temp_ascii_reader import load_data as load_ascii_data
-from sasdata.dataset_types import one_dim
-import sasdata.quantities.units as units
-import numpy as np
 
 from sas.data_explorer_tree import DataExplorerTree
 from sas.dummy_perspective import DummyPerspective
@@ -38,7 +31,6 @@ perspectives: dict[str, None | Perspective] = {
     "Dummy": DummyPerspective,
     "Mumag": None,
 }
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 
 # TODO: Just using the word 'new' to avoid conflicts. The final version
