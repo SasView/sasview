@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 from sasdata.temp_xml_reader import load_data as load_xml_data
 from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
 from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_data
+from os.path import basename
 
 from sas.data_explorer_tree import DataExplorerTree
 from sas.dummy_perspective import DummyPerspective
@@ -144,7 +145,7 @@ class NewDataExplorer(QWidget):
                 data_list = load_ascii_data(filename)
                 # Since we're only giving the load function one filename, we can
                 # assume only one data object is being loaded.
-                loaded_data = dict([(filename, data_list[0])])
+                loaded_data = dict([(basename(filename), data_list[0])])
             case _:
                 QMessageBox.critical(
                     self,
