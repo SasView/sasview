@@ -34,6 +34,7 @@ class DataExplorerTree(QTreeWidget):
         self._data_manager = data_manager
         _ = self._data_manager.new_data.connect(self.addToTable)
         _ = self._data_manager.data_removed.connect(self.removeFromTable)
+        _ = self.view_data_activated.connect(self.showViewData)
 
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
