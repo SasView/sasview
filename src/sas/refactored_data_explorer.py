@@ -141,7 +141,10 @@ class NewDataExplorer(QWidget):
             case "h5":
                 loaded_data = load_hdf5_data(filename)
             case "txt":
-                loaded_data = load_ascii_data(filename)
+                data_list = load_ascii_data(filename)
+                # Since we're only giving the load function one filename, we can
+                # assume only one data object is being loaded.
+                loaded_data = dict([(filename, data_list[0])])
             case _:
                 QMessageBox.critical(
                     self,
