@@ -12,6 +12,7 @@ from sas.data_manager import NewDataManager as DataManager, TrackedData
 from sas.refactored import Perspective
 from src.sas.data_explorer_error_message import DataExplorerErrorMessage
 from src.sas.data_explorer_menu import DataExplorerMenu, DataExplorerMenuAction
+from sas.qtgui.MainWindow.DataViewer import DataViewer
 
 
 # TODO: Is this the right place for this?
@@ -24,6 +25,7 @@ def tracked_data_name(data: TrackedData) -> str:
 
 class DataExplorerTree(QTreeWidget):
     current_datum_removed = Signal()
+    view_data_activated = Signal()
 
     def __init__(
         self, data_manager: DataManager, parent: QWidget | None = None
@@ -108,6 +110,8 @@ class DataExplorerTree(QTreeWidget):
             case "remove":
                 # TODO: Work for all data.
                 self.current_datum_removed.emit()
+            case "view_data":
+                self.view_data_activated.emit()
             case "send_to":
                 # TODO: This cast might not be necessary.
                 to_perspective = cast(Perspective, result.action_data)
@@ -121,6 +125,10 @@ class DataExplorerTree(QTreeWidget):
         if len(errors):
             box = DataExplorerErrorMessage(self, errors)
             box.show()
+
+    def showViewData(self):
+        viewer = DataViewer(self.currentTrackkedDatum)
+        viewer.exec()
 
     @property
     def currentTrackedDatum(self) -> TrackedData | None:
