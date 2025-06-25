@@ -12,14 +12,13 @@ from PySide6.QtWidgets import (
 )
 from sasdata.temp_xml_reader import load_data as load_xml_data
 from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
-from sasdata.temp_ascii_reader import load_data as load_ascii_data
+from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_data
 
 from sas.data_explorer_tree import DataExplorerTree
 from sas.dummy_perspective import DummyPerspective
 from sas.refactored import Perspective
 from sas.data_manager import NewDataManager as DataManager
 from src.sas.data_explorer_error_message import DataExplorerErrorMessage
-from ascii_dialog.dialog import AsciiDialog
 
 # TODO: Eventually, the values (should) never be None.
 # FIXME: Linter is complaining about DummyPew
@@ -142,12 +141,7 @@ class NewDataExplorer(QWidget):
             case "h5":
                 loaded_data = load_hdf5_data(filename)
             case "txt":
-                dialog = AsciiDialog()
-                status = dialog.exec()
-                if status != 1:
-                    # User closed the dialog without accepting the data.
-                    return
-                loaded_data = load_ascii_data(dialog.params)
+                loaded_data = load_ascii_data(filename)
             case _:
                 QMessageBox.critical(
                     self,
