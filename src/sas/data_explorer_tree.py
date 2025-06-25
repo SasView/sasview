@@ -128,7 +128,7 @@ class DataExplorerTree(QTreeWidget):
             box.show()
 
     def showViewData(self):
-        viewer = DataViewer(self.currentTrackkedDatum)
+        viewer = DataViewer(self.currentTrackedDatum)
         viewer.exec()
 
     @property
