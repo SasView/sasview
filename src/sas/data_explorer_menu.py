@@ -11,7 +11,7 @@ from dataclasses import dataclass
 # should not be None?
 @dataclass
 class DataExplorerMenuAction:
-    action: Literal["remove", "send_to"]
+    action: Literal["remove", "send_to", "view_data"]
     action_data: Perspective | None = None
 
 
@@ -22,6 +22,9 @@ class DataExplorerMenu(QMenu):
         remove_data = QAction("Remove", parent)
         # remove_data.setData('remove')
         remove_data.setData(DataExplorerMenuAction("remove"))
+
+        view_data = QAction("View Data", parent)
+        view_data.setData(DataExplorerMenuAction("view_data"))
         # TODO: There will be loads more
 
         if send_to:
