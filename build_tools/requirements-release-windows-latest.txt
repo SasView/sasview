@@ -14,7 +14,7 @@ babel==2.17.0
 beautifulsoup4==4.13.4
 BTrees==6.1
 build==1.2.2.post1
-bumps>=1.0.0a1
+bumps==1.0.1
 certifi==2025.4.26
 cffi==1.17.1
 Chameleon==4.6.0
