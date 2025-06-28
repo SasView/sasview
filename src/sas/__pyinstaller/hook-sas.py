@@ -23,7 +23,6 @@ try:
         # are looking for the same resource in different places
         ('sas/qtgui/images', 'images'),
         ('sas/qtgui/images', "sas/qtgui/images"),
-        ('sas/sasview/media', 'media'),
         ('sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib'),
         ('sas/qtgui/Utilities/Reports/report_style.css', 'sas/qtgui/Utilities/Reports'),
         ('sas/qtgui/Perspectives/Fitting/plugin_models', 'plugin_models'),
