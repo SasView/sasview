@@ -28,17 +28,23 @@ from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
 
 # Local SasView
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.sascalc.shape2sas.Shape2SAS import (
-    ModelProfile,
-    ModelSystem,
-    Qsampling,
-    SimulateScattering,
-    SimulationParameters,
-    TheoreticalScatteringCalculation,
-    getPointDistribution,
-    getSimulatedScattering,
-    getTheoreticalScattering,
-)
+from sas.qtgui.Perspectives.perspective import Perspective
+from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
+from sas.qtgui.Plotting.PlotterData import Data1D
+
+from sas.qtgui.Calculators.Shape2SAS.UI.DesignWindowUI import Ui_Shape2SAS
+from sas.qtgui.Calculators.Shape2SAS.ViewerModel import ViewerModel
+from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
+from sas.qtgui.Calculators.Shape2SAS.Tables.subunitTable import SubunitTable, OptionLayout
+from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints, logger
+from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import Canvas
+
+from sas.sascalc.shape2sas.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering,
+                                                                     ModelProfile, ModelSystem, SimulationParameters, 
+                                                                     Qsampling, TheoreticalScatteringCalculation, 
+                                                                     SimulateScattering)
+from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
+from sas.sascalc.shape2sas.PluginGenerator import generate_plugin
 
 
 class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
@@ -641,7 +647,14 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
-        model_str, full_path = generatePlugin(modelProfile, [importStatement, parameters, translation], fitPar, Npoints, prPoints, modelName)
+        model_str, full_path = generate_plugin(
+            modelProfile, 
+            [importStatement, parameters, translation], 
+            fitPar, 
+            Npoints, 
+            prPoints, 
+            modelName
+        )
 
         #Write file to plugin model folder
         TabbedModelEditor.writeFile(full_path, model_str)
