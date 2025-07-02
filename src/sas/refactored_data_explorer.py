@@ -19,6 +19,7 @@ from sas.data_explorer_tree import DataExplorerTree
 from sas.dummy_perspective import DummyPerspective
 from sas.refactored import Perspective
 from sas.data_manager import NewDataManager as DataManager
+from ascii_dialog.dialog import AsciiDialog
 from src.sas.data_explorer_error_message import DataExplorerErrorMessage
 
 # TODO: Eventually, the values (should) never be None.
@@ -156,3 +157,9 @@ class NewDataExplorer(QWidget):
 
         for _, datum in loaded_data.items():
             self._data_manager.add_data(datum)
+
+    @Slot()
+    def onAdvancedLoad(self):
+        dialog = AsciiDialog()
+        dialog.exec()
+        # TODO: Actually do something with this return.

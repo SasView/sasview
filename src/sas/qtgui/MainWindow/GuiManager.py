@@ -811,6 +811,7 @@ class GuiManager:
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
+        self._workspace.actionAdvanced_Load.triggered.connect(self.actionAdvancedLoad)
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
         self._workspace.actionOpen_Project.triggered.connect(self.actionOpen_Project)
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
@@ -907,6 +908,9 @@ class GuiManager:
         Menu File/Load Data File(s)
         """
         self.filesWidget.loadFile()
+
+    def actionAdvancedLoad(self):
+        self.filesWidget.onAdvancedLoad()
 
 
     def actionLoad_Data_Folder(self):
