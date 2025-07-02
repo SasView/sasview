@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 from sasdata.temp_xml_reader import load_data as load_xml_data
 from sasdata.temp_hdf5_reader import load_data as load_hdf5_data
 from sasdata.temp_ascii_reader import load_data_default_params as load_ascii_data
+from sasdata.temp_ascii_reader import load_data as load_advanced_ascii_data
 from os.path import basename
 
 from sas.data_explorer_tree import DataExplorerTree
@@ -161,5 +162,8 @@ class NewDataExplorer(QWidget):
     @Slot()
     def onAdvancedLoad(self):
         dialog = AsciiDialog()
-        dialog.exec()
-        # TODO: Actually do something with this return.
+        status = dialog.exec()
+        if status == 1:
+            loaded = load_advanced_ascii_data(dialog.params)
+            for datum in loaded:
+                self._data_manager.add_data(datum)
