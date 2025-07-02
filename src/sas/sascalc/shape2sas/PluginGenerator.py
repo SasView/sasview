@@ -1,29 +1,24 @@
-#Global
-from pathlib import Path
 import textwrap
+from pathlib import Path
+import logging
 
-#Global SasView
 from sas.sascalc.fit import models
-
-#Local Perspectives
 from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
 
-
-
-def generatePlugin(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
-                   Npoints: int, pr_points: int, file_name: str) -> (str, Path):
+def generate_plugin(prof: ModelProfile, constrainParameters: (str), fitPar: list[str],
+                   Npoints: int, pr_points: int, file_name: str) -> tuple[str, Path]:
     """Generates a theoretical scattering plugin model"""
 
     plugin_location = Path(models.find_plugins_dir())
-    full_path = plugin_location / file_name
-    full_path = full_path.with_suffix('.py')
+    full_path = plugin_location.joinpath(file_name).with_suffix('.py')
+    logging.info(f"Plugin model will be saved to: {full_path}")
 
-    model_str = generateModel(prof, constrainParameters, fitPar, Npoints, pr_points, file_name)
+    model_str = generate_model(prof, constrainParameters, fitPar, Npoints, pr_points, file_name)
 
     return model_str, full_path
     
 
-def parListFormat(par: [[str | float]]) -> str:
+def format_parameter_list(par: list[list[str | float]]) -> str:
     """
     Format a list of parameters to the model string. In this case the list
     is on element for each shape. For a single shape there will be only
@@ -32,7 +27,7 @@ def parListFormat(par: [[str | float]]) -> str:
     return f"[{', '.join(str(x) for x in par)}]"
 
 
-def parListsFormat(par: [str | float]) -> str:
+def format_parameter_list_of_list(par: list[str | float]) -> str:
     """
     Format a list of list containing parameters to the model string. This
     is used for single shape parameter lists like the center of mass of the
@@ -43,7 +38,7 @@ def parListsFormat(par: [str | float]) -> str:
     return f"[[{'],['.join(sub_pars_join)}]]"
 
 
-def generateModel(prof: ModelProfile, constrainParameters: (str), fitPar: [str],
+def generate_model(prof: ModelProfile, constrainParameters: (str), fitPar: list[str],
                   Npoints: int, pr_points: int, model_name: str) -> str:
     """Generates a theoretical model"""
     importStatement, parameters, translation = constrainParameters
@@ -89,31 +84,35 @@ def Iq({', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
 
 {textwrap.indent(translation, '    ')}
-    
-    modelProfile = ModelProfile(subunits={prof.subunits}, 
-                                    p_s={parListFormat(prof.p_s)}, 
-                                    dimensions={parListsFormat(prof.dimensions)}, 
-                                    com={parListsFormat(prof.com)}, 
-                                    rotation_points={parListsFormat(prof.rotation_points)}, 
-                                    rotation={parListsFormat(prof.rotation)}, 
-                                    exclude_overlap={prof.exclude_overlap})
-    
+
+    modelProfile = ModelProfile(
+        subunits={prof.subunits}, 
+        p_s={format_parameter_list(prof.p_s)}, 
+        dimensions={format_parameter_list_of_list(prof.dimensions)}, 
+        com={format_parameter_list_of_list(prof.com)}, 
+        rotation_points={format_parameter_list_of_list(prof.rotation_points)}, 
+        rotation={format_parameter_list_of_list(prof.rotation)}, 
+        exclude_overlap={prof.exclude_overlap}
+    )
+
     simPar = SimulationParameters(q=q, prpoints={pr_points}, Npoints={Npoints}, model_name="{model_name.replace('.py', '')}")
     dist = getPointDistribution(modelProfile, {Npoints})
 
-    scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=dist, 
-                                                                        Stype="None", par=[], 
-                                                                        polydispersity=0.0, conc=1, 
-                                                                        sigma_r=0.0), 
-                                                                        Calculation=simPar)
+    scattering = TheoreticalScatteringCalculation(
+        System=ModelSystem(
+            PointDistribution=dist, 
+            Stype="None", par=[], 
+            polydispersity=0.0, conc=1, 
+            sigma_r=0.0
+        ), 
+        Calculation=simPar
+    )
     theoreticalScattering = getTheoreticalScattering(scattering)
 
     return theoreticalScattering.I
 
 Iq.vectorized = True
 
-''').lstrip().rstrip()
+''')
     
     return model_str
-
-

@@ -25,7 +25,7 @@ from sas.sascalc.shape2sas.Shape2SAS import (getTheoreticalScattering, getPointD
                                                                      Qsampling, TheoreticalScatteringCalculation, 
                                                                      SimulateScattering)
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
-from sas.qtgui.Calculators.Shape2SAS.genPlugin import generatePlugin
+from sas.sascalc.shape2sas.PluginGenerator import generate_plugin
 
 
 class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
@@ -628,7 +628,14 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
-        model_str, full_path = generatePlugin(modelProfile, [importStatement, parameters, translation], fitPar, Npoints, prPoints, modelName)
+        model_str, full_path = generate_plugin(
+            modelProfile, 
+            [importStatement, parameters, translation], 
+            fitPar, 
+            Npoints, 
+            prPoints, 
+            modelName
+        )
 
         #Write file to plugin model folder
         TabbedModelEditor.writeFile(full_path, model_str)
