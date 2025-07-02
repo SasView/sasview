@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -32,6 +32,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionLoadData"/>
+    <addaction name="actionAdvanced_Load"/>
     <addaction name="actionLoad_Data_Folder"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Project"/>
@@ -684,6 +685,11 @@
   <action name="actionDev_Tools">
    <property name="text">
     <string>Dev Tools</string>
+   </property>
+  </action>
+  <action name="actionAdvanced_Load">
+   <property name="text">
+    <string>Advanced Load</string>
    </property>
   </action>
  </widget>
