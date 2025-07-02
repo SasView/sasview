@@ -47,6 +47,7 @@ class Constraints(QWidget, Ui_Constraints):
         self.createPlugin.setMaximumSize(110, 24)
         self.createPlugin.setToolTip("Create and send the plugin model to the Plugin Models Category in Fit panel")
         self.createPlugin.setEnabled(False)
+        self.variableTable.on_item_changed_callback = lambda _: self.createPlugin.setEnabled(True)
 
         self.buttonOptions.horizontalLayout_5.insertWidget(1, self.createPlugin)
         self.buttonOptions.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
@@ -97,8 +98,8 @@ translation = """
             #send to log
             logger.error(traceback_to_show)
 
-    def getConstraints(self, constraintsStr: str, fitPar: [str], modelPars: [str], modelVals: [[float]],
-                       checkedPars: [str]) -> ([str], str, str, [[bool]]):
+    def getConstraints(self, constraintsStr: str, fitPar: list[str], modelPars: list[str], modelVals: list[list[float]],
+                       checkedPars: list[str]) -> tuple[list[str], str, str, list[list[bool]]]:
         """Read inputs from text editor"""
 
         self.checkPythonSyntax(constraintsStr)
@@ -115,7 +116,7 @@ translation = """
         return importStatement, parameters, translation, checkedPars
 
     @staticmethod
-    def getPosition(item: VAL_TYPE, itemLists: [[VAL_TYPE]]) -> (int, int):
+    def getPosition(item: VAL_TYPE, itemLists: list[list[VAL_TYPE]]) -> tuple[int, int]:
         """Find position of an item in lists"""
 
         for i, sublist in enumerate(itemLists):
@@ -123,7 +124,7 @@ translation = """
                 return i, sublist.index(item)
 
     @staticmethod
-    def removeFromList(listItems: [VAL_TYPE], listToCompare: [VAL_TYPE]):
+    def removeFromList(listItems: list[VAL_TYPE], listToCompare: list[VAL_TYPE]):
         """Remove items from a list if in another list"""
 
         finalpars = []
@@ -135,7 +136,7 @@ translation = """
         # Explicilty modify list sent to the method
         listItems = finalpars
 
-    def ifParameterExists(self, lineNames: [str], modelPars: [[str]]) -> bool:
+    def ifParameterExists(self, lineNames: list[str], modelPars: list[list[str]]) -> bool:
         """Check if parameter exists in model parameters"""
 
         for par in lineNames:
@@ -145,8 +146,8 @@ translation = """
 
         return False
 
-    def getTranslation(self, constraintsStr: str, importStatement: [str], modelPars: [[str]], modelVals: [[float]],
-                       checkedPars: [[str]]) -> (str, [[bool]]):
+    def getTranslation(self, constraintsStr: str, importStatement: list[str], modelPars: list[list[str]], 
+                       modelVals: list[list[float]], checkedPars: list[list[str]]) -> tuple[str, list[list[bool]]]:
         """Get translation from constraints"""
 
         #see if translation is in constraints
@@ -239,7 +240,7 @@ translation = """
 
         logger.warn(f"No {targetName} variable found in constraints")
 
-    def getParameters(self, constraintsStr: str, fitPar: [str]) -> str:
+    def getParameters(self, constraintsStr: str, fitPar: list[str]) -> str:
         """Get parameters from constraints"""
 
         #Is anything in parameters?
@@ -260,7 +261,7 @@ translation = """
 
         return parameters_str
 
-    def isImportFromStatement(self, node: ast.ImportFrom) -> [str]:
+    def isImportFromStatement(self, node: ast.ImportFrom) -> list[str]:
         """Return list of ImportFrom statements"""
 
         #Check if library exists
@@ -281,7 +282,7 @@ translation = """
         
         return [f"from {node.module} import {', '.join(imports)}"]
 
-    def isImportStatement(self, node: ast.Import) -> [str]:
+    def isImportStatement(self, node: ast.Import) -> list[str]:
         """Return list of Import statements"""
 
         imports = []
@@ -297,7 +298,7 @@ translation = """
 
         return [f"import {', '.join(imports)}"]
 
-    def getImportStatements(self, text: str) -> [str]:
+    def getImportStatements(self, text: str) -> list[str]:
         """return all import statements that were 
         written in the text editor"""
 
