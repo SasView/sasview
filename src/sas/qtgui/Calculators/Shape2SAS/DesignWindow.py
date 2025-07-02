@@ -639,11 +639,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #get chosen fit parameters
         fitPar = self.getFitParameters()
 
-        logger.info("Retrieving and verifying constraints. . .")
+        logger.info("Retrieving and verifying constraints.")
         #get parameters constraints
         importStatement, parameters, translation, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
-        logger.info("Retrieving Model. . .")
+        logger.info("Retrieving Model.")
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
@@ -660,6 +660,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         TabbedModelEditor.writeFile(full_path, model_str)
         self.communicator.customModelDirectoryChanged.emit()
         logger.info(f"Successfully generated model {modelName}!")
+        self.constraint.createPlugin.setEnabled(False)
 
     def onCheckingInput(self, input: str, default: str) -> str:
         """Check if the input not None. Otherwise, return default value"""
