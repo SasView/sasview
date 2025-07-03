@@ -17,3 +17,6 @@ class DataViewer(QDialog):
         self.dataTable = QTableWidget()  # TODO: Fill.
 
         self.layout.addWidget(self.nameLabel, 0, 0, 1, 1)
+        self.layout.addWidget(self.viewMetadataButton, 0, 1, 1, 1)
+        self.layout.addWidget(self.dataTypeLabel, 1, 0, 1, 1)
+        self.layout.addWidget(self.dataTable, 2, 0, 1, 1)
