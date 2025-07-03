@@ -12,7 +12,7 @@ class DataViewer(QDialog):
         self.nameLabel = QLabel(f"Name: {self.to_view.name}")
         self.viewMetadataButton = QPushButton("View Metadata")
         self.dataTypeLabel = QLabel(
-            f"Type: {self.to_view.dataset_type}"
+            f"Type: {self.to_view.dataset_type.name}"
         )  # TODO: Probably a better way of printing this
         self.dataTable = QTableWidget()  # TODO: Fill.
 
