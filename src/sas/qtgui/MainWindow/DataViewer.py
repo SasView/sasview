@@ -15,8 +15,11 @@ class DataViewer(QDialog):
             f"Type: {self.to_view.dataset_type.name}"
         )  # TODO: Probably a better way of printing this
         self.dataTable = QTableWidget()  # TODO: Fill.
+        self.closeButton = QPushButton("Close")
+        self.closeButton.clicked.connect(self.close)
 
         self.layout.addWidget(self.nameLabel, 0, 0, 1, 1)
         self.layout.addWidget(self.viewMetadataButton, 0, 1, 1, 1)
         self.layout.addWidget(self.dataTypeLabel, 1, 0, 1, 1)
         self.layout.addWidget(self.dataTable, 2, 0, 1, 2)
+        self.layout.addWidget(self.closeButton, 3, 0, 1, 2)
