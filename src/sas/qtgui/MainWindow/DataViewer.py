@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QDialog, QLabel, QGridLayout
+from PySide6.QtWidgets import QDialog, QGridLayout, QLabel, QPushButton, QTableWidget
+
 from sasdata.data import SasData
 
 
@@ -9,4 +10,10 @@ class DataViewer(QDialog):
         self.layout = QGridLayout(self)
 
         self.nameLabel = QLabel(f"Name: {self.to_view.name}")
+        self.viewMetadataButton = QPushButton("View Metadata")
+        self.dataTypeLabel = QLabel(
+            f"Type: {self.to_view.dataset_type}"
+        )  # TODO: Probably a better way of printing this
+        self.dataTable = QTableWidget()  # TODO: Fill.
+
         self.layout.addWidget(self.nameLabel, 0, 0, 1, 1)
