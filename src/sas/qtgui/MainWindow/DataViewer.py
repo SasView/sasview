@@ -31,7 +31,12 @@ class DataViewer(QDialog):
         self.layout.addWidget(self.closeButton, 3, 0, 1, 2)
 
     def buildTable(self):
-        self.dataTable.setHorizontalHeaderLabels(self.to_view._data_contents.keys())
+        columns = self.to_view._data_contents.keys()
+        self.dataTable.setColumnCount(len(columns))
+        # NOTE: Assumes each column has the same amount of rows, which should be
+        # the case, although perhaps we should validate this.
+        self.dataTable.setRowCount(len(self.to_view._data_contents.values()[0].value))
+        self.dataTable.setHorizontalHeaderLabels(columns)
         for i, data in enumerate(self.to_view._data_contents.values()):
             for j, datum in enumerate(data.value):
                 self.dataTable.setItem(j, i, QTableWidgetItem(datum))
