@@ -31,6 +31,8 @@ class DataViewer(QDialog):
         self.layout.addWidget(self.closeButton, 3, 0, 1, 2)
 
     def buildTable(self):
+        # Make the table readonly
+        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         columns = self.to_view._data_contents.keys()
         self.dataTable.setColumnCount(len(columns))
         # NOTE: Assumes each column has the same amount of rows, which should be
