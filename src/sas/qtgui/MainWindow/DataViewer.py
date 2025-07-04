@@ -35,7 +35,9 @@ class DataViewer(QDialog):
         self.dataTable.setColumnCount(len(columns))
         # NOTE: Assumes each column has the same amount of rows, which should be
         # the case, although perhaps we should validate this.
-        self.dataTable.setRowCount(len(self.to_view._data_contents.values()[0].value))
+        self.dataTable.setRowCount(
+            len(next(iter(self.to_view._data_contents.values())).value)
+        )
         self.dataTable.setHorizontalHeaderLabels(columns)
         for i, data in enumerate(self.to_view._data_contents.values()):
             for j, datum in enumerate(data.value):
