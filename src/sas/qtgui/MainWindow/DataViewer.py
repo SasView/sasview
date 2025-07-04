@@ -1,4 +1,9 @@
-from PySide6.QtWidgets import QDialog, QGridLayout, QLabel, QPushButton, QTableWidget
+from PySide6.QtWidgets import (
+    QDialog, QGridLayout, QLabel,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+)
 
 from sasdata.data import SasData
 
@@ -14,7 +19,8 @@ class DataViewer(QDialog):
         self.dataTypeLabel = QLabel(
             f"Type: {self.to_view.dataset_type.name}"
         )  # TODO: Probably a better way of printing this
-        self.dataTable = QTableWidget()  # TODO: Fill.
+        self.dataTable = QTableWidget()
+        self.buildTable()
         self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.close)
 
@@ -23,3 +29,24 @@ class DataViewer(QDialog):
         self.layout.addWidget(self.dataTypeLabel, 1, 0, 1, 1)
         self.layout.addWidget(self.dataTable, 2, 0, 1, 2)
         self.layout.addWidget(self.closeButton, 3, 0, 1, 2)
+
+    def buildTable(self):
+        self.dataTable.setHorizontalHeaderLabels(self.to_view._data_contents.keys())
+        for i, data in enumerate(self.to_view._data_contents.values()):
+            for j, datum in enumerate(data):
+                self.dataTable.setItem(j, i, QTableWidgetItem(datum))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
