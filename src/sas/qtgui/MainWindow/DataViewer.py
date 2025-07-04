@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
 )
 from sasdata.data import SasData
+from sas.qtgui.MainWindow.MetadataExplorer import MetadataExplorer
 
 
 class DataViewer(QDialog):
@@ -19,6 +20,7 @@ class DataViewer(QDialog):
 
         self.nameLabel = QLabel(f"Name: {self.to_view.name}")
         self.viewMetadataButton = QPushButton("View Metadata")
+        self.viewMetadataButton.clicked.connect(self.openMetadataExplorer)
         self.dataTypeLabel = QLabel(
             f"Type: {self.to_view.dataset_type.name}"
         )  # TODO: Probably a better way of printing this
@@ -50,3 +52,7 @@ class DataViewer(QDialog):
         for i, data in enumerate(self.to_view._data_contents.values()):
             for j, datum in enumerate(data.value):
                 self.dataTable.setItem(j, i, QTableWidgetItem(str(datum)))
+
+    def openMetadataExplorer(self):
+        explorer = MetadataExplorer(self.to_view.metadata, self.to_view.name)
+        explorer.exec()
