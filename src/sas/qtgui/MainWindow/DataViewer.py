@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
+    QAbstractScrollArea,
 )
 
 from sasdata.data import SasData
@@ -33,6 +34,10 @@ class DataViewer(QDialog):
     def buildTable(self):
         # Make the table readonly
         self.dataTable.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        # The table's width will always resize to fit the amount of space it has.
+        self.dataTable.setSizeAdjustPolicy(
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
+        )
         columns = self.to_view._data_contents.keys()
         self.dataTable.setColumnCount(len(columns))
         # NOTE: Assumes each column has the same amount of rows, which should be
