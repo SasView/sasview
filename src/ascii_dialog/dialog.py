@@ -1,3 +1,4 @@
+
 from os import path
 
 from PySide6.QtCore import QModelIndex, QPoint, Slot
@@ -83,6 +84,9 @@ class AsciiDialog(QDialog):
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
         for name in dataset_types:
+            # TODO: Temporarily exclude SESANS until that's been fixed.
+            if name == 'SESANS':
+                continue
             self.dataset_combobox.addItem(name)
         self.dataset_layout.addWidget(self.dataset_label)
         self.dataset_layout.addWidget(self.dataset_combobox)
