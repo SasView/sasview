@@ -43,4 +43,4 @@ class DataViewer(QDialog):
         self.dataTable.setHorizontalHeaderLabels(columns)
         for i, data in enumerate(self.to_view._data_contents.values()):
             for j, datum in enumerate(data.value):
-                self.dataTable.setItem(j, i, QTableWidgetItem(datum))
+                self.dataTable.setItem(j, i, QTableWidgetItem(str(datum)))
