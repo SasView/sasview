@@ -42,4 +42,4 @@ def evaluate_saxs_debye(q, I, Ierr, coords, atom_names, residue_names, elements)
     if (status.value == 0):
         return np.array(I_out)
 
-    logging.warning(f"AUSAXS: External library evaluation terminated unexpectedly (error code \"{status.value}\"). Using default Debye implementation instead.")
+    logging.warning(f"AUSAXS: \"fit_saxs\" terminated unexpectedly (error code \"{status.value}\"). Using default Debye implementation instead.")

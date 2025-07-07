@@ -76,7 +76,7 @@ class AUSAXSLIB:
                 ]
                 self.functions.evaluate_sans_debye.restype = None # returns void
 
-                # evaluate_saxs_debye
+                # fit_saxs
                 self.functions.fit_saxs.argtypes = [
                     ct.POINTER(ct.c_double), # data q vector
                     ct.POINTER(ct.c_double), # data I vector
@@ -94,6 +94,39 @@ class AUSAXSLIB:
                 ]
                 self.functions.fit_saxs.restype = None # returns void
 
+                # iterative_fit_start
+                self.functions.iterative_fit_start.argtypes = [
+                    ct.POINTER(ct.c_double), # data q vector
+                    ct.POINTER(ct.c_double), # data I vector
+                    ct.POINTER(ct.c_double), # data Ierr vector
+                    ct.c_int,                # n_data (number of points in q, I, Ierr)
+                    ct.POINTER(ct.c_double), # pdb x vector
+                    ct.POINTER(ct.c_double), # pdb y vector
+                    ct.POINTER(ct.c_double), # pdb z vector
+                    ct.POINTER(ct.c_char_p), # pdb atom names
+                    ct.POINTER(ct.c_char_p), # pdb residue names
+                    ct.POINTER(ct.c_char_p), # pdb elements
+                    ct.c_int,                # n_pdb (number of atoms)
+                    ct.POINTER(ct.c_int)     # return status (0 = success)
+                ]
+                self.functions.fit_saxs.restype = None # returns void
+
+                # iterative_fit_step
+                self.functions.iterative_fit_step.argtypes = [
+                    ct.POINTER(ct.c_double), # parameters vector
+                    ct.POINTER(ct.c_double), # return I vector for return value
+                    ct.c_int,                # return status (0 = success)
+                ]
+                self.functions.iterative_fit_step.restype = None # returns void
+
+                # iterative_fit_end
+                self.functions.iterative_fit_end.argtypes = [
+                    ct.POINTER(ct.c_double), # parameters vector
+                    ct.POINTER(ct.c_double), # return I vector for return value
+                    ct.c_int,                # return status (0 = success)
+                ]
+                self.functions.iterative_fit_end.restype = None # returns void
+
                 self.state = self.STATE.READY
 
             except Exception as e:
@@ -104,7 +137,7 @@ class AUSAXSLIB:
     def _test_integration(self):
         '''
             Test the integration of the AUSAXS library by running a simple test function in a separate process. 
-            This protects the main thread from potential segfaults.
+            This protects the main thread from potential segfaults due to e.g. incompatible architectures. 
         '''
         if (self.state != self.STATE.READY):
             return

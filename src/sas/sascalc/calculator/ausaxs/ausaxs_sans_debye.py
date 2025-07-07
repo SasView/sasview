@@ -27,6 +27,6 @@ def evaluate_sans_debye(q, coords, w):
         if (status.value == 0):
             return np.array(Iq)
 
-        logging.warning(f"AUSAXS: External library evaluation terminated unexpectedly (error code \"{status.value}\"). Using default Debye implementation instead.")
+        logging.warning(f"AUSAXS: \"evaluate_sans_debye\" terminated unexpectedly (error code \"{status.value}\"). Using default Debye implementation instead.")
 
     return sasview_sans_debye(q, coords, w)
