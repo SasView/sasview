@@ -76,7 +76,9 @@ def SplashScreen():
 def get_highdpi_scaling():
     return 1.0
 
+mainwindow = None
 def run_sasview():
+    global mainwindow
 
     # Check for updates
     maybe_prompt_new_version_download()

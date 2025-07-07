@@ -14,6 +14,7 @@ import logging
 import numpy as np
 from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
+from enum import Enum
 
 if sys.version_info[0] < 3:
     def decode(s):
@@ -55,6 +56,12 @@ def transform_center(pos_x, pos_y, pos_z):
     posz = pos_z - (min(pos_z) + max(pos_z)) / 2.0
     return posx, posy, posz
 
+class ComputationType(Enum):
+    SANS_2D = 0,
+    SANS_1D = 1,
+    SANS_1D_BETA = 2,
+    SAXS = 3
+
 class GenSAS(object):
     """
     Generic SAS computation Model based on sld (n & m) arrays
@@ -77,6 +84,7 @@ class GenSAS(object):
         self.data_vol = None # [A^3]
         self.is_avg = False
         self.is_elements = False
+        self.type = ComputationType.SANS_2D
         ## Name of the model
         self.name = "GenSAS"
         ## Define parameters
@@ -107,6 +115,12 @@ class GenSAS(object):
         self.details['Up_phi'] = ['[deg]', -180, 180]
         # fixed parameters
         self.fixed = []
+
+    def set_calculation_type(self, computation_type : ComputationType):
+        """
+        Set the computation type. This will determine which calculation is performed.
+        """
+        self.type = computation_type
 
     def set_pixel_volumes(self, volume):
         """
@@ -169,7 +183,7 @@ class GenSAS(object):
         s_phi = np.degrees(np.arctan2(p_hat[1], p_hat[0]))
         self.transformed_angles = (s_theta, s_phi)
         return self.transformed_angles
-
+    
     def calculate_Iq(self, qx, qy=None):
         """
         Evaluate the function
@@ -182,33 +196,52 @@ class GenSAS(object):
         x, y, z = self.transform_positions()
         sld = self.data_sldn - self.params['solvent_SLD']
         vol = self.data_vol
-        if qy is not None and len(qy) > 0:
-            # 2-D calculation
-            qx, qy = _vec(qx), _vec(qy)
-            # MagSLD can have sld_m = None, although in practice usually a zero array
-            # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
-            mx, my, mz = self.transform_magnetic_slds()
-            in_spin = self.params['Up_frac_in']
-            out_spin = self.params['Up_frac_out']
-            # transform angles from environment to beamline coords
-            s_theta, s_phi = self.transform_angles()
 
-            if self.is_elements:
-                I_out = Iqxy(
-                    qx, qy, x, y, z, sld, vol, mx, my, mz,
-                    in_spin, out_spin, s_theta, s_phi,
-                    self.data_elements, self.is_elements)
-            else:
-                I_out = Iqxy(
-                    qx, qy, x, y, z, sld, vol, mx, my, mz,
-                    in_spin, out_spin, s_theta, s_phi,
-                    )
-        else:
-            # 1-D calculation
-            q = _vec(qx)
-            if self.is_avg:
-                x, y, z = transform_center(x, y, z)
-            I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+        match self.type:
+            case ComputationType.SANS_2D:
+                if qy is None or len(qy) > 0:
+                    raise ValueError("Two-dimensional q-data must be used with the 2D SANS calculator.")
+
+                # 2-D calculation
+                qx, qy = _vec(qx), _vec(qy)
+                # MagSLD can have sld_m = None, although in practice usually a zero array
+                # if all are None can continue as normal, otherwise set None to array of zeroes to allow rotations
+                mx, my, mz = self.transform_magnetic_slds()
+                in_spin = self.params['Up_frac_in']
+                out_spin = self.params['Up_frac_out']
+                # transform angles from environment to beamline coords
+                s_theta, s_phi = self.transform_angles()
+
+                if self.is_elements:
+                    I_out = Iqxy(
+                        qx, qy, x, y, z, sld, vol, mx, my, mz,
+                        in_spin, out_spin, s_theta, s_phi,
+                        self.data_elements, self.is_elements)
+                else:
+                    I_out = Iqxy(
+                        qx, qy, x, y, z, sld, vol, mx, my, mz,
+                        in_spin, out_spin, s_theta, s_phi,
+                        )
+
+            case ComputationType.SANS_1D | ComputationType.SANS_1D_BETA:
+                q = _vec(qx)
+                if self.is_avg:
+                    x, y, z = transform_center(x, y, z)
+
+                I_out = Iq(q, x, y, z, sld, vol, is_avg=self.is_avg)
+
+            case ComputationType.SAXS:
+                data = np.loadtxt("test/sascalculator/data/saxs_test_files/1ubq.dat")
+                qd   = data[:, 0].astype(np.float64)
+                I    = data[:, 1].astype(np.float64)
+                Ierr = data[:, 2].astype(np.float64)
+
+                from sas.sascalc.calculator.ausaxs.ausaxs_saxs_debye import evaluate_saxs_debye
+                I_out = evaluate_saxs_debye(qd, I, Ierr, np.vstack((x, y, z)), self.sld_data.atom_names, self.sld_data.residue_names, self.sld_data.atom_elements)
+
+                # additional interpolation step; shouldn't be necessary with a better data integration
+                q = _vec(qx)
+                return np.interp(q, qd, I_out) # don't modify scale or background since it is a fit
 
         vol_correction = self.data_total_volume / self.params['total_volume']
         result = ((self.params['scale'] * vol_correction) * I_out
@@ -1183,6 +1216,9 @@ class PDBReader(object):
         pos_x = []
         pos_y = []
         pos_z = []
+        atom_names = []
+        residues = []
+        elements = []
         sld_n = []
         sld_mx = []
         sld_my = []
@@ -1200,11 +1236,14 @@ class PDBReader(object):
             input_f.close()
             num = 0
             for line in lines:
+                line.ljust(80) # ensure we can index to 80
+
                 try:
                     # check if line starts with "ATOM"
                     if line[0:6] in ('ATM   ', 'ATOM  '):
-                        # define fields of interest
+                        # 12:16 ATOM NAME
                         atom_name = line[12:16].strip()
+                        atom_names.append(atom_name)
                         try:
                             float(line[12])
                             atom_name = atom_name[1].upper()
@@ -1216,12 +1255,27 @@ class PDBReader(object):
                                         atom_name[1].lower()
                             else:
                                 atom_name = atom_name[0].upper()
+                        
+                        # 17:20 RESIDUE NAME
+                        residue = line[17:20].strip()
+                        residues.append(residue)
+
+                        # 30:38 POS X
                         _pos_x = float(line[30:38].strip())
-                        _pos_y = float(line[38:46].strip())
-                        _pos_z = float(line[46:54].strip())
                         pos_x.append(_pos_x)
+
+                        # 38:46 POS Y
+                        _pos_y = float(line[38:46].strip())
                         pos_y.append(_pos_y)
+
+                        # 46:54 POS Z
+                        _pos_z = float(line[46:54].strip())
                         pos_z.append(_pos_z)
+
+                        # 76:78 ELEMENT
+                        element = line[76:78].strip()
+                        elements.append(element)
+
                         try:
                             if atom_name in atom_value_dict:
                                 sld_n.append(atom_value_dict[atom_name][0])
@@ -1283,6 +1337,10 @@ class PDBReader(object):
             pos_y = np.reshape(pos_y, (-1, ))
             pos_z = np.reshape(pos_z, (-1, ))
 
+            atom_names = np.reshape(atom_names, (-1, ))
+            residues = np.reshape(residues, (-1, ))
+            elements = np.reshape(elements, (-1, ))
+
             n_atoms = len(pos_x)
             ordered_pairs = sorted([(a, b) for a, b in connected_pairs if a < n_atoms and b < n_atoms])  # Why *not* sort
             x_lines = [(pos_x[a], pos_x[b]) for a, b in ordered_pairs]
@@ -1298,7 +1356,10 @@ class PDBReader(object):
             vol_pix = np.reshape(vol_pix, (-1, ))
             pix_symbol = np.reshape(pix_symbol, (-1, ))
 
-            output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
+            output = MagSLD(
+                pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz, 
+                atom_names=atom_names, residue_names=residues, atom_elements=elements
+            )
             output.set_conect_lines(x_lines, y_lines, z_lines)
             output.filename = os.path.basename(path)
             output.set_pix_type('atom')
@@ -1484,20 +1545,25 @@ class MagSLD(object):
     """
     Magnetic SLD.
     """
-    pos_x = None
-    pos_y = None
-    pos_z = None
-    sld_n = None
+    pos_x =  None
+    pos_y =  None
+    pos_z =  None
+    sld_n =  None
     sld_mx = None
     sld_my = None
     sld_mz = None
+    atom_names =    None
+    residue_names = None
+    atom_elements = None
+
     # Units
     _pos_unit = 'A'
     _sld_unit = '1/A^(2)'
     _pix_type = 'pixel'
 
     def __init__(self, pos_x, pos_y, pos_z, sld_n=None,
-                 sld_mx=None, sld_my=None, sld_mz=None, vol_pix=None):
+                 sld_mx=None, sld_my=None, sld_mz=None, vol_pix=None,
+                 atom_names=None, residue_names=None, atom_elements=None):
         """
         Init for mag SLD
         :params : All should be np 1D array
@@ -1526,6 +1592,10 @@ class MagSLD(object):
         self.pos_x = np.asarray(pos_x, 'd')
         self.pos_y = np.asarray(pos_y, 'd')
         self.pos_z = np.asarray(pos_z, 'd')
+
+        self.atom_names    = atom_names
+        self.residue_names = residue_names
+        self.atom_elements = atom_elements
 
         self.sld_n = np.asarray(sld_n, 'd')
 
