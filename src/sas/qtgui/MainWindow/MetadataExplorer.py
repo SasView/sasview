@@ -20,7 +20,9 @@ def metadata_as_dict(to_convert: object):
     easier to iterate over.
 
     """
-    if isinstance(to_convert, list) and all([hasattr(item, '__dict__') for item in to_convert]):
+    if isinstance(to_convert, list) and all(
+        [hasattr(item, "__dict__") for item in to_convert]
+    ):
         converted_dicts: list[dict[str, object]] = []
         for item in to_convert:
             converted_dicts.append(item.__dict__)
