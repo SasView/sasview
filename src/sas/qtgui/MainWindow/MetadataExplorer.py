@@ -84,7 +84,10 @@ class MetadataExplorer(QDialog):
             dicts = [current_item]
         for single_dict in dicts:
             for key, value in single_dict.items():
-                if isinstance(value, dict) or (isinstance(value, list) and any([isinstance(member, dict) for member in value])):
+                if isinstance(value, dict) or (
+                    isinstance(value, list)
+                    and any([isinstance(member, dict) for member in value])
+                ):
                     dict_root = QTreeWidgetItem([key])
                     table_root.addChild(dict_root)
                     self.buildTree(dict_root, value)
