@@ -28,7 +28,7 @@ def convert_raw_to_dict(to_convert: MetaNode, converted: dict = None) -> dict:
 
 def metadata_as_dict(to_convert: object):
     converted = to_convert.__dict__
-    converted["raw"] = convert_raw_to_dict(to_convert["raw"])
+    converted["raw"] = convert_raw_to_dict(converted["raw"])
     return converted
 
 
