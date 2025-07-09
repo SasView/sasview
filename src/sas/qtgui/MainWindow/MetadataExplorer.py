@@ -19,7 +19,7 @@ def convert_raw_to_dict(to_convert: MetaNode, converted: dict = None) -> dict:
     converted[to_convert.name] = {}
     for raw_content in to_convert.contents:
         if raw_content is MetaNode:
-            to_add = convert_raw_to_dict(to_convert, converted)
+            to_add = convert_raw_to_dict(to_convert, converted[to_convert.name])
         else:
             to_add = raw_content
         converted[to_convert.name][to_add.name] = to_add
