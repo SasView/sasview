@@ -13,17 +13,15 @@ from sasdata.metadata import MetaNode, Metadata
 from sasdata.temp_xml_reader import load_data
 
 
-def convert_raw_to_dict(to_convert: MetaNode, converted: dict = None) -> dict:
-    if converted is None:
-        converted = {}
-    converted[to_convert.name] = {}
-    for raw_content in to_convert.contents:
-        if isinstance(raw_content, MetaNode):
-            to_add = convert_raw_to_dict(raw_content, converted[to_convert.name])
-        else:
-            to_add = raw_content
-        converted[to_convert.name] = to_add
-    return converted
+def convert_raw_to_dict(to_convert: MetaNode) -> dict:
+    # converted = {to_convert.name: to_convert.contents}
+    if isinstance(to_convert.contents, str):
+        return {to_convert.name: to_convert.contents}
+    value = {}
+    # We can now assume that every content is a MetaNode as per the typing.
+    for content in to_convert.contents:
+        value = value | convert_raw_to_dict(content)
+    return {to_convert.name: value}
 
 
 def metadata_as_dict(to_convert: object):
