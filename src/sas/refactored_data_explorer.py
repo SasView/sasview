@@ -146,7 +146,7 @@ class NewDataExplorer(QWidget):
                     loaded_data = load_xml_data(filename)
                 case "h5" | "hdf":
                     loaded_data = load_hdf5_data(filename)
-                case "txt":
+                case "txt" | "csv":
                     data_list = load_ascii_data(filename)
                     # Since we're only giving the load function one filename, we can
                     # assume only one data object is being loaded.
