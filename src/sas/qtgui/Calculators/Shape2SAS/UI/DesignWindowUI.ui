@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1306</width>
-    <height>638</height>
+    <height>823</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -51,6 +51,9 @@
            <layout class="QGridLayout" name="gridLayout_6">
             <item row="0" column="1">
              <spacer name="verticalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
@@ -61,6 +64,9 @@
             </item>
             <item row="4" column="1">
              <spacer name="verticalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
@@ -71,6 +77,9 @@
             </item>
             <item row="2" column="1">
              <spacer name="verticalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
@@ -387,6 +396,9 @@
             </item>
             <item row="1" column="4">
              <spacer name="horizontalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
@@ -397,6 +409,9 @@
             </item>
             <item row="1" column="0">
              <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
@@ -407,6 +422,9 @@
             </item>
             <item row="1" column="2">
              <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>40</width>
@@ -417,6 +435,9 @@
             </item>
             <item row="6" column="1">
              <spacer name="verticalSpacer_10">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
@@ -446,6 +467,9 @@
            <layout class="QGridLayout" name="gridLayout_4">
             <item row="11" column="1">
              <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
@@ -456,6 +480,9 @@
             </item>
             <item row="0" column="0">
              <spacer name="horizontalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>13</width>
@@ -532,6 +559,9 @@
             </item>
             <item row="0" column="1">
              <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
@@ -542,6 +572,9 @@
             </item>
             <item row="7" column="1">
              <spacer name="verticalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>266</width>
@@ -561,7 +594,7 @@
               <item>
                <widget class="QLabel" name="label_10">
                 <property name="text">
-                 <string>Volumen fraction</string>
+                 <string>Volume fraction</string>
                 </property>
                </widget>
               </item>
@@ -586,7 +619,7 @@
                  </size>
                 </property>
                 <property name="toolTip">
-                 <string>Volumen fraction (concentration)</string>
+                 <string>Volume fraction (concentration)</string>
                 </property>
                 <property name="text">
                  <string>0.02</string>
@@ -595,6 +628,9 @@
               </item>
               <item>
                <spacer name="horizontalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
                 <property name="sizeHint" stdset="0">
                  <size>
                   <width>0</width>
@@ -607,6 +643,9 @@
             </item>
             <item row="0" column="2">
              <spacer name="horizontalSpacer_12">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>13</width>
@@ -660,6 +699,9 @@
               </item>
               <item>
                <spacer name="horizontalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
                 <property name="sizeHint" stdset="0">
                  <size>
                   <width>0</width>
@@ -672,6 +714,9 @@
             </item>
             <item row="3" column="1">
              <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>266</width>
@@ -737,6 +782,9 @@
               </item>
               <item>
                <spacer name="horizontalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
                 <property name="sizeHint" stdset="0">
                  <size>
                   <width>0</width>
@@ -798,6 +846,9 @@
               </item>
               <item>
                <spacer name="horizontalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
                 <property name="sizeHint" stdset="0">
                  <size>
                   <width>0</width>
@@ -895,6 +946,9 @@
                  </item>
                  <item>
                   <spacer name="horizontalSpacer_3">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
                    <property name="sizeHint" stdset="0">
                     <size>
                      <width>0</width>
@@ -974,7 +1028,7 @@
                  <rect>
                   <x>0</x>
                   <y>30</y>
-                  <width>269</width>
+                  <width>274</width>
                   <height>33</height>
                  </rect>
                 </property>
@@ -1098,6 +1152,9 @@
             </item>
             <item row="9" column="1">
              <spacer name="verticalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>266</width>
@@ -1108,6 +1165,9 @@
             </item>
             <item row="5" column="1">
              <spacer name="verticalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>266</width>

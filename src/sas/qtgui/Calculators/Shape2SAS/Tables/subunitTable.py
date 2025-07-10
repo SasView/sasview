@@ -142,8 +142,8 @@ class OptionLayout(ExtendedEnum):
         """Return the hollow sphere dimensions"""
         name = {self.x: "R", self.y: "r"}
         units = {self.x: "Å", self.y: "Å"}
-        types = {self.x: "volume"}
-        bounds = {self.x: [0, inf]}
+        types = {self.x: "volume", self.y: "volume"}
+        bounds = {self.x: [0, inf], self.y: [0, inf]}
         tooltip = {self.x: "Outer radius of the hollow sphere",
                    self.y: "Inner radius of the hollow sphere"}
         defaultVal = {self.x: 50.0, self.y: 25.0}
@@ -535,6 +535,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.model.insertColumn(numcolumn, items)
         self.model.setData(self.model.index(0, numcolumn), self.subunit.currentText())
         self.setSubunitRestriction(subunitName.keys())
+        self.table.resizeColumnsToContents()
         self.setButtonSpinboxBounds()
 
 
@@ -561,6 +562,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
 
         self.deleteButton.setEnabled(numcolumn > 0)
         self.selected.setEnabled(numcolumn > 0)
+        self.selected.setMinimum(1)
         self.selected.setMaximum(numcolumn)
         
     

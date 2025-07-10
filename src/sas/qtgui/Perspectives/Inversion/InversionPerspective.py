@@ -7,21 +7,16 @@ from PySide6 import QtGui, QtCore, QtWidgets
 # sas-global
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Inversion.NewInversionWidget import NewInversionWidget
+from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
 # pr inversion GUI elements
-from .InversionUtils import WIDGETS
-from .UI.TabbedInversionUI import Ui_PrInversion
 from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 
-from sas.sascalc.pr.invertor import Invertor
 from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
-from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget, DICT_KEYS, NUMBER_OF_TERMS, REGULARIZATION
 
 
 
@@ -42,11 +37,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
     def title(self):
         return "P(r) Inversion"
 
-    @property
-    def title(self):
-        return "P(r) Inversion"
-
-
     def __init__(self, parent=None,data=None):
         super().__init__()
 
@@ -59,10 +49,11 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.parent = parent
         self.communicate = self.parent.communicate
         #self.communicate = self.parent.communicator()
+        self.communicate.dataDeletedSignal.connect(self.removeData)
         self.tabCloseRequested.connect(self.tabCloses)
 
         # List of active Pr Tabs
-        self.tabs = []
+        self.tabs: list[InversionWidget] = []
         self.setTabsClosable(True)
 
 
@@ -89,7 +80,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.batchResultsWindow = None
         self.batchResults = {}
 
-
+        self.logic = InversionLogic()
 
 
         # The tabs need to be closeable
@@ -121,9 +112,9 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         Update local bookkeeping on tab close
         """
-        # don't remove the last tab
+        # If we're removing the last tab, create a new empty tab.
         if len(self.tabs) <= 1:
-            return
+            self.addData(None)
         self.closeTabByIndex(index)
 
     def closeTabByIndex(self, index):
@@ -158,29 +149,39 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         """
         state = {}
         tab_ids = [tab.tab_id for tab in self.tabs]
+        batch_warned = False
         for index, _ in enumerate(tab_ids):
-            state.update(self.getSerializePage(index))
+            tab_state, warn_batch = self.getSerializePage(index)
+            if not batch_warned and warn_batch:
+                batch_warned = True
+                _ = QtWidgets.QMessageBox.warning(self, "Batch Serialisation", """Saving of projects with batch inversion
+tabs is currently not supported. Support will be added in a later version of SasView but please note
+that in the meantime, these tabs will be excluded from the saved project.""")
+            state.update(tab_state)
         return state
 
     def serializeCurrentPage(self):
         # serialize current (active) page
         return self.getSerializePage(self.currentIndex())
 
-    def getSerializePage(self, index=None):
+    def getSerializePage(self, index=None) -> tuple[dict, bool]:
         """
-        Serialize and return a dictionary of {data_id: inversion-state}
+        Serialize and return a dictionary of {tab_id: inversion-state}
         Return original dictionary if no data
         """
         state = {}
+        # If any tabs are batch tabs, these are not supported for serialisation so this needs to be true.
         if index is None:
             index = self.currentIndex()
         # If data on tab empty - do nothing TODO: Reinstate this check.
         tab = self.tabs[index]
-        if tab.logic.data_is_loaded:
+        if tab.currentResult.logic.data_is_loaded:
+            if tab.is_batch:
+                return {}, True
             tab_data = tab.getPage()
             data_id = tab_data.pop('data_id', '')
             state[data_id] = {'pr_params': tab_data}
-        return state
+        return state, False
 
 
     ######################################################################
@@ -250,8 +251,8 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def closeDMax(self):
-        if self.dmaxWindow is not None:
-            self.dmaxWindow.close()
+        if self.currentTab.dmaxWindow is not None:
+            self.currentTab.dmaxWindow.close()
 
     def closeBatchResults(self):
         if self.batchResultsWindow is not None:
@@ -283,7 +284,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id
         # will just make the page displayed from the top
-        self._manager.showHelp(tree_location)
+        self.parent.showHelp(tree_location)
 
 
 
@@ -374,7 +375,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
 
     @property
-    def currentTab(self): # TODO: More pythonic name
+    def currentTab(self) -> InversionWidget:
         """
         Returns the tab widget currently shown
         """
@@ -393,8 +394,15 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
 
         return tab_id
 
-
-
+    def removeData(self, data_list: list[QtGui.QStandardItem]):
+        # We need this list because we can't modify the tabs list while looping over it.
+        tabs_to_remove: list[InversionWidget] = []
+        for datum in data_list:
+            for tab in self.tabs:
+                if any([result.logic.data_item == datum for result in tab.results]):
+                    tabs_to_remove.append(tab)
+        for to_remove in tabs_to_remove:
+            self.closeTabByName(to_remove.tab_name)
 
     def addData(self, data=None, is_batch=False, tab_index=None):
 
@@ -410,7 +418,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Create tab
         # tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab_name = self.getTabName(is_batch=is_batch)
-        tab = NewInversionWidget(self.parent, data, tab_index, tab_name)
+        tab = InversionWidget(self, self.parent, data, tab_index, tab_name)
         #ObjectLibrary.addObject(tab_name, tab)
         icon = QtGui.QIcon()
         # Setting UP batch Mode for 1D data
@@ -427,8 +435,6 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         self.maxIndex = max([tab.tab_id for tab in self.tabs], default=0) + 1
         self.setCurrentWidget(tab)
 
-    # FIXME: This is not an ideal solution, and I suspect requires a whole refactor of the
-    # InversionPerspective/InversionWidget design.
     def updateFromParameters(self, params):
         inversion_widget = self.currentWidget()
         if isinstance(inversion_widget, InversionWidget):

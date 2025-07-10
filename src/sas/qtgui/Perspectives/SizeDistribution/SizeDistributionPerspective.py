@@ -38,6 +38,7 @@ POWER_LOW_Q = 4
 SCALE_LOW_Q = 1.0
 NUM_ITERATIONS = 100
 WEIGHT_FACTOR = 1.0
+WEIGHT_PERCENT = 1.0
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +172,15 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Local signals
         self.fittingFinishedSignal.connect(self.fitComplete)
 
+        # Event filters for plot background update
+        background_update_widgets = [
+            self.txtBackgd,
+            self.txtScaleLowQ,
+            self.txtPowerLowQ,
+        ]
+        for widget in background_update_widgets:
+            widget.installEventFilter(self)
+
     def setupMapper(self):
         # Set up the mapper.
         self.mapper.setOrientation(QtCore.Qt.Vertical)
@@ -205,6 +215,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         # Weighting
         self.mapper.addMapping(self.txtWgtFactor, WIDGETS.W_WEIGHT_FACTOR)
+        self.mapper.addMapping(self.txtWgtPercent, WIDGETS.W_WEIGHT_PERCENT)
 
         self.mapper.toFirst()
 
@@ -259,15 +270,15 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # Weighting
         item = QtGui.QStandardItem(str(WEIGHT_FACTOR))
         self.model.setItem(WIDGETS.W_WEIGHT_FACTOR, item)
-
-        # Connect slot
-        self.model.dataChanged.connect(self.onModelChange)
+        item = QtGui.QStandardItem(str(WEIGHT_PERCENT))
+        self.model.setItem(WIDGETS.W_WEIGHT_PERCENT, item)
 
     def setupWindow(self):
         """Initialize base window state on init"""
         self.enableButtons()
         self.txtPowerLowQ.setEnabled(False)
         self.txtScaleLowQ.setEnabled(False)
+        self.rbFixPower.setChecked(True)
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
@@ -282,6 +293,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtScaleLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtWgtFactor.setValidator(GuiUtils.DoubleValidator())
+        self.txtWgtPercent.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgdQMin.setValidator(GuiUtils.DoubleValidator())
         self.txtBackgdQMax.setValidator(GuiUtils.DoubleValidator())
 
@@ -299,15 +311,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.logic.data_is_loaded and not self.is_calculating
         )
         self.boxWeighting.setEnabled(self.logic.data_is_loaded)
-        # Weighting controls
-        if self.logic.di_flag:
-            self.rbWeighting2.setEnabled(True)
-            self.rbWeighting2.setChecked(True)
-            # self.onWeightingChoice(self.rbWeighting2)
-        else:
-            self.rbWeighting2.setEnabled(False)
-            self.rbWeighting1.setChecked(True)
-            # self.onWeightingChoice(self.rbWeighting1)
         self.cmdFitFlatBackground.setEnabled(self.logic.data_is_loaded)
         self.cmdFitPowerLaw.setEnabled(
             self.logic.data_is_loaded and self.chkLowQ.isChecked()
@@ -369,58 +372,73 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             qmin, qmax = self.logic.computeDataRange()
         self.updateQRange(qmin, qmax)
 
-    def onLowQStateChanged(self, state):
+    def onLowQStateChanged(self, state: int):
+        """
+        Slot for state change of the subtract power law checkbox
+        """
         is_checked = state == QtCore.Qt.CheckState.Checked.value
         self.txtPowerLowQ.setEnabled(is_checked)
         self.txtScaleLowQ.setEnabled(is_checked)
         self.cmdFitPowerLaw.setEnabled(is_checked)
+        if self.logic.data_is_loaded:
+            self.updateBackground()
+            self.plotData()
 
     def onFitFlatBackground(self):
         """
         Fit flat background and update plot
         """
         qmin, qmax = self.getFlatBackgroundRange()
-        constant = self.logic.fitFlatBackground(qmin, qmax)
+        fit_result = self.logic.fitBackground(power=0.0, qmin=qmin, qmax=qmax)
+        if fit_result is None:
+            return
+        constant = fit_result[0]
         self.txtBackgd.setText(f"{constant:5g}")
-        # TODO: this is needed to trigger model change and plot update,
-        # but maybe there is a better way
-        self.mapper.submit()
+        self.updateBackground()
+        self.plotData()
 
     def onFitPowerLaw(self):
         """
         Fit background power law and update plot
         """
         qmin, qmax = self.getPowerLawBackgroundRange()
-        _, _, power = self.getBackgroundParams()
-        scale = self.logic.fitBackgroundScale(power, qmin, qmax)
+        if self.rbFitPower.isChecked():
+            # if the power should be fit, pass None
+            fit_result = self.logic.fitBackground(power=None, qmin=qmin, qmax=qmax)
+            if fit_result is None:
+                return
+            scale, power_fit = fit_result
+            # by convention, the power is shown without a minus sign
+            power = -1.0 * power_fit
+            self.txtPowerLowQ.setText(f"{power:5g}")
+        else:
+            # if the power should be fixed, pass the value from the input box
+            _, _, power_fixed = self.getBackgroundParams()
+            fit_result = self.logic.fitBackground(power_fixed, qmin, qmax)
+            if fit_result is None:
+                return
+            scale = fit_result[0]
+        # update the scale
         self.txtScaleLowQ.setText(f"{scale:5g}")
-        # TODO: this is needed to trigger model change and plot update,
-        # but maybe there is a better way
-        self.mapper.submit()
+        self.updateBackground()
+        self.plotData()
 
-    def onModelChange(self, top, bottom):
+    def eventFilter(self, widget: QtCore.QObject, event: QtCore.QEvent) -> bool:
         """
-        Respond to model change by updating the plot
+        Catch enter key presses and update data plot
         """
-        # "bottom" is unused
-        # update if there's something to update
-        item_text = self.model.item(top.row()).text()
-        if not item_text:
-            return
-        # Update plot of data and background
         if not self.logic.data_is_loaded:
-            return
-        background_update_widgets = [
-            WIDGETS.W_BACKGROUND,
-            WIDGETS.W_SUBTRACT_LOW_Q,
-            WIDGETS.W_POWER_LOW_Q,
-            WIDGETS.W_SCALE_LOW_Q,
-        ]
-        if top.row() in background_update_widgets:
-            # update background data
-            self.updateBackground()
-            # update the plot(s)
-            self.plotData()
+            return False
+        if widget.text() == "":
+            return False
+        # Update plot of data and background
+        if event.type() == QtCore.QEvent.KeyPress:
+            # check for Enter press
+            if event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
+                self.updateBackground()
+                self.plotData()
+                return True
+        return False
 
     ######################################################################
     # Response Actions
@@ -434,14 +452,20 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             msg = "Incorrect type passed to the Size Distribution Perspective"
             raise AttributeError(msg)
 
-        self._model_item = data_item[0]
-        self.logic.data = GuiUtils.dataFromItem(self._model_item)
-        self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
-        self.updateBackground()
+        if self.logic.data_is_loaded:
+            # remove existing data and reset GUI
+            self.resetWindow()
 
-        if not isinstance(self.logic.data, Data1D):
+        self._model_item = data_item[0]
+        logic_data = GuiUtils.dataFromItem(self._model_item)
+
+        if not isinstance(logic_data, Data1D):
             msg = "Size Distribution cannot be computed with 2D data."
             raise ValueError(msg)
+
+        self.logic.data = logic_data
+        self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
+        self.updateBackground()
 
         try:
             name = self.logic.data.name
@@ -459,6 +483,12 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.model.item(WIDGETS.W_QMIN).setText(str(qmin))
         self.model.item(WIDGETS.W_QMAX).setText(str(qmax))
         self._path = self.logic.data.filename
+
+        # Set up default weighting controls
+        self.rbWeighting2.setEnabled(self.logic.di_flag)
+        self.rbWeighting2.setChecked(self.logic.di_flag)
+        if not self.logic.di_flag:
+            self.rbWeighting4.setChecked(True)
 
         self.enableButtons()
 
@@ -518,9 +548,19 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """Remove the existing data reference from the Size Distribution Perspective"""
         if not data_list or self._model_item not in data_list:
             return
+        self.resetWindow()
+
+    def resetWindow(self):
+        """
+        Reset the state of input widgets and data structures
+        """
         self._data = None
         self._path = ""
         self.txtName.setText("")
+        self.txtPowerLawQMin.setText("")
+        self.txtPowerLawQMax.setText("")
+        self.txtBackgdQMin.setText("")
+        self.txtBackgdQMax.setText("")
         self._model_item = None
         self.logic.data = None
         self.logic.data_fit = None
@@ -614,14 +654,14 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         """
         self.fittingFinishedSignal.emit(result)
 
-    def fittingError(self, error):
+    def fittingError(self, etype, value, traceback):
         """
         Handle error in the calculation thread
         """
         # re-enable the fit buttons
         self.is_calculating = False
         self.enableButtons()
-        logger.exception(error)
+        logging.exception("Fitting failed", exc_info=(etype, value, traceback))
 
     def fitComplete(self, result: MaxEntResult) -> None:
         """
@@ -672,7 +712,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             self.rbWeighting1: WeightType.NONE,
             self.rbWeighting2: WeightType.DI,
             self.rbWeighting3: WeightType.SQRT_I,
-            self.rbWeighting4: WeightType.I,
+            self.rbWeighting4: WeightType.PERCENT_I,
         }
         for button, weight_type in weight_type_map.items():
             if button.isChecked():
@@ -694,6 +734,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             sky_background=float(self.txtSkyBackgd.text()),
             max_iterations=int(self.txtIterations.text()),
             weight_factor=float(self.txtWgtFactor.text()),
+            weight_percent=float(self.txtWgtPercent.text()),
             weight_type=self.getWeightType(),
         )
 
@@ -751,25 +792,25 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
                 )
             else:
                 converge_msg = f"Full fit converged after on average {np.mean(result.num_iters):.1f} iterations"
+            self.lblConvergence.setStyleSheet("color: black;")
         else:
-            converge_msg = "Not converged"
+            converge_msg = "Not converged! Try increasing the weight factor."
+            self.lblConvergence.setStyleSheet("color: red; font-weight: bold;")
         self.lblConvergence.setText(converge_msg)
-        self.lblChiSq.setText(f"ChiSq: {result.chisq:.5g}")
+        self.txtChiSq.setText(f"{result.chisq:.5g}")
         stats = result.statistics
-        self.lblVolume.setText(
-            f"Volume of scatterers: {stats['volume']:.5g} +/- {stats['volume_err']:.5g}"
-        )
-        self.lblDiameterMean.setText(f"Mean diameter: {stats['mean']:.5g} \u212b")
-        self.lblDiameterMode.setText(f"Median diameter: {stats['median']:.5g} \u212b")
-        self.lblDiameterMedian.setText(f"Mode diameter: {stats['mode']:.5g} \u212b")
+        self.txtVolume.setText(f"{stats['volume']:.5g} +/- {stats['volume_err']:.5g}")
+        self.txtDiameterMean.setText(f"{stats['mean']:.5g}")
+        self.txtDiameterMedian.setText(f"{stats['median']:.5g}")
+        self.txtDiameterMode.setText(f"{stats['mode']:.5g}")
 
     def clearStatistics(self):
         """
         Clear the output box
         """
         self.lblConvergence.setText("")
-        self.lblChiSq.setText("")
-        self.lblVolume.setText("")
-        self.lblDiameterMean.setText("")
-        self.lblDiameterMode.setText("")
-        self.lblDiameterMedian.setText("")
+        self.txtChiSq.setText("")
+        self.txtVolume.setText("")
+        self.txtDiameterMean.setText("")
+        self.txtDiameterMode.setText("")
+        self.txtDiameterMedian.setText("")

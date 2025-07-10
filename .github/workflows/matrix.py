@@ -29,6 +29,7 @@ os_release_list = [
     'ubuntu-22.04',
     'windows-latest',
     'macos-latest',
+    'macos-13',
 ]
 
 # List of OS images to use for release tests
@@ -43,7 +44,7 @@ python_release_list = [
 
 # List of python versions to use for tests
 python_test_list = python_release_list + [
-    '3.10'
+    # No additional test versions - add more to this list as needed
 ]
 
 

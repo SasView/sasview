@@ -18,6 +18,8 @@ from PySide6.QtGui import QIcon
 # sas-global
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
+
+from sas.qtgui.Utilities.GuiUtils import enum
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
@@ -25,7 +27,6 @@ from .UI.DMaxExplorer import Ui_DmaxExplorer
 
 logger = logging.getLogger(__name__)
 
-from sas.qtgui.Utilities.GuiUtils import enum
 
 W = enum( 'NPTS',      #0
           'DMIN',      #1

@@ -17,7 +17,7 @@ from sas.qtgui.Calculators.Shape2SAS.UI.DesignWindowUI import Ui_Shape2SAS
 from sas.qtgui.Calculators.Shape2SAS.ViewerModel import ViewerModel
 from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
 from sas.qtgui.Calculators.Shape2SAS.Tables.subunitTable import SubunitTable, OptionLayout
-from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints
+from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints, logger
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import Canvas
 
 from sas.sascalc.shape2sas.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering,
@@ -42,7 +42,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
-        self.setWindowTitle("Shape2SAS")
+        self.setWindowTitle("Shape2SAS (Experimental)")
         self.parent = parent
 
         self._manager = parent
@@ -75,7 +75,12 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plugin = QPushButton("To plugin model")
         self.plugin.setMinimumSize(110, 24)
         self.plugin.setToolTip("Go to the plugin model page")
+        self.plugin.setEnabled(False)
         self.modelTabButtonOptions.horizontalLayout_5.insertWidget(1, self.plugin)
+
+        # TODO: Remove these lines to enable the plugin model generation window - hidden for v6.1.0
+        self.line2.setHidden(True)
+        self.plugin.setHidden(True)
 
         #connect buttons
         self.modelTabButtonOptions.reset.clicked.connect(self.onSubunitTableReset)
@@ -118,6 +123,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #create and set layout for buttons
         self.SAXSTabButtons = ButtonOptions()
         self.SAXSTabButtons.help.setToolTip("Go to help page")
+        self.SAXSTabButtons.help.clicked.connect(self.onHelp)
         self.SAXSTabButtons.closePage.setToolTip("Close Shape2SAS")
         self.SAXSTabButtons.reset.setToolTip("Reset this page to default")
         self.SAXSTabButtons.reset.clicked.connect(self.onSAXSExperimentReset)
@@ -128,17 +134,18 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.sendSimToSasView = QPushButton("Create SAXS file")
         self.sendSimToSasView.setMinimumSize(110, 24)
         self.sendSimToSasView.setToolTip("Send simulated SAXS data to SasView Data Explorer")
+        self.sendSimToSasView.setEnabled(False)
         self.SAXSTabButtons.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.SAXSTabButtons.horizontalLayout_5.insertWidget(1, self.sendSimToSasView)
         self.gridLayout_2.addWidget(self.SAXSTabButtons, 2, 0, 1, 2, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         self.SAXSExperiment.setLayout(self.gridLayout_2)
 
         #connect buttons
-        self.sendSimToSasView.clicked.connect(self.getSimulatedSAXSData)
         self.structureFactor.currentIndexChanged.connect(self.showStructureFactorOptions)
         self.plotSAXS.clicked.connect(self.showSimulatedSAXSData)
         self.sendSimToSasView.clicked.connect(self.sendSimulatedSAXSToDataExplorer)
         self.SAXSTabButtons.closePage.clicked.connect(self.onClickingClose)
+        self.enableButtons(False)
 
         ###Building Virtual SANS Experiment tab
         #TODO: implement in a future project
@@ -147,13 +154,16 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.constraint = Constraints()
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
         self.subunitTable.deleteButton.clicked.connect(self.deleteFromVariableTable)
+        self.subunitTable.table.clicked.connect(self.updateDeleteButton)
+        self.subunitTable.table.horizontalHeader().sectionClicked.connect(self.updateDeleteButton)
         self.constraint.variableTable.setConstraints.clicked.connect(self.setConstraintsToTextEditor)
         self.constraint.createPlugin.clicked.connect(self.getPluginModel)
         self.constraint.buttonOptions.reset.clicked.connect(self.onConstraintReset)
-        self.constraint.buttonOptions.closePage.clicked.connect(self.onClickingClose)
+        self.constraint.buttonOptions.closePage.clicked.connect(self.constraint.onClosingConstraints)
+        self.constraint.buttonOptions.help.clicked.connect(self.onHelp)
 
         #create png of each tab
-        self.modelTabButtonOptions.help.clicked.connect(self.onClickingHelp)
+        self.modelTabButtonOptions.help.clicked.connect(self.onHelp)
 
     def showConstraintWindow(self):
         """Get the Constraint window"""
@@ -249,13 +259,26 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             #TODO: print to GUI output texteditor
             return "", "", "", checkedPars
 
+    def enableButtons(self, toggle: bool):
+        self.plot.setEnabled(toggle)
+        self.plugin.setEnabled(toggle)
+        self.plotSAXS.setEnabled(toggle)
+
     def addToVariableTable(self):
         """Set up parameters to the variable table"""
         column = self.subunitTable.model.columnCount() - 1 #-1 to account for the added column
         names = self.getTableNames(self.ifEmptyName, column)
 
+        self.enableButtons(column >= 0)
+
         #set variables in variable table
         self.constraint.variableTable.setVariableTableData(names, column)
+
+    def updateDeleteButton(self):
+        selection_model = self.subunitTable.table.selectionModel()
+        selected_indexes = selection_model.selectedIndexes()
+        column = selected_indexes[0].column()
+        self.subunitTable.selected.setValue(int(column) + 1)
 
     def deleteFromVariableTable(self):
         """Delete parameters from the variable table"""
@@ -276,7 +299,9 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #Delete rows associated with the subunit table column from variable table
         for delete in [row_pos[selected_column] for _ in range(numNames)]:
             self.constraint.variableTable.removeTableData(delete)
-        
+
+        self.enableButtons(self.subunitTable.model.columnCount() > 0)
+
         #Update column number in table
         columnNum = selected_column + 1 #column number name
         for row in row_pos[selected_column + 1:]: #get all values after selected_column
@@ -446,6 +471,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         """Get 3D plot of the designed model in the Build model tab. 
         If checked, plot theoretical scattering from the designed model."""
         columns = self.subunitTable.model.columnCount()
+        self.plugin.setEnabled(columns > 0)
+
         if not self.subunitTable.model.item(1, columns - 1):
             return
 
@@ -484,7 +511,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.checkTheoreticalScattering.setChecked(False)
         self.subunitTable.overlap.setChecked(True)
         self.subunitTable.subunit.setCurrentIndex(0)
-
+        self.enableButtons(False)
 
     def onSAXSExperimentReset(self):
         """Reset Virtual SAXS Experiment tab to default"""
@@ -503,10 +530,12 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.aggregateFrac.setText("0.1")
         self.EffctiveRadius.setText("50.0")
         self.particlePerAggregate.setText("80")
+        self.sendSimToSasView.setEnabled(False)
 
-        # Clear the plot in the Virtual SAXS Experiment tab
-        self.canvas.figure.clf()
-        self.canvas.draw()
+        # Clear the plot in the Virtual SAXS Experiment tab if it has already been generated
+        if hasattr(self, 'canvas'):
+            self.canvas.figure.clf()
+            self.canvas.draw()
 
     def onConstraintReset(self):
         """Reset Constraint window to default"""
@@ -515,6 +544,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.constraint.variableTable.prPoints.setText("100")
         self.constraint.variableTable.Npoints.setText("3000")
         self.constraint.variableTable.pluginModelName.setText("Model_1")
+        self.constraint.createPlugin.setEnabled(False)
 
     def onClickingClose(self):
         """Close Shape2SAS GUI"""
@@ -522,10 +552,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.close()
         self.constraint.onClosingConstraints()
 
-    def onClickingHelp(self):
+    def onHelp(self):
         """Opening the help window"""
-        print("Help")
-        #TODO: creat HTML help file to be displayed
+        location = "/user/qtgui/Calculators/shape_2_sas_help.html"
+        self.parent.showHelp(location)
 
     @staticmethod
     def ifNoCondition(name: str, names: list[str], **kwargs):
@@ -578,7 +608,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         """Generating a plugin model and sends it to
         the Plugin Models folder in SasView"""
         
-        self.constraint.logInfo("Generating plugin model.")
+        logger.info("Generating plugin model.")
         #no subunits inputted
         columns = self.subunitTable.model.columnCount() #TODO: maybe give a warning to output texteditor
         if not self.subunitTable.model.item(1, columns - 1):
@@ -594,11 +624,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #get chosen fit parameters
         fitPar = self.getFitParameters()
 
-        self.constraint.logInfo("Retrieving and verifying constraints. . .")
+        logger.info("Retrieving and verifying constraints. . .")
         #get parameters constraints
         importStatement, parameters, translation, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
-        self.constraint.logInfo("Retrieving Model. . .")
+        logger.info("Retrieving Model. . .")
         #conditional subunit table parameters
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
@@ -607,7 +637,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #Write file to plugin model folder
         TabbedModelEditor.writeFile(full_path, model_str)
         self.communicator.customModelDirectoryChanged.emit()
-        self.constraint.logInfo(f"Succefully generated model {modelName}!")
+        logger.info(f"Successfully generated model {modelName}!")
 
     def onCheckingInput(self, input: str, default: str) -> str:
         """Check if the input not None. Otherwise, return default value"""
@@ -676,6 +706,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         if not self.subunitTable.model.item(1, columns - 1):
             return
 
+        self.sendSimToSasView.setEnabled(True)
+
         #Clear layout for last plot
         if self.scatteringScene.count():
             widget = self.scatteringScene.takeAt(0).widget()
@@ -709,8 +741,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         name = self.onCheckingInput(self.modelName, "Model_1")
         sim = self.getSimulatedSAXSData()
-        dataClass = Data1D(x=sim.q, y=sim.I_sim, dy=sim.I_err)
+        if sim is not None:
+            dataClass = Data1D(x=sim.q, y=sim.I_sim, dy=sim.I_err)
 
-        #Send data to SasView Data Explorer
-        data = createModelItemWithPlot(dataClass, name)
-        self.communicator.updateModelFromPerspectiveSignal.emit(data)
+            #Send data to SasView Data Explorer
+            data = createModelItemWithPlot(dataClass, name)
+            self.communicator.updateModelFromPerspectiveSignal.emit(data)
+        else:
+            logger.warning("No SAXS data has been generated in the Shape2SAS window.")

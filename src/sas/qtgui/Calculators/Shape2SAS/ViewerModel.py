@@ -44,8 +44,10 @@ class ViewerModel(QWidget):
         self.dict_series = {"Red": self.seriesRed, "Green": self.seriesGreen, "Blue": self.seriesBlue}
        
         self.scatterContainer = QWidget.createWindowContainer(self.scatter)
-        self.scatterContainer.setFixedHeight(200)
-        self.scatterContainer.setFixedWidth(271)
+        self.scatter.setMinimumSize(QSize(271, 271))
+        self.scatter.setHorizontalAspectRatio(1.0)
+        self.scatter.setAspectRatio(1.0)
+        self.scatterContainer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.initialiseAxis()
 
@@ -62,8 +64,8 @@ class ViewerModel(QWidget):
 
         #2D plot of P(q)
         self.scattering = QGraphicsView()
-        self.scattering.setMinimumSize(QSize(271, 250))  
-        self.scattering.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.scattering.setMinimumSize(QSize(271, 271))
+        self.scattering.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.scattering.setBackgroundBrush(QColor(255, 255, 255))
         self.scene = QGraphicsScene()
         self.scattering.setScene(self.scene)
@@ -72,7 +74,7 @@ class ViewerModel(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 10, 0, 0)#remove margins
 
-        spacer = QSpacerItem(271, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+        spacer = QSpacerItem(271, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         subunitTableLabel = QLabel("Scattering of P(q)")
 
         layout.addWidget(self.scatterContainer)
@@ -83,11 +85,9 @@ class ViewerModel(QWidget):
         layout.addWidget(self.scattering)
 
         self.setLayout(layout)
-        self.setFixedWidth(271)
 
         self.Viewmodel_modul = QWidget()
         self.Viewmodel_modul.setLayout(layout)
-        self.Viewmodel_modul.setFixedWidth(271)
 
     def setScatteringPlot(self, theo: TheoreticalScattering):
         """Set the scattering plot"""
@@ -166,10 +166,25 @@ class ViewerModel(QWidget):
            data = []
            series.dataProxy().resetArray(data)
 
+        # Check if we have any data at all
+        if not distr.x or len(distr.x) == 0:
+            return
+
         minx, maxx = min(distr.x[0]), max(distr.x[0])
         miny, maxy = min(distr.y[0]), max(distr.y[0])
         minz, maxz = min(distr.z[0]), max(distr.z[0])
+
         for subunit in range(len(colours)):
+            # Skip empty subunits - handle numpy arrays properly
+            try:
+                if (subunit >= len(distr.x)
+                        or not hasattr(distr.x[subunit], '__len__')
+                        or len(distr.x[subunit]) == 0):
+                    continue
+            except (ValueError, TypeError):
+                # Handle numpy array comparison issues
+                continue
+
             series = self.dict_series[colours[subunit]]
             data = []
             for index in range(len(distr.x[subunit])):

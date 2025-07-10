@@ -46,6 +46,7 @@ class Constraints(QWidget, Ui_Constraints):
         self.createPlugin.setMinimumSize(110, 24)
         self.createPlugin.setMaximumSize(110, 24)
         self.createPlugin.setToolTip("Create and send the plugin model to the Plugin Models Category in Fit panel")
+        self.createPlugin.setEnabled(False)
 
         self.buttonOptions.horizontalLayout_5.insertWidget(1, self.createPlugin)
         self.buttonOptions.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
@@ -62,7 +63,7 @@ class Constraints(QWidget, Ui_Constraints):
 #Write libraries to be imported here.
 from numpy import inf
 
-#Modify fit parameteres here.
+#Modify fit parameters here.
 parameters = {constraints}
 
 #Set constraints here.
@@ -79,6 +80,7 @@ translation = """
 
         constraints = self.getConstraintText(constraints)
         self.constraintTextEditor.txtEditor.setPlainText(constraints)
+        self.createPlugin.setEnabled(True)
 
     def checkPythonSyntax(self, text: str):
         """Check if text is valid python syntax"""

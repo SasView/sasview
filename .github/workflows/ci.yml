@@ -53,9 +53,8 @@ jobs:
       fail-fast: false
       matrix:
         package: [
-          ["sasdata", "git+https://github.com/llimeht/sasdata.git@tmp/pyproject"],
-          ["sasmodels", "git+https://github.com/llimeht/sasmodels.git@tmp/pyproject"],
-          ["bumps", "git+https://github.com/bumps/bumps/@v0.9.3"],
+          ["sasdata", "sasdata"],
+          ["sasmodels", "sasmodels"]
         ]
 
     name: Build wheel "${{ matrix.package[0] }}"
@@ -90,6 +89,13 @@ jobs:
     env:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
       # Only sign/notarize if the secrets will be available
+      RELEASE_BRANCH_BUILD: ${{
+          (
+            (github.event_name == 'push' && contains(github.ref, 'release')) ||
+            (github.event_name == 'push' && contains(github.ref, 'tags/v6.1')) ||
+            (github.event_name == 'pull_request' && contains(github.base_ref, 'release-6.1'))
+          ) && 'true' || ''
+        }}
       SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork) && 'true' || '' }}
       UV_SYSTEM_PYTHON: 1
 
@@ -140,21 +146,26 @@ jobs:
           uv pip install dist/*whl
 
       - name: Install Python dependencies
+        if: ${{ ! env.RELEASE_BRANCH_BUILD }}
         run: |
           uv pip install -r build_tools/requirements.txt
           uv pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
 
-      ### Document the build environment
+      ### For pull_requests with the release branch as the base -or- branches with the name *release*
 
-      - name: Python package version list
+      - name: Install Python dependencies for release branches
+        if: ${{ env.RELEASE_BRANCH_BUILD }}
         run: |
-          python -m pip freeze
+          python -m pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
 
       ### Actual building of sasview
 
       - name: Build sasview
         run: |
           python -m build --no-isolation --sdist --wheel
+
+      - name: Install sasview wheel
+        run: |
           uv pip install dist/sasview*whl
 
       - name: Publish sdist and wheel package
@@ -200,6 +211,12 @@ jobs:
         if: ${{ matrix.installer }}
         run: |
           uv pip install pyinstaller
+
+      ### Document the build environment
+
+      - name: Python package version list
+        run: |
+          python -m pip freeze
 
       - name: Build sasview with pyinstaller
         if: ${{ matrix.installer }}
@@ -297,17 +314,32 @@ jobs:
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
 
-      - name: Sign binary
+      - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        uses: lando/code-sign-action@v2
-        with:
-          file: installers/dist/setupSasView.exe
-          certificate-data: ${{ secrets.WINDOZE_CERT_DATA }}
-          certificate-password: ${{ secrets.WINDOZE_CERT_PASSWORD }}
-          keylocker-host: ${{ secrets.KEYLOCKER_HOST }}
-          keylocker-api-key: ${{ secrets.KEYLOCKER_API_KEY }}
-          keylocker-cert-sha1-hash: ${{ secrets.KEYLOCKER_CERT_SHA1_HASH }}
+        uses: digicert/ssm-code-signing@v1.0.1
 
+      - name: Set up P12 certificate
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        run: |
+          echo "${{ secrets.WINDOZE_CERT_DATA }}" | base64 --decode > /d/Certificate_pkcs12.p12
+        shell: bash
+
+      - name: Set keylocker variables
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        id: variables
+        run: |
+          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          echo "SM_HOST=${{ secrets.KEYLOCKER_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ secrets.KEYLOCKER_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.WINDOZE_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Sign the binary using keypair alias
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        run: |
+           smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
+        shell: cmd
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
@@ -315,10 +347,10 @@ jobs:
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
-            installers/dist/setupSasView*.exe
+            installers/dist/setupSasView.exe
             installers/dist/SasView6-macos-13.dmg
             installers/dist/SasView6-macos-latest.dmg
-            installers/dist/SasView*.tar.gz
+            installers/dist/SasView6.tar.gz
           if-no-files-found: ignore
 
 

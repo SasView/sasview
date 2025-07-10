@@ -14,4 +14,5 @@ SasView Documentation Index
    DEVELOPER DOCUMENTATION <dev/dev>
    
    Release Notes <user/RELEASE>
-   
+
+   License <user/license>
