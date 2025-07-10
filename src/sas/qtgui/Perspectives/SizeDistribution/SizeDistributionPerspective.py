@@ -31,7 +31,7 @@ DIAMETER_MAX = 1000.0
 NUM_DIAMETER_BINS = 100
 LOG_BINNING = "true"
 CONTRAST = 1.0
-BACKGROUND = 1e-6
+BACKGROUND = ""  # initially no background subtraction
 SKY_BACKGROUND = 1e-6
 SUBTRACT_LOW_Q = "false"
 POWER_LOW_Q = 4
@@ -465,7 +465,6 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
 
         self.logic.data = logic_data
         self.model.item(WIDGETS.W_NAME).setData(self._model_item.text())
-        self.updateBackground()
 
         try:
             name = self.logic.data.name
@@ -519,6 +518,16 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
             title = self.fit_plot.name
             GuiUtils.updateModelItemWithPlot(self._model_item, self.fit_plot, title)
             plots.append(self.fit_plot)
+
+        if len(plots) == 1:
+            # only the data itself to plot, but need to append the Data1D object
+            main_data = GuiUtils.dataFromItem(plots[0])
+            main_data.show_q_range_sliders = True
+            main_data.slider_update_on_move = False
+            main_data.slider_perspective_name = "SizeDistribution"
+            main_data.slider_low_q_input = ["txtMinRange"]
+            main_data.slider_high_q_input = ["txtMaxRange"]
+            plots.append(main_data)
 
         self.communicate.plotRequestedSignal.emit(plots, None)
 
