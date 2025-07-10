@@ -141,7 +141,7 @@ class NewDataExplorer(QWidget):
         match file_extension:
             case "xml":
                 loaded_data = load_xml_data(filename)
-            case "h5":
+            case "h5" | "hdf":
                 loaded_data = load_hdf5_data(filename)
             case "txt":
                 data_list = load_ascii_data(filename)
