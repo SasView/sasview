@@ -10,12 +10,15 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 from sasdata.metadata import MetaNode, Metadata
+from sasdata.quantities.quantity import Quantity
 from sasdata.temp_xml_reader import load_data
 
 
 def convert_raw_to_dict(to_convert: MetaNode) -> dict:
     # converted = {to_convert.name: to_convert.contents}
-    if isinstance(to_convert.contents, str):
+    if isinstance(to_convert.contents, str) or isinstance(
+        to_convert.contents, Quantity
+    ):
         return {to_convert.name: to_convert.contents}
     value = {}
     # We can now assume that every content is a MetaNode as per the typing.
