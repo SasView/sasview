@@ -132,6 +132,8 @@ class NewDataExplorer(QWidget):
             self,
             "Open Data File",
         )
+        if filename == "":
+            return
         # FIXME: This would probably break if there isn't an extension.
 
         # TODO: The logic for deciding which reader to use is temporary. It
