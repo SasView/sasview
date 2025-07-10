@@ -128,38 +128,39 @@ class NewDataExplorer(QWidget):
     @Slot()
     def onLoadFile(self):
         # TODO: Probably want to add filters.
-        filename, _ = QFileDialog.getOpenFileName(
+        filenames, _ = QFileDialog.getOpenFileNames(
             self,
             "Open Data File",
         )
-        if filename == "":
+        if len(filenames) == 0:
             return
-        # FIXME: This would probably break if there isn't an extension.
+        for filename in filenames:
+            # FIXME: This would probably break if there isn't an extension.
 
-        # TODO: The logic for deciding which reader to use is temporary. It
-        # won't work for all file extensions, and ultimately this logic probably
-        # needs to be moved in sasdata.
-        file_extension = filename.split(".")[-1].lower()
-        match file_extension:
-            case "xml":
-                loaded_data = load_xml_data(filename)
-            case "h5" | "hdf":
-                loaded_data = load_hdf5_data(filename)
-            case "txt":
-                data_list = load_ascii_data(filename)
-                # Since we're only giving the load function one filename, we can
-                # assume only one data object is being loaded.
-                loaded_data = dict([(basename(filename), data_list[0])])
-            case _:
-                QMessageBox.critical(
-                    self,
-                    "Data Loading Error",
-                    f"Error loading {filename}. Extension not recognised.",
-                )
-                return
+            # TODO: The logic for deciding which reader to use is temporary. It
+            # won't work for all file extensions, and ultimately this logic probably
+            # needs to be moved in sasdata.
+            file_extension = filename.split(".")[-1].lower()
+            match file_extension:
+                case "xml":
+                    loaded_data = load_xml_data(filename)
+                case "h5" | "hdf":
+                    loaded_data = load_hdf5_data(filename)
+                case "txt":
+                    data_list = load_ascii_data(filename)
+                    # Since we're only giving the load function one filename, we can
+                    # assume only one data object is being loaded.
+                    loaded_data = dict([(basename(filename), data_list[0])])
+                case _:
+                    QMessageBox.critical(
+                        self,
+                        "Data Loading Error",
+                        f"Error loading {filename}. Extension not recognised.",
+                    )
+                    return
 
-        for _, datum in loaded_data.items():
-            self._data_manager.add_data(datum)
+            for _, datum in loaded_data.items():
+                self._data_manager.add_data(datum)
 
     @Slot()
     def onAdvancedLoad(self):
