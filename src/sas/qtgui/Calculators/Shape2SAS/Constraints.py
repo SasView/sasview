@@ -73,11 +73,61 @@ class Constraints(QWidget, Ui_Constraints):
 
         return self.constraintText
 
-    def setConstraints(self, fit_params: str):
+    def setConstraints(self, parameter_text: str):
         """Insert the text into the constraints editor"""
 
-        constraints = self.getConstraintText(fit_params)
-        self.constraintTextEditor.txtEditor.setPlainText(constraints)
+        def get_default(parameter_text: str):
+            return self.getConstraintText(parameter_text)
+
+        def merge_text(current_text: str, parameter_text: str):
+            if not current_text:
+                return get_default(parameter_text)
+
+            # search for 'parameters =' in the current text
+            found = False
+            current_text_lines = current_text.splitlines()
+            for start, line in enumerate(current_text_lines):
+                if line.startswith("parameters ="):
+                    break
+            
+            # find closing bracket of the parameters list
+            bracket_count = 0
+            for end, line in enumerate(current_text_lines[start:]):
+                bracket_count += line.count('[') - line.count(']')
+                if bracket_count == 0:
+                    # found the closing bracket
+                    found = True
+                    old_lines = current_text_lines[start:start+end+1]
+                    break
+
+            if not found:
+                return get_default(parameter_text)
+            
+            new_lines = parameter_text.split("\n")
+            # fit_param string is formatted as: 
+            # [
+            #  # header
+            #  ['name1', 'unit1', ...],
+            #  ['name2', 'unit2', ...],
+            # ...
+            # ]
+            # extract names from the first element of each sublist, skipping the first two and last lines
+            table = str.maketrans("", "", "[]' ")
+            old_names = [line.translate(table).split(",")[0] for line in old_lines[2:-1]]
+            new_names = [line.translate(table).split(",")[0] for line in new_lines[2:-1]]
+
+            # create new list of parameters, replacing existing old lines in the new list
+            for i, name in enumerate(new_names):
+                if name in old_names:
+                    new_lines[i+2] = old_lines[old_names.index(name)+2]
+            
+            # remove old lines from the current text and insert the new ones in the middle
+            current_text = "\n".join(current_text_lines[:start+1] + new_lines[2:-1] + current_text_lines[start+end:])
+            return current_text
+        
+        current_text = self.constraintTextEditor.txtEditor.toPlainText()
+        text = merge_text(current_text, parameter_text)
+        self.constraintTextEditor.txtEditor.setPlainText(text)
         self.createPlugin.setEnabled(True)
 
     @staticmethod
