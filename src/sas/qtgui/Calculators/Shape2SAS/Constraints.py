@@ -8,14 +8,11 @@ import traceback
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton, QWidget
 
-from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
-from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
-
-#Local Perspectives
-from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
-
-#Global SasView
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
+from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
+from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
+from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
+from sas.sascalc.shape2sas.UserText import UserText
 
 logger = logging.getLogger(__name__)
 
@@ -129,22 +126,63 @@ class Constraints(QWidget, Ui_Constraints):
             # ensure imports are valid
             #! not implemented yet
 
-            return [
-                ast.unparse(params),
-                [ast.unparse(imp) for imp in imports],
-                [ast.unparse(constraint) for constraint in constraints]
-            ]
+            return params, imports, constraints
+        
+        def extract_symbols(constraints: list[ast.AST]) -> tuple[list[str], list[str]]:
+            """Extract all symbols used in the constraints."""
+            lhs, rhs = set(), set()
+            for node in constraints:
+                # left-hand side of assignment
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        lhs.add(target.id)
+
+                # right-hand side of assignment
+                for value in ast.walk(node.value):
+                    if isinstance(value, ast.Name):
+                        rhs.add(value.id)
+
+            return lhs, rhs
+
+        def validate_symbols(lhs: list[str], rhs: list[str], fitPars: list[str]):
+            """Check if all symbols in lhs and rhs are valid parameters."""
+            # lhs is not allowed to contain fit parameters
+            for symbol in lhs:
+                if symbol in fitPars or symbol[1:] in fitPars:
+                    logger.error(f"Symbol '{symbol}' is a fit parameter and cannot be used in constraints.")
+                    raise ValueError(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to.")
+        
+        def validate_imports(imports: list[ast.ImportFrom | ast.Import]):
+            """Check if all imports are valid."""
+            for imp in imports:
+                if isinstance(imp, ast.ImportFrom):
+                    if not importlib.util.find_spec(imp.module):
+                        logger.error(f"Module '{imp.module}' not found.")
+                        raise ModuleNotFoundError(f"No module named {imp.module}")
+                elif isinstance(imp, ast.Import):
+                    for name in imp.names:
+                        if not importlib.util.find_spec(name.name):
+                            logger.error(f"Module '{name.name}' not found.")
+                            raise ModuleNotFoundError(f"No module named {name.name}")
 
         tree = as_ast(text)
-        if tree is None:
-            return None
-
         params, imports, constraints = parse_ast(tree)
+        lhs, rhs = extract_symbols(constraints)
+        validate_symbols(lhs, rhs, fitPar)
+        validate_imports(imports)
+
+        params = ast.unparse(params)
+        imports = [ast.unparse(imp) for imp in imports]
+        constraints = [ast.unparse(constraint) for constraint in constraints]
+        symbols = (lhs, rhs)
+
         print("Finished parsing constraints text.")
         print(f"Parsed parameters: {params}")
         print(f"Parsed imports: {imports}")
         print(f"Parsed constraints: {constraints}")
-        return imports, params, constraints, checkedPars
+        print(f"Symbols used: {symbols}")
+
+        return UserText(imports, params, constraints, symbols), checkedPars
 
     @staticmethod
     def getPosition(item: VAL_TYPE, itemLists: list[list[VAL_TYPE]]) -> tuple[int, int]:

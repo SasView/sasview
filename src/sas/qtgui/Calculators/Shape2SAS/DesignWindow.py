@@ -641,7 +641,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         logger.info("Retrieving and verifying constraints.")
         #get parameters constraints
-        importStatement, parameters, translation, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
+        usertext, checkedPars = self.checkStateOfConstraints(fitPar, parNames, parVals, checkedPars)
 
         logger.info("Retrieving Model.")
         #conditional subunit table parameters
@@ -650,7 +650,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         model_str, full_path = generate_plugin(
             modelProfile, 
             [parNames, parVals],
-            [importStatement, parameters, translation], 
+            usertext,
             fitPar, 
             Npoints, 
             prPoints, 
