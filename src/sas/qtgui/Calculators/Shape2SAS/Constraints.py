@@ -114,7 +114,7 @@ class Constraints(QWidget, Ui_Constraints):
                 match node:
                     case ast.ImportFrom() | ast.Import():
                         imports.append(node)
-                    
+
                     case ast.Assign():
                         if node.targets[0].id == 'parameters':
                             params = node
