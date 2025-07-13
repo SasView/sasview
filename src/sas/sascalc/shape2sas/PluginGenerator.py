@@ -50,7 +50,9 @@ def generate_model(prof: ModelProfile, constrainParameters: (str), fitPar: list[
 
     fitPar.insert(0, "q")
 
-    model_str = (f'''
+    model_str = (
+# file header
+f'''\
 r"""
 This plugin model uses Shape2SAS to generate theoretical 1D small-angle scattering.
 Shape2SAS is a program built by Larsen and Brookes
@@ -67,26 +69,33 @@ Model {model_name.replace('.py', '')} has been built from the following subunits
 {', '.join(prof.subunits)}
 
 """
+'''
 
+# imports
+f'''\
 {nl.join(importStatement)}
-from sas.sascalc.shape2sas.Shape2SAS import (ModelProfile, SimulationParameters,
-                                                        ModelSystem, getPointDistribution,
-                                                        TheoreticalScatteringCalculation,
-                                                        getTheoreticalScattering)
+from sas.sascalc.shape2sas.Shape2SAS import (
+    ModelProfile, SimulationParameters, ModelSystem, getPointDistribution, 
+    TheoreticalScatteringCalculation, getTheoreticalScattering
+)
+'''
 
-name = "{model_name.replace('.py', '')}"
+# model description
+f'''\
+name = "{model_name.replace('.py', '')}"'
 title = "Shape2SAS Model"
-description = """
-Theoretical generation of P(q) using Shape2SAS
-"""
+description = "Theoretical generation of P(q) using Shape2SAS"
 category = "plugin"
+'''
 
-{parameters}
+# parameter list
+f"{parameters}\n"
 
+# define Iq
+f'''\
 def Iq({', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
-
-{textwrap.indent(translation, '    ')}
+    {nl.join(translation)}
 
     modelProfile = ModelProfile(
         subunits={prof.subunits}, 
