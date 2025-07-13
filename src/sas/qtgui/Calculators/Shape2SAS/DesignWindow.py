@@ -147,7 +147,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #TODO: implement in a future project
 
         ###Building Constraint window
-        self.constraint = Constraints()
+        self.constraint = Constraints(parent=self)
+        self.constraint.setWindowFlags(Qt.Window | Qt.Tool)
         self.subunitTable.add.clicked.connect(self.addToVariableTable)
         self.subunitTable.deleteButton.clicked.connect(self.deleteFromVariableTable)
         self.subunitTable.table.clicked.connect(self.updateDeleteButton)
@@ -164,6 +165,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     def showConstraintWindow(self):
         """Get the Constraint window"""
 
+        self.constraint.setScreen(self.screen())
+        self.constraint.move(self.pos().x()+50, self.pos().y()+50)
         self.constraint.show()
 
     def checkedVariables(self):
