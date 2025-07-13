@@ -649,6 +649,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         model_str, full_path = generate_plugin(
             modelProfile, 
+            [parNames, parVals],
             [importStatement, parameters, translation], 
             fitPar, 
             Npoints, 

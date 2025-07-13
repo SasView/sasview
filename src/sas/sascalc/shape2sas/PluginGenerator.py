@@ -8,15 +8,22 @@ from sas.sascalc.fit import models
 from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
 from sas.system.user import find_plugins_dir
 
-def generate_plugin(prof: ModelProfile, constrainParameters: (str), fitPar: list[str],
-                   Npoints: int, pr_points: int, file_name: str) -> tuple[str, Path]:
+def generate_plugin(
+        prof: ModelProfile, 
+        modelPars: list[list[str], list[str | float]],
+        constrainParameters: (str), 
+        fitPar: list[str],
+        Npoints: int, 
+        pr_points: int, 
+        file_name: str
+) -> tuple[str, Path]:
     """Generates a theoretical scattering plugin model"""
 
     plugin_location = Path(models.find_plugins_dir())
     full_path = plugin_location.joinpath(file_name).with_suffix('.py')
     logging.info(f"Plugin model will be saved to: {full_path}")
 
-    model_str = generate_model(prof, constrainParameters, fitPar, Npoints, pr_points, file_name)
+    model_str = generate_model(prof, modelPars, constrainParameters, fitPar, Npoints, pr_points, file_name)
 
     return model_str, full_path
 
@@ -41,16 +48,58 @@ def format_parameter_list_of_list(par: list[str | float]) -> str:
     return f"[[{'],['.join(sub_pars_join)}]]"
 
 
-def generate_model(prof: ModelProfile, constrainParameters: (str), fitPar: list[str],
-                  Npoints: int, pr_points: int, model_name: str) -> str:
+def delta_parameters_script_inserts(fitPar: list[str], modelPars: list[list[str | float]]) -> str:
+    """
+    Format the code section defining and updating the delta parameters.
+    """
+    par_names, par_vals = modelPars[0], modelPars[1]
+
+    prev_pars_def = []
+    shape_index, par_index = -1, -1
+    for par in fitPar:
+        name = "prev_" + par
+        for shape_index in range(len(modelPars)):
+            if par in par_names[shape_index]:
+                par_index = par_names[shape_index].index(par)
+                break
+        if par_index == -1:
+            raise ValueError(f"Parameter '{par}' not found in model parameters.")
+        val = par_vals[shape_index][par_index]
+        prev_pars_def.append(f"{name} = {val}")
+    prev_pars_def = "\n".join(prev_pars_def)
+    
+    globals = "global " + ", ".join([f"prev_{par}" for par in fitPar])
+    delta_pars_def = []
+    prev_pars_update = []
+    for par in fitPar:
+        delta_pars_def.append(f"d{par} = {par} - prev_{par}")
+        prev_pars_update.append(f"prev_{par} = {par}")
+    delta_pars_def   = "\n    ".join(delta_pars_def) # indentation for the function body
+    prev_pars_update = "\n    ".join(prev_pars_update)
+
+    return (
+        f"{prev_pars_def}",
+        f"    {globals}\n"
+        f"    {delta_pars_def}\n"
+        f"    {prev_pars_update}\n"
+    )
+
+def generate_model(
+    prof: ModelProfile, 
+    modelPars: list[list[str], list[str | float]],
+    constrainParameters: (str), 
+    fitPar: list[str],
+    Npoints: int, 
+    pr_points: int, 
+    model_name: str
+) -> str:
     """Generates a theoretical model"""
     importStatement, parameters, translation = constrainParameters
-
+    delta_parameters_def, delta_parameters_update = delta_parameters_script_inserts(fitPar, modelPars)
     nl = '\n'
-
     fitPar.insert(0, "q")
-
     model_str = (
+
 # file header
 f'''\
 r"""
@@ -93,8 +142,13 @@ f"{parameters}\n"
 
 # define Iq
 f'''\
+
+# previous fit parameter values
+{delta_parameters_def}
+
 def Iq({', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
+{delta_parameters_update}
     {nl.join(translation)}
 
     modelProfile = ModelProfile(
