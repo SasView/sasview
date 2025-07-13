@@ -46,7 +46,7 @@ def format_parameter_list_of_list(par: list[str | float]) -> str:
     return f"[[{'],['.join(sub_pars_join)}]]"
 
 
-def script_insert_delta_parameters(modelPars: list[list[str | float]], symbols: tuple[set[str], set[str]]) -> tuple[str, str]:
+def script_insert_delta_parameters(modelPars: list[list[str | float]], fitPars: list[str], symbols: tuple[set[str], set[str]]) -> tuple[str, str]:
     """
     Create the code sections defining and updating the delta parameters.
     Only parameters declared in the symbol list will be included.
@@ -59,6 +59,7 @@ def script_insert_delta_parameters(modelPars: list[list[str | float]], symbols: 
     delta_pars_def = []
     prev_pars_update = []
     for symbol in symbols:
+        print(f"Processing symbol: {symbol}")
         if symbol[0] != 'd':
             continue # skip if symbol is not a delta parameter
         symbol = symbol[1:]  # remove 'd' prefix
@@ -76,11 +77,17 @@ def script_insert_delta_parameters(modelPars: list[list[str | float]], symbols: 
         # create the variable names
         val = par_vals[shape_index][par_index]
 
+        # add base variable to globals if not a fit parameter
+        if symbol not in fitPars:
+            globals.append(symbol)
+
         prev_name = "prev_" + symbol
         globals.append(f"{prev_name}")
         prev_pars_def.append(f"{prev_name} = {val}")
         delta_pars_def.append(f"d{symbol} = {prev_name} - {symbol}")
         prev_pars_update.append(f"{prev_name} = {symbol}")
+
+    print(f"Globals: {globals}")
 
     if not delta_pars_def:
         return False, "", ""
@@ -110,6 +117,30 @@ def script_insert_apply_constraints(lhs_symbols: set[str]) -> str:
         text.append(f"{symbol} += d{symbol}")
     return bool(text), "\n    ".join(text)  # indentation for the function body
 
+def script_insert_constrained_parameters(symbols: set[str], modelPars: list[list[str], list[str | float]]) -> str:
+    """ Create the code defining the constrained parameters."""
+    par_names, par_vals = modelPars[0], modelPars[1]
+    symbols = symbols[0].union(symbols[1]) # combine lhs and rhs symbols
+
+    text = []
+    for symbol in symbols:
+        if symbol[0] == 'd':
+            if symbol[1:] in symbols:
+                continue
+            symbol = symbol[1:]  # remove 'd' prefix
+
+        # find the list index of the parameter
+        par_index = -1
+        for shape_index in range(len(par_names)):
+            shape = par_names[shape_index]
+            if symbol in shape:
+                par_index = par_names[shape_index].index(symbol)
+                break
+        if par_index == -1:
+            raise ValueError(f"Parameter '{symbol}' not found in model parameters.")
+        text.append(f"{symbol} = {par_vals[shape_index][par_index]}")
+    return bool(text), "\n".join(text)  # indentation for the function body
+
 def generate_model(
     prof: ModelProfile, 
     modelPars: list[list[str], list[str | float]],
@@ -121,8 +152,9 @@ def generate_model(
 ) -> str:
     """Generates a theoretical model"""
     importStatement, parameters, translation = usertext.imports, usertext.params, usertext.constraints
-    insert_delta, delta_parameters_def, delta_parameters_update = script_insert_delta_parameters(modelPars, usertext.symbols)
+    insert_delta, delta_parameters_def, delta_parameters_update = script_insert_delta_parameters(modelPars, fitPar, usertext.symbols)
     insert_constraint_update, constraint_update = script_insert_apply_constraints(usertext.symbols[0])
+    insert_constrained_defs, constrained_parameters = script_insert_constrained_parameters(usertext.symbols, modelPars)
     nl = '\n'
     fitPar.insert(0, "q")
     model_str = (
@@ -158,18 +190,19 @@ from sas.sascalc.shape2sas.Shape2SAS import (
 
 # model description
 f'''\
-name = "{model_name.replace('.py', '')}"'
+name = "{model_name.replace('.py', '')}"
 title = "Shape2SAS Model"
 description = "Theoretical generation of P(q) using Shape2SAS"
 category = "plugin"
 '''
 
 # parameter list
-f"{parameters}\n\n"
+f"{parameters}\n"
 
-# define prev_X vars
+# define prev_X vars and constrained parameters
 f'''\
-{"# previous fit parameter values" + nl + delta_parameters_def if insert_delta else ""}
+{nl + "# previous fit parameter values" + nl + delta_parameters_def if insert_delta else ""}
+{nl + "# constrained parameters" + nl + constrained_parameters if insert_constrained_defs else ""}
 '''
 
 # define Iq
@@ -177,7 +210,7 @@ f'''\
 def Iq({', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
     {delta_parameters_update if insert_delta else ""}
-    {nl.join(translation)}
+    {(nl + "    ").join(translation)}
     {constraint_update if insert_constraint_update else ""}
 
     modelProfile = ModelProfile(
