@@ -27,6 +27,7 @@ class Constraints(QWidget, Ui_Constraints):
 
         #Setup GUI for Constraints
         self.constraintTextEditor = ModelEditor() #SasView's standard text editor
+        self.constraintTextEditor.modelModified.connect(lambda: self.createPlugin.setEnabled(True))
         self.constraintTextEditor.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.constraintTextEditor.gridLayout_16.setContentsMargins(5, 5, 5, 5)
         self.constraintTextEditor.groupBox_13.setTitle("Constraints") #override title
