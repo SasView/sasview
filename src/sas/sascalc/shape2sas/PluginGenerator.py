@@ -4,11 +4,12 @@ import logging
 
 from sas.sascalc.fit import models
 from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
+from sas.sascalc.shape2sas.UserText import UserText
 
 def generate_plugin(
         prof: ModelProfile, 
         modelPars: list[list[str], list[str | float]],
-        constrainParameters: (str), 
+        usertext: UserText, 
         fitPar: list[str],
         Npoints: int, 
         pr_points: int, 
@@ -20,7 +21,7 @@ def generate_plugin(
     full_path = plugin_location.joinpath(file_name).with_suffix('.py')
     logging.info(f"Plugin model will be saved to: {full_path}")
 
-    model_str = generate_model(prof, modelPars, constrainParameters, fitPar, Npoints, pr_points, file_name)
+    model_str = generate_model(prof, modelPars, usertext, fitPar, Npoints, pr_points, file_name)
 
     return model_str, full_path
 
@@ -45,54 +46,83 @@ def format_parameter_list_of_list(par: list[str | float]) -> str:
     return f"[[{'],['.join(sub_pars_join)}]]"
 
 
-def delta_parameters_script_inserts(fitPar: list[str], modelPars: list[list[str | float]]) -> str:
+def script_insert_delta_parameters(modelPars: list[list[str | float]], symbols: tuple[set[str], set[str]]) -> tuple[str, str]:
     """
-    Format the code section defining and updating the delta parameters.
+    Create the code sections defining and updating the delta parameters.
+    Only parameters declared in the symbol list will be included.
     """
     par_names, par_vals = modelPars[0], modelPars[1]
+    symbols = symbols[0].union(symbols[1]) # combine lhs and rhs symbols
 
+    globals = []
     prev_pars_def = []
-    shape_index, par_index = -1, -1
-    for par in fitPar:
-        name = "prev_" + par
-        for shape_index in range(len(modelPars)):
-            if par in par_names[shape_index]:
-                par_index = par_names[shape_index].index(par)
-                break
-        if par_index == -1:
-            raise ValueError(f"Parameter '{par}' not found in model parameters.")
-        val = par_vals[shape_index][par_index]
-        prev_pars_def.append(f"{name} = {val}")
-    prev_pars_def = "\n".join(prev_pars_def)
-    
-    globals = "global " + ", ".join([f"prev_{par}" for par in fitPar])
     delta_pars_def = []
     prev_pars_update = []
-    for par in fitPar:
-        delta_pars_def.append(f"d{par} = {par} - prev_{par}")
-        prev_pars_update.append(f"prev_{par} = {par}")
+    for symbol in symbols:
+        if symbol[0] != 'd':
+            continue # skip if symbol is not a delta parameter
+        symbol = symbol[1:]  # remove 'd' prefix
+
+        # find the list index of the parameter
+        par_index = -1
+        for shape_index in range(len(par_names)):
+            shape = par_names[shape_index]
+            if symbol in shape:
+                par_index = par_names[shape_index].index(symbol)
+                break
+        if par_index == -1:
+            raise ValueError(f"Parameter '{symbol}' not found in model parameters.")
+
+        # create the variable names
+        val = par_vals[shape_index][par_index]
+
+        prev_name = "prev_" + symbol
+        globals.append(f"{prev_name}")
+        prev_pars_def.append(f"{prev_name} = {val}")
+        delta_pars_def.append(f"d{symbol} = {prev_name} - {symbol}")
+        prev_pars_update.append(f"{prev_name} = {symbol}")
+
+    if not delta_pars_def:
+        return False, "", ""
+
+    # convert to strings
+    globals = "global " + ", ".join(globals)
+    prev_pars_def = "\n".join(prev_pars_def)
     delta_pars_def   = "\n    ".join(delta_pars_def) # indentation for the function body
     prev_pars_update = "\n    ".join(prev_pars_update)
 
     return (
+        True,
         f"{prev_pars_def}",
-        f"    {globals}\n"
+        f"{globals}\n" # insertion site is already indented, so only newlines should be manually indented
         f"    {delta_pars_def}\n"
         f"    {prev_pars_update}\n"
     )
 
+def script_insert_apply_constraints(lhs_symbols: set[str]) -> str:
+    """ Create the code responsible for updating constraints."""
+
+    text = []
+    for symbol in lhs_symbols:
+        if symbol[0] != 'd':
+            continue
+        symbol = symbol[1:]  # remove 'd' prefix
+        text.append(f"{symbol} += d{symbol}")
+    return bool(text), "\n    ".join(text)  # indentation for the function body
+
 def generate_model(
     prof: ModelProfile, 
     modelPars: list[list[str], list[str | float]],
-    constrainParameters: (str), 
+    usertext: UserText, 
     fitPar: list[str],
     Npoints: int, 
     pr_points: int, 
     model_name: str
 ) -> str:
     """Generates a theoretical model"""
-    importStatement, parameters, translation = constrainParameters
-    delta_parameters_def, delta_parameters_update = delta_parameters_script_inserts(fitPar, modelPars)
+    importStatement, parameters, translation = usertext.imports, usertext.params, usertext.constraints
+    insert_delta, delta_parameters_def, delta_parameters_update = script_insert_delta_parameters(modelPars, usertext.symbols)
+    insert_constraint_update, constraint_update = script_insert_apply_constraints(usertext.symbols[0])
     nl = '\n'
     fitPar.insert(0, "q")
     model_str = (
@@ -135,18 +165,20 @@ category = "plugin"
 '''
 
 # parameter list
-f"{parameters}\n"
+f"{parameters}\n\n"
+
+# define prev_X vars
+f'''\
+{"# previous fit parameter values" + nl + delta_parameters_def if insert_delta else ""}
+'''
 
 # define Iq
 f'''\
-
-# previous fit parameter values
-{delta_parameters_def}
-
 def Iq({', '.join(fitPar)}):
     """Fit function using Shape2SAS to calculate the scattering intensity."""
-{delta_parameters_update}
+    {delta_parameters_update if insert_delta else ""}
     {nl.join(translation)}
+    {constraint_update if insert_constraint_update else ""}
 
     modelProfile = ModelProfile(
         subunits={prof.subunits}, 
