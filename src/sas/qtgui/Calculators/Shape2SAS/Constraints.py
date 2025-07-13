@@ -101,7 +101,7 @@ class Constraints(QWidget, Ui_Constraints):
 
             if not found:
                 return get_default(parameter_text)
-            
+
             new_lines = parameter_text.split("\n")
             # fit_param string is formatted as: 
             # [
@@ -123,7 +123,7 @@ class Constraints(QWidget, Ui_Constraints):
             # remove old lines from the current text and insert the new ones in the middle
             current_text = "\n".join(current_text_lines[:start+1] + new_lines[2:-1] + current_text_lines[start+end:])
             return current_text
-        
+
         current_text = self.constraintTextEditor.txtEditor.toPlainText()
         text = merge_text(current_text, parameter_text)
         self.constraintTextEditor.txtEditor.setPlainText(text)
@@ -131,7 +131,7 @@ class Constraints(QWidget, Ui_Constraints):
 
     @staticmethod
     def parseConstraintsText(
-        text: str, fitPar: list[str], modelPars: list[str], modelVals: list[list[float]], checkedPars: list[str]
+        text: str, fitPar: list[str], modelPars: list[list[str]], modelVals: list[list[float]], checkedPars: list[list[bool]]
     ) -> tuple[list[str], str, str, list[list[bool]]]:
         """Parse the text in the constraints editor and return a dictionary of parameters"""
 
@@ -169,14 +169,6 @@ class Constraints(QWidget, Ui_Constraints):
                         else:
                             constraints.append(node)
 
-            # params must be defined
-            if params is None:
-                logger.error("No parameters found in constraints text.")
-                return None, None, None
-
-            # ensure imports are valid
-            #! not implemented yet
-
             return params, imports, constraints
         
         def extract_symbols(constraints: list[ast.AST]) -> tuple[list[str], list[str]]:
@@ -194,6 +186,11 @@ class Constraints(QWidget, Ui_Constraints):
                         rhs.add(value.id)
 
             return lhs, rhs
+        
+        def validate_params(params: ast.AST): 
+            if params is None:
+                logger.error("No parameters found in constraints text.")
+                raise ValueError("No parameters found in constraints text.")
 
         def validate_symbols(lhs: list[str], rhs: list[str], fitPars: list[str]):
             """Check if all symbols in lhs and rhs are valid parameters."""
@@ -216,9 +213,21 @@ class Constraints(QWidget, Ui_Constraints):
                             logger.error(f"Module '{name.name}' not found.")
                             raise ModuleNotFoundError(f"No module named {name.name}")
 
+        def mark_named_parameters(checkedPars: list[list[bool]], modelPars: list[str], symbols: set[str]):
+            """Mark parameters in the modelPars as checked if they are in symbols_lhs."""
+            for i, shape in enumerate(modelPars):
+                for j, par in enumerate(shape):
+                    if par is None:
+                        continue
+                    in_symbols = par in symbols
+                    d_in_symbols = "d" + par in symbols
+                    checkedPars[i][j] = checkedPars[i][j] or in_symbols or d_in_symbols
+            return checkedPars
+
         tree = as_ast(text)
         params, imports, constraints = parse_ast(tree)
         lhs, rhs = extract_symbols(constraints)
+        validate_params(params)
         validate_symbols(lhs, rhs, fitPar)
         validate_imports(imports)
 
@@ -233,7 +242,7 @@ class Constraints(QWidget, Ui_Constraints):
         print(f"Parsed constraints: {constraints}")
         print(f"Symbols used: {symbols}")
 
-        return UserText(imports, params, constraints, symbols), checkedPars
+        return UserText(imports, params, constraints, symbols), mark_named_parameters(checkedPars, modelPars, lhs.union(rhs))
 
     @staticmethod
     def getPosition(item: VAL_TYPE, itemLists: list[list[VAL_TYPE]]) -> tuple[int, int]:
