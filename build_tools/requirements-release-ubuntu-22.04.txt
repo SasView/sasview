@@ -143,7 +143,7 @@ svglib==1.5.1
 tccbox==2025.1.26
 tinycss2==1.4.0
 tomlkit==0.13.2
-tornado==6.4.2
+tornado==6.5.1
 traitlets==5.14.3
 transaction==5.0
 trove-classifiers==2025.4.28.22
