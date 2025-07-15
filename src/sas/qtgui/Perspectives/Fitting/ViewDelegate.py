@@ -58,7 +58,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
 
             # delete the original content
             options.text = ""
-            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget);
+            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget)
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
@@ -202,7 +202,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
 
             # delete the original content
             options.text = ""
-            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget);
+            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget)
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
@@ -285,7 +285,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
 
             # delete the original content
             options.text = ""
-            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget);
+            style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter, options.widget)
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
