@@ -1,6 +1,6 @@
 .. RELEASE.rst
 
-.. _Release_Notes:
+.. _Sasview_Release_Notes:
 
 Release Notes
 =============

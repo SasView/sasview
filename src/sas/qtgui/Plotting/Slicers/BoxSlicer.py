@@ -632,7 +632,7 @@ class VerticalDoubleLine(BaseInteractor):
         :param x2: new minimum value of x coordinates
         :param y1: new maximum value of y coordinates
         :param y2: new minimum value of y coordinates
-        :param half_ width: is the half width of the new rectangle
+        :param half_width: is the half width of the new rectangle
         :param half_height: is the half height of the new rectangle
         :param center: provided x, y  coordinates of the center point
         """
