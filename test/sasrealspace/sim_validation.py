@@ -6,7 +6,9 @@
 """
 from __future__ import print_function
 
-import math, time, pylab
+import math
+import time
+import pylab
 
 try:
     import VolumeCanvas

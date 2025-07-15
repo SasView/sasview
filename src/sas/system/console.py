@@ -1,7 +1,8 @@
 """
 Windows console binding for SasView
 """
-import os, sys
+import os
+import sys
 import atexit
 
 def attach_windows_console():

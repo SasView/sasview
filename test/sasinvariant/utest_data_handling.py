@@ -51,7 +51,8 @@ class TestLinearFit(unittest.TestCase):
         """ 
             Simple linear fit with noise
         """
-        import random, math
+        import random
+        import math
     
         for i in range(len(self.data.y)):
             self.data.y[i] = self.data.y[i]+.1*(random.random()-0.5)
@@ -80,7 +81,8 @@ class TestLinearFit(unittest.TestCase):
         """ 
             Simple linear fit with noise
         """
-        import random, math
+        import random
+        import math
 
         for i in range(len(self.data.y)):
             self.data.y[i] = self.data.y[i]+.1*(random.random()-0.5)

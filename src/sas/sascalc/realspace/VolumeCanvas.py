@@ -28,7 +28,8 @@ from sas.sascalc.simulation.pointsmodelpy import pointsmodelpy
 from sas.sascalc.simulation.geoshapespy import geoshapespy
 
 
-import os.path, math
+import os.path
+import math
 
 class ShapeDescriptor(object):
     """

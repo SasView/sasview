@@ -29,7 +29,9 @@ def mesh_example():
 def primative_library():
     """ Shows all the existing primitives that can be rendered, press a key to go through them"""
 
-    import sys, os, traceback
+    import sys
+    import os
+    import traceback
     def excepthook(exc_type, exc_value, exc_tb):
         tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
         print("error catched!:")
