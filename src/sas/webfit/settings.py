@@ -17,7 +17,6 @@ from django.core.signals import setting_changed
 from django.conf import settings
 # Import from `django.core.signals` instead of the official location
 # `django.test.signals` to avoid importing the test module unnecessarily.
-from django.core.signals import setting_changed
 from django.utils.module_loading import import_string
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

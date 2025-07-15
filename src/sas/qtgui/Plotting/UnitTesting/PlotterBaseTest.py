@@ -5,7 +5,6 @@ import pytest
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-import pytest
 
 import matplotlib as mpl
 mpl.use("Qt5Agg")
