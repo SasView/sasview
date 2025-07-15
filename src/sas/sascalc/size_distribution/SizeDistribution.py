@@ -523,7 +523,7 @@ class sizeDistribution():
                 convergence.append([converged, conv_iter])
                 if (not converged):
                     logger.warning("Maximum Entropy did not converge. Try increasing the weight factor to increase the weighting effect.")
-            except ZeroDivisionError as e:
+            except ZeroDivisionError:
                 logger.error("Divide by Zero Error occured in maximum entropy fitting. Try increasing the weight factor to increase the error weighting")
 
         # If all bin magnitudes are NaN, raise an error and let the caller handle it

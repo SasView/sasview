@@ -9,7 +9,7 @@ def reduced_version(version_string: str) -> Tuple[int, int, int]:
 
     try:
         version = parse(version_string)
-    except InvalidVersion as e:
+    except InvalidVersion:
         raise ValueError(f"{version_string} not a valid version string")
 
     return (version.major, version.minor, version.micro)

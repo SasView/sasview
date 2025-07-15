@@ -145,7 +145,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
                                             encoding='UTF-8')
                 return pisaStatus.err
 
-        except Exception as ex:
+        except Exception:
             # logging.error("Error creating pdf: " + str(ex))
             logging.error("Error creating pdf: " + traceback.format_exc())
         return False

@@ -754,7 +754,7 @@ class FormulaValidator(QtGui.QValidator):
             self._setStyleSheet("")
             return QtGui.QValidator.Acceptable
 
-        except Exception as e:
+        except Exception:
             self._setStyleSheet("background-color:pink;")
             return QtGui.QValidator.Intermediate
 

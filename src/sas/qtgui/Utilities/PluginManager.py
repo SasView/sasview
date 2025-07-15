@@ -122,7 +122,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
             logging.info(model_results)
         # We can't guarantee the type of the exception coming from
         # Sasmodels, so need the overreaching general Exception
-        except Exception as ex:
+        except Exception:
             msg = "Invalid plugin: %s " % file_name
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)

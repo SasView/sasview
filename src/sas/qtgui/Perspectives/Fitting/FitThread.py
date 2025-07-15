@@ -13,7 +13,7 @@ def map_getattr(classInstance, classFunc, *args):
     """
     try:
         return_value = getattr(classInstance, classFunc)(*args)
-    except Exception as ex:
+    except Exception:
         logger.error("Fitting failed: %s", traceback.format_exc())
         return None
     return  return_value
@@ -21,7 +21,7 @@ def map_getattr(classInstance, classFunc, *args):
 def map_apply(arguments):
     try:
         return_value = arguments[0](*arguments[1:])
-    except Exception as ex:
+    except Exception:
         logger.error("Fitting failed: %s", traceback.format_exc())
         return None
     return return_value
