@@ -17,7 +17,6 @@ from superqt import QDoubleRangeSlider
 DEFAULT_MAP = 'jet'
 
 # Local UI
-from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
 
 class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):

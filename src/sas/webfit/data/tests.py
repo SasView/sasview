@@ -1,22 +1,13 @@
-import os
 import shutil
-from glob import glob
-from pathlib import Path, PurePath
+from pathlib import Path
 
 from django.conf import settings
 from django.test import TestCase
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.test import APIClient, force_authenticate, APITestCase
+from rest_framework.test import APIClient, APITestCase
 
 from .models import Data
-from .views import (
-    list_data,
-    data_info,
-    upload,
-    download
-)
 
 def find(filename):
     return Path(__file__).resolve().parent.parent.parent/'example_data'/'1d_data'/filename

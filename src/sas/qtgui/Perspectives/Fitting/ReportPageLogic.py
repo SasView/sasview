@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
 import datetime
-import re
 import sys
 
 from typing import List

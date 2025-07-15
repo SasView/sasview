@@ -2,9 +2,7 @@ from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 
-from sas.qtgui.UI import main_resources_rc
 from .UI.KiessigPanel import Ui_KiessigPanel
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # sas-global
 from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator

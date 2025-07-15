@@ -1,4 +1,3 @@
-import logging
 
 interface_color = 'black'
 disable_color = 'gray'

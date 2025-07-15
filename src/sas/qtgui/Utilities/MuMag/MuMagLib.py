@@ -1,12 +1,10 @@
 import numpy as np
-import matplotlib.pylab as pl
 import os
 import os.path
 from datetime import datetime
 
 import scipy.optimize
 
-from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog
 
 from sas.qtgui.Utilities.MuMag.datastructures import ExperimentalData, LoadFailure, FitFailure, ExperimentGeometry, \

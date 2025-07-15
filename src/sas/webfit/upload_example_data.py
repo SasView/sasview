@@ -1,7 +1,4 @@
 import os
-import re
-import sys
-import json
 import logging
 import django
 from glob import glob
@@ -11,8 +8,6 @@ from sasdata import example_data
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 django.setup()
 
-from django.contrib.auth.models import User
-from django.core.files.uploadedfile import SimpleUploadedFile
 from data.models import Data
 
 EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", os.path.dirname(example_data.__file__))

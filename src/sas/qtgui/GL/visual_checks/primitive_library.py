@@ -6,7 +6,7 @@ from PySide6 import QtWidgets
 
 from sas.qtgui.GL.scene import Scene
 from sas.qtgui.GL.models import ModelBase
-from sas.qtgui.GL.color import uniform_coloring, mesh_coloring, vertex_coloring
+from sas.qtgui.GL.color import uniform_coloring, mesh_coloring
 from sas.qtgui.GL.surface import Surface
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube

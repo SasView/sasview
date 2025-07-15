@@ -7,7 +7,6 @@ It's not great, should all really be implemented as a finite state machine with 
 
 """
 
-import sys
 from PySide6.QtCore import QRegularExpression, QRegularExpressionMatchIterator
 from PySide6.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
 

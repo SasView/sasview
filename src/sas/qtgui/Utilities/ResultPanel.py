@@ -35,7 +35,6 @@ class ResultPanel(QtWidgets.QTabWidget):
 
     def onPlotResults(self, results, optimizer="Unknown"):
         # import moved here due to its cost
-        from bumps.dream.stats import var_stats, format_vars
         self.clearAnyData()
 
         result = results[0][0]

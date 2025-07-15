@@ -3,7 +3,7 @@ import os
 from shutil import copyfile
 import logging
 
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets
 
 from sas.sascalc.fit import models
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor

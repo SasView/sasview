@@ -22,7 +22,7 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.PlotterData import DataRole
-from sas.qtgui.Plotting.Plotter import Plotter, PlotterWidget
+from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
 

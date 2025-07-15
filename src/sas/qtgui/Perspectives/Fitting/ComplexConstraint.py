@@ -1,19 +1,15 @@
 """
 Widget for multi-model constraints.
 """
-import os
 
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
 
 from PySide6 import QtCore
-from PySide6 import QtGui
 from PySide6 import QtWidgets
-import webbrowser
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 #ALLOWED_OPERATORS = ['=','<','>','>=','<=']

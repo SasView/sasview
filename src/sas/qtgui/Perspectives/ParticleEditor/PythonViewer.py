@@ -1,6 +1,6 @@
 
-from PySide6 import QtWidgets, QtGui
-from PySide6.QtCore import Qt, Signal, QObject
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 
 

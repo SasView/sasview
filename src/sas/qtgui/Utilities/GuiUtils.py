@@ -1330,7 +1330,6 @@ def readProjectFromSVS(filepath):
     """
     Read old SVS file and convert to the project dictionary
     """
-    from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
     from sas.sascalc.fit.pagestate import Reader
 
     loader = Loader()

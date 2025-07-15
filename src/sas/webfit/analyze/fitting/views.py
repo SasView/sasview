@@ -1,17 +1,15 @@
 import json
 from logging import getLogger
 
-from django.http import HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from bumps.names import *
 from bumps import fitters
-from bumps.formatnum import format_uncertainty
-from sasdata.dataloader.loader import Loader
 from sasmodels.core import load_model, load_model_info, list_models
-from sasmodels.data import load_data, empty_data1D, empty_data2D, empty_sesans
+from sasmodels.data import load_data, empty_data1D
 from sasmodels.bumps_model import Model, Experiment
 from sasmodels.direct_model import DirectModel
 from sas.sascalc.fit.models import ModelManager

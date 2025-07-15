@@ -1,7 +1,6 @@
 import numpy as np
-import warnings
 
-from typing import Optional, Callable, Union
+from typing import Optional, Callable
 from collections import namedtuple
 
 

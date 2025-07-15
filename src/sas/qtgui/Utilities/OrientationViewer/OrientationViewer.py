@@ -1,5 +1,4 @@
-import webbrowser
-from typing import Optional, List
+from typing import Optional
 
 import numpy as np
 from PySide6.QtGui import QIcon
@@ -9,7 +8,6 @@ from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtCore import Qt, QSize
 
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sasmodels.core import load_model_info, build_model
 from sasmodels.data import empty_data2D
 from sasmodels.direct_model import DirectModel

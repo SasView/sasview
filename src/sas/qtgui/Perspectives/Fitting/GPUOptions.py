@@ -1,9 +1,6 @@
 # global
-import os
-import sys
 import json
 import platform
-import webbrowser
 import logging
 from twisted.internet import threads
 from twisted.internet import reactor
@@ -13,8 +10,7 @@ import sasmodels.model_test
 import sasmodels.kernelcl
 from sasmodels.generate import F32, F64
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget

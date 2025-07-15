@@ -159,9 +159,6 @@ def setup_console_simple(stderr_to_stdout=True):
 def demo():
     setup_console()
     if 0:
-        import win32
-        from win32 import win32console
-        from win32 import win32gui
         from win32 import win32process, win32api
         pid = win32process.GetWindowThreadProcessId(hwnd)
         handle = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid[1])

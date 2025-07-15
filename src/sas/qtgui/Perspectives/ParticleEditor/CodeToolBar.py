@@ -2,7 +2,6 @@ from PySide6 import QtWidgets, QtGui
 
 from sas.qtgui.Perspectives.ParticleEditor.UI.CodeToolBarUI import Ui_CodeToolBar
 
-import sas.qtgui.Perspectives.ParticleEditor.UI.icons_rc
 class CodeToolBar(QtWidgets.QWidget, Ui_CodeToolBar):
     def __init__(self, parent=None):
         super().__init__()

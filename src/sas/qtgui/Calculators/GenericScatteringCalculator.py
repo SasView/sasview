@@ -16,26 +16,21 @@ from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 
-from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.backends.backend_qt5agg import (FigureCanvas)
 from mpl_toolkits.mplot3d.axes3d import Axes3D
-from matplotlib import __version__ as mpl_version
 
 from twisted.internet import threads
 
-import periodictable
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.GenericReader import GenReader
 from sasdata.dataloader.data_info import Detector, Source
-from sas.system.version import __version__
 from sas.sascalc.calculator import sas_gen
 from sas.sascalc.fit import models
 from sas.sascalc.calculator.geni import radius_of_gyration, create_beta_plot, f_of_q
 import sas.sascalc.calculator.gsc_model as gsc_model
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
 
 from sas.qtgui.Plotting.PlotterData import Data1D

@@ -1,5 +1,3 @@
-import sys
-import logging
 import pytest
 
 from PySide6.QtGui import *

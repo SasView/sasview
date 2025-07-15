@@ -1,4 +1,3 @@
-from typing import Callable
 from sas.qtgui.Utilities.GuiUtils import enum
 
 WIDGETS = enum( 'W_QMIN',

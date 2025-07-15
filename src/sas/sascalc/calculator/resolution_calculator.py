@@ -3,7 +3,6 @@ This object is a small tool to allow user to quickly
 determine the variance in q  from the
 instrumental parameters.
 """
-import sys
 from math import pi, sqrt
 import math
 import logging

@@ -10,7 +10,6 @@ import uncertainties
 
 import numpy as np
 
-import bumps
 from bumps import fitters
 try:
     from bumps.options import FIT_CONFIG

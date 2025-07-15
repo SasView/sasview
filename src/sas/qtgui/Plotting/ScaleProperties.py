@@ -1,8 +1,5 @@
-from PySide6 import QtCore
-from PySide6 import QtGui
 from PySide6 import QtWidgets
 
-from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ScalePropertiesUI import Ui_scalePropertiesUI
 
 x_values = ["x", "x^(2)", "x^(4)", "ln(x)", "log10(x)", "log10(x^(4))"]

@@ -8,12 +8,8 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-import math
-import logging
-import sys
 
 import numpy as np  # type: ignore
-from numpy import pi, exp # type:ignore
 
 from sasmodels.resolution import Slit1D, Pinhole1D
 from sasmodels.sesans import SesansTransform

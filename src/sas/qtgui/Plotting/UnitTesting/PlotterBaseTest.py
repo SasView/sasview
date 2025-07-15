@@ -1,4 +1,3 @@
-import sys
 import platform
 
 import pytest
@@ -12,9 +11,7 @@ import matplotlib as mpl
 mpl.use("Qt5Agg")
 
 from PySide6 import QtGui, QtWidgets, QtPrintSupport
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle

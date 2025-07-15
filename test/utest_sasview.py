@@ -12,7 +12,7 @@ logging.config.fileConfig(LOGGER_CONFIG_FILE)
 logger = logging.getLogger(__name__)
 
 try:
-    import xmlrunner
+    pass
 except:
     logger.error("xmlrunner needs to be installed to run these tests")
     logger.error("Try easy_install unittest-xml-reporting")

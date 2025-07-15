@@ -2,12 +2,11 @@ from functools import partial
 import copy
 import numpy as np
 
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local UI
-from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.MaskEditorUI import Ui_MaskEditorUI
 from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
 

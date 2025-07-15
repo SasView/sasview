@@ -1,4 +1,4 @@
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
 
 
 class AssociatedComboBox(QtWidgets.QComboBox):

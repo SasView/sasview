@@ -1,10 +1,9 @@
-import sys
 import numpy as np
 import webbrowser
 
 import pytest
 
-from PySide6 import QtGui, QtWidgets, QtCore, QtTest
+from PySide6 import QtWidgets, QtCore, QtTest
 
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint

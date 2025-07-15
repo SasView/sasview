@@ -1,4 +1,3 @@
-import sys
 import time
 import random
 import pytest
@@ -9,7 +8,6 @@ from PySide6.QtWidgets import *
 from PySide6.QtTest import QTest
 from PySide6.QtCore import *
 
-from mpl_toolkits.mplot3d import Axes3D
 
 # Local
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
@@ -17,7 +15,6 @@ from sasdata.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Plotting.Plotter import Plotter

@@ -1,4 +1,3 @@
-import sys
 import webbrowser
 
 import pytest

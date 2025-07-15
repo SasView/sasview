@@ -1,12 +1,10 @@
-import sys
 import numpy as np
 from unittest.mock import mock_open, patch
-import webbrowser
 import logging
 
 import pytest
 
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
 
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 

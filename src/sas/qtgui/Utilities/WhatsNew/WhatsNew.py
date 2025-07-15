@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from PySide6 import QtWidgets
-from PySide6.QtGui import QImage, QPixmap, QIcon
+from PySide6.QtGui import QPixmap, QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QTextBrowser, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox
 from PySide6.QtCore import QUrl, QSize
 
@@ -226,7 +226,6 @@ class WhatsNew(QDialog):
 def main():
     """ Demo/testing window"""
 
-    from sas.qtgui.convertUI import main
 
     app = QtWidgets.QApplication([])
 

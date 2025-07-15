@@ -1,11 +1,7 @@
-import sys
-import webbrowser
 import pytest
 
 from PySide6 import QtGui
 from PySide6 import QtWidgets
-from PySide6 import QtTest
-from PySide6 import QtCore
 
 # Local
 import sas.qtgui.Utilities.GuiUtils as GuiUtils

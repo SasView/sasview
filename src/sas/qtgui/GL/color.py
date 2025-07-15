@@ -6,7 +6,6 @@ import matplotlib as mpl
 from enum import Enum
 from dataclasses import dataclass
 
-from OpenGL.GL import glColor4f
 
 "Helper classes for dealing with colours"
 

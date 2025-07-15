@@ -1,4 +1,3 @@
-import webbrowser
 
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
 from PySide6.QtWidgets import QVBoxLayout

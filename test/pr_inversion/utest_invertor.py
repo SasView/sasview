@@ -584,7 +584,6 @@ def pr_theory(r, R):
 def load(path = find("sphere_60_q0_2.txt")):
     import numpy as np
     import math
-    import sys
     # Read the data from the data file
     data_x   = np.zeros(0)
     data_y   = np.zeros(0)

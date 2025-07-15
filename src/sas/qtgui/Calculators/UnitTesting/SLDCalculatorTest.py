@@ -1,18 +1,14 @@
-import sys
-import webbrowser
 
 import pytest
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
 from PySide6.QtTest import QTest
 from PySide6 import QtCore
-from unittest.mock import MagicMock
 
 
 # Local
 #from sas.qtgui.Calculators.SldPanel import SldResult
 from sas.qtgui.Calculators.SldPanel import SldPanel
-from sas.qtgui.Calculators.SldPanel import neutronSldAlgorithm, xraySldAlgorithm
-from sas.qtgui.Utilities.GuiUtils import FormulaValidator
+from sas.qtgui.Calculators.SldPanel import neutronSldAlgorithm
 
 class SldAlgorithmTest:
     """ Test the periodictable wrapper """

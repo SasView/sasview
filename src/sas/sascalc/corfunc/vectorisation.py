@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Union, Callable, Any
+from typing import Union, Callable
 
 # TODO: Proper typing when newer numpy (>1.20) is supported
 ArrayLike = Union[np.ndarray, float, int]

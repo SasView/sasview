@@ -1,6 +1,5 @@
-import sys
 
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
 import pytest
 
 # Local

@@ -1,7 +1,7 @@
 import functools
 
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QPixmap, QIcon, QCloseEvent
+from PySide6.QtGui import QPixmap, QIcon
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QSizePolicy, QSpacerItem, QFrame, QPushButton, \
     QGridLayout, QDialog
 

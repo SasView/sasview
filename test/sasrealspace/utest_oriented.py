@@ -4,7 +4,7 @@
 """
 from __future__ import print_function
 
-import unittest, math, sys
+import unittest, math
 
 # Disable "missing docstring" complaint
 # pylint: disable-msg=C0111

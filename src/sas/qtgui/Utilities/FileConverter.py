@@ -7,7 +7,7 @@ import logging
 
 import numpy as np
 
-from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 

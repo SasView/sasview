@@ -35,7 +35,6 @@ Something like this
 
 from typing import Tuple, Sequence, Any
 
-import math
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3

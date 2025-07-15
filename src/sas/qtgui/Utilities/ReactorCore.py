@@ -412,7 +412,7 @@ def win32install():
 
 
 if runtime.platform.getType() == 'win32':
-    from win32event import CreateEvent, MsgWaitForMultipleObjects
+    from win32event import MsgWaitForMultipleObjects
     from win32event import WAIT_OBJECT_0, WAIT_TIMEOUT, QS_ALLINPUT, QS_ALLEVENTS
     install = win32install
 else:

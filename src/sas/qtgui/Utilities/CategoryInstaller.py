@@ -9,7 +9,6 @@ Copyright (c) Institut Laue-Langevin 2012
 """
 
 import os
-import sys
 import json
 import logging
 from collections import defaultdict, OrderedDict

@@ -1,5 +1,4 @@
 from typing import Tuple
-import re
 
 from packaging.version import parse, Version, InvalidVersion
 

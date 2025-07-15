@@ -1,4 +1,3 @@
-import sys
 
 import pytest
 
@@ -7,7 +6,6 @@ from PySide6 import QtGui, QtCore
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 
 from sasmodels import generate
 from sasmodels import modelinfo

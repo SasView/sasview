@@ -6,7 +6,6 @@ import pytest
 
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
-from PySide6.QtTest import QTest
 from PySide6 import QtCore
 
 # Local

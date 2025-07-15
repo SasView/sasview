@@ -2,11 +2,9 @@
 Unit Tests for CorfuncCalculator class
 """
 
-from typing import Optional
 
 import os.path
 import unittest
-import time
 
 import numpy as np
 
