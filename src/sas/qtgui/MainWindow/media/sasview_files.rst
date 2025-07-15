@@ -29,7 +29,7 @@ of the `~/.sasview` directory.**
 .. _Config_Files:
 
 Configuration Files
---------------------
+-------------------
 SasView stores two types of config file on the user disk, a general configuration file for each major version of sasview,
 and a categories file that allows the end user to change how their models are organized in the fitting perspective. The
 general configuration file, config-<v>.json is a json file that stores a mapping of config variables to their updated values.
@@ -70,7 +70,7 @@ OS-specific file locations for plugin files:
 .. _Compiled_Files:
 
 Complied Model Files
-------------
+--------------------
 The fitting module, when a model is selected, compiles each model in an on-demand process. The compiled file will include
 all form factors and structure factors used to create the model, and will be compiled based on the GPU optimization
 currently in use. These models are stored in a parallel directory to the plugin models, but end users do not need to add

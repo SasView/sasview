@@ -28,7 +28,7 @@ New Features
 * A model reparameterization editor is now available from the fitting menu by @tsole0 in https://github.com/SasView/sasview/pull/3136
 
 Feature Enhancements
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 * P(r) analysis now allows multiple files and batch processing by @ru4en in https://github.com/SasView/sasview/pull/3137
 * Fitting widget refactor by @rozyczko in https://github.com/SasView/sasview/pull/3169
 * Initial implementation of the undelete mechanism for fitting tabs by @rozyczko in https://github.com/SasView/sasview/pull/3140
@@ -37,14 +37,14 @@ Feature Enhancements
 * Update model editor (rebase) by @krzywon in https://github.com/SasView/sasview/pull/3135
 
 Bug Fixes
-^^^^^^^^^^^^
+^^^^^^^^^
 * Fix LaTeX equation in corfunc docs by @llimeht in https://github.com/SasView/sasview/pull/3162
 * Allow webfit to run in Django v5.0 by @summerhenson in https://github.com/SasView/sasview/pull/3200
 * Bumps v1.* compatibility fixes by @krzywon in https://github.com/SasView/sasview/pull/3165 and @bmaranville in https://github.com/SasView/sasview/pull/3268
 * Whats new window no longer shows previous version information by @lucas-wilkins in https://github.com/SasView/sasview/pull/3261
 
 Infrastructure Changes
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 * Bump dawidd6/action-download-artifact from 2 to 6 in /.github/workflows by @dependabot in https://github.com/SasView/sasview/pull/3151
 * Renabling the Ubuntu installer test by @jamescrake-merani in https://github.com/SasView/sasview/pull/3174
 * Remove Ubuntu 20.04 from CI by @jamescrake-merani in https://github.com/SasView/sasview/pull/3214
@@ -57,7 +57,7 @@ Infrastructure Changes
 * Auto generate wheels by @llimeht in https://github.com/SasView/sasview/pull/3281
 
 Known Issues
-^^^^^^^^^
+^^^^^^^^^^^^
 All known bugs and feature requests can be found in the issues on github.
 
 `sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
@@ -70,20 +70,20 @@ This is a bug fix release and the issues fixed for this release are described be
 This version of SasView is built with Sasmodels v1.0.9, Sasdata v0.9.0, and bumps v0.9.3.
 
 General GUI Fixes
-^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 * Open a pop-up on start-up if a new version is available by @lucas-wilkins in https://github.com/SasView/sasview/pull/3216
 * Removed superfluous signal connection causing duplicate theories by @rozyczko in https://github.com/SasView/sasview/pull/3199
 * Removing data from the context menu now removes it from perspectives by @rozyczko in https://github.com/SasView/sasview/pull/3236
 
 Plotting Fixes
-^^^^^^^^^
+^^^^^^^^^^^^^^
 * Fix to ensure default plot scaling matches the plot type by @krzywon in https://github.com/SasView/sasview/pull/3184
 * Delete intermediate theory plots by tab id not model id. by @jamescrake-merani in https://github.com/SasView/sasview/pull/3160
 * Linear fit no longer causes graph rescaling by @krzywon in https://github.com/SasView/sasview/pull/3187
 * Fix for errors thrown when modifying tick labels by @jamescrake-merani in https://github.com/SasView/sasview/pull/3191
 
 Fitting and Other Perspective Fixes
-^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Status bar message does not clear on gsc exit by @rozyczko in https://github.com/SasView/sasview/pull/3185
 * Guard against bad fit results to ensure fit tabs can run new fits by @rozyczko in https://github.com/SasView/sasview/pull/3172
 * A number of model editor bug fixes by @tsole0 in https://github.com/SasView/sasview/pull/2901
@@ -91,19 +91,19 @@ Fitting and Other Perspective Fixes
 * Added OpenCL support for the Flatpak release by @jamescrake-merani in https://github.com/flathub/org.sasview.sasview/pull/4
 
 Other Fixes
-^^^^^^^^^
+^^^^^^^^^^^
 * Call the system default csv viewer to allow batch fit results output for any OS by @summerhenson in https://github.com/SasView/sasview/pull/3186
 * Remove a button that did nothing by @jamescrake-merani in https://github.com/SasView/sasview/pull/3217
 
 Infrastructure Fixes
-^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 * Fixes to the flatpak metadata by @jamescrake-merani in https://github.com/SasView/sasview/pull/3150
 * Replace the expired OSX Notarization key by @krzywon in https://github.com/SasView/sasview/pull/3183
 * Include new contributors in the contributor file by @krzywon in https://github.com/SasView/sasview/pull/3192
 * Fix for sasmodel doc build by @krzywon in https://github.com/SasView/sasview/pull/3212
 
 Known Issues
-^^^^^^^^^
+^^^^^^^^^^^^
 All known bugs and feature requests can be found in the issues on github.
 
 `sasview issues <https://github.com/SasView/sasview/issues>`_ | `sasmodels issues <https://github.com/SasView/sasmodels/issues>`_ | `sasdata issues <https://github.com/SasView/sasdata/issues>`_
@@ -200,7 +200,7 @@ ______________
 * Fixed sesans residuals plots to show in real space rather than q space by @caitwolf in https://github.com/SasView/sasview/pull/2338
 
 Fitting and Other Perspective Fixes
-_____________
+___________________________________
 * Fix model date format in the user model docstring by @mrakitin in https://github.com/SasView/sasview/pull/2713
 * Various Multiplicity Model Fixes by @krzywon in https://github.com/SasView/sasview/pull/2647
 * Fix model save error by @krzywon in https://github.com/SasView/sasview/pull/2864
@@ -1531,7 +1531,7 @@ New in Version 2.2.0
 
 
 Feature set from previous versions
------------------------------------
+----------------------------------
 Perspectives Available
 ^^^^^^^^^^^^^^^^^^^^^^
 * Invariant calculator: Calculates the invariant, volume fraction, and

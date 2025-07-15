@@ -35,6 +35,7 @@ extensions = ['sphinx.ext.autodoc',
               #'mathjax',  # replacement mathjax that allows a list of paths
               'dollarmath',
               #'sphinx.ext.viewcode',
+              'matplotlib.sphinxext.roles',  # For mpltype in Plotting/Arrow3D.py
               ]
 
 no_highlight = os.environ.get('SAS_NO_HIGHLIGHT', '0') # Check if sphinx highlighting is disabled in this environment

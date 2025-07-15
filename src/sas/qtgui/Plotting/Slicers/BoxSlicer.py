@@ -377,16 +377,18 @@ class BoxInteractor(BaseInteractor, SlicerModel):
     def validate(self, param_name, param_value):
         """
         Validate input from user.
-        Values get checked at apply time.
-        * nbins cannot be zero or samller
-        * The full ROI should stay within the data. thus center_x and center_y
+
+        Values get checked at apply time:
+
+        * ``nbins`` cannot be zero or smaller
+        * The full ROI should stay within the data. Thus ``center_x`` and ``center_y``
           are restricted such that the center +/- width (or height) cannot be
-          greate or smaller than data max/min.
+          greater or smaller than data max/min.
         * The width/height should not be set so small as to leave no data in
           the ROI. Here we only make sure that the width/height is not zero
           as done when dragging the vertical or horizontal lines. We let the
-          call to _post_data capture the ValueError of no points in ROI
-          raised by manipulations.py, log the message and negate the entry
+          call to ``_post_data`` capture the ``ValueError`` of no points in ROI
+          raised by ``manipulations.py``, log the message and negate the entry
           at that point.
         """
         isValid = True
