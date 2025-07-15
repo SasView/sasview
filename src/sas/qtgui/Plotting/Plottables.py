@@ -383,7 +383,7 @@ class Transform(object):
         user, along with an indication of which plottable was at fault.
 
         """
-        raise NotImplemented("Not a valid transform")
+        raise NotImplementedError("Not a valid transform")
 
     # Related issues
     # ==============
