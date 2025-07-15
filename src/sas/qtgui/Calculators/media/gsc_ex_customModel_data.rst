@@ -3,7 +3,7 @@
 .. _gsc_ex_customModel_data:
 
 Example: Fit the experimental data using the calculated $P(Q)$ from a PDB file
-==============================================================================
+====================================================================================
 
 (Pictures in this document were generated using SasView 6.0.0.) To calculate $P(Q)$ from a PDB file, use the Generic Scattering Calculator in the Tools menu. In this example, a PDB file for apoferritin was downloaded from the PDB data bank (https://www.rcsb.org/structure/6z6u). The custom model function, custom_apoferritinLong, was obtained from the scattering calculator using the Debye full avg. w/ $\beta(Q)$ option after loading the apoferritin PDB file (see print-screen below). Note that the q-range and the number of data points can be customized. The Export Model box should be checked to enable a file name for the custom plugin model that will be produced (custom_apoferritinLong). Clicking "Compute" launches the calculation of $P(Q)$ and $\beta(Q)$, and generate the file into the plugin model directory of the SasView. Once the computation is finished, the plugin model is ready to use to fit scattering data.
 
