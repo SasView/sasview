@@ -142,7 +142,7 @@ class ConfigBase:
                 self.load_from_file_object(file)
 
         else:
-            logger.warning(f"No config file found - one will be created when sasview exits")
+            logger.warning("No config file found - one will be created when sasview exits")
 
     def load_from_file_object(self, file):
         """ Load config file """

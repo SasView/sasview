@@ -153,7 +153,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         a_max = self.aMaxSpinBox.value()
 
         if a_max <= a_min:
-            raise ValueError(f"minimum A must be less than maximum A")
+            raise ValueError("minimum A must be less than maximum A")
 
         match self.ScatteringGeometrySelect.currentText().lower():
             case "parallel":

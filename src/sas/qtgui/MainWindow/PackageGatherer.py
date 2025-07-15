@@ -235,6 +235,6 @@ class PackageGatherer:
                 pass
             # Append module to output_list
             else:
-                output_dict[module_name] = f"Unknown: Version number could not be found"
+                output_dict[module_name] = "Unknown: Version number could not be found"
 
         return output_dict

@@ -41,9 +41,9 @@ class NewVersionAvailable(QDialog):
 
         self.setLayout(vertical_layout)
 
-        text = QLabel(f"<p>A new version of sasview is available.</p>"
-                       f""
-                       f"<p><center>Visit the download page?</centre></p><p/>")
+        text = QLabel("<p>A new version of sasview is available.</p>"
+                       ""
+                       "<p><center>Visit the download page?</centre></p><p/>")
 
         vertical_layout.addWidget(text)
 
