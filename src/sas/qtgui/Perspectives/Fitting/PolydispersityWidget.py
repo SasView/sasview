@@ -481,6 +481,14 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             # Nsigs
             param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
             self.poly_model.item(row, 5+joffset).setText(param_repr)
+            # Function
+            param_repr = param_dict[param_name][6+ioffset]
+            self.poly_model.item(row, 6+joffset).setText(param_repr)
+            index = self.poly_model.index(row, 6+joffset)
+            widget = self.lstPoly.indexWidget(index)
+            if widget is not None and isinstance(widget, QtWidgets.QComboBox):
+                func_index = widget.findText(param_repr)
+                widget.setCurrentIndex(func_index)
 
             self.setFocus()
 
