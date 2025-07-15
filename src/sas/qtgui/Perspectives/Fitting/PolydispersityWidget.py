@@ -157,8 +157,11 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             if model_column not in delegate.columnDict():
                 return
-            self.poly_params[parameter_name_w] = value
-            self.logic.kernel_module.setParam(parameter_name_w, value)
+            # Map the column to the poly param that was changed
+            associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
+            p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
+            self.poly_params[p_name] = value
+            self.logic.kernel_module.setParam(p_name, value)
 
             # Update plot
             self.updateDataSignal.emit()
