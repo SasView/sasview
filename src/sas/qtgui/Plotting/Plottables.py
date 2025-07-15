@@ -205,7 +205,7 @@ class Graph(object):
     def add(self, plottable, color=None):
         """Add a new plottable to the graph"""
         # record the colour associated with the plottable
-        if not plottable in self.plottables:
+        if plottable not in self.plottables:
             if color is not None:
                 self.plottables[plottable] = color
             else:

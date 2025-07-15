@@ -542,7 +542,7 @@ class FitArrange:
 
         :param data: Data to add in the list
         """
-        if not data in self.data_list:
+        if data not in self.data_list:
             self.data_list.append(data)
 
     def get_model(self):

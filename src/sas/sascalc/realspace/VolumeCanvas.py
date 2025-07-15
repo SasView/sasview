@@ -426,7 +426,7 @@ class VolumeCanvas(BaseComponent):
                 raise ValueError("VolumeCanvas.getParam: Could not find "
                                  "%s" % name)
 
-            if not toks[1] in shapeinstance.params:
+            if toks[1] not in shapeinstance.params:
                 raise ValueError("VolumeCanvas.getParam: Could not find "
                                  "%s" % name)
 
@@ -460,7 +460,7 @@ class VolumeCanvas(BaseComponent):
                     param_list.append(fullname)
 
         else:
-            if not shapeid in self.shapes:
+            if shapeid not in self.shapes:
                 raise ValueError("VolumeCanvas: getParamList: Could not find "
                                  "%s" % shapeid)
 

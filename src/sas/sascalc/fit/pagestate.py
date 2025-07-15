@@ -611,7 +611,7 @@ class PageState(object):
         for line in lines:
             # Skip lines which are not key: value pairs, which includes
             # blank lines and freeform notes in SASNotes fields.
-            if not ':' in line:
+            if ':' not in line:
                 #msg = "Report string expected 'name: value' but got %r" % line
                 #logger.error(msg)
                 continue

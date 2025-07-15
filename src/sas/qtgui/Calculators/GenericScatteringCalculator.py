@@ -483,7 +483,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sender.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
         # If the LineEdit is an acceptable value according to the regex apply warnings
         # This functionality was previously found in check_value()
-        if not(sender in self.invalidLineEdits):
+        if sender not in self.invalidLineEdits:
             if sender == self.txtNoQBins :
                 xnodes = float(self.txtXnodes.text())
                 ynodes = float(self.txtYnodes.text())
