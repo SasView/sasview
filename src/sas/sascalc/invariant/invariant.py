@@ -360,7 +360,7 @@ class Extrapolator(object):
             try:
                 inv_cov = np.dot(A.transpose(), A)
                 cov = np.linalg.pinv(inv_cov)
-                err_matrix = math.fabs(residuals) * cov
+                err_matrix = np.fabs(residuals) * cov
                 err = [math.sqrt(err_matrix[0][0]), math.sqrt(err_matrix[1][1])]
             except:
                 err = [-1.0, -1.0]
