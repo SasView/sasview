@@ -159,12 +159,6 @@ def setup_console_simple(stderr_to_stdout=True):
 
 def demo():
     setup_console()
-    if 0:
-        from win32 import win32process, win32api
-        pid = win32process.GetWindowThreadProcessId(hwnd)
-        handle = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid[1])
-        proc_name = win32process.GetModuleFileNameEx(handle, 0)
-        print(proc_name)
     print("demo ready")
     import code; code.interact(local={'exit': sys.exit})
     print('demo done')

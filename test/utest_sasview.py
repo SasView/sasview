@@ -11,13 +11,6 @@ LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'l
 logging.config.fileConfig(LOGGER_CONFIG_FILE)
 logger = logging.getLogger(__name__)
 
-try:
-    pass
-except:
-    logger.error("xmlrunner needs to be installed to run these tests")
-    logger.error("Try easy_install unittest-xml-reporting")
-    sys.exit(1)
-
 # Check whether we have matplotlib installed
 HAS_MPL_WX = True
 try:
