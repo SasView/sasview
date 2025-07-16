@@ -682,7 +682,7 @@ class View(object):
         has_err_y = not (dy is None or len(dy) == 0)
 
         if(x is not None) and (y is not None):
-            if dx is not None and not len(dx) == 0 and not len(x) == len(dx):
+            if dx is not None and len(dx) != 0 and len(x) != len(dx):
                 msg = "Plottable.View: Given x and dx are not"
                 msg += " of the same length"
                 raise ValueError(msg)

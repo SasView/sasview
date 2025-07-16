@@ -15,8 +15,6 @@ from PySide6.QtCore import Qt, QLocale
 
 import sas.system.version
 
-#mpl.use("Qt5Agg")
-
 from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
 
 from twisted.internet import reactor
