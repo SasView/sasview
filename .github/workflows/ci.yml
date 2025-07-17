@@ -21,11 +21,16 @@ env:
 
 jobs:
 
-  run_ruff:
-    uses: ./.github/workflows/run_ruff.yml
+  ruff:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: astral-sh/ruff-action@v3
+    - run: ruff check --fix-only
+    - uses: pre-commit-ci/lite-action@v1.1.0
+      if: always()
 
   matrix:
-    needs: [run_ruff]
+    needs: [ruff]
     name: Generate test matrix
 
     #if: false    # uncomment to prevent the rest of the workflow running
@@ -52,7 +57,7 @@ jobs:
 
 
   builddeps:
-    needs: [run_ruff]
+    needs: [ruff]
     runs-on: ubuntu-latest
 
     strategy:
