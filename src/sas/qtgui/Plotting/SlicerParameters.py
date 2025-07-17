@@ -387,20 +387,35 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Send `items_for_fit` to the Fit perspective, in either single fit or batch mode
         """
-        if fitting_requested not in (1, 2):
+        if fitting_requested in (1, 2):            
+            isBatch = fitting_requested == 2
+            # Check if perspective is correct, otherwise complain
+            if self.parent.manager._perspective().name != 'Fitting':
+                msg = "Please change current perspective to Fitting to enable requested Fitting Options."
+                msgbox = QtWidgets.QMessageBox()
+                msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+                msgbox.setText(msg)
+                msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                _ = msgbox.exec_()
+                return
+            # icky way to go up the tree
+            self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)
+        if fitting_requested in (3, 4):            
+            isBatch = fitting_requested == 4
+            # Check if perspective is correct, otherwise complain
+            if self.parent.manager._perspective().name != 'Inversion':
+                msg = "Please change current perspective to Inversion to enable requested Inversion Options."
+                msgbox = QtWidgets.QMessageBox()
+                msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+                msgbox.setText(msg)
+                msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                _ = msgbox.exec_()
+                return
+            # icky way to go up the tree
+            self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)    
+        else:
             return
-        isBatch = fitting_requested == 2
-        # Check if perspective is correct, otherwise complain
-        if self.parent.manager._perspective().name != 'Fitting':
-            msg = "Please change current perspective to Fitting to enable requested Fitting Options."
-            msgbox = QtWidgets.QMessageBox()
-            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
-            msgbox.setText(msg)
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            _ = msgbox.exec_()
-            return
-        # icky way to go up the tree
-        self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)
+    
 
     def keyPressEvent(self, event):
         """
