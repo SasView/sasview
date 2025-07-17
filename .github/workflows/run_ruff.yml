@@ -8,4 +8,6 @@ jobs:
     steps:
       - uses: astral-sh/ruff-action@v3
       - run: ruff check --fix-only
+      - uses: pre-commit-ci/lite-action@v1.1.0
+        if: always()
           
