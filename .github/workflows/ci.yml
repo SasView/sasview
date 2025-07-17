@@ -20,7 +20,12 @@ env:
   INSTALLER_USE_DEBUG: false
 
 jobs:
+
+  run_ruff:
+    uses: ./.github/workflows/run_ruff.yml
+
   matrix:
+    needs: [run_ruff]
     name: Generate test matrix
 
     #if: false    # uncomment to prevent the rest of the workflow running
@@ -47,6 +52,7 @@ jobs:
 
 
   builddeps:
+    needs: [run_ruff]
     runs-on: ubuntu-latest
 
     strategy:
