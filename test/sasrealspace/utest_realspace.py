@@ -9,6 +9,8 @@ import math
 import time
 import ruff
 import pytest
+import scipy as sp
+
 
 # Disable "missing docstring" complaint
 # pylint: disable-msg=C0111
