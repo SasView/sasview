@@ -2,8 +2,7 @@ from copy import deepcopy
 
 #from django.contrib.auth.models import Group, Permission
 #from django.contrib.contenttypes.models import ContentType
-from rest_framework import serializers, validators
-from rest_framework.fields import CharField, ChoiceField, DateTimeField, DecimalField, IntegerField
+from rest_framework import serializers
 from rest_framework.utils import model_meta
 from django.contrib.auth.models import User
 from dj_rest_auth.serializers import UserDetailsSerializer

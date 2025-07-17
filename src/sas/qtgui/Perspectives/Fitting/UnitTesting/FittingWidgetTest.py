@@ -1,8 +1,6 @@
-import sys
 import time
 import logging
 import os
-import inspect
 import glob
 import pytest
 
@@ -11,7 +9,7 @@ from PySide6 import QtWidgets
 from PySide6 import QtTest
 from PySide6 import QtCore
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from twisted.internet import threads
 
 # Local
@@ -19,7 +17,6 @@ from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 
 from sas.qtgui.Plotting.PlotterData import Data1D

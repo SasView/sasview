@@ -584,7 +584,7 @@ def test_expr():
             p6 = TestParameter('broken', expression=expr)
             fn = compile_constraints(*world(p6))
             fn()
-        except Exception as msg:
+        except Exception:
             #print(msg)
             pass
         else:

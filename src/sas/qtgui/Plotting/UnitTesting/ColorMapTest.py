@@ -1,5 +1,3 @@
-import sys
-import numpy
 
 from PySide6 import QtGui, QtWidgets
 import pytest
@@ -10,7 +8,6 @@ mpl.use("Qt5Agg")
 
 from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local

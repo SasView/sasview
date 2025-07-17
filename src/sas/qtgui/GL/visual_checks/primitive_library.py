@@ -6,7 +6,7 @@ from PySide6 import QtWidgets
 
 from sas.qtgui.GL.scene import Scene
 from sas.qtgui.GL.models import ModelBase
-from sas.qtgui.GL.color import uniform_coloring, mesh_coloring, vertex_coloring
+from sas.qtgui.GL.color import uniform_coloring, mesh_coloring
 from sas.qtgui.GL.surface import Surface
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
@@ -29,7 +29,9 @@ def mesh_example():
 def primative_library():
     """ Shows all the existing primitives that can be rendered, press a key to go through them"""
 
-    import sys, os, traceback
+    import sys
+    import os
+    import traceback
     def excepthook(exc_type, exc_value, exc_tb):
         tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
         print("error catched!:")

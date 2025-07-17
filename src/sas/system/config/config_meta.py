@@ -1,5 +1,4 @@
-import re
-from typing import Dict, Any, List, Set
+from typing import Dict, Any, List
 import os
 import logging
 import json
@@ -143,7 +142,7 @@ class ConfigBase:
                 self.load_from_file_object(file)
 
         else:
-            logger.warning(f"No config file found - one will be created when sasview exits")
+            logger.warning("No config file found - one will be created when sasview exits")
 
     def load_from_file_object(self, file):
         """ Load config file """

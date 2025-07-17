@@ -1,8 +1,6 @@
-import sys
 
 import pytest
 
-from PySide6 import QtCore, QtWidgets
 
 # Local
 from PySide6.QtWidgets import QMdiArea

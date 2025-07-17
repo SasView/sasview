@@ -40,13 +40,12 @@ have one.
 
 import sys
 import os
-from os.path import basename, dirname, realpath, join as joinpath, exists
+from os.path import basename, dirname, join as joinpath, exists
 from pathlib import Path
 import math
 import re
 import shutil
 import argparse
-import subprocess
 
 import matplotlib.axes
 from os import makedirs
@@ -59,7 +58,7 @@ from sasmodels.data import empty_data1D, empty_data2D
 
 from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, generate_html, PATH_LIKE
 
-from typing import Any, Dict, Union
+from typing import Any, Dict
 from sasmodels.kernel import KernelModel
 from sasmodels.modelinfo import ModelInfo
 

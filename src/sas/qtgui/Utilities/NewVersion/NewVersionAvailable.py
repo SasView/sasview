@@ -3,7 +3,6 @@ from copy import copy
 from typing import Optional
 
 import json
-import re
 from packaging.version import Version, parse
 
 from PySide6.QtCore import QSize
@@ -13,7 +12,7 @@ from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QWidget
 
 import logging
 
-from sas import config, system
+from sas import config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.system import web
 
@@ -42,9 +41,9 @@ class NewVersionAvailable(QDialog):
 
         self.setLayout(vertical_layout)
 
-        text = QLabel(f"<p>A new version of sasview is available.</p>"
-                       f""
-                       f"<p><center>Visit the download page?</centre></p><p/>")
+        text = QLabel("<p>A new version of sasview is available.</p>"
+                       ""
+                       "<p><center>Visit the download page?</centre></p><p/>")
 
         vertical_layout.addWidget(text)
 

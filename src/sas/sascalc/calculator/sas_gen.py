@@ -1261,7 +1261,7 @@ class PDBReader(object):
                                 index = int(part) - 1
                                 bonded_indices.append(index)
 
-                            except ValueError as ve:
+                            except ValueError:
                                 pass
 
                         # Store pairs in canonical order

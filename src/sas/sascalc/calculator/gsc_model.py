@@ -1,7 +1,6 @@
 """
 create plugin model from the Generic Scattering Calculator
 """
-import logging
 import math
 from pathlib import Path
 

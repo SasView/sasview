@@ -4,16 +4,7 @@ Implements low level inversion functionality, with conditional Numba njit compil
 """
 from __future__ import division
 
-import sys
-import math
-import time
-import copy
-import os
-import re
-import logging
-import time
 
-from functools import reduce
 import numpy as np
 from numpy import pi
 

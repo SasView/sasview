@@ -7,7 +7,7 @@ import logging
 
 import numpy as np
 
-from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
@@ -331,9 +331,9 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         # Check/add extension
         filename_tuple = os.path.splitext(text)
         ext = filename_tuple[1]
-        if not ext.lower() in ('.xml', '.h5'):
+        if ext.lower() not in ('.xml', '.h5'):
             text += '.h5'
-        if not self.is1D and not '.h5' in ext.lower():
+        if not self.is1D and '.h5' not in ext.lower():
             # quietly add .h5 as extension
             text += '.h5'
 
@@ -356,7 +356,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         Enable/disable UI items based on input format spec
         """
         # ASCII 2D allows for one file only
-        self.is1D = not '2D' in self.cbInputFormat.currentText()
+        self.is1D = '2D' not in self.cbInputFormat.currentText()
         self.label_7.setVisible(self.is1D)
         self.txtQFile.setVisible(self.is1D)
         self.btnQFile.setVisible(self.is1D)

@@ -18,7 +18,6 @@ import logging
 
 from django.contrib import admin
 from django.urls import path, re_path, include
-from rest_framework import routers, serializers
 
 logger = logging.getLogger(__name__)
 

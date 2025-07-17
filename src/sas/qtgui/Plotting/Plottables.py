@@ -205,7 +205,7 @@ class Graph(object):
     def add(self, plottable, color=None):
         """Add a new plottable to the graph"""
         # record the colour associated with the plottable
-        if not plottable in self.plottables:
+        if plottable not in self.plottables:
             if color is not None:
                 self.plottables[plottable] = color
             else:
@@ -226,7 +226,7 @@ class Graph(object):
         for p in self.plottables:
             if p.hidden == True:
                 continue
-            if not p.x is None:
+            if p.x is not None:
                 for x_i in p.x:
                     if min_value is None or x_i < min_value:
                         min_value = x_i
@@ -383,7 +383,7 @@ class Transform(object):
         user, along with an indication of which plottable was at fault.
 
         """
-        raise NotImplemented("Not a valid transform")
+        raise NotImplementedError("Not a valid transform")
 
     # Related issues
     # ==============
@@ -561,8 +561,8 @@ class Plottable(object):
         """
         Returns True if there is no data stored in the plottable
         """
-        if not self.x is None and len(self.x) == 0 \
-            and not self.y is None and len(self.y) == 0:
+        if self.x is not None and len(self.x) == 0 \
+            and self.y is not None and len(self.y) == 0:
             return True
         return False
 
@@ -682,7 +682,7 @@ class View(object):
         has_err_y = not (dy is None or len(dy) == 0)
 
         if(x is not None) and (y is not None):
-            if not dx is None and not len(dx) == 0 and not len(x) == len(dx):
+            if dx is not None and len(dx) != 0 and len(x) != len(dx):
                 msg = "Plottable.View: Given x and dx are not"
                 msg += " of the same length"
                 raise ValueError(msg)
@@ -692,7 +692,7 @@ class View(object):
                 msg += "and x are not of the same length"
                 raise ValueError(msg)
 
-            if not dy is None and not len(dy) == 0 and not len(y) == len(dy):
+            if dy is not None and not len(dy) == 0 and not len(y) == len(dy):
                 msg = "Plottable.View: Given y and dy are not of the same "
                 msg += "length: len(y)=%s, len(dy)=%s" % (len(y), len(dy))
                 raise ValueError(msg)

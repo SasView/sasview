@@ -12,7 +12,7 @@
 # 
 
 def copyright():
-    return "iqPy pyre module: Copyright (c) 1998-2005 Michael A.G. Aivazis";
+    return "iqPy pyre module: Copyright (c) 1998-2005 Michael A.G. Aivazis"
 
 
 # version

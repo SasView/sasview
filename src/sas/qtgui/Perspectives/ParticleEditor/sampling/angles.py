@@ -36,7 +36,7 @@ class ZDelta(AngularDistribution):
         return []
 
     def __repr__(self):
-        return f"ZDelta()"
+        return "ZDelta()"
 
 
 class Uniform(AngularDistribution):

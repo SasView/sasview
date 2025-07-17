@@ -1,9 +1,9 @@
-from typing import Optional, Tuple, List, Callable
+from typing import List, Callable
 import numpy as np
 
 # from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
 from PySide6 import QtGui, QtCore
-from PySide6 import QtWidgets, QtOpenGL, QtOpenGLWidgets 
+from PySide6 import QtWidgets, QtOpenGLWidgets 
 
 from OpenGL.GL import *
 from OpenGL.GLU import *

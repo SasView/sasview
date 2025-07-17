@@ -1,5 +1,4 @@
 import numpy
-import logging
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D

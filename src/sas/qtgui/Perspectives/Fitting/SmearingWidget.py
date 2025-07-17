@@ -405,18 +405,18 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         q_max = max(self.data.x)
         smearing_error_flag = False
         if d_length < d_width:
-            msg = f'Length specified which is less than width. \n' \
-                  f'This is not slit-smearing, probably you switched the two parameters? \n' \
-                  f'I am internally using the smaller parameter as the width and larger as the length. \n' \
-                  f'This is the only mathematically valid version of this.'
+            msg = 'Length specified which is less than width. \n' \
+                  'This is not slit-smearing, probably you switched the two parameters? \n' \
+                  'I am internally using the smaller parameter as the width and larger as the length. \n' \
+                  'This is the only mathematically valid version of this.'
             smearing_error_flag = True
             temp = d_length
             d_length = d_width
             d_width = temp
         elif d_length < 10 * d_width:
-            msg = f'Slit length specified which is less than 10 x slit width. ' \
-                  f'This is not slit-smearing (at least not in the form we implement). \n' \
-                  f'Use pinhole smearing instead.'
+            msg = 'Slit length specified which is less than 10 x slit width. ' \
+                  'This is not slit-smearing (at least not in the form we implement). \n' \
+                  'Use pinhole smearing instead.'
             smearing_error_flag = True
         # elif d_length < q_max:
         #     msg = f'Length specified which is less than q_max for the data. \n' \

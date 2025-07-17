@@ -773,7 +773,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Determines if the tab can be imported and included in the widget
         """
         if not isinstance(tab, str): return False
-        if not self.currentType in tab: return False
+        if self.currentType not in tab: return False
         object = ObjectLibrary.getObject(tab)
         if not isinstance(object, FittingWidget): return False
         if not object.data_is_loaded : return False
@@ -1189,7 +1189,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Update the page with passed parameter values
         """
         # checked models
-        if not 'checked_models' in parameters:
+        if 'checked_models' not in parameters:
             return
         models = parameters['checked_models'][0]
         for model, check_state in models.items():
@@ -1204,7 +1204,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 else:
                     self.tblTabList.item(row,0).setCheckState(QtCore.Qt.Checked)
 
-        if not 'checked_constraints' in parameters:
+        if 'checked_constraints' not in parameters:
             return
         # checked constraints
         models = parameters['checked_constraints'][0]

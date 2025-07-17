@@ -1,5 +1,5 @@
 import logging
-from django.urls import path, re_path, include
+from django.urls import path, include
 from .views import KnoxLoginView, KnoxRegisterView
 
 logger = logging.getLogger(__name__)

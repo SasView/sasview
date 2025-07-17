@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QTreeWidget
 from PySide6.QtGui import QPainter, QPen, QColor, QFont
-from PySide6.QtCore import Qt, QRect
+from PySide6.QtCore import Qt
 
 class QParameterTreeWidget(QTreeWidget):
     def __init__(self, *args, **kwargs):

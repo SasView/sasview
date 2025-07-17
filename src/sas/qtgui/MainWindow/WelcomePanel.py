@@ -3,7 +3,6 @@ from PySide6 import QtWidgets
 import sas.sasview
 import sas.system.version
 
-from sas import config
 from sas.system import legal
 
 from sas.qtgui.MainWindow.UI.WelcomePanelUI import Ui_WelcomePanelUI

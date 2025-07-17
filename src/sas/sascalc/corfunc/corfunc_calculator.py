@@ -4,8 +4,6 @@ This module implements corfunc
 
 
 from typing import Optional, Tuple, Callable
-from dataclasses import dataclass
-from enum import Enum
 
 import numpy as np
 import scipy.optimize
@@ -27,8 +25,6 @@ from sas.sascalc.corfunc.calculation_data import (TransformedData,
 
 
 from sasdata.dataloader.data_info import Data1D
-from sas.sascalc.corfunc.transform_thread import FourierThread
-from sas.sascalc.corfunc.transform_thread import HilbertThread
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
 

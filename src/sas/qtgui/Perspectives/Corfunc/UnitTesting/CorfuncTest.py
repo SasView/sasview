@@ -1,5 +1,4 @@
 import os
-import sys
 
 import pytest
 
@@ -10,7 +9,6 @@ from PySide6.QtTest import QTest
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sasdata.dataloader.loader import Loader
-from sas.qtgui.MainWindow.DataManager import DataManager
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 

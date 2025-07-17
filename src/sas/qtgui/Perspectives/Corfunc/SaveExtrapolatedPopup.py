@@ -1,6 +1,5 @@
 import numpy as np
 
-from PySide6 import QtCore
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 

@@ -12,12 +12,8 @@ from PySide6.QtWidgets import *
 from PySide6.QtGui import *
 from PySide6.QtCore import Qt, QLocale
 
-import matplotlib as mpl
 
 import sas.system.version
-from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
-
-#mpl.use("Qt5Agg")
 
 from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
 

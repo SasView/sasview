@@ -1,4 +1,3 @@
-import sys
 import platform
 from unittest.mock import patch
 
@@ -12,10 +11,6 @@ from PySide6 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
-from sas.qtgui.Plotting.LinearFit import LinearFit
-from sas.qtgui.Plotting.PlotProperties import PlotProperties
 
 # Tested module
 import sas.qtgui.Plotting.Plotter as Plotter

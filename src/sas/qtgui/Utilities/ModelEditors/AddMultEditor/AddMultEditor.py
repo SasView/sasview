@@ -4,12 +4,10 @@ Widget for simple add / multiply editor.
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
-import numpy as np
 
 from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
-import webbrowser
 
 import os
 import logging

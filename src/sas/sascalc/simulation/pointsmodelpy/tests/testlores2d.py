@@ -29,10 +29,8 @@ def test_lores2d(phi):
   iqPy.OutputIQ(iq, "out_xy.iq")
 
 def get2d():
-  from math import pi
-  from Numeric import arange,zeros
+  from Numeric import zeros
   from enthought.util.numerix import Float,zeros
-  from sasModeling.file2array import readfile2array
   from sasModeling.pointsmodelpy import pointsmodelpy
   from sasModeling.geoshapespy import geoshapespy
 
@@ -69,10 +67,8 @@ def get2d():
   return value_grid
 
 def get2d_2():
-  from math import pi
-  from Numeric import arange,zeros
+  from Numeric import zeros
   from enthought.util.numerix import Float,zeros
-  from sasModeling.file2array import readfile2array
   from sasModeling.pointsmodelpy import pointsmodelpy
   from sasModeling.geoshapespy import geoshapespy
 

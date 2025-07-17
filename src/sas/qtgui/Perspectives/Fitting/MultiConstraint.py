@@ -9,7 +9,6 @@ import webbrowser
 from numpy import *
 
 from PySide6 import QtWidgets
-from PySide6 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 

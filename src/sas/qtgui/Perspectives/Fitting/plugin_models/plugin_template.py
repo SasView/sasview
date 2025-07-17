@@ -27,7 +27,6 @@ Authorship and Verification
 * **Last Reviewed by:** Reviewer Name Here **Date:** Date Here
 """
 
-import numpy as np
 from numpy import inf
 
 name = "plugin_template"

@@ -233,7 +233,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             rst_time = os.path.getmtime(src)
             html_time = os.path.getmtime(html)
             return not html_exists or rst_time > html_time
-        except Exception as e:
+        except Exception:
             # Catch exception for debugging
             return True
 

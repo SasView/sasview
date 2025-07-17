@@ -12,15 +12,12 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
-from rest_framework import permissions, versioning
 from django.core.signals import setting_changed
 
 from django.conf import settings
 # Import from `django.core.signals` instead of the official location
 # `django.test.signals` to avoid importing the test module unnecessarily.
-from django.core.signals import setting_changed
 from django.utils.module_loading import import_string
-from rest_framework import ISO_8601
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent

@@ -108,7 +108,7 @@ class SchemaNonSpecified(SchemaElement):
         return isinstance(other, SchemaNonSpecified)
 
     def __repr__(self):
-        return f"SchemaNonSpecified"
+        return "SchemaNonSpecified"
 
 
 class SchemaList(SchemaElement):

@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
 from PySide6.QtGui import *
 from PySide6.QtTest import QTest
 from PySide6 import QtCore
@@ -11,7 +11,7 @@ from PySide6 import QtCore
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.MainWindow.MainWindow import SplashScreen
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
-from sas.qtgui.Utilities.HidableDialog import HidableDialog, ShowAgainResult
+from sas.qtgui.Utilities.HidableDialog import HidableDialog
 
 from sas.system import config
 class MainWindowTest:

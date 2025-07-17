@@ -4,12 +4,10 @@ from PySide6 import QtWidgets
 import functools
 import copy
 import math
-import matplotlib as mpl
 import matplotlib.ticker as ticker
 import numpy as np
 import textwrap
 from matplotlib.font_manager import FontProperties
-from packaging import version
 
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Plotting.PlotterBase import PlotterBase

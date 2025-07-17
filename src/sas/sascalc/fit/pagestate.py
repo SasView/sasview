@@ -20,7 +20,6 @@ import logging
 import numpy as np
 import traceback
 
-import xml.dom.minidom
 from xml.dom.minidom import parseString
 from xml.dom.minidom import getDOMImplementation
 from lxml import etree
@@ -30,11 +29,8 @@ import sasmodels.weights
 
 from sas.system.version import __version__ as SASVIEW_VERSION
 
-import sasdata.dataloader
 from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
-from sasdata.dataloader.readers.cansas_reader import get_content, write_node
-from sasdata.dataloader.data_info import Data2D, Collimation, Detector
-from sasdata.dataloader.data_info import Process, Aperture
+from sasdata.dataloader.readers.cansas_reader import get_content
 
 logger = logging.getLogger(__name__)
 
@@ -615,7 +611,7 @@ class PageState(object):
         for line in lines:
             # Skip lines which are not key: value pairs, which includes
             # blank lines and freeform notes in SASNotes fields.
-            if not ':' in line:
+            if ':' not in line:
                 #msg = "Report string expected 'name: value' but got %r" % line
                 #logger.error(msg)
                 continue

@@ -1,4 +1,3 @@
-import sys
 import time
 import numpy
 
@@ -10,14 +9,11 @@ from PySide6.QtCore import Qt
 from unittest.mock import MagicMock
 
 from mpl_toolkits.mplot3d import Axes3D
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 from sas.qtgui.Calculators.GenericScatteringCalculator import Plotter3D
 from sas.qtgui.Plotting.PlotterBase import PlotHelper
 
-from sas.qtgui.MainWindow.DataManager import DataManager
-from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.sascalc.calculator import sas_gen
 

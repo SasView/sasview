@@ -1,4 +1,3 @@
-import sys
 from collections import OrderedDict
 
 from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented

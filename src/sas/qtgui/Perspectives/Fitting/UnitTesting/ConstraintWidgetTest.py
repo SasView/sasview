@@ -1,5 +1,3 @@
-import sys
-import numpy as np
 from unittest.mock import MagicMock
 import pytest
 
@@ -8,8 +6,6 @@ from PySide6.QtTest import QTest, QSignalSpy
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Plotting.PlotterData import Data1D
 
 from sas.qtgui.MainWindow.GuiManager import GuiManager
 

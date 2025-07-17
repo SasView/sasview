@@ -77,7 +77,7 @@ def _invoke_independent(q, coords, w, queue):
     This will redo the import every time it is called, and is only intended for use in a subprocess.
     """
     ausaxs, ausaxs_state = _attach_hooks()
-    if not ausaxs_state is lib_state.READY:
+    if ausaxs_state is not lib_state.READY:
         queue.put(None)
         queue.put(-1)
         return

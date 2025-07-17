@@ -225,7 +225,7 @@ class CalcThread:
     def compute(self, *args, **kwargs):
         """Perform a work unit.  The subclass will provide details of
         the arguments."""
-        raise NotImplemented("Calculation thread needs compute method")
+        raise NotImplementedError("Calculation thread needs compute method")
 
     def exception(self):
         """

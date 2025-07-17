@@ -166,7 +166,7 @@ def find_plugin_models():
                 #if not model.name.startswith(PLUGIN_NAME_BASE):
                 #    model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
-            except Exception as exc:
+            except Exception:
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)

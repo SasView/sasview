@@ -6,10 +6,9 @@ import math
 from PySide6.QtGui import QStandardItem, QDoubleValidator
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
-from numpy.linalg.linalg import LinAlgError
 
 
-from typing import Optional, List, Tuple, Callable
+from typing import Optional, List, Callable
 
 import logging
 

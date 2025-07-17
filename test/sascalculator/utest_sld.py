@@ -4,11 +4,9 @@ import unittest
 _SCALE = 1e-6
 
 # the calculator default value for wavelength is 6
-import periodictable
 from periodictable import formula
 from periodictable.xsf import xray_energy, xray_sld_from_atoms
-from periodictable.constants import avogadro_number
-from  periodictable.nsf import neutron_scattering, neutron_sld
+from  periodictable.nsf import neutron_scattering
 
 
 def calculate_xray_sld(element, density, molecule_formula):

@@ -261,10 +261,10 @@ class maxEntMethod():
             xi[0] = f * cgrad / cnorm
             xi[1] = f * (a * sgrad - b * cgrad)
             
-            eta[0] = np.dot(xi[0], Gqr.transpose());          # solution --> data
-            eta[1] = np.dot(xi[1], Gqr.transpose());          # solution --> data
+            eta[0] = np.dot(xi[0], Gqr.transpose())          # solution --> data
+            eta[1] = np.dot(xi[1], Gqr.transpose())          # solution --> data
             ox = eta[1] / (sigma * sigma)
-            xi[2] = np.dot(ox, Gqr);          # data --> solution
+            xi[2] = np.dot(ox, Gqr)          # data --> solution
             a = 1.0 / math.sqrt(sum(f * xi[2]*xi[2]))
             xi[2] = f * xi[2] * a
             eta[2] = np.dot(xi[2], Gqr.transpose())           # solution --> data
