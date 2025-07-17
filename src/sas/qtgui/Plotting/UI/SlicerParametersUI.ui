@@ -326,6 +326,16 @@
                   <string>Batch fitting</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>Inversion</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Batch inversion</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
