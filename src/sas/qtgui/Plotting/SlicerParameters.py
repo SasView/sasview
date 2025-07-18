@@ -386,24 +386,30 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if model is not None:
             self.model.itemChanged.connect(self.onParamChange)
 
-    def sendToFit(self, items_for_fit, fitting_requested):
-        """
-        Send `items_for_fit` to the Fit perspective, in either single fit or batch mode
-        """
-        if fitting_requested not in (1, 2):
-            return
-        isBatch = fitting_requested == 2
-        # Check if perspective is correct, otherwise complain
-        if self.parent.manager._perspective().name != 'Fitting':
-            msg = "Please change current perspective to Fitting to enable requested Fitting Options."
+    def check_perspective_and_set_data(self,fitting_requested, perspective_name, items_for_fit):
+        if self.parent.manager._perspective().name != perspective_name:
+            msg = f"Please change current perspective to {perspective_name} to enable requested {perspective_name} Options."
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
             return
-        # icky way to go up the tree
+        isBatch = fitting_requested in (2, 4)
         self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)
+
+    def sendToFit(self, items_for_fit, fitting_requested):
+        """
+        Send `items_for_fit` to the Fit perspective, in either single fit or batch mode
+        """
+
+        if fitting_requested in (1, 2):
+            self.check_perspective_and_set_data(fitting_requested, 'Fitting', items_for_fit)
+        elif fitting_requested in (3, 4):
+            self.check_perspective_and_set_data(fitting_requested, 'Inversion', items_for_fit)    
+        else:
+            return
+    
 
     def keyPressEvent(self, event):
         """
