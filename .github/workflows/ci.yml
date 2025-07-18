@@ -149,7 +149,7 @@ jobs:
         if: ${{ ! env.RELEASE_BRANCH_BUILD }}
         run: |
           uv pip install -r build_tools/requirements.txt
-          uv pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
+          uv pip install -r build_tools/requirements-dev.txt
 
       ### For pull_requests with the release branch as the base -or- branches with the name *release*
 
