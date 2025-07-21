@@ -68,8 +68,7 @@ class AsciiDialog(QDialog):
         # TODO: Temporarily exclude SESANS until that's been fixed.
         with suppress(ValueError):
             reduced_dataset_types = dataset_types.remove('SESANS')
-        for name in reduced_dataset_types:
-            self.dataset_combobox.addItem(name)
+        self.dataset_combobox.addItems(reduced_dataset_types)
         self.dataset_layout.addWidget(self.dataset_label)
         self.dataset_layout.addWidget(self.dataset_combobox)
 
