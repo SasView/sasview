@@ -128,7 +128,7 @@ setuptools-scm==8.3.1
 shiboken6==6.9.0
 siphash24==1.7
 six==1.17.0
-snowballstemmer==2.2.0
+snowballstemmer==3.0.1
 soupsieve==2.7
 Sphinx==8.2.3
 sphinxcontrib-applehelp==2.0.0
