@@ -1,5 +1,7 @@
 import webbrowser
 import pytest
+import os
+import logging
 
 from PySide6 import QtCore
 from PySide6 import QtGui, QtWidgets
@@ -11,7 +13,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Tested module
-from sas.qtgui.Utilities.GuiUtils import *
+from sas.qtgui.Utilities import GuiUtils
 
 
 class GuiUtilsTest:
@@ -36,7 +38,7 @@ class GuiUtilsTest:
         """
         Test the container class with signal definitions
         """
-        com = Communicate()
+        com = GuiUtils.Communicate()
 
         # All defined signals
         list_of_signals = [
@@ -65,7 +67,7 @@ class GuiUtilsTest:
         name = "Black Sabbath"
 
         # update the item
-        updateModelItem(test_item, test_list, name)
+        GuiUtils.updateModelItem(test_item, test_list, name)
 
         # Make sure test_item got all data added
         assert test_item.child(0).text() == name
@@ -94,7 +96,7 @@ class GuiUtilsTest:
         update_data.id = '[0]data0'
         update_data.name = 'data0'
         # update the item
-        updateModelItemWithPlot(test_item, update_data, name)
+        GuiUtils.updateModelItemWithPlot(test_item, update_data, name)
 
         # Make sure test_item got all data added
         assert test_item.child(0).text() == name
@@ -111,7 +113,7 @@ class GuiUtilsTest:
         update_data1.name = 'data1'
         name1 = "Black Sabbath1"
         # update the item and check number of rows
-        updateModelItemWithPlot(test_item, update_data1, name1)
+        GuiUtils.updateModelItemWithPlot(test_item, update_data1, name1)
 
         assert test_item.rowCount() == 2
 
@@ -121,7 +123,7 @@ class GuiUtilsTest:
         update_data2.id = '[1]data0'
         update_data2.name = 'data0'
         name2 = "Black Sabbath2"
-        updateModelItemWithPlot(test_item, update_data2, name2)
+        GuiUtils.updateModelItemWithPlot(test_item, update_data2, name2)
         assert test_item.rowCount() == 2
 
         data_from_item = test_item.child(0).child(0).data()
@@ -170,7 +172,7 @@ class GuiUtilsTest:
         checkbox_model.appendRow(checkbox_item)
 
         # Pull out the "plottable" documents
-        plot_list = plotsFromCheckedItems(checkbox_model)
+        plot_list = GuiUtils.plotsFromCheckedItems(checkbox_model)
 
         # Make sure only the checked data is present
         # FRIDAY IN
@@ -195,7 +197,7 @@ class GuiUtilsTest:
         new_data = manager.create_gui_data(output_object[0], p_file)
 
         # Extract Info elements into a model item
-        item = infoFromData(new_data)
+        item = GuiUtils.infoFromData(new_data)
 
         # Test the item and its children
         assert isinstance(item, QtGui.QStandardItem)
@@ -220,31 +222,31 @@ class GuiUtilsTest:
         bad_url3 = r"poop;//**I.am.a.!bad@url"
 
         mocker.patch.object(webbrowser, 'open')
-        openLink(good_url1)
-        openLink(good_url2)
-        openLink(good_url3)
+        GuiUtils.openLink(good_url1)
+        GuiUtils.openLink(good_url2)
+        GuiUtils.openLink(good_url3)
         assert webbrowser.open.call_count == 3
 
         with pytest.raises(AttributeError):
-            openLink(bad_url1)
+            GuiUtils.openLink(bad_url1)
         with pytest.raises(AttributeError):
-            openLink(bad_url2)
+            GuiUtils.openLink(bad_url2)
         with pytest.raises(AttributeError):
-            openLink(bad_url3)
+            GuiUtils.openLink(bad_url3)
 
     def testRetrieveData1d(self):
         """
         """
         with pytest.raises(AttributeError):
-            retrieveData1d("BOOP")
+            GuiUtils.retrieveData1d("BOOP")
 
         #data = Data1D()
         #with pytest.raises(ValueError):
-        #    retrieveData1d(data)
+        #    GuiUtils.retrieveData1d(data)
 
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
 
-        text = retrieveData1d(data)
+        text = GuiUtils.retrieveData1d(data)
 
         assert "Temperature:" in text
         assert "Beam_size:" in text
@@ -255,13 +257,13 @@ class GuiUtilsTest:
         """
         """
         with pytest.raises(AttributeError):
-            retrieveData2d("BOOP")
+            GuiUtils.retrieveData2d("BOOP")
         data = Data2D(image=[1.0, 2.0, 3.0],
                       err_image=[0.01, 0.02, 0.03],
                       qx_data=[0.1, 0.2, 0.3],
                       qy_data=[0.1, 0.2, 0.3])
 
-        text = retrieveData2d(data)
+        text = GuiUtils.retrieveData2d(data)
 
         assert "Type:         Data2D" in text
         assert "I_min = 1.0" in text
@@ -283,11 +285,11 @@ class GuiUtilsTest:
         data = Data1D(x=[1.0, 2.0, 3.0], y=[])
         # Expect a raise
         with pytest.raises(IndexError):
-            onTXTSave(data, path)
+            GuiUtils.onTXTSave(data, path)
 
         # Good data - no dX/dY
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
-        onTXTSave(data, path)
+        GuiUtils.onTXTSave(data, path)
 
         assert os.path.isfile(save_path)
         with open(save_path,'r') as out:
@@ -307,7 +309,7 @@ class GuiUtilsTest:
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
                       dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
 
-        onTXTSave(data, path)
+        GuiUtils.onTXTSave(data, path)
         with open(save_path,'r') as out:
             data_read = out.read()
             assert "<X> <Y> <dY> <dX>\n" in data_read
@@ -392,11 +394,11 @@ class GuiUtilsTest:
 
     def genericFileSaveTest(self, data, name, name_full="", file_format="ASCII", level=None, caplog=False):
         if level == '1D':
-            saveMethod = saveData1D
+            saveMethod = GuiUtils.saveData1D
         elif level == "2D":
-            saveMethod = saveData2D
+            saveMethod = GuiUtils.saveData2D
         else:
-            saveMethod = saveAnyData
+            saveMethod = GuiUtils.saveAnyData
 
         name_full = name if name_full == "" else name_full
 
@@ -417,62 +419,62 @@ class GuiUtilsTest:
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
                       dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="y")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x", yLabel="y")
         assert xLabel == "()"
         assert xscale == "linear"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x^(2)", yLabel="1/y")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x^(2)", yLabel="1/y")
         assert xLabel == "^{2}(()^{2})"
         assert yLabel == "1/(()^{-1})"
         assert xscale == "linear"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x^(4)", yLabel="ln(y)")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x^(4)", yLabel="ln(y)")
         assert xLabel == "^{4}(()^{4})"
         assert yLabel == "\\ln{()}()"
         assert xscale == "linear"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="ln(x)", yLabel="y^(2)")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="ln(x)", yLabel="y^(2)")
         assert xLabel == "\\ln{()}()"
         assert yLabel == "^{2}(()^{2})"
         assert xscale == "linear"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="log10(x)", yLabel="y*x^(2)")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="log10(x)", yLabel="y*x^(2)")
         assert xLabel == "()"
         assert yLabel == " \\ \\ ^{2}(()^{2})"
         assert xscale == "log"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="log10(x^(4))", yLabel="y*x^(4)")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="log10(x^(4))", yLabel="y*x^(4)")
         assert xLabel == "^{4}(()^{4})"
         assert yLabel == " \\ \\ ^{4}(()^{16})"
         assert xscale == "log"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="1/sqrt(y)")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x", yLabel="1/sqrt(y)")
         assert yLabel == "1/\\sqrt{}(()^{-0.5})"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="log10(y)")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x", yLabel="log10(y)")
         assert yLabel == "()"
         assert yscale == "log"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x)")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x", yLabel="ln(y*x)")
         assert yLabel == "\\ln{( \\ \\ )}()"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x^(2))")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x", yLabel="ln(y*x^(2))")
         assert yLabel == "\\ln ( \\ \\ ^{2})(()^{2})"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x^(4))")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x", yLabel="ln(y*x^(4))")
         assert yLabel == "\\ln ( \\ \\ ^{4})(()^{4})"
         assert yscale == "linear"
 
-        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="log10(y*x^(4))")
+        xLabel, yLabel, xscale, yscale = GuiUtils.xyTransform(data, xLabel="x", yLabel="log10(y*x^(4))")
         assert yLabel == " \\ \\ ^{4}(()^{4})"
         assert yscale == "log"
 
@@ -480,132 +482,132 @@ class GuiUtilsTest:
         ''' test single character replacement '''
         s = None
         with pytest.raises(AttributeError):
-            result = replaceHTMLwithUTF8(s)
+            result = GuiUtils.replaceHTMLwithUTF8(s)
 
         s = ""
-        assert replaceHTMLwithUTF8(s) == s
+        assert GuiUtils.replaceHTMLwithUTF8(s) == s
 
         s = "aaaa"
-        assert replaceHTMLwithUTF8(s) == s
+        assert GuiUtils.replaceHTMLwithUTF8(s) == s
 
         s = "&#x212B; &#x221e;      &#177;"
-        assert replaceHTMLwithUTF8(s) == "Å ∞      ±"
+        assert GuiUtils.replaceHTMLwithUTF8(s) == "Å ∞      ±"
 
     def testReplaceHTMLwithASCII(self):
         ''' test single character replacement'''
         s = None
         with pytest.raises(AttributeError):
-            result = replaceHTMLwithASCII(s)
+            result = GuiUtils.replaceHTMLwithASCII(s)
 
         s = ""
-        assert replaceHTMLwithASCII(s) == s
+        assert GuiUtils.replaceHTMLwithASCII(s) == s
 
         s = "aaaa"
-        assert replaceHTMLwithASCII(s) == s
+        assert GuiUtils.replaceHTMLwithASCII(s) == s
 
         s = "&#x212B; &#x221e;      &#177;"
-        assert replaceHTMLwithASCII(s) == "Ang inf      +/-"
+        assert GuiUtils.replaceHTMLwithASCII(s) == "Ang inf      +/-"
 
     def testrstToHtml(self):
         ''' test rst to html conversion'''
         s = None
         with pytest.raises(TypeError):
-            result = rstToHtml(s)
+            result = GuiUtils.rstToHtml(s)
 
         s = ".. |Ang| unicode:: U+212B"
-        assert rstToHtml(s) == ('Ang', 'Å')
+        assert GuiUtils.rstToHtml(s) == ('Ang', 'Å')
         s = r".. |Ang^-1| replace:: |Ang|\ :sup:`-1`"
-        assert rstToHtml(s) == ('Ang^-1', 'Å<sup>-1</sup>')
+        assert GuiUtils.rstToHtml(s) == ('Ang^-1', 'Å<sup>-1</sup>')
         s = r".. |1e-6Ang^-2| replace:: 10\ :sup:`-6`\ |Ang|\ :sup:`-2`"
-        assert rstToHtml(s) == ('1e-6Ang^-2', '10<sup>-6</sup> Å<sup>-2</sup>')
+        assert GuiUtils.rstToHtml(s) == ('1e-6Ang^-2', '10<sup>-6</sup> Å<sup>-2</sup>')
         s = r".. |cm^-1| replace:: cm\ :sup:`-1`"
-        assert rstToHtml(s) == ('cm^-1', 'cm<sup>-1</sup>')
+        assert GuiUtils.rstToHtml(s) == ('cm^-1', 'cm<sup>-1</sup>')
         s = ".. |deg| unicode:: U+00B0"
-        assert rstToHtml(s) == ('deg', '°')
+        assert GuiUtils.rstToHtml(s) == ('deg', '°')
         s = ".. |cdot| unicode:: U+00B7"
-        assert rstToHtml(s) == ('cdot', '·')
+        assert GuiUtils.rstToHtml(s) == ('cdot', '·')
         s = "bad string"
-        assert rstToHtml(s) == (None, None)
+        assert GuiUtils.rstToHtml(s) == (None, None)
 
 
     def testConvertUnitToHTML(self):
         ''' test unit string replacement'''
         s = None
-        assert convertUnitToHTML(s) == ""
+        assert GuiUtils.convertUnitToHTML(s) == ""
 
         s = ""
-        assert convertUnitToHTML(s) == s
+        assert GuiUtils.convertUnitToHTML(s) == s
 
         s = "aaaa"
-        assert convertUnitToHTML(s) == s
+        assert GuiUtils.convertUnitToHTML(s) == s
 
         s = "1/A"
-        assert convertUnitToHTML(s) == "Å<sup>-1</sup>"
+        assert GuiUtils.convertUnitToHTML(s) == "Å<sup>-1</sup>"
 
         s = "Ang"
-        assert convertUnitToHTML(s) == "Å"
+        assert GuiUtils.convertUnitToHTML(s) == "Å"
 
         s = "1e-6/Ang^2"
-        assert convertUnitToHTML(s) == "10<sup>-6</sup>/Å<sup>2</sup>"
+        assert GuiUtils.convertUnitToHTML(s) == "10<sup>-6</sup>/Å<sup>2</sup>"
 
         s = "inf"
-        assert convertUnitToHTML(s) == "∞"
+        assert GuiUtils.convertUnitToHTML(s) == "∞"
         s = "-inf"
 
-        assert convertUnitToHTML(s) == "-∞"
+        assert GuiUtils.convertUnitToHTML(s) == "-∞"
 
         s = "1/cm"
-        assert convertUnitToHTML(s) == "cm<sup>-1</sup>"
+        assert GuiUtils.convertUnitToHTML(s) == "cm<sup>-1</sup>"
 
         s = "degrees"
-        assert convertUnitToHTML(s) == "°"
+        assert GuiUtils.convertUnitToHTML(s) == "°"
 
     def testParseName(self):
         '''test parse out a string from the beinning of a string'''
         # good input
         value = "_test"
-        assert parseName(value, '_') == 'test'
+        assert GuiUtils.parseName(value, '_') == 'test'
         value = "____test____"
-        assert parseName(value, '_') == '___test____'
-        assert parseName(value, '___') == '_test____'
-        assert parseName(value, 'test') == '____test____'
+        assert GuiUtils.parseName(value, '_') == '___test____'
+        assert GuiUtils.parseName(value, '___') == '_test____'
+        assert GuiUtils.parseName(value, 'test') == '____test____'
         # bad input
         with pytest.raises(TypeError):
-            parseName(value, None)
+            GuiUtils.parseName(value, None)
         with pytest.raises(TypeError):
-            parseName(None, '_')
+            GuiUtils.parseName(None, '_')
         value = []
         with pytest.raises(TypeError):
-            parseName(value, '_')
+            GuiUtils.parseName(value, '_')
         value = 1.44
         with pytest.raises(TypeError):
-            parseName(value, 'p')
+            GuiUtils.parseName(value, 'p')
         value = 100
         with pytest.raises(TypeError):
-            parseName(value, 'p')
+            GuiUtils.parseName(value, 'p')
 
     @pytest.mark.xfail(reason="2022-09 already broken")
     def testToDouble(self):
         '''test homemade string-> double converter'''
         #good values
         value = "1"
-        assert toDouble(value) == 1.0
+        assert GuiUtils.toDouble(value) == 1.0
         value = "1.2"
         # has to be AlmostEqual due to numerical rounding
-        assert toDouble(value) == pytest.approx(1.2, abs=1e-6)
+        assert GuiUtils.toDouble(value) == pytest.approx(1.2, abs=1e-6)
         value = "2,1"
-        assert toDouble(value) == pytest.approx(2.1, abs=1e-6)
+        assert GuiUtils.toDouble(value) == pytest.approx(2.1, abs=1e-6)
 
         # bad values
         value = None
         with pytest.raises(TypeError):
-            toDouble(value)
+            GuiUtils.toDouble(value)
         value = "MyDouble"
         with pytest.raises(TypeError):
-            toDouble(value)
+            GuiUtils.toDouble(value)
         value = [1,2.2]
         with pytest.raises(TypeError):
-            toDouble(value)
+            GuiUtils.toDouble(value)
 
 
 class DoubleValidatorTest:
@@ -613,7 +615,7 @@ class DoubleValidatorTest:
     @pytest.fixture(autouse=True)
     def validator(self, qapp):
         '''Create/Destroy the validator'''
-        v = DoubleValidator()
+        v = GuiUtils.DoubleValidator()
         yield v
 
     def testValidateGood(self, validator):
@@ -649,7 +651,7 @@ class FormulaValidatorTest:
     @pytest.fixture(autouse=True)
     def validator(self, qapp):
         '''Create/Destroy the validator'''
-        v = FormulaValidator()
+        v = GuiUtils.FormulaValidator()
         yield v
 
     def testValidateGood(self, validator):
@@ -675,7 +677,7 @@ class HashableStandardItemTest:
     @pytest.fixture(autouse=True)
     def item(self, qapp):
         '''Create/Destroy the HashableStandardItem'''
-        i = HashableStandardItem()
+        i = GuiUtils.HashableStandardItem()
         yield i
 
     def testHash(self, item):
@@ -709,7 +711,7 @@ class HashableStandardItemTest:
         fit_page2 = {'fit_data': None, 'fit_params': [fit_params2]}
         fit_project = {'dataset1': fit_page1, 'dataset2': fit_page2}
         # get the constraint_dict
-        constraint_dict = getConstraints(fit_project)
+        constraint_dict = GuiUtils.getConstraints(fit_project)
         # we have two constraints on different fit pages
         assert len(constraint_dict) == 2
         # we have one constraint per fit page

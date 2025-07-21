@@ -3,10 +3,10 @@ import random
 import pytest
 
 
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtGui import QIcon, QStandardItemModel, QStandardItem
+from PySide6.QtWidgets import QTabWidget, QTreeView, QFileDialog, QMessageBox, QApplication
 from PySide6.QtTest import QTest
-from PySide6.QtCore import *
+from PySide6.QtCore import QSize, QSortFilterProxyModel
 
 
 # Local
@@ -15,7 +15,7 @@ from sasdata.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-from sas.qtgui.Utilities.GuiUtils import *
+from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D

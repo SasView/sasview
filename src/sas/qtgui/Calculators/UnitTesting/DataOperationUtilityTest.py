@@ -7,7 +7,7 @@ import pytest
 
 
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
-from sas.qtgui.Utilities.GuiUtils import *
+from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.MainWindow.DataState import DataState

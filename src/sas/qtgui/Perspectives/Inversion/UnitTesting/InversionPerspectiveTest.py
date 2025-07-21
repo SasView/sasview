@@ -1,9 +1,10 @@
+import numpy as np
 import pytest
 
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-from sas.qtgui.Utilities.GuiUtils import *
+from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
 from sas.qtgui.Plotting.PlotterData import Data1D

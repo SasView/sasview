@@ -8,8 +8,8 @@ import traceback
 from typing import Optional, Dict
 from pathlib import Path
 
-from PySide6.QtWidgets import *
-from PySide6.QtGui import *
+from PySide6.QtWidgets import QDockWidget, QTextBrowser, QProgressBar, QLabel
+from PySide6.QtGui import QStandardItem
 from PySide6.QtCore import Qt, QLocale
 
 

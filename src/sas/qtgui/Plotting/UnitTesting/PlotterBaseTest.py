@@ -5,16 +5,12 @@ import pytest
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-
-import matplotlib as mpl
-mpl.use("Qt5Agg")
-
-from PySide6 import QtGui, QtWidgets, QtPrintSupport
+from PySide6 import QtCore, QtGui, QtWidgets, QtPrintSupport
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
-from sas.qtgui.Utilities.GuiUtils import *
+from sas.qtgui.Utilities.GuiUtils import Communicate
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # Tested module
