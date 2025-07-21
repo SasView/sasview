@@ -88,7 +88,7 @@ class DataExplorerTree(QTreeWidget):
             item = root.child(i)
             item_datum = cast(TrackedData, item.data(0, Qt.ItemDataRole.UserRole))
             if item_datum == datum and (
-                not root_datum is None
+                root_datum is not None
                 or root_datum == root.data(0, Qt.ItemDataRole.UserRole)
             ):
                 # Need to defer this to later so we don't delete data while we're doing a for loop over it.
