@@ -5,7 +5,6 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
-    QAbstractScrollArea,
     QHeaderView,
 )
 from sasdata.data import SasData
