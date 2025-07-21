@@ -104,7 +104,7 @@ pyproject_hooks==1.2.0
 PySide6==6.9.0
 PySide6_Addons==6.9.0
 PySide6_Essentials==6.9.0
-pytest==8.3.5
+pytest==8.4.1
 pytest-mock==3.14.0
 pytest-qt==4.4.0
 python-bidi==0.6.6
