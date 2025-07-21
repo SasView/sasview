@@ -190,6 +190,7 @@ class GuiManager:
         # self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         # TODO: Is this a good opportunity to change this name? dataExplorer would be better I think.
         self.filesWidget = NewDataExplorer(self._data_manager ,self._parent)
+        self.filesWidget.new_perspective.connect(self.new_perspective)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
@@ -778,6 +779,7 @@ class GuiManager:
 
         # File
         self._workspace.actionLoadData.triggered.connect(self.actionLoadData)
+        self._workspace.actionAdvanced_Load.triggered.connect(self.actionAdvancedLoad)
         self._workspace.actionLoad_Data_Folder.triggered.connect(self.actionLoad_Data_Folder)
         self._workspace.actionOpen_Project.triggered.connect(self.actionOpen_Project)
         self._workspace.actionOpen_Analysis.triggered.connect(self.actionOpen_Analysis)
@@ -868,6 +870,9 @@ class GuiManager:
         Menu File/Load Data File(s)
         """
         self.filesWidget.loadFile()
+
+    def actionAdvancedLoad(self):
+        self.filesWidget.onAdvancedLoad()
 
     def actionLoad_Data_Folder(self):
         """
