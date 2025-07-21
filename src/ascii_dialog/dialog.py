@@ -1,8 +1,11 @@
 
+
 from os import path
 
 from PySide6.QtCore import QModelIndex, QPoint, Slot
+
 from PySide6.QtGui import QColor, QCursor, Qt
+
 from PySide6.QtWidgets import (
     QAbstractScrollArea,
     QApplication,
@@ -24,16 +27,26 @@ from PySide6.QtWidgets import (
 )
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
+
 from sasdata.dataset_types import DatasetType, dataset_types, one_dim, sesans, two_dim
+
 from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
+
 from sasdata.temp_ascii_reader import AsciiReaderParams, load_data, split_line
 
 from ascii_dialog.col_editor import ColEditor
+
 from ascii_dialog.constants import TABLE_MAX_ROWS
+
 from ascii_dialog.row_status_widget import RowStatusWidget
+
 from ascii_dialog.selection_menu import SelectionMenu
+
 from ascii_dialog.warning_label import WarningLabel
+
 from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
+
+from contextlib import suppress
 
 dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
 
@@ -83,7 +96,9 @@ class AsciiDialog(QDialog):
         self.dataset_layout = QHBoxLayout()
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
-        for name in dataset_types:
+        with suppress(ValueError):
+            reduced_dataset_types = dataset_types.remove('SESANS')
+        for name in reduced_dataset_types:
             # TODO: Temporarily exclude SESANS until that's been fixed.
             if name == 'SESANS':
                 continue
