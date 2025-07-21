@@ -27,6 +27,7 @@ class DataViewer(QDialog):
         self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.close)
 
+        self.setWindowTitle("Data Viewer")
         self.layout.addWidget(self.nameLabel, 0, 0, 1, 1)
         self.layout.addWidget(self.viewMetadataButton, 0, 1, 1, 1)
         self.layout.addWidget(self.dataTypeLabel, 1, 0, 1, 1)
