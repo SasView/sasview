@@ -24,10 +24,10 @@ _CONFIG_DIR = PLATFORM_DIRS_UNVERSIONED.user_config_dir
 _LOG_DIR = PLATFORM_DIRS_UNVERSIONED.user_log_dir
 EXAMPLE_DATA_DIR = Path(_APP_DATA_DIR) / "example_data"
 
-PATH_TYPE = [Path, os.path, str]
+PATH_LIKE = Path | str | os.PathLike[str]
 
 
-def get_dir_and_create_if_needed(path: PATH_TYPE, create_if_nonexistent: bool = True) -> Path:
+def get_dir_and_create_if_needed(path: PATH_LIKE, create_if_nonexistent: bool = True) -> Path:
     """Returns the requested directory as a pathlib.Path object, creating the directory if it does not already exist."""
     path = Path(path)
     if create_if_nonexistent and not os.path.exists(path):
