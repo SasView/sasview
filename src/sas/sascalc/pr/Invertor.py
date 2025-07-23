@@ -203,8 +203,8 @@ class Invertor():
         # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
 
         rcond = np.finfo(float).eps * max(a.shape)
-        if rcond ==None:
-            rcond =-1
+        if rcond is None:
+            rcond = -1
         c, chi2, _, _ = lstsq(a, b, rcond=rcond)
         # Sanity check
         try:

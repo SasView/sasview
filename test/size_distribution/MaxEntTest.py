@@ -64,7 +64,7 @@ def test_noRes(data1):
     # TODO: Need to understand how IRENA is reporting bins. It seems to be using bin 1 and last as the
     #       values input from the user while we are starting from the midpoint of what should be the
     #       the first bin if the min diameter is the bottom edge of the bin.
-    assert convergence[0][0] == True
+    assert convergence[0][0]
     assert data1.MaxEnt_statistics['volume'] == pytest.approx(4.84, abs=0.02)
     assert data1.BinMagnitude_maxEnt == pytest.approx(answerMags, abs=1e-3)
 

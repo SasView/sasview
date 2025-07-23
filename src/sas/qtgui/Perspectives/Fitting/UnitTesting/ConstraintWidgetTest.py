@@ -148,11 +148,11 @@ class ConstraintWidgetTest:
 
         # disable the tab
         widget.tblTabList.item(0, 0).setCheckState(0)
-        assert widget.tabs_for_fitting["test_tab"] == False
+        assert not widget.tabs_for_fitting["test_tab"]
         assert not widget.cmdFit.isEnabled()
         # enable the tab
         widget.tblTabList.item(0, 0).setCheckState(2)
-        assert widget.tabs_for_fitting["test_tab"] == True
+        assert widget.tabs_for_fitting["test_tab"]
         assert widget.cmdFit.isEnabled()
 
     def testUpdateFitLine(self, widget, mocker):
@@ -348,7 +348,7 @@ class ConstraintWidgetTest:
         # Should be unchecked in tblConstraint
         assert widget.tblConstraints.item(0, 0).checkState() == 0
         # Constraint should be deactivated
-        assert self.constraint1.active == False
+        assert not self.constraint1.active
 
     def testOnConstraintChange(self, widget, mocker):
         ''' test edition of the constraint list '''
@@ -446,6 +446,6 @@ class ConstraintWidgetTest:
         widget.tblConstraints.item(0, 0).setCheckState(0)
         assert test_tab.modifyViewOnRow.call_args[0][0] == 0
         assert not test_tab.modifyViewOnRow.call_args[1]
-        assert self.constraint1.active == False
+        assert not self.constraint1.active
         # Check the reloading of the view
         widget.initializeFitList.assert_called_once()

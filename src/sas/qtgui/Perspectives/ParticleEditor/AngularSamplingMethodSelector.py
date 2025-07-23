@@ -17,13 +17,13 @@ class ParametersForm(QWidget):
         self.parameter_callbacks = []
 
         for parameter_name, text, cls in sampling_class.parameters():
-            if cls == GeodesicDivisions:
+            if isinstance(cls, GeodesicDivisions):
                 widget = GeodesicSamplingSpinBox()
 
                 def callback():
                     return widget.getNDivisions()
 
-            elif cls == float:
+            elif isinstance(cls, float):
                 widget = QDoubleSpinBox()
 
                 def callback():

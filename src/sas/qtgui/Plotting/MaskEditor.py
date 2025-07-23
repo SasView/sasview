@@ -218,7 +218,7 @@ class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):
         temp_mask = temp_mask / temp_mask
         temp_mask[mask] = temp_data.data[mask]
 
-        temp_data.data[mask == False] = temp_mask[mask == False]
+        temp_data.data[not mask] = temp_mask[not mask]
 
         if self.current_slicer is not None:
             self.current_slicer.clear()

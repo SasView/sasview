@@ -95,7 +95,7 @@ class CircularMask(BaseInteractor):
         mask = Ringcut(r_min=rmin, r_max=rmax)
 
         if self.is_inside:
-            out = (mask(data) == False)
+            out = (not mask(data))
         else:
             out = (mask(data))
         return out

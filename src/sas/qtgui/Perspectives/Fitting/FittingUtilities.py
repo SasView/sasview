@@ -514,7 +514,6 @@ def residualsData1D(reference_data, current_data, weights):
     """
     # temporary default values for index and weight
     index = None
-    weight = None
 
     # 1d theory from model_thread is only in the range of index
     if current_data.dy is None or not len(current_data.dy):

@@ -9,7 +9,8 @@ from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import SLDFunction, M
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import (
     SolventSLD, Background, Scale, FunctionParameter, MagnetismParameterContainer, ValueSource, CalculationParameters)
 
-class LinkingImpossible(Exception): pass
+class LinkingImpossible(Exception):
+    pass
 
 class ParameterTableModel:
     """

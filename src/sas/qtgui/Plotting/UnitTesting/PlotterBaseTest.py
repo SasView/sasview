@@ -12,6 +12,7 @@ from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
 from sas.qtgui.Utilities.GuiUtils import Communicate
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
+from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
 
 # Tested module
 import sas.qtgui.Plotting.PlotterBase as PlotterBase

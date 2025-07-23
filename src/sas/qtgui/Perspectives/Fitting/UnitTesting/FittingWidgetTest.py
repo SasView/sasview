@@ -880,7 +880,7 @@ class FittingWidgetTest:
         assert logging.error.called_with('no fitting parameters')
         widget.close()
 
-    def notestOnFit1D(self, widget):
+    def notestOnFit1D(self, widget, mocker):
         """
         Test the threaded fitting call
         """
@@ -1772,7 +1772,7 @@ class FittingWidgetTest:
         # Check that QMessagebox was called
         QtWidgets.QMessageBox.exec_.assert_called_once()
         # Constraint should be inactive
-        assert constraint.active == False
+        assert not constraint.active
         # Check that the uncheckConstraint method was called
         constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
 

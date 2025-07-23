@@ -482,7 +482,7 @@ class GuiUtilsTest:
         ''' test single character replacement '''
         s = None
         with pytest.raises(AttributeError):
-            result = GuiUtils.replaceHTMLwithUTF8(s)
+            GuiUtils.replaceHTMLwithUTF8(s)
 
         s = ""
         assert GuiUtils.replaceHTMLwithUTF8(s) == s
@@ -497,7 +497,7 @@ class GuiUtilsTest:
         ''' test single character replacement'''
         s = None
         with pytest.raises(AttributeError):
-            result = GuiUtils.replaceHTMLwithASCII(s)
+            GuiUtils.replaceHTMLwithASCII(s)
 
         s = ""
         assert GuiUtils.replaceHTMLwithASCII(s) == s
@@ -512,7 +512,7 @@ class GuiUtilsTest:
         ''' test rst to html conversion'''
         s = None
         with pytest.raises(TypeError):
-            result = GuiUtils.rstToHtml(s)
+            GuiUtils.rstToHtml(s)
 
         s = ".. |Ang| unicode:: U+212B"
         assert GuiUtils.rstToHtml(s) == ('Ang', 'Å')

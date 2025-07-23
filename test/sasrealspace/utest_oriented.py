@@ -16,12 +16,13 @@ import math
 # pylint: disable-msg=W0702
 
 from sasmodels.sasview_model import _make_standard_model
+
+import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
+
 EllipsoidModel = _make_standard_model('ellipsoid')
 SphereModel = _make_standard_model('sphere')
 CylinderModel = _make_standard_model('cylinder')
 CoreShellModel = _make_standard_model('core_shell_sphere')
-
-import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
 
 
 

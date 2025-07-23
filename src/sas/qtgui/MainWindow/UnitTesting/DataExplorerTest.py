@@ -6,7 +6,7 @@ import pytest
 from PySide6.QtGui import QIcon, QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import QTabWidget, QTreeView, QFileDialog, QMessageBox, QApplication
 from PySide6.QtTest import QTest
-from PySide6.QtCore import QSize, QSortFilterProxyModel
+from PySide6.QtCore import QItemSelectionModel, QPoint, QSize, QSortFilterProxyModel, Qt
 
 
 # Local
@@ -15,7 +15,7 @@ from sasdata.dataloader.loader import Loader
 from sas.qtgui.MainWindow.DataManager import DataManager
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.Utilities.GuiUtils import Communicate, HashableStandardItem
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
@@ -566,7 +566,7 @@ class DataExplorerTest:
         assert form.manager.add_data.called
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testNewPlot1D(self, mocker):
+    def testNewPlot1D(self, form, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -606,7 +606,7 @@ class DataExplorerTest:
         assert form.cmdAppend.isEnabled()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testNewPlot2D(self, mocker):
+    def testNewPlot2D(self, form, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -641,7 +641,7 @@ class DataExplorerTest:
         #assert form.cmdAppend.isEnabled()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testAppendPlot(self, mocker):
+    def testAppendPlot(self, form, mocker):
         """
         Creating new plots from Data1D/2D
         """
@@ -977,7 +977,7 @@ class DataExplorerTest:
         QFileDialog.getSaveFileName.assert_called_once()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testQuickDataPlot(self, form):
+    def testQuickDataPlot(self, form, mocker):
         """
         Quick data plot generation.
         """
@@ -995,7 +995,7 @@ class DataExplorerTest:
         form.quickDataPlot()
         assert Plotter.show.called
 
-    def notestQuickData3DPlot(self, form):
+    def notestQuickData3DPlot(self, form, mocker):
         """
         Slow(er) 3D data plot generation.
         """
@@ -1023,7 +1023,7 @@ class DataExplorerTest:
         pass
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testDeleteItem(self, form):
+    def testDeleteItem(self, form, mocker):
         """
         Delete selected item from data explorer
         """
@@ -1042,7 +1042,7 @@ class DataExplorerTest:
         assert form.model.rowCount() == 3
 
         # Add an item to first file item
-        item1 = QtGui.QStandardItem("test")
+        item1 = QStandardItem("test")
         item1.setCheckable(True)
         form.model.item(0).appendRow(item1)
 
@@ -1058,7 +1058,7 @@ class DataExplorerTest:
         form.current_view.expandAll()
 
         # Select the newly created item
-        form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
+        form.current_view.selectionModel().select(select_index, QItemSelectionModel.Rows)
 
         # Attempt at deleting
         form.deleteFile()
@@ -1073,7 +1073,7 @@ class DataExplorerTest:
         mocker.patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
 
         # Select the newly created item
-        form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
+        form.current_view.selectionModel().select(select_index, QItemSelectionModel.Rows)
         # delete it. now for good
         form.deleteFile()
 
@@ -1084,7 +1084,7 @@ class DataExplorerTest:
         assert form.model.rowCount() == 3
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testClosePlotsForItem(self, form):
+    def testClosePlotsForItem(self, form, mocker):
         """
         Delete selected item from data explorer should also delete corresponding plots
         """

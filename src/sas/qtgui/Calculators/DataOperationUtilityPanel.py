@@ -128,8 +128,8 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         # calculate and send data to DataExplorer
         output = None
         try:
-            data1 = self.data1
-            data2 = self.data2
+            self.data1
+            self.data2
             output = eval("data1 %s data2" % operator)
         except Exception as ex:
             logging.error(ex)

@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, slot
+from PySide6.QtCore import QObject, slot, pyqtBoundSignal
 import inspect
 
 def WarningTestNotImplemented(method_name=None):

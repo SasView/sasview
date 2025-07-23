@@ -17,7 +17,6 @@ from pathlib import Path
 
 import numpy as np
 
-warnings.simplefilter("ignore")
 import logging
 
 from PySide6 import QtCore
@@ -49,6 +48,8 @@ import sas
 from sas import config
 
 from sasdata.dataloader.loader import Loader
+
+warnings.simplefilter("ignore")
 
 # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
 # "5 [P(Q)] modelname"
@@ -1342,7 +1343,7 @@ def readProjectFromSVS(filepath):
         if state is not None:
             state_svs.append(state)
     state_reader = Reader(call_back=collector)
-    data_svs = state_reader.read(filepath)
+    state_reader.read(filepath)
 
     if isinstance(temp, list) and isinstance(state_svs, list):
         output = list(zip(temp, state_svs))
@@ -1430,7 +1431,6 @@ def convertFromSVS(datasets):
             for p in params.fittable_param:
                 p_name = p[1]
                 p_opt = str(p[0])
-                p_err = "0"
                 p_width = str(p[2])
                 p_min = str(0)
                 p_max = "inf"

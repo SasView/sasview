@@ -4,7 +4,6 @@ Unit tests for the sas_gen
 
 import os.path
 import warnings
-warnings.simplefilter("ignore")
 
 import unittest
 import numpy as np
@@ -13,6 +12,8 @@ from scipy.spatial.transform import Rotation
 
 
 from sas.sascalc.calculator import sas_gen
+
+warnings.simplefilter("ignore")
 
 MFACTOR_AM = 2.90636E-12
 

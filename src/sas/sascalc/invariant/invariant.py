@@ -313,7 +313,7 @@ class Extrapolator(object):
         fx = np.zeros(len(self.data.x))
 
         # Uncertainty
-        if type(self.data.dy) == np.ndarray and \
+        if isinstance(self.data.dy, np.ndarray) and \
             len(self.data.dy) == len(self.data.x) and \
                 np.all(self.data.dy > 0):
             sigma = self.data.dy

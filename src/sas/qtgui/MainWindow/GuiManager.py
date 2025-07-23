@@ -475,19 +475,19 @@ class GuiManager:
         #
         # checking `isinstance`` fails in PySide6 with
         # AttributeError: type object 'FittingWindow' has no attribute '_abc_impl'
-        if type(new_perspective) == FittingWindow:
+        if type(new_perspective) == FittingWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionFitting)
 
-        elif type(new_perspective) == InvariantWindow:
+        elif type(new_perspective) == InvariantWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionInvariant)
 
-        elif type(new_perspective) == InversionWindow:
+        elif type(new_perspective) == InversionWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionInversion)
 
-        elif type(new_perspective) == CorfuncWindow:
+        elif type(new_perspective) == CorfuncWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionCorfunc)
 
-        elif type(new_perspective) == SizeDistributionWindow:
+        elif type(new_perspective) == SizeDistributionWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionSizeDistribution)
 
 

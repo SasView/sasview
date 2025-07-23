@@ -1,6 +1,10 @@
 import numpy as np
 import pytest
 
+
+from PySide6 import QtGui, QtWidgets
+import logging
+
 import matplotlib as mpl
 mpl.use("Qt5Agg")
 
@@ -325,8 +329,8 @@ class InversionTest:
         # getPage should include an extra param 'data_id' removed by serialize
         assert len(params) != len(page)
         assert len(params) == 26
-        assert params.get('data_id', None) == None
-        assert page.get('data_id', None) != None
-        assert params.get('alpha', None) != None
+        assert params.get('data_id', None) is None
+        assert page.get('data_id', None) is not None
+        assert params.get('alpha', None) is not None
         assert params.get('alpha', None) == page.get('alpha', None)
         assert np.isnan(params.get('rg'))

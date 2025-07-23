@@ -30,11 +30,14 @@ class OrderWidget(QtWidgets.QWidget, Ui_OrderWidgetUI):
         """
         Populate the widget with dataset names in original order
         """
-        if self.all_data is None: return
+        if self.all_data is None:
+            return
         for item in self.all_data:
-            if not hasattr(item, 'data'): continue
+            if not hasattr(item, 'data'):
+                continue
             dataset = GuiUtils.dataFromItem(item)
-            if dataset is None: continue
+            if dataset is None:
+                continue
             dataset_name = dataset.name
             self.order[dataset_name] = item
             self.lstOrder.addItem(dataset_name)

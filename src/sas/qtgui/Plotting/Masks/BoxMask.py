@@ -150,7 +150,7 @@ class BoxMask(BaseInteractor):
         mask = Boxcut(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
 
         if self.is_inside:
-            out = (mask(data) == False)
+            out = (not mask(data))
         else:
             out = (mask(data))
         # self.base.data.mask=out

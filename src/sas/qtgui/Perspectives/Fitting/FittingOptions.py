@@ -100,10 +100,10 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         for option in bumps.options.FIT_FIELDS.keys():
             (f_name, f_type) = bumps.options.FIT_FIELDS[option]
             validator = None
-            if type(f_type) == types.FunctionType:
+            if isinstance(f_type, types.FunctionType):
                 validator = QtGui.QIntValidator()
                 validator.setBottom(0)
-            elif f_type == float:
+            elif isinstance(f_type, float):
                 validator = GuiUtils.DoubleValidator()
                 validator.setBottom(0)
             else:
@@ -245,9 +245,11 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         """
         if current_fitter is None:
             current_fitter = self.current_fitter_id
-        if option_id not in list(bumps.options.FIT_FIELDS.keys()): return None
+        if option_id not in list(bumps.options.FIT_FIELDS.keys()):
+            return None
         option = option_id + '_' + current_fitter
-        if not hasattr(self, option): return None
+        if not hasattr(self, option):
+            return None
         return eval('self.' + option)
 
     def getResults(self):

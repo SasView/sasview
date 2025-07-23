@@ -346,7 +346,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Prepare the fitter object
         try:
             for tab in tabs_to_fit:
-                if not self.isTabImportable(tab): continue
+                if not self.isTabImportable(tab):
+                    continue
                 tab_object = ObjectLibrary.getObject(tab)
                 if tab_object is None:
                     # No such tab!
@@ -772,11 +773,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Determines if the tab can be imported and included in the widget
         """
-        if not isinstance(tab, str): return False
-        if self.currentType not in tab: return False
+        if not isinstance(tab, str):
+            return False
+        if self.currentType not in tab:
+            return False
         object = ObjectLibrary.getObject(tab)
-        if not isinstance(object, FittingWidget): return False
-        if not object.data_is_loaded : return False
+        if not isinstance(object, FittingWidget):
+            return False
+        if not object.data_is_loaded:
+            return False
         return True
 
     def showModelContextMenu(self, position):

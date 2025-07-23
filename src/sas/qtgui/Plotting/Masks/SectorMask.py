@@ -120,7 +120,7 @@ class SectorMask(BaseInteractor):
 
         mask = Sectorcut(phi_min=phimin, phi_max=phimax)
         if self.is_inside:
-            out = (mask(self.data) == False)
+            out = (not mask(self.data))
         else:
             out = (mask(self.data))
         return out

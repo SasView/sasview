@@ -673,7 +673,6 @@ class VTKReader:
                 sld_mz = np.zeros_like(sld_n)
             elif element_data[0][2] == 3:
                 sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
-                nuc_data = np.zeros_like(sld_mx)
             else:
                 logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear or magnetic SLD")
                 return None
@@ -1062,7 +1061,8 @@ class OMFReader(object):
                 # Reading Header; Segment count ignored
                     s_line = line.split(":", 1)
                     if s_line[0].lower().count("oommf") > 0:
-                        if len(s_line) < 2: s_line = line.split(" ",1)
+                        if len(s_line) < 2:
+                            s_line = line.split(" ",1)
                         oommf = s_line[1].strip()                               
 
                     if s_line[0].lower().count("title") > 0:
@@ -1198,7 +1198,6 @@ class PDBReader(object):
             buff = decode(input_f.read())
             lines = buff.split('\n')
             input_f.close()
-            num = 0
             for line in lines:
                 try:
                     # check if line starts with "ATOM"
