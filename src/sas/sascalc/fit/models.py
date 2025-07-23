@@ -80,12 +80,6 @@ def _check_plugin(model, name):
     return model
 
 
-def find_plugins_dir() -> str:
-    """A helper function that returns a string representation of the plugins directory as defined by sas.system.user.
-    """
-    return str(get_plugin_dir())
-
-
 def initialize_plugins_dir(path):
     # TODO: There are no default plugins
     # Walk up the tree looking for default plugin_models directory
