@@ -22,6 +22,7 @@ _APP_VERS_DIR = PLATFORM_DIRS_VERSIONED.user_data_dir
 _CACHE_DIR = PLATFORM_DIRS_VERSIONED.user_cache_dir
 _CONFIG_DIR = PLATFORM_DIRS_UNVERSIONED.user_config_dir
 _LOG_DIR = PLATFORM_DIRS_UNVERSIONED.user_log_dir
+EXAMPLE_DATA_DIR = Path(_APP_DATA_DIR) / "example_data"
 
 PATH_TYPE = [Path, os.path, str]
 
