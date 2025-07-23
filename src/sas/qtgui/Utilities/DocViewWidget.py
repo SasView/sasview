@@ -10,10 +10,9 @@ from twisted.internet import threads
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.sascalc.doc_regen.makedocumentation import (make_documentation, create_user_files_if_needed,
-                                                     HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE)
+from sas.sascalc.doc_regen.makedocumentation import make_documentation
+from sas.system.user import create_user_files_if_needed, get_plugin_dir, HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE
 
 HTML_404 = '''
 <html>
@@ -173,7 +172,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         The documentation window will open after the process of regeneration is completed.
         Otherwise, simply triggers a load of the documentation window with loadHtml()
         """
-        user_models = Path(models.find_plugins_dir())
+        user_models = Path(get_plugin_dir())
         html_path = HELP_DIRECTORY_LOCATION
         rst_path = MAIN_DOC_SRC
         base_path = self.source.parent.parts

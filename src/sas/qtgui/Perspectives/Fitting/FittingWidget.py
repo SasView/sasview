@@ -24,7 +24,7 @@ from sasmodels.sasview_model import MultiplicationModel
 from sas import config
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit import models
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION
+from sas.system.user import HELP_DIRECTORY_LOCATION
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller

@@ -1,18 +1,13 @@
 """
 Creates documentation from .py files
 """
-import importlib.resources
 import logging
 import os
 import sys
 import subprocess
-import shutil
 
 from pathlib import Path
 from typing import Sequence, Union
-
-from sas.sascalc.fit import models
-from sas.system.user import get_app_dir_versioned
 
 from sasmodels.core import list_models
 from sas.system.user import (MAIN_PY_SRC, PLUGIN_PY_SRC, PATH_LIKE, HELP_DIRECTORY_LOCATION, MAIN_BUILD_SRC,

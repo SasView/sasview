@@ -138,7 +138,7 @@ def find_plugin_models():
     Find custom models
     """
     # List of plugin objects
-    plugins_dir = find_plugins_dir()
+    plugins_dir = get_plugin_dir()
     # Go through files in plug-in directory
     if not os.path.isdir(plugins_dir):
         msg = "SasView couldn't locate Model plugin folder %r." % plugins_dir
@@ -202,7 +202,7 @@ class ModelManagerBase(object):
         is the directory was modified else return false
         """
         is_modified = False
-        plugin_dir = find_plugins_dir()
+        plugin_dir = get_plugin_dir()
         if os.path.isdir(plugin_dir):
             mod_time = os.path.getmtime(plugin_dir)
             if  self.last_time_dir_modified != mod_time:
