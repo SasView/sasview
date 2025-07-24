@@ -255,7 +255,7 @@ def create_user_files_if_needed() -> None:
     if not EXAMPLE_DATA_DIR.exists():
         os.mkdir(EXAMPLE_DATA_DIR)
     if not DOC_LOG.exists():
-        with open(DOC_LOG, "wb") as f:
+        with open(DOC_LOG, "wb"):
             # Write an empty file to eliminate any potential future file creation conflicts
             pass
     copy_resources()
