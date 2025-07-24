@@ -77,7 +77,7 @@ from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 import sas
 from sas import config
 from sas.system import web
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
+from sas.system.user import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
 
 logger = logging.getLogger(__name__)
 

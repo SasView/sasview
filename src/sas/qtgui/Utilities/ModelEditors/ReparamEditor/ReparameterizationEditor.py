@@ -8,7 +8,7 @@ import traceback
 from numpy import inf
 from PySide6 import QtWidgets, QtCore, QtGui
 
-from sas.sascalc.fit.models import find_plugins_dir
+from sas.system.user import find_plugins_dir
 
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.ModelEditors.ReparamEditor.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
