@@ -12,7 +12,7 @@ import unittest
 import math
 import numpy
 import pytest
-from sas.sascalc.pr.Invertor import Invertor
+from sas.sascalc.pr.invertor import Invertor
 
 
 pytest.skip(reason="Refactored invertor doesn't support this test", allow_module_level=True)
