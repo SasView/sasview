@@ -1,7 +1,7 @@
 .. sasview_files.rst
 
 .. Initial Draft: J Krzywon, Apr 2025
-.. Last Updated: J Krzywon, Apr. 9, 2025
+.. Last Updated: J Krzywon, Jul 24, 2025
 
 .. _UserFiles:
 
@@ -97,7 +97,7 @@ OS-specific file locations for documentation:
 Example Data
 ------------
 SasView supplies a number of example data files that may be used to orient yourself with the application. More information
-on the included files is available at :ref:`example_data_help`. These files are moved to the user directory on install.
+on the included files is available in the :ref:`testdata_help`.
 
 OS-specific file locations for example data:
  - Windows: ~/AppData/Local/sasview/SasView/example_data/
