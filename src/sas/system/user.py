@@ -154,21 +154,22 @@ def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
 
     for resource in importlib.resources.files(module).joinpath(src).iterdir():
         f_name = dpth / resource.name
+        s_name = spth / resource.name
         if "__pycache__" in resource.name:
             continue
 
         if resource.is_dir():
             # recurse into the directory
-            module_copytree(module, spth / resource.name, dpth / resource.name)
+            module_copytree(module, s_name, f_name)
         elif resource.is_file() and not f_name.exists():
-            logging.debug("Copied: %s", spth / resource.name)
-            with open(dpth / resource.name, "wb") as dh:
+            logging.debug("Copied: %s", s_name)
+            with open(f_name, "wb") as dh:
                 dh.write(resource.read_bytes())
         else:
-            logging.warning("Skipping %s (unknown type)", spth / resource.name)
+            logging.warning("Skipping %s (unknown type)", str(s_name))
 
 
-def copy_module_resources() -> bool:
+def is_copy_successful() -> bool:
     """Obtain the source and build output from within the installed sas module"""
 
     # Look in the module for the resources. We know that there is a conf.py
@@ -227,7 +228,7 @@ def copy_resources() -> None:
     Installed versions are prioritised over uninstalled versions to make sure
     that inconveniently named local directories don't cause issues.
     """
-    if copy_module_resources():
+    if is_copy_successful():
         return
 
     source_dir, build_dir = locate_unpacked_resources()
@@ -246,18 +247,13 @@ def copy_resources() -> None:
 
 def create_user_files_if_needed() -> None:
     """Create user documentation directories if necessary and copy built docs there."""
-    if not USER_DOC_BASE.exists():
-        os.mkdir(USER_DOC_BASE)
-    if not USER_DOC_SRC.exists():
-        os.mkdir(USER_DOC_SRC)
-    if not USER_DOC_LOG.exists():
-        os.mkdir(USER_DOC_LOG)
-    if not EXAMPLE_DATA_DIR.exists():
-        os.mkdir(EXAMPLE_DATA_DIR)
-    if not DOC_LOG.exists():
-        with open(DOC_LOG, "wb"):
-            # Write an empty file to eliminate any potential future file creation conflicts
-            pass
+    USER_DOC_BASE.mkdir(exist_ok=True)
+    USER_DOC_SRC.mkdir(exist_ok=True)
+    USER_DOC_LOG.mkdir(exist_ok=True)
+    EXAMPLE_DATA_DIR.mkdir(exist_ok=True)
+    with open(DOC_LOG, "wb"):
+        # If the file doesn't exist, write an empty file to eliminate any potential future file creation conflicts
+        pass
     copy_resources()
 
 
