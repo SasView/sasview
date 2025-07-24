@@ -136,7 +136,8 @@ def copy_old_files_to_new_location():
     for old_path, new_path in location_map.items():
         if old_path.exists() and not new_path.exists():
             shutil.copy2(old_path, new_path)
-        # Once the file is moved, the old file should be removed from the system to ensure
+        # Once the file is copied, the old file should be removed from the system to ensure.
+        # I did not change the shutil to a move, to ensure files that exist in both locations aren't overlooked.
         if old_path.exists():
             os.remove(old_path)
 
