@@ -136,6 +136,9 @@ def copy_old_files_to_new_location():
     for old_path, new_path in location_map.items():
         if old_path.exists() and not new_path.exists():
             shutil.copy2(old_path, new_path)
+        # Once the file is moved, the old file should be removed from the system to ensure
+        if old_path.exists():
+            os.remove(old_path)
 
 
 def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
