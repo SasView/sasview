@@ -6,6 +6,10 @@ import math
 from numpy.linalg import lstsq
 import numpy.typing as npt
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
+
 # TODO: Add docstrings later
 
 # Default Values for inputs
@@ -55,8 +59,7 @@ def help():
 
 class Invertor():
 
-    # "InversionLogic" type hint for "logic" removed to avoid circular import
-    def __init__(self, logic):
+    def __init__(self, logic: "InversionLogic"):
         self.init_default_values()
         self.logic = logic
 

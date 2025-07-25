@@ -1772,7 +1772,7 @@ class FittingWidgetTest:
         # Check that QMessagebox was called
         QtWidgets.QMessageBox.exec_.assert_called_once()
         # Constraint should be inactive
-        assert not constraint.active
+        assert constraint.active is False
         # Check that the uncheckConstraint method was called
         constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
 

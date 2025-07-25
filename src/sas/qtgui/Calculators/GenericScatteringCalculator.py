@@ -1752,7 +1752,7 @@ class Plotter3DWidget(PlotterBase):
         for key in list(color_dic.keys()):
             chosen_color = pix_symbol == key
             if numpy.any(chosen_color):
-                other_color = other_color & (not chosen_color)
+                other_color = other_color & (chosen_color != True)
                 color = color_dic[key]
                 im = ax.plot(pos_x[chosen_color], pos_z[chosen_color],
                          pos_y[chosen_color], marker, c=color, alpha=0.5,
