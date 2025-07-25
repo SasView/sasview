@@ -21,6 +21,9 @@ from os.path import abspath, dirname, realpath, join as joinpath
 from contextlib import contextmanager
 from importlib import import_module
 
+# I don't think we need this import . . .
+import ruff
+
 def addpath(path):
     """
     Add a directory to the python path environment, and to the PYTHONPATH
