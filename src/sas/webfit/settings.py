@@ -19,13 +19,13 @@ from django.conf import settings
 # `django.test.signals` to avoid importing the test module unnecessarily.
 from django.utils.module_loading import import_string
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent
 
 #imports for knox
 from datetime import timedelta
 from rest_framework.settings import api_settings
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/

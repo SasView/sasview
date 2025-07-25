@@ -72,7 +72,8 @@ class BumpsMonitor(object):
         history.requires(time=1, value=2, point=1, step=1)
 
     def __call__(self, history):
-        if self.handler is None: return
+        if self.handler is None:
+            return
         self.handler.set_result(Progress(history, self.max_step, self.pars, self.dof))
         self.handler.progress(history.step[0], self.max_step)
         if len(history.step) > 1 and history.step[1] > history.step[0]:
@@ -378,8 +379,10 @@ class BumpsFit(FitEngine):
 
 def run_bumps(problem, handler, curr_thread):
     def abort_test():
-        if curr_thread is None: return False
-        try: curr_thread.isquit()
+        if curr_thread is None:
+            return False
+        try:
+            curr_thread.isquit()
         except KeyboardInterrupt:
             if handler is not None:
                 handler.stop("Fitting: Terminated!!!")

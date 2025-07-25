@@ -363,22 +363,27 @@ class Plotter2DWidget(PlotterBase):
         """
         Update circular averaging plot on Data2D change
         """
-        if not hasattr(self, '_item'): return
+        if not hasattr(self, '_item'):
+            return
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
 
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
-        if plots is None: return
+        if plots is None:
+            return
         ca_caption = '2daverage' + self.data0.name
         # See if current item plots contain 2D average plot
         has_plot = False
         for plot in plots:
-            if plot.id is None: continue
-            if ca_caption in plot.id: has_plot = True
+            if plot.id is None:
+                continue
+            if ca_caption in plot.id:
+                has_plot = True
         # return prematurely if no circular average plot found
-        if not has_plot: return
+        if not has_plot:
+            return
 
         # Create a new plot
         new_plot = self.circularAverage()
@@ -392,22 +397,27 @@ class Plotter2DWidget(PlotterBase):
         """
         Update slicer plot on Data2D change
         """
-        if not hasattr(self, '_item'): return
+        if not hasattr(self, '_item'):
+            return
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
 
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
-        if plots is None: return
+        if plots is None:
+            return
         slicer_caption = 'Slicer' + self.data0.name
         # See if current item plots contain slicer plot
         has_plot = False
         for plot in plots:
-            if not hasattr(plot, 'type_id') or plot.type_id is None: continue
-            if slicer_caption in plot.type_id: has_plot = True
+            if not hasattr(plot, 'type_id') or plot.type_id is None:
+                continue
+            if slicer_caption in plot.type_id:
+                has_plot = True
         # return prematurely if no slicer plot found
-        if not has_plot: return
+        if not has_plot:
+            return
 
         # Now that we've identified the right plot, update the 2D data the slicer uses
         self.slicer.data = self.data0
@@ -644,8 +654,6 @@ class Plotter2DWidget(PlotterBase):
                 output[output > 0] = numpy.log10(output[output > 0])
                 pass
 
-        vmin, vmax = None, None
-
         self.cmap = cmap
         if self.dimension != 3:
             #Re-adjust colorbar
@@ -728,9 +736,9 @@ class Plotter2DWidget(PlotterBase):
         :Param img: [imread(path) from matplotlib.pyplot]
         """
         if origin is not None:
-            im = self.ax.imshow(img, origin=origin)
+            self.ax.imshow(img, origin=origin)
         else:
-            im = self.ax.imshow(img)
+            self.ax.imshow(img)
 
     def replacePlot(self, id, new_plot):
         """

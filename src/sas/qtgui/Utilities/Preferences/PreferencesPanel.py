@@ -84,7 +84,6 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
     def prefMenuChanged(self):
         """When the preferences menu selection changes, change to the appropriate preferences widget """
-        row = self.listWidget.currentRow()
         self.setWidgetIndex(self.listWidget.currentRow())
 
     def setMenuByName(self, name: str):

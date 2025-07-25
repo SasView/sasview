@@ -12,6 +12,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from mpl_toolkits.mplot3d import Axes3D
 
 from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
 
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D

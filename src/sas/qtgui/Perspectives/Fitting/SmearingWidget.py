@@ -7,7 +7,6 @@ from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 import logging
-logger = logging.getLogger(__name__)
 
 from sas.sascalc.fit.qsmearing import smear_selection, PySmear, PySmear2D
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -19,6 +18,9 @@ from sasmodels.sesans import SesansTransform
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.SmearingWidgetUI import Ui_SmearingWidgetUI
+
+logger = logging.getLogger(__name__)
+
 
 class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
     """

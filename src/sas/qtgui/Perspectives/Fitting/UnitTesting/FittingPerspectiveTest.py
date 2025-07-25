@@ -266,7 +266,7 @@ class FittingPerspectiveTest:
         '''test the constraint tab getter'''
         # no constraint tab is present, should return None
         constraint_tab = widget.getConstraintTab()
-        assert constraint_tab == None
+        assert constraint_tab is None
 
         # add a constraint tab
         widget.addConstraintTab()
@@ -303,7 +303,7 @@ class FittingPerspectiveTest:
         # getPage should include an extra param 'data_id' removed by serialize
         assert len(params) != len(page)
         assert len(params) == 28
-        assert page.get('data_id', None) == None
+        assert page.get('data_id', None) is None
 
     def testUpdateFromConstraints(self, widget, mocker):
         '''tests the method that parses the loaded project dict and retuens a dict with constrains across all fit pages'''

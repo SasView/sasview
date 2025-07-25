@@ -12,8 +12,7 @@ import unittest
 import math
 import numpy
 import pytest
-# TODO: This import is broken. It needs to be rewritten if this test is to be renabled.
-# from sas.sascalc.pr.invertor import Invertor
+from sas.sascalc.pr.invertor import Invertor
 
 
 pytest.skip(reason="Refactored invertor doesn't support this test", allow_module_level=True)
@@ -601,7 +600,7 @@ def load(path = find("sphere_60_q0_2.txt")):
                     if len(toks)>2:
                         err = float(toks[2])
                     else:
-                        if scale==None:
+                        if scale is None:
                             scale = 0.15*math.sqrt(y)
                         err = scale*math.sqrt(y)
                     data_x = np.append(data_x, x)

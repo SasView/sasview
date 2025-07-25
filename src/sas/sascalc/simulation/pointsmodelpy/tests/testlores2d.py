@@ -29,7 +29,6 @@ def test_lores2d(phi):
   iqPy.OutputIQ(iq, "out_xy.iq")
 
 def get2d():
-  from Numeric import zeros
   from enthought.util.numerix import Float,zeros
   from sasModeling.pointsmodelpy import pointsmodelpy
   from sasModeling.geoshapespy import geoshapespy
@@ -67,7 +66,6 @@ def get2d():
   return value_grid
 
 def get2d_2():
-  from Numeric import zeros
   from enthought.util.numerix import Float,zeros
   from sasModeling.pointsmodelpy import pointsmodelpy
   from sasModeling.geoshapespy import geoshapespy

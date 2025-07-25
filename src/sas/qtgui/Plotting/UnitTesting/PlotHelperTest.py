@@ -7,7 +7,7 @@ class PlotProxy:
         self.name = name
 
     def __str__(self):
-        return name
+        return self.name
 
 
 class PlotHelperTest:

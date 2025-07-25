@@ -309,9 +309,12 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         restoring the vertical lines and then doing an updated will take care
         of the related values in horizontal lines.
         """
-        if self.horizontal_lines.has_move: self.horizontal_lines.restore(ev)
-        if self.vertical_lines.has_move: self.vertical_lines.restore(ev)
-        if self.center.has_move: self.center.restore(ev)
+        if self.horizontal_lines.has_move:
+            self.horizontal_lines.restore(ev)
+        if self.vertical_lines.has_move:
+            self.vertical_lines.restore(ev)
+        if self.center.has_move:
+            self.center.restore(ev)
 
     def move(self, x, y, ev):
         """
@@ -723,7 +726,7 @@ class VerticalDoubleLine(BaseInteractor):
             self.base.update()
             self.base.draw()
         else:
-            if self.valid_move == True:
+            if self.valid_move:
                 self.valid_move = False
                 logging.warning("the ROI cannot be negative")
 
@@ -905,7 +908,7 @@ class HorizontalDoubleLine(BaseInteractor):
             self.base.update()
             self.base.draw()
         else:
-            if self.valid_move == True:
+            if self.valid_move:
                 self.valid_move = False
                 logging.warning("the ROI cannot be negative")
 

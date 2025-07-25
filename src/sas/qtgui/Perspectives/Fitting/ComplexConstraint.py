@@ -12,11 +12,11 @@ from PySide6 import QtWidgets
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
-#ALLOWED_OPERATORS = ['=','<','>','>=','<=']
-ALLOWED_OPERATORS = ['=']
-
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
+
+#ALLOWED_OPERATORS = ['=','<','>','>=','<=']
+ALLOWED_OPERATORS = ['=']
 
 class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
     constraintReadySignal = QtCore.Signal(tuple)
@@ -358,7 +358,8 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # create an empty list to store redefined constraints
         redefined_constraints = []
         for item in items1:
-            if item not in items2: continue
+            if item not in items2:
+                continue
             param = item
             value = item
             func = self.cbModel2.currentText() + "." + param

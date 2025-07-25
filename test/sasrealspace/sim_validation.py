@@ -13,7 +13,7 @@ import pylab
 try:
     import VolumeCanvas
     print("Testing local version")
-except:
+except ImportError:
     print("Testing installed version")
     import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
      

@@ -105,7 +105,8 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         return
 
         # Don't validate if requested
-        if not self.validate: return
+        if not self.validate:
+            return
 
         formula_is_valid = False
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())

@@ -39,7 +39,8 @@ class ConsoleUpdate(FitHandler):
         """
         Report on progress.
         """
-        if self.quiet: return
+        if self.quiet:
+            return
 
         t = time.time()
         p = int((100 * k) // n)
@@ -54,7 +55,8 @@ class ConsoleUpdate(FitHandler):
 
         # Update percent complete
         dp = p - self.progress_percent
-        if dp < 1: return
+        if dp < 1:
+            return
         dt = t - self.progress_time
         if dt > self.progress_delta:
             if 1 <= dp <= 2:

@@ -151,7 +151,7 @@ class ColorMapTest:
         assert widget.txtMaxAmplitude.text() == "45"
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnMapIndexChange(self, widget):
+    def testOnMapIndexChange(self, widget, mocker):
         '''Test the response to the combo box index change'''
 
         mocker.patch.object(widget.canvas, 'draw')
@@ -165,7 +165,7 @@ class ColorMapTest:
         assert mpl.colorbar.ColorbarBase.called
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnColorMapReversed(self, widget):
+    def testOnColorMapReversed(self, widget, mocker):
         '''Test reversing the color map functionality'''
         # Check the defaults
         assert widget._cmap == "jet"
@@ -179,7 +179,7 @@ class ColorMapTest:
         assert widget.cbColorMap.addItems.called
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnAmplitudeChange(self, widget):
+    def testOnAmplitudeChange(self, widget, mocker):
         '''Check the callback method for responding to changes in textboxes'''
         mocker.patch.object(widget.canvas, 'draw')
         mocker.patch.object(mpl.colors, 'Normalize')

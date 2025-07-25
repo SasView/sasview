@@ -76,7 +76,7 @@ class CorfuncTest:
         assert widget.calculate_background.called_once()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testProcess(self, widget):
+    def testProcess(self, widget, mocker):
         """Test the full analysis path"""
 
         filename = os.path.join("UnitTesting", "ISIS_98929.txt")

@@ -4,8 +4,7 @@ import webbrowser
 import logging
 import pytest
 
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtWidgets import QMdiArea, QDockWidget, QTextBrowser, QMessageBox, QFileDialog
 from PySide6 import QtCore
 
 # Local

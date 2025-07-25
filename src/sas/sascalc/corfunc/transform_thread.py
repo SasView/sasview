@@ -31,14 +31,16 @@ class FourierThread(CalcThread):
         self.update(msg="Fourier transform in progress.")
         self.ready(delay=0.0)
 
-        if self.check_if_cancelled(): return
+        if self.check_if_cancelled():
+            return
         try:
             # ----- 1D Correlation Function -----
             gamma1 = dct((iqs-background)*(qs**2))
             Q = gamma1.max()
             gamma1 /= Q
 
-            if self.check_if_cancelled(): return
+            if self.check_if_cancelled():
+                return
 
             # ----- 3D Correlation Function -----
             # gamma3(R) = 1/R int_{0}^{R} gamma1(x) dx
@@ -47,12 +49,14 @@ class FourierThread(CalcThread):
             gamma3 = cumulative_trapezoid(gamma1, xs)/xs[1:]
             gamma3 = np.hstack((1.0, gamma3)) # gamma3(0) is defined as 1
 
-            if self.check_if_cancelled(): return
+            if self.check_if_cancelled():
+                return
 
             # ----- Interface Distribution function -----
             idf = dct(-qs**4 * (iqs-background))
 
-            if self.check_if_cancelled(): return
+            if self.check_if_cancelled():
+                return
 
             # Manually calculate IDF(0.0), since scipy DCT tends to give us a
             # very large negative value.

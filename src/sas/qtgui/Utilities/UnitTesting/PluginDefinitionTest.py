@@ -1,8 +1,6 @@
 import pytest
 
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import *
+from PySide6.QtWidgets import QTableWidgetItem
 
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 

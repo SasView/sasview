@@ -6,7 +6,9 @@ import math
 from numpy.linalg import lstsq
 import numpy.typing as npt
 
-from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 
 # TODO: Add docstrings later
 
@@ -57,7 +59,7 @@ def help():
 
 class Invertor():
 
-    def __init__(self, logic: InversionLogic):
+    def __init__(self, logic: "InversionLogic"):
         self.init_default_values()
         self.logic = logic
 
@@ -203,8 +205,8 @@ class Invertor():
         # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
 
         rcond = np.finfo(float).eps * max(a.shape)
-        if rcond ==None:
-            rcond =-1
+        if rcond is None:
+            rcond = -1
         c, chi2, _, _ = lstsq(a, b, rcond=rcond)
         # Sanity check
         try:

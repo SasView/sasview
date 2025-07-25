@@ -3,6 +3,7 @@ import logging
 import os
 import glob
 import pytest
+import webbrowser
 
 from PySide6 import QtGui
 from PySide6 import QtWidgets
@@ -13,8 +14,10 @@ from unittest.mock import MagicMock
 from twisted.internet import threads
 
 # Local
-from sas.qtgui.Utilities.GuiUtils import *
-from sas.qtgui.Perspectives.Fitting.FittingWidget import *
+from sas import config
+from sas.qtgui.Utilities import GuiUtils
+from sas.qtgui.Perspectives.Fitting import FittingWidget
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
@@ -28,7 +31,7 @@ from sas.sascalc.fit.models import ModelManagerBase, ModelManager
 
 class dummy_manager(object):
     HELP_DIRECTORY_LOCATION = "html"
-    communicate = Communicate()
+    communicate = GuiUtils.Communicate()
 
     def __init__(self):
         self._perspective = dummy_perspective()
@@ -108,7 +111,7 @@ class ModelManagerMod(ModelManager):
         if ModelManagerMod.base is None:
             ModelManagerMod.base = ModelManagerBaseMod()
 
-class FittingWidgetMod(FittingWidget):
+class FittingWidgetMod(FittingWidget.FittingWidget):
     """
     Inherits from FittingWidget class which is the main widget for selecting form and structure factor models.
     Modified to test handling of plugin models.
@@ -161,7 +164,7 @@ class FittingWidgetTest:
             assert fittingWindow.cbCategory.findText(category) != -1
 
         #Test what is current text in the combobox
-        assert fittingWindow.cbCategory.currentText() == CATEGORY_DEFAULT
+        assert fittingWindow.cbCategory.currentText() == FittingWidget.CATEGORY_DEFAULT
 
     def testWidgetWithData(self, widget, mocker):
         """
@@ -284,7 +287,7 @@ class FittingWidgetTest:
         assert widget.cbModel.count() == 30
 
         # Set the structure factor
-        structure_index=widget.cbCategory.findText(CATEGORY_STRUCTURE)
+        structure_index=widget.cbCategory.findText(FittingWidget.CATEGORY_STRUCTURE)
         widget.cbCategory.setCurrentIndex(structure_index)
         # check the enablement of controls
         assert not widget.cbModel.isEnabled()
@@ -347,7 +350,7 @@ class FittingWidgetTest:
 
         # Check that the factor combo is active and the default is chosen
         assert widget.cbStructureFactor.isEnabled()
-        assert widget.cbStructureFactor.currentText() == STRUCTURE_DEFAULT
+        assert widget.cbStructureFactor.currentText() == FittingWidget.STRUCTURE_DEFAULT
 
         # We have this many rows in the model
         rowcount = widget._model_model.rowCount()
@@ -367,7 +370,7 @@ class FittingWidgetTest:
         assert widget.cbStructureFactor.currentText() == 'squarewell'
 
         # Switch category to structure factor
-        structure_index=widget.cbCategory.findText(CATEGORY_STRUCTURE)
+        structure_index=widget.cbCategory.findText(FittingWidget.CATEGORY_STRUCTURE)
         widget.cbCategory.setCurrentIndex(structure_index)
         # Observe the correct enablement
         assert widget.cbStructureFactor.isEnabled()
@@ -800,7 +803,7 @@ class FittingWidgetTest:
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
         item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
+        GuiUtils.updateModelItem(item, test_data, "test")
         # Force same data into logic
         widget.data = item
 
@@ -831,7 +834,7 @@ class FittingWidgetTest:
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
         item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
+        GuiUtils.updateModelItem(item, test_data, "test")
         # Force same data into logic
         widget.data = item
 
@@ -858,7 +861,7 @@ class FittingWidgetTest:
 
         # Force same data into logic
         item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
+        GuiUtils.updateModelItem(item, test_data, "test")
 
         # Force same data into logic
         widget.data = item
@@ -877,14 +880,14 @@ class FittingWidgetTest:
         assert logging.error.called_with('no fitting parameters')
         widget.close()
 
-    def notestOnFit1D(self, widget):
+    def notestOnFit1D(self, widget, mocker):
         """
         Test the threaded fitting call
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
         item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
+        GuiUtils.updateModelItem(item, test_data, "test")
         # Force same data into logic
         widget.data = item
         category_index = widget.cbCategory.findText("Sphere")
@@ -929,7 +932,7 @@ class FittingWidgetTest:
 
         # Force same data into logic
         item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
+        GuiUtils.updateModelItem(item, test_data, "test")
         # Force same data into logic
         widget.data = item
         category_index = widget.cbCategory.findText("Sphere")
@@ -1011,7 +1014,7 @@ class FittingWidgetTest:
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
         item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
+        GuiUtils.updateModelItem(item, test_data, "test")
         # Force same data into logic
         widget.data = item
 
@@ -1059,7 +1062,7 @@ class FittingWidgetTest:
         widget.data_is_loaded = True
 
         #item = QtGui.QStandardItem()
-        #updateModelItem(item, [test_data], "test")
+        #GuiUtils.updateModelItem(item, [test_data], "test")
         # Force same data into logic
         #widget.logic.data = item
         #widget.data_is_loaded = True
@@ -1101,7 +1104,7 @@ class FittingWidgetTest:
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
         item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
+        GuiUtils.updateModelItem(item, test_data, "test")
         # Force same data into logic
         widget.data = item
         category_index = widget.cbCategory.findText("Sphere")
@@ -1128,7 +1131,7 @@ class FittingWidgetTest:
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
         item = QtGui.QStandardItem()
-        updateModelItem(item, test_data, "test")
+        GuiUtils.updateModelItem(item, test_data, "test")
         # Force same data into logic
         widget.data = item
         category_index = widget.cbCategory.findText("Sphere")
@@ -1769,7 +1772,7 @@ class FittingWidgetTest:
         # Check that QMessagebox was called
         QtWidgets.QMessageBox.exec_.assert_called_once()
         # Constraint should be inactive
-        assert constraint.active == False
+        assert constraint.active is False
         # Check that the uncheckConstraint method was called
         constraint_tab.uncheckConstraint.assert_called_with("M1:scale")
 
@@ -1800,7 +1803,7 @@ class FittingWidgetTest:
         data = Data1D(x=[1,2], y=[1,2])
         mocker.patch.object(GuiUtils, 'dataFromItem', return_value=data)
         item = QtGui.QStandardItem("test")
-        widget_with_data = FittingWidget(dummy_manager(), data=item, tab_id=3)
+        widget_with_data = FittingWidget.FittingWidget(dummy_manager(), data=item, tab_id=3)
         assert widget_with_data.options_widget.qmin == min(data.x)
         assert widget_with_data.options_widget.qmax == max(data.x)
         assert widget_with_data.options_widget.npts == len(data.x)

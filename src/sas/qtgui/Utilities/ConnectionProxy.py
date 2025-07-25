@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import urllib.request
-import urllib.error
-import urllib.parse
 import sys
 import json
 import logging

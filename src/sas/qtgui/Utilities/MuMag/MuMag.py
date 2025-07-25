@@ -2,7 +2,6 @@
 from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
 from PySide6.QtWidgets import QVBoxLayout
 from PySide6 import QtWidgets
-from sas.qtgui.Utilities.MuMag import MuMagLib
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt

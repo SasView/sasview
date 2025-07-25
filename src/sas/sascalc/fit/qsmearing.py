@@ -108,7 +108,8 @@ class PySmear(object):
         The returned value is of the same length as iq_in, with the range
         first_bin:last_bin set to the resolution smeared values.
         """
-        if last_bin is None: last_bin = len(iq_in)
+        if last_bin is None:
+            last_bin = len(iq_in)
         start, end = first_bin + self.offset, last_bin + self.offset
         q_calc = self.resolution.q_calc
         iq_calc = np.empty_like(q_calc)

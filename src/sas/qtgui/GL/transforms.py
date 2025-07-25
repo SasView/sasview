@@ -3,8 +3,7 @@ from typing import List
 
 import numpy as np
 
-from OpenGL.GL import *
-from OpenGL.GLU import *
+from OpenGL import GL
 
 from sas.qtgui.GL.renderable import Renderable
 
@@ -37,11 +36,11 @@ class SceneGraphNode(Renderable):
         if self.solid_render_enabled:
 
             # Apply transform
-            glPushMatrix()
+            GL.glPushMatrix()
             self.apply()
 
             # Check stack
-            if glGetIntegerv(GL_MODELVIEW_STACK_DEPTH) >= 16:
+            if GL.glGetIntegerv(GL.GL_MODELVIEW_STACK_DEPTH) >= 16:
                 logger.info("GL Stack size utilisation {glGetIntegerv(GL_MODELVIEW_STACK_DEPTH))}, the limit could be as low as is 16")
 
             # Render children
@@ -49,18 +48,18 @@ class SceneGraphNode(Renderable):
                 child.render_solid()
 
             # Unapply
-            glPopMatrix()
+            GL.glPopMatrix()
 
 
     def render_wireframe(self):
 
         if self.wireframe_render_enabled:
             # Apply transform
-            glPushMatrix()
+            GL.glPushMatrix()
             self.apply()
 
             # Check stack
-            if glGetIntegerv(GL_MODELVIEW_STACK_DEPTH) >= 16:
+            if GL.glGetIntegerv(GL.GL_MODELVIEW_STACK_DEPTH) >= 16:
                 logger.info("GL Stack size utilisation {glGetIntegerv(GL_MODELVIEW_STACK_DEPTH))}, the limit could be as low as is 16")
 
 
@@ -69,7 +68,7 @@ class SceneGraphNode(Renderable):
                 child.render_wireframe()
 
             # unapply transform
-            glPopMatrix()
+            GL.glPopMatrix()
 
 
 class Rotation(SceneGraphNode):
@@ -89,7 +88,7 @@ class Rotation(SceneGraphNode):
         self.z = z
 
     def apply(self):
-        glRotate(self.angle, self.x, self.y, self.z)
+        GL.glRotate(self.angle, self.x, self.y, self.z)
 
 
 class Translation(SceneGraphNode):
@@ -109,7 +108,7 @@ class Translation(SceneGraphNode):
         self.z = z
 
     def apply(self):
-        glTranslate(self.x, self.y, self.z)
+        GL.glTranslate(self.x, self.y, self.z)
 
 
 class Scaling(SceneGraphNode):
@@ -129,7 +128,7 @@ class Scaling(SceneGraphNode):
         self.z = z
 
     def apply(self):
-        glScale(self.x, self.y, self.z)
+        GL.glScale(self.x, self.y, self.z)
 
 class MatrixTransform(SceneGraphNode):
 
@@ -147,4 +146,4 @@ class MatrixTransform(SceneGraphNode):
         self.matrix = matrix
 
     def apply(self):
-        glMultMatrixd(self.matrix)
+        GL.glMultMatrixd(self.matrix)

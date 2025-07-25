@@ -26,6 +26,5 @@ def safe_float(x: str):
 
     try:
         return float(x)
-
     except:
         return 0.0
