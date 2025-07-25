@@ -22,7 +22,6 @@ from contextlib import contextmanager
 from importlib import import_module
 
 # I don't think we need this import . . .
-import ruff
 
 def addpath(path):
     """
