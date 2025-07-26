@@ -47,9 +47,6 @@ def get_shape_symbols(symbols: tuple[set[str], set[str]], modelPars: list[list[s
         if symbol in shape_symbols or symbol[1:] in shape_symbols:
             rhs_symbols.add(symbol)
     
-    print(f"LHS: {lhs_symbols}")
-    print(f"RHS: {rhs_symbols}")
-
     return lhs_symbols, rhs_symbols
 
 def format_parameter_list(par: list[list[str | float]]) -> str:
