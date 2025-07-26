@@ -28,6 +28,30 @@ def generate_plugin(
     return model_str, full_path
 
 
+def get_shape_symbols(symbols: tuple[set[str], set[str]], modelPars: list[list[str], list[str | float]]) -> tuple[set[str], set[str]]:
+    """
+    Get the symbols used in the model, discarding user-defined variables
+    """
+    shape_symbols = set()
+    for shape in modelPars[0]: # iterate over shape names
+        for symbol in shape[1:]: # skip shape name
+            shape_symbols.add(symbol)
+    
+    # filter out user-defined symbols
+    lhs_symbols, rhs_symbols = set(), set()
+    for symbol in symbols[0]:
+        if symbol in shape_symbols or symbol[1:] in shape_symbols:
+            lhs_symbols.add(symbol)
+
+    for symbol in symbols[1]:
+        if symbol in shape_symbols or symbol[1:] in shape_symbols:
+            rhs_symbols.add(symbol)
+    
+    print(f"LHS: {lhs_symbols}")
+    print(f"RHS: {rhs_symbols}")
+
+    return lhs_symbols, rhs_symbols
+
 def format_parameter_list(par: list[list[str | float]]) -> str:
     """
     Format a list of parameters to the model string. In this case the list
@@ -176,9 +200,10 @@ def generate_model(
 ) -> str:
     """Generates a theoretical model"""
     importStatement, parameters, translation = usertext.imports, usertext.params, usertext.constraints
-    insert_delta, delta_parameters_def, delta_parameters_update = script_insert_delta_parameters(modelPars, fitPar, usertext.symbols)
-    insert_constraint_update, constraint_update = script_insert_apply_constraints(usertext.symbols[0])
-    insert_constrained_defs, constrained_parameters = script_insert_constrained_parameters(usertext.symbols, modelPars)
+    symbols = get_shape_symbols(usertext.symbols, modelPars)
+    insert_delta, delta_parameters_def, delta_parameters_update = script_insert_delta_parameters(modelPars, fitPar, symbols)
+    insert_constraint_update, constraint_update = script_insert_apply_constraints(symbols[0])
+    insert_constrained_defs, constrained_parameters = script_insert_constrained_parameters(symbols, modelPars)
     nl = '\n'
     fitPar.insert(0, "q")
     model_str = (
