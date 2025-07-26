@@ -58,7 +58,8 @@ class Constraints(QWidget, Ui_Constraints):
         """Log an error message in the embedded logbook."""
         self.textEdit_2.append(f"<span style='color: red;'>{message}</span>")
         self.textEdit_2.verticalScrollBar().setValue(self.textEdit_2.verticalScrollBar().maximum())
-    
+        logger.error(message)
+
     def log_embedded(self, message: str):
         """Log a message in the embedded logbook."""
         self.textEdit_2.append(f"<span style='color: black;'>{message}</span>")
@@ -66,7 +67,7 @@ class Constraints(QWidget, Ui_Constraints):
 
     def getConstraintText(self, fit_params: str) -> str:
         """Get the default text for the constraints editor"""
-    
+
         self.constraintText = (
             "# Write libraries to be imported here.\n"
             "from numpy import inf\n"
@@ -160,7 +161,7 @@ class Constraints(QWidget, Ui_Constraints):
                 last_lines = all_lines[-1:]
                 traceback_to_show = '\n'.join(last_lines)
                 logger.error(traceback_to_show)
-                self.log_embedded_error(f"Error parsing constraints text: {e}")
+                self.log_embedded_error(f"{e}")
                 return None
 
         def expand_center_of_mass_pars(constraint: ast.Assign) -> list[ast.Assign]:
@@ -222,9 +223,15 @@ class Constraints(QWidget, Ui_Constraints):
                         imports.append(node)
 
                     case ast.Assign():
+                        if len(node.targets) != 1 or isinstance(node.targets[0], ast.Tuple) or isinstance(node.value, ast.Tuple):
+                            self.log_embedded_error(f"Tuple assignment is not supported (line {node.lineno}).")
+                            raise ValueError(f"Tuple assignment is not supported (line {node.lineno}).")
+
                         if node.targets[0].id == 'parameters':
                             params = node
-                        elif node.targets[0].id.startswith('dCOM') or node.targets[0].id.startswith('COM'):
+                            continue
+
+                        if node.targets[0].id.startswith('dCOM') or node.targets[0].id.startswith('COM'):
                             constraints.append(expand_center_of_mass_pars(node))
                         else:
                             constraints.append(node)
@@ -233,65 +240,65 @@ class Constraints(QWidget, Ui_Constraints):
         def extract_symbols(constraints: list[ast.AST]) -> tuple[list[str], list[str]]:
             """Extract all symbols used in the constraints."""
             lhs, rhs = set(), set()
+            lineno = {}
             for node in constraints:
                 # left-hand side of assignment
                 for target in node.targets:
                     match target:
                         case ast.Name():
                             lhs.add(target.id)
+                            lineno[target.id] = target.lineno
                         case ast.Tuple():
                             for elt in target.elts:
                                 if isinstance(elt, ast.Name):
                                     lhs.add(elt.id)
+                                    lineno[elt.id] = elt.lineno
 
                 # right-hand side of assignment
                 for value in ast.walk(node.value):
                     match value:
                         case ast.Name():
                             rhs.add(value.id)
+                            lineno[value.id] = value.lineno
                         case ast.Tuple:
                             for elt in value.elts:
                                 if isinstance(elt, ast.Name):
                                     rhs.add(elt.id)
+                                    lineno[elt.id] = elt.lineno
 
-            return lhs, rhs
+            return lhs, rhs, lineno
 
         def validate_params(params: ast.AST): 
             if params is None:
-                logger.error("No parameters found in constraints text.")
                 self.log_embedded_error("No parameters found in constraints text.")
                 raise ValueError("No parameters found in constraints text.")
 
-        def validate_symbols(lhs: list[str], rhs: list[str], fitPars: list[str]):
+        def validate_symbols(lhs: list[str], rhs: list[str], symbol_linenos: dict[str, int], fitPars: list[str]):
             """Check if all symbols in lhs and rhs are valid parameters."""
             # lhs is not allowed to contain fit parameters
             for symbol in lhs:
                 if symbol in fitPars or symbol[1:] in fitPars:
-                    logger.error(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to.")
-                    self.log_embedded_error(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to.")
-                    raise ValueError(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to.")
+                    self.log_embedded_error(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to (line {symbol_linenos[symbol]}).")
+                    raise ValueError(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to (line {symbol_linenos[symbol]}).")
 
             for symbol in rhs:
                 is_fit_par = symbol in fitPars or symbol[1:] in fitPars
                 is_defined = symbol in lhs
                 if not is_fit_par and not is_defined:
-                    logger.error(f"Symbol '{symbol}' is undefined.")
-                    self.log_embedded_error(f"Symbol '{symbol}' is undefined.")
-                    raise ValueError(f"Symbol '{symbol}' is undefined.")
+                    self.log_embedded_error(f"Symbol '{symbol}' is undefined (line {symbol_linenos[symbol]}).")
+                    raise ValueError(f"Symbol '{symbol}' is undefined (line {symbol_linenos[symbol]}).")
 
         def validate_imports(imports: list[ast.ImportFrom | ast.Import]):
             """Check if all imports are valid."""
             for imp in imports:
                 if isinstance(imp, ast.ImportFrom):
                     if not importlib.util.find_spec(imp.module):
-                        logger.error(f"Module '{imp.module}' not found.")
-                        self.log_embedded_error(f"Module '{imp.module}' not found.")
+                        self.log_embedded_error(f"Module '{imp.module}' not found (line {imp.lineno}).")
                         raise ModuleNotFoundError(f"No module named {imp.module}")
                 elif isinstance(imp, ast.Import):
                     for name in imp.names:
                         if not importlib.util.find_spec(name.name):
-                            logger.error(f"Module '{name.name}' not found.")
-                            self.log_embedded_error(f"Module '{name.name}' not found.")
+                            self.log_embedded_error(f"Module '{name.name}' not found (line {imp.lineno}).")
                             raise ModuleNotFoundError(f"No module named {name.name}")
 
         def mark_named_parameters(checkedPars: list[list[bool]], modelPars: list[str], symbols: set[str]):
@@ -310,9 +317,9 @@ class Constraints(QWidget, Ui_Constraints):
 
         tree = as_ast(text)
         params, imports, constraints = parse_ast(tree)
-        lhs, rhs = extract_symbols(constraints)
+        lhs, rhs, symbol_linenos = extract_symbols(constraints)
         validate_params(params)
-        validate_symbols(lhs, rhs, fitPar)
+        validate_symbols(lhs, rhs, symbol_linenos, fitPar)
         validate_imports(imports)
 
         params = ast.unparse(params)
