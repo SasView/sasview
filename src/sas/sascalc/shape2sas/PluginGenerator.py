@@ -55,17 +55,17 @@ def format_parameter_list_of_list_dimension(par: list[list[str | float]]) -> str
     """
     def format_parameter(p):
         if isinstance(p, str):
-            return f"min(abs({p}), 1)"
+            return f"max({p}, 1)"
         elif isinstance(p, (int, float)):
             if p < 0:
                 raise ValueError(f"PluginGenerator: Got value {p}, but dimensional scalars cannot be negative!")
             return str(p)
         else:
             return str(p)
-    
+
     def format_sublist(sub_par):
         return ", ".join(format_parameter(p) for p in sub_par)
-    
+
     formatted_sublists = [format_sublist(sub_par) for sub_par in par]
     return f"[[{'],['.join(formatted_sublists)}]]"
 
