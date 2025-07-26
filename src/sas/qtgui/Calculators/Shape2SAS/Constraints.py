@@ -88,7 +88,7 @@ class Constraints(QWidget, Ui_Constraints):
             for start, line in enumerate(current_text_lines):
                 if line.startswith("parameters ="):
                     break
-            
+
             # find closing bracket of the parameters list
             bracket_count = 0
             for end, line in enumerate(current_text_lines[start:]):
@@ -152,7 +152,57 @@ class Constraints(QWidget, Ui_Constraints):
                 traceback_to_show = '\n'.join(last_lines)
                 logger.error(traceback_to_show)
                 return None
-        
+
+        def expand_center_of_mass_pars(constraint: ast.Assign) -> list[ast.Assign]:
+            """Expand center of mass parameters to include all components."""
+
+            # check if this is a COM assignment we need to expand
+            if (len(constraint.targets) != 1 or 
+                not isinstance(constraint.targets[0], ast.Name) or
+                not isinstance(constraint.value, ast.Name)):
+                return constraint
+
+            lhs = constraint.targets[0].id
+            rhs = constraint.value.id
+
+            # check if lhs is a COM parameter (with or without 'd' prefix)
+            lhs_is_delta = lhs.startswith('d')
+            lhs_base = lhs[1:] if lhs_is_delta else lhs
+
+            if not (lhs_base.startswith("COM") and lhs_base[3:].isdigit()):
+                return constraint
+
+            # check rhs
+            rhs_is_delta = rhs.startswith('d')
+            rhs_base = rhs[1:] if rhs_is_delta else rhs
+
+            new_targets, new_values = [], []
+            if rhs_base.startswith("COM") and rhs_base[3:].isdigit():
+                print("CASE DOUBLE COM")
+                # rhs is also a COM parameter: COM2 = COM1 -> COMX2, COMY2, COMZ2 =COMX1, COMY1, COMZ1
+                lhs_shape_num = lhs_base[3:]
+                rhs_shape_num = rhs_base[3:]
+
+                for axis in ['X', 'Y', 'Z']:
+                    lhs_full = f"{'d' if lhs_is_delta else ''}COM{axis}{lhs_shape_num}"
+                    rhs_full = f"{'d' if rhs_is_delta else ''}COM{axis}{rhs_shape_num}"
+                    new_targets.append(ast.Name(id=lhs_full, ctx=ast.Store()))
+                    new_values.append(ast.Name(id=rhs_full, ctx=ast.Load()))
+
+            else:
+                print("CASE SINGLE COM")
+                # rhs is a regular parameter: COM2 = X -> COMX2, COMY2, COMZ2 = X, X, X
+                lhs_shape_num = lhs_base[3:]
+                rhs_full = f"{'d' if rhs_is_delta else ''}{rhs_base}"
+                for axis in ['X', 'Y', 'Z']:
+                    lhs_full = f"{'d' if lhs_is_delta else ''}COM{axis}{lhs_shape_num}"
+                    new_targets.append(ast.Name(id=lhs_full, ctx=ast.Store()))
+                    new_values.append(ast.Name(id=rhs_full, ctx=ast.Load()))
+
+            constraint.targets = [ast.Tuple(elts=new_targets, ctx=ast.Store())]
+            constraint.value = ast.Tuple(elts=new_values, ctx=ast.Load())
+            return constraint
+
         def parse_ast(tree: ast.AST):
             params = None
             imports = []
@@ -166,24 +216,37 @@ class Constraints(QWidget, Ui_Constraints):
                     case ast.Assign():
                         if node.targets[0].id == 'parameters':
                             params = node
+                        elif node.targets[0].id.startswith('dCOM') or node.targets[0].id.startswith('COM'):
+                            constraints.append(expand_center_of_mass_pars(node))
                         else:
                             constraints.append(node)
 
+            print(f"Parsed constraints: {constraints}")
             return params, imports, constraints
-        
+
         def extract_symbols(constraints: list[ast.AST]) -> tuple[list[str], list[str]]:
             """Extract all symbols used in the constraints."""
             lhs, rhs = set(), set()
             for node in constraints:
                 # left-hand side of assignment
                 for target in node.targets:
-                    if isinstance(target, ast.Name):
-                        lhs.add(target.id)
+                    match target:
+                        case ast.Name():
+                            lhs.add(target.id)
+                        case ast.Tuple():
+                            for elt in target.elts:
+                                if isinstance(elt, ast.Name):
+                                    lhs.add(elt.id)
 
                 # right-hand side of assignment
                 for value in ast.walk(node.value):
-                    if isinstance(value, ast.Name):
-                        rhs.add(value.id)
+                    match value:
+                        case ast.Name():
+                            rhs.add(value.id)
+                        case ast.Tuple:
+                            for elt in value.elts:
+                                if isinstance(elt, ast.Name):
+                                    rhs.add(elt.id)
 
             return lhs, rhs
         
@@ -215,13 +278,16 @@ class Constraints(QWidget, Ui_Constraints):
 
         def mark_named_parameters(checkedPars: list[list[bool]], modelPars: list[str], symbols: set[str]):
             """Mark parameters in the modelPars as checked if they are in symbols_lhs."""
+            def in_symbols(par: str): 
+                if par in symbols: return True
+                if 'd' + par in symbols: return True
+                return False
+
             for i, shape in enumerate(modelPars):
                 for j, par in enumerate(shape):
                     if par is None:
                         continue
-                    in_symbols = par in symbols
-                    d_in_symbols = "d" + par in symbols
-                    checkedPars[i][j] = checkedPars[i][j] or in_symbols or d_in_symbols
+                    checkedPars[i][j] = checkedPars[i][j] or in_symbols(par)
             return checkedPars
 
         tree = as_ast(text)
