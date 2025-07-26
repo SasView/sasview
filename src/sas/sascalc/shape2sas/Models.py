@@ -62,15 +62,12 @@ class ModelSystem:
 
 
 class Rotation:
-    def __init__(self, x_add: np.ndarray,
-                       y_add: np.ndarray,
-                       z_add: np.ndarray,
-                       alpha: float,
-                       beta: float,
-                       gam: float,
-                       rotp_x: float,
-                       rotp_y: float,
-                       rotp_z: float):
+    def __init__(
+        self, 
+        x_add: np.ndarray, y_add: np.ndarray, z_add: np.ndarray, 
+        alpha: float, beta: float, gam: float,
+        rotp_x: float, rotp_y: float,rotp_z: float
+    ):
         self.x_add = x_add
         self.y_add = y_add
         self.z_add = z_add
@@ -145,6 +142,7 @@ class GeneratePoints:
 
     def onGeneratingPoints(self) -> Vector3D:
         """Generates the points"""
+        print(f"Generating {self.Npoints} points for subunit {self.subunitClass.__name__} with dimensions {self.dimensions}")
         x, y, z= self.subunitClass(self.dimensions).getPointDistribution(self.Npoints)
         x, y, z = self.onTransformingPoints(x, y, z)
         return x, y, z
@@ -188,35 +186,36 @@ class GenerateAllPoints:
     def setAvailableSubunits(self):
         """Returns the available subunits"""
         self.subunitClasses = {
-                "sphere": Sphere,
-                "ball": Sphere,
+            "sphere": Sphere,
+            "ball": Sphere,
 
-                "hollow_sphere": HollowSphere,
-                "Hollow sphere": HollowSphere,
+            "hollow_sphere": HollowSphere, 
+            "Hollow sphere": HollowSphere, 
 
-                "cylinder": Cylinder,
+            "cylinder": Cylinder,
 
-                "ellipsoid": Ellipsoid,
+            "ellipsoid": Ellipsoid,
 
-                "elliptical_cylinder": EllipticalCylinder,
-                "Elliptical cylinder": EllipticalCylinder,
+            "elliptical_cylinder": EllipticalCylinder,
+            "Elliptical cylinder": EllipticalCylinder,
 
-                "disc": Disc,
+            "disc": Disc,
 
-                "cube": Cube,
+            "cube": Cube,
 
-                "hollow_cube": HollowCube,
-                "Hollow cube": HollowCube,
+            "hollow_cube": HollowCube,
+            "Hollow cube": HollowCube,
 
-                "cuboid": Cuboid,
+            "cuboid": Cuboid,
 
-                "cyl_ring": CylinderRing,
-                "Cylinder ring": CylinderRing,
+            "cyl_ring": CylinderRing,
+            "Cylinder ring": CylinderRing,
 
-                "disc_ring": DiscRing,
-                "Disc ring": DiscRing,
-                
-                "superellipsoid": SuperEllipsoid}
+            "disc_ring": DiscRing,
+            "Disc ring": DiscRing,
+            
+            "superellipsoid": SuperEllipsoid
+        }
 
     def getSubunitClass(self, key: str):
         if key in self.subunitClasses:
@@ -254,16 +253,18 @@ class GenerateAllPoints:
         return x_new, y_new, z_new, p_new
 
     @staticmethod
-    def onCheckOverlap(x: np.ndarray,
-                       y: np.ndarray,
-                       z: np.ndarray,
-                       p: np.ndarray,
-                       rotation: list[float],
-                       rotation_point: list[float],
-                       com: list[float],
-                       subunitClass: object,
-                       dimensions: list[float]):
-        """check for overlap with previous subunits.
+    def onCheckOverlap(
+        x: np.ndarray, 
+        y: np.ndarray, 
+        z: np.ndarray, 
+        p: np.ndarray, 
+        rotation: List[float], 
+        rotation_point: list[float],
+        com: List[float], 
+        subunitClass: object, 
+        dimensions: List[float]
+    ):
+        """check for overlap with previous subunits. 
         if overlap, the point is removed"""
 
         if sum(rotation) != 0:
@@ -330,7 +331,7 @@ class GenerateAllPoints:
             N.append(N_subunit)
             rho.append(rho_subunit)
             N_exclude.append(N_x_sum)
-            fraction_left = (N_subunit-N_x_sum) / N_subunit
+            fraction_left = (N_subunit-N_x_sum) / max(N_subunit, 1)
             volume_total += volume[i] * fraction_left
 
             x_new.append(x_add)
@@ -420,6 +421,13 @@ class GenerateAllPoints:
 
 def getPointDistribution(prof: ModelProfile, Npoints):
     """Generate points for a given model profile."""
+
+    print(f"Generating points for model profile: {prof.subunits}")
+    print(f"Number of subunits: {len(prof.subunits)}")
+    for i, subunit in enumerate(prof.subunits):
+        print(f"  Subunit {i}: {subunit} with dimensions {prof.dimensions[i]} at COM {prof.com[i]}")
+        print(f"  Rotation: {prof.rotation[i]} at rotation point {prof.rotation_points[i]} with SLD {prof.p_s[i]}")
+
     x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits, 
                                                   prof.dimensions, prof.rotation, prof.rotation_points, 
                                                   prof.p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()

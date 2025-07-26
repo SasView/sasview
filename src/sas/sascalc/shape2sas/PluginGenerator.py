@@ -9,13 +9,13 @@ from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
 from sas.sascalc.shape2sas.UserText import UserText
 
 def generate_plugin(
-        prof: ModelProfile, 
-        modelPars: list[list[str], list[str | float]],
-        usertext: UserText, 
-        fitPar: list[str],
-        Npoints: int, 
-        pr_points: int, 
-        file_name: str
+    prof: ModelProfile, 
+    modelPars: list[list[str], list[str | float]],
+    usertext: UserText, 
+    fitPar: list[str],
+    Npoints: int, 
+    pr_points: int, 
+    file_name: str
 ) -> tuple[str, Path]:
     """Generates a theoretical scattering plugin model"""
 
@@ -46,6 +46,28 @@ def format_parameter_list_of_list(par: list[str | float]) -> str:
     """
     sub_pars_join =[", ".join(map(str,sub_par)) for sub_par in par]
     return f"[[{'],['.join(sub_pars_join)}]]"
+
+
+def format_parameter_list_of_list_dimension(par: list[list[str | float]]) -> str:
+    """
+    Format a list of lists containing dimensional parameters to the model string. 
+    Variables will be enclosed in 'min(abs(x), 1)' for safety.
+    """
+    def format_parameter(p):
+        if isinstance(p, str):
+            return f"min(abs({p}), 1)"
+        elif isinstance(p, (int, float)):
+            if p < 0:
+                raise ValueError(f"PluginGenerator: Got value {p}, but dimensional scalars cannot be negative!")
+            return str(p)
+        else:
+            return str(p)
+    
+    def format_sublist(sub_par):
+        return ", ".join(format_parameter(p) for p in sub_par)
+    
+    formatted_sublists = [format_sublist(sub_par) for sub_par in par]
+    return f"[[{'],['.join(formatted_sublists)}]]"
 
 
 def script_insert_delta_parameters(modelPars: list[list[str | float]], fitPars: list[str], symbols: tuple[set[str], set[str]]) -> tuple[str, str]:
@@ -86,7 +108,7 @@ def script_insert_delta_parameters(modelPars: list[list[str | float]], fitPars: 
         prev_name = "prev_" + symbol
         globals.append(f"{prev_name}")
         prev_pars_def.append(f"{prev_name} = {val}")
-        delta_pars_def.append(f"d{symbol} = {prev_name} - {symbol}")
+        delta_pars_def.append(f"d{symbol} = {symbol} - {prev_name}")
         prev_pars_update.append(f"{prev_name} = {symbol}")
 
     print(f"Globals: {globals}")
@@ -218,7 +240,7 @@ def Iq({', '.join(fitPar)}):
     modelProfile = ModelProfile(
         subunits={prof.subunits}, 
         p_s={format_parameter_list(prof.p_s)}, 
-        dimensions={format_parameter_list_of_list(prof.dimensions)}, 
+        dimensions={format_parameter_list_of_list_dimension(prof.dimensions)}, 
         com={format_parameter_list_of_list(prof.com)}, 
         rotation_points={format_parameter_list_of_list(prof.rotation_points)}, 
         rotation={format_parameter_list_of_list(prof.rotation)}, 
