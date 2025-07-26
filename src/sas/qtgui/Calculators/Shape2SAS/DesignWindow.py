@@ -105,7 +105,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         #create layout for build model tab
         self.viewerModel = ViewerModel()
-        self.subunitTable = SubunitTable()
+        self.subunitTable = SubunitTable(self.onClickingPlot)
 
         modelVbox = QVBoxLayout()
         modelHbox = QHBoxLayout()
@@ -492,6 +492,8 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         self.plugin.setEnabled(columns > 0)
 
         if not self.subunitTable.model.item(1, columns - 1):
+            self.viewerModel.setClearScatteringPlot()
+            self.viewerModel.setClearModelPlot()
             return
 
         modelProfile = self.getModelProfile(self.ifEmptyValue)

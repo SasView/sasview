@@ -333,11 +333,12 @@ class CustomStandardItem(QStandardItem):
     """Custom QStandardItem to set initial values, roles
     and take care of subunit and colour case"""
 
-    def __init__(self, prefix="", unit="", tooltip="", default_value=None):
+    def __init__(self, prefix="", unit="", tooltip="", default_value=None, plot_callback=None):
         super().__init__(str(default_value))
         self.prefix = prefix
         self.tooltip = tooltip
         self.unit = unit
+        self.plot_callback = plot_callback
 
         self.setData(default_value, Qt.EditRole)
 
@@ -350,7 +351,6 @@ class CustomStandardItem(QStandardItem):
             return f"{self.prefix}{value}{self.unit}"
         elif role == Qt.ToolTipRole:
             return self.tooltip
-
         return value
 
 
@@ -366,6 +366,8 @@ class CustomStandardItem(QStandardItem):
             super().setData(value, Qt.DisplayRole)
         else:
             super().setData(value, role)
+        if self.plot_callback:
+            self.plot_callback()
 
 
 class CustomDelegate(QStyledItemDelegate):
@@ -433,13 +435,14 @@ class ModelTableModel(QStandardItemModel):
 class SubunitTable(QWidget, Ui_SubunitTableController):
     """Subunit table functionality and design for the model tab"""
 
-    def __init__(self):
+    def __init__(self, updatePlotCallback=None):
         super(SubunitTable, self).__init__()
         self.setupUi(self)
 
         self.columnEyeKeeper = []
         self.restrictedRowsPos = []
 
+        self.updatePlotCallback = updatePlotCallback
         self.initializeModel()
         self.initializeSignals()
         self.setSubunitOptions()
@@ -508,8 +511,11 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                 #if row is contained in the subunit
                 if row in subunitName.keys():
                     paintedName = subunitName[row] + f"{to_column_name}" + " = "
-                    item = CustomStandardItem(paintedName, subunitUnits[row],
-                                            subunitTooltip[row], subunitDefault_value[row])
+                    item = CustomStandardItem(
+                        paintedName, subunitUnits[row], 
+                        subunitTooltip[row], subunitDefault_value[row],
+                        plot_callback=self.updatePlotCallback
+                    )
                 else:
                     #no input for this row
                     item = CustomStandardItem("", "", "", "")
@@ -529,8 +535,11 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                 attr = getattr(OptionLayout, row.value)
                 method = MethodType(attr, OptionLayout)
                 name, defaultVal, units, tooltip, _, _ = method()
-                item = CustomStandardItem(name[row] + f"{to_column_name}" + " = ", units[row],
-                                          tooltip[row], defaultVal[row])
+                item = CustomStandardItem(
+                    name[row] + f"{to_column_name}" + " = ", units[row], 
+                    tooltip[row], defaultVal[row],
+                    plot_callback=self.updatePlotCallback
+                )
 
             items.append(item)
 
@@ -539,6 +548,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.setSubunitRestriction(subunitName.keys())
         self.table.resizeColumnsToContents()
         self.setButtonSpinboxBounds()
+        self.updatePlotCallback() # Update the plot after adding a subunit
 
 
     def onDeleting(self):
@@ -554,6 +564,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         #clear the table if no columns are left
         if not self.model.columnCount():
             self.onClearSubunitTable()
+        self.updatePlotCallback() # Update the plot after removing a subunit
 
 
     def setButtonSpinboxBounds(self):
