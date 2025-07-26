@@ -54,6 +54,15 @@ class Constraints(QWidget, Ui_Constraints):
         defaultText = "<span><b>Shape2SAS plugin constraints log</b></p></span>"
         self.textEdit_2.append(defaultText)
 
+    def log_embedded_error(self, message: str):
+        """Log an error message in the embedded logbook."""
+        self.textEdit_2.append(f"<span style='color: red;'>{message}</span>")
+        self.textEdit_2.verticalScrollBar().setValue(self.textEdit_2.verticalScrollBar().maximum())
+    
+    def log_embedded(self, message: str):
+        """Log a message in the embedded logbook."""
+        self.textEdit_2.append(f"<span style='color: black;'>{message}</span>")
+        self.textEdit_2.verticalScrollBar().setValue(self.textEdit_2.verticalScrollBar().maximum())
 
     def getConstraintText(self, fit_params: str) -> str:
         """Get the default text for the constraints editor"""
@@ -118,7 +127,8 @@ class Constraints(QWidget, Ui_Constraints):
             # create new list of parameters, replacing existing old lines in the new list
             for i, name in enumerate(new_names):
                 if name in old_names:
-                    new_lines[i+2] = old_lines[old_names.index(name)+2]
+                    entry = old_lines[old_names.index(name)+2]
+                    new_lines[i+2] = entry + ',' if entry[-1] != ',' else entry
             
             # remove old lines from the current text and insert the new ones in the middle
             current_text = "\n".join(current_text_lines[:start+1] + new_lines[2:-1] + current_text_lines[start+end:])
@@ -129,8 +139,7 @@ class Constraints(QWidget, Ui_Constraints):
         self.constraintTextEditor.txtEditor.setPlainText(text)
         self.createPlugin.setEnabled(True)
 
-    @staticmethod
-    def parseConstraintsText(
+    def parseConstraintsText(self,
         text: str, fitPar: list[str], modelPars: list[list[str]], modelVals: list[list[float]], checkedPars: list[list[bool]]
     ) -> tuple[list[str], str, str, list[list[bool]]]:
         """Parse the text in the constraints editor and return a dictionary of parameters"""
@@ -151,6 +160,7 @@ class Constraints(QWidget, Ui_Constraints):
                 last_lines = all_lines[-1:]
                 traceback_to_show = '\n'.join(last_lines)
                 logger.error(traceback_to_show)
+                self.log_embedded_error(f"Error parsing constraints text: {e}")
                 return None
 
         def expand_center_of_mass_pars(constraint: ast.Assign) -> list[ast.Assign]:
@@ -178,7 +188,6 @@ class Constraints(QWidget, Ui_Constraints):
 
             new_targets, new_values = [], []
             if rhs_base.startswith("COM") and rhs_base[3:].isdigit():
-                print("CASE DOUBLE COM")
                 # rhs is also a COM parameter: COM2 = COM1 -> COMX2, COMY2, COMZ2 =COMX1, COMY1, COMZ1
                 lhs_shape_num = lhs_base[3:]
                 rhs_shape_num = rhs_base[3:]
@@ -190,7 +199,6 @@ class Constraints(QWidget, Ui_Constraints):
                     new_values.append(ast.Name(id=rhs_full, ctx=ast.Load()))
 
             else:
-                print("CASE SINGLE COM")
                 # rhs is a regular parameter: COM2 = X -> COMX2, COMY2, COMZ2 = X, X, X
                 lhs_shape_num = lhs_base[3:]
                 rhs_full = f"{'d' if rhs_is_delta else ''}{rhs_base}"
@@ -220,8 +228,6 @@ class Constraints(QWidget, Ui_Constraints):
                             constraints.append(expand_center_of_mass_pars(node))
                         else:
                             constraints.append(node)
-
-            print(f"Parsed constraints: {constraints}")
             return params, imports, constraints
 
         def extract_symbols(constraints: list[ast.AST]) -> tuple[list[str], list[str]]:
@@ -249,10 +255,11 @@ class Constraints(QWidget, Ui_Constraints):
                                     rhs.add(elt.id)
 
             return lhs, rhs
-        
+
         def validate_params(params: ast.AST): 
             if params is None:
                 logger.error("No parameters found in constraints text.")
+                self.log_embedded_error("No parameters found in constraints text.")
                 raise ValueError("No parameters found in constraints text.")
 
         def validate_symbols(lhs: list[str], rhs: list[str], fitPars: list[str]):
@@ -260,20 +267,31 @@ class Constraints(QWidget, Ui_Constraints):
             # lhs is not allowed to contain fit parameters
             for symbol in lhs:
                 if symbol in fitPars or symbol[1:] in fitPars:
-                    logger.error(f"Symbol '{symbol}' is a fit parameter and cannot be used in constraints.")
+                    logger.error(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to.")
+                    self.log_embedded_error(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to.")
                     raise ValueError(f"Symbol '{symbol}' is a fit parameter and cannot be assigned to.")
-        
+
+            for symbol in rhs:
+                is_fit_par = symbol in fitPars or symbol[1:] in fitPars
+                is_defined = symbol in lhs
+                if not is_fit_par and not is_defined:
+                    logger.error(f"Symbol '{symbol}' is undefined.")
+                    self.log_embedded_error(f"Symbol '{symbol}' is undefined.")
+                    raise ValueError(f"Symbol '{symbol}' is undefined.")
+
         def validate_imports(imports: list[ast.ImportFrom | ast.Import]):
             """Check if all imports are valid."""
             for imp in imports:
                 if isinstance(imp, ast.ImportFrom):
                     if not importlib.util.find_spec(imp.module):
                         logger.error(f"Module '{imp.module}' not found.")
+                        self.log_embedded_error(f"Module '{imp.module}' not found.")
                         raise ModuleNotFoundError(f"No module named {imp.module}")
                 elif isinstance(imp, ast.Import):
                     for name in imp.names:
                         if not importlib.util.find_spec(name.name):
                             logger.error(f"Module '{name.name}' not found.")
+                            self.log_embedded_error(f"Module '{name.name}' not found.")
                             raise ModuleNotFoundError(f"No module named {name.name}")
 
         def mark_named_parameters(checkedPars: list[list[bool]], modelPars: list[str], symbols: set[str]):
@@ -302,7 +320,7 @@ class Constraints(QWidget, Ui_Constraints):
         constraints = [ast.unparse(constraint) for constraint in constraints]
         symbols = (lhs, rhs)
 
-        print("Finished parsing constraints text.")
+        self.log_embedded("Successfully parsed user text. Generating plugin model...")
         print(f"Parsed parameters: {params}")
         print(f"Parsed imports: {imports}")
         print(f"Parsed constraints: {constraints}")

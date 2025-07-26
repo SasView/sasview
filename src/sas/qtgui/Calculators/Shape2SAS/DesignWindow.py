@@ -260,21 +260,21 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         #Has anything been written to the text editor
         if constraintsStr:
-            #TODO: print to GUI output texteditor
+            self.constraint.log_embedded("Parsing constraints...")
             return self.constraint.parseConstraintsText(constraintsStr, fitPar, modelPars, modelVals, checkedPars)
-        
+
         #Did the user only check parameters and click generate plugin
         elif fitPar:
             #Get default constraints
             fitParLists = self.getConstraintsToTextEditor()
             defaultConstraintsStr = self.constraint.getConstraintText(fitParLists)
-            #TODO: print to GUI output texteditor
+            self.constraint.log_embedded("No constraints text found. Creating unconstrained model")
             return self.constraint.getConstraints(defaultConstraintsStr, fitPar, modelPars, modelVals, checkedPars)
 
         #If not, return empty
         else:
             #all parameters are constant
-            #TODO: print to GUI output texteditor
+            self.constraint.log_embedded("Creating unconstrained model.")
             return "", "", "", checkedPars
 
     def enableButtons(self, toggle: bool):
@@ -666,6 +666,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         TabbedModelEditor.writeFile(full_path, model_str)
         self.communicator.customModelDirectoryChanged.emit()
         logger.info(f"Successfully generated model {modelName}!")
+        self.constraint.log_embedded(f"Plugin model {modelName} has been generated and is now available in the Fit panel.")
         self.constraint.createPlugin.setEnabled(False)
 
     def onCheckingInput(self, input: str, default: str) -> str:
