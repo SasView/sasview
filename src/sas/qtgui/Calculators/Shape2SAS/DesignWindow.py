@@ -431,7 +431,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         com = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.COM_x), 
                                                 OptionLayout.get_position(OptionLayout.COM_y), 
                                                 OptionLayout.get_position(OptionLayout.COM_z)], **kwargs)
-        
+
         rotation_points = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.RP_x),
                                                 OptionLayout.get_position(OptionLayout.RP_y),
                                                 OptionLayout.get_position(OptionLayout.RP_z)], **kwargs)
@@ -439,7 +439,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         rotation = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.α),
                                             OptionLayout.get_position(OptionLayout.β),
                                             OptionLayout.get_position(OptionLayout.γ)], **kwargs)
-        
+
         #set bool to checkbox
         if self.subunitTable.overlap.isChecked():
             exclude_overlap = True
@@ -478,7 +478,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             return
 
         modelProfile = self.getModelProfile(self.ifEmptyValue)
-        
+
         plotDesign = self.getViewFeatures()
         modelDistribution = getPointDistribution(modelProfile, 3000)
         self.viewerModel.setPlot(modelDistribution, plotDesign)

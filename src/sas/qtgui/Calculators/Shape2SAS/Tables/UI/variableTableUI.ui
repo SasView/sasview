@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>232</width>
+    <width>330</width>
     <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>232</width>
+    <width>330</width>
     <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>232</width>
+    <width>332</width>
     <height>16777215</height>
    </size>
   </property>
@@ -27,7 +27,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="sizeConstraint">
-    <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
+    <enum>QLayout::SetDefaultConstraint</enum>
    </property>
    <property name="leftMargin">
     <number>0</number>
@@ -53,13 +53,13 @@
       <widget class="QTableView" name="tableView">
        <property name="minimumSize">
         <size>
-         <width>230</width>
+         <width>330</width>
          <height>300</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>230</width>
+         <width>330</width>
          <height>16777215</height>
         </size>
        </property>
@@ -80,11 +80,8 @@
          </property>
          <item>
           <spacer name="horizontalSpacer_5">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::Expanding</enum>
+            <enum>QSizePolicy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -118,11 +115,8 @@
          </item>
          <item>
           <spacer name="horizontalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::Expanding</enum>
+            <enum>QSizePolicy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -136,11 +130,8 @@
        </item>
        <item>
         <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Policy::Fixed</enum>
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -157,11 +148,8 @@
          </property>
          <item>
           <spacer name="horizontalSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::Fixed</enum>
+            <enum>QSizePolicy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -175,13 +163,13 @@
           <widget class="QLabel" name="label_3">
            <property name="minimumSize">
             <size>
-             <width>75</width>
+             <width>100</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>75</width>
+             <width>100</width>
              <height>24</height>
             </size>
            </property>
@@ -214,11 +202,8 @@
          </item>
          <item>
           <spacer name="horizontalSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::Expanding</enum>
+            <enum>QSizePolicy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -237,11 +222,8 @@
          </property>
          <item>
           <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::Fixed</enum>
+            <enum>QSizePolicy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -255,13 +237,13 @@
           <widget class="QLabel" name="label">
            <property name="minimumSize">
             <size>
-             <width>75</width>
+             <width>100</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>75</width>
+             <width>100</width>
              <height>24</height>
             </size>
            </property>
@@ -294,11 +276,8 @@
          </item>
          <item>
           <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::Expanding</enum>
+            <enum>QSizePolicy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -317,11 +296,8 @@
          </property>
          <item>
           <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::Fixed</enum>
+            <enum>QSizePolicy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -335,13 +311,13 @@
           <widget class="QLabel" name="label_2">
            <property name="minimumSize">
             <size>
-             <width>75</width>
+             <width>100</width>
              <height>24</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>75</width>
+             <width>100</width>
              <height>24</height>
             </size>
            </property>
@@ -374,11 +350,8 @@
          </item>
          <item>
           <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Policy::Expanding</enum>
+            <enum>QSizePolicy::Fixed</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -394,11 +367,8 @@
      </item>
      <item>
       <spacer name="verticalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Orientation::Vertical</enum>
-       </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Policy::Fixed</enum>
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>

@@ -2,7 +2,7 @@
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
-from PySide6.QtWidgets import QStyledItemDelegate, QWidget, QCheckBox
+from PySide6.QtWidgets import QStyledItemDelegate, QWidget, QCheckBox, QPushButton
 
 # Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.Tables.UI.variableTableUI import Ui_VariableTable
@@ -14,13 +14,18 @@ class CustomDelegate(QStyledItemDelegate):
     def createEditor(self, widget, option, index):
         """Create editor for the model table view"""
 
-        if index.column() == 0: #subunit case
-            return None
+        match index.column():
+            case 0:  # subunit case
+                return None  # No editor for the subunit name column
 
-        else:
-            editor = QCheckBox(widget)
-            return editor
-    
+            case 1:  # checkbox case
+                editor = QCheckBox(widget)
+                return editor
+
+            case 2: # button case
+                editor = QPushButton(widget)
+                return editor
+
     def setEditorData(self, editor, index):
         """Set the checkbox state based on the model data"""
         value = index.model().data(index, Qt.CheckStateRole)
@@ -31,7 +36,49 @@ class CustomDelegate(QStyledItemDelegate):
         value = Qt.Checked if editor.isChecked() else Qt.Unchecked
         model.setData(index, value, Qt.CheckStateRole)
 
+    def paint(self, painter, option, index):
+        """Custom paint for button column"""
+        if index.column() == 2:
+            button_rect = option.rect
+            button_rect.adjust(2, 2, -2, -2)
+
+            # Check if button should be enabled
+            is_enabled = index.model().data(index, Qt.ItemDataRole.UserRole) != False
+
+            if is_enabled:
+                painter.fillRect(button_rect, option.palette.button())
+                painter.setPen(option.palette.buttonText().color())
+            else:
+                painter.fillRect(button_rect, option.palette.mid())
+                painter.setPen(option.palette.mid().color())
+
+            painter.drawRect(button_rect)
+            painter.drawText(button_rect, Qt.AlignmentFlag.AlignCenter, "preview")
+        else:
+            super().paint(painter, option, index)
+
+    def editorEvent(self, event, model, option, index):
+        """Handle mouse clicks on buttons"""
+        if index.column() == 1 and event.type() == event.Type.MouseButtonPress:
+            super().editorEvent(event, model, option, index)
+            is_checked = model.data(index, Qt.CheckStateRole) == Qt.Checked
+            button_index = model.index(index.row(), 2)
+            model.setData(button_index, is_checked, Qt.ItemDataRole.UserRole)
+            self.parent().update(button_index) if self.parent() else None
+            return True
+
+        if index.column() == 2 and event.type() == event.Type.MouseButtonPress:
+            is_enabled = model.data(index, Qt.UserRole) != False
+            if is_enabled and self.button_callback:
+                self.button_callback(index.row())
+                return True
         
+        return super().editorEvent(event, model, option, index)
+
+    def handleButtonClick(self, index):
+        """Handle button click"""
+        if self.button_callback:
+            self.button_callback(index.row())
         
 class ModelVariableTableModel(QStandardItemModel):
     """Subclass from QStandardItemModel to allow displaying parameters in
@@ -45,7 +92,7 @@ class ModelVariableTableModel(QStandardItemModel):
         Displays model parameters in the header of the model table
         """
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return list(['Parameters', 'Add to Fit'])[section]
+            return list(['Parameters', 'Add to Fit', 'Preview'])[section]
         
         return super(ModelVariableTableModel, self).headerData(section, orientation, role)
 
@@ -83,11 +130,18 @@ class VariableTable(QWidget, Ui_VariableTable):
 
         for name in range(len(names) - 1, 0, -1):
             itemName = QStandardItem(names[name])
+
             itemCheck = QStandardItem()
             itemCheck.setData(Qt.Unchecked, Qt.CheckStateRole)
             itemCheck.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             itemCheck.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.variableModel.insertRow(numrow, [itemName, itemCheck])
+
+            itemButton = QStandardItem("vary")
+            itemButton.setFlags(Qt.ItemIsEnabled)
+            itemButton.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            itemButton.setData(False, Qt.ItemDataRole.UserRole)
+        
+            self.variableModel.insertRow(numrow, [itemName, itemCheck, itemButton])
 
         font = QFont()
         font.setBold(True)
@@ -99,7 +153,13 @@ class VariableTable(QWidget, Ui_VariableTable):
         itemNum = QStandardItem(f"{column + 1}")
         itemNum.setTextAlignment(Qt.AlignCenter)
         itemNum.setFont(font)
-        self.variableModel.insertRow(numrow, [itemName, itemNum])
+
+        itemButton = QStandardItem()
+        itemButton.setFlags(Qt.ItemIsEnabled)
+        itemButton.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        itemButton.setData(False, Qt.ItemDataRole.UserRole)
+
+        self.variableModel.insertRow(numrow, [itemName, itemNum, itemButton])
         self.variableModel.itemChanged.connect(self.onItemChanged)
         itemNum.setFlags(itemNum.flags() & ~Qt.ItemIsSelectable & ~Qt.ItemIsEditable)
 
@@ -107,6 +167,7 @@ class VariableTable(QWidget, Ui_VariableTable):
         """Handle item changes in the variable table"""
         if self.on_item_changed_callback:
             self.on_item_changed_callback(item)
+        
 
     def removeTableData(self, row):
         """Remove data from table"""
