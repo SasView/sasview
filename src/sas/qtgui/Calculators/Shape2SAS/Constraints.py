@@ -3,7 +3,6 @@ import ast
 import logging
 import traceback
 import importlib.util
-import re
 
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt
