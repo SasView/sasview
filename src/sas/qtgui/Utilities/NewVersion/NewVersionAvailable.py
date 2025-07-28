@@ -105,6 +105,7 @@ def get_current_release_version() -> Optional[tuple[str, str, Version]]:
         return None
     except Exception as ex:
         logging.info("Failed to get version number %s", ex)
+        return None
 
 
 
