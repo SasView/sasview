@@ -106,7 +106,7 @@ PySide6_Addons==6.9.0
 PySide6_Essentials==6.9.0
 pytest==8.3.5
 pytest-mock==3.14.0
-pytest-qt==4.4.0
+pytest-qt==4.5.0
 python-bidi==0.6.6
 python-dateutil==2.9.0.post0
 python-gettext==5.0
