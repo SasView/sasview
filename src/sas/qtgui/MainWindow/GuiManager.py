@@ -1,7 +1,6 @@
 import sys
 import os
 import logging
-import json
 import webbrowser
 import traceback
 
