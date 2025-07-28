@@ -10,6 +10,7 @@ from periodictable.nsf import neutron_scattering
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
+from sas.qtgui.UI import main_resources_rc # noqa: F401
 
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel

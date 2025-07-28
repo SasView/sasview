@@ -7,6 +7,7 @@ from periodictable import formula as Formula
 
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc # noqa: F401
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
 
 from sas.qtgui.Utilities.GuiUtils import enum

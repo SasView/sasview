@@ -15,6 +15,7 @@ from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 from superqt import QDoubleRangeSlider
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc # noqa: F401
 from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
 
 DEFAULT_MAP = 'jet'

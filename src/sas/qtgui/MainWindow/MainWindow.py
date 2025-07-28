@@ -14,6 +14,7 @@ from PySide6.QtCore import Qt, QTimer
 from importlib import resources
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc # noqa: F401
 from .UI.MainWindowUI import Ui_SasView
 from ..Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
 
