@@ -87,10 +87,6 @@ class NewVersionAvailable(QDialog):
 
 def get_current_release_version() -> Optional[tuple[str, str, Version]]:
     """ Get the current version from the server """
-
-    c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
-    response = c.connect()
-
     try:
         response = requests.get(web.update_url)
         # Will throw Exception if the HTTP status code returned isn't success
