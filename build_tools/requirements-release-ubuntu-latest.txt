@@ -96,7 +96,7 @@ Pygments==2.19.1
 pyHanko==0.26.0
 pyhanko-certvalidator==0.26.8
 pylint==3.3.6
-pyopencl==2025.1
+pyopencl==2025.2.6
 PyOpenGL==3.1.9
 pyparsing==3.2.3
 pypdf==5.4.0

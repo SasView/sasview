@@ -98,7 +98,7 @@ pyhanko-certvalidator==0.26.8
 pyinstaller==6.13.0
 pyinstaller-hooks-contrib==2025.3
 pylint==3.3.6
-pyopencl==2025.1
+pyopencl==2025.2.6
 PyOpenGL==3.1.9
 pyparsing==3.2.3
 pypdf==5.4.0
