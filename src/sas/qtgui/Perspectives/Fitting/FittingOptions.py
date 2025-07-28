@@ -98,7 +98,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         Use options.FIT_FIELDS to assert which line edit gets what validator
         """
         for option in bumps.options.FIT_FIELDS.keys():
-            (f_name, f_type) = bumps.options.FIT_FIELDS[option]
+            _, f_type = bumps.options.FIT_FIELDS[option]
             validator = None
             if isinstance(f_type, types.FunctionType):
                 validator = QtGui.QIntValidator()
