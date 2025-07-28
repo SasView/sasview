@@ -184,7 +184,7 @@ zope.datetime==5.1
 zope.deferredimport==5.0
 zope.deprecation==5.1
 zope.dottedname==6.0
-zope.event==5.0
+zope.event==5.1.1
 zope.exceptions==5.2
 zope.filerepresentation==6.1
 zope.globalrequest==2.0
