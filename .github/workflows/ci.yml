@@ -110,9 +110,11 @@ jobs:
             (github.event_name == 'push' && contains(github.ref, 'release')) ||
             (github.event_name == 'push' && contains(github.ref, 'tags/v6.1')) ||
             (github.event_name == 'pull_request' && contains(github.base_ref, 'release-6.1'))
-          ) && 'true' || ''
-        }}
-      SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork && RELEASE_BRANCH_BUILD == 'true') && 'true' || '' }}
+          ) && 'true' || '' }}
+
+      # Only sign the installer if non-forked repo
+      SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork ) && 'true' || '' }}
+
       UV_SYSTEM_PYTHON: 1
 
     name: "${{ matrix.job_name }}"
@@ -352,7 +354,7 @@ jobs:
         shell: bash
 
       - name: Sign the binary using keypair alias
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER && env.RELEASE_BRANCH_BUILD }}
         run: |
            smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
         shell: cmd
