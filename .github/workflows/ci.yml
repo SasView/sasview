@@ -18,6 +18,7 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
 
@@ -351,7 +352,7 @@ jobs:
         shell: bash
 
       - name: Sign the binary using keypair alias
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER && env.BRANCH_NAME == 'main' }}
         run: |
            smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
         shell: cmd
