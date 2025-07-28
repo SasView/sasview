@@ -12,7 +12,6 @@ from matplotlib import rcParams
 
 from packaging import version
 
-DEFAULT_CMAP = mpl.cm.jet
 from sas.qtgui.Plotting.PlotterData import Data1D
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
@@ -23,6 +22,7 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 from sas import config
 
+DEFAULT_CMAP = mpl.cm.jet
 
 class PlotterBase(QtWidgets.QWidget):
     #TODO: Describe what this class is
@@ -117,7 +117,7 @@ class PlotterBase(QtWidgets.QWidget):
 
         self.contextMenu = QtWidgets.QMenu(self)
         self.toolbar = NavigationToolbar(self.canvas, self)
-        cid = self.canvas.mpl_connect('resize_event', self.onResize)
+        self.canvas.mpl_connect('resize_event', self.onResize)
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.canvas.customContextMenuRequested.connect(self.showContextMenu)
 

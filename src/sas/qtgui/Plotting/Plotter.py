@@ -207,7 +207,7 @@ class PlotterWidget(PlotterBase):
             else:
                 dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
-                if dy is not None and type(dy) == type(()):
+                if dy is not None and isinstance(dy, tuple):
                     dy = np.vstack((y - dy[0], dy[1] - y)).transpose()
 
                 line = ax.errorbar(x, y,
@@ -603,7 +603,6 @@ class PlotterWidget(PlotterBase):
         if num_text < 1:
             return
         txt = self.textList[num_text - 1]
-        text_remove = txt.get_text()
         try:
             txt.remove()
         except ValueError:

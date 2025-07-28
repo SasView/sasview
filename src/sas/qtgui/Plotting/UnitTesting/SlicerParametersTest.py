@@ -191,7 +191,7 @@ class SlicerParametersTest:
         mocker.patch.object(widget, 'onApply')
         assert widget.lstParams.model().rowCount() == 0
         assert widget.lstParams.model().columnCount() == 0
-        assert widget.lstParams.model().index(0, 0).data() == None
+        assert widget.lstParams.model().index(0, 0).data() is None
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
     def testOnApply(self, widget, mocker):

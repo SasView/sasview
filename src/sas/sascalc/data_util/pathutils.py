@@ -18,16 +18,21 @@ def relpath(p1, p2):
     """Compute the relative path of p1 with respect to p2."""
 
     def commonpath(L1, L2, common=[]):
-        if len(L1) < 1: return (common, L1, L2)
-        if len(L2) < 1: return (common, L1, L2)
-        if L1[0] != L2[0]: return (common, L1, L2)
+        if len(L1) < 1:
+            return (common, L1, L2)
+        if len(L2) < 1:
+            return (common, L1, L2)
+        if L1[0] != L2[0]:
+            return (common, L1, L2)
         return commonpath(L1[1:], L2[1:], common=common+[L1[0]])
 
     # if the strings are equal, then return "."
-    if p1 == p2: return "."
+    if p1 == p2:
+        return "."
     (common,L1,L2) = commonpath(p2.split(sep), p1.split(sep))
     # if there is nothing in common, then return an empty string
-    if not common: return ""
+    if not common:
+        return ""
     # otherwise, replace the common pieces with "../" (or "..\")
     p = [(".."+sep) * len(L1)] + L2
     return join(*p)

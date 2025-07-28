@@ -13,7 +13,7 @@ from sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, Estimat
 from sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem, DoubleValidator
-from sas.sascalc.pr.Invertor import Invertor
+from sas.sascalc.pr.invertor import Invertor
 
 @dataclass
 class CalculatedOutputs:

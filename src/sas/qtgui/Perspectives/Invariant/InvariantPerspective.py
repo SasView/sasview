@@ -837,7 +837,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         item = QtGui.QStandardItem(str(self._scale))
         self.model.setItem(WIDGETS.W_SCALE, item)
         # leave line edit empty if Porod constant not defined
-        if self._porod != None:
+        if self._porod is not None:
             item = QtGui.QStandardItem(str(self._porod))
         else:
             item = QtGui.QStandardItem(str(''))

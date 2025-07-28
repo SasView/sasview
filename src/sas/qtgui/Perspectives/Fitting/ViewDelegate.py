@@ -107,7 +107,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         if index.column() in (self.param_min, self.param_max):
             try:
-                value_float = float(editor.text())
+                float(editor.text())
             except ValueError:
                 # TODO: present the failure to the user
                 # balloon popup? tooltip? cell background colour flash?

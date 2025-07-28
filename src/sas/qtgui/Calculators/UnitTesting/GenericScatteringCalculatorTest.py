@@ -1,5 +1,6 @@
 import time
 import numpy
+import os
 
 import pytest
 from PySide6 import QtGui, QtWidgets
@@ -14,7 +15,7 @@ from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringC
 from sas.qtgui.Calculators.GenericScatteringCalculator import Plotter3D
 from sas.qtgui.Plotting.PlotterBase import PlotHelper
 
-from sas.qtgui.Utilities.GuiUtils import *
+from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.sascalc.calculator import sas_gen
 
 

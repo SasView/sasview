@@ -476,7 +476,6 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         :param n_frames: How many frames the loaded data file has
         :return: A dictionary containing the parameters input by the user
         """
-        valid_input = False
         output_path = self.txtOutputFile.text()
         if not output_path:
             return
