@@ -11,26 +11,24 @@ Class that holds a fit page state
 #
 # copyright 2009, University of Tennessee
 ################################################################################
-import time
-import re
-import os
-import sys
 import copy
 import logging
-import numpy as np
+import os
+import re
+import sys
+import time
 import traceback
+from xml.dom.minidom import getDOMImplementation, parseString
 
-from xml.dom.minidom import parseString
-from xml.dom.minidom import getDOMImplementation
+import numpy as np
 from lxml import etree
 
-from sasmodels import convert
 import sasmodels.weights
-
-from sas.system.version import __version__ as SASVIEW_VERSION
-
 from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
 from sasdata.dataloader.readers.cansas_reader import get_content
+from sasmodels import convert
+
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 logger = logging.getLogger(__name__)
 

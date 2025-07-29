@@ -1,6 +1,5 @@
-from abc import ABC
-
 import logging
+from abc import ABC
 
 logger = logging.getLogger("GL Subsystem")
 

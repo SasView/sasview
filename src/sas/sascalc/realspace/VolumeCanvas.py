@@ -23,13 +23,13 @@
 
 """
 
-from sas.sascalc.calculator.BaseComponent import BaseComponent
-from sas.sascalc.simulation.pointsmodelpy import pointsmodelpy
-from sas.sascalc.simulation.geoshapespy import geoshapespy
-
-
-import os.path
 import math
+import os.path
+
+from sas.sascalc.calculator.BaseComponent import BaseComponent
+from sas.sascalc.simulation.geoshapespy import geoshapespy
+from sas.sascalc.simulation.pointsmodelpy import pointsmodelpy
+
 
 class ShapeDescriptor(object):
     """

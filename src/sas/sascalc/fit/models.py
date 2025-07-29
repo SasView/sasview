@@ -1,15 +1,15 @@
 """
     Utilities to manage models
 """
-import os
-import sys
-import time
 import datetime
+import io
 import logging
-import traceback
+import os
 import py_compile
 import shutil
-import io
+import sys
+import time
+import traceback
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 

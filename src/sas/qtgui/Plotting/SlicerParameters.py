@@ -2,28 +2,25 @@
 """
 Allows users to modify the box slicer parameters.
 """
-import os
 import functools
 import logging
+import os
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
-from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
-from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasdata.dataloader.loader import Loader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas import config
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
+from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
+from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInteractorQ
+
 # Local UI
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
-from sas import config
 
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):

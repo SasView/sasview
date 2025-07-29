@@ -11,6 +11,7 @@ are added.
 
 
 from typing import List, Tuple
+
 import numpy as np
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import AngularDistribution

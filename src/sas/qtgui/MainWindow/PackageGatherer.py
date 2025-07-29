@@ -1,7 +1,8 @@
-import sys
 import logging
-import pkg_resources
 import pathlib
+import sys
+
+import pkg_resources
 
 import sas
 import sas.system.version

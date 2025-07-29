@@ -3,10 +3,10 @@
 FrameSelect class describes behaviour of the FrameSelect dialog
 
 """
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 from .UI.FrameSelectUI import Ui_FrameSelect
+
 
 class FrameSelect(QtWidgets.QDialog, Ui_FrameSelect):
     """

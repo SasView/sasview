@@ -17,9 +17,9 @@ Works with modules that are in zip/wheel form as well as on-disk.
 
 """
 
-from pathlib import Path
-import sys
 import importlib.resources
+import sys
+from pathlib import Path
 
 VERBOSE = False
 

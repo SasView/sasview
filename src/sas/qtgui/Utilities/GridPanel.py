@@ -1,9 +1,9 @@
+import logging
 import os
 import sys
 import time
-import logging
 
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import QMimeDatabase, QUrl
 from PySide6.QtGui import QDesktopServices
 

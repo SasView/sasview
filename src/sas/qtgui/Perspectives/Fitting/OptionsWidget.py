@@ -2,15 +2,14 @@
 Widget/logic for smearing data.
 """
 import numpy as np
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.OptionsWidgetUI import Ui_tabOptions
+from sas.qtgui.Plotting.PlotterData import Data2D
+
 
 class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
     """

@@ -1,12 +1,11 @@
 import pytest
-
-from PySide6.QtWidgets import QApplication
 from PySide6 import QtCore, QtGui
+from PySide6.QtWidgets import QApplication
 
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
-from sas.qtgui.Utilities.GuiUtils import Communicate
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class DroppableDataLoadWidgetTest:

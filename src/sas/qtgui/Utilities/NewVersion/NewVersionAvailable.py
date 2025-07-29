@@ -1,21 +1,27 @@
+import json
+import logging
 import webbrowser
 from copy import copy
 from typing import Optional
 
-import json
 from packaging.version import Version, parse
-
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QCheckBox, QPushButton, QSpacerItem, \
-    QApplication
-
-import logging
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from sas import config
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.system import web
-
 from sas.system.version import __version__ as current_version_string
 
 logger = logging.getLogger("NewVersionAvailable")

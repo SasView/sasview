@@ -1,27 +1,23 @@
-from typing import List, Tuple, Iterable, Any, Dict, Optional
-
-import sys
-import os
-import datetime
-
-import importlib.resources as pkg_resources
-
 import base64
+import datetime
+import importlib.resources as pkg_resources
+import logging
+import os
+import sys
 from io import BytesIO
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import dominate
+import html2text
 from dominate import tags
 from dominate.util import raw
 
-import html2text
+import sasmodels
 
 import sas.sasview
 import sas.system.version
-import sasmodels
-import logging
-
-from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Plotting.PlotterBase import Data1D
+from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 #
@@ -283,9 +279,10 @@ def main():
     """ This can be run locally without sasview to make it easy to adjust the report layout/styling,
     it will generate a report with some arbitrary data"""
 
-    from sasdata.dataloader.loader import Loader
     import matplotlib.pyplot as plt
     import numpy as np
+
+    from sasdata.dataloader.loader import Loader
     loader = Loader()
 
 

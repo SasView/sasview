@@ -1,13 +1,15 @@
 # Global
 from enum import Enum
 from types import MethodType
+
 from numpy import inf
-from PySide6.QtCore import Qt, QLocale
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QDoubleValidator, QBrush, QColor, QValidator
-from PySide6.QtWidgets import QStyledItemDelegate, QLineEdit, QComboBox, QWidget, QSizePolicy
+from PySide6.QtCore import QLocale, Qt
+from PySide6.QtGui import QBrush, QColor, QDoubleValidator, QStandardItem, QStandardItemModel, QValidator
+from PySide6.QtWidgets import QComboBox, QLineEdit, QSizePolicy, QStyledItemDelegate, QWidget
 
 #Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.Tables.UI.subunitTableUI import Ui_SubunitTableController
+
 
 #Row option layout
 class ExtendedEnum(Enum):

@@ -1,11 +1,10 @@
 from __future__ import print_function
 
-
 if __name__ == "__main__":
 
-    from sasModeling.iqPy import iqPy
     #from sasModeling.analmodelpy import analmodelpy as analmodelpymodule
     from sasModeling.geoshapespy import geoshapespy
+    from sasModeling.iqPy import iqPy
     from sasModeling.pointsmodelpy import pointsmodelpy
 
 #    print "copyright information:"

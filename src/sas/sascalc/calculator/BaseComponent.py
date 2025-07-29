@@ -9,6 +9,7 @@ import copy
 from collections import OrderedDict
 
 import numpy as np
+
 #TO DO: that about a way to make the parameter
 #is self return if it is fittable or not
 

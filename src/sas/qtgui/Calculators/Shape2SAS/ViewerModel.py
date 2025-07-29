@@ -1,18 +1,16 @@
 # Global
-from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from PySide6.QtCore import QSize
+from PySide6.QtDataVisualization import Q3DScatter, QScatter3DSeries, QScatterDataItem, QValue3DAxis
+from PySide6.QtGui import QColor, QVector3D
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QLabel, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSpacerItem, 
-    QSizePolicy, QLabel, QGraphicsView, QGraphicsScene)
-from PySide6.QtCore import QSize 
-from PySide6.QtDataVisualization import (Q3DScatter, QScatterDataItem, 
-QScatter3DSeries, QValue3DAxis)
-from PySide6.QtGui import QVector3D, QColor
+from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
 
 # Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.ViewerAllOptions import ViewerButtons, ViewerModelRadius
 from sas.sascalc.shape2sas.Shape2SAS import ModelPointDistribution, TheoreticalScattering
-from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
 
 
 class ViewerModel(QWidget):

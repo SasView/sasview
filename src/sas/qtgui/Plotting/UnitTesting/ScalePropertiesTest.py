@@ -1,6 +1,6 @@
 
-from PySide6 import QtWidgets
 import pytest
+from PySide6 import QtWidgets
 
 # Local
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties

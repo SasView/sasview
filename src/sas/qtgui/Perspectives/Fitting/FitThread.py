@@ -1,6 +1,6 @@
+import logging
 import time
 import traceback
-import logging
 
 from sas.sascalc.data_util.calcthread import CalcThread
 

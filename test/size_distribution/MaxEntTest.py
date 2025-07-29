@@ -1,9 +1,12 @@
-import os
-import pytest
 import csv
+import os
+
 import numpy as np
-from sasdata.dataloader.loader import Loader
+import pytest
+
 from sasdata.dataloader.data_info import Data1D
+from sasdata.dataloader.loader import Loader
+
 from src.sas.sascalc.size_distribution.SizeDistribution import sizeDistribution
 
 

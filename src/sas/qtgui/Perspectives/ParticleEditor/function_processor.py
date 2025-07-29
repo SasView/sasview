@@ -1,14 +1,13 @@
-from typing import Callable
-
-from io import StringIO
-
 import inspect
-from contextlib import redirect_stdout
 import traceback
+from contextlib import redirect_stdout
+from io import StringIO
+from typing import Callable
 
 import numpy as np
 
 from sas.qtgui.Perspectives.ParticleEditor.helper_functions import rect, step
+
 
 class FunctionDefinitionFailed(Exception):
     def __init__(self, *args):

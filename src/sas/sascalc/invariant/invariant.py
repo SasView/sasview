@@ -18,6 +18,7 @@ This module implements invariant and its related computations.
 from __future__ import division
 
 import math
+
 import numpy as np
 
 from sasdata.dataloader.data_info import Data1D as LoaderData1D

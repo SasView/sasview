@@ -1,10 +1,8 @@
 import sys
 import webbrowser
 
-import pytest
-
 import numpy as np
-
+import pytest
 from PySide6 import QtWidgets
 
 # Local

@@ -1,5 +1,7 @@
-import numpy as np
 import logging
+
+import numpy as np
+
 
 def sasview_sans_debye(q, coords, weight, worksize=100000):
     """

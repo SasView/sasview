@@ -3,20 +3,20 @@ This object is a small tool to allow user to quickly
 determine the variance in q  from the
 instrumental parameters.
 """
-from PySide6 import QtWidgets
-
-from twisted.internet import threads
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
-from sas.sascalc.calculator.resolution_calculator import ResolutionCalculator
-import matplotlib.patches as patches
-
-import numpy
-import sys
 import logging
 import os
 import re
+import sys
+
+import matplotlib.patches as patches
+import numpy
+from PySide6 import QtWidgets
+from twisted.internet import threads
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
+from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.sascalc.calculator.resolution_calculator import ResolutionCalculator
 
 from .UI.ResolutionCalculatorPanelUI import Ui_ResolutionCalculatorPanel
 

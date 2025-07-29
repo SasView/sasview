@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-
-from typing import Optional, Union, List, Iterable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, List, Optional, Union
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from sasdata.dataloader.data_info import Data1D
-
 
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow

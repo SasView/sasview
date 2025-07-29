@@ -4,6 +4,7 @@
 """
 import re
 
+
 def convertUnit(power, unit):
     """
         Convert units to strings that can be displayed

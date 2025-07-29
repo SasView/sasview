@@ -1,22 +1,21 @@
 """
 Widget/logic for polydispersity.
 """
-import os
-import numpy as np
 import logging
-from typing import Any, Tuple, Optional, List, Dict
+import os
+from typing import Any, Dict, List, Optional, Tuple
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-# Local UI
-from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
+import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
+
+# Local UI
+from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
+from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 logger = logging.getLogger(__name__)

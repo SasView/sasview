@@ -1,16 +1,15 @@
-import webbrowser
-import pytest
-import os
 import logging
+import os
+import webbrowser
 
-from PySide6 import QtCore
-from PySide6 import QtGui, QtWidgets
+import pytest
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # SV imports
 from sasdata.dataloader.loader import Loader
+
 from sas.qtgui.MainWindow.DataManager import DataManager
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 # Tested module
 from sas.qtgui.Utilities import GuiUtils

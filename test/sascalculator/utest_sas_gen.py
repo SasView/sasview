@@ -2,14 +2,13 @@
 Unit tests for the sas_gen
 """
 
+import math
 import os.path
+import unittest
 import warnings
 
-import unittest
 import numpy as np
-import math
 from scipy.spatial.transform import Rotation
-
 
 from sas.sascalc.calculator import sas_gen
 
@@ -226,8 +225,7 @@ class sas_gen_test(unittest.TestCase):
         """
         Test that the Debye algorithm supplied by the external AUSAXS library agrees with the default implementation.
         """
-        from sas.sascalc.calculator.ausaxs import sasview_sans_debye
-        from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye
+        from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye, sasview_sans_debye
 
         rng = np.random.default_rng(1984)
 

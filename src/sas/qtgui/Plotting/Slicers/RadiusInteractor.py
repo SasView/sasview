@@ -2,6 +2,7 @@ import numpy as np
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
+
 class RadiusInteractor(BaseInteractor):
     """
     Draw a pair of lines radiating from a center at [0,0], between radius

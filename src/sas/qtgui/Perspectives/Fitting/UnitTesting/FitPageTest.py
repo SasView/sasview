@@ -4,6 +4,7 @@ import pytest
 # Tested module
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 
+
 class FitPageTest:
     '''Test the FitPage methods'''
 

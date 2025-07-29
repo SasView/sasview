@@ -1,5 +1,7 @@
-from sas.sascalc.calculator.BaseComponent import BaseComponent
 import math
+
+from sas.sascalc.calculator.BaseComponent import BaseComponent
+
 
 class Model1DPlugin(BaseComponent):
     is_multiplicity_model = False

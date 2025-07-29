@@ -1,10 +1,10 @@
+import logging
 from typing import Tuple
 
-import logging
 import numpy as np
 
-from sas.qtgui.GL.models import FullModel
 from sas.qtgui.GL.color import ColorMap, uniform_coloring
+from sas.qtgui.GL.models import FullModel
 
 logger = logging.getLogger("GL.Surface")
 

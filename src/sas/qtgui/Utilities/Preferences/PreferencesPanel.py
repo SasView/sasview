@@ -1,17 +1,15 @@
 import logging
 import os
 import sys
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QMessageBox
 from PySide6.QtCore import Qt
-from typing import Optional, Callable, Dict, Any, Union, List
-
-from sas.system import config
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
 
 from sas.qtgui.Perspectives.perspective import Perspective
-
-from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+from sas.qtgui.Utilities.Preferences.UI.PreferencesUI import Ui_preferencesUI
+from sas.system import config
 
 # The PreferencesPanel object will instantiate all widgets during its instantiation.
 #  e.g:
@@ -20,6 +18,7 @@ from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
 # PreferenceWidget Imports go here and then are added to the BASE_PANELS, but not instantiated.
 from .DisplayPreferencesWidget import DisplayPreferencesWidget
 from .PlottingPreferencesWidget import PlottingPreferencesWidget
+
 # Pre-made option widgets
 
 BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,

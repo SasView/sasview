@@ -1,5 +1,4 @@
-from PySide6 import QtGui
-from PySide6 import QtCore
+from PySide6 import QtCore, QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 

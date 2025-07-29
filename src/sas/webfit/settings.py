@@ -11,17 +11,17 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
-from pathlib import Path
-from django.core.signals import setting_changed
-
-from django.conf import settings
-# Import from `django.core.signals` instead of the official location
-# `django.test.signals` to avoid importing the test module unnecessarily.
-from django.utils.module_loading import import_string
-
 
 #imports for knox
 from datetime import timedelta
+from pathlib import Path
+
+from django.conf import settings
+from django.core.signals import setting_changed
+
+# Import from `django.core.signals` instead of the official location
+# `django.test.signals` to avoid importing the test module unnecessarily.
+from django.utils.module_loading import import_string
 from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

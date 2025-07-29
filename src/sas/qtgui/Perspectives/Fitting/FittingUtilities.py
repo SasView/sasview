@@ -1,15 +1,10 @@
 import copy
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
 import numpy
-
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole, Data2D
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting.AssociatedComboBox import AssociatedComboBox
-
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.sascalc.fit.expression import check_constraints
 
 model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']

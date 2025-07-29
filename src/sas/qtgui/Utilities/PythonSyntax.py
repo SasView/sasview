@@ -1,5 +1,6 @@
 from PySide6.QtCore import QRegularExpression
-from PySide6.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
+from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
+
 
 def format(color, style=''):
     """Return a QTextCharFormat with the given attributes.

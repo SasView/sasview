@@ -2,28 +2,28 @@ import logging
 from typing import Optional
 
 import numpy as np
-from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
+from sasdata.dataloader.data_info import Data1D as LoadData1D
+
+from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionLogic import (
     SizeDistributionLogic,
 )
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionThread import (
     SizeDistributionThread,
 )
-from sas.qtgui.Perspectives.SizeDistribution.UI.SizeDistributionUI import (
-    Ui_SizeDistribution,
-)
-from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import (
     WIDGETS,
     MaxEntParameters,
-    WeightType,
     MaxEntResult,
+    WeightType,
+)
+from sas.qtgui.Perspectives.SizeDistribution.UI.SizeDistributionUI import (
+    Ui_SizeDistribution,
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities import GuiUtils
-from sasdata.dataloader.data_info import Data1D as LoadData1D
-
 
 ASPECT_RATIO = 1.0
 DIAMETER_MIN = 10.0

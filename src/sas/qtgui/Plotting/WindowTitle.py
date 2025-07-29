@@ -6,6 +6,7 @@ from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.UI.WindowTitleUI import Ui_WindowTitle
 
+
 class WindowTitle(QtWidgets.QDialog, Ui_WindowTitle):
     """ Simple GUI for a single line text query """
     def __init__(self, parent=None, new_title=""):

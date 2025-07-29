@@ -1,7 +1,7 @@
 from PySide6 import QtWidgets
 
-from sas.qtgui.UI import main_resources_rc # noqa: F401
 from sas.qtgui.Plotting.UI.ScalePropertiesUI import Ui_scalePropertiesUI
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
 
 x_values = ["x", "x^(2)", "x^(4)", "ln(x)", "log10(x)", "log10(x^(4))"]
 y_values = ["y", "1/y", "ln(y)", "y^(2)", "y*x^(2)", "y*x^(4)", "1/sqrt(y)",

@@ -1,25 +1,21 @@
-import logging
 import copy
+import logging
 import re
 
+from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-from PySide6 import QtGui, QtCore, QtWidgets
-
-from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
-from sas.qtgui.Perspectives.Fitting.UI.ConstraintWidgetUI import Ui_ConstraintWidgetUI
-from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
-from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
-from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
-from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-
 from sas import config
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
+from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
+from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting.UI.ConstraintWidgetUI import Ui_ConstraintWidgetUI
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 if __name__ == "__main__":
-  from sasModeling.pointsmodelpy import pointsmodelpy
   from sasModeling.geoshapespy import geoshapespy
+  from sasModeling.pointsmodelpy import pointsmodelpy
 
   a = geoshapespy.new_sphere(10)
   lm = pointsmodelpy.new_loresmodel(0.0005)

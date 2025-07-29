@@ -42,9 +42,10 @@ distinctiveness rather than a simple colour number.
 
 # Support for ancient python versions
 import copy
-import numpy
-import sys
 import logging
+import sys
+
+import numpy
 
 if 'any' not in dir(__builtins__):
     def any(L):

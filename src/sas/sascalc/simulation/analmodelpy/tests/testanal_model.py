@@ -12,12 +12,10 @@
 # 
 from __future__ import print_function
 
-
 if __name__ == "__main__":
 
     from SASsimulation import analmodelpy as analmodelpymodule
-    from SASsimulation import iqPy
-    from SASsimulation import geoshapespy
+    from SASsimulation import geoshapespy, iqPy
 
     print("copyright information:")
     print("   ", analmodelpymodule.copyright())

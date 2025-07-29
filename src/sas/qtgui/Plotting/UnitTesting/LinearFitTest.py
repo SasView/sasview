@@ -1,18 +1,17 @@
+import matplotlib as mpl
 import numpy
 import pytest
 
-import matplotlib as mpl
 mpl.use("Qt5Agg")
 
 from PySide6 import QtWidgets
 
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-
-from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Plotting.Plotter as Plotter
 
 # Local
 from sas.qtgui.Plotting.LinearFit import LinearFit
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 
 class LinearFitTest:

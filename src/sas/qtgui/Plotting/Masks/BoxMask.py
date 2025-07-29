@@ -1,9 +1,7 @@
 import numpy as np
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.Slicers.BoxSum import PointInteractor
-from sas.qtgui.Plotting.Slicers.BoxSum import VerticalDoubleLine
-from sas.qtgui.Plotting.Slicers.BoxSum import HorizontalDoubleLine
+from sas.qtgui.Plotting.Slicers.BoxSum import HorizontalDoubleLine, PointInteractor, VerticalDoubleLine
 
 
 class BoxMask(BaseInteractor):

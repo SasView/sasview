@@ -1,26 +1,19 @@
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets, QtPrintSupport
-
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib import rcParams
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib import rcParams
-
 from packaging import version
+from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas import config
+from sas.qtgui.Plotting.Binder import BindArtist
 from sas.qtgui.Plotting.PlotterData import Data1D
-
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
-from sas.qtgui.Plotting.Binder import BindArtist
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Plotting.PlotHelper as PlotHelper
-
-from sas import config
 
 DEFAULT_CMAP = mpl.cm.jet
 

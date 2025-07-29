@@ -1,10 +1,14 @@
 from typing import Optional
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QSpacerItem, QSizePolicy
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import MagnetismFunction, SLDFunction
+from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterEntries import (
+    MagneticParameterEntry,
+    ParameterEntry,
+)
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
-from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterEntries import ParameterEntry, MagneticParameterEntry
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import SLDFunction, MagnetismFunction
+
 
 class ParameterTable(QWidget):
     """ Main table of parameters """

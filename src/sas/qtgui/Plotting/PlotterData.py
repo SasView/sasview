@@ -2,17 +2,16 @@
 Adapters for fitting module
 """
 import copy
-import numpy
 import math
 from enum import Enum, auto
 
+import numpy
+
 from sasdata.data_util.uncertainty import Uncertainty
-
-from sas.qtgui.Plotting.Plottables import PlottableData1D
-from sas.qtgui.Plotting.Plottables import PlottableData2D
-
 from sasdata.dataloader.data_info import Data1D as LoadData1D
 from sasdata.dataloader.data_info import Data2D as LoadData2D
+
+from sas.qtgui.Plotting.Plottables import PlottableData1D, PlottableData2D
 
 
 class DataRole(Enum):

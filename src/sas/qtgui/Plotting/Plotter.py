@@ -1,30 +1,27 @@
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-import functools
 import copy
+import functools
 import math
+import textwrap
+
 import matplotlib.ticker as ticker
 import numpy as np
-import textwrap
 from matplotlib.font_manager import FontProperties
+from PySide6 import QtGui, QtWidgets
 
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
+import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas import config
 from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.Binder import BindArtist
-from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
-from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
+from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelProperties, PlotLabelPropertyHolder
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
-from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelProperties
-from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelPropertyHolder
+from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
-
-from sas import config
 
 class PlotterWidget(PlotterBase):
     """

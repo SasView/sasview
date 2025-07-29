@@ -2,13 +2,16 @@ from typing import Optional
 
 import numpy as np
 
+from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-    SLDDefinition, MagnetismDefinition, QSample, CalculationParameters)
-
+    CalculationParameters,
+    MagnetismDefinition,
+    QSample,
+    SLDDefinition,
+)
 from sas.qtgui.Perspectives.ParticleEditor.sampling.chunking import SingleChunk, pairwise_chunk_iterator
 from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution
 
-from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld
 
 def debye(
         sld_definition: SLDDefinition,

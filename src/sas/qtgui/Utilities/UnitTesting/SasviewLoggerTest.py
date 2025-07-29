@@ -1,6 +1,6 @@
 import logging
-import pytest
 
+import pytest
 from PySide6.QtWidgets import QTextBrowser
 
 # Local

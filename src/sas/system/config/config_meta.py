@@ -1,15 +1,15 @@
-from typing import Dict, Any, List
-import os
-import logging
 import json
+import logging
+import os
 from copy import deepcopy
+from typing import Any, Dict, List
 
-from packaging.version import parse, InvalidVersion
+from packaging.version import InvalidVersion, parse
 
 import sas
 import sas.system.version
 from sas.system import user
-from sas.system.config.schema_elements import create_schema_element, CoercionError, SchemaElement
+from sas.system.config.schema_elements import CoercionError, SchemaElement, create_schema_element
 
 logger = logging.getLogger("sas.config")
 

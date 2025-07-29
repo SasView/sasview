@@ -1,7 +1,8 @@
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtGui, QtWidgets
 
+import sas.qtgui.Perspectives.ParticleEditor.UI.icons_rc  # noqa: F401
 from sas.qtgui.Perspectives.ParticleEditor.UI.CodeToolBarUI import Ui_CodeToolBar
-import sas.qtgui.Perspectives.ParticleEditor.UI.icons_rc # noqa: F401
+
 
 class CodeToolBar(QtWidgets.QWidget, Ui_CodeToolBar):
     def __init__(self, parent=None):
