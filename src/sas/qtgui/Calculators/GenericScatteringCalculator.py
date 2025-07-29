@@ -16,7 +16,7 @@ from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 
-from matplotlib.backends.backend_qt5agg import (FigureCanvas)
+from matplotlib.backends.backend_qt5agg import FigureCanvas
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from twisted.internet import threads

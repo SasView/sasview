@@ -6,6 +6,7 @@ from PySide6 import QtWidgets
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc # noqa: F401
 from sas.qtgui.Plotting.UI.SetGraphRangeUI import Ui_setGraphRangeUI
 
 class SetGraphRange(QtWidgets.QDialog, Ui_setGraphRangeUI):

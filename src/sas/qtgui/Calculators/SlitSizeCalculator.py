@@ -7,6 +7,7 @@ import logging
 
 from PySide6 import QtWidgets
 
+from sas.qtgui.UI import main_resources_rc # noqa: F401
 
 from .UI.SlitSizeCalculator import Ui_SlitSizeCalculator
 from sasdata.dataloader.loader import Loader
