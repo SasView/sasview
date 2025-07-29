@@ -4,7 +4,9 @@ import matplotlib as mpl
 
 mpl.use("Qt5Agg")
 
-from sas.qtgui.Utilities.GuiUtils import *
+from PySide6 import QtWidgets
+
+from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import (
     SizeDistributionWindow,
 )

@@ -118,7 +118,8 @@ class BindArtist(object):
         In case we need to disconnect from the canvas...
         """
         try:
-            for cid in self._connections: self.canvas.mpl_disconnect(cid)
+            for cid in self._connections:
+                self.canvas.mpl_disconnect(cid)
         except:
             logging.error("Error disconnection canvas: %s" % sys.exc_info()[1])
         self._connections = []

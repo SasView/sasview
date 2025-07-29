@@ -83,8 +83,8 @@ def prepare():
     #    with cd(root):
     #        subprocess.call((sys.executable, "setup.py", "build"), shell=False)
 
-import multiprocessing
 if __name__ == "__main__":
+    import multiprocessing
     multiprocessing.freeze_support()
     multiprocessing.set_start_method('spawn')
     prepare()

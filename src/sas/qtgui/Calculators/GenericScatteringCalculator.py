@@ -16,7 +16,7 @@ from PySide6 import QtCore
 from PySide6 import QtGui
 from PySide6 import QtWidgets
 
-from matplotlib.backends.backend_qt5agg import (FigureCanvas)
+from matplotlib.backends.backend_qt5agg import FigureCanvas
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from twisted.internet import threads
@@ -1752,7 +1752,7 @@ class Plotter3DWidget(PlotterBase):
         for key in list(color_dic.keys()):
             chosen_color = pix_symbol == key
             if numpy.any(chosen_color):
-                other_color = other_color & (chosen_color!=True)
+                other_color = other_color & (chosen_color != True)
                 color = color_dic[key]
                 im = ax.plot(pos_x[chosen_color], pos_z[chosen_color],
                          pos_y[chosen_color], marker, c=color, alpha=0.5,
@@ -1770,17 +1770,17 @@ class Plotter3DWidget(PlotterBase):
                     if a_name.count(name) == 0:
                         a_name += new_name
             # plot in black
-            im = ax.plot(pos_x[other_color], pos_z[other_color],
-                         pos_y[other_color], marker, c="k", alpha=0.5,
-                         markeredgecolor="k", markersize=m_size, label=a_name)
+            ax.plot(pos_x[other_color], pos_z[other_color],
+                    pos_y[other_color], marker, c="k", alpha=0.5,
+                    markeredgecolor="k", markersize=m_size, label=a_name)
         if data.pix_type == 'atom':
             ax.legend(loc='upper left', prop={'size': 10})
         # IV. Draws atomic bond with grey lines if any
         if data.has_conect:
             for ind in range(len(data.line_x)):
-                im = ax.plot(data.line_x[ind], data.line_z[ind],
-                             data.line_y[ind], '-', lw=0.6, c="grey",
-                             alpha=0.3)
+                ax.plot(data.line_x[ind], data.line_z[ind],
+                        data.line_y[ind], '-', lw=0.6, c="grey",
+                        alpha=0.3)
         # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:
             def _draw_arrow(input=None, update=None):

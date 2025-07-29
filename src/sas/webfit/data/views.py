@@ -74,7 +74,7 @@ def upload(request, data_id = None, version = None):
     #saves or updates file
     elif request.method == 'PUT':
         #require data_id
-        if data_id != None and request.user:
+        if data_id is not None and request.user:
             if request.user.is_authenticated:
                 db = get_object_or_404(Data, current_user = request.user.id, id = data_id)
                 form = DataForm(request.data, request.FILES, instance=db)

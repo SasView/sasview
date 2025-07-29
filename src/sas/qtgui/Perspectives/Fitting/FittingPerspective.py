@@ -178,7 +178,8 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             if len(line) > 1:
                 line_dict[line[0]] = line[1:]
 
-        if 'data_id' not in line_dict: return state
+        if 'data_id' not in line_dict:
+            return state
         id = line_dict['data_id'][0]
         if not isinstance(id, list):
             id = [id]

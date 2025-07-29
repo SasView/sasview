@@ -14,10 +14,11 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 from superqt import QDoubleRangeSlider
 
-DEFAULT_MAP = 'jet'
-
 # Local UI
+from sas.qtgui.UI import main_resources_rc # noqa: F401
 from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
+
+DEFAULT_MAP = 'jet'
 
 class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
     apply_signal = QtCore.Signal(tuple, str)

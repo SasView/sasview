@@ -5,8 +5,7 @@ import numpy as np
 from PySide6 import QtGui, QtCore
 from PySide6 import QtWidgets, QtOpenGLWidgets 
 
-from OpenGL.GL import *
-from OpenGL.GLU import *
+from OpenGL import GL, GLU
 
 from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.surface import Surface
@@ -52,10 +51,10 @@ class Scene(QtOpenGLWidgets.QOpenGLWidget):
 
 
     def initializeGL(self):
-        glClearDepth(1.0)
-        glDepthFunc(GL_LESS)
-        glEnable(GL_DEPTH_TEST)
-        glShadeModel(GL_SMOOTH)
+        GL.glClearDepth(1.0)
+        GL.glDepthFunc(GL.GL_LESS)
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glShadeModel(GL.GL_SMOOTH)
 
     def default_viewport(self):
         x = int(self.width() * self.devicePixelRatioF())
@@ -70,24 +69,24 @@ class Scene(QtOpenGLWidgets.QOpenGLWidget):
         Paint the GL viewport
         """
 
-        glViewport(*self.default_viewport())
+        GL.glViewport(*self.default_viewport())
         self.set_projection()
 
-        glClearColor(*self.background_color)
-        glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT )
+        GL.glClearColor(*self.background_color)
+        GL.glClear( GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT )
 
         self.set_model_view()
 
         # self.test_paint()
-        glEnable(GL_POLYGON_OFFSET_FILL)
+        GL.glEnable(GL.GL_POLYGON_OFFSET_FILL)
 
         for item in self._items:
-            glPolygonOffset(1.0, 10.0)
+            GL.glPolygonOffset(1.0, 10.0)
             item.render_solid()
-            glPolygonOffset(0.0, 0.0)
+            GL.glPolygonOffset(0.0, 0.0)
             item.render_wireframe()
 
-        glPolygonOffset(0.0, 0.0)
+        GL.glPolygonOffset(0.0, 0.0)
 
 
     def projection_matrix(self):
@@ -105,10 +104,10 @@ class Scene(QtOpenGLWidgets.QOpenGLWidget):
 
     def set_projection(self):
 
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        # gluPerspective(45.0,1.33,0.1, 100.0)
-        glLoadMatrixf(np.array(self.projection_matrix().data(), dtype=np.float32))
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GL.glLoadIdentity()
+        # GLU.gluPerspective(45.0,1.33,0.1, 100.0)
+        GL.glLoadMatrixf(np.array(self.projection_matrix().data(), dtype=np.float32))
 
     def set_model_view(self):
 
@@ -125,13 +124,13 @@ class Scene(QtOpenGLWidgets.QOpenGLWidget):
         y = centre[1] - self.view_distance*np.sin(azimuth)*np.cos(elevation)
         z = centre[2] + self.view_distance*np.sin(elevation)
 
-        gluLookAt(
+        GLU.gluLookAt(
             x, y, z,
             centre[0], centre[1], centre[2],
             0.0, 0.0, 1.0)
 
 
-        glMatrixMode(GL_MODELVIEW)
+        GL.glMatrixMode(GL.GL_MODELVIEW)
 
 
     def mousePressEvent(self, ev):

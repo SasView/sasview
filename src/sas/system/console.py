@@ -160,7 +160,8 @@ def setup_console_simple(stderr_to_stdout=True):
 def demo():
     setup_console()
     print("demo ready")
-    import code; code.interact(local={'exit': sys.exit})
+    import code
+    code.interact(local={'exit': sys.exit})
     print('demo done')
     #import time; time.sleep(2)
 

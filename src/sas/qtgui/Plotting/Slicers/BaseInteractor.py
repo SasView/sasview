@@ -59,7 +59,8 @@ class BaseInteractor(object):
         """
         Clear old markers and interfaces.
         """
-        for h in self.markers: h.remove()
+        for h in self.markers:
+            h.remove()
         if self.markers:
             self.base.connect.clear(*self.markers)
         self.markers = []
@@ -158,7 +159,8 @@ class BaseInteractor(object):
                 self.clicky -= dy
             elif ev.key == 'right':
                 self.clickx += dx
-            else: self.clickx -= dx
+            else:
+                self.clickx -= dx
             self.move(self.clickx, self.clicky, ev)
         else:
             return False
