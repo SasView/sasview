@@ -383,17 +383,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if model is not None:
             self.model.itemChanged.connect(self.onParamChange)
 
-    def check_perspective_and_set_data(self,fitting_requested, perspective_name, items_for_fit):
-        if self.parent.manager._perspective().name != perspective_name:
-            msg = f"Please change current perspective to {perspective_name} to enable requested {perspective_name} Options."
-            msgbox = QtWidgets.QMessageBox()
-            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
-            msgbox.setText(msg)
-            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            _ = msgbox.exec_()
-            return
+    def check_perspective_and_set_data(self,fitting_requested, perspective_name, items_for_fit):        
         isBatch = fitting_requested in (2, 4)
-        self.parent.manager._perspective().setData(data_item=items_for_fit, is_batch=isBatch)
+        self.parent.manager.loadedPerspectives[perspective_name].setData(data_item=items_for_fit,is_batch=isBatch)
 
     def sendToFit(self, items_for_fit, fitting_requested):
         """
@@ -401,9 +393,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
 
         if fitting_requested in (1, 2):
-            self.check_perspective_and_set_data(fitting_requested, 'Fitting', items_for_fit)
+            self.check_perspective_and_set_data(fitting_requested, 'FittingWindow', items_for_fit)
         elif fitting_requested in (3, 4):
-            self.check_perspective_and_set_data(fitting_requested, 'Inversion', items_for_fit)    
+            self.check_perspective_and_set_data(fitting_requested, 'InversionWindow', items_for_fit)    
         else:
             return
     
