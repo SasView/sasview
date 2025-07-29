@@ -322,9 +322,9 @@ class InversionWidget(QWidget, Ui_PrInversion):
         if result is None:
             result = self.currentResult
         # PR Plot
-        result.pr_plot = self.currentResult.logic.newPRPlot(out, pr, cov)
+        result.pr_plot = result.logic.newPRPlot(out, pr, cov)
         result.pr_plot.show_yzero = True
-        result.pr_plot.filename = self.currentResult.logic.data.filename
+        result.pr_plot.filename = result.logic.data.filename
         result.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
 
         # Data Plot
