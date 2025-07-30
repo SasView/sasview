@@ -318,7 +318,7 @@ class CorfuncCalculator:
         if self._guinier.allow_fit:
 
             q = self.data.x
-            mask = np.logical_and(q < self._extrapolation_parameters.point_1, 0 < q)
+            mask = np.logical_and(q < self._extrapolation_parameters.point_1, q > 0)
 
             g = CorfuncCalculator.calculate_guinier_parameters(q[mask], self._background_subtracted[mask])
 
