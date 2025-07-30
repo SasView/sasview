@@ -739,9 +739,9 @@ class Invertor:
         """
         Computes sum_sig and sum_reg of input array given.
 
-	    :param nfunc: number of base functions.
-	    :param nr: number of r-points used when evaluating reg term.
-	    :param a_obj: Array to compute sum_sig and sum_reg of.
+        :param nfunc: number of base functions.
+        :param nr: number of r-points used when evaluating reg term.
+        :param a_obj: Array to compute sum_sig and sum_reg of.
 
         :return: Tuple of (sum_sig, sum_reg)
         """

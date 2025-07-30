@@ -131,8 +131,8 @@ class Guinier(Transform):
 
     def extract_model_parameters(self, constant, slope, dconstant=0, dslope=0):
         """
-	    assign new value to the scale and the radius
-    	"""
+        assign new value to the scale and the radius
+        """
         self.scale = math.exp(constant)
         if slope > 0:
             slope = 0.0
