@@ -14,12 +14,9 @@ import numpy as np
 from periodictable import formula, nsf
 from scipy.spatial.transform import Rotation
 
-if sys.version_info[0] < 3:
-    def decode(s):
-        return s
-else:
-    def decode(s):
-        return s.decode() if isinstance(s, bytes) else s
+
+def decode(s):
+    return s.decode() if isinstance(s, bytes) else s
 
 MFACTOR_AM = 2.90636E-12
 MFACTOR_MT = 2.3128E-9
