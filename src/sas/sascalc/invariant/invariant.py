@@ -346,8 +346,8 @@ class Extrapolator(object):
                      np.ones(len(linearized_data.x)) * b - linearized_data.y
             residuals = np.sum(deltas * deltas / sigma2)
 
-            err = math.fabs(residuals) / np.sum(1.0 / sigma2)
-            return [a, b], [0, math.sqrt(err)]
+            err = np.fabs(residuals) / np.sum(1.0 / sigma2)
+            return [a, b], [0, np.sqrt(err)]
         else:
             A = np.vstack([linearized_data.x / linearized_data.dy, 1.0 / linearized_data.dy]).T
             # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
@@ -361,7 +361,7 @@ class Extrapolator(object):
                 inv_cov = np.dot(A.transpose(), A)
                 cov = np.linalg.pinv(inv_cov)
                 err_matrix = np.fabs(residuals) * cov
-                err = [math.sqrt(err_matrix[0][0]), math.sqrt(err_matrix[1][1])]
+                err = [np.sqrt(err_matrix[0][0]), np.sqrt(err_matrix[1][1])]
             except:
                 err = [-1.0, -1.0]
 
