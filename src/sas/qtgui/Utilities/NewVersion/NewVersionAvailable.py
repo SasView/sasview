@@ -91,7 +91,7 @@ class NewVersionAvailable(QDialog):
 def get_current_release_version() -> Optional[tuple[str, str, Version]]:
     """ Get the current version from the server """
     try:
-        response = requests.get(web.update_url)
+        response = requests.get(web.update_url, timeout=config.UPDATE_TIMEOUT)
         # Will throw Exception if the HTTP status code returned isn't success
         # (2xx)
         response.raise_for_status()
