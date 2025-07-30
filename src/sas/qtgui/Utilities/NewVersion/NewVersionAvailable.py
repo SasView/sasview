@@ -1,7 +1,6 @@
 import logging
 import webbrowser
 from copy import copy
-from typing import Optional
 
 import requests
 from packaging.version import Version, parse
@@ -39,7 +38,7 @@ class NewVersionAvailable(QDialog):
         self.setWindowTitle(f"SasView {latest_version} Is Out!")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
         vertical_layout = QVBoxLayout()
@@ -84,7 +83,7 @@ class NewVersionAvailable(QDialog):
         self.close()
 
 
-def get_current_release_version() -> Optional[tuple[str, str, Version]]:
+def get_current_release_version() -> tuple[str, str, Version] | None:
     """ Get the current version from the server """
     try:
         response = requests.get(web.update_url, timeout=config.UPDATE_TIMEOUT)
@@ -105,7 +104,7 @@ def get_current_release_version() -> Optional[tuple[str, str, Version]]:
 
 
 
-def maybe_prompt_new_version_download() -> Optional[QDialog]:
+def maybe_prompt_new_version_download() -> QDialog | None:
     """ If a new version is available, and Show a dialog prompting the user to download """
 
     try:

@@ -20,7 +20,7 @@ class ComplexConstraintTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
         '''Create/Destroy the ComplexConstraint'''
-        class dummy_manager(object):
+        class dummy_manager:
             HELP_DIRECTORY_LOCATION = "html"
             communicate = GuiUtils.Communicate()
 

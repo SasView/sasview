@@ -8,7 +8,7 @@ from math import fabs, pi
 _DQ_DEFAULT = 0.05
 
 
-class KiessigThicknessCalculator(object):
+class KiessigThicknessCalculator:
     """
     compute thickness from the fringe width of data
     """

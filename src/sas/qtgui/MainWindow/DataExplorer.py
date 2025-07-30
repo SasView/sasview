@@ -156,8 +156,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def createSendToMenu(self):
         self.actionReplace = QtGui.QAction(self)
-        self.actionReplace.setObjectName(u"actionReplace")
-        self.actionReplace.setText(u"... replacing data in the current page")
+        self.actionReplace.setObjectName("actionReplace")
+        self.actionReplace.setText("... replacing data in the current page")
         self.send_menu = QtWidgets.QMenu(self)
         self.send_menu.addAction(self.actionReplace)
 
@@ -338,7 +338,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         default_name = "Analysis"+str(tab_id)+"."+str(extension)
 
-        wildcard = "{0} files (*.{0})".format(extension)
+        wildcard = f"{extension} files (*.{extension})"
         caption = 'Save As'
         directory = default_name
         filter = wildcard
@@ -507,7 +507,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 logging.error(msg)
                 pass
         else:
-            with open(filename, 'r') as infile:
+            with open(filename) as infile:
                 try:
                     all_data = GuiUtils.readDataFromFile(infile)
                 except Exception as ex:
@@ -1433,7 +1433,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     if hasattr(item, 'errors'):
                         for error_data in item.errors:
                             data_error = True
-                            error_message += "\tError: {0}\n".format(error_data)
+                            error_message += f"\tError: {error_data}\n"
                     else:
 
                         logging.error("Loader returned an invalid object:\n %s" % str(item))
@@ -1454,7 +1454,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     error_message += " following:\n%s" % str(error)
                 elif data_error:
                     base_message = "Errors occurred while loading "
-                    base_message += "{0}\n".format(basename)
+                    base_message += f"{basename}\n"
                     base_message += "The data file loaded but with errors.\n"
                     error_message = base_message + error_message
                 else:

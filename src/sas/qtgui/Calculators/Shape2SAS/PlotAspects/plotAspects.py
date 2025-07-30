@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Optional
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
@@ -17,6 +16,6 @@ class Canvas(FigureCanvasQTAgg):
 @dataclass
 class ViewerPlotDesign:
     """Values affecting the illustrative aspect of Viewer"""
-    colour: Optional[List[str]]
+    colour: list[str] | None
 
 

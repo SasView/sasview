@@ -15,7 +15,6 @@ This module implements invariant and its related computations.
 :author: Paul Butler/NIST/UD/UTK -- refactor in 2020
 
 """
-from __future__ import division
 
 import math
 
@@ -32,7 +31,7 @@ Q_MAXIMUM = 10
 # Number of steps in the extrapolation
 INTEGRATION_NSTEPS = 1000
 
-class Transform(object):
+class Transform:
     """
     Define interface that need to compute a function or an inverse
     function given some x, y
@@ -269,7 +268,7 @@ class PowerLaw(Transform):
         value = np.array([math.pow(i, -self.power) for i in x])
         return self.scale * value
 
-class Extrapolator(object):
+class Extrapolator:
     """
     Extrapolate I(q) distribution using a given model
     """
@@ -369,7 +368,7 @@ class Extrapolator(object):
             return p, err
 
 
-class InvariantCalculator(object):
+class InvariantCalculator:
     """
     Compute invariant if data is given.
     Can provide volume fraction and surface area if the user provides

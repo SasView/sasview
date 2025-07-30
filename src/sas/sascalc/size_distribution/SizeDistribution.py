@@ -120,7 +120,7 @@ def background_fit(data, power=None, qmin=None, qmax=None):
 def ellipse_volume(rp, re):
     return (4*np.pi/3)*rp*re**2
 
-class sizeDistribution():
+class sizeDistribution:
 
     def __init__(self, data:Data1D):
 

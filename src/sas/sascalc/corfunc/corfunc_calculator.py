@@ -3,7 +3,7 @@ This module implements corfunc
 """
 
 
-from typing import Callable, Optional, Tuple
+from collections.abc import Callable
 
 import numpy as np
 import scipy.optimize
@@ -38,10 +38,10 @@ class CalculationError(Exception):
 class CorfuncCalculator:
 
     def __init__(self,
-                 data: Optional[Data1D] = None,
-                 extrapolation_parameters: Optional[SettableExtrapolationParameters] = None,
-                 long_period_method: Optional[LongPeriodMethod] = None,
-                 tangent_method: Optional[TangentMethod] = None):
+                 data: Data1D | None = None,
+                 extrapolation_parameters: SettableExtrapolationParameters | None = None,
+                 long_period_method: LongPeriodMethod | None = None,
+                 tangent_method: TangentMethod | None = None):
 
         """
         Back-end for corfunc calculations
@@ -54,9 +54,9 @@ class CorfuncCalculator:
         self._data = data
 
         # Input parameters
-        self._extrapolation_parameters: Optional[SettableExtrapolationParameters] = extrapolation_parameters
-        self.tangent_method: Optional[TangentMethod] = tangent_method
-        self.long_period_method: Optional[LongPeriodMethod] = long_period_method
+        self._extrapolation_parameters: SettableExtrapolationParameters | None = extrapolation_parameters
+        self.tangent_method: TangentMethod | None = tangent_method
+        self.long_period_method: LongPeriodMethod | None = long_period_method
 
         # Fittable parameters
         self._background: Fittable[float] = Fittable()
@@ -64,12 +64,12 @@ class CorfuncCalculator:
         self._guinier: Fittable[GuinierData] = Fittable()
 
         # Derived quantities
-        self._background_subtracted: Optional[np.ndarray] = None
-        self._extrapolation_function: Optional[SmoothJoin] = None
-        self._extrapolation_data: Optional[Data1D] = None
-        self._transformed_data: Optional[TransformedData] = None
-        self._lamellar_parameters: Optional[LamellarParameters] = None
-        self._supplementary_parameters: Optional[SupplementaryParameters] = None
+        self._background_subtracted: np.ndarray | None = None
+        self._extrapolation_function: SmoothJoin | None = None
+        self._extrapolation_data: Data1D | None = None
+        self._transformed_data: TransformedData | None = None
+        self._lamellar_parameters: LamellarParameters | None = None
+        self._supplementary_parameters: SupplementaryParameters | None = None
 
     def reset_calculated_values(self):
 
@@ -81,12 +81,12 @@ class CorfuncCalculator:
         self._guinier.clear()
 
         # Derived quantities
-        self._background_subtracted: Optional[np.ndarray] = None
-        self._extrapolation_function: Optional[SmoothJoin] = None
-        self._extrapolation_data: Optional[Data1D] = None
-        self._transformed_data: Optional[TransformedData] = None
-        self._lamellar_parameters: Optional[LamellarParameters] = None
-        self._supplementary_parameters: Optional[SupplementaryParameters] = None
+        self._background_subtracted: np.ndarray | None = None
+        self._extrapolation_function: SmoothJoin | None = None
+        self._extrapolation_data: Data1D | None = None
+        self._transformed_data: TransformedData | None = None
+        self._lamellar_parameters: LamellarParameters | None = None
+        self._supplementary_parameters: SupplementaryParameters | None = None
 
 
 
@@ -95,7 +95,7 @@ class CorfuncCalculator:
     #
 
     @property
-    def extrapolation_parameters(self) -> Optional[ExtrapolationParameters]:
+    def extrapolation_parameters(self) -> ExtrapolationParameters | None:
         if self._data is None or self._extrapolation_parameters is None:
             return None
         else:
@@ -115,11 +115,11 @@ class CorfuncCalculator:
 
 
     @property
-    def data(self) -> Optional[Data1D]:
+    def data(self) -> Data1D | None:
         return self._data
 
     @data.setter
-    def data(self, data: Optional[Data1D]):
+    def data(self, data: Data1D | None):
         if data is None:
             return
 
@@ -130,7 +130,7 @@ class CorfuncCalculator:
         self._data = data
 
     @property
-    def q_range(self) -> Tuple[float, float]:
+    def q_range(self) -> tuple[float, float]:
         return self.data.x[0], self.data.x[-1]
     @property
     def background(self):
@@ -140,7 +140,7 @@ class CorfuncCalculator:
         return self._background.data
 
     @background.setter
-    def background(self, value: Optional[float]):
+    def background(self, value: float | None):
         self._background.data = value
 
     @property
@@ -151,7 +151,7 @@ class CorfuncCalculator:
         return self._guinier.data
 
     @guinier.setter
-    def guinier(self, value: Optional[GuinierData]):
+    def guinier(self, value: GuinierData | None):
         self._guinier.data = value
 
     @property
@@ -162,7 +162,7 @@ class CorfuncCalculator:
         return self._porod.data
 
     @porod.setter
-    def porod(self, value: Optional[PorodData]):
+    def porod(self, value: PorodData | None):
         self._porod.data = value
 
     @property
@@ -174,15 +174,15 @@ class CorfuncCalculator:
         return self._lamellar_parameters
 
     @property
-    def supplementary_parameters(self) -> Optional[SupplementaryParameters]:
+    def supplementary_parameters(self) -> SupplementaryParameters | None:
         return self._supplementary_parameters
 
     @property
-    def extrapolation_function(self) -> Optional[Callable]:
+    def extrapolation_function(self) -> Callable | None:
         return self._extrapolation_function
 
     @property
-    def min_extrapolated(self) -> Optional[float]:
+    def min_extrapolated(self) -> float | None:
         if self._extrapolation_data is None:
             return None
         else:
@@ -636,8 +636,8 @@ def extract_lamellar_parameters(
         guinier_to_data_transition_right: float,
         data_to_porod_transition_left: float,
         data_to_porod_transition_right: float,
-        long_period_method: Optional[LongPeriodMethod]=None,
-        tangent_method: Optional[TangentMethod]=None):
+        long_period_method: LongPeriodMethod | None=None,
+        tangent_method: TangentMethod | None=None):
 
     """
     Extract lamellar parameters from data using the corfunc calculator

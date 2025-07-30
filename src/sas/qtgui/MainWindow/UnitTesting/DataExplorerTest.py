@@ -58,7 +58,7 @@ class dummy_manager:
     def workspace(self):
         return None
 
-    class _parent(object):
+    class _parent:
         screen_width = 1024
         screen_height = 768
 

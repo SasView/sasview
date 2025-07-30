@@ -4,7 +4,6 @@
     @copyright: University of Tennessee, 2007
     @license: This software is provided as part of the DANSE project
 """
-from __future__ import print_function
 
 import math
 import time

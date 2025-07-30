@@ -1,4 +1,3 @@
-from __future__ import print_function
 
 # class Loader  to load any kind of file
 #import wx
@@ -37,7 +36,7 @@ class Load:
     def set_values(self):
         """ Store the values loaded from file in local variables"""
         if self.filename is not None:
-            input_f =  open(self.filename, 'r')
+            input_f =  open(self.filename)
             buff = input_f.read()
             lines = buff.split('\n')
             self.x = []

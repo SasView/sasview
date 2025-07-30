@@ -2,7 +2,6 @@
 """ Code that handles the parameter list backend """
 
 import inspect
-from typing import Dict, Optional
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import (
     Background,
@@ -39,8 +38,8 @@ class ParameterTableModel:
             self.background_parameter,
             self.scale_parameter]
 
-        self._sld_parameters: Dict[str, FunctionParameter] = {}
-        self._magnetism_parameters: Dict[str, MagnetismParameterContainer] = {}
+        self._sld_parameters: dict[str, FunctionParameter] = {}
+        self._magnetism_parameters: dict[str, MagnetismParameterContainer] = {}
 
     @property
     def sld_parameters(self):
@@ -68,7 +67,7 @@ class ParameterTableModel:
 
         self._magnetism_parameters[name].linked = linked
 
-    def update_from_code(self, sld: SLDFunction, magnetism: Optional[MagnetismFunction]):
+    def update_from_code(self, sld: SLDFunction, magnetism: MagnetismFunction | None):
         """ Update the parameter list with sld and magnetism functions """
 
         # Mark all SLD/magnetism parameters as not in use, we'll mark them as in use if
@@ -220,7 +219,7 @@ class ParameterTableModel:
                            if self._sld_parameters[key].in_use}
 
         # Currently assume no bad linking
-        magnetic_parameters_linked: Dict[str, FunctionParameter] = \
+        magnetic_parameters_linked: dict[str, FunctionParameter] = \
             {key: self._sld_parameters[key]
                     if self._magnetism_parameters[key].linked
                     else self._magnetism_parameters[key].parameter

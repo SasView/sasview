@@ -1,4 +1,3 @@
-from typing import Optional
 
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
@@ -70,7 +69,7 @@ class ParameterTable(QWidget):
         self._model.clean()
         self.rebuild()
 
-    def update_contents(self, sld_function: SLDFunction, magnetism_function: Optional[MagnetismFunction]):
+    def update_contents(self, sld_function: SLDFunction, magnetism_function: MagnetismFunction | None):
         """ Update the contents of the parameter table with new functions"""
         self._model.update_from_code(sld_function, magnetism_function)
         self.rebuild()

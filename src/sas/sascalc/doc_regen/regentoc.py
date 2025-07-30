@@ -6,7 +6,7 @@ sys.path.append('..')
 from os import mkdir
 from os.path import basename, exists
 from os.path import join as joinpath
-from typing import IO, BinaryIO, Optional
+from typing import IO, BinaryIO
 
 from sasmodels.core import load_model_info
 
@@ -28,7 +28,7 @@ TEMPLATE = """\
 MODEL_TOC_PATH = MAIN_DOC_SRC / "user/qtgui/Perspectives/Fitting/models"
 
 
-def _make_category(category_name: str, label: str, title: str, parent: Optional[BinaryIO] = None) -> IO:
+def _make_category(category_name: str, label: str, title: str, parent: BinaryIO | None = None) -> IO:
     """Generate the base ReST file for a specific model category."""
     file = open(joinpath(MODEL_TOC_PATH, category_name+".rst"), "w")
     file.write(TEMPLATE % {'label': label, 'title': title, 'bar': '*'*len(title)})

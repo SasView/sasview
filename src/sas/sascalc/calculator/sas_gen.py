@@ -5,7 +5,6 @@ SAS generic computation and sld file readers.
 Calculation checked by sampling from an ellipsoid and comparing Iq with the
 1D, 2D oriented and 2D oriented magnetic analytical model from sasmodels.
 """
-from __future__ import print_function
 
 import logging
 import os
@@ -55,7 +54,7 @@ def transform_center(pos_x, pos_y, pos_z):
     posz = pos_z - (min(pos_z) + max(pos_z)) / 2.0
     return posx, posy, posz
 
-class GenSAS(object):
+class GenSAS:
     """
     Generic SAS computation Model based on sld (n & m) arrays
     """
@@ -884,7 +883,7 @@ class VTKReader:
         else:
             return None
 
-class OMF2SLD(object):
+class OMF2SLD:
     """
     Convert OMFData to MAgData
     """
@@ -1010,7 +1009,7 @@ class OMF2SLD(object):
 
 
 
-class OMFReader(object):
+class OMFReader:
     """
     Class to load omf/ascii files (3 columns w/header).
     """
@@ -1159,7 +1158,7 @@ class OMFReader(object):
             logging.warning(msg)
             return None
 
-class PDBReader(object):
+class PDBReader:
     """
     PDB reader class: limited for reading the lines starting with 'ATOM'
     """
@@ -1317,7 +1316,7 @@ class PDBReader(object):
         """
         print("Not implemented... ")
 
-class SLDReader(object):
+class SLDReader:
     """SLD reader for text files.
 
     format:
@@ -1479,7 +1478,7 @@ class OMFData:
         self.my = my
         self.mz = mz
 
-class MagSLD(object):
+class MagSLD:
     """
     Magnetic SLD.
     """
@@ -1919,13 +1918,13 @@ def set_axis_equal_3D(ax):
     """
     Set equal axes on a 3D plot.
     """
-    extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+    extents = np.array([getattr(ax, f'get_{dim}lim')() for dim in 'xyz'])
     sz = extents[:, 1] - extents[:, 0]
     centers = np.mean(extents, axis=1)
     maxsize = max(abs(sz))
     r = maxsize/2
     for ctr, dim in zip(centers, 'xyz'):
-        getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
+        getattr(ax, f'set_{dim}lim')(ctr - r, ctr + r)
 
 def compare(obj, qx, qy=None, plot_points=False, theory=None):
     """

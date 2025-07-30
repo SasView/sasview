@@ -15,7 +15,7 @@ class FittingPerspectiveTest:
     @pytest.fixture(autouse=True, scope='function')
     def widget(self, qapp):
         '''Create/Destroy the perspective'''
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(self):
                 return GuiUtils.Communicate()
             communicate = GuiUtils.Communicate()

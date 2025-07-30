@@ -7,8 +7,9 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence, Union
+from typing import Union
 
 from sasmodels.core import list_models
 
@@ -248,7 +249,7 @@ def call_regenmodel(filepaths: Sequence[PATH_LIKE]) -> list[Path]:
         process_model(py_file, True)
     return removed_files
 
-def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False, output_path: PATH_LIKE = "") -> subprocess.Popen[bytes]:
+def generate_html(single_files: PATH_LIKE | list[PATH_LIKE] = "", rst: bool = False, output_path: PATH_LIKE = "") -> subprocess.Popen[bytes]:
     """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
 
     :param single_file: A file name that needs the html regenerated.

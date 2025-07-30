@@ -58,7 +58,7 @@ def help():
 
     return info_txt
 
-class Invertor():
+class Invertor:
 
     def __init__(self, logic: "InversionLogic"):
         self.init_default_values()

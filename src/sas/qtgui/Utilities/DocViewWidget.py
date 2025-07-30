@@ -3,7 +3,6 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 from PySide6 import QtCore, QtWebEngineCore, QtWidgets
 from twisted.internet import threads
@@ -97,7 +96,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Necessary globals
         self.source: Path = Path(source)
         self.regen_in_progress: bool = False
-        self.thread: Optional[CalcThread] = None
+        self.thread: CalcThread | None = None
 
         from sas.qtgui.Utilities.GuiUtils import communicate
         self.communicate = communicate

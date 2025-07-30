@@ -1,4 +1,3 @@
-from typing import Optional
 
 from sas.qtgui.GL.color import ColorSpecification
 from sas.qtgui.GL.models import FullModel
@@ -49,8 +48,8 @@ class Cube(FullModel):
     ]
 
     def __init__(self,
-                 colors: Optional[ColorSpecification]=None,
-                 edge_colors: Optional[ColorSpecification]=None):
+                 colors: ColorSpecification | None=None,
+                 edge_colors: ColorSpecification | None=None):
 
         super().__init__(
             vertices=Cube.cube_vertices,

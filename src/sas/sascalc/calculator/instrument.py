@@ -24,7 +24,7 @@ _MASS = 1.67492729E-24  # [gr]
 _LAMBDA_ARRAY = [[0, 1e+16], [_INTENSITY, _INTENSITY]]
 
 
-class Aperture(object):
+class Aperture:
     """
     An object class that defines the aperture variables
     """
@@ -67,7 +67,7 @@ class Aperture(object):
             validate(distance[0])
 
 
-class Sample(object):
+class Sample:
     """
     An object class that defines the sample variables
     """
@@ -108,7 +108,7 @@ class Sample(object):
                 validate(distance[0])
 
 
-class Detector(object):
+class Detector:
     """
     An object class that defines the detector variables
     """
@@ -155,7 +155,7 @@ class Detector(object):
             validate(distance[0])
 
 
-class Neutron(object):
+class Neutron:
     """
     An object that defines the wavelength variables
     """

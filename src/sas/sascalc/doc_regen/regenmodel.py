@@ -48,7 +48,7 @@ from os import makedirs
 from os.path import basename, dirname, exists
 from os.path import join as joinpath
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import matplotlib.axes
 import numpy as np
@@ -65,7 +65,7 @@ from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, PATH_LIKE, gen
 TARGET_DIR = MAIN_DOC_SRC / "user" / "models"
 
 
-def plot_1d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
+def plot_1d(model: KernelModel, opts: dict[str, Any], ax: matplotlib.axes.Axes):
     """Create a 1-D image based on the model."""
     q_min, q_max, nq = opts['q_min'], opts['q_max'], opts['nq']
     q_min = math.log10(q_min)
@@ -82,7 +82,7 @@ def plot_1d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
     ax.set_yscale(opts['yscale'])
 
 
-def plot_2d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
+def plot_2d(model: KernelModel, opts: dict[str, Any], ax: matplotlib.axes.Axes):
     """Create a 2-D image based on the model."""
     qx_max, nq2d = opts['qx_max'], opts['nq2d']
     q = np.linspace(-qx_max, qx_max, nq2d) # type: np.ndarray
@@ -121,7 +121,7 @@ def figfile(model_info: ModelInfo) -> str:
     return model_info.id + '_autogenfig.png'
 
 
-def make_figure(model_info: ModelInfo, opts: Dict[str, Any]):
+def make_figure(model_info: ModelInfo, opts: dict[str, Any]):
     """Generate the figure file to include in the docs."""
     import matplotlib.pyplot as plt
 

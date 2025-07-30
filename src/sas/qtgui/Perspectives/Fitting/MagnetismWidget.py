@@ -2,7 +2,7 @@
 Widget/logic for magnetism.
 """
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -21,7 +21,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
     updateDataSignal = QtCore.Signal()
     iterateOverModelSignal = QtCore.Signal()
 
-    def __init__(self, parent: Optional[QtWidgets.QWidget] = None, logic: Optional[Any] = None) -> None:
+    def __init__(self, parent: QtWidgets.QWidget | None = None, logic: Any | None = None) -> None:
         super(MagnetismWidget, self).__init__()
 
         self.setupUi(self)
@@ -84,7 +84,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
 
         FittingUtilities.addHeadersToModel(self._magnet_model)
 
-    def getParamNamesMagnet(self) -> List[str]:
+    def getParamNamesMagnet(self) -> list[str]:
         """
         Return list of magnetic parameters for the current model
         """
@@ -145,7 +145,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             for row_i in range(self._magnet_model.rowCount()):
                 func(row_i)
 
-    def updateFullMagnetModel(self, param_dict: Dict[str, List[str]]) -> None:
+    def updateFullMagnetModel(self, param_dict: dict[str, list[str]]) -> None:
         """
         Update the magnetism model with new parameters, create the errors column
         """
@@ -183,7 +183,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
 
         self.iterateOverMagnetModel(updateFittedValues)
 
-    def updateMagnetModelFromList(self, param_dict: Dict[str, Tuple[float, float]]) -> None:
+    def updateMagnetModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
             """
             Update the magnetic model with new parameters, create the errors column
             """

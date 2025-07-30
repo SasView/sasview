@@ -4,7 +4,6 @@ import sys
 import traceback
 import webbrowser
 from pathlib import Path
-from typing import Dict, Optional
 
 from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
@@ -104,8 +103,8 @@ class GuiManager:
         self.addTriggers()
 
         # Currently displayed perspective
-        self._current_perspective: Optional[Perspective] = None
-        self.loadedPerspectives: Dict[str, Perspective] = {}
+        self._current_perspective: Perspective | None = None
+        self.loadedPerspectives: dict[str, Perspective] = {}
 
         # Populate the main window with stuff
         self.addWidgets()
