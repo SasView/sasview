@@ -135,7 +135,14 @@ def copy_old_files_to_new_location():
     # Iterate through dictionary, check if new files exist, and move files that haven't already been created
     for old_path, new_path in location_map.items():
         if old_path.exists() and not new_path.exists():
-            shutil.copy2(old_path, new_path)
+            # Move the file to the new location instead of copying (fixes future issues)
+            shutil.move(old_path, new_path)
+        if old_path.exists() and new_path.exists():
+            # Files copied to the new location in previous versions may still exist. Attempt to delete them.
+            try:
+                os.remove(old_path)
+            except Exception as e:
+                logging.error(f"Failed to remove {old_path}: {e}")
 
 
 def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
