@@ -1144,8 +1144,8 @@ using an on-the-fly :ref:`SESANS` from *Q*-space to real-space.
 To use this functionality it is important that the SESANS data file has
 the extension .ses to distinguish it from *Q*-space data. The SESANS user
 community is gradually refining the structure and content of its data files.
-Some current examples can be found in the \\example_data\\sesans_data folder within
-the SasView installation folder. For more information about the contents
+Some current examples can be found in the \\sesans_data folder
+in your :ref:`Example_data` directory. For more information about the contents
 of .ses files, see :ref:`Formats`.
 
 Load the .ses file and Send to Fitting as normal.

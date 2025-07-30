@@ -11,7 +11,7 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from pathlib import Path
 
 from sas.sascalc.fit import models
-from sas.sascalc.fit.models import find_plugins_dir
+from sas.system.user import find_plugins_dir, MAIN_DOC_SRC
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
@@ -153,7 +153,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # If we are loading in a file at the launch of the editor instead of letting the user pick, we need to process the HTML location from
         # the documentation viewer into the filepath for its corresponding RST
         if at_launch:
-            from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
             user_models = find_plugins_dir()
             user_model_name = user_models + self.load_file + ".py"
 
@@ -166,7 +165,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 self.is_python = False
                 self.is_documentation = True
         else:
-            plugin_location = models.find_plugins_dir()
+            plugin_location = find_plugins_dir()
             filename = QtWidgets.QFileDialog.getOpenFileName(
                                             self,
                                             'Open Plugin',
