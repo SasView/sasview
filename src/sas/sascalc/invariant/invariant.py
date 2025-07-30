@@ -933,9 +933,9 @@ class InvariantCalculator:
             volume1 = 0.5 * (1 - math.sqrt(discrim))
             volume2 = 0.5 * (1 + math.sqrt(discrim))
 
-            if 0 <= volume1 and volume1 <= 1:
+            if volume1 >= 0 and volume1 <= 1:
                 return volume1
-            elif 0 <= volume2 and volume2 <= 1:
+            elif volume2 >= 0 and volume2 <= 1:
                 return volume2
             msg = "Could not compute the volume fraction: inconsistent results"
             raise RuntimeError(msg)
