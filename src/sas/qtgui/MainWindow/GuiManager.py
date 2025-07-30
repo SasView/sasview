@@ -6,6 +6,7 @@ import traceback
 
 from typing import Optional, Dict
 from pathlib import Path
+from packaging.version import Version
 
 from PySide6.QtWidgets import *
 from PySide6.QtGui import *
@@ -630,7 +631,7 @@ class GuiManager:
         """
         PackageGatherer().log_imported_packages()
 
-    def processVersion(self, version_str):
+    def processVersion(self, version_info: tuple[str, str, Version]):
         """
         Call-back method for the process of checking for updates.
         This methods is called by a VersionThread object once the current
@@ -639,11 +640,12 @@ class GuiManager:
 
         :param version_str: version string
         """
+        version_str, download_url, _ = version_info
         try:
             if version_str.__gt__(sas.system.version.__version__):
-                msg = "Version %s is available! " % str(version_str)
-                if "download_url" in version_str:
-                    webbrowser.open(version_str["download_url"])
+                msg = "Version %s is available! " % str(version_info)
+                if download_url is not None:
+                    webbrowser.open(version_info["download_url"])
                 else:
                     webbrowser.open(web.download_url)
                 self.communicate.statusBarUpdateSignal.emit(msg)
