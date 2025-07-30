@@ -173,6 +173,10 @@ jobs:
         run: |
           uv pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
 
+      - name: Fetch external AUSAXS C library
+        run: |
+          python build_tools/get_external_dependencies.py
+
       ### Actual building of sasview
 
       - name: Build sasview
@@ -199,7 +203,6 @@ jobs:
         if: ${{ matrix.tests }}
         run: |
           uv pip install -r build_tools/requirements-test.txt
-          python build_tools/get_external_dependencies.py
 
       - name: Test with pytest
         if: ${{ matrix.tests }}
