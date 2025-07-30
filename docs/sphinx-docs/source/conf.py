@@ -13,6 +13,7 @@
 
 import datetime
 import os
+import sphinx
 import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -320,8 +321,6 @@ if os.path.exists('rst_prolog'):
         rst_prolog = fid.read()
 
 numfig = True
-
-import sphinx
 
 if sphinx.version_info[0] >= 3:   # CRUFT
 
