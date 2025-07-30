@@ -103,9 +103,6 @@ def get_current_release_version() -> Optional[tuple[str, str, Version]]:
 
         return version_string, url, parse(version_string)
 
-    except ConnectionError:
-        # Return None if we can't reach the server.
-        return None
     except Exception as ex:
         logging.info("Failed to get version number %s", ex)
         return None
