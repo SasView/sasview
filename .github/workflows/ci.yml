@@ -160,12 +160,15 @@ jobs:
         run: |
           uv pip install dist/*whl
 
+      - name: Fetch external AUSAXS C library
+        run: |
+          python build_tools/get_external_dependencies.py
+
       - name: Install Python dependencies
         if: ${{ ! env.RELEASE_BRANCH_BUILD }}
         run: |
           uv pip install -r build_tools/requirements.txt
           uv pip install -r build_tools/requirements-dev.txt
-          python build_tools/get_external_dependencies.py
 
       ### For pull_requests with the release branch as the base -or- branches with the name *release*
 
@@ -173,7 +176,6 @@ jobs:
         if: ${{ env.RELEASE_BRANCH_BUILD }}
         run: |
           python -m pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
-          python build_tools/get_external_dependencies.py
 
       ### Actual building of sasview
 
