@@ -79,7 +79,7 @@ class WindowsConsole(metaclass=Singleton):
     def _read_fd(self):
         if self._conin is None:
             self._attach_console()
-            self._conin = open("CONIN$", "r")
+            self._conin = open("CONIN$")
         return self._conin
     @property
     def _write_fd(self):
@@ -148,7 +148,7 @@ def setup_console_simple(stderr_to_stdout=True):
     if os.name == 'nt':
         def console_open(mode):
             attach_windows_console()
-            return open("CON:", "r") if mode == "r" else open("CON:", "w") 
+            return open("CON:") if mode == "r" else open("CON:", "w") 
         if sys.__stdin__ is None:
             sys.__stdin__ = sys.stdin = console_open("r")
         if sys.__stdout__ is None:

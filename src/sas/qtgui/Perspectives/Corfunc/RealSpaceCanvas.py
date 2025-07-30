@@ -1,4 +1,3 @@
-from typing import Optional
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
 from sas.sascalc.corfunc.corfunc_calculator import SupplementaryParameters
@@ -9,7 +8,7 @@ class RealSpaceCanvas(CorfuncCanvas):
 
     def __init__(self, parent, width=5, height=4, dpi=100):
         super().__init__(parent, width, height, dpi)
-        self._supplementary: Optional[SupplementaryParameters] = None
+        self._supplementary: SupplementaryParameters | None = None
 
 
     def draw_data(self):

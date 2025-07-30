@@ -1,4 +1,4 @@
-class Constraint(object):
+class Constraint:
     """
     Internal representation of a single parameter constraint
     Currently just a data structure, might get expanded with more functionality,

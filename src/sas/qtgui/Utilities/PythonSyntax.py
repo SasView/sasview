@@ -207,7 +207,7 @@ if __name__ == '__main__':
     editor.show()
 
     # Load syntax.py into the editor for demo purposes
-    infile = open('PythonSyntax.py', 'r')
+    infile = open('PythonSyntax.py')
     editor.setPlainText(infile.read())
 
     app.exec_()

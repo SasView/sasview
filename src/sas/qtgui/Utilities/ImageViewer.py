@@ -189,7 +189,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
             title = 'Picture: ' + self.filename
             self.setWindowTitle(title)
             self.plotter.draw()
-        except IOError as ex:
+        except OSError as ex:
             err_msg = "Failed to load '%s'.\n" % self.filename
             logging.error(err_msg+str(ex))
             return

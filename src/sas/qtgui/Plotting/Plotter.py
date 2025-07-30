@@ -990,7 +990,7 @@ class PlotterWidget(PlotterBase):
 
         x_str = GuiUtils.formatNumber(self.x_click)
         y_str = GuiUtils.formatNumber(self.y_click)
-        coord_str = "x: {}, y: {}".format(x_str, y_str)
+        coord_str = f"x: {x_str}, y: {y_str}"
         self.manager.communicator.statusBarUpdateSignal.emit(coord_str)
 
     def onMplMouseUp(self, event):

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Generic, NamedTuple, Optional, Tuple, TypeVar
+from typing import Generic, NamedTuple, TypeVar
 
 from sasdata.dataloader.data_info import Data1D
 
@@ -8,8 +8,8 @@ T = TypeVar("T")
 
 class Fittable(Generic[T]):
     """ Container for parameters that can be fitted by the corfunc perspective"""
-    def __init__(self, data: Optional[T] = None, allow_fit: bool = True):
-        self.data: Optional[T] = data
+    def __init__(self, data: T | None = None, allow_fit: bool = True):
+        self.data: T | None = data
         self.allow_fit: bool = allow_fit
 
     def clear(self):
@@ -40,8 +40,8 @@ class SupplementaryParameters:
     hard_block_gamma: float
     interface_z: float
     core_z: float
-    z_range: Tuple[float, float]
-    gamma_range: Tuple[float, float]
+    z_range: tuple[float, float]
+    gamma_range: tuple[float, float]
 
 @dataclass
 class LamellarParameters:
@@ -111,5 +111,5 @@ class ExtrapolationInteractionState:
     Contains extrapolation parameters along with the representation of the hover state.
     """
     extrapolation_parameters: ExtrapolationParameters
-    working_line_id: Optional[int] = None
-    dragging_line_position: Optional[float] = None
+    working_line_id: int | None = None
+    dragging_line_position: float | None = None

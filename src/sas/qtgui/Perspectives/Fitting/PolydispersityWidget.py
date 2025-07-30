@@ -3,7 +3,7 @@ Widget/logic for polydispersity.
 """
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -25,7 +25,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
     updateDataSignal = QtCore.Signal()
     iterateOverModelSignal = QtCore.Signal()
 
-    def __init__(self, parent: Optional[QtWidgets.QWidget] = None) -> None:
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super(PolydispersityWidget, self).__init__()
 
         self.setupUi(self)
@@ -87,7 +87,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         param_name += '.width'
         return param_name
 
-    def getParamNamesPoly(self) -> List[str]:
+    def getParamNamesPoly(self) -> list[str]:
         """
         Return list of polydisperse parameters for the current model
         """
@@ -165,7 +165,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             # Update plot
             self.updateDataSignal.emit()
 
-    def checkedListFromModel(self) -> List[str]:
+    def checkedListFromModel(self) -> list[str]:
         """
         Returns list of checked parameters for given model
         """
@@ -187,7 +187,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 if key[-6:] == '.width':
                     self.logic.kernel_module.setParam(key, (value if isChecked else 0))
 
-    def updateModel(self, model: Optional[Any] = None) -> None:
+    def updateModel(self, model: Any | None = None) -> None:
         # add polydisperse parameters if asked
         if self.isActive and self.poly_model.rowCount() > 0:
             for key, value in self.poly_params.items():
@@ -302,7 +302,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 [self.poly_model.item(row_index, i).setEnabled(False) for i in range(lo, hi)]
                 self.poly_model.blockSignals(False)
                 return
-            except IOError:
+            except OSError:
                 combo_box.setCurrentIndex(self.orig_poly_index)
                 # Pass for cancel/bad read
                 pass
@@ -339,11 +339,11 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
 
         if not datafile:
             logger.info("No weight data chosen.")
-            raise IOError
+            raise OSError
 
         values = []
         weights = []
-        def appendData(data_tuple: List[str]) -> None:
+        def appendData(data_tuple: list[str]) -> None:
             """
             Fish out floats from a tuple of strings
             """
@@ -354,7 +354,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 # just pass through if line with bad data
                 return
 
-        with open(datafile, 'r') as column_file:
+        with open(datafile) as column_file:
             column_data = [line.rstrip().split() for line in column_file.readlines()]
             [appendData(line) for line in column_data]
 
@@ -372,7 +372,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         for row_i in range(self.poly_model.rowCount()):
             func(row_i)
 
-    def updatePolyModelFromList(self, param_dict: Dict[str, Tuple[float, float]]) -> None:
+    def updatePolyModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
         """
         Update the polydispersity model with new parameters, create the errors column
         """
@@ -437,7 +437,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         """
         self.poly_params_to_fit = []
 
-    def updateFullPolyModel(self, param_dict: Dict[str, List[str]]) -> None:
+    def updateFullPolyModel(self, param_dict: dict[str, list[str]]) -> None:
         """
         Update the polydispersity model with new parameters, create the errors column
         """
@@ -493,7 +493,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
 
         self.iterateOverPolyModel(updateFittedValues)
 
-    def gatherPolyParams(self, row: int) -> List[List[str]]:
+    def gatherPolyParams(self, row: int) -> list[list[str]]:
         """
         Create list of polydisperse parameters based on _poly_model
         """

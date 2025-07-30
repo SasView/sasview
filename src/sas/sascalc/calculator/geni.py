@@ -4,7 +4,6 @@ For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 """
 import logging
 import os
-from typing import Union
 
 import numpy as np
 import periodictable
@@ -483,7 +482,7 @@ def _spin_weights(in_spin, out_spin):
     return weight
 
 
-def radius_of_gyration(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> tuple[str, str, float]:
+def radius_of_gyration(nuc_sl_data: MagSLD | OMF2SLD) -> tuple[str, str, float]:
     """Calculate parameters related to the radius of gyration using and SLD profile.
 
     :param nuc_sl_data: A scattering length object for a series of atomic points in space
@@ -537,7 +536,7 @@ def radius_of_gyration(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> tuple[str, str, f
     return rog_mass, guinier_value, r_g_mass  # (String, String, Float), float used for plugin model
 
     
-def center_of_mass(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> list[float]:
+def center_of_mass(nuc_sl_data: MagSLD | OMF2SLD) -> list[float]:
     """Calculate Center of Mass(CoM) of provided molecule using an SL profile
 
     :param nuc_sl_data: A coordinate data object (MagSLD or OMF2SLD)
@@ -564,7 +563,7 @@ def center_of_mass(nuc_sl_data: Union[MagSLD, OMF2SLD]) -> list[float]:
     return c_o_m
 
 
-def create_beta_plot(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD], form_factor: np.ndarray) -> np.ndarray:
+def create_beta_plot(q_x: np.ndarray, nuc_sl_data: MagSLD | OMF2SLD, form_factor: np.ndarray) -> np.ndarray:
     """Carry out the computation of beta Q using provided & calculated data
 
     :param q_x: The Q values where the beta will be calculated.
@@ -583,7 +582,7 @@ def create_beta_plot(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD], form_
     return data_beta_q
 
 
-def f_of_q(q_x: np.ndarray, nuc_sl_data: Union[MagSLD, OMF2SLD]) -> np.ndarray:
+def f_of_q(q_x: np.ndarray, nuc_sl_data: MagSLD | OMF2SLD) -> np.ndarray:
     """Compute the base F(Q) calculation based from the nuclear data.
 
     :param q_x: The Q values where the beta will be calculated.

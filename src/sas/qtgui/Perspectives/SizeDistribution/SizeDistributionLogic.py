@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 import numpy as np
 
@@ -97,7 +96,7 @@ class SizeDistributionLogic:
 
     def fitBackground(
         self, power: float | None, qmin: float, qmax: float
-    ) -> List[float]:
+    ) -> list[float]:
         """
         Estimate the background power law, scale * q^(power)
         :param power: if a float is given, the power is fixed; if None, the power is fitted

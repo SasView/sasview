@@ -31,7 +31,7 @@ from sas.sascalc.simulation.geoshapespy import geoshapespy
 from sas.sascalc.simulation.pointsmodelpy import pointsmodelpy
 
 
-class ShapeDescriptor(object):
+class ShapeDescriptor:
     """
         Class to hold the information about a shape
         The descriptor holds a dictionary of parameters.

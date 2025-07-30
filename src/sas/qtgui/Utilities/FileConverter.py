@@ -40,7 +40,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.setWindowTitle("File Converter")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
 
@@ -137,7 +137,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
                     return
                 Utilities.convert_2d_data(dataset, self.ofile, self.getMetadata())
 
-        except (ValueError, IOError) as ex:
+        except (OSError, ValueError) as ex:
             msg = str(ex)
             logging.error(msg)
             return
@@ -187,8 +187,8 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         try:
             datafile = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Choose a file", "", "All files (*.*)")[0]
-        except (RuntimeError, IOError) as ex:
-            log_msg = "File Converter failed with: {}".format(ex)
+        except (OSError, RuntimeError) as ex:
+            log_msg = f"File Converter failed with: {ex}"
             logging.error(log_msg)
             raise
         return datafile

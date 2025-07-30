@@ -98,7 +98,7 @@ class WhatsNew(QDialog):
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
         self.browser = WhatsNewBrowser()
@@ -197,7 +197,7 @@ class WhatsNew(QDialog):
         """ Set the text of the window to the file with the current index"""
         if len(self.all_messages) > 0:
             filename = self.all_messages[self.current_index]
-            with open(filename, 'r') as fid:
+            with open(filename) as fid:
                 data = fid.read()
                 self.browser.setHtml(data)
         else:

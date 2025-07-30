@@ -17,7 +17,7 @@ class AddMultEditorTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
         '''Create/Destroy the AddMultEditor'''
-        class dummy_manager(object):
+        class dummy_manager:
             HELP_DIRECTORY_LOCATION = "html"
             communicate = Communicate()
             _parent = QtWidgets.QDialog()
@@ -166,25 +166,20 @@ class AddMultEditorTest:
         symbol_operator = widget.cbOperator.currentText()
 
         # default description
-        desc_line = "{} {} {}".format(model1_name,
-                                      symbol_operator,
-                                      model2_name)
+        desc_line = f"{model1_name} {symbol_operator} {model2_name}"
 
         widget.write_new_model_to_file(dummy_file_path, model1_name,
                                             model2_name, symbol_operator)
         # check content of dummy file path
-        with open(dummy_file_path, 'r') as f_in:
+        with open(dummy_file_path) as f_in:
             lines_from_generated_file = [line.strip() for line in f_in]
 
         # SUM_TEMPLATE with updated entries
         completed_template = ["from sasmodels.core import load_model_info",
                         "from sasmodels.sasview_model import make_model_from_info",
-                        "model_info = load_model_info('{model1}{operator}{model2}')".
-                            format(model1=model1_name,
-                                   operator=symbol_operator,
-                                   model2=model2_name),
+                        f"model_info = load_model_info('{model1_name}{symbol_operator}{model2_name}')",
                         "model_info.name = '{}'".format("test_datafile"),
-                        "model_info.description = '{}'".format(desc_line),
+                        f"model_info.description = '{desc_line}'",
                         "Model = make_model_from_info(model_info)"]
 
         for item in completed_template:
@@ -200,7 +195,7 @@ class AddMultEditorTest:
                                             model2_name, symbol_operator)
 
         # check content of dummy file path
-        with open(dummy_file_path, 'r') as f_in:
+        with open(dummy_file_path) as f_in:
             lines_from_generated_file = [line.strip() for line in f_in]
 
         # update completed template

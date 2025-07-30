@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Global defaults and various utility functions usable by the general GUI
 """
@@ -1192,7 +1191,7 @@ def readDataFromFile(fp):
         pass
 
     def simple_type(cls, data, level):
-        class Empty(object):
+        class Empty:
             def __init__(self):
                 for key, value in data.items():
                     setattr(self, key, generate(value, level))

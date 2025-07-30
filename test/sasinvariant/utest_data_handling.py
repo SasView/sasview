@@ -140,7 +140,7 @@ class TestInvariantCalculator(unittest.TestCase):
             Check that only classes that inherit from Data1D are allowed
             as data.
         """
-        class Incompatible():
+        class Incompatible:
             pass
         self.assertRaises(ValueError, invariant.InvariantCalculator,
                           Incompatible())

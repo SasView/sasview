@@ -1,4 +1,3 @@
-from typing import Optional
 
 import numpy as np
 from PySide6 import QtWidgets
@@ -65,7 +64,7 @@ class OrientationViewer(QtWidgets.QWidget):
 
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
         self._colormap_name = 'viridis'
@@ -205,7 +204,7 @@ class OrientationViewer(QtWidgets.QWidget):
                 for c, c_ghosts in zip(self.ghost_spacings, b_ghosts.children):
                     c_ghosts.angle = c*orientation.dpsi
 
-    def on_angle_changed(self, orientation: Optional[Orientation]):
+    def on_angle_changed(self, orientation: Orientation | None):
 
         """ Response to angle change"""
 
@@ -224,7 +223,7 @@ class OrientationViewer(QtWidgets.QWidget):
         self._set_image_data(orientation)
 
 
-    def on_angle_changing(self, orientation: Optional[Orientation]):
+    def on_angle_changing(self, orientation: Orientation | None):
 
         """ Response to angle change"""
 

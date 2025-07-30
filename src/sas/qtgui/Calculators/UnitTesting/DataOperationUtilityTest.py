@@ -16,7 +16,7 @@ class DataOperationUtilityTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         """Create/Destroy the DataOperationUtilityPanel"""
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(widget):
                 return Communicate()
 

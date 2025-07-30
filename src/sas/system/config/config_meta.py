@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any
 
 from packaging.version import InvalidVersion, parse
 
@@ -42,10 +42,10 @@ class ConfigBase:
         #   you need to keep this up to date (probably shouldn't be
         #   changing it anyway)
         self._locked = False
-        self._schema: Dict[str, SchemaElement] = {}
-        self._defaults: Dict[str, SchemaElement] = {}
-        self._deleted_attributes: List[str] = []
-        self._bad_entries: Dict[str, Any] = {}
+        self._schema: dict[str, SchemaElement] = {}
+        self._defaults: dict[str, SchemaElement] = {}
+        self._deleted_attributes: list[str] = []
+        self._bad_entries: dict[str, Any] = {}
         self._disable_writing = False
         self._meta_attributes = ["_locked", "_schema", "_defaults",
                                  "_deleted_attributes", "_meta_attributes",
@@ -70,7 +70,7 @@ class ConfigBase:
         self._defaults = self._state_copy()
         self._locked = True
 
-    def update(self, data: Dict[str, Any]):
+    def update(self, data: dict[str, Any]):
         """ Set the fields of the config from a dictionary"""
 
         for key in data:
@@ -138,7 +138,7 @@ class ConfigBase:
         filename = self.config_filename(False)
 
         if os.path.exists(filename):
-            with open(filename, 'r') as file:
+            with open(filename) as file:
                 self.load_from_file_object(file)
 
         else:
@@ -175,9 +175,9 @@ class ConfigBase:
 
         self.update(data["config_data"])
 
-    def _state_copy(self) -> Dict[str, Any]:
+    def _state_copy(self) -> dict[str, Any]:
         """ Get a copy of all the data in the config"""
-        state: Dict[str, Any] = {}
+        state: dict[str, Any] = {}
         variables = vars(self)
         for variable_name in variables:
             if variable_name in self._meta_attributes:
@@ -187,14 +187,14 @@ class ConfigBase:
 
         return state
 
-    def _generate_schema(self) -> Dict[str, SchemaElement]:
+    def _generate_schema(self) -> dict[str, SchemaElement]:
         """ Auto-generate schema for the current config class and validate config class
 
         Note: there is an assumption here that the class of the value in the default
         config file is
         """
 
-        schema: Dict[str, SchemaElement] = {}
+        schema: dict[str, SchemaElement] = {}
         variables = vars(self)
         for variable_name in variables:
             if variable_name in self._meta_attributes:

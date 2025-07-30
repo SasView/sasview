@@ -1,7 +1,6 @@
 import logging
 import os
 import traceback
-from typing import Optional
 
 from PySide6 import QtCore, QtPrintSupport, QtWidgets
 
@@ -15,7 +14,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     """
     Class for stateless grid-like printout of model parameters for mutiple models
     """
-    def __init__(self, report_data: ReportData, parent: Optional[QtCore.QObject]=None):
+    def __init__(self, report_data: ReportData, parent: QtCore.QObject | None=None):
 
         super().__init__(parent)
         self.setupUi(self)

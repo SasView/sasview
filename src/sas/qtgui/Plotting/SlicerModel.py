@@ -3,7 +3,7 @@ from PySide6 import QtCore, QtGui
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 
-class SlicerModel(object):
+class SlicerModel:
     def __init__(self):
         # Model representation of local parameters
         self._model = QtGui.QStandardItemModel()

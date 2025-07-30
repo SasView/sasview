@@ -23,7 +23,7 @@ class ConstraintWidgetTest:
         '''Create/Destroy the ConstraintWidget'''
 
         '''Create ConstraintWidget dialog'''
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(self):
                 return GuiUtils.Communicate()
             communicate = GuiUtils.Communicate()
@@ -34,7 +34,7 @@ class ConstraintWidgetTest:
             def perspective(self):
                 return self._perspective
 
-        class dummy_perspective(object):
+        class dummy_perspective:
 
             def __init__(self):
                 self.symbol_dict = {}

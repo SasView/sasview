@@ -1,4 +1,3 @@
-from __future__ import print_function
 
 from sasModeling.geoshapespy import geoshapespy
 from sasModeling.iqPy import iqPy

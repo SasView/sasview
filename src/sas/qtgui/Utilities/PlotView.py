@@ -1,4 +1,3 @@
-from __future__ import print_function, with_statement
 
 from matplotlib.backends.qt_compat import QtWidgets
 

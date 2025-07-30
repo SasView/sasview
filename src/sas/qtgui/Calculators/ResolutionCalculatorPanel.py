@@ -299,9 +299,8 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 max_lambda = 2 * min_lambda
             else:
                 max_lambda = max(list_wdata[0])
-            self.txtWavelength.setText('{} - {}'.format(min_lambda, max_lambda))
-            self.txtWavelengthSpread.setText('{} - {}'.format(min_wspread,
-                                                    max_wspread))
+            self.txtWavelength.setText(f'{min_lambda} - {max_lambda}')
+            self.txtWavelengthSpread.setText(f'{min_wspread} - {max_wspread}')
 
         else:
             self.cbCustomSpectrum.setVisible(False)
@@ -327,7 +326,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
 
             basename = os.path.basename(datafile)
 
-            input_f = open(datafile, 'r')
+            input_f = open(datafile)
             buff = input_f.read()
             lines = buff.split('\n')
 

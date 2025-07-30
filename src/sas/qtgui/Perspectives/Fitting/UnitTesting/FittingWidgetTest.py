@@ -22,7 +22,7 @@ from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 
 
-class dummy_manager(object):
+class dummy_manager:
     HELP_DIRECTORY_LOCATION = "html"
     communicate = GuiUtils.Communicate()
 
@@ -32,7 +32,7 @@ class dummy_manager(object):
     def perspective(self):
         return self._perspective
 
-class dummy_perspective(object):
+class dummy_perspective:
 
     def __init__(self):
         self.symbol_dict = {}

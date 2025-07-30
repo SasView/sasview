@@ -17,7 +17,7 @@ class FileConverterTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         '''Create/Destroy the FileConverter'''
-        class dummy_manager(object):
+        class dummy_manager:
             communicate = Communicate()
             _parent = QtWidgets.QDialog()
 

@@ -17,11 +17,11 @@ class CorfuncTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
         '''Create/Destroy the CorfuncWindow'''
-        class MainWindow(object):
+        class MainWindow:
             def __init__(self, widget):
                 self.model = QtGui.QStandardItemModel()
 
-        class dummy_manager(object):
+        class dummy_manager:
             def __init__(self, widget):
                 self.filesWidget = MainWindow()
 
