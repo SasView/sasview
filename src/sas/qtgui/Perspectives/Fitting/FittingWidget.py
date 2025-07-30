@@ -3818,27 +3818,27 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Update FitPage with parameters in line_dict
         """
-        if 'model_name' not in line_dict.keys():
+        if 'model_name' not in line_dict:
             return
         model = line_dict['model_name'][0]
         context = {}
 
-        if 'multiplicity' in line_dict.keys():
+        if 'multiplicity' in line_dict:
             multip = int(line_dict['multiplicity'][0], 0)
             # reset the model with multiplicity, so further updates are saved
             if self.logic.kernel_module.is_multiplicity_model:
                 self.logic.kernel_module.multiplicity=multip
                 self.updateMultiplicityCombo(multip)
 
-        if 'tab_name' in line_dict.keys() and self.logic.kernel_module is not None:
+        if 'tab_name' in line_dict and self.logic.kernel_module is not None:
             self.logic.kernel_module.name = line_dict['tab_name'][0]
-        if 'polydisperse_params' in line_dict.keys():
+        if 'polydisperse_params' in line_dict:
             self.chkPolydispersity.setChecked(line_dict['polydisperse_params'][0]=='True')
-        if 'magnetic_params' in line_dict.keys():
+        if 'magnetic_params' in line_dict:
             self.chkMagnetism.setChecked(line_dict['magnetic_params'][0]=='True')
-        if 'chainfit_params' in line_dict.keys():
+        if 'chainfit_params' in line_dict:
             self.chkChainFit.setChecked(line_dict['chainfit_params'][0]=='True')
-        if '2D_params' in line_dict.keys():
+        if '2D_params' in line_dict:
             self.chk2DView.setChecked(line_dict['2D_params'][0]=='True')
 
         # Create the context dictionary for parameters
@@ -3858,24 +3858,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             else:
                 return
 
-        if 'smearing' in line_dict.keys():
+        if 'smearing' in line_dict:
             try:
                 index = int(line_dict['smearing'][0])
                 self.smearing_widget.cbSmearing.setCurrentIndex(index)
             except ValueError:
                 pass
-        if 'smearing_min' in line_dict.keys():
+        if 'smearing_min' in line_dict:
             try:
                 self.smearing_widget.dq_r = float(line_dict['smearing_min'][0])
             except ValueError:
                 pass
-        if 'smearing_max' in line_dict.keys():
+        if 'smearing_max' in line_dict:
             try:
                 self.smearing_widget.dq_l = float(line_dict['smearing_max'][0])
             except ValueError:
                 pass
 
-        if 'q_range_max' in line_dict.keys():
+        if 'q_range_max' in line_dict:
             try:
                 self.q_range_min = float(line_dict['q_range_min'][0])
                 self.q_range_max = float(line_dict['q_range_max'][0])
@@ -3883,7 +3883,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 pass
         self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
         try:
-            if 'weighting' in line_dict.keys():
+            if 'weighting' in line_dict:
                 button_id = int(line_dict['weighting'][0])
                 for button in self.options_widget.weightingGroup.buttons():
                     if abs(self.options_widget.weightingGroup.id(button)) == button_id+2:

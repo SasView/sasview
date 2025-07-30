@@ -177,7 +177,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         if not isinstance(id, list):
             id = [id]
         for i in id:
-            if 'is_constraint' in line_dict.keys():
+            if 'is_constraint' in line_dict:
                 state[i] = line_dict
             elif i in state and 'fit-params' in state[i]:
                 state[i]['fit_params'].update(line_dict)
