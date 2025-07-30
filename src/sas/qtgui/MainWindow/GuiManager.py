@@ -1,83 +1,71 @@
-import sys
-import os
-import logging
 import json
-import webbrowser
+import logging
+import os
+import sys
 import traceback
-
-from typing import Optional, Dict
+import webbrowser
 from pathlib import Path
+from typing import Dict, Optional
 
-from PySide6.QtWidgets import QDockWidget, QTextBrowser, QProgressBar, QLabel
+from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem
-from PySide6.QtCore import Qt, QLocale
-
-
-import sas.system.version
-
-from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
-
+from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
 from twisted.internet import reactor
-# General SAS imports
-from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
-from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Utilities.PluginManager import PluginManager
-from sas.qtgui.Utilities.ModelEditors.ReparamEditor.ReparameterizationEditor import ReparameterizationEditor
-from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
-from sas.qtgui.Utilities.ResultPanel import ResultPanel
-from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
-from sas.qtgui.Utilities.HidableDialog import hidable_dialog
-from sas.qtgui.Utilities.MuMag.MuMag import MuMag
-# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
-from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
-from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
-from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
-from sas.qtgui.Utilities.About.About import About
-
-from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
-from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
-from sas.qtgui.MainWindow.CategoryManager import CategoryManager
-from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
-
-from sas.qtgui.MainWindow.DataManager import DataManager
-
-from sas.qtgui.Calculators.SldPanel import SldPanel
-from sas.qtgui.Calculators.DensityPanel import DensityPanel
-from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
-from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
-from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
-from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
-from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
-
-
-import sas.qtgui.Plotting.PlotHelper as PlotHelper
+import sas
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
-from sas.qtgui.Perspectives.perspective import Perspective
-
-from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+import sas.system.version
+from sas import config
+from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
+from sas.qtgui.Calculators.DensityPanel import DensityPanel
+from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
+from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
+from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
+from sas.qtgui.Calculators.SldPanel import SldPanel
+from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
+from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
+from sas.qtgui.MainWindow.CategoryManager import CategoryManager
+from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
+from sas.qtgui.MainWindow.DataManager import DataManager
+from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
+from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
+from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
+from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
+from sas.qtgui.Utilities.About.About import About
 
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
+# General SAS imports
+from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 
-from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
-from sas.qtgui.Utilities.ImageViewer import ImageViewer
+# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
+from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
+from sas.qtgui.Utilities.HidableDialog import hidable_dialog
+from sas.qtgui.Utilities.ImageViewer import ImageViewer
+from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
+from sas.qtgui.Utilities.ModelEditors.ReparamEditor.ReparameterizationEditor import ReparameterizationEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
+from sas.qtgui.Utilities.PluginManager import PluginManager
+from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
+from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
+from sas.qtgui.Utilities.ResultPanel import ResultPanel
+from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
-
-import sas
-from sas import config
-from sas.system import web
 from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
+from sas.system import web
+from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -259,8 +247,8 @@ class GuiManager:
         Make sure categories.json exists and if not compile it and install in ~/.sasview
         """
         try:
-            from sas.sascalc.fit.models import ModelManager
             from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+            from sas.sascalc.fit.models import ModelManager
             model_list = ModelManager().cat_model_list()
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:

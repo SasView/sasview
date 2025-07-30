@@ -2,12 +2,13 @@ import shutil
 from pathlib import Path
 
 from django.conf import settings
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
 from .models import Data
+
 
 def find(filename):
     return Path(__file__).resolve().parent.parent.parent/'example_data'/'1d_data'/filename

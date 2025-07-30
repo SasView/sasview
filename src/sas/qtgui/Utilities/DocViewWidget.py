@@ -1,19 +1,25 @@
-import sys
-import os
 import logging
+import os
+import sys
 import time
 from pathlib import Path
 from typing import Optional
 
-from PySide6 import QtCore, QtWidgets, QtWebEngineCore
+from PySide6 import QtCore, QtWebEngineCore, QtWidgets
 from twisted.internet import threads
 
-from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.sascalc.doc_regen.makedocumentation import (make_documentation, create_user_files_if_needed,
-                                                     HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE)
+from sas.sascalc.doc_regen.makedocumentation import (
+    HELP_DIRECTORY_LOCATION,
+    MAIN_DOC_SRC,
+    PATH_LIKE,
+    create_user_files_if_needed,
+    make_documentation,
+)
+from sas.sascalc.fit import models
+
+from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 
 HTML_404 = '''
 <html>

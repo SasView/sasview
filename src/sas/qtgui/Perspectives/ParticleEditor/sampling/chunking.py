@@ -33,13 +33,11 @@ Something like this
 """
 
 
-from typing import Tuple, Sequence, Any
-
-
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
-
 from abc import ABC, abstractmethod
+from typing import Any, Sequence, Tuple
+
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution
 
 
 class Chunker(ABC):

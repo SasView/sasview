@@ -3,9 +3,8 @@ from typing import NamedTuple
 from PySide6 import QtWidgets
 from PySide6.QtCore import Signal
 
-
-
 from sas.qtgui.Utilities.OrientationViewer.UI.OrientationViewerControllerUI import Ui_OrientationViewierControllerUI
+
 
 class Orientation(NamedTuple):
     """ Data sent when updating the plot"""

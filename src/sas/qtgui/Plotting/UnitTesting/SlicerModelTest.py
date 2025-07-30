@@ -1,6 +1,5 @@
 
 import pytest
-
 from PySide6 import QtGui
 
 # Local

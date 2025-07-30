@@ -2,11 +2,9 @@ import logging
 from typing import List
 
 import numpy as np
-
 from OpenGL import GL
 
 from sas.qtgui.GL.renderable import Renderable
-
 
 logger = logging.getLogger("GL.transforms")
 

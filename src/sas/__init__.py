@@ -1,5 +1,5 @@
-from sas.system.version import __version__
 from sas.system import config
+from sas.system.version import __version__
 
 __all__ = ["config", "__version__"]
 

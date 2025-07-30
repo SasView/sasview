@@ -1,16 +1,16 @@
 # Create your tests here.
-import shutil
 import json
+import shutil
 
+from data.models import Data
 from django.conf import settings
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from rest_framework.test import APIRequestFactory, APIClient, APITestCase
+from django.test import TestCase
+from rest_framework.test import APIClient, APIRequestFactory, APITestCase
 
 from sasdata.dataloader.loader import Loader
 
-from data.models import Data
 from .views import (
     start_fit,
 )

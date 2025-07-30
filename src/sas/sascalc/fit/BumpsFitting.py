@@ -3,14 +3,14 @@ BumpsFitting module runs the bumps optimizer.
 """
 import logging
 import os
-from copy import deepcopy
-from datetime import timedelta, datetime
 import traceback
-import uncertainties
+from copy import deepcopy
+from datetime import datetime, timedelta
 
 import numpy as np
-
+import uncertainties
 from bumps import fitters
+
 try:
     from bumps.options import FIT_CONFIG
     # Default bumps to use the Levenberg-Marquardt optimizer
@@ -26,13 +26,11 @@ except ImportError:
         return fitopts.fitclass, fitopts.options.clipboard_copy()
 
 
-from bumps.mapper import SerialMapper, MPMapper
 from bumps import parameter
 from bumps.fitproblem import FitProblem
+from bumps.mapper import MPMapper, SerialMapper
 
-
-from sas.sascalc.fit.AbstractFitEngine import FitEngine
-from sas.sascalc.fit.AbstractFitEngine import FResult
+from sas.sascalc.fit.AbstractFitEngine import FitEngine, FResult
 from sas.sascalc.fit.expression import compile_constraints
 
 # patch uncertainties.core.AffineScalarFunc to work with float() conversion

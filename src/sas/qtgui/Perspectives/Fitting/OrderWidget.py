@@ -8,6 +8,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.OrderWidgetUI import Ui_OrderWidgetUI
 
+
 class OrderWidget(QtWidgets.QWidget, Ui_OrderWidgetUI):
     def __init__(self, parent=None, all_data=None):
         super(OrderWidget, self).__init__()

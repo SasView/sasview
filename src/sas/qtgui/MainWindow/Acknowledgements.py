@@ -8,6 +8,7 @@ import sas.system.zenodo
 
 from .UI.AcknowledgementsUI import Ui_Acknowledgements
 
+
 class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
 
     def __init__(self, parent=None):

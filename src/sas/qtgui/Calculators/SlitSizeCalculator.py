@@ -1,17 +1,18 @@
 """
 Slit Size Calculator Panel
 """
+import logging
 import os
 import sys
-import logging
 
 from PySide6 import QtWidgets
 
-from sas.qtgui.UI import main_resources_rc # noqa: F401
+from sasdata.dataloader.loader import Loader
+
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
+from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
 from .UI.SlitSizeCalculator import Ui_SlitSizeCalculator
-from sasdata.dataloader.loader import Loader
-from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
 
 class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):

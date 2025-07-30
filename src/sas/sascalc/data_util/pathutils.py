@@ -11,8 +11,8 @@ from the pythonutils package (http://groups.google.com/group/pythonutils).
 
 __all__ = ['relpath']
 
-from os.path import join
-from os.path import sep
+from os.path import join, sep
+
 
 def relpath(p1, p2):
     """Compute the relative path of p1 with respect to p2."""

@@ -1,8 +1,11 @@
 """ Helper functions that run SLD and magnetism functions """
 import numpy as np
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (SLDDefinition, MagnetismDefinition, CalculationParameters)
-
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
+    CalculationParameters,
+    MagnetismDefinition,
+    SLDDefinition,
+)
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
 
 

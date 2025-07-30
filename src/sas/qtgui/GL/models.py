@@ -4,14 +4,13 @@
 """
 
 
-from typing import Sequence, Tuple, Union, Optional
+from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
-
 from OpenGL import GL
 
-from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.color import ColorSpecification, ColorSpecificationMethod
+from sas.qtgui.GL.renderable import Renderable
 
 VertexData = Union[Sequence[Tuple[float, float, float]], np.ndarray]
 EdgeData = Union[Sequence[Tuple[int, int]], np.ndarray]

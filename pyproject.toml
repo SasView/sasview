@@ -199,3 +199,16 @@ norecursedirs = [
     "test/sasrealspace",
     "test/calculatorview",
 ]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = ["I"]   # isort
+
+[tool.ruff.lint.isort.sections]
+# Group all SasData and SasModels imports into a separate section.
+"sas" = ["sasdata", "sasmodels"]
+
+[tool.ruff.lint.isort]
+section-order = ["future", "standard-library", "third-party", "sas", "first-party", "local-folder"]

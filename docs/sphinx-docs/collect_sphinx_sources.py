@@ -3,9 +3,8 @@
 Script to collect sphinx sources for building
 """
 import os
-from pathlib import Path
 import shutil
-
+from pathlib import Path
 
 # sphinx paths for the document
 BASE = Path(__file__).parent

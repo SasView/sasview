@@ -1,8 +1,8 @@
 # Global
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
-from PySide6.QtWidgets import QStyledItemDelegate, QWidget, QCheckBox
+from PySide6.QtGui import QFont, QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import QCheckBox, QStyledItemDelegate, QWidget
 
 # Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.Tables.UI.variableTableUI import Ui_VariableTable

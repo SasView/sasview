@@ -4,18 +4,16 @@ Creates documentation from .py files
 import importlib.resources
 import logging
 import os
-import sys
-import subprocess
 import shutil
-
+import subprocess
+import sys
 from pathlib import Path
 from typing import Sequence, Union
 
-from sas.sascalc.fit import models
-from sas.system.user import get_app_dir_versioned
-
 from sasmodels.core import list_models
 
+from sas.sascalc.fit import models
+from sas.system.user import get_app_dir_versioned
 
 PATH_LIKE = Union[Path, str, os.PathLike[str]]
 

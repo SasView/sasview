@@ -2,25 +2,21 @@
 Adds a linear fit plot to the chart
 """
 import re
-import numpy as np
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
 from typing import Optional
 
-from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
+import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.Plotting import Fittings
-from sas.qtgui.Plotting import DataTransform
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting import DataTransform, Fittings
+from sas.qtgui.Plotting.LineModel import LineModel
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.LineModel import LineModel
 from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.GuiUtils import xyTransform
 
 # Local UI
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
+from sas.qtgui.Utilities.GuiUtils import DoubleValidator, formatNumber, xyTransform
 
 
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):

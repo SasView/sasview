@@ -1,8 +1,11 @@
-from sas.sascalc.data_util.calcthread import CalcThread
-from sasdata.dataloader.data_info import Data1D
-from scipy.fftpack import dct
-from scipy.integrate import trapezoid, cumulative_trapezoid
 import numpy as np
+from scipy.fftpack import dct
+from scipy.integrate import cumulative_trapezoid, trapezoid
+
+from sasdata.dataloader.data_info import Data1D
+
+from sas.sascalc.data_util.calcthread import CalcThread
+
 
 class FourierThread(CalcThread):
     def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,

@@ -1,10 +1,11 @@
-import os
 import logging
-import django
+import os
 from glob import glob
-from sasdata import example_data
 
+import django
 from data.models import Data
+
+from sasdata import example_data
 
 # Initialise the Django environment. This must be done before importing anything
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")

@@ -1,4 +1,5 @@
-from typing import Tuple, Protocol
+from typing import Protocol, Tuple
+
 import numpy as np
 
 # 3D vector output as numpy arrays

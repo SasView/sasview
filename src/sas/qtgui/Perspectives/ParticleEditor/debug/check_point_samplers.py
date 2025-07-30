@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling.points import Grid
 
-
-
 fig = plt.figure("Grid plot")
 ax = fig.add_subplot(projection='3d')
 

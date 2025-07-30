@@ -11,11 +11,10 @@
 
 import numpy as np  # type: ignore
 
-from sasmodels.resolution import Slit1D, Pinhole1D
-from sasmodels.sesans import SesansTransform
-from sasmodels.resolution2d import Pinhole2D
-
 from sasdata.data_util.nxsunit import Converter
+from sasmodels.resolution import Pinhole1D, Slit1D
+from sasmodels.resolution2d import Pinhole2D
+from sasmodels.sesans import SesansTransform
 
 
 def smear_selection(data, model=None):

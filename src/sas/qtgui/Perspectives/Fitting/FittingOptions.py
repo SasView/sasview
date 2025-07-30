@@ -1,18 +1,14 @@
 # global
 import types
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+import bumps.options
+from bumps import fitters
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-from bumps import fitters
-import bumps.options
-
-from sas.system.config.config import config as sasview_config
 from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+from sas.system.config.config import config as sasview_config
 
 # Set the default optimizer
 fitters.FIT_DEFAULT_ID = 'lm'

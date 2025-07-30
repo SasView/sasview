@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import os
-import subprocess
-import re
-import sys
-
 import logging
 import logging.config
+import os
+import re
+import subprocess
+import sys
+
 LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
 logging.config.fileConfig(LOGGER_CONFIG_FILE)
 logger = logging.getLogger(__name__)

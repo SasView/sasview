@@ -3,8 +3,8 @@ Listing all so and dylib files and signs them separetly.
 Required for notarization.
 """
 import glob
-import subprocess
 import itertools
+import subprocess
 
 so_list = glob.glob("SasView*.app/Contents/MacOS/**/*.so", recursive=True)
 dylib_list = glob.glob("SasView*.app/Contents/MacOS/**/*.dylib", recursive=True)

@@ -1,5 +1,6 @@
-import numpy as np
 import math
+
+import numpy as np
 
 # Constants (comments mostly copied from the original GSASIIsasd.py)
 TEST_LIMIT        = 0.05                    # for convergence

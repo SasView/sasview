@@ -1,8 +1,8 @@
 from __future__ import print_function
 
-from sasModeling.pointsmodelpy import pointsmodelpy
-from sasModeling.iqPy import iqPy
 from sasModeling.geoshapespy import geoshapespy
+from sasModeling.iqPy import iqPy
+from sasModeling.pointsmodelpy import pointsmodelpy
 
 
 #First testing: a normal case, a lores model holds a sphere

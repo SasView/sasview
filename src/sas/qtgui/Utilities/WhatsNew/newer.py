@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from packaging.version import parse, Version, InvalidVersion
+from packaging.version import InvalidVersion, Version, parse
 
 
 def reduced_version(version_string: str) -> Tuple[int, int, int]:

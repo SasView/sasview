@@ -1,18 +1,14 @@
 import os
+import tempfile
+import webbrowser
 
 import pytest
-
-import webbrowser
-import tempfile
-
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import Communicate
 
 # Local
 from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
-
 
 
 class AddMultEditorTest:

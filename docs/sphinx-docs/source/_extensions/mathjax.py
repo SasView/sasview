@@ -27,12 +27,11 @@
     * allow list of URLS for mathjax_path, which permits use of katex.js
 """
 
-from docutils import nodes
-
 import sphinx
-from sphinx.locale import _
+from docutils import nodes
 from sphinx.errors import ExtensionError
 from sphinx.ext.mathbase import setup_math as mathbase_setup
+from sphinx.locale import _
 
 
 def html_visit_math(self, node):

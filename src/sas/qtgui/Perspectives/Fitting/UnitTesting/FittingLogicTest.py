@@ -1,7 +1,6 @@
 
-import pytest
-
 import numpy
+import pytest
 
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingLogic

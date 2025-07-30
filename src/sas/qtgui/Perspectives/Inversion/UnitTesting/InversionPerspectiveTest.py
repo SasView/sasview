@@ -1,19 +1,17 @@
-import numpy as np
-import pytest
-
-
-from PySide6 import QtGui, QtWidgets
 import logging
 
 import matplotlib as mpl
+import numpy as np
+import pytest
+from PySide6 import QtGui, QtWidgets
+
 mpl.use("Qt5Agg")
 
-from sas.qtgui.Utilities.GuiUtils import Communicate
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
 from sas.qtgui.Plotting.PlotterData import Data1D
-
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class InversionTest:

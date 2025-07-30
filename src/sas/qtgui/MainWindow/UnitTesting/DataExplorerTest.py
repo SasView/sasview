@@ -1,26 +1,24 @@
-import time
 import random
+import time
+
 import pytest
-
-
-from PySide6.QtGui import QIcon, QStandardItemModel, QStandardItem
-from PySide6.QtWidgets import QTabWidget, QTreeView, QFileDialog, QMessageBox, QApplication
-from PySide6.QtTest import QTest
 from PySide6.QtCore import QItemSelectionModel, QPoint, QSize, QSortFilterProxyModel, Qt
+from PySide6.QtGui import QIcon, QStandardItem, QStandardItemModel
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTabWidget, QTreeView
 
+from sasdata.dataloader.loader import Loader
+
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
+from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
+from sas.qtgui.MainWindow.DataManager import DataManager
+from sas.qtgui.Plotting.Plotter import Plotter
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
 
 # Local
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
-from sasdata.dataloader.loader import Loader
-from sas.qtgui.MainWindow.DataManager import DataManager
-
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-from sas.qtgui.Utilities.GuiUtils import Communicate, HashableStandardItem
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Plotting.Plotter import Plotter
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
-import sas.qtgui.Plotting.PlotHelper as PlotHelper
-
+from sas.qtgui.Utilities.GuiUtils import Communicate, HashableStandardItem
 from sas.system.version import __version__ as SASVIEW_VERSION
 
 

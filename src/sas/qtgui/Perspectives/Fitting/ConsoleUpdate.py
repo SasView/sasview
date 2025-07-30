@@ -1,6 +1,8 @@
-import time
 import logging
+import time
+
 from sas.sascalc.fit import FitHandler
+
 
 class ConsoleUpdate(FitHandler):
     """

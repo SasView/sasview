@@ -1,17 +1,16 @@
 from unittest.mock import MagicMock
+
 import pytest
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtTest import QSignalSpy, QTest
 
-from PySide6 import QtGui, QtCore, QtWidgets
-from PySide6.QtTest import QTest, QSignalSpy
-
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.MainWindow.GuiManager import GuiManager
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 # Local
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
-from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 

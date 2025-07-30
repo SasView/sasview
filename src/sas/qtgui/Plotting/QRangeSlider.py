@@ -1,9 +1,9 @@
 """Double slider interactor for setting the Q range for a fit or function"""
 import numpy as np
 
+import sas.qtgui.Utilities.ObjectLibrary as ol
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-import sas.qtgui.Utilities.ObjectLibrary as ol
 
 
 class QRangeSlider(BaseInteractor):

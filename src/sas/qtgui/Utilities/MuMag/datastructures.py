@@ -1,12 +1,10 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Generic
+from typing import Generic, TypeVar
 
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
-
-from typing import TypeVar
 
 """ Data structures used in MuMag"""
 

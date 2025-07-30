@@ -1,6 +1,7 @@
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
 
+
 class LabelledSlider(QtWidgets.QWidget):
     """ Slider with labels and value text"""
     def __init__(self, name: str, min_value: int, max_value: int, value: int, tick_interval: int=10, name_width=10, value_width=30, value_units="°"):

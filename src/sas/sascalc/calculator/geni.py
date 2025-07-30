@@ -2,15 +2,14 @@
 Compute scattering from a set of points.
 For 1-D scattering use *Iq(q, x, y, z, sld, vol, is_avg)*
 """
-import os
 import logging
+import os
+from typing import Union
+
 import numpy as np
 import periodictable
 
-from typing import Union
-
-from sas.sascalc.calculator.sas_gen import MagSLD, OMF2SLD
-
+from sas.sascalc.calculator.sas_gen import OMF2SLD, MagSLD
 
 try:
     if os.environ.get('SAS_NUMBA', '1').lower() in ('1', 'yes', 'true', 't'):

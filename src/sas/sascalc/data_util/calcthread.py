@@ -4,15 +4,12 @@
 #  \brief Abstract class for defining calculation threads.
 #
 
-from typing import Optional, Callable
-
-import sys
-import logging
-import traceback
-from time import sleep,  perf_counter
-
 import _thread as thread
-
+import logging
+import sys
+import traceback
+from time import perf_counter, sleep
+from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 

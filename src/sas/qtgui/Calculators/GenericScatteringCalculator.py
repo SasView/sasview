@@ -1,43 +1,36 @@
-import sys
-import os
-
-from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
-from matplotlib.figure import Figure
-import numpy
 import logging
+import math
+import os
+import sys
 import time
 import timeit
-import math
 
-from scipy.spatial.transform import Rotation
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+import numpy
 from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d.axes3d import Axes3D
-
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
+from scipy.spatial.transform import Rotation
 from twisted.internet import threads
 
+from sasdata.dataloader.data_info import Detector, Source
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Utilities.GenericReader import GenReader
-from sasdata.dataloader.data_info import Detector, Source
-from sas.sascalc.calculator import sas_gen
-from sas.sascalc.fit import models
-from sas.sascalc.calculator.geni import radius_of_gyration, create_beta_plot, f_of_q
 import sas.sascalc.calculator.gsc_model as gsc_model
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
-
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.GenericReader import GenReader
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.sascalc.calculator import sas_gen
+from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
+from sas.sascalc.fit import models
 
 # Local UI
 from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
+
 
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 

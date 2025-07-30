@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import numpy as np
 from typing import Optional
 
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import ScatteringOutput
+
 
 def spherical_form_factor(q, r):
     rq = r * q

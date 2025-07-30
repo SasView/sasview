@@ -1,11 +1,10 @@
 import numpy
 from PySide6 import QtGui
 
-from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
-
-from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sasdata.data_util.manipulations import Boxavg, Boxsum
 
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
 
 class BoxSumCalculator(BaseInteractor):

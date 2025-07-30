@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QSpinBox, QWidget
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling.geodesic import Geodesic
 
+
 class GeodesicSamplingSpinBox(QSpinBox):
     """ SpinBox that only takes values that corresponds to the number of vertices on a geodesic sphere """
 

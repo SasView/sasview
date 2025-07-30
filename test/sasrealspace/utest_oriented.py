@@ -4,8 +4,8 @@
 """
 from __future__ import print_function
 
-import unittest
 import math
+import unittest
 
 # Disable "missing docstring" complaint
 # pylint: disable-msg=C0111
@@ -14,7 +14,6 @@ import math
 # Disable "could be a function" complaint
 # pylint: disable-msg=R0201
 # pylint: disable-msg=W0702
-
 from sasmodels.sasview_model import _make_standard_model
 
 import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas

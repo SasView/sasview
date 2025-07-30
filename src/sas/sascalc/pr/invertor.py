@@ -1,12 +1,13 @@
-from copy import copy
 import logging
-import numpy as np
-import time
 import math
-from numpy.linalg import lstsq
-import numpy.typing as npt
-
+import time
+from copy import copy
 from typing import TYPE_CHECKING
+
+import numpy as np
+import numpy.typing as npt
+from numpy.linalg import lstsq
+
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 

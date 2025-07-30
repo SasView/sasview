@@ -1,12 +1,9 @@
 import pytest
-
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 from PySide6.QtTest import QTest
-from PySide6 import QtCore
 
 # Local
-from sas.qtgui.Calculators.DensityPanel import DensityPanel, MODEL
-from sas.qtgui.Calculators.DensityPanel import toMolarMass
+from sas.qtgui.Calculators.DensityPanel import MODEL, DensityPanel, toMolarMass
 
 
 class ToMolarMassTest:

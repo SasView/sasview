@@ -1,24 +1,22 @@
 # global
-import logging
 import copy
+import logging
+
 import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
+from twisted.internet import reactor, threads
 
-from PySide6 import QtCore
-from PySide6 import QtGui, QtWidgets
-
-from twisted.internet import threads
-from twisted.internet import reactor
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 
 # sas-global
 from sas.sascalc.invariant import invariant
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
 from ..perspective import Perspective
-from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS
+from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5

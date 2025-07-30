@@ -15,11 +15,13 @@ Without arguments run.py runs sasview.  With arguments, run.py will run
 the given module or script.
 """
 
-import sys
 import os
-from os.path import abspath, dirname, realpath, join as joinpath
+import sys
 from contextlib import contextmanager
 from importlib import import_module
+from os.path import abspath, dirname, realpath
+from os.path import join as joinpath
+
 
 def addpath(path):
     """
