@@ -1946,7 +1946,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plots_to_close = set(current_plot_items.values()) & set(items_being_deleted)
 
         for plot_item in plots_to_close:
-            for plot_name in current_plot_items.keys():
+            for plot_name in current_plot_items:
                 if plot_item == current_plot_items[plot_name]:
                     plotter = PlotHelper.plotById(plot_name)
                     # try to delete the plot
