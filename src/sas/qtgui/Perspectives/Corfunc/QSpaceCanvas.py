@@ -91,7 +91,7 @@ class QSpaceCanvas(CorfuncCanvas):
                                linestyle='',
                                markersize=3,
                                capsize=2)
-                               
+
             self.line1 = self.axes.axvline(extrapolation_params.point_1, color='k')
             self.line2 = self.axes.axvline(extrapolation_params.point_2, color='k')
             self.line3 = self.axes.axvline(extrapolation_params.point_3, color='k')

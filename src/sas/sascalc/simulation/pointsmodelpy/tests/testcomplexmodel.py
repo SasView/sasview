@@ -31,7 +31,7 @@ def test_complex():
     complex = pointsmodelpy.new_complexmodel()
     pointsmodelpy.complexmodel_add(complex,p,"PDB")
     pointsmodelpy.complexmodel_add(complex,lm,"LORES")
-    
+
     pointsmodelpy.get_complexpoints(complex,vpcomplex)
     pointsmodelpy.get_complex_pr(complex,vpcomplex)
     pointsmodelpy.save_complex_pr(complex,"testcomplex1.pr")
@@ -48,7 +48,7 @@ def test_complex2():
 
   lores = pointsmodelpy.new_loresmodel(0.1)
 
-  complex = pointsmodelpy.new_complexmodel()	
+  complex = pointsmodelpy.new_complexmodel()
   pointsmodelpy.complexmodel_add(complex,pdb,"PDB")
   pointsmodelpy.complexmodel_add(complex,lores,"LORES")
 
@@ -75,7 +75,7 @@ def test_complex3():
   sph = geoshapespy.new_sphere(10)
   pointsmodelpy.lores_add(lores,sph,1.0)
 
-  complex = pointsmodelpy.new_complexmodel()	
+  complex = pointsmodelpy.new_complexmodel()
   pointsmodelpy.complexmodel_add(complex,pdb,"PDB")
   pointsmodelpy.complexmodel_add(complex,lores,"LORES")
 
@@ -105,9 +105,9 @@ def test_complex4():
     vpcomplex = pointsmodelpy.new_point3dvec()
     complex = pointsmodelpy.new_complexmodel()
     pointsmodelpy.complexmodel_add(complex,lm,"LORES")
-    
+
     pointsmodelpy.get_complexpoints(complex,vpcomplex)
- 
+
     print(pointsmodelpy.get_complex_iq_2D(complex,vpcomplex,0.1,0.1))
     print(pointsmodelpy.get_complex_iq_2D(complex,vpcomplex,0.01,0.1))
 

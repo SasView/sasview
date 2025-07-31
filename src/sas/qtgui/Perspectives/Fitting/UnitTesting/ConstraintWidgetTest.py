@@ -83,7 +83,7 @@ class ConstraintWidgetTest:
         # TableWidgets
         assert widget.tblTabList.columnCount() == 4
         assert widget.tblConstraints.columnCount() == 1
-        # Data accept 
+        # Data accept
         assert not widget.acceptsData()
         # By default, the constraint table is disabled
         assert not widget.tblConstraints.isEnabled()

@@ -37,7 +37,7 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(f.pos_x[0], -40.5)
         self.assertEqual(f.pos_y[0], -13.5)
         self.assertEqual(f.pos_z[0], -13.5)
-    
+
     def test_sldwriter(self):
         """
         Test .sld file is written correctly
@@ -94,8 +94,8 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(f.sld_mz[0], MFACTOR_AM * 835889.300446479)
         self.assertEqual(f.pos_x[0], 0.0)
         self.assertEqual(f.pos_y[0], 0.0)
-        self.assertEqual(f.pos_z[0], 0.0)        
-    
+        self.assertEqual(f.pos_z[0], 0.0)
+
     def test_rotations(self):
         pos_x = np.array([1, 0, 0])
         pos_y = np.array([0, 1, 0])
@@ -115,7 +115,7 @@ class sas_gen_test(unittest.TestCase):
         self.assertAlmostEqual(theta, 90)
         self.assertAlmostEqual(phi, 0)
 
-    
+
     def test_vtkreader(self):
         """
         Test .vtkfile loaded
@@ -130,9 +130,9 @@ class sas_gen_test(unittest.TestCase):
             [1 , -1 ,   1 ],
             [-1,   1,    1],
             [1 ,  1 ,   1 ]])
-        element_0 = np.array([[1, 4, 2], 
-                              [1, 2, 7], 
-                              [1, 7, 4], 
+        element_0 = np.array([[1, 4, 2],
+                              [1, 2, 7],
+                              [1, 7, 4],
                               [2, 4, 7]])
         self.assertTrue(np.array_equal(f.pos_x, points[:, 0]))
         self.assertTrue(np.array_equal(f.pos_y, points[:, 1]))
@@ -196,10 +196,10 @@ class sas_gen_test(unittest.TestCase):
         errs = (output - analytical)/analytical
         for val in np.abs(errs):
             self.assertLessEqual(val, 1e-3)
-    
+
     def test_calculator_1D(self):
         """
-        Test the calculator correctly calculates 1D averages. 
+        Test the calculator correctly calculates 1D averages.
         """
         # TEST 1D debye averaging
         # use only a 10x10x10 grid because this algorithm scales quickly

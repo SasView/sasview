@@ -45,7 +45,7 @@ class FitResultView(QtWidgets.QWidget):
         layout.addWidget(canvas)
         layout.addWidget(mpl_toolbar)
         self.setLayout(layout)
-    
+
     def update(self, state):
         self.state = state
         self.plot()

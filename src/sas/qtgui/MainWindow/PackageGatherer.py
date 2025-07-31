@@ -190,7 +190,7 @@ class PackageGatherer:
         :rtype: dict
         """
         output_dict = dict()
-        
+
         for module_name in modules_dict.keys():
             parent_module = module_name.split('.')[0]
             # Save one instance of each module
@@ -204,7 +204,7 @@ class PackageGatherer:
 
         return output_dict
 
-      
+
     def format_no_version_list(self, modules_dict, no_version_list):
         """ Format module names in the no_version_list list
 

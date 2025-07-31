@@ -12,7 +12,7 @@ class Canvas(FigureCanvasQTAgg):
         FigureCanvasQTAgg.__init__(self, self.fig)
         self.setParent(parent)
         Canvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
-        Canvas.updateGeometry(self) 
+        Canvas.updateGeometry(self)
 
 @dataclass
 class ViewerPlotDesign:

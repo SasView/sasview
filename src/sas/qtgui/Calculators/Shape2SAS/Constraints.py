@@ -58,7 +58,7 @@ class Constraints(QWidget, Ui_Constraints):
 
     def getConstraintText(self, constraints: str) -> str:
         """Get default text for constraints"""
-    
+
         self.constraintText = (f'''
 #Write libraries to be imported here.
 from numpy import inf
@@ -84,10 +84,10 @@ translation = """
 
     def checkPythonSyntax(self, text: str):
         """Check if text is valid python syntax"""
-        
+
         try:
             ast.parse(text)
-        
+
         except SyntaxError:
             #Get last line of traceback
             all_lines = traceback.format_exc().split('\n')
@@ -183,7 +183,7 @@ translation = """
 
             #check if parameters exist in model parameters
             self.ifParameterExists(rightPars + leftPars, modelPars)
-            
+
             #Translate
             notes = ""
             for par in rightPars:
@@ -207,7 +207,7 @@ translation = """
             translationInput += line + "\n"
 
         return translationInput, checkedPars
-    
+
     def extractValues(self, elt: ast.AST) -> VAL_TYPE:
         if isinstance(elt, ast.Constant):
             return elt.value
@@ -228,7 +228,7 @@ translation = """
     def getParametersFromConstraints(self, constraints_str: str, targetName: str) -> []:
         """Extract parameters from constraints string"""
         tree = ast.parse(constraints_str) #get abstract syntax tree
-        
+
         parametersNode = None
         for node in ast.walk(tree):
             #is the node an assignment and does it have the target name?
@@ -254,7 +254,7 @@ translation = """
         for name in names:
             if name not in fitPar:
                 logger.error(f"{name} does not exists in checked parameters")
-        
+
         description = 'parameters =' + '[' + '\n' + '# name, units, default, [min, max], type, description,' + '\n'
         parameters_str = description  + ',\n'.join(str(sublist) for sublist in parameters) + "\n]"
 
@@ -278,7 +278,7 @@ translation = """
                 imports.append(f"{alias.name} as {alias.asname}")
             else:
                 imports.append(f"{alias.name}")
-        
+
         return [f"from {node.module} import {', '.join(imports)}"]
 
     def isImportStatement(self, node: ast.Import) -> [str]:
@@ -298,7 +298,7 @@ translation = """
         return [f"import {', '.join(imports)}"]
 
     def getImportStatements(self, text: str) -> [str]:
-        """return all import statements that were 
+        """return all import statements that were
         written in the text editor"""
 
         importStatements = []
@@ -313,9 +313,9 @@ translation = """
 
                 elif isinstance(node, ast.Import):
                     importStatements.extend(self.isImportStatement(node))
-            
+
             return importStatements
-        
+
         except SyntaxError as e:
             error_line = text.splitlines()[e.lineno - 1]
             raise SyntaxError(f"Syntax error: {e.msg} at line {e.lineno}: {error_line}")

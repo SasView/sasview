@@ -4,15 +4,15 @@
 ## \mainpage P(r) inversion for SAS
 #
 # \section intro_sec Introduction
-# This module provides calculations to transform scattering intensity data 
-# I(q) into distance distribution function P(r). A description of the 
-# technique can be found elsewhere [1-5]. The module is useable as a 
-# standalone application but its functionality is meant to be presented 
-# to end-users through the user interface developed as part of the SAS 
-# flagship application. 
+# This module provides calculations to transform scattering intensity data
+# I(q) into distance distribution function P(r). A description of the
+# technique can be found elsewhere [1-5]. The module is useable as a
+# standalone application but its functionality is meant to be presented
+# to end-users through the user interface developed as part of the SAS
+# flagship application.
 #
 # Procedure: We will follow the procedure of Moore [1].
-# 
+#
 # [1] P.B. Moore, J.Appl. Cryst (1980) 13, 168-175.
 #
 # [2] O. Glatter, J.Appl. Cryst (1977) 10, 415-421.
@@ -78,7 +78,7 @@
 # \verbatim
 #    c_out, c_cov = invertor.invert(10)
 # \endverbatim
-# The c_out and c_cov are the set of coefficients and the covariance 
+# The c_out and c_cov are the set of coefficients and the covariance
 # matrix for those coefficients, respectively.
 #
 # To get P(r):

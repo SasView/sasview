@@ -1,5 +1,5 @@
 """
-This module is a wrapper to a map function. It allows to loop through 
+This module is a wrapper to a map function. It allows to loop through
 different invariant objects to call the same function
 """
 
@@ -37,7 +37,7 @@ def get_surface(inv, contrast, porod_const, extrapolation=None):
                                       porod_const=porod_const,
                                       extrapolation=extrapolation)
 
-def get_surface_with_error(inv, contrast, 
+def get_surface_with_error(inv, contrast,
                            porod_const, extrapolation=None):
     """
     Get surface with uncertainty

@@ -624,7 +624,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     tab_index = int(tab_index)
                 # Send current model item to the perspective
                 self.sendItemToPerspective(items[0], tab_index=tab_index)
-                # Assign parameters to the most recent (current) page. 
+                # Assign parameters to the most recent (current) page.
                 self._perspective().updateFromParameters(page)
         if 'invar_params' in value:
             self.cbFitting.setCurrentIndex(self.cbFitting.findText('Invariant'))
@@ -815,7 +815,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         selected_items = self.selectedItems()
         if len(selected_items) < 1:
             return
- 
+
         # Notify the GuiManager about the send request
         try:
             self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())

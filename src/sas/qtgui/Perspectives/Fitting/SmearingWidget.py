@@ -225,7 +225,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
             self.accuracy = accuracy
             if accuracy == 'High' or accuracy == 'Extra high':
                 QtWidgets.QMessageBox.information(self, "Accuracy Warning",
-                  "Higher accuracy is very expensive, \nso fitting can be very slow!")      
+                  "Higher accuracy is very expensive, \nso fitting can be very slow!")
 
         self.onIndexChange(index)
 
@@ -343,7 +343,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         Create a custom dQ smear object that will change the way residuals
         are compute when fitting
         """
-        # resolution information already in data.dx (if 1D) or 
+        # resolution information already in data.dx (if 1D) or
         # data.dqx_data & data.dqy_data (if 2D),
         # so only need to set accuracy for 2D
         _, accuracy, _, _ = self.state()
@@ -389,7 +389,7 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
                 self.current_smearer.set_accuracy(accuracy=backend_accuracy)
             else:
                 self.current_smearer.set_accuracy(accuracy='low')
-    
+
     def onSlitSmear(self):
         """
         Create a custom slit smear object that will change the way residuals

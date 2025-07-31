@@ -378,14 +378,14 @@ class GuiManager:
         try:
             # In order to have multiple help windows open simultaneously, we need to create a new class variable
             # If we just reassign the old one, the old window will be destroyed
-            
+
             # Have we found a name not assigned to a window?
-            potential_help_window = getattr(cls, window_name, None) 
+            potential_help_window = getattr(cls, window_name, None)
             while potential_help_window and potential_help_window.isVisible():
                 window_name = f"help_window_{counter}"
                 potential_help_window = getattr(cls, window_name, None)
                 counter += 1
-            
+
             # Assign new variable to the GuiManager
             setattr(cls, window_name, GuiUtils.showHelp(url_abs))
 
