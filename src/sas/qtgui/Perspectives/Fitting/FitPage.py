@@ -1,7 +1,7 @@
 """
 Container class for fitting widget state storage
 """
-class FitPage(object):
+class FitPage:
     """
     Container for all data related to the current fit page
     """

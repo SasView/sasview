@@ -1,7 +1,6 @@
-
 import logging
 import math
-from typing import Callable, List, Optional
+from collections.abc import Callable
 
 import numpy as np
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
@@ -67,16 +66,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.communicate.dataDeletedSignal.connect(self.removeData)
 
         self._allow_close = False
-        self._model_item: Optional[QStandardItem] = None
+        self._model_item: QStandardItem | None = None
 
-        self.data: Optional[Data1D] = None
-        self.extrap: Optional[Data1D] = None
+        self.data: Data1D | None = None
+        self.extrap: Data1D | None = None
         self.has_data = False
 
-        self._long_period_method: Optional[LongPeriodMethod] = None
-        self._tangent_method: Optional[TangentMethod] = None
+        self._long_period_method: LongPeriodMethod | None = None
+        self._tangent_method: TangentMethod | None = None
 
-        self._calculator: Optional[CorfuncCalculator] = None
+        self._calculator: CorfuncCalculator | None = None
         self._running = False
 
         # Add slider widget
@@ -189,14 +188,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtUpperQMin.setEnabled(state)
         self.txtUpperQMax.setEnabled(state)
 
-    def set_long_period_method(self, value: Optional[LongPeriodMethod]) -> Callable[[bool], None]:
+    def set_long_period_method(self, value: LongPeriodMethod | None) -> Callable[[bool], None]:
         """ Function to set the long period method"""
         def setter_function(state: bool):
             self._long_period_method = value
 
         return setter_function
 
-    def set_tangent_method(self, value: Optional[TangentMethod]) -> Callable[[bool], None]:
+    def set_tangent_method(self, value: TangentMethod | None) -> Callable[[bool], None]:
         """ Function to set the tangent method"""
         def setter_function(state: bool):
             self._tangent_method = value
@@ -344,27 +343,27 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
             # Background
             if background is not None:
-                self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem("{:.5g}".format(background)))
+                self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem(f"{background:.5g}"))
                 self.set_background_warning()
 
             # Interpolation
             if guinier is not None:
-                self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem("{:.5g}".format(guinier.A)))
-                self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem("{:.5g}".format(guinier.B)))
+                self.model.setItem(WIDGETS.W_GUINIERA, QtGui.QStandardItem(f"{guinier.A:.5g}"))
+                self.model.setItem(WIDGETS.W_GUINIERB, QtGui.QStandardItem(f"{guinier.B:.5g}"))
             if porod is not None:
-                self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem("{:.5g}".format(porod.K)))
-                self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem("{:.5g}".format(porod.sigma)))
+                self.model.setItem(WIDGETS.W_PORODK, QtGui.QStandardItem(f"{porod.K:.5g}"))
+                self.model.setItem(WIDGETS.W_PORODSIGMA, QtGui.QStandardItem(f"{porod.sigma:.5g}"))
 
             # Lamellar
             if lamellar is not None:
-                self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(lamellar.core_thickness)))
-                self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(lamellar.interface_thickness)))
-                self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(lamellar.hard_block_thickness)))
-                self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem("{:.3g}".format(lamellar.soft_block_thickness)))
-                self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(lamellar.local_crystallinity)))
-                self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem("{:.3g}".format(lamellar.polydispersity_ryan)))
-                self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem("{:.3g}".format(lamellar.polydispersity_stribeck)))
-                self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(lamellar.long_period)))
+                self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(f"{lamellar.core_thickness:.3g}"))
+                self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(f"{lamellar.interface_thickness:.3g}"))
+                self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(f"{lamellar.hard_block_thickness:.3g}"))
+                self.model.setItem(WIDGETS.W_SOFTBLOCK, QtGui.QStandardItem(f"{lamellar.soft_block_thickness:.3g}"))
+                self.model.setItem(WIDGETS.W_CRYSTAL, QtGui.QStandardItem(f"{lamellar.local_crystallinity:.3g}"))
+                self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(f"{lamellar.polydispersity_ryan:.3g}"))
+                self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(f"{lamellar.polydispersity_stribeck:.3g}"))
+                self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(f"{lamellar.long_period:.3g}"))
 
             self.cmdSave.setEnabled(True)
             self.cmdSaveExtrapolation.setEnabled(True)
@@ -434,7 +433,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         return False
 
     @property
-    def extrapolation_paramameters(self) -> Optional[ExtrapolationParameters]:
+    def extrapolation_paramameters(self) -> ExtrapolationParameters | None:
         if self.data is not None:
             return ExtrapolationParameters(
                 min(self.data.x),
@@ -445,7 +444,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         else:
             return None
 
-    def setData(self, data_item: List[QStandardItem], is_batch=False):
+    def setData(self, data_item: list[QStandardItem], is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
@@ -825,7 +824,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def supports_reports(self) -> bool:
         return True
 
-    def getReport(self) -> Optional[ReportData]:
+    def getReport(self) -> ReportData | None:
         if not self.has_data:
             return None
 

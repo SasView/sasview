@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import os
 import shutil
 import sys
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, List, Optional
 
 from macholib.MachO import MachO
 
@@ -33,7 +32,7 @@ def fix_dll(dll: Path) -> None:
         @loader_path/../../../../../../MacOS/QtCore
     """
 
-    def match_func(pth: str) -> Optional[str]:
+    def match_func(pth: str) -> str | None:
         """Callback function for MachO.rewriteLoadCommands() that is
         called on every lookup path setted in the DLL headers.
         By returning None for system libraries, it changes nothing.
@@ -91,7 +90,7 @@ def move_contents_to_resources(folder: Path) -> Generator[Path, None, None]:
             yield sibbling
 
 
-def main(args: List[str]) -> int:
+def main(args: list[str]) -> int:
     """
     Fix the application to allow codesign (NXDRIVE-1301).
     Take one or more .app as arguments: "Nuxeo Drive.app".

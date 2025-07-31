@@ -41,7 +41,7 @@ SASDATA_GUIDE_TARGET = SPHINX_SOURCE / "user" / "data"
 
 def inplace_change(filename, old_string, new_string):
 
-    with open(filename, 'r', encoding="UTF-8") as f:
+    with open(filename, encoding="UTF-8") as f:
         s = f.read()
 
     if old_string in s:

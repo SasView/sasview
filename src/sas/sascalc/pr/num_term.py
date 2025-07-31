@@ -1,4 +1,3 @@
-from __future__ import division, print_function
 
 import copy
 import logging
@@ -10,7 +9,7 @@ from sas.sascalc.pr.invertor import Invertor
 
 logger = logging.getLogger(__name__)
 
-class NTermEstimator(object):
+class NTermEstimator:
     """
     """
     def __init__(self, invertor):
@@ -161,7 +160,7 @@ def load(path):
     scale = None
     min_err = 0.0
     if path is not None:
-        input_f = open(path, 'r')
+        input_f = open(path)
         buff = input_f.read()
         lines = buff.split('\n')
         for line in lines:

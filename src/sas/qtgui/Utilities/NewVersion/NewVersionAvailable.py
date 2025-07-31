@@ -2,7 +2,6 @@ import json
 import logging
 import webbrowser
 from copy import copy
-from typing import Optional
 
 from packaging.version import Version, parse
 from PySide6.QtCore import QSize
@@ -40,7 +39,7 @@ class NewVersionAvailable(QDialog):
         self.setWindowTitle(f"SasView {latest_version} Is Out!")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
         vertical_layout = QVBoxLayout()
@@ -85,7 +84,7 @@ class NewVersionAvailable(QDialog):
         self.close()
 
 
-def get_current_release_version() -> Optional[tuple[str, str, Version]]:
+def get_current_release_version() -> tuple[str, str, Version] | None:
     """ Get the current version from the server """
 
     c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
@@ -111,7 +110,7 @@ def get_current_release_version() -> Optional[tuple[str, str, Version]]:
         logging.info("Failed to get version number %s", ex)
 
 
-def maybe_prompt_new_version_download() -> Optional[QDialog]:
+def maybe_prompt_new_version_download() -> QDialog | None:
     """ If a new version is available, and Show a dialog prompting the user to download """
 
     try:

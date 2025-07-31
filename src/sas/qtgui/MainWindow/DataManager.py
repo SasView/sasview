@@ -38,7 +38,7 @@ from sas.qtgui.Utilities import GuiUtils
 from sas.system.version import __version__ as SASVIEW_VERSION
 
 
-class DataManager(object):
+class DataManager:
     """
     Manage a list of data
     """
@@ -424,7 +424,7 @@ class DataManager(object):
             pass
 
         def simple_type(cls, data, level):
-            class Empty(object):
+            class Empty:
                 def __init__(self):
                     for key, value in data.items():
                         setattr(self, key, generate(value, level))

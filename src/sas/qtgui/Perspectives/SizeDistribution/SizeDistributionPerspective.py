@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -648,7 +647,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         self.model.item(WIDGETS.W_QMIN).setText(q_min)
         self.model.item(WIDGETS.W_QMAX).setText(q_max)
 
-    def fittingCompleted(self, result: Optional[MaxEntResult]) -> None:
+    def fittingCompleted(self, result: MaxEntResult | None) -> None:
         """
         Send the finish message from calculate threads to main thread
         """

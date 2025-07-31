@@ -23,7 +23,7 @@ class Plotter2DTest:
     def plotter(self, qapp):
         '''Create/Destroy the Plotter2D'''
 
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(self):
                 return Communicate()
             def perspective(self):

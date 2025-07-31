@@ -8,8 +8,8 @@ import _thread as thread
 import logging
 import sys
 import traceback
+from collections.abc import Callable
 from time import perf_counter, sleep
-from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -109,11 +109,11 @@ class CalcThread:
     """
 
     def __init__(self,
-                 completefn: Optional[Callable]=None,  # TODO: Specify types properly when they are supported
-                 updatefn: Optional[Callable]=None,
+                 completefn: Callable | None=None,  # TODO: Specify types properly when they are supported
+                 updatefn: Callable | None=None,
                  yieldtime=0.01,
                  worktime=0.01,
-                 exception_handler: Optional[Callable]=None):
+                 exception_handler: Callable | None=None):
 
         self.yieldtime = yieldtime
         self.worktime = worktime

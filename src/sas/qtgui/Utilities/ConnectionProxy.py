@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import json
 import logging
 import re
@@ -17,7 +16,7 @@ connect() function:
 '''
 
 
-class ConnectionProxy(object):
+class ConnectionProxy:
 
     def __init__(self, url, timeout):
         self.url = url

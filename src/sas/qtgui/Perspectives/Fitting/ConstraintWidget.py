@@ -467,7 +467,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.tblTabList.blockSignals(False)
             self.cmdFit.setEnabled(True)
             item.setToolTip("")
-            msg = "Fitpage name changed to {}.".format(new_moniker)
+            msg = f"Fitpage name changed to {new_moniker}."
             self.parent.communicate.statusBarUpdateSignal.emit(msg)
 
             if not self.current_cell:

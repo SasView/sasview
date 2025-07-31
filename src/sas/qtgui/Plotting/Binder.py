@@ -5,7 +5,7 @@ import logging
 import sys
 
 
-class Selection(object):
+class Selection:
     """
     Store and compare selections.
     """
@@ -28,7 +28,7 @@ class Selection(object):
         return self.artist is not None
 
 
-class BindArtist(object):
+class BindArtist:
     """
     """
     # Track keyboard modifiers for events.

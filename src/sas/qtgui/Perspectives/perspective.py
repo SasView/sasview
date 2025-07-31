@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Optional, Union
 
 from PySide6 import QtCore
 from PySide6.QtGui import QStandardItem
@@ -17,7 +16,7 @@ class PerspectiveMeta(type(QtCore.QObject), ABCMeta):
     """
 
 
-class Perspective(object, metaclass=PerspectiveMeta):
+class Perspective(metaclass=PerspectiveMeta):
 
     """
     Mixin class for all perspectives,
@@ -41,12 +40,12 @@ class Perspective(object, metaclass=PerspectiveMeta):
     #
 
     @abstractmethod
-    def setData(self, data_item: List[QStandardItem], is_batch: bool=False):
+    def setData(self, data_item: list[QStandardItem], is_batch: bool=False):
         """ Set the data to be processed in this perspective, called when
         the 'send data' button is pressed"""
         pass # TODO: Should we really be passing Qt objects around, rather than actual data
 
-    def removeData(self, data_list: Optional[Union[QStandardItem, List[QStandardItem]]]):
+    def removeData(self, data_list: QStandardItem | list[QStandardItem] | None):
         """ Remove data from """
         raise NotImplementedError(f"Remove data not implemented in {self.name}")
 
@@ -89,7 +88,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
         pass
 
     # TODO: Use a more ordered datastructure for constraints
-    def updateFromConstraints(self, constraints: Dict[str, list]):
+    def updateFromConstraints(self, constraints: dict[str, list]):
         """
         Updates all tabs with constraints present in *constraint_dict*, where
         *constraint_dict*  keys are the fit page name, and the value is a
@@ -108,7 +107,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
         """ Does this perspective have a report functionality (currently used by menus and toolbar)"""
         return False
 
-    def getReport(self) -> Optional[ReportData]: # TODO: Refactor to just report, or report_html
+    def getReport(self) -> ReportData | None: # TODO: Refactor to just report, or report_html
         """ A string containing the HTML to be shown in the report"""
         raise NotImplementedError(f"Report not implemented for {self.name}")
 
@@ -140,7 +139,7 @@ class Perspective(object, metaclass=PerspectiveMeta):
     #
 
     @property
-    def preferences(self) -> Optional[List[PreferencesWidget]]:
+    def preferences(self) -> list[PreferencesWidget] | None:
         """ Return a list of widgets that should be added to the preferences panel. """
         return []
 

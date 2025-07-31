@@ -43,7 +43,7 @@ References:
 # from GSASIIsasd.py. Currently, this code only works with spheroidal models
 
     
-class decision_helper():
+class decision_helper:
 
     class MaxEntException(Exception): 
         '''Any exception from this module'''
@@ -117,7 +117,7 @@ class decision_helper():
             bl[i] = (b[i] - z) / fl[i][i]
 
         # last, compute beta from bl and fl
-        beta = np.empty((n))
+        beta = np.empty(n)
         beta[-1] = bl[-1] / fl[-1][-1]
         for i in (1, 0):
             z = 0.0
@@ -127,7 +127,7 @@ class decision_helper():
 
         return beta
     
-class maxEntMethod():
+class maxEntMethod:
     def MaxEntMove(self,fSum, blank, chisq, chizer, c1, c2, s1, s2):
         r'''
         Implementing the maximum entropy move for feature size distribution
@@ -230,7 +230,7 @@ class maxEntMethod():
         
         xi = np.zeros((SEARCH_DIRECTIONS, n))
         eta = np.zeros((SEARCH_DIRECTIONS, npt))
-        beta = np.zeros((SEARCH_DIRECTIONS))
+        beta = np.zeros(SEARCH_DIRECTIONS)
         s2 = np.zeros((SEARCH_DIRECTIONS, SEARCH_DIRECTIONS))
         c2 = np.zeros((SEARCH_DIRECTIONS, SEARCH_DIRECTIONS))
         

@@ -1,5 +1,4 @@
 import copy
-from typing import Optional
 
 import numpy
 from bumps import options
@@ -178,7 +177,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         if not isinstance(id, list):
             id = [id]
         for i in id:
-            if 'is_constraint' in line_dict.keys():
+            if 'is_constraint' in line_dict:
                 state[i] = line_dict
             elif i in state and 'fit-params' in state[i]:
                 state[i]['fit_params'].update(line_dict)
@@ -566,7 +565,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         return self.currentWidget()
 
     @property
-    def currentFittingWidget(self) -> Optional[FittingWidget]:
+    def currentFittingWidget(self) -> FittingWidget | None:
         current_tab = self.currentTab
         if isinstance(current_tab, FittingWidget):
             return current_tab
@@ -629,7 +628,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
     def supports_reports(self) -> bool:
         return True
 
-    def getReport(self) -> Optional[ReportData]:
+    def getReport(self) -> ReportData | None:
         """ Get the report from the current tab"""
         fitting_widget = self.currentFittingWidget
         return None if fitting_widget is None else fitting_widget.getReport()

@@ -22,7 +22,7 @@ class BatchOutputPanelTest:
     def widget(self, qapp):
         '''Create/Destroy the dialog'''
         # dummy perspective
-        class dummy_manager(object):
+        class dummy_manager:
             _parent = QtWidgets.QWidget()
             def communicator(self):
                 return GuiUtils.Communicate()

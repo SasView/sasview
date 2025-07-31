@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Dialog panel to explore the P(r) inversion results for a range
 of D_max value. User picks a number of points and a range of
@@ -46,7 +45,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.setWindowTitle("Dmax Explorer")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
         self.pr_state = pr_state
@@ -91,10 +90,10 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.model.setItem(W.NPTS, QtGui.QStandardItem(str(self.nfunc)))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
-        self.model.setItem(W.DMIN, QtGui.QStandardItem("{:.1f}".format(0.9*self.pr_state.dmax)))
+        self.model.setItem(W.DMIN, QtGui.QStandardItem(f"{0.9*self.pr_state.dmax:.1f}"))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
-        self.model.setItem(W.DMAX, QtGui.QStandardItem("{:.1f}".format(1.1*self.pr_state.dmax)))
+        self.model.setItem(W.DMAX, QtGui.QStandardItem(f"{1.1*self.pr_state.dmax:.1f}"))
         self.model.blockSignals(False)
         self.model.blockSignals(True)
         self.model.setItem(W.VARIABLE, QtGui.QStandardItem( "χ²/dof"))
@@ -129,8 +128,8 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             npts = int(self.model.item(W.NPTS).text())
             xs = np.linspace(dmin, dmax, npts)
         except ValueError as e:
-            msg = ("An input value is not correctly formatted. Please check {}"
-                   .format(e.message))
+            msg = (f"An input value is not correctly formatted. Please check {e.message}"
+                   )
             logger.error(msg)
 
         original = self.pr_state.dmax

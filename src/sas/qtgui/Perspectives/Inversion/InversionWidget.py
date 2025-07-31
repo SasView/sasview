@@ -258,10 +258,10 @@ class InversionWidget(QWidget, Ui_PrInversion):
         # Checks if there is an estimation available.
         if self.currentResult.estimated_parameters is not None:
             self.noOfTermsSuggestionButton.setText(str(self.currentResult.estimated_parameters.nterms))
-            self.regConstantSuggestionButton.setText("{:.2g}".format(self.currentResult.estimated_parameters.reg_constant))
+            self.regConstantSuggestionButton.setText(f"{self.currentResult.estimated_parameters.reg_constant:.2g}")
 
         self.noOfTermsInput.setText(str(current_calculator.noOfTerms))
-        self.regularizationConstantInput.setText("{:.2g}".format(current_calculator.alpha))
+        self.regularizationConstantInput.setText(f"{current_calculator.alpha:.2g}")
         self.maxDistanceInput.setText(str(current_calculator.dmax))
 
         # Options tab

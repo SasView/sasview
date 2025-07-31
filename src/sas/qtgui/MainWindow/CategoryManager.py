@@ -34,7 +34,7 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
 
         return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
 
-class Categories(object):
+class Categories:
     """
     Container class for accessing model categories
     """

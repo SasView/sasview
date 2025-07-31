@@ -62,7 +62,7 @@ class MainWindowTest:
         """
         def check_after_load(name):
             assert name == gui.perspective().name
-            assert 1 == len(gui.perspective().currentTabDataId())
+            assert len(gui.perspective().currentTabDataId()) == 1
             assert (gui.perspective().currentTabDataId()[0]) in dataIDList
 
         # Base definitions
@@ -74,7 +74,7 @@ class MainWindowTest:
         sendDataButton = filesWidget.cmdSendTo
         # Verify defaults
         assert hasattr(gui, 'loadedPerspectives')
-        assert 4 == len(gui.loadedPerspectives)
+        assert len(gui.loadedPerspectives) == 4
         # Load data
         file = ["cyl_400_20.txt"]
         filesWidget.readData(file)

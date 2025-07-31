@@ -13,7 +13,7 @@ function should disappear in a future iteration (see notes in fitDialog)
 import math
 
 
-class LineModel(object):
+class LineModel:
     """
     Class that evaluates a linear model.
 

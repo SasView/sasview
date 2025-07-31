@@ -24,7 +24,7 @@ class ResolutionCalculatorPanelTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         """Create/Destroy the ResolutionCalculatorPanel"""
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(widget):
                 return Communicate()
 

@@ -1,4 +1,3 @@
-from typing import Optional
 
 import numpy as np
 
@@ -77,8 +76,8 @@ class Icosahedron(FullModel):
     ]]
 
     def __init__(self,
-                 colors: Optional[ColorSpecification]=None,
-                 edge_colors: Optional[ColorSpecification]=None):
+                 colors: ColorSpecification | None=None,
+                 edge_colors: ColorSpecification | None=None):
 
         super().__init__(
             vertices=Icosahedron.ico_vertices,

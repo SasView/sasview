@@ -2,7 +2,6 @@
     Unit tests for specific oriented models
     @copyright: University of Tennessee, for the DANSE project
 """
-from __future__ import print_function
 
 import math
 import unittest

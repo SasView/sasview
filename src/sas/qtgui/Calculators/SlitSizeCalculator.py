@@ -124,7 +124,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
             logging.error(msg)
             return
 
-        slit_length_str = "{:.5f}".format(slit_length)
+        slit_length_str = f"{slit_length:.5f}"
         self.slit_length_out.setText(slit_length_str)
 
         #Display unit, which most likely needs to be 1/Ang but needs to be confirmed
