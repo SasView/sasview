@@ -9,7 +9,6 @@ import subprocess
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Union
 
 from sasmodels.core import list_models
 

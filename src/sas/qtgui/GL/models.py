@@ -5,7 +5,6 @@
 
 
 from collections.abc import Sequence
-from typing import Union
 
 import numpy as np
 from OpenGL import GL

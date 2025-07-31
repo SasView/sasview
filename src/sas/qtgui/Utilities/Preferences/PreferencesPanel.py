@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 from collections.abc import Callable
-from typing import Any, Union
+from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
