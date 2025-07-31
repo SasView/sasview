@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel,
 
 from sas.system import config
 
-ConfigType = Union[str, bool, float, int, list[str | float | int]]
+ConfigType = str | bool | float | int | list[str | float | int]
 logger = logging.getLogger(__name__)
 
 

@@ -25,7 +25,7 @@ from .PlottingPreferencesWidget import PlottingPreferencesWidget
 BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,
                "Display Settings": DisplayPreferencesWidget,
                }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
-ConfigType = Union[str, bool, float, int, list[str | float | int]]
+ConfigType = str | bool | float | int | list[str | float | int]
 
 logger = logging.getLogger(__name__)
 

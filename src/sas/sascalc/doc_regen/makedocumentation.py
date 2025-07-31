@@ -16,7 +16,7 @@ from sasmodels.core import list_models
 from sas.sascalc.fit import models
 from sas.system.user import get_app_dir_versioned
 
-PATH_LIKE = Union[Path, str, os.PathLike[str]]
+PATH_LIKE = Path | str | os.PathLike[str]
 
 
 # Path constants related to the directories and files used in documentation regeneration processes
