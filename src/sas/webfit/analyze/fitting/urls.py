@@ -22,7 +22,7 @@ info_patterns = [
 #urls to fit
 urlpatterns = [
     path("", views.start, name = "starting a fit"),
-    path("status/", views.status, name = "get status of all user's fits"),  
+    path("status/", views.status, name = "get status of all user's fits"),
     path("<int:fit_id>/", include(info_patterns), name = "get fit info"),
     path("optimizers/", views.list_optimizers, name = "lists all fit optimizers"),
     path("models/", views.list_model, name = "lists all fit models"),

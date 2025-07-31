@@ -128,51 +128,51 @@ def process_code(input_text: str,
 def main():
 
     test_text_valid_sld_xyz = """
-    
+
     print("test print string")
-    
+
     def sld(x,y,z,p1,p2,p3):
         print(x,y,z)
-    
+
     """
 
     test_text_valid_sld_radial = """
     def sld(r,theta,phi,p1,p2,p3):
         print(x,y,z)
-    
+
     """
 
 
     test_text_invalid_start_sld = """
     def sld(theta,phi,p1,p2,p3):
         print(x,y,z)
-    
+
     """
 
     test_text_invalid_rest_sld = """
     def sld(r,p1,p2,p3):
         print(x,y,z)
-    
+
     """
 
     test_sld_class = """
-    
+
     class SLD:
         def __call__(self,x,y,z):
             print(x,y,z)
-    
+
     sld = SLD()
-    
+
     """
 
     test_bad_class = """
-    
+
     class SLD:
         def __call__(self,x,y,q):
             print(x,y,z)
-    
+
     sld = SLD()
-    
+
     """
 
 

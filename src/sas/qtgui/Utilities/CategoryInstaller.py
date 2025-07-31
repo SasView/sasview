@@ -44,7 +44,7 @@ class CategoryInstaller:
         """
         by_model_dict = defaultdict(list)
         model_enabled_dict = defaultdict(bool)
-        
+
         for category in master_category_dict:
             for (model, enabled) in master_category_dict[category]:
                 by_model_dict[model].append(category)
@@ -55,7 +55,7 @@ class CategoryInstaller:
     @staticmethod
     def _regenerate_master_dict(by_model_dict, model_enabled_dict):
         """
-        regenerates master_category_dict from by_model_dict 
+        regenerates master_category_dict from by_model_dict
         and model_enabled_dict
         returns the master category dictionary
         """

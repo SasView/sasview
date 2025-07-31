@@ -147,7 +147,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
             if retval == QtWidgets.QMessageBox.RejectRole:
                 # cancel copy
                 return
-                
+
         # Copy from origin to ~/.sasview/plugin_models
         from shutil import copy
 

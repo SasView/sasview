@@ -220,7 +220,7 @@ class TestConfig(unittest.TestCase):
     def test_bad_config_file_structure(self):
 
         config = Config()
-        
+
         bad_structures = [
             {
                 "sasview_version": sas.system.version.__version__,

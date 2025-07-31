@@ -101,10 +101,10 @@ class About(QDialog):
 
             button.setStyleSheet("""
                 QPushButton {
-                    background-color: white; 
+                    background-color: white;
                     color: black;
                 }
-                
+
                 QPushButton:hover {
                     border: none;
                 }
@@ -151,8 +151,8 @@ class About(QDialog):
                 <p align="center">
                     <a href="{web.homepage_url}">{web.homepage_url}</a>
                 </p>
-                                
-                <p align="center">A list of individual contributors can be found at: 
+
+                <p align="center">A list of individual contributors can be found at:
                 <a href="{web.homepage_url}/people">{web.homepage_url}/people</a></p>
                 <p align="center">
                     Comments? Bugs? Requests?
