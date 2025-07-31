@@ -1,10 +1,9 @@
 from collections.abc import Callable
-from typing import Union
 
 import numpy as np
 
 # TODO: Proper typing when newer numpy (>1.20) is supported
-ArrayLike = Union[np.ndarray, float, int]
+ArrayLike = np.ndarray | float | int
 
 def assure_vectorised_argument(f: Callable):
     """ Allow arguments to a function mapping numpy vectors

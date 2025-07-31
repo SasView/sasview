@@ -5,7 +5,6 @@
 
 
 from collections.abc import Sequence
-from typing import Union
 
 import numpy as np
 from OpenGL import GL
@@ -13,9 +12,9 @@ from OpenGL import GL
 from sas.qtgui.GL.color import ColorSpecification, ColorSpecificationMethod
 from sas.qtgui.GL.renderable import Renderable
 
-VertexData = Union[Sequence[tuple[float, float, float]], np.ndarray]
-EdgeData = Union[Sequence[tuple[int, int]], np.ndarray]
-TriangleMeshData = Union[Sequence[tuple[int, int, int]], np.ndarray]
+VertexData = Sequence[tuple[float, float, float]] | np.ndarray
+EdgeData = Sequence[tuple[int, int]] | np.ndarray
+TriangleMeshData = Sequence[tuple[int, int, int]] | np.ndarray
 
 
 class ModelBase(Renderable):
