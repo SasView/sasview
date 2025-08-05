@@ -1,10 +1,8 @@
-import sys
-import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-
-from PySide6 import QtCore, QtWidgets
-
+import pytest
+from PySide6 import QtWidgets
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 
 # Global QApplication instance

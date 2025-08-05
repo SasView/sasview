@@ -1,11 +1,8 @@
-import sys
-import pytest
-import numpy as np
 from unittest.mock import MagicMock, patch
 
-from PySide6 import QtCore, QtWidgets, QtGui
-
-from sas.qtgui.Calculators.SldPanel import SldPanel, MODEL, neutronSldAlgorithm, xraySldAlgorithm
+import pytest
+from PySide6 import QtWidgets
+from sas.qtgui.Calculators.SldPanel import MODEL, SldPanel, neutronSldAlgorithm, xraySldAlgorithm
 
 # Global QApplication instance
 _app = None

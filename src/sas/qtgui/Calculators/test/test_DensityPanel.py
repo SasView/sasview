@@ -1,10 +1,8 @@
-import sys
-import pytest
 from unittest.mock import MagicMock, patch
 
-from PySide6 import QtCore, QtWidgets, QtGui
-
-from sas.qtgui.Calculators.DensityPanel import DensityPanel, MODES, toMolarMass
+import pytest
+from PySide6 import QtGui, QtWidgets
+from sas.qtgui.Calculators.DensityPanel import MODES, DensityPanel, toMolarMass
 
 # Global QApplication instance
 _app = None

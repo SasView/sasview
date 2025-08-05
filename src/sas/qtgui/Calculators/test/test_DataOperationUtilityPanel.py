@@ -1,13 +1,9 @@
-import sys
 import time
 import unittest
 from unittest.mock import MagicMock, patch
+
 import numpy as np
-import pytest
-
-from PySide6 import QtCore, QtWidgets
-from PySide6.QtTest import QTest
-
+from PySide6 import QtWidgets
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 

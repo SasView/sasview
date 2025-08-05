@@ -1,11 +1,8 @@
-import sys
-import pytest
-import numpy as np
 from unittest.mock import MagicMock, patch
 
-from PySide6 import QtCore, QtWidgets
-
-from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel, _SOURCE_MASS
+import pytest
+from PySide6 import QtWidgets
+from sas.qtgui.Calculators.ResolutionCalculatorPanel import _SOURCE_MASS, ResolutionCalculatorPanel
 
 # Global QApplication instance
 _app = None
@@ -208,10 +205,6 @@ class TestResolutionCalculatorPanel:
              patch('builtins.open', MagicMock(return_value=MagicMock(read=MagicMock(return_value=mock_file_content)))):
             
             calculator.onSelectCustomSpectrum()
-            
-            # Verify that the file was read correctly
-            expected_wavelength = [1.0, 2.0, 3.0]
-            expected_intensity = [10.0, 20.0, 30.0]
             
             # Verify the spectrum was added to dictionary
             assert 'spectrum.dat' in calculator.spectrum_dic
