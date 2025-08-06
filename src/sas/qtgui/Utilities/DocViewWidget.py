@@ -11,7 +11,13 @@ from twisted.internet import threads
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.doc_regen.makedocumentation import make_documentation
-from sas.system.user import create_user_files_if_needed, get_plugin_dir, HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE
+from sas.system.user import (
+    HELP_DIRECTORY_LOCATION,
+    MAIN_DOC_SRC,
+    PATH_LIKE,
+    create_user_files_if_needed,
+    get_plugin_dir,
+)
 
 from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 
