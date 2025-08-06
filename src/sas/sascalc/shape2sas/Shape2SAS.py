@@ -1,14 +1,22 @@
-import time
 import argparse
-import warnings
 import re
-import numpy as np
-from typing import Optional, List
+import time
+import warnings
 from dataclasses import dataclass, field
+from typing import List, Optional
+
+import numpy as np
 
 from sas.sascalc.shape2sas.helpfunctions import (
-    GenerateAllPoints, WeightedPairDistribution, StructureFactor, ITheoretical, IExperimental, Qsampling,
-    plot_2D, plot_results, generate_pdb
+    GenerateAllPoints,
+    IExperimental,
+    ITheoretical,
+    Qsampling,
+    StructureFactor,
+    WeightedPairDistribution,
+    generate_pdb,
+    plot_2D,
+    plot_results,
 )
 
 Vectors = List[List[float]]

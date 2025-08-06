@@ -2,8 +2,8 @@
 FitPanel class contains fields allowing to fit  models and  data
 
 """
-from PySide6 import QtCore
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
+
 
 class ResultPanel(QtWidgets.QTabWidget):
     """
@@ -26,7 +26,7 @@ class ResultPanel(QtWidgets.QTabWidget):
         self.setMinimumSize(400, 400)
         self.data_id = None
 
-        from .PlotView import CorrelationView, ConvergenceView, TraceView, UncertaintyView
+        from .PlotView import ConvergenceView, CorrelationView, TraceView, UncertaintyView
         self.convergenceView = ConvergenceView()
         self.correlationView = CorrelationView()
         self.uncertaintyView = UncertaintyView()

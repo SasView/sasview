@@ -1,34 +1,30 @@
-from typing import List, Tuple, Iterable, Any, Dict, Optional
-
-import sys
-import os
-import datetime
-
-import importlib.resources as pkg_resources
-
 import base64
+import datetime
+import importlib.resources as pkg_resources
+import logging
+import os
+import sys
 from io import BytesIO
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import dominate
-from dominate.tags import *
+import html2text
+from dominate import tags
 from dominate.util import raw
 
-import html2text
+import sasmodels
 
 import sas.sasview
 import sas.system.version
-import sasmodels
-import logging
-
-from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Plotting.PlotterBase import Data1D
+from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 #
 # Utility classes
 #
 
-class pretty_units(span):
+class pretty_units(tags.span):
     """ HTML tag for units, prettifies angstroms, inverse angstroms and inverse cm
     TODO: Should be replaced when there is a better way of handling units"""
     tagname = "span"
@@ -58,7 +54,7 @@ class pretty_units(span):
 
         if do_superscript_power:
             with self:
-                span("-1", style="vertical-align:super;")
+                tags.span("-1", style="vertical-align:super;")
 
 
 
@@ -93,42 +89,42 @@ class ReportBase:
         self.plots = []
 
         with self._html_doc.head:
-            meta(http_equiv="Content-Type", content="text/html; charset=utf-8")
-            meta(name="Generator", content=f"SasView {sas.system.version.__version__}")
+            tags.meta(http_equiv="Content-Type", content="text/html; charset=utf-8")
+            tags.meta(name="Generator", content=f"SasView {sas.system.version.__version__}")
 
             if style_link is not None:
-                link(rel="stylesheet", href=style_link)
+                tags.link(rel="stylesheet", href=style_link)
 
             else:
                 style_data = pkg_resources.read_text("sas.qtgui.Utilities.Reports", "report_style.css")
-                style(style_data)
+                tags.style(style_data)
 
         with self._html_doc.body:
-            with div(id="main"):
+            with tags.div(id="main"):
 
-                with div(id="sasview"):
-                    h1(title)
-                    p(datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y"))
-                    with div(id="version-info"):
-                        p(f"sasview {sas.system.version.__version__}, sasmodels {sasmodels.__version__}", cls="sasview-details")
+                with tags.div(id="sasview"):
+                    tags.h1(title)
+                    tags.p(datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y"))
+                    with tags.div(id="version-info"):
+                        tags.p(f"sasview {sas.system.version.__version__}, sasmodels {sasmodels.__version__}", cls="sasview-details")
 
-                div(id="perspective")
-                with div(id="data"):
-                    h2("Data")
+                tags.div(id="perspective")
+                with tags.div(id="data"):
+                    tags.h2("Data")
 
-                with div(id="model"):
+                with tags.div(id="model"):
 
                     if show_param_section_title:
-                        h2("Details")
+                        tags.h2("Details")
 
-                    div(id="model-details")
-                    div(id="model-parameters")
+                    tags.div(id="model-details")
+                    tags.div(id="model-parameters")
 
-                with div(id='figures-outer'):
+                with tags.div(id='figures-outer'):
                     if show_figure_section_title:
-                        h2("Figures")
+                        tags.h2("Figures")
 
-                    div(id="figures")
+                    tags.div(id="figures")
 
     def add_data_details(self, data: Data1D):
         """ Add details of input data to the report"""
@@ -141,8 +137,8 @@ class ReportBase:
         table_data = [
             ["File", os.path.basename(data.filename)],
             ["n Samples", n_points],
-            ["Q min", span(low_q, pretty_units(data.x_unit))],
-            ["Q max", span(high_q, pretty_units(data.x_unit))]
+            ["Q min", tags.span(low_q, pretty_units(data.x_unit))],
+            ["Q max", tags.span(high_q, pretty_units(data.x_unit))]
         ]
 
         self.add_table(table_data, target_tag="data", column_prefix="data-column")
@@ -160,7 +156,7 @@ class ReportBase:
         """
 
         if figure_title is not None:
-            h2(figure_title)
+            tags.h2(figure_title)
 
         if image_type == "svg":
             logging.warning("xhtml2pdf does not currently support svg export to pdf.")
@@ -209,9 +205,9 @@ class ReportBase:
 
         data64 = base64.b64encode(bytes.getvalue())
         with self._html_doc.getElementById("figures"):
-            with p():
-                img(src=f"data:image/{file_type};base64," + data64.decode("utf-8"),
-                    style="width:100%")
+            with tags.p():
+                tags.img(src=f"data:image/{file_type};base64," + data64.decode("utf-8"),
+                         style="width:100%")
 
     def add_table_dict(self, d: Dict[str, Any], titles: Optional[Tuple[str, str]]=None):
 
@@ -226,17 +222,17 @@ class ReportBase:
         """ Add a table of parameters to the report"""
         with self._html_doc.getElementById(target_tag):
 
-            with table():
+            with tags.table():
 
                 if titles is not None:
-                    with tr():
+                    with tags.tr():
                         for title in titles:
-                            th(title)
+                            tags.th(title)
 
                 for row in sorted(data, key=lambda x: x[0]):
-                    with tr():
+                    with tags.tr():
                         for i, value in enumerate(row):
-                            td(value, cls=f"{column_prefix}-{i}")
+                            tags.td(value, cls=f"{column_prefix}-{i}")
 
     @property
     def text(self) -> str:
@@ -283,10 +279,10 @@ def main():
     """ This can be run locally without sasview to make it easy to adjust the report layout/styling,
     it will generate a report with some arbitrary data"""
 
-    from sasdata.dataloader.loader import Loader
-    import os
     import matplotlib.pyplot as plt
     import numpy as np
+
+    from sasdata.dataloader.loader import Loader
     loader = Loader()
 
 

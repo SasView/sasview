@@ -42,9 +42,10 @@ distinctiveness rather than a simple colour number.
 
 # Support for ancient python versions
 import copy
-import numpy
-import sys
 import logging
+import sys
+
+import numpy
 
 if 'any' not in dir(__builtins__):
     def any(L):
@@ -224,7 +225,7 @@ class Graph(object):
         min_value = None
         max_value = None
         for p in self.plottables:
-            if p.hidden == True:
+            if p.hidden:
                 continue
             if p.x is not None:
                 for x_i in p.x:
@@ -1056,7 +1057,7 @@ class PlottableData1D(Plottable):
         """
         Renders the plottable on the graph
         """
-        if self.interactive == True:
+        if self.interactive:
             kw['symbol'] = self.symbol
             kw['id'] = self.id
             kw['hide_error'] = self.hide_error

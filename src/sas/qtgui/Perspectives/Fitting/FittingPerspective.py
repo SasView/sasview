@@ -1,27 +1,21 @@
-import numpy
 import copy
-
 from typing import Optional
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+import numpy
 from bumps import options
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.system.config import config
-
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-
-from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
+from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 from sas.qtgui.Perspectives.perspective import Perspective
-
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.system.config import config
+
 
 class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
@@ -178,7 +172,8 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
             if len(line) > 1:
                 line_dict[line[0]] = line[1:]
 
-        if 'data_id' not in line_dict: return state
+        if 'data_id' not in line_dict:
+            return state
         id = line_dict['data_id'][0]
         if not isinstance(id, list):
             id = [id]

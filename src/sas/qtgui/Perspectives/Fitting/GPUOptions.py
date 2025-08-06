@@ -1,21 +1,20 @@
 # global
 import json
-import platform
 import logging
-from twisted.internet import threads
-from twisted.internet import reactor
-
-import sasmodels
-import sasmodels.model_test
-import sasmodels.kernelcl
-from sasmodels.generate import F32, F64
+import platform
 
 from PySide6 import QtCore, QtWidgets
+from twisted.internet import reactor, threads
+
+import sasmodels
+import sasmodels.kernelcl
+import sasmodels.model_test
+from sasmodels.generate import F32, F64
+
+from sas import config
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
-
-from sas import config
 from sas.system import lib
 
 try:

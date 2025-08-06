@@ -1,15 +1,14 @@
 # global
+import logging
 import os
 from shutil import copyfile
-import logging
 
 from PySide6 import QtWidgets
 
-from sas.sascalc.fit import models
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.UI.PluginManagerUI import Ui_PluginManagerUI
+from sas.sascalc.fit import models
 
 
 class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):

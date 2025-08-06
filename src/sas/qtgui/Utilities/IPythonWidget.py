@@ -1,8 +1,8 @@
 
 
-from sas.qtgui.Utilities import GuiUtils
-
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
+
+from sas.qtgui.Utilities import GuiUtils
 
 MODULES_TO_IMPORT = [
     ('sas', 'sas'),
@@ -12,8 +12,8 @@ MODULES_TO_IMPORT = [
 class IPythonWidget(RichJupyterWidget):
     def __init__(self, parent=None, **kwargs):
         super(self.__class__, self).__init__(parent)
-        from qtconsole.inprocess import QtInProcessKernelManager
         from IPython.lib import guisupport
+        from qtconsole.inprocess import QtInProcessKernelManager
         app = guisupport.get_app_qt4()
 
         font = GuiUtils.getMonospaceFont()

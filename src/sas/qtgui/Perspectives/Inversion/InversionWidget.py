@@ -1,19 +1,27 @@
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 from typing import Any
+
 from PySide6.QtCore import Signal
-from PySide6.QtGui import QStandardItem, QIntValidator
+from PySide6.QtGui import QIntValidator, QStandardItem
 from PySide6.QtWidgets import QWidget
 
 from sas.qtgui.Perspectives.Inversion.DMaxExplorerWidget import DmaxWindow
-from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 from sas.qtgui.Perspectives.Inversion.Thread import CalcBatchPr, CalcPr, EstimateNT
 from sas.qtgui.Perspectives.Inversion.UI.TabbedInversionUI import Ui_PrInversion
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.qtgui.Utilities.GuiUtils import updateModelItemWithPlot, HashableStandardItem, Communicate, dataFromItem, DoubleValidator
-from sas.sascalc.pr.Invertor import Invertor
+from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
+from sas.qtgui.Utilities.GuiUtils import (
+    Communicate,
+    DoubleValidator,
+    HashableStandardItem,
+    dataFromItem,
+    updateModelItemWithPlot,
+)
+from sas.sascalc.pr.invertor import Invertor
+
 
 @dataclass
 class CalculatedOutputs:

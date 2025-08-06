@@ -1,7 +1,6 @@
 import pytest
 from PySide6.QtWidgets import QWidget
 
-
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget

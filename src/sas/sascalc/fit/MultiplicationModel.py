@@ -4,6 +4,7 @@ import numpy as np
 
 from sas.sascalc.calculator.BaseComponent import BaseComponent
 
+
 class MultiplicationModel(BaseComponent):
     r"""
         Use for P(Q)\*S(Q); function call must be in the order of P(Q) and then S(Q):

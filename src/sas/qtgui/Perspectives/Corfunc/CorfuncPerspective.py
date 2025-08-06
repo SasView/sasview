@@ -1,45 +1,42 @@
 
-import numpy as np
+import logging
 import math
+from typing import Callable, List, Optional
+
+import numpy as np
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # global
-from PySide6.QtGui import QStandardItem, QDoubleValidator
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
+from PySide6.QtGui import QDoubleValidator, QStandardItem
 
-
-
-from typing import Optional, List, Callable
-
-import logging
-
-from PySide6 import QtCore
-from PySide6 import QtGui, QtWidgets
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # sas-global
 # pylint: disable=import-error, no-name-in-module
-
 from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
-from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
-from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Perspectives.Corfunc.ExtractionCanvas import ExtractionCanvas
 from sas.qtgui.Perspectives.Corfunc.IDFCanvas import IDFCanvas
-
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.Reports.reportdata import ReportData
-from sas.qtgui.Utilities.Reports import ReportBase
+from sas.qtgui.Perspectives.Corfunc.QSpaceCanvas import QSpaceCanvas
+from sas.qtgui.Perspectives.Corfunc.RealSpaceCanvas import RealSpaceCanvas
 from sas.qtgui.Plotting.PlotterData import Data1D
-
-from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator, CalculationError
-
+from sas.qtgui.Utilities.Reports import ReportBase
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.sascalc.corfunc.calculation_data import (
-    TransformedData,  TangentMethod, LongPeriodMethod,
-    GuinierData, PorodData,
-    ExtrapolationParameters, ExtrapolationInteractionState)
+    ExtrapolationInteractionState,
+    ExtrapolationParameters,
+    GuinierData,
+    LongPeriodMethod,
+    PorodData,
+    TangentMethod,
+    TransformedData,
+)
+from sas.sascalc.corfunc.corfunc_calculator import CalculationError, CorfuncCalculator
 
+from ..perspective import Perspective
+from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .util import WIDGETS, safe_float
-from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
-from ..perspective import Perspective
 
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):

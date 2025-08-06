@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import Any, List
 
 
 def unique_preserve_order(seq: List[Any]) -> List[Any]:

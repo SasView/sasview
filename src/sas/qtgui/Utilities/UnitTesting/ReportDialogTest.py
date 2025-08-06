@@ -1,16 +1,15 @@
+import logging
 import os
 import sys
-import logging
-from xhtml2pdf import pisa
 
 import pytest
-
-from PySide6 import QtWidgets, QtPrintSupport
+from PySide6 import QtPrintSupport, QtWidgets
 from PySide6.QtTest import QTest
+from xhtml2pdf import pisa
 
 # set up import paths
-
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
 # Local
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 

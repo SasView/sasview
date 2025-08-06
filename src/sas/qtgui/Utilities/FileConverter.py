@@ -2,32 +2,25 @@
 """
 File Converter Widget
 """
-import os
 import logging
+import os
 
 import numpy as np
-
 from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
+import sasdata.file_converter.FileConverterUtilities as Utilities
+from sasdata.dataloader.data_info import Data1D, Detector, Sample, Source, Vector
 from sasdata.file_converter.ascii2d_loader import ASCII2DLoader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
-from sasdata.dataloader.data_info import Data1D
-
-from sasdata.dataloader.data_info import Detector
-from sasdata.dataloader.data_info import Sample
-from sasdata.dataloader.data_info import Source
-from sasdata.dataloader.data_info import Vector
-
-import sasdata.file_converter.FileConverterUtilities as Utilities
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.FrameSelect import FrameSelect
-
 from sas.system import version
 
 from .UI.FileConverterUI import Ui_FileConverterUI
+
 
 class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
     """
@@ -476,7 +469,6 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         :param n_frames: How many frames the loaded data file has
         :return: A dictionary containing the parameters input by the user
         """
-        valid_input = False
         output_path = self.txtOutputFile.text()
         if not output_path:
             return

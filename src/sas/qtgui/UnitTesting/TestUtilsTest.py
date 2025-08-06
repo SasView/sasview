@@ -1,11 +1,10 @@
+from PySide6.QtWidgets import QWidget
 
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 from sas.qtgui.Utilities.GuiUtils import Communicate
-from sas.qtgui.UnitTesting.TestUtils import *
+
 
 class TestUtilsTest:
     '''Test TestUtils'''

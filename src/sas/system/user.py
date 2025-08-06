@@ -1,13 +1,14 @@
-import os
-from packaging.version import Version
-import shutil
+import importlib.resources
 import logging
+import os
+import shutil
 import sys
 from pathlib import Path
-import importlib.resources
-from platformdirs import PlatformDirs
-from sas.system.version import __version__
 
+from packaging.version import Version
+from platformdirs import PlatformDirs
+
+from sas.system.version import __version__
 
 sasview_version = Version(__version__).base_version
 

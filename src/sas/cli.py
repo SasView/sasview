@@ -38,12 +38,11 @@ Note: On Windows any console output is ignored by default. You can either
 open a console to show the output with the *-o* flag or redirect output to
 a file using something like *sasview ... > output.txt*.
 """
-import sys
-
 # TODO: Support dropping datafiles onto .exe?
 # TODO: Maybe use the bumps cli with project file as model?
-
 import argparse
+import sys
+
 
 def parse_cli(argv):
     """
@@ -108,9 +107,7 @@ def main(logging="production"):
     from sas.system.user import copy_old_files_to_new_location
     copy_old_files_to_new_location()
 
-    from sas.system import log
-    from sas.system import lib
-    from sas.system import console
+    from sas.system import console, lib, log
 
     # I/O redirection for the windows console. Need to do this early so that
     # output will be displayed on the console. Presently not working for
@@ -180,6 +177,7 @@ def main(logging="production"):
             exitmsg = banner = ""
         else:
             import platform
+
             import sas
             # Form dotted python version number out of sys.version_info
             major, minor, micro = sys.version_info[:3]

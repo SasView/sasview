@@ -2,12 +2,16 @@ from typing import Optional
 
 import numpy as np
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-    SLDDefinition, MagnetismDefinition, AngularDistribution, QSample, CalculationParameters)
-
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution, PointGeneratorStepper
-
 from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
+    AngularDistribution,
+    CalculationParameters,
+    MagnetismDefinition,
+    QSample,
+    SLDDefinition,
+)
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import PointGeneratorStepper, SpatialDistribution
+
 
 def scattering_via_fq(
         sld_definition: SLDDefinition,

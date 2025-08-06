@@ -1,13 +1,13 @@
+import argparse
+import datetime
+import json
 import logging
+import os
+import sys
+from csv import DictReader
+from pathlib import Path
 
 import requests
-import argparse
-import json
-import datetime
-import sys
-import os
-from pathlib import Path
-from csv import DictReader
 
 from sas.system.legal import legal
 

@@ -1,24 +1,22 @@
 # global
-import logging
 import copy
+import logging
+
 import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
+from twisted.internet import reactor, threads
 
-from PySide6 import QtCore
-from PySide6 import QtGui, QtWidgets
-
-from twisted.internet import threads
-from twisted.internet import reactor
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 
 # sas-global
 from sas.sascalc.invariant import invariant
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
 from ..perspective import Perspective
-from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS
+from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5
@@ -837,7 +835,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         item = QtGui.QStandardItem(str(self._scale))
         self.model.setItem(WIDGETS.W_SCALE, item)
         # leave line edit empty if Porod constant not defined
-        if self._porod != None:
+        if self._porod is not None:
             item = QtGui.QStandardItem(str(self._porod))
         else:
             item = QtGui.QStandardItem(str(''))

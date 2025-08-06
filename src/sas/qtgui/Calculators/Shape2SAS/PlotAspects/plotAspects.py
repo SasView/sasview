@@ -1,10 +1,10 @@
-from typing import Optional, List
 from dataclasses import dataclass
+from typing import List, Optional
 
-from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-
+from matplotlib.figure import Figure
 from PySide6.QtWidgets import QSizePolicy
+
 
 class Canvas(FigureCanvasQTAgg):
     def __init__(self, parent=None):

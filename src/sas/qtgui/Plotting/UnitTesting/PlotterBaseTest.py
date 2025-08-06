@@ -1,24 +1,21 @@
 import platform
 
+import matplotlib as mpl
 import pytest
 
-import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-
-import matplotlib as mpl
-mpl.use("Qt5Agg")
-
-from PySide6 import QtGui, QtWidgets, QtPrintSupport
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
-from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
-from sas.qtgui.Plotting.WindowTitle import WindowTitle
-from sas.qtgui.Utilities.GuiUtils import *
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # Tested module
 import sas.qtgui.Plotting.PlotterBase as PlotterBase
+from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
+from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
+from sas.qtgui.Plotting.WindowTitle import WindowTitle
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class PlotterBaseTest:

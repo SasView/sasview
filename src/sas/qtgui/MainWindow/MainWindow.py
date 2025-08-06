@@ -1,23 +1,20 @@
 import logging
 import os
 import sys
-
-from sas.system.version import __version__
-
-from PySide6.QtWidgets import QMainWindow
-from PySide6.QtWidgets import QMdiArea
-from PySide6.QtWidgets import QSplashScreen
-from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QPixmap, QGuiApplication
-from PySide6.QtCore import Qt, QTimer
-
 from importlib import resources
 
-# Local UI
-from .UI.MainWindowUI import Ui_SasView
-from ..Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QGuiApplication, QPixmap
+from PySide6.QtWidgets import QApplication, QMainWindow, QMdiArea, QSplashScreen
 
 import sas.system.config as config
+
+# Local UI
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
+from sas.system.version import __version__
+
+from ..Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
+from .UI.MainWindowUI import Ui_SasView
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +86,7 @@ def run_sasview():
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    from PySide6.QtQuick import QSGRendererInterface, QQuickWindow
+    from PySide6.QtQuick import QQuickWindow, QSGRendererInterface
     QGuiApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
     QQuickWindow.setGraphicsApi(QSGRendererInterface.OpenGLRhi)
     # Note: Qt environment variables are initialized in sas.system.lib.setup_qt_env

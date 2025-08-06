@@ -1,9 +1,9 @@
 from collections import OrderedDict
 
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
-
 # Tested module
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
+from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
+
 
 class PlotUtilitiesTest:
 

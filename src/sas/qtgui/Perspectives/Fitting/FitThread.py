@@ -1,6 +1,6 @@
+import logging
 import time
 import traceback
-import logging
 
 from sas.sascalc.data_util.calcthread import CalcThread
 
@@ -71,7 +71,6 @@ class FitThread(CalcThread):
         """
         Perform a fit
         """
-        msg = ""
         try:
             fitter_size = len(self.fitter)
             list_handler = [self.handler]*fitter_size

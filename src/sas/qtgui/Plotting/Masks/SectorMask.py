@@ -4,8 +4,8 @@
 import numpy as np
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.Slicers.SectorSlicer import SideInteractor
-from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
+from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor, SideInteractor
+
 
 class SectorMask(BaseInteractor):
     """

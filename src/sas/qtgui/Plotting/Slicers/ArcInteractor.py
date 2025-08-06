@@ -2,6 +2,7 @@ import numpy as np
 
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
+
 class ArcInteractor(BaseInteractor):
     """
     Draw an arc on a data2D plot with a variable radius (centered at [0,0]).

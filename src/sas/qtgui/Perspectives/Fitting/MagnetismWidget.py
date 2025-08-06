@@ -2,17 +2,16 @@
 Widget/logic for magnetism.
 """
 import logging
-from typing import Any, Tuple, Optional, List, Dict
+from typing import Any, Dict, List, Optional, Tuple
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
+
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
+from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 from sas.system.user import IMAGES_DIRECTORY_LOCATION
 
 logger = logging.getLogger(__name__)

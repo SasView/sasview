@@ -2,17 +2,17 @@
 Unit tests for the sas_gen
 """
 
-import os.path
-import warnings
-warnings.simplefilter("ignore")
-
-import unittest
-import numpy as np
 import math
+import os.path
+import unittest
+import warnings
+
+import numpy as np
 from scipy.spatial.transform import Rotation
 
-
 from sas.sascalc.calculator import sas_gen
+
+warnings.simplefilter("ignore")
 
 MFACTOR_AM = 2.90636E-12
 
@@ -225,8 +225,7 @@ class sas_gen_test(unittest.TestCase):
         """
         Test that the Debye algorithm supplied by the external AUSAXS library agrees with the default implementation.
         """
-        from sas.sascalc.calculator.ausaxs import sasview_sans_debye
-        from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye
+        from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye, sasview_sans_debye
 
         rng = np.random.default_rng(1984)
 

@@ -1,25 +1,25 @@
 from copy import deepcopy
 
-#from django.contrib.auth.models import Group, Permission
-#from django.contrib.contenttypes.models import ContentType
-from rest_framework import serializers
-from rest_framework.utils import model_meta
-from django.contrib.auth.models import User
-from dj_rest_auth.serializers import UserDetailsSerializer
-
-from data.models import (
-    Data,
+from analyze.fitting.models import (
+    Fit,
+    FitParameter,
+    #FitConstriant,
 )
 from analyze.models import (
     AnalysisBase,
     AnalysisParameterBase,
     #AnalysisConstraint,
 )
-from analyze.fitting.models import (
-    Fit,
-    FitParameter,
-    #FitConstriant,
+from data.models import (
+    Data,
 )
+from dj_rest_auth.serializers import UserDetailsSerializer
+from django.contrib.auth.models import User
+
+#from django.contrib.auth.models import Group, Permission
+#from django.contrib.contenttypes.models import ContentType
+from rest_framework import serializers
+from rest_framework.utils import model_meta
 
 """    read_only=False,
     queryset=Song.objects.all()

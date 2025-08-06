@@ -1,13 +1,12 @@
 #Global
-from pathlib import Path
 import textwrap
+from pathlib import Path
 
 #Global SasView
 from sas.sascalc.fit import models
 
 #Local Perspectives
 from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
-
 
 
 def generatePlugin(prof: ModelProfile, constrainParameters: (str), fitPar: [str],

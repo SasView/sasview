@@ -1,16 +1,14 @@
 import numpy as np
-
-from PySide6 import QtGui, QtWidgets, QtCore
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt
-
-
-from sas.qtgui.Perspectives.ParticleEditor.LabelledSlider import LabelledSlider
-from sas.qtgui.Perspectives.ParticleEditor.SLDMagnetismOption import SLDMagnetismOption
-from sas.qtgui.Perspectives.ParticleEditor.ViewerButtons import AxisButtons, PlaneButtons
-from sas.qtgui.Perspectives.ParticleEditor.RadiusSelection import RadiusSelection
 
 from sas.qtgui.Perspectives.ParticleEditor.defaults import sld as default_sld
 from sas.qtgui.Perspectives.ParticleEditor.function_processor import spherical_converter
+from sas.qtgui.Perspectives.ParticleEditor.LabelledSlider import LabelledSlider
+from sas.qtgui.Perspectives.ParticleEditor.RadiusSelection import RadiusSelection
+from sas.qtgui.Perspectives.ParticleEditor.SLDMagnetismOption import SLDMagnetismOption
+from sas.qtgui.Perspectives.ParticleEditor.ViewerButtons import AxisButtons, PlaneButtons
+
 
 def rotation_matrix(alpha: float, beta: float):
 

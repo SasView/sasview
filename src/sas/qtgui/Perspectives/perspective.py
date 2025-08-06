@@ -1,11 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
-from PySide6.QtGui import QStandardItem
 from PySide6 import QtCore
+from PySide6.QtGui import QStandardItem
 
-from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 
 class PerspectiveMeta(type(QtCore.QObject), ABCMeta):

@@ -1,44 +1,42 @@
 import traceback
-from typing import Optional
-
 from datetime import datetime
+from typing import Optional
 
 import numpy as np
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QSpacerItem, QSizePolicy
 from PySide6.QtCore import Qt
-
-from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWindow
-
-from sas.qtgui.Perspectives.ParticleEditor.FunctionViewer import FunctionViewer
-from sas.qtgui.Perspectives.ParticleEditor.PythonViewer import PythonViewer
-from sas.qtgui.Perspectives.ParticleEditor.OutputViewer import OutputViewer
-from sas.qtgui.Perspectives.ParticleEditor.CodeToolBar import CodeToolBar
-
-from sas.qtgui.Perspectives.ParticleEditor.Plots.QCanvas import QCanvas
-
-
-from sas.qtgui.Perspectives.ParticleEditor.function_processor import process_code, FunctionDefinitionFailed
-from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
-
-
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-
-    QSample, ScatteringCalculation, CalculationParameters, AngularDistribution, SpatialDistribution,
-    SLDDefinition, SLDFunction, MagnetismDefinition, ParticleDefinition, CoordinateSystemTransform, ScatteringOutput)
-
-from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
-from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTable import ParameterTable
-from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableButtons import ParameterTableButtons
+from PySide6.QtWidgets import QSizePolicy, QSpacerItem
 
 from sas.qtgui.Perspectives.ParticleEditor.AngularSamplingMethodSelector import AngularSamplingMethodSelector
-
+from sas.qtgui.Perspectives.ParticleEditor.calculations.calculate import calculate_scattering
+from sas.qtgui.Perspectives.ParticleEditor.CodeToolBar import CodeToolBar
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
+    AngularDistribution,
+    CalculationParameters,
+    CoordinateSystemTransform,
+    MagnetismDefinition,
+    ParticleDefinition,
+    QSample,
+    ScatteringCalculation,
+    ScatteringOutput,
+    SLDDefinition,
+    SLDFunction,
+    SpatialDistribution,
+)
+from sas.qtgui.Perspectives.ParticleEditor.function_processor import FunctionDefinitionFailed, process_code
+from sas.qtgui.Perspectives.ParticleEditor.FunctionViewer import FunctionViewer
+from sas.qtgui.Perspectives.ParticleEditor.OutputViewer import OutputViewer
+from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTable import ParameterTable
+from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableButtons import ParameterTableButtons
+from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
+from sas.qtgui.Perspectives.ParticleEditor.Plots.QCanvas import QCanvas
+from sas.qtgui.Perspectives.ParticleEditor.PythonViewer import PythonViewer
 from sas.qtgui.Perspectives.ParticleEditor.sampling.points import Grid as GridSampling
 from sas.qtgui.Perspectives.ParticleEditor.sampling.points import RandomCube as UniformCubeSampling
-
+from sas.qtgui.Perspectives.ParticleEditor.UI.DesignWindowUI import Ui_DesignWindow
 from sas.qtgui.Perspectives.ParticleEditor.util import format_time_estimate
+from sas.qtgui.Perspectives.ParticleEditor.vectorise import vectorise_sld
 
-from sas.qtgui.Perspectives.ParticleEditor.calculations.calculate import calculate_scattering
 
 def safe_float(text: str):
     try:

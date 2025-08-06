@@ -1,18 +1,14 @@
+import importlib.resources as resources
 from collections import defaultdict
 
 from PySide6 import QtWidgets
-from PySide6.QtGui import QPixmap, QIcon
-from PySide6.QtWidgets import QDialog, QWidget, QTextBrowser, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox
-from PySide6.QtCore import QUrl, QSize
+from PySide6.QtCore import QSize, QUrl
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import QCheckBox, QDialog, QHBoxLayout, QPushButton, QTextBrowser, QVBoxLayout, QWidget
 
-from sas.system.version import __version__ as sasview_version
-import importlib.resources as resources
-
+from sas.qtgui.Utilities.WhatsNew.newer import newest, reduced_version, strictly_newer_than
 from sas.system import config
-
-
-from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_version, newest
-
+from sas.system.version import __version__ as sasview_version
 
 
 def whats_new_messages(only_recent=True):

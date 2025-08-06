@@ -1,8 +1,7 @@
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
-from PySide6.QtTest import *
 import inspect
+
+from PySide6.QtCore import QObject, pyqtBoundSignal, slot
+
 
 def WarningTestNotImplemented(method_name=None):
     """

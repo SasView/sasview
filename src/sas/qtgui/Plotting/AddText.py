@@ -1,10 +1,9 @@
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtGui, QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
-
 from sas.qtgui.Plotting.UI.AddTextUI import Ui_AddText
+
 
 class AddText(QtWidgets.QDialog, Ui_AddText):
     """ Simple GUI for a single line text query """

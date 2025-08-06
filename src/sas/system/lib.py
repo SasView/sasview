@@ -5,15 +5,14 @@ These functions are used to setup up the GUI and the scripting environment.
 """
 import os
 
+
 def setup_sasmodels():
     """Initialize sasmodels settings from the sasview configuration."""
-    from .user import get_app_dir
-
     # Don't need to set SAS_MODELPATH for gui because sascalc.fit uses the
     # full paths to models, but when using the sasview package as a python
     # distribution for running sasmodels scripts we need to set SAS_MODELPATH
     # to the path used by SasView to store models.
-    from sas.system.user import find_plugins_dir
+    from sas.system.user import find_plugins_dir, get_app_dir
     os.environ['SAS_MODELPATH'] = find_plugins_dir()
 
     # TODO: Use same mechanism as OpenCL/CUDA to manage the cache file path
@@ -40,6 +39,7 @@ def reset_sasmodels(sas_opencl):
     sas_opencl. The new value will be saved in the sasview configuration file.
     """
     from sasmodels.sasview_model import reset_environment
+
     from sas import config
 
     config.SAS_OPENCL = sas_opencl

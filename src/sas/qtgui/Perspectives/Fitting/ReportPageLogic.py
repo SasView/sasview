@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*-
 import base64
 import datetime
+import logging
 import sys
-
+import urllib.parse
+from io import BytesIO
 from typing import List
 
-import logging
-from io import BytesIO
-import urllib.parse
 import html2text
-
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from bumps import options
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
+from sasmodels import __version__ as SASMODELS_VERSION
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
-
 from sas.system.version import __version__ as SASVIEW_VERSION
-from sasmodels import __version__ as SASMODELS_VERSION
+
 
 # TODO: Integrate with other reports
 class ReportPageLogic:

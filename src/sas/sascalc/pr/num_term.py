@@ -1,10 +1,12 @@
-from __future__ import print_function, division
+from __future__ import division, print_function
 
-import math
-import numpy as np
 import copy
 import logging
-from sas.sascalc.pr.Invertor import Invertor
+import math
+
+import numpy as np
+
+from sas.sascalc.pr.invertor import Invertor
 
 logger = logging.getLogger(__name__)
 

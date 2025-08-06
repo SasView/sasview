@@ -1,8 +1,7 @@
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
 
 class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
     """
@@ -107,7 +106,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         if index.column() in (self.param_min, self.param_max):
             try:
-                value_float = float(editor.text())
+                float(editor.text())
             except ValueError:
                 # TODO: present the failure to the user
                 # balloon popup? tooltip? cell background colour flash?

@@ -1,31 +1,31 @@
 import json
 from logging import getLogger
 
+import numpy as np
+from bumps import fitters
+from bumps.fitProblem import FitProblem
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from serializers import (
+    FitParameterSerializer,
+    FitSerializer,
+)
 
-from bumps.names import *
-from bumps import fitters
-from sasmodels.core import load_model, load_model_info, list_models
-from sasmodels.data import load_data, empty_data1D
-from sasmodels.bumps_model import Model, Experiment
+from sasmodels.bumps_model import Experiment, Model
+from sasmodels.core import list_models, load_model, load_model_info
+from sasmodels.data import empty_data1D, load_data
 from sasmodels.direct_model import DirectModel
-from sas.sascalc.fit.models import ModelManager
 
 #TODO categoryinstallers should belong in SasView.System rather than in QTGUI
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+from sas.sascalc.fit.models import ModelManager
 
-from serializers import (
-    FitSerializer,
-    FitParameterSerializer,
-)
 from .models import (
     Fit,
     FitParameter,
 )
-
 
 fit_logger = getLogger(__name__)
 model_manager = ModelManager()
@@ -141,9 +141,9 @@ def start_fit(fit_db):
         #TODO be able to do multiple experiments
         problem = FitProblem(M)
         if fit_db.optimizer:
-            fitted = fit(problem, method=fit_db.optimizer)
+            fitted = fitters.fit(problem, method=fit_db.optimizer)
         else:
-            fitted = fit(problem)
+            fitted = fitters.fit(problem)
         #TODO results to be formatted differently later
         result = M.__getstate__()
         result['_data'] = test_data.__str__()

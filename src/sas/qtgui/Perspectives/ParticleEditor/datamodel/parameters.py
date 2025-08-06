@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import NamedTuple
 
+
 class ValueSource(Enum):
     """ Item that decribes where the current parameter came from"""
     DEFAULT = 0

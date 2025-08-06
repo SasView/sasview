@@ -1,7 +1,7 @@
 from typing import Optional
-from sas.sascalc.corfunc.corfunc_calculator import SupplementaryParameters
 
 from sas.qtgui.Perspectives.Corfunc.CorfuncCanvas import CorfuncCanvas
+from sas.sascalc.corfunc.corfunc_calculator import SupplementaryParameters
 
 
 class RealSpaceCanvas(CorfuncCanvas):

@@ -7,13 +7,13 @@ Instances of the spatial sampler
 """
 
 import math
-import numpy as np
-
 from collections import defaultdict
 
+import numpy as np
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import SpatialDistribution
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
+
 
 class BoundedByCube(SpatialDistribution):
 

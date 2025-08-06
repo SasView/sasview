@@ -11,11 +11,10 @@
 
 import numpy as np  # type: ignore
 
-from sasmodels.resolution import Slit1D, Pinhole1D
-from sasmodels.sesans import SesansTransform
-from sasmodels.resolution2d import Pinhole2D
-
 from sasdata.data_util.nxsunit import Converter
+from sasmodels.resolution import Pinhole1D, Slit1D
+from sasmodels.resolution2d import Pinhole2D
+from sasmodels.sesans import SesansTransform
 
 
 def smear_selection(data, model=None):
@@ -108,7 +107,8 @@ class PySmear(object):
         The returned value is of the same length as iq_in, with the range
         first_bin:last_bin set to the resolution smeared values.
         """
-        if last_bin is None: last_bin = len(iq_in)
+        if last_bin is None:
+            last_bin = len(iq_in)
         start, end = first_bin + self.offset, last_bin + self.offset
         q_calc = self.resolution.q_calc
         iq_calc = np.empty_like(q_calc)

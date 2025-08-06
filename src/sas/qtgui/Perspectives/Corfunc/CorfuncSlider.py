@@ -1,13 +1,13 @@
+import math
 from typing import Optional, Tuple
 
-import math
 import numpy as np
-
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFontMetrics
 
-from sas.sascalc.corfunc.calculation_data import ExtrapolationParameters, ExtrapolationInteractionState
+from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState, ExtrapolationParameters
+
 
 class CorfuncSlider(QtWidgets.QWidget):
     """ Slider that allows the selection of the different Q-ranges involved in interpolation,

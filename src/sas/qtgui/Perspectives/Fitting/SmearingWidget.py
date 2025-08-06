@@ -2,23 +2,23 @@
 Widget/logic for smearing data.
 """
 import copy
-import numpy as np
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
 import logging
-logger = logging.getLogger(__name__)
 
-from sas.sascalc.fit.qsmearing import smear_selection, PySmear, PySmear2D
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sasmodels.resolution import Slit1D, Pinhole1D
+from sasmodels.resolution import Pinhole1D, Slit1D
 from sasmodels.sesans import SesansTransform
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.SmearingWidgetUI import Ui_SmearingWidgetUI
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.sascalc.fit.qsmearing import PySmear, PySmear2D, smear_selection
+
+logger = logging.getLogger(__name__)
+
 
 class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
     """

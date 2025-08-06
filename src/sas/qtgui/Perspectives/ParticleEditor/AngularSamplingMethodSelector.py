@@ -1,10 +1,11 @@
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QFormLayout, QComboBox, QDoubleSpinBox
+from PySide6.QtWidgets import QComboBox, QDoubleSpinBox, QFormLayout, QVBoxLayout, QWidget
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import AngularDistribution
-from sas.qtgui.Perspectives.ParticleEditor.sampling.geodesic import GeodesicDivisions
-from sas.qtgui.Perspectives.ParticleEditor.sampling.angles import angular_sampling_methods
 from sas.qtgui.Perspectives.ParticleEditor.GeodesicSampleSelector import GeodesicSamplingSpinBox
+from sas.qtgui.Perspectives.ParticleEditor.sampling.angles import angular_sampling_methods
+from sas.qtgui.Perspectives.ParticleEditor.sampling.geodesic import GeodesicDivisions
+
 
 class ParametersForm(QWidget):
     """ Form that displays the parameters associated with the class (also responsible for generating the sampler)"""
@@ -17,13 +18,13 @@ class ParametersForm(QWidget):
         self.parameter_callbacks = []
 
         for parameter_name, text, cls in sampling_class.parameters():
-            if cls == GeodesicDivisions:
+            if isinstance(cls, GeodesicDivisions):
                 widget = GeodesicSamplingSpinBox()
 
                 def callback():
                     return widget.getNDivisions()
 
-            elif cls == float:
+            elif isinstance(cls, float):
                 widget = QDoubleSpinBox()
 
                 def callback():

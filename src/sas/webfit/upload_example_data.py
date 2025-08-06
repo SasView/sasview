@@ -1,14 +1,16 @@
-import os
 import logging
-import django
+import os
 from glob import glob
+
+import django
+from data.models import Data
+
 from sasdata import example_data
 
 # Initialise the Django environment. This must be done before importing anything
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 django.setup()
 
-from data.models import Data
 
 EXAMPLE_DATA_DIR = os.environ.get("EXAMPLE_DATA_DIR", os.path.dirname(example_data.__file__))
 

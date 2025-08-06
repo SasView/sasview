@@ -3,10 +3,10 @@ from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 
-
+from sas.qtgui.Perspectives.ParticleEditor.defaults import default_text
 from sas.qtgui.Perspectives.ParticleEditor.syntax_highlight import PythonHighlighter
 
-from sas.qtgui.Perspectives.ParticleEditor.defaults import default_text
+
 class PythonViewer(QtWidgets.QTextEdit):
     """ Python text editor window"""
 

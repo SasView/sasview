@@ -1,7 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Optional, List, Any
 import logging
-
+from abc import ABC, abstractmethod
+from typing import Any, List, Optional
 
 """ Type representation for config elements
 

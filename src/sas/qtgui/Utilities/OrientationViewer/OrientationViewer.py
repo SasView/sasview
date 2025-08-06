@@ -1,26 +1,24 @@
 from typing import Optional
 
 import numpy as np
+from PySide6 import QtWidgets
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QSizePolicy
 from scipy.special import erfinv
 
-from PySide6 import QtWidgets
-from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtCore import Qt, QSize
-
-from sasmodels.core import load_model_info, build_model
+from sasmodels.core import build_model, load_model_info
 from sasmodels.data import empty_data2D
 from sasmodels.direct_model import DirectModel
 
-from sas.qtgui.GL.scene import Scene
-from sas.qtgui.GL.transforms import Rotation, Scaling, Translation
-from sas.qtgui.GL.surface import Surface
-from sas.qtgui.GL.cylinder import Cylinder
+from sas.qtgui.GL.color import uniform_coloring
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
-from sas.qtgui.GL.color import uniform_coloring
-
-from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import OrientationViewierController, Orientation
+from sas.qtgui.GL.cylinder import Cylinder
+from sas.qtgui.GL.scene import Scene
+from sas.qtgui.GL.surface import Surface
+from sas.qtgui.GL.transforms import Rotation, Scaling, Translation
+from sas.qtgui.Utilities.OrientationViewer.OrientationViewerController import Orientation, OrientationViewierController
 
 
 class OrientationViewer(QtWidgets.QWidget):

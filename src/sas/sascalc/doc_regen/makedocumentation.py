@@ -3,13 +3,13 @@ Creates documentation from .py files
 """
 import logging
 import os
-import sys
 import subprocess
-
+import sys
 from pathlib import Path
 from typing import Sequence, Union
 
 from sasmodels.core import list_models
+
 from sas.system.user import (MAIN_PY_SRC, PLUGIN_PY_SRC, PATH_LIKE, HELP_DIRECTORY_LOCATION, MAIN_BUILD_SRC,
                              MAIN_DOC_SRC, DOC_LOG, create_user_files_if_needed)
 

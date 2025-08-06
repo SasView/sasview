@@ -1,8 +1,9 @@
 from PySide6 import QtWidgets
 
+from .InvariantUtils import WIDGETS
+
 # local
 from .UI.InvariantDetailsUI import Ui_Dialog
-from .InvariantUtils import WIDGETS
 
 # ERROR_COLOR = wx.Colour(255, 0, 0, 128)
 # EXTRAPOLATION_COLOR = wx.Colour(169, 169, 168, 128)

@@ -1,23 +1,22 @@
 # global
-import os
-import re
 import ast
 import datetime
-import logging
-import traceback
 import importlib.util
-
-from PySide6 import QtWidgets, QtCore, QtGui
+import logging
+import os
+import re
+import traceback
 from pathlib import Path
 
-from sas.sascalc.fit import models
-from sas.system.user import find_plugins_dir, MAIN_DOC_SRC
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
+from sas.sascalc.fit import models
+from sas.system.user import find_plugins_dir, MAIN_DOC_SRC
 
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):

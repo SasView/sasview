@@ -1,11 +1,13 @@
 
-import numpy as np
 import logging
-from scipy import stats, integrate, optimize
+
+import numpy as np
+from scipy import integrate, optimize, stats
 
 from sasdata.dataloader.data_info import Data1D
 from sasmodels.core import load_model
 from sasmodels.direct_model import DirectModel
+
 from sas.sascalc.size_distribution.maxEnt_method import maxEntMethod
 
 logger = logging.getLogger(__name__)

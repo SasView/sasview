@@ -1,10 +1,8 @@
-from typing import Tuple, Optional, TypeVar, Generic, NamedTuple
+from dataclasses import dataclass
+from enum import Enum
+from typing import Generic, NamedTuple, Optional, Tuple, TypeVar
 
 from sasdata.dataloader.data_info import Data1D
-
-from enum import Enum
-from dataclasses import dataclass
-
 
 T = TypeVar("T")
 

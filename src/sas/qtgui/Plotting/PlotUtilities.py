@@ -1,7 +1,7 @@
-import numpy
 import string
-
 from collections import OrderedDict
+
+import numpy
 
 # MPL shapes dictionary with some extra styles rendered internally.
 # Ordered for consistent display in combo boxes

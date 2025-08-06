@@ -1,14 +1,16 @@
 import sys
+
 # make sure sasmodels is on the path
 sys.path.append('..')
 
 from os import mkdir
-from os.path import basename, exists, join as joinpath
+from os.path import basename, exists
+from os.path import join as joinpath
+from typing import IO, BinaryIO, Optional
+
 from sasmodels.core import load_model_info
+
 from sas.system.user import MAIN_DOC_SRC, PATH_LIKE
-
-from typing import Optional, IO, BinaryIO
-
 
 TEMPLATE = """\
 ..

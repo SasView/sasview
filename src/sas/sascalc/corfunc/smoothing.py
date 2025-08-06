@@ -1,10 +1,10 @@
+from collections import namedtuple
+from typing import Callable, Optional
+
 import numpy as np
 
-from typing import Optional, Callable
-from collections import namedtuple
-
-
 from sas.sascalc.corfunc.vectorisation import ArrayLike, assure_vectorised_argument
+
 Cache = namedtuple("Cache", 'x, y')
 
 class SmoothJoin:
