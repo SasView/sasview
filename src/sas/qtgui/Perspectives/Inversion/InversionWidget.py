@@ -328,7 +328,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         result.pr_plot.plot_role = DataRole.ROLE_STAND_ALONE
 
         # Data Plot
-        data_plot = result.logic.new1DPlot(self.tab_id, out, self.currentResult.calculator)
+        data_plot = result.logic.new1DPlot(self.tab_id, out, pr)
         data_plot.filename = result.logic.data.filename
 
         data_plot.show_q_range_sliders = True
