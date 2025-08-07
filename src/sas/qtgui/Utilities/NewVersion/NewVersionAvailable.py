@@ -1,9 +1,9 @@
-import json
 import logging
 import webbrowser
 from copy import copy
 from typing import Optional
 
+import requests
 from packaging.version import Version, parse
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
@@ -20,7 +20,6 @@ from PySide6.QtWidgets import (
 )
 
 from sas import config
-from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.system import web
 from sas.system.version import __version__ as current_version_string
 
@@ -87,28 +86,23 @@ class NewVersionAvailable(QDialog):
 
 def get_current_release_version() -> Optional[tuple[str, str, Version]]:
     """ Get the current version from the server """
-
-    c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
-    response = c.connect()
-
-    # Don't do anything if we can't reach the server
-    if response is None:
-        return None
-
     try:
-        content = response.read().strip()
-        logger.info("Connected to www.sasview.org. Received: %s", content)
-
-        version_info = json.loads(content)
+        response = requests.get(web.update_url, timeout=config.UPDATE_TIMEOUT)
+        # Will throw Exception if the HTTP status code returned isn't success
+        # (2xx)
+        response.raise_for_status()
+        version_info = response.json()
+        logger.info("Connected to www.sasview.org. Received: %s", version_info)
 
         version_string = version_info["version"]
         url = version_info["download_url"]
 
         return version_string, url, parse(version_string)
 
-
     except Exception as ex:
         logging.info("Failed to get version number %s", ex)
+        return None
+
 
 
 def maybe_prompt_new_version_download() -> Optional[QDialog]:
