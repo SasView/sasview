@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import sys
@@ -6,8 +5,8 @@ import traceback
 import webbrowser
 from pathlib import Path
 from typing import Dict, Optional
-from packaging.version import Version
 
+from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem
 from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
@@ -43,11 +42,6 @@ from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
 from sas.qtgui.Utilities.About.About import About
 
-# General SAS imports
-from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
-from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
-from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import get_current_release_version
-
 # from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
@@ -58,11 +52,14 @@ from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMult
 from sas.qtgui.Utilities.ModelEditors.ReparamEditor.ReparameterizationEditor import ReparameterizationEditor
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import get_current_release_version
 from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 from sas.qtgui.Utilities.ResultPanel import ResultPanel
+
+# General SAS imports
 from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
