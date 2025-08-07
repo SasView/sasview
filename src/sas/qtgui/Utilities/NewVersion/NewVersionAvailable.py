@@ -4,10 +4,7 @@ import webbrowser
 from copy import copy
 from typing import Optional
 
-<<<<<<< HEAD
-=======
 import requests
->>>>>>> ab18ce7d8 ([pre-commit.ci lite] apply automatic fixes for ruff linting errors)
 from packaging.version import Version, parse
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
