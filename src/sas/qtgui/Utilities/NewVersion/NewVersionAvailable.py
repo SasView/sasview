@@ -91,24 +91,25 @@ def get_current_release_version() -> Optional[tuple[str, str, Version]]:
     c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
     response = c.connect()
 
-    # Don't do anything if we can't reach the server
-    if response is None:
-        return None
-
     try:
-        content = response.read().strip()
-        logger.info("Connected to www.sasview.org. Received: %s", content)
-
-        version_info = json.loads(content)
+        response = requests.get(web.update_url)
+        # Will throw Exception if the HTTP status code returned isn't success
+        # (2xx)
+        response.raise_for_status()
+        version_info = response.json()
+        logger.info("Connected to www.sasview.org. Received: %s", version_info)
 
         version_string = version_info["version"]
         url = version_info["download_url"]
 
         return version_string, url, parse(version_string)
 
-
+    except ConnectionError:
+        # Return None if we can't reach the server.
+        return None
     except Exception as ex:
         logging.info("Failed to get version number %s", ex)
+
 
 
 def maybe_prompt_new_version_download() -> Optional[QDialog]:
