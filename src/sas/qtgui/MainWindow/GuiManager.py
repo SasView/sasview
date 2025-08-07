@@ -629,7 +629,8 @@ class GuiManager:
         version number has been obtained. If the check is being done in the
         background, the user will not be notified unless there's an update.
 
-        :param version_str: version string
+        :param version_info: tuple of version string, download url, and the
+        version object.
         """
         version_str, download_url, _ = version_info
         try:
