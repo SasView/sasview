@@ -44,6 +44,8 @@ from sas.qtgui.Utilities.About.About import About
 
 # General SAS imports
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
+from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
+from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import get_current_release_version
 
 # from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
 from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
@@ -378,14 +380,14 @@ class GuiManager:
         try:
             # In order to have multiple help windows open simultaneously, we need to create a new class variable
             # If we just reassign the old one, the old window will be destroyed
-            
+
             # Have we found a name not assigned to a window?
-            potential_help_window = getattr(cls, window_name, None) 
+            potential_help_window = getattr(cls, window_name, None)
             while potential_help_window and potential_help_window.isVisible():
                 window_name = f"help_window_{counter}"
                 potential_help_window = getattr(cls, window_name, None)
                 counter += 1
-            
+
             # Assign new variable to the GuiManager
             setattr(cls, window_name, GuiUtils.showHelp(url_abs))
 
@@ -602,19 +604,10 @@ class GuiManager:
         A thread is started for the connecting with the server. The thread calls
         a call-back method when the current version number has been obtained.
         """
-        version_info = {"version": "0.0.0"}
-        c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
-        response = c.connect()
-        if response is None:
-            return
-        try:
-            content = response.read().strip()
-            logging.info("Connected to www.sasview.org. Latest version: %s"
-                            % (content))
-            version_info = json.loads(content)
-            self.processVersion(version_info)
-        except ValueError as ex:
-            logging.info("Failed to connect to www.sasview.org:", ex)
+        latest_version = get_current_release_version()
+        if latest_version is None:
+            logging.info("Failed to connect to www.sasview.org:")
+        self.processVersion(latest_version)
 
     def log_installed_packages(self):
         """
@@ -628,26 +621,20 @@ class GuiManager:
         """
         PackageGatherer().log_imported_packages()
 
-    def processVersion(self, version_info):
+    def processVersion(self, version_str):
         """
         Call-back method for the process of checking for updates.
         This methods is called by a VersionThread object once the current
         version number has been obtained. If the check is being done in the
         background, the user will not be notified unless there's an update.
 
-        :param version: version string
+        :param version_str: version string
         """
         try:
-            version = version_info["version"]
-            if version == "0.0.0":
-                msg = "Could not connect to the application server."
-                msg += " Please try again later."
-                self.communicate.statusBarUpdateSignal.emit(msg)
-
-            elif version.__gt__(sas.system.version.__version__):
-                msg = "Version %s is available! " % str(version)
-                if "download_url" in version_info:
-                    webbrowser.open(version_info["download_url"])
+            if version_str.__gt__(sas.system.version.__version__):
+                msg = "Version %s is available! " % str(version_str)
+                if "download_url" in version_str:
+                    webbrowser.open(version_str["download_url"])
                 else:
                     webbrowser.open(web.download_url)
                 self.communicate.statusBarUpdateSignal.emit(msg)
