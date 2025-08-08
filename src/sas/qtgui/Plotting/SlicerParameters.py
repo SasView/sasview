@@ -393,9 +393,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
 
         if fitting_requested in (1, 2):
-            self.check_perspective_and_set_data(fitting_requested, 'FittingWindow', items_for_fit)
+            self.check_perspective_and_set_data(fitting_requested, 'Fitting', items_for_fit)
         elif fitting_requested in (3, 4):
-            self.check_perspective_and_set_data(fitting_requested, 'InversionWindow', items_for_fit)    
+            self.check_perspective_and_set_data(fitting_requested, 'Inversion', items_for_fit)
         else:
             return
     
