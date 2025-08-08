@@ -26,7 +26,7 @@ MODEL = enum(
     'NEUTRON_LENGTH',
 )
 
-class NeutronSldResult(object):
+class NeutronSldResult:
     def __init__(self, neutron_wavelength, neutron_sld_real,
                  neutron_sld_imag, neutron_inc_xs, neutron_abs_xs,
                  neutron_length):
@@ -38,7 +38,7 @@ class NeutronSldResult(object):
         self.neutron_abs_xs = neutron_abs_xs
         self.neutron_length = neutron_length
 
-class XraySldResult(object):
+class XraySldResult:
     def __init__(self, xray_wavelength, xray_sld_real, xray_sld_imag):
 
         self.xray_wavelength = xray_wavelength

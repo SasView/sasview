@@ -194,7 +194,7 @@ class PackageGatherer:
         for module_name in modules_dict.keys():
             parent_module = module_name.split('.')[0]
             # Save one instance of each module
-            if parent_module not in output_dict.keys():
+            if parent_module not in output_dict:
                 output_dict[parent_module] = modules_dict[module_name]
             else:
                 # Modules versions are not the same
@@ -232,7 +232,7 @@ class PackageGatherer:
             if parent_module in modules_dict.keys():
                 pass
             # Module is already in output_list
-            elif parent_module in output_dict.keys():
+            elif parent_module in output_dict:
                 pass
             # Append module to output_list
             else:

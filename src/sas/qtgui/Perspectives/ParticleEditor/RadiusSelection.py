@@ -1,4 +1,3 @@
-from typing import Optional
 
 from PySide6 import QtWidgets
 
@@ -6,7 +5,7 @@ from sas.qtgui.Perspectives.ParticleEditor.UI.RadiusSelectionUI import Ui_Radius
 
 
 class RadiusSelection(QtWidgets.QWidget, Ui_RadiusSelection):
-    def __init__(self, text: Optional[str]=None, parent=None):
+    def __init__(self, text: str | None=None, parent=None):
         super().__init__()
 
         self.setupUi(self)

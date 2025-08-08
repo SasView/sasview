@@ -199,7 +199,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         self.editor_widget.blockSignals(True)
         plugin_text = ""
-        with open(filename, "r", encoding="utf-8") as plugin:
+        with open(filename, encoding="utf-8") as plugin:
             plugin_text = plugin.read()
             self.editor_widget.txtEditor.setPlainText(plugin_text)
         self.editor_widget.setEnabled(True)
@@ -237,7 +237,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.c_editor_widget = ModelEditor(self, is_python=False)
         self.tabWidget.addTab(self.c_editor_widget, c_display_name)
         # Read in the file and set in on the widget
-        with open(self.filename_c, "r", encoding="utf-8") as plugin:
+        with open(self.filename_c, encoding="utf-8") as plugin:
             self.c_editor_widget.txtEditor.setPlainText(plugin.read())
         self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
@@ -446,7 +446,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         :param full_path: full path to the model file
         """
         try:
-            with open(full_path, "r", encoding="utf-8") as plugin:
+            with open(full_path, encoding="utf-8") as plugin:
                 model_str = plugin.read()
             ast.parse(model_str)
             GuiUtils.checkModel(full_path)

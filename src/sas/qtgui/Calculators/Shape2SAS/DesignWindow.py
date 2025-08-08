@@ -1,7 +1,6 @@
 # Global
 import re
 from types import MethodType
-from typing import Union
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -123,11 +122,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #plot scene
         self.scatteringProf = QWidget()
         self.scatteringProf.setContentsMargins(0, 0, 0, 0)
-        self.scatteringProf.setObjectName(u"scatteringProf")
+        self.scatteringProf.setObjectName("scatteringProf")
         self.scatteringProf.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.scatteringScene = QVBoxLayout(self.scatteringProf)
         self.scatteringScene.setContentsMargins(5, 5, 5, 5)
-        self.scatteringScene.setObjectName(u"scatteringScene")
+        self.scatteringScene.setObjectName("scatteringScene")
         self.plotBoxLayout = QHBoxLayout()
         self.plotBoxLayout.setContentsMargins(5, 5, 5, 5)
         self.plotBoxLayout.addWidget(self.scatteringProf)
@@ -356,18 +355,18 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         return S_vals
 
-    def getSubunitTableCell(self, row: int, column: int) -> Union[float, str]:
+    def getSubunitTableCell(self, row: int, column: int) -> float | str:
         """Get model data from a single cell."""
         return self.subunitTable.model.item(row, column).data(Qt.EditRole)
 
     @staticmethod
-    def ifEmptyValue(value: Union[float, str], values: list[Union[float, str]], *args, **kwargs):
+    def ifEmptyValue(value: float | str, values: list[float | str], *args, **kwargs):
         """condition method. Append if not empty"""
         if not value == "":
             values.append(value)
 
     @staticmethod
-    def ifFitPar(value: Union[float, str], values: list[Union[float, str]], *args, **kwargs):
+    def ifFitPar(value: float | str, values: list[float | str], *args, **kwargs):
         """condition method. Append FitPar if condition. Otherwise append constant"""
 
         conditionFitPar = kwargs['conditionFitPar'] #list[list[str]]
@@ -380,7 +379,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             else:
                 values.append(value)
 
-    def getSubunitTableRow(self, condition: MethodType, row: int, **kwargs) -> list[Union[float, str]]:
+    def getSubunitTableRow(self, condition: MethodType, row: int, **kwargs) -> list[float | str]:
         """Get model data from a single row"""
 
         values = []
@@ -391,7 +390,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         return values
 
-    def getSubunitTableSets(self, condition: MethodType, rows: list[int], **kwargs) -> list[list[Union[float, str]]]:
+    def getSubunitTableSets(self, condition: MethodType, rows: list[int], **kwargs) -> list[list[float | str]]:
         """Get a set of rows per column in subunit table"""
 
         sets = []
@@ -405,7 +404,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             sets.append(set)
         return sets
     
-    def getStandardReadOfTableData(self) -> list[list[Union[float, str]]]:
+    def getStandardReadOfTableData(self) -> list[list[float | str]]:
         """Get a standard data read from subunit TableView"""
 
         columns = self.subunitTable.model.columnCount()
@@ -428,7 +427,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         return data
 
-    def getModelData(self, condition: MethodType, **kwargs) -> list[list[Union[float, str]]]:
+    def getModelData(self, condition: MethodType, **kwargs) -> list[list[float | str]]:
         """Get all data in the subunit table"""
 
         #no subunits inputted

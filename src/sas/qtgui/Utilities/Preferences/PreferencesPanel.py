@@ -1,7 +1,8 @@
 import logging
 import os
 import sys
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QWidget
@@ -24,7 +25,7 @@ from .PlottingPreferencesWidget import PlottingPreferencesWidget
 BASE_PANELS = {"Plotting Settings": PlottingPreferencesWidget,
                "Display Settings": DisplayPreferencesWidget,
                }  # Type: Dict[str, Union[Type[PreferencesWidget], Callable[[],QWidget]]
-ConfigType = Union[str, bool, float, int, List[Union[str, float, int]]]
+ConfigType = str | bool | float | int | list[str | float | int]
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
     associated with each listWidget item.
     """
 
-    def __init__(self, parent: Optional[Any] = None):
+    def __init__(self, parent: Any | None = None):
         super(PreferencesPanel, self).__init__(parent)
         self.setupUi(self)
         self._staged_changes = {}
@@ -73,7 +74,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
 
         self.registered_perspectives: list[str] = []
 
-    def addWidgets(self, widgets: Dict[str, Callable]):
+    def addWidgets(self, widgets: dict[str, Callable]):
         """Add a list of named widgets to the window"""
         for name, widget in widgets.items():
             if isinstance(widget, PreferencesWidget):
@@ -104,7 +105,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
             widget.restoreDefaults()
         self._set_accept()
 
-    def stageSingleChange(self, key: str, value: ConfigType, config_restart_message: Optional[str] = ""):
+    def stageSingleChange(self, key: str, value: ConfigType, config_restart_message: str | None = ""):
         """ Preferences widgets should call this method when changing a variable to prevent direct configuration
         changes"""
         if getattr(config, key, None) is None:
@@ -115,7 +116,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         self.unset_invalid_input(key)
         self._set_accept()
 
-    def unStageSingleChange(self, key: str, config_restart_message: Optional[str] = ""):
+    def unStageSingleChange(self, key: str, config_restart_message: str | None = ""):
         """Preferences widgets should call this method when removing an invalid value from the staged changes."""
         self._staged_changes.pop(key, None)
         self._staged_requiring_restart.discard(config_restart_message)
@@ -183,7 +184,7 @@ class PreferencesPanel(QDialog, Ui_preferencesUI):
         """Save the configuration values when the preferences window is closed"""
         super(PreferencesPanel, self).close()
 
-    def addWidget(self, widget: QWidget, name: Optional[str] = None):
+    def addWidget(self, widget: QWidget, name: str | None = None):
         """Add a single widget to the panel"""
 
         # Set the parent of the new widget to the parent of this window

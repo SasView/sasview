@@ -163,7 +163,7 @@ class Calc1D(CalcThread):
         Compute model 1d value given qmin , qmax , x value
         """
         self.starttime = time.time()
-        output = numpy.zeros((len(self.data.x)))
+        output = numpy.zeros(len(self.data.x))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
 
         intermediate_results = None
@@ -182,12 +182,12 @@ class Calc1D(CalcThread):
                 mask = self.smearer.resolution.q_calc
                 first_bin = 0
                 last_bin = len(mask)
-                unsmeared_output = numpy.zeros((len(mask)))
+                unsmeared_output = numpy.zeros(len(mask))
             else:
                 first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
                                                                  self.qmax)
                 mask = self.data.x[first_bin:last_bin+1]
-                unsmeared_output = numpy.zeros((len(self.data.x)))
+                unsmeared_output = numpy.zeros(len(self.data.x))
 
             return_data = self.model.calculate_Iq(mask)
             if isinstance(return_data, tuple):
@@ -201,8 +201,8 @@ class Calc1D(CalcThread):
             # the length of data.y will be zero.
             # does not apply to SESANS where Hankel was implemented as resolution function
             if isinstance(self.data.y, numpy.ndarray) and output.shape == self.data.y.shape and not self.data.isSesans:
-                unsmeared_data = numpy.zeros((len(self.data.x)))
-                unsmeared_error = numpy.zeros((len(self.data.x)))
+                unsmeared_data = numpy.zeros(len(self.data.x))
+                unsmeared_error = numpy.zeros(len(self.data.x))
                 unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
                                                         * unsmeared_output[first_bin:last_bin+1]\
                                                         / output[first_bin:last_bin+1]
@@ -252,8 +252,8 @@ class Calc1D(CalcThread):
 
             if pq_values is None or sq_values is None:
                 if p_model is not None and s_model is not None:
-                    sq_values = numpy.zeros((len(self.data.x)))
-                    pq_values = numpy.zeros((len(self.data.x)))
+                    sq_values = numpy.zeros(len(self.data.x))
+                    pq_values = numpy.zeros(len(self.data.x))
                     sq_values[index] = s_model.evalDistribution(self.data.x[index])
                     pq_values[index] = p_model.evalDistribution(self.data.x[index])
 

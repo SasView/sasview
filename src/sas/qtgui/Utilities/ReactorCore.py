@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2001-2018
 # Allen Short
 # Andy Gayton
@@ -118,7 +117,7 @@ try:
     )
 except ImportError as e1:
     raise ImportError(
-        "PySide6 is not installed. PySide6: {})".format(e1)
+        f"PySide6 is not installed. PySide6: {e1})"
     )
 
 from twisted.internet import posixbase

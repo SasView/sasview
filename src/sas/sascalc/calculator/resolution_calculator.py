@@ -20,7 +20,7 @@ _PLANK_H = 6.62606896E-27
 _GRAVITY = 981.0
 
 
-class ResolutionCalculator(object):
+class ResolutionCalculator:
     """
     compute resolution in 2D
     """

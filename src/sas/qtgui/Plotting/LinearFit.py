@@ -2,7 +2,6 @@
 Adds a linear fit plot to the chart
 """
 import re
-from typing import Optional
 
 import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -22,8 +21,8 @@ from sas.qtgui.Utilities.GuiUtils import DoubleValidator, formatNumber, xyTransf
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
     updatePlot = QtCore.Signal(np.ndarray, np.ndarray)
 
-    def __init__(self, parent: Optional[PlotterBase] = None,
-                 data: Optional[Data1D] = None,
+    def __init__(self, parent: PlotterBase | None = None,
+                 data: Data1D | None = None,
                  max_range: tuple = (0.0, 0.0),
                  fit_range: tuple = (0.0, 0.0),
                  xlabel: str = "",
@@ -35,8 +34,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         assert isinstance(max_range, tuple)
         assert isinstance(fit_range, tuple)
 
-        self.data: Optional[Data1D] = data
-        self.parent: Optional[PlotterBase] = parent
+        self.data: Data1D | None = data
+        self.parent: PlotterBase | None = parent
 
         self.max_range: tuple = max_range
         # Set fit minimum to 0.0 if below zero
@@ -87,8 +86,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         fr_max = GuiUtils.formatNumber(fit_range[1])
         self.txtFitRangeMin.setText(str(fr_min))
         self.txtFitRangeMax.setText(str(fr_max))
-        self.xminFit: Optional[float] = None
-        self.xmaxFit: Optional[float] = None
+        self.xminFit: float | None = None
+        self.xmaxFit: float | None = None
 
         # cast xLabel into html
         label = re.sub(r'\^\((.)\)(.*)', r'<span style=" vertical-align:super;">\1</span>\2',
@@ -103,7 +102,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.cstB: Fittings.Parameter = Fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = DataTransform
 
-        self.q_sliders: Optional[QRangeSlider] = None
+        self.q_sliders: QRangeSlider | None = None
         self.drawSliders()
 
         self.setFixedSize(self.minimumSizeHint())

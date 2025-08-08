@@ -437,7 +437,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         error_line = 0
         try:
-            with open(full_path, 'r', encoding="utf-8") as plugin:
+            with open(full_path, encoding="utf-8") as plugin:
                 model_str = plugin.read()
             ast.parse(model_str)
             GuiUtils.checkModel(full_path)

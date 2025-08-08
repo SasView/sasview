@@ -1,8 +1,8 @@
 import inspect
 import traceback
+from collections.abc import Callable
 from contextlib import redirect_stdout
 from io import StringIO
-from typing import Callable
 
 import numpy as np
 

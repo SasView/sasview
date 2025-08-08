@@ -1,8 +1,6 @@
 """
 Allows users to change the range of the current graph
 """
-from typing import Tuple, Union
-
 import matplotlib as mpl
 import numpy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -181,7 +179,7 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
             self.txtMaxAmplitude.setText(formatNumber(value))
             self.updateMap()
 
-        def set_values(values: Tuple[Union[int,float], Union[int,float]]):
+        def set_values(values: tuple[int | float, int | float]):
             v1, v2 = values
             if v1 != self.vmin:
                 set_vmin(v1)

@@ -21,14 +21,14 @@ class InvariantPerspectiveTest:
     def widget(self, qapp, mocker):
         '''Create/Destroy the Invariant Perspective Window'''
 
-        class MainWindow(object):
+        class MainWindow:
             def __init__(self):
                 self.model = QtGui.QStandardItemModel()
 
             def plotData(self, data_to_plot):
                 pass
 
-        class dummy_manager(object):
+        class dummy_manager:
             def __init__(self):
                 self.filesWidget = MainWindow()
 

@@ -13,7 +13,7 @@ collimation of SANS but may be good for SAXS.  It is completely wrong for
 slit smeared data. 
 
 """
-class Parameter(object):
+class Parameter:
     """
     Class to handle model parameters - sets the parameters and their
     initial value from the model based to it.

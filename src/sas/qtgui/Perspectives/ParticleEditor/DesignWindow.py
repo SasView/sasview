@@ -1,6 +1,5 @@
 import traceback
 from datetime import datetime
-from typing import Optional
 
 import numpy as np
 from PySide6 import QtWidgets
@@ -161,14 +160,14 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         # Set up variables
 
-        self.last_calculation_time: Optional[float] = None
+        self.last_calculation_time: float | None = None
         self.last_calculation_n_r: int = 0
         self.last_calculation_n_q: int = 0
 
-        self.sld_function: Optional[SLDFunction] = None
-        self.sld_coordinate_mapping: Optional[CoordinateSystemTransform] = None
-        self.magnetism_function: Optional[np.ndarray] = None
-        self.magnetism_coordinate_mapping: Optional[np.ndarray] = None
+        self.sld_function: SLDFunction | None = None
+        self.sld_coordinate_mapping: CoordinateSystemTransform | None = None
+        self.magnetism_function: np.ndarray | None = None
+        self.magnetism_coordinate_mapping: np.ndarray | None = None
 
     def onRadiusChanged(self):
         if self.radiusFromParticleTab.isChecked():
@@ -290,7 +289,7 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
         else:
             raise NotImplementedError("Careful handling of SLD Definitions not implemented yet")
 
-    def magnetismDefinition(self) -> Optional[MagnetismDefinition]:
+    def magnetismDefinition(self) -> MagnetismDefinition | None:
         return None
 
     def particleDefinition(self) -> ParticleDefinition:

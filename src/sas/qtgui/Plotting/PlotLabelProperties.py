@@ -4,7 +4,7 @@ from sas.qtgui.Plotting.PlotUtilities import COLORS, COLORS_LETTER, FONTS, WEIGH
 from sas.qtgui.Plotting.UI.PlotLabelPropertiesUI import Ui_PlotLabelPropertiesUI
 
 
-class PlotLabelPropertyHolder():
+class PlotLabelPropertyHolder:
     def __init__(self, font=None, color=None, weight=None, size=None, text="",):
         self.__properties = {}
         self.__properties['font'] = font

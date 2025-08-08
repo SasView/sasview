@@ -2,7 +2,6 @@
     Utilities to manage models
 """
 import datetime
-import io
 import logging
 import os
 import py_compile
@@ -34,7 +33,7 @@ def plugin_log(message):
     """
     now = time.time()
     stamp = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
-    with io.open(PLUGIN_LOG, 'a', encoding='utf-8') as out:
+    with open(PLUGIN_LOG, 'a', encoding='utf-8') as out:
         out.write("%s: %s\n" % (stamp, message))
 
 
@@ -106,7 +105,7 @@ def initialize_plugins_dir(path):
             shutil.copy(source, target)
 
 
-class ReportProblem(object):
+class ReportProblem:
     """
     Class to check for problems with specific values
     """
@@ -170,7 +169,7 @@ def find_plugin_models():
     return plugins
 
 
-class ModelManagerBase(object):
+class ModelManagerBase:
     """
     Base class for the model manager
     """
@@ -283,7 +282,7 @@ class ModelManagerBase(object):
         }
 
 
-class ModelManager(object):
+class ModelManager:
     """
     manage the list of available models
     """

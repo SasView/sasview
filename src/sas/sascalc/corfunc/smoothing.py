@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import numpy as np
 
@@ -31,7 +31,7 @@ class SmoothJoin:
         self.start = start
         self.stop = stop
 
-        self._cache: Optional[Cache] = None
+        self._cache: Cache | None = None
 
     @assure_vectorised_argument
     def __call__(self, x: ArrayLike) -> ArrayLike:
