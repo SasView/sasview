@@ -17,8 +17,7 @@ Including another URLconf
 import logging
 
 from django.contrib import admin
-from django.urls import path, re_path, include
-from rest_framework import routers, serializers
+from django.urls import include, path, re_path
 
 logger = logging.getLogger(__name__)
 

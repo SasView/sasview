@@ -1,16 +1,15 @@
-import re
-from typing import Dict, Any, List, Set
-import os
-import logging
 import json
+import logging
+import os
 from copy import deepcopy
+from typing import Any, Dict, List
 
-from packaging.version import parse, InvalidVersion
+from packaging.version import InvalidVersion, parse
 
 import sas
 import sas.system.version
 from sas.system import user
-from sas.system.config.schema_elements import create_schema_element, CoercionError, SchemaElement
+from sas.system.config.schema_elements import CoercionError, SchemaElement, create_schema_element
 
 logger = logging.getLogger("sas.config")
 
@@ -143,7 +142,7 @@ class ConfigBase:
                 self.load_from_file_object(file)
 
         else:
-            logger.warning(f"No config file found - one will be created when sasview exits")
+            logger.warning("No config file found - one will be created when sasview exits")
 
     def load_from_file_object(self, file):
         """ Load config file """

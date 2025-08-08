@@ -7,13 +7,13 @@ Calculation checked by sampling from an ellipsoid and comparing Iq with the
 """
 from __future__ import print_function
 
+import logging
 import os
 import sys
-import logging
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
+from scipy.spatial.transform import Rotation
 
 if sys.version_info[0] < 3:
     def decode(s):
@@ -673,7 +673,6 @@ class VTKReader:
                 sld_mz = np.zeros_like(sld_n)
             elif element_data[0][2] == 3:
                 sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
-                nuc_data = np.zeros_like(sld_mx)
             else:
                 logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear or magnetic SLD")
                 return None
@@ -1062,7 +1061,8 @@ class OMFReader(object):
                 # Reading Header; Segment count ignored
                     s_line = line.split(":", 1)
                     if s_line[0].lower().count("oommf") > 0:
-                        if len(s_line) < 2: s_line = line.split(" ",1)
+                        if len(s_line) < 2:
+                            s_line = line.split(" ",1)
                         oommf = s_line[1].strip()                               
 
                     if s_line[0].lower().count("title") > 0:
@@ -1198,7 +1198,6 @@ class PDBReader(object):
             buff = decode(input_f.read())
             lines = buff.split('\n')
             input_f.close()
-            num = 0
             for line in lines:
                 try:
                     # check if line starts with "ATOM"
@@ -1261,7 +1260,7 @@ class PDBReader(object):
                                 index = int(part) - 1
                                 bonded_indices.append(index)
 
-                            except ValueError as ve:
+                            except ValueError:
                                 pass
 
                         # Store pairs in canonical order
@@ -1760,7 +1759,8 @@ def test():
 # =======================================================================
 
 def _get_data_path(*path_parts):
-    from os.path import realpath, join as joinpath, dirname
+    from os.path import dirname, realpath
+    from os.path import join as joinpath
     # in sas/sascalc/calculator;  want sas/sasview/test
     return joinpath(dirname(realpath(__file__)),
                     '..', '..', 'sasview', 'test', *path_parts)
@@ -1867,8 +1867,7 @@ def realspace_Iq(self, qx, qy):
     """
     Compute Iq for GenSAS object using sasmodels/explore/realspace.py
     """
-    from realspace import calc_Iq_magnetic, calc_Iqxy
-    from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
+    from realspace import calc_Iq_avg, calc_Iq_from_Pr, calc_Iq_magnetic, calc_Iqxy, calc_Pr, r_bins
 
     x, y, z = self.data_x, self.data_y, self.data_z
     if self.is_avg:
@@ -1934,8 +1933,9 @@ def compare(obj, qx, qy=None, plot_points=False, theory=None):
 
     *theory* is the I(q) value for the shape, if known.
     """
-    from matplotlib import pyplot as plt
     from timeit import default_timer as timer
+
+    from matplotlib import pyplot as plt
 
     try:
         import realspace
@@ -2201,7 +2201,8 @@ def _setup_realspace_path():
     try:
         import realspace
     except ImportError:
-        from os.path import join as joinpath, realpath, dirname
+        from os.path import dirname, realpath
+        from os.path import join as joinpath
         path = realpath(joinpath(dirname(__file__),
                                  '..', '..', '..', '..', '..',
                                  'sasmodels', 'explore'))

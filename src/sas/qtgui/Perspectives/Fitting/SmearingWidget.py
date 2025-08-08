@@ -2,23 +2,23 @@
 Widget/logic for smearing data.
 """
 import copy
-import numpy as np
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
 import logging
-logger = logging.getLogger(__name__)
 
-from sas.sascalc.fit.qsmearing import smear_selection, PySmear, PySmear2D
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sasmodels.resolution import Slit1D, Pinhole1D
+from sasmodels.resolution import Pinhole1D, Slit1D
 from sasmodels.sesans import SesansTransform
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.SmearingWidgetUI import Ui_SmearingWidgetUI
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.sascalc.fit.qsmearing import PySmear, PySmear2D, smear_selection
+
+logger = logging.getLogger(__name__)
+
 
 class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
     """
@@ -405,18 +405,18 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
         q_max = max(self.data.x)
         smearing_error_flag = False
         if d_length < d_width:
-            msg = f'Length specified which is less than width. \n' \
-                  f'This is not slit-smearing, probably you switched the two parameters? \n' \
-                  f'I am internally using the smaller parameter as the width and larger as the length. \n' \
-                  f'This is the only mathematically valid version of this.'
+            msg = 'Length specified which is less than width. \n' \
+                  'This is not slit-smearing, probably you switched the two parameters? \n' \
+                  'I am internally using the smaller parameter as the width and larger as the length. \n' \
+                  'This is the only mathematically valid version of this.'
             smearing_error_flag = True
             temp = d_length
             d_length = d_width
             d_width = temp
         elif d_length < 10 * d_width:
-            msg = f'Slit length specified which is less than 10 x slit width. ' \
-                  f'This is not slit-smearing (at least not in the form we implement). \n' \
-                  f'Use pinhole smearing instead.'
+            msg = 'Slit length specified which is less than 10 x slit width. ' \
+                  'This is not slit-smearing (at least not in the form we implement). \n' \
+                  'Use pinhole smearing instead.'
             smearing_error_flag = True
         # elif d_length < q_max:
         #     msg = f'Length specified which is less than q_max for the data. \n' \

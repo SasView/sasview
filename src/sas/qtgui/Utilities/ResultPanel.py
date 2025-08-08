@@ -2,8 +2,8 @@
 FitPanel class contains fields allowing to fit  models and  data
 
 """
-from PySide6 import QtCore
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
+
 
 class ResultPanel(QtWidgets.QTabWidget):
     """
@@ -26,7 +26,7 @@ class ResultPanel(QtWidgets.QTabWidget):
         self.setMinimumSize(400, 400)
         self.data_id = None
 
-        from .PlotView import CorrelationView, ConvergenceView, TraceView, UncertaintyView
+        from .PlotView import ConvergenceView, CorrelationView, TraceView, UncertaintyView
         self.convergenceView = ConvergenceView()
         self.correlationView = CorrelationView()
         self.uncertaintyView = UncertaintyView()
@@ -35,7 +35,6 @@ class ResultPanel(QtWidgets.QTabWidget):
 
     def onPlotResults(self, results, optimizer="Unknown"):
         # import moved here due to its cost
-        from bumps.dream.stats import var_stats, format_vars
         self.clearAnyData()
 
         result = results[0][0]

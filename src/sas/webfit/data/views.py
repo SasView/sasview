@@ -1,18 +1,18 @@
 import os
 
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseBadRequest, HttpResponseForbidden, Http404
 from django.core.files.storage import FileSystemStorage
-
-#TODO go over to see if token is needed for is_authenticated
-from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
+from django.http import Http404, HttpResponseBadRequest, HttpResponseForbidden
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 
-from sasdata.dataloader.loader import Loader
+#TODO go over to see if token is needed for is_authenticated
+from rest_framework.response import Response
 from serializers import DataSerializer
-from .models import Data
+
+from sasdata.dataloader.loader import Loader
+
 from .forms import DataForm
+from .models import Data
 
 #TODO finish logger
 #TODO look through whole code to make sure serializer updates to the correct object
@@ -75,7 +75,7 @@ def upload(request, data_id = None, version = None):
     #saves or updates file
     elif request.method == 'PUT':
         #require data_id
-        if data_id != None and request.user:
+        if data_id is not None and request.user:
             if request.user.is_authenticated:
                 db = get_object_or_404(Data, current_user = request.user.id, id = data_id)
                 form = DataForm(request.data, request.FILES, instance=db)

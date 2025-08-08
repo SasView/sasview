@@ -18,30 +18,23 @@ Data_manager  make these new data available for all other perspectives.
 # REDUNDANT CLASS!!!
 # ALL THE FUNCTIONALITY IS BEING MOVED TO GuiManager.py
 #
-import os
 import copy
-import logging
 import json
-import time
+import logging
+import os
 import re
+import time
 from io import BytesIO
+
 import numpy as np
-
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Plotting.Plottables import PlottableTheory1D
-from sas.qtgui.Plotting.Plottables import PlottableFit1D
-from sas.qtgui.Plotting.Plottables import Text
-from sas.qtgui.Plotting.Plottables import Chisq
-from sas.qtgui.Plotting.Plottables import View
-
-from sas.qtgui.Utilities import GuiUtils
-from sas.qtgui.MainWindow.DataState import DataState
-import sasdata.dataloader.data_info as DataInfo
 
 # used for import/export
 from sasdata.dataloader.data_info import Sample, Source, Vector
 
+from sas.qtgui.MainWindow.DataState import DataState
+from sas.qtgui.Plotting.Plottables import Chisq, PlottableFit1D, PlottableTheory1D, Text, View
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.Utilities import GuiUtils
 from sas.system.version import __version__ as SASVIEW_VERSION
 
 

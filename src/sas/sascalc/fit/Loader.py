@@ -5,6 +5,7 @@ from __future__ import print_function
 #import string
 import numpy as np
 
+
 class Load:
     """
     This class is loading values from given file or value giving by the user

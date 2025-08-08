@@ -1,9 +1,8 @@
 import numpy as np
 
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sasdata.dataloader.data_info import Detector, Source
 
-from sasdata.dataloader.data_info import Detector
-from sasdata.dataloader.data_info import Source
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 
 
 class FittingLogic:

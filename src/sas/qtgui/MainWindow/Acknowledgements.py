@@ -1,5 +1,4 @@
-import functools
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
@@ -8,6 +7,7 @@ import sas.system.version
 import sas.system.zenodo
 
 from .UI.AcknowledgementsUI import Ui_Acknowledgements
+
 
 class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
 

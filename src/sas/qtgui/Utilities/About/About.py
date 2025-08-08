@@ -1,16 +1,26 @@
 import functools
+import os
+from importlib import resources
 
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QPixmap, QIcon, QCloseEvent
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QSizePolicy, QSpacerItem, QFrame, QPushButton, \
-    QGridLayout, QDialog
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import (
+    QDialog,
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 import sas.system.version
 from sas.qtgui.Utilities import GuiUtils
 from sas.system import legal, web
-import os
 
-from importlib import resources
 
 class About(QDialog):
 
@@ -181,8 +191,9 @@ class About(QDialog):
 
 
 if __name__ == "__main__":
-    from PySide6.QtWidgets import QApplication
     import sys
+
+    from PySide6.QtWidgets import QApplication
 
 
     app = QApplication([])

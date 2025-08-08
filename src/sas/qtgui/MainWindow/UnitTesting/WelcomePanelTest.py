@@ -1,8 +1,6 @@
-import sys
 
 import pytest
-
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
 
 # Local
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel

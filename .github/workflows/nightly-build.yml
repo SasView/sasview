@@ -21,6 +21,10 @@ jobs:
         os: [ ubuntu-latest]
     needs: reuse_main_ci
 
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Retrieve saved artifacts
         uses: actions/download-artifact@v4
@@ -28,7 +32,13 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: .
-          
+
+      - name: Bundle up wheels
+        run: |
+          cp sasview-wheel-*/* sasview-wheel/
+          cd sasview-wheel
+          zip ../SasView-nightly-wheels.zip *
+
       - name: Rename artifacts
         run: |
           mv SasView-Installer-windows*/setupSasView.exe ./setupSasView-nightly-Win64.exe
@@ -36,7 +46,11 @@ jobs:
           for file in $(ls *.dmg); do
               mv $file ${file/SasView6-/SasView-nightly-MacOSX-}
           done
-          mv SasView-Installer-ubuntu*/sasview6.tar.gz ./SasView-nightly-Linux.tar.gz
+          mv SasView-Installer-ubuntu*/SasView6.tar.gz ./SasView-nightly-Linux.tar.gz
+
+      - name: Clean out old release
+        run: |
+          gh release delete nightly-build --cleanup-tag --yes || true
 
       - name: Upload Nightly Build Installer to GitHub releases
         uses: ncipollo/release-action@v1
@@ -46,7 +60,8 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "setupSasView-nightly-Win64.exe, SasView-nightly-MacOSX-*.dmg, SasView-nightly-Linux.tar.gz"
+          artifacts: "setupSasView-nightly-Win64.exe, SasView-nightly-MacOSX-*.dmg, SasView-nightly-Linux.tar.gz, SasView-nightly-wheels.zip"
           body: "Nightly build of main SasView branch"
           name: "nightly-build"
           tag: "nightly-build"
+          commit: ${{ github.sha }}

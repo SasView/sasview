@@ -1,8 +1,8 @@
 import logging
+from typing import Dict, List, Optional, Union
 
-from PySide6.QtGui import QIntValidator, QDoubleValidator, QValidator
-from PySide6.QtWidgets import QComboBox, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QCheckBox, QFrame
-from typing import Optional, List, Union, Dict
+from PySide6.QtGui import QDoubleValidator, QIntValidator, QValidator
+from PySide6.QtWidgets import QCheckBox, QComboBox, QFrame, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
 from sas.system import config
 

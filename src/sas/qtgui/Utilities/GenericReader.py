@@ -2,7 +2,9 @@
 Thread handler used to load data
 """
 import time
+
 from sas.sascalc.data_util.calcthread import CalcThread
+
 
 class GenReader(CalcThread):
     """

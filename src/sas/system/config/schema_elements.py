@@ -1,7 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Optional, List, Any
 import logging
-
+from abc import ABC, abstractmethod
+from typing import Any, List, Optional
 
 """ Type representation for config elements
 
@@ -108,7 +107,7 @@ class SchemaNonSpecified(SchemaElement):
         return isinstance(other, SchemaNonSpecified)
 
     def __repr__(self):
-        return f"SchemaNonSpecified"
+        return "SchemaNonSpecified"
 
 
 class SchemaList(SchemaElement):

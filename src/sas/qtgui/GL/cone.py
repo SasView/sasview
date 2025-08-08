@@ -1,9 +1,9 @@
-from typing import Optional, Union, Sequence, List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 
-from sas.qtgui.GL.models import FullModel
 from sas.qtgui.GL.color import ColorSpecification
+from sas.qtgui.GL.models import FullModel
 
 
 class Cone(FullModel):

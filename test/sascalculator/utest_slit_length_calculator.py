@@ -4,9 +4,10 @@
 
 import os.path
 import unittest
+
 from sasdata.dataloader.readers.ascii_reader import Reader
-from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator \
-    as calculator
+
+from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator as calculator
 
 
 def find(filename):

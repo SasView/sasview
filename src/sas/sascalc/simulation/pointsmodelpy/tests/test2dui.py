@@ -8,25 +8,16 @@ Demonstration of drawing a 2D image plot using the "hot" colormap
 #--------------------------------------------------------------------------------
 from __future__ import print_function
 
-import wx
+from math import sin, sqrt
 
-from enthought.traits import Any, Instance
-from enthought.enable.wx     import Window
-from enthought.pyface        import ApplicationWindow, GUI
-from enthought.util.numerix  import pi, concatenate, array, zeros, ones, \
-                                    arange, resize, ravel
-from enthought.util.numerix import Float as NumericFloat
-from math import sqrt, sin
-
-from enthought.chaco.plot_component import PlotComponent
-from enthought.chaco.plot_axis import PlotAxis
-from enthought.chaco.plot_canvas import PlotCanvas
-from enthought.chaco.plot_group import PlotGroup
-from enthought.chaco.image_plot_value import ImageData, CmapImagePlotValue
-from enthought.chaco.colormap import LinearColormap
 from enthought.chaco.colormap_legend import ColormapLegend
-from enthought.chaco.default_colormaps import hot, gray
+from enthought.chaco.default_colormaps import hot
 from enthought.chaco.demo.demo_base import PlotApplicationWindow
+from enthought.chaco.image_plot_value import CmapImagePlotValue, ImageData
+from enthought.chaco.plot_axis import PlotAxis
+from enthought.chaco.plot_group import PlotGroup
+from enthought.pyface import GUI
+from enthought.util.numerix import arange
 
 
 class ImagePlotApplicationWindow( PlotApplicationWindow ):
@@ -40,7 +31,7 @@ class ImagePlotApplicationWindow( PlotApplicationWindow ):
         
         # Create the image data and the index values
         #value_grid = zeros((100,100), NumericFloat)
-        from testlores2d import get2d_2        
+        from testlores2d import get2d_2
         value_grid = get2d_2()
         #self._compute_function(value_grid)
         index_vals = (arange(value_grid.shape[0]), arange(value_grid.shape[1]))

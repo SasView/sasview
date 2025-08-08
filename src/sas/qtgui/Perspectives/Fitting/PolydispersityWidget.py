@@ -1,22 +1,21 @@
 """
 Widget/logic for polydispersity.
 """
-import os
-import numpy as np
 import logging
-from typing import Any, Tuple, Optional, List, Dict
+import os
+from typing import Any, Dict, List, Optional, Tuple
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-# Local UI
-from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
+import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Fitting import FittingUtilities
+
+# Local UI
+from sas.qtgui.Perspectives.Fitting.UI.PolydispersityWidget import Ui_PolydispersityWidgetUI
+from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 logger = logging.getLogger(__name__)
@@ -157,8 +156,11 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             if model_column not in delegate.columnDict():
                 return
-            self.poly_params[parameter_name_w] = value
-            self.logic.kernel_module.setParam(parameter_name_w, value)
+            # Map the column to the poly param that was changed
+            associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
+            p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
+            self.poly_params[p_name] = value
+            self.logic.kernel_module.setParam(p_name, value)
 
             # Update plot
             self.updateDataSignal.emit()
@@ -478,6 +480,14 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
             # Nsigs
             param_repr = GuiUtils.formatNumber(param_dict[param_name][5+ioffset], high=True)
             self.poly_model.item(row, 5+joffset).setText(param_repr)
+            # Function
+            param_repr = param_dict[param_name][6+ioffset]
+            self.poly_model.item(row, 6+joffset).setText(param_repr)
+            index = self.poly_model.index(row, 6+joffset)
+            widget = self.lstPoly.indexWidget(index)
+            if widget is not None and isinstance(widget, QtWidgets.QComboBox):
+                func_index = widget.findText(param_repr)
+                widget.setCurrentIndex(func_index)
 
             self.setFocus()
 

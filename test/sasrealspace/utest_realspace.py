@@ -4,7 +4,9 @@
 """
 from __future__ import print_function
 
-import unittest, math, time
+import math
+import time
+import unittest
 
 # Disable "missing docstring" complaint
 # pylint: disable-msg=C0111
@@ -12,14 +14,15 @@ import unittest, math, time
 # pylint: disable-msg=R0904
 # Disable "could be a function" complaint
 # pylint: disable-msg=R0201
-
 from sasmodels.sasview_model import _make_standard_model
+
+import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
+
 EllipsoidModel = _make_standard_model('ellipsoid')
 SphereModel = _make_standard_model('sphere')
 CylinderModel = _make_standard_model('cylinder')
 CoreShellModel = _make_standard_model('core_shell_sphere')
 
-import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
 
 class TestRealSpaceModel(unittest.TestCase):
     """ Unit tests for sphere model """

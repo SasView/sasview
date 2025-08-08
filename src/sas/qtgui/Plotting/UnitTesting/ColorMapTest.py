@@ -1,20 +1,17 @@
-import sys
-import numpy
-
-from PySide6 import QtGui, QtWidgets
-import pytest
 
 import matplotlib as mpl
+import pytest
+from PySide6 import QtGui, QtWidgets
+
 mpl.use("Qt5Agg")
 
 
-from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 from sas.qtgui.Plotting.ColorMap import ColorMap
+from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 
 class ColorMapTest:
@@ -154,7 +151,7 @@ class ColorMapTest:
         assert widget.txtMaxAmplitude.text() == "45"
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnMapIndexChange(self, widget):
+    def testOnMapIndexChange(self, widget, mocker):
         '''Test the response to the combo box index change'''
 
         mocker.patch.object(widget.canvas, 'draw')
@@ -168,7 +165,7 @@ class ColorMapTest:
         assert mpl.colorbar.ColorbarBase.called
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnColorMapReversed(self, widget):
+    def testOnColorMapReversed(self, widget, mocker):
         '''Test reversing the color map functionality'''
         # Check the defaults
         assert widget._cmap == "jet"
@@ -182,7 +179,7 @@ class ColorMapTest:
         assert widget.cbColorMap.addItems.called
 
     @pytest.mark.skip(reason="2022-09 already broken - causes segfault")
-    def testOnAmplitudeChange(self, widget):
+    def testOnAmplitudeChange(self, widget, mocker):
         '''Check the callback method for responding to changes in textboxes'''
         mocker.patch.object(widget.canvas, 'draw')
         mocker.patch.object(mpl.colors, 'Normalize')

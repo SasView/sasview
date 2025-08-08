@@ -4,15 +4,12 @@
 #  \brief Abstract class for defining calculation threads.
 #
 
-from typing import Optional, Callable
-
-import sys
-import logging
-import traceback
-from time import sleep,  perf_counter
-
 import _thread as thread
-
+import logging
+import sys
+import traceback
+from time import perf_counter, sleep
+from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -225,7 +222,7 @@ class CalcThread:
     def compute(self, *args, **kwargs):
         """Perform a work unit.  The subclass will provide details of
         the arguments."""
-        raise NotImplemented("Calculation thread needs compute method")
+        raise NotImplementedError("Calculation thread needs compute method")
 
     def exception(self):
         """

@@ -1,11 +1,9 @@
 import sys
 import webbrowser
 
-import pytest
-
 import numpy as np
-
-from PySide6 import QtGui, QtWidgets
+import pytest
+from PySide6 import QtWidgets
 
 # Local
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint

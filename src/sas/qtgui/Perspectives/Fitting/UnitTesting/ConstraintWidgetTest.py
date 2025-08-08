@@ -1,21 +1,16 @@
-import sys
-import numpy as np
 from unittest.mock import MagicMock
+
 import pytest
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtTest import QSignalSpy, QTest
 
-from PySide6 import QtGui, QtCore, QtWidgets
-from PySide6.QtTest import QTest, QSignalSpy
-
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Plotting.PlotterData import Data1D
-
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.MainWindow.GuiManager import GuiManager
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 # Local
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
-from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 
@@ -152,11 +147,11 @@ class ConstraintWidgetTest:
 
         # disable the tab
         widget.tblTabList.item(0, 0).setCheckState(0)
-        assert widget.tabs_for_fitting["test_tab"] == False
+        assert widget.tabs_for_fitting["test_tab"] is False
         assert not widget.cmdFit.isEnabled()
         # enable the tab
         widget.tblTabList.item(0, 0).setCheckState(2)
-        assert widget.tabs_for_fitting["test_tab"] == True
+        assert widget.tabs_for_fitting["test_tab"] is True
         assert widget.cmdFit.isEnabled()
 
     def testUpdateFitLine(self, widget, mocker):
@@ -352,7 +347,7 @@ class ConstraintWidgetTest:
         # Should be unchecked in tblConstraint
         assert widget.tblConstraints.item(0, 0).checkState() == 0
         # Constraint should be deactivated
-        assert self.constraint1.active == False
+        assert self.constraint1.active is False
 
     def testOnConstraintChange(self, widget, mocker):
         ''' test edition of the constraint list '''
@@ -450,6 +445,6 @@ class ConstraintWidgetTest:
         widget.tblConstraints.item(0, 0).setCheckState(0)
         assert test_tab.modifyViewOnRow.call_args[0][0] == 0
         assert not test_tab.modifyViewOnRow.call_args[1]
-        assert self.constraint1.active == False
+        assert self.constraint1.active is False
         # Check the reloading of the view
         widget.initializeFitList.assert_called_once()

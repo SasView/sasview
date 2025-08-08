@@ -1,20 +1,26 @@
-import sys
-import os
 import logging
+import os
+import sys
 import time
 from pathlib import Path
 from typing import Optional
 
-from PySide6 import QtCore, QtWidgets, QtWebEngineCore
+from PySide6 import QtCore, QtWebEngineCore, QtWidgets
 from PySide6.QtGui import QCloseEvent
 from twisted.internet import threads
 
-from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.sascalc.doc_regen.makedocumentation import (make_documentation, create_user_files_if_needed,
-                                                     HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE)
+from sas.sascalc.doc_regen.makedocumentation import (
+    HELP_DIRECTORY_LOCATION,
+    MAIN_DOC_SRC,
+    PATH_LIKE,
+    create_user_files_if_needed,
+    make_documentation,
+)
+from sas.sascalc.fit import models
+
+from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 
 HTML_404 = '''
 <html>
@@ -154,8 +160,11 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         self.show()
 
     def onDownload(self, download_item):
-        download_item.accept()
-        download_item.isFinishedChanged.connect(lambda: self.onDownloadFinished(download_item))
+        # There may be several active webEngineViewers. Only process the
+        # actual caller
+        if download_item.page() == self.webEngineViewer.page():
+            download_item.accept()
+            download_item.isFinishedChanged.connect(lambda: self.onDownloadFinished(download_item))
 
     def onDownloadFinished(self, item):
         _filename = item.downloadFileName()
@@ -231,7 +240,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             rst_time = os.path.getmtime(src)
             html_time = os.path.getmtime(html)
             return not html_exists or rst_time > html_time
-        except Exception as e:
+        except Exception:
             # Catch exception for debugging
             return True
 

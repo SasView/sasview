@@ -1,11 +1,12 @@
-import numpy as np
 import time
-import matplotlib.pyplot as plt
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import SLDDefinition, CalculationParameters, QSample
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import Grid
+import matplotlib.pyplot as plt
+import numpy as np
 
 from sas.qtgui.Perspectives.ParticleEditor.calculations.debye import debye
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import CalculationParameters, QSample, SLDDefinition
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import Grid
+
 
 def sld(x, y, z):
     """ Cube sld """

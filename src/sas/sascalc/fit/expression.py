@@ -44,10 +44,11 @@ Ideally, this interface will change
 """
 from __future__ import print_function
 
-from copy import copy
 import math
 import re
+from copy import copy
 from keyword import iskeyword
+
 
 def standard_symbols(context={}):
     symbols = {}
@@ -457,8 +458,8 @@ def test_deps():
     _check("depth-2", A)
 
 def test_expr():
-    import inspect
     import dis
+    import inspect
 
     symtab = {'a.b.x': 1, 'a.c': 2, 'a.b': 3, 'b.x': 4}
     expr = 'a.b.x + sin(4*pi*a.c) + a.b.x/a.b'
@@ -584,7 +585,7 @@ def test_expr():
             p6 = TestParameter('broken', expression=expr)
             fn = compile_constraints(*world(p6))
             fn()
-        except Exception as msg:
+        except Exception:
             #print(msg)
             pass
         else:

@@ -8,19 +8,18 @@ their distribution as a function of D_max.
 
 # global
 import logging
+
 import numpy as np
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
-# sas-global
-from sas.qtgui.Plotting.PlotterData import Data1D
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 
+# sas-global
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import enum
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
 from .UI.DMaxExplorer import Ui_DmaxExplorer

@@ -1,4 +1,3 @@
-from typing import Callable
 from sas.qtgui.Utilities.GuiUtils import enum
 
 WIDGETS = enum( 'W_QMIN',
@@ -27,6 +26,5 @@ def safe_float(x: str):
 
     try:
         return float(x)
-
     except:
         return 0.0

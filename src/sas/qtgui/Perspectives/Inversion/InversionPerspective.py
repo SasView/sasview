@@ -1,24 +1,20 @@
 import logging
+
 import numpy as np
-
-
-from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # sas-global
-
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Inversion.InversionWidget import InversionWidget
 
-# pr inversion GUI elements
-from .InversionLogic import InversionLogic
-
-# pr inversion calculation elements
-
-from sas.qtgui.Plotting.PlotterData import Data1D
 # Batch calculation display
 from sas.qtgui.Perspectives.perspective import Perspective
 
+# pr inversion calculation elements
+from sas.qtgui.Plotting.PlotterData import Data1D
 
+# pr inversion GUI elements
+from .InversionLogic import InversionLogic
 
 logger = logging.getLogger(__name__)
 

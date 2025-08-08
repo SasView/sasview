@@ -1,11 +1,13 @@
 
-import numpy as np
 import logging
-from scipy import stats, integrate, optimize
+
+import numpy as np
+from scipy import integrate, optimize, stats
 
 from sasdata.dataloader.data_info import Data1D
 from sasmodels.core import load_model
 from sasmodels.direct_model import DirectModel
+
 from sas.sascalc.size_distribution.maxEnt_method import maxEntMethod
 
 logger = logging.getLogger(__name__)
@@ -523,7 +525,7 @@ class sizeDistribution():
                 convergence.append([converged, conv_iter])
                 if (not converged):
                     logger.warning("Maximum Entropy did not converge. Try increasing the weight factor to increase the weighting effect.")
-            except ZeroDivisionError as e:
+            except ZeroDivisionError:
                 logger.error("Divide by Zero Error occured in maximum entropy fitting. Try increasing the weight factor to increase the error weighting")
 
         # If all bin magnitudes are NaN, raise an error and let the caller handle it

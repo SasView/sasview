@@ -8,12 +8,14 @@ See the license text in license.txt
 copyright 2010, University of Tennessee
 """
 
+import math
 import os.path
 import unittest
-import math
+
 import numpy as np
-from sasdata.dataloader.loader import Loader
+
 from sasdata.dataloader.data_info import Data1D
+from sasdata.dataloader.loader import Loader
 
 from sas.sascalc.invariant import invariant
 
@@ -51,7 +53,8 @@ class TestLinearFit(unittest.TestCase):
         """ 
             Simple linear fit with noise
         """
-        import random, math
+        import math
+        import random
     
         for i in range(len(self.data.y)):
             self.data.y[i] = self.data.y[i]+.1*(random.random()-0.5)
@@ -80,7 +83,8 @@ class TestLinearFit(unittest.TestCase):
         """ 
             Simple linear fit with noise
         """
-        import random, math
+        import math
+        import random
 
         for i in range(len(self.data.y)):
             self.data.y[i] = self.data.y[i]+.1*(random.random()-0.5)

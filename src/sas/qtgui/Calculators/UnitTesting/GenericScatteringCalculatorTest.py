@@ -1,24 +1,18 @@
-import sys
+import os
 import time
-import numpy
-
-import pytest
-from PySide6 import QtGui, QtWidgets
-from PySide6.QtTest import QTest
-
-from PySide6.QtCore import Qt
 from unittest.mock import MagicMock
 
-from mpl_toolkits.mplot3d import Axes3D
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+import numpy
+import pytest
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
-from sas.qtgui.Calculators.GenericScatteringCalculator import Plotter3D
-from sas.qtgui.Plotting.PlotterBase import PlotHelper
+from mpl_toolkits.mplot3d import Axes3D
+from PySide6 import QtGui, QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtTest import QTest
 
-from sas.qtgui.MainWindow.DataManager import DataManager
-from sas.qtgui.MainWindow.GuiManager import GuiManager
-from sas.qtgui.Utilities.GuiUtils import *
+from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator, Plotter3D
+from sas.qtgui.Plotting.PlotterBase import PlotHelper
+from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.sascalc.calculator import sas_gen
 
 

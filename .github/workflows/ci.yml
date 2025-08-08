@@ -20,7 +20,21 @@ env:
   INSTALLER_USE_DEBUG: false
 
 jobs:
+
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: "check --fix-only --exit-non-zero-on-fix"
+      - uses: pre-commit-ci/lite-action@v1.1.0
+        if: always()
+        with:
+          msg: '[pre-commit.ci lite] apply automatic fixes for ruff linting errors'
+
   matrix:
+    needs: [ruff]
     name: Generate test matrix
 
     #if: false    # uncomment to prevent the rest of the workflow running
@@ -47,14 +61,15 @@ jobs:
 
 
   builddeps:
+    needs: [ruff]
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         package: [
-          ["sasdata", "git+https://github.com/SasView/sasdata.git@sasdata_0.10.0"],
-          ["sasmodels", "git+https://github.com/SasView/sasmodels.git@sasmodels_1.0.10"]
+          ["sasdata", "sasdata"],
+          ["sasmodels", "sasmodels"]
         ]
 
     name: Build wheel "${{ matrix.package[0] }}"
@@ -65,7 +80,7 @@ jobs:
         with:
           python-version: 3.11
 
-      ### Installation of some build-dependencies
+      ### Compilation of build-dependencies
 
       - name: Build wheel of ${{ matrix.package[0] }}
         run: |
@@ -89,7 +104,6 @@ jobs:
     env:
       MACOS_DMG_NAME: SasView6-${{ matrix.os }}.dmg
       # Only sign/notarize if the secrets will be available
-      SIGN_INSTALLER: ${{ (github.repository == 'SasView/sasview') && 'true' || '' }}
       RELEASE_BRANCH_BUILD: ${{
           (
             (github.event_name == 'push' && contains(github.ref, 'release')) ||
@@ -97,6 +111,8 @@ jobs:
             (github.event_name == 'pull_request' && contains(github.base_ref, 'release-6.1'))
           ) && 'true' || ''
         }}
+      SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork) && 'true' || '' }}
+      UV_SYSTEM_PYTHON: 1
 
     name: "${{ matrix.job_name }}"
 
@@ -116,10 +132,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: |
-            **/ci.yml
-            **/requirements*.txt
+
+      - name: Install uv utilities to speed up python module installation
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
 
       ### Installation of build-dependencies
 
@@ -140,23 +158,24 @@ jobs:
 
       - name: Install correct versions of sibling projects
         run: |
-          python -m pip install dist/*whl
+          uv pip install dist/*whl
 
       - name: Install Python dependencies
         if: ${{ ! env.RELEASE_BRANCH_BUILD }}
         run: |
-          # Don't try to reinstall sibling packages if already at right version
-          # Comment out the 'grep' below when not needed
-          cp  build_tools/requirements.txt build_tools/tmp.txt
-          grep -v -e sasdata -e sasmodels < build_tools/requirements.txt > build_tools/tmp.txt
-          python -m pip install -r build_tools/tmp.txt -r build_tools/requirements-dev.txt
+          uv pip install -r build_tools/requirements.txt
+          uv pip install -r build_tools/requirements-dev.txt
 
       ### For pull_requests with the release branch as the base -or- branches with the name *release*
 
       - name: Install Python dependencies for release branches
         if: ${{ env.RELEASE_BRANCH_BUILD }}
         run: |
-          python -m pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
+          uv pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
+
+      - name: Fetch external AUSAXS C library
+        run: |
+          python build_tools/get_external_dependencies.py
 
       ### Actual building of sasview
 
@@ -166,7 +185,7 @@ jobs:
 
       - name: Install sasview wheel
         run: |
-          python -m pip install --no-deps dist/sasview*whl
+          uv pip install dist/sasview*whl
 
       - name: Publish sdist and wheel package
         uses: actions/upload-artifact@v4
@@ -183,8 +202,7 @@ jobs:
       - name: Install test dependencies
         if: ${{ matrix.tests }}
         run: |
-          python -m pip install -r build_tools/requirements-test.txt
-          python build_tools/get_external_dependencies.py
+          uv pip install -r build_tools/requirements-test.txt
 
       - name: Test with pytest
         if: ${{ matrix.tests }}
@@ -210,7 +228,7 @@ jobs:
       - name: Install utilities to build installer
         if: ${{ matrix.installer }}
         run: |
-          python -m pip install pyinstaller
+          uv pip install pyinstaller
 
       ### Document the build environment
 
@@ -314,17 +332,32 @@ jobs:
         with:
           product-path: installers/dist/SasView6-macos-13.dmg
 
-      - name: Sign binary
+      - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        uses: lando/code-sign-action@v2
-        with:
-          file: installers/dist/setupSasView.exe
-          certificate-data: ${{ secrets.WINDOZE_CERT_DATA }}
-          certificate-password: ${{ secrets.WINDOZE_CERT_PASSWORD }}
-          keylocker-host: ${{ secrets.KEYLOCKER_HOST }}
-          keylocker-api-key: ${{ secrets.KEYLOCKER_API_KEY }}
-          keylocker-cert-sha1-hash: ${{ secrets.KEYLOCKER_CERT_SHA1_HASH }}
+        uses: digicert/ssm-code-signing@v1.0.1
 
+      - name: Set up P12 certificate
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        run: |
+          echo "${{ secrets.WINDOZE_CERT_DATA }}" | base64 --decode > /d/Certificate_pkcs12.p12
+        shell: bash
+
+      - name: Set keylocker variables
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        id: variables
+        run: |
+          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          echo "SM_HOST=${{ secrets.KEYLOCKER_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ secrets.KEYLOCKER_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.WINDOZE_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Sign the binary using keypair alias
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        run: |
+           smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
+        shell: cmd
 
       - name: Publish installer package
         if: ${{ matrix.installer }}
@@ -473,6 +506,7 @@ jobs:
         # If sasview has crashed on its own, then this should return an error
         run: |
           (
+            export https_proxy=https://127.0.0.1:9
             echo "## START SASVIEW"
             xvfb-run -a --server-args="-screen 0 1024x768x24" $RUN_SASVIEW 2>&1 |
             tee sasview-test.log

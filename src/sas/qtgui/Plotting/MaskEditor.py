@@ -1,19 +1,18 @@
-from functools import partial
 import copy
+from functools import partial
+
 import numpy as np
+from PySide6 import QtWidgets
 
-from PySide6 import QtWidgets, QtCore
-
-from sas.qtgui.Plotting.PlotterData import Data2D
-
-# Local UI
-from sas.qtgui.UI import main_resources_rc
-from sas.qtgui.Plotting.UI.MaskEditorUI import Ui_MaskEditorUI
-from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
-
-from sas.qtgui.Plotting.Masks.SectorMask import SectorMask
 from sas.qtgui.Plotting.Masks.BoxMask import BoxMask
 from sas.qtgui.Plotting.Masks.CircularMask import CircularMask
+from sas.qtgui.Plotting.Masks.SectorMask import SectorMask
+from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
+from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.UI.MaskEditorUI import Ui_MaskEditorUI
+
+# Local UI
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
 
 
 class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):

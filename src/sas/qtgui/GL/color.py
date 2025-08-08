@@ -1,12 +1,10 @@
+import logging
+from dataclasses import dataclass
+from enum import Enum
 from typing import Sequence, Union
 
-import logging
-import numpy as np
 import matplotlib as mpl
-from enum import Enum
-from dataclasses import dataclass
-
-from OpenGL.GL import glColor4f
+import numpy as np
 
 "Helper classes for dealing with colours"
 

@@ -1,32 +1,27 @@
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-import functools
 import copy
+import functools
 import math
-import matplotlib as mpl
+import textwrap
+
 import matplotlib.ticker as ticker
 import numpy as np
-import textwrap
 from matplotlib.font_manager import FontProperties
-from packaging import version
+from PySide6 import QtGui, QtWidgets
 
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
+import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas import config
 from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.Binder import BindArtist
-from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
-from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
+from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelProperties, PlotLabelPropertyHolder
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
-from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelProperties
-from sas.qtgui.Plotting.PlotLabelProperties import PlotLabelPropertyHolder
+from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
-
-from sas import config
 
 class PlotterWidget(PlotterBase):
     """
@@ -209,7 +204,7 @@ class PlotterWidget(PlotterBase):
             else:
                 dy = data.view.dy
                 # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
-                if dy is not None and type(dy) == type(()):
+                if dy is not None and isinstance(dy, tuple):
                     dy = np.vstack((y - dy[0], dy[1] - y)).transpose()
 
                 line = ax.errorbar(x, y,
@@ -605,7 +600,6 @@ class PlotterWidget(PlotterBase):
         if num_text < 1:
             return
         txt = self.textList[num_text - 1]
-        text_remove = txt.get_text()
         try:
             txt.remove()
         except ValueError:

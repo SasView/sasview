@@ -1,22 +1,15 @@
 # global
 import numpy as np
-import logging
-from pyparsing.exceptions import ParseException
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-from periodictable import formula as Formula
-from periodictable.xsf import xray_energy, xray_sld
 from periodictable.nsf import neutron_scattering
+from periodictable.xsf import xray_sld
+from pyparsing.exceptions import ParseException
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from sas.qtgui.UI import main_resources_rc
-
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
-
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
 from sas.qtgui.Utilities.GuiUtils import enum
 
 MODEL = enum(

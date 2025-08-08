@@ -1,7 +1,6 @@
 import logging
-from django.urls import path, re_path, include
-from analyze.fitting import views as fit_views
-from . import views
+
+from django.urls import include, path
 
 logger = logging.getLogger(__name__)
 

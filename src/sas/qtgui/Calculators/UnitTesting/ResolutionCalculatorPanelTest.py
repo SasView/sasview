@@ -1,25 +1,18 @@
-import sys
-import time
-import numpy
-import logging
-import pytest
-
-from PySide6 import QtGui, QtWidgets
-from PySide6 import QtCore
-from PySide6.QtTest import QTest
-from PySide6.QtCore import Qt
-
 # CRUFT: this shouldn't be needed in the test but makes the difference
 # between passing tests and failing tests. Remove this and figure out how
 # to fix the resolution calculator widget itself?
 import matplotlib as mpl
+import pytest
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtTest import QTest
+
 mpl.use("Qt5Agg")
 
 from twisted.internet import threads
 
+from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Utilities.GuiUtils import Communicate
-from sas.qtgui.Calculators.ResolutionCalculatorPanel \
-    import ResolutionCalculatorPanel
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 

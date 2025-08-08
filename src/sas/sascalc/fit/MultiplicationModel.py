@@ -4,6 +4,7 @@ import numpy as np
 
 from sas.sascalc.calculator.BaseComponent import BaseComponent
 
+
 class MultiplicationModel(BaseComponent):
     r"""
         Use for P(Q)\*S(Q); function call must be in the order of P(Q) and then S(Q):
@@ -62,7 +63,7 @@ class MultiplicationModel(BaseComponent):
         for item in self.p_model.magnetic_params:
             self.magnetic_params.append(item)
         for item in self.s_model.orientation_params:
-            if not item in self.orientation_params:
+            if item not in self.orientation_params:
                 self.orientation_params.append(item)
         # get multiplicity if model provide it, else 1.
         try:
@@ -135,12 +136,12 @@ class MultiplicationModel(BaseComponent):
         """
 
         for name , value in self.p_model.params.items():
-            if not name in self.params.keys() and name not in self.excluded_params:
+            if name not in self.params.keys() and name not in self.excluded_params:
                 self.params[name] = value
 
         for name , value in self.s_model.params.items():
             #Remove the radius_effective from the (P*S) model parameters.
-            if not name in self.params.keys() and name not in self.excluded_params:
+            if name not in self.params.keys() and name not in self.excluded_params:
                 self.params[name] = value
 
         # Set "scale and effec_radius to P and S model as initializing
@@ -159,7 +160,7 @@ class MultiplicationModel(BaseComponent):
                 self.details[name] = detail
 
         for name , detail in self.s_model.details.items():
-            if not name in self.details.keys() or name not in self.exluded_params:
+            if name not in self.details.keys() or name not in self.exluded_params:
                 self.details[name] = detail
 
     def _set_backgrounds(self):
@@ -190,7 +191,7 @@ class MultiplicationModel(BaseComponent):
         """
         Set effective radius to S(Q) model
         """
-        if not 'radius_effective' in self.s_model.params.keys():
+        if 'radius_effective' not in self.s_model.params.keys():
             return
         effective_radius = self.p_model.calculate_ER()
         #Reset the effective_radius of s_model just before the run

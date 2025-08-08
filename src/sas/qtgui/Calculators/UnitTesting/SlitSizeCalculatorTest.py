@@ -1,14 +1,13 @@
-import sys
 import logging
 
 import pytest
-
-from PySide6 import QtGui, QtWidgets
-from PySide6.QtTest import QTest
+from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
+from PySide6.QtTest import QTest
+
+from sasdata.dataloader.loader import Loader
 
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
-from sasdata.dataloader.loader import Loader
 
 
 class SlitSizeCalculatorTest:

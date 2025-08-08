@@ -1,6 +1,7 @@
 from typing import Callable
 
 from PySide6 import QtWidgets
+
 from sas.qtgui.Perspectives.ParticleEditor.UI.AxisButtonsUI import Ui_AxisSelection
 from sas.qtgui.Perspectives.ParticleEditor.UI.PlaneButtonsUI import Ui_PlaneSelection
 

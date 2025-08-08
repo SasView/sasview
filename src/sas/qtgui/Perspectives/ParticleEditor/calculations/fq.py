@@ -1,18 +1,17 @@
-from typing import Optional, Tuple
-import time
+from typing import Optional
 
 import numpy as np
-from scipy.interpolate import interp1d
-from scipy.special import jv as bessel
-from scipy.spatial.distance import cdist
 
+from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-    SLDDefinition, MagnetismDefinition, AngularDistribution, QSample, CalculationParameters)
+    AngularDistribution,
+    CalculationParameters,
+    MagnetismDefinition,
+    QSample,
+    SLDDefinition,
+)
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import PointGeneratorStepper, SpatialDistribution
 
-from sas.qtgui.Perspectives.ParticleEditor.sampling.chunking import SingleChunk, pairwise_chunk_iterator
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution, PointGeneratorStepper
-
-from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld, run_magnetism
 
 def scattering_via_fq(
         sld_definition: SLDDefinition,

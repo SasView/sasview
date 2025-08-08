@@ -1,10 +1,11 @@
 import numpy
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from .BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-from sas.qtgui.Utilities.GuiUtils import formatNumber
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
+
+from .BaseInteractor import BaseInteractor
+
 
 class AnnulusInteractor(BaseInteractor, SlicerModel):
     """

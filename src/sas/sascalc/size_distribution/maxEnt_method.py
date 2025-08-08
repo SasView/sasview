@@ -1,5 +1,6 @@
-import numpy as np
 import math
+
+import numpy as np
 
 # Constants (comments mostly copied from the original GSASIIsasd.py)
 TEST_LIMIT        = 0.05                    # for convergence
@@ -128,7 +129,7 @@ class decision_helper():
     
 class maxEntMethod():
     def MaxEntMove(self,fSum, blank, chisq, chizer, c1, c2, s1, s2):
-        '''
+        r'''
         Implementing the maximum entropy move for feature size distribution
         The goal of this function is to calculate distance and choose the next
         target $\chi^2$ and to move beta one step closer towards the solution
@@ -174,7 +175,7 @@ class maxEntMethod():
         return w, chtarg, loop, a_new, fx, beta
 
     def MaxEnt_SB(self,Iq,sigma,Gqr,first_bins,IterMax=5000,report=True):
-        '''
+        r'''
         This function does the complete Maximum Entropy algorithm of Skilling
         and Bryan
          
@@ -261,10 +262,10 @@ class maxEntMethod():
             xi[0] = f * cgrad / cnorm
             xi[1] = f * (a * sgrad - b * cgrad)
             
-            eta[0] = np.dot(xi[0], Gqr.transpose());          # solution --> data
-            eta[1] = np.dot(xi[1], Gqr.transpose());          # solution --> data
+            eta[0] = np.dot(xi[0], Gqr.transpose())          # solution --> data
+            eta[1] = np.dot(xi[1], Gqr.transpose())          # solution --> data
             ox = eta[1] / (sigma * sigma)
-            xi[2] = np.dot(ox, Gqr);          # data --> solution
+            xi[2] = np.dot(ox, Gqr)          # data --> solution
             a = 1.0 / math.sqrt(sum(f * xi[2]*xi[2]))
             xi[2] = f * xi[2] * a
             eta[2] = np.dot(xi[2], Gqr.transpose())           # solution --> data

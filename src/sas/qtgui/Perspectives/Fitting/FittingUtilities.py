@@ -1,15 +1,10 @@
 import copy
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
 import numpy
-
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole, Data2D
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting.AssociatedComboBox import AssociatedComboBox
-
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.sascalc.fit.expression import check_constraints
 
 model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
@@ -514,7 +509,6 @@ def residualsData1D(reference_data, current_data, weights):
     """
     # temporary default values for index and weight
     index = None
-    weight = None
 
     # 1d theory from model_thread is only in the range of index
     if current_data.dy is None or not len(current_data.dy):

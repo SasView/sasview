@@ -1,21 +1,14 @@
 # global
-import sys
-import os
 import types
-import webbrowser
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+import bumps.options
+from bumps import fitters
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-from bumps import fitters
-import bumps.options
-
-from sas.system.config.config import config as sasview_config
 from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+from sas.system.config.config import config as sasview_config
 
 # Set the default optimizer
 fitters.FIT_DEFAULT_ID = 'lm'
@@ -101,12 +94,12 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         Use options.FIT_FIELDS to assert which line edit gets what validator
         """
         for option in bumps.options.FIT_FIELDS.keys():
-            (f_name, f_type) = bumps.options.FIT_FIELDS[option]
+            _, f_type = bumps.options.FIT_FIELDS[option]
             validator = None
-            if type(f_type) == types.FunctionType:
+            if isinstance(f_type, types.FunctionType):
                 validator = QtGui.QIntValidator()
                 validator.setBottom(0)
-            elif f_type == float:
+            elif isinstance(f_type, float):
                 validator = GuiUtils.DoubleValidator()
                 validator.setBottom(0)
             else:
@@ -248,9 +241,11 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         """
         if current_fitter is None:
             current_fitter = self.current_fitter_id
-        if option_id not in list(bumps.options.FIT_FIELDS.keys()): return None
+        if option_id not in list(bumps.options.FIT_FIELDS.keys()):
+            return None
         option = option_id + '_' + current_fitter
-        if not hasattr(self, option): return None
+        if not hasattr(self, option):
+            return None
         return eval('self.' + option)
 
     def getResults(self):

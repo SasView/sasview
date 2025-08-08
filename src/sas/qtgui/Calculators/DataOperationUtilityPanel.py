@@ -1,17 +1,14 @@
-import time
+import copy
 import logging
 import re
-import copy
+import time
 
-from PySide6 import QtCore
-from PySide6 import QtGui
 from PySide6 import QtWidgets
 
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.Plotter import PlotterWidget
-from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.Plotter import PlotterWidget
+from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 

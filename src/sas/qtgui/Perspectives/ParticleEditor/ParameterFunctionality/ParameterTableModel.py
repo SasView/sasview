@@ -1,15 +1,23 @@
 
 """ Code that handles the parameter list backend """
 
-from typing import Optional, Dict
-
 import inspect
+from typing import Dict, Optional
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import SLDFunction, MagnetismFunction
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import (
-    SolventSLD, Background, Scale, FunctionParameter, MagnetismParameterContainer, ValueSource, CalculationParameters)
+    Background,
+    CalculationParameters,
+    FunctionParameter,
+    MagnetismParameterContainer,
+    Scale,
+    SolventSLD,
+    ValueSource,
+)
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import MagnetismFunction, SLDFunction
 
-class LinkingImpossible(Exception): pass
+
+class LinkingImpossible(Exception):
+    pass
 
 class ParameterTableModel:
     """

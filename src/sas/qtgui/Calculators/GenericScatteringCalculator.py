@@ -1,48 +1,36 @@
-import sys
-import os
-
-from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
-from matplotlib.figure import Figure
-import numpy
 import logging
+import math
+import os
+import sys
 import time
 import timeit
-import math
 
-from scipy.spatial.transform import Rotation
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+import numpy
+from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d.axes3d import Axes3D
-from matplotlib import __version__ as mpl_version
-
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
+from scipy.spatial.transform import Rotation
 from twisted.internet import threads
 
-import periodictable
+from sasdata.dataloader.data_info import Detector, Source
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Utilities.GenericReader import GenReader
-from sasdata.dataloader.data_info import Detector, Source
-from sas.system.version import __version__
-from sas.sascalc.calculator import sas_gen
-from sas.sascalc.fit import models
-from sas.sascalc.calculator.geni import radius_of_gyration, create_beta_plot, f_of_q
 import sas.sascalc.calculator.gsc_model as gsc_model
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
-
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.GenericReader import GenReader
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.sascalc.calculator import sas_gen
+from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
+from sas.sascalc.fit import models
 
 # Local UI
 from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
+
 
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
@@ -488,7 +476,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sender.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
         # If the LineEdit is an acceptable value according to the regex apply warnings
         # This functionality was previously found in check_value()
-        if not(sender in self.invalidLineEdits):
+        if sender not in self.invalidLineEdits:
             if sender == self.txtNoQBins :
                 xnodes = float(self.txtXnodes.text())
                 ynodes = float(self.txtYnodes.text())
@@ -1757,7 +1745,7 @@ class Plotter3DWidget(PlotterBase):
         for key in list(color_dic.keys()):
             chosen_color = pix_symbol == key
             if numpy.any(chosen_color):
-                other_color = other_color & (chosen_color!=True)
+                other_color = other_color & (chosen_color != True)
                 color = color_dic[key]
                 im = ax.plot(pos_x[chosen_color], pos_z[chosen_color],
                          pos_y[chosen_color], marker, c=color, alpha=0.5,
@@ -1775,17 +1763,17 @@ class Plotter3DWidget(PlotterBase):
                     if a_name.count(name) == 0:
                         a_name += new_name
             # plot in black
-            im = ax.plot(pos_x[other_color], pos_z[other_color],
-                         pos_y[other_color], marker, c="k", alpha=0.5,
-                         markeredgecolor="k", markersize=m_size, label=a_name)
+            ax.plot(pos_x[other_color], pos_z[other_color],
+                    pos_y[other_color], marker, c="k", alpha=0.5,
+                    markeredgecolor="k", markersize=m_size, label=a_name)
         if data.pix_type == 'atom':
             ax.legend(loc='upper left', prop={'size': 10})
         # IV. Draws atomic bond with grey lines if any
         if data.has_conect:
             for ind in range(len(data.line_x)):
-                im = ax.plot(data.line_x[ind], data.line_z[ind],
-                             data.line_y[ind], '-', lw=0.6, c="grey",
-                             alpha=0.3)
+                ax.plot(data.line_x[ind], data.line_z[ind],
+                        data.line_y[ind], '-', lw=0.6, c="grey",
+                        alpha=0.3)
         # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:
             def _draw_arrow(input=None, update=None):

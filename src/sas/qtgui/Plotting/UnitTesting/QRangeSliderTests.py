@@ -1,17 +1,15 @@
-import sys
 
 import pytest
 
-from PySide6 import QtCore, QtWidgets
-
 # Local
 from PySide6.QtWidgets import QMdiArea
+
+import sas.qtgui.Plotting.Plotter as Plotter
 from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
-from sas.qtgui.Plotting.PlotterData import Data1D
-import sas.qtgui.Plotting.Plotter as Plotter
-from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.LinearFit import LinearFit
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 
 
 class QRangeSlidersTest:

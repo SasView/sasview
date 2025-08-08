@@ -1,21 +1,21 @@
 #Global
 import ast
-import logging
-import traceback
 import importlib.util
+import logging
 import re
+import traceback
 
-from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QPushButton
+from PySide6.QtWidgets import QPushButton, QWidget
 
-#Global SasView
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
+from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
+from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
 
 #Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
-from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
-from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
+
+#Global SasView
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 
 logger = logging.getLogger(__name__)
 

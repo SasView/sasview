@@ -1,23 +1,13 @@
-import sys
-import time
-import numpy
-import logging
-import webbrowser
-
-from PySide6 import QtGui, QtWidgets
-from PySide6 import QtCore
-from PySide6.QtTest import QTest
-from PySide6.QtCore import Qt
 
 import pytest
-
-from twisted.internet import threads
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtTest import QTest
 
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
-from sas.qtgui.Utilities.GuiUtils import *
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.MainWindow.DataState import DataState
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 

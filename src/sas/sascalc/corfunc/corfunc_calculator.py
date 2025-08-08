@@ -3,32 +3,29 @@ This module implements corfunc
 """
 
 
-from typing import Optional, Tuple, Callable
-from dataclasses import dataclass
-from enum import Enum
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 import scipy.optimize
+from scipy.fftpack import dct
+from scipy.integrate import cumulative_trapezoid, trapezoid
 from scipy.interpolate import interp1d
 from scipy.signal import argrelextrema
-from scipy.fftpack import dct
-from scipy.integrate import trapezoid, cumulative_trapezoid
-
-from sas.sascalc.corfunc.calculation_data import (TransformedData,
-                                                  LamellarParameters,
-                                                  SupplementaryParameters,
-                                                  TangentMethod,
-                                                  LongPeriodMethod,
-                                                  ExtrapolationParameters,
-                                                  SettableExtrapolationParameters,
-                                                  Fittable,
-                                                  PorodData,
-                                                  GuinierData)
-
 
 from sasdata.dataloader.data_info import Data1D
-from sas.sascalc.corfunc.transform_thread import FourierThread
-from sas.sascalc.corfunc.transform_thread import HilbertThread
+
+from sas.sascalc.corfunc.calculation_data import (
+    ExtrapolationParameters,
+    Fittable,
+    GuinierData,
+    LamellarParameters,
+    LongPeriodMethod,
+    PorodData,
+    SettableExtrapolationParameters,
+    SupplementaryParameters,
+    TangentMethod,
+    TransformedData,
+)
 from sas.sascalc.corfunc.smoothing import SmoothJoin
 
 

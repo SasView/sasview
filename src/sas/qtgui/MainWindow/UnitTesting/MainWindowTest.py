@@ -1,19 +1,16 @@
 import sys
 
 import pytest
-
-from PySide6 import QtGui, QtWidgets
-from PySide6.QtGui import *
+from PySide6 import QtCore, QtWidgets
 from PySide6.QtTest import QTest
-from PySide6 import QtCore
 
 # Local
-from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
-from sas.qtgui.MainWindow.MainWindow import SplashScreen
+from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow, SplashScreen
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
-from sas.qtgui.Utilities.HidableDialog import HidableDialog, ShowAgainResult
-
+from sas.qtgui.Utilities.HidableDialog import HidableDialog
 from sas.system import config
+
+
 class MainWindowTest:
     """Test the Main Window GUI"""
 

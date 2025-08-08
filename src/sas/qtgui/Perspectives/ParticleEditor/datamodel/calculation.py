@@ -1,13 +1,16 @@
-from typing import Optional, Tuple, List
-import numpy as np
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import List, Optional, Tuple
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import (
-    SLDFunction, MagnetismFunction, CoordinateSystemTransform)
+import numpy as np
+
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import CalculationParameters
-
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import (
+    CoordinateSystemTransform,
+    MagnetismFunction,
+    SLDFunction,
+    VectorComponents3,
+)
 
 
 class QSample:

@@ -1,9 +1,9 @@
-from typing import Optional, Union, Sequence
+from typing import Optional
 
 import numpy as np
 
-from sas.qtgui.GL.models import FullModel
 from sas.qtgui.GL.color import ColorSpecification
+from sas.qtgui.GL.models import FullModel
 
 
 class Sphere(FullModel):

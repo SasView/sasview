@@ -11,6 +11,7 @@ are added.
 
 
 from typing import List, Tuple
+
 import numpy as np
 
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import AngularDistribution
@@ -36,7 +37,7 @@ class ZDelta(AngularDistribution):
         return []
 
     def __repr__(self):
-        return f"ZDelta()"
+        return "ZDelta()"
 
 
 class Uniform(AngularDistribution):

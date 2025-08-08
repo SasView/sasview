@@ -1,12 +1,13 @@
+import argparse
+import datetime
+import json
 import logging
+import os
+import sys
+from csv import DictReader
+from pathlib import Path
 
 import requests
-import argparse
-import json
-import datetime
-import sys
-import os
-from pathlib import Path
 
 from sas.system.legal import legal
 
@@ -36,8 +37,8 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': f'SasView version 6.1.0',
-    'description': f'6.1.0 release',
+    'title': 'SasView version 6.1.0',
+    'description': '6.1.0 release',
     'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.0-alpha-1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
@@ -141,20 +142,18 @@ def generate_sasview_data() -> dict:
         contributors = []
         creators = []
         with open(CONTRIBUTORS_FILE) as f:
-            # Rear in the lines and ignore the first line
-            lines = f.readlines()[1:]
-            for line in lines:
-                values = line.split('\t')
-                record = {"name": values[0], "affiliation": values[1]}
-                if len(values) > 5 and values[5]:
-                    record['orcid'] = values[5]
-                if values[2]:
+            reader = DictReader(f, delimiter="\t")
+            for row in reader:
+                record = {"name": row["Name"], "affiliation": row["Affiliation"]}
+                if 'ORCID' in row:
+                    record['orcid'] = row['ORCID']
+                if row['Creator']:
                     creators.append(record)
-                elif len(values) > 3 and values[3]:
-                    record['type'] = "Producer"
+                elif row['Producer']:
+                    record['type'] = 'Producer'
                     contributors.append(record)
-                elif len(values) > 4 and values[4]:
-                    record['type'] = "Other"
+                else:
+                    record['type'] = 'Other'
                     contributors.append(record)
         return {"creators": creators, "contributors": contributors}
     else:
@@ -347,12 +346,9 @@ def main(args=None):
 
     # Pull the license from a know location
     license_line = legal.copyright
-    subpackages = [SASMODELS_PATH, SASDATA_PATH, SASVIEW_PATH]
-    for subpackage in subpackages:
-        license_file = subpackage / 'LICENSE.txt'
-        update_file(license_file, license_line, 0)
-    license_file = SASVIEW_PATH / 'installers' / 'license.txt'
-    update_file(license_file, license_line, -1)
+    update_file(SASMODELS_PATH / 'LICENSE.txt', license_line, 0)
+    update_file(SASDATA_PATH / 'LICENSE.TXT', license_line, 0)
+    update_file(SASVIEW_PATH / 'installers' / 'license.txt', license_line, -1)
 
     sasview_issues_list = args.sasview_list
     sasmodels_issues_list = args.sasmodels_list

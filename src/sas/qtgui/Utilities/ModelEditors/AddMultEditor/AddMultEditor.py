@@ -3,27 +3,21 @@ Widget for simple add / multiply editor.
 """
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
-from numpy import *
-import numpy as np
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-import webbrowser
-
-import os
 import logging
+import os
 import traceback
 
-from sasmodels.sasview_model import load_standard_models
+from numpy import *
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.sascalc.fit import models
+from sasmodels.sasview_model import load_standard_models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
 
 # Local UI
 from sas.qtgui.Utilities.ModelEditors.AddMultEditor.UI.AddMultEditorUI import Ui_AddMultEditorUI
+from sas.sascalc.fit import models
 
 # Template for the output plugin file
 SUM_TEMPLATE = """

@@ -1,5 +1,6 @@
 import traceback
-from typing import List, Union, Callable
+from typing import Callable
+
 import numpy as np
 
 test_n = 7

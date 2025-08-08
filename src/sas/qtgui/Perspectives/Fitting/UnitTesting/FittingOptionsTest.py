@@ -1,17 +1,14 @@
-import sys
 import webbrowser
 
 import pytest
-
 from bumps import options
-
 from PySide6 import QtGui, QtWidgets
-
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities.Preferences.PreferencesWidget import PreferencesWidget
+
 
 class FittingOptionsTest:
     '''Test the FittingOptions dialog'''

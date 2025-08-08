@@ -1,7 +1,6 @@
-from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from sas.qtgui.Plotting.PlotUtilities import COLORS, COLORS_LETTER, WEIGHTS, FONTS
+from sas.qtgui.Plotting.PlotUtilities import COLORS, COLORS_LETTER, FONTS, WEIGHTS
 from sas.qtgui.Plotting.UI.PlotLabelPropertiesUI import Ui_PlotLabelPropertiesUI
 
 

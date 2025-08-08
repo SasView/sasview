@@ -1,17 +1,14 @@
 import os
-import sys
 
 import pytest
-
-from PySide6 import QtGui, QtWidgets
-from PySide6 import QtCore
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtTest import QTest
 
+from sasdata.dataloader.loader import Loader
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sasdata.dataloader.loader import Loader
-from sas.qtgui.MainWindow.DataManager import DataManager
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 
 class CorfuncTest:
@@ -78,7 +75,7 @@ class CorfuncTest:
         assert widget.calculate_background.called_once()
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
-    def testProcess(self, widget):
+    def testProcess(self, widget, mocker):
         """Test the full analysis path"""
 
         filename = os.path.join("UnitTesting", "ISIS_98929.txt")

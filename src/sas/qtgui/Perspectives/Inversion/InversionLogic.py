@@ -1,6 +1,7 @@
 import logging
-from PySide6.QtGui import QStandardItem
+
 import numpy as np
+from PySide6.QtGui import QStandardItem
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import dataFromItem

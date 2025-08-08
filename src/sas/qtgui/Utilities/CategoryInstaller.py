@@ -8,11 +8,10 @@ Copyright (c) Institut Laue-Langevin 2012
 @modified by NIST/MD sasview team
 """
 
-import os
-import sys
 import json
 import logging
-from collections import defaultdict, OrderedDict
+import os
+from collections import OrderedDict, defaultdict
 
 from sas.system.user import get_config_dir
 

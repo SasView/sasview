@@ -1,54 +1,44 @@
+import copy
 import json
+import logging
 import os
 import re
-from collections import defaultdict
-from typing import Any, Tuple, Optional, Union, List, Dict
-from pathlib import Path
-
-import copy
-import logging
 import traceback
-from twisted.internet import threads
+from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
+from twisted.internet import threads
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-from sasmodels import generate
-from sasmodels import modelinfo
-from sasmodels.sasview_model import SasviewModel
-from sasmodels.sasview_model import load_standard_models
-from sasmodels.sasview_model import MultiplicationModel
-
-from sas import config
-from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.sascalc.fit import models
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION
+from sasmodels import generate, modelinfo
+from sasmodels.sasview_model import MultiplicationModel, SasviewModel, load_standard_models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
-from sas.qtgui.Plotting.Plotter import PlotterWidget
-
-from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
-from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
-from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
-
-from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
-from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
-from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
+from sas import config
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
-from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
-from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
-from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
-from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
-from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
+from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
+from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
+from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
+from sas.qtgui.Perspectives.Fitting.MagnetismWidget import MagnetismWidget
+from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D, Calc2D
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
-from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
+from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.OrderWidget import OrderWidget
+from sas.qtgui.Perspectives.Fitting.PolydispersityWidget import PolydispersityWidget
+from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
+from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
+from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
+from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
+from sas.qtgui.Plotting.Plotter import PlotterWidget
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION
+from sas.sascalc.fit import models
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -2501,7 +2491,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Only show volfraction once if it appears in both P and S models.
         Issues SV:1280, SV:1295, SM:219, SM:199, SM:101
         """
-        from sasmodels.product import VOLFRAC_ID, RADIUS_MODE_ID, STRUCTURE_MODE_ID
+        from sasmodels.product import RADIUS_MODE_ID, STRUCTURE_MODE_ID, VOLFRAC_ID
 
         product_params = None
         p_kernel = self.logic.kernel_module

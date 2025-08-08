@@ -1,16 +1,16 @@
-import pytest
-
 import matplotlib as mpl
+import pytest
 
 mpl.use("Qt5Agg")
 
-from sas.qtgui.Utilities.GuiUtils import *
+from PySide6 import QtWidgets
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import (
     SizeDistributionWindow,
 )
 from sas.qtgui.Plotting.PlotterData import Data1D
-
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class SizeDistributionTest:

@@ -3,8 +3,8 @@ from __future__ import print_function
 import logging
 import logging.config
 import os
-import sys
 import os.path
+import sys
 
 from sas.system.user import get_log_dir
 

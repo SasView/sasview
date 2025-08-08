@@ -1,37 +1,30 @@
 # pylint: disable=E501, E203, E701
 # global
-import sys
-import os
-import time
-import logging
 import copy
+import logging
+import os
+import sys
+import time
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import threads
 
 # SASCALC
 from sasdata.dataloader.loader import Loader
 
-# QTGUI
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Perspectives as Perspectives
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Plotting.PlotterData import DataRole
-from sas.qtgui.Plotting.Plotter import Plotter, PlotterWidget
-from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
-from sas.qtgui.Plotting.MaskEditor import MaskEditor
-
+# QTGUI
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas import config
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MainWindow.NameChanger import ChangeName
-
-import sas.qtgui.Perspectives as Perspectives
-from sas import config
+from sas.qtgui.Plotting.MaskEditor import MaskEditor
+from sas.qtgui.Plotting.Plotter import PlotterWidget
+from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 
 logger = logging.getLogger(__name__)
 
@@ -381,7 +374,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for i in range(model.rowCount()):
             item = model.item(i)
             data = GuiUtils.dataFromItem(item)
-            if data is None: continue
+            if data is None:
+                continue
             # Now, all plots under this item
             name = data.name
             all_data[name] = data
@@ -408,7 +402,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             properties = {}
             item = model.item(i)
             data = GuiUtils.dataFromItem(item)
-            if data is None: continue
+            if data is None:
+                continue
             # Now, all plots under this item
             name = data.name
             is_checked_bool = item.checkState() == QtCore.Qt.Checked
@@ -428,8 +423,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 properties = {}
                 item = model.item(i)
                 data = GuiUtils.dataFromItem(item)
-                if data is None: continue
-                if data.id != id: continue
+                if data is None or data.id != id:
+                    continue
                 # We found the dataset - save it.
                 name = data.name
                 is_checked_bool = item.checkState() == QtCore.Qt.Checked
@@ -447,8 +442,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for model in (self.model, self.theory_model):
             for i in range(model.rowCount()):
                 data = GuiUtils.dataFromItem(model.item(i))
-                if data is None: continue
-                if data.id != id: continue
+                if data is None or data.id != id:
+                    continue
                 # We found the item - return it
                 item = model.item(i)
                 break
@@ -658,7 +653,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # key - cardinal number of dataset
             # value - main dataset, [dependant filesets]
             # add the main index
-            if not value: continue
+            if not value:
+                continue
             new_data = value[0]
             from sasdata.dataloader.data_info import Data1D as old_data1d
             from sasdata.dataloader.data_info import Data2D as old_data2d
@@ -1311,7 +1307,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plot_id = str(graph.currentText())
         try:
             assert plot_id in PlotHelper.currentPlotIds(), "No such plot: %s" % (plot_id)
-        except:
+        except AssertionError:
             return
 
         old_plot = PlotHelper.plotById(plot_id)

@@ -1,12 +1,9 @@
-import numpy as np
+from typing import Callable
 
-from PySide6 import QtCore
+import numpy as np
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
-
 from .UI.SaveExtrapolated import Ui_SaveExtrapolatedPanel
-
-from typing import Callable
 
 
 class UserInputInvalid(Exception):

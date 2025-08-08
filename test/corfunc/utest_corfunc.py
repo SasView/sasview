@@ -2,17 +2,16 @@
 Unit Tests for CorfuncCalculator class
 """
 
-from typing import Optional
 
 import os.path
 import unittest
-import time
 
 import numpy as np
 
+from sasdata.dataloader.data_info import Data1D
+
 from sas.sascalc.corfunc.calculation_data import SettableExtrapolationParameters
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator, extract_lamellar_parameters
-from sasdata.dataloader.data_info import Data1D
 
 
 def find(filename):

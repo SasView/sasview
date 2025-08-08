@@ -2,12 +2,15 @@
     Calculation thread for modeling
 """
 
-import time
-import numpy
 import math
+import time
+
+import numpy
+
+from sas import config
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
-from sas import config
+
 
 class Calc2D(CalcThread):
     """

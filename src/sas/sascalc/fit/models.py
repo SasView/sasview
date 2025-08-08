@@ -1,15 +1,15 @@
 """
     Utilities to manage models
 """
-import os
-import sys
-import time
 import datetime
+import io
 import logging
-import traceback
+import os
 import py_compile
 import shutil
-import io
+import sys
+import time
+import traceback
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
@@ -166,7 +166,7 @@ def find_plugin_models():
                 #if not model.name.startswith(PLUGIN_NAME_BASE):
                 #    model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
-            except Exception as exc:
+            except Exception:
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)

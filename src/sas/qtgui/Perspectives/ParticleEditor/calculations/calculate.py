@@ -1,10 +1,16 @@
 import time
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import \
-    ScatteringCalculation, QSpaceScattering, ScatteringOutput
-from sas.qtgui.Perspectives.ParticleEditor.calculations.fq import scattering_via_fq
 from sas.qtgui.Perspectives.ParticleEditor.calculations.boundary_check import (
-    check_sld_continuity_at_boundary, check_mag_zero_at_boundary)
+    check_mag_zero_at_boundary,
+    check_sld_continuity_at_boundary,
+)
+from sas.qtgui.Perspectives.ParticleEditor.calculations.fq import scattering_via_fq
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
+    QSpaceScattering,
+    ScatteringCalculation,
+    ScatteringOutput,
+)
+
 
 class SLDBoundaryMismatch(Exception):
     pass

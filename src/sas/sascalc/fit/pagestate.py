@@ -11,30 +11,24 @@ Class that holds a fit page state
 #
 # copyright 2009, University of Tennessee
 ################################################################################
-import time
-import re
-import os
-import sys
 import copy
 import logging
-import numpy as np
+import os
+import re
+import sys
+import time
 import traceback
+from xml.dom.minidom import getDOMImplementation, parseString
 
-import xml.dom.minidom
-from xml.dom.minidom import parseString
-from xml.dom.minidom import getDOMImplementation
+import numpy as np
 from lxml import etree
 
-from sasmodels import convert
 import sasmodels.weights
+from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
+from sasdata.dataloader.readers.cansas_reader import get_content
+from sasmodels import convert
 
 from sas.system.version import __version__ as SASVIEW_VERSION
-
-import sasdata.dataloader
-from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
-from sasdata.dataloader.readers.cansas_reader import get_content, write_node
-from sasdata.dataloader.data_info import Data2D, Collimation, Detector
-from sasdata.dataloader.data_info import Process, Aperture
 
 logger = logging.getLogger(__name__)
 
@@ -615,7 +609,7 @@ class PageState(object):
         for line in lines:
             # Skip lines which are not key: value pairs, which includes
             # blank lines and freeform notes in SASNotes fields.
-            if not ':' in line:
+            if ':' not in line:
                 #msg = "Report string expected 'name: value' but got %r" % line
                 #logger.error(msg)
                 continue

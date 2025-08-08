@@ -1,21 +1,14 @@
-import sys
 
 import pytest
+from PySide6 import QtCore, QtGui
 
-from PySide6 import QtGui, QtCore
-
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
-
-from sasmodels import generate
-from sasmodels import modelinfo
+from sasmodels import generate, modelinfo
 from sasmodels.sasview_model import load_standard_models
 
 # Tested module
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.FittingUtilities import checkConstraints
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 
 class FittingUtilitiesTest:

@@ -1,25 +1,17 @@
 # Create your tests here.
-import shutil
 import json
-
-from django.conf import settings
-from django.test import TestCase
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.test import APIRequestFactory, APIClient, force_authenticate, APITestCase
-
-from sasmodels.data import empty_data1D
-from sasdata.dataloader.loader import Loader
-import numpy as np
+import shutil
 
 from data.models import Data
-from .models import (
-    Fit,
-    FitParameter
-)
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from django.test import TestCase
+from rest_framework.test import APIClient, APIRequestFactory, APITestCase
+
+from sasdata.dataloader.loader import Loader
+
 from .views import (
-    start,
     start_fit,
 )
 
