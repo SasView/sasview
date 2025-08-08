@@ -385,7 +385,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
 
     def check_perspective_and_set_data(self,fitting_requested, perspective_name, items_for_fit):        
         isBatch = fitting_requested in (2, 4)
-        self.parent.manager.loadedPerspectives[perspective_name].setData(data_item=items_for_fit,is_batch=isBatch)
+        self.parent.manager.parent.loadedPerspectives[perspective_name].setData(data_item=items_for_fit,is_batch=isBatch)
 
     def sendToFit(self, items_for_fit, fitting_requested):
         """
