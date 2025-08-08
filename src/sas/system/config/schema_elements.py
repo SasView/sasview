@@ -1,7 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Optional, List, Any
 import logging
-
+from abc import ABC, abstractmethod
+from typing import Any
 
 """ Type representation for config elements
 
@@ -189,7 +188,7 @@ def create_schema_element(name: str, value, recursion_depth: int=10) -> SchemaEl
         raise SchemaError(f"Config element is not a bool, int, float, str, or a homogeneous list thereof ({name}={value})")
 
 
-def schema_union(elements: List[SchemaElement]):
+def schema_union(elements: list[SchemaElement]):
     """ Union of an arbitrary number of Schema Elements"""
     if len(elements) == 0:
         return SchemaNonSpecified()
@@ -204,7 +203,7 @@ def schema_union(elements: List[SchemaElement]):
         return unioned
 
 
-def pairwise_schema_union(a: Optional[SchemaElement], b: Optional[SchemaElement]) -> Optional[SchemaElement]:
+def pairwise_schema_union(a: SchemaElement | None, b: SchemaElement | None) -> SchemaElement | None:
     """ Pairwise union of Schema Elements"""
 
     if a is None or b is None:

@@ -1,6 +1,7 @@
 import logging
-from PySide6.QtGui import QStandardItem
+
 import numpy as np
+from PySide6.QtGui import QStandardItem
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import dataFromItem
@@ -17,7 +18,7 @@ PR_PLOT_PTS = 51
 logger = logging.getLogger(__name__)
 
 
-class InversionLogic(object):
+class InversionLogic:
     """
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.
@@ -77,7 +78,7 @@ class InversionLogic(object):
         index = np.isnan(y)
         if index.any():
             y[index] = err[index] = 1.0
-            logger.info("Could not compute I(q) for q =", list((x[index])))
+            logger.info("Could not compute I(q) for q =", list(x[index]))
 
         new_plot = Data1D(x, y)
         new_plot.is_data = False
@@ -104,7 +105,7 @@ class InversionLogic(object):
             index = np.isnan(y)
             if index.any():
                 y[index] = err[index] = 1.0
-                logger.info("Could not compute smeared I(q) for q =", list((x[index])))
+                logger.info("Could not compute smeared I(q) for q =", list(x[index]))
 
             new_plot = Data1D(x, y)
             new_plot.name = IQ_SMEARED_LABEL

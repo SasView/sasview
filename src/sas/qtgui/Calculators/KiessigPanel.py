@@ -1,12 +1,11 @@
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.UI import main_resources_rc # noqa: F401
-from .UI.KiessigPanel import Ui_KiessigPanel
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
 
 # sas-global
 from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator
+
+from .UI.KiessigPanel import Ui_KiessigPanel
 
 
 class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
@@ -48,7 +47,7 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
             self.thickness.set_deltaq(dq=float(self.deltaq_in.text()))
             kiessing_result = self.thickness.compute_thickness()
             if kiessing_result:
-                float_as_str = "{:.3f}".format(kiessing_result)
+                float_as_str = f"{kiessing_result:.3f}"
                 self.lengthscale_out.setText(float_as_str)
             else:
                 # error or division by zero

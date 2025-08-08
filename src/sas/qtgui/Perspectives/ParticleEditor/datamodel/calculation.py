@@ -1,13 +1,15 @@
-from typing import Optional, Tuple, List
-import numpy as np
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import (
-    SLDFunction, MagnetismFunction, CoordinateSystemTransform)
+import numpy as np
+
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import CalculationParameters
-
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import VectorComponents3
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import (
+    CoordinateSystemTransform,
+    MagnetismFunction,
+    SLDFunction,
+    VectorComponents3,
+)
 
 
 class QSample:
@@ -81,11 +83,11 @@ class AngularDistribution(ABC):
 
     @staticmethod
     @abstractmethod
-    def parameters() -> List[Tuple[str, str, type]]:
+    def parameters() -> list[tuple[str, str, type]]:
         """ List of keyword arguments to constructor, names for GUI, and the type of value"""
 
     @abstractmethod
-    def sample_points_and_weights(self) -> Tuple[np.ndarray, np.ndarray]:
+    def sample_points_and_weights(self) -> tuple[np.ndarray, np.ndarray]:
         """ Get sample q vector directions and associated weights"""
 
 
@@ -107,7 +109,7 @@ class MagnetismDefinition:
 class ParticleDefinition:
     """ Object containing the functions that define a particle"""
     sld: SLDDefinition
-    magnetism: Optional[MagnetismDefinition]
+    magnetism: MagnetismDefinition | None
 
 
 @dataclass
@@ -118,8 +120,8 @@ class ScatteringCalculation:
     spatial_sampling_method: SpatialDistribution
     particle_definition: ParticleDefinition
     parameter_settings: CalculationParameters
-    polarisation_vector: Optional[np.ndarray]
-    seed: Optional[int]
+    polarisation_vector: np.ndarray | None
+    seed: int | None
     bounding_surface_sld_check: bool
     bin_count = 1_000
     sample_chunk_size_hint: int = 100_000
@@ -146,8 +148,8 @@ class RealSpaceScattering:
 
 @dataclass
 class ScatteringOutput:
-    q_space: Optional[QSpaceScattering]
+    q_space: QSpaceScattering | None
     calculation_time: float
-    seed_used: Optional[int]
+    seed_used: int | None
 
 

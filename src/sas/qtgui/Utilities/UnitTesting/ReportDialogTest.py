@@ -1,16 +1,15 @@
+import logging
 import os
 import sys
-import logging
-from xhtml2pdf import pisa
 
 import pytest
-
-from PySide6 import QtWidgets, QtPrintSupport
+from PySide6 import QtPrintSupport, QtWidgets
 from PySide6.QtTest import QTest
+from xhtml2pdf import pisa
 
 # set up import paths
-
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
 # Local
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 
@@ -137,7 +136,7 @@ class ReportDialogTest:
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
     def testHTML2PDF(self, widget, mocker):
         ''' html to pdf conversion '''
-        class pisa_dummy(object):
+        class pisa_dummy:
             err = 0
         mocker.patch.object(pisa, 'CreatePDF', return_value=pisa_dummy())
         mocker.patch.object(builtins, 'open', return_value="y")

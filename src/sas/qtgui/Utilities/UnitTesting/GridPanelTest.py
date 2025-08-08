@@ -1,21 +1,19 @@
-import numpy as np
-from unittest.mock import mock_open, patch
 import logging
+from unittest.mock import mock_open, patch
 
+import numpy as np
 import pytest
-
 from PySide6 import QtWidgets
 
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-
-from sas.sascalc.fit.AbstractFitEngine import FResult
-from sas.sascalc.fit.AbstractFitEngine import FitData1D
 from sasmodels.sasview_model import load_standard_models
-from sas.qtgui.Plotting.PlotterData import Data1D
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+
 # Local
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
+from sas.sascalc.fit.AbstractFitEngine import FitData1D, FResult
 
 
 class BatchOutputPanelTest:
@@ -24,7 +22,7 @@ class BatchOutputPanelTest:
     def widget(self, qapp):
         '''Create/Destroy the dialog'''
         # dummy perspective
-        class dummy_manager(object):
+        class dummy_manager:
             _parent = QtWidgets.QWidget()
             def communicator(self):
                 return GuiUtils.Communicate()

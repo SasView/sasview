@@ -5,22 +5,18 @@ SAS generic computation and sld file readers.
 Calculation checked by sampling from an ellipsoid and comparing Iq with the
 1D, 2D oriented and 2D oriented magnetic analytical model from sasmodels.
 """
-from __future__ import print_function
 
+import logging
 import os
 import sys
-import logging
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
+from scipy.spatial.transform import Rotation
 
-if sys.version_info[0] < 3:
-    def decode(s):
-        return s
-else:
-    def decode(s):
-        return s.decode() if isinstance(s, bytes) else s
+
+def decode(s):
+    return s.decode() if isinstance(s, bytes) else s
 
 MFACTOR_AM = 2.90636E-12
 MFACTOR_MT = 2.3128E-9
@@ -55,7 +51,7 @@ def transform_center(pos_x, pos_y, pos_z):
     posz = pos_z - (min(pos_z) + max(pos_z)) / 2.0
     return posx, posy, posz
 
-class GenSAS(object):
+class GenSAS:
     """
     Generic SAS computation Model based on sld (n & m) arrays
     """
@@ -884,7 +880,7 @@ class VTKReader:
         else:
             return None
 
-class OMF2SLD(object):
+class OMF2SLD:
     """
     Convert OMFData to MAgData
     """
@@ -1010,7 +1006,7 @@ class OMF2SLD(object):
 
 
 
-class OMFReader(object):
+class OMFReader:
     """
     Class to load omf/ascii files (3 columns w/header).
     """
@@ -1159,7 +1155,7 @@ class OMFReader(object):
             logging.warning(msg)
             return None
 
-class PDBReader(object):
+class PDBReader:
     """
     PDB reader class: limited for reading the lines starting with 'ATOM'
     """
@@ -1317,7 +1313,7 @@ class PDBReader(object):
         """
         print("Not implemented... ")
 
-class SLDReader(object):
+class SLDReader:
     """SLD reader for text files.
 
     format:
@@ -1479,7 +1475,7 @@ class OMFData:
         self.my = my
         self.mz = mz
 
-class MagSLD(object):
+class MagSLD:
     """
     Magnetic SLD.
     """
@@ -1759,7 +1755,8 @@ def test():
 # =======================================================================
 
 def _get_data_path(*path_parts):
-    from os.path import realpath, join as joinpath, dirname
+    from os.path import dirname, realpath
+    from os.path import join as joinpath
     # in sas/sascalc/calculator;  want sas/sasview/test
     return joinpath(dirname(realpath(__file__)),
                     '..', '..', 'sasview', 'test', *path_parts)
@@ -1866,8 +1863,7 @@ def realspace_Iq(self, qx, qy):
     """
     Compute Iq for GenSAS object using sasmodels/explore/realspace.py
     """
-    from realspace import calc_Iq_magnetic, calc_Iqxy
-    from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
+    from realspace import calc_Iq_avg, calc_Iq_from_Pr, calc_Iq_magnetic, calc_Iqxy, calc_Pr, r_bins
 
     x, y, z = self.data_x, self.data_y, self.data_z
     if self.is_avg:
@@ -1919,13 +1915,13 @@ def set_axis_equal_3D(ax):
     """
     Set equal axes on a 3D plot.
     """
-    extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+    extents = np.array([getattr(ax, f'get_{dim}lim')() for dim in 'xyz'])
     sz = extents[:, 1] - extents[:, 0]
     centers = np.mean(extents, axis=1)
     maxsize = max(abs(sz))
     r = maxsize/2
     for ctr, dim in zip(centers, 'xyz'):
-        getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
+        getattr(ax, f'set_{dim}lim')(ctr - r, ctr + r)
 
 def compare(obj, qx, qy=None, plot_points=False, theory=None):
     """
@@ -1933,8 +1929,9 @@ def compare(obj, qx, qy=None, plot_points=False, theory=None):
 
     *theory* is the I(q) value for the shape, if known.
     """
-    from matplotlib import pyplot as plt
     from timeit import default_timer as timer
+
+    from matplotlib import pyplot as plt
 
     try:
         import realspace
@@ -2200,7 +2197,8 @@ def _setup_realspace_path():
     try:
         import realspace
     except ImportError:
-        from os.path import join as joinpath, realpath, dirname
+        from os.path import dirname, realpath
+        from os.path import join as joinpath
         path = realpath(joinpath(dirname(__file__),
                                  '..', '..', '..', '..', '..',
                                  'sasmodels', 'explore'))

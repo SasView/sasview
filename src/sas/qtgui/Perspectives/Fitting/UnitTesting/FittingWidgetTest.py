@@ -1,35 +1,28 @@
-import time
+import glob
 import logging
 import os
-import glob
-import pytest
+import time
 import webbrowser
-
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-from PySide6 import QtTest
-from PySide6 import QtCore
-
 from unittest.mock import MagicMock
+
+import pytest
+from PySide6 import QtCore, QtGui, QtTest, QtWidgets
 from twisted.internet import threads
+
+from sasmodels.sasview_model import load_custom_model
 
 # Local
 from sas import config
-from sas.qtgui.Utilities import GuiUtils
-from sas.qtgui.Perspectives.Fitting import FittingWidget
-from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting import FittingUtilities, FittingWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
-
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-
-from sasmodels.sasview_model import load_custom_model
-from sas.sascalc.fit.models import ModelManagerBase, ModelManager
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.Utilities import GuiUtils
+from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 
 
-class dummy_manager(object):
+class dummy_manager:
     HELP_DIRECTORY_LOCATION = "html"
     communicate = GuiUtils.Communicate()
 
@@ -39,7 +32,7 @@ class dummy_manager(object):
     def perspective(self):
         return self._perspective
 
-class dummy_perspective(object):
+class dummy_perspective:
 
     def __init__(self):
         self.symbol_dict = {}

@@ -1,27 +1,26 @@
-import numpy as np
 import webbrowser
 
+import numpy as np
 import pytest
+from PySide6 import QtCore, QtTest, QtWidgets
 
-from PySide6 import QtWidgets, QtCore, QtTest
-
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-from sas.qtgui.MainWindow.GuiManager import GuiManager
 
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
-from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+
 
 class ComplexConstraintTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
         '''Create/Destroy the ComplexConstraint'''
-        class dummy_manager(object):
+        class dummy_manager:
             HELP_DIRECTORY_LOCATION = "html"
             communicate = GuiUtils.Communicate()
 

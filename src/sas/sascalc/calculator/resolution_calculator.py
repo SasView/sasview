@@ -3,16 +3,14 @@ This object is a small tool to allow user to quickly
 determine the variance in q  from the
 instrumental parameters.
 """
-from math import pi, sqrt
-import math
 import logging
+import math
+from math import pi, sqrt
 
 import numpy as np
 
-from .instrument import Sample
-from .instrument import Detector
 from .instrument import TOF as Neutron
-from .instrument import Aperture
+from .instrument import Aperture, Detector, Sample
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +20,7 @@ _PLANK_H = 6.62606896E-27
 _GRAVITY = 981.0
 
 
-class ResolutionCalculator(object):
+class ResolutionCalculator:
     """
     compute resolution in 2D
     """

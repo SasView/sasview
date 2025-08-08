@@ -15,9 +15,9 @@ This module implements invariant and its related computations.
 :author: Paul Butler/NIST/UD/UTK -- refactor in 2020
 
 """
-from __future__ import division
 
 import math
+
 import numpy as np
 
 from sasdata.dataloader.data_info import Data1D as LoaderData1D
@@ -31,7 +31,7 @@ Q_MAXIMUM = 10
 # Number of steps in the extrapolation
 INTEGRATION_NSTEPS = 1000
 
-class Transform(object):
+class Transform:
     """
     Define interface that need to compute a function or an inverse
     function given some x, y
@@ -131,8 +131,8 @@ class Guinier(Transform):
 
     def extract_model_parameters(self, constant, slope, dconstant=0, dslope=0):
         """
-	    assign new value to the scale and the radius
-    	"""
+        assign new value to the scale and the radius
+        """
         self.scale = math.exp(constant)
         if slope > 0:
             slope = 0.0
@@ -268,7 +268,7 @@ class PowerLaw(Transform):
         value = np.array([math.pow(i, -self.power) for i in x])
         return self.scale * value
 
-class Extrapolator(object):
+class Extrapolator:
     """
     Extrapolate I(q) distribution using a given model
     """
@@ -346,8 +346,8 @@ class Extrapolator(object):
                      np.ones(len(linearized_data.x)) * b - linearized_data.y
             residuals = np.sum(deltas * deltas / sigma2)
 
-            err = math.fabs(residuals) / np.sum(1.0 / sigma2)
-            return [a, b], [0, math.sqrt(err)]
+            err = np.fabs(residuals) / np.sum(1.0 / sigma2)
+            return [a, b], [0, np.sqrt(err)]
         else:
             A = np.vstack([linearized_data.x / linearized_data.dy, 1.0 / linearized_data.dy]).T
             # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
@@ -360,15 +360,15 @@ class Extrapolator(object):
             try:
                 inv_cov = np.dot(A.transpose(), A)
                 cov = np.linalg.pinv(inv_cov)
-                err_matrix = math.fabs(residuals) * cov
-                err = [math.sqrt(err_matrix[0][0]), math.sqrt(err_matrix[1][1])]
+                err_matrix = np.fabs(residuals) * cov
+                err = [np.sqrt(err_matrix[0][0]), np.sqrt(err_matrix[1][1])]
             except:
                 err = [-1.0, -1.0]
 
             return p, err
 
 
-class InvariantCalculator(object):
+class InvariantCalculator:
     """
     Compute invariant if data is given.
     Can provide volume fraction and surface area if the user provides
@@ -933,9 +933,9 @@ class InvariantCalculator(object):
             volume1 = 0.5 * (1 - math.sqrt(discrim))
             volume2 = 0.5 * (1 + math.sqrt(discrim))
 
-            if 0 <= volume1 and volume1 <= 1:
+            if volume1 >= 0 and volume1 <= 1:
                 return volume1
-            elif 0 <= volume2 and volume2 <= 1:
+            elif volume2 >= 0 and volume2 <= 1:
                 return volume2
             msg = "Could not compute the volume fraction: inconsistent results"
             raise RuntimeError(msg)

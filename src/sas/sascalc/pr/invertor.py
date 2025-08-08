@@ -1,12 +1,13 @@
-from copy import copy
 import logging
-import numpy as np
-import time
 import math
-from numpy.linalg import lstsq
-import numpy.typing as npt
-
+import time
+from copy import copy
 from typing import TYPE_CHECKING
+
+import numpy as np
+import numpy.typing as npt
+from numpy.linalg import lstsq
+
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Inversion.InversionLogic import InversionLogic
 
@@ -57,7 +58,7 @@ def help():
 
     return info_txt
 
-class Invertor():
+class Invertor:
 
     def __init__(self, logic: "InversionLogic"):
         self.init_default_values()
@@ -738,9 +739,9 @@ class Invertor():
         """
         Computes sum_sig and sum_reg of input array given.
 
-	    :param nfunc: number of base functions.
-	    :param nr: number of r-points used when evaluating reg term.
-	    :param a_obj: Array to compute sum_sig and sum_reg of.
+        :param nfunc: number of base functions.
+        :param nr: number of r-points used when evaluating reg term.
+        :param a_obj: Array to compute sum_sig and sum_reg of.
 
         :return: Tuple of (sum_sig, sum_reg)
         """

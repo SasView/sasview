@@ -2,24 +2,25 @@
 Image viewer widget.
 """
 
-import os
 import logging
-import numpy as np
+import os
+
 import matplotlib
 import matplotlib.image as mpimg
-
+import numpy as np
 from PySide6 import QtWidgets
 
 from sasdata.data_util.manipulations import reader2D_converter
+from sasdata.dataloader.data_info import Detector
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sasdata.dataloader.data_info import Detector
+from sas.qtgui.Utilities.UI.ImageViewerOptionsUI import Ui_ImageViewerOptionsUI
 
 # Local UI
 from sas.qtgui.Utilities.UI.ImageViewerUI import Ui_ImageViewerUI
-from sas.qtgui.Utilities.UI.ImageViewerOptionsUI import Ui_ImageViewerOptionsUI
+
 matplotlib.interactive(False)
 
 class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
@@ -188,7 +189,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
             title = 'Picture: ' + self.filename
             self.setWindowTitle(title)
             self.plotter.draw()
-        except IOError as ex:
+        except OSError as ex:
             err_msg = "Failed to load '%s'.\n" % self.filename
             logging.error(err_msg+str(ex))
             return

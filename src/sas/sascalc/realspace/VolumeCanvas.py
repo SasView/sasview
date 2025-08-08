@@ -23,15 +23,15 @@
 
 """
 
-from sas.sascalc.calculator.BaseComponent import BaseComponent
-from sas.sascalc.simulation.pointsmodelpy import pointsmodelpy
-from sas.sascalc.simulation.geoshapespy import geoshapespy
-
-
-import os.path
 import math
+import os.path
 
-class ShapeDescriptor(object):
+from sas.sascalc.calculator.BaseComponent import BaseComponent
+from sas.sascalc.simulation.geoshapespy import geoshapespy
+from sas.sascalc.simulation.pointsmodelpy import pointsmodelpy
+
+
+class ShapeDescriptor:
     """
         Class to hold the information about a shape
         The descriptor holds a dictionary of parameters.

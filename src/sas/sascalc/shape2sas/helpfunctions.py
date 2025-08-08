@@ -1,14 +1,16 @@
-import numpy as np
+from typing import Any
+
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.special import gamma
-from typing import Optional, Tuple, List, Any
+
 #from dataclasses import dataclass
 
 
 ################################ Type Hints ################################
-Vector2D = Tuple[np.ndarray, np.ndarray]
-Vector3D = Tuple[np.ndarray, np.ndarray, np.ndarray]
-Vector4D = Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+Vector2D = tuple[np.ndarray, np.ndarray]
+Vector3D = tuple[np.ndarray, np.ndarray, np.ndarray]
+Vector4D = tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
 
 
 ################################ Shape2SAS helper functions ###################################
@@ -59,7 +61,7 @@ class <NAME OF SUBUNIT HERE>:
 
 
 class Sphere:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.R = dimensions[0]
 
     def getVolume(self) -> float:
@@ -95,7 +97,7 @@ class Sphere:
 
     
 class HollowSphere:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.R = dimensions[0]
         self.r = dimensions[1]
 
@@ -156,7 +158,7 @@ class HollowSphere:
 
 
 class Cylinder:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.R = dimensions[0]
         self.l = dimensions[1]
 
@@ -190,7 +192,7 @@ class Cylinder:
 
 
 class Ellipsoid:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.a = dimensions[0]
         self.b = dimensions[1]
         self.c = dimensions[2]
@@ -226,7 +228,7 @@ class Ellipsoid:
 
 
 class EllipticalCylinder:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.a = dimensions[0]
         self.b = dimensions[1]
         self.l = dimensions[2]
@@ -266,7 +268,7 @@ class Disc(EllipticalCylinder):
 
 
 class Cube:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.a = dimensions[0]
 
     def getVolume(self) -> float:
@@ -293,7 +295,7 @@ class Cube:
 
 
 class HollowCube:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.a = dimensions[0]
         self.b = dimensions[1]
 
@@ -371,7 +373,7 @@ class HollowCube:
 
 
 class Cuboid:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.a = dimensions[0]
         self.b = dimensions[1]
         self.c = dimensions[2]
@@ -397,7 +399,7 @@ class Cuboid:
 
 
 class CylinderRing:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.R = dimensions[0]
         self.r = dimensions[1]
         self.l = dimensions[2]
@@ -459,7 +461,7 @@ class DiscRing(CylinderRing):
 
 
 class Superellipsoid:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.R = dimensions[0]
         self.eps = dimensions[1]
         self.t = dimensions[2]
@@ -600,10 +602,10 @@ class Translation:
 
 
 class GeneratePoints:
-    def __init__(self, com: List[float], 
+    def __init__(self, com: list[float], 
                     subunitClass: object, 
-                    dimensions: List[float], 
-                    rotation: List[float],
+                    dimensions: list[float], 
+                    rotation: list[float],
                     rotation_point: list[float],
                     Npoints: int):
 
@@ -638,12 +640,12 @@ class GeneratePoints:
 
 class GenerateAllPoints:
     def __init__(self, Npoints: int, 
-                            com: List[List[float]], 
-                        subunits: List[List[float]], 
-                        dimensions: List[List[float]], 
-                        rotation : List[List[float]],
+                            com: list[list[float]], 
+                        subunits: list[list[float]], 
+                        dimensions: list[list[float]], 
+                        rotation : list[list[float]],
                         rotation_point: list[float],
-                        p: List[float], 
+                        p: list[float], 
                         exclude_overlap: bool):
         self.Npoints = Npoints
         self.com = com
@@ -729,11 +731,11 @@ class GenerateAllPoints:
                        y: np.ndarray, 
                        z: np.ndarray, 
                        p: np.ndarray, 
-                       rotation: List[float], 
+                       rotation: list[float], 
                        rotation_point: list[float],
-                       com: List[float], 
+                       com: list[float], 
                        subunitClass: object, 
-                       dimensions: List[float]):
+                       dimensions: list[float]):
         """check for overlap with previous subunits. 
         if overlap, the point is removed"""
 
@@ -827,7 +829,7 @@ class GenerateAllPoints:
 
         return x_new, y_new, z_new, p_new, volume_total
 
-    def onGeneratingAllPoints(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+    def onGeneratingAllPoints(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
         """Generating points for all subunits from each built model"""
         volume = []
         sum_vol = 0
@@ -1177,7 +1179,7 @@ class HardSphereStructure(StructureDecouplingApprox):
                  y_new: np.ndarray, 
                  z_new: np.ndarray, 
                  p_new: np.ndarray, 
-                 par: List[float]):
+                 par: list[float]):
         super(HardSphereStructure, self).__init__(q, x_new, y_new, z_new, p_new)
         self.q = q
         self.x_new = x_new
@@ -1249,7 +1251,7 @@ class Aggregation(StructureDecouplingApprox):
                  y_new: np.ndarray, 
                  z_new: np.ndarray, 
                  p_new: np.ndarray, 
-                 par: List[float]):
+                 par: list[float]):
         super(Aggregation, self).__init__(q, x_new, y_new, z_new, p_new)
         self.q = q
         self.x_new = x_new
@@ -1311,7 +1313,7 @@ class StructureFactor:
                  z_new: np.ndarray, 
                  p_new: np.ndarray,
                  Stype: str,
-                 par: Optional[List[float]]):
+                 par: list[float] | None):
         self.q = q
         self.x_new = x_new
         self.y_new = y_new
@@ -1343,7 +1345,7 @@ class StructureFactor:
                 ValueError(f"Structure factor '{self.Stype}' was not found in structureFactor or global scope.")
 
     @staticmethod
-    def getparname(name: str) -> List[str]:
+    def getparname(name: str) -> list[str]:
         """Return the name of the parameters"""
         pars = {
             'HS': {'conc': 0.02,'r_hs': 50},
@@ -1610,14 +1612,14 @@ def plot_2D(x_list: np.ndarray,
 
 
 def plot_results(q: np.ndarray, 
-                 r_list: List[np.ndarray], 
-                 pr_list: List[np.ndarray], 
-                 I_list: List[np.ndarray], 
-                 Isim_list: List[np.ndarray], 
-                 sigma_list: List[np.ndarray], 
-                 S_list: List[np.ndarray], 
-                 names: List[str], 
-                 scales: List[float], 
+                 r_list: list[np.ndarray], 
+                 pr_list: list[np.ndarray], 
+                 I_list: list[np.ndarray], 
+                 Isim_list: list[np.ndarray], 
+                 sigma_list: list[np.ndarray], 
+                 S_list: list[np.ndarray], 
+                 names: list[str], 
+                 scales: list[float], 
                  xscale_log: bool, 
                  high_res: bool) -> None:
     """
@@ -1679,11 +1681,11 @@ def plot_results(q: np.ndarray,
     plt.close()
 
 
-def generate_pdb(x_list: List[np.ndarray], 
-                 y_list: List[np.ndarray], 
-                 z_list: List[np.ndarray], 
-                 p_list: List[np.ndarray], 
-                 Model_list: List[str]) -> None:
+def generate_pdb(x_list: list[np.ndarray], 
+                 y_list: list[np.ndarray], 
+                 z_list: list[np.ndarray], 
+                 p_list: list[np.ndarray], 
+                 Model_list: list[str]) -> None:
     """
     Generates a visualisation file in PDB format with the simulated points (coordinates) and contrasts
     ONLY FOR VISUALIZATION!
@@ -1718,7 +1720,7 @@ def generate_pdb(x_list: List[np.ndarray],
             f.write('END')
 
 
-def check_unique(A_list: List[float]) -> bool:
+def check_unique(A_list: list[float]) -> bool:
     """
     if all elements in a list are unique then return True, else return False
     """

@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
-from sas.qtgui.Utilities.GuiUtils import enum
 from sasdata.dataloader.data_info import Data1D
+
+from sas.qtgui.Utilities.GuiUtils import enum
 
 WIDGETS = enum(
     "W_NAME",

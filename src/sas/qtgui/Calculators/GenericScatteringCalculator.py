@@ -1,43 +1,36 @@
-import sys
-import os
-
-from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
-from matplotlib.figure import Figure
-import numpy
 import logging
+import math
+import os
+import sys
 import time
 import timeit
-import math
 
-from scipy.spatial.transform import Rotation
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+import numpy
 from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d.axes3d import Axes3D
-
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
+from scipy.spatial.transform import Rotation
 from twisted.internet import threads
 
+from sasdata.dataloader.data_info import Detector, Source
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Utilities.GenericReader import GenReader
-from sasdata.dataloader.data_info import Detector, Source
-from sas.sascalc.calculator import sas_gen
-from sas.sascalc.fit import models
-from sas.sascalc.calculator.geni import radius_of_gyration, create_beta_plot, f_of_q
 import sas.sascalc.calculator.gsc_model as gsc_model
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
-
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.GenericReader import GenReader
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.sascalc.calculator import sas_gen
+from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
+from sas.sascalc.fit import models
 
 # Local UI
 from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
+
 
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
@@ -758,7 +751,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                         completefn=lambda data=None: self.complete_loading_ex(data=data, load_nuc=load_nuc),
                                         updatefn=self.load_update)
                 self.reader.queue()
-        except (RuntimeError, IOError):
+        except (OSError, RuntimeError):
             log_msg = "Generic SAS Calculator: %s" % sys.exc_info()[1]
             logging.info(log_msg)
             raise
@@ -832,7 +825,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 # only nuclear data can be read from pdb files
                 self.nuc_sld_data = data
                 is_pdbdata = True
-        except IOError:
+        except OSError:
             log_msg = "Loading Error: " \
                       "This file format is not supported for GenSAS."
             logging.warning(log_msg)
@@ -956,8 +949,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         #update RG boxes or run RG calculation
         if self.is_nuc:
             if self.nuc_sld_data.is_elements:
-                self.txtRgMass.setText(str("N/A"))
-                self.txtRG.setText(str("N/A "))                    
+                self.txtRgMass.setText("N/A")
+                self.txtRG.setText("N/A ")                    
                 logging.info("SasView does not support computation of Radius of Gyration for elements.")
             else:
                 rgVals = radius_of_gyration(self.nuc_sld_data)  #[String, String, Float], float used for plugin model
@@ -966,12 +959,12 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.rGMass = rgVals[2]                         #used in plugin model
 
         elif self.is_mag:
-            self.txtRgMass.setText(str("N/A"))            
-            self.txtRG.setText(str("N/A"))
+            self.txtRgMass.setText("N/A")            
+            self.txtRG.setText("N/A")
             logging.info("SasView does not support computation of Radius of Gyration for Magnetic Data.")
         else:
-            self.txtRgMass.setText(str("No Data"))
-            self.txtRG.setText(str("No Data"))
+            self.txtRgMass.setText("No Data")
+            self.txtRG.setText("No Data")
             
         
 
@@ -1414,7 +1407,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             d.addCallback(self.calculateComplete)
             d.addErrback(self.calculateFailed)
         except Exception:
-            log_msg = "{}. stop".format(sys.exc_info()[1])
+            log_msg = f"{sys.exc_info()[1]}. stop"
             logging.info(log_msg)
         return
     
@@ -1604,8 +1597,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """
         sld_data = self.create_full_sld_data()
         self.write_new_values_from_gui()
-        graph_title = " Graph {}: {} 3D SLD Profile".format(self.graph_num,
-                                                            self.file_name())
+        graph_title = f" Graph {self.graph_num}: {self.file_name()} 3D SLD Profile"
         if has_arrow:
             graph_title += ' - Magnetic Vector as Arrow'
 
@@ -1621,8 +1613,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """ Generate 1D or 2D plot, called in Compute"""
         if self.is_avg or self.is_avg is None:
             data = Data1D(x=self.data.x, y=self.data_to_plot)
-            data.title = "GenSAS {}  #{} 1D".format(self.file_name(),
-                                                    int(self.graph_num))
+            data.title = f"GenSAS {self.file_name()}  #{int(self.graph_num)} 1D"
             data.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
             data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
             data.id = data.title # required for serialization
@@ -1630,8 +1621,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.graph_num += 1
             if self.is_beta:
                 dataBetaQ = Data1D(x=self.data.x, y=self.data_betaQ)
-                dataBetaQ.title = "GenSAS {}  #{} BetaQ".format(self.file_name(),
-                                                    int(self.graph_num))
+                dataBetaQ.title = f"GenSAS {self.file_name()}  #{int(self.graph_num)} BetaQ"
                 dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
                 dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
                 dataBetaQ.id = dataBetaQ.title # required for serialization
@@ -1645,9 +1635,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           xmin=self.data.xmin, xmax=self.data.ymax,
                           ymin=self.data.ymin, ymax=self.data.ymax,
                           err_image=self.data.err_data)
-            data.title = "GenSAS {}  #{} 2D".format(self.file_name(),
-                                                    int(self.graph_num))
-            data.id = "gsc_2d_{}".format(self.graph_num) # required for serialization
+            data.title = f"GenSAS {self.file_name()}  #{int(self.graph_num)} 2D"
+            data.id = f"gsc_2d_{self.graph_num}" # required for serialization
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
             data.xmin = self.data.xmin
@@ -1731,9 +1720,9 @@ class Plotter3DWidget(PlotterBase):
         self.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
         ax = Axes3D(self.figure, auto_add_to_figure=False)
         self.figure.add_axes(ax)
-        ax.set_xlabel(r'x ($\A{}$)'.format(data.pos_unit))
-        ax.set_ylabel(r'z ($\A{}$)'.format(data.pos_unit))
-        ax.set_zlabel(r'y ($\A{}$)'.format(data.pos_unit))
+        ax.set_xlabel(rf'x ($\A{data.pos_unit}$)')
+        ax.set_ylabel(rf'z ($\A{data.pos_unit}$)')
+        ax.set_zlabel(rf'y ($\A{data.pos_unit}$)')
 
         # I. Plot null points
         if is_zero.any():
@@ -1878,7 +1867,7 @@ class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
         self.gsc_instance = gsc_instance
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:

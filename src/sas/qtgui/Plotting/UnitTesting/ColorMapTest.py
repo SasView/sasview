@@ -1,17 +1,17 @@
 
-from PySide6 import QtGui, QtWidgets
-import pytest
-
 import matplotlib as mpl
+import pytest
+from PySide6 import QtGui, QtWidgets
+
 mpl.use("Qt5Agg")
 
 
-from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 from sas.qtgui.Plotting.ColorMap import ColorMap
+from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 
 class ColorMapTest:

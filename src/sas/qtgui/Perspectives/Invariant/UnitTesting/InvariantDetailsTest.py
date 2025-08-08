@@ -1,12 +1,10 @@
 import pytest
-
-from PySide6.QtTest import QTest
-from PySide6.QtCore import Qt
 from pyside6 import QtGui, QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtTest import QTest
 
 from sas.qtgui.Perspectives.Invariant.InvariantDetails import DetailsDialog
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
-
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 

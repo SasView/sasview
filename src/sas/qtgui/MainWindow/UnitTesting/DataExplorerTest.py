@@ -1,26 +1,24 @@
-import time
 import random
+import time
+
 import pytest
-
-
-from PySide6.QtGui import QIcon, QStandardItemModel, QStandardItem
-from PySide6.QtWidgets import QTabWidget, QTreeView, QFileDialog, QMessageBox, QApplication
-from PySide6.QtTest import QTest
 from PySide6.QtCore import QItemSelectionModel, QPoint, QSize, QSortFilterProxyModel, Qt
+from PySide6.QtGui import QIcon, QStandardItem, QStandardItemModel
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTabWidget, QTreeView
 
+from sasdata.dataloader.loader import Loader
+
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
+from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
+from sas.qtgui.MainWindow.DataManager import DataManager
+from sas.qtgui.Plotting.Plotter import Plotter
+from sas.qtgui.Plotting.Plotter2D import Plotter2D
 
 # Local
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
-from sasdata.dataloader.loader import Loader
-from sas.qtgui.MainWindow.DataManager import DataManager
-
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-from sas.qtgui.Utilities.GuiUtils import Communicate, HashableStandardItem
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Plotting.Plotter import Plotter
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
-import sas.qtgui.Plotting.PlotHelper as PlotHelper
-
+from sas.qtgui.Utilities.GuiUtils import Communicate, HashableStandardItem
 from sas.system.version import __version__ as SASVIEW_VERSION
 
 
@@ -60,7 +58,7 @@ class dummy_manager:
     def workspace(self):
         return None
 
-    class _parent(object):
+    class _parent:
         screen_width = 1024
         screen_height = 768
 
@@ -107,7 +105,7 @@ class DataExplorerTest:
         assert form.model.columnCount() == 0
         assert isinstance(form.data_proxy, QSortFilterProxyModel)
         assert form.data_proxy.sourceModel() == form.model
-        assert ".+" == str(form.data_proxy.filterRegExp().pattern())
+        assert str(form.data_proxy.filterRegExp().pattern()) == ".+"
         assert isinstance(form.treeView, QTreeView)
 
         # Models - theory
@@ -118,7 +116,7 @@ class DataExplorerTest:
         assert form.theory_model.columnCount() == 0
         assert isinstance(form.theory_proxy, QSortFilterProxyModel)
         assert form.theory_proxy.sourceModel() == form.theory_model
-        assert ".+" == str(form.theory_proxy.filterRegExp().pattern())
+        assert str(form.theory_proxy.filterRegExp().pattern()) == ".+"
         assert isinstance(form.freezeView, QTreeView)
 
     def testWidgets(self, form):
@@ -781,8 +779,8 @@ class DataExplorerTest:
         names_numbered = ["test [1]", "test [2]"]
         names_edge_cases = ["test [1] [2]", "test [2] [1]"]
         # Ensure items not of type() == str return empty string
-        assert "" == form.manager.rename(names_with_brackets)
-        assert "" == form.manager.rename(self)
+        assert form.manager.rename(names_with_brackets) == ""
+        assert form.manager.rename(self) == ""
         assert "" not in form.manager.data_name_dict
         # Test names with brackets
         for i, name in enumerate(names_with_brackets):
@@ -790,19 +788,19 @@ class DataExplorerTest:
             names_to_delete.append(form.manager.rename(name))
             # Ensure each name is unique
             assert i + 1 == len(form.manager.data_name_dict)
-            assert 1 == len(form.manager.data_name_dict[name])
+            assert len(form.manager.data_name_dict[name]) == 1
         for i, name in enumerate(names_with_brackets):
             names_to_delete.append(form.manager.rename(name))
-            assert 4 == len(form.manager.data_name_dict)
-            assert 2 == len(form.manager.data_name_dict[name])
+            assert len(form.manager.data_name_dict) == 4
+            assert len(form.manager.data_name_dict[name]) == 2
             assert form.manager.data_name_dict[name] == [0,1]
         for i, name in enumerate(names_numbered):
             return_name = form.manager.rename(name)
             names_to_delete.append(return_name)
             assert return_name == f"test [{i+2}]"
-            assert 4 == len(form.manager.data_name_dict)
+            assert len(form.manager.data_name_dict) == 4
             assert name not in form.manager.data_name_dict
-        assert [0,1,2,3] == form.manager.data_name_dict['test']
+        assert form.manager.data_name_dict['test'] == [0,1,2,3]
         for i, name in enumerate(names_edge_cases):
             names_to_delete.append(form.manager.rename(name))
             assert 5 + i == len(form.manager.data_name_dict)
@@ -817,7 +815,7 @@ class DataExplorerTest:
                 items_left += len(value)
             assert items_left < len(names_to_delete)
         # Data name dictionary should be empty at this point
-        assert 0 == len(form.manager.data_name_dict)
+        assert len(form.manager.data_name_dict) == 0
 
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testNameChange(self, form):

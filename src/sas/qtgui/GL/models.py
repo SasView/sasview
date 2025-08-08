@@ -4,18 +4,17 @@
 """
 
 
-from typing import Sequence, Tuple, Union, Optional
+from collections.abc import Sequence
 
 import numpy as np
-
 from OpenGL import GL
 
-from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.color import ColorSpecification, ColorSpecificationMethod
+from sas.qtgui.GL.renderable import Renderable
 
-VertexData = Union[Sequence[Tuple[float, float, float]], np.ndarray]
-EdgeData = Union[Sequence[Tuple[int, int]], np.ndarray]
-TriangleMeshData = Union[Sequence[Tuple[int, int, int]], np.ndarray]
+VertexData = Sequence[tuple[float, float, float]] | np.ndarray
+EdgeData = Sequence[tuple[int, int]] | np.ndarray
+TriangleMeshData = Sequence[tuple[int, int, int]] | np.ndarray
 
 
 class ModelBase(Renderable):
@@ -64,7 +63,7 @@ class SolidVertexModel(SolidModel):
     def __init__(self,
                  vertices: VertexData,
                  triangle_meshes: Sequence[TriangleMeshData],
-                 colors: Optional[ColorSpecification]):
+                 colors: ColorSpecification | None):
 
         """
 
@@ -132,7 +131,7 @@ class WireModel(ModelBase):
     def __init__(self,
                  vertices: VertexData,
                  edges: EdgeData,
-                 edge_colors: Optional[ColorSpecification]):
+                 edge_colors: ColorSpecification | None):
 
         """ Wireframe Model
 
@@ -192,8 +191,8 @@ class FullModel(SolidVertexModel, WireModel):
                  vertices: VertexData,
                  edges: EdgeData,
                  triangle_meshes: Sequence[TriangleMeshData],
-                 edge_colors: Optional[ColorSpecification],
-                 colors: Optional[ColorSpecification]):
+                 edge_colors: ColorSpecification | None,
+                 colors: ColorSpecification | None):
 
         SolidVertexModel.__init__(self,
                                   vertices=vertices,

@@ -38,36 +38,35 @@ parallel.  More parallelism won't help, and may overwhelm the GPU if you
 have one.
 """
 
-import sys
-import os
-from os.path import basename, dirname, join as joinpath, exists
-from pathlib import Path
+import argparse
 import math
+import os
 import re
 import shutil
-import argparse
+import sys
+from os import makedirs
+from os.path import basename, dirname, exists
+from os.path import join as joinpath
+from pathlib import Path
+from typing import Any
 
 import matplotlib.axes
-from os import makedirs
-
 import numpy as np
 
-from sasmodels import generate, core
-from sasmodels.direct_model import DirectModel, call_profile
+from sasmodels import core, generate
 from sasmodels.data import empty_data1D, empty_data2D
-
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, generate_html, PATH_LIKE
-
-from typing import Any, Dict
+from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.kernel import KernelModel
 from sasmodels.modelinfo import ModelInfo
 
+from sas.sascalc.doc_regen.makedocumentation import generate_html
+from sas.system.user import MAIN_DOC_SRC, PATH_LIKE
 
 # Destination directory for model docs
 TARGET_DIR = MAIN_DOC_SRC / "user" / "models"
 
 
-def plot_1d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
+def plot_1d(model: KernelModel, opts: dict[str, Any], ax: matplotlib.axes.Axes):
     """Create a 1-D image based on the model."""
     q_min, q_max, nq = opts['q_min'], opts['q_max'], opts['nq']
     q_min = math.log10(q_min)
@@ -84,7 +83,7 @@ def plot_1d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
     ax.set_yscale(opts['yscale'])
 
 
-def plot_2d(model: KernelModel, opts: Dict[str, Any], ax: matplotlib.axes.Axes):
+def plot_2d(model: KernelModel, opts: dict[str, Any], ax: matplotlib.axes.Axes):
     """Create a 2-D image based on the model."""
     qx_max, nq2d = opts['qx_max'], opts['nq2d']
     q = np.linspace(-qx_max, qx_max, nq2d) # type: np.ndarray
@@ -123,7 +122,7 @@ def figfile(model_info: ModelInfo) -> str:
     return model_info.id + '_autogenfig.png'
 
 
-def make_figure(model_info: ModelInfo, opts: Dict[str, Any]):
+def make_figure(model_info: ModelInfo, opts: dict[str, Any]):
     """Generate the figure file to include in the docs."""
     import matplotlib.pyplot as plt
 

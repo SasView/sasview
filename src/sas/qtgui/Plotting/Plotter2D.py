@@ -1,33 +1,26 @@
 import copy
-import numpy
 import functools
 
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+import matplotlib as mpl
+import numpy
 from mpl_toolkits.mplot3d import Axes3D
+from PySide6 import QtGui, QtWidgets
 
 from sasdata.data_util.manipulations import CircularAverage
 
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.BoxSum import BoxSum
+from sas.qtgui.Plotting.ColorMap import ColorMap
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
-
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
-from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
+from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
+from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInteractorQ
 
-import matplotlib as mpl
 DEFAULT_CMAP = mpl.cm.jet
 
 # Minimum value of Z for which we will present data.
@@ -766,7 +759,7 @@ class Plotter2DWidget(PlotterBase):
             self.position = None
         x_str = GuiUtils.formatNumber(x_click)
         y_str = GuiUtils.formatNumber(y_click)
-        coord_str = "x: {}, y: {}".format(x_str, y_str)
+        coord_str = f"x: {x_str}, y: {y_str}"
         self.manager.communicate.statusBarUpdateSignal.emit(coord_str)
 
 class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):

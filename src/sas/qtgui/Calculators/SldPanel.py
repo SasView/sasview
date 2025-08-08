@@ -1,20 +1,15 @@
 # global
 import numpy as np
-from pyparsing.exceptions import ParseException
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-from periodictable.xsf import xray_sld
 from periodictable.nsf import neutron_scattering
+from periodictable.xsf import xray_sld
+from pyparsing.exceptions import ParseException
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from sas.qtgui.UI import main_resources_rc # noqa: F401
-
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
-
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
 from sas.qtgui.Utilities.GuiUtils import enum
 
 MODEL = enum(
@@ -31,7 +26,7 @@ MODEL = enum(
     'NEUTRON_LENGTH',
 )
 
-class NeutronSldResult(object):
+class NeutronSldResult:
     def __init__(self, neutron_wavelength, neutron_sld_real,
                  neutron_sld_imag, neutron_inc_xs, neutron_abs_xs,
                  neutron_length):
@@ -43,7 +38,7 @@ class NeutronSldResult(object):
         self.neutron_abs_xs = neutron_abs_xs
         self.neutron_length = neutron_length
 
-class XraySldResult(object):
+class XraySldResult:
     def __init__(self, xray_wavelength, xray_sld_real, xray_sld_imag):
 
         self.xray_wavelength = xray_wavelength

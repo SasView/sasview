@@ -1,6 +1,8 @@
-import requests
 import platform
 from enum import Enum
+
+import requests
+
 
 class OS(Enum):
     WIN = 0

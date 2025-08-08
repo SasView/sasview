@@ -1,14 +1,12 @@
 import pytest
-
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 # Local
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.MainWindow.GuiManager import GuiManager
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
+from sas.qtgui.Plotting.PlotterData import Data1D
 
 
 class FittingPerspectiveTest:
@@ -17,7 +15,7 @@ class FittingPerspectiveTest:
     @pytest.fixture(autouse=True, scope='function')
     def widget(self, qapp):
         '''Create/Destroy the perspective'''
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(self):
                 return GuiUtils.Communicate()
             communicate = GuiUtils.Communicate()

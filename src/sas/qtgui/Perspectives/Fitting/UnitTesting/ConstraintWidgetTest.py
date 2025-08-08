@@ -1,17 +1,16 @@
 from unittest.mock import MagicMock
+
 import pytest
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtTest import QSignalSpy, QTest
 
-from PySide6 import QtGui, QtCore, QtWidgets
-from PySide6.QtTest import QTest, QSignalSpy
-
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.MainWindow.GuiManager import GuiManager
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 # Local
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
-from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 
@@ -24,7 +23,7 @@ class ConstraintWidgetTest:
         '''Create/Destroy the ConstraintWidget'''
 
         '''Create ConstraintWidget dialog'''
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(self):
                 return GuiUtils.Communicate()
             communicate = GuiUtils.Communicate()
@@ -35,7 +34,7 @@ class ConstraintWidgetTest:
             def perspective(self):
                 return self._perspective
 
-        class dummy_perspective(object):
+        class dummy_perspective:
 
             def __init__(self):
                 self.symbol_dict = {}

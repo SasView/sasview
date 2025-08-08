@@ -1,11 +1,7 @@
 
 from pytest import mark
 
-from sas.qtgui.Perspectives.ParticleEditor.sampling.points import (
-    Grid,
-    RandomCube,
-    PointGeneratorStepper)
-
+from sas.qtgui.Perspectives.ParticleEditor.sampling.points import Grid, PointGeneratorStepper, RandomCube
 
 
 @mark.parametrize("splits", [42, 100, 381,999])

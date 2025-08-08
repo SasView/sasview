@@ -1,18 +1,15 @@
 import logging
+
 import pytest
-
 from PySide6 import QtGui, QtWidgets
-from PySide6.QtTest import QTest
 from PySide6.QtCore import Qt
-
+from PySide6.QtTest import QTest
 from twisted.internet import threads
 
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
 from sas.qtgui.Perspectives.Invariant.InvariantUtils import WIDGETS
 from sas.qtgui.Plotting.PlotterData import Data1D
-
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
@@ -24,14 +21,14 @@ class InvariantPerspectiveTest:
     def widget(self, qapp, mocker):
         '''Create/Destroy the Invariant Perspective Window'''
 
-        class MainWindow(object):
+        class MainWindow:
             def __init__(self):
                 self.model = QtGui.QStandardItemModel()
 
             def plotData(self, data_to_plot):
                 pass
 
-        class dummy_manager(object):
+        class dummy_manager:
             def __init__(self):
                 self.filesWidget = MainWindow()
 

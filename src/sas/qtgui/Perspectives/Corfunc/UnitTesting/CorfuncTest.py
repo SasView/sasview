@@ -1,15 +1,14 @@
 import os
 
 import pytest
-
-from PySide6 import QtGui, QtWidgets
-from PySide6 import QtCore
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtTest import QTest
 
+from sasdata.dataloader.loader import Loader
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
 from sas.qtgui.Plotting.PlotterData import Data1D
-from sasdata.dataloader.loader import Loader
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 
 class CorfuncTest:
@@ -18,11 +17,11 @@ class CorfuncTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp, mocker):
         '''Create/Destroy the CorfuncWindow'''
-        class MainWindow(object):
+        class MainWindow:
             def __init__(self, widget):
                 self.model = QtGui.QStandardItemModel()
 
-        class dummy_manager(object):
+        class dummy_manager:
             def __init__(self, widget):
                 self.filesWidget = MainWindow()
 

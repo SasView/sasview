@@ -1,9 +1,9 @@
-from __future__ import with_statement, print_function
+
+from matplotlib.backends.qt_compat import QtWidgets
 
 # The Figure object is used to create backend-independent plot representations.
 from matplotlib.figure import Figure
-from matplotlib.backends.qt_compat import QtWidgets
-from PySide6.QtWidgets import QLabel, QComboBox
+from PySide6.QtWidgets import QComboBox, QLabel
 
 
 class FitResultView(QtWidgets.QWidget):
@@ -74,8 +74,8 @@ class CorrelationView(FitResultView):
 
 class UncertaintyView(FitResultView):
     def plot(self):
-        from bumps.dream.varplot import plot_vars
         from bumps.dream.stats import var_stats
+        from bumps.dream.varplot import plot_vars
 
         draw = self.state.uncertainty_state.draw()
         stats = var_stats(draw)

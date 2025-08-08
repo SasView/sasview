@@ -1,27 +1,20 @@
-import numpy
 import copy
 
-from typing import Optional
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+import numpy
 from bumps import options
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.system.config import config
-
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
-
-from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
+from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 from sas.qtgui.Perspectives.perspective import Perspective
-
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.system.config import config
+
 
 class FittingWindow(QtWidgets.QTabWidget, Perspective):
     """
@@ -184,7 +177,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         if not isinstance(id, list):
             id = [id]
         for i in id:
-            if 'is_constraint' in line_dict.keys():
+            if 'is_constraint' in line_dict:
                 state[i] = line_dict
             elif i in state and 'fit-params' in state[i]:
                 state[i]['fit_params'].update(line_dict)
@@ -572,7 +565,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
         return self.currentWidget()
 
     @property
-    def currentFittingWidget(self) -> Optional[FittingWidget]:
+    def currentFittingWidget(self) -> FittingWidget | None:
         current_tab = self.currentTab
         if isinstance(current_tab, FittingWidget):
             return current_tab
@@ -635,7 +628,7 @@ class FittingWindow(QtWidgets.QTabWidget, Perspective):
     def supports_reports(self) -> bool:
         return True
 
-    def getReport(self) -> Optional[ReportData]:
+    def getReport(self) -> ReportData | None:
         """ Get the report from the current tab"""
         fitting_widget = self.currentFittingWidget
         return None if fitting_widget is None else fitting_widget.getReport()

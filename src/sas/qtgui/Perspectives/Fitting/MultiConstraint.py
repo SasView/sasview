@@ -7,13 +7,13 @@ import webbrowser
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
-
 from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MultiConstraintUI import Ui_MultiConstraintUI
+
 
 class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
     """

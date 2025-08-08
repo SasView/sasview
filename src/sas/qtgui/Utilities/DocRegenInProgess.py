@@ -1,7 +1,7 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtCore, QtWidgets
 
 from sas.qtgui.Utilities.UI.DocRegenInProgress import Ui_DocRegenProgress
-from sas.sascalc.doc_regen.makedocumentation import DOC_LOG
+from sas.system.user import DOC_LOG
 
 
 class DocRegenProgress(QtWidgets.QWidget, Ui_DocRegenProgress):
@@ -36,7 +36,7 @@ class DocRegenProgress(QtWidgets.QWidget, Ui_DocRegenProgress):
     def updateLog(self):
         """This method is triggered whenever the file associated with the file_watcher object is changed."""
         self.textBrowser.setText("")
-        with open(DOC_LOG, 'r') as f:
+        with open(DOC_LOG) as f:
             self.textBrowser.append(f.read())
 
     def close(self):

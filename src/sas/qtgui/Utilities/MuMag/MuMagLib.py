@@ -1,18 +1,26 @@
-import numpy as np
+import logging
 import os
 import os.path
 from datetime import datetime
 
+import numpy as np
 import scipy.optimize
-
 from PySide6.QtWidgets import QFileDialog
-
-from sas.qtgui.Utilities.MuMag.datastructures import ExperimentalData, LoadFailure, FitFailure, ExperimentGeometry, \
-    FitParameters, FitResults, LeastSquaresOutputParallel, LeastSquaresOutputPerpendicular, SweepOutput
 
 from sasdata.dataloader.loader import Loader
 
-import logging
+from sas.qtgui.Utilities.MuMag.datastructures import (
+    ExperimentalData,
+    ExperimentGeometry,
+    FitFailure,
+    FitParameters,
+    FitResults,
+    LeastSquaresOutputParallel,
+    LeastSquaresOutputPerpendicular,
+    LoadFailure,
+    SweepOutput,
+)
+
 
 class MuMagLib:
     """ Library for methods supporting MuMag"""

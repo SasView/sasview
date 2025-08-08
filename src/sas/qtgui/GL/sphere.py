@@ -1,9 +1,7 @@
-from typing import Optional
-
 import numpy as np
 
-from sas.qtgui.GL.models import FullModel
 from sas.qtgui.GL.color import ColorSpecification
+from sas.qtgui.GL.models import FullModel
 
 
 class Sphere(FullModel):
@@ -68,8 +66,8 @@ class Sphere(FullModel):
                  n_horizontal: int = 21,
                  n_segments: int = 28,
                  grid_gap: int = 1,
-                 colors: Optional[ColorSpecification]=None,
-                 edge_colors: Optional[ColorSpecification]=None):
+                 colors: ColorSpecification | None=None,
+                 edge_colors: ColorSpecification | None=None):
 
         """
 

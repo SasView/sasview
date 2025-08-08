@@ -1,18 +1,16 @@
 import sys
 
 import pytest
-
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 from PySide6.QtTest import QTest
-from PySide6 import QtCore
 
 # Local
-from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
-from sas.qtgui.MainWindow.MainWindow import SplashScreen
+from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow, SplashScreen
 from sas.qtgui.Perspectives.Fitting import FittingPerspective
 from sas.qtgui.Utilities.HidableDialog import HidableDialog
-
 from sas.system import config
+
+
 class MainWindowTest:
     """Test the Main Window GUI"""
 
@@ -64,7 +62,7 @@ class MainWindowTest:
         """
         def check_after_load(name):
             assert name == gui.perspective().name
-            assert 1 == len(gui.perspective().currentTabDataId())
+            assert len(gui.perspective().currentTabDataId()) == 1
             assert (gui.perspective().currentTabDataId()[0]) in dataIDList
 
         # Base definitions
@@ -76,7 +74,7 @@ class MainWindowTest:
         sendDataButton = filesWidget.cmdSendTo
         # Verify defaults
         assert hasattr(gui, 'loadedPerspectives')
-        assert 4 == len(gui.loadedPerspectives)
+        assert len(gui.loadedPerspectives) == 4
         # Load data
         file = ["cyl_400_20.txt"]
         filesWidget.readData(file)

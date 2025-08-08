@@ -3,16 +3,14 @@ import logging
 import os.path
 from collections import defaultdict
 
-import sasmodels.modelinfo
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtCore, QtWidgets
 
-from sasmodels import generate
-from sasmodels import modelinfo
+import sasmodels.modelinfo
+from sasmodels import generate, modelinfo
 from sasmodels.sasview_model import load_standard_models
 
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Utilities.ModelEditors.Dialogs.UI.ModelSelectorUI import Ui_ModelSelector
-
 from sas.sascalc.fit import models
 
 logger = logging.getLogger(__name__)

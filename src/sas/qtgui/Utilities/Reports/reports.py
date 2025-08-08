@@ -1,27 +1,24 @@
-from typing import List, Tuple, Iterable, Any, Dict, Optional
-
-import sys
-import os
-import datetime
-
-import importlib.resources as pkg_resources
-
 import base64
+import datetime
+import importlib.resources as pkg_resources
+import logging
+import os
+import sys
+from collections.abc import Iterable
 from io import BytesIO
+from typing import Any
 
 import dominate
+import html2text
 from dominate import tags
 from dominate.util import raw
 
-import html2text
+import sasmodels
 
 import sas.sasview
 import sas.system.version
-import sasmodels
-import logging
-
-from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Plotting.PlotterBase import Data1D
+from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 
 #
@@ -69,7 +66,7 @@ class pretty_units(tags.span):
 class ReportBase:
     def __init__(self,
                  title: str,
-                 style_link: Optional[str]=None,
+                 style_link: str | None=None,
                  show_figure_section_title=True,
                  show_param_section_title=True):
 
@@ -149,7 +146,7 @@ class ReportBase:
 
 
 
-    def add_plot(self, fig, image_type="png", figure_title: Optional[str]=None):
+    def add_plot(self, fig, image_type="png", figure_title: str | None=None):
         """ Add a plot to the report
 
         :param fig: matplotlib.figure.Figure, Matplotlib figure object to add
@@ -213,13 +210,13 @@ class ReportBase:
                 tags.img(src=f"data:image/{file_type};base64," + data64.decode("utf-8"),
                          style="width:100%")
 
-    def add_table_dict(self, d: Dict[str, Any], titles: Optional[Tuple[str, str]]=None):
+    def add_table_dict(self, d: dict[str, Any], titles: tuple[str, str] | None=None):
 
         self.add_table([[key, d[key]] for key in d], titles=titles)
 
     def add_table(self,
-                  data: List[List[Any]],
-                  titles: Optional[Iterable[str]]=None,
+                  data: list[list[Any]],
+                  titles: Iterable[str] | None=None,
                   target_tag="model-parameters",
                   column_prefix="column"):
 
@@ -283,9 +280,10 @@ def main():
     """ This can be run locally without sasview to make it easy to adjust the report layout/styling,
     it will generate a report with some arbitrary data"""
 
-    from sasdata.dataloader.loader import Loader
     import matplotlib.pyplot as plt
     import numpy as np
+
+    from sasdata.dataloader.loader import Loader
     loader = Loader()
 
 

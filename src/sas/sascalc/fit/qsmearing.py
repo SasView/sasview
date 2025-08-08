@@ -11,11 +11,10 @@
 
 import numpy as np  # type: ignore
 
-from sasmodels.resolution import Slit1D, Pinhole1D
-from sasmodels.sesans import SesansTransform
-from sasmodels.resolution2d import Pinhole2D
-
 from sasdata.data_util.nxsunit import Converter
+from sasmodels.resolution import Pinhole1D, Slit1D
+from sasmodels.resolution2d import Pinhole2D
+from sasmodels.sesans import SesansTransform
 
 
 def smear_selection(data, model=None):
@@ -87,7 +86,7 @@ def smear_selection(data, model=None):
     return None
 
 
-class PySmear(object):
+class PySmear:
     """
     Wrapper for pure python sasmodels resolution functions.
     """
@@ -149,7 +148,7 @@ def pinhole_smear(data, model=None):
     return PySmear(Pinhole1D(q, width), model)
 
 
-class PySmear2D(object):
+class PySmear2D:
     """
     Q smearing class for SAS 2d pinhole data
     """

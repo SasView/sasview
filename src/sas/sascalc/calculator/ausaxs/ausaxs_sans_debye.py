@@ -1,10 +1,13 @@
 import ctypes as ct
-import numpy as np
+import importlib.resources as resources
 import logging
 import multiprocessing
-import importlib.resources as resources
 from enum import Enum
+
+import numpy as np
+
 from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
+
 
 # we need to be able to differentiate between being uninitialized and failing to load
 class lib_state(Enum):

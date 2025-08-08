@@ -2,12 +2,9 @@
 Converted invertor.c's methods.
 Implements low level inversion functionality, with conditional Numba njit compilation.
 """
-from __future__ import division
-
 
 import numpy as np
 from numpy import pi
-
 
 try:
     from numba import njit

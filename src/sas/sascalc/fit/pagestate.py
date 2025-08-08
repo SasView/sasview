@@ -11,26 +11,24 @@ Class that holds a fit page state
 #
 # copyright 2009, University of Tennessee
 ################################################################################
-import time
-import re
-import os
-import sys
 import copy
 import logging
-import numpy as np
+import os
+import re
+import sys
+import time
 import traceback
+from xml.dom.minidom import getDOMImplementation, parseString
 
-from xml.dom.minidom import parseString
-from xml.dom.minidom import getDOMImplementation
+import numpy as np
 from lxml import etree
 
-from sasmodels import convert
 import sasmodels.weights
-
-from sas.system.version import __version__ as SASVIEW_VERSION
-
 from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
 from sasdata.dataloader.readers.cansas_reader import get_content
+from sasmodels import convert
+
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +132,7 @@ def parse_entry_helper(node, item):
                 return None
 
 
-class PageState(object):
+class PageState:
     """
     Contains information to reconstruct a page of the fitpanel.
     """
@@ -632,7 +630,7 @@ class PageState(object):
                 param_string += value + ','
             elif name == "selected":
                 # remember if it is fixed when reporting error value
-                fixed_parameter = (value == u'False')
+                fixed_parameter = (value == 'False')
             elif name == "error value":
                 if fixed_parameter:
                     param_string += '(fixed),'
@@ -1059,7 +1057,7 @@ class PageState(object):
                         dic[name] = np.array(value_list)
                     setattr(self, varname, dic)
 
-class SimFitPageState(object):
+class SimFitPageState:
     """
     State of the simultaneous fit page for saving purposes
     """

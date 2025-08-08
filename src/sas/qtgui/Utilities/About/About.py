@@ -1,16 +1,26 @@
 import functools
+import os
+from importlib import resources
 
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QPixmap, QIcon
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QSizePolicy, QSpacerItem, QFrame, QPushButton, \
-    QGridLayout, QDialog
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import (
+    QDialog,
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 import sas.system.version
 from sas.qtgui.Utilities import GuiUtils
 from sas.system import legal, web
-import os
 
-from importlib import resources
 
 class About(QDialog):
 
@@ -35,7 +45,7 @@ class About(QDialog):
         self.setWindowTitle("About SasView")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
         self.mainLayout = QVBoxLayout()
@@ -181,8 +191,9 @@ class About(QDialog):
 
 
 if __name__ == "__main__":
-    from PySide6.QtWidgets import QApplication
     import sys
+
+    from PySide6.QtWidgets import QApplication
 
 
     app = QApplication([])

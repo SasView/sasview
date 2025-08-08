@@ -1,41 +1,25 @@
 """
 Creates documentation from .py files
 """
-import importlib.resources
 import logging
 import os
-import sys
 import subprocess
-import shutil
-
+import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence, Union
-
-from sas.sascalc.fit import models
-from sas.system.user import get_app_dir_versioned
 
 from sasmodels.core import list_models
 
-
-PATH_LIKE = Union[Path, str, os.PathLike[str]]
-
-
-# Path constants related to the directories and files used in documentation regeneration processes
-APP_DIRECTORY = Path(get_app_dir_versioned())
-USER_DOC_BASE = APP_DIRECTORY / "doc"
-USER_DOC_SRC = USER_DOC_BASE
-USER_DOC_LOG = USER_DOC_SRC / 'log'
-DOC_LOG = USER_DOC_LOG / 'output.log'
-MAIN_DOC_SRC = USER_DOC_SRC / "source-temp"
-MAIN_BUILD_SRC = USER_DOC_SRC / "build"
-MAIN_PY_SRC = MAIN_DOC_SRC / "user" / "models" / "src"
-ABSOLUTE_TARGET_MAIN = Path(MAIN_DOC_SRC)
-PLUGIN_PY_SRC = Path(models.find_plugins_dir())
-
-HELP_DIRECTORY_LOCATION = MAIN_BUILD_SRC / "html"
-RECOMPILE_DOC_LOCATION = HELP_DIRECTORY_LOCATION
-IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
-
+from sas.system.user import (
+    DOC_LOG,
+    HELP_DIRECTORY_LOCATION,
+    MAIN_BUILD_SRC,
+    MAIN_DOC_SRC,
+    MAIN_PY_SRC,
+    PATH_LIKE,
+    PLUGIN_PY_SRC,
+    create_user_files_if_needed,
+)
 
 # logging.debug("""
 # APP_DIRECTORY = %s
@@ -66,130 +50,6 @@ IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION / "_images"
 #     RECOMPILE_DOC_LOCATION,
 #     IMAGES_DIRECTORY_LOCATION,
 # )
-
-def copy_resources() -> None:
-    """Find the original documentation location (source and built)
-
-    The source and built docs for SasView could be in a number of locations.
-    Search for them in the following locations:
-    1. installed within the module
-    2. unpacked next to the source
-    3. in legacy paths from older installation approaches
-
-    Installed versions are prioritised over uninstalled versions to make sure
-    that inconveniently named local directories don't cause issues.
-    """
-    # Fast path out - everything already exists
-    if MAIN_DOC_SRC.exists() and MAIN_BUILD_SRC.exists():
-        return
-
-    if copy_module_resources():
-        return
-
-    source_dir, build_dir = locate_unpacked_resources()
-    if not MAIN_DOC_SRC.exists():
-        if source_dir.exists():
-            shutil.copytree(source_dir, MAIN_DOC_SRC)
-        else:
-            logging.error("Could not find source for documentation")
-
-    if not MAIN_BUILD_SRC.exists():
-        if build_dir.exists():
-            shutil.copytree(build_dir, MAIN_BUILD_SRC)
-        else:
-            logging.error("Could not find pre-built documentation")
-
-
-def copy_module_resources() -> bool:
-    """Obtain the source and build output from within the installed sas module"""
-
-    # Look in the module for the resources. We know that there is a conf.py
-    # for sphinx so check that it exists; checking that the file exists and
-    # not just the directory protects against empty directories
-    if importlib.resources.files("sas").joinpath("docs-source/conf.py").is_file():
-        logging.info("Extracting docs from sas module")
-        if not MAIN_DOC_SRC.exists():
-            module_copytree("sas", "docs-source", MAIN_DOC_SRC)
-        if not MAIN_BUILD_SRC.exists():
-            module_copytree("sas", "docs", MAIN_BUILD_SRC / "html")
-        return True
-
-    return False
-
-
-def locate_unpacked_resources() -> tuple[Path, Path]:
-    """Locate the resources unpacked on disk"""
-    # Look near where sasview executable sits - if it's from the pyinstaller
-    # bundle or from run.py then the doc source will be close by. Note that
-    # this won't be true for POSIX-like installations where the executable
-    # is in /usr/bin, ~/.local/bin, or .../venv/bin.
-    exe_dir = Path(sys.argv[0]).parent
-
-    if (exe_dir / "doc").exists():
-        # This is the directory structure for the installed version of SasView
-        # such as when installed from the pyinstaller bundle prior to v6.1
-        source_dir = exe_dir / "doc" / "source"
-        build_dir = exe_dir / "doc" / "build"
-
-    elif (exe_dir.parent / "Frameworks" / "doc").exists():
-        # In the MacOS bundle, the executable and packages are in parallel directories
-        source_dir = exe_dir.parent / "Frameworks" / "doc" / "source"
-        build_dir = exe_dir.parent / "Frameworks" / "doc" / "build"
-
-    else:
-        # This is the directory structure for developers
-        source_dir = exe_dir / "docs" / "sphinx-docs" / "source-temp"
-        build_dir = exe_dir / "build" / "doc"
-
-    logging.info(
-        "Extracting docs from on-disk locations: source=%s, build=%s",
-        source_dir, build_dir
-    )
-    return source_dir, build_dir
-
-
-def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
-    """Copy the tree from a module to the specified directory
-
-    module: name of the Python module (the "anchor" for importlib.resources)
-    src: source name of the resource inside the module
-    dest: destination directory for the resources to be copied into; will be
-        created if it doesn't exist
-    """
-    spth = Path(src)
-    src = str(spth)
-
-    dpth = Path(dest)
-    dpth.mkdir(exist_ok=True, parents=True)
-
-    for resource in importlib.resources.files(module).joinpath(src).iterdir():
-        if "__pycache__" in resource.name:
-            continue
-
-        if resource.is_dir():
-            # recurse into the directory
-            module_copytree(module, spth / resource.name, dpth / resource.name)
-        elif resource.is_file():
-            logging.debug("Copied: %s", spth / resource.name)
-            with open(dpth / resource.name, "wb") as dh:
-                dh.write(resource.read_bytes())
-        else:
-            logging.warning("Skipping %s (unknown type)", spth / resource.name)
-
-
-def create_user_files_if_needed() -> None:
-    """Create user documentation directories if necessary and copy built docs there."""
-    if not USER_DOC_BASE.exists():
-        os.mkdir(USER_DOC_BASE)
-    if not USER_DOC_SRC.exists():
-        os.mkdir(USER_DOC_SRC)
-    if not USER_DOC_LOG.exists():
-        os.mkdir(USER_DOC_LOG)
-    if not DOC_LOG.exists():
-        with open(DOC_LOG, "wb") as f:
-            # Write an empty file to eliminate any potential future file creation conflicts
-            pass
-    copy_resources()
 
 
 def get_py(directory: Path) -> list[Path]:
@@ -250,7 +110,7 @@ def call_regenmodel(filepaths: Sequence[PATH_LIKE]) -> list[Path]:
         process_model(py_file, True)
     return removed_files
 
-def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False, output_path: PATH_LIKE = "") -> subprocess.Popen[bytes]:
+def generate_html(single_files: PATH_LIKE | list[PATH_LIKE] = "", rst: bool = False, output_path: PATH_LIKE = "") -> subprocess.Popen[bytes]:
     """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
 
     :param single_file: A file name that needs the html regenerated.

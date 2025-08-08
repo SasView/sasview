@@ -8,7 +8,7 @@ P_color = 'blue'
 theta_color = 'orange'
 profile_colors = [rho_color, mu_color, P_color, theta_color]
 
-class BaseInteractor(object):
+class BaseInteractor:
     """
     Share some functions between the interface interactor and various layer
     interactors.

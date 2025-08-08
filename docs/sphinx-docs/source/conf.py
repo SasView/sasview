@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # SasView documentation build configuration file, created by
 # sphinx-quickstart on Wed Aug 28 14:59:44 2013.
@@ -11,9 +10,11 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
-import os
 import datetime
+import os
+import sys
+
+import sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -254,8 +255,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'SasView.tex', u'SasView Documentation',
-   u'The SasView Project', 'manual'),
+  ('index', 'SasView.tex', 'SasView Documentation',
+   'The SasView Project', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -284,8 +285,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'sasview', u'SasView Documentation',
-     [u'The SasView Project'], 1)
+    ('index', 'sasview', 'SasView Documentation',
+     ['The SasView Project'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -298,8 +299,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'SasView', u'SasView Documentation',
-   u'The SasView Project', 'SasView', 'One line description of project.',
+  ('index', 'SasView', 'SasView Documentation',
+   'The SasView Project', 'SasView', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -321,7 +322,6 @@ if os.path.exists('rst_prolog'):
 
 numfig = True
 
-import sphinx
 if sphinx.version_info[0] >= 3:   # CRUFT
 
     # Skip the monkey-patched 'sas.models' which grafts the sasmodels classes

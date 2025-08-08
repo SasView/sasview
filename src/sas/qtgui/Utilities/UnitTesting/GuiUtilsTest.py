@@ -1,16 +1,15 @@
-import webbrowser
-import pytest
-import os
 import logging
+import os
+import webbrowser
 
-from PySide6 import QtCore
-from PySide6 import QtGui, QtWidgets
+import pytest
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # SV imports
 from sasdata.dataloader.loader import Loader
+
 from sas.qtgui.MainWindow.DataManager import DataManager
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 # Tested module
 from sas.qtgui.Utilities import GuiUtils
@@ -292,7 +291,7 @@ class GuiUtilsTest:
         GuiUtils.onTXTSave(data, path)
 
         assert os.path.isfile(save_path)
-        with open(save_path,'r') as out:
+        with open(save_path) as out:
             data_read = out.read()
             expected = \
             "<X> <Y>\n"+\
@@ -310,7 +309,7 @@ class GuiUtilsTest:
                       dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
 
         GuiUtils.onTXTSave(data, path)
-        with open(save_path,'r') as out:
+        with open(save_path) as out:
             data_read = out.read()
             assert "<X> <Y> <dY> <dX>\n" in data_read
             assert "1.000000000000000e+00 1.000000000000000e+01 1.000000000000000e-01 1.000000000000000e-01\n" in data_read

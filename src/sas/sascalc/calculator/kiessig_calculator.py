@@ -3,11 +3,12 @@ This module is a small tool to allow user to quickly
 determine the size value in real space  from the
 fringe width in q space.
 """
-from math import pi, fabs
+from math import fabs, pi
+
 _DQ_DEFAULT = 0.05
 
 
-class KiessigThicknessCalculator(object):
+class KiessigThicknessCalculator:
     """
     compute thickness from the fringe width of data
     """

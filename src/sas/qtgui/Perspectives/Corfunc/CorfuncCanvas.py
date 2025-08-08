@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-
-from typing import Optional, Union, List, Iterable, TYPE_CHECKING
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from sasdata.dataloader.data_info import Data1D
-
 
 if TYPE_CHECKING:
     from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
@@ -33,7 +32,7 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
 
         FigureCanvas.__init__(self, self.fig)
 
-        self._data: Optional[List[Data1D]] = None
+        self._data: list[Data1D] | None = None
 
     def parent(self):
         """ Parent function is needed by the toolbar, and needs to return the appropriate figure canvas object,
@@ -49,12 +48,12 @@ class CorfuncCanvas(FigureCanvas, metaclass=CorfuncCanvasMeta):
         pass
 
     @property
-    def data(self) -> Optional[List[Data1D]]:
+    def data(self) -> list[Data1D] | None:
         """ The data currently shown by the plots """
         return self._data
 
     @data.setter
-    def data(self, target_data: Optional[Union[Data1D, Iterable[Data1D]]]):
+    def data(self, target_data: Data1D | Iterable[Data1D] | None):
         # I'm not 100% sure this is good practice, but it will make things cleaner in the short term
         if target_data is None:
             self._data = None

@@ -8,6 +8,7 @@ import sas.system.zenodo
 
 from .UI.AcknowledgementsUI import Ui_Acknowledgements
 
+
 class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
 
     def __init__(self, parent=None):
@@ -15,7 +16,7 @@ class Acknowledgements(QtWidgets.QDialog, Ui_Acknowledgements):
         self.setupUi(self)
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
         self.addText()

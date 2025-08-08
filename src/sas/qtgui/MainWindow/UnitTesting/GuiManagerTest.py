@@ -1,22 +1,21 @@
-import sys
-import subprocess
-import webbrowser
 import logging
-import pytest
+import subprocess
+import sys
+import webbrowser
 
-from PySide6.QtWidgets import QMdiArea, QDockWidget, QTextBrowser, QMessageBox, QFileDialog
+import pytest
 from PySide6 import QtCore
+from PySide6.QtWidgets import QDockWidget, QFileDialog, QMdiArea, QMessageBox, QTextBrowser
 
 # Local
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
-
 from sas.qtgui.MainWindow.GuiManager import Acknowledgements, GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities.HidableDialog import HidableDialog
-
+from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
 from sas.system import config
+
 
 class GuiManagerTest:
     '''Test the Main Window functionality'''
@@ -253,21 +252,21 @@ class GuiManagerTest:
 
         # Check the initial state
         assert not manager._workspace.toolBar.isVisible()
-        assert 'Show Toolbar' == manager._workspace.actionHide_Toolbar.text()
+        assert manager._workspace.actionHide_Toolbar.text() == 'Show Toolbar'
 
         # Invoke action
         manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
         assert manager._workspace.toolBar.isVisible()
-        assert 'Hide Toolbar' == manager._workspace.actionHide_Toolbar.text()
+        assert manager._workspace.actionHide_Toolbar.text() == 'Hide Toolbar'
 
         # Revert
         manager.actionHide_Toolbar()
 
         # Assure the original values are back
         assert not manager._workspace.toolBar.isVisible()
-        assert 'Show Toolbar' == manager._workspace.actionHide_Toolbar.text()
+        assert manager._workspace.actionHide_Toolbar.text() == 'Show Toolbar'
 
 
     #### HELP ####

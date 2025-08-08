@@ -2,32 +2,25 @@
 """
 File Converter Widget
 """
-import os
 import logging
+import os
 
 import numpy as np
-
 from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
+import sasdata.file_converter.FileConverterUtilities as Utilities
+from sasdata.dataloader.data_info import Data1D, Detector, Sample, Source, Vector
 from sasdata.file_converter.ascii2d_loader import ASCII2DLoader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
-from sasdata.dataloader.data_info import Data1D
-
-from sasdata.dataloader.data_info import Detector
-from sasdata.dataloader.data_info import Sample
-from sasdata.dataloader.data_info import Source
-from sasdata.dataloader.data_info import Vector
-
-import sasdata.file_converter.FileConverterUtilities as Utilities
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.FrameSelect import FrameSelect
-
 from sas.system import version
 
 from .UI.FileConverterUI import Ui_FileConverterUI
+
 
 class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
     """
@@ -47,7 +40,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.setWindowTitle("File Converter")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
 
@@ -144,7 +137,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
                     return
                 Utilities.convert_2d_data(dataset, self.ofile, self.getMetadata())
 
-        except (ValueError, IOError) as ex:
+        except (OSError, ValueError) as ex:
             msg = str(ex)
             logging.error(msg)
             return
@@ -194,8 +187,8 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         try:
             datafile = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Choose a file", "", "All files (*.*)")[0]
-        except (RuntimeError, IOError) as ex:
-            log_msg = "File Converter failed with: {}".format(ex)
+        except (OSError, RuntimeError) as ex:
+            log_msg = f"File Converter failed with: {ex}"
             logging.error(log_msg)
             raise
         return datafile

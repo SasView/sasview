@@ -1,11 +1,13 @@
 # global
 import os
-from PySide6 import QtCore
-from PySide6 import QtWidgets
+
+from PySide6 import QtCore, QtWidgets
+
+from sas.qtgui.MainWindow.UI.DataExplorerUI import Ui_DataLoadWidget
 
 # UI
-from sas.qtgui.UI import main_resources_rc # noqa: F401
-from sas.qtgui.MainWindow.UI.DataExplorerUI import Ui_DataLoadWidget
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
+
 
 class DroppableDataLoadWidget(QtWidgets.QTabWidget, Ui_DataLoadWidget):
     """

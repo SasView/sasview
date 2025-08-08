@@ -1,24 +1,21 @@
-# -*- coding: utf-8 -*-
 import base64
 import datetime
-import sys
-
-from typing import List
-
 import logging
-from io import BytesIO
+import sys
 import urllib.parse
-import html2text
+from io import BytesIO
 
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import html2text
 from bumps import options
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
+from sasmodels import __version__ as SASMODELS_VERSION
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
-
 from sas.system.version import __version__ as SASVIEW_VERSION
-from sasmodels import __version__ as SASMODELS_VERSION
+
 
 # TODO: Integrate with other reports
 class ReportPageLogic:
@@ -83,19 +80,19 @@ class ReportPageLogic:
         else:
             qrange_min = min(self.data.x)
             qrange_max = max(self.data.x)
-        qrange = "min = {}, max = {}".format(qrange_min, qrange_max)
+        qrange = f"min = {qrange_min}, max = {qrange_max}"
 
         title = title + " [" + current_time + "]"
         title_name = HEADER % title
         report = title_name
-        report += CENTRE % "File name: {}\n".format(filename)
-        report += CENTRE % "SasView version: {}\n".format(SASVIEW_VERSION)
-        report += CENTRE % "SasModels version: {}\n".format(SASMODELS_VERSION)
-        report += CENTRE % "Fit optimizer used: {}\n".format(optimizer)
-        report += CENTRE % "Model name: {}\n".format(modelname)
-        report += CENTRE % "Q Range: {}\n".format(qrange)
+        report += CENTRE % f"File name: {filename}\n"
+        report += CENTRE % f"SasView version: {SASVIEW_VERSION}\n"
+        report += CENTRE % f"SasModels version: {SASMODELS_VERSION}\n"
+        report += CENTRE % f"Fit optimizer used: {optimizer}\n"
+        report += CENTRE % f"Model name: {modelname}\n"
+        report += CENTRE % f"Q Range: {qrange}\n"
         chi2_repr = GuiUtils.formatNumber(self.parent.chi2, high=True)
-        report += CENTRE % "Chi2/Npts: {}\n".format(chi2_repr)
+        report += CENTRE % f"Chi2/Npts: {chi2_repr}\n"
 
         return report
 
@@ -162,7 +159,7 @@ class ReportPageLogic:
 
         return report
 
-    def getImages(self) -> List[PlotterBase]:
+    def getImages(self) -> list[PlotterBase]:
         """
         Create MPL figures for the current fit
         """

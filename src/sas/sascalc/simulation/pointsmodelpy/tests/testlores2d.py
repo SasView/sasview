@@ -1,10 +1,9 @@
-from __future__ import print_function
 
 
 def test_lores2d(phi):
-  from sasModeling.pointsmodelpy import pointsmodelpy 
-  from sasModeling.iqPy import iqPy
   from sasModeling.geoshapespy import geoshapespy
+  from sasModeling.iqPy import iqPy
+  from sasModeling.pointsmodelpy import pointsmodelpy
 
   #lores model is to hold several geometric objects
   lm = pointsmodelpy.new_loresmodel(0.1)
@@ -29,9 +28,9 @@ def test_lores2d(phi):
   iqPy.OutputIQ(iq, "out_xy.iq")
 
 def get2d():
-  from enthought.util.numerix import Float,zeros
-  from sasModeling.pointsmodelpy import pointsmodelpy
+  from enthought.util.numerix import Float, zeros
   from sasModeling.geoshapespy import geoshapespy
+  from sasModeling.pointsmodelpy import pointsmodelpy
 
   lm = pointsmodelpy.new_loresmodel(0.1)
   sph = geoshapespy.new_sphere(20)
@@ -66,9 +65,9 @@ def get2d():
   return value_grid
 
 def get2d_2():
-  from enthought.util.numerix import Float,zeros
-  from sasModeling.pointsmodelpy import pointsmodelpy
+  from enthought.util.numerix import Float, zeros
   from sasModeling.geoshapespy import geoshapespy
+  from sasModeling.pointsmodelpy import pointsmodelpy
 
   lm = pointsmodelpy.new_loresmodel(0.1)
   cyn = geoshapespy.new_cylinder(5,20)

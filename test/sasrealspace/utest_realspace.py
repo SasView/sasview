@@ -2,11 +2,10 @@
     Unit tests for specific models
     @author: Mathieu Doucet / UTK
 """
-from __future__ import print_function
 
-import unittest
 import math
 import time
+import unittest
 
 # Disable "missing docstring" complaint
 # pylint: disable-msg=C0111
@@ -14,8 +13,8 @@ import time
 # pylint: disable-msg=R0904
 # Disable "could be a function" complaint
 # pylint: disable-msg=R0201
-
 from sasmodels.sasview_model import _make_standard_model
+
 import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
 
 EllipsoidModel = _make_standard_model('ellipsoid')

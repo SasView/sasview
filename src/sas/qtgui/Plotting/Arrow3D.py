@@ -2,10 +2,13 @@
 Module that draws multiple arrows in 3D coordinates
 """
 
+import time
+
 import numpy as np
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
-import time
+
+
 # from matplotlib.artist import allow_rasterization
 class Arrow3D(FancyArrowPatch):
     """

@@ -3,20 +3,20 @@ This object is a small tool to allow user to quickly
 determine the variance in q  from the
 instrumental parameters.
 """
-from PySide6 import QtWidgets
-
-from twisted.internet import threads
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
-from sas.sascalc.calculator.resolution_calculator import ResolutionCalculator
-import matplotlib.patches as patches
-
-import numpy
-import sys
 import logging
 import os
 import re
+import sys
+
+import matplotlib.patches as patches
+import numpy
+from PySide6 import QtWidgets
+from twisted.internet import threads
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
+from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.sascalc.calculator.resolution_calculator import ResolutionCalculator
 
 from .UI.ResolutionCalculatorPanelUI import Ui_ResolutionCalculatorPanel
 
@@ -299,9 +299,8 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 max_lambda = 2 * min_lambda
             else:
                 max_lambda = max(list_wdata[0])
-            self.txtWavelength.setText('{} - {}'.format(min_lambda, max_lambda))
-            self.txtWavelengthSpread.setText('{} - {}'.format(min_wspread,
-                                                    max_wspread))
+            self.txtWavelength.setText(f'{min_lambda} - {max_lambda}')
+            self.txtWavelengthSpread.setText(f'{min_wspread} - {max_wspread}')
 
         else:
             self.cbCustomSpectrum.setVisible(False)
@@ -327,7 +326,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
 
             basename = os.path.basename(datafile)
 
-            input_f = open(datafile, 'r')
+            input_f = open(datafile)
             buff = input_f.read()
             lines = buff.split('\n')
 

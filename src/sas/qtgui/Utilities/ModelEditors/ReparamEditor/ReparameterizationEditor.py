@@ -6,16 +6,15 @@ import re
 import traceback
 
 from numpy import inf
-from PySide6 import QtWidgets, QtCore, QtGui
-
-from sas.sascalc.fit.models import find_plugins_dir
-
-from sas.qtgui.Utilities import GuiUtils
-from sas.qtgui.Utilities.ModelEditors.ReparamEditor.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
-from sas.qtgui.Utilities.ModelEditors.Dialogs.ModelSelector import ModelSelector
-from sas.qtgui.Utilities.ModelEditors.Dialogs.ParameterEditDialog import ParameterEditDialog
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sasmodels.modelinfo import Parameter
+
+from sas.qtgui.Utilities import GuiUtils
+from sas.qtgui.Utilities.ModelEditors.Dialogs.ModelSelector import ModelSelector
+from sas.qtgui.Utilities.ModelEditors.Dialogs.ParameterEditDialog import ParameterEditDialog
+from sas.qtgui.Utilities.ModelEditors.ReparamEditor.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
+from sas.system.user import find_plugins_dir
 
 logger = logging.getLogger(__name__)
 
@@ -438,7 +437,7 @@ class ReparameterizationEditor(QtWidgets.QDialog, Ui_ReparameterizationEditor):
         """
         error_line = 0
         try:
-            with open(full_path, 'r', encoding="utf-8") as plugin:
+            with open(full_path, encoding="utf-8") as plugin:
                 model_str = plugin.read()
             ast.parse(model_str)
             GuiUtils.checkModel(full_path)

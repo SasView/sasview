@@ -3,6 +3,7 @@ test gui for sld calculator
 """
 
 import unittest
+
 import wx
 
 H2O_DENSITY = 1.0

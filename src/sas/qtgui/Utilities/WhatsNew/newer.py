@@ -1,9 +1,7 @@
-from typing import Tuple
-
-from packaging.version import parse, Version, InvalidVersion
+from packaging.version import InvalidVersion, Version, parse
 
 
-def reduced_version(version_string: str) -> Tuple[int, int, int]:
+def reduced_version(version_string: str) -> tuple[int, int, int]:
     """ Convert a version string into the three numbers we care about for the purposes
     of the WhatsNew dialog (i.e. strip a,b suffixes etc, make into three ints"""
 

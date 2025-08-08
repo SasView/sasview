@@ -42,9 +42,10 @@ distinctiveness rather than a simple colour number.
 
 # Support for ancient python versions
 import copy
-import numpy
-import sys
 import logging
+import sys
+
+import numpy
 
 if 'any' not in dir(__builtins__):
     def any(L):
@@ -60,7 +61,7 @@ if 'any' not in dir(__builtins__):
         return True
 
 
-class Graph(object):
+class Graph:
     """
     Generic plottables graph structure.
 
@@ -328,7 +329,7 @@ class Graph(object):
 # Transform interface definition
 # No need to inherit from this class, just need to provide
 # the same methods.
-class Transform(object):
+class Transform:
     """
     Define a transform plugin to the plottable architecture.
 
@@ -420,7 +421,7 @@ class Transform(object):
     #    to the sliced data as well?
 
 
-class Plottable(object):
+class Plottable:
     """
     """
     # Short ascii name to refer to the plottable in a menu
@@ -635,7 +636,7 @@ class Plottable(object):
         self.view.onFitRangeView(xmin, xmax)
 
 
-class View(object):
+class View:
     """
     Representation of the data that might include a transformation
     """

@@ -1,24 +1,22 @@
 # global
-import logging
 import copy
+import logging
+
 import numpy as np
+from PySide6 import QtCore, QtGui, QtWidgets
+from twisted.internet import reactor, threads
 
-from PySide6 import QtCore
-from PySide6 import QtGui, QtWidgets
-
-from twisted.internet import threads
-from twisted.internet import reactor
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 
 # sas-global
 from sas.sascalc.invariant import invariant
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
 from ..perspective import Perspective
-from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 from .InvariantDetails import DetailsDialog
 from .InvariantUtils import WIDGETS
+from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5
@@ -350,7 +348,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 qstar_low, qstar_low_err = self._calculator.get_qstar_low(qmin)
                 low_calculation_pass = True
             except Exception as ex:
-                logging.warning('Low-q calculation failed: {}'.format(str(ex)))
+                logging.warning(f'Low-q calculation failed: {str(ex)}')
                 qstar_low = "ERROR"
                 qstar_low_err = "ERROR"
         if self.low_extrapolation_plot and not low_calculation_pass:
@@ -379,7 +377,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 qstar_high, qstar_high_err = self._calculator.get_qstar_high(qmax)
                 high_calculation_pass = True
             except Exception as ex:
-                logging.warning('High-q calculation failed: {}'.format(str(ex)))
+                logging.warning(f'High-q calculation failed: {str(ex)}')
                 qstar_high = "ERROR"
                 qstar_high_err = "ERROR"
         if self.high_extrapolation_plot and not high_calculation_pass:
@@ -434,7 +432,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Early exit if calculations failed
         if calculation_failed:
             self.cmdStatus.setEnabled(False)
-            logging.warning('Calculation failed: {}'.format(msg))
+            logging.warning(f'Calculation failed: {msg}')
             return self.model
 
         if low_calculation_pass:
@@ -615,7 +613,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self._data:
             if len(self._data.x) < int_value:
                 self.sender().setStyleSheet(BG_RED)
-                logging.warning('The number of points must be smaller than {}'.format(len(self._data.x)))
+                logging.warning(f'The number of points must be smaller than {len(self._data.x)}')
             else:
                 self.sender().setStyleSheet(BG_WHITE)
                 self.allow_calculation()
@@ -840,7 +838,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self._porod is not None:
             item = QtGui.QStandardItem(str(self._porod))
         else:
-            item = QtGui.QStandardItem(str(''))
+            item = QtGui.QStandardItem('')
         self.model.setItem(WIDGETS.W_POROD_CST, item)
 
         # Dialog elements

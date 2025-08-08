@@ -1,37 +1,30 @@
 # pylint: disable=E501, E203, E701
 # global
-import sys
-import os
-import time
-import logging
 import copy
+import logging
+import os
+import sys
+import time
 
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import threads
 
 # SASCALC
 from sasdata.dataloader.loader import Loader
 
-# QTGUI
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Perspectives as Perspectives
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Plotting.PlotterData import DataRole
-from sas.qtgui.Plotting.Plotter import PlotterWidget
-from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
-from sas.qtgui.Plotting.MaskEditor import MaskEditor
-
+# QTGUI
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas import config
 from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MainWindow.NameChanger import ChangeName
-
-import sas.qtgui.Perspectives as Perspectives
-from sas import config
+from sas.qtgui.Plotting.MaskEditor import MaskEditor
+from sas.qtgui.Plotting.Plotter import PlotterWidget
+from sas.qtgui.Plotting.Plotter2D import Plotter2D, Plotter2DWidget
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 
 logger = logging.getLogger(__name__)
 
@@ -163,8 +156,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def createSendToMenu(self):
         self.actionReplace = QtGui.QAction(self)
-        self.actionReplace.setObjectName(u"actionReplace")
-        self.actionReplace.setText(u"... replacing data in the current page")
+        self.actionReplace.setObjectName("actionReplace")
+        self.actionReplace.setText("... replacing data in the current page")
         self.send_menu = QtWidgets.QMenu(self)
         self.send_menu.addAction(self.actionReplace)
 
@@ -345,7 +338,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         default_name = "Analysis"+str(tab_id)+"."+str(extension)
 
-        wildcard = "{0} files (*.{0})".format(extension)
+        wildcard = f"{extension} files (*.{extension})"
         caption = 'Save As'
         directory = default_name
         filter = wildcard
@@ -514,7 +507,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 logging.error(msg)
                 pass
         else:
-            with open(filename, 'r') as infile:
+            with open(filename) as infile:
                 try:
                     all_data = GuiUtils.readDataFromFile(infile)
                 except Exception as ex:
@@ -1440,7 +1433,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     if hasattr(item, 'errors'):
                         for error_data in item.errors:
                             data_error = True
-                            error_message += "\tError: {0}\n".format(error_data)
+                            error_message += f"\tError: {error_data}\n"
                     else:
 
                         logging.error("Loader returned an invalid object:\n %s" % str(item))
@@ -1461,7 +1454,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     error_message += " following:\n%s" % str(error)
                 elif data_error:
                     base_message = "Errors occurred while loading "
-                    base_message += "{0}\n".format(basename)
+                    base_message += f"{basename}\n"
                     base_message += "The data file loaded but with errors.\n"
                     error_message = base_message + error_message
                 else:
@@ -1953,7 +1946,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plots_to_close = set(current_plot_items.values()) & set(items_being_deleted)
 
         for plot_item in plots_to_close:
-            for plot_name in current_plot_items.keys():
+            for plot_name in current_plot_items:
                 if plot_item == current_plot_items[plot_name]:
                     plotter = PlotHelper.plotById(plot_name)
                     # try to delete the plot

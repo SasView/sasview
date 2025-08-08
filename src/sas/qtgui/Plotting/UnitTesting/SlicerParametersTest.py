@@ -1,20 +1,19 @@
 import webbrowser
 
+import matplotlib as mpl
 import pytest
 
-import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-from PySide6 import QtGui, QtWidgets
-from PySide6 import QtCore
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class dummy_manager:

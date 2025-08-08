@@ -1,14 +1,14 @@
-from typing import List, Callable
+from collections.abc import Callable
+
 import numpy as np
+from OpenGL import GL, GLU
 
 # from PyQt5 import QtWidgets, Qt, QtGui, QtOpenGL, QtCore
-from PySide6 import QtGui, QtCore
-from PySide6 import QtWidgets, QtOpenGLWidgets 
-
-from OpenGL import GL, GLU
+from PySide6 import QtCore, QtGui, QtOpenGLWidgets, QtWidgets
 
 from sas.qtgui.GL.renderable import Renderable
 from sas.qtgui.GL.surface import Surface
+
 
 class Scene(QtOpenGLWidgets.QOpenGLWidget):
 
@@ -42,7 +42,7 @@ class Scene(QtOpenGLWidgets.QOpenGLWidget):
         self.view_azimuth_difference = 0.0
         self.view_elevation_difference = 0.0
 
-        self._items: List[Renderable] = []
+        self._items: list[Renderable] = []
 
         self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 

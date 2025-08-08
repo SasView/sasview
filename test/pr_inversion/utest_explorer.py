@@ -4,7 +4,9 @@
 
 import os.path
 import unittest
+
 import pytest
+
 from sas.sascalc.pr.distance_explorer import DistExplorer
 from sas.sascalc.pr.invertor import Invertor
 

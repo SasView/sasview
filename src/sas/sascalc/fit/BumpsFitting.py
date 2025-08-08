@@ -3,14 +3,14 @@ BumpsFitting module runs the bumps optimizer.
 """
 import logging
 import os
-from copy import deepcopy
-from datetime import timedelta, datetime
 import traceback
-import uncertainties
+from copy import deepcopy
+from datetime import datetime, timedelta
 
 import numpy as np
-
+import uncertainties
 from bumps import fitters
+
 try:
     from bumps.options import FIT_CONFIG
     # Default bumps to use the Levenberg-Marquardt optimizer
@@ -26,19 +26,17 @@ except ImportError:
         return fitopts.fitclass, fitopts.options.clipboard_copy()
 
 
-from bumps.mapper import SerialMapper, MPMapper
 from bumps import parameter
 from bumps.fitproblem import FitProblem
+from bumps.mapper import MPMapper, SerialMapper
 
-
-from sas.sascalc.fit.AbstractFitEngine import FitEngine
-from sas.sascalc.fit.AbstractFitEngine import FResult
+from sas.sascalc.fit.AbstractFitEngine import FitEngine, FResult
 from sas.sascalc.fit.expression import compile_constraints
 
 # patch uncertainties.core.AffineScalarFunc to work with float() conversion
 uncertainties.core.AffineScalarFunc.__float__ = lambda self: float(self.nominal_value)
 
-class Progress(object):
+class Progress:
     def __init__(self, history, max_step, pars, dof):
         remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
         if remaining_time < 60:
@@ -61,7 +59,7 @@ class Progress(object):
         return self.msg
 
 
-class BumpsMonitor(object):
+class BumpsMonitor:
     def __init__(self, handler, max_step, pars, dof):
         self.handler = handler
         self.max_step = max_step
@@ -80,7 +78,7 @@ class BumpsMonitor(object):
             self.handler.improvement()
         self.handler.update_fit()
 
-class ConvergenceMonitor(object):
+class ConvergenceMonitor:
     """
     ConvergenceMonitor contains population summary statistics to show progress
     of the fit.  This is a list [ (best, 0%, 25%, 50%, 75%, 100%) ] or
@@ -110,7 +108,7 @@ class ConvergenceMonitor(object):
 # define reference parameters for each sas parameter, but then we would not
 # be able to express constraints using python expressions in the usual way
 # from bumps, and would instead need to use string expressions.
-class SasFitness(object):
+class SasFitness:
     """
     Wrap SAS model as a bumps fitness object
     """
@@ -214,7 +212,7 @@ class SasFitness(object):
     #
     #     resynth_data/restore_data/save/plot
 
-class ParameterExpressions(object):
+class ParameterExpressions:
     def __init__(self, models):
         self.models = models
         self._setup()

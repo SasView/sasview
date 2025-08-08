@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import urllib.request
-import sys
 import json
 import logging
 import re
+import sys
+import urllib.request
 
 '''
 HTTP Proxy parser and Connection
@@ -17,7 +16,7 @@ connect() function:
 '''
 
 
-class ConnectionProxy(object):
+class ConnectionProxy:
 
     def __init__(self, url, timeout):
         self.url = url
