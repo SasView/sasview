@@ -115,7 +115,7 @@ class WindowsConsole(metaclass=Singleton):
 
 def setup_console(stderr_as="console"):
     """
-    Lazy redirect of stdio to windows console. 
+    Lazy redirect of stdio to windows console.
 
     Handling of stderr is defined by the caller:
 
@@ -148,13 +148,13 @@ def setup_console_simple(stderr_to_stdout=True):
     if os.name == 'nt':
         def console_open(mode):
             attach_windows_console()
-            return open("CON:") if mode == "r" else open("CON:", "w") 
+            return open("CON:") if mode == "r" else open("CON:", "w")
         if sys.__stdin__ is None:
             sys.__stdin__ = sys.stdin = console_open("r")
         if sys.__stdout__ is None:
             sys.__stdout__ = sys.stdout = console_open("w")
         if sys.__stderr__ is None:
-            sys.__stderr__ = sys.stderr = sys.__stdout__ if stderr_to_stdout else console_open("w") 
+            sys.__stderr__ = sys.stderr = sys.__stdout__ if stderr_to_stdout else console_open("w")
             sys.__stderr__ = sys.stderr = console_open("w")
 
 

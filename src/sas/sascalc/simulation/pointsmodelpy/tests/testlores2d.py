@@ -101,7 +101,7 @@ def get2d_2():
 
   value_grid[50,50] = 1
   return value_grid
-  
+
 if __name__ == "__main__":
 
   print("start to test lores 2D")

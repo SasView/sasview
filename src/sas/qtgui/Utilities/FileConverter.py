@@ -132,7 +132,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
             else: # self.data_type == 'bsl'
                 #dataset = Utilities.extract_bsl_data(self.ifile)
                 dataset = self.extractBSLdata(self.ifile)
-                
+
                 if dataset is None:
                     return
                 Utilities.convert_2d_data(dataset, self.ofile, self.getMetadata())

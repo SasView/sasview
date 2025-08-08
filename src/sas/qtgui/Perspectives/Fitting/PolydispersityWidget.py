@@ -96,7 +96,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         poly_model_params = [self.polyNameToParam(self.poly_model.item(row).text())
                              for row in range(self.poly_model.rowCount())]
         return poly_model_params
-    
+
     def onPolyModelChange(self, top: QtCore.QModelIndex) -> None:
         """
         Callback method for updating the main model and sasmodel

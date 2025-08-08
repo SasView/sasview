@@ -36,7 +36,7 @@ class FittingOptionsTest:
         Check that line edits got correct validators
         """
         # Can't reliably test the method in action, but can easily check the results
-        
+
         # DREAM
         assert isinstance(widget.samples_dream.validator(), QtGui.QIntValidator)
         assert isinstance(widget.burn_dream.validator(), QtGui.QIntValidator)
@@ -147,7 +147,7 @@ class FittingOptionsTest:
         options.FIT_CONFIG.values['newton']['starts'] = 666
         options.FIT_CONFIG.values['newton']['xtol'] = 0.01
 
-        # Invoke the method for the changed 
+        # Invoke the method for the changed
         widget.updateWidgetFromBumps('newton')
 
         # See that the widget picked up the right values

@@ -252,7 +252,7 @@ class _Parameter:
     @property
     def value(self):
         return self.slot.value
-    
+
     @value.setter
     def value(self, value):
         self.slot.value = value

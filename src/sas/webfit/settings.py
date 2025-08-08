@@ -117,7 +117,7 @@ REST_FRAMEWORK = {
     #version_param is default set to "version"
 }
 
-# These are the default values if none are set 
+# These are the default values if none are set
 REST_KNOX = {
     'SECURE_HASH_ALGORITHM':'cryptography.hazmat.primitives.hashes.SHA512',
     'AUTH_TOKEN_CHARACTER_LENGTH': 64, # By default, it is set to 64 characters (this shouldn't need changing).

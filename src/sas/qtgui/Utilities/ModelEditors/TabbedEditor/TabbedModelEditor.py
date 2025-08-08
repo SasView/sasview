@@ -1121,7 +1121,7 @@ C_COMMENT_TEMPLATE = """\
 // 4. Press 'Apply' or 'Save' to save your model and run a model check
 //      (note that the model check will fail if there is no python file
 //      of the same name in your plugins directory)
-// 
+//
 // NOTE: SasView has many built-in functions that you can use in your C
 //       model. For example, spherical Bessel functions
 //       (lib/sas_3j1x_x.c), Gaussian, quadrature (lib/sas_J1.c), and
@@ -1177,7 +1177,7 @@ C_TEMPLATE = """\
 //}}
 
 static void
-Fq(double q, 
+Fq(double q,
    double *F1,
    double *F2,
    {args}) // Remove arguments as needed
@@ -1188,7 +1188,7 @@ Fq(double q,
     //    beta approximation. the *F2 value is F(Q)^2 and equivalent to
     //    the output of Iq. While currently F(Q) is only used in the
     //    beta approximation, it may be used for other things in the
-    //    future. You must still define Iqac or Iqabc if your model has 
+    //    future. You must still define Iqac or Iqabc if your model has
     //    orientation  parameters (i.e. fits data in 2D plots).
     // TO USE: Convert your copied Python code to C below and uncomment
     // it. Note that F2 is essentially F1^2.
@@ -1259,7 +1259,7 @@ Iqxy(double qx,
     //            Iqac or Iqabc or Ixy.  Remove the others.
     // IMPORTANT: Make sure to remove or comment out any Iqxy in the
     //            python file
-    
+
     return 1.0;
 }}
 """

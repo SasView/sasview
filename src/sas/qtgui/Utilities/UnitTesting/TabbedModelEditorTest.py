@@ -278,7 +278,7 @@ class TabbedModelEditorTest:
 
     def testGetParamHelper(self):
         """
-        Test the convenience method for converting 
+        Test the convenience method for converting
         GUI parameter representation into sasmodel comprehensible string
         """
         pass

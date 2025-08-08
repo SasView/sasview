@@ -148,7 +148,7 @@ else:
         return np.asarray(Iq).reshape(qx.shape)
 _calc_Iqxy.__doc__ = r"""
     Compute I(q) for a set of points (x, y).
-    
+
     Uses: I(q) = \|sum V(r) rho(r) e^(1j q.r)\|^2 / sum V(r)
     Since qz is zero for SAS, only need 2D vectors q = (qx, qy) and r = (x, y).
     """
@@ -212,7 +212,7 @@ def _calc_Iqxy_magnetic(
 @njit
 def orth(A, b): # A = 3 x n, and b_hat unit vector
     return A - np.outer(b, b)@A
- 
+
 
 @njit("(" + "f8[:], "*7 + "f8[:,::1], "+ "f8, "*8 + ")")
 def _calc_Iqxy_magnetic_helper(
@@ -224,7 +224,7 @@ def _calc_Iqxy_magnetic_helper(
     p_hat = np.array([sin_spin * cos_phi, sin_spin * sin_phi, cos_spin ])
     #two unit vectors spanning up the plane perpendicular to polarisation for SF scattering
     perpy_hat = np.array([-sin_phi, cos_phi, 0 ])
-    perpz_hat = np.array([-cos_spin * cos_phi, -cos_spin * sin_phi, sin_spin ])    
+    perpz_hat = np.array([-cos_spin * cos_phi, -cos_spin * sin_phi, sin_spin ])
 
     for k in range(len(qx)):
         qxk, qyk = qx[k], qy[k]
@@ -265,7 +265,7 @@ def _get_normal_vec(geometry):
 
     .. warning:: This function alters geometry in place as well as returning it - so when this
                     function is called the geometry array will always be re-ordered.
-    
+
     :param geometry: an array of the position data for the mesh which goes as
                         (elements x faces x vertices x coordinates)
     :type geometry: numpy.ndarray
@@ -363,7 +363,7 @@ def _calc_Iqxy_magnetic_elements_helper(
 
 def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
     """carries out fourier transform on elements
-    
+
     This function carries out the polyhedral transformation on the elements that make up the mesh.
     This algorithm only works on meshes where all the elements have the same number of faces, and
     each face has the same number of vertices. It is heavily based on the algorithm in:
@@ -420,7 +420,7 @@ def element_transform(geometry, normals, rn_norm, volumes, qx, qy):
     vs = vs / np.sqrt(np.sum(vs*vs, axis=-1))[..., None]
     Qp[problem_elements, ...] += eps * vs[problem_elements, None, ...]
     Q[problem_elements, ...] += eps * vs[problem_elements, ...]
-    # calculate the face-dependent prefactor for the sum over vertices (elements x faces) 
+    # calculate the face-dependent prefactor for the sum over vertices (elements x faces)
     prefactor = (1j * Qn_comp * np.exp(1j * Qn_comp * rn_norm)) / np.sum(Q * Q, axis=-1)[..., None]
     # calculate the sum over vertices term
     # the sub sum over the vertices in eq (14) (elements x faces)
@@ -535,7 +535,7 @@ def radius_of_gyration(nuc_sl_data: MagSLD | OMF2SLD) -> tuple[str, str, float]:
 
     return rog_mass, guinier_value, r_g_mass  # (String, String, Float), float used for plugin model
 
-    
+
 def center_of_mass(nuc_sl_data: MagSLD | OMF2SLD) -> list[float]:
     """Calculate Center of Mass(CoM) of provided molecule using an SL profile
 
@@ -549,7 +549,7 @@ def center_of_mass(nuc_sl_data: MagSLD | OMF2SLD) -> list[float]:
 
     for i in range(len(nuc_sl_data.pos_x)):
         coordinates = np.asarray([float(nuc_sl_data.pos_x[i]), float(nuc_sl_data.pos_y[i]), float(nuc_sl_data.pos_z[i])])
-        
+
         #Coh b - Coherent Scattering Length(fm)
         symbol = nuc_sl_data.pix_symbol[i]
         coh_b = coh_b_storage.get(symbol, periodictable.elements.symbol(symbol).neutron.b_c)
@@ -559,7 +559,7 @@ def center_of_mass(nuc_sl_data: MagSLD | OMF2SLD) -> list[float]:
         densities += coh_b
 
     c_o_m = np.divide(masses, densities)
-    
+
     return c_o_m
 
 
@@ -571,10 +571,10 @@ def create_beta_plot(q_x: np.ndarray, nuc_sl_data: MagSLD | OMF2SLD, form_factor
     :param form_factor: The form factor calculated prior to applying the beta approximation.
     :return: An array of form factor values with the beta approximation applied."""
     f_q = f_of_q(q_x, nuc_sl_data)
-    
+
     # Center Of Mass Calculation
     data_beta_q = (f_q**2) / form_factor
-    
+
     # Scale Beta Q to 0-1
     scaling_factor = data_beta_q[0]
     data_beta_q = data_beta_q / scaling_factor

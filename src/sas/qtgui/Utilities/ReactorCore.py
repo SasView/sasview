@@ -321,7 +321,7 @@ class QtReactor(posixbase.PosixReactorBase):
             self.stop()
             self.runUntilCurrent()
 
-            
+
 class QtEventReactor(QtReactor):
     def __init__(self, *args, **kwargs):
         self._events = {}

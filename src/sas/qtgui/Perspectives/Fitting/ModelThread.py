@@ -74,7 +74,7 @@ class Calc2D(CalcThread):
         radius = numpy.sqrt((self.data.qx_data * self.data.qx_data) + \
                     (self.data.qy_data * self.data.qy_data))
 
-        # For theory, qmax is based on 1d qmax 
+        # For theory, qmax is based on 1d qmax
         # so that must be mulitified by sqrt(2) to get actual max for 2d
         index_model = (self.qmin <= radius) & (radius <= self.qmax)
         index_model = index_model & self.data.mask
@@ -266,7 +266,7 @@ class Calc1D(CalcThread):
                 intermediate_results = {}
 
         elapsed = time.time() - self.starttime
-  
+
         res = dict(x = self.data.x[index], y = output[index],
             page_id = self.page_id, state = self.state, weight = self.weight,
             fid = self.fid, toggle_mode_on = self.toggle_mode_on,
