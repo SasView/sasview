@@ -252,21 +252,21 @@ class GuiManagerTest:
 
         # Check the initial state
         assert not manager._workspace.toolBar.isVisible()
-        assert 'Show Toolbar' == manager._workspace.actionHide_Toolbar.text()
+        assert manager._workspace.actionHide_Toolbar.text() == 'Show Toolbar'
 
         # Invoke action
         manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
         assert manager._workspace.toolBar.isVisible()
-        assert 'Hide Toolbar' == manager._workspace.actionHide_Toolbar.text()
+        assert manager._workspace.actionHide_Toolbar.text() == 'Hide Toolbar'
 
         # Revert
         manager.actionHide_Toolbar()
 
         # Assure the original values are back
         assert not manager._workspace.toolBar.isVisible()
-        assert 'Show Toolbar' == manager._workspace.actionHide_Toolbar.text()
+        assert manager._workspace.actionHide_Toolbar.text() == 'Show Toolbar'
 
 
     #### HELP ####

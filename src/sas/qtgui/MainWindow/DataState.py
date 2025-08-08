@@ -12,7 +12,7 @@
 import copy
 
 
-class DataState(object):
+class DataState:
     """
      Store information about data
     """

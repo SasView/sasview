@@ -17,7 +17,7 @@ over that range.
 """
 
 
-class Results(object):
+class Results:
     """
     Class to hold the inversion output parameters
     as a function of D_max
@@ -40,7 +40,7 @@ class Results(object):
         self.errors = []
 
 
-class DistExplorer(object):
+class DistExplorer:
     """
     The explorer class
     """

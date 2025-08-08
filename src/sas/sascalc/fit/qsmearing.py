@@ -86,7 +86,7 @@ def smear_selection(data, model=None):
     return None
 
 
-class PySmear(object):
+class PySmear:
     """
     Wrapper for pure python sasmodels resolution functions.
     """
@@ -148,7 +148,7 @@ def pinhole_smear(data, model=None):
     return PySmear(Pinhole1D(q, width), model)
 
 
-class PySmear2D(object):
+class PySmear2D:
     """
     Q smearing class for SAS 2d pinhole data
     """

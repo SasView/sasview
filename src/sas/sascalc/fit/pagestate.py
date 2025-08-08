@@ -132,7 +132,7 @@ def parse_entry_helper(node, item):
                 return None
 
 
-class PageState(object):
+class PageState:
     """
     Contains information to reconstruct a page of the fitpanel.
     """
@@ -630,7 +630,7 @@ class PageState(object):
                 param_string += value + ','
             elif name == "selected":
                 # remember if it is fixed when reporting error value
-                fixed_parameter = (value == u'False')
+                fixed_parameter = (value == 'False')
             elif name == "error value":
                 if fixed_parameter:
                     param_string += '(fixed),'
@@ -1057,7 +1057,7 @@ class PageState(object):
                         dic[name] = np.array(value_list)
                     setattr(self, varname, dic)
 
-class SimFitPageState(object):
+class SimFitPageState:
     """
     State of the simultaneous fit page for saving purposes
     """

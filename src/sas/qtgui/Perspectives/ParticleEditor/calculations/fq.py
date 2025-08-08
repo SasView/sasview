@@ -1,4 +1,3 @@
-from typing import Optional
 
 import numpy as np
 
@@ -15,7 +14,7 @@ from sas.qtgui.Perspectives.ParticleEditor.sampling.points import PointGenerator
 
 def scattering_via_fq(
         sld_definition: SLDDefinition,
-        magnetism_definition: Optional[MagnetismDefinition],
+        magnetism_definition: MagnetismDefinition | None,
         parameters: CalculationParameters,
         point_generator: SpatialDistribution,
         q_sample: QSample,

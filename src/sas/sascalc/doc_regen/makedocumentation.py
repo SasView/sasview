@@ -7,15 +7,15 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence, Union
 
 from sasmodels.core import list_models
 
 from sas.sascalc.fit import models
 from sas.system.user import get_app_dir_versioned
 
-PATH_LIKE = Union[Path, str, os.PathLike[str]]
+PATH_LIKE = Path | str | os.PathLike[str]
 
 
 # Path constants related to the directories and files used in documentation regeneration processes
@@ -248,7 +248,7 @@ def call_regenmodel(filepaths: Sequence[PATH_LIKE]) -> list[Path]:
         process_model(py_file, True)
     return removed_files
 
-def generate_html(single_files: Union[PATH_LIKE, list[PATH_LIKE]] = "", rst: bool = False, output_path: PATH_LIKE = "") -> subprocess.Popen[bytes]:
+def generate_html(single_files: PATH_LIKE | list[PATH_LIKE] = "", rst: bool = False, output_path: PATH_LIKE = "") -> subprocess.Popen[bytes]:
     """Generates HTML from an RST using a subprocess. Based off of syntax provided in Makefile found in /sasmodels/doc/
 
     :param single_file: A file name that needs the html regenerated.

@@ -2,7 +2,6 @@
     Unit tests for specific models
     @author: Mathieu Doucet / UTK
 """
-from __future__ import print_function
 
 import math
 import time

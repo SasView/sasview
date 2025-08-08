@@ -14,7 +14,7 @@ class DroppableDataLoadWidgetTest:
     @pytest.fixture(autouse=True)
     def form(self, qapp):
         '''Create/Destroy the DroppableDataLoadWidget'''
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(self):
                 return Communicate()
             def perspective(self):

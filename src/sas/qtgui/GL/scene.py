@@ -1,4 +1,4 @@
-from typing import Callable, List
+from collections.abc import Callable
 
 import numpy as np
 from OpenGL import GL, GLU
@@ -42,7 +42,7 @@ class Scene(QtOpenGLWidgets.QOpenGLWidget):
         self.view_azimuth_difference = 0.0
         self.view_elevation_difference = 0.0
 
-        self._items: List[Renderable] = []
+        self._items: list[Renderable] = []
 
         self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 

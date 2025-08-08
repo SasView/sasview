@@ -136,7 +136,7 @@ class ReportDialogTest:
     # RuntimeError: wrapped C/C++ object of type QTextBrowser has been deleted
     def testHTML2PDF(self, widget, mocker):
         ''' html to pdf conversion '''
-        class pisa_dummy(object):
+        class pisa_dummy:
             err = 0
         mocker.patch.object(pisa, 'CreatePDF', return_value=pisa_dummy())
         mocker.patch.object(builtins, 'open', return_value="y")

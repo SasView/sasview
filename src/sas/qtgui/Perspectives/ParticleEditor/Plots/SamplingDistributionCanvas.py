@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -18,7 +16,7 @@ class SamplingDistributionCanvas(FigureCanvas):
 
         FigureCanvas.__init__(self, self.fig)
 
-        self._data: Optional[ScatteringOutput] = None
+        self._data: ScatteringOutput | None = None
 
     @property
     def data(self):
