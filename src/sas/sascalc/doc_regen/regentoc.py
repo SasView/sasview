@@ -10,7 +10,7 @@ from typing import IO, BinaryIO
 
 from sasmodels.core import load_model_info
 
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, PATH_LIKE
+from sas.system.user import MAIN_DOC_SRC, PATH_LIKE
 
 TEMPLATE = """\
 ..

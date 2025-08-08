@@ -14,7 +14,7 @@ from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.ModelEditors.Dialogs.ModelSelector import ModelSelector
 from sas.qtgui.Utilities.ModelEditors.Dialogs.ParameterEditDialog import ParameterEditDialog
 from sas.qtgui.Utilities.ModelEditors.ReparamEditor.UI.ReparameterizationEditorUI import Ui_ReparameterizationEditor
-from sas.sascalc.fit.models import find_plugins_dir
+from sas.system.user import find_plugins_dir
 
 logger = logging.getLogger(__name__)
 

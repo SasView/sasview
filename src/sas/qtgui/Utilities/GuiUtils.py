@@ -40,8 +40,8 @@ from sas.qtgui.Plotting.ConvertUnits import convertUnit
 from sas.qtgui.Plotting.Plottables import Chisq, Plottable, PlottableFit1D, PlottableTheory1D, Text, View
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, PATH_LIKE
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D, FResult
+from sas.system.user import HELP_DIRECTORY_LOCATION, PATH_LIKE
 
 warnings.simplefilter("ignore")
 

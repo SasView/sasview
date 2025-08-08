@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtWidgets
 
 from sas.qtgui.Utilities.UI.DocRegenInProgress import Ui_DocRegenProgress
-from sas.sascalc.doc_regen.makedocumentation import DOC_LOG
+from sas.system.user import DOC_LOG
 
 
 class DocRegenProgress(QtWidgets.QWidget, Ui_DocRegenProgress):

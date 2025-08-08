@@ -1,7 +1,7 @@
 .. sasview_files.rst
 
 .. Initial Draft: J Krzywon, Apr 2025
-.. Last Updated: J Krzywon, Apr. 9, 2025
+.. Last Updated: J Krzywon, Jul 24, 2025
 
 .. _UserFiles:
 
@@ -22,9 +22,7 @@ This document is specific to v6.1.0 and beyond. Previous versions of SasView sto
 of the `~/.sasview` directory.**
 
 
-:ref:`Config_Files`, :ref:`Log_Files`, :ref:`Plugin_Files`, :ref:`Compiled_Files`, :ref:`Documentation`
-
-.. , :ref:`Example_Data`
+:ref:`Config_Files`, :ref:`Log_Files`, :ref:`Plugin_Files`, :ref:`Compiled_Files`, :ref:`Documentation`, :ref:`Example_Data`
 
 .. _Config_Files:
 
@@ -94,15 +92,14 @@ OS-specific file locations for documentation:
  - MacOS: ~/Library/Application Support/SasView/<sasview.version>/doc/
  - Linux: ~/.local/share/SasView/<sasview.version>/doc/
 
-..
 .. _Example_Data:
 
-.. Example Data
-.. ------------
-.. SasView supplies a number of example data files that may be used to orient yourself with the application. More information
-.. on the included files is available at :ref:`example_data_help`. These files are moved to the user directory on install.
+Example Data
+------------
+SasView supplies a number of example data files that may be used to orient yourself with the application. More information
+on the included files is available in the :ref:`testdata_help`.
 
-.. OS-specific file locations for example data:
-.. - Windows: ~/AppData/Local/sasview/SasView/example_data/
-.. - MacOS: ~/Library/Application Support/SasView/example_data/
-.. - Linux: <TODO>
+OS-specific file locations for example data:
+ - Windows: ~/AppData/Local/sasview/SasView/example_data/
+ - MacOS: ~/Library/Application Support/SasView/example_data/
+ - Linux: ~/.local/share/SasView/example_data

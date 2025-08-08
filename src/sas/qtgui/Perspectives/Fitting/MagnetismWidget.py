@@ -12,7 +12,7 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
-from sas.sascalc.doc_regen.makedocumentation import IMAGES_DIRECTORY_LOCATION
+from sas.system.user import IMAGES_DIRECTORY_LOCATION
 
 logger = logging.getLogger(__name__)
 

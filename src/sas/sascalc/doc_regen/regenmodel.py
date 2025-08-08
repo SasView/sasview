@@ -59,7 +59,8 @@ from sasmodels.direct_model import DirectModel, call_profile
 from sasmodels.kernel import KernelModel
 from sasmodels.modelinfo import ModelInfo
 
-from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC, PATH_LIKE, generate_html
+from sas.sascalc.doc_regen.makedocumentation import generate_html
+from sas.system.user import MAIN_DOC_SRC, PATH_LIKE
 
 # Destination directory for model docs
 TARGET_DIR = MAIN_DOC_SRC / "user" / "models"

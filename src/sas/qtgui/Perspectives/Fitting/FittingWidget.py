@@ -36,9 +36,9 @@ from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION
 from sas.sascalc.fit import models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
+from sas.system.user import HELP_DIRECTORY_LOCATION
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3

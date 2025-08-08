@@ -5,7 +5,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Utilities import GuiUtils
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.PluginDefinitionUI import Ui_PluginDefinition
-from sas.sascalc.fit.models import find_plugins_dir
+from sas.system.user import find_plugins_dir
 
 MODEL_TEXT = """intensity = q
 
