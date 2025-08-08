@@ -93,7 +93,7 @@ form_volume(double swelling, double protein_volume)
 
 static double
 radius_effective(int mode, double swelling,double protein_volume)
-{{  
+{{
     switch (mode) {{
     default:
     case 1: // equivalent sphere
@@ -103,7 +103,7 @@ radius_effective(int mode, double swelling,double protein_volume)
     }}
 }}
 
-static void 
+static void
 Fq(double q, double *f1, double *f2, double sld, double sld_solvent, double swelling, double protein_volume)
 {{
     const double logq = log(q*swelling);
@@ -152,5 +152,5 @@ Fq(double q, double *f1, double *f2, double sld, double sld_solvent, double swel
 have_Fq = True
 radius_effective_modes = ["equivalent sphere", "radius of gyration"]
 ''').lstrip().rstrip()
-        
+
     return model_str

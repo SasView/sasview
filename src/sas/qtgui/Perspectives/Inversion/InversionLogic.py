@@ -30,7 +30,7 @@ class InversionLogic:
         self.data_is_loaded = False
         if data_item is not None:
             self.data_is_loaded = True
-        self.qmin = 0.0    
+        self.qmin = 0.0
         self.qmax = np.inf
 
     @property
@@ -147,7 +147,7 @@ class InversionLogic:
         new_plot.group_id = GROUP_ID_PR_FIT
 
         return new_plot
-      
+
     def add_errors(self, sigma=0.05):
         """
         Adds errors to data set is they are not available.
@@ -175,12 +175,12 @@ class InversionLogic:
         if isinstance(data, Data1D):
             try:
                 qmax = max(data.x)
-                #set q values where Intensity is zero, 
+                #set q values where Intensity is zero,
                 #to qmax and exclude from minimum accepted q
                 #to avoid dodgy points around beam stop
                 usable_qrange=np.where(data.y <= 0, qmax, data.x)
                 qmin = min(usable_qrange)
-                
+
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename

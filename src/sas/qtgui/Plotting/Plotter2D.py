@@ -159,9 +159,9 @@ class Plotter2DWidget(PlotterBase):
         """
         Define common context menu and associated actions for the MPL widget
         """
-                
+
         self.defaultContextMenu()
-        
+
         plot_slicer_menu=self.contextMenu.addMenu('Slicers')
         self.actionCircularAverage = plot_slicer_menu.addAction("&Perform Circular Average")
         self.actionCircularAverage.triggered.connect(self.onCircularAverage)

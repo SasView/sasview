@@ -59,7 +59,7 @@ class InversionWindow(QtWidgets.QTabWidget, Perspective):
         # Visible data items
         # current QStandardItem showing on the panel
         self._data = data
-        
+
 
 
         # Mapping for all data items
@@ -187,7 +187,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
     @property
     def supports_reports(self):
         return True
-        
+
     @property
     def supports_fitting(self):
         return False
@@ -299,7 +299,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         Pass it over to the calculator
         """
         assert data_item is not None
-        
+
 
 
         if not isinstance(data_item, list):
@@ -309,7 +309,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
         if not isinstance(data_item[0], QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
-        
+
 #        if is_batch:
 #            # Just create a new fit tab. No empty batchFit tabs
 #            self.addData(data_item, is_batch=is_batch)
@@ -323,16 +323,16 @@ that in the meantime, these tabs will be excluded from the saved project.""")
                 msg = "Inversion cannot be computed with 2D data."
                 raise ValueError(msg)
 
-   
+
             # Find the first unassigned tab.
             # If none, open a new tab.
             available_tabs = [tab.acceptsData() for tab in self.tabs]
             tab_ids = [tab.tab_id for tab in self.tabs]
             if tab_index is not None:
-                if tab_index not in tab_ids: 
+                if tab_index not in tab_ids:
                     self.addData(data = data, is_batch=is_batch, tab_index=tab_index)
                 else:
-                    self.setCurrentIndex(tab_index-1)                
+                    self.setCurrentIndex(tab_index-1)
                     self.swapData(data = data,tab_index=self.currentIndex())
                     return
             #debug Batch mode, gives none Type has no attribute name
@@ -342,7 +342,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
                 self.tabs[first_good_tab].updateTab(data = data, tab_id=first_good_tab)
 
             else:
-                self.addData(data = data, is_batch=is_batch, tab_index = tab_index)               
+                self.addData(data = data, is_batch=is_batch, tab_index = tab_index)
 
 
 
@@ -410,7 +410,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             tab_index = self.maxIndex
         else:
             self.maxIndex = tab_index
-        
+
         # Create tab
         # tab = InversionWidget(parent=self.parent, data=data, tab_id=tab_index)
         tab_name = self.getTabName(is_batch=is_batch)
@@ -422,7 +422,7 @@ that in the meantime, these tabs will be excluded from the saved project.""")
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         if data is not None:
             tab.updateTab(data = data, tab_id=tab_index)
-                
+
         self.addTab(tab, icon, tab.tab_name)
         tab.enableButtons()
         self.tabs.append(tab)

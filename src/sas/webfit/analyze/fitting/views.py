@@ -56,13 +56,13 @@ def start(request, version = None):
     if request.method == "POST":
         #TODO set status
         #TODO add constraints
-        
+
         base_serializer = FitSerializer(data=request.data)
         if base_serializer.is_valid():
             base_serializer.save()
         else:
             return Response(base_serializer.errors)
-        
+
         fit_db = get_object_or_404(Fit, id = base_serializer.data["id"])
 
         if not load_model(fit_db.model.lower()):
@@ -70,14 +70,14 @@ def start(request, version = None):
             return HttpResponseBadRequest("No model selected for fitting")
 
         if fit_db.data_id:
-            if not (fit_db.data_id.is_public or (request.user.is_authenticated and 
+            if not (fit_db.data_id.is_public or (request.user.is_authenticated and
                     request.user is fit_db.data_id.current_user)):
                 fit_db.delete()
                 return HttpResponseBadRequest("data isn't public and/or the user's")
 
         if request.data.get("parameters"):
             parameters = request.data.get("parameters")
-            
+
             #list of FitParameter objects
             all_param_dbs = []
             for x in parameters:
@@ -89,8 +89,8 @@ def start(request, version = None):
 
         #TODO move below data to created queuing function
         result = start_fit(fit_db)
-        
-        #TODO result_serializer should actually be formatted to save result.model.state() in parameter database, 
+
+        #TODO result_serializer should actually be formatted to save result.model.state() in parameter database,
         #with parameter name like "name = 'fit_radius'"
         result_serializer = FitSerializer(fit_db, data = {"results": str(result), "status":3}, partial=True)
         if result_serializer.is_valid():
@@ -98,7 +98,7 @@ def start(request, version = None):
         else:
             return Response(result_serializer.errors)
         fit_db = get_object_or_404(Fit, id = result_serializer.data["id"])
-        
+
         #add "warnings": ... later
         return Response({"authenticated":request.user.is_authenticated, "fit_id":fit_db.id, "results":result})
 
@@ -126,7 +126,7 @@ def start_fit(fit_db):
                 lower_limit = par_limits[name]["lower"] if par_limits[name]["lower"] else attr.limits[0]
                 upper_limit = par_limits[name]["upper"] if par_limits[name]["upper"] else attr.limits[1]
                 attr.range(lower_limit, upper_limit)
-        
+
         #TODO implement using Loader() instead of load_data
         """loader = Loader()
         test_data = loader.load(f.path)[0]"""
@@ -233,7 +233,7 @@ def list_optimizers(request, version = None):
 
 #TODO strip models that are in blacklist, categoryinstaller get rid of those that are False
 #TODO implement category manager
-#TODO in fresh install categories.json is gone, fix 
+#TODO in fresh install categories.json is gone, fix
 #TODO move code to share between both qtgui and webfit, move to CategoryInstaller
 #TODO CategoryInstaller should be moved to sasmodels? (as it manages models)
 def regenerate_category_dict(cat_name):
@@ -268,7 +268,7 @@ def list_model(request, category = None, kind = None, version = None):
         '''TODO requires discussion:
         if request.username:
             if request.user.is_authenticated:
-                user_models = 
+                user_models =
                 listed_models += {"plugin_models": user_models}
         '''
     return HttpResponseBadRequest()

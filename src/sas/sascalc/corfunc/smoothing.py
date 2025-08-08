@@ -67,7 +67,7 @@ class SmoothJoin:
             # This shouldn't have any divide by zero, as x_mid is strictly bigger than start
             # and strictly less than stop
             h = 1.0 / (1.0 + ((x_mid - self.stop) / (self.start - x_mid)) ** 2)
-            
+
             y[mid_indices] = h * self.right_function(x_mid) + \
                              (1 - h) * self.left_function(x_mid)
 

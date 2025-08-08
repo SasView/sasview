@@ -85,8 +85,8 @@ def createFixedChoiceComboBox(param, item_row):
     """
     Determines whether param is a fixed-choice parameter, modifies items in item_row appropriately and returns a combo
     box containing the fixed choices. Returns None if param is not fixed-choice.
-    
-    item_row is a list of QStandardItem objects for insertion into the parameter table. 
+
+    item_row is a list of QStandardItem objects for insertion into the parameter table.
     """
 
     # Determine whether this is a fixed-choice parameter. There are lots of conditionals, simply because the

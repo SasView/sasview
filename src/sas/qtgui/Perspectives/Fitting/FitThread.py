@@ -94,7 +94,7 @@ class FitThread(CalcThread):
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
             #print "keyboard exception"
-            #Stop on exception during fitting. Todo: need to put 
+            #Stop on exception during fitting. Todo: need to put
             #some mssg and reset progress bar.
 
             # Shouldn't this be re-raising? ConsoleUpdate doesn't act on it.

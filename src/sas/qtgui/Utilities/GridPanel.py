@@ -178,7 +178,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         model_name = results[0][0].model.id
         self.tabWidget.setTabToolTip(self.tabWidget.count()-1, model_name)
         self.data_dict[page_name] = results
-    
+
     def onHelp(self):
         """
         Open a local url in the default browser
@@ -464,7 +464,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
         self.parent = parent
         self.batch_results = output_data
-        
+
 
     def setupTable(self, widget=None,  data=None):
         """
@@ -476,7 +476,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                       'Background [cm^-1]', 'P+ Fraction', 'P+1-theta Fraction',
                       'Calc. Time [sec]', 'Q Min [Å^-1]', 'Q Max [Å^-1]']
 
-            
+
         if data is None:
             return
 

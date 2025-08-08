@@ -40,7 +40,7 @@ class ViewerModel(QWidget):
         self.scatter.addSeries(self.seriesGreen)
         self.scatter.addSeries(self.seriesBlue)
         self.dict_series = {"Red": self.seriesRed, "Green": self.seriesGreen, "Blue": self.seriesBlue}
-       
+
         self.scatterContainer = QWidget.createWindowContainer(self.scatter)
         self.scatter.setMinimumSize(QSize(271, 271))
         self.scatter.setHorizontalAspectRatio(1.0)
@@ -231,7 +231,7 @@ class ViewerModel(QWidget):
         for series in self.dict_series.values():
             data = []
             series.dataProxy().resetArray(data)
-        
+
         #reset view
         self.scene.clear()
         self.scatter.scene().activeCamera().setCameraPosition(0, 0, 110)

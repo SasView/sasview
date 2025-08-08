@@ -21,7 +21,7 @@ class AddTextTest:
         assert isinstance(widget, QtWidgets.QDialog)
         assert isinstance(widget._font, QtGui.QFont)
         assert widget._color == "black"
-        
+
     @pytest.mark.skip(reason="2022-09 already broken")
     def testOnFontChange(self, widget, mocker):
         '''Test the QFontDialog output'''

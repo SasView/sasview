@@ -84,7 +84,7 @@ class FittingOptions(PreferencesWidget, Ui_FittingOptions):
         name = [n.name for n in fitters.FITTERS if n.id == self.current_fitter_id][0]
         self.cbAlgorithm.setCurrentIndex(self.cbAlgorithm.findText(name))
         self._algorithm_change(self.cbAlgorithm.currentIndex())
-    
+
     def addSignals(self):
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cbAlgorithm.currentIndexChanged.connect(lambda: self.cmdHelp.setText(f"{self.cmdHelp.text().split(' ')[0]} {self.cbAlgorithm.currentText()}"))

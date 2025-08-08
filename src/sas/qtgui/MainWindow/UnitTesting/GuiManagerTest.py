@@ -32,7 +32,7 @@ class GuiManagerTest:
 
             def __init__(self,  parent=None):
                 super(MainWindow, self).__init__( parent)
-        
+
                 # define workspace for dialogs.
                 self.workspace = QMdiArea(self)
                 self.setCentralWidget(self.workspace)
@@ -146,7 +146,7 @@ class GuiManagerTest:
         """
         mocker.patch.object(manager, 'processVersion')
         version = {'version'     : '5.0.2',
-                   'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
+                   'update_url'  : 'http://www.sasview.org/sasview.latestversion',
                    'download_url': 'https://github.com/SasView/sasview/releases/tag/v5.0.2'}
         manager.checkUpdate()
 

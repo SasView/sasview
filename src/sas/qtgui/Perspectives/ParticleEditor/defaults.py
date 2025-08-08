@@ -8,7 +8,7 @@ def sld(r, theta, phi):
     return out
 
 
-default_text = '''""" 
+default_text = '''"""
 
 Here's a new perspective. It calculates the scattering based on real-space description of a particle.
 
@@ -20,7 +20,7 @@ Basically, define your SLD as a function of either cartesian or polar coordinate
 The display on the right shows your particle, both as a total projected density (top) and as a slice (bottom).
 
 This is a minimal working system. Currently magnetism doesn't work, neither do extra parameters for your functions,
-nor structure factors, nor fitting, nor 2D plots. 
+nor structure factors, nor fitting, nor 2D plots.
 
 Here's a simple example: """
 

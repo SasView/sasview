@@ -179,7 +179,7 @@ class DataExplorerTest:
         expected_list = [0, 0, 33, 66, -1]
         spied_list = [spy_progress_bar_update.called()[i]['args'][0] for i in range(5)]
         assert expected_list == spied_list
-        
+
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testDeleteButton(self, form, mocker):
         """
@@ -530,7 +530,7 @@ class DataExplorerTest:
 
         for def_format in default_list:
             assert def_format in w_list
-       
+
     def testLoadComplete(self, form, mocker):
         """
         Test the callback method updating the data object

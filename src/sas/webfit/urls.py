@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 #TO DO: finalize version control
 
-#base urls 
+#base urls
 # no urls for plugins currently
 urlpatterns = [
     #admin page
@@ -36,7 +36,7 @@ urlpatterns = [
 
     #data path
     re_path(r"^(?P<version>(v1))/data/", include("data.urls"), name = "data tools"),
-    
+
     #perspective paths
     re_path(r"^(?P<version>(v1))/analyze/", include("analyze.urls"), name = "analysis tools"),
 ]

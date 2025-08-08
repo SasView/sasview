@@ -203,7 +203,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             # Test to see if HTML does not exist or is older than python file
             elif not os.path.exists(url_str):
                 self.load404()
-            # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
+            # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py
 
         elif "index" in url_str:
             # Regenerate if HTML is older than RST -- for index.html, which gets passed in differently because it is located in a different folder
@@ -222,7 +222,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                 # Test to see if HTML does not exist or is older than python file
             if not os.path.exists(html_path):
                 self.load404()
-        
+
         if self.regen_in_progress is False:
             self.loadHtml() #loads the html file specified in the source url to the QWebViewer
 
@@ -255,7 +255,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         # Show widget
         self.onShow()
-    
+
     def updateTitle(self):
         """
         Set the title of the window to include the name of the document,
@@ -272,7 +272,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     def load404(self):
         self.webEngineViewer.setHtml(HTML_404)
         self.onShow()
-    
+
     def refresh(self):
         self.webEngineViewer.reload()
 

@@ -12,13 +12,13 @@ class ViewerButtons(QWidget, Ui_ViewerButtons):
         super().__init__()
 
         self.setupUi(self)
-    
+
 
 class ViewerModelRadius(QWidget, Ui_ViewerModelRadius):
     """Model radius view"""
     def __init__(self, parent=None):
         super().__init__()
-        
+
         self.setupUi(self)
 
 

@@ -28,14 +28,14 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
         self.addSignals()
 
         self.onLoad()
-    
+
     def addSignals(self):
         if self.parent:
             self.parent.destroyed.connect(self.onClose)
         self.valuesTable.cellPressed.connect(self.onCellPressed)
         self.cmdCancel.clicked.connect(self.onClose)
         self.cmdSave.clicked.connect(self.onSave)
-    
+
     def onLoad(self):
         self.valuesTable.resizeRowsToContents()
         self.adjustTableSize()
@@ -60,14 +60,14 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
             font = item.font()
             font.setBold(False)
             item.setFont(font)
-        
+
         # Make text bolded in the clicked-on box in the first column
         selected_row = self.valuesTable.currentRow()
         item = self.valuesTable.item(selected_row, 0)
         font = item.font()
         font.setBold(True)
         item.setFont(font)
-    
+
     def onSave(self):
         """
         Return the values in the table to the listening parent widget
@@ -80,7 +80,7 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
             self.returnNewParamsSignal.emit(self.getValues())
 
         self.onClose()
-    
+
     def getValues(self):
         """
         Get the values from the table and return them as a parameter object
@@ -109,10 +109,10 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
         parameter.description = self.getValuesFromTable(self.valuesTable, "Description")
 
         return [parameter]
-    
+
     def adjustTableSize(self):
         self.valuesTable.setFixedHeight(self.valuesTable.verticalHeader().length() + self.valuesTable.horizontalHeader().height())
-    
+
     @staticmethod
     def getValuesFromTable(table, search_string):
         """
@@ -125,7 +125,7 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
             return table.item(property_row, 1).text()
         except AttributeError:
             return ""
-    
+
     @staticmethod
     def writeValuesToTable(table, search_string, value):
         """
@@ -141,7 +141,7 @@ class ParameterEditDialog(QtWidgets.QDialog, Ui_ParameterEditDialog):
             new_item = QtWidgets.QTableWidgetItem()
             table.setItem(property_row, 1, new_item)
             return table.item(property_row, 1).setText(value)
-    
+
     def onClose(self):
         self.close()
         self.deleteLater()

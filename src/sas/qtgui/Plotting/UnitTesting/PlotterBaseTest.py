@@ -104,7 +104,7 @@ class PlotterBaseTest:
         ''' test toggling the grid lines '''
         # Check the toggle
         orig_toggle = plotter.grid_on
-        
+
         mocker.patch.object(FigureCanvas, 'draw_idle')
         plotter.onGridToggle()
 

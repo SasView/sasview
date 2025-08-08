@@ -22,11 +22,11 @@ def find(filename):
 
 
 class TestExplorer(unittest.TestCase):
-            
+
     def setUp(self):
         self.invertor = Invertor()
         x, y, err = load(find('sphere_80.txt'))
-        
+
         # Choose the right d_max...
         self.invertor.d_max = 160.0
         # Set a small alpha
@@ -34,11 +34,11 @@ class TestExplorer(unittest.TestCase):
         # Set data
         self.invertor.x   = x
         self.invertor.y   = y
-        self.invertor.err = err        
+        self.invertor.err = err
         self.invertor.nfunc = 15
-        
+
         self.explo = DistExplorer(self.invertor)
-        
+
     def test_exploration(self):
         results = self.explo(120, 200, 25)
         self.assertEqual(len(results.errors), 0)

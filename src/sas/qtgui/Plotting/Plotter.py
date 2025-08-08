@@ -259,7 +259,7 @@ class PlotterWidget(PlotterBase):
                 self.legend = ax.legend(newhandles,newlabels,loc='best', shadow=True)
             self.legend.set_picker(True)
             self.legend.set_visible(self.legendVisible)
-            
+
         # Current labels for axes
         if self.yLabel and not is_fit:
             ax.set_ylabel(self.yLabel)
