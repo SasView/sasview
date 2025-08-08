@@ -20,7 +20,7 @@ J Skilling and RK Bryan; MNRAS 211 (1984) 111 - 124.
 
 :license: Copyright (c) 2013, UChicago Argonne, LLC
 :license: This file is distributed subject to a Software License Agreement found
-     in the file LICENSE that is included with this distribution. 
+     in the file LICENSE that is included with this distribution.
 
 References:
 
@@ -42,10 +42,10 @@ References:
 # constraint C<=C_aim, which is some Chi^2 target. Most comments are copied
 # from GSASIIsasd.py. Currently, this code only works with spheroidal models
 
-    
+
 class decision_helper:
 
-    class MaxEntException(Exception): 
+    class MaxEntException(Exception):
         '''Any exception from this module'''
         pass
 
@@ -62,10 +62,10 @@ class decision_helper:
     def ChiNow(self, ax, c1, c2, s1, s2):
         '''
         ChiNow
-        
+
         :returns tuple: (ChiNow computation of ``w``, beta)
         '''
-        
+
         bx = 1 - ax
         a =   bx * c2  -  ax * s2
         b = -(bx * c1  -  ax * s1)
@@ -79,15 +79,15 @@ class decision_helper:
     def ChoSol(self, a, b):
         '''
         ChoSol: Chop the solution vectors
-        
+
         :returns: new vector beta
         '''
         n = b.shape[0]
         fl = np.zeros((n,n))
         bl = np.zeros_like(b)
-        
+
         if (a[0][0] <= 0):
-            msg = "ChoSol: a[0][0] = " 
+            msg = "ChoSol: a[0][0] = "
             msg += str(a[0][0])
             msg += '  Value must be positive'
             raise self.MaxEntException(msg)
@@ -126,7 +126,7 @@ class decision_helper:
             beta[i] = (bl[i] - z) / fl[i][i]
 
         return beta
-    
+
 class maxEntMethod:
     def MaxEntMove(self,fSum, blank, chisq, chizer, c1, c2, s1, s2):
         r'''
@@ -161,7 +161,7 @@ class maxEntMethod:
             loop += 1
 
         if abs(fx) >= MOVE_PASSES or loop > MAX_MOVE_LOOPS:
-            msg = "MaxEntMove: Loop counter = " 
+            msg = "MaxEntMove: Loop counter = "
             msg += str(MAX_MOVE_LOOPS)
             msg += '  No convergence in alpha chop'
             raise helper.MaxEntException(msg)
@@ -178,7 +178,7 @@ class maxEntMethod:
         r'''
         This function does the complete Maximum Entropy algorithm of Skilling
         and Bryan
-         
+
         The scattering intensity, I(Q), is related to the histogram size
         distribution, Np(r) by the following equation:
 
@@ -208,32 +208,32 @@ class maxEntMethod:
         solution fits the measured data to some extent. But compared to a
         regular regularization method, maximum entropy method also forces all
         histograms in the size distribution to have a positive amplitude
-        
+
         :param float Iq: background-subtracted scattering intensity data
         :param float sigma: normalization factor obtained using scale, weights,
                and weight factors
-        :param float[][] G: transformation matrix 
+        :param float[][] G: transformation matrix
         :param float first_bins[]: initial guess for distribution
         :param int IterMax: maximum iterations allowed
         :param obj resolution: resolution object providing information about
             smearing
         :param boolean report: print report if True; do not print if False
-        
+
         :returns float[]: :math:`f(r) dr`
         '''
         SEARCH_DIRECTIONS = 3
         CHI_SQR_LIMIT = 0.01
         n = len(first_bins)
         npt = len(Iq)
-        
+
         #operation = matrix_operation()
-        
+
         xi = np.zeros((SEARCH_DIRECTIONS, n))
         eta = np.zeros((SEARCH_DIRECTIONS, npt))
         beta = np.zeros(SEARCH_DIRECTIONS)
         s2 = np.zeros((SEARCH_DIRECTIONS, SEARCH_DIRECTIONS))
         c2 = np.zeros((SEARCH_DIRECTIONS, SEARCH_DIRECTIONS))
-        
+
         blank = sum(first_bins) / len(first_bins)            # average of initial bins before optimization
         chizer, chtarg = npt*1.0, npt*1.0
         f = first_bins * 1.0                                 # starting distribution is the same as the inital distribution
@@ -243,14 +243,14 @@ class maxEntMethod:
         converged = False
 
         for iter in range(IterMax):
-            ox = -2 * z / sigma                                    
-            
+            ox = -2 * z / sigma
+
             cgrad = np.dot(ox, Gqr)  # cgrad[i] = del(C)/del(f[i]), SB eq. 8
             sgrad = -np.log(f/first_bins) / (blank*math.exp (1.0)) # sgrad[i] = del(S)/del(f[i])
             snorm = math.sqrt(sum(f * sgrad*sgrad))                # entropy, SB eq. 22
             cnorm = math.sqrt(sum(f * cgrad*cgrad))                # Chi^2, SB eq. 22
             tnorm = sum(f * sgrad * cgrad)                         # norm of gradient
-            
+
             a = 1.0
             b = 1.0 / cnorm
             if iter == 0:
@@ -261,7 +261,7 @@ class maxEntMethod:
                 b *= 0.5 / test
             xi[0] = f * cgrad / cnorm
             xi[1] = f * (a * sgrad - b * cgrad)
-            
+
             eta[0] = np.dot(xi[0], Gqr.transpose())          # solution --> data
             eta[1] = np.dot(xi[1], Gqr.transpose())          # solution --> data
             ox = eta[1] / (sigma * sigma)
@@ -274,7 +274,7 @@ class maxEntMethod:
             c1 = xi.dot(cgrad) / chisq                          # C_mu, SB eq. 24
             s1 = xi.dot(sgrad)                                  # S_mu, SB eq. 24
 
-            
+
             for k in range(SEARCH_DIRECTIONS):
                 for l in range(k+1):
                     c2[k][l] = 2 * sum(eta[k] * eta[l] / sigma/sigma) / chisq
@@ -284,16 +284,16 @@ class maxEntMethod:
             for k, l in ((0,1), (0,2), (1,2)):
                 c2[k][l] = c2[l][k]                     #  M_(mu,nu)
                 s2[k][l] = s2[l][k]                     #  g_(mu,nu)
-    
+
             beta[0] = -0.5 * c1[0] / c2[0][0]
             beta[1] = 0.0
             beta[2] = 0.0
             if (iter > 0):
                 w, chtarg, loop, a_new, fx, beta = self.MaxEntMove(fSum, blank, chisq, chizer, c1, c2, s1, s2)
-                
+
             f_old = f.copy()                # preserve the last solution
             f += xi.transpose().dot(beta)   # move the solution towards the solution, SB eq. 25
-        
+
             # As mentioned at the top of p.119,
             # need to protect against stray negative values.
             # In this case, set them to RESET_STRAYS * base[i]
@@ -314,7 +314,7 @@ class maxEntMethod:
                 print (" MaxEnt trial/max: %3d/%3d" % ((iter+1), IterMax))
                 print (" Residual: %5.2lf%% Entropy: %8lg" % (100*test, S))
                 print (" Function sum: %.6lg Change from last: %.2lf%%\n" % (fSum,100*fChange/fSum))
-                
+
             # See if we have finished our task.
             # do the hardest test first
             if (abs(chisq/chizer-1.0) < CHI_SQR_LIMIT) and  (test < TEST_LIMIT):

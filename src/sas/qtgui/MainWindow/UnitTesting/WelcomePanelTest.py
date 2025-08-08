@@ -22,7 +22,7 @@ class WelcomePanelTest:
         '''Test the GUI in its default state'''
         assert isinstance(widget, QtWidgets.QDialog)
         assert widget.windowTitle() == "Welcome"
-        
+
     def testVersion(self, widget):
         '''Test the version string'''
         version = widget.lblVersion

@@ -53,7 +53,7 @@ class FileConverterTest:
         mocker.patch.object(widget.parent, 'showHelp', create=True)
         widget.onHelp()
         assert widget.parent.showHelp.called_once()
-     
+
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testOnIFileOpen(self, widget, mocker):
         """

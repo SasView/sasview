@@ -217,5 +217,5 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
 
         if msg == '':
             msg = "No Warnings to report\n"
-        
+
         return msg

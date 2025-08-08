@@ -611,7 +611,7 @@ def load(path = find("sphere_60_q0_2.txt")):
                 except:
                     pass
 
-    return data_x, data_y, data_err 
+    return data_x, data_y, data_err
 
 
 if __name__ == '__main__':

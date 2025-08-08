@@ -489,10 +489,10 @@ class PageState:
                 pd_type = self.model.dispersion[par]['type']
                 npts = self.model.dispersion[par]['npts']
                 nsigmas = self.model.dispersion[par]['nsigmas']
-                dist_str = str(item[1]) 
-                dist_str += '(' + str(pd_type) 
-                dist_str += '; points = ' + str(npts) 
-                dist_str += '; sigmas = ' + str(nsigmas) + ')' 
+                dist_str = str(item[1])
+                dist_str += '(' + str(pd_type)
+                dist_str += '; points = ' + str(npts)
+                dist_str += '; sigmas = ' + str(nsigmas) + ')'
                 rep += "parameter name: %s \n" % dist_str
             else:
                 rep += "parameter name: %s \n" % str(item[1])

@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
 #    a = geoshapespy.new_singlehelix(10,2,30,2)
     #a = geoshapespy.new_sphere(20)
-    
+
     iq = iqPy.new_iq(100,0.001, 0.3)
 
 #    geoshapespy.set_orientation(a,20,40,60)
@@ -31,12 +31,12 @@ if __name__ == "__main__":
 #    geoshapespy.set_center(b,15,15,15)
 #    pointsmodelpy.lores_add(lm,b,2.0)
 
-    
+
     c = geoshapespy.new_cylinder(10,40)
     geoshapespy.set_center(c,1,1,1)
     geoshapespy.set_orientation(c,0,0,0)
     pointsmodelpy.lores_add(lm,c,3.0)
-    
+
 #    d = geoshapespy.new_ellipsoid(10,8,6)
 #    geoshapespy.set_center(d,3,3,3)
 #    geoshapespy.set_orientation(c,30,30,30)
@@ -56,9 +56,9 @@ if __name__ == "__main__":
 
     print("Testing get I from a single q")
     result = pointsmodelpy.get_lores_i(lm,0.1)
-    print("The I(0.1) is: %s" % str(result)) 
+    print("The I(0.1) is: %s" % str(result))
 
 # version
 __id__ = "$Id$"
 
-#  End of file 
+#  End of file

@@ -441,7 +441,7 @@ class VolumeCanvas(BaseComponent):
 ....       return a full list of all available parameters from
            self.params.keys(). If a key in self.params is a instance
            of ShapeDescriptor, extend the return list to:
-           
+
            [param1,param2,shapeid.param1,shapeid.param2.......]
 
            If shapeid is provided, return the list of parameters that
