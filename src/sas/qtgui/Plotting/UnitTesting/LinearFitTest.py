@@ -133,7 +133,7 @@ class LinearFitTest:
         widget.x_is_log = True
         widget.txtFitRangeMin.setText("-1.0")
         assert not widget.checkFitValues(widget.txtFitRangeMin)
-       
+
 
     def testFloatInvTransform(self, widget):
         '''Test the helper method for providing conversion function'''

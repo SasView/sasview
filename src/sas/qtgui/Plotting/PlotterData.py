@@ -81,7 +81,7 @@ class Data1D(PlottableData1D, LoadData1D):
         self.slider_low_q_getter = []  # List of attributes that lead to a getter to tie a low Q method to the slider
         self.slider_high_q_setter = []  # List of attributes that lead to a setter to tie a high Q method to the slider
         self.slider_high_q_getter = []  # List of attributes that lead to a getter to tie a high Q method to the slider
-        
+
     def copy_from_datainfo(self, data1d):
         """
         copy values of Data1D of type DataLaoder.Data_info
@@ -89,27 +89,27 @@ class Data1D(PlottableData1D, LoadData1D):
         self.x  = copy.deepcopy(data1d.x)
         self.y  = copy.deepcopy(data1d.y)
         self.dy = copy.deepcopy(data1d.dy)
-        
+
         if hasattr(data1d, "dx"):
-            self.dx = copy.deepcopy(data1d.dx)    
+            self.dx = copy.deepcopy(data1d.dx)
         if hasattr(data1d, "dxl"):
             self.dxl = copy.deepcopy(data1d.dxl)
         if hasattr(data1d, "dxw"):
             self.dxw = copy.deepcopy(data1d.dxw)
-    
+
         self.xaxis(data1d._xaxis, data1d._xunit)
         self.yaxis(data1d._yaxis, data1d._yunit)
         self.title = data1d.title
         self.isSesans = data1d.isSesans
-        
+
     def __str__(self):
         """
         print data
         """
         _str = "%s\n" % LoadData1D.__str__(self)
-      
-        return _str 
-    
+
+        return _str
+
     def _perform_operation(self, other, operation):
         """
         """
@@ -135,7 +135,7 @@ class Data1D(PlottableData1D, LoadData1D):
                 result.dxw[i] = self.dxw[i]
             if self.dxl is not None and len(self.x) == len(self.dxl):
                 result.dxl[i] = self.dxl[i]
-            
+
             a = Uncertainty(self.y[i], dy[i]**2)
             if isinstance(other, Data1D):
                 b = Uncertainty(other.y[i], dy_other[i]**2)
@@ -151,12 +151,12 @@ class Data1D(PlottableData1D, LoadData1D):
                     result.dxl[i] = math.sqrt(result.dxl[i])
             else:
                 b = other
-            
+
             output = operation(a, b)
             result.y[i] = output.x
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
-    
+
     def _perform_union(self, other):
         """
         """
@@ -206,17 +206,17 @@ class Data2D(PlottableData2D, LoadData2D):
     """
     """
     def __init__(self, image=None, err_image=None,
-                 qx_data=None, qy_data=None, q_data=None, 
-                 mask=None, dqx_data=None, dqy_data=None, 
+                 qx_data=None, qy_data=None, q_data=None,
+                 mask=None, dqx_data=None, dqy_data=None,
                  xmin=None, xmax=None, ymin=None, ymax=None,
                  zmin=None, zmax=None):
         """
         """
         PlottableData2D.__init__(self, image=image, err_image=err_image,
                             xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax,
-                            zmin=zmin, zmax=zmax, qx_data=qx_data, 
+                            zmin=zmin, zmax=zmax, qx_data=qx_data,
                             qy_data=qy_data)
-        
+
         LoadData2D.__init__(self, data=image, err_data=err_image,
                             qx_data=qx_data, qy_data=qy_data,
                             dqx_data=dqx_data, dqy_data=dqy_data,
@@ -232,7 +232,7 @@ class Data2D(PlottableData2D, LoadData2D):
         self.scale = None
         # Always default
         self.plot_role = DataRole.ROLE_DEFAULT
-        
+
     def copy_from_datainfo(self, data2d):
         """
         copy value of Data2D of type DataLoader.data_info
@@ -260,21 +260,21 @@ class Data2D(PlottableData2D, LoadData2D):
         self.xaxis(data2d._xaxis, data2d._xunit)
         self.yaxis(data2d._yaxis, data2d._yunit)
         self.title = data2d.title
-        
+
     def __str__(self):
         """
         print data
         """
         _str = "%s\n" % LoadData2D.__str__(self)
-        return _str 
+        return _str
 
     def _perform_operation(self, other, operation):
         """
         Perform 2D operations between data sets
-        
+
         :param other: other data set
         :param operation: function defining the operation
-        
+
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
@@ -297,7 +297,7 @@ class Data2D(PlottableData2D, LoadData2D):
             result.data[i] = self.data[i]
             if self.err_data is not None and \
                 numpy.size(self.data) == numpy.size(self.err_data):
-                result.err_data[i] = self.err_data[i]    
+                result.err_data[i] = self.err_data[i]
             if self.dqx_data is not None:
                 result.dqx_data[i] = self.dqx_data[i]
             if self.dqy_data is not None:
@@ -306,7 +306,7 @@ class Data2D(PlottableData2D, LoadData2D):
             result.qy_data[i] = self.qy_data[i]
             result.q_data[i] = self.q_data[i]
             result.mask[i] = self.mask[i]
-            
+
             a = Uncertainty(self.data[i], dy[i]**2)
             if isinstance(other, Data2D):
                 b = Uncertainty(other.data[i], dy_other[i]**2)
@@ -315,7 +315,7 @@ class Data2D(PlottableData2D, LoadData2D):
                     result.dqx_data[i] *= self.dqx_data[i]
                     result.dqx_data[i] += (other.dqx_data[i]**2)
                     result.dqx_data[i] /= 2
-                    result.dqx_data[i] = math.sqrt(result.dqx_data[i])     
+                    result.dqx_data[i] = math.sqrt(result.dqx_data[i])
                 if other.dqy_data is not None and \
                         result.dqy_data is not None:
                     result.dqy_data[i] *= self.dqy_data[i]
@@ -324,19 +324,19 @@ class Data2D(PlottableData2D, LoadData2D):
                     result.dqy_data[i] = math.sqrt(result.dqy_data[i])
             else:
                 b = other
-            
+
             output = operation(a, b)
             result.data[i] = output.x
             result.err_data[i] = math.sqrt(math.fabs(output.variance))
         return result
-    
+
     def _perform_union(self, other):
         """
         Perform 2D operations between data sets
-        
+
         :param other: other data set
         :param operation: function defining the operation
-        
+
         """
         # First, check the data compatibility
         self._validity_check_union(other)
@@ -359,14 +359,14 @@ class Data2D(PlottableData2D, LoadData2D):
                                          numpy.size(other.data))
             result.dqy_data = numpy.zeros(len(self.data) + \
                                          numpy.size(other.data))
-        
+
         result.data = numpy.append(self.data, other.data)
         result.qx_data = numpy.append(self.qx_data, other.qx_data)
         result.qy_data = numpy.append(self.qy_data, other.qy_data)
         result.q_data = numpy.append(self.q_data, other.q_data)
         result.mask = numpy.append(self.mask, other.mask)
         if result.err_data is not None:
-            result.err_data = numpy.append(self.err_data, other.err_data) 
+            result.err_data = numpy.append(self.err_data, other.err_data)
         if self.dqx_data is not None:
             result.dqx_data = numpy.append(self.dqx_data, other.dqx_data)
         if self.dqy_data is not None:
@@ -385,7 +385,7 @@ def check_data_validity(data):
             or (len(data.err_data) == 0):
                 flag = False
         else:
-            if (data.y is None) or (len(data.y) == 0): 
+            if (data.y is None) or (len(data.y) == 0):
                 flag = False
         if not data.is_data:
             flag = False

@@ -309,7 +309,7 @@ class FittingWidgetTest:
         mocker.patch.object(widget, 'SASModelToQModel')
         mocker.patch.object(widget, 'createDefaultDataset')
         mocker.patch.object(widget, 'calculateQGridForModel')
-        # 
+        #
         # Now change the model
         widget.cbModel.setCurrentIndex(4)
         assert widget.cbModel.currentText() == 'dab'

@@ -23,7 +23,7 @@ class WindowTitleTest:
         widget.show()
         assert isinstance(widget, QtWidgets.QDialog)
         assert widget.windowTitle() == "Modify Window Title"
-        
+
     def testTitle(self, widget):
         '''Modify the title'''
         widget.show()

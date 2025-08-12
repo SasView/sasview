@@ -21,7 +21,7 @@ class GenReader(CalcThread):
                             yieldtime,
                             worktime)
         self.path = path
-        #Instantiate a loader 
+        #Instantiate a loader
         self.loader = loader
         self.starttime = 0
 

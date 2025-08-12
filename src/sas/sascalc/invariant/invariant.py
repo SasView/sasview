@@ -547,7 +547,7 @@ class InvariantCalculator:
 
            dq_star = math.sqrt[(x0**2*(dy0)*dx0)**2 +
                 (x1**2 *(dy1)*dx1)**2 + ..+ (xn**2 *(dyn)*dxn)**2 ]
-                
+
         where n >= len(data.x)-1
         dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
         dx0 = (x1 - x0)/2
@@ -959,7 +959,7 @@ class InvariantCalculator:
         This uncertainty is given by the following equation: ::
 
             sigV = dV/dq_star * sigq_star
-            
+
         so that: ::
 
             sigV = (k * sigq_star) /(q_star * math.sqrt(1 - 4 * k))
@@ -1044,12 +1044,12 @@ class InvariantCalculator:
         # if dporod_const is None:
         #     _dporod_const = 0.
         # else:
-        #     _dporod_const = dporod_const * 1e-8 
+        #     _dporod_const = dporod_const * 1e-8
         # if dcontrast is None:
         #    dcontrast = 0.
         # For this new computation we DO need to convert the units
         # _porod_const = porod_const * 1e-8
-        #ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const * 
+        #ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const *
         #                 dcontrast)**2 / (4 * math.pi**2 * constrast**6))
-   
+
         return s, ds

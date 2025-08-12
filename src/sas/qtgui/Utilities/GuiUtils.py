@@ -886,7 +886,7 @@ def formatNumber(value, high=False):
 
 def formatValue(value):
     """Formats specific data types for the GUI.
-    
+
     This function accepts three types of data: numeric data castable to float, a numpy.ndarray of type
     castable to float, or None. Numeric data is returned in human-readable format by formatNumber(), numpy
     arrays are averaged over all axes, and the mean returned in human-readable format. If `value=None` then

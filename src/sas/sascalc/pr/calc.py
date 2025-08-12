@@ -227,7 +227,7 @@ def int_pr_square(pars, d_max, nslice):
     r = np.linspace(0., d_max - dx, nslice)
     values = pr(pars, d_max, r)
     total = np.sum(values ** 2)
-    
+
     return total * dx
 
 @njit('f8(f8[:], f8, u8)')

@@ -248,7 +248,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             tab_object.newModelSignal.disconnect()
         except RuntimeError:
             # need to pass here since no known PySide6 method of checking if signal is connected
-            # seems to work here. Need to upgrade to more recent version of PySide6 but this 
+            # seems to work here. Need to upgrade to more recent version of PySide6 but this
             # currently causes other issues.
             pass
         try:

@@ -14,7 +14,7 @@ class AddText(QtWidgets.QDialog, Ui_AddText):
         icon = QIcon()
         icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
-        
+
         self._font = QtGui.QFont()
         self._color = "black"
         self.btnFont.clicked.connect(self.onFontChange)

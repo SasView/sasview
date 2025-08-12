@@ -139,9 +139,9 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         :param new_sector: slicer used for directional averaging in Q or Phi
         :param nbins: the number of point plotted when averaging
-        
+
         :TODO
-        
+
         Unlike other slicers, the two sector types are sufficiently different
         that this method contains three instances of If (check class name) do x.
         The point of post_data vs _post_data I think was to avoid this kind of

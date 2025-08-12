@@ -90,17 +90,17 @@ def background_fit(data, power=None, qmin=None, qmax=None):
     # Compute theory data f(x)
     fx[idx] = data.y[idx]
 
-    ## # Linearize the data 
+    ## # Linearize the data
     linearized_data = Data1D(np.log(data.x[idx]), np.log(fx[idx]), dy=sigma[idx]/fx[idx])
     ##Get values of scale and if required power
     if power is not None:
-        # Fit only scale 
+        # Fit only scale
         fit_func = lambda x,b:line_func(x, b, power)
         init_guess = (linearized_data.y[0])
 
     else:
-        # Fit both the power and scale 
-        
+        # Fit both the power and scale
+
         fit_func = line_func
         init_guess = (linearized_data.y[0], 4)
 
@@ -133,23 +133,23 @@ class sizeDistribution:
 
         ## MaxEntropy bin parameters
         self._diamMin = 10
-        self._diamMax = 100000 
+        self._diamMax = 100000
         self._nbins = 2
         self._logbin = True
         self._bins = None
 
-        #sasmodels 
+        #sasmodels
         self._model = "ellipsoid"
         self._aspectRatio = 1.0
 
         self._contrast = 1.0 ## sld - sld_solvent=0.0
-        self._background = 0.0 ## Not For Model ! 
-        self._scale = 1.0 ## Fix to 1.0 for models 
-        self._resolution = None ## For future implementation. For now, only use data with resolution information. 
+        self._background = 0.0 ## Not For Model !
+        self._scale = 1.0 ## Fix to 1.0 for models
+        self._resolution = None ## For future implementation. For now, only use data with resolution information.
 
         self.model_matrix = None
 
-        #advanced parameters for MaxEnt 
+        #advanced parameters for MaxEnt
         self._iterMax = 5000
         self._skyBackground = 1e-6
         self._weightType = 'dI'
@@ -157,7 +157,7 @@ class sizeDistribution:
         self._weightPercent = 1.0
         self._weights = self.data.dy
 
-        ## Return Values after the MaxEnt should 
+        ## Return Values after the MaxEnt should
         self.BinMagnitude_maxEnt = np.zeros_like(self.bins)
         self.BinMagnitude_Errs = None
         self.chiSq_maxEnt = np.inf
@@ -168,7 +168,7 @@ class sizeDistribution:
     @property
     def data(self):
         return self._data
-    
+
     @data.setter
     def data(self, value:Data1D):
         self._data = value
@@ -176,7 +176,7 @@ class sizeDistribution:
     @property
     def qMin(self):
         return self._qMin
-        
+
     @qMin.setter
     def qMin(self, value):
         self._qMin = value
@@ -185,7 +185,7 @@ class sizeDistribution:
     @property
     def qMax(self):
         return self._qMax
-        
+
     @qMax.setter
     def qMax(self, value):
         self._qMax = value
@@ -194,7 +194,7 @@ class sizeDistribution:
     @property
     def ndx_qmin(self):
         return self._ndx_qmin
-        
+
     @ndx_qmin.setter
     def ndx_qmin(self, value:int):
         """set the ndx_qmin value and update q_min variable"""
@@ -214,7 +214,7 @@ class sizeDistribution:
     @property
     def diamMax(self):
         return self._diamMax
-        
+
     @diamMax.setter
     def diamMax(self, value):
         self._diamMax = value
@@ -223,7 +223,7 @@ class sizeDistribution:
     @property
     def diamMin(self):
         return self._diamMin
-        
+
     @diamMin.setter
     def diamMin(self, value):
         self._diamMin = value
@@ -232,7 +232,7 @@ class sizeDistribution:
     @property
     def nbins(self):
         return self._nbins
-        
+
     @nbins.setter
     def nbins(self, value:int):
         self._nbins = value
@@ -241,32 +241,32 @@ class sizeDistribution:
     @property
     def logbin(self):
         return self._logbin
-        
+
     @logbin.setter
     def logbin(self, value:bool):
         self._login=value
         self.set_bins()
 
-    @property 
+    @property
     def bins(self):
         return self._bins
-    
+
     def set_bins(self):
 
         ## bins are in radius distances
         if self.logbin:
 
             self._bins = np.logspace(np.log10(self.diamMin),
-                                      np.log10(self.diamMax), 
+                                      np.log10(self.diamMax),
                                        self.nbins+1, True)/2
-            
-        else: 
+
+        else:
             self._bins = np.linspace(self.diamMin, self.diamMax, self.nbins+1,True)/2
 
         #self._volume_bins = ellipse_volume(self._bins*self.aspectRatio, )
         self._bin_edges = self._bins
         self._binDiff = np.diff(self._bins)
-        self._bins = self._bins[:-1] + self._binDiff/2  
+        self._bins = self._bins[:-1] + self._binDiff/2
 
     @property
     def model(self):
@@ -278,12 +278,12 @@ class sizeDistribution:
             logger.info("model is hard coded to ellipsoid for the time being. Please only use ellipsoid. Setting model to ellipsoid.")
             self._model = "ellipsoid"
         else:
-            self._model = value   
-   
+            self._model = value
+
     @property
     def aspectRatio(self):
         return self._aspectRatio
-        
+
     @aspectRatio.setter
     def aspectRatio(self, value:float):
         self._aspectRatio = value
@@ -299,7 +299,7 @@ class sizeDistribution:
     @property
     def resolution(self):
         return self._resolution
-    
+
     @resolution.setter
     def resolution(self, value):
         self._resolution = value
@@ -307,7 +307,7 @@ class sizeDistribution:
     @property
     def background(self):
         return self._background
-        
+
     @background.setter
     def background(self, value):
         self._background = value
@@ -315,15 +315,15 @@ class sizeDistribution:
     @property
     def scale(self):
         return self._scale
-    
+
     @scale.setter
     def scale(self, value):
         self._scale = value
-        
+
     @property
     def iterMax(self):
         return self._iterMax
-        
+
     @iterMax.setter
     def iterMax(self, value):
         self._iterMax = value
@@ -331,15 +331,15 @@ class sizeDistribution:
     @property
     def skyBackground(self):
         return self._skyBackground
-        
+
     @skyBackground.setter
     def skyBackground(self, value):
-        self._skyBackground = value   
+        self._skyBackground = value
 
     @property
     def weightFactor(self):
         return self._weightFactor
-        
+
     @weightFactor.setter
     def weightFactor(self, value):
         self._weightFactor = value
@@ -355,7 +355,7 @@ class sizeDistribution:
     @property
     def weightType(self):
         return self._weightType
-    
+
     @weightType.setter
     def weightType(self, value):
         self._weightType = value
@@ -364,14 +364,14 @@ class sizeDistribution:
     @property
     def weights(self):
         return self._weights
-    
+
     def update_weights(self, sigma=None):
 
         if sigma is None:
             wdata = self.data
         else:
             wdata = sigma
-        
+
         if self.weightType == 'None':
             self._weights = np.ones_like(wdata.y)
         elif (self.weightType == 'dI'):
@@ -383,31 +383,31 @@ class sizeDistribution:
             self._weights = np.abs(weight_fraction*wdata.y)
         else:
             logger.error("weightType doesn't match the possible strings for weight selection.\n Please check the value entered or use 'dI'.")
-        
+
         return None
 
 
     def generate_model_matrix(self, moddata:Data1D):
         """
-        generate a matrix of intensities from a specific sasmodels model; 
-        probably should be generalized to a class to use maxent on any parameter of interest w/in the model. 
-        For now, the pars are fixed. 
-        moddata :: Data1D object that has the data trimmed depending on background subtraction or powerlaw subtracted from the data. Also self.qMin and self.qMax. 
+        generate a matrix of intensities from a specific sasmodels model;
+        probably should be generalized to a class to use maxent on any parameter of interest w/in the model.
+        For now, the pars are fixed.
+        moddata :: Data1D object that has the data trimmed depending on background subtraction or powerlaw subtracted from the data. Also self.qMin and self.qMax.
 
         """
         model = load_model(self.model)
 
         pars = {'sld':self.contrast, 'sld_solvent':0.0, 'background':0.0, 'scale':1.0,
                 }
-        
+
         kernel = DirectModel(moddata, model)
-        
+
         intensities = []
         for bin in self.bins:
             pars['radius_equatorial'] = bin
             pars['radius_polar'] = bin*self.aspectRatio
             intensities.append(kernel(**pars))
-        
+
         self.model_matrix = np.vstack(intensities).T
 
         ## For data with no resolution. Should be defined in moddata
@@ -421,16 +421,16 @@ class sizeDistribution:
 
     def calc_volume_weighted_dist(self, binmag):
         """
-        This is not used right now. 
-        Calculate the volume weighted distribution. 
+        This is not used right now.
+        Calculate the volume weighted distribution.
         """
         if self.logbin:
 
             radbins = np.logspace(np.log10(self.diamMin),
-                                      np.log10(self.diamMax), 
+                                      np.log10(self.diamMax),
                                        self.nbins+1, True)/2
-            
-        else: 
+
+        else:
             radbins = np.linspace(self.diamMin, self.diamMax, self.nbins+1,True)/2
 
         self.volume_bins = ellipse_volume(self.aspectRatio*radbins, radbins)
@@ -440,14 +440,14 @@ class sizeDistribution:
 
         if self.BinMagnitude_Errs is not None:
             self.volume_fraction_errs = self.BinMagnitude_Errs*(self.volume_bins/(2*self.vbin_diff))
-        else: 
+        else:
             self.volume_fraction_errs = None
-        
+
     def prep_maxEnt(self, sub_intensities:Data1D, full_fit:bool=False, nreps:int = 10, rngseed=None):
         """
-        1. Subtract intensities from the raw data. 
+        1. Subtract intensities from the raw data.
         2. Trim the data to the correct q-range for maxEnt; Create new trimmed Data1D object to return after MaxEnt.
-        3. Generate Model Data based of the trimmed data 
+        3. Generate Model Data based of the trimmed data
         4. Create a list of intensities for maxEnt, if full_fit == True , call add_gausisan_noise nreps times; pass just subtracted intensities
         5. calculate initial bin weights, sigma, and return
         """
@@ -455,11 +455,11 @@ class sizeDistribution:
         # Then, if full fit is selected set up loop with a callable number of
         # iterations that calls add_gaussian_noise(x, dx) before
         # running run_maxEnt for iter number of times
-        
+
         ## subtract the background and powerlaw from the raw data
         ## sub_intensities Data1D object with y=A*x^M + B; should have dy as well
 
-        ## Loop through parameters for the 
+        ## Loop through parameters for the
         pars_keys = ['x','y','dx','dy'] #,'dxw','dxl']
         trim_data_pars = {}
 
@@ -467,7 +467,7 @@ class sizeDistribution:
 
         for pkey in pars_keys:
             check_data = (pkey in list(self._data.__dict__.keys()))
-            
+
             if check_data:
                 item = self._data.__dict__[pkey]
                 try:
@@ -482,7 +482,7 @@ class sizeDistribution:
                     print(e)
                 trim_data_pars[pkey] = data_vals
 
-        
+
         trim_data = Data1D(**trim_data_pars)
         trim_data.__dict__['qmin'] = self.qMin
         trim_data.__dict__['qmax'] = self.qMax
@@ -503,7 +503,7 @@ class sizeDistribution:
         return trim_data, intensities, init_binsBack, sigma
 
     def run_maxEnt(self, maxentdata:Data1D, intensities:list, BinsBack:np.array, sigma:np.array):
-        
+
         ChiSq = []
         BinMag = []
         IMaxEnt = []
@@ -518,7 +518,7 @@ class sizeDistribution:
                                                                self.model_matrix,
                                                                  BinsBack,
                                                                    self.iterMax, report=True)
-            
+
                 ChiSq.append(chisq)
                 BinMag.append(bin_magnitude)
                 IMaxEnt.append(icalc)
@@ -537,11 +537,11 @@ class sizeDistribution:
             self.chiSq_maxEnt = np.mean(ChiSq)
             self.BinMagnitude_maxEnt = np.mean(BinMag,axis=0)/(2.*self._binDiff)
 
-            self.BinMagnitude_Errs = None 
+            self.BinMagnitude_Errs = None
             maxentdata.y = np.mean(IMaxEnt, axis=0)
             maxentdata.dy = None
             self.Iq_maxEnt  = maxentdata
-            
+
         elif len(intensities) > 1:
             self.chiSq_maxEnt = np.mean(ChiSq)
             self.BinMagnitude_maxEnt = np.mean(BinMag, axis=0)/(2.*self._binDiff)
@@ -550,20 +550,20 @@ class sizeDistribution:
             maxentdata.y = np.mean(IMaxEnt, axis=0)
             maxentdata.dy = np.std(IMaxEnt, axis=0)
             self.Iq_maxEnt  = maxentdata
-            
+
 
         else:
             logger.error('The length of the intensity array is 0. Did you run prep_maxEnt before run_maxEnt? Check that intensities is an array of at least length 1.')
 
         self.calculate_statistics(BinMag)
         #self.calc_volume_weighted_dist(np.mean(BinMag, axis=0))
-        
+
 
         return convergence
 
-    def calculate_statistics(self, bin_mag:list, 
+    def calculate_statistics(self, bin_mag:list,
                              ):
-        
+
         maxent_cdf_array = integrate.cumulative_trapezoid(bin_mag/(2*self._binDiff), 2*self.bins, axis=1)
         self.BinMag_numberDist = self.BinMagnitude_maxEnt/ellipse_volume(self.aspectRatio*self.bins, self.bins)
 

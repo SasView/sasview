@@ -132,11 +132,11 @@ class BindArtist:
         """Register a callback for an artist to a particular trigger event.
 
         usage:
-        
+
             self.connect(eventname,artist,action)
 
         where:
-        
+
             eventname is a string
             artist is the particular graph object to respond to the event
             action(event,**kw) is called when the event is triggered
@@ -148,7 +148,7 @@ class BindArtist:
         returned by Line2D and by collections.
 
         The following events are supported:
-        
+
             enter: mouse cursor moves into the artist or to a new index
             leave: mouse cursor leaves the artist
             click: mouse button pressed on the artist
@@ -158,7 +158,7 @@ class BindArtist:
             keyrelease: key released for the artist
 
         The event received by action has a number of attributes:
-        
+
             name is the event name which was triggered
             artist is the object which triggered the event
             x,y are the screen coordinates of the mouse
@@ -172,7 +172,7 @@ class BindArtist:
 
         When receiving an event, first check the modifier state to be
         sure it applies.  E.g., the callback for 'press' might be:
-        
+
             if event.button == 1 and event.shift: process Shift-click
 
         TODO: Only receive events with the correct modifiers (e.g., S-click,
