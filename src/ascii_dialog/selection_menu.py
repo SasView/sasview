@@ -5,6 +5,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu, QWidget
 
+
 class SelectionMenu(QMenu):
     select_all_event = Signal()
     deselect_all_event = Signal()

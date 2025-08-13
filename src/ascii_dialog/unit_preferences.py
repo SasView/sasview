@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
+import random
+
 from PySide6.QtGui import Qt
 from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QWidget
-from sasdata.quantities.units import NamedUnit
+
 from sasdata.dataset_types import unit_kinds
+from sasdata.quantities.units import NamedUnit
+
 from ascii_dialog.unit_preference_line import UnitPreferenceLine
-import random
+
 
 class UnitPreferences(QWidget):
     def __init__(self):

@@ -1,7 +1,8 @@
-from PySide6.QtWidgets import QWidget, QPushButton, QHBoxLayout
-from PySide6.QtCore import Signal, Qt, Slot
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
+
 
 class MetadataComponentSelector(QWidget):
     # Creating a separate signal for this because the custom button may be destroyed/recreated whenever the options are
