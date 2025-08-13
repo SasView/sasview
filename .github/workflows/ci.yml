@@ -18,6 +18,8 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
+  # Python version to be used in the CI
+  CI_PYTHON_VERSION: 3.12
 
 jobs:
 
@@ -53,7 +55,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: ${{ env.CI_PYTHON_VERSION }}
 
       - uses: actions/checkout@v4
       - id: set-matrix
@@ -78,7 +80,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: ${{ env.CI_PYTHON_VERSION }}
 
       ### Compilation of build-dependencies
 
@@ -378,7 +380,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, macos-latest, ubuntu-22.04 ]
-        python-version: [ 3.11 ]
+        python-version: [ 3.12 ]
       fail-fast: false
 
     name: Test installer
