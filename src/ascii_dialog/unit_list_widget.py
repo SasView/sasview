@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from PySide6.QtWidgets import QListWidget, QListWidgetItem
+
 from sasdata.quantities.units import NamedUnit
 
 
