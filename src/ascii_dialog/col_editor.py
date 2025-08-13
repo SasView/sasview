@@ -1,10 +1,13 @@
-from PySide6.QtGui import QRegularExpressionValidator
-from PySide6.QtWidgets import QComboBox, QHBoxLayout, QWidget
-from PySide6.QtCore import Slot, Signal
-from sasdata.quantities.units import NamedUnit
-from sasdata.ascii_reader_metadata import bidirectional_pairings
-from ascii_dialog.column_unit import ColumnUnit
 from typing import cast
+
+from PySide6.QtCore import Signal, Slot
+from PySide6.QtWidgets import QHBoxLayout, QWidget
+
+from sasdata.ascii_reader_metadata import bidirectional_pairings
+from sasdata.quantities.units import NamedUnit
+
+from ascii_dialog.column_unit import ColumnUnit
+
 
 class ColEditor(QWidget):
     """An editor widget which allows the user to specify the columns of the data
@@ -28,7 +31,7 @@ class ColEditor(QWidget):
     def onColumnUpdate(self):
         column_changed = cast(ColumnUnit, self.sender())
         pairing = bidirectional_pairings.get(column_changed.currentColumn)
-        if not pairing is None:
+        if pairing is not None:
             for col_unit in self.option_widgets:
                 # Second condition is important because otherwise, this event will keep being called, and the GUI will
                 # go into an infinite loop.

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QComboBox, QCompleter, QHBoxLayout, QSizePolicy, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtWidgets import QComboBox, QHBoxLayout, QSizePolicy, QWidget
+
 from sasdata.dataset_types import unit_kinds
-from sasdata.quantities.units import symbol_lookup, NamedUnit
+from sasdata.default_units import defaults_or_fallback
+from sasdata.quantities.units import NamedUnit
 
 from ascii_dialog.unit_selector import UnitSelector
-from sasdata.default_units import defaults_or_fallback
+
 
 def configure_size_policy(combo_box: QComboBox) -> None:
     policy = combo_box.sizePolicy()
