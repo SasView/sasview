@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QLabel
+
 from ascii_dialog.constants import TABLE_MAX_ROWS
 
 
@@ -37,7 +38,7 @@ class WarningLabel(QLabel):
             self.setText(f'The following columns are missing: {missing_columns}')
             self.setFontRed()
         elif len(duplicate_columns) > 0:
-            self.setText(f'There are columns which are repeated.')
+            self.setText('There are columns which are repeated.')
             self.setFontRed()
         elif unparsable > 0:
             # FIXME: This error message could perhaps be a bit clearer.
