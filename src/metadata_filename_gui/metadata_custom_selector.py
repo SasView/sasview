@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout
+from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QPushButton, QWidget
 
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
+
 
 class MetadataCustomSelector(QWidget):
     def __init__(self, category:str, metadatum: str, internal_metadata: AsciiReaderMetadata, filename: str):

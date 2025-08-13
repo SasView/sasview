@@ -1,8 +1,21 @@
-from PySide6.QtWidgets import QBoxLayout, QButtonGroup, QRadioButton, QWidget, QApplication, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QDialog, QPushButton
-from metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
-from sasdata.ascii_reader_metadata import AsciiReaderMetadata, CASING_REGEX
 from sys import argv
-import re
+
+from PySide6.QtWidgets import (
+    QApplication,
+    QButtonGroup,
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QVBoxLayout,
+)
+
+from sasdata.ascii_reader_metadata import AsciiReaderMetadata
+
+from metadata_filename_gui.metadata_tree_widget import MetadataTreeWidget
+
 
 def build_font(text: str, classname: str = '') -> str:
     match classname:
