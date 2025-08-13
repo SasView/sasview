@@ -1,20 +1,38 @@
-from PySide6.QtGui import QColor, QContextMenuEvent, QCursor, QPalette, Qt
-from PySide6.QtWidgets import QAbstractScrollArea, QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QLabel, \
-    QMessageBox, QPushButton, QSpacerItem, QSpinBox, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QApplication, QDialog
+from os import path
+
 from PySide6.QtCore import QModelIndex, QPoint, Slot
+from PySide6.QtGui import QColor, QCursor, Qt
+from PySide6.QtWidgets import (
+    QAbstractScrollArea,
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSpacerItem,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
+
+from sasdata.ascii_reader_metadata import AsciiReaderMetadata
+from sasdata.dataset_types import DatasetType, dataset_types, one_dim, sesans, two_dim
+from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
+from sasdata.temp_ascii_reader import AsciiReaderParams, load_data, split_line
+
+from ascii_dialog.col_editor import ColEditor
+from ascii_dialog.constants import TABLE_MAX_ROWS
+from ascii_dialog.row_status_widget import RowStatusWidget
 from ascii_dialog.selection_menu import SelectionMenu
 from ascii_dialog.warning_label import WarningLabel
-from ascii_dialog.col_editor import ColEditor
-from ascii_dialog.row_status_widget import RowStatusWidget
-from sasdata.guess import guess_column_count, guess_columns, guess_starting_position
-from os import path
-from sasdata.dataset_types import DatasetType, dataset_types, one_dim, two_dim, sesans
-from sasdata.temp_ascii_reader import load_data, AsciiReaderParams, split_line
 from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialog
-from metadata_filename_gui.metadata_tree_data import initial_metadata_dict
-from sasdata.ascii_reader_metadata import AsciiReaderMetadata
-from ascii_dialog.constants import TABLE_MAX_ROWS, NOFILE_TEXT
-import re
 
 dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
 

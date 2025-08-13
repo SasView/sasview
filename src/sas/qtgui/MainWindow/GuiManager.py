@@ -9,13 +9,9 @@ from packaging.version import Version
 from PySide6.QtCore import QLocale, Qt
 from PySide6.QtGui import QStandardItem
 from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
+from twisted.internet import reactor
 
 from sasdata.temp_ascii_reader import load_data
-
-import sas.system.version
-from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
-
-from twisted.internet import reactor
 
 import sas
 

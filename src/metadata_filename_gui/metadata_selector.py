@@ -1,7 +1,10 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout
+from PySide6.QtWidgets import QHBoxLayout, QWidget
+
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
+
 from metadata_filename_gui.metadata_component_selector import MetadataComponentSelector
 from metadata_filename_gui.metadata_custom_selector import MetadataCustomSelector
+
 
 class MetadataSelector(QWidget):
     def __init__(self, category: str, metadatum: str, metadata: AsciiReaderMetadata, filename: str):
