@@ -214,7 +214,7 @@ class Config(ConfigBase, metaclass=ConfigMeta):
         # Stack plots when using slicers
         # If true, plots generated when using slicers will be on the same canvas
         self.STACK_PLOTS = True
-        
+
         # Developer menu
         self.DEV_MENU = False
 
