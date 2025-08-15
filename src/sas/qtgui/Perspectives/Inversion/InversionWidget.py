@@ -109,6 +109,9 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.batchResultsWindow: BatchInversionOutputPanel | None = None
         self.batch_dict: dict[str, Any] | None = None
 
+        self.input_boxes = [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput,
+                             self.minQInput, self.maxQInput, self.slitHeightInput, self.slitHeightInput]
+
         self.updateGuiValues()
         self.events()
 
@@ -139,8 +142,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.removeButton.clicked.connect(self.handleRemove)
         self.showResultsButton.clicked.connect(self.handleShowResults)
 
-        for input_box in [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput, self.minQInput,
-                          self.maxQInput, self.slitHeightInput, self.slitHeightInput]:
+        for input_box in self.input_boxes:
             input_box.editingFinished.connect(self.startEstimateParameters)
 
     def handleRemove(self):
@@ -292,24 +294,13 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
 
     def clearGuiValues(self):
-        self.noOfTermsInput.setText("")
-        self.regularizationConstantInput.setText("")
-        self.maxDistanceInput.setText("")
 
-        self.minQInput.setText("")
-        self.maxQInput.setText("")
-        self.slitHeightInput.setText("")
-        self.slitWidthInput.setText("")
+        value_text_boxes = [*self.input_boxes, self.rgValue, self.iQ0Value, self.backgroundValue, self.backgroundInput,
+                            self.computationTimeValue, self.chiDofValue, self.oscillationValue, self.posFractionValue,
+                            self.sigmaPosFractionValue]
 
-        self.rgValue.setText("")
-        self.iQ0Value.setText("")
-        self.backgroundValue.setText("")
-        self.backgroundInput.setText("")
-        self.computationTimeValue.setText("")
-        self.chiDofValue.setText("")
-        self.oscillationValue.setText("")
-        self.posFractionValue.setText("")
-        self.sigmaPosFractionValue.setText("")
+        for text_box in value_text_boxes:
+            text_box.setText("")
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
