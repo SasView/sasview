@@ -156,6 +156,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         # If there's no results left, we need an empty one.
         if len(self.results) == 0:
             self.results.append(self.initResult())
+            self.clearGuiValues()
         self.enableButtons()
         self.updateGuiValues()
 
@@ -289,6 +290,26 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.oscillationValue.setText(format_float(out.oscillations))
             self.posFractionValue.setText(format_float(out.pos_frac))
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
+
+    def clearGuiValues(self):
+        self.noOfTermsInput.setText("")
+        self.regularizationConstantInput.setText("")
+        self.maxDistanceInput.setText("")
+
+        self.minQInput.setText("")
+        self.maxQInput.setText("")
+        self.slitHeightInput.setText("")
+        self.slitWidthInput.setText("")
+
+        self.rgValue.setText("")
+        self.iQ0Value.setText("")
+        self.backgroundValue.setText("")
+        self.backgroundInput.setText("")
+        self.computationTimeValue.setText("")
+        self.chiDofValue.setText("")
+        self.oscillationValue.setText("")
+        self.posFractionValue.setText("")
+        self.sigmaPosFractionValue.setText("")
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
