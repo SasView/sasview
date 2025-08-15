@@ -294,7 +294,7 @@ which by the relationship between complex trigonometric and hyperbolic functions
 The leading :math:`2` will cancel the leading :math:`1/2` and the value of :math:`I(q)` can be seen to be
 
 .. math::
-    I(q) = \int_{r=0}^{\infty} \gamma(\vec{r}) \frac{\sin qr}{qr} d \vec{r}
+    I(q) = \int_{r\in\mathbb{R}^3} \gamma(\vec{r}) \frac{\sin qr}{qr} d \vec{r}
 
 Note that this object is not dependent on the angular components of :math:`\vec{r}`, so the integral
 over :math:`\mathbb{R}^3` can be written as
