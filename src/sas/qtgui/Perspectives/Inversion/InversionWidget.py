@@ -109,6 +109,9 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.batchResultsWindow: BatchInversionOutputPanel | None = None
         self.batch_dict: dict[str, Any] | None = None
 
+        self.input_boxes = [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput,
+                             self.minQInput, self.maxQInput, self.slitHeightInput, self.slitHeightInput]
+
         self.updateGuiValues()
         self.events()
 
@@ -139,8 +142,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         self.removeButton.clicked.connect(self.handleRemove)
         self.showResultsButton.clicked.connect(self.handleShowResults)
 
-        for input_box in [self.noOfTermsInput, self.regularizationConstantInput, self.maxDistanceInput, self.minQInput,
-                          self.maxQInput, self.slitHeightInput, self.slitHeightInput]:
+        for input_box in self.input_boxes:
             input_box.editingFinished.connect(self.startEstimateParameters)
 
     def handleRemove(self):
@@ -156,6 +158,7 @@ class InversionWidget(QWidget, Ui_PrInversion):
         # If there's no results left, we need an empty one.
         if len(self.results) == 0:
             self.results.append(self.initResult())
+            self.clearGuiValues()
         self.enableButtons()
         self.updateGuiValues()
 
@@ -289,6 +292,15 @@ class InversionWidget(QWidget, Ui_PrInversion):
             self.oscillationValue.setText(format_float(out.oscillations))
             self.posFractionValue.setText(format_float(out.pos_frac))
             self.sigmaPosFractionValue.setText(format_float(out.pos_err))
+
+    def clearGuiValues(self):
+
+        value_text_boxes = [*self.input_boxes, self.rgValue, self.iQ0Value, self.backgroundValue, self.backgroundInput,
+                            self.computationTimeValue, self.chiDofValue, self.oscillationValue, self.posFractionValue,
+                            self.sigmaPosFractionValue]
+
+        for text_box in value_text_boxes:
+            text_box.setText("")
 
     def setupValidators(self):
         """Apply validators to editable line edits"""
