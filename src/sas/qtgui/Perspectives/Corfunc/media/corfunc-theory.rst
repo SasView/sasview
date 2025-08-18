@@ -262,24 +262,24 @@ as in such a coordinate system, the dot product :math:`\vec{r}\cdot\vec{q}` beco
 For our averaging there is a total of :math:`4\pi` steradians in a sphere, giving a leading factor of :math:`1/4\pi`.
 
 .. math::
-    I(\vec{q}) = \frac{1}{4\pi}\int_{\phi=0}{\phi=2\pi}\int_{\theta=0}^{\theta=\pi}\int_{\vec{r}\in\mathbb{R}} \gamma(\vec{r}) e^{i qr \cos\theta} d\vec{r}^3 \sin(\theta) d\theta d\phi
+    I(\vec{q}) = \frac{1}{4\pi}\int_{\phi=0}^{\phi=2\pi}\int_{\theta=0}^{\theta=\pi}\int_{\vec{r}\in\mathbb{R}} \gamma(\vec{r}) e^{i qr \cos\theta} d r \sin(\theta) d\theta d\phi
 
 The integral is constant with with respect to :math:`\phi`, so drops out as a factor of :math:`2\pi`.
 
 .. math::
-    = \frac{1}{2}\int_{\theta=0}^{\theta=\pi}\int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) e^{i \vec{r} \cdot \vec{q}} d\vec{r}^3 \sin(\theta) d\theta
+    = \frac{1}{2}\int_{\theta=0}^{\theta=\pi}\int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) e^{i qr \cos\theta} d r \sin(\theta) d\theta
 
 and we can adjust the order of integration, noting that because of our choice of coordinate system, :math:`\gamma(\vec{r})` is
 independent of :math:`\theta`.
 
 .. math::
-    = \frac{1}{2}\int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) \int_{\theta=0}^{\theta=\pi} e^{i \vec{r} \cdot \vec{q}} \sin(\theta) d\theta d\vec{r}^3
+    = \frac{1}{2}\int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) \int_{\theta=0}^{\theta=\pi} e^{i qr \cos\theta} \sin(\theta) d\theta d r
 
 Now, we can consider the inner integral specifically, firstly by doing a substitution of :math:`u = -\cos\theta`. This
-means that :math:`du = \sin\theta d\theta`, the interval :math:`\theta\in[0,\pi]` becomes :math:`u\in[1, -1]`.
+means that :math:`du = \sin\theta d\theta`, the interval :math:`\theta\in[0,\pi]` becomes :math:`u\in[-1, 1]`.
 
 .. math::
-    \int_{\theta=0}^{\theta=\pi} e^{i \vec{r} \cdot \vec{q}} \sin(\theta) d\theta = \int_{u=-1}^{u=1} e^{i q r u} du
+    \int_{\theta=0}^{\theta=\pi} e^{i qr \cos\theta} \sin(\theta) d\theta = \int_{u=-1}^{u=1} e^{i q r u} du
 
 which is just an exponential and easily integrated
 
@@ -294,7 +294,7 @@ which by the relationship between complex trigonometric and hyperbolic functions
 The leading :math:`2` will cancel the leading :math:`1/2` and the value of :math:`I(q)` can be seen to be
 
 .. math::
-    I(q) = \int_{\vec{r}\in\mathbb{R}^3} \gamma(\vec{r}) \frac{\sin qr}{qr} d\vec{r}^3
+    I(q) = \int_{r\in\mathbb{R}^3} \gamma(\vec{r}) \frac{\sin qr}{qr} d \vec{r}
 
 Note that this object is not dependent on the angular components of :math:`\vec{r}`, so the integral
 over :math:`\mathbb{R}^3` can be written as
