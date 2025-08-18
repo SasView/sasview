@@ -6,7 +6,6 @@ import os
 import sys
 from csv import DictReader
 from pathlib import Path
-from typing import Any
 
 import requests
 
