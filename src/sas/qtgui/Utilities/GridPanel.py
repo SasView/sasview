@@ -26,8 +26,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         self.setupUi(self)
 
         self.parent = parent
-        if hasattr(self.parent, "commuicator"):
-            self.communicate = parent.communicator
+        self.communicate = GuiUtils.communicate
 
         self.addToolbarActions()
 
@@ -192,7 +191,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         rows = [s.row() for s in self.currentTable().selectionModel().selectedRows()]
         if not rows:
             msg = "Nothing to plot!"
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicate.statusBarUpdateSignal.emit(msg)
             return
         data = self.dataFromTable(self.currentTable())
         # data['Data'] -> ['filename1', 'filename2', ...]
@@ -572,9 +571,36 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         self.tabWidget.addTab(tableItem, tab_name)
         self.tabWidget.setCurrentIndex(self.tab_number-1)
 
+    def onPlot(self):
+        """
+        Plot selected fits by sending signal to the parent
+        """
+        rows = [s.row() for s in self.currentTable().selectionModel().selectedRows()]
+        if not rows:
+            msg = "Nothing to plot!"
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            return
+        data = self.dataFromTable(self.currentTable())
+        # data['Data'] -> ['filename1', 'filename2', ...]
+        # look for the 'Data' column and extract the filename
+        for row in rows:
+            try:
+                name = data['Filename'][row]
+                self.prPlot = self.batch_results[name].get(DICT_KEYS[1])
+                self.dataPlot = self.batch_results[name].get(DICT_KEYS[2])
+                # emit a signal so the plots are being shown
+                self.parent.showPlots(self.batch_results[name]['Result'])
+                # This is an important processEvent.
+                # This allows charts to be properly updated in order
+                # of plots being applied.
+                QtWidgets.QApplication.processEvents()
+            except (IndexError, AttributeError):
+                # data messed up.
+                logging.error('Issue with data')
+                return
+
     def onHelp(self):
         self.parent.onHelp()
-
 
     def closeEvent(self, event):
         """Tell the parent window the window closed"""
