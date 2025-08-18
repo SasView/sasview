@@ -139,9 +139,11 @@ def sort_records(records: list[dict]):
     # Move the release manager so they are at the front of the list. Assumes
     # there's only one release manager, and that there always is a release
     # manager. This assumption may not be correct in the future.
-    release_manager = next(filter(lambda r: r['release_manager'], records))
-    records.remove(release_manager)
-    records.insert(0, release_manager)
+    filtered_release_managers = [r for r in records if r['release_manager']]
+    if len(filtered_release_managers) > 0:
+        release_manager = filtered_release_managers[0]
+        records.remove(release_manager)
+        records.insert(0, release_manager)
 
 def generate_sasview_data() -> dict:
     """Read in a known file and parse it for the information required to populate the list of participants used
