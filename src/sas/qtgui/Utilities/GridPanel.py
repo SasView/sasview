@@ -158,7 +158,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         # pull out page name from results
         page_name = None
-        results = results.get(DICT_KEYS[0])
         if len(results)>=2:
             if isinstance(results[-1], str):
                 page_name = results[-1]
@@ -200,11 +199,9 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         # look for the 'Data' column and extract the filename
         for row in rows:
             try:
-                name = data['Filename'][row]
-                self.prPlot = self.batch_results[name].get(DICT_KEYS[1])
-                self.dataPlot = self.batch_results[name].get(DICT_KEYS[2])
+                name = data['Data'][row]
                 # emit a signal so the plots are being shown
-                self.parent.showPlots(self.batch_results[name]['Result'])
+                self.communicate.plotFromNameSignal.emit(name)
                 # This is an important processEvent.
                 # This allows charts to be properly updated in order
                 # of plots being applied.
@@ -222,14 +219,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         assert(isinstance(table, QtWidgets.QTableWidget))
         params = {}
         for column in range(table.columnCount()):
-            value = []
+            value = [table.item(row, column).data(0) for row in range(table.rowCount())]
             key = table.horizontalHeaderItem(column).data(0)
-            for row in range(table.rowCount()):
-                item = table.item(row, column)
-                if item is not None:
-                    value.append(item.data(0))
-                else:
-                    value.append(" ")
             params[key] = value
         return params
 
@@ -326,7 +317,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
         if data is None or widget is None:
             return
-        data = data.get(DICT_KEYS[0])
         # Figure out the headers
         model = data[0][0]
 
