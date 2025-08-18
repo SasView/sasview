@@ -6,6 +6,7 @@ import os
 import sys
 from csv import DictReader
 from pathlib import Path
+from typing import Any
 
 import requests
 
@@ -132,6 +133,16 @@ class SplitArgs(argparse.Action):
         setattr(namespace, self.dest, values.split(','))
 
 
+def sort_records(records: list[dict]):
+    records.sort(key=lambda r: r['name'])
+
+    # Move the release manager so they are at the front of the list. Assumes
+    # there's only one release manager, and that there always is a release
+    # manager. This assumption may not be correct in the future.
+    release_manager = next(filter(lambda r: r['release_manager'], records))
+    records.remove(release_manager)
+    records.insert(0, release_manager)
+
 def generate_sasview_data() -> dict:
     """Read in a known file and parse it for the information required to populate the list of participants used
     in the zenodo record generation. The defined contributor types and difference between creators are defined in
@@ -159,6 +170,8 @@ def generate_sasview_data() -> dict:
                 else:
                     record['type'] = 'Other'
                     contributors.append(record)
+        sort_records(creators)
+        sort_records(contributors)
         return {"creators": creators, "contributors": contributors}
     else:
         return {}
