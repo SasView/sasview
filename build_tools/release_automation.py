@@ -147,6 +147,10 @@ def generate_sasview_data() -> dict:
                 record = {"name": row["Name"], "affiliation": row["Affiliation"]}
                 if 'ORCID' in row:
                     record['orcid'] = row['ORCID']
+                if 'ReleaseManager' in row:
+                    record['release_manager'] = row['ReleaseManager'] == 'x'
+                else:
+                    record['release_manager'] = False
                 if row['Creator']:
                     creators.append(record)
                 elif row['Producer']:
