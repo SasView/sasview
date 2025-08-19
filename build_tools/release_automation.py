@@ -135,9 +135,7 @@ class SplitArgs(argparse.Action):
 def sort_records(records: list[dict]):
     records.sort(key=lambda r: r['name'])
 
-    # Move the release manager so they are at the front of the list. Assumes
-    # there's only one release manager, and that there always is a release
-    # manager. This assumption may not be correct in the future.
+    # Move the release manager(s) so they are at the front of the list.
     filtered_release_managers = [r for r in records if r['release_manager']]
     for record in reversed(filtered_release_managers):
         # Go backwards through the list to ensure the release managers remain in alphabetical order when appending to the beginning of the contributors list
