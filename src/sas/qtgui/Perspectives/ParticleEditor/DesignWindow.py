@@ -397,6 +397,13 @@ class DesignWindow(QtWidgets.QDialog, Ui_DesignWindow):
 
         return QSample(min_q, max_q, n_samples, is_log)
 
+particle_editor_window = None
+def show_particle_editor():
+    global particle_editor_window
+
+    particle_editor_window = DesignWindow()
+    particle_editor_window.show()
+
 
 def main():
     """ Demo/testing window"""
