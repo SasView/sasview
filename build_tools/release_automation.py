@@ -139,7 +139,7 @@ def sort_records(records: list[dict]):
     # there's only one release manager, and that there always is a release
     # manager. This assumption may not be correct in the future.
     filtered_release_managers = [r for r in records if r['release_manager']]
-    for record in reverse(filtered_release_managers):
+    for record in reversed(filtered_release_managers):
         # Go backwards through the list to ensure the release managers remain in alphabetical order when appending to the beginning of the contributors list
         records.remove(record)
         records.insert(0, record)
