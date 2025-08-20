@@ -37,9 +37,9 @@ zenodo_url = "https://zenodo.org"
 # Should import release notes from git repo, for now will need to cut and paste
 sasview_data = {
 'metadata': {
-    'title': 'SasView version 6.1.0',
-    'description': '6.1.0 release',
-    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.0-alpha-1',
+    'title': 'SasView version 6.1.1',
+    'description': '6.1.1 release',
+    'related_identifiers': [{'identifier': 'https://github.com/SasView/sasview/releases/tag/v6.1.1',
                         'relation': 'isAlternateIdentifier', 'scheme': 'url'}],
     'contributors': [
         {'name': 'Anuchitanukul, Atijit', 'affiliation': 'STFC - Rutherford Appleton Laboratory', 'type':'Researcher'},
@@ -86,7 +86,7 @@ sasview_data = {
         {'name': 'Heenan, Richard','affiliation': 'STFC - Rutherford Appleton Laboratory','orcid': '0000-0002-7729-1454'},
         {'name': 'Jackson, Andrew','affiliation': 'European Spallation Source ERIC', 'orcid': '0000-0002-6296-0336'},
         {'name': 'King, Stephen','affiliation': 'STFC - Rutherford Appleton Laboratory', 'orcid': '0000-0003-3386-9151'},
-        {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology'},
+        {'name': 'Kienzle, Paul','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-7893-0318'},
         {'name': 'Krzywon, Jeff','affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-2380-4090'},
         {'name': 'Maranville, Brian', 'affiliation': 'National Institute of Standards and Technology', 'orcid': '0000-0002-6105-8789'},
         {'name': 'Martinez, Nicolas','affiliation': 'Institut Laue-Langevin'},
@@ -132,6 +132,16 @@ class SplitArgs(argparse.Action):
         setattr(namespace, self.dest, values.split(','))
 
 
+def sort_records(records: list[dict]):
+    records.sort(key=lambda r: r['name'])
+
+    # Move the release manager(s) so they are at the front of the list.
+    filtered_release_managers = [r for r in records if r['release_manager']]
+    for record in reversed(filtered_release_managers):
+        # Go backwards through the list to ensure the release managers remain in alphabetical order when appending to the beginning of the contributors list
+        records.remove(record)
+        records.insert(0, record)
+
 def generate_sasview_data() -> dict:
     """Read in a known file and parse it for the information required to populate the list of participants used
     in the zenodo record generation. The defined contributor types and difference between creators are defined in
@@ -147,6 +157,10 @@ def generate_sasview_data() -> dict:
                 record = {"name": row["Name"], "affiliation": row["Affiliation"]}
                 if 'ORCID' in row:
                     record['orcid'] = row['ORCID']
+                if 'ReleaseManager' in row:
+                    record['release_manager'] = row['ReleaseManager'] == 'x'
+                else:
+                    record['release_manager'] = False
                 if row['Creator']:
                     creators.append(record)
                 elif row['Producer']:
@@ -155,6 +169,8 @@ def generate_sasview_data() -> dict:
                 else:
                     record['type'] = 'Other'
                     contributors.append(record)
+        sort_records(creators)
+        sort_records(contributors)
         return {"creators": creators, "contributors": contributors}
     else:
         return {}
