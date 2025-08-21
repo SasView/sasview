@@ -7,7 +7,6 @@ from PySide6.QtCore import QEvent
 from PySide6.QtWidgets import QLineEdit, QTextEdit
 
 import sas.qtgui.Utilities.ObjectLibrary as ol
-from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
@@ -18,7 +17,7 @@ class QRangeSlider(BaseInteractor):
     """  Draw a pair of draggable vertical lines. Each line can be linked to a GUI input.
     The GUI input should update the lines and vice-versa.
     """
-    def __init__(self, base: Plotter, axes: Plotter.ax, color: str = 'black', zorder: int = 5, data: Data1D = None) -> None:
+    def __init__(self, base: "Plotter", axes: "Plotter.ax", color: str = 'black', zorder: int = 5, data: Data1D = None) -> None:
         """ Initialize the slideable lines and associated markers """
         # Assert the data object is a plottable
         assert isinstance(data, Data1D)
@@ -109,7 +108,7 @@ class LineInteractor(BaseInteractor):
     """
     Draw a single vertical line that can be dragged on a plot
     """
-    def __init__(self, base: Plotter, axes: Plotter.ax, color: str = 'black', zorder: int = 5, x: float = 0.5, y: float = 0.5,
+    def __init__(self, base: "Plotter", axes: "Plotter.ax", color: str = 'black', zorder: int = 5, x: float = 0.5, y: float = 0.5,
                  input: list[str] = None, setter: list[str] = None, getter: list[str] = None, perspective: str = None, tab: str = None) -> None:
         """ Initialize the line interactor object"""
         BaseInteractor.__init__(self, base, axes, color=color)
