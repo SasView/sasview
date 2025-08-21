@@ -1,4 +1,5 @@
 import copy
+from collections.abc import Sequence
 
 import numpy
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -998,8 +999,7 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
             break
     return has_poly
 
-def checkConstraints(symtab, constraints):
-    # type: (Dict[str, float], Sequence[Tuple[str, str]]) -> str
+def checkConstraints(symtab: dict[str, float], constraints: Sequence[tuple[str, str]]) -> str:
     """
     Compile and evaluate the constraints in the context of the initial values
     and return the list of errors.
