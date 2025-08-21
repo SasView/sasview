@@ -1,5 +1,7 @@
 """Double slider interactor for setting the Q range for a fit or function"""
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 from PySide6.QtCore import QEvent
 from PySide6.QtWidgets import QLineEdit, QTextEdit
@@ -9,6 +11,8 @@ from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
+if TYPE_CHECKING:
+    from sas.qtgui.Plotting.Plotter import Plotter
 
 class QRangeSlider(BaseInteractor):
     """  Draw a pair of draggable vertical lines. Each line can be linked to a GUI input.
