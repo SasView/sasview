@@ -1,5 +1,6 @@
 """Double slider interactor for setting the Q range for a fit or function"""
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -163,22 +164,22 @@ class LineInteractor(BaseInteractor):
             self._input.editingFinished.connect(self.inputChanged)
 
     @property
-    def setter(self) -> callable | None:
+    def setter(self) -> Callable | None:
         """ Get the x-value setter method associated with this slider """
         return self._setter
 
     @setter.setter
-    def setter(self, setter: callable | None) -> None:
+    def setter(self, setter: Callable | None) -> None:
         """ Set the x-value setter method associated with this slider """
         self._setter = setter if callable(setter) else None
 
     @property
-    def getter(self) -> callable | None:
+    def getter(self) -> Callable | None:
         """ Get the x-value getter method associated with this slider """
         return self._getter
 
     @getter.setter
-    def getter(self, getter: callable | None) -> None:
+    def getter(self, getter: Callable | None) -> None:
         """ Set the x-value getter associated with this slider """
         self._getter = getter if callable(getter) else None
 
