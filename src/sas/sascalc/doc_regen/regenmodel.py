@@ -86,7 +86,7 @@ def plot_1d(model: KernelModel, opts: dict[str, Any], ax: matplotlib.axes.Axes):
 def plot_2d(model: KernelModel, opts: dict[str, Any], ax: matplotlib.axes.Axes):
     """Create a 2-D image based on the model."""
     qx_max, nq2d = opts['qx_max'], opts['nq2d']
-    q = np.linspace(-qx_max, qx_max, nq2d) # type: np.ndarray
+    q: np.ndarray = np.linspace(-qx_max, qx_max, nq2d)
     data2d = empty_data2D(q, resolution=0.0)
     calculator = DirectModel(data2d, model)
     Iq2D = calculator() #background=0)

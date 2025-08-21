@@ -10,7 +10,7 @@ import sys
 import time
 import traceback
 
-from sasmodels.sasview_model import load_custom_model, load_standard_models
+from sasmodels.sasview_model import SasviewModelType, load_custom_model, load_standard_models
 
 from sas.system.user import get_plugin_dir
 
@@ -175,13 +175,13 @@ class ModelManagerBase:
     """
     #: mutable dictionary of models, continually updated to reflect the
     #: current set of plugins
-    model_dictionary = None  # type: Dict[str, Model]
+    model_dictionary: dict[str, SasviewModelType] = None
     #: constant list of standard models
-    standard_models = None  # type: Dict[str, Model]
+    standard_models: dict[str, SasviewModelType] = None
     #: list of plugin models reset each time the plugin directory is queried
-    plugin_models = None  # type: Dict[str, Model]
+    plugin_models: dict[str, SasviewModelType] = None
     #: timestamp on the plugin directory at the last plugin update
-    last_time_dir_modified = 0  # type: int
+    last_time_dir_modified: int = 0
 
     def __init__(self):
         # the model dictionary is allocated at the start and updated to
@@ -286,7 +286,7 @@ class ModelManager:
     """
     manage the list of available models
     """
-    base = None  # type: ModelManagerBase()
+    base: ModelManagerBase = None
 
     def __init__(self):
         if ModelManager.base is None:
