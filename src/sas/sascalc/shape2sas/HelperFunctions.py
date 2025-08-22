@@ -1,7 +1,8 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 from sas.sascalc.shape2sas.Typing import *
 
-import numpy as np
-import matplotlib.pyplot as plt
 
 ################################ Shape2SAS helper functions ###################################
 class Qsampling:

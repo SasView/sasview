@@ -1,7 +1,8 @@
-from sas.sascalc.shape2sas.Typing import *
-from sas.sascalc.shape2sas.HelperFunctions import sinc
-
 import numpy as np
+
+from sas.sascalc.shape2sas.HelperFunctions import sinc
+from sas.sascalc.shape2sas.Typing import *
+
 
 class StructureDecouplingApprox:
     def __init__(self, q: np.ndarray, 
