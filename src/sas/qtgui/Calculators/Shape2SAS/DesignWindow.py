@@ -15,17 +15,6 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
-from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints, logger
-from sas.qtgui.Calculators.Shape2SAS.genPlugin import generatePlugin
-from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import Canvas, ViewerPlotDesign
-from sas.qtgui.Calculators.Shape2SAS.Tables.subunitTable import OptionLayout, SubunitTable
-from sas.qtgui.Calculators.Shape2SAS.UI.DesignWindowUI import Ui_Shape2SAS
-from sas.qtgui.Calculators.Shape2SAS.ViewerModel import ViewerModel
-from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
-
 # Local SasView
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Perspectives.perspective import Perspective
@@ -39,10 +28,10 @@ from sas.qtgui.Calculators.Shape2SAS.Tables.subunitTable import SubunitTable, Op
 from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints, logger
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import Canvas
 
-from sas.sascalc.shape2sas.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering,
-                                                                     ModelProfile, ModelSystem, SimulationParameters, 
-                                                                     Qsampling, TheoreticalScatteringCalculation, 
-                                                                     SimulateScattering)
+from sas.sascalc.shape2sas.Shape2SAS import (
+    getTheoreticalScattering, getPointDistribution, getSimulatedScattering,
+    ModelProfile, ModelSystem, SimulationParameters, Qsampling, TheoreticalScatteringCalculation, SimulateScattering
+)
 from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
 from sas.sascalc.shape2sas.PluginGenerator import generate_plugin
 
