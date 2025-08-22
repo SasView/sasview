@@ -1996,6 +1996,28 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for row_i in range(self._model_model.rowCount()):
             func(row_i)
 
+    def updateFunctionCaption(self, row):
+        # Utility function for update of polydispersity function name in the main model
+        param_name = self._model_model.item(row, 0).text()
+        dispersion_value = self.polydispersity_widget.poly_params.get(param_name + ".width", None)
+        # This is an explicit check against None which means the param is not in the polydispersity list
+        if dispersion_value is None:
+            return
+        combo_string = DEFAULT_POLYDISP_FUNCTION
+        # TODO: Get dispersity function
+        for child in self.polydispersity_widget.lstPoly.children():
+            print(child)
+        # Modify the param value
+        param_row = self._model_model.item(row, 0).child(0)
+        self._model_model.blockSignals(True)
+        param_row.child(0, 1).setText(str(dispersion_value))
+        if self.has_error_column:
+            # err column changes the indexing
+            param_row.child(0, 5).setText(combo_string)
+        else:
+            param_row.child(0, 4).setText(combo_string)
+        self._model_model.blockSignals(False)
+
     def updateModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
         """
         Update the model with new parameters, create the errors column
