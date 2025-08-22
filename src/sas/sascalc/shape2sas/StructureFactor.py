@@ -12,7 +12,7 @@ class StructureFactor:
                  z_new: np.ndarray, 
                  p_new: np.ndarray,
                  Stype: str,
-                 par: List[float] | None):
+                 par: list[float] | None):
         self.q = q
         self.x_new = x_new
         self.y_new = y_new
@@ -44,7 +44,7 @@ class StructureFactor:
                 ValueError(f"Structure factor '{self.Stype}' was not found in structureFactor or global scope.")
 
     @staticmethod
-    def getparname(name: str) -> List[str]:
+    def getparname(name: str) -> list[str]:
         """Return the name of the parameters"""
         pars = {
             'HS': {'conc': 0.02,'r_hs': 50},
