@@ -1,8 +1,9 @@
+from dataclasses import dataclass, field
+
+import numpy as np
+
 from sas.sascalc.shape2sas.Typing import *
 
-from dataclasses import dataclass, field
-from typing import Optional
-import numpy as np
 
 @dataclass
 class SimulateScattering:
@@ -12,7 +13,7 @@ class SimulateScattering:
     q: np.ndarray
     I0: np.ndarray
     I: np.ndarray
-    exposure: Optional[float] = field(default_factory=lambda:500.0)
+    exposure: float | None = field(default_factory=lambda:500.0)
 
 
 @dataclass

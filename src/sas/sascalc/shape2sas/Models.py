@@ -1,10 +1,11 @@
-from sas.sascalc.shape2sas.Typing import *
-from sas.sascalc.shape2sas.models import *
-from sas.sascalc.shape2sas.HelperFunctions import Qsampling
-
 from dataclasses import dataclass, field
-from typing import Optional, List
+
 import numpy as np
+
+from sas.sascalc.shape2sas.HelperFunctions import Qsampling
+from sas.sascalc.shape2sas.models import *
+from sas.sascalc.shape2sas.Typing import *
+
 
 @dataclass
 class ModelProfile:
@@ -15,13 +16,13 @@ class ModelProfile:
     radius of 50 Å at the origin.
     """
 
-    subunits: List[str] = field(default_factory=lambda: ['sphere'])
-    p_s: List[float] = field(default_factory=lambda: [1.0]) # scattering length density
+    subunits: list[str] = field(default_factory=lambda: ['sphere'])
+    p_s: list[float] = field(default_factory=lambda: [1.0]) # scattering length density
     dimensions: Vectors = field(default_factory=lambda: [[50]])
     com: Vectors = field(default_factory=lambda: [[0, 0, 0]])
     rotation_points: Vectors = field(default_factory=lambda: [[0, 0, 0]])
     rotation: Vectors = field(default_factory=lambda: [[0, 0, 0]])
-    exclude_overlap: Optional[bool] = field(default_factory=lambda: True)
+    exclude_overlap: bool | None = field(default_factory=lambda: True)
 
 
 @dataclass
@@ -40,12 +41,12 @@ class SimulationParameters:
     """Class containing parameters for
     the simulation itself"""
 
-    q: Optional[np.ndarray] = field(default_factory=lambda: Qsampling.onQsampling(0.001, 0.5, 400))
-    prpoints: Optional[int] = field(default_factory=lambda: 100)
-    Npoints: Optional[int] = field(default_factory=lambda: 3000)
+    q: np.ndarray | None = field(default_factory=lambda: Qsampling.onQsampling(0.001, 0.5, 400))
+    prpoints: int | None = field(default_factory=lambda: 100)
+    Npoints: int | None = field(default_factory=lambda: 3000)
     #seed: Optional[int] #TODO:Add for future projects
     #method: Optional[str] #generation of point method #TODO: Add for future projects
-    model_name: Optional[List[str]] = field(default_factory=lambda: ['Model_1'])
+    model_name: list[str] | None = field(default_factory=lambda: ['Model_1'])
 
 
 @dataclass
@@ -55,7 +56,7 @@ class ModelSystem:
 
     PointDistribution: ModelPointDistribution
     Stype: str = field(default_factory=lambda: "None") #structure factor
-    par: List[float] = field(default_factory=lambda: np.array([]))#parameters for structure factor
+    par: list[float] = field(default_factory=lambda: np.array([]))#parameters for structure factor
     polydispersity: float = field(default_factory=lambda: 0.0)#polydispersity
     conc: float = field(default_factory=lambda: 0.02) #concentration
     sigma_r: float = field(default_factory=lambda: 0.0) #interface roughness
@@ -258,11 +259,11 @@ class GenerateAllPoints:
         y: np.ndarray, 
         z: np.ndarray, 
         p: np.ndarray, 
-        rotation: List[float], 
+        rotation: list[float], 
         rotation_point: list[float],
-        com: List[float], 
+        com: list[float], 
         subunitClass: object, 
-        dimensions: List[float]
+        dimensions: list[float]
     ):
         """check for overlap with previous subunits. 
         if overlap, the point is removed"""

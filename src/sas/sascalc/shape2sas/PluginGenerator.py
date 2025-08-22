@@ -1,11 +1,12 @@
-from pathlib import Path
 import logging
+from pathlib import Path
 
 #Global SasView
 #Local Perspectives
 from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
 from sas.sascalc.shape2sas.UserText import UserText
 from sas.system.user import get_plugin_dir
+
 
 def generate_plugin(
     prof: ModelProfile, 

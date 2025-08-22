@@ -1,8 +1,9 @@
-from sas.sascalc.shape2sas.Typing import *
-from sas.sascalc.shape2sas.structure_factors import *
 
-from typing import Optional
 import numpy as np
+
+from sas.sascalc.shape2sas.structure_factors import *
+from sas.sascalc.shape2sas.Typing import *
+
 
 class StructureFactor:
     def __init__(self, q: np.ndarray, 
@@ -11,7 +12,7 @@ class StructureFactor:
                  z_new: np.ndarray, 
                  p_new: np.ndarray,
                  Stype: str,
-                 par: Optional[List[float]]):
+                 par: List[float] | None):
         self.q = q
         self.x_new = x_new
         self.y_new = y_new

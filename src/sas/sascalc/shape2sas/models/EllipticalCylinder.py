@@ -1,5 +1,6 @@
 from sas.sascalc.shape2sas.Typing import *
 
+
 class EllipticalCylinder:
     def __init__(self, dimensions: List[float]):
         self.a = dimensions[0]
