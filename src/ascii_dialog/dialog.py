@@ -14,6 +14,7 @@ from metadata_filename_gui.metadata_filename_dialog import MetadataFilenameDialo
 from metadata_filename_gui.metadata_tree_data import initial_metadata_dict
 from sasdata.ascii_reader_metadata import AsciiReaderMetadata
 from ascii_dialog.constants import TABLE_MAX_ROWS, NOFILE_TEXT
+from contextlib import suppress
 import re
 
 dataset_dictionary = dict([(dataset.name, dataset) for dataset in [one_dim, two_dim, sesans]])
@@ -64,8 +65,10 @@ class AsciiDialog(QDialog):
         self.dataset_layout = QHBoxLayout()
         self.dataset_label = QLabel("Dataset Type")
         self.dataset_combobox = QComboBox()
-        for name in dataset_types:
-            self.dataset_combobox.addItem(name)
+        # TODO: Temporarily exclude SESANS until that's been fixed.
+        with suppress(ValueError):
+            dataset_types.remove('SESANS')
+        self.dataset_combobox.addItems(dataset_types)
         self.dataset_layout.addWidget(self.dataset_label)
         self.dataset_layout.addWidget(self.dataset_combobox)
 
