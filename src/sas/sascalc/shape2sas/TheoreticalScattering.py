@@ -296,22 +296,9 @@ def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> Theoret
     I_theory = ITheoretical(q)
 
     if use_ausaxs:
-        # import time
-        # t_start = time.time()
         I0 = np.square(np.sum(p)) * sys.conc * prof.volume_total
         Pq = I_theory.calc_Pq_ausaxs(q, x, y, z, p)/I0
         I0 = 1
-        print(f"AUSAXS I0: {I0}")
-        print(f"AUSAXS P: {Pq[0]}, {Pq[1]}, {Pq[2]}, {Pq[3]}, {Pq[4]}")
-        # t_end_ausaxs = time.time()
-
-        # r, pr, _ = WeightedPairDistribution(x, y, z, p).calc_pr(calc.prpoints, sys.polydispersity)
-        # I0, Pq = I_theory.calc_Pq(r, pr, sys.conc, prof.volume_total)
-        # t_end_shape2sas = time.time()
-        # print(f"Shape2SAS I0: {I0}")
-        # print(f"Shape2SAS P: {Pq[0]}, {Pq[1]}, {Pq[2]}, {Pq[3]}, {Pq[4]}")
-        # print(f"AUSAXS time: {(t_end_ausaxs - t_start)*1000:.2f} ms")
-        # print(f"Shape2SAS time: {(t_end_shape2sas - t_start)*1000:.2f} ms")
 
     else: 
         r, pr, _ = WeightedPairDistribution(x, y, z, p).calc_pr(calc.prpoints, sys.polydispersity)

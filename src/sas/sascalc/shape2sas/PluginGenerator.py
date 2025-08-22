@@ -1,9 +1,9 @@
 from pathlib import Path
 import logging
 
-from sas.sascalc.fit import models
 from sas.sascalc.shape2sas.Shape2SAS import ModelProfile
 from sas.sascalc.shape2sas.UserText import UserText
+from sas.system.user import get_plugin_dir
 
 def generate_plugin(
     prof: ModelProfile, 
@@ -16,7 +16,7 @@ def generate_plugin(
 ) -> tuple[str, Path]:
     """Generates a theoretical scattering plugin model"""
 
-    plugin_location = Path(models.find_plugins_dir())
+    plugin_location = Path(get_plugin_dir())
     full_path = plugin_location.joinpath(file_name).with_suffix('.py')
     logging.info(f"Plugin model will be saved to: {full_path}")
 
