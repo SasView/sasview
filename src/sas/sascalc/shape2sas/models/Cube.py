@@ -2,7 +2,7 @@ from sas.sascalc.shape2sas.Typing import *
 
 
 class Cube:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.a = dimensions[0]
 
     def getVolume(self) -> float:
