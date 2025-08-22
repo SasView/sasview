@@ -7,10 +7,10 @@ import traceback
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton, QWidget
 
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
-from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
-from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
 from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
+from sas.qtgui.Calculators.Shape2SAS.Tables.variableTable import VariableTable
+from sas.qtgui.Calculators.Shape2SAS.UI.ConstraintsUI import Ui_Constraints
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.sascalc.shape2sas.UserText import UserText
 
 logger = logging.getLogger(__name__)

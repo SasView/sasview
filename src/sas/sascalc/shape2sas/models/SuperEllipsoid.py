@@ -1,5 +1,7 @@
-from sas.sascalc.shape2sas.Typing import *
 from scipy.special import gamma
+
+from sas.sascalc.shape2sas.Typing import *
+
 
 class SuperEllipsoid:
     def __init__(self, dimensions: List[float]):

@@ -1,17 +1,15 @@
 import argparse
 import re
-import numpy as np
-import warnings
 import time
+import warnings
 
+import numpy as np
+
+from sas.sascalc.shape2sas.ExperimentalScattering import *
+from sas.sascalc.shape2sas.HelperFunctions import generate_pdb, plot_2D, plot_results
+from sas.sascalc.shape2sas.Models import *
 from sas.sascalc.shape2sas.StructureFactor import StructureFactor
 from sas.sascalc.shape2sas.TheoreticalScattering import *
-from sas.sascalc.shape2sas.ExperimentalScattering import *
-from sas.sascalc.shape2sas.Models import *
-from sas.sascalc.shape2sas.HelperFunctions import (
-    plot_2D, plot_results, generate_pdb
-)
-
 
 ################################ Shape2SAS batch version ################################
 if __name__ == "__main__":
