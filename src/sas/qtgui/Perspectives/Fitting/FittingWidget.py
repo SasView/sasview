@@ -2010,7 +2010,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Modify the param value
         param_row = self._model_model.item(row, 0).child(0)
         self._model_model.blockSignals(True)
-        param_row.child(0, 1).setText(str(dispersion_value))
+        param_row.child(0, 1).setText(f"{dispersion_value:.3f}")
         if self.has_error_column:
             # err column changes the indexing
             param_row.child(0, 5).setText(combo_string)
