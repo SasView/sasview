@@ -2,7 +2,7 @@ from sas.sascalc.shape2sas.Typing import *
 
 
 class HollowCube:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.a = dimensions[0]
         self.b = dimensions[1]
 

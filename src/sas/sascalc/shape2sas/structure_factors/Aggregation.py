@@ -10,7 +10,7 @@ class Aggregation(StructureDecouplingApprox):
                  y_new: np.ndarray, 
                  z_new: np.ndarray, 
                  p_new: np.ndarray, 
-                 par: List[float]):
+                 par: list[float]):
         super(Aggregation, self).__init__(q, x_new, y_new, z_new, p_new)
         self.q = q
         self.x_new = x_new

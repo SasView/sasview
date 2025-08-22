@@ -137,14 +137,14 @@ def plot_2D(x_list: np.ndarray,
 
 
 def plot_results(q: np.ndarray, 
-                 r_list: List[np.ndarray], 
-                 pr_list: List[np.ndarray], 
-                 I_list: List[np.ndarray], 
-                 Isim_list: List[np.ndarray], 
-                 sigma_list: List[np.ndarray], 
-                 S_list: List[np.ndarray], 
-                 names: List[str], 
-                 scales: List[float], 
+                 r_list: list[np.ndarray], 
+                 pr_list: list[np.ndarray], 
+                 I_list: list[np.ndarray], 
+                 Isim_list: list[np.ndarray], 
+                 sigma_list: list[np.ndarray], 
+                 S_list: list[np.ndarray], 
+                 names: list[str], 
+                 scales: list[float], 
                  xscale_log: bool, 
                  high_res: bool) -> None:
     """
@@ -206,11 +206,11 @@ def plot_results(q: np.ndarray,
     plt.close()
 
 
-def generate_pdb(x_list: List[np.ndarray], 
-                 y_list: List[np.ndarray], 
-                 z_list: List[np.ndarray], 
-                 p_list: List[np.ndarray], 
-                 Model_list: List[str]) -> None:
+def generate_pdb(x_list: list[np.ndarray], 
+                 y_list: list[np.ndarray], 
+                 z_list: list[np.ndarray], 
+                 p_list: list[np.ndarray], 
+                 Model_list: list[str]) -> None:
     """
     Generates a visualisation file in PDB format with the simulated points (coordinates) and contrasts
     ONLY FOR VISUALIZATION!
@@ -245,7 +245,7 @@ def generate_pdb(x_list: List[np.ndarray],
             f.write('END')
 
 
-def check_unique(A_list: List[float]) -> bool:
+def check_unique(A_list: list[float]) -> bool:
     """
     if all elements in a list are unique then return True, else return False
     """

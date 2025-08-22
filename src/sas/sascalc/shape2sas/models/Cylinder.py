@@ -2,7 +2,7 @@ from sas.sascalc.shape2sas.Typing import *
 
 
 class Cylinder:
-    def __init__(self, dimensions: List[float]):
+    def __init__(self, dimensions: list[float]):
         self.R = dimensions[0]
         self.l = dimensions[1]
 
