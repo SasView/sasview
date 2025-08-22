@@ -1,6 +1,8 @@
 #Global
 import ast
 import importlib.util
+import logging
+import traceback
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton, QWidget
