@@ -2003,10 +2003,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # This is an explicit check against None which means the param is not in the polydispersity list
         if dispersion_value is None:
             return
-        combo_string = DEFAULT_POLYDISP_FUNCTION
-        # TODO: Get dispersity function
-        for child in self.polydispersity_widget.lstPoly.children():
-            print(child)
+        try:
+            dispersion_model = self.logic.kernel_module.dispersion.get(param_name, None)
+            combo_string = dispersion_model.get('type')
+        except AttributeError:
+            combo_string = DEFAULT_POLYDISP_FUNCTION
         # Modify the param value
         param_row = self._model_model.item(row, 0).child(0)
         self._model_model.blockSignals(True)
