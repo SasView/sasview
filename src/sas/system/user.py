@@ -187,7 +187,7 @@ def is_copy_successful() -> bool:
         logging.info("Extracting docs from sas module")
         module_copytree("sas", "docs-source", MAIN_DOC_SRC)
         module_copytree("sas", "docs", MAIN_BUILD_SRC / "html")
-        module_copytree("sas", "example_data", EXAMPLE_DATA_DIR)
+        module_copytree("example_data", '.', EXAMPLE_DATA_DIR)
         return True
 
     return False
