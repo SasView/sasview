@@ -151,11 +151,11 @@ def locate_unpacked_resources() -> tuple[Path, Path]:
 def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
     """Copy the tree from a module to the specified directory
 
-    *module* name of the Python module (the "anchor" for importlib.resources)
+    :param module: name of the Python module (the "anchor" for importlib.resources)
 
-    *src* source name of the resource inside the module
+    :param src: source name of the resource inside the module
 
-    *dest* destination directory for the resources to be copied into; will be
+    :param dest: destination directory for the resources to be copied into; will be
     created if it doesn't exist
     """
     spth = Path(src)
