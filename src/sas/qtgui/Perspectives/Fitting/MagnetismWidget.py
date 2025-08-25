@@ -138,6 +138,12 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             # Update plot
             self.updateDataSignal.emit()
 
+    def updateModel(self, model: Any | None = None) -> None:
+        # add magnetic parameters if asked
+        if self.isActive and self._magnet_model.rowCount() > 0:
+            for key, value in self.magnet_params.items():
+                model.setParam(key, value)
+
     def iterateOverMagnetModel(self, func: Any) -> None:
             """
             Take func and throw it inside the magnet model row loop
@@ -239,6 +245,25 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             FittingUtilities.addErrorHeadersToModel(self._magnet_model)
 
             self.has_magnet_error_column = True
+
+    def gatherMagnetParams(self, row):
+        """
+        Create list of magnetic parameters based on _magnet_model
+        """
+        param_list = []
+        param_name = str(self._magnet_model.item(row, 0).text())
+        param_checked = str(self._magnet_model.item(row, 0).checkState() == QtCore.Qt.Checked)
+        param_value = str(self._magnet_model.item(row, 1).text())
+        param_error = None
+        column_offset = 0
+        if self.has_magnet_error_column:
+            column_offset = 1
+            param_error = str(self._magnet_model.item(row, 1+column_offset).text())
+        param_min = str(self._magnet_model.item(row, 2+column_offset).text())
+        param_max = str(self._magnet_model.item(row, 3+column_offset).text())
+        param_list.append([param_name, param_checked, param_value,
+                            param_error, param_min, param_max])
+        return param_list
 
     def addCheckedMagneticListToModel(self, param: Any, value: float) -> None:
         """

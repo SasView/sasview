@@ -523,6 +523,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
+        self.magnetism_widget.isActive = isChecked
 
     def toggleChainFit(self, isChecked: bool) -> None:
         """ Enable/disable chain fitting """
@@ -2586,7 +2587,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
             # doesn't contain multiplicity parameter
-            self.logic.kernel_module.setParam(parameter_name, value)
+            if hasattr(self.logic.kernel_module, 'parameters') and \
+                parameter_name in self.logic.kernel_module.parameters:
+                self.logic.kernel_module.setParam(parameter_name, value)
 
         elif model_column == min_column:
             # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
@@ -2812,9 +2815,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.polydispersity_widget.updateModel(model)
         # add magnetic params if asked
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
-            for key, value in self.magnet_params.items():
-                model.setParam(key, value)
+        self.magnetism_widget.updateModel(model)
 
     def calculateQGridForModelExt(self, data: Data1D | Data2D | None = None, model: Any | None = None, completefn: Any | None = None, use_threads: bool = True) -> None:
         """
@@ -3775,18 +3776,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             Create list of magnetic parameters based on _magnet_model
             """
-            param_name = str(self.magnetism_widget._magnet_model.item(row, 0).text())
-            param_checked = str(self.magnetism_widget._magnet_model.item(row, 0).checkState() == QtCore.Qt.Checked)
-            param_value = str(self.magnetism_widget._magnet_model.item(row, 1).text())
-            param_error = None
-            column_offset = 0
-            if self.has_magnet_error_column:
-                column_offset = 1
-                param_error = str(self.magnetism_widget._magnet_model.item(row, 1+column_offset).text())
-            param_min = str(self.magnetism_widget._magnet_model.item(row, 2+column_offset).text())
-            param_max = str(self.magnetism_widget._magnet_model.item(row, 3+column_offset).text())
-            param_list.append([param_name, param_checked, param_value,
-                               param_error, param_min, param_max])
+            param_list.extend(self.magnetism_widget.gatherMagnetParams(row))
 
         self.iterateOverModel(gatherParams)
         if self.chkPolydispersity.isChecked():
