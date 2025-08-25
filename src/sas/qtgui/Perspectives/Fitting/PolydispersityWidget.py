@@ -132,7 +132,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 value = GuiUtils.toDouble(item.text())
             except TypeError:
                 # Can't be converted properly, bring back the old value and exit
-                return
+                pass
 
             current_details = self.logic.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
@@ -150,20 +150,22 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 value = GuiUtils.toDouble(item.text())
             except TypeError:
                 # Can't be converted properly, bring back the old value and exit
-                return
+                pass
 
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
-            if model_column not in delegate.columnDict():
-                return
-            # Map the column to the poly param that was changed
-            associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
-            p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
-            self.poly_params[p_name] = value
-            self.logic.kernel_module.setParam(p_name, value)
+            if model_column in delegate.columnDict():
+                # Map the column to the poly param that was changed
+                associations = {1: "width", delegate.poly_npts: "npts", delegate.poly_nsigs: "nsigmas"}
+                p_name = f"{parameter_name}.{associations.get(model_column, 'width')}"
+                self.poly_params[p_name] = value
+                self.logic.kernel_module.setParam(p_name, value)
 
-            # Update plot
-            self.updateDataSignal.emit()
+                # Update plot
+                self.updateDataSignal.emit()
+
+        # Update main model for display
+        self.iterateOverModelSignal.emit()
 
     def checkedListFromModel(self) -> list[str]:
         """
@@ -290,8 +292,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 combo_box.blockSignals(False)
                 # Load the file
                 self.loadPolydispArray(row_index)
-                # Update main model for display
-                self.iterateOverModelSignal.emit()
                 self.logic.kernel_module.set_dispersion(param.name, self.disp_model)
                 # uncheck the parameter
                 self.poly_model.item(row_index, 0).setCheckState(QtCore.Qt.Unchecked)
@@ -325,7 +325,6 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
         self.poly_model.setData(npts_index, npts)
         self.poly_model.setData(nsigs_index, nsigs)
 
-        # self.iterateOverModel(updateFunctionCaption)
         if combo_box is not None:
             self.orig_poly_index = combo_box.currentIndex()
 
