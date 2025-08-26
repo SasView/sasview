@@ -132,7 +132,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 value = GuiUtils.toDouble(item.text())
             except TypeError:
                 # Can't be converted properly, bring back the old value and exit
-                pass
+                return
 
             current_details = self.logic.kernel_module.details[parameter_name_w]
             if self.has_poly_error_column:
@@ -150,7 +150,7 @@ class PolydispersityWidget(QtWidgets.QWidget, Ui_PolydispersityWidgetUI):
                 value = GuiUtils.toDouble(item.text())
             except TypeError:
                 # Can't be converted properly, bring back the old value and exit
-                pass
+                return
 
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
