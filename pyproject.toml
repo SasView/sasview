@@ -121,11 +121,6 @@ artifacts = [
     # "**/UI/*py",
 ]
 
-[[tool.hatch.build.targets.wheel.hooks.build-scripts.scripts]]
-# Install sasview dependencies so that sphinx autodoc can run in source tree.
-commands = [
-    "python -m pip install -r build_tools/requirements.txt",
-]
 
 [[tool.hatch.build.targets.wheel.hooks.sphinx.tools]]
 tool = "custom"
