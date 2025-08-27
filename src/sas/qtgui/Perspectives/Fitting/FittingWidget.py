@@ -237,8 +237,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Parameters to fit
         self.main_params_to_fit = []
-        #self.polydispersity_widget.poly_params_to_fit = []
-        self.magnet_params_to_fit = []
 
         # Fit options
         self.q_range_min = OptionsWidget.QMIN_DEFAULT
@@ -1948,7 +1946,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 else:
                     params_to_fit += [p]
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
-            params_to_fit += self.magnet_params_to_fit
+            params_to_fit += self.magnetism_widget.magnet_params_to_fit
         if not params_to_fit:
             raise ValueError('Fitting requires at least one parameter to optimize.')
 
@@ -2543,7 +2541,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         if self.chkPolydispersity.isChecked() and self.polydispersity_widget.poly_params_to_fit:
             return True
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnet_params_to_fit:
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget.magnet_params_to_fit:
             return True
         return False
 
@@ -2706,7 +2704,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # update the list of parameters to fit
         self.main_params_to_fit = self.checkedListFromModel("standard")
         self.polydispersity_widget.poly_params_to_fit = self.checkedListFromModel("poly")
-        self.magnet_params_to_fit = self.checkedListFromModel("magnet")
+        self.magnetism_widget.magnet_params_to_fit = self.checkedListFromModel("magnet")
 
     def checkedListFromModel(self, model_key: str) -> list[str]:
         """
@@ -3438,7 +3436,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fp.chi2 = self.chi2
         fp.main_params_to_fit = self.main_params_to_fit
         fp.poly_params_to_fit = self.polydispersity_widget.poly_params_to_fit
-        fp.magnet_params_to_fit = self.magnet_params_to_fit
+        fp.magnet_params_to_fit = self.magnetism_widgetmagnet_params_to_fit
         fp.kernel_module = self.logic.kernel_module
 
         # Algorithm options
