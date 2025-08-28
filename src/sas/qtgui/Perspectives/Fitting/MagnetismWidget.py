@@ -2,6 +2,7 @@
 Widget/logic for magnetism.
 """
 import logging
+from importlib import resources
 from typing import Any
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -12,9 +13,10 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
-from sas.system.user import IMAGES_DIRECTORY_LOCATION
+
 
 logger = logging.getLogger(__name__)
+
 
 class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
     cmdFitSignal = QtCore.Signal()
@@ -52,7 +54,10 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         # Magnetic angles explained in one picture
         self.magneticAnglesWidget = QtWidgets.QWidget()
         labl = QtWidgets.QLabel(self.magneticAnglesWidget)
-        pixmap = QtGui.QPixmap(IMAGES_DIRECTORY_LOCATION / 'M_angles_pic.png')
+        with resources.open_binary("sas.qtgui.images", "M_angles_pic.png") as file:
+            image_data = file.read()
+            pixmap = QtGui.QPixmap()
+            pixmap.loadFromData(image_data)
         labl.setPixmap(pixmap)
         self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
 
