@@ -14,7 +14,6 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 
-
 logger = logging.getLogger(__name__)
 
 
