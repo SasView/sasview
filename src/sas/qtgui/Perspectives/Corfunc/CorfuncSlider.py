@@ -273,7 +273,7 @@ class CorfuncSlider(QtWidgets.QWidget):
     @property
     def guinier_label_position(self) -> float:
         """ Position to put the text for the guinier region"""
-        return 0.5*self.left_pad
+        return 0.5 * self.transform(self._point_1)
 
     @property
     def data_label_centre(self) -> float:
