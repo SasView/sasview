@@ -456,10 +456,22 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
             msg += f"will remove the Corfunc analysis for {self._path}. Continue?"
             dialog = QtWidgets.QMessageBox(self, text=msg)
+            
+            # checkbox to reset Q range to defaults
+            checkbox = QtWidgets.QCheckBox("Reset Q range to defaults")
+            dialog.setCheckBox(checkbox)
+            checkbox.setChecked(False)
+            
             dialog.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
             retval = dialog.exec_()
             if retval == QtWidgets.QMessageBox.Cancel:
                 return
+            
+            reset_q_range = checkbox.isChecked()
+            if reset_q_range:
+                self.clear_data = True
+            else:
+                self.clear_data = False
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
@@ -505,7 +517,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             if any(not math.isfinite(x) for x in [prev_q1, prev_q2, prev_q3]) or any(x <= min(self.data.x) or x >= max(self.data.x) for x in [prev_q1, prev_q2, prev_q3]):
                 self.has_data = False
                                 
-        if self.has_data == False:          
+        if not self.has_data or self.clear_data:     
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
             self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
