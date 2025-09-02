@@ -3436,7 +3436,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fp.chi2 = self.chi2
         fp.main_params_to_fit = self.main_params_to_fit
         fp.poly_params_to_fit = self.polydispersity_widget.poly_params_to_fit
-        fp.magnet_params_to_fit = self.magnetism_widgetmagnet_params_to_fit
+        fp.magnet_params_to_fit = self.magnetism_widget.magnet_params_to_fit
         fp.kernel_module = self.logic.kernel_module
 
         # Algorithm options
