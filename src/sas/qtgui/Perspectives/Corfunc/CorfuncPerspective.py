@@ -501,11 +501,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             prev_q1 = safe_float(self.model.item(WIDGETS.W_QMIN).text())     if self.model.item(WIDGETS.W_QMIN)     else None
             prev_q2 = safe_float(self.model.item(WIDGETS.W_QMAX).text())     if self.model.item(WIDGETS.W_QMAX)     else None
             prev_q3 = safe_float(self.model.item(WIDGETS.W_QCUTOFF).text())  if self.model.item(WIDGETS.W_QCUTOFF)  else None
-            # If any are missing or non-finite, fall back to defaults
-            if any(not math.isfinite(x) for x in [prev_q1, prev_q2, prev_q3]):
+            # If any are missing or non-finite, or out of range fall back to defaults
+            if any(not math.isfinite(x) for x in [prev_q1, prev_q2, prev_q3]) or any(x <= min(self.data.x) or x >= max(self.data.x) for x in [prev_q1, prev_q2, prev_q3]):
                 self.has_data = False
-                
-        else:          
+                                
+        if self.has_data == False:          
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
             self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
