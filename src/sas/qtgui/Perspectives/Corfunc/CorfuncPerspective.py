@@ -509,15 +509,21 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         def fractional_position(f):
             return math.exp(f*log_data_max + (1-f)*log_data_min)
         
+        # If we have data, check if any of the Q range values are missing or non-finite, or out of range
         if self.has_data:
             prev_q1 = safe_float(self.model.item(WIDGETS.W_QMIN).text())     if self.model.item(WIDGETS.W_QMIN)     else None
             prev_q2 = safe_float(self.model.item(WIDGETS.W_QMAX).text())     if self.model.item(WIDGETS.W_QMAX)     else None
             prev_q3 = safe_float(self.model.item(WIDGETS.W_QCUTOFF).text())  if self.model.item(WIDGETS.W_QCUTOFF)  else None
+            
             # If any are missing or non-finite, or out of range fall back to defaults
-            if any(not math.isfinite(x) for x in [prev_q1, prev_q2, prev_q3]) or any(x <= min(self.data.x) or x >= max(self.data.x) for x in [prev_q1, prev_q2, prev_q3]):
-                self.has_data = False
+            q_range = [WIDGETS.W_QMIN, WIDGETS.W_QMAX, WIDGETS.W_QCUTOFF]
+            q_frac = [0.2, 0.7, 0.8]
+            for i, x in enumerate([prev_q1, prev_q2, prev_q3]):
+                if any([x <= min(self.data.x), x >= max(self.data.x), not math.isfinite(x)]):
+                    self.model.setItem(q_range[i], QtGui.QStandardItem("%.7g"%fractional_position(q_frac[i])))
                                 
-        if not self.has_data or self.clear_data:     
+        # If no data or clear data, set to defaults
+        if not self.has_data or self.clear_data:
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
             self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
