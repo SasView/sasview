@@ -5,6 +5,7 @@ Allows users to modify the box slicer parameters.
 import functools
 import logging
 import os
+from enum import Enum
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
@@ -22,6 +23,16 @@ from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInte
 # Local UI
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 
+
+class Property(Enum):
+    FITTING_SINGLE: int = 1
+    FITTING_BATCH: int = 2
+    INVERSION_SINGLE: int = 3
+    INVERSION_BATCH: int = 4
+    
+FITTING_TYPES: set[int] = {Property.FITTING_SINGLE, Property.FITTING_BATCH} # 1, 2
+BATCH_TYPES: set[int]   = {Property.FITTING_BATCH, Property.INVERSION_BATCH} # 2, 4
+INVERSION_TYPES: set[int] = {Property.INVERSION_SINGLE, Property.INVERSION_BATCH} # 3, 4
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     """
@@ -384,7 +395,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             self.model.itemChanged.connect(self.onParamChange)
 
     def check_perspective_and_set_data(self,fitting_requested, perspective_name, items_for_fit):        
-        isBatch = fitting_requested in (2, 4)
+        isBatch = fitting_requested in BATCH_TYPES
         self.parent.manager.parent.loadedPerspectives[perspective_name].setData(data_item=items_for_fit,is_batch=isBatch)
 
     def sendToFit(self, items_for_fit, fitting_requested):
@@ -392,9 +403,9 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Send `items_for_fit` to the Fit perspective, in either single fit or batch mode
         """
 
-        if fitting_requested in (1, 2):
+        if fitting_requested in FITTING_TYPES:
             self.check_perspective_and_set_data(fitting_requested, 'Fitting', items_for_fit)
-        elif fitting_requested in (3, 4):
+        elif fitting_requested in INVERSION_TYPES:
             self.check_perspective_and_set_data(fitting_requested, 'Inversion', items_for_fit)
         else:
             return
