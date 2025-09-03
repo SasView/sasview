@@ -2,6 +2,7 @@
 """
 Allows users to modify the box slicer parameters.
 """
+
 import functools
 import logging
 import os
@@ -29,23 +30,22 @@ class Property(Enum):
     FITTING_BATCH: int = 2
     INVERSION_SINGLE: int = 3
     INVERSION_BATCH: int = 4
-    
-FITTING_TYPES: set[int] = {Property.FITTING_SINGLE, Property.FITTING_BATCH} # 1, 2
-BATCH_TYPES: set[int]   = {Property.FITTING_BATCH, Property.INVERSION_BATCH} # 2, 4
-INVERSION_TYPES: set[int] = {Property.INVERSION_SINGLE, Property.INVERSION_BATCH} # 3, 4
+
+
+FITTING_TYPES: set[int] = {Property.FITTING_SINGLE, Property.FITTING_BATCH}  # 1, 2
+BATCH_TYPES: set[int] = {Property.FITTING_BATCH, Property.INVERSION_BATCH}  # 2, 4
+INVERSION_TYPES: set[int] = {Property.INVERSION_SINGLE, Property.INVERSION_BATCH}  # 3, 4
+
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
     """
     Interaction between the QTableView and the underlying model,
     passed from a slicer instance.
     """
+
     closeWidgetSignal = QtCore.Signal()
 
-    def __init__(self, parent=None,
-                 model=None,
-                 active_plots=None,
-                 validate_method=None,
-                 communicator=None):
+    def __init__(self, parent=None, model=None, active_plots=None, validate_method=None, communicator=None):
         super(SlicerParameters, self).__init__(parent.manager)
 
         self.setupUi(self)
@@ -64,13 +64,15 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.cmdApply.setEnabled(False)
 
         # Mapping combobox index -> slicer module
-        self.callbacks = {0: None,
-                          1: SectorInteractor,
-                          2: AnnulusInteractor,
-                          3: BoxInteractorX,
-                          4: BoxInteractorY,
-                          5: WedgeInteractorQ,
-                          6: WedgeInteractorPhi}
+        self.callbacks = {
+            0: None,
+            1: SectorInteractor,
+            2: AnnulusInteractor,
+            3: BoxInteractorX,
+            4: BoxInteractorY,
+            5: WedgeInteractorQ,
+            6: WedgeInteractorPhi,
+        }
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -111,8 +113,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Disable row number display
         self.lstParams.verticalHeader().setVisible(False)
         self.lstParams.setAlternatingRowColors(True)
-        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                     QtWidgets.QSizePolicy.Expanding)
+        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
         # Header properties for nicer display
         header = self.lstParams.horizontalHeader()
@@ -120,8 +121,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         header.setStretchLastSection(True)
 
     def updatePlotList(self):
-        '''
-        '''
+        """ """
         self.active_plots = self.parent.getActivePlots()
         self.setPlotsList()
 
@@ -195,14 +195,14 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.lstPlots.itemChanged.connect(lambda: self.cmdApply.setEnabled(True))
 
     def onFocus(self, row, column):
-        """ Set the focus on the cell (row, column) """
+        """Set the focus on the cell (row, column)"""
         selection_model = self.lstParams.selectionModel()
         selection_model.select(self.model.index(row, column), QtGui.QItemSelectionModel.Select)
         self.lstParams.setSelectionModel(selection_model)
         self.lstParams.setCurrentIndex(self.model.index(row, column))
 
     def onSlicerChanged(self, index):
-        """ change the parameters based on the slicer chosen """
+        """change the parameters based on the slicer chosen"""
         if index == 0:  # No interactor
             self.parent.onClearSlicer()
             self.setModel(None)
@@ -227,7 +227,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Open save file location dialog
         """
         parent = self
-        caption = 'Save files to:'
+        caption = "Save files to:"
         options = QtWidgets.QFileDialog.ShowDirsOnly
         directory = self.save_location
         folder = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, directory, options)
@@ -316,8 +316,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         Prepares full, unique path for a 1D plot
         """
         # Extend filename with the requested string
-        filename = data.name if self.txtExtension.text() == ""\
-            else data.name + "_" + str(self.txtExtension.text())
+        filename = data.name if self.txtExtension.text() == "" else data.name + "_" + str(self.txtExtension.text())
         extension = self.cbSaveExt.currentText()
         filename_ext = filename + extension
 
@@ -335,12 +334,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         # Choose serializer based on requested extension
         extension = self.cbSaveExt.currentText()
-        if 'txt' in extension:
+        if "txt" in extension:
             GuiUtils.onTXTSave(data, filepath)
-        elif 'xml' in extension:
+        elif "xml" in extension:
             loader = Loader()
             loader.save(filepath, data, ".xml")
-        elif 'h5' in extension:
+        elif "h5" in extension:
             nxcansaswriter = NXcanSASWriter()
             nxcansaswriter.write([data], filepath)
         else:
@@ -375,13 +374,12 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         self.sendToFit(items_for_fit, fitting_requested)
 
     def setModel(self, model):
-        """ Model setter """
+        """Model setter"""
         # check if parent slicer changed
         current_slicer = type(self.parent.slicer)
         for index in self.callbacks:
             # must use type() for None or just imported type for ! None
-            if type(self.callbacks[index]) == current_slicer or \
-               self.callbacks[index] == current_slicer:
+            if type(self.callbacks[index]) == current_slicer or self.callbacks[index] == current_slicer:
                 if index != self.cbSlicer.currentIndex():
                     # parameters already updated, no need to notify
                     # combobox listeners
@@ -394,9 +392,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if model is not None:
             self.model.itemChanged.connect(self.onParamChange)
 
-    def check_perspective_and_set_data(self,fitting_requested, perspective_name, items_for_fit):        
+    def check_perspective_and_set_data(self, fitting_requested, perspective_name, items_for_fit):
         isBatch = fitting_requested in BATCH_TYPES
-        self.parent.manager.parent.loadedPerspectives[perspective_name].setData(data_item=items_for_fit,is_batch=isBatch)
+        self.parent.manager.parent.loadedPerspectives[perspective_name].setData(
+            data_item=items_for_fit, is_batch=isBatch
+        )
 
     def sendToFit(self, items_for_fit, fitting_requested):
         """
@@ -404,12 +404,11 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
 
         if fitting_requested in FITTING_TYPES:
-            self.check_perspective_and_set_data(fitting_requested, 'Fitting', items_for_fit)
+            self.check_perspective_and_set_data(fitting_requested, "Fitting", items_for_fit)
         elif fitting_requested in INVERSION_TYPES:
-            self.check_perspective_and_set_data(fitting_requested, 'Inversion', items_for_fit)
+            self.check_perspective_and_set_data(fitting_requested, "Inversion", items_for_fit)
         else:
             return
-    
 
     def keyPressEvent(self, event):
         """
@@ -440,23 +439,24 @@ class ProxyModel(QtCore.QIdentityProxyModel):
     """
     Trivial proxy model with custom column edit flag
     """
+
     def __init__(self, parent=None):
         super(ProxyModel, self).__init__(parent)
         self._columns = set()
 
     def columnReadOnly(self, column):
-        '''Returns True if column is read only, false otherwise'''
+        """Returns True if column is read only, false otherwise"""
         return column in self._columns
 
     def setColumnReadOnly(self, column, readonly=True):
-        '''Add/removes a column from the readonly list'''
+        """Add/removes a column from the readonly list"""
         if readonly:
             self._columns.add(column)
         else:
             self._columns.discard(column)
 
     def flags(self, index):
-        '''Sets column flags'''
+        """Sets column flags"""
         flags = super(ProxyModel, self).flags(index)
         if self.columnReadOnly(index.column()):
             flags &= ~QtCore.Qt.ItemIsEditable
