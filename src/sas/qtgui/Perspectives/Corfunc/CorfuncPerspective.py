@@ -617,33 +617,18 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def notify_extrapolation_text_box_validity(self, params):
         """ Set the colour of the text boxes to red if they have bad parameter definitions"""
-        box_1_style = ""
-        box_2_style = ""
-        box_3_style = ""
-        red = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
+        normal = "QLineEdit { background-color: rgb(0,0,0); color: rgb(255,255,255) }"
+        red    = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
 
-        if params.point_1 <= params.data_q_min:
-            box_1_style = red
+        # Determine validity flags first
+        invalid_1 = params.point_1 < params.data_q_min or params.point_1 >= params.point_2
+        invalid_2 = params.point_2 <= params.point_1 or params.point_2 >= params.point_3
+        invalid_3 = params.point_3 <= params.point_2 or params.point_3 > params.data_q_max
 
-        if params.point_2 <= params.point_1:
-            box_1_style = red
-            box_2_style = red
-
-        if params.point_3 <= params.point_2:
-            box_2_style = red
-            box_3_style = red
-
-        if params.data_q_max <= params.point_3:
-            box_3_style = red
-
-        # if v3 < v1 and v2, all three will go red (because of transitivity of <=), but this is good
-        if params.point_3 <= params.point_1:
-            box_1_style = red
-            box_3_style = red
-
-        self.txtLowerQMax.setStyleSheet(box_1_style)
-        self.txtUpperQMin.setStyleSheet(box_2_style)
-        self.txtUpperQMax.setStyleSheet(box_3_style)
+        # Apply styles based on flags
+        self.txtLowerQMax.setStyleSheet(red if invalid_1 else normal)
+        self.txtUpperQMin.setStyleSheet(red if invalid_2 else normal)
+        self.txtUpperQMax.setStyleSheet(red if invalid_3 else normal)
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         """ Slider state changed"""
@@ -654,6 +639,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                            QtGui.QStandardItem(format_string%state.point_2))
         self.model.setItem(WIDGETS.W_QCUTOFF,
                            QtGui.QStandardItem(format_string%state.point_3))
+
+        # Check validity of the text boxes
+        self.notify_extrapolation_text_box_validity(state)
 
     def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
         """ Slider is being moved about"""
