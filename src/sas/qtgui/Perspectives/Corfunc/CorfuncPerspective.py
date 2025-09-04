@@ -593,13 +593,20 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """ Set the colour of the text boxes to red if they have bad parameter definitions"""
         normal = "QLineEdit { background-color: rgb(0,0,0); color: rgb(255,255,255) }"
         red    = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
+        
+        # Round values to 8 significant figures to avoid floating point precision issues
+        p1 = float(f"{params.point_1:.8g}")
+        p2 = float(f"{params.point_2:.8g}")
+        p3 = float(f"{params.point_3:.8g}")
+        qmin = float(f"{params.data_q_min:.8g}")
+        qmax = float(f"{params.data_q_max:.8g}")
 
-        # Determine validity flags first
-        invalid_1 = params.point_1 < params.data_q_min or params.point_1 >= params.point_2
-        invalid_2 = params.point_2 <= params.point_1 or params.point_2 >= params.point_3
-        invalid_3 = params.point_3 <= params.point_2 or params.point_3 > params.data_q_max
+        # Determine validity flags such that data_q_min <= point_1 < point_2 < point_3 <= data_q_max
+        invalid_1 = p1 < qmin or p1 >= p2
+        invalid_2 = p2 <= p1 or p2 >= p3
+        invalid_3 = p3 <= p2 or p3 > qmax
 
-        # Apply styles based on flags
+        # Make the background red if the text box is invalid
         self.txtLowerQMax.setStyleSheet(red if invalid_1 else normal)
         self.txtUpperQMin.setStyleSheet(red if invalid_2 else normal)
         self.txtUpperQMax.setStyleSheet(red if invalid_3 else normal)
