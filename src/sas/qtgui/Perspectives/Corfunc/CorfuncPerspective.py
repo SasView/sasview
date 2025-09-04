@@ -636,6 +636,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMax.setStyleSheet(red if invalid_1 else normal)
         self.txtUpperQMin.setStyleSheet(red if invalid_2 else normal)
         self.txtUpperQMax.setStyleSheet(red if invalid_3 else normal)
+        
+        # Pops a message box if the slider values are out of range
+        if p1 < qmin or p3 > qmax:
+            msg = "The slider values are out of range."
+            msg += f"\n The minimum value is {qmin:.8g} and the maximum value is {qmax:.8g}"
+            dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            dialog.exec_()
+            return
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         """ Slider state changed"""
