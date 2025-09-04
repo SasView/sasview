@@ -134,7 +134,8 @@ class CorfuncSlider(QtWidgets.QWidget):
     def mouseReleaseEvent(self, event: QtGui.QMouseEvent):
         if self.isEnabled():
             if self._drag_id is not None and self._movement_line_position is not None:
-                self.set_boundary(self._drag_id, self.inverse_transform(self._movement_line_position))
+                safe_pos = self._sanitise_new_position(self._drag_id, self._movement_line_position)
+                self.set_boundary(self._drag_id, self.inverse_transform(safe_pos))
 
             self._drag_id = None
             self._movement_line_position = None
