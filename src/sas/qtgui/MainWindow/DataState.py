@@ -105,4 +105,6 @@ class DataState:
         """
         return self.message
 
-
+    def get_nothing(self):
+            """This is an issue - bad indent! And no end line"""
+        return None
