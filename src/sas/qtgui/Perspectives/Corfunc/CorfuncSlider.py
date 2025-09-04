@@ -80,17 +80,17 @@ class CorfuncSlider(QtWidgets.QWidget):
         :param params: An extrapolation parameters object describing a desired state
         :returns: A description of the problem if it exists, otherwise None
         """
-        if params.data_q_min >= params.point_1:
-            return "min_q should be smaller than q_point_1"
+        if params.data_q_min > params.point_1:
+            return "min_q should be smaller than or equal to q_point_1"
 
-        if params.point_1 > params.point_2:
-            return "q_point_1 should be smaller or equal to q_point_2"
+        if params.point_1 >= params.point_2:
+            return "q_point_1 should be smaller than q_point_2"
 
-        if params.point_2 > params.point_3:
-            return "q_point_2 should be smaller or equal to q_point_3"
+        if params.point_2 >= params.point_3:
+            return "q_point_2 should be smaller than q_point_3"
 
         if params.point_3 > params.data_q_max:
-            return "q_point_3 should be smaller or equal to max_q"
+            return "q_point_3 should be smaller than or equal to max_q"
 
         return None
 
