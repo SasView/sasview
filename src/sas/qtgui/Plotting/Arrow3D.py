@@ -2,10 +2,13 @@
 Module that draws multiple arrows in 3D coordinates
 """
 
+import time
+
 import numpy as np
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
-import time
+
+
 # from matplotlib.artist import allow_rasterization
 class Arrow3D(FancyArrowPatch):
     """
@@ -33,7 +36,7 @@ class Arrow3D(FancyArrowPatch):
             # To turn the updating off during dragging
             base.canvas.mpl_connect('button_press_event', self.on_left_down)
             base.canvas.mpl_connect('button_release_event', self.on_left_up)
-    
+
     def set_realtime(self, realtime):
         """
             Bool specifying whether arrows should be shown rotating while dragging is in progress
@@ -57,7 +60,7 @@ class Arrow3D(FancyArrowPatch):
         if t_up > 0.1:
             self.leftdown = False
             self.base.canvas.draw()
-    
+
     def update_data(self, xs, ys, zs):
         self._verts3d = xs, ys, zs
         self.base.canvas.draw()

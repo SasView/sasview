@@ -1,18 +1,14 @@
+import importlib.resources as resources
 from collections import defaultdict
 
 from PySide6 import QtWidgets
-from PySide6.QtGui import QImage, QPixmap, QIcon
-from PySide6.QtWidgets import QDialog, QWidget, QTextBrowser, QVBoxLayout, QHBoxLayout, QPushButton, QCheckBox
-from PySide6.QtCore import QUrl, QSize
+from PySide6.QtCore import QSize, QUrl
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import QCheckBox, QDialog, QHBoxLayout, QPushButton, QTextBrowser, QVBoxLayout, QWidget
 
-from sas.system.version import __version__ as sasview_version
-import importlib.resources as resources
-
+from sas.qtgui.Utilities.WhatsNew.newer import newest, reduced_version, strictly_newer_than
 from sas.system import config
-
-
-from sas.qtgui.Utilities.WhatsNew.newer import strictly_newer_than, reduced_version, newest
-
+from sas.system.version import __version__ as sasview_version
 
 
 def whats_new_messages(only_recent=True):
@@ -102,7 +98,7 @@ class WhatsNew(QDialog):
         self.setWindowTitle(f"What's New in SasView {sasview_version}")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
         self.browser = WhatsNewBrowser()
@@ -201,7 +197,7 @@ class WhatsNew(QDialog):
         """ Set the text of the window to the file with the current index"""
         if len(self.all_messages) > 0:
             filename = self.all_messages[self.current_index]
-            with open(filename, 'r') as fid:
+            with open(filename) as fid:
                 data = fid.read()
                 self.browser.setHtml(data)
         else:
@@ -226,7 +222,6 @@ class WhatsNew(QDialog):
 def main():
     """ Demo/testing window"""
 
-    from sas.qtgui.convertUI import main
 
     app = QtWidgets.QApplication([])
 

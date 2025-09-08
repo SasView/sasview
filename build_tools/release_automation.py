@@ -1,13 +1,13 @@
+import argparse
+import datetime
+import json
 import logging
+import os
+import sys
+from csv import DictReader
+from pathlib import Path
 
 import requests
-import argparse
-import json
-import datetime
-import sys
-import os
-from pathlib import Path
-from csv import DictReader
 
 from sas.system.legal import legal
 
@@ -240,7 +240,7 @@ def update_sasmodels_init(version):
     """
     init_file = os.path.join('sasmodels', 'sasmodels', '__init__.py')
     output_lines = []
-    with open(init_file, 'r') as f:
+    with open(init_file) as f:
         for line in f.readlines():
             if line[:11] == '__version__':
                 output_lines.append('__version__ = \"' + version + '\"\n')
@@ -258,7 +258,7 @@ def update_sasdata_init(version):
     """
     init_file = CURRENT_PATH / 'sasdata' / 'sasdata' / '__init__.py'
     output_lines = []
-    with open(init_file, 'r') as f:
+    with open(init_file) as f:
         for line in f.readlines():
             if line[:11] == '__version__':
                 output_lines.append('__version__ = \"' + version + '\"\n')
@@ -270,7 +270,7 @@ def update_sasdata_init(version):
 
 def update_file(license_file: Path, license_line: str, line_to_update: int):
     """Update a specific line in a text file."""
-    with open(license_file, 'r') as f:
+    with open(license_file) as f:
         output_lines = f.readlines()
         output_lines[line_to_update] = license_line
     with open(license_file, 'w') as f:

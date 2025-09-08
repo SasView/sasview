@@ -1,11 +1,10 @@
-from PySide6 import QtCore
 from PySide6 import QtWidgets
 
-from sas.qtgui.Plotting.PlotUtilities import COLORS, COLORS_LETTER, WEIGHTS, FONTS
+from sas.qtgui.Plotting.PlotUtilities import COLORS, COLORS_LETTER, FONTS, WEIGHTS
 from sas.qtgui.Plotting.UI.PlotLabelPropertiesUI import Ui_PlotLabelPropertiesUI
 
 
-class PlotLabelPropertyHolder():
+class PlotLabelPropertyHolder:
     def __init__(self, font=None, color=None, weight=None, size=None, text="",):
         self.__properties = {}
         self.__properties['font'] = font

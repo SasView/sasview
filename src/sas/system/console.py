@@ -1,8 +1,10 @@
 """
 Windows console binding for SasView
 """
-import os, sys
 import atexit
+import os
+import sys
+
 
 def attach_windows_console():
     """
@@ -77,7 +79,7 @@ class WindowsConsole(metaclass=Singleton):
     def _read_fd(self):
         if self._conin is None:
             self._attach_console()
-            self._conin = open("CONIN$", "r")
+            self._conin = open("CONIN$")
         return self._conin
     @property
     def _write_fd(self):
@@ -113,7 +115,7 @@ class WindowsConsole(metaclass=Singleton):
 
 def setup_console(stderr_as="console"):
     """
-    Lazy redirect of stdio to windows console. 
+    Lazy redirect of stdio to windows console.
 
     Handling of stderr is defined by the caller:
 
@@ -146,29 +148,21 @@ def setup_console_simple(stderr_to_stdout=True):
     if os.name == 'nt':
         def console_open(mode):
             attach_windows_console()
-            return open("CON:", "r") if mode == "r" else open("CON:", "w") 
+            return open("CON:") if mode == "r" else open("CON:", "w")
         if sys.__stdin__ is None:
             sys.__stdin__ = sys.stdin = console_open("r")
         if sys.__stdout__ is None:
             sys.__stdout__ = sys.stdout = console_open("w")
         if sys.__stderr__ is None:
-            sys.__stderr__ = sys.stderr = sys.__stdout__ if stderr_to_stdout else console_open("w") 
+            sys.__stderr__ = sys.stderr = sys.__stdout__ if stderr_to_stdout else console_open("w")
             sys.__stderr__ = sys.stderr = console_open("w")
 
 
 def demo():
     setup_console()
-    if 0:
-        import win32
-        from win32 import win32console
-        from win32 import win32gui
-        from win32 import win32process, win32api
-        pid = win32process.GetWindowThreadProcessId(hwnd)
-        handle = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid[1])
-        proc_name = win32process.GetModuleFileNameEx(handle, 0)
-        print(proc_name)
     print("demo ready")
-    import code; code.interact(local={'exit': sys.exit})
+    import code
+    code.interact(local={'exit': sys.exit})
     print('demo done')
     #import time; time.sleep(2)
 

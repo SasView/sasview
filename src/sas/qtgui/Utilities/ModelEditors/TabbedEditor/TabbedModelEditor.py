@@ -1,23 +1,22 @@
 # global
-import os
-import re
 import ast
 import datetime
-import logging
-import traceback
 import importlib.util
-
-from PySide6 import QtWidgets, QtCore, QtGui
+import logging
+import os
+import re
+import traceback
 from pathlib import Path
 
-from sas.sascalc.fit import models
-from sas.sascalc.fit.models import find_plugins_dir
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
 from sas.qtgui.Utilities.CustomGUI.CodeEditor import QCodeEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.ModelEditor import ModelEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.PluginDefinition import PluginDefinition
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import Ui_TabbedModelEditor
+from sas.sascalc.fit import models
+from sas.system.user import MAIN_DOC_SRC, find_plugins_dir
 
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
@@ -153,7 +152,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # If we are loading in a file at the launch of the editor instead of letting the user pick, we need to process the HTML location from
         # the documentation viewer into the filepath for its corresponding RST
         if at_launch:
-            from sas.sascalc.doc_regen.makedocumentation import MAIN_DOC_SRC
             user_models = find_plugins_dir()
             user_model_name = user_models + self.load_file + ".py"
 
@@ -166,7 +164,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 self.is_python = False
                 self.is_documentation = True
         else:
-            plugin_location = models.find_plugins_dir()
+            plugin_location = find_plugins_dir()
             filename = QtWidgets.QFileDialog.getOpenFileName(
                                             self,
                                             'Open Plugin',
@@ -201,7 +199,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         self.editor_widget.blockSignals(True)
         plugin_text = ""
-        with open(filename, "r", encoding="utf-8") as plugin:
+        with open(filename, encoding="utf-8") as plugin:
             plugin_text = plugin.read()
             self.editor_widget.txtEditor.setPlainText(plugin_text)
         self.editor_widget.setEnabled(True)
@@ -239,7 +237,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.c_editor_widget = ModelEditor(self, is_python=False)
         self.tabWidget.addTab(self.c_editor_widget, c_display_name)
         # Read in the file and set in on the widget
-        with open(self.filename_c, "r", encoding="utf-8") as plugin:
+        with open(self.filename_c, encoding="utf-8") as plugin:
             self.c_editor_widget.txtEditor.setPlainText(plugin.read())
         self.c_editor_widget.modelModified.connect(self.editorModelModified)
 
@@ -448,7 +446,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         :param full_path: full path to the model file
         """
         try:
-            with open(full_path, "r", encoding="utf-8") as plugin:
+            with open(full_path, encoding="utf-8") as plugin:
                 model_str = plugin.read()
             ast.parse(model_str)
             GuiUtils.checkModel(full_path)
@@ -1123,7 +1121,7 @@ C_COMMENT_TEMPLATE = """\
 // 4. Press 'Apply' or 'Save' to save your model and run a model check
 //      (note that the model check will fail if there is no python file
 //      of the same name in your plugins directory)
-// 
+//
 // NOTE: SasView has many built-in functions that you can use in your C
 //       model. For example, spherical Bessel functions
 //       (lib/sas_3j1x_x.c), Gaussian, quadrature (lib/sas_J1.c), and
@@ -1179,7 +1177,7 @@ C_TEMPLATE = """\
 //}}
 
 static void
-Fq(double q, 
+Fq(double q,
    double *F1,
    double *F2,
    {args}) // Remove arguments as needed
@@ -1190,7 +1188,7 @@ Fq(double q,
     //    beta approximation. the *F2 value is F(Q)^2 and equivalent to
     //    the output of Iq. While currently F(Q) is only used in the
     //    beta approximation, it may be used for other things in the
-    //    future. You must still define Iqac or Iqabc if your model has 
+    //    future. You must still define Iqac or Iqabc if your model has
     //    orientation  parameters (i.e. fits data in 2D plots).
     // TO USE: Convert your copied Python code to C below and uncomment
     // it. Note that F2 is essentially F1^2.
@@ -1261,7 +1259,7 @@ Iqxy(double qx,
     //            Iqac or Iqabc or Ixy.  Remove the others.
     // IMPORTANT: Make sure to remove or comment out any Iqxy in the
     //            python file
-    
+
     return 1.0;
 }}
 """

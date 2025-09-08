@@ -1,12 +1,13 @@
 import logging
 
+from sasdata.dataloader.data_info import Data1D
+
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import (
     MaxEntParameters,
     MaxEntResult,
 )
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.size_distribution.SizeDistribution import sizeDistribution
-from sasdata.dataloader.data_info import Data1D
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,8 @@
-import requests
 import platform
 from enum import Enum
+
+import requests
+
 
 class OS(Enum):
     WIN = 0
@@ -38,7 +40,7 @@ def get_ausaxs():
         with open(base_loc+lib, "wb") as f:
             f.write(response.content)
 
-def fetch_external_dependencies(): 
+def fetch_external_dependencies():
     #surround with try/except to avoid breaking the build if the download fails
     try:
         get_ausaxs()

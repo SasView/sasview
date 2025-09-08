@@ -1,8 +1,6 @@
-import sys
-import time
-import copy
-import traceback
 import logging
+import time
+import traceback
 
 from sas.sascalc.data_util.calcthread import CalcThread
 
@@ -15,7 +13,7 @@ def map_getattr(classInstance, classFunc, *args):
     """
     try:
         return_value = getattr(classInstance, classFunc)(*args)
-    except Exception as ex:
+    except Exception:
         logger.error("Fitting failed: %s", traceback.format_exc())
         return None
     return  return_value
@@ -23,7 +21,7 @@ def map_getattr(classInstance, classFunc, *args):
 def map_apply(arguments):
     try:
         return_value = arguments[0](*arguments[1:])
-    except Exception as ex:
+    except Exception:
         logger.error("Fitting failed: %s", traceback.format_exc())
         return None
     return return_value
@@ -73,7 +71,6 @@ class FitThread(CalcThread):
         """
         Perform a fit
         """
-        msg = ""
         try:
             fitter_size = len(self.fitter)
             list_handler = [self.handler]*fitter_size
@@ -97,7 +94,7 @@ class FitThread(CalcThread):
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
             #print "keyboard exception"
-            #Stop on exception during fitting. Todo: need to put 
+            #Stop on exception during fitting. Todo: need to put
             #some mssg and reset progress bar.
 
             # Shouldn't this be re-raising? ConsoleUpdate doesn't act on it.

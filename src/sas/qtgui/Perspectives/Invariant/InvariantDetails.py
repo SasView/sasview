@@ -1,11 +1,9 @@
-import sys
-import os
-from PySide6 import QtCore
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
+
+from .InvariantUtils import WIDGETS
 
 # local
 from .UI.InvariantDetailsUI import Ui_Dialog
-from .InvariantUtils import WIDGETS
 
 # ERROR_COLOR = wx.Colour(255, 0, 0, 128)
 # EXTRAPOLATION_COLOR = wx.Colour(169, 169, 168, 128)
@@ -219,5 +217,5 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
 
         if msg == '':
             msg = "No Warnings to report\n"
-        
+
         return msg

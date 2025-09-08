@@ -1,48 +1,36 @@
-import sys
-import os
-
-from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
-from matplotlib.figure import Figure
-import numpy
 import logging
+import math
+import os
+import sys
 import time
 import timeit
-import math
 
-from scipy.spatial.transform import Rotation
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
-from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+import numpy
+from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d.axes3d import Axes3D
-from matplotlib import __version__ as mpl_version
-
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
+from scipy.spatial.transform import Rotation
 from twisted.internet import threads
 
-import periodictable
+from sasdata.dataloader.data_info import Detector, Source
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Utilities.GenericReader import GenReader
-from sasdata.dataloader.data_info import Detector, Source
-from sas.system.version import __version__
-from sas.sascalc.calculator import sas_gen
-from sas.sascalc.fit import models
-from sas.sascalc.calculator.geni import radius_of_gyration, create_beta_plot, f_of_q
 import sas.sascalc.calculator.gsc_model as gsc_model
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Arrow3D import Arrow3D
-
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
+from sas.qtgui.Utilities.GenericReader import GenReader
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.sascalc.calculator import sas_gen
+from sas.sascalc.calculator.geni import create_beta_plot, f_of_q, radius_of_gyration
+from sas.sascalc.fit import models
 
 # Local UI
 from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
+
 
 class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
@@ -155,7 +143,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         #check for SLD changes
         #TODO: Implement a scientifically sound method for obtaining protein volume - Current value is a inprecise approximation. Until then Solvent SLD does not impact RG - SLD.
-        # self.txtSolventSLD.editingFinished.connect(self.update_Rg)        
+        # self.txtSolventSLD.editingFinished.connect(self.update_Rg)
 
         #update coord display
         self.txtEnvYaw.textChanged.connect(self.update_coords)
@@ -172,7 +160,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxMagData.setEnabled(False)
         self.change_data_type()
         # verify that the new enabled files are compatible
-        
+
         self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
         self.toggle_error_functionality()
 
@@ -204,42 +192,42 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtSolventSLD.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSolventSLD))
         self.txtNucl.setValidator(
-            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtNucl))        
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtNucl))
 
         self.txtMx.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtMx))
         self.txtMy.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtMy))
         self.txtMz.setValidator(
-            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtMz))                
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtMz))
 
         self.txtXstepsize.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtXstepsize))
         self.txtYstepsize.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtYstepsize))
         self.txtZstepsize.setValidator(
-            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtZstepsize))  
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtZstepsize))
 
         self.txtEnvYaw.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtEnvYaw))
         self.txtEnvPitch.setValidator(
-            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtEnvPitch))   
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtEnvPitch))
         self.txtEnvRoll.setValidator(
-            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtEnvRoll)) 
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtEnvRoll))
         self.txtSampleYaw.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleYaw))
         self.txtSamplePitch.setValidator(
-            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSamplePitch))   
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSamplePitch))
         self.txtSampleRoll.setValidator(
-            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleRoll))   
+            QtGui.QRegularExpressionValidator(validat_regex_float, self.txtSampleRoll))
 
         self.change_qValidator()
-        
+
         # 2 <= Qbin and nodes integers < 1000
         validat_regex_int = QtCore.QRegularExpression(r'^[2-9]|[1-9]\d{1,2}$')
         self.txtNoQBins.setValidator(QtGui.QRegularExpressionValidator(validat_regex_int,
                                                             self.txtNoQBins))
-        
+
         # Plugin File Name
         rx = QtCore.QRegularExpression("^[A-Za-z0-9_]*$")
         self.txtFileName.setValidator(QtGui.QRegularExpressionValidator(rx))
@@ -249,7 +237,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.txtYnodes.setValidator(
             QtGui.QRegularExpressionValidator(validat_regex_int, self.txtYnodes))
         self.txtZnodes.setValidator(
-            QtGui.QRegularExpressionValidator(validat_regex_int, self.txtZnodes))         
+            QtGui.QRegularExpressionValidator(validat_regex_int, self.txtZnodes))
 
         # plots - 3D in real space
         self.trigger_plot_3d.connect(self.plot3d)
@@ -403,7 +391,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             UVW_to_uvw, _ = self.create_rotation_matrices()
             p_vec = (UVW_to_uvw * Rotation.from_euler("ZY", [phi, theta])).apply(numpy.array([0, 0, 0.8])) # vector relative to beamline coords
             self.polarisation_arrow.update_data([[0, p_vec[2]]], [[0, p_vec[0]]], [[0, p_vec[1]]])
-    
+
     def set_polarisation_visible(self, visible):
         """
         This function updates the visibility of the polarisation vector
@@ -413,7 +401,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.polarisation_arrow.set_visible(visible)
         self.p_text.set_visible(visible)
         self.polarisation_arrow.base.canvas.draw()
-    
+
     def reset_camera(self):
         self.view_azim = 45
         self.view_elev = 45
@@ -425,7 +413,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
     def gui_text_changed_slot(self):
         """Catches the signal that a textbox has beeen altered"""
         self.gui_text_changed(self.sender())
-    
+
     def eventFilter(self, target, event):
         """Catches the event that a textbox has been enabled/disabled"""
         if target in self.lineEdits and event.type() == QtCore.QEvent.EnabledChange:
@@ -488,14 +476,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             sender.setStyleSheet(self.TEXTBOX_ERROR_STYLESTRING)
         # If the LineEdit is an acceptable value according to the regex apply warnings
         # This functionality was previously found in check_value()
-        if not(sender in self.invalidLineEdits):
+        if sender not in self.invalidLineEdits:
             if sender == self.txtNoQBins :
                 xnodes = float(self.txtXnodes.text())
                 ynodes = float(self.txtYnodes.text())
                 znodes = float(self.txtZnodes.text())
                 value = float(str(self.txtNoQBins.text()))
-                max_step =  3*max(xnodes, ynodes, znodes) 
-                    # limits qmin > maxq / nodes                 
+                max_step =  3*max(xnodes, ynodes, znodes)
+                    # limits qmin > maxq / nodes
                 if value < 2 or value > max_step:
                     self.txtNoQBins.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
                 else:
@@ -505,7 +493,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 ystepsize = float(self.txtYstepsize.text())
                 zstepsize = float(self.txtZstepsize.text())
                 value = float(str(self.txtQxMax.text()))
-                max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))                   
+                max_q = numpy.pi / (max(xstepsize, ystepsize, zstepsize))
                 if value <= 0 or value > max_q or value < float(self.txtQxMin.text()):
                     self.txtQxMax.setStyleSheet(self.TEXTBOX_WARNING_STYLESTRING)
                 else:
@@ -524,7 +512,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 else:
                     self.txtQxMin.setStyleSheet(self.TEXTBOX_DEFAULT_STYLESTRING)
 
-            
+
 
     def selectedshapechange(self):
         """
@@ -538,7 +526,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """Disables/Enables some functionality if the state of the GUI means calculation cannot proceed
 
         This function is called during any process whenever there is a risk that the state
-        of the GUI will make the data invalid for plotting, drawing or saving. If that is the 
+        of the GUI will make the data invalid for plotting, drawing or saving. If that is the
         case then this functionality is disabled. This function is currently called when two
         files are being verified for compatibility, and when textboxes enter 'intermediate' states.
         """
@@ -620,7 +608,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # 0 < Qmin&QMax <= 1000
         self.txtQxMax.setValidator(QtGui.QDoubleValidator(min, 1000, 10, self.txtQxMax))
         self.txtQxMin.setValidator(QtGui.QDoubleValidator(min, 1000, 10, self.txtQxMin))
-    
+
     def update_cbOptionsCalc_visibility(self):
         # Only allow 1D averaging if no magnetic data and not elements
         allow = not self.is_mag
@@ -640,7 +628,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.checkboxLogSpace.setChecked(not self.is_mag)
             self.checkboxLogSpace.setEnabled(not self.is_mag)
 
-        
+
     def change_is_avg(self):
         """Adjusts the GUI for whether 1D averaging is enabled
 
@@ -665,19 +653,19 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.checkboxLogSpace.setChecked(self.is_avg)
         self.checkboxLogSpace.setEnabled(self.is_avg)
         self.checkboxPluginModel.setEnabled(self.is_avg)
-        
-        if self.is_avg:   
+
+        if self.is_avg:
             self.txtMx.setText("0.0")
             self.txtMy.setText("0.0")
             self.txtMz.setText("0.0")
             self.txtQxMin.setText(str(float(self.txtQxMax.text())*.001))
-            
+
         # If not averaging then re-enable the magnetic sld textboxes
         else:
             self.txtQxMin.setText(str(float(self.txtQxMax.text())*-1))
             self.checkboxPluginModel.setChecked(False)
             self.txtFileName.setEnabled(False)
-    
+
     def check_for_magnetic_controls(self):
         if self.txtMx.hasAcceptableInput() and self.txtMy.hasAcceptableInput() and self.txtMz.hasAcceptableInput():
             if (not self.is_mag) and float(self.txtMx.text()) == 0 and float(self.txtMy.text()) == 0 and float(self.txtMy.text()) == 0:
@@ -763,7 +751,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                                         completefn=lambda data=None: self.complete_loading_ex(data=data, load_nuc=load_nuc),
                                         updatefn=self.load_update)
                 self.reader.queue()
-        except (RuntimeError, IOError):
+        except (OSError, RuntimeError):
             log_msg = "Generic SAS Calculator: %s" % sys.exc_info()[1]
             logging.info(log_msg)
             raise
@@ -826,7 +814,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.txtMagData.setText(os.path.basename(str(self.datafile)))
             if self.ext in self.omf_reader.ext:
                 # only magnetic data can be read from omf files
-                self.mag_sld_data = data 
+                self.mag_sld_data = data
                 self.check_units()
             elif self.ext in self.sld_reader.ext or self.ext in self.vtk_reader.ext:
                 if load_nuc:
@@ -837,7 +825,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 # only nuclear data can be read from pdb files
                 self.nuc_sld_data = data
                 is_pdbdata = True
-        except IOError:
+        except OSError:
             log_msg = "Loading Error: " \
                       "This file format is not supported for GenSAS."
             logging.warning(log_msg)
@@ -883,7 +871,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     def update_gui(self):
         """Update the interface and model with values from loaded data
-        
+
         This function updates the model parameter 'total_volume' with values from the loaded data
         and then updates all values in the gui with either model paramters or paramaters from the
         loaded data.
@@ -956,13 +944,13 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # otherwise leave as set since editable by user
         self.update_Rg()
 
-        
+
     def update_Rg(self):
         #update RG boxes or run RG calculation
         if self.is_nuc:
             if self.nuc_sld_data.is_elements:
-                self.txtRgMass.setText(str("N/A"))
-                self.txtRG.setText(str("N/A "))                    
+                self.txtRgMass.setText("N/A")
+                self.txtRG.setText("N/A ")
                 logging.info("SasView does not support computation of Radius of Gyration for elements.")
             else:
                 rgVals = radius_of_gyration(self.nuc_sld_data)  #[String, String, Float], float used for plugin model
@@ -971,14 +959,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self.rGMass = rgVals[2]                         #used in plugin model
 
         elif self.is_mag:
-            self.txtRgMass.setText(str("N/A"))            
-            self.txtRG.setText(str("N/A"))
+            self.txtRgMass.setText("N/A")
+            self.txtRG.setText("N/A")
             logging.info("SasView does not support computation of Radius of Gyration for Magnetic Data.")
         else:
-            self.txtRgMass.setText(str("No Data"))
-            self.txtRG.setText(str("No Data"))
-            
-        
+            self.txtRgMass.setText("No Data")
+            self.txtRG.setText("No Data")
+
+
 
     def update_geometry_effects(self):
         """This function updates the number of pixels and total volume when the number of nodes/stepsize is changed
@@ -1056,7 +1044,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     def onReset(self):
         """ Reset the GUI to its default state
-        
+
         This resets all GUI parameters to their default values and also resets
         all GUI states such as loaded files, stored data, verification and disabled/enabled
         widgets.
@@ -1126,7 +1114,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             # update the gui for the no files loaded case
             self.change_data_type()
             # verify that the new enabled files are compatible
-            
+
             self.verified = self.model.file_verification(self.nuc_sld_data, self.mag_sld_data)
             self.toggle_error_functionality()
 
@@ -1229,14 +1217,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         qstep = self.npts_x
         if self.checkboxLogSpace.isChecked():
             self.xValues = numpy.logspace(start=math.log(xmin,10),
-                                stop=math.log(xmax,10), 
-                                num=qstep, 
+                                stop=math.log(xmax,10),
+                                num=qstep,
                                 endpoint=True)
         else:
-            self.xValues = numpy.linspace(start=xmin, 
-                           stop=xmax, 
-                           num=qstep, 
-                           endpoint=True)        
+            self.xValues = numpy.linspace(start=xmin,
+                           stop=xmax,
+                           num=qstep,
+                           endpoint=True)
         # store x and y bin centers in q space
         y = numpy.ones(len(self.xValues))
         dy = numpy.zeros(len(self.xValues))
@@ -1244,7 +1232,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         self.data = Data1D(x=self.xValues, y=y)
         self.data.dx = dx
         self.data.dy = dy
-    
+
     def create_full_sld_data(self):
         """Create the sld data to be used in the final calculation
 
@@ -1327,7 +1315,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                     sld_data.line_x = self.mag_sld_data.line_x
                     sld_data.line_y = self.mag_sld_data.line_y
                     sld_data.line_z = self.mag_sld_data.line_z
-        
+
         # take pixel data from nuclear sld as preference because may contatin atom types from pdb files
         if self.is_nuc:
             sld_data.pix_type = self.nuc_sld_data.pix_type
@@ -1356,8 +1344,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
         The rotation given by the user transforms the BASIS VECTORS - the user gives
         the trasformation from beamline coords to samplecoords for example - so from there perspective the
-        beamline is the fixed object and the environment and sample rotate. The rotation is first a yaw angle 
-        about the V axis (UVW -> U'V'W') then a pitch angle about the U' axis (U'V'W' -> U''V''W'') and 
+        beamline is the fixed object and the environment and sample rotate. The rotation is first a yaw angle
+        about the V axis (UVW -> U'V'W') then a pitch angle about the U' axis (U'V'W' -> U''V''W'') and
         finally a roll rotation abot the W'' axis (U''V''W'' -> uvw).
 
         This function expects that the textbox values are correct.
@@ -1419,10 +1407,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             d.addCallback(self.calculateComplete)
             d.addErrback(self.calculateFailed)
         except Exception:
-            log_msg = "{}. stop".format(sys.exc_info()[1])
+            log_msg = f"{sys.exc_info()[1]}. stop"
             logging.info(log_msg)
         return
-    
+
     def onCancel(self):
         """Notify the calculation thread that the user has cancelled the calculation.
         """
@@ -1472,7 +1460,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         if self.is_avg and not len(input[1]):
             self.data_to_plot = self.model.runXY(input)
 
-        # chunk the other calculations to allow cancellation        
+        # chunk the other calculations to allow cancellation
         else:
             for ind in range(0, nq, chunk_size):
                 t = timer()
@@ -1502,7 +1490,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         # if Beta(Q) Calculation has been requested, run calculation
         if self.is_beta:
             self.data_betaQ  = create_beta_plot(self.xValues, self.nuc_sld_data, self.data_to_plot)
-        
+
         if self.checkboxPluginModel.isChecked():
             self.fQ = f_of_q(self.xValues, self.nuc_sld_data)
             model_str, model_path = gsc_model.generate_plugin(self.txtFileName.text(), self.data_to_plot, self.xValues,
@@ -1555,10 +1543,10 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 break
             else:
                 i += 1
-            
+
         return ("custom_gsc" + str(i))
-        
-        
+
+
     def onSaveFile(self):
         """Save data as .sld file"""
         path = os.path.dirname(str(self.datafile))
@@ -1578,7 +1566,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 sas_gen.SLDReader().write(filename, sld_data)
             except Exception:
                 raise
-    
+
     def file_name(self):
         """Creates a suitable filename for display on graphs depending on which files are enabled
 
@@ -1602,15 +1590,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
 
     def plot3d(self, has_arrow=False):
         """ Generate 3D plot in real space with or without arrows
-        
+
         :param has_arrow: Whether to plot arrows for the magnetic field on the plot.
             Defaults to `False`
         :type has_arrow: bool
         """
         sld_data = self.create_full_sld_data()
         self.write_new_values_from_gui()
-        graph_title = " Graph {}: {} 3D SLD Profile".format(self.graph_num,
-                                                            self.file_name())
+        graph_title = f" Graph {self.graph_num}: {self.file_name()} 3D SLD Profile"
         if has_arrow:
             graph_title += ' - Magnetic Vector as Arrow'
 
@@ -1626,8 +1613,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
         """ Generate 1D or 2D plot, called in Compute"""
         if self.is_avg or self.is_avg is None:
             data = Data1D(x=self.data.x, y=self.data_to_plot)
-            data.title = "GenSAS {}  #{} 1D".format(self.file_name(),
-                                                    int(self.graph_num))
+            data.title = f"GenSAS {self.file_name()}  #{int(self.graph_num)} 1D"
             data.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
             data.yaxis(r'\rm{Intensity}', 'cm^{-1}')
             data.id = data.title # required for serialization
@@ -1635,8 +1621,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             self.graph_num += 1
             if self.is_beta:
                 dataBetaQ = Data1D(x=self.data.x, y=self.data_betaQ)
-                dataBetaQ.title = "GenSAS {}  #{} BetaQ".format(self.file_name(),
-                                                    int(self.graph_num))
+                dataBetaQ.title = f"GenSAS {self.file_name()}  #{int(self.graph_num)} BetaQ"
                 dataBetaQ.xaxis(r'\rm{Q_{x}}', r'\AA^{-1}')
                 dataBetaQ.yaxis(r'\rm{Beta(Q)}', 'cm^{-1}')
                 dataBetaQ.id = dataBetaQ.title # required for serialization
@@ -1650,9 +1635,8 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                           xmin=self.data.xmin, xmax=self.data.ymax,
                           ymin=self.data.ymin, ymax=self.data.ymax,
                           err_image=self.data.err_data)
-            data.title = "GenSAS {}  #{} 2D".format(self.file_name(),
-                                                    int(self.graph_num))
-            data.id = "gsc_2d_{}".format(self.graph_num) # required for serialization
+            data.title = f"GenSAS {self.file_name()}  #{int(self.graph_num)} 2D"
+            data.id = f"gsc_2d_{self.graph_num}" # required for serialization
             zeros = numpy.ones(data.data.size, dtype=bool)
             data.mask = zeros
             data.xmin = self.data.xmin
@@ -1736,9 +1720,9 @@ class Plotter3DWidget(PlotterBase):
         self.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
         ax = Axes3D(self.figure, auto_add_to_figure=False)
         self.figure.add_axes(ax)
-        ax.set_xlabel(r'x ($\A{}$)'.format(data.pos_unit))
-        ax.set_ylabel(r'z ($\A{}$)'.format(data.pos_unit))
-        ax.set_zlabel(r'y ($\A{}$)'.format(data.pos_unit))
+        ax.set_xlabel(rf'x ($\A{data.pos_unit}$)')
+        ax.set_ylabel(rf'z ($\A{data.pos_unit}$)')
+        ax.set_zlabel(rf'y ($\A{data.pos_unit}$)')
 
         # I. Plot null points
         if is_zero.any():
@@ -1757,7 +1741,7 @@ class Plotter3DWidget(PlotterBase):
         for key in list(color_dic.keys()):
             chosen_color = pix_symbol == key
             if numpy.any(chosen_color):
-                other_color = other_color & (chosen_color!=True)
+                other_color = other_color & (chosen_color != True)
                 color = color_dic[key]
                 im = ax.plot(pos_x[chosen_color], pos_z[chosen_color],
                          pos_y[chosen_color], marker, c=color, alpha=0.5,
@@ -1775,17 +1759,17 @@ class Plotter3DWidget(PlotterBase):
                     if a_name.count(name) == 0:
                         a_name += new_name
             # plot in black
-            im = ax.plot(pos_x[other_color], pos_z[other_color],
-                         pos_y[other_color], marker, c="k", alpha=0.5,
-                         markeredgecolor="k", markersize=m_size, label=a_name)
+            ax.plot(pos_x[other_color], pos_z[other_color],
+                    pos_y[other_color], marker, c="k", alpha=0.5,
+                    markeredgecolor="k", markersize=m_size, label=a_name)
         if data.pix_type == 'atom':
             ax.legend(loc='upper left', prop={'size': 10})
         # IV. Draws atomic bond with grey lines if any
         if data.has_conect:
             for ind in range(len(data.line_x)):
-                im = ax.plot(data.line_x[ind], data.line_z[ind],
-                             data.line_y[ind], '-', lw=0.6, c="grey",
-                             alpha=0.3)
+                ax.plot(data.line_x[ind], data.line_z[ind],
+                        data.line_y[ind], '-', lw=0.6, c="grey",
+                        alpha=0.3)
         # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:
             def _draw_arrow(input=None, update=None):
@@ -1840,10 +1824,10 @@ class Plotter3DWidget(PlotterBase):
                         ax.add_artist(arrows)
                 except Exception:
                     pass
-  
+
                 log_msg = "Arrow Drawing completed.\n"
                 logging.info(log_msg)
-  
+
             log_msg = "Arrow Drawing is in progress..."
             logging.info(log_msg)
 
@@ -1883,7 +1867,7 @@ class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
         self.gsc_instance = gsc_instance
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
@@ -1893,4 +1877,3 @@ class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
             self.gsc_instance.plot3ds.remove(self)
 
         event.accept()
-        

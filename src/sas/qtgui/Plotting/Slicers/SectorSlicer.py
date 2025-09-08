@@ -1,10 +1,9 @@
 import numpy
-import logging
 
-from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 MIN_PHI = 0.05
 

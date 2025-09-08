@@ -1,21 +1,24 @@
-import webbrowser
-
-from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
-from PySide6.QtWidgets import QVBoxLayout
-from PySide6 import QtWidgets
-from sas.qtgui.Utilities.MuMag import MuMagLib
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import matplotlib.pyplot as plt
-
-import matplotlib.pylab as pl
-import numpy as np
-
-from sas.qtgui.Utilities.MuMag.datastructures import ExperimentalData, LoadFailure, FitFailure, ExperimentGeometry, \
-    FitParameters, FitResults, LeastSquaresOutputPerpendicular
-from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
 
 from logging import getLogger
+
+import matplotlib.pylab as pl
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PySide6 import QtWidgets
+from PySide6.QtWidgets import QVBoxLayout
+
+from sas.qtgui.Utilities.MuMag.datastructures import (
+    ExperimentalData,
+    ExperimentGeometry,
+    FitFailure,
+    FitParameters,
+    FitResults,
+    LeastSquaresOutputPerpendicular,
+    LoadFailure,
+)
+from sas.qtgui.Utilities.MuMag.MuMagLib import MuMagLib
+from sas.qtgui.Utilities.MuMag.UI.MuMagUI import Ui_MuMagTool
 
 log = getLogger("MuMag")
 
@@ -154,7 +157,7 @@ class MuMag(QtWidgets.QMainWindow, Ui_MuMagTool):
         a_max = self.aMaxSpinBox.value()
 
         if a_max <= a_min:
-            raise ValueError(f"minimum A must be less than maximum A")
+            raise ValueError("minimum A must be less than maximum A")
 
         match self.ScatteringGeometrySelect.currentText().lower():
             case "parallel":

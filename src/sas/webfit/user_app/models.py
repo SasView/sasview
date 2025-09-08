@@ -1,6 +1,4 @@
-from django.db import models
 from logging import getLogger
-from django.contrib.auth.models import User
 
 models_logger = getLogger(__name__)
 

@@ -1,19 +1,17 @@
-import sys
+import matplotlib as mpl
 import numpy
 import pytest
 
-import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
 
-from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
-
-from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Plotting.Plotter as Plotter
 
 # Local
 from sas.qtgui.Plotting.LinearFit import LinearFit
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 
 class LinearFitTest:
@@ -135,7 +133,7 @@ class LinearFitTest:
         widget.x_is_log = True
         widget.txtFitRangeMin.setText("-1.0")
         assert not widget.checkFitValues(widget.txtFitRangeMin)
-       
+
 
     def testFloatInvTransform(self, widget):
         '''Test the helper method for providing conversion function'''

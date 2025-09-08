@@ -1,11 +1,10 @@
-import numpy as np
-import warnings
-
-from typing import Optional, Callable, Union
 from collections import namedtuple
+from collections.abc import Callable
 
+import numpy as np
 
 from sas.sascalc.corfunc.vectorisation import ArrayLike, assure_vectorised_argument
+
 Cache = namedtuple("Cache", 'x, y')
 
 class SmoothJoin:
@@ -32,7 +31,7 @@ class SmoothJoin:
         self.start = start
         self.stop = stop
 
-        self._cache: Optional[Cache] = None
+        self._cache: Cache | None = None
 
     @assure_vectorised_argument
     def __call__(self, x: ArrayLike) -> ArrayLike:
@@ -68,7 +67,7 @@ class SmoothJoin:
             # This shouldn't have any divide by zero, as x_mid is strictly bigger than start
             # and strictly less than stop
             h = 1.0 / (1.0 + ((x_mid - self.stop) / (self.start - x_mid)) ** 2)
-            
+
             y[mid_indices] = h * self.right_function(x_mid) + \
                              (1 - h) * self.left_function(x_mid)
 

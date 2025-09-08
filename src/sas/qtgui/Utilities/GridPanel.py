@@ -1,11 +1,10 @@
+import logging
 import os
 import sys
 import time
-import logging
-import webbrowser
 
-from PySide6 import QtCore, QtWidgets, QtGui
-from PySide6.QtCore import QMimeType, QMimeDatabase, QUrl
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QMimeDatabase, QUrl
 from PySide6.QtGui import QDesktopServices
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -89,7 +88,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             logging.info("No data file chosen.")
             return
 
-        with open(datafile, 'r') as csv_file:
+        with open(datafile) as csv_file:
             lines = csv_file.readlines()
 
         self.setupTableFromCSV(lines)
@@ -179,7 +178,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         model_name = results[0][0].model.id
         self.tabWidget.setTabToolTip(self.tabWidget.count()-1, model_name)
         self.data_dict[page_name] = results
-    
+
     def onHelp(self):
         """
         Open a local url in the default browser
@@ -465,7 +464,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
         self.parent = parent
         self.batch_results = output_data
-        
+
 
     def setupTable(self, widget=None,  data=None):
         """
@@ -477,7 +476,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                       'Background [cm^-1]', 'P+ Fraction', 'P+1-theta Fraction',
                       'Calc. Time [sec]', 'Q Min [Å^-1]', 'Q Max [Å^-1]']
 
-            
+
         if data is None:
             return
 
@@ -498,73 +497,73 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             out = pr.out
             cov = pr.cov
             self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
-                "{}".format(filename)))
+                f"{filename}"))
             if out is None:
-                logging.warning("P(r) for {} did not converge.".format(filename))
+                logging.warning(f"P(r) for {filename} did not converge.")
                 continue
             try:
                 self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.noOfTerms)))
+                    f"{pr.noOfTerms:.3g}"))
             except TypeError:
                 failedCells = True
             try:
                 self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.alpha)))
+                    f"{pr.alpha:.3g}"))
             except TypeError:
                 failedCells = True
             try:
                 self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.dmax)))
+                    f"{pr.dmax:.3g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.rg(out))))
+                    f"{pr.rg(out):.3g}"))
             except TypeError:
                 failedCells = True
             try:
                 self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.chi2[0])))
+                f"{pr.chi2[0]:.3g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.iq0(out))))
+                    f"{pr.iq0(out):.3g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.oscillations(out))))
+                    f"{pr.oscillations(out):.3g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 8, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.background)))
+                    f"{pr.background:.3g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 9, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.get_positive(out))))
+                    f"{pr.get_positive(out):.3g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 10, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.get_pos_err(out, cov))))
+                    f"{pr.get_pos_err(out, cov):.3g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 11, QtWidgets.QTableWidgetItem(
-                    "{:.2g}".format(pr.elapsed)))
+                    f"{pr.elapsed:.2g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 12, QtWidgets.QTableWidgetItem(
-                    "{:.2g}".format(pr.q_min)))
+                    f"{pr.q_min:.2g}"))
             except TypeError:
                 failedCells = True
             try:
                     self.tblParams.setItem(i_row, 13, QtWidgets.QTableWidgetItem(
-                    "{:.2g}".format(pr.q_max)))
+                    f"{pr.q_max:.2g}"))
             except TypeError:
                 failedCells = True
         if failedCells:

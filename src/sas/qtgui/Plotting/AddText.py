@@ -1,12 +1,9 @@
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtGui, QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
-import sas.sasview
-
 from sas.qtgui.Plotting.UI.AddTextUI import Ui_AddText
+
 
 class AddText(QtWidgets.QDialog, Ui_AddText):
     """ Simple GUI for a single line text query """
@@ -15,9 +12,9 @@ class AddText(QtWidgets.QDialog, Ui_AddText):
         self.setupUi(self)
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
-        
+
         self._font = QtGui.QFont()
         self._color = "black"
         self.btnFont.clicked.connect(self.onFontChange)

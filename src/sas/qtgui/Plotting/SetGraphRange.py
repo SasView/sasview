@@ -1,15 +1,14 @@
 """
 Allows users to change the range of the current graph
 """
-from PySide6 import QtCore
-from PySide6 import QtGui
 from PySide6 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.UI.SetGraphRangeUI import Ui_setGraphRangeUI
 
 # Local UI
-from sas.qtgui.UI import main_resources_rc
-from sas.qtgui.Plotting.UI.SetGraphRangeUI import Ui_setGraphRangeUI
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
+
 
 class SetGraphRange(QtWidgets.QDialog, Ui_setGraphRangeUI):
     def __init__(self, parent=None, x_range: tuple[float, float]=(0.0, 0.0), y_range: tuple[float, float]=(0.0, 0.0)):

@@ -11,24 +11,21 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
-from pathlib import Path
-from rest_framework import permissions, versioning
-from django.core.signals import setting_changed
-
-from django.conf import settings
-# Import from `django.core.signals` instead of the official location
-# `django.test.signals` to avoid importing the test module unnecessarily.
-from django.core.signals import setting_changed
-from django.utils.module_loading import import_string
-from rest_framework import ISO_8601
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent
 
 #imports for knox
 from datetime import timedelta
+from pathlib import Path
+
+from django.conf import settings
+from django.core.signals import setting_changed
+
+# Import from `django.core.signals` instead of the official location
+# `django.test.signals` to avoid importing the test module unnecessarily.
+from django.utils.module_loading import import_string
 from rest_framework.settings import api_settings
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -120,7 +117,7 @@ REST_FRAMEWORK = {
     #version_param is default set to "version"
 }
 
-# These are the default values if none are set 
+# These are the default values if none are set
 REST_KNOX = {
     'SECURE_HASH_ALGORITHM':'cryptography.hazmat.primitives.hashes.SHA512',
     'AUTH_TOKEN_CHARACTER_LENGTH': 64, # By default, it is set to 64 characters (this shouldn't need changing).

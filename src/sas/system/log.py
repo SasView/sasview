@@ -1,10 +1,9 @@
-from __future__ import print_function
 
 import logging
 import logging.config
 import os
-import sys
 import os.path
+import sys
 
 from sas.system.user import get_log_dir
 
@@ -44,7 +43,7 @@ def setup_logging(level=logging.INFO):
     try:
         filename = os.path.join(get_log_dir(), 'sasview.log')
         fh = logging.FileHandler(filename=filename, mode="a")
-    except IOError:
+    except OSError:
         print(f"ERROR: Log config '{filename}' not found...", file=sys.stderr)
         fh = None
     ch = logging.StreamHandler()

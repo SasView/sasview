@@ -1,12 +1,9 @@
-from rest_framework.response import Response
-
-from dj_rest_auth.views import LoginView
-from dj_rest_auth.registration.views import RegisterView
-from knox.models import AuthToken
-
-from allauth.account.utils import complete_signup
 from allauth.account import app_settings as allauth_settings
-
+from allauth.account.utils import complete_signup
+from dj_rest_auth.registration.views import RegisterView
+from dj_rest_auth.views import LoginView
+from knox.models import AuthToken
+from rest_framework.response import Response
 from serializers import KnoxSerializer
 
 

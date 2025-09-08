@@ -1,8 +1,8 @@
-import pytest
-from pytest import mark
 import numpy as np
+from pytest import mark
 
 from sas.qtgui.Perspectives.ParticleEditor.sampling.geodesic import Geodesic
+
 
 @mark.parametrize("n_divisions", [1,2,3,4,5])
 def test_point_number_prediction(n_divisions):

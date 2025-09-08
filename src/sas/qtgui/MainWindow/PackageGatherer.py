@@ -1,7 +1,8 @@
-import sys
 import logging
-import pkg_resources
 import pathlib
+import sys
+
+import pkg_resources
 
 import sas
 import sas.system.version
@@ -189,11 +190,11 @@ class PackageGatherer:
         :rtype: dict
         """
         output_dict = dict()
-        
+
         for module_name in modules_dict.keys():
             parent_module = module_name.split('.')[0]
             # Save one instance of each module
-            if parent_module not in output_dict.keys():
+            if parent_module not in output_dict:
                 output_dict[parent_module] = modules_dict[module_name]
             else:
                 # Modules versions are not the same
@@ -203,7 +204,7 @@ class PackageGatherer:
 
         return output_dict
 
-      
+
     def format_no_version_list(self, modules_dict, no_version_list):
         """ Format module names in the no_version_list list
 
@@ -231,10 +232,10 @@ class PackageGatherer:
             if parent_module in modules_dict.keys():
                 pass
             # Module is already in output_list
-            elif parent_module in output_dict.keys():
+            elif parent_module in output_dict:
                 pass
             # Append module to output_list
             else:
-                output_dict[module_name] = f"Unknown: Version number could not be found"
+                output_dict[module_name] = "Unknown: Version number could not be found"
 
         return output_dict

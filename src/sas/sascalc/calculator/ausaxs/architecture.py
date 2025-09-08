@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class OS(Enum):
     WIN = 0
     LINUX = 1

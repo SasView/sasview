@@ -23,14 +23,15 @@
 
 """
 
+import math
+import os.path
+
 from sas.sascalc.calculator.BaseComponent import BaseComponent
-from sas.sascalc.simulation.pointsmodelpy import pointsmodelpy
 from sas.sascalc.simulation.geoshapespy import geoshapespy
+from sas.sascalc.simulation.pointsmodelpy import pointsmodelpy
 
 
-import os.path, math
-
-class ShapeDescriptor(object):
+class ShapeDescriptor:
     """
         Class to hold the information about a shape
         The descriptor holds a dictionary of parameters.
@@ -426,7 +427,7 @@ class VolumeCanvas(BaseComponent):
                 raise ValueError("VolumeCanvas.getParam: Could not find "
                                  "%s" % name)
 
-            if not toks[1] in shapeinstance.params:
+            if toks[1] not in shapeinstance.params:
                 raise ValueError("VolumeCanvas.getParam: Could not find "
                                  "%s" % name)
 
@@ -440,7 +441,7 @@ class VolumeCanvas(BaseComponent):
 ....       return a full list of all available parameters from
            self.params.keys(). If a key in self.params is a instance
            of ShapeDescriptor, extend the return list to:
-           
+
            [param1,param2,shapeid.param1,shapeid.param2.......]
 
            If shapeid is provided, return the list of parameters that
@@ -460,7 +461,7 @@ class VolumeCanvas(BaseComponent):
                     param_list.append(fullname)
 
         else:
-            if not shapeid in self.shapes:
+            if shapeid not in self.shapes:
                 raise ValueError("VolumeCanvas: getParamList: Could not find "
                                  "%s" % shapeid)
 

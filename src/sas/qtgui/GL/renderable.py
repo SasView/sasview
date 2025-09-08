@@ -1,6 +1,5 @@
-from abc import ABC, abstractmethod
-
 import logging
+from abc import ABC
 
 logger = logging.getLogger("GL Subsystem")
 

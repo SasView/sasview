@@ -1,8 +1,7 @@
-import sys
-import numpy
 import string
-
 from collections import OrderedDict
+
+import numpy
 
 # MPL shapes dictionary with some extra styles rendered internally.
 # Ordered for consistent display in combo boxes
@@ -294,7 +293,7 @@ def getValidColor(color):
     elif isinstance(color, str):
         # This could be a one letter code
         if len(color) == 1:
-            if not color in list (COLORS_LETTER.keys()):
+            if color not in list (COLORS_LETTER.keys()):
                 raise AttributeError
         elif color in list(COLORS.keys()):
             # or the full word

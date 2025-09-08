@@ -1,10 +1,13 @@
-from typing import Optional
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QSpacerItem, QSizePolicy
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import MagnetismFunction, SLDFunction
+from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterEntries import (
+    MagneticParameterEntry,
+    ParameterEntry,
+)
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
-from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterEntries import ParameterEntry, MagneticParameterEntry
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.types import SLDFunction, MagnetismFunction
+
 
 class ParameterTable(QWidget):
     """ Main table of parameters """
@@ -66,7 +69,7 @@ class ParameterTable(QWidget):
         self._model.clean()
         self.rebuild()
 
-    def update_contents(self, sld_function: SLDFunction, magnetism_function: Optional[MagnetismFunction]):
+    def update_contents(self, sld_function: SLDFunction, magnetism_function: MagnetismFunction | None):
         """ Update the contents of the parameter table with new functions"""
         self._model.update_from_code(sld_function, magnetism_function)
         self.rebuild()

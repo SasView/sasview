@@ -1,16 +1,16 @@
-from __future__ import print_function
 
-import  copy
+import copy
+
 #import logging
-import sys
 import math
+
 import numpy as np
 
-from sasdata.dataloader.data_info import Data1D
-from sasdata.dataloader.data_info import Data2D
+from sasdata.dataloader.data_info import Data1D, Data2D
+
 _SMALLVALUE = 1.0e-10
 
-class FitHandler(object):
+class FitHandler:
     """
     Abstract interface for fit thread handler.
 
@@ -543,7 +543,7 @@ class FitArrange:
 
         :param data: Data to add in the list
         """
-        if not data in self.data_list:
+        if data not in self.data_list:
             self.data_list.append(data)
 
     def get_model(self):
@@ -581,7 +581,7 @@ class FitArrange:
         """
         return self.selected
 
-class FResult(object):
+class FResult:
     """
     Storing fit result
     """

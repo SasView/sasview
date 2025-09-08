@@ -2,32 +2,25 @@
 """
 File Converter Widget
 """
-import os
 import logging
+import os
 
 import numpy as np
-
-from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 
+import sasdata.file_converter.FileConverterUtilities as Utilities
+from sasdata.dataloader.data_info import Data1D, Detector, Sample, Source, Vector
 from sasdata.file_converter.ascii2d_loader import ASCII2DLoader
 from sasdata.file_converter.nxcansas_writer import NXcanSASWriter
-from sasdata.dataloader.data_info import Data1D
-
-from sasdata.dataloader.data_info import Detector
-from sasdata.dataloader.data_info import Sample
-from sasdata.dataloader.data_info import Source
-from sasdata.dataloader.data_info import Vector
-
-import sasdata.file_converter.FileConverterUtilities as Utilities
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.FrameSelect import FrameSelect
-
 from sas.system import version
 
 from .UI.FileConverterUI import Ui_FileConverterUI
+
 
 class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
     """
@@ -47,7 +40,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         self.setWindowTitle("File Converter")
 
         icon = QIcon()
-        icon.addFile(u":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(":/res/ball.ico", QSize(), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
 
 
@@ -139,12 +132,12 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
             else: # self.data_type == 'bsl'
                 #dataset = Utilities.extract_bsl_data(self.ifile)
                 dataset = self.extractBSLdata(self.ifile)
-                
+
                 if dataset is None:
                     return
                 Utilities.convert_2d_data(dataset, self.ofile, self.getMetadata())
 
-        except (ValueError, IOError) as ex:
+        except (OSError, ValueError) as ex:
             msg = str(ex)
             logging.error(msg)
             return
@@ -194,8 +187,8 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         try:
             datafile = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Choose a file", "", "All files (*.*)")[0]
-        except (RuntimeError, IOError) as ex:
-            log_msg = "File Converter failed with: {}".format(ex)
+        except (OSError, RuntimeError) as ex:
+            log_msg = f"File Converter failed with: {ex}"
             logging.error(log_msg)
             raise
         return datafile
@@ -331,9 +324,9 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         # Check/add extension
         filename_tuple = os.path.splitext(text)
         ext = filename_tuple[1]
-        if not ext.lower() in ('.xml', '.h5'):
+        if ext.lower() not in ('.xml', '.h5'):
             text += '.h5'
-        if not self.is1D and not '.h5' in ext.lower():
+        if not self.is1D and '.h5' not in ext.lower():
             # quietly add .h5 as extension
             text += '.h5'
 
@@ -356,7 +349,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         Enable/disable UI items based on input format spec
         """
         # ASCII 2D allows for one file only
-        self.is1D = not '2D' in self.cbInputFormat.currentText()
+        self.is1D = '2D' not in self.cbInputFormat.currentText()
         self.label_7.setVisible(self.is1D)
         self.txtQFile.setVisible(self.is1D)
         self.btnQFile.setVisible(self.is1D)
@@ -476,7 +469,6 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
         :param n_frames: How many frames the loaded data file has
         :return: A dictionary containing the parameters input by the user
         """
-        valid_input = False
         output_path = self.txtOutputFile.text()
         if not output_path:
             return

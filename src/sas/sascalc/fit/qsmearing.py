@@ -8,18 +8,13 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-import math
-import logging
-import sys
 
 import numpy as np  # type: ignore
-from numpy import pi, exp # type:ignore
-
-from sasmodels.resolution import Slit1D, Pinhole1D
-from sasmodels.sesans import SesansTransform
-from sasmodels.resolution2d import Pinhole2D
 
 from sasdata.data_util.nxsunit import Converter
+from sasmodels.resolution import Pinhole1D, Slit1D
+from sasmodels.resolution2d import Pinhole2D
+from sasmodels.sesans import SesansTransform
 
 
 def smear_selection(data, model=None):
@@ -91,7 +86,7 @@ def smear_selection(data, model=None):
     return None
 
 
-class PySmear(object):
+class PySmear:
     """
     Wrapper for pure python sasmodels resolution functions.
     """
@@ -112,7 +107,8 @@ class PySmear(object):
         The returned value is of the same length as iq_in, with the range
         first_bin:last_bin set to the resolution smeared values.
         """
-        if last_bin is None: last_bin = len(iq_in)
+        if last_bin is None:
+            last_bin = len(iq_in)
         start, end = first_bin + self.offset, last_bin + self.offset
         q_calc = self.resolution.q_calc
         iq_calc = np.empty_like(q_calc)
@@ -152,7 +148,7 @@ def pinhole_smear(data, model=None):
     return PySmear(Pinhole1D(q, width), model)
 
 
-class PySmear2D(object):
+class PySmear2D:
     """
     Q smearing class for SAS 2d pinhole data
     """

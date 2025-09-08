@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget
-from PySide6.QtGui import QPainter, QPen, QColor, QFont
-from PySide6.QtCore import Qt, QRect
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor, QFont, QPainter, QPen
+from PySide6.QtWidgets import QTreeWidget
+
 
 class QParameterTreeWidget(QTreeWidget):
     def __init__(self, *args, **kwargs):
@@ -20,6 +21,6 @@ class QParameterTreeWidget(QTreeWidget):
             painter.setRenderHint(QPainter.TextAntialiasing)
             painter.setPen(QPen(QColor(170, 170, 170)))  # Light gray color for text
             painter.setFont(QFont("Segoe UI", 11, italic=True))
-            
+
             rect = self.viewport().rect()
             painter.drawText(rect, Qt.AlignCenter, self.disabled_text)

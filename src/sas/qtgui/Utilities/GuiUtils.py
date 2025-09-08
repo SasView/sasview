@@ -1,54 +1,49 @@
-# -*- coding: utf-8 -*-
 """
 Global defaults and various utility functions usable by the general GUI
 """
+import json
+import logging
 import numbers
 import os
 import re
 import sys
+import types
+import urllib.parse
 import warnings
 import webbrowser
-import urllib.parse
-import json
-import types
-import numpy
 from io import BytesIO
 from pathlib import Path
 
+import numpy
 import numpy as np
-
-warnings.simplefilter("ignore")
-import logging
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
 from periodictable import formula as Formula
-from sas.qtgui.Plotting import DataTransform
-from sas.qtgui.Plotting.ConvertUnits import convertUnit
-from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
-from sas.qtgui.Plotting.Plottables import Plottable
-from sasdata.dataloader.data_info import Sample, Source, Vector
-from sasdata.dataloader.data_info import Detector, Process, TransmissionSpectrum
-from sasdata.dataloader.data_info import Aperture, Collimation
-from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, PATH_LIKE
-from sas.qtgui.Plotting.Plottables import View
-from sas.qtgui.Plotting.Plottables import PlottableTheory1D
-from sas.qtgui.Plotting.Plottables import PlottableFit1D
-from sas.qtgui.Plotting.Plottables import Text
-from sas.qtgui.Plotting.Plottables import Chisq
-from sas.qtgui.MainWindow.DataState import DataState
-from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.sascalc.fit.AbstractFitEngine import FResult
-from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D
+from sasdata.dataloader.data_info import (
+    Aperture,
+    Collimation,
+    Detector,
+    Process,
+    Sample,
+    Source,
+    TransmissionSpectrum,
+    Vector,
+)
+from sasdata.dataloader.loader import Loader
 from sasmodels.sasview_model import SasviewModel
 
 import sas
 from sas import config
+from sas.qtgui.MainWindow.DataState import DataState
+from sas.qtgui.Plotting import DataTransform
+from sas.qtgui.Plotting.ConvertUnits import convertUnit
+from sas.qtgui.Plotting.Plottables import Chisq, Plottable, PlottableFit1D, PlottableTheory1D, Text, View
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
+from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from sas.sascalc.fit.AbstractFitEngine import FitData1D, FitData2D, FResult
+from sas.system.user import HELP_DIRECTORY_LOCATION, PATH_LIKE
 
-from sasdata.dataloader.loader import Loader
+warnings.simplefilter("ignore")
 
 # This matches the ID of a plot created using FittingLogic._create1DPlot, e.g.
 # "5 [P(Q)] modelname"
@@ -754,7 +749,7 @@ class FormulaValidator(QtGui.QValidator):
             self._setStyleSheet("")
             return QtGui.QValidator.Acceptable
 
-        except Exception as e:
+        except Exception:
             self._setStyleSheet("background-color:pink;")
             return QtGui.QValidator.Intermediate
 
@@ -891,7 +886,7 @@ def formatNumber(value, high=False):
 
 def formatValue(value):
     """Formats specific data types for the GUI.
-    
+
     This function accepts three types of data: numeric data castable to float, a numpy.ndarray of type
     castable to float, or None. Numeric data is returned in human-readable format by formatNumber(), numpy
     arrays are averaged over all axes, and the mean returned in human-readable format. If `value=None` then
@@ -1196,7 +1191,7 @@ def readDataFromFile(fp):
         pass
 
     def simple_type(cls, data, level):
-        class Empty(object):
+        class Empty:
             def __init__(self):
                 for key, value in data.items():
                     setattr(self, key, generate(value, level))
@@ -1330,7 +1325,6 @@ def readProjectFromSVS(filepath):
     """
     Read old SVS file and convert to the project dictionary
     """
-    from sasdata.dataloader.readers.cansas_reader import Reader as CansasReader
     from sas.sascalc.fit.pagestate import Reader
 
     loader = Loader()
@@ -1343,7 +1337,7 @@ def readProjectFromSVS(filepath):
         if state is not None:
             state_svs.append(state)
     state_reader = Reader(call_back=collector)
-    data_svs = state_reader.read(filepath)
+    state_reader.read(filepath)
 
     if isinstance(temp, list) and isinstance(state_svs, list):
         output = list(zip(temp, state_svs))
@@ -1431,7 +1425,6 @@ def convertFromSVS(datasets):
             for p in params.fittable_param:
                 p_name = p[1]
                 p_opt = str(p[0])
-                p_err = "0"
                 p_width = str(p[2])
                 p_min = str(0)
                 p_max = "inf"

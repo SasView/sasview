@@ -1,8 +1,6 @@
-import sys
-
-import pytest
 
 import numpy
+import pytest
 
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingLogic
@@ -16,8 +14,8 @@ class FittingLogicTest:
     def logic(self, qapp):
         '''Create/Destroy the component'''
         data = Data1D(x=[1,2,3],y=[3,4,5])
-        l = FittingLogic(data=data)
-        yield l
+        logic = FittingLogic(data=data)
+        yield logic
 
     def testDefaults(self, logic):
         """Test the component in its default state"""

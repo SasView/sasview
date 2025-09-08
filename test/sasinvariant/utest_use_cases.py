@@ -1,14 +1,16 @@
 """
    Implementation of the use-case from a usage perspective.
-   
+
    TODO: The calculation of the uncertainties needs to be checked
    TODO: It woudl be good to add tests for the uncertainties
-  
-""" 
+
+"""
 
 import os.path
 import unittest
+
 from sasdata.dataloader.loader import Loader
+
 from sas.sascalc.invariant import invariant
 
 
@@ -22,14 +24,14 @@ class Data1D:
 
 class TestLineFit(unittest.TestCase):
     """
-        Test Line fit 
+        Test Line fit
     """
     def setUp(self):
         self.data_list = Loader().load(find("linefittest.txt"))
         self.data = self.data_list[0]
 
     def test_fit_line_data(self):
-        """ 
+        """
             Fit_Test_1: test linear fit, ax +b. The power law is calculated
             on the log data so that B * x^A becomes logB + A logX = ax+b.
             For the extrapolation a can be fixed (usually to -4) or floating.
@@ -38,7 +40,7 @@ class TestLineFit(unittest.TestCase):
 
         # Create invariant object. Background and scale left as defaults.
         fit = invariant.Extrapolator(data=self.data)
-        
+
         # Let the power float (not fixed)
         p, dp = fit.fit(power=None)
 
@@ -47,7 +49,7 @@ class TestLineFit(unittest.TestCase):
         self.assertAlmostEqual(p[1], 0.87833,3)
 
     def test_fit_line_data_fixed(self):
-        """ 
+        """
             Fit_Test_2: test linear fit, ax +b, with 'a' fixed
         """
 
@@ -71,7 +73,7 @@ class TestLineFitNoweight(unittest.TestCase):
         self.data = self.data_list[0]
 
     def skip_test_fit_line_data_no_weight(self):
-        """ 
+        """
             Fit_Test_1: test linear fit, ax +b, without fixing the power a
         """
 
@@ -86,7 +88,7 @@ class TestLineFitNoweight(unittest.TestCase):
         self.assertAlmostEqual(p[1], 0.6,3)
 
     def test_fit_line_data_fixed_no_weight(self):
-        """ 
+        """
             Fit_Test_2: test linear fit, ax +b, with 'a' fixed
         """
 
@@ -107,29 +109,29 @@ class TestInvNoResolution(unittest.TestCase):
         The test data is simulated using the sphere form factor simulating
         a 1% solution of SiO2 sphere of 100nm in diameter in D2O with zero
         polydispersity.
-        
+
         Moreover NO resolution smearing was included so that this would be for
         a perfect, infinitely small pinhole camera.
-        
+
         The parameters then are:
         vol fraction (Phi) = 0.01
         SLD = 4.2e-6 1/A (silica SLD)
         Solvent SLD = 6.4e-6 1/A (D2O SLD)
         Backgroun was set to 0.
-        
+
         From this we can calculate the Sv (3*Phi/R):
         Sv = N * Surface of one sphere/ V_T
         V_T = N * Vol of one sphere/Phi
         Sv = surface of one sphere * Phi/Vol of one sphere =
         4 Pi R^2 * Phi/({4/3) Pi R^3) =
         3 * Phi/R = 6e-5 1/A
-        
+
         Then the Porod Constant = 2 * PI *(SLD_solv-SLD)^2 * Sv
         = 1.825E-7 cm^-1A^-4
-        
+
         and Q* = 2 * Pi^2 * (SLD_solv-SLD)^2 * Phi * (1-Phi)
         = 9.458239e-13 A^-4 = 9.458239e-5
-        
+
         ..NOTE: with zero resolution there are two problems due to the fact
         that the curves have many deep dips to zero but they do not get well
         captured with fininte number of points.  This means:
@@ -172,11 +174,11 @@ class TestInvNoResolution(unittest.TestCase):
         # The version of the call including uncertainty
         qstar, qstar_err = inv.get_qstar_with_error()
 
-        # The volume fraction and surface use Q*. That means that the following 
-        # methods should check that Q* has been computed. If not, it should 
+        # The volume fraction and surface use Q*. That means that the following
+        # methods should check that Q* has been computed. If not, it should
         # compute it by calling get_qstare(), leaving the parameters as default.
         v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6, 
+        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-7)
 
         # Test results
@@ -212,7 +214,7 @@ class TestInvNoResolution(unittest.TestCase):
         # returns the same value as it calculates and passes to the verion of
         # the call with uncertainties.
         #
-        # Note that at this point, we could still compute Q* without 
+        # Note that at this point, we could still compute Q* without
         # extrapolation by calling get_qstar with no arguments, or with
         # extrapolation=None.
         # But of course we want to test the low Q Guinier extrapolation so...
@@ -247,7 +249,7 @@ class TestInvNoResolution(unittest.TestCase):
         # for a solid sphere at high q.
         inv.set_extrapolation(range='high', npts=10, function='power_law',
                               power=4)
-        
+
         # Again we start with the version of the call that does not return the
         # uncertainties to verify that it returns the same value as it passes
         # to the verion of the call with uncertainties.
@@ -280,7 +282,7 @@ class TestInvNoResolution(unittest.TestCase):
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
 
-        # Finally set the extrapolation parameters to test both the low- and 
+        # Finally set the extrapolation parameters to test both the low- and
         # high-Q extrapolotaions applied together.
         inv.set_extrapolation(range='low', npts=10, function='guinier')
         inv.set_extrapolation(range='high', npts=10, function='power_law',
@@ -292,7 +294,7 @@ class TestInvNoResolution(unittest.TestCase):
         # Again by passing an extrapolation value, the values just set for
         # that extrapolation are used.
         qstar1 = inv.get_qstar(extrapolation='both')
-        
+
         # The version of the call with error
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='both')
 
@@ -327,7 +329,7 @@ class TestInvPinholeSmeared(unittest.TestCase):
              it has been). If that is done and implmented the value in these
              tests should be adjusted to be approriately. The test values are
              given assuming the invariant is NOT handling pinhole smearing.
-            
+
          ..NOTE2:
              The data supplied here is for the exact same system as above,
              so the result values should in principle be identical. However the
@@ -336,7 +338,7 @@ class TestInvPinholeSmeared(unittest.TestCase):
              experimental determination of the porod constant (unlike in the
              previous case without resolution smearing) but means the integral
              will evaluate high and the vol fraction should thus be high.
-             
+
         The fundamental theoretical values are the same as before (given the
         system is the same) but due to the 15% dQ/Q the invariant, and thus the
         volume fraction computed from that invariant, are roughly 15% high
@@ -354,7 +356,7 @@ class TestInvPinholeSmeared(unittest.TestCase):
         * Vol Fraction = 0.01 * 1.15 ~ 0.0115
         * Q* = 9.458239e-5 * 1.15 ~ 1.088e-4 cm^-1 A^-3
 
-       
+
 
     """
     def setUp(self):
@@ -390,11 +392,11 @@ class TestInvPinholeSmeared(unittest.TestCase):
         # The version of the call including uncertainty
         qstar, qstar_err = inv.get_qstar_with_error()
 
-        # The volume fraction and surface use Q*. That means that the following 
-        # methods should check that Q* has been computed. If not, it should 
+        # The volume fraction and surface use Q*. That means that the following
+        # methods should check that Q* has been computed. If not, it should
         # compute it by calling get_qstare(), leaving the parameters as default.
         v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6, 
+        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-7)
 
         # Test results
@@ -430,7 +432,7 @@ class TestInvPinholeSmeared(unittest.TestCase):
         # returns the same value as it calculates and passes to the verion of
         # the call with uncertainties.
         #
-        # Note that at this point, we could still compute Q* without 
+        # Note that at this point, we could still compute Q* without
         # extrapolation by calling get_qstar with no arguments, or with
         # extrapolation=None.
         # But of course we want to test the low Q Guinier extrapolation so...
@@ -465,7 +467,7 @@ class TestInvPinholeSmeared(unittest.TestCase):
         # for a solid sphere at high q.
         inv.set_extrapolation(range='high', npts=10, function='power_law',
                               power=4)
-        
+
         # Again we start with the version of the call that does not return the
         # uncertainties to verify that it returns the same value as it passes
         # to the verion of the call with uncertainties.
@@ -498,7 +500,7 @@ class TestInvPinholeSmeared(unittest.TestCase):
         inv = invariant.InvariantCalculator(data=self.data, background=0)
 
 
-        # Finally set the extrapolation parameters to test both the low- and 
+        # Finally set the extrapolation parameters to test both the low- and
         # high-Q extrapolotaions applied together.
         inv.set_extrapolation(range='low', npts=10, function='guinier')
         inv.set_extrapolation(range='high', npts=10, function='power_law',
@@ -510,7 +512,7 @@ class TestInvPinholeSmeared(unittest.TestCase):
         # Again by passing an extrapolation value, the values just set for
         # that extrapolation are used.
         qstar1 = inv.get_qstar(extrapolation='both')
-        
+
         # The version of the call with error
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='both')
 
@@ -541,30 +543,30 @@ class TestInvSlitSmear(unittest.TestCase):
            known for a long time and is included here.  Ironically this means
            that as of March 21, 2020, the invarian calucation on slit smeared
            data will provide more accurate results.
-        
-        The data provided for this test was again computed using the sphere 
+
+        The data provided for this test was again computed using the sphere
         form factor simulating a similar 1% solution of SiO2 sphere in D2O but
         this time with a 1micron diameter - again with zero polydispersity.
-        
+
         This time however a slit smearing of was applied to simulate data from
         the NIST USANS instrument (dl=0.117 1/A).
-        
+
         The parameters then are:
         vol fraction (Phi) = 0.01
         SLD = 4.2e-6 1/A (silica SLD)
         Solvent SLD = 6.4e-6 1/A (D2O SLD)
         Backgroun was set to 0.
-        
+
         From this we can again calculate the Sv (3*Phi/R):
         Sv = N * Surface of one sphere/ V_T
         V_T = N * Vol of one sphere/Phi
         Sv = surface of one sphere * Phi/Vol of one sphere =
         4 Pi R^2 * Phi/({4/3) Pi R^3) =
         3 * Phi/R = 6e-6 1/A
-        
+
         Then the Porod Constant = 2 * PI *(SLD_solv-SLD)^2 * Sv
         = 1.825E-8 cm^-1A^-4
-        
+
         and Q* = 2 * Pi^2 * (SLD_solv-SLD)^2 * Phi * (1-Phi) remains the same,
         as it should by the very principle of the invariant at:
         = 9.458239e-13 A^-4 = 9.458239e-5
@@ -597,7 +599,7 @@ class TestInvSlitSmear(unittest.TestCase):
 
         # Get the volume fraction and surface
         v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6, 
+        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-8)
         # Test results
         self.assertEqual(qstar1, qstar)
@@ -624,7 +626,7 @@ class TestInvSlitSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='low')
         # Get the volume fraction and surface
         v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6, 
+        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-8)
 
         # Test results
@@ -653,7 +655,7 @@ class TestInvSlitSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='high')
         # Get the volume fraction and surface
         v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6, 
+        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-8)
 
         # Test results
@@ -682,7 +684,7 @@ class TestInvSlitSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='low')
         # Get the volume fraction and surface
         v, dv = inv.get_volume_fraction_with_error(contrast=2.2e-6)
-        s, ds = inv.get_surface_with_error(contrast=2.2e-6, 
+        s, ds = inv.get_surface_with_error(contrast=2.2e-6,
                                            porod_const=1.825e-8)
 
         # Test results
@@ -690,8 +692,8 @@ class TestInvSlitSmear(unittest.TestCase):
         self.assertAlmostEqual(qstar, 9.458239e-5, delta=1.5e-6)
         self.assertAlmostEqual(v, 0.01, delta=15e-4)
         self.assertAlmostEqual(s , 6.000e-6, 7 )
-      
-  
+
+
 if __name__ == '__main__':
     unittest.main(testRunner=unittest.TextTestRunner(verbosity=2))
-   
+

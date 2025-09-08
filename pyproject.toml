@@ -21,7 +21,7 @@ dynamic = [
 ]
 description = "SasView application"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = { text = "BSD-3-Clause" }
 authors = [
     {name = "SasView Team", email = "developers@sasview.org"},
@@ -200,3 +200,26 @@ norecursedirs = [
     "test/sasrealspace",
     "test/calculatorview",
 ]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# The ruff rules are available at: https://docs.astral.sh/ruff/rules/
+select = ["E",       # pycodestyle errors
+          "F",       # pyflakes
+          "I",       # isort
+          "UP",      # pyupgrade
+          "SIM118",  # Use `key in dict` instead of `key in dict.keys()`
+          "SIM300"]  # Yoda condition detected
+
+ignore = ["E501",  # line too long (leave to formatter)
+          "UP008", # Use `super()` instead of `super(__class__, self)`
+          "UP031"] # Use format specifiers instead of percent format
+
+[tool.ruff.lint.isort.sections]
+# Group all SasData and SasModels imports into a separate section.
+"sas" = ["sasdata", "sasmodels"]
+
+[tool.ruff.lint.isort]
+section-order = ["future", "standard-library", "third-party", "sas", "first-party", "local-folder"]

@@ -20,7 +20,21 @@ env:
   INSTALLER_USE_DEBUG: false
 
 jobs:
+
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: "check --fix-only --exit-non-zero-on-fix"
+      - uses: pre-commit-ci/lite-action@v1.1.0
+        if: always()
+        with:
+          msg: '[pre-commit.ci lite] apply automatic fixes for ruff linting errors'
+
   matrix:
+    needs: [ruff]
     name: Generate test matrix
 
     #if: false    # uncomment to prevent the rest of the workflow running
@@ -47,6 +61,7 @@ jobs:
 
 
   builddeps:
+    needs: [ruff]
     runs-on: ubuntu-latest
 
     strategy:
@@ -149,14 +164,18 @@ jobs:
         if: ${{ ! env.RELEASE_BRANCH_BUILD }}
         run: |
           uv pip install -r build_tools/requirements.txt
-          uv pip install build hatchling hatch-build-scripts hatch-requirements-txt hatch-vcs hatch-sphinx
+          uv pip install -r build_tools/requirements-dev.txt
 
       ### For pull_requests with the release branch as the base -or- branches with the name *release*
 
       - name: Install Python dependencies for release branches
         if: ${{ env.RELEASE_BRANCH_BUILD }}
         run: |
-          python -m pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
+          uv pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
+
+      - name: Fetch external AUSAXS C library
+        run: |
+          python build_tools/get_external_dependencies.py
 
       ### Actual building of sasview
 
@@ -184,7 +203,6 @@ jobs:
         if: ${{ matrix.tests }}
         run: |
           uv pip install -r build_tools/requirements-test.txt
-          python build_tools/get_external_dependencies.py
 
       - name: Test with pytest
         if: ${{ matrix.tests }}

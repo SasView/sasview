@@ -1,12 +1,12 @@
 import logging
-from typing import List
 
 import numpy as np
+
+from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionUtils import MaxEntResult
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 from sas.sascalc.size_distribution.SizeDistribution import background_fit
-from sasdata.dataloader.data_info import Data1D as LoadData1D
 
 BACKGD_PLOT_LABEL = "Background"
 BACKGD_SUBTR_PLOT_LABEL = "Intensity-Background"
@@ -96,7 +96,7 @@ class SizeDistributionLogic:
 
     def fitBackground(
         self, power: float | None, qmin: float, qmax: float
-    ) -> List[float]:
+    ) -> list[float]:
         """
         Estimate the background power law, scale * q^(power)
         :param power: if a float is given, the power is fixed; if None, the power is fitted

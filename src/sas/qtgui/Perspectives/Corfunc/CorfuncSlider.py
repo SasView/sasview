@@ -1,13 +1,12 @@
-from typing import Optional, Tuple
-
 import math
-import numpy as np
 
+import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFontMetrics
 
-from sas.sascalc.corfunc.calculation_data import ExtrapolationParameters, ExtrapolationInteractionState
+from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState, ExtrapolationParameters
+
 
 class CorfuncSlider(QtWidgets.QWidget):
     """ Slider that allows the selection of the different Q-ranges involved in interpolation,
@@ -61,10 +60,10 @@ class CorfuncSlider(QtWidgets.QWidget):
 
         # Mouse control
         self._hovering = False
-        self._hover_id: Optional[int] = None
+        self._hover_id: int | None = None
 
-        self._drag_id: Optional[int] = None
-        self._movement_line_position: Optional[int] = None
+        self._drag_id: int | None = None
+        self._movement_line_position: int | None = None
 
         # Qt things
         # self.setAttribute(Qt.WA_Hover)
@@ -75,7 +74,7 @@ class CorfuncSlider(QtWidgets.QWidget):
         )
 
     @staticmethod
-    def find_parameter_problems(params: ExtrapolationParameters) -> Optional[str]:
+    def find_parameter_problems(params: ExtrapolationParameters) -> str | None:
         """ Check an extratpolation prarameters object for consistency
 
         :param params: An extrapolation parameters object describing a desired state
@@ -269,7 +268,7 @@ class CorfuncSlider(QtWidgets.QWidget):
 
     def inverse_transform(self, px_value: float) -> float:
         """Convert a value from draw coordinates to input value"""
-        return self._min*math.exp(((px_value - self.left_pad)/self.scale))
+        return self._min*math.exp((px_value - self.left_pad)/self.scale)
 
     @property
     def guinier_label_position(self) -> float:
@@ -293,7 +292,7 @@ class CorfuncSlider(QtWidgets.QWidget):
         return 0.5 * (self.transform(self._point_3) + self.width())
 
     @property
-    def line_paint_positions(self) -> Tuple[float, float, float]:
+    def line_paint_positions(self) -> tuple[float, float, float]:
         """ x coordinate of the painted lines"""
         return (self.transform(self._point_1),
                 self.transform(self._point_2),

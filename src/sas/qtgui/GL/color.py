@@ -1,12 +1,10 @@
-from typing import Sequence, Union
-
 import logging
-import numpy as np
-import matplotlib as mpl
-from enum import Enum
+from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import Enum
 
-from OpenGL.GL import glColor4f
+import matplotlib as mpl
+import numpy as np
 
 "Helper classes for dealing with colours"
 
@@ -32,17 +30,17 @@ def uniform_coloring(r, g, b, alpha=1.0):
         data=np.array([r, g, b, alpha]))
 
 
-def edge_coloring(data: Sequence[Union[Sequence[float], np.ndarray]]) -> ColorSpecification:
+def edge_coloring(data: Sequence[Sequence[float] | np.ndarray]) -> ColorSpecification:
     """ Create a ColorSpecification for colouring each edge within an object a single colour"""
     return _component_coloring(data)
 
 
-def mesh_coloring(data: Sequence[Union[Sequence[float], np.ndarray]]) -> ColorSpecification:
+def mesh_coloring(data: Sequence[Sequence[float] | np.ndarray]) -> ColorSpecification:
     """ Create a ColorSpecification for colouring each mesh within an object a single colour"""
     return _component_coloring(data)
 
 
-def _component_coloring(data: Sequence[Union[Sequence[float], np.ndarray]]) -> ColorSpecification:
+def _component_coloring(data: Sequence[Sequence[float] | np.ndarray]) -> ColorSpecification:
     """ Create a ColorSpecification for colouring each mesh/edge within an object a single colour"""
     try:
         data = np.array(data)
@@ -76,7 +74,7 @@ def vertex_coloring(data: np.ndarray) -> ColorSpecification:
     return ColorSpecification(ColorSpecificationMethod.BY_VERTEX, data)
 
 
-class ColorMap():
+class ColorMap:
 
     _default_colormap = 'rainbow'
     def __init__(self, colormap_name=_default_colormap, min_value=0.0, max_value=1.0):

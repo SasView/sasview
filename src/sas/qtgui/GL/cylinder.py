@@ -1,16 +1,14 @@
-from typing import Optional, List, Tuple
-
 import numpy as np
 
-from sas.qtgui.GL.models import FullModel
 from sas.qtgui.GL.color import ColorSpecification
+from sas.qtgui.GL.models import FullModel
 
 
 class Cylinder(FullModel):
     """ Graphics primitive: Radius 1, Height 2 cone "centred" at (0,0,0)"""
 
     @staticmethod
-    def cylinder_vertices(n) -> List[Tuple[float, float, float]]:
+    def cylinder_vertices(n) -> list[tuple[float, float, float]]:
         """ Helper function: Vertices of the cylinder primitive"""
         return [(0.0, 0.0, 1.0)] + \
                [ (np.sin(angle), np.cos(angle), 1.0) for angle in 2*np.pi*np.arange(0, n)/n] + \
@@ -26,12 +24,12 @@ class Cylinder(FullModel):
                [(i+1, i + n + 2) for i in range(n)]
 
     @staticmethod
-    def cylinder_face_triangles(n, offset) -> List[Tuple[int, int, int]]:
+    def cylinder_face_triangles(n, offset) -> list[tuple[int, int, int]]:
         """ Helper function: Faces of the ends of cylinder primitive"""
         return [(i+offset + 1, (i + 1) % n + offset + 1, offset) for i in range(n)]
 
     @staticmethod
-    def cylinder_side_triangles(n) -> List[Tuple[int, int, int]]:
+    def cylinder_side_triangles(n) -> list[tuple[int, int, int]]:
         """ Helper function: Faces of the sides of the cylinder primitive"""
         sides = []
         for i in range(n):
@@ -44,7 +42,7 @@ class Cylinder(FullModel):
         return sides
 
     @staticmethod
-    def cylinder_triangles(n) -> List[List[Tuple[int, int, int]]]:
+    def cylinder_triangles(n) -> list[list[tuple[int, int, int]]]:
         """ Helper function: All faces of the cylinder primitive"""
         return [
             Cylinder.cylinder_face_triangles(n, 0),
@@ -54,8 +52,8 @@ class Cylinder(FullModel):
 
     def __init__(self,
                  n: int = 20,
-                 colors: Optional[ColorSpecification]=None,
-                 edge_colors: Optional[ColorSpecification]=None):
+                 colors: ColorSpecification | None=None,
+                 edge_colors: ColorSpecification | None=None):
 
         super().__init__(
             vertices=Cylinder.cylinder_vertices(n),

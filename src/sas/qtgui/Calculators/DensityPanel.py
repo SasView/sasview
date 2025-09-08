@@ -1,20 +1,12 @@
 # global
-import logging
-import functools
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
 from periodictable import formula as Formula
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.qtgui.Utilities.GuiUtils import FormulaValidator
-from sas.qtgui.UI import main_resources_rc
-
-# Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
 
-from sas.qtgui.Utilities.GuiUtils import enum
-from sas.qtgui.Utilities.GuiUtils import formatNumber
+# Local UI
+from sas.qtgui.UI import main_resources_rc  # noqa: F401
+from sas.qtgui.Utilities.GuiUtils import enum, formatNumber
 
 MODEL = enum(
     'MOLECULAR_FORMULA',
@@ -140,7 +132,7 @@ class DensityPanel(QtWidgets.QDialog):
 
     def formulaChanged(self, current_text):
         try:
-            molarMass = toMolarMass(current_text)
+            toMolarMass(current_text)
             # if this doesn't fail, update the model item for formula
             # so related values can get recomputed
             self.model.item(MODEL.MOLECULAR_FORMULA).setText(current_text)

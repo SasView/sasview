@@ -6,15 +6,15 @@
 # Disable "too many methods" complaint
 # pylint: disable-msg=R0904
 
+import math
 import os
 import os.path
 import unittest
-import math
+
 import numpy
 import pytest
-# TODO: This import is broken. It needs to be rewritten if this test is to be renabled.
-# from sas.sascalc.pr.invertor import Invertor
 
+from sas.sascalc.pr.invertor import Invertor
 
 pytest.skip(reason="Refactored invertor doesn't support this test", allow_module_level=True)
 
@@ -582,16 +582,16 @@ def pr_theory(r, R):
 
 
 def load(path = find("sphere_60_q0_2.txt")):
-    import numpy as np
     import math
-    import sys
+
+    import numpy as np
     # Read the data from the data file
     data_x   = np.zeros(0)
     data_y   = np.zeros(0)
     data_err = np.zeros(0)
     scale    = None
     if path is not None:
-        with open(path,'r') as input_f:
+        with open(path) as input_f:
             buff    = input_f.read()
             lines   = buff.split('\n')
             for line in lines:
@@ -602,7 +602,7 @@ def load(path = find("sphere_60_q0_2.txt")):
                     if len(toks)>2:
                         err = float(toks[2])
                     else:
-                        if scale==None:
+                        if scale is None:
                             scale = 0.15*math.sqrt(y)
                         err = scale*math.sqrt(y)
                     data_x = np.append(data_x, x)
@@ -611,7 +611,7 @@ def load(path = find("sphere_60_q0_2.txt")):
                 except:
                     pass
 
-    return data_x, data_y, data_err 
+    return data_x, data_y, data_err
 
 
 if __name__ == '__main__':

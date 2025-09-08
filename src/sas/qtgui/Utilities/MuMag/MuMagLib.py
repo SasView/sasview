@@ -1,20 +1,26 @@
-import numpy as np
-import matplotlib.pylab as pl
+import logging
 import os
 import os.path
 from datetime import datetime
 
+import numpy as np
 import scipy.optimize
-
-from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog
-
-from sas.qtgui.Utilities.MuMag.datastructures import ExperimentalData, LoadFailure, FitFailure, ExperimentGeometry, \
-    FitParameters, FitResults, LeastSquaresOutputParallel, LeastSquaresOutputPerpendicular, SweepOutput
 
 from sasdata.dataloader.loader import Loader
 
-import logging
+from sas.qtgui.Utilities.MuMag.datastructures import (
+    ExperimentalData,
+    ExperimentGeometry,
+    FitFailure,
+    FitParameters,
+    FitResults,
+    LeastSquaresOutputParallel,
+    LeastSquaresOutputPerpendicular,
+    LoadFailure,
+    SweepOutput,
+)
+
 
 class MuMagLib:
     """ Library for methods supporting MuMag"""
@@ -484,7 +490,7 @@ class MuMagLib:
             os.mkdir(path)
 
         with open(os.path.join(path, "fit_info.txt"), "w") as fid:
-            fid.write(f"FitMagneticSANS Toolbox - SimpleFit Results Info File \n\n")
+            fid.write("FitMagneticSANS Toolbox - SimpleFit Results Info File \n\n")
             fid.write(f"Timestamp: {timestamp}\n")
             fid.write(f"SANS geometry: {data.parameters.experiment_geometry.name}\n\n")
             fid.write(f"Maximal Scattering Vector:  q_max = {np.max(data.refined_fit_data.q)} /nm\n")

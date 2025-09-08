@@ -1,8 +1,6 @@
-import sys
 
 import pytest
-
-from PySide6 import QtGui, QtWidgets
+from PySide6 import QtWidgets
 
 # Local
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
@@ -25,7 +23,7 @@ class WindowTitleTest:
         widget.show()
         assert isinstance(widget, QtWidgets.QDialog)
         assert widget.windowTitle() == "Modify Window Title"
-        
+
     def testTitle(self, widget):
         '''Modify the title'''
         widget.show()

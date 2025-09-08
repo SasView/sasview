@@ -2,7 +2,9 @@
 Thread handler used to load data
 """
 import time
+
 from sas.sascalc.data_util.calcthread import CalcThread
+
 
 class GenReader(CalcThread):
     """
@@ -19,7 +21,7 @@ class GenReader(CalcThread):
                             yieldtime,
                             worktime)
         self.path = path
-        #Instantiate a loader 
+        #Instantiate a loader
         self.loader = loader
         self.starttime = 0
 

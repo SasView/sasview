@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2001-2018
 # Allen Short
 # Andy Gayton
@@ -106,20 +105,23 @@ Subsequent port by therve
 
 import sys
 
-
 try:
     # try PySide2
     # Modified the original code to use PySide6
     from PySide6.QtCore import (
-        QCoreApplication, QEventLoop, QObject, QSocketNotifier, QTimer,
+        QCoreApplication,
+        QEventLoop,
+        QObject,
+        QSocketNotifier,
+        QTimer,
     )
 except ImportError as e1:
     raise ImportError(
-        "PySide6 is not installed. PySide6: {})".format(e1)
+        f"PySide6 is not installed. PySide6: {e1})"
     )
 
-from twisted.internet.error import ReactorAlreadyInstalledError
 from twisted.internet import posixbase
+from twisted.internet.error import ReactorAlreadyInstalledError
 from twisted.internet.interfaces import IReactorFDSet
 from twisted.python import log, runtime
 from zope.interface import implementer
@@ -319,7 +321,7 @@ class QtReactor(posixbase.PosixReactorBase):
             self.stop()
             self.runUntilCurrent()
 
-            
+
 class QtEventReactor(QtReactor):
     def __init__(self, *args, **kwargs):
         self._events = {}
@@ -412,8 +414,7 @@ def win32install():
 
 
 if runtime.platform.getType() == 'win32':
-    from win32event import CreateEvent, MsgWaitForMultipleObjects
-    from win32event import WAIT_OBJECT_0, WAIT_TIMEOUT, QS_ALLINPUT, QS_ALLEVENTS
+    from win32event import QS_ALLEVENTS, QS_ALLINPUT, WAIT_OBJECT_0, WAIT_TIMEOUT, MsgWaitForMultipleObjects
     install = win32install
 else:
     install = posixinstall

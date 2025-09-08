@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Provide Line function (y= Ax + B). Until July 10, 2016 this function provided
-(y= A + Bx).  This however was contrary to all the other code using it which 
+(y= A + Bx).  This however was contrary to all the other code using it which
 assumed (y= mx+b) or in this nomenclature (y=Ax + B). This lead to some
 contortions in the code and worse incorrect calculations until now for at least
 some of the functions.  This seemed the easiest to fix particularly since this
@@ -12,7 +12,8 @@ function should disappear in a future iteration (see notes in fitDialog)
 
 import math
 
-class LineModel(object):
+
+class LineModel:
     """
     Class that evaluates a linear model.
 
@@ -89,7 +90,7 @@ class LineModel(object):
     def runXY(self, x=0.0):
         """
         Evaluate the model.
-        
+
 
         :param x: simple value
 

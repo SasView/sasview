@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Optional, TYPE_CHECKING
+
+from typing import TYPE_CHECKING
 
 import numpy as np
 from matplotlib.lines import Line2D
@@ -19,13 +20,13 @@ class QSpaceCanvas(CorfuncCanvas):
         super().__init__(corfunc_window, width, height, dpi)
 
 
-        self.extrap: Optional[Data1D] = None
+        self.extrap: Data1D | None = None
 
         # Vertical lines
-        self.line1: Optional[Line2D] = None
-        self.line2: Optional[Line2D] = None
-        self.line3: Optional[Line2D] = None
-        self.ghost_line: Optional[Line2D] = None # Ghostly line for showing during interactions
+        self.line1: Line2D | None = None
+        self.line2: Line2D | None = None
+        self.line3: Line2D | None = None
+        self.ghost_line: Line2D | None = None # Ghostly line for showing during interactions
 
     @property
     def interactive_lines(self):
@@ -90,7 +91,7 @@ class QSpaceCanvas(CorfuncCanvas):
                                linestyle='',
                                markersize=3,
                                capsize=2)
-                               
+
             self.line1 = self.axes.axvline(extrapolation_params.point_1, color='k')
             self.line2 = self.axes.axvline(extrapolation_params.point_2, color='k')
             self.line3 = self.axes.axvline(extrapolation_params.point_3, color='k')

@@ -4,7 +4,7 @@ determine the slit length value of data.
 """
 
 
-class SlitlengthCalculator(object):
+class SlitlengthCalculator:
     """
     compute slit length from SAXSess beam profile (1st col. Q , 2nd col. I ,
     and 3rd col. dI.: don't need the 3rd)

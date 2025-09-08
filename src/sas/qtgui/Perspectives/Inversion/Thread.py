@@ -2,7 +2,7 @@ import sys
 import time
 
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.sascalc.pr.Invertor import Invertor
+from sas.sascalc.pr.invertor import Invertor
 
 
 class CalcPr(CalcThread):

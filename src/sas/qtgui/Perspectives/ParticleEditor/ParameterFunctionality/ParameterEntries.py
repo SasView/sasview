@@ -1,8 +1,8 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QSizePolicy, QSpacerItem
-from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QDoubleValidator
+from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QLineEdit, QSizePolicy, QSpacerItem, QWidget
 
-from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import Parameter, MagnetismParameterContainer
+from sas.qtgui.Perspectives.ParticleEditor.datamodel.parameters import MagnetismParameterContainer, Parameter
 from sas.qtgui.Perspectives.ParticleEditor.ParameterFunctionality.ParameterTableModel import ParameterTableModel
 
 

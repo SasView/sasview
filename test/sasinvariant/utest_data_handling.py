@@ -1,19 +1,21 @@
 """
 This software was developed by the University of Tennessee as part of the
 Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
+project funded by the US National Science Foundation.
 
 See the license text in license.txt
 
 copyright 2010, University of Tennessee
 """
 
+import math
 import os.path
 import unittest
-import math
+
 import numpy as np
-from sasdata.dataloader.loader import Loader
+
 from sasdata.dataloader.data_info import Data1D
+from sasdata.dataloader.loader import Loader
 
 from sas.sascalc.invariant import invariant
 
@@ -24,7 +26,7 @@ def find(filename):
 
 class TestLinearFit(unittest.TestCase):
     """
-        Test Line fit 
+        Test Line fit
     """
     def setUp(self):
         x = np.asarray([1.,2.,3.,4.,5.,6.,7.,8.,9.])
@@ -34,7 +36,7 @@ class TestLinearFit(unittest.TestCase):
         self.data = Data1D(x=x,y=y,dy=dy)
 
     def test_fit_linear_data(self):
-        """ 
+        """
             Simple linear fit
         """
 
@@ -48,14 +50,15 @@ class TestLinearFit(unittest.TestCase):
         self.assertAlmostEqual(p[1], 0.0, 5)
 
     def test_fit_linear_data_with_noise(self):
-        """ 
+        """
             Simple linear fit with noise
         """
-        import random, math
-    
+        import math
+        import random
+
         for i in range(len(self.data.y)):
             self.data.y[i] = self.data.y[i]+.1*(random.random()-0.5)
-            
+
         # Create invariant object. Background and scale left as defaults.
         fit = invariant.Extrapolator(data=self.data)
         p, dp = fit.fit()
@@ -77,10 +80,11 @@ class TestLinearFit(unittest.TestCase):
         self.assertAlmostEqual(p[1], 0.0, 5)
 
     def test_fit_linear_data_with_noise_and_fixed_par(self):
-        """ 
+        """
             Simple linear fit with noise
         """
-        import random, math
+        import math
+        import random
 
         for i in range(len(self.data.y)):
             self.data.y[i] = self.data.y[i]+.1*(random.random()-0.5)
@@ -104,8 +108,8 @@ class TestInvariantCalculator(unittest.TestCase):
         self.data.dxl = None
 
     def test_initial_data_processing(self):
-        """ 
-            Test whether the background and scale are handled properly 
+        """
+            Test whether the background and scale are handled properly
             when creating an InvariantCalculator object
         """
         length = len(self.data.x)
@@ -136,7 +140,7 @@ class TestInvariantCalculator(unittest.TestCase):
             Check that only classes that inherit from Data1D are allowed
             as data.
         """
-        class Incompatible():
+        class Incompatible:
             pass
         self.assertRaises(ValueError, invariant.InvariantCalculator,
                           Incompatible())
@@ -148,7 +152,7 @@ class TestInvariantCalculator(unittest.TestCase):
         # These are all the values of the dy array that would cause
         # us to set all dy values to 1.0 at __init__ time.
         dy_list = [ [], None, [0,0,0,0] ]
- 
+
         for dy in dy_list:
             data = Data1D(x=x, y=y, dy=dy)
             inv = invariant.InvariantCalculator(data)
@@ -223,13 +227,13 @@ class TestInvariantCalculator(unittest.TestCase):
 #        if False:
 #          npts = len(inv._data.x)-1
 #          import matplotlib.pyplot as plt
-#          plt.loglog(inv._data.x[:npts], inv._data.y[:npts], 'o', 
+#          plt.loglog(inv._data.x[:npts], inv._data.y[:npts], 'o',
 #                    label='Original data', markersize=10)
 #          plt.loglog(inv._data.x[:npts],
 #                     inv._low_extrapolation_function.evaluate_model(inv._data.x[:npts]),
 #                     'r', label='Fitted line')
 #          plt.legend()
-#          plt.show()        
+#          plt.show()
 
 #      self.assertEqual(qs_extr, _qstar+delta_qs_extr)
 #        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar
@@ -308,12 +312,12 @@ class TestInvariantCalculator(unittest.TestCase):
         qs_extr, dqs_extr = inv.get_qstar_with_error('both')
         delta_qs_low, delta_dqs_low = inv.get_qstar_low()
         delta_qs_hi,  delta_dqs_hi = inv.get_qstar_high()
-        
+
         self.assertAlmostEqual(qs_extr, _qstar+delta_qs_low+delta_qs_hi, 8)
         self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar
                                          + delta_dqs_low*delta_dqs_low
                                          + delta_dqs_hi*delta_dqs_hi), 8)
- 
+
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
         #TODO: verify whether this test really makes sense
@@ -367,7 +371,7 @@ class TestInvariantCalculator(unittest.TestCase):
 
     def test_bad_parameter_name(self):
         """
-            The set_extrapolation method checks that the name of the 
+            The set_extrapolation method checks that the name of the
             extrapolation function and the name of the q-range to extrapolate
             (high/low) is recognized.
         """
@@ -523,9 +527,9 @@ class TestLinearization(unittest.TestCase):
 class TestDataExtraLow(unittest.TestCase):
     """
         Generate a Guinier distribution and verify that the extrapolation
-        produce the correct ditribution. Test if the data generated by the 
+        produce the correct ditribution. Test if the data generated by the
         invariant calculator is correct
-        TODO:: on 3/23/2020 PDB says: this seems to be exactly the same 
+        TODO:: on 3/23/2020 PDB says: this seems to be exactly the same
                tests as class TestDataExtraLowSlitGunier (whih in fact
                has no smearing whatsoever) and is a superset of the class
                TestGunierExtrapolation?
@@ -580,14 +584,14 @@ class TestDataExtraLow(unittest.TestCase):
 
 class TestDataExtraLowSlitGuinier(unittest.TestCase):
     """
-        for a smear data, test that the fitting goes through 
+        for a smear data, test that the fitting goes through
         real data for at least the 2 first points
         TODO:: on 3/23/2020 PDB says: a) there is no slit smear data here and
                b) this seems to be the exactly the same tests as in class
                TestDataExtraLow which iteself is a superset of the class
                TestGunierExtrapolation?
         DELETE
-             
+
     """
 
     def setUp(self):
@@ -655,7 +659,7 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         inv.set_extrapolation(range='low', npts=self.npts, function='guinier')
 
         self.assertEqual(inv._low_extrapolation_npts, self.npts)
-        self.assertEqual(inv._low_extrapolation_function.__class__, 
+        self.assertEqual(inv._low_extrapolation_function.__class__,
                          invariant.Guinier)
 
         # Data boundaries for fiiting
@@ -673,8 +677,8 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         #Computing the ys coming out of the invariant when computing
         # extrapolated low data . expect the fit engine to have been already
         # called and the guinier to have the radius and the scale fitted
-        data_in_range = inv.get_extra_data_low(q_start=self.data.x[0], 
-                                               npts = inv._low_extrapolation_npts) 
+        data_in_range = inv.get_extra_data_low(q_start=self.data.x[0],
+                                               npts = inv._low_extrapolation_npts)
         test_y = data_in_range.y
         self.assertTrue(len(test_y) == len(self.data.y[:inv._low_extrapolation_npts]))
         for i in range(inv._low_extrapolation_npts):
@@ -684,7 +688,7 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
 
 class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
     """
-        for a smear data, test that the fitting goes through 
+        for a smear data, test that the fitting goes through
         real data for atleast the 2 first points
         TODO:: As of 3/23/2020 by PDB - this data is NOT smeared as far as
                I can see. On the other hand it is the only high q extrapolation
@@ -777,7 +781,7 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         qstar = inv.get_qstar(extrapolation='high')
 
         data_in_range= inv.get_extra_data_high(q_end = max(self.data.x),
-                                               npts = inv._high_extrapolation_npts) 
+                                               npts = inv._high_extrapolation_npts)
         test_y = data_in_range.y
         self.assertTrue(len(test_y) == len(self.data.y[start:]))
         temp = self.data.y[start:]

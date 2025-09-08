@@ -1,28 +1,21 @@
-import sys
 import platform
 
+import matplotlib as mpl
 import pytest
 
-import matplotlib as mpl
 mpl.use("Qt5Agg")
 
-import pytest
-
-import matplotlib as mpl
-mpl.use("Qt5Agg")
-
-from PySide6 import QtGui, QtWidgets, QtPrintSupport
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
-from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
-from sas.qtgui.Plotting.WindowTitle import WindowTitle
-from sas.qtgui.Utilities.GuiUtils import *
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
 # Tested module
 import sas.qtgui.Plotting.PlotterBase as PlotterBase
+from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
+from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
+from sas.qtgui.Plotting.WindowTitle import WindowTitle
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class PlotterBaseTest:
@@ -111,7 +104,7 @@ class PlotterBaseTest:
         ''' test toggling the grid lines '''
         # Check the toggle
         orig_toggle = plotter.grid_on
-        
+
         mocker.patch.object(FigureCanvas, 'draw_idle')
         plotter.onGridToggle()
 

@@ -1,5 +1,5 @@
 def format_time_estimate(est_time_seconds):
-    """ Get easily understandable string for a computational time estimate"""
+    """Get easily understandable string for a computational time estimate"""
     # This is some silly code, but eh, why not
     #
     # I'm not even sure this is bad code, it's quite readable,

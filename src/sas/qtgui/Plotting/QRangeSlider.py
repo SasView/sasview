@@ -1,20 +1,24 @@
 """Double slider interactor for setting the Q range for a fit or function"""
+
+from collections.abc import Callable
+from typing import TYPE_CHECKING
+
 import numpy as np
-from typing import Union
 from PySide6.QtCore import QEvent
 from PySide6.QtWidgets import QLineEdit, QTextEdit
 
+import sas.qtgui.Utilities.ObjectLibrary as ol
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-import sas.qtgui.Utilities.ObjectLibrary as ol
 
+if TYPE_CHECKING:
+    from sas.qtgui.Plotting.Plotter import Plotter
 
 class QRangeSlider(BaseInteractor):
     """  Draw a pair of draggable vertical lines. Each line can be linked to a GUI input.
     The GUI input should update the lines and vice-versa.
     """
-    def __init__(self, base, axes, color='black', zorder=5, data=None):
-        # type: (Plotter, Plotter.ax, str, int, Data1D) -> None
+    def __init__(self, base: "Plotter", axes: "Plotter.ax", color: str = 'black', zorder: int = 5, data: Data1D = None) -> None:
         """ Initialize the slideable lines and associated markers """
         # Assert the data object is a plottable
         assert isinstance(data, Data1D)
@@ -46,67 +50,57 @@ class QRangeSlider(BaseInteractor):
         self.has_move = True
         self.update()
 
-    def clear(self):
-        # type: () -> None
+    def clear(self) -> None:
         """ Clear this slicer and its markers """
         self.clear_markers()
 
-    def show(self):
-        # type: () -> None
+    def show(self) -> None:
         """ Show this slicer and its markers """
         self.line_max.draw()
         self.line_min.draw()
         self.update()
 
-    def remove(self):
-        # type: () -> None
+    def remove(self) -> None:
         """ Remove this slicer and its markers """
         self.line_max.remove()
         self.line_min.remove()
         self.draw()
         self.is_visible = False
 
-    def update(self, x=None, y=None):
-        # type: (float, float) -> None
+    def update(self, x: float = None, y: float = None) -> None:
         """Draw the new lines on the graph."""
         self.line_min.update(x, y, draw=self.updateOnMove)
         self.line_max.update(x, y, draw=self.updateOnMove)
         self.base.update()
         self.is_visible = True
 
-    def save(self, ev):
-        # type: (QEvent) -> None
+    def save(self, ev: QEvent) -> None:
         """ Remember the position of the lines so that we can restore on Esc. """
         self.line_min.save(ev)
         self.line_max.save(ev)
 
-    def restore(self, ev):
-        # type: (QEvent) -> None
+    def restore(self, ev: QEvent) -> None:
         """ Restore the lines. """
         self.line_max.restore(ev)
         self.line_min.restore(ev)
 
-    def toggle(self):
-        # type: () -> None
+    def toggle(self) -> None:
         """ Toggle the slider visibility. """
         if self.is_visible:
             self.remove()
         else:
             self.show()
 
-    def move(self, x, y, ev):
-        # type: (float, float, QEvent) -> None
+    def move(self, x: float, y: float, ev: QEvent) -> None:
         """ Process move to a new position, making sure that the move is allowed. """
         pass
 
-    def clear_markers(self):
-        # type: () -> None
+    def clear_markers(self) -> None:
         """ Clear each of the lines individually """
         self.line_min.clear()
         self.line_max.clear()
 
-    def draw(self):
-        # type: () -> None
+    def draw(self) -> None:
         """ Update the plot """
         self.base.draw()
 
@@ -115,9 +109,8 @@ class LineInteractor(BaseInteractor):
     """
     Draw a single vertical line that can be dragged on a plot
     """
-    def __init__(self, base, axes, color='black', zorder=5, x=0.5, y=0.5,
-                 input=None, setter=None, getter=None, perspective=None, tab=None):
-        # type: (Plotter, Plotter.ax, str, int, float, float, [str], [str], [str], str, str) -> None
+    def __init__(self, base: "Plotter", axes: "Plotter.ax", color: str = 'black', zorder: int = 5, x: float = 0.5, y: float = 0.5,
+                 input: list[str] = None, setter: list[str] = None, getter: list[str] = None, perspective: str = None, tab: str = None) -> None:
         """ Initialize the line interactor object"""
         BaseInteractor.__init__(self, base, axes, color=color)
         # Plotter object
@@ -159,59 +152,50 @@ class LineInteractor(BaseInteractor):
         self.inputChanged()
 
     @property
-    def input(self):
-        # type: () -> Union[QLineEdit, QTextEdit, None]
+    def input(self) -> QLineEdit | QTextEdit | None:
         """ Get the text input that should be linked to the position of this slider """
         return self._input
 
     @input.setter
-    def input(self, input):
-        # type: (Union[QLineEdit, QTextEdit, None]) -> None
+    def input(self, input: QLineEdit | QTextEdit | None) -> None:
         """ Set the text input that should be linked to the position of this slider """
         self._input = input
         if self._input:
             self._input.editingFinished.connect(self.inputChanged)
 
     @property
-    def setter(self):
-        # type: () -> Union[callable, None]
+    def setter(self) -> Callable | None:
         """ Get the x-value setter method associated with this slider """
         return self._setter
 
     @setter.setter
-    def setter(self, setter):
-        # type: (Union[callable, None]) -> None
+    def setter(self, setter: Callable | None) -> None:
         """ Set the x-value setter method associated with this slider """
         self._setter = setter if callable(setter) else None
 
     @property
-    def getter(self):
-        # type: () -> Union[callable, None]
+    def getter(self) -> Callable | None:
         """ Get the x-value getter method associated with this slider """
         return self._getter
 
     @getter.setter
-    def getter(self, getter):
-        # type: (Union[callable, None]) -> None
+    def getter(self, getter: Callable | None) -> None:
         """ Set the x-value getter associated with this slider """
         self._getter = getter if callable(getter) else None
 
-    def clear(self):
-        # type: () -> None
+    def clear(self) -> None:
         """ Disconnect any inputs and callbacks and the clear the line and marker """
         self.clear_markers()
         self.remove()
 
-    def remove(self):
-        # type: () -> None
+    def remove(self) -> None:
         """ Clear this slicer and its markers """
         if self.inner_marker:
             self.inner_marker.remove()
         if self.line:
             self.line.remove()
 
-    def draw(self, zorder=5):
-        # type: (int) -> None
+    def draw(self, zorder: int = 5) -> None:
         """ Draw the line and marker on the linked plot using the latest x and y values """
         # Inner circle marker
         self.inner_marker = self.axes.plot([self.x], [self.y_marker], linestyle='', marker='o', markersize=4,
@@ -220,8 +204,7 @@ class LineInteractor(BaseInteractor):
         self.line = self.axes.axvline(self.x, linestyle='-', color=self.color, marker='', pickradius=5,
                                       label=None, zorder=zorder, visible=True)
 
-    def _get_input_or_callback(self, connection_list=None):
-        # type: ([str]) -> Union[QLineEdit, QTextEdit, None]
+    def _get_input_or_callback(self, connection_list: list[str] = None) -> QLineEdit | QTextEdit | None:
         """ Returns an input or callback method based on a list of inputs/commands """
         connection = None
         if isinstance(connection_list, list):
@@ -233,8 +216,7 @@ class LineInteractor(BaseInteractor):
                     return None
         return connection
 
-    def _set_q(self, value):
-        # type: (float) -> None
+    def _set_q(self, value: float) -> None:
         """ Call the q setter callback method if it exists """
         self.x = value
         if self.setter and callable(self.setter):
@@ -242,8 +224,7 @@ class LineInteractor(BaseInteractor):
         elif hasattr(self.input, 'setText'):
             self.input.setText(f"{value:.3}")
 
-    def _get_q(self):
-        # type: () -> None
+    def _get_q(self) -> None:
         """ Get the q value, inferring the method to get the value """
         if self.getter:
             # Separate callback method to get Q value
@@ -255,15 +236,13 @@ class LineInteractor(BaseInteractor):
             # Text box
             self.x = float(self.input.getText())
 
-    def inputChanged(self):
-        # type: () -> None
+    def inputChanged(self) -> None:
         """ Track the input linked to the x value for this slider and update as needed """
         self._get_q()
         self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
         self.update(draw=True)
 
-    def update(self, x=None, y=None, draw=False):
-        # type: (float, float, bool) -> None
+    def update(self, x: float = None, y: float = None, draw: bool = False) -> None:
         """ Update the line position on the graph. """
         # Reset x, y -coordinates if given as parameters
         if x is not None:
@@ -277,20 +256,17 @@ class LineInteractor(BaseInteractor):
         if draw:
             self.base.draw()
 
-    def save(self, ev):
-        # type: (QEvent) -> None
+    def save(self, ev: QEvent) -> None:
         """ Remember the position for this line so that we can restore on Esc. """
         self.save_x = self.x
         self.save_y = self.y_marker
 
-    def restore(self, ev):
-        # type: (QEvent) -> None
+    def restore(self, ev: QEvent) -> None:
         """ Restore the position for this line """
         self.x = self.save_x
         self.y_marker = self.save_y
 
-    def move(self, x, y, ev):
-        # type: (float, float, QEvent) -> None
+    def move(self, x: float, y: float, ev: QEvent) -> None:
         """ Process move to a new position, making sure that the move is allowed. """
         self.has_move = True
         self.x = x
@@ -299,8 +275,7 @@ class LineInteractor(BaseInteractor):
         self.y_marker = self.base.data.y[(np.abs(self.base.data.x - self.x)).argmin()]
         self.update(draw=self.base.updateOnMove)
 
-    def onRelease(self, ev):
-        # type: (QEvent) -> bool
+    def onRelease(self, ev: QEvent) -> bool:
         """ Update the line position when the mouse button is released """
         # Set the Q value if a callable setter exists otherwise update the attached input
         self._set_q(self.x)
@@ -308,8 +283,7 @@ class LineInteractor(BaseInteractor):
         self.moveend(ev)
         return True
 
-    def clear_markers(self):
-        # type: () -> None
+    def clear_markers(self) -> None:
         """ Disconnect the input and clear the callbacks """
         if self.input:
             self.input.editingFinished.disconnect(self.inputChanged)

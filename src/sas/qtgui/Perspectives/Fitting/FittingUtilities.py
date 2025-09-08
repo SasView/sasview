@@ -1,15 +1,11 @@
 import copy
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from collections.abc import Sequence
 
 import numpy
-
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole, Data2D
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting.AssociatedComboBox import AssociatedComboBox
-
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.sascalc.fit.expression import check_constraints
 
 model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
@@ -90,8 +86,8 @@ def createFixedChoiceComboBox(param, item_row):
     """
     Determines whether param is a fixed-choice parameter, modifies items in item_row appropriately and returns a combo
     box containing the fixed choices. Returns None if param is not fixed-choice.
-    
-    item_row is a list of QStandardItem objects for insertion into the parameter table. 
+
+    item_row is a list of QStandardItem objects for insertion into the parameter table.
     """
 
     # Determine whether this is a fixed-choice parameter. There are lots of conditionals, simply because the
@@ -514,7 +510,6 @@ def residualsData1D(reference_data, current_data, weights):
     """
     # temporary default values for index and weight
     index = None
-    weight = None
 
     # 1d theory from model_thread is only in the range of index
     if current_data.dy is None or not len(current_data.dy):
@@ -665,7 +660,7 @@ def plotPolydispersities(model):
         data1d.yaxis(r'\rm{probability}', 'normalized')
         data1d.scale = 'linear'
         data1d.symbol = 'Line'
-        data1d.name = "{} polydispersity".format(name)
+        data1d.name = f"{name} polydispersity"
         data1d.id = data1d.name # placeholder, has to be completed later
         data1d.plot_role = DataRole.ROLE_POLYDISPERSITY
         plots.append(data1d)
@@ -1004,8 +999,7 @@ def isParamPolydisperse(param_name, kernel_params, is2D=False):
             break
     return has_poly
 
-def checkConstraints(symtab, constraints):
-    # type: (Dict[str, float], Sequence[Tuple[str, str]]) -> str
+def checkConstraints(symtab: dict[str, float], constraints: Sequence[tuple[str, str]]) -> str:
     """
     Compile and evaluate the constraints in the context of the initial values
     and return the list of errors.

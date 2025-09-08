@@ -1,17 +1,16 @@
 """
     Utilities to manage models
 """
-import os
-import sys
-import time
 import datetime
 import logging
-import traceback
+import os
 import py_compile
 import shutil
-import io
+import sys
+import time
+import traceback
 
-from sasmodels.sasview_model import load_custom_model, load_standard_models
+from sasmodels.sasview_model import SasviewModelType, load_custom_model, load_standard_models
 
 from sas.system.user import get_plugin_dir
 
@@ -34,7 +33,7 @@ def plugin_log(message):
     """
     now = time.time()
     stamp = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
-    with io.open(PLUGIN_LOG, 'a', encoding='utf-8') as out:
+    with open(PLUGIN_LOG, 'a', encoding='utf-8') as out:
         out.write("%s: %s\n" % (stamp, message))
 
 
@@ -80,12 +79,6 @@ def _check_plugin(model, name):
     return model
 
 
-def find_plugins_dir() -> str:
-    """A helper function that returns a string representation of the plugins directory as defined by sas.system.user.
-    """
-    return str(get_plugin_dir())
-
-
 def initialize_plugins_dir(path):
     # TODO: There are no default plugins
     # Walk up the tree looking for default plugin_models directory
@@ -112,7 +105,7 @@ def initialize_plugins_dir(path):
             shutil.copy(source, target)
 
 
-class ReportProblem(object):
+class ReportProblem:
     """
     Class to check for problems with specific values
     """
@@ -144,7 +137,7 @@ def find_plugin_models():
     Find custom models
     """
     # List of plugin objects
-    plugins_dir = find_plugins_dir()
+    plugins_dir = get_plugin_dir()
     # Go through files in plug-in directory
     if not os.path.isdir(plugins_dir):
         msg = "SasView couldn't locate Model plugin folder %r." % plugins_dir
@@ -166,7 +159,7 @@ def find_plugin_models():
                 #if not model.name.startswith(PLUGIN_NAME_BASE):
                 #    model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
-            except Exception as exc:
+            except Exception:
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)
@@ -176,19 +169,19 @@ def find_plugin_models():
     return plugins
 
 
-class ModelManagerBase(object):
+class ModelManagerBase:
     """
     Base class for the model manager
     """
     #: mutable dictionary of models, continually updated to reflect the
     #: current set of plugins
-    model_dictionary = None  # type: Dict[str, Model]
+    model_dictionary: dict[str, SasviewModelType] = None
     #: constant list of standard models
-    standard_models = None  # type: Dict[str, Model]
+    standard_models: dict[str, SasviewModelType] = None
     #: list of plugin models reset each time the plugin directory is queried
-    plugin_models = None  # type: Dict[str, Model]
+    plugin_models: dict[str, SasviewModelType] = None
     #: timestamp on the plugin directory at the last plugin update
-    last_time_dir_modified = 0  # type: int
+    last_time_dir_modified: int = 0
 
     def __init__(self):
         # the model dictionary is allocated at the start and updated to
@@ -208,7 +201,7 @@ class ModelManagerBase(object):
         is the directory was modified else return false
         """
         is_modified = False
-        plugin_dir = find_plugins_dir()
+        plugin_dir = get_plugin_dir()
         if os.path.isdir(plugin_dir):
             mod_time = os.path.getmtime(plugin_dir)
             if  self.last_time_dir_modified != mod_time:
@@ -289,11 +282,11 @@ class ModelManagerBase(object):
         }
 
 
-class ModelManager(object):
+class ModelManager:
     """
     manage the list of available models
     """
-    base = None  # type: ModelManagerBase()
+    base: ModelManagerBase = None
 
     def __init__(self):
         if ModelManager.base is None:

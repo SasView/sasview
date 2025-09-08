@@ -1,17 +1,15 @@
-import sys
 
 import pytest
 
-from PySide6 import QtCore, QtWidgets
-
 # Local
 from PySide6.QtWidgets import QMdiArea
+
+import sas.qtgui.Plotting.Plotter as Plotter
 from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
-from sas.qtgui.Plotting.PlotterData import Data1D
-import sas.qtgui.Plotting.Plotter as Plotter
-from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 from sas.qtgui.Plotting.LinearFit import LinearFit
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.QRangeSlider import QRangeSlider
 
 
 class QRangeSlidersTest:
@@ -144,7 +142,7 @@ class QRangeSlidersTest:
         assert self.slider.line_max.setter == widget.updateMaxQ()
         # Move slider and ensure text input matches
         self.moveSliderAndInputs(widget.minQInput, widget.maxQInput)
-        
+
 
     def testLinearFitSliders(self, slidersetup):
         '''Test the QRangeSlider class within the context of the Linear Fit tool'''

@@ -1,6 +1,7 @@
 import logging
-from PySide6.QtGui import QStandardItem
+
 import numpy as np
+from PySide6.QtGui import QStandardItem
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import dataFromItem
@@ -17,7 +18,7 @@ PR_PLOT_PTS = 51
 logger = logging.getLogger(__name__)
 
 
-class InversionLogic(object):
+class InversionLogic:
     """
     All the data-related logic. This class deals exclusively with Data1D/2D
     No QStandardModelIndex here.
@@ -29,7 +30,7 @@ class InversionLogic(object):
         self.data_is_loaded = False
         if data_item is not None:
             self.data_is_loaded = True
-        self.qmin = 0.0    
+        self.qmin = 0.0
         self.qmax = np.inf
 
     @property
@@ -77,7 +78,7 @@ class InversionLogic(object):
         index = np.isnan(y)
         if index.any():
             y[index] = err[index] = 1.0
-            logger.info("Could not compute I(q) for q =", list((x[index])))
+            logger.info("Could not compute I(q) for q =", list(x[index]))
 
         new_plot = Data1D(x, y)
         new_plot.is_data = False
@@ -104,7 +105,7 @@ class InversionLogic(object):
             index = np.isnan(y)
             if index.any():
                 y[index] = err[index] = 1.0
-                logger.info("Could not compute smeared I(q) for q =", list((x[index])))
+                logger.info("Could not compute smeared I(q) for q =", list(x[index]))
 
             new_plot = Data1D(x, y)
             new_plot.name = IQ_SMEARED_LABEL
@@ -146,7 +147,7 @@ class InversionLogic(object):
         new_plot.group_id = GROUP_ID_PR_FIT
 
         return new_plot
-      
+
     def add_errors(self, sigma=0.05):
         """
         Adds errors to data set is they are not available.
@@ -174,12 +175,12 @@ class InversionLogic(object):
         if isinstance(data, Data1D):
             try:
                 qmax = max(data.x)
-                #set q values where Intensity is zero, 
+                #set q values where Intensity is zero,
                 #to qmax and exclude from minimum accepted q
                 #to avoid dodgy points around beam stop
                 usable_qrange=np.where(data.y <= 0, qmax, data.x)
                 qmin = min(usable_qrange)
-                
+
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename

@@ -2,21 +2,9 @@
 Converted invertor.c's methods.
 Implements low level inversion functionality, with conditional Numba njit compilation.
 """
-from __future__ import division
 
-import sys
-import math
-import time
-import copy
-import os
-import re
-import logging
-import time
-
-from functools import reduce
 import numpy as np
 from numpy import pi
-
 
 try:
     from numba import njit
@@ -239,7 +227,7 @@ def int_pr_square(pars, d_max, nslice):
     r = np.linspace(0., d_max - dx, nslice)
     values = pr(pars, d_max, r)
     total = np.sum(values ** 2)
-    
+
     return total * dx
 
 @njit('f8(f8[:], f8, u8)')

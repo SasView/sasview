@@ -1,7 +1,5 @@
-import sys
 
 import pytest
-
 from PySide6 import QtGui, QtWidgets
 
 # Local
@@ -47,7 +45,7 @@ class PlotPropertiesTest:
 
         assert widget.cbColor.currentText() == "Custom"
         assert widget.cbColor.count() == 8
-        
+
     def testOnColorChange(self, widget, mocker):
         '''Test the response to color change event'''
         # Accept the new color

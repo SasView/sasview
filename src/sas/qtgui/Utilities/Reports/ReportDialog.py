@@ -1,25 +1,20 @@
-import os
-import sys
-import re
 import logging
+import os
 import traceback
-from typing import Optional
 
-from PySide6 import QtWidgets, QtCore
-from PySide6 import QtPrintSupport
+from PySide6 import QtCore, QtPrintSupport, QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
-
-from sas.qtgui.Utilities.Reports.UI.ReportDialogUI import Ui_ReportDialogUI
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
+from sas.qtgui.Utilities.Reports.UI.ReportDialogUI import Ui_ReportDialogUI
 
 
 class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     """
     Class for stateless grid-like printout of model parameters for mutiple models
     """
-    def __init__(self, report_data: ReportData, parent: Optional[QtCore.QObject]=None):
+    def __init__(self, report_data: ReportData, parent: QtCore.QObject | None=None):
 
         super().__init__(parent)
         self.setupUi(self)
@@ -147,7 +142,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
                                             encoding='UTF-8')
                 return pisaStatus.err
 
-        except Exception as ex:
+        except Exception:
             # logging.error("Error creating pdf: " + str(ex))
             logging.error("Error creating pdf: " + traceback.format_exc())
         return False

@@ -1,31 +1,44 @@
 # Global
 import re
 from types import MethodType
-from typing import Union
 
-from PySide6.QtWidgets import QDialog, QHBoxLayout, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QPushButton, QCheckBox, QFrame, QLineEdit, QSizePolicy
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QFrame,
+    QHBoxLayout,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
+
+from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
+from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints, logger
+from sas.qtgui.Calculators.Shape2SAS.genPlugin import generatePlugin
+from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import Canvas, ViewerPlotDesign
+from sas.qtgui.Calculators.Shape2SAS.Tables.subunitTable import OptionLayout, SubunitTable
+from sas.qtgui.Calculators.Shape2SAS.UI.DesignWindowUI import Ui_Shape2SAS
+from sas.qtgui.Calculators.Shape2SAS.ViewerModel import ViewerModel
+from sas.qtgui.Perspectives.perspective import Perspective
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
 
 # Local SasView
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Perspectives.perspective import Perspective
-from sas.qtgui.Utilities.GuiUtils import createModelItemWithPlot
-from sas.qtgui.Plotting.PlotterData import Data1D
-
-from sas.qtgui.Calculators.Shape2SAS.UI.DesignWindowUI import Ui_Shape2SAS
-from sas.qtgui.Calculators.Shape2SAS.ViewerModel import ViewerModel
-from sas.qtgui.Calculators.Shape2SAS.ButtonOptions import ButtonOptions
-from sas.qtgui.Calculators.Shape2SAS.Tables.subunitTable import SubunitTable, OptionLayout
-from sas.qtgui.Calculators.Shape2SAS.Constraints import Constraints, logger
-from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import Canvas
-
-from sas.sascalc.shape2sas.Shape2SAS import (getTheoreticalScattering, getPointDistribution, getSimulatedScattering,
-                                                                     ModelProfile, ModelSystem, SimulationParameters, 
-                                                                     Qsampling, TheoreticalScatteringCalculation, 
-                                                                     SimulateScattering)
-from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDesign
-from sas.qtgui.Calculators.Shape2SAS.genPlugin import generatePlugin
+from sas.sascalc.shape2sas.Shape2SAS import (
+    ModelProfile,
+    ModelSystem,
+    Qsampling,
+    SimulateScattering,
+    SimulationParameters,
+    TheoreticalScatteringCalculation,
+    getPointDistribution,
+    getSimulatedScattering,
+    getTheoreticalScattering,
+)
 
 
 class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
@@ -94,7 +107,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         modelVbox = QVBoxLayout()
         modelHbox = QHBoxLayout()
-        
+
         modelVbox.setContentsMargins(10,10,10,10)
         modelHbox.setContentsMargins(10,10,10,10)
         modelSection = QWidget()
@@ -109,11 +122,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #plot scene
         self.scatteringProf = QWidget()
         self.scatteringProf.setContentsMargins(0, 0, 0, 0)
-        self.scatteringProf.setObjectName(u"scatteringProf")
+        self.scatteringProf.setObjectName("scatteringProf")
         self.scatteringProf.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.scatteringScene = QVBoxLayout(self.scatteringProf)
         self.scatteringScene.setContentsMargins(5, 5, 5, 5)
-        self.scatteringScene.setObjectName(u"scatteringScene")
+        self.scatteringScene.setObjectName("scatteringScene")
         self.plotBoxLayout = QHBoxLayout()
         self.plotBoxLayout.setContentsMargins(5, 5, 5, 5)
         self.plotBoxLayout.addWidget(self.scatteringProf)
@@ -188,7 +201,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         #no subunits inputted
         if not columns:
             return
-        
+
         #no parameters inputted
         if not any(any(column) for column in columns):
             return
@@ -217,9 +230,9 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
                     inputName = self.getTableName(column, row)
 
                     #create parameter list
-                    parameter = [inputName, units[enumMember], inputVal, bounds[enumMember], 
+                    parameter = [inputName, units[enumMember], inputVal, bounds[enumMember],
                                  types[enumMember], f"{inputName} for column {column + 1}"]
-        
+
                     toTextEditor.append(parameter)
 
         formatted = "[\n " + ",\n ".join(str(pars) for pars in toTextEditor) + "\n]"
@@ -234,7 +247,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             formatted = constraints
             self.constraint.setConstraints(formatted)
 
-    def checkStateOfConstraints(self, fitPar: list[str], modelPars: list[list[str]], modelVals: list[list[float]], 
+    def checkStateOfConstraints(self, fitPar: list[str], modelPars: list[list[str]], modelVals: list[list[float]],
                                 checkedPars: list[list[bool]]) -> tuple[str, str, str]:
         """Check if the user has written constraints. Otherwise return Default"""
 
@@ -244,7 +257,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         if constraintsStr:
             #TODO: print to GUI output texteditor
             return self.constraint.getConstraints(constraintsStr, fitPar, modelPars, modelVals, checkedPars)
-        
+
         #Did the user only check parameters and click generate plugin
         elif fitPar:
             #Get default constraints
@@ -252,7 +265,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             defaultConstraintsStr = self.constraint.getConstraintText(fitParLists)
             #TODO: print to GUI output texteditor
             return self.constraint.getConstraints(defaultConstraintsStr, fitPar, modelPars, modelVals, checkedPars)
-        
+
         #If not, return empty
         else:
             #all parameters are constant
@@ -318,7 +331,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
     def getStructureFactorValues(self):
         """
-        Read structure factor options from chosen structure 
+        Read structure factor options from chosen structure
         factor in Virtual SAXS experiment tab
         """
         S_vals = []
@@ -331,7 +344,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         lineEdits = currentWidget.findChildren(QLineEdit)
 
         #get concentration value for Hardsphere case
-        #TODO: concentration is already an input value. Maybe add 
+        #TODO: concentration is already an input value. Maybe add
         #a texbox to explain that to the user if stackedWidget chosen?
         if index == 1:
             conc = self.volumeFraction
@@ -342,31 +355,31 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         return S_vals
 
-    def getSubunitTableCell(self, row: int, column: int) -> Union[float, str]:
+    def getSubunitTableCell(self, row: int, column: int) -> float | str:
         """Get model data from a single cell."""
         return self.subunitTable.model.item(row, column).data(Qt.EditRole)
 
     @staticmethod
-    def ifEmptyValue(value: Union[float, str], values: list[Union[float, str]], *args, **kwargs):
+    def ifEmptyValue(value: float | str, values: list[float | str], *args, **kwargs):
         """condition method. Append if not empty"""
         if not value == "":
             values.append(value)
 
     @staticmethod
-    def ifFitPar(value: Union[float, str], values: list[Union[float, str]], *args, **kwargs):
+    def ifFitPar(value: float | str, values: list[float | str], *args, **kwargs):
         """condition method. Append FitPar if condition. Otherwise append constant"""
 
         conditionFitPar = kwargs['conditionFitPar'] #list[list[str]]
         conditionBool = kwargs['conditionBool'] #list[list[bool]]
         row, column = args #int, int
-        
+
         if not value == "":
             if conditionBool[column][row]:
                 values.append(conditionFitPar[column][row])
             else:
                 values.append(value)
 
-    def getSubunitTableRow(self, condition: MethodType, row: int, **kwargs) -> list[Union[float, str]]:
+    def getSubunitTableRow(self, condition: MethodType, row: int, **kwargs) -> list[float | str]:
         """Get model data from a single row"""
 
         values = []
@@ -377,7 +390,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         return values
 
-    def getSubunitTableSets(self, condition: MethodType, rows: list[int], **kwargs) -> list[list[Union[float, str]]]:
+    def getSubunitTableSets(self, condition: MethodType, rows: list[int], **kwargs) -> list[list[float | str]]:
         """Get a set of rows per column in subunit table"""
 
         sets = []
@@ -390,14 +403,14 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
                 condition(value, set, row, column, **kwargs)
             sets.append(set)
         return sets
-    
-    def getStandardReadOfTableData(self) -> list[list[Union[float, str]]]:
+
+    def getStandardReadOfTableData(self) -> list[list[float | str]]:
         """Get a standard data read from subunit TableView"""
 
         columns = self.subunitTable.model.columnCount()
         if not self.subunitTable.model.item(1, columns - 1):
             return
-        
+
         model = self.subunitTable.model
         layout = list(OptionLayout)
         layout.remove(OptionLayout.Colour) #TODO: features may be in another Enum
@@ -414,7 +427,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         return data
 
-    def getModelData(self, condition: MethodType, **kwargs) -> list[list[Union[float, str]]]:
+    def getModelData(self, condition: MethodType, **kwargs) -> list[list[float | str]]:
         """Get all data in the subunit table"""
 
         #no subunits inputted
@@ -423,24 +436,24 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             return
 
         subunit = self.getSubunitTableRow(condition, OptionLayout.get_position(OptionLayout.Subunit), **kwargs)
-        dimensions = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.x), 
-                                                        OptionLayout.get_position(OptionLayout.y), 
+        dimensions = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.x),
+                                                        OptionLayout.get_position(OptionLayout.y),
                                                         OptionLayout.get_position(OptionLayout.z)], **kwargs)
 
         p_s = self.getSubunitTableRow(condition, OptionLayout.get_position(OptionLayout.ΔSLD), **kwargs)
 
-        com = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.COM_x), 
-                                                OptionLayout.get_position(OptionLayout.COM_y), 
+        com = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.COM_x),
+                                                OptionLayout.get_position(OptionLayout.COM_y),
                                                 OptionLayout.get_position(OptionLayout.COM_z)], **kwargs)
-        
+
         rotation_points = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.RP_x),
                                                 OptionLayout.get_position(OptionLayout.RP_y),
                                                 OptionLayout.get_position(OptionLayout.RP_z)], **kwargs)
-        
+
         rotation = self.getSubunitTableSets(condition, [OptionLayout.get_position(OptionLayout.α),
                                             OptionLayout.get_position(OptionLayout.β),
                                             OptionLayout.get_position(OptionLayout.γ)], **kwargs)
-        
+
         #set bool to checkbox
         if self.subunitTable.overlap.isChecked():
             exclude_overlap = True
@@ -454,7 +467,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         subunit, dimensions, p_s, com, rotation_points, rotation, exclude_overlap = self.getModelData(condition, **kwargs)
 
-        return ModelProfile(subunits=subunit, p_s=p_s, dimensions=dimensions, com=com, 
+        return ModelProfile(subunits=subunit, p_s=p_s, dimensions=dimensions, com=com,
                            rotation_points=rotation_points, rotation=rotation, exclude_overlap=exclude_overlap)
 
     def getViewFeatures(self) -> ViewerPlotDesign:
@@ -464,11 +477,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         columns = self.subunitTable.model.columnCount()
         for column in range(columns):
             colour.append(self.getSubunitTableCell(OptionLayout.get_position(OptionLayout.Colour), column))
-        
+
         return ViewerPlotDesign(colour=colour)
 
     def onClickingPlot(self):
-        """Get 3D plot of the designed model in the Build model tab. 
+        """Get 3D plot of the designed model in the Build model tab.
         If checked, plot theoretical scattering from the designed model."""
         columns = self.subunitTable.model.columnCount()
         self.plugin.setEnabled(columns > 0)
@@ -477,7 +490,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
             return
 
         modelProfile = self.getModelProfile(self.ifEmptyValue)
-        
+
         plotDesign = self.getViewFeatures()
         modelDistribution = getPointDistribution(modelProfile, 3000)
         self.viewerModel.setPlot(modelDistribution, plotDesign)
@@ -485,16 +498,16 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         # Save the Q3DScatter plot to a PNG file
         #NOTE: The resolution is very low for this image!
         #scatter_plot = self.viewerModel.scatter  # Assuming scatter is the Q3DScatter instance
-        #dpi = 3000       
+        #dpi = 3000
         #image = scatter_plot.renderToImage(dpi)
         #image.save("scatter_plot.png")
 
         #on being checked, plot theoretical scattering
         if self.checkTheoreticalScattering.isChecked():
-            scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=modelDistribution, 
-                                                                        Stype="None", par=[], 
-                                                                        polydispersity=0.0, conc=0.02, 
-                                                                        sigma_r=0.0), 
+            scattering = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=modelDistribution,
+                                                                        Stype="None", par=[],
+                                                                        polydispersity=0.0, conc=0.02,
+                                                                        sigma_r=0.0),
                                                                         Calculation=SimulationParameters())
             theoreticalScattering = getTheoreticalScattering(scattering)
             self.viewerModel.setScatteringPlot(theoreticalScattering)
@@ -565,7 +578,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     @staticmethod
     def ifEmptyName(name: str, names: list[str], **kwargs):
         """condition method. Append if not empty"""
-        
+
         if name:
             names.append(name)
 
@@ -578,7 +591,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
     def getTableNames(self, condition: MethodType, column: int, **kwargs) -> list[str]:
         """Get the parameter names of a column in the subunit table"""
-            
+
         names = []
         layout = list(OptionLayout)
         layout.remove(OptionLayout.Colour) #TODO: features may be in another Enum
@@ -607,7 +620,7 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
     def getPluginModel(self):
         """Generating a plugin model and sends it to
         the Plugin Models folder in SasView"""
-        
+
         logger.info("Generating plugin model.")
         #no subunits inputted
         columns = self.subunitTable.model.columnCount() #TODO: maybe give a warning to output texteditor
@@ -686,11 +699,11 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
 
         Distr = getPointDistribution(Profile, N)
 
-        Theo_calc = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=Distr, 
-                                                                        Stype=Stype, par=par, 
-                                                                        polydispersity=polydispersity, 
-                                                                        conc=conc, 
-                                                                        sigma_r=sigma_r), 
+        Theo_calc = TheoreticalScatteringCalculation(System=ModelSystem(PointDistribution=Distr,
+                                                                        Stype=Stype, par=par,
+                                                                        polydispersity=polydispersity,
+                                                                        conc=conc,
+                                                                        sigma_r=sigma_r),
                                                                         Calculation=Sim_par)
         Theo_I = getTheoreticalScattering(Theo_calc)
         Sim_calc = SimulateScattering(q=Theo_I.q, I0=Theo_I.I0, I=Theo_I.I, exposure=exposure)

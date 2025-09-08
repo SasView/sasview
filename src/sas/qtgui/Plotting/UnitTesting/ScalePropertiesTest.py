@@ -1,7 +1,6 @@
-import sys
 
-from PySide6 import QtGui, QtWidgets
 import pytest
+from PySide6 import QtWidgets
 
 # Local
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
@@ -23,7 +22,7 @@ class ScalePropertiesTest:
         assert widget.cbX.count() == 6
         assert widget.cbY.count() == 12
         assert widget.cbView.count() == 7
-        
+
     def testGetValues(self, widget):
         '''Test the values returned'''
         assert widget.getValues() == ("x", "y")

@@ -1,11 +1,10 @@
 import numpy as np
 
-from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from sas.qtgui.Plotting.SlicerModel import SlicerModel
-from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
+from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.ArcInteractor import ArcInteractor
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.Slicers.RadiusInteractor import RadiusInteractor
 from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
 
@@ -140,9 +139,9 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         :param new_sector: slicer used for directional averaging in Q or Phi
         :param nbins: the number of point plotted when averaging
-        
+
         :TODO
-        
+
         Unlike other slicers, the two sector types are sufficiently different
         that this method contains three instances of If (check class name) do x.
         The point of post_data vs _post_data I think was to avoid this kind of

@@ -1,19 +1,25 @@
-import sys
-import os
 import logging
+import os
+import sys
 import time
 from pathlib import Path
-from typing import Optional
 
-from PySide6 import QtCore, QtWidgets, QtWebEngineCore
+from PySide6 import QtCore, QtWebEngineCore, QtWidgets
+from PySide6.QtGui import QCloseEvent
 from twisted.internet import threads
 
-from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.sascalc.fit import models
 from sas.sascalc.data_util.calcthread import CalcThread
-from sas.sascalc.doc_regen.makedocumentation import (make_documentation, create_user_files_if_needed,
-                                                     HELP_DIRECTORY_LOCATION, MAIN_DOC_SRC, PATH_LIKE)
+from sas.sascalc.doc_regen.makedocumentation import make_documentation
+from sas.system.user import (
+    HELP_DIRECTORY_LOCATION,
+    MAIN_DOC_SRC,
+    PATH_LIKE,
+    create_user_files_if_needed,
+    get_plugin_dir,
+)
+
+from .UI.DocViewWidgetUI import Ui_DocViewerWindow
 
 HTML_404 = '''
 <html>
@@ -91,7 +97,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         # Necessary globals
         self.source: Path = Path(source)
         self.regen_in_progress: bool = False
-        self.thread: Optional[CalcThread] = None
+        self.thread: CalcThread | None = None
 
         from sas.qtgui.Utilities.GuiUtils import communicate
         self.communicate = communicate
@@ -105,9 +111,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     def initializeSignals(self):
         """Initialize all external signals that will trigger events for the window."""
         self.editButton.clicked.connect(self.onEdit)
-        self.closeButton.clicked.connect(self.onClose)
+        self.closeButton.clicked.connect(self.closeEvent)
         self.communicate.documentationRegeneratedSignal.connect(self.refresh)
-        self.communicate.closeSignal.connect(self.onClose)
+        self.communicate.closeSignal.connect(self.closeEvent)
         self.webEngineViewer.urlChanged.connect(self.updateTitle)
         self.webEngineViewer.page().profile().downloadRequested.connect(self.onDownload)
 
@@ -136,14 +142,14 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                                                   model=False)
         self.editorWindow.show()
 
-    def onClose(self):
+    def closeEvent(self, event: QCloseEvent):
         """
         Close window
         Keep as a separate method to allow for additional functionality when closing
         """
         if self.thread:
             self.thread.close()
-        self.close()
+        self.accept()
 
     def onShow(self):
         """
@@ -173,7 +179,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         The documentation window will open after the process of regeneration is completed.
         Otherwise, simply triggers a load of the documentation window with loadHtml()
         """
-        user_models = Path(models.find_plugins_dir())
+        user_models = Path(get_plugin_dir())
         html_path = HELP_DIRECTORY_LOCATION
         rst_path = MAIN_DOC_SRC
         base_path = self.source.parent.parts
@@ -197,7 +203,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             # Test to see if HTML does not exist or is older than python file
             elif not os.path.exists(url_str):
                 self.load404()
-            # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py    
+            # Regenerate RST then HTML if no model file found OR if HTML is older than equivalent .py
 
         elif "index" in url_str:
             # Regenerate if HTML is older than RST -- for index.html, which gets passed in differently because it is located in a different folder
@@ -216,7 +222,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
                 # Test to see if HTML does not exist or is older than python file
             if not os.path.exists(html_path):
                 self.load404()
-        
+
         if self.regen_in_progress is False:
             self.loadHtml() #loads the html file specified in the source url to the QWebViewer
 
@@ -233,7 +239,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             rst_time = os.path.getmtime(src)
             html_time = os.path.getmtime(html)
             return not html_exists or rst_time > html_time
-        except Exception as e:
+        except Exception:
             # Catch exception for debugging
             return True
 
@@ -249,7 +255,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         # Show widget
         self.onShow()
-    
+
     def updateTitle(self):
         """
         Set the title of the window to include the name of the document,
@@ -266,7 +272,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     def load404(self):
         self.webEngineViewer.setHtml(HTML_404)
         self.onShow()
-    
+
     def refresh(self):
         self.webEngineViewer.reload()
 

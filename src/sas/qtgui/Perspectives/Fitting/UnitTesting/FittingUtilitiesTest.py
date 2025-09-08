@@ -1,21 +1,14 @@
-import sys
 
 import pytest
+from PySide6 import QtCore, QtGui
 
-from PySide6 import QtGui, QtCore
-
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
-
-from sasmodels import generate
-from sasmodels import modelinfo
+from sasmodels import generate, modelinfo
 from sasmodels.sasview_model import load_standard_models
 
 # Tested module
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.FittingUtilities import checkConstraints
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 
 
 class FittingUtilitiesTest:
@@ -28,7 +21,7 @@ class FittingUtilitiesTest:
         param_name = "test [123]"
         value = "replaced"
         result = FittingUtilities.replaceShellName(param_name, value)
-        
+
         assert result == "test replaced"
 
         # Assert!
@@ -36,7 +29,7 @@ class FittingUtilitiesTest:
         with pytest.raises(AssertionError):
             result = FittingUtilities.replaceShellName(param_name, value)
 
-        
+
     def testGetIterParams(self):
         """
         Assure the right multishell parameters are returned
@@ -189,7 +182,7 @@ class FittingUtilitiesTest:
         index = 5
         FittingUtilities.addShellsToModel(multi_parameters, model, index)
         assert model.rowCount() == 10
-        
+
         assert model.item(1).child(0).text() == "Polydispersity"
         assert model.item(1).child(0).child(0).text() == "Distribution"
         assert model.item(1).child(0).child(0,1).text() == "40.0"

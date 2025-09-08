@@ -3,27 +3,21 @@ Widget for simple add / multiply editor.
 """
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
-from numpy import *
-import numpy as np
-
-from PySide6 import QtCore
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-import webbrowser
-
-import os
 import logging
+import os
 import traceback
 
-from sasmodels.sasview_model import load_standard_models
+from numpy import *
+from PySide6 import QtCore, QtGui, QtWidgets
 
-from sas.sascalc.fit import models
+from sasmodels.sasview_model import load_standard_models
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.FittingWidget import SUPPRESSED_MODELS
 
 # Local UI
 from sas.qtgui.Utilities.ModelEditors.AddMultEditor.UI.AddMultEditorUI import Ui_AddMultEditorUI
+from sas.sascalc.fit import models
 
 # Template for the output plugin file
 SUM_TEMPLATE = """
@@ -179,8 +173,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
                 s_title = title
                 if len(title) > 20:
                     s_title = title[0:19] + '...'
-                logging.info("Model function ({}) has been set!\n".
-                                format(str(s_title)))
+                logging.info(f"Model function ({str(s_title)}) has been set!\n")
                 self.good_name = True
                 self.txtName.setStyleSheet(BG_WHITE)
                 self.plugin_filename = os.path.join(self.plugin_dir, filename)
@@ -194,10 +187,9 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         self.lblEquation.setText('<html><head/><body><p><span style=" font-weight:600;">'
                                  'Plugin_model = scale_factor * '
-                                 '(model_1 {} model_2) + background</span></p><p>'
+                                 f'(model_1 {self.cbOperator.currentText()} model_2) + background</span></p><p>'
                                  '<p>To add/multiply plugin models, or combine more than two models, '
-                                 'please check Help below.<br/></p></body></html>'.
-                                 format(self.cbOperator.currentText()))
+                                 'please check Help below.<br/></p></body></html>')
 
     def onApply(self):
         """ Validity check, save model to file """
@@ -253,9 +245,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
             # their own description, add a line to overwrite the sasmodels one
             desc_line = description
         else:
-            desc_line = "{} {} {}".format(model1_name,
-                                          operator,
-                                          model2_name)
+            desc_line = f"{model1_name} {operator} {model2_name}"
 
         name = os.path.splitext(os.path.basename(fname))[0]
         output = SUM_TEMPLATE.format(name=name,

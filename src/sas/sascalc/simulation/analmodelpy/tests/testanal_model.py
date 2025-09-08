@@ -1,23 +1,20 @@
 #!/usr/bin/env python
-# 
+#
 #  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 
+#
 #                               Michael A.G. Aivazis
 #                        California Institute of Technology
 #                        (C) 1998-2005  All Rights Reserved
-# 
+#
 #  <LicenseText>
-# 
+#
 #  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 
-from __future__ import print_function
-
+#
 
 if __name__ == "__main__":
 
     from SASsimulation import analmodelpy as analmodelpymodule
-    from SASsimulation import iqPy
-    from SASsimulation import geoshapespy
+    from SASsimulation import geoshapespy, iqPy
 
     print("copyright information:")
     print("   ", analmodelpymodule.copyright())
@@ -40,4 +37,4 @@ if __name__ == "__main__":
 # version
 __id__ = "$Id$"
 
-#  End of file 
+#  End of file

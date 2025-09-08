@@ -1,15 +1,14 @@
-import sys
 import os
+
 import numpy as np
-from lxml import etree
-
 import pytest
-
+from lxml import etree
 from PySide6 import QtWidgets
 
-from sas.qtgui.Utilities.GuiUtils import Communicate
-from sas.qtgui.Utilities.FileConverter import FileConverterWidget
 import sasdata.file_converter.FileConverterUtilities as Utilities
+
+from sas.qtgui.Utilities.FileConverter import FileConverterWidget
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class FileConverterTest:
@@ -18,7 +17,7 @@ class FileConverterTest:
     @pytest.fixture(autouse=True)
     def widget(self, qapp):
         '''Create/Destroy the FileConverter'''
-        class dummy_manager(object):
+        class dummy_manager:
             communicate = Communicate()
             _parent = QtWidgets.QDialog()
 
@@ -54,7 +53,7 @@ class FileConverterTest:
         mocker.patch.object(widget.parent, 'showHelp', create=True)
         widget.onHelp()
         assert widget.parent.showHelp.called_once()
-     
+
     @pytest.mark.xfail(reason="2022-09 already broken - input file issue")
     def testOnIFileOpen(self, widget, mocker):
         """

@@ -1,10 +1,11 @@
 """
 Extension to MPL to support the binding of artists to key/mouse events.
 """
-import sys
 import logging
+import sys
 
-class Selection(object):
+
+class Selection:
     """
     Store and compare selections.
     """
@@ -27,7 +28,7 @@ class Selection(object):
         return self.artist is not None
 
 
-class BindArtist(object):
+class BindArtist:
     """
     """
     # Track keyboard modifiers for events.
@@ -118,7 +119,8 @@ class BindArtist(object):
         In case we need to disconnect from the canvas...
         """
         try:
-            for cid in self._connections: self.canvas.mpl_disconnect(cid)
+            for cid in self._connections:
+                self.canvas.mpl_disconnect(cid)
         except:
             logging.error("Error disconnection canvas: %s" % sys.exc_info()[1])
         self._connections = []
@@ -130,11 +132,11 @@ class BindArtist(object):
         """Register a callback for an artist to a particular trigger event.
 
         usage:
-        
+
             self.connect(eventname,artist,action)
 
         where:
-        
+
             eventname is a string
             artist is the particular graph object to respond to the event
             action(event,**kw) is called when the event is triggered
@@ -146,7 +148,7 @@ class BindArtist(object):
         returned by Line2D and by collections.
 
         The following events are supported:
-        
+
             enter: mouse cursor moves into the artist or to a new index
             leave: mouse cursor leaves the artist
             click: mouse button pressed on the artist
@@ -156,7 +158,7 @@ class BindArtist(object):
             keyrelease: key released for the artist
 
         The event received by action has a number of attributes:
-        
+
             name is the event name which was triggered
             artist is the object which triggered the event
             x,y are the screen coordinates of the mouse
@@ -170,7 +172,7 @@ class BindArtist(object):
 
         When receiving an event, first check the modifier state to be
         sure it applies.  E.g., the callback for 'press' might be:
-        
+
             if event.button == 1 and event.shift: process Shift-click
 
         TODO: Only receive events with the correct modifiers (e.g., S-click,

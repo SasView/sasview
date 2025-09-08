@@ -1,23 +1,20 @@
-import sys
-import numpy
 import platform
-import pytest
 
 import matplotlib as mpl
-mpl.use("Qt5Agg")
+import numpy
+import pytest
 
-from PySide6 import QtGui, QtWidgets, QtPrintSupport
-from PySide6 import QtCore
+mpl.use("Qt5Agg")
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from mpl_toolkits.mplot3d import Axes3D
-
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
+from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
+from sas.qtgui.MainWindow.UnitTesting.DataExplorerTest import MyPerspective
+from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.Utilities.GuiUtils import Communicate
 
 
 class Plotter2DTest:
@@ -26,7 +23,7 @@ class Plotter2DTest:
     def plotter(self, qapp):
         '''Create/Destroy the Plotter2D'''
 
-        class dummy_manager(object):
+        class dummy_manager:
             def communicator(self):
                 return Communicate()
             def perspective(self):

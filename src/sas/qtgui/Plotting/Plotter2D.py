@@ -1,33 +1,26 @@
 import copy
-import numpy
 import functools
 
-from PySide6 import QtGui
-from PySide6 import QtWidgets
-
+import matplotlib as mpl
+import numpy
 from mpl_toolkits.mplot3d import Axes3D
+from PySide6 import QtGui, QtWidgets
 
 from sasdata.data_util.manipulations import CircularAverage
 
-from sas.qtgui.Plotting.PlotterData import Data1D
-from sas.qtgui.Plotting.PlotterData import Data2D
-
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from sas.qtgui.Plotting.ColorMap import ColorMap
 from sas.qtgui.Plotting.BoxSum import BoxSum
+from sas.qtgui.Plotting.ColorMap import ColorMap
+from sas.qtgui.Plotting.PlotterBase import PlotterBase
+from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
-
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
-from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorQ
-from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi
 from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
-from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
+from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX, BoxInteractorY
 from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
+from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
+from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInteractorQ
 
-import matplotlib as mpl
 DEFAULT_CMAP = mpl.cm.jet
 
 # Minimum value of Z for which we will present data.
@@ -166,9 +159,9 @@ class Plotter2DWidget(PlotterBase):
         """
         Define common context menu and associated actions for the MPL widget
         """
-                
+
         self.defaultContextMenu()
-        
+
         plot_slicer_menu=self.contextMenu.addMenu('Slicers')
         self.actionCircularAverage = plot_slicer_menu.addAction("&Perform Circular Average")
         self.actionCircularAverage.triggered.connect(self.onCircularAverage)
@@ -363,22 +356,27 @@ class Plotter2DWidget(PlotterBase):
         """
         Update circular averaging plot on Data2D change
         """
-        if not hasattr(self, '_item'): return
+        if not hasattr(self, '_item'):
+            return
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
 
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
-        if plots is None: return
+        if plots is None:
+            return
         ca_caption = '2daverage' + self.data0.name
         # See if current item plots contain 2D average plot
         has_plot = False
         for plot in plots:
-            if plot.id is None: continue
-            if ca_caption in plot.id: has_plot = True
+            if plot.id is None:
+                continue
+            if ca_caption in plot.id:
+                has_plot = True
         # return prematurely if no circular average plot found
-        if not has_plot: return
+        if not has_plot:
+            return
 
         # Create a new plot
         new_plot = self.circularAverage()
@@ -392,22 +390,27 @@ class Plotter2DWidget(PlotterBase):
         """
         Update slicer plot on Data2D change
         """
-        if not hasattr(self, '_item'): return
+        if not hasattr(self, '_item'):
+            return
         item = self._item
         if self._item.parent() is not None:
             item = self._item.parent()
 
         # Get all plots for current item
         plots = GuiUtils.plotsFromModel("", item)
-        if plots is None: return
+        if plots is None:
+            return
         slicer_caption = 'Slicer' + self.data0.name
         # See if current item plots contain slicer plot
         has_plot = False
         for plot in plots:
-            if not hasattr(plot, 'type_id') or plot.type_id is None: continue
-            if slicer_caption in plot.type_id: has_plot = True
+            if not hasattr(plot, 'type_id') or plot.type_id is None:
+                continue
+            if slicer_caption in plot.type_id:
+                has_plot = True
         # return prematurely if no slicer plot found
-        if not has_plot: return
+        if not has_plot:
+            return
 
         # Now that we've identified the right plot, update the 2D data the slicer uses
         self.slicer.data = self.data0
@@ -644,8 +647,6 @@ class Plotter2DWidget(PlotterBase):
                 output[output > 0] = numpy.log10(output[output > 0])
                 pass
 
-        vmin, vmax = None, None
-
         self.cmap = cmap
         if self.dimension != 3:
             #Re-adjust colorbar
@@ -728,9 +729,9 @@ class Plotter2DWidget(PlotterBase):
         :Param img: [imread(path) from matplotlib.pyplot]
         """
         if origin is not None:
-            im = self.ax.imshow(img, origin=origin)
+            self.ax.imshow(img, origin=origin)
         else:
-            im = self.ax.imshow(img)
+            self.ax.imshow(img)
 
     def replacePlot(self, id, new_plot):
         """
@@ -758,7 +759,7 @@ class Plotter2DWidget(PlotterBase):
             self.position = None
         x_str = GuiUtils.formatNumber(x_click)
         y_str = GuiUtils.formatNumber(y_click)
-        coord_str = "x: {}, y: {}".format(x_str, y_str)
+        coord_str = f"x: {x_str}, y: {y_str}"
         self.manager.communicate.statusBarUpdateSignal.emit(coord_str)
 
 class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):

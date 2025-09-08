@@ -15,10 +15,9 @@ of D_max value. User picks a number of points and a range of
 distances, then get a series of outputs as a function of D_max
 over that range.
 """
-import sys
 
 
-class Results(object):
+class Results:
     """
     Class to hold the inversion output parameters
     as a function of D_max
@@ -41,7 +40,7 @@ class Results(object):
         self.errors = []
 
 
-class DistExplorer(object):
+class DistExplorer:
     """
     The explorer class
     """

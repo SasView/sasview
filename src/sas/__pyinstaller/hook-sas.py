@@ -57,7 +57,7 @@ try:
     append_data_files("sas/docs")
 
     datas.sort()
-    print(f"SasView added datas:")
+    print("SasView added datas:")
     for s, d in datas:
         print(f"  {s}")
         print(f"  > {d}")

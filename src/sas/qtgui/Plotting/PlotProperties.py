@@ -1,8 +1,8 @@
-from PySide6 import QtCore
 from PySide6 import QtWidgets
 
 from sas.qtgui.Plotting.PlotUtilities import COLORS, SHAPES
 from sas.qtgui.Plotting.UI.PlotPropertiesUI import Ui_PlotPropertiesUI
+
 
 class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
     """ Dialog for modification of single plot properties """

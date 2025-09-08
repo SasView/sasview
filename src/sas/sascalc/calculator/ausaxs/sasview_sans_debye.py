@@ -1,5 +1,7 @@
-import numpy as np
 import logging
+
+import numpy as np
+
 
 def sasview_sans_debye(q, coords, weight, worksize=100000):
     """
@@ -26,7 +28,8 @@ def _calc_Iq_batch(Iq, q_pi, coords, weight):
     *weight* is the weight associated with each point.
     """
     for j in range(len(weight)):
-        if j % 100 == 0: logging.info(f"\tprogress: {j/len(weight)*100:.0f}%")
+        if j % 100 == 0:
+            logging.info(f"\tprogress: {j/len(weight)*100:.0f}%")
         # Compute dx for one row of the upper triangle matrix.
         dx = coords[:, j:] - coords[:, j:j+1]
         # Find the length of each dx vector.

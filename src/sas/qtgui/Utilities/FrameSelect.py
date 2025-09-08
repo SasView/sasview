@@ -3,10 +3,10 @@
 FrameSelect class describes behaviour of the FrameSelect dialog
 
 """
-from PySide6 import QtGui
-from PySide6 import QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 from .UI.FrameSelectUI import Ui_FrameSelect
+
 
 class FrameSelect(QtWidgets.QDialog, Ui_FrameSelect):
     """
@@ -32,9 +32,9 @@ class FrameSelect(QtWidgets.QDialog, Ui_FrameSelect):
         """
         Initialize view
         """
-        instructions = ("The file you've selected has {} frames. "
+        instructions = (f"The file you've selected has {self.n_frames} frames. "
                         "Please select a subset of frames to convert to CanSAS "
-                        "format").format(self.n_frames)
+                        "format")
 
         self.lblDescription.setText(instructions)
         self.lblDescription.setWordWrap(True)

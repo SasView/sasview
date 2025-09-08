@@ -1,25 +1,17 @@
 # Create your tests here.
-import shutil
 import json
-
-from django.conf import settings
-from django.test import TestCase
-from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.test import APIRequestFactory, APIClient, force_authenticate, APITestCase
-
-from sasmodels.data import empty_data1D
-from sasdata.dataloader.loader import Loader
-import numpy as np
+import shutil
 
 from data.models import Data
-from .models import (
-    Fit,
-    FitParameter
-)
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from django.test import TestCase
+from rest_framework.test import APIClient, APIRequestFactory, APITestCase
+
+from sasdata.dataloader.loader import Loader
+
 from .views import (
-    start,
     start_fit,
 )
 
@@ -36,7 +28,7 @@ class TestLists(APITestCase):
     def get_model_list(self):
         request = self.client.post('/v1/analyze/fit/models/')
         self.assertEqual(request.data, {"all models":['adsorbed_layer', 'barbell', 'bcc_paracrystal', 'be_polyelectrolyte', 'binary_hard_sphere', 'broad_peak', 'capped_cylinder', 'core_multi_shell', 'core_shell_bicelle', 'core_shell_bicelle_elliptical', 'core_shell_bicelle_elliptical_belt_rough', 'core_shell_cylinder', 'core_shell_ellipsoid', 'core_shell_parallelepiped', 'core_shell_sphere', 'correlation_length', 'cylinder', 'dab', 'ellipsoid', 'elliptical_cylinder', 'fcc_paracrystal', 'flexible_cylinder', 'flexible_cylinder_elliptical', 'fractal', 'fractal_core_shell', 'fuzzy_sphere', 'gauss_lorentz_gel', 'gaussian_peak', 'gel_fit', 'guinier', 'guinier_porod', 'hardsphere', 'hayter_msa', 'hollow_cylinder', 'hollow_rectangular_prism', 'hollow_rectangular_prism_thin_walls', 'lamellar', 'lamellar_hg', 'lamellar_hg_stack_caille', 'lamellar_stack_caille', 'lamellar_stack_paracrystal', 'line', 'linear_pearls', 'lorentz', 'mass_fractal', 'mass_surface_fractal', 'mono_gauss_coil', 'multilayer_vesicle', 'onion', 'parallelepiped', 'peak_lorentz', 'pearl_necklace', 'poly_gauss_coil', 'polymer_excl_volume', 'polymer_micelle', 'porod', 'power_law', 'pringle', 'raspberry', 'rectangular_prism', 'rpa', 'sc_paracrystal', 'sphere', 'spherical_sld', 'spinodal', 'squarewell', 'stacked_disks', 'star_polymer', 'stickyhardsphere', 'superball', 'surface_fractal', 'teubner_strey', 'triaxial_ellipsoid', 'two_lorentzian', 'two_power_law', 'unified_power_Rg', 'vesicle']})
-    
+
     #working
     def get_model_list_category(self):
         data = {
@@ -66,7 +58,7 @@ class TestFitStart(TestCase):
 
         self.public_test_data = Data.objects.create(id = 2, file_name = "cyl_400_20.txt", is_public = True)
         self.public_test_data.file.save("cyl_400_20.txt", open(r"../src/sas/example_data/1d_data/cyl_400_20.txt"))
-        
+
         #self.private_test_data = Data.objects.create(id = 3, current_user = self.user, file_name = "another.txt", is_public = False)
         #self.private_test_data.file.save("another.txt",open(r""))
 
@@ -89,7 +81,7 @@ class TestFitStart(TestCase):
             "model":"cylinder",
             "data_id":2,
             "optimizer":"amoeba",
-            "parameters" : 
+            "parameters" :
             [
                 {
                     "name":"radius",

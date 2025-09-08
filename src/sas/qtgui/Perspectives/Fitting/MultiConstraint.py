@@ -7,14 +7,13 @@ import webbrowser
 # numpy methods required for the validator! Don't remove.
 # pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
-
 from PySide6 import QtWidgets
-from PySide6 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MultiConstraintUI import Ui_MultiConstraintUI
+
 
 class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
     """
@@ -106,7 +105,8 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         return
 
         # Don't validate if requested
-        if not self.validate: return
+        if not self.validate:
+            return
 
         formula_is_valid = False
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())

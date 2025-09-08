@@ -3,6 +3,7 @@ test gui for sld calculator
 """
 
 import unittest
+
 import wx
 
 H2O_DENSITY = 1.0
@@ -20,7 +21,7 @@ class testTextCtrl(unittest.TestCase):
         self.app = wx.App()
         from sas.sasgui.perspectives.calculator.sld_panel import SldWindow
         self.sld_frame = SldWindow()
-       
+
     def testCompoundTextCtrl(self):
         """
         Test Compund textCtrl
@@ -45,11 +46,11 @@ class testTextCtrl(unittest.TestCase):
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.compound_ctl.GetBackgroundColour()
         self.assertTrue(bkg.GetAsString() == 'white')
-       
+
     def testDensityTextCtrl(self):
         """
         Test Density textCtrl
-        
+
         """
         #add  invalid value for density
         self.sld_frame.panel.compound_ctl.SetValue("H2O")
@@ -71,11 +72,11 @@ class testTextCtrl(unittest.TestCase):
         self.sld_frame.panel.ProcessEvent(clickEvent)
         bkg = self.sld_frame.panel.density_ctl.GetBackgroundColour()
         self.assertTrue(bkg.GetAsString() == 'white')
-        
+
     def testWavelengthTextCtrl(self):
         """
         Test wavelength textCtrl
-        
+
         """
         #add  invalid value for wavelength
         self.sld_frame.panel.compound_ctl.SetValue("H2O")
@@ -108,7 +109,7 @@ class testTextCtrl(unittest.TestCase):
         abs = self.sld_frame.panel.neutron_abs_ctl.GetValue()
         incoh = self.sld_frame.panel.neutron_inc_ctl.GetValue()
         length = self.sld_frame.panel.neutron_length_ctl.GetValue()
-        
+
         self.assertAlmostEqual(float(sld_real), 1.04e-6, 1)
         self.assertAlmostEqual(float(sld_im), -1.5e-7, 1)
         #test absorption value
@@ -131,7 +132,7 @@ class testTextCtrl(unittest.TestCase):
         value = self.sld_frame.panel.wavelength_ctl.GetValue()
         self.assertTrue(bkg.GetAsString() == 'white')
         self.assertTrue(float(value) == WAVELENGTH/2)
-        
+
     def testSomeCombination(self):
         """
         Test other error
@@ -178,14 +179,14 @@ class testTextCtrl(unittest.TestCase):
         value = self.sld_frame.panel.wavelength_ctl.GetValue()
         self.assertTrue(float(value) == WAVELENGTH)
 
-        
-        
+
+
     def tearDown(self):
         """
         Destroy the sld calculator frame
         """
         self.sld_frame.Close()
         self.app.MainLoop()
-        
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,24 +1,25 @@
 
 """ Unit tests for Config system. """
 
-import unittest
-
-from io import StringIO
 import json
+import unittest
+from io import StringIO
 
 import sas
 import sas.system.version
-
 from sas.system.config.config import Config
-
 from sas.system.config.config_meta import MalformedFile
-
-from sas.system.config.schema_elements import \
-    pairwise_schema_union, create_schema_element, \
-    SchemaBool, SchemaInt, SchemaFloat, SchemaStr, \
-    SchemaList, SchemaNonSpecified, \
-    CoercionError
-
+from sas.system.config.schema_elements import (
+    CoercionError,
+    SchemaBool,
+    SchemaFloat,
+    SchemaInt,
+    SchemaList,
+    SchemaNonSpecified,
+    SchemaStr,
+    create_schema_element,
+    pairwise_schema_union,
+)
 
 
 class TestConfig(unittest.TestCase):
@@ -219,7 +220,7 @@ class TestConfig(unittest.TestCase):
     def test_bad_config_file_structure(self):
 
         config = Config()
-        
+
         bad_structures = [
             {
                 "sasview_version": sas.system.version.__version__,

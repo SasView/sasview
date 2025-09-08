@@ -1,4 +1,3 @@
-import logging
 
 interface_color = 'black'
 disable_color = 'gray'
@@ -9,7 +8,7 @@ P_color = 'blue'
 theta_color = 'orange'
 profile_colors = [rho_color, mu_color, P_color, theta_color]
 
-class BaseInteractor(object):
+class BaseInteractor:
     """
     Share some functions between the interface interactor and various layer
     interactors.
@@ -60,7 +59,8 @@ class BaseInteractor(object):
         """
         Clear old markers and interfaces.
         """
-        for h in self.markers: h.remove()
+        for h in self.markers:
+            h.remove()
         if self.markers:
             self.base.connect.clear(*self.markers)
         self.markers = []
@@ -159,7 +159,8 @@ class BaseInteractor(object):
                 self.clicky -= dy
             elif ev.key == 'right':
                 self.clickx += dx
-            else: self.clickx -= dx
+            else:
+                self.clickx -= dx
             self.move(self.clickx, self.clicky, ev)
         else:
             return False

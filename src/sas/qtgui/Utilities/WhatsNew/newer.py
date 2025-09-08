@@ -1,16 +1,13 @@
-from typing import Tuple
-import re
-
-from packaging.version import parse, Version, InvalidVersion
+from packaging.version import InvalidVersion, Version, parse
 
 
-def reduced_version(version_string: str) -> Tuple[int, int, int]:
+def reduced_version(version_string: str) -> tuple[int, int, int]:
     """ Convert a version string into the three numbers we care about for the purposes
     of the WhatsNew dialog (i.e. strip a,b suffixes etc, make into three ints"""
 
     try:
         version = parse(version_string)
-    except InvalidVersion as e:
+    except InvalidVersion:
         raise ValueError(f"{version_string} not a valid version string")
 
     return (version.major, version.minor, version.micro)

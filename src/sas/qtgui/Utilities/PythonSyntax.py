@@ -1,5 +1,6 @@
 from PySide6.QtCore import QRegularExpression
-from PySide6.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
+from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
+
 
 def format(color, style=''):
     """Return a QTextCharFormat with the given attributes.
@@ -206,7 +207,7 @@ if __name__ == '__main__':
     editor.show()
 
     # Load syntax.py into the editor for demo purposes
-    infile = open('PythonSyntax.py', 'r')
+    infile = open('PythonSyntax.py')
     editor.setPlainText(infile.read())
 
     app.exec_()

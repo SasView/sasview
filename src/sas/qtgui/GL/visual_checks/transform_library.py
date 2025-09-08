@@ -2,13 +2,14 @@
 
 from PySide6 import QtWidgets
 
-from sas.qtgui.GL.scene import Scene
 from sas.qtgui.GL.color import uniform_coloring
 from sas.qtgui.GL.cone import Cone
 from sas.qtgui.GL.cube import Cube
 from sas.qtgui.GL.cylinder import Cylinder
 from sas.qtgui.GL.icosahedron import Icosahedron
-from sas.qtgui.GL.transforms import SceneGraphNode, Translation, Rotation, Scaling
+from sas.qtgui.GL.scene import Scene
+from sas.qtgui.GL.transforms import Rotation, Scaling, SceneGraphNode, Translation
+
 
 def transform_tests():
     """ Shows all the existing primitives that can be rendered, press a key to go through them

@@ -1,8 +1,8 @@
 # Global
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
-from PySide6.QtWidgets import QStyledItemDelegate, QWidget, QCheckBox
+from PySide6.QtGui import QFont, QStandardItem, QStandardItemModel
+from PySide6.QtWidgets import QCheckBox, QStyledItemDelegate, QWidget
 
 # Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.Tables.UI.variableTableUI import Ui_VariableTable
@@ -20,7 +20,7 @@ class CustomDelegate(QStyledItemDelegate):
         else:
             editor = QCheckBox(widget)
             return editor
-    
+
     def setEditorData(self, editor, index):
         """Set the checkbox state based on the model data"""
         value = index.model().data(index, Qt.CheckStateRole)
@@ -31,8 +31,8 @@ class CustomDelegate(QStyledItemDelegate):
         value = Qt.Checked if editor.isChecked() else Qt.Unchecked
         model.setData(index, value, Qt.CheckStateRole)
 
-        
-        
+
+
 class ModelVariableTableModel(QStandardItemModel):
     """Subclass from QStandardItemModel to allow displaying parameters in
     QTableView model."""
@@ -46,7 +46,7 @@ class ModelVariableTableModel(QStandardItemModel):
         """
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return list(['Parameters', 'Add to Fit'])[section]
-        
+
         return super(ModelVariableTableModel, self).headerData(section, orientation, role)
 
 
@@ -73,7 +73,7 @@ class VariableTable(QWidget, Ui_VariableTable):
     def setDefaultLayout(self):
         """Set default values"""
         self.tableView.setAlternatingRowColors(True)
-        
+
 
     def setVariableTableData(self, names: list[str], column: int):
         """Set names and checkboxes to table"""
@@ -120,7 +120,7 @@ class VariableTable(QWidget, Ui_VariableTable):
             names.append(self.variableModel.item(row, 0).text())
 
         return names
-    
+
     def getCheckedTableNamesVariables(self):
         """Get checked names from the variable table"""
         names = []
@@ -154,7 +154,7 @@ class VariableTable(QWidget, Ui_VariableTable):
 
         column_pos = self.getAllTableColumnsPos()
         column_pos.append(self.variableModel.rowCount())
-        
+
         i = 0
         for row in range(self.variableModel.rowCount()):
             itemCheck = self.variableModel.item(row, 1)
@@ -165,14 +165,14 @@ class VariableTable(QWidget, Ui_VariableTable):
             if row == column_pos[i + 1] - 1 or row == self.variableModel.rowCount() - 1:
                 columns.append(rows)
                 rows = []
-            
+
             #check if row is greater than lenght of the column
             if not column_pos[i + 1] > row:
                 #go to the next column
                 i += 1
 
         return columns
-    
+
     def setUncheckToAllCheckBoxes(self):
         """Uncheck all checkboxes"""
         for row in range(self.variableModel.rowCount()):

@@ -1,7 +1,5 @@
-import sys
 
 import pytest
-
 from PySide6 import QtGui, QtWidgets
 
 # Local
@@ -24,9 +22,9 @@ class SetGraphRangeTest:
         assert widget.windowTitle() == "Set Graph Range"
         assert isinstance(widget.txtXmin, QtWidgets.QLineEdit)
         assert isinstance(widget.txtXmin.validator(), QtGui.QDoubleValidator)
-        
+
     def testGoodRanges(self, widget):
-        '''Test the X range values set by caller''' 
+        '''Test the X range values set by caller'''
         assert widget.xrange() == (0.0, 0.0)
         assert widget.yrange() == (0.0, 0.0)
 

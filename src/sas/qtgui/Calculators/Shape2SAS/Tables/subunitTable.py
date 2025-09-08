@@ -1,13 +1,15 @@
 # Global
 from enum import Enum
 from types import MethodType
+
 from numpy import inf
-from PySide6.QtCore import Qt, QLocale
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QDoubleValidator, QBrush, QColor, QValidator
-from PySide6.QtWidgets import QStyledItemDelegate, QLineEdit, QComboBox, QWidget, QSizePolicy
+from PySide6.QtCore import QLocale, Qt
+from PySide6.QtGui import QBrush, QColor, QDoubleValidator, QStandardItem, QStandardItemModel, QValidator
+from PySide6.QtWidgets import QComboBox, QLineEdit, QSizePolicy, QStyledItemDelegate, QWidget
 
 #Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.Tables.UI.subunitTableUI import Ui_SubunitTableController
+
 
 #Row option layout
 class ExtendedEnum(Enum):
@@ -70,7 +72,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.x: 50.0, self.y: 50.0, self.z: 200.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
 
     def cylinder(self):
         """Return the cylinder dimensions"""
@@ -78,12 +80,12 @@ class OptionLayout(ExtendedEnum):
         units = {self.x: "Å", self.y: "Å"}
         types = {self.x: "volume", self.y: "volume"}
         bounds = {self.x: [0, inf], self.y: [0, inf]}
-        tooltip = {self.x: "Radius of the cylinder", 
+        tooltip = {self.x: "Radius of the cylinder",
                    self.y: "Length of the cylinder"}
         defaultVal = {self.x: 50.0, self.y: 50.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
 
     def elliptical_cylinder(self):
         """Return the elliptical cylinder dimensions"""
@@ -150,7 +152,7 @@ class OptionLayout(ExtendedEnum):
 
         return name, defaultVal, units, tooltip, types, bounds
 
-    
+
     def hollow_cube(self):
         """Return the hollow cube dimensions"""
 
@@ -203,7 +205,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.COM_x: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
 
     def COMY(self):
         """Return COMY dimensions"""
@@ -215,7 +217,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal= {self.COM_y: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
 
     def COMZ(self):
         """Return COMZ dimensions"""
@@ -227,7 +229,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.COM_z: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
 
     def RPX(self):
         """Return RPX dimensions"""
@@ -239,7 +241,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.RP_x: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
 
     def RPY(self):
         """Return RPY dimensions"""
@@ -251,7 +253,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.RP_y: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
 
     def RPZ(self):
         """Return RPZ dimensions"""
@@ -263,7 +265,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.RP_z: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
 
     def alpha(self):
         """Return α dimensions"""
@@ -275,7 +277,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.α: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
     def beta(self):
         """Return β dimensions"""
         name = {self.β: "β"}
@@ -286,7 +288,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.β: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
     def gamma(self):
         """Return γ dimensions"""
         name = {self.γ: "γ"}
@@ -297,7 +299,7 @@ class OptionLayout(ExtendedEnum):
         defaultVal = {self.γ: 0.0}
 
         return name, defaultVal, units, tooltip, types, bounds
-    
+
     def colour(self):
         """Return Colour dimensions"""
         name = {self.Colour: ""}
@@ -336,7 +338,7 @@ class CustomStandardItem(QStandardItem):
         self.prefix = prefix
         self.tooltip = tooltip
         self.unit = unit
-       
+
         self.setData(default_value, Qt.EditRole)
 
 
@@ -348,9 +350,9 @@ class CustomStandardItem(QStandardItem):
             return f"{self.prefix}{value}{self.unit}"
         elif role == Qt.ToolTipRole:
             return self.tooltip
-        
+
         return value
-    
+
 
     def setData(self, value, role=Qt.EditRole):
         """Set data for the model"""
@@ -367,7 +369,7 @@ class CustomStandardItem(QStandardItem):
 
 
 class CustomDelegate(QStyledItemDelegate):
-    """Delegate for appearance and 
+    """Delegate for appearance and
     behaviour control of the model table view"""
 
 
@@ -385,7 +387,7 @@ class CustomDelegate(QStyledItemDelegate):
             editor.setValidator(validator)
 
         return editor
-    
+
     def setEditorData(self, editor, index):
         """Set the editor data from the model"""
 
@@ -395,7 +397,7 @@ class CustomDelegate(QStyledItemDelegate):
         else:
             #QLineEdit case
             super().setEditorData(editor, index)
-    
+
 
     def setModelData(self, editor, model, index):
         """Set model data for the editor"""
@@ -424,7 +426,7 @@ class ModelTableModel(QStandardItemModel):
     #    """
     #    if orientation == Qt.Vertical and role == Qt.DisplayRole:
     #        return list(OptionLayout.__members__.keys())[section]
-    #    
+    #
     #    return super(ModelTableModel, self).headerData(section, orientation, role)
 
 
@@ -446,7 +448,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
 
     def setTableProperties(self):
         """Setting table properties"""
-        
+
         self.table.setAlternatingRowColors(True)
         self.table.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
         self.table.resizeColumnsToContents()
@@ -506,7 +508,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                 #if row is contained in the subunit
                 if row in subunitName.keys():
                     paintedName = subunitName[row] + f"{to_column_name}" + " = "
-                    item = CustomStandardItem(paintedName, subunitUnits[row], 
+                    item = CustomStandardItem(paintedName, subunitUnits[row],
                                             subunitTooltip[row], subunitDefault_value[row])
                 else:
                     #no input for this row
@@ -527,7 +529,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                 attr = getattr(OptionLayout, row.value)
                 method = MethodType(attr, OptionLayout)
                 name, defaultVal, units, tooltip, _, _ = method()
-                item = CustomStandardItem(name[row] + f"{to_column_name}" + " = ", units[row], 
+                item = CustomStandardItem(name[row] + f"{to_column_name}" + " = ", units[row],
                                           tooltip[row], defaultVal[row])
 
             items.append(item)
@@ -564,8 +566,8 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
         self.selected.setEnabled(numcolumn > 0)
         self.selected.setMinimum(1)
         self.selected.setMaximum(numcolumn)
-        
-    
+
+
     def setSubunitRestriction(self, dimensions):
         """Set input restriction for a row"""
         numcolumn = self.model.columnCount()

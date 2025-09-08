@@ -1,87 +1,71 @@
-import sys
-import os
 import logging
-import json
-import webbrowser
+import os
+import sys
 import traceback
-
-from typing import Optional, Dict
+import webbrowser
 from pathlib import Path
 
-from PySide6.QtWidgets import *
-from PySide6.QtGui import *
-from PySide6.QtCore import Qt, QLocale
-
-import matplotlib as mpl
-
-import sas.system.version
-from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import maybe_prompt_new_version_download
-
-#mpl.use("Qt5Agg")
-
-from sas.system.version import __version__ as SASVIEW_VERSION, __release_date__ as SASVIEW_RELEASE_DATE
-
+from packaging.version import Version
+from PySide6.QtCore import QLocale, Qt
+from PySide6.QtGui import QStandardItem
+from PySide6.QtWidgets import QDockWidget, QLabel, QProgressBar, QTextBrowser
 from twisted.internet import reactor
-# General SAS imports
-from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
-from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
-from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
-from sas.qtgui.Utilities.PluginManager import PluginManager
-from sas.qtgui.Utilities.ModelEditors.ReparamEditor.ReparameterizationEditor import ReparameterizationEditor
-from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
-from sas.qtgui.Utilities.ResultPanel import ResultPanel
-from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
-from sas.qtgui.Utilities.HidableDialog import hidable_dialog
-from sas.qtgui.Utilities.MuMag.MuMag import MuMag
-# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
-from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
-from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
-from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
-from sas.qtgui.Utilities.About.About import About
-
-from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
-from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
-from sas.qtgui.MainWindow.CategoryManager import CategoryManager
-from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
-
-from sas.qtgui.MainWindow.DataManager import DataManager
-
-from sas.qtgui.Calculators.SldPanel import SldPanel
-from sas.qtgui.Calculators.DensityPanel import DensityPanel
-from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
-from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
-from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
-from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
-from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
-
-
-import sas.qtgui.Plotting.PlotHelper as PlotHelper
+import sas
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
-from sas.qtgui.Perspectives.perspective import Perspective
-
-from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
+import sas.qtgui.Plotting.PlotHelper as PlotHelper
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+import sas.system.version
+from sas import config
+from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
+from sas.qtgui.Calculators.DensityPanel import DensityPanel
+from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
+from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
+from sas.qtgui.Calculators.Shape2SAS.DesignWindow import DesignWindow as Shape2SAS
+from sas.qtgui.Calculators.SldPanel import SldPanel
+from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
+from sas.qtgui.MainWindow.Acknowledgements import Acknowledgements
+from sas.qtgui.MainWindow.CategoryManager import CategoryManager
+from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
+from sas.qtgui.MainWindow.DataManager import DataManager
+from sas.qtgui.MainWindow.PackageGatherer import PackageGatherer
+from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 from sas.qtgui.Perspectives.Corfunc.CorfuncPerspective import CorfuncWindow
+from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
+from sas.qtgui.Perspectives.perspective import Perspective
 from sas.qtgui.Perspectives.SizeDistribution.SizeDistributionPerspective import SizeDistributionWindow
+from sas.qtgui.Utilities.About.About import About
 
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
-
-from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
-from sas.qtgui.Utilities.ImageViewer import ImageViewer
+# from sas.qtgui.Utilities.DocViewWidget import DocViewWindow
+from sas.qtgui.Utilities.DocRegenInProgess import DocRegenProgress
 from sas.qtgui.Utilities.FileConverter import FileConverterWidget
-from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
+from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
+from sas.qtgui.Utilities.HidableDialog import hidable_dialog
+from sas.qtgui.Utilities.ImageViewer import ImageViewer
+from sas.qtgui.Utilities.ModelEditors.AddMultEditor.AddMultEditor import AddMultEditor
+from sas.qtgui.Utilities.ModelEditors.ReparamEditor.ReparameterizationEditor import ReparameterizationEditor
+from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.MuMag.MuMag import MuMag
+from sas.qtgui.Utilities.NewVersion.NewVersionAvailable import get_current_release_version
+from sas.qtgui.Utilities.OrientationViewer.OrientationViewer import show_orientation_viewer
+from sas.qtgui.Utilities.PluginManager import PluginManager
+from sas.qtgui.Utilities.Preferences.PreferencesPanel import PreferencesPanel
+from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
+from sas.qtgui.Utilities.ResultPanel import ResultPanel
 
-import sas
-from sas import config
-from sas.system import web
+# General SAS imports
+from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
+from sas.qtgui.Utilities.WhatsNew.WhatsNew import WhatsNew
 from sas.sascalc.doc_regen.makedocumentation import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
+from sas.system import web
+from sas.system.user import HELP_DIRECTORY_LOCATION, create_user_files_if_needed
+from sas.system.version import __release_date__ as SASVIEW_RELEASE_DATE
+from sas.system.version import __version__ as SASVIEW_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -120,8 +104,8 @@ class GuiManager:
         self.addTriggers()
 
         # Currently displayed perspective
-        self._current_perspective: Optional[Perspective] = None
-        self.loadedPerspectives: Dict[str, Perspective] = {}
+        self._current_perspective: Perspective | None = None
+        self.loadedPerspectives: dict[str, Perspective] = {}
 
         # Populate the main window with stuff
         self.addWidgets()
@@ -263,8 +247,8 @@ class GuiManager:
         Make sure categories.json exists and if not compile it and install in ~/.sasview
         """
         try:
-            from sas.sascalc.fit.models import ModelManager
             from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+            from sas.sascalc.fit.models import ModelManager
             model_list = ModelManager().cat_model_list()
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:
@@ -394,14 +378,14 @@ class GuiManager:
         try:
             # In order to have multiple help windows open simultaneously, we need to create a new class variable
             # If we just reassign the old one, the old window will be destroyed
-            
+
             # Have we found a name not assigned to a window?
-            potential_help_window = getattr(cls, window_name, None) 
+            potential_help_window = getattr(cls, window_name, None)
             while potential_help_window and potential_help_window.isVisible():
                 window_name = f"help_window_{counter}"
                 potential_help_window = getattr(cls, window_name, None)
                 counter += 1
-            
+
             # Assign new variable to the GuiManager
             setattr(cls, window_name, GuiUtils.showHelp(url_abs))
 
@@ -479,19 +463,19 @@ class GuiManager:
         #
         # checking `isinstance`` fails in PySide6 with
         # AttributeError: type object 'FittingWindow' has no attribute '_abc_impl'
-        if type(new_perspective) == FittingWindow:
+        if type(new_perspective) == FittingWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionFitting)
 
-        elif type(new_perspective) == InvariantWindow:
+        elif type(new_perspective) == InvariantWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionInvariant)
 
-        elif type(new_perspective) == InversionWindow:
+        elif type(new_perspective) == InversionWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionInversion)
 
-        elif type(new_perspective) == CorfuncWindow:
+        elif type(new_perspective) == CorfuncWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionCorfunc)
 
-        elif type(new_perspective) == SizeDistributionWindow:
+        elif type(new_perspective) == SizeDistributionWindow: # noqa: E721
             self.checkAnalysisOption(self._workspace.actionSizeDistribution)
 
 
@@ -618,19 +602,10 @@ class GuiManager:
         A thread is started for the connecting with the server. The thread calls
         a call-back method when the current version number has been obtained.
         """
-        version_info = {"version": "0.0.0"}
-        c = ConnectionProxy(web.update_url, config.UPDATE_TIMEOUT)
-        response = c.connect()
-        if response is None:
-            return
-        try:
-            content = response.read().strip()
-            logging.info("Connected to www.sasview.org. Latest version: %s"
-                            % (content))
-            version_info = json.loads(content)
-            self.processVersion(version_info)
-        except ValueError as ex:
-            logging.info("Failed to connect to www.sasview.org:", ex)
+        latest_version = get_current_release_version()
+        if latest_version is None:
+            logging.info("Failed to connect to www.sasview.org:")
+        self.processVersion(latest_version)
 
     def log_installed_packages(self):
         """
@@ -644,25 +619,21 @@ class GuiManager:
         """
         PackageGatherer().log_imported_packages()
 
-    def processVersion(self, version_info):
+    def processVersion(self, version_info: tuple[str, str, Version]):
         """
         Call-back method for the process of checking for updates.
         This methods is called by a VersionThread object once the current
         version number has been obtained. If the check is being done in the
         background, the user will not be notified unless there's an update.
 
-        :param version: version string
+        :param version_info: tuple of version string, download url, and the
+        version object.
         """
+        version_str, download_url, _ = version_info
         try:
-            version = version_info["version"]
-            if version == "0.0.0":
-                msg = "Could not connect to the application server."
-                msg += " Please try again later."
-                self.communicate.statusBarUpdateSignal.emit(msg)
-
-            elif version.__gt__(sas.system.version.__version__):
-                msg = "Version %s is available! " % str(version)
-                if "download_url" in version_info:
+            if version_str.__gt__(sas.system.version.__version__):
+                msg = "Version %s is available! " % str(version_info)
+                if download_url is not None:
                     webbrowser.open(version_info["download_url"])
                 else:
                     webbrowser.open(web.download_url)

@@ -5,22 +5,18 @@ SAS generic computation and sld file readers.
 Calculation checked by sampling from an ellipsoid and comparing Iq with the
 1D, 2D oriented and 2D oriented magnetic analytical model from sasmodels.
 """
-from __future__ import print_function
 
+import logging
 import os
 import sys
-import logging
 
 import numpy as np
-from scipy.spatial.transform import Rotation
 from periodictable import formula, nsf
+from scipy.spatial.transform import Rotation
 
-if sys.version_info[0] < 3:
-    def decode(s):
-        return s
-else:
-    def decode(s):
-        return s.decode() if isinstance(s, bytes) else s
+
+def decode(s):
+    return s.decode() if isinstance(s, bytes) else s
 
 MFACTOR_AM = 2.90636E-12
 MFACTOR_MT = 2.3128E-9
@@ -55,7 +51,7 @@ def transform_center(pos_x, pos_y, pos_z):
     posz = pos_z - (min(pos_z) + max(pos_z)) / 2.0
     return posx, posy, posz
 
-class GenSAS(object):
+class GenSAS:
     """
     Generic SAS computation Model based on sld (n & m) arrays
     """
@@ -122,14 +118,14 @@ class GenSAS(object):
         Sets is_avg: [bool]
         """
         self.is_avg = bool(is_avg)
-    
+
     def reset_transformations(self):
         """Set previous transformations as invalid
         """
         self.transformed_positions = None
         self.transformed_magnetic_slds = None
         self.transformed_angles = None
-    
+
     def transform_positions(self):
         """Transform position data"""
         if self.transformed_positions is not None:
@@ -137,7 +133,7 @@ class GenSAS(object):
         position_data = np.column_stack((self.data_x, self.data_y, self.data_z))
         self.transformed_positions = np.transpose(self.xyz_to_UVW.apply(position_data))
         return self.transformed_positions
-    
+
     def transform_magnetic_slds(self):
         if self.transformed_magnetic_slds is not None:
             return self.transformed_magnetic_slds
@@ -155,7 +151,7 @@ class GenSAS(object):
             magnetic_data = np.column_stack((sld_mx, sld_my, sld_mz))
             self.transformed_magnetic_slds = np.transpose(self.xyz_to_UVW.apply(magnetic_data))
             return self.transformed_magnetic_slds
-    
+
     def transform_angles(self):
         if self.transformed_angles is not None:
             return self.transformed_angles
@@ -324,12 +320,12 @@ class GenSAS(object):
            (not nuc_data.is_elements and mag_data.is_elements):
             logging.error("ERROR: files must both be point-wise or element-wise")
             return False
-            
+
         # check each file has the same number of coords
         if nuc_data.pos_x.size != mag_data.pos_x.size:
             logging.error("ERROR: files have a different number of data points")
             return False
-            
+
         # check the coords match up 1-to-1
         nuc_coords = np.array(np.column_stack((nuc_data.pos_x, nuc_data.pos_y, nuc_data.pos_z)))
         mag_coords = np.array(np.column_stack((mag_data.pos_x, mag_data.pos_y, mag_data.pos_z)))
@@ -379,7 +375,7 @@ class GenSAS(object):
                 # if sorted lists not equal then data points aren't equal
                 logging.error("ERROR: files have different real space position data")
                 return False
-                
+
         if nuc_data.are_elements_array != mag_data.are_elements_array:
             # If files don't have the same value for this they do not match anyway.
             logging.error("ERROR: files must contain the same elements")
@@ -396,7 +392,7 @@ class GenSAS(object):
                 mag_elements_sort = np.unique(mag_data.elements.reshape((mag_data.elements.shape[0], -1)), axis=-1)
             else:
                 # get reverse permutation
-                # when positions were changed each index was sent to a new position - this finds the 
+                # when positions were changed each index was sent to a new position - this finds the
                 # position each index was sent to by inverting the permuation
                 nuc_permutation = np.argsort(nuc_sort_order)
                 mag_permutation = np.argsort(mag_sort_order)
@@ -412,7 +408,7 @@ class GenSAS(object):
             if not np.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
                 logging.error("ERROR: files must contain the same elements")
                 return False
-                
+
             # if the sorted elements did match we must reposition all the 'per cell' values so the files match
             nuc_data.elements = nuc_data.elements[nuc_elements_sort_order, ...]
             mag_data.elements = mag_data.elements[mag_elements_sort_order, ...]
@@ -432,7 +428,7 @@ class GenSAS(object):
                 nuc_data.elements = nuc_permutation[nuc_data.elements]
                 mag_data.elements = mag_permutation[mag_data.elements]
             return True
-            
+
         else:
             # the files have different cell types within themselves - the elements are not already in a np array
             # as np does not support jagged arrays
@@ -458,7 +454,7 @@ class GenSAS(object):
             if max(nuc_lengths) != max(mag_lengths): # if files have different lengthed elements cannot match
                 logging.error("ERROR: files must contain the same elements")
                 return False
-                
+
             # sort element vertices into a np array with '-1' filling up the empty slots
             r = np.arange(max(nuc_lengths))
             nuc_elements_sort = -np.ones((len(nuc_elements), max(nuc_lengths)))
@@ -473,7 +469,7 @@ class GenSAS(object):
             if not np.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
                 logging.error("ERROR: files must contain the same elements")
                 return False
-                
+
             # if the sorted elements did match we must reposition all the 'per cell' values so the files match
             nuc_data.elements = [nuc_data.elements[i] for i in nuc_elements_sort_order]
             mag_data.elements = [mag_data.elements[i] for i in mag_elements_sort_order]
@@ -491,7 +487,7 @@ class GenSAS(object):
             if not points_already_match:
                 nuc_data.elements = [[[nuc_permutation[v] for v in f] for f in e] for e in nuc_data.elements]
                 mag_data.elements = [[[mag_permutation[v] for v in f] for f in e] for e in mag_data.elements]
-            
+
         return True
 
 
@@ -554,7 +550,7 @@ class VTKReader:
         except Exception as error:
             logging.exception(error)
             return None
-    
+
     def unstructured_grid_read(self, lines, path):
         """Processes .vtk files in ASCII unstructured_grid format
 
@@ -590,7 +586,7 @@ class VTKReader:
         elements_raw = []
         while len(elements_raw) < len_elements:
             elements_raw += [int(item) for item in next(lines).split()]
-        # convert element data from a list of integers into a list of lists of element vertices 
+        # convert element data from a list of integers into a list of lists of element vertices
         elements_sorted = []
         elements_sizes = []
         index = 0
@@ -673,7 +669,6 @@ class VTKReader:
                 sld_mz = np.zeros_like(sld_n)
             elif element_data[0][2] == 3:
                 sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
-                nuc_data = np.zeros_like(sld_mx)
             else:
                 logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear or magnetic SLD")
                 return None
@@ -705,7 +700,7 @@ class VTKReader:
 
     def load_data_attributes(self, lines, num_points, num_elements):
         """Extract the data attributes from the file
-        
+
         In the vtk file format the data attributes (POINT_DATA and CELL_DATA) are the last part of
         the file. This function processes that data and returns it.
 
@@ -715,7 +710,7 @@ class VTKReader:
         :type num_points: int
         :param num_elements: The number of elements in the loaded file.
         :type num_elements: int
-        :return: Either the loaded data attributes of None if loading failed. The data is a 2-tuple of lists 
+        :return: Either the loaded data attributes of None if loading failed. The data is a 2-tuple of lists
                 of attributes - each attribute being a list of length 3 containing:
                 the data as a list, the name of the attribute and the number of components of the attribute.
                 The first list in the tuple is data associated with points, and the second is data
@@ -797,12 +792,12 @@ class VTKReader:
                 attribute += [float(item) for item in next(lines).split()]
             attribute = np.reshape(np.array(attribute), (size, components))
             data.append([attribute, dataName, components])
-    
+
     def get_faces(self, e, element_type):
         """Returns the faces of the elements
 
         This function takes in the vertices and element type of an element and returns
-        a list of faces - the orientation of the vertices in each face does not appear 
+        a list of faces - the orientation of the vertices in each face does not appear
         to be guaranteed in the vtk file format.
 
         :param e: The vertices (as indices) of the element in the order as given in the .vtk file
@@ -816,9 +811,9 @@ class VTKReader:
         # e = cell_elements - shortened for brevity in code
         #returns points in faces
         if element_type == 10: # tetrahedron
-            return [[e[0], e[2], e[1]], 
-                    [e[0], e[1], e[3]], 
-                    [e[0], e[3], e[2]], 
+            return [[e[0], e[2], e[1]],
+                    [e[0], e[1], e[3]],
+                    [e[0], e[3], e[2]],
                     [e[1], e[2], e[3]]]
         elif element_type == 11 or element_type == 12: # voxel (rectangular cuboid) or hexahedron
             return [[e[0], e[2], e[3], e[1]],
@@ -885,7 +880,7 @@ class VTKReader:
         else:
             return None
 
-class OMF2SLD(object):
+class OMF2SLD:
     """
     Convert OMFData to MAgData
     """
@@ -1011,7 +1006,7 @@ class OMF2SLD(object):
 
 
 
-class OMFReader(object):
+class OMFReader:
     """
     Class to load omf/ascii files (3 columns w/header).
     """
@@ -1062,8 +1057,9 @@ class OMFReader(object):
                 # Reading Header; Segment count ignored
                     s_line = line.split(":", 1)
                     if s_line[0].lower().count("oommf") > 0:
-                        if len(s_line) < 2: s_line = line.split(" ",1)
-                        oommf = s_line[1].strip()                               
+                        if len(s_line) < 2:
+                            s_line = line.split(" ",1)
+                        oommf = s_line[1].strip()
 
                     if s_line[0].lower().count("title") > 0:
                         title = s_line[1].strip()
@@ -1086,17 +1082,17 @@ class OMFReader(object):
                     if s_line[0].lower().count("zbase") > 0:
                         zbase = s_line[1].strip()
                     if s_line[0].lower().count("xstepsize") > 0:
-                        xstepsize = s_line[1].strip() 
+                        xstepsize = s_line[1].strip()
                     if s_line[0].lower().count("ystepsize") > 0:
-                        ystepsize = s_line[1].strip()   
+                        ystepsize = s_line[1].strip()
                     if s_line[0].lower().count("zstepsize") > 0:
                         zstepsize = s_line[1].strip()
                     if s_line[0].lower().count("xnodes") > 0:
-                        xnodes = s_line[1].strip()   
+                        xnodes = s_line[1].strip()
                     if s_line[0].lower().count("ynodes") > 0:
                         ynodes = s_line[1].strip()
                     if s_line[0].lower().count("znodes") > 0:
-                        znodes = s_line[1].strip()  
+                        znodes = s_line[1].strip()
                     if s_line[0].lower().count("xmin") > 0:
                         xmin = s_line[1].strip()
                     if s_line[0].lower().count("ymin") > 0:
@@ -1111,17 +1107,17 @@ class OMFReader(object):
                         zmax = s_line[1].strip()
                     if s_line[0].lower().count("valueunit") > 0:
                         valueunit = s_line[1].strip()
-                        if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1: 
+                        if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1:
                             msg = "Error: \n"
                             msg += "We accept only mT or A/m as valueunit"
-                            logging.error(msg)    
+                            logging.error(msg)
                             return None
-                        elif "mT" in valueunit or "A/m" in valueunit:    
+                        elif "mT" in valueunit or "A/m" in valueunit:
                             valueunit = valueunit.split(" ", 1)
                             valueunit = valueunit[0].strip()
                     if s_line[0].lower().count("valuemultiplier") > 0:
                         valuemultiplier = s_line[1].strip()
-                    else: 
+                    else:
                         valuemultiplier = 1
                     if s_line[0].lower().count("end") > 0:
                         output.filename = os.path.basename(path)
@@ -1159,7 +1155,7 @@ class OMFReader(object):
             logging.warning(msg)
             return None
 
-class PDBReader(object):
+class PDBReader:
     """
     PDB reader class: limited for reading the lines starting with 'ATOM'
     """
@@ -1198,7 +1194,6 @@ class PDBReader(object):
             buff = decode(input_f.read())
             lines = buff.split('\n')
             input_f.close()
-            num = 0
             for line in lines:
                 try:
                     # check if line starts with "ATOM"
@@ -1261,7 +1256,7 @@ class PDBReader(object):
                                 index = int(part) - 1
                                 bonded_indices.append(index)
 
-                            except ValueError as ve:
+                            except ValueError:
                                 pass
 
                         # Store pairs in canonical order
@@ -1318,7 +1313,7 @@ class PDBReader(object):
         """
         print("Not implemented... ")
 
-class SLDReader(object):
+class SLDReader:
     """SLD reader for text files.
 
     format:
@@ -1329,7 +1324,7 @@ class SLDReader(object):
     6 columns: x        y       z       mx      my      mz
     7 columns: x        y       z       sld     mx      my      mz
     8 columns: x        y       z       sld     mx      my      mz      volume
-    
+
     where all n lines have the same format.
     """
     ## File type
@@ -1480,7 +1475,7 @@ class OMFData:
         self.my = my
         self.mz = mz
 
-class MagSLD(object):
+class MagSLD:
     """
     Magnetic SLD.
     """
@@ -1634,7 +1629,7 @@ class MagSLD(object):
         else:
             # TODO: raise error rather than silently ignore
             self.vol_pix = None
-    
+
     def set_elements(self, elements, are_elements_array):
         """Set elements for a non-rectangular grid
 
@@ -1760,7 +1755,8 @@ def test():
 # =======================================================================
 
 def _get_data_path(*path_parts):
-    from os.path import realpath, join as joinpath, dirname
+    from os.path import dirname, realpath
+    from os.path import join as joinpath
     # in sas/sascalc/calculator;  want sas/sasview/test
     return joinpath(dirname(realpath(__file__)),
                     '..', '..', 'sasview', 'test', *path_parts)
@@ -1846,7 +1842,7 @@ def sas_gen_c(self, qx, qy=None):
         mx = my = mz = np.zeros_like(x)
     args = (
         (1 if self.is_avg else 0),
-        # WARNING: 
+        # WARNING:
         # To compare new to old need to swap the inputs.  Also need to
         # reverse the sign.
         x, y, z, sld, mx, mz, my, vol, in_spin, out_spin, s_theta, s_phi)
@@ -1867,8 +1863,7 @@ def realspace_Iq(self, qx, qy):
     """
     Compute Iq for GenSAS object using sasmodels/explore/realspace.py
     """
-    from realspace import calc_Iq_magnetic, calc_Iqxy
-    from realspace import calc_Pr, calc_Iq_from_Pr, calc_Iq_avg, r_bins
+    from realspace import calc_Iq_avg, calc_Iq_from_Pr, calc_Iq_magnetic, calc_Iqxy, calc_Pr, r_bins
 
     x, y, z = self.data_x, self.data_y, self.data_z
     if self.is_avg:
@@ -1920,13 +1915,13 @@ def set_axis_equal_3D(ax):
     """
     Set equal axes on a 3D plot.
     """
-    extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+    extents = np.array([getattr(ax, f'get_{dim}lim')() for dim in 'xyz'])
     sz = extents[:, 1] - extents[:, 0]
     centers = np.mean(extents, axis=1)
     maxsize = max(abs(sz))
     r = maxsize/2
     for ctr, dim in zip(centers, 'xyz'):
-        getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
+        getattr(ax, f'set_{dim}lim')(ctr - r, ctr + r)
 
 def compare(obj, qx, qy=None, plot_points=False, theory=None):
     """
@@ -1934,8 +1929,9 @@ def compare(obj, qx, qy=None, plot_points=False, theory=None):
 
     *theory* is the I(q) value for the shape, if known.
     """
-    from matplotlib import pyplot as plt
     from timeit import default_timer as timer
+
+    from matplotlib import pyplot as plt
 
     try:
         import realspace
@@ -2201,7 +2197,8 @@ def _setup_realspace_path():
     try:
         import realspace
     except ImportError:
-        from os.path import join as joinpath, realpath, dirname
+        from os.path import dirname, realpath
+        from os.path import join as joinpath
         path = realpath(joinpath(dirname(__file__),
                                  '..', '..', '..', '..', '..',
                                  'sasmodels', 'explore'))

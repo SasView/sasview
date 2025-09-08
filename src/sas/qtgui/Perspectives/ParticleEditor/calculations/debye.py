@@ -1,24 +1,20 @@
-from typing import Optional, Tuple
-import time
 
 import numpy as np
-from scipy.interpolate import interp1d
-from scipy.special import jv as bessel
-from scipy.spatial.distance import cdist
 
+from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld
 from sas.qtgui.Perspectives.ParticleEditor.datamodel.calculation import (
-    ScatteringCalculation, ScatteringOutput, OrientationalDistribution, SamplingDistribution,
-    QSpaceScattering, QSpaceCalcDatum, RealSpaceScattering,
-    SLDDefinition, MagnetismDefinition, SpatialSample, QSample, CalculationParameters)
-
+    CalculationParameters,
+    MagnetismDefinition,
+    QSample,
+    SLDDefinition,
+)
 from sas.qtgui.Perspectives.ParticleEditor.sampling.chunking import SingleChunk, pairwise_chunk_iterator
 from sas.qtgui.Perspectives.ParticleEditor.sampling.points import SpatialDistribution
 
-from sas.qtgui.Perspectives.ParticleEditor.calculations.run_function import run_sld, run_magnetism
 
 def debye(
         sld_definition: SLDDefinition,
-        magnetism_definition: Optional[MagnetismDefinition],
+        magnetism_definition: MagnetismDefinition | None,
         parameters: CalculationParameters,
         point_generator: SpatialDistribution,
         q_sample: QSample,

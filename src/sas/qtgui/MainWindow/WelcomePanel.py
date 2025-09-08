@@ -2,11 +2,9 @@ from PySide6 import QtWidgets
 
 import sas.sasview
 import sas.system.version
-
-from sas import config
+from sas.qtgui.MainWindow.UI.WelcomePanelUI import Ui_WelcomePanelUI
 from sas.system import legal
 
-from sas.qtgui.MainWindow.UI.WelcomePanelUI import Ui_WelcomePanelUI
 
 class WelcomePanel(QtWidgets.QDialog, Ui_WelcomePanelUI):
     def __init__(self, parent=None):
