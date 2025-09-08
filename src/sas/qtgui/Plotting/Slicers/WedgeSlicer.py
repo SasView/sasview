@@ -175,7 +175,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         # range from python default of -pi,pi to 0,2pi suitable for manipulations
         sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi,
                              phi_max=phimax + np.pi, nbins=self.nbins)
-        sect.fold = False
+        sect.fold = True
         sector = sect(self.data)
 
         if hasattr(sector, "dxl"):
