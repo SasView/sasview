@@ -25,16 +25,16 @@ from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInte
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 
 
-class Property(Enum):
+class FittingType(Enum):
     FITTING_SINGLE: int = 1
     FITTING_BATCH: int = 2
     INVERSION_SINGLE: int = 3
     INVERSION_BATCH: int = 4
 
 
-FITTING_TYPES: set[int] = {Property.FITTING_SINGLE, Property.FITTING_BATCH}  # 1, 2
-BATCH_TYPES: set[int] = {Property.FITTING_BATCH, Property.INVERSION_BATCH}  # 2, 4
-INVERSION_TYPES: set[int] = {Property.INVERSION_SINGLE, Property.INVERSION_BATCH}  # 3, 4
+FITTING_TYPES: set[int] = {FittingType.FITTING_SINGLE, FittingType.FITTING_BATCH}  # 1, 2
+BATCH_TYPES: set[int] = {FittingType.FITTING_BATCH, FittingType.INVERSION_BATCH}  # 2, 4
+INVERSION_TYPES: set[int] = {FittingType.INVERSION_SINGLE, FittingType.INVERSION_BATCH}  # 3, 4
 
 
 class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
@@ -370,7 +370,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Send to fitting, if needed
         # We can get away with directly querying the UI, since this is the only
         # place we need that state.
-        fitting_requested = self.cbFitOptions.currentIndex()
+        fitting_requested = FittingType(self.cbFitOptions.currentIndex())
         self.sendToFit(items_for_fit, fitting_requested)
 
     def setModel(self, model):
