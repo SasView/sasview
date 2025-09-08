@@ -6,7 +6,7 @@ requires = [
     "hatch-sphinx",
     "hatch-vcs",
     "pyside6",
-    "sasdata",
+    "sasdata @ git+https://github.com/SasView/sasdata.git@refactor_24",
     "sasmodels",
 ]
 build-backend = "hatchling.build"
