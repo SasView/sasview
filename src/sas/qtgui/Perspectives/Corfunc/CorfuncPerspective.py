@@ -616,6 +616,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             msg = "The slider values are out of range."
             msg += f"\n The minimum value is {qmin:.8g} and the maximum value is {qmax:.8g}"
             dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setWindowTitle("Value out of range")
             dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
             dialog.exec_()
             return
