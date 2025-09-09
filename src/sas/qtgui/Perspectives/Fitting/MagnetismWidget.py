@@ -138,7 +138,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             self.logic.kernel_module.details[parameter_name][pos] = value
         else:
             self.magnet_params[parameter_name] = value
-            #self.logic.kernel_module.setParam(parameter_name) = value
+            self.logic.kernel_module.setParam(parameter_name, value)
             # Update plot
             self.updateDataSignal.emit()
 
