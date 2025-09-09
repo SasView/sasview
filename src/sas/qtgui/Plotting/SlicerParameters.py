@@ -26,6 +26,7 @@ from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 
 
 class FittingType(Enum):
+    NO_FITTING: int = 0
     FITTING_SINGLE: int = 1
     FITTING_BATCH: int = 2
     INVERSION_SINGLE: int = 3
@@ -371,6 +372,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # We can get away with directly querying the UI, since this is the only
         # place we need that state.
         fitting_requested = FittingType(self.cbFitOptions.currentIndex())
+        print('fitting_requested', fitting_requested)
         self.sendToFit(items_for_fit, fitting_requested)
 
     def setModel(self, model):
