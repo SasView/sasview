@@ -2,8 +2,8 @@ import os
 import platform
 
 import pytest
-
 from run import prepare
+
 from src.sas.system import config
 
 prepare()
