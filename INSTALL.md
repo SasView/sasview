@@ -25,25 +25,39 @@ If you're familiar with working with developing in Python, then the
 very quick version is:
 
 ```console
+$ git clone https://github.com/sasview/sasdata/
+$ git clone https://github.com/sasview/sasmodels/
 $ git clone https://github.com/sasview/sasview/
 $ cd sasview
 $ python -m venv venv
-$ . venv/bin/activate
-$ pip install -r build_tools/requirements.txt -r build_tools/requirements-dev.txt
-$ hatchling build --hooks-only
-$ python run.py
+$ venv\Scripts\activate # Windows command to activate the environment
+$ # . venv/bin/activate  # Linux/Mac command to activate the environment
+$ pip install -e ../sasdata
+$ pip install -e ../sasmodels
+$ pip install -e .[dev,test]
+$ python -m sas
 ```
 
 Step by step, that is:
 
- 1. Obtain the SasView source using `git`.
+ 1. Obtain the SasView source using `git`. You will likely need to coordinate
+    updates to `sasdata` and `sasmodels`. The
+    `bumps` (https://github.com/bumps/bumps) and
+    `periodictable` (https://github.com/python-periodictable/periodictable)
+    packages are far more loosely coupled, but depending on what you are
+    doing you may also want them as development packages.
  1. Create a Python virtual environment in the `venv` directory.
  1. Activate the `venv` so that Python and its modules from the venv are used.
     Note that the particular syntax above works for the `bash` and `zsh` shells under Linux, Windows and macOS;
     if you use `cmd` or PowerShell under windows, there are
     [different ways](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments)
     to activate the virtual environment.
- 1. Install the necessary modules for building and running SasView. It will take a while to download and unpack all the dependencies.
+ 1. Install the necessary modules for building and running SasView.
+    It will take a while to download and unpack all the dependencies.
+    The `pip -e` command says to install the package in development mode
+    so that any changes you make in the source tree will be available the
+    next time you run the program. The `.[dev,test]` syntax says to install
+    the current directory (sasview) with test and dev dependencies.
  1. Build the GUI and the documentation using the `hatchling` builder.
  1. Run SasView!
 
@@ -55,7 +69,8 @@ dependencies should be a one-off task.
 When you want to work on SasView again at a later date, you can:
 
 ```
-$ . venv/bin/activate
+$ venv\Scripts\activate  # Windows
+$ # . venv/bin/activate  # Linux/Mac
 $ python run.py
 ```
 
