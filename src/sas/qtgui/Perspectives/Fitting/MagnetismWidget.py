@@ -2,6 +2,7 @@
 Widget/logic for magnetism.
 """
 import logging
+from importlib import resources
 from typing import Any
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -12,9 +13,9 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.MagnetismWidget import Ui_MagnetismWidgetUI
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
-from sas.system.user import IMAGES_DIRECTORY_LOCATION
 
 logger = logging.getLogger(__name__)
+
 
 class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
     cmdFitSignal = QtCore.Signal()
@@ -52,7 +53,10 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         # Magnetic angles explained in one picture
         self.magneticAnglesWidget = QtWidgets.QWidget()
         labl = QtWidgets.QLabel(self.magneticAnglesWidget)
-        pixmap = QtGui.QPixmap(IMAGES_DIRECTORY_LOCATION / 'M_angles_pic.png')
+        with resources.open_binary("sas.qtgui.images", "M_angles_pic.png") as file:
+            image_data = file.read()
+            pixmap = QtGui.QPixmap()
+            pixmap.loadFromData(image_data)
         labl.setPixmap(pixmap)
         self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
 
@@ -134,16 +138,22 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             self.logic.kernel_module.details[parameter_name][pos] = value
         else:
             self.magnet_params[parameter_name] = value
-            #self.logic.kernel_module.setParam(parameter_name) = value
+            self.logic.kernel_module.setParam(parameter_name, value)
             # Update plot
             self.updateDataSignal.emit()
 
+    def updateModel(self, model: Any | None = None) -> None:
+        # add magnetic parameters if asked
+        if self.isActive and self._magnet_model.rowCount() > 0:
+            for key, value in self.magnet_params.items():
+                model.setParam(key, value)
+
     def iterateOverMagnetModel(self, func: Any) -> None:
-            """
-            Take func and throw it inside the magnet model row loop
-            """
-            for row_i in range(self._magnet_model.rowCount()):
-                func(row_i)
+        """
+        Take func and throw it inside the magnet model row loop
+        """
+        for row_i in range(self._magnet_model.rowCount()):
+            func(row_i)
 
     def updateFullMagnetModel(self, param_dict: dict[str, list[str]]) -> None:
         """
@@ -239,6 +249,24 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             FittingUtilities.addErrorHeadersToModel(self._magnet_model)
 
             self.has_magnet_error_column = True
+
+    def gatherMagnetParams(self, row):
+        """
+        Create list of magnetic parameters based on _magnet_model
+        """
+        param_name = str(self._magnet_model.item(row, 0).text())
+        param_checked = str(self._magnet_model.item(row, 0).checkState() == QtCore.Qt.Checked)
+        param_value = str(self._magnet_model.item(row, 1).text())
+        param_error = None
+        column_offset = 0
+        if self.has_magnet_error_column:
+            column_offset = 1
+            param_error = str(self._magnet_model.item(row, 1+column_offset).text())
+        param_min = str(self._magnet_model.item(row, 2+column_offset).text())
+        param_max = str(self._magnet_model.item(row, 3+column_offset).text())
+        param_list = [[param_name, param_checked, param_value,
+                        param_error, param_min, param_max]]
+        return param_list
 
     def addCheckedMagneticListToModel(self, param: Any, value: float) -> None:
         """
