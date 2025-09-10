@@ -2,14 +2,13 @@ import os
 import platform
 
 import pytest
-from run import prepare
 
-from src.sas.system import config
-
-prepare()
+# We are assuming that the tests are running in a virtual environment with
+# sasview, sasmodels and sasdata already installed, perhaps in dev mode
+# using "pip install -e".
+from sas.system import config
 
 config.override_with_defaults()
-
 
 @pytest.fixture(scope="session", autouse=True)
 def set_env():
