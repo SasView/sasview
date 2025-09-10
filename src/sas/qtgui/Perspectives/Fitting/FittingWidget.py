@@ -2585,9 +2585,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # don't try to update multiplicity counters if they aren't there.
             # Note that this will fail for proper bad update where the model
             # doesn't contain multiplicity parameter
-            if hasattr(self.logic.kernel_module, 'parameters') and \
-                parameter_name in self.logic.kernel_module.parameters:
-                self.logic.kernel_module.setParam(parameter_name, value)
+            self.logic.kernel_module.setParam(parameter_name, value)
 
         elif model_column == min_column:
             # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
@@ -2597,9 +2595,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             # don't update the chart
             return
-
-        # TODO: magnetic params in self.kernel_module.details['M0:parameter_name'] = value
-        # TODO: multishell params in self.kernel_module.details[??] = value
 
         # handle display of effective radius parameter according to radius_effective_mode; pass ER into model if
         # necessary
@@ -3776,11 +3771,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             param_list.extend(self.magnetism_widget.gatherMagnetParams(row))
 
+        print("Gathering parameters:")
         self.iterateOverModel(gatherParams)
+        print(param_list)
         if self.chkPolydispersity.isChecked():
+            print("Gathering polydisperse parameters:")
             self.polydispersity_widget.iterateOverPolyModel(gatherPolyParams)
+            print(param_list)
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
+            print("Gathering magnetic parameters:")
             self.magnetism_widget.iterateOverMagnetModel(gatherMagnetParams)
+            print(param_list)
 
         if self.logic.kernel_module.is_multiplicity_model:
             param_list.append(['multiplicity', str(self.logic.kernel_module.multiplicity)])
