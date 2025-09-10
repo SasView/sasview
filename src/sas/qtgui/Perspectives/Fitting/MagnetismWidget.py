@@ -149,11 +149,11 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
                 model.setParam(key, value)
 
     def iterateOverMagnetModel(self, func: Any) -> None:
-            """
-            Take func and throw it inside the magnet model row loop
-            """
-            for row_i in range(self._magnet_model.rowCount()):
-                func(row_i)
+        """
+        Take func and throw it inside the magnet model row loop
+        """
+        for row_i in range(self._magnet_model.rowCount()):
+            func(row_i)
 
     def updateFullMagnetModel(self, param_dict: dict[str, list[str]]) -> None:
         """
