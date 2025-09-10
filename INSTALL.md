@@ -24,18 +24,18 @@ environment).
 If you're familiar with working with developing in Python, then the
 very quick version is:
 
-```console
-$ git clone https://github.com/sasview/sasdata/
-$ git clone https://github.com/sasview/sasmodels/
-$ git clone https://github.com/sasview/sasview/
-$ cd sasview
-$ python -m venv venv
-$ venv\Scripts\activate # Windows command to activate the environment
-$ # . venv/bin/activate  # Linux/Mac command to activate the environment
-$ pip install -e ../sasdata
-$ pip install -e ../sasmodels
-$ pip install -e .[dev,test]
-$ python -m sas
+```shell
+git clone https://github.com/sasview/sasdata/
+git clone https://github.com/sasview/sasmodels/
+git clone https://github.com/sasview/sasview/
+cd sasview
+python -m venv venv
+# venv\Scripts\activate & REM Windows: activate environment
+. venv/bin/activate  # Linux/Mac: activate environment
+pip install -e ../sasdata
+pip install -e ../sasmodels
+pip install -e .[dev,test]
+python -m sas
 ```
 
 Step by step, that is:
@@ -54,7 +54,7 @@ Step by step, that is:
     to activate the virtual environment.
  1. Install the necessary modules for building and running SasView.
     It will take a while to download and unpack all the dependencies.
-    The `pip -e` command says to install the package in development mode
+    The `pip install -e` command says to install the package in development mode
     so that any changes you make in the source tree will be available the
     next time you run the program. The `.[dev,test]` syntax says to install
     the current directory (sasview) with test and dev dependencies.
@@ -66,12 +66,12 @@ on PyPI, including numpy, scipy, h5py, pyside6. A handful of Python-only
 modules will be built into wheels on your local machine. Installing the
 dependencies should be a one-off task.
 
-When you want to work on SasView again at a later date, you can:
+When you want to work on SasView again at a later date, you can type:
 
-```
-$ venv\Scripts\activate  # Windows
-$ # . venv/bin/activate  # Linux/Mac
-$ python run.py
+```shell
+# venv\Scripts\activate  & REM Windows: activate environment
+. venv/bin/activate  # Linux/Mac: activate environment
+python -m sas
 ```
 
 (or the [equivalent command](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments) for your shell to activate the venv)

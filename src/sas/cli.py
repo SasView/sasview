@@ -111,27 +111,30 @@ def main(dev_mode: bool|None=None) -> int:
     is not provided, then look into the filesystem to guess whether we are
     running from the source tree or from an installed version.
     """
-    target_file = Path(__file__).resolve().parent / "qtgui" / "make_ui.sh"
+    # Guess if we are in development mode if not provided on the command line.
     if dev_mode is None:
-        dev_mode = target_file.exists()
-    # print(f"dev mode = {dev} looking for {target_file}")
-
-    # Copy files before loading config
-    from sas.system.user import copy_old_files_to_new_location
-    copy_old_files_to_new_location()
-
-    from sas.system import console, lib, log
+        # Check that we are in ".../src/sas/cli.py" and ".../pyproject.toml" exists.
+        src = Path(__file__).resolve().parent.parent
+        dev_mode = src.name == "src" and (src.parent / "pyproject.toml").exists()
 
     # I/O redirection for the windows console. Need to do this early so that
     # output will be displayed on the console. Presently not working for
     # production (it always opens the console even if it is not needed)
-    # so require "sasview con ..." to open the console. Not an infamous
+    # so require "sasview -o ..." to open the console. Not an infamous
     # "temporary fix" I hope...
     if "-i" in sys.argv[1:] or "-o" in sys.argv[1:]:
+        from sas.system import console
         console.setup_console()
 
     # Eventually argument processing might affect logger or config, so do it first
     opts = parse_cli(sys.argv)
+
+    # Move config files from .sasview to the platform specific user config directory
+    from sas.system.user import copy_old_files_to_new_location
+    copy_old_files_to_new_location()
+
+    # Now we can load the config files and setup the sasview environment
+    from sas.system import lib, log
 
     # Setup logger and sasmodels
     log_mode = opts.loglevel if opts.loglevel else "development" if dev_mode else "production"
