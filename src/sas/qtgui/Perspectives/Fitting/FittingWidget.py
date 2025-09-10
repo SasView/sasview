@@ -3794,17 +3794,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             param_list.extend(self.magnetism_widget.gatherMagnetParams(row))
 
-        print("Gathering parameters:")
         self.iterateOverModel(gatherParams)
-        print(param_list)
         if self.chkPolydispersity.isChecked():
-            print("Gathering polydisperse parameters:")
             self.polydispersity_widget.iterateOverPolyModel(gatherPolyParams)
-            print(param_list)
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
-            print("Gathering magnetic parameters:")
             self.magnetism_widget.iterateOverMagnetModel(gatherMagnetParams)
-            print(param_list)
 
         if self.logic.kernel_module.is_multiplicity_model:
             param_list.append(['multiplicity', str(self.logic.kernel_module.multiplicity)])
