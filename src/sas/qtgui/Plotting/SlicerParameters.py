@@ -372,7 +372,6 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # We can get away with directly querying the UI, since this is the only
         # place we need that state.
         fitting_requested = FittingType(self.cbFitOptions.currentIndex())
-        print('fitting_requested', fitting_requested)
         self.sendToFit(items_for_fit, fitting_requested)
 
     def setModel(self, model):
