@@ -7,6 +7,7 @@ from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 MIN_PHI = 0.05
 
+
 class SectorInteractor(BaseInteractor, SlicerModel):
     """
     SectorInteractor plots a data1D average of a sector area defined in a
@@ -25,23 +26,22 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         ..TODO: the 2 subclasses here are the same as used by the BoxSum. These
             should probably be abstracted out.
     """
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
 
+    def __init__(self, base, axes, item=None, color="black", zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
         # Class initialization
         self.markers = []
         self.axes = axes
+
         self._item = item
 
         # Connect the plot to event
         self.connect = self.base.connect
 
         # Compute qmax limit to reset the graph
-        x = numpy.power(max(self.data.xmax,
-                         numpy.fabs(self.data.xmin)), 2)
-        y = numpy.power(max(self.data.ymax,
-                         numpy.fabs(self.data.ymin)), 2)
+        x = numpy.power(max(self.data.xmax, numpy.fabs(self.data.xmin)), 2)
+        y = numpy.power(max(self.data.ymax, numpy.fabs(self.data.ymin)), 2)
         self.qmax = numpy.sqrt(x + y)
         # Number of points on the plot
         self.nbins = 100
@@ -50,20 +50,18 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         # Absolute value of the Angle between the middle line and any side line
         self.phi = numpy.pi / 12
         # Middle line
-        self.main_line = LineInteractor(self, self.axes, color='blue',
-                                        zorder=zorder, r=self.qmax,
-                                        theta=self.theta2)
+        self.main_line = LineInteractor(self, self.axes, color="blue", zorder=zorder, r=self.qmax, theta=self.theta2)
         self.main_line.qmax = self.qmax
         # Right Side line
-        self.right_line = SideInteractor(self, self.axes, color='black',
-                                         zorder=zorder, r=self.qmax,
-                                         phi=-1 * self.phi, theta2=self.theta2)
+        self.right_line = SideInteractor(
+            self, self.axes, color="black", zorder=zorder, r=self.qmax, phi=-1 * self.phi, theta2=self.theta2
+        )
         self.right_line.update(right=True)
         self.right_line.qmax = self.qmax
         # Left Side line
-        self.left_line = SideInteractor(self, self.axes, color='black',
-                                        zorder=zorder, r=self.qmax,
-                                        phi=self.phi, theta2=self.theta2)
+        self.left_line = SideInteractor(
+            self, self.axes, color="black", zorder=zorder, r=self.qmax, phi=self.phi, theta2=self.theta2
+        )
         self.left_line.update(left=True)
         self.left_line.qmax = self.qmax
         # draw the sector
@@ -101,24 +99,18 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         # update the picture accordingly
         if self.main_line.has_move:
             self.main_line.update()
-            self.right_line.update(delta=-self.left_line.phi / 2,
-                                   mline=self.main_line.theta, right=True)
-            self.left_line.update(delta=self.left_line.phi / 2,
-                                  mline=self.main_line.theta, left=True)
+            self.right_line.update(delta=-self.left_line.phi / 2, mline=self.main_line.theta, right=True)
+            self.left_line.update(delta=self.left_line.phi / 2, mline=self.main_line.theta, left=True)
         # Check if the left side has moved and update the slicer accordingly
         if self.left_line.has_move:
             self.main_line.update()
-            self.left_line.update(phi=None, delta=None, mline=self.main_line,
-                                  side=True, left=True)
-            self.right_line.update(phi=self.left_line.phi, delta=None,
-                                   mline=self.main_line, side=True, right=True)
+            self.left_line.update(phi=None, delta=None, mline=self.main_line, side=True, left=True)
+            self.right_line.update(phi=self.left_line.phi, delta=None, mline=self.main_line, side=True, right=True)
         # Check if the right side line has moved and update the slicer accordingly
         if self.right_line.has_move:
             self.main_line.update()
-            self.right_line.update(phi=None, delta=None, mline=self.main_line,
-                                   side=True, right=True)
-            self.left_line.update(phi=self.right_line.phi, delta=None,
-                                  mline=self.main_line, side=True, left=True)
+            self.right_line.update(phi=None, delta=None, mline=self.main_line, side=True, right=True)
+            self.left_line.update(phi=self.right_line.phi, delta=None, mline=self.main_line, side=True, left=True)
 
     def save(self, ev):
         """
@@ -141,14 +133,13 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             return
         # Averaging
         from sasdata.data_util.manipulations import SectorQ
+
         radius = self.qmax
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
         if nbins is None:
             nbins = self.nbins
-        sect = SectorQ(r_min=0.0, r_max=radius,
-                       phi_min=phimin + numpy.pi,
-                       phi_max=phimax + numpy.pi, nbins=nbins)
+        sect = SectorQ(r_min=0.0, r_max=radius, phi_min=phimin + numpy.pi, phi_max=phimax + numpy.pi, nbins=nbins)
 
         sector = sect(self.data)
         # Create 1D data resulting from average
@@ -172,9 +163,8 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         # If the data file does not tell us what the axes are, just assume them.
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity}", "cm^{-1}")
-        if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.data.name.count("Residuals") > 0:
-            new_plot.ytransform = 'y'
+        if hasattr(data, "scale") and data.scale == "linear" and self.data.name.count("Residuals") > 0:
+            new_plot.ytransform = "y"
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
         new_plot.group_id = "2daverage" + self.data.name
@@ -192,7 +182,6 @@ class SectorInteractor(BaseInteractor, SlicerModel):
             self.setModelFromParams()
         self.draw()
 
-
     def validate(self, param_name, param_value):
         """
         Test the proposed new value "value" for row "row" of parameters
@@ -200,12 +189,12 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         MIN_DIFFERENCE = 0.01
         isValid = True
 
-        if param_name == 'Delta_Phi [deg]':
+        if param_name == "Delta_Phi [deg]":
             # First, check the closeness
             if numpy.fabs(param_value) < MIN_DIFFERENCE:
                 print("Sector angles too close. Please adjust.")
                 isValid = False
-        elif param_name == 'nbins':
+        elif param_name == "nbins":
             # Can't be 0
             if param_value < 1:
                 print("Number of bins cannot be less than or equal to 0. Please adjust.")
@@ -273,10 +262,8 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         self.main_line.theta = main
         # Reset the slicer parameters
         self.main_line.update()
-        self.right_line.update(phi=phi, delta=None, mline=self.main_line,
-                               side=True, right=True)
-        self.left_line.update(phi=phi, delta=None, mline=self.main_line,
-                              side=True, left=True)
+        self.right_line.update(phi=phi, delta=None, mline=self.main_line, side=True, right=True)
+        self.left_line.update(phi=phi, delta=None, mline=self.main_line, side=True, left=True)
         # Post the new corresponding data
         self._post_data(nbins=self.nbins)
         self.draw()
@@ -299,8 +286,8 @@ class SideInteractor(BaseInteractor):
     :param theta2: the angle between the middle line and x- axis
 
     """
-    def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 phi=numpy.pi / 4, theta2=numpy.pi / 3):
+
+    def __init__(self, base, axes, color="black", zorder=5, r=1.0, phi=numpy.pi / 4, theta2=numpy.pi / 3):
         BaseInteractor.__init__(self, base, axes, color=color)
         # Initialize the class
         self.markers = []
@@ -322,16 +309,22 @@ class SideInteractor(BaseInteractor):
         x2 = -1 * self.radius * numpy.cos(self.theta)
         y2 = -1 * self.radius * numpy.sin(self.theta)
         # Defining a new marker
-        self.inner_marker = self.axes.plot([x1 / 2.5], [y1 / 2.5], linestyle='',
-                                           marker='s', markersize=10,
-                                           color=self.color, alpha=0.6,
-                                           pickradius=5, label="pick",
-                                           zorder=zorder, visible=True)[0]
+        self.inner_marker = self.axes.plot(
+            [x1 / 2.5],
+            [y1 / 2.5],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
 
         # Defining the current line
-        self.line = self.axes.plot([x1, x2], [y1, y2],
-                                   linestyle='-', marker='',
-                                   color=self.color, visible=True)[0]
+        self.line = self.axes.plot([x1, x2], [y1, y2], linestyle="-", marker="", color=self.color, visible=True)[0]
         # Flag to differentiate the left line from the right line motion
         self.left_moving = False
         # Flag to define a motion
@@ -361,8 +354,7 @@ class SideInteractor(BaseInteractor):
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
 
-    def update(self, phi=None, delta=None, mline=None,
-               side=False, left=False, right=False):
+    def update(self, phi=None, delta=None, mline=None, side=False, left=False, right=False):
         """
         Draw oblique line
 
@@ -376,9 +368,9 @@ class SideInteractor(BaseInteractor):
             self.phi = phi
         if delta is None:
             delta = 0
-        if  right:
+        if right:
             self.phi = -1 * numpy.fabs(self.phi)
-            #delta=-delta
+            # delta=-delta
         else:
             self.phi = numpy.fabs(self.phi)
         if side:
@@ -424,44 +416,38 @@ class SideInteractor(BaseInteractor):
         self.theta = numpy.arctan2(y, x)
         self.has_move = True
         if not self.left_moving:
-
-
-            if  self.theta2 - self.theta <= 0 and self.theta2 > 0:
+            if self.theta2 - self.theta <= 0 and self.theta2 > 0:
                 self.restore(ev)
                 return
-            elif self.theta2 < 0 and self.theta < 0 and \
-                self.theta - self.theta2 >= 0:
+            elif self.theta2 < 0 and self.theta < 0 and self.theta - self.theta2 >= 0:
                 self.restore(ev)
                 return
-            elif  self.theta2 < 0 and self.theta > 0 and \
-                (self.theta2 + 2 * numpy.pi - self.theta) >= numpy.pi / 2:
+            elif self.theta2 < 0 and self.theta > 0 and (self.theta2 + 2 * numpy.pi - self.theta) >= numpy.pi / 2:
                 self.restore(ev)
                 return
-            elif  self.theta2 < 0 and self.theta < 0 and \
-                (self.theta2 - self.theta) >= numpy.pi / 2:
+            elif self.theta2 < 0 and self.theta < 0 and (self.theta2 - self.theta) >= numpy.pi / 2:
                 self.restore(ev)
                 return
-            elif self.theta2 > 0 and (self.theta2 - self.theta >= numpy.pi / 2 or \
-                (self.theta2 - self.theta >= numpy.pi / 2)):
+            elif self.theta2 > 0 and (
+                self.theta2 - self.theta >= numpy.pi / 2 or (self.theta2 - self.theta >= numpy.pi / 2)
+            ):
                 self.restore(ev)
                 return
         else:
-            if  self.theta < 0 and (self.theta + numpy.pi * 2 - self.theta2) <= 0:
+            if self.theta < 0 and (self.theta + numpy.pi * 2 - self.theta2) <= 0:
                 self.restore(ev)
 
                 return
             elif self.theta2 < 0 and (self.theta - self.theta2) <= 0:
                 self.restore(ev)
                 return
-            elif  self.theta > 0 and self.theta - self.theta2 <= 0:
-
+            elif self.theta > 0 and self.theta - self.theta2 <= 0:
                 self.restore(ev)
 
                 return
-            elif self.theta - self.theta2 >= numpy.pi / 2 or  \
-                ((self.theta + numpy.pi * 2 - self.theta2) >= numpy.pi / 2 and \
-                 self.theta < 0 and self.theta2 > 0):
-
+            elif self.theta - self.theta2 >= numpy.pi / 2 or (
+                (self.theta + numpy.pi * 2 - self.theta2) >= numpy.pi / 2 and self.theta < 0 and self.theta2 > 0
+            ):
                 self.restore(ev)
 
                 return
@@ -497,8 +483,8 @@ class LineInteractor(BaseInteractor):
     :param half_length: Defaults to False. If True, the line is drawn from the
                         origin rather than across the whole graph.
     """
-    def __init__(self, base, axes, color='black',
-                 zorder=5, r=1.0, theta=numpy.pi / 4, half_length=False):
+
+    def __init__(self, base, axes, color="black", zorder=5, r=1.0, theta=numpy.pi / 4, half_length=False):
         BaseInteractor.__init__(self, base, axes, color=color)
 
         self.markers = []
@@ -519,15 +505,20 @@ class LineInteractor(BaseInteractor):
             x2 = 0
             y2 = 0
         # Inner circle marker
-        self.inner_marker = self.axes.plot([x1 / 2.5], [y1 / 2.5], linestyle='',
-                                           marker='s', markersize=10,
-                                           color=self.color, alpha=0.6,
-                                           pickradius=5, label="pick",
-                                           zorder=zorder,
-                                           visible=True)[0]
-        self.line = self.axes.plot([x1, x2], [y1, y2],
-                                   linestyle='-', marker='',
-                                   color=self.color, visible=True)[0]
+        self.inner_marker = self.axes.plot(
+            [x1 / 2.5],
+            [y1 / 2.5],
+            linestyle="",
+            marker="s",
+            markersize=10,
+            color=self.color,
+            alpha=0.6,
+            pickradius=5,
+            label="pick",
+            zorder=zorder,
+            visible=True,
+        )[0]
+        self.line = self.axes.plot([x1, x2], [y1, y2], linestyle="-", marker="", color=self.color, visible=True)[0]
         self.has_move = False
         self.connect_markers([self.inner_marker, self.line])
         self.update()
