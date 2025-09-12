@@ -456,6 +456,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
             msg += f"will remove the Corfunc analysis for {self._path}. Continue?"
             dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setWindowTitle("Data already loaded")
             
             # checkbox to reset Q range to defaults
             checkbox = QtWidgets.QCheckBox("Reset Q range to defaults")
@@ -468,10 +469,6 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                 return
             
             reset_q_range = checkbox.isChecked()
-            if reset_q_range:
-                self.clear_data = True
-            else:
-                self.clear_data = False
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
@@ -519,11 +516,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             q_range = [WIDGETS.W_QMIN, WIDGETS.W_QMAX, WIDGETS.W_QCUTOFF]
             q_frac = [0.2, 0.7, 0.8]
             for i, x in enumerate([prev_q1, prev_q2, prev_q3]):
-                if any([x <= min(self.data.x), x >= max(self.data.x), not math.isfinite(x)]):
+                if any([x <= min(self.data.x), x >= max(self.data.x), not math.isfinite(x), x is None]):
                     self.model.setItem(q_range[i], QtGui.QStandardItem("%.7g"%fractional_position(q_frac[i])))
                                 
         # If no data or clear data, set to defaults
-        if not self.has_data or self.clear_data:
+        if not self.has_data or reset_q_range:
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
             self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
@@ -627,10 +624,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         qmin = float(f"{params.data_q_min:.8g}")
         qmax = float(f"{params.data_q_max:.8g}")
 
-        # Determine validity flags such that data_q_min <= point_1 < point_2 < point_3 <= data_q_max
-        invalid_1 = p1 < qmin or p1 >= p2
+        # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < data_q_max
+        invalid_1 = p1 <= qmin or p1 >= p2
         invalid_2 = p2 <= p1 or p2 >= p3
-        invalid_3 = p3 <= p2 or p3 > qmax
+        invalid_3 = p3 <= p2 or p3 >= qmax
 
         # Make the background red if the text box is invalid
         self.txtLowerQMax.setStyleSheet(red if invalid_1 else normal)
@@ -639,8 +636,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         
         # Pops a message box if the slider values are out of range
         if p1 < qmin or p3 > qmax:
-            msg = "The slider values are out of range."
-            msg += f"\n The minimum value is {qmin:.8g} and the maximum value is {qmax:.8g}"
+            msg = "The slider values are out of range.\n"
+            msg += f"The minimum value is {qmin:.8g} and the maximum value is {qmax:.8g}"
             dialog = QtWidgets.QMessageBox(self, text=msg)
             dialog.setWindowTitle("Value out of range")
             dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
