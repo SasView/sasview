@@ -190,7 +190,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = str(self.averager.__name__) + "(" + self.data.name + ")"
+        new_plot.name = "Wedge" + str(self.averager.__name__) + "(" + self.data.name + ")"
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
