@@ -30,16 +30,14 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
     (as for the SectorSlicer).
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
-
+    def __init__(self, base, axes, item=None, color="black", zorder=3):
         BaseInteractor.__init__(self, base, axes, color=color)
         SlicerModel.__init__(self)
 
         self.markers = []
         self.axes = axes
         self._item = item
-        self.qmax = max(self.data.xmax, np.fabs(self.data.xmin),
-                        self.data.ymax, np.fabs(self.data.ymin))
+        self.qmax = max(self.data.xmax, np.fabs(self.data.xmin), self.data.ymax, np.fabs(self.data.ymin))
         self.dqmin = min(np.fabs(self.data.qx_data))
         self.connect = self.base.connect
 
@@ -56,22 +54,21 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         # reference of the current data averager
         self.averager = None
 
-        self.inner_arc = ArcInteractor(self, self.axes, color='black',
-                                       zorder=zorder, r=self.r1,
-                                       theta=self.theta, phi=self.phi)
+        self.inner_arc = ArcInteractor(
+            self, self.axes, color="black", zorder=zorder, r=self.r1, theta=self.theta, phi=self.phi
+        )
         self.inner_arc.qmax = self.qmax
-        self.outer_arc = ArcInteractor(self, self.axes, color='black',
-                                       zorder=zorder + 1, r=self.r2,
-                                       theta=self.theta, phi=self.phi)
+        self.outer_arc = ArcInteractor(
+            self, self.axes, color="black", zorder=zorder + 1, r=self.r2, theta=self.theta, phi=self.phi
+        )
         self.outer_arc.qmax = self.qmax * 1.2
-        self.radial_lines = RadiusInteractor(self, self.axes, color='black',
-                                             zorder=zorder + 1,
-                                             r1=self.r1, r2=self.r2,
-                                             theta=self.theta, phi=self.phi)
+        self.radial_lines = RadiusInteractor(
+            self, self.axes, color="black", zorder=zorder + 1, r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi
+        )
         self.radial_lines.qmax = self.qmax * 1.2
-        self.central_line = LineInteractor(self, self.axes, color='black',
-                                           zorder=zorder, r=self.qmax * 1.414,
-                                           theta=self.theta, half_length=True)
+        self.central_line = LineInteractor(
+            self, self.axes, color="black", zorder=zorder, r=self.qmax * 1.414, theta=self.theta, half_length=True
+        )
         self.central_line.qmax = self.qmax * 1.414
         self.update()
         self.draw()
@@ -173,8 +170,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         # Add pi to the angles before invoking sector averaging to transform angular
         # range from python default of -pi,pi to 0,2pi suitable for manipulations
-        sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi,
-                             phi_max=phimax + np.pi, nbins=self.nbins)
+        sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi, phi_max=phimax + np.pi, nbins=self.nbins)
         sect.fold = False
         sector = sect(self.data)
 
@@ -186,7 +182,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             dxw = sector.dxw
         else:
             dxw = None
-        if self.averager.__name__ == 'SectorPhi':
+        if self.averager.__name__ == "SectorPhi":
             # And here subtract pi when getting angular data back from wedge averaging in
             # phi in manipulations to get back in the -pi,pi range. Also convert from
             # radians to degrees for nicer display.
@@ -194,23 +190,24 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = str(self.averager.__name__) + \
-                        "(" + self.data.name + ")"
+        new_plot.name = str(self.averager.__name__) + "(" + self.data.name + ")"
         new_plot.source = self.data.source
         new_plot.interactive = True
         new_plot.detector = self.data.detector
         # If the data file does not tell us what the axes are, just assume...
-        if self.averager.__name__ == 'SectorPhi':
+        if self.averager.__name__ == "SectorPhi":
             # angular plots usually require a linear x scale and better with
             # a linear y scale as well.
             new_plot.xaxis(r"\rm{\phi}", "degrees")
             new_plot.plot_role = DataRole.ROLE_ANGULAR_SLICE
         else:
-            new_plot.xaxis(r"\rm{Q}", 'A^{-1}')
+            new_plot.xaxis(r"\rm{Q}", "A^{-1}")
         new_plot.yaxis(r"\rm{Intensity} ", "cm^{-1}")
-        
+
         new_plot.id = "Wedge" + self.averager.__name__ + self.data.name
-        new_plot.type_id = "WedgeSlicer" + self.data.name        
+        new_plot.type_id = (
+            "Slicer" + self.data.name
+        )  # Used to remove plots after changing slicer so they don't keep showing up after closed
         new_plot.is_data = True
         item = self._item
         if self._item.parent() is not None:
@@ -222,7 +219,6 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         if self.update_model:
             self.setModelFromParams()
-
 
     def validate(self, param_name, param_value):
         """
@@ -248,10 +244,10 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
             return None
 
         validators = {
-            'r_min': lambda value: check_radius_difference('r_min', 'r_max', value),
-            'r_max': lambda value: check_radius_difference('r_max', 'r_min', value),
-            'delta_phi [deg]': check_phi_difference,
-            'nbins': check_bins
+            "r_min": lambda value: check_radius_difference("r_min", "r_max", value),
+            "r_max": lambda value: check_radius_difference("r_max", "r_min", value),
+            "delta_phi [deg]": check_phi_difference,
+            "nbins": check_bins,
         }
 
         if param_name in validators:
@@ -317,8 +313,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         self.inner_arc.update(theta=self.theta, phi=self.phi, r=self.r1)
         self.outer_arc.update(theta=self.theta, phi=self.phi, r=self.r2)
-        self.radial_lines.update(r1=self.r1, r2=self.r2,
-                                 theta=self.theta, phi=self.phi)
+        self.radial_lines.update(r1=self.r1, r2=self.r2, theta=self.theta, phi=self.phi)
         self.central_line.update(theta=self.theta)
         self._post_data()
         self.draw()
@@ -338,13 +333,14 @@ class WedgeInteractorQ(WedgeInteractor):
     of Q)
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base, axes, item=None, color="black", zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
         super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorQ
+
         super()._post_data(SectorQ)
 
 
@@ -355,12 +351,12 @@ class WedgeInteractorPhi(WedgeInteractor):
     of phi)
     """
 
-    def __init__(self, base, axes, item=None, color='black', zorder=3):
+    def __init__(self, base, axes, item=None, color="black", zorder=3):
         WedgeInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
         super()._post_data()
 
     def _post_data(self, new_sector=None, nbins=None):
         from sasdata.data_util.manipulations import SectorPhi
-        super()._post_data(SectorPhi)
 
+        super()._post_data(SectorPhi)
