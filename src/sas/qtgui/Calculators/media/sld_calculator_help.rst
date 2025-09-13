@@ -17,7 +17,7 @@ This tool calculates the neutron and x-ray scattering length densities (SLD) and
 This SLD calculator utilizes the periodictable python package\ :sup:`1`, which is a periodic table populated with values useful for neutron and x-ray experiments.
 
 User Inputs
-----------------------------
+-----------
 **Molecular Formula**
     This field defines the material for which you are calculating the SLD. The section "`Specifying Materials or Mixtures in the Molecular Formula Field`_" offers further guidance on how to enter molecules, biomolecules, and more complex mixtures.
 
@@ -31,7 +31,7 @@ User Inputs
     Wavelength is used to calculate the x-ray scattering length density. It is required for x-ray calculations and entered in units of |Ang|.
 
 Calculator Output
-----------------------------
+-----------------
 **Neutron SLD** (|Ang^-2|)
    A measure of the neutron scattering power of the material, which is used for fitting data from neutron scattering experiments.
 
@@ -48,7 +48,7 @@ Calculator Output
     The sample thickness required to reduce the transmission to 36.8% (1/e).
 
 Specifying Materials or Mixtures in the Molecular Formula Field
-----------------------------
+---------------------------------------------------------------
 **Molecular formulas** can be entered intuitively with atoms being represented by their atomic symbol. For example, calcium carbonate (CaCO\ :sub:`3`):
 
     CaCO3
