@@ -6,5 +6,5 @@ repos:
     hooks:
       # Run the linter, applying any available fixes
       - id: ruff-check
-        stages: [ pre-push ]
-        args: [ --fix-only, --exit-non-zero-on-fix ]
+        stages: [ pre-commit, pre-push ]
+        args: [ --fix-only ]
