@@ -383,7 +383,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         if model is not None:
             self.model.itemChanged.connect(self.onParamChange)
 
-    def check_perspective_and_set_data(self,fitting_requested, perspective_name, items_for_fit):        
+    def check_perspective_and_set_data(self,fitting_requested, perspective_name, items_for_fit):
         isBatch = fitting_requested in (2, 4)
         self.parent.manager.parent.loadedPerspectives[perspective_name].setData(data_item=items_for_fit,is_batch=isBatch)
 
@@ -398,7 +398,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
             self.check_perspective_and_set_data(fitting_requested, 'Inversion', items_for_fit)
         else:
             return
-    
+
 
     def keyPressEvent(self, event):
         """
