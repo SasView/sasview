@@ -177,7 +177,6 @@ def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
                 with open(f_name, "wb") as dh:
                     dh.write(resource.read_bytes())
         else:
-            # What is there besides files and directories??
             logger.warning("Skipping %s (unknown type)", str(s_name))
 
 
