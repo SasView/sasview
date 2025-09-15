@@ -79,6 +79,3 @@ tests.log
 /installers/build
 /installers/dist
 *.exe
-
-# Local pre-commit hooks
-.pre-commit-config.yaml
