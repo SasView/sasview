@@ -40,6 +40,7 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.qmax = max(self.data.xmax, np.fabs(self.data.xmin), self.data.ymax, np.fabs(self.data.ymin))
         self.dqmin = min(np.fabs(self.data.qx_data))
         self.connect = self.base.connect
+        
 
         # Number of points on the plot
         self.nbins = 100
@@ -51,6 +52,11 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
         self.theta = np.pi / 3
         # Angle between the central line and the radial lines either side of it
         self.phi = np.pi / 8
+        # If True, I(|Q|) will be return, otherwise,
+        # negative q-values are allowed
+        # Default to true on initialize
+        # Same as BoxInteractor
+        self.fold = True
         # reference of the current data averager
         self.averager = None
 
@@ -170,9 +176,8 @@ class WedgeInteractor(BaseInteractor, SlicerModel):
 
         # Add pi to the angles before invoking sector averaging to transform angular
         # range from python default of -pi,pi to 0,2pi suitable for manipulations
-        sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi,
-                             phi_max=phimax + np.pi, nbins=self.nbins)
-        sect.fold = True
+        sect = self.averager(r_min=rmin, r_max=rmax, phi_min=phimin + np.pi, phi_max=phimax + np.pi, nbins=self.nbins)
+        sect.fold = self.fold
         sector = sect(self.data)
 
         if hasattr(sector, "dxl"):
