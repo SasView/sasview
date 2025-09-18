@@ -194,61 +194,59 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         self.iterateOverMagnetModel(updateFittedValues)
 
     def updateMagnetModelFromList(self, param_dict: dict[str, tuple[float, float]]) -> None:
-            """
-            Update the magnetic model with new parameters, create the errors column
-            """
-            assert isinstance(param_dict, dict)
-            if not dict:
+        """
+        Update the magnetic model with new parameters, create the errors column
+        """
+        assert isinstance(param_dict, dict)
+        if self._magnet_model.rowCount() == 0:
+            return
+
+        def updateFittedValues(row):
+            # Utility function for main model update
+            # internal so can use closure for param_dict
+            if self._magnet_model.item(row, 0) is None:
                 return
-            if self._magnet_model.rowCount() == 0:
+            param_name = str(self._magnet_model.item(row, 0).text())
+            if param_name not in list(param_dict.keys()):
                 return
-
-            def updateFittedValues(row):
-                # Utility function for main model update
-                # internal so can use closure for param_dict
-                if self._magnet_model.item(row, 0) is None:
-                    return
-                param_name = str(self._magnet_model.item(row, 0).text())
-                if param_name not in list(param_dict.keys()):
-                    return
-                # modify the param value
-                param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
-                self._magnet_model.item(row, 1).setText(param_repr)
-                self.logic.kernel_module.setParam(param_name, param_dict[param_name][0])
-                if self.has_magnet_error_column:
-                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                    self._magnet_model.item(row, 2).setText(error_repr)
-
-            def createErrorColumn(row):
-                # Utility function for error column update
-                item = QtGui.QStandardItem()
-                def createItem(param_name):
-                    if param_name in self.magnet_params_to_fit:
-                        error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                    else:
-                        error_repr = ""
-                    item.setText(error_repr)
-                def curr_param():
-                    return str(self._magnet_model.item(row, 0).text())
-
-                [createItem(param_name) for param_name in list(param_dict.keys()) if curr_param() == param_name]
-
-                error_column.append(item)
-
-            self.iterateOverMagnetModel(updateFittedValues)
-
+            # modify the param value
+            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
+            self._magnet_model.item(row, 1).setText(param_repr)
+            self.logic.kernel_module.setParam(param_name, param_dict[param_name][0])
             if self.has_magnet_error_column:
-                self._magnet_model.removeColumn(2)
+                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                self._magnet_model.item(row, 2).setText(error_repr)
 
-            self.lstMagnetic.itemDelegate().addErrorColumn()
-            error_column = []
-            self.iterateOverMagnetModel(createErrorColumn)
+        def createErrorColumn(row):
+            # Utility function for error column update
+            item = QtGui.QStandardItem()
+            def createItem(param_name):
+                if param_name in self.magnet_params_to_fit:
+                    error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                else:
+                    error_repr = ""
+                item.setText(error_repr)
+            def curr_param():
+                return str(self._magnet_model.item(row, 0).text())
 
-            # switch off reponse to model change
-            self._magnet_model.insertColumn(2, error_column)
-            FittingUtilities.addErrorHeadersToModel(self._magnet_model)
+            [createItem(param_name) for param_name in list(param_dict.keys()) if curr_param() == param_name]
 
-            self.has_magnet_error_column = True
+            error_column.append(item)
+
+        self.iterateOverMagnetModel(updateFittedValues)
+
+        if self.has_magnet_error_column:
+            self._magnet_model.removeColumn(2)
+
+        self.lstMagnetic.itemDelegate().addErrorColumn()
+        error_column = []
+        self.iterateOverMagnetModel(createErrorColumn)
+
+        # switch off reponse to model change
+        self._magnet_model.insertColumn(2, error_column)
+        FittingUtilities.addErrorHeadersToModel(self._magnet_model)
+
+        self.has_magnet_error_column = True
 
     def gatherMagnetParams(self, row):
         """
