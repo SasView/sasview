@@ -133,7 +133,8 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
             elif model_column == delegate.mag_unit:
                 pos = 0
             else:
-                raise AttributeError("Wrong column in magnetism table.")
+                # For all other values sent here (e.g. the error column, do nothing)
+                return
             # min/max to be changed in self.logic.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
             self.logic.kernel_module.details[parameter_name][pos] = value
         else:
@@ -263,7 +264,7 @@ class MagnetismWidget(QtWidgets.QWidget, Ui_MagnetismWidgetUI):
         param_min = str(self._magnet_model.item(row, 2+column_offset).text())
         param_max = str(self._magnet_model.item(row, 3+column_offset).text())
         param_list = [[param_name, param_checked, param_value,
-                        param_error, param_min, param_max]]
+                        param_error, param_min, param_max, ()]]
         return param_list
 
     def addCheckedMagneticListToModel(self, param: Any, value: float) -> None:
