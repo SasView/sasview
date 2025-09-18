@@ -235,6 +235,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
         self.mag_min = 2
         self.mag_max = 3
         self.mag_unit = 4
+        self.mag_error = -1
 
     def editableParameters(self):
         return [self.mag_value, self.mag_min, self.mag_max]
@@ -246,6 +247,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         self.mag_parameter = 0
         self.mag_value = 1
+        self.mag_error = 2
         self.mag_min = 3
         self.mag_max = 4
         self.mag_unit = 5
