@@ -334,7 +334,7 @@ jobs:
 
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        uses: digicert/ssm-code-signing@v1.0.1
+        uses: digicert/ssm-code-signing@v1.1.1
 
       - name: Set up P12 certificate
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
