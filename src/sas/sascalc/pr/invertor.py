@@ -213,7 +213,7 @@ class Invertor:
         try:
             float(chi2)
         except:
-            chi2 = -1.0
+            chi2 = np.array([-1.0])
         self.chi2 = chi2
 
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
