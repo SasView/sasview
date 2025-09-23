@@ -259,6 +259,11 @@ jobs:
             installers/dist/sasview-pyinstaller-dist.tar.gz
           if-no-files-found: ignore
 
+      - name: Install OS-specific installer tools (Windows)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        run: |
+          choco install innosetup
+
       - name: Build sasview installer with INNO (Windows)
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
