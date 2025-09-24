@@ -39,7 +39,7 @@ os_test_list = os_release_list + [
 
 # List of python versions to use for release builds
 python_release_list = [
-    '3.11',
+    '3.12',
 ]
 
 # List of python versions to use for tests
