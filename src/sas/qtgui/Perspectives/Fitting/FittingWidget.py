@@ -1405,7 +1405,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
         self._previous_model_index = self.cbModel.currentIndex()
 
