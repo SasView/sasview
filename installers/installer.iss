@@ -3,7 +3,7 @@
 
 #define MyAppName "SasView"
 #define MyAppVersion "6.1.1"
-#define MyAppPublisher "(c) 2009 - 2024, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
+#define MyAppPublisher "(c) 2009 - 2025, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
 #define MyAppURL "http://www.sasview.org"
 #define MyAppExeName "sasview.exe"
 
