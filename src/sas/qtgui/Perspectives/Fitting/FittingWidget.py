@@ -444,7 +444,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
-        self.chkMagnetism.setEnabled(False)
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
         # Combo box or label for file name"
         if self.is_batch_fitting:
