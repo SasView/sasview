@@ -18,15 +18,17 @@ env:
   INSTALLER_OLD_RUNID: 3204825457
   # The test-installer job can run with the pyinstaller debug bundle
   INSTALLER_USE_DEBUG: false
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
 
   ruff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: astral-sh/ruff-action@v3
         with:
+          version: "latest"
           args: "check --fix-only --exit-non-zero-on-fix"
       - uses: pre-commit-ci/lite-action@v1.1.0
         if: always()
@@ -51,11 +53,11 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: set-matrix
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
@@ -76,7 +78,7 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
 
@@ -109,9 +111,11 @@ jobs:
             (github.event_name == 'push' && contains(github.ref, 'release')) ||
             (github.event_name == 'push' && contains(github.ref, 'tags/v6.1')) ||
             (github.event_name == 'pull_request' && contains(github.base_ref, 'release-6.1'))
-          ) && 'true' || ''
-        }}
-      SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork) && 'true' || '' }}
+          ) && 'true' || '' }}
+
+      # Only sign the installer if non-forked repo
+      SIGN_INSTALLER: ${{ (! github.event.repository.fork && ! github.event.pull_request.head.repo.fork ) && 'true' || '' }}
+
       UV_SYSTEM_PYTHON: 1
 
     name: "${{ matrix.job_name }}"
@@ -124,12 +128,12 @@ jobs:
           echo '${{ toJson(matrix) }}'
 
       - name: Obtain SasView source from git
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -150,7 +154,7 @@ jobs:
           sudo apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev
 
       - name: Fetch wheels of sibling projects
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: dist/
           pattern: sasview-wheel-*
@@ -259,6 +263,11 @@ jobs:
             installers/dist/sasview-pyinstaller-dist.tar.gz
           if-no-files-found: ignore
 
+      - name: Install OS-specific installer tools (Windows)
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
+        run: |
+          choco install innosetup
+
       - name: Build sasview installer with INNO (Windows)
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') }}
         run: |
@@ -334,7 +343,7 @@ jobs:
 
       - name: Install DigiCert Client tools from Github Custom Actions marketplace
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
-        uses: digicert/ssm-code-signing@v1.0.1
+        uses: digicert/ssm-code-signing@v1.1.1
 
       - name: Set up P12 certificate
         if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
@@ -354,7 +363,7 @@ jobs:
         shell: bash
 
       - name: Sign the binary using keypair alias
-        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER }}
+        if: ${{ matrix.installer && startsWith(matrix.os, 'windows') && env.SIGN_INSTALLER && env.RELEASE_BRANCH_BUILD }}
         run: |
            smctl sign --keypair-alias key_911959544 --input installers/dist/setupSasView.exe
         shell: cmd
@@ -411,7 +420,7 @@ jobs:
 
       - name: Retrieve installer (workflow image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE != 'true' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         id: download
         with:
           name: SasView-Installer-${{ matrix.os }}-${{ matrix.python-version }}
@@ -430,7 +439,7 @@ jobs:
       - name: Retrieve installer (old image)
         if: ${{ env.INSTALLER_USE_OLD_IMAGE == 'true' }}
         id: download-old-installer
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v11
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}
@@ -541,7 +550,7 @@ jobs:
       - name: Retrieve installer debug tarball
         if: ${{ env.INSTALLER_USE_DEBUG == 'true' }}
         id: download-old-debug
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v11
         with:
           # Select a specific installer image based on the GitHub Actions run id
           run_id: ${{ env.INSTALLER_OLD_RUNID }}

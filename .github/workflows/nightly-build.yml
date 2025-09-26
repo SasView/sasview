@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Retrieve saved artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
 
       - name: Display structure of downloaded files
         run: ls -R
