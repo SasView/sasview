@@ -154,7 +154,7 @@ tzlocal==5.3.1
 uncertainties==3.2.3
 unittest-xml-reporting==3.2.0
 uritools==4.0.3
-urllib3==2.4.0
+urllib3==2.5.0
 waitress==3.0.2
 wcwidth==0.2.13
 webencodings==0.5.1
