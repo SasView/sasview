@@ -209,6 +209,7 @@ select = ["E",       # pycodestyle errors
           "F",       # pyflakes
           "I",       # isort
           "UP",      # pyupgrade
+          "W",       # pycodestyle warnings
           "SIM118",  # Use `key in dict` instead of `key in dict.keys()`
           "SIM300"]  # Yoda condition detected
 
