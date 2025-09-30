@@ -237,8 +237,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Parameters to fit
         self.main_params_to_fit = []
-        #self.polydispersity_widget.poly_params_to_fit = []
-        self.magnet_params_to_fit = []
 
         # Fit options
         self.q_range_min = OptionsWidget.QMIN_DEFAULT
@@ -446,7 +444,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
-        self.chkMagnetism.setEnabled(False)
+        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
         # Combo box or label for file name"
         if self.is_batch_fitting:
@@ -523,6 +521,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
         # Check if any parameters are ready for fitting
         self.cmdFit.setEnabled(self.haveParamsToFit())
+        self.magnetism_widget.isActive = isChecked
 
     def toggleChainFit(self, isChecked: bool) -> None:
         """ Enable/disable chain fitting """
@@ -1406,7 +1405,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         self.chkMagnetism.setEnabled(self.canHaveMagnetism())
-        self.chkMagnetism.setEnabled(self.canHaveMagnetism())
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked() and self.canHaveMagnetism())
         self._previous_model_index = self.cbModel.currentIndex()
 
@@ -1947,7 +1945,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 else:
                     params_to_fit += [p]
         if self.chkMagnetism.isChecked() and self.canHaveMagnetism():
-            params_to_fit += self.magnet_params_to_fit
+            params_to_fit += self.magnetism_widget.magnet_params_to_fit
         if not params_to_fit:
             raise ValueError('Fitting requires at least one parameter to optimize.')
 
@@ -2565,7 +2563,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return True
         if self.chkPolydispersity.isChecked() and self.polydispersity_widget.poly_params_to_fit:
             return True
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnet_params_to_fit:
+        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget.magnet_params_to_fit:
             return True
         return False
 
@@ -2619,9 +2617,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             # don't update the chart
             return
-
-        # TODO: magnetic params in self.kernel_module.details['M0:parameter_name'] = value
-        # TODO: multishell params in self.kernel_module.details[??] = value
 
         # handle display of effective radius parameter according to radius_effective_mode; pass ER into model if
         # necessary
@@ -2726,7 +2721,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # update the list of parameters to fit
         self.main_params_to_fit = self.checkedListFromModel("standard")
         self.polydispersity_widget.poly_params_to_fit = self.checkedListFromModel("poly")
-        self.magnet_params_to_fit = self.checkedListFromModel("magnet")
+        self.magnetism_widget.magnet_params_to_fit = self.checkedListFromModel("magnet")
 
     def checkedListFromModel(self, model_key: str) -> list[str]:
         """
@@ -2835,9 +2830,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.polydispersity_widget.updateModel(model)
         # add magnetic params if asked
-        if self.chkMagnetism.isChecked() and self.canHaveMagnetism() and self.magnetism_widget._magnet_model.rowCount() > 0:
-            for key, value in self.magnet_params.items():
-                model.setParam(key, value)
+        self.magnetism_widget.updateModel(model)
 
     def calculateQGridForModelExt(self, data: Data1D | Data2D | None = None, model: Any | None = None, completefn: Any | None = None, use_threads: bool = True) -> None:
         """
@@ -3460,7 +3453,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         fp.chi2 = self.chi2
         fp.main_params_to_fit = self.main_params_to_fit
         fp.poly_params_to_fit = self.polydispersity_widget.poly_params_to_fit
-        fp.magnet_params_to_fit = self.magnet_params_to_fit
+        fp.magnet_params_to_fit = self.magnetism_widget.magnet_params_to_fit
         fp.kernel_module = self.logic.kernel_module
 
         # Algorithm options
@@ -3798,18 +3791,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             """
             Create list of magnetic parameters based on _magnet_model
             """
-            param_name = str(self.magnetism_widget._magnet_model.item(row, 0).text())
-            param_checked = str(self.magnetism_widget._magnet_model.item(row, 0).checkState() == QtCore.Qt.Checked)
-            param_value = str(self.magnetism_widget._magnet_model.item(row, 1).text())
-            param_error = None
-            column_offset = 0
-            if self.has_magnet_error_column:
-                column_offset = 1
-                param_error = str(self.magnetism_widget._magnet_model.item(row, 1+column_offset).text())
-            param_min = str(self.magnetism_widget._magnet_model.item(row, 2+column_offset).text())
-            param_max = str(self.magnetism_widget._magnet_model.item(row, 3+column_offset).text())
-            param_list.append([param_name, param_checked, param_value,
-                               param_error, param_min, param_max])
+            param_list.extend(self.magnetism_widget.gatherMagnetParams(row))
 
         self.iterateOverModel(gatherParams)
         if self.chkPolydispersity.isChecked():
