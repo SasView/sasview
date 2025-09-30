@@ -1,111 +1,112 @@
-Name	Affiliation	Creator	Producer	RelatedPerson	ORCID	Notes
-"Adams, Michel"	University of Luxembourg	x				None
-"Agouzal, Nouhaila"	Institut Laue-Langevin	x				None
-"Alina, Gervaise"	"University of Tennessee, Knoxville"	x				None
-"Anuchitanukul, Atijit"	ISIS Neutron and Muon Source			x		None
-"Attala, Ziggy"	ISIS Neutron and Muon Source	x				"Changed RAL to ISIS, as we have diamond separately, needs to be checked"
-"Backman, Marie"	Oak Ridge National Laboratory	x			0000-0003-0860-213X	None
-"Bakker, Jurrian"	"Technical University, Delft"	x				None
-"Beaucage, Peter"	National Institute of Standards and Technology	x			0000-0002-2147-0728	None
-"Berger, Jordan"	University of Delaware	x				None
-"Bourne, Robert"	ISIS Neutron and Muon Source	x				None
-"Bouwman, Wim"	"Technical University, Delft"	x				None
-"Bressler, Ingo"	Paul Scherrer Institute	x				None
-"Butler, Paul"	National Institute of Standards and Technology	x			0000-0002-5978-4714	None
-"Cadwallader-Jones, Iestyn"	Institut Laue-Langevin	x				None
-"Campbell, Kieran"	ISIS Neutron and Muon Source	x				None
-"Cho, Jae-Hie"	"University of Tennessee, Knoxville"	x				None
-"Cooper-Benun, Torin"	ISIS Neutron and Muon Source	x				None
-"Cortes Hernandez, R"	"University of Tennessee, Knoxville"	x				None
-"Corona, Patrick"	"University of California, Santa Barbara"			x		None
-"Crake-Merani, James Akbar"	ISIS Neutron and Muon Source	x			0009-0003-1736-5567	None
-"Detiste, Alexandre"	The Debian Project	x				None
-"Doucet, Mathieu"	Oak Ridge National Laboratory	x			0000-0002-5560-6478	None
-"Doutch, James"	ISIS Neutron and Muon Source     	x				None
-"Dresen, Dominique"	University of Cologne	x				None
-"Drosos, Giogos"	ETH Zurich	x				Submitted PR externally - never communicated directly with group. Still counts?
-"Durniak, Celine"	European Spallation Source	x				None
-"Farrow, Chris"	California Institute of Technology	x				None
-"Ferraz Leal, Ricardo"	Oak Ridge National Laboratory	x				None
-"Ford, Rachel"	California Institute of Technology	x				At Grenoble camp and worked on adding assigned model all week till RKH pointed out that it duplicated an existing model. Still should count?
-"Forster, Laura"	Diamond Light Source	x				None
-"Fragneto, Giovanna"	European Spallation Source		x			None
-"Fultz, Brent"	California Institute of Technology		x			None
-"Gaudet, Jonathan"	University of Maryland	x				None
-"Gerina, Mariana"	Charles University	x				None
-"Gilbert, Peter"	National Institute of Standards and Technology	x			0000-0003-1707-7517	Not sure he is properly an author vs other? check contribution.
-"Gonzalez, Miguel"	Institut Laue-Langevin	x			0000-0002-3478-0215	None
-"Hammond, Oliver"	European Spallation Source	x				None
-"Hansen, Thomas Bukholt"	University of Copenhagen	x			0009-0007-9154-7106	None
-"Heenan, Richard"	ISIS Neutron and Muon Source	x			0000-0002-7729-1454	None
-"Henson, Summer"	Oak Ridge National Laboratory	x			0009-0000-2299-5457	None
-"Hewins, Ellis"	ISIS Neutron and Muon Source	x				None
-"Honecker, Dirk"	ISIS Neutron and Muon Source	x				None
-"Hicks, Alan"	Oak Ridge National Laboratory	x			0000-0002-2115-7432	None
-"Jackson, Andrew"	European Spallation Source	x			0000-0002-6296-0336	None
-"Jensen, Grethe"	National Institute of Standards and Technology	x				None
-"Juhas, Pavol"	Brookhaven National Laboratory	x				None
-"Karliczek, Julius"	Institut Laue-Langevin	x				None
-"Kienzle, Paul"	National Institute of Standards and Technology	x				None
-"King, Stephen"	ISIS Neutron and Muon Source	x	x		0000-0003-3386-9151	None
-"Kline, Steve"	National Institute of Standards and Technology	x				None
-"Knudsen, Mikkel"	University of Copenhagen			x		Who is this person? What is the connection?
-"Krueger, Susan"	National Institute of Standards and Technology			x		None
-"Krzywon, Jeff"	National Institute of Standards and Technology	x			0000-0002-2380-4090	None 
-"Larsen, Andreas Haahr"	University of Copenhagen		x		0000-0002-2230-2654	None
-"Lee, Sangjoon Bob"		Columbia University	x		0000-0002-2367-3932	None
-"Lin, Jiao"	California Institute of Technology	x				None
-"Liu, Yun"	National Institute of Standards and Technology	x				None
-"Lopes, Ruben"	ISIS Neutron and Muon Source	x				None
-"Lozano, Dorian"	Institut Laue-Langevin	x				None
-"Lytje, Kristian"	Aarhus University	x				None
-"Mannicke, David"	Australian National Science and Technology Organisation	x				None
-"Maranville, Brian"	National Institute of Standards and Technology	x			0000-0002-6105-8789	None
-"Markvardsen, Anders"	ISIS Neutron and Muon Source	x	x			None
-"Martinez, Nicolas"	Institut Laue-Langevin	x				None
-"McKerns, Mike"	California Institute of Technology	x				None
-"Miller, Brayden"	National Institute of Standards and Technology	x				None
-"Mothander, Karolina"	Lund University	x				None
-"Murphy, Ryan"	National Institute of Standards and Technology	x			0000-0002-4080-7525	None
-"Narayanan, Theyencheri"	European Synchrotron Radiation Facility			x		None
-"Nelson, Andrew "	Australian National Science and Technology Organisation	x				None
-"Nielsen, Torben"	European Spallation Source	x	x			None
-"Oakley, Michael"	ISIS Neutron and Muon Source	x				None
-"O'Driscoll, Lewis"	ISIS Neutron and Muon Source	x				None
-"Park, Helen"	National Institute of Standards and Technology	x				None
-"Parker, Peter"	ISIS Neutron and Muon Source	x				None
-"Parsons, Drew"	University of Cagliari			x		Or should he be listed as creator?
-"Patrou, Maria"	Oak Ridge National Laboratory	x				No commits yet but contributed 6 days at contributor camp on designs and path forwards
-"Pauw, Brian"	Federal Institute for Materials Research and Testing			x		None
-"Pellicelli, R"						Who is this person (and what it their affiliation?) How did the name show up here (could tell us who they are?)
-"Perring, Toby"	ISIS Neutron and Muon Source		x			None
-"Peterson, Pete"	Oak Ridge National Laboratory	x				None
-"Porcar, Lionel"	Institut Laue-Langevin			x		None
-"Potrzebowski, Wojciech"	SciLifeLab at Lund University	x	x		0000-0002-7789-6779	None
-"Pozzo, Lilo"	University of Washington			x		None
-"Prescott, Stuart"	University of New South Wales	x			0000-0001-5639-9688	None
-"Prevost, Sylvain"	Institut Laue-Langevin			x		None
-"Rakitin, Maksim"	Brookhaven National Laboratory	x				None
-"Rennie, Adrian"	Uppsala University			x		None
-"Richter, Tobias"	Diamond Light Source	x	x			Was at Diamond as creator. counts as Producer at ESS? How to list here?
-"Roberts, Graham"	University of Connecticut			x		Working on AI module but mostly alone? so not yet creator?
-"Rod, Thomas Holm"	European Spallation Source		x			None
-"Rooks, Jack"	University of Delaware	x				None
-"Rozyczko, Piotr"	European Spallation Source	x			0000-0002-2359-1013	None
-"Shan, Xael"	National Institute of Standards and Technology	x				None
-"Shang, Yingrui"	Oak Ridge National Laboratory			x		None
-"Snow, Tim"	Diamond Light Source	x			0000-0001-7146-6885	None
-"Stellhorn, Annika"	European Spallation Source	x				None
-"Taylor, Jonathan"	European Spallation Source		x			None
-"Teixeira, Susana"	National Institute of Standards and Technology	x				None
-"Tumarkin, Jessica"	"University of Tennessee, Knoxville"	x				None
-"Udby, Linda"	Niels Bohr Institute			x		Pan-learning person.
-"Washington, Adam"	ISIS Neutron and Muon Source	x				None
-"Weigandt, Katie"	National Institute of Standards and Technology	x				None
-"Whitley, Robert"	ISIS Neutron and Muon Source	x				None
-"Wilkins, Lucas"	ISIS Neutron and Muon Source	x				None
-"Wolf, Caitlyn"	National Institute of Standards and Technology	x			0000-0002-2956-7049	None
-"Zakoutna, Dominika"	Charles University			x		None
-"Zhang, Anita"	University of Princeton	x				None
-"Zheng, Alex"	National Institute of Standards and Technology	x				None
-"Zhou, Jing"	"University of Tennessee, Knoxville"					"First person working on SANS part of DANSE project, but not really SansView yet? not sure how (or if) to list."
+Name	Affiliation	Creator	Producer	RelatedPerson	ReleaseManager	ORCID	Notes
+"Adams, Michel"	University of Luxembourg	x					None
+"Agouzal, Nouhaila"	Institut Laue-Langevin	x					None
+"Alina, Gervaise"	"University of Tennessee, Knoxville"	x					None
+"Anuchitanukul, Atijit"	ISIS Neutron and Muon Source			x			None
+"Attala, Ziggy"	ISIS Neutron and Muon Source	x					"Changed RAL to ISIS, as we have diamond separately, needs to be checked"
+"Backman, Marie"	Oak Ridge National Laboratory	x				0000-0003-0860-213X	None
+"Bakker, Jurrian"	"Technical University, Delft"	x					None
+"Beaucage, Peter"	National Institute of Standards and Technology	x				0000-0002-2147-0728	None
+"Berger, Jordan"	University of Delaware	x					None
+"Bourne, Robert"	ISIS Neutron and Muon Source	x					None
+"Bouwman, Wim"	"Technical University, Delft"	x					None
+"Bressler, Ingo"	Paul Scherrer Institute	x					None
+"Butler, Paul"	National Institute of Standards and Technology	x				0000-0002-5978-4714	None
+"Cadwallader-Jones, Iestyn"	Institut Laue-Langevin	x					None
+"Campbell, Kieran"	ISIS Neutron and Muon Source	x					None
+"Cho, Jae-Hie"	"University of Tennessee, Knoxville"	x					None
+"Cooper-Benun, Torin"	ISIS Neutron and Muon Source	x					None
+"Cortes Hernandez, R"	"University of Tennessee, Knoxville"	x					None
+"Corona, Patrick"	"University of California, Santa Barbara"			x			None
+"Crake-Merani, James Akbar"	ISIS Neutron and Muon Source	x			x	0009-0003-1736-5567	None
+"Detiste, Alexandre"	The Debian Project	x					None
+"Doucet, Mathieu"	Oak Ridge National Laboratory	x				0000-0002-5560-6478	None
+"Doutch, James"	ISIS Neutron and Muon Source     	x					None
+"Dresen, Dominique"	University of Cologne	x					None
+"Drosos, Giogos"	ETH Zurich	x					Submitted PR externally - never communicated directly with group. Still counts?
+"Durniak, Celine"	European Spallation Source	x					None
+"Farrow, Chris"	California Institute of Technology	x					None
+"Ferraz Leal, Ricardo"	Oak Ridge National Laboratory	x					None
+"Ford, Rachel"	California Institute of Technology	x					At Grenoble camp and worked on adding assigned model all week till RKH pointed out that it duplicated an existing model. Still should count?
+"Forster, Laura"	Diamond Light Source	x					None
+"Fragneto, Giovanna"	European Spallation Source		x				None
+"Fultz, Brent"	California Institute of Technology		x				None
+"Gaudet, Jonathan"	University of Maryland	x					None
+"Gerina, Mariana"	Charles University	x					None
+"Gilbert, Peter"	National Institute of Standards and Technology	x				0000-0003-1707-7517	Not sure he is properly an author vs other? check contribution.
+"Gonzalez, Miguel"	Institut Laue-Langevin	x				0000-0002-3478-0215	None
+"Hammond, Oliver"	European Spallation Source	x					None
+"Hansen, Thomas Bukholt"	University of Copenhagen	x				0009-0007-9154-7106	None
+"Heenan, Richard"	ISIS Neutron and Muon Source	x				0000-0002-7729-1454	None
+"Henson, Summer"	Oak Ridge National Laboratory	x				0009-0000-2299-5457	None
+"Hewins, Ellis"	ISIS Neutron and Muon Source	x					None
+"Honecker, Dirk"	ISIS Neutron and Muon Source	x					None
+"Hicks, Alan"	Oak Ridge National Laboratory	x				0000-0002-2115-7432	None
+"Jackson, Andrew"	European Spallation Source	x				0000-0002-6296-0336	None
+"Jensen, Grethe"	National Institute of Standards and Technology	x					None
+"Juhas, Pavol"	Brookhaven National Laboratory	x					None
+"Karliczek, Julius"	Institut Laue-Langevin	x					None
+"Kienzle, Paul"	National Institute of Standards and Technology	x				0000-0002-7893-0318	None
+"King, Stephen"	ISIS Neutron and Muon Source	x	x			0000-0003-3386-9151	None
+"Kline, Steve"	National Institute of Standards and Technology	x					None
+"Knudsen, Mikkel"	University of Copenhagen			x			Who is this person? What is the connection?
+"Krueger, Susan"	National Institute of Standards and Technology			x			None
+"Krzywon, Jeff"	National Institute of Standards and Technology	x				0000-0002-2380-4090	None 
+"Larsen, Andreas Haahr"	University of Copenhagen		x			0000-0002-2230-2654	None
+"Lee, Sangjoon Bob"	Columbia University		x			0000-0002-2367-3932	None
+"Lin, Jiao"	California Institute of Technology	x					None
+"Liu, Yun"	National Institute of Standards and Technology	x					None
+"Lopes, Ruben"	ISIS Neutron and Muon Source	x					None
+"Lozano, Dorian"	Institut Laue-Langevin	x					None
+"Lytje, Kristian"	Aarhus University	x					None
+"Mannicke, David"	Australian National Science and Technology Organisation	x					None
+"Maranville, Brian"	National Institute of Standards and Technology	x				0000-0002-6105-8789	None
+"Markvardsen, Anders"	ISIS Neutron and Muon Source	x	x				None
+"Martinez, Nicolas"	Institut Laue-Langevin	x					None
+"McKerns, Mike"	California Institute of Technology	x					None
+"Miller, Brayden"	National Institute of Standards and Technology	x					None
+"Mothander, Karolina"	Lund University	x					None
+"Murphy, Ryan"	National Institute of Standards and Technology	x				0000-0002-4080-7525	None
+"Narayanan, Theyencheri"	European Synchrotron Radiation Facility			x			None
+"Nelson, Andrew "	Australian National Science and Technology Organisation	x					None
+"Nielsen, Torben"	European Spallation Source	x	x				None
+"Oakley, Michael"	ISIS Neutron and Muon Source	x					None
+"O'Driscoll, Lewis"	ISIS Neutron and Muon Source	x					None
+"Park, Helen"	National Institute of Standards and Technology	x					None
+"Parker, Peter"	ISIS Neutron and Muon Source	x					None
+"Parsons, Drew"	University of Cagliari			x			Or should he be listed as creator?
+"Patrou, Maria"	Oak Ridge National Laboratory	x					No commits yet but contributed 6 days at contributor camp on designs and path forwards
+"Pauw, Brian"	Federal Institute for Materials Research and Testing			x			None
+"Pellicelli, R"							Who is this person (and what it their affiliation?) How did the name show up here (could tell us who they are?)
+"Perring, Toby"	ISIS Neutron and Muon Source		x				None
+"Peterson, Pete"	Oak Ridge National Laboratory	x					None
+"Porcar, Lionel"	Institut Laue-Langevin			x			None
+"Potrzebowski, Wojciech"	SciLifeLab at Lund University	x	x			0000-0002-7789-6779	None
+"Pozzo, Lilo"	University of Washington			x			None
+"Prescott, Stuart"	University of New South Wales	x				0000-0001-5639-9688	None
+"Prevost, Sylvain"	Institut Laue-Langevin			x			None
+"Rakitin, Maksim"	Brookhaven National Laboratory	x					None
+"Rennie, Adrian"	Uppsala University			x			None
+"Richter, Tobias"	Diamond Light Source	x	x				Was at Diamond as creator. counts as Producer at ESS? How to list here?
+"Roberts, Graham"	University of Connecticut			x			Working on AI module but mostly alone? so not yet creator?
+"Rod, Thomas Holm"	European Spallation Source		x				None
+"Rooks, Jack"	University of Delaware	x					None
+"Rozyczko, Piotr"	European Spallation Source	x				0000-0002-2359-1013	None
+"Sharp, Paul"	ISIS Neutron and Muon Source	x				0000-0003-3072-6155	None
+"Shan, Xael"	National Institute of Standards and Technology	x					None
+"Shang, Yingrui"	Oak Ridge National Laboratory			x			None
+"Snow, Tim"	Diamond Light Source	x				0000-0001-7146-6885	None
+"Stellhorn, Annika"	European Spallation Source	x					None
+"Taylor, Jonathan"	European Spallation Source		x				None
+"Teixeira, Susana"	National Institute of Standards and Technology	x					None
+"Tumarkin, Jessica"	"University of Tennessee, Knoxville"	x					None
+"Udby, Linda"	Niels Bohr Institute			x			Pan-learning person.
+"Washington, Adam"	ISIS Neutron and Muon Source	x					None
+"Weigandt, Katie"	National Institute of Standards and Technology	x					None
+"Whitley, Robert"	ISIS Neutron and Muon Source	x					None
+"Wilkins, Lucas"	ISIS Neutron and Muon Source	x					None
+"Wolf, Caitlyn"	National Institute of Standards and Technology	x				0000-0002-2956-7049	None
+"Zakoutna, Dominika"	Charles University			x			None
+"Zhang, Anita"	University of Princeton	x					None
+"Zheng, Alex"	National Institute of Standards and Technology	x					None
+"Zhou, Jing"	"University of Tennessee, Knoxville"						"First person working on SANS part of DANSE project, but not really SansView yet? not sure how (or if) to list."
