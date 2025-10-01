@@ -28,8 +28,8 @@ NPOINTS_Q_INTERP = 10
 DEFAULT_POWER_LOW = 4
 
 # Background of line edits if settings OK or wrong
-BG_WHITE = "background-color: rgb(255, 255, 255);"
-BG_RED = "background-color: rgb(244, 170, 164);"
+BG_DEFAULT = ""
+BG_RED = "background-color: rgb(255, 0, 0);"
 
 
 class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
@@ -615,7 +615,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.sender().setStyleSheet(BG_RED)
                 logging.warning(f'The number of points must be smaller than {len(self._data.x)}')
             else:
-                self.sender().setStyleSheet(BG_WHITE)
+                self.sender().setStyleSheet(BG_DEFAULT)
                 self.allow_calculation()
 
     def modelChanged(self, item):
@@ -709,8 +709,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         calculate = ((q_low_min < q_low_max) and (q_high_min < q_high_max) and (q_high_min > q_low_max)
                      and self.txtExtrapolQMax.text() and self.txtExtrapolQMin.text() and self.txtNptsLowQ.text()
                      and self.txtNptsHighQ.text())
-        self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max and q_low_max < q_high_min else BG_WHITE)
-        self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max and q_low_max < q_high_min else BG_WHITE)
+        self.txtExtrapolQMin.setStyleSheet(BG_RED if q_low_min >= q_low_max and q_low_max < q_high_min else BG_DEFAULT)
+        self.txtExtrapolQMax.setStyleSheet(BG_RED if q_high_min >= q_high_max and q_low_max < q_high_min else BG_DEFAULT)
         if calculate:
             self.allow_calculation()
         else:
@@ -740,7 +740,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.model.setItem(related_widgets[index_elt], item)
         try:
             related_internal_values[index_elt] = float(self.sender().text())
-            self.sender().setStyleSheet(BG_WHITE)
+            self.sender().setStyleSheet(BG_DEFAULT)
             self.allow_calculation()
         except ValueError:
             # empty field, just skip
