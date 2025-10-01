@@ -1840,26 +1840,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Given the fit results structure, pull out optimized parameters and return them as nicely
         formatted dict
         """
-        pvec = [float(p) for p in results.pvec]
-        if results.fitness is None or \
-            not np.isfinite(results.fitness) or \
-            np.any(pvec is None) or \
-            not np.all(np.isfinite(pvec)):
-            msg = "Fitting did not converge!"
-            self.communicate.statusBarUpdateSignal.emit(msg)
-            msg += results.mesg
-            logger.error(msg)
-            return
-
-        if results.mesg:
-            logger.warning(results.mesg)
-
-        param_list = results.param_list # ['radius', 'radius.width']
-        param_values = pvec             # array([ 0.36221662,  0.0146783 ])
-        param_stderr = results.stderr   # array([ 1.71293015,  1.71294233])
-        params_and_errors = list(zip(param_values, param_stderr))
-        param_dict = dict(zip(param_list, params_and_errors))
-
+        param_dict = FittingUtilities.paramDictFromResults(results)
+        if param_dict is None:
+            self.communicate.statusBarUpdateSignal.emit("Fitting did not converge!")
         return param_dict
 
     def fittingCompleted(self, result: tuple | None) -> None:
@@ -2271,43 +2254,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Adds background parameter with default values to the model
         """
-        assert isinstance(model, QtGui.QStandardItemModel)
-        checked_list = ['background', '0.001', '-inf', 'inf', '1/cm']
-        FittingUtilities.addCheckedListToModel(model, checked_list)
-        last_row = model.rowCount()-1
-        model.item(last_row, 0).setEditable(False)
-        model.item(last_row, 4).setEditable(False)
-        model.item(last_row,0).setData('background', role=QtCore.Qt.UserRole)
+        FittingUtilities.addBackgroundToModel(model)
 
 
     def addScaleToModel(self, model: QtGui.QStandardItemModel) -> None:
         """
         Adds scale parameter with default values to the model
         """
-        assert isinstance(model, QtGui.QStandardItemModel)
-        checked_list = ['scale', '1.0', '0.0', 'inf', '']
-        FittingUtilities.addCheckedListToModel(model, checked_list)
-        last_row = model.rowCount()-1
-        model.item(last_row, 0).setEditable(False)
-        model.item(last_row, 4).setEditable(False)
-        model.item(last_row,0).setData('scale', role=QtCore.Qt.UserRole)
+        FittingUtilities.addScaleToModel(model)
 
     def addWeightingToData(self, data: Data1D | Data2D) -> Data1D | Data2D:
         """
         Adds weighting contribution to fitting data
         """
-        if not self.data_is_loaded:
-            # no weighting for theories (dy = 0)
-            return data
-        new_data = copy.deepcopy(data)
-        # Send original data for weighting
-        weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
-        if self.is2D:
-            new_data.err_data = weight
-        else:
-            new_data.dy = weight
-
-        return new_data
+        return FittingUtilities.addWeightingToData(data, self.data_is_loaded, self.is2D, self.weighting)
 
     def updateQRange(self) -> None:
         """

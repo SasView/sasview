@@ -1,7 +1,9 @@
 import copy
+import logging
 from collections.abc import Sequence
+from typing import Any
 
-import numpy
+import numpy as np
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from sas.qtgui.Perspectives.Fitting.AssociatedComboBox import AssociatedComboBox
@@ -441,22 +443,22 @@ def calculateChi2(reference_data, current_data, weight):
     # Get data: data I, theory I, and data dI in order
     if isinstance(reference_data, Data2D):
         if index is None:
-            index = numpy.ones(len(current_data.data), dtype=bool)
+            index = np.ones(len(current_data.data), dtype=bool)
         if weight is not None:
             current_data.err_data = weight
         # get rid of zero error points
         index = index & (current_data.err_data != 0)
-        index = index & (numpy.isfinite(current_data.data))
+        index = index & (np.isfinite(current_data.data))
         fn = current_data.data[index]
         gn = reference_data.data[index]
         en = current_data.err_data[index]
     else:
 
         if index is None:
-            index = numpy.ones(len(current_data.y), dtype=bool)
+            index = np.ones(len(current_data.y), dtype=bool)
         # if current_data.dy is None or not len(current_data.dy):
         if current_data.dy is None or current_data.dy.size == 0:
-            dy = numpy.ones(len(current_data.y))
+            dy = np.ones(len(current_data.y))
         else:
             dy = weight
             dy[dy == 0] = 1
@@ -473,7 +475,7 @@ def calculateChi2(reference_data, current_data, weight):
             en = en[0:len(gn)]
         else:
             try:
-                y = numpy.zeros(len(current_data.y))
+                y = np.zeros(len(current_data.y))
                 begin = 0
                 for i, x_value in enumerate(x_reference):
                     if x_value in x_current:
@@ -499,8 +501,8 @@ def calculateChi2(reference_data, current_data, weight):
         #print "Chi2 calculations: Unmatched lengths %s, %s, %s" % (len(fn), len(gn), len(en))
         return None
 
-    residuals = res[numpy.isfinite(res)]
-    chisqr = numpy.average(residuals * residuals)
+    residuals = res[np.isfinite(res)]
+    chisqr = np.average(residuals * residuals)
 
     return chisqr
 
@@ -513,10 +515,10 @@ def residualsData1D(reference_data, current_data, weights):
 
     # 1d theory from model_thread is only in the range of index
     if current_data.dy is None or not len(current_data.dy):
-        dy = numpy.ones(len(current_data.y))
+        dy = np.ones(len(current_data.y))
     else:
         #dy = weight if weight is not None else numpy.ones(len(current_data.y))
-        if numpy.all(current_data.dy):
+        if np.all(current_data.dy):
             dy = current_data.dy
         else:
             dy = weights
@@ -540,7 +542,7 @@ def residualsData1D(reference_data, current_data, weights):
         residuals.y = -(fn - gn[1:len(fn)])/en
     else:
         try:
-            y = numpy.zeros(len(current_data.y))
+            y = np.zeros(len(current_data.y))
             begin = 0
             for i, x_value in enumerate(x_reference):
                 if x_value in x_current:
@@ -694,9 +696,9 @@ def getWeight(data, is2d, flag=None):
     elif flag == 1:
         weight = dy_data
     elif flag == 2:
-        weight = numpy.sqrt(numpy.abs(data))
+        weight = np.sqrt(np.abs(data))
     elif flag == 3:
-        weight = numpy.abs(data)
+        weight = np.abs(data)
 
     return weight
 
@@ -715,7 +717,7 @@ def getRelativeError(data, is2d, flag=None):
         data = data.data
     else:
         if not hasattr(data, 'dy'):
-            return numpy.ones_like(data.y)
+            return np.ones_like(data.y)
         dy_data = data.dy
         data = data.y
 
@@ -724,9 +726,9 @@ def getRelativeError(data, is2d, flag=None):
     elif flag == 1:
         weight = dy_data / data
     elif flag == 2:
-        weight = 1.0 / numpy.sqrt(numpy.abs(data))
+        weight = 1.0 / np.sqrt(np.abs(data))
     elif flag == 3:
-        weight = 1.0 / numpy.abs(data)
+        weight = 1.0 / np.abs(data)
 
     return weight
 
@@ -1048,3 +1050,76 @@ def setTableProperties(table):
     # header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
     # header.setSectionResizeMode(7, QtWidgets.QHeaderView.ResizeToContents)
 
+
+# Static utility methods extracted from FittingWidget
+
+def addBackgroundToModel(model: QtGui.QStandardItemModel) -> None:
+    """
+    Adds background parameter with default values to the model
+    """
+    assert isinstance(model, QtGui.QStandardItemModel)
+    checked_list = ['background', '0.001', '-inf', 'inf', '1/cm']
+    addCheckedListToModel(model, checked_list)
+    last_row = model.rowCount()-1
+    model.item(last_row, 0).setEditable(False)
+    model.item(last_row, 4).setEditable(False)
+    model.item(last_row,0).setData('background', role=QtCore.Qt.UserRole)
+
+
+def addScaleToModel(model: QtGui.QStandardItemModel) -> None:
+    """
+    Adds scale parameter with default values to the model
+    """
+    assert isinstance(model, QtGui.QStandardItemModel)
+    checked_list = ['scale', '1.0', '0.0', 'inf', '']
+    addCheckedListToModel(model, checked_list)
+    last_row = model.rowCount()-1
+    model.item(last_row, 0).setEditable(False)
+    model.item(last_row, 4).setEditable(False)
+    model.item(last_row,0).setData('scale', role=QtCore.Qt.UserRole)
+
+
+def addWeightingToData(data: Data1D | Data2D, is_loaded: bool, is2D: bool, weighting: int) -> Data1D | Data2D:
+    """
+    Adds weighting contribution to fitting data
+    """
+    if not is_loaded:
+        # no weighting for theories (dy = 0)
+        return data
+    new_data = copy.deepcopy(data)
+    # Send original data for weighting
+    weight = getWeight(data=data, is2d=is2D, flag=weighting)
+    if is2D:
+        new_data.err_data = weight
+    else:
+        new_data.dy = weight
+
+    return new_data
+
+
+def paramDictFromResults(results: Any) -> dict[str, tuple[float, float]] | None:
+    """
+    Given the fit results structure, pull out optimized parameters and return them as nicely
+    formatted dict
+    """
+    logger = logging.getLogger(__name__)
+
+    pvec = [float(p) for p in results.pvec]
+    if results.fitness is None or \
+        not np.isfinite(results.fitness) or \
+        np.any(pvec is None) or \
+        not np.all(np.isfinite(pvec)):
+        msg = "Fitting did not converge!"
+        logger.error(msg + (results.mesg or ""))
+        return None
+
+    if results.mesg:
+        logger.warning(results.mesg)
+
+    param_list = results.param_list # ['radius', 'radius.width']
+    param_values = pvec             # array([ 0.36221662,  0.0146783 ])
+    param_stderr = results.stderr   # array([ 1.71293015,  1.71294233])
+    params_and_errors = list(zip(param_values, param_stderr))
+    param_dict = dict(zip(param_list, params_and_errors))
+
+    return param_dict
