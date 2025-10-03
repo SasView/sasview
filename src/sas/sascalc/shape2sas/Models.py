@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from sas.sascalc.shape2sas.HelperFunctions import Qsampling
+from sas.sascalc.shape2sas.HelperFunctions import Qsampling, euler_rotation_matrix
 from sas.sascalc.shape2sas.models import *
 from sas.sascalc.shape2sas.Typing import *
 
@@ -63,67 +63,25 @@ class ModelSystem:
 
 
 class Rotation:
-    def __init__(
-        self, 
-        x_add: np.ndarray, y_add: np.ndarray, z_add: np.ndarray, 
-        alpha: float, beta: float, gam: float,
-        rotp_x: float, rotp_y: float,rotp_z: float
-    ):
-        self.x_add = x_add
-        self.y_add = y_add
-        self.z_add = z_add
-        self.alpha = alpha
-        self.beta = beta
-        self.gam = gam
-        self.rotp_x = rotp_x
-        self.rotp_y = rotp_y
-        self.rotp_z = rotp_z
+    def __init__(self, matrix: np.ndarray, center_mass: np.ndarray):
+        self.M = matrix        # matrix
+        self.cm = center_mass  # center of mass
+Translation = np.ndarray
 
-    def onRotatingPoints(self) -> Vector3D:
-        """Simple Euler rotation"""
-        self.x_add -= self.rotp_x
-        self.y_add -= self.rotp_y
-        self.z_add -= self.rotp_z
+def transform(coords: np.ndarray[Vector3D], T: Translation, R: Rotation):
+    """Transform a set of coordinates by a rotation R and translation T"""
+    assert coords.shape[0] == 3
+    assert T.shape == (3,)
+    assert R.M.shape == (3, 3)
+    assert R.cm.shape == (3,)
 
-        x_rot = (self.x_add * np.cos(self.gam) * np.cos(self.beta)
-             + self.y_add * (np.cos(self.gam) * np.sin(self.beta) * np.sin(self.alpha) - np.sin(self.gam) * np.cos(self.alpha))
-             + self.z_add * (np.cos(self.gam) * np.sin(self.beta) * np.cos(self.alpha) + np.sin(self.gam) * np.sin(self.alpha)))
+    # The transform is:
+    #   v' = R*(v - R_cm) + R_cm + T
+    #      = R*v - R*R_cm + R_cm + T
+    #      = R*v + (-R*R_cm + R_cm + T)
 
-        y_rot = (self.x_add * np.sin(self.gam) * np.cos(self.beta)
-             + self.y_add * (np.sin(self.gam) * np.sin(self.beta) * np.sin(self.alpha) + np.cos(self.gam) * np.cos(self.alpha))
-             + self.z_add * (np.sin(self.gam) * np.sin(self.beta) * np.cos(self.alpha) - np.cos(self.gam) * np.sin(self.alpha)))
-
-        z_rot = (-self.x_add * np.sin(self.beta)
-            + self.y_add * np.cos(self.beta) * np.sin(self.alpha)
-            + self.z_add * np.cos(self.beta) * np.cos(self.alpha))
-
-        x_rot += self.rotp_x
-        y_rot += self.rotp_y
-        z_rot += self.rotp_z
-
-        return x_rot, y_rot, z_rot
-
-    #More advanced rotation functions can be added here
-    #but GeneratePoints should be changed....
-
-
-class Translation:
-    def __init__(self, x_add: np.ndarray,
-                       y_add: np.ndarray,
-                       z_add: np.ndarray,
-                       com_x: float,
-                       com_y: float,
-                       com_z: float):
-        self.x_add = x_add
-        self.y_add = y_add
-        self.z_add = z_add
-        self.com_x = com_x
-        self.com_y = com_y
-        self.com_z = com_z
-
-    def onTranslatingPoints(self) -> Vector3D:
-        """Translates points"""
-        return self.x_add + self.com_x, self.y_add + self.com_y, self.z_add + self.com_z
+    Tp = -np.dot(R.M, R.cm) + R.cm + T
+    return np.dot(R.M, coords) + Tp[:, np.newaxis]
 
 
 class GeneratePoints:
@@ -157,11 +115,9 @@ class GeneratePoints:
         alpha = np.radians(alpha)
         beta = np.radians(beta)
         gam = np.radians(gam)
-        com_x, com_y, com_z = self.com
-
-        x, y, z = Rotation(x, y, z, alpha, beta, gam, rotp_x, rotp_y, rotp_z).onRotatingPoints()
-        x, y, z = Translation(x, y, z, com_x, com_y, com_z).onTranslatingPoints()
-        return x, y, z
+        rotation = Rotation(euler_rotation_matrix(alpha, beta, gam), np.array([rotp_x, rotp_y, rotp_z]))
+        translation = np.array(self.com)
+        return transform(np.vstack([x, y, z]), translation, rotation)
 
 
 class GenerateAllPoints:
@@ -268,7 +224,7 @@ class GenerateAllPoints:
         """check for overlap with previous subunits. 
         if overlap, the point is removed"""
 
-        if sum(rotation) != 0:
+        if any(r != 0 for r in rotation):
             ## effective coordinates, shifted by (x_com,y_com,z_com)
             x_eff, y_eff, z_eff = Translation(x, y, z, -com[0], -com[1], -com[2]).onTranslatingPoints()
 
