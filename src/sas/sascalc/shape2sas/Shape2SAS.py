@@ -7,11 +7,16 @@ import numpy as np
 
 from sas.sascalc.shape2sas.ExperimentalScattering import SimulateScattering, getSimulatedScattering
 from sas.sascalc.shape2sas.HelperFunctions import generate_pdb, plot_2D, plot_results
-from sas.sascalc.shape2sas.Models import Qsampling, ModelProfile, SimulationParameters, getPointDistribution
+from sas.sascalc.shape2sas.Models import ModelProfile, Qsampling, SimulationParameters, getPointDistribution
 from sas.sascalc.shape2sas.StructureFactor import StructureFactor
-from sas.sascalc.shape2sas.TheoreticalScattering import \
-    TheoreticalScatteringCalculation, ModelSystem, ITheoretical, WeightedPairDistribution, \
-    getTheoreticalScattering, getTheoreticalHistogram
+from sas.sascalc.shape2sas.TheoreticalScattering import (
+    ITheoretical,
+    ModelSystem,
+    TheoreticalScatteringCalculation,
+    WeightedPairDistribution,
+    getTheoreticalHistogram,
+    getTheoreticalScattering,
+)
 
 ################################ Shape2SAS batch version ################################
 if __name__ == "__main__":
