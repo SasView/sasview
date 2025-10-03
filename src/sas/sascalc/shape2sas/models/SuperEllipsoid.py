@@ -1,6 +1,7 @@
+import numpy as np
 from scipy.special import gamma
 
-from sas.sascalc.shape2sas.Typing import *
+from sas.sascalc.shape2sas.Typing import Vector3D
 
 
 class SuperEllipsoid:
