@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
         Theo_I = getTheoreticalScattering(
             TheoreticalScatteringCalculation(
-                System=model, 
+                System=model,
                 Calculation=Sim_par
             )
         )
