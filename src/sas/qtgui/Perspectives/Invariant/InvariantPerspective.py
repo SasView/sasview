@@ -145,21 +145,21 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.mapper.toFirst()
 
-    def get_low_q_extrapolation_upper_limit(self): # TODO: No usages
+    def get_low_q_extrapolation_upper_limit(self):
         q_value = self._data.x[int(self.txtNptsLowQ.text()) - 1]
         return q_value
 
-    def set_low_q_extrapolation_upper_limit(self, value): # TODO: No usages
+    def set_low_q_extrapolation_upper_limit(self, value):
         n_pts = (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(n_pts))
         self.model.setItem(WIDGETS.W_NPTS_LOWQ, item)
         self.txtNptsLowQ.setText(str(n_pts))
 
-    def get_high_q_extrapolation_lower_limit(self): # TODO: No usgaes
+    def get_high_q_extrapolation_lower_limit(self):
         q_value = self._data.x[len(self._data.x) - int(self.txtNptsHighQ.text()) - 1]
         return q_value
 
-    def set_high_q_extrapolation_lower_limit(self, value): # TODO: No usages
+    def set_high_q_extrapolation_lower_limit(self, value):
         n_pts = len(self._data.x) - (np.abs(self._data.x - value)).argmin() + 1
         item = QtGui.QStandardItem(str(int(n_pts)))
         self.model.setItem(WIDGETS.W_NPTS_HIGHQ, item)
@@ -171,8 +171,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def setClosable(self, value: bool=True):
         """ Allow outsiders close this widget """
-        assert isinstance(value, bool) # TODO: Remove
-
         self._allow_close = value
 
     def isSerializable(self):
@@ -218,7 +216,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self._high_fit = str(self.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true'
         self._high_power_value = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
 
-    def calculateInvariant(self): # TODO: pythonic name
+    def calculate_invariant(self) -> None:
         """ Use twisted to thread the calculations away """
         # Find out if extrapolation needs to be used.
         extrapolation = None
@@ -234,21 +232,21 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.cmdCalculate.setEnabled(False)
 
         # Send the calculations to separate thread.
-        d = threads.deferToThread(self.calculateThread, extrapolation)
+        d = threads.deferToThread(self.calculate_thread, extrapolation)
 
         # Add deferred callback for call return
         d.addCallback(self.deferredPlot)
-        d.addErrback(self.calculationFailed)
+        d.addErrback(self.on_calculation_failed)
 
-    def calculationFailed(self, reason): # TODO: rename to on_calculation_failed
-        print("calculation failed: ", reason) # TODO: Print to log
+    def on_calculation_failed(self, reason) -> None:
+        logger.error("calculation failed: ", reason)
         self.allow_calculation()
 
-    def deferredPlot(self, model):
+    def deferredPlot(self, model: QtGui.QStandardItemModel) -> None:
         """
         Run the GUI/model update in the main thread
         """
-        reactor.callFromThread(lambda: self.plotResult(model))
+        reactor.callFromThread(lambda: self.plot_result(model))
         self.allow_calculation()
 
     def allow_calculation(self):
@@ -256,7 +254,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.cmdCalculate.setEnabled(True)
         self.cmdCalculate.setText("Calculate")
 
-    def plotResult(self, model): # TODO: Pythonic name, typing
+    def plot_result(self, model: QtGui.QStandardItemModel) -> None:
         """ Plot result of calculation """
 
         self.model = model
@@ -295,16 +293,16 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.communicate.plotRequestedSignal.emit(plots, None)
 
         # Update the details dialog in case it is open
-        self.updateDetailsWidget(model)
+        self.update_details_widget(model)
 
-    def updateDetailsWidget(self, model): # TODO: pythonic name, type model
+    def update_details_widget(self, model: QtGui.QStandardItemModel) -> None:
         """
         On demand update of the details widget
         """
         if self.detailsDialog.isVisible():
             self.onStatus()
 
-    def calculateThread(self, extrapolation): # Pythonic name, typing
+    def calculate_thread(self, extrapolation: str) -> None:
         """
         Perform Invariant calculations.
         """
@@ -360,8 +358,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                     reactor.callFromThread(self._model_item.removeRow, item.row())
                     break
             self.low_extrapolation_plot = None
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR, qstar_low)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.D_LOW_QSTAR, qstar_low)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.D_LOW_QSTAR_ERR, qstar_low_err)
 
         # High Q Extrapolation calculations
         if self._high_extrapolate:
@@ -389,8 +387,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                     reactor.callFromThread(self._model_item.removeRow, item.row())
                     break
             self.high_extrapolation_plot = None
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR, qstar_high)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.D_HIGH_QSTAR, qstar_high)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.D_HIGH_QSTAR_ERR, qstar_high_err)
 
         # Q* Data calculations
         try:
@@ -400,8 +398,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             calculation_failed = True
             qstar_data = "ERROR"
             qstar_data_err = "ERROR"
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR, qstar_data)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.D_DATA_QSTAR, qstar_data)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
 
         # Volume Fraction calculations
         try:
@@ -412,8 +410,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             msg += str(ex)
             volume_fraction = "ERROR"
             volume_fraction_error = "ERROR"
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
 
         # Surface Error calculations
         if self._porod:
@@ -424,8 +422,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 msg += str(ex)
                 surface = "ERROR"
                 surface_error = "ERROR"
-            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE, surface)
-            reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_SPECIFIC_SURFACE_ERR, surface_error)
+            reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_SPECIFIC_SURFACE, surface)
+            reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_SPECIFIC_SURFACE_ERR, surface_error)
 
         # Enable the status button
         self.cmdStatus.setEnabled(True)
@@ -458,7 +456,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.low_extrapolation_plot._yunit = temp_data._yunit
 
             if self._low_fit:
-                reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_LOWQ_POWER_VALUE, power_low)
+                reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_LOWQ_POWER_VALUE, power_low)
 
         if high_calculation_pass:
             # for presentation in InvariantDetails
@@ -485,7 +483,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.high_extrapolation_plot._yunit = temp_data._yunit
 
             if self._high_fit:
-                reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_HIGHQ_POWER_VALUE, power_high)
+                reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_HIGHQ_POWER_VALUE, power_high)
 
         if qstar_high == "ERROR":
             qstar_high = 0.0
@@ -497,17 +495,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         qstar_total_error = np.sqrt(
             qstar_data_err * qstar_data_err
             + qstar_low_err * qstar_low_err + qstar_high_err * qstar_high_err)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT, qstar_total)
-        reactor.callFromThread(self.updateModelFromThread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_INVARIANT, qstar_total)
+        reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_INVARIANT_ERR, qstar_total_error)
 
         return self.model
 
-    def updateModelFromThread(self, widget, value): # TODO: Name, and typing
+    def update_model_from_thread(self, widget: int, value: float) -> None:
         """
         Update the model in the main thread
         """
         try:
-            value = float('%.3g' % value) # TODO: Replace with round
+            value = round(value, 3)
         except TypeError:
             pass
         item = QtGui.QStandardItem(str(value))
@@ -529,7 +527,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
     def setupSlots(self):
         """ """
-        self.cmdCalculate.clicked.connect(self.calculateInvariant)
+        self.cmdCalculate.clicked.connect(self.calculate_invariant)
         self.cmdStatus.clicked.connect(self.onStatus)
         self.cmdHelp.clicked.connect(self.onHelp)
 
@@ -916,7 +914,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.mapper.toFirst()
 
-    def setData(self, data_item=None, is_batch=False):
+    def setData(self, data_item: QtGui.QStandardItem, is_batch: bool=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
@@ -948,7 +946,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # update GUI and model with info from loaded data
         self.updateGuiFromFile(data=data)
 
-    def removeData(self, data_list=None):
+    def removeData(self, data_list: list=None):
         """Remove the existing data reference from the Invariant Persepective"""
         if not data_list or self._model_item not in data_list:
             return
@@ -965,7 +963,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.cmdCalculate.setEnabled(False)
         self.cmdStatus.setEnabled(False)
 
-    def updateGuiFromFile(self, data=None):
+    def updateGuiFromFile(self, data: Data1D=None):
         """
         update display in GUI and plot
         """
@@ -1006,7 +1004,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Calculate and add to GUI: volume fraction, invariant total,
         # and specific surface if porod checked
         if self.cmdCalculate.isEnabled():
-            self.calculateInvariant()
+            self.calculate_invariant()
 
     def serializeAll(self):
         """
@@ -1024,25 +1022,25 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         """
         state = {}
         if self._data:
-            tab_data = self.getPage()
+            tab_data = self.serializePage()
             data_id = tab_data.pop('data_id', '')
             state[data_id] = {'invar_params': tab_data}
         return state
 
-    def getPage(self) -> dict: # TODO: Better name, serializePage, pageData
+    def serializePage(self) -> dict:
         """
         Serializes full state of this invariant page
         Called by Save Analysis
         :return: {invariant-state}
         """
         # Get all parameters from page
-        param_dict = self.getState()
+        param_dict = self.serealizeState()
         if self._data:
             param_dict['data_name'] = str(self._data.name)
             param_dict['data_id'] = str(self._data.id)
         return param_dict
 
-    def getState(self): # TODO: Better name, serializeState, stateData
+    def serializeState(self) -> dict:
         """
         Collects all active params into a dictionary of {name: value}
         :return: {name: value}
@@ -1121,7 +1119,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             str(params.get('high_power_value', DEFAULT_POWER_LOW)))
         # Update once all inputs are changed
         self.updateFromModel()
-        self.plotResult(self.model)
+        self.plot_result(self.model)
 
     def allowBatch(self):
         """
