@@ -5,7 +5,7 @@ import numpy as np
 from sas.sascalc.shape2sas.HelperFunctions import sinc
 from sas.sascalc.shape2sas.Models import ModelSystem, SimulationParameters
 from sas.sascalc.shape2sas.StructureFactor import StructureFactor
-from sas.sascalc.shape2sas.Typing import *
+from sas.sascalc.shape2sas.Typing import Vector2D, Vector3D
 
 
 @dataclass

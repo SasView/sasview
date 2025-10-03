@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from sas.sascalc.shape2sas.Typing import *
+from sas.sascalc.shape2sas.Typing import Vector2D
 
 
 @dataclass

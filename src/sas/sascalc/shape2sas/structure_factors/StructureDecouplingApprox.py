@@ -1,7 +1,6 @@
 import numpy as np
 
 from sas.sascalc.shape2sas.HelperFunctions import sinc
-from sas.sascalc.shape2sas.Typing import *
 
 
 class StructureDecouplingApprox:

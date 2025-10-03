@@ -5,11 +5,13 @@ import warnings
 
 import numpy as np
 
-from sas.sascalc.shape2sas.ExperimentalScattering import *
+from sas.sascalc.shape2sas.ExperimentalScattering import SimulateScattering, getSimulatedScattering
 from sas.sascalc.shape2sas.HelperFunctions import generate_pdb, plot_2D, plot_results
-from sas.sascalc.shape2sas.Models import *
+from sas.sascalc.shape2sas.Models import Qsampling, ModelProfile, SimulationParameters, getPointDistribution
 from sas.sascalc.shape2sas.StructureFactor import StructureFactor
-from sas.sascalc.shape2sas.TheoreticalScattering import *
+from sas.sascalc.shape2sas.TheoreticalScattering import \
+    TheoreticalScatteringCalculation, ModelSystem, ITheoretical, WeightedPairDistribution, \
+    getTheoreticalScattering, getTheoreticalHistogram
 
 ################################ Shape2SAS batch version ################################
 if __name__ == "__main__":
