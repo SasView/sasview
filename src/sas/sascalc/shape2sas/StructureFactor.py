@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from sas.sascalc.shape2sas.structure_factors import HardSphereStructure, Aggregation, NoStructure
+from sas.sascalc.shape2sas.structure_factors import Aggregation, HardSphereStructure, NoStructure
 
 
 class StructureFactor:

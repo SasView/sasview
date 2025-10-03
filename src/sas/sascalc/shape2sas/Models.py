@@ -3,10 +3,21 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from sas.sascalc.shape2sas.HelperFunctions import Qsampling, euler_rotation_matrix
-from sas.sascalc.shape2sas.models import \
-    Cube, Cuboid, Cylinder, CylinderRing, Disc, DiscRing, Ellipsoid, \
-    EllipticalCylinder, HollowCube, HollowSphere, Sphere, SuperEllipsoid
-from sas.sascalc.shape2sas.Typing import Vectors, Vector3D, Vector4D
+from sas.sascalc.shape2sas.models import (
+    Cube,
+    Cuboid,
+    Cylinder,
+    CylinderRing,
+    Disc,
+    DiscRing,
+    Ellipsoid,
+    EllipticalCylinder,
+    HollowCube,
+    HollowSphere,
+    Sphere,
+    SuperEllipsoid,
+)
+from sas.sascalc.shape2sas.Typing import Vector3D, Vector4D, Vectors
 
 
 @dataclass
@@ -72,7 +83,7 @@ Translation = np.ndarray
 
 def transform(coords: np.ndarray[Vector3D], translate: Translation = np.array([0, 0, 0]), rotate: Rotation = Rotation(np.eye(3), np.array([0, 0, 0]))):
     """Transform a set of coordinates by a rotation R and translation T"""
-    if isinstance(rotate, np.ndarray): 
+    if isinstance(rotate, np.ndarray):
         rotate = Rotation(rotate, np.array([0, 0, 0]))
     assert coords.shape[0] == 3
     assert translate.shape == (3,)
