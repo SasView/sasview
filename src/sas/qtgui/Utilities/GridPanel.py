@@ -523,7 +523,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 failedCells = True
             try:
                 self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
-                f"{pr.chi2[0]:.3g}"))
+                f"{pr.chi2:.3g}"))
             except TypeError:
                 failedCells = True
             try:
