@@ -10,7 +10,8 @@ from sas.qtgui.Calculators.Shape2SAS.PlotAspects.plotAspects import ViewerPlotDe
 
 # Local Perspectives
 from sas.qtgui.Calculators.Shape2SAS.ViewerAllOptions import ViewerButtons, ViewerModelRadius
-from sas.sascalc.shape2sas.Shape2SAS import ModelPointDistribution, TheoreticalScattering
+from sas.sascalc.shape2sas.Models import ModelPointDistribution
+from sas.sascalc.shape2sas.TheoreticalScattering import TheoreticalScattering
 
 
 class ViewerModel(QWidget):

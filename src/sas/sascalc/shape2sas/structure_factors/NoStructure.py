@@ -3,7 +3,6 @@ from typing import Any
 import numpy as np
 
 from sas.sascalc.shape2sas.structure_factors.StructureDecouplingApprox import StructureDecouplingApprox
-from sas.sascalc.shape2sas.Typing import *
 
 
 class NoStructure(StructureDecouplingApprox):

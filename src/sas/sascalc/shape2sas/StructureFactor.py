@@ -1,8 +1,7 @@
 
 import numpy as np
 
-from sas.sascalc.shape2sas.structure_factors import *
-from sas.sascalc.shape2sas.Typing import *
+from sas.sascalc.shape2sas.structure_factors import HardSphereStructure, Aggregation, NoStructure
 
 
 class StructureFactor:
