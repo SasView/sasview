@@ -31,6 +31,20 @@ class Qsampling:
         return inputs[name]
 
 
+def euler_rotation_matrix(alpha: float, beta: float, gamma: float) -> np.ndarray:
+    """
+    Convert Euler angles to a rotation matrix, following the intrinsic ZYX convention.
+    """
+    cosa, cosb, cosg = np.cos(alpha), np.cos(beta), np.cos(gamma)
+    sina, sinb, sing = np.sin(alpha), np.sin(beta), np.sin(gamma)
+    sinasinb, cosasinb = sina*sinb, cosa*sinb
+    return np.array([
+        [cosb*cosg, sinasinb*cosg - cosa*sing, cosasinb*cosg + sina*sing],
+        [cosb*sing, sinasinb*sing + cosa*cosg, cosasinb*sing - sina*cosg],
+        [-sinb, sina*cosb, cosa*cosb]
+    ])
+
+
 def sinc(x) -> np.ndarray:
     """
     function for calculating sinc = sin(x)/x
