@@ -112,7 +112,7 @@ class Constraints(QWidget, Ui_Constraints):
                 return get_default(parameter_text)
 
             new_lines = parameter_text.split("\n")
-            # fit_param string is formatted as: 
+            # fit_param string is formatted as:
             # [
             #  # header
             #  ['name1', 'unit1', ...],
@@ -129,7 +129,7 @@ class Constraints(QWidget, Ui_Constraints):
                 if name in old_names:
                     entry = old_lines[old_names.index(name)+2]
                     new_lines[i+2] = entry + ',' if entry[-1] != ',' else entry
-            
+
             # remove old lines from the current text and insert the new ones in the middle
             current_text = "\n".join(current_text_lines[:start+1] + new_lines[2:-1] + current_text_lines[start+end:])
             return current_text
@@ -167,7 +167,7 @@ class Constraints(QWidget, Ui_Constraints):
             """Expand center of mass parameters to include all components."""
 
             # check if this is a COM assignment we need to expand
-            if (len(constraint.targets) != 1 or 
+            if (len(constraint.targets) != 1 or
                 not isinstance(constraint.targets[0], ast.Name) or
                 not isinstance(constraint.value, ast.Name)):
                 return constraint
@@ -267,7 +267,7 @@ class Constraints(QWidget, Ui_Constraints):
 
             return lhs, rhs, lineno
 
-        def validate_params(params: ast.AST): 
+        def validate_params(params: ast.AST):
             if params is None:
                 self.log_embedded_error("No parameters found in constraints text.")
                 raise ValueError("No parameters found in constraints text.")
@@ -302,7 +302,7 @@ class Constraints(QWidget, Ui_Constraints):
 
         def mark_named_parameters(checkedPars: list[list[bool]], modelPars: list[str], symbols: set[str]):
             """Mark parameters in the modelPars as checked if they are in symbols_lhs."""
-            def in_symbols(par: str): 
+            def in_symbols(par: str):
                 if par in symbols: return True
                 if 'd' + par in symbols: return True
                 return False

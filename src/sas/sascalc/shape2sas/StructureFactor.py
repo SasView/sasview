@@ -6,10 +6,10 @@ from sas.sascalc.shape2sas.Typing import *
 
 
 class StructureFactor:
-    def __init__(self, q: np.ndarray, 
-                 x_new: np.ndarray, 
-                 y_new: np.ndarray, 
-                 z_new: np.ndarray, 
+    def __init__(self, q: np.ndarray,
+                 x_new: np.ndarray,
+                 y_new: np.ndarray,
+                 z_new: np.ndarray,
                  p_new: np.ndarray,
                  Stype: str,
                  par: list[float] | None):
@@ -31,12 +31,12 @@ class StructureFactor:
             'Aggregation': Aggregation,
             'None': NoStructure
         }
-    
+
     def getStructureFactorClass(self):
         """Return chosen structure factor"""
         if self.Stype in self.structureFactor:
             return self.structureFactor[self.Stype](self.q, self.x_new, self.y_new, self.z_new, self.p_new, self.par)
-        
+
         else:
             try:
                 return globals()[self.Stype](self.q, self.x_new, self.y_new, self.z_new, self.p_new, self.par)

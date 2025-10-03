@@ -147,7 +147,7 @@ class ViewerModel(QWidget):
 
     def setAxis(self, x_range: (float, float), y_range: (float, float), z_range: (float, float)):
         """Set axis for the model with equal aspect ratio"""
-        
+
         # Calculate the overall range to ensure equal aspect ratio
         x_min, x_max = x_range
         y_min, y_max = y_range
@@ -156,10 +156,10 @@ class ViewerModel(QWidget):
         y_center = (y_min + y_max) / 2
         z_center = (z_min + z_max) / 2
         max_range = max(x_max - x_min, y_max - y_min, z_max - z_min)
-        
+
         # Add some padding
         half_range = (max_range*1.1) / 2
-        
+
         # Set equal ranges for all axes centered on their respective centers
         self.X_ax.setRange(x_center - half_range, x_center + half_range)
         self.Y_ax.setRange(y_center - half_range, y_center + half_range)

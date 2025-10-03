@@ -26,10 +26,10 @@ class SimulatedScattering:
     I_err: np.ndarray
 
 class IExperimental:
-    def __init__(self, 
-                 q: np.ndarray, 
-                 I0: np.ndarray, 
-                 I: np.ndarray, 
+    def __init__(self,
+                 q: np.ndarray,
+                 I0: np.ndarray,
+                 I: np.ndarray,
                  exposure: float):
         self.q = q
         self.I0 = I0
@@ -73,7 +73,7 @@ class IExperimental:
         N = k * self.q # original expression from Sedlak2017 paper
 
         qt = 1.4 # threshold - above this q value, the linear expression do not hold
-        a = 3.0 # empirical constant 
+        a = 3.0 # empirical constant
         b = 0.6 # empirical constant
         idx = np.where(self.q > qt)
         N[idx] = k * qt * np.exp(-0.5 * ((self.q[idx] - qt) / b)**a)
@@ -83,7 +83,7 @@ class IExperimental:
         q_arb = 0.3
         if q_max <= q_arb:
            I_sed_arb = I_sed[-2]
-        else: 
+        else:
             idx_arb = np.where(self.q > q_arb)[0][0]
             I_sed_arb = I_sed[idx_arb]
 

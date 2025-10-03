@@ -5,11 +5,11 @@ from sas.sascalc.shape2sas.Typing import *
 
 
 class HardSphereStructure(StructureDecouplingApprox):
-    def __init__(self, q: np.ndarray, 
-                 x_new: np.ndarray, 
-                 y_new: np.ndarray, 
-                 z_new: np.ndarray, 
-                 p_new: np.ndarray, 
+    def __init__(self, q: np.ndarray,
+                 x_new: np.ndarray,
+                 y_new: np.ndarray,
+                 z_new: np.ndarray,
+                 p_new: np.ndarray,
                  par: list[float]):
         super(HardSphereStructure, self).__init__(q, x_new, y_new, z_new, p_new)
         self.q = q
@@ -35,14 +35,14 @@ class HardSphereStructure(StructureDecouplingApprox):
         """
 
         if self.conc > 0.0:
-            A = 2 * self.R_HS * self.q 
+            A = 2 * self.R_HS * self.q
             G = self.calc_G(A, self.conc)
             S_HS = 1 / (1 + 24 * self.conc * G / A) #percus-yevick approximation for
         else:                         #calculating the structure factor
             S_HS = np.ones(len(self.q))
 
         return S_HS
-    
+
     @staticmethod
     def calc_G(A: np.ndarray, eta: float) -> np.ndarray:
         """ 
@@ -59,7 +59,7 @@ class HardSphereStructure(StructureDecouplingApprox):
         """
 
         a = (1 + 2 * eta)**2 / (1 - eta)**4
-        b = -6 * eta * (1 + eta / 2)**2/(1 - eta)**4 
+        b = -6 * eta * (1 + eta / 2)**2/(1 - eta)**4
         c = eta * a / 2
         sinA = np.sin(A)
         cosA = np.cos(A)
@@ -73,4 +73,4 @@ class HardSphereStructure(StructureDecouplingApprox):
     def structure_eff(self, Pq: np.ndarray) -> np.ndarray:
         S = self.calc_S_HS()
         S_eff = self.decoupling_approx(Pq, S)
-        return S_eff 
+        return S_eff

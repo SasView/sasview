@@ -29,9 +29,9 @@ class TheoreticalScattering:
 
 
 class WeightedPairDistribution:
-    def __init__(self, x: np.ndarray, 
-                       y: np.ndarray, 
-                       z: np.ndarray, 
+    def __init__(self, x: np.ndarray,
+                       y: np.ndarray,
+                       z: np.ndarray,
                        p: np.ndarray):
         self.x = x
         self.y = y
@@ -46,7 +46,7 @@ class WeightedPairDistribution:
         # mesh this array so that you will have all combinations
         m, n = np.meshgrid(x, x, sparse=True)
         # get the distance via the norm
-        dist = abs(m - n) 
+        dist = abs(m - n)
         return dist
 
     def calc_all_dist(self) -> np.ndarray:
@@ -59,7 +59,7 @@ class WeightedPairDistribution:
 
         square_sum = 0
         for arr in [self.x, self.y, self.z]:
-            square_sum += self.calc_dist(arr)**2 #arr will input x_new, then y_new and z_new so you get 
+            square_sum += self.calc_dist(arr)**2 #arr will input x_new, then y_new and z_new so you get
                                             #x_new^2 + y_new^2 + z_new^2
         d = np.sqrt(square_sum)             #then the square root is taken to get avector for the distance
         # convert from matrix to array
@@ -99,7 +99,7 @@ class WeightedPairDistribution:
 
         """
 
-        histo, bin_edges = np.histogram(dist, bins=Nbins, weights=contrast, range=(0, r_max)) 
+        histo, bin_edges = np.histogram(dist, bins=Nbins, weights=contrast, range=(0, r_max))
         dr = bin_edges[2] - bin_edges[1]
         r = bin_edges[0:-1] + dr / 2
 
@@ -115,11 +115,11 @@ class WeightedPairDistribution:
         Rg = np.sqrt(abs(sum_pr_r2 / sum_pr) / 2)
 
         return Rg
-    
-    def calc_hr(self, 
-                dist: np.ndarray, 
-                Nbins: int, 
-                contrast: np.ndarray, 
+
+    def calc_hr(self,
+                dist: np.ndarray,
+                Nbins: int,
+                contrast: np.ndarray,
                 polydispersity: float) -> Vector2D:
         """
         calculate h(r)
@@ -201,12 +201,12 @@ class WeightedPairDistribution:
         #NOTE: If Nreps is to be added from the original code
         #Then r_sum, pr_sum and pr_norm_sum should be added here
 
-        return r, pr, pr_norm 
-    
+        return r, pr, pr_norm
+
     @staticmethod
     def save_pr(Nbins: int,
-                r: np.ndarray, 
-                pr_norm: np.ndarray, 
+                r: np.ndarray,
+                pr_norm: np.ndarray,
                 Model: str):
         """
         save p(r) to textfile
@@ -231,7 +231,7 @@ class ITheoretical:
             I0 += pr_i
             qr = self.q * r_i
             Pq += pr_i * sinc(qr)
-    
+
         # normalization, P(0) = 1
         if I0 == 0:
             I0 = 1E-5
@@ -239,13 +239,13 @@ class ITheoretical:
             I0 = abs(I0)
         Pq /= I0
 
-        # make I0 scale with volume fraction (concentration) and 
+        # make I0 scale with volume fraction (concentration) and
         # volume squared and scale so default values gives I(0) of approx unity
 
         I0 *= conc * volume_total * 1E-4
 
         return I0, Pq
-    
+
     def calc_Pq_ausaxs(self, q: np.ndarray, x: np.ndarray, y: np.ndarray, z: np.ndarray, p: np.ndarray) -> np.ndarray:
         """
         calculate form factor, P(q), using ausaxs SANS Debye method
@@ -253,8 +253,8 @@ class ITheoretical:
         from sas.sascalc.calculator.ausaxs.ausaxs_sans_debye import evaluate_sans_debye
         return evaluate_sans_debye(q, np.array([x, y, z]), p)
 
-    def calc_Iq(self, Pq: np.ndarray, 
-                S_eff: np.ndarray, 
+    def calc_Iq(self, Pq: np.ndarray,
+                S_eff: np.ndarray,
                 sigma_r: float) -> np.ndarray:
         """
         calculates intensity
@@ -302,7 +302,7 @@ def getTheoreticalScattering(scalc: TheoreticalScatteringCalculation) -> Theoret
         Pq = I_theory.calc_Pq_ausaxs(q, x, y, z, p)/I0
         I0 = 1
 
-    else: 
+    else:
         r, pr, _ = WeightedPairDistribution(x, y, z, p).calc_pr(calc.prpoints, sys.polydispersity)
         I0, Pq = I_theory.calc_Pq(r, pr, sys.conc, prof.volume_total)
 

@@ -512,7 +512,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                 if row in subunitName.keys():
                     paintedName = subunitName[row] + f"{to_column_name}" + " = "
                     item = CustomStandardItem(
-                        paintedName, subunitUnits[row], 
+                        paintedName, subunitUnits[row],
                         subunitTooltip[row], subunitDefault_value[row],
                         plot_callback=self.updatePlotCallback
                     )
@@ -536,7 +536,7 @@ class SubunitTable(QWidget, Ui_SubunitTableController):
                 method = MethodType(attr, OptionLayout)
                 name, defaultVal, units, tooltip, _, _ = method()
                 item = CustomStandardItem(
-                    name[row] + f"{to_column_name}" + " = ", units[row], 
+                    name[row] + f"{to_column_name}" + " = ", units[row],
                     tooltip[row], defaultVal[row],
                     plot_callback=self.updatePlotCallback
                 )

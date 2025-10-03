@@ -19,10 +19,10 @@ class Cube:
         z_add = np.random.uniform(-self.a / 2, self.a / 2, N)
         return x_add, y_add, z_add
 
-    def checkOverlap(self, x_eff: np.ndarray, 
-                           y_eff: np.ndarray, 
+    def checkOverlap(self, x_eff: np.ndarray,
+                           y_eff: np.ndarray,
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a cube"""
-        idx = np.where((abs(x_eff) >= self.a/2) | (abs(y_eff) >= self.a/2) | 
+        idx = np.where((abs(x_eff) >= self.a/2) | (abs(y_eff) >= self.a/2) |
             (abs(z_eff) >= self.a/2))
         return idx

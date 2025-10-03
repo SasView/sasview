@@ -13,7 +13,7 @@ class HollowSphere:
 
         if self.r == self.R:
             return 4 * np.pi * self.R**2 #surface area of a sphere
-        else: 
+        else:
             return (4 / 3) * np.pi * (self.R**3 - self.r**3)
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
@@ -44,8 +44,8 @@ class HollowSphere:
         x_add, y_add, z_add = x[idx], y[idx], z[idx]
         return x_add, y_add, z_add
 
-    def checkOverlap(self, x_eff: np.ndarray, 
-                           y_eff: np.ndarray, 
+    def checkOverlap(self, x_eff: np.ndarray,
+                           y_eff: np.ndarray,
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a hollow sphere"""
 
@@ -56,7 +56,7 @@ class HollowSphere:
         if self.r == self.R:
             idx = np.where(d != self.R)
             return idx
-        
+
         else:
             idx = np.where((d > self.R) | (d < self.r))
             return idx

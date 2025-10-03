@@ -9,12 +9,12 @@ from sas.system.user import get_plugin_dir
 
 
 def generate_plugin(
-    prof: ModelProfile, 
+    prof: ModelProfile,
     modelPars: list[list[str], list[str | float]],
-    usertext: UserText, 
+    usertext: UserText,
     fitPar: list[str],
-    Npoints: int, 
-    pr_points: int, 
+    Npoints: int,
+    pr_points: int,
     file_name: str
 ) -> tuple[str, Path]:
     """Generates a theoretical scattering plugin model"""
@@ -36,7 +36,7 @@ def get_shape_symbols(symbols: tuple[set[str], set[str]], modelPars: list[list[s
     for shape in modelPars[0]: # iterate over shape names
         for symbol in shape[1:]: # skip shape name
             shape_symbols.add(symbol)
-    
+
     # filter out user-defined symbols
     lhs_symbols, rhs_symbols = set(), set()
     for symbol in symbols[0]:
@@ -46,7 +46,7 @@ def get_shape_symbols(symbols: tuple[set[str], set[str]], modelPars: list[list[s
     for symbol in symbols[1]:
         if symbol in shape_symbols or symbol[1:] in shape_symbols:
             rhs_symbols.add(symbol)
-    
+
     return lhs_symbols, rhs_symbols
 
 def format_parameter_list(par: list[list[str | float]]) -> str:
@@ -187,12 +187,12 @@ def script_insert_constrained_parameters(symbols: set[str], modelPars: list[list
     return bool(text), "\n".join(text)  # indentation for the function body
 
 def generate_model(
-    prof: ModelProfile, 
+    prof: ModelProfile,
     modelPars: list[list[str], list[str | float]],
-    usertext: UserText, 
+    usertext: UserText,
     fitPar: list[str],
-    Npoints: int, 
-    pr_points: int, 
+    Npoints: int,
+    pr_points: int,
     model_name: str
 ) -> str:
     """Generates a theoretical model"""
@@ -288,5 +288,5 @@ def Iq({', '.join(fitPar)}):
 Iq.vectorized = True
 
 ''')
-    
+
     return model_str
