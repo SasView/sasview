@@ -16,7 +16,7 @@ class CylinderRing:
         if self.r == self.R:
             return 2 * np.pi * self.R * self.l #surface area of a cylinder
 
-        else: 
+        else:
             return np.pi * (self.R**2 - self.r**2) * self.l
 
     def getPointDistribution(self, Npoints: int) -> Vector3D:
@@ -43,8 +43,8 @@ class CylinderRing:
 
         return x_add, y_add, z_add
 
-    def checkOverlap(self, x_eff: np.ndarray, 
-                           y_eff: np.ndarray, 
+    def checkOverlap(self, x_eff: np.ndarray,
+                           y_eff: np.ndarray,
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a cylinder ring"""
         d = np.sqrt(x_eff**2 + y_eff**2)
@@ -54,6 +54,6 @@ class CylinderRing:
         if self.r == self.R:
             idx = np.where((d != self.R) | (abs(z_eff) > self.l / 2))
             return idx
-        else: 
+        else:
             idx = np.where((d > self.R) | (d < self.r) | (abs(z_eff) > self.l / 2))
             return idx

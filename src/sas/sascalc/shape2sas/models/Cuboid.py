@@ -18,10 +18,10 @@ class Cuboid:
         z_add = np.random.uniform(-self.c, self.c, Npoints)
         return x_add, y_add, z_add
 
-    def checkOverlap(self, x_eff: np.ndarray, 
-                           y_eff: np.ndarray, 
+    def checkOverlap(self, x_eff: np.ndarray,
+                           y_eff: np.ndarray,
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a Cuboid"""
-        idx = np.where((abs(x_eff) >= self.a/2) 
+        idx = np.where((abs(x_eff) >= self.a/2)
         | (abs(y_eff) >= self.b/2) | (abs(z_eff) >= self.c/2))
         return idx

@@ -22,7 +22,7 @@ class Qsampling:
             "User_sampled": Qsampling.onUserSampledQ
         }
         return methods[name]
-    
+
     def qMethodsInput(name: str):
         inputs = {
             "Uniform": {"qmin": 0.001, "qmax": 0.5, "Nq": 400},
@@ -50,7 +50,7 @@ def sinc(x) -> np.ndarray:
     function for calculating sinc = sin(x)/x
     numpy.sinc is defined as sinc(x) = sin(pi*x)/(pi*x)
     """
-    return np.sinc(x / np.pi)   
+    return np.sinc(x / np.pi)
 
 
 def get_max_dimension(x_list: np.ndarray, y_list: np.ndarray, z_list: np.ndarray) -> float:
@@ -76,11 +76,11 @@ def get_max_dimension(x_list: np.ndarray, y_list: np.ndarray, z_list: np.ndarray
     return max_l
 
 
-def plot_2D(x_list: np.ndarray, 
-            y_list: np.ndarray, 
-            z_list: np.ndarray, 
-            p_list: np.ndarray, 
-            Models: np.ndarray, 
+def plot_2D(x_list: np.ndarray,
+            y_list: np.ndarray,
+            z_list: np.ndarray,
+            p_list: np.ndarray,
+            Models: np.ndarray,
             high_res: bool) -> None:
     """
     plot 2D-projections of generated points (shapes) using matplotlib:
@@ -123,7 +123,7 @@ def plot_2D(x_list: np.ndarray,
         ax[0].set_title('pointmodel, (x,z), "front"')
 
         ## plot, perspective 2
-        ax[1].plot(y[idx_pos], z[idx_pos], linestyle='none', marker='.', markersize=markersize) 
+        ax[1].plot(y[idx_pos], z[idx_pos], linestyle='none', marker='.', markersize=markersize)
         ax[1].plot(y[idx_neg], z[idx_neg], linestyle='none', marker='.', markersize=markersize, color='black')
         ax[1].plot(y[idx_nul], z[idx_nul], linestyle='none', marker='.', markersize=markersize, color='grey')
         ax[1].set_xlim(lim)
@@ -133,15 +133,15 @@ def plot_2D(x_list: np.ndarray,
         ax[1].set_title('pointmodel, (y,z), "side"')
 
         ## plot, perspective 3
-        ax[2].plot(x[idx_pos], y[idx_pos], linestyle='none', marker='.', markersize=markersize) 
+        ax[2].plot(x[idx_pos], y[idx_pos], linestyle='none', marker='.', markersize=markersize)
         ax[2].plot(x[idx_neg], y[idx_neg], linestyle='none', marker='.', markersize=markersize, color='black')
-        ax[2].plot(x[idx_nul], y[idx_nul], linestyle='none', marker='.', markersize=markersize, color='grey')    
+        ax[2].plot(x[idx_nul], y[idx_nul], linestyle='none', marker='.', markersize=markersize, color='grey')
         ax[2].set_xlim(lim)
         ax[2].set_ylim(lim)
         ax[2].set_xlabel('x')
         ax[2].set_ylabel('y')
         ax[2].set_title('pointmodel, (x,y), "bottom"')
-    
+
         plt.tight_layout()
         if high_res:
             plt.savefig('points%s.png' % Model,dpi=600)
@@ -150,16 +150,16 @@ def plot_2D(x_list: np.ndarray,
         plt.close()
 
 
-def plot_results(q: np.ndarray, 
-                 r_list: list[np.ndarray], 
-                 pr_list: list[np.ndarray], 
-                 I_list: list[np.ndarray], 
-                 Isim_list: list[np.ndarray], 
-                 sigma_list: list[np.ndarray], 
-                 S_list: list[np.ndarray], 
-                 names: list[str], 
-                 scales: list[float], 
-                 xscale_log: bool, 
+def plot_results(q: np.ndarray,
+                 r_list: list[np.ndarray],
+                 pr_list: list[np.ndarray],
+                 I_list: list[np.ndarray],
+                 Isim_list: list[np.ndarray],
+                 sigma_list: list[np.ndarray],
+                 S_list: list[np.ndarray],
+                 names: list[str],
+                 scales: list[float],
+                 xscale_log: bool,
                  high_res: bool) -> None:
     """
     plot results for all models, using matplotlib:
@@ -174,7 +174,7 @@ def plot_results(q: np.ndarray,
     for (r, pr, I, Isim, sigma, S, model_name, scale) in zip (r_list, pr_list, I_list, Isim_list, sigma_list, S_list, names, scales):
         ax[0].plot(r,pr,zorder=zo,label='p(r), %s' % model_name)
 
-        if scale > 1: 
+        if scale > 1:
             ax[2].errorbar(q,Isim*scale,yerr=sigma*scale,linestyle='none',marker='.',label=r'$I_\mathrm{sim}(q)$, %s, scaled by %d' % (model_name,scale),zorder=1/zo)
         else:
             ax[2].errorbar(q,Isim*scale,yerr=sigma*scale,linestyle='none',marker='.',label=r'$I_\mathrm{sim}(q)$, %s' % model_name,zorder=zo)
@@ -220,10 +220,10 @@ def plot_results(q: np.ndarray,
     plt.close()
 
 
-def generate_pdb(x_list: list[np.ndarray], 
-                 y_list: list[np.ndarray], 
-                 z_list: list[np.ndarray], 
-                 p_list: list[np.ndarray], 
+def generate_pdb(x_list: list[np.ndarray],
+                 y_list: list[np.ndarray],
+                 z_list: list[np.ndarray],
+                 p_list: list[np.ndarray],
                  Model_list: list[str]) -> None:
     """
     Generates a visualisation file in PDB format with the simulated points (coordinates) and contrasts

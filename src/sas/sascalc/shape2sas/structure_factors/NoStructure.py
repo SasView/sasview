@@ -7,11 +7,11 @@ from sas.sascalc.shape2sas.Typing import *
 
 
 class NoStructure(StructureDecouplingApprox):
-    def __init__(self, q: np.ndarray, 
-                 x_new: np.ndarray, 
-                 y_new: np.ndarray, 
-                 z_new: np.ndarray, 
-                 p_new: np.ndarray, 
+    def __init__(self, q: np.ndarray,
+                 x_new: np.ndarray,
+                 y_new: np.ndarray,
+                 z_new: np.ndarray,
+                 p_new: np.ndarray,
                  par: Any):
         super(NoStructure, self).__init__(q, x_new, y_new, z_new, p_new)
         self.q = q

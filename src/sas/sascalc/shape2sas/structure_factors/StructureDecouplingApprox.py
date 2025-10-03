@@ -5,10 +5,10 @@ from sas.sascalc.shape2sas.Typing import *
 
 
 class StructureDecouplingApprox:
-    def __init__(self, q: np.ndarray, 
-                 x_new: np.ndarray, 
-                 y_new: np.ndarray, 
-                 z_new: np.ndarray, 
+    def __init__(self, q: np.ndarray,
+                 x_new: np.ndarray,
+                 y_new: np.ndarray,
+                 z_new: np.ndarray,
                  p_new: np.ndarray):
         self.q = q
         self.x_new = x_new
@@ -38,7 +38,7 @@ class StructureDecouplingApprox:
         d_new = self.calc_com_dist()
         M = len(self.q)
         A00 = np.zeros(M)
-        
+
         for i in range(M):
             qr = self.q[i] * d_new
 
@@ -46,7 +46,7 @@ class StructureDecouplingApprox:
         A00 = A00 / A00[0] # normalise, A00[0] = 1
 
         return A00
-    
+
     def decoupling_approx(self, Pq: np.ndarray, S: np.ndarray) -> np.ndarray:
         """
         modify structure factor with the decoupling approximation

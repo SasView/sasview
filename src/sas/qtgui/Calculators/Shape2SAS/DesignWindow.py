@@ -647,12 +647,12 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         modelProfile = self.getModelProfile(self.ifFitPar, conditionBool=checkedPars, conditionFitPar=parNames)
 
         model_str, full_path = generate_plugin(
-            modelProfile, 
+            modelProfile,
             [parNames, parVals],
             usertext,
-            fitPar, 
-            Npoints, 
-            prPoints, 
+            fitPar,
+            Npoints,
+            prPoints,
             modelName
         )
 
@@ -711,10 +711,10 @@ class DesignWindow(QDialog, Ui_Shape2SAS, Perspective):
         Distr = getPointDistribution(Profile, N)
 
         model = ModelSystem(
-            PointDistribution=Distr, 
-            Stype=Stype, par=par, 
-            polydispersity=polydispersity, 
-            conc=conc, 
+            PointDistribution=Distr,
+            Stype=Stype, par=par,
+            polydispersity=polydispersity,
+            conc=conc,
             sigma_r=sigma_r
         )
 

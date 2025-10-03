@@ -146,8 +146,8 @@ class GenerateAllPoints:
             "sphere": Sphere,
             "ball": Sphere,
 
-            "hollow_sphere": HollowSphere, 
-            "Hollow sphere": HollowSphere, 
+            "hollow_sphere": HollowSphere,
+            "Hollow sphere": HollowSphere,
 
             "cylinder": Cylinder,
 
@@ -170,7 +170,7 @@ class GenerateAllPoints:
 
             "disc_ring": DiscRing,
             "Disc ring": DiscRing,
-            
+
             "superellipsoid": SuperEllipsoid
         }
 
@@ -211,14 +211,14 @@ class GenerateAllPoints:
 
     @staticmethod
     def onCheckOverlap(
-        x: np.ndarray, 
-        y: np.ndarray, 
-        z: np.ndarray, 
-        p: np.ndarray, 
-        rotation: list[float], 
+        x: np.ndarray,
+        y: np.ndarray,
+        z: np.ndarray,
+        p: np.ndarray,
+        rotation: list[float],
         rotation_point: list[float],
-        com: list[float], 
-        subunitClass: object, 
+        com: list[float],
+        subunitClass: object,
         dimensions: list[float]
     ):
         """check for overlap with previous subunits. 
@@ -385,8 +385,8 @@ def getPointDistribution(prof: ModelProfile, Npoints):
         print(f"  Subunit {i}: {subunit} with dimensions {prof.dimensions[i]} at COM {prof.com[i]}")
         print(f"  Rotation: {prof.rotation[i]} at rotation point {prof.rotation_points[i]} with SLD {prof.p_s[i]}")
 
-    x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits, 
-                                                  prof.dimensions, prof.rotation, prof.rotation_points, 
+    x_new, y_new, z_new, p_new, volume_total = GenerateAllPoints(Npoints, prof.com, prof.subunits,
+                                                  prof.dimensions, prof.rotation, prof.rotation_points,
                                                   prof.p_s, prof.exclude_overlap).onGeneratingAllPointsSeparately()
-    
+
     return ModelPointDistribution(x=x_new, y=y_new, z=z_new, p=p_new, volume_total=volume_total)

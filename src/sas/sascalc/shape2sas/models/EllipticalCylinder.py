@@ -28,8 +28,8 @@ class EllipticalCylinder:
 
         return x_add, y_add, z_add
 
-    def checkOverlap(self, x_eff: np.ndarray, 
-                           y_eff: np.ndarray, 
+    def checkOverlap(self, x_eff: np.ndarray,
+                           y_eff: np.ndarray,
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a Elliptical cylinder"""
         d2 = x_eff**2 / self.a**2 + y_eff**2 / self.b**2

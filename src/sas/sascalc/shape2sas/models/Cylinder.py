@@ -26,8 +26,8 @@ class Cylinder:
 
         return x_add, y_add, z_add
 
-    def checkOverlap(self, x_eff: np.ndarray, 
-                           y_eff: np.ndarray, 
+    def checkOverlap(self, x_eff: np.ndarray,
+                           y_eff: np.ndarray,
                            z_eff: np.ndarray) -> np.ndarray:
         """Check for points within a cylinder"""
         d = np.sqrt(x_eff**2+y_eff**2)
