@@ -29,7 +29,6 @@ os_release_list = [
     'ubuntu-22.04',
     'windows-latest',
     'macos-latest',
-    'macos-13',
 ]
 
 # List of OS images to use for release tests
