@@ -1,4 +1,5 @@
 import numpy as np
+
 from sas.sascalc.shape2sas.Typing import Vector3D
 
 
