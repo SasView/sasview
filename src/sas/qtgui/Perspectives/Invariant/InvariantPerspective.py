@@ -29,7 +29,7 @@ DEFAULT_POWER_LOW = 4
 
 # Background of line edits if settings OK or wrong
 BG_DEFAULT = ""
-BG_RED = "background-color: rgb(255, 0, 0);"
+BG_RED = "background-color: rgb(244, 170, 164);"
 
 
 class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
@@ -239,7 +239,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         d.addErrback(self.on_calculation_failed)
 
     def on_calculation_failed(self, reason) -> None:
-        logger.error("calculation failed: ", reason)
+        logging.error("calculation failed: ", reason)
         self.allow_calculation()
 
     def deferredPlot(self, model: QtGui.QStandardItemModel) -> None:
@@ -295,7 +295,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Update the details dialog in case it is open
         self.update_details_widget(model)
 
-    def update_details_widget(self, model: QtGui.QStandardItemModel) -> None:
+    def update_details_widget(self) -> None:
         """
         On demand update of the details widget
         """
@@ -500,7 +500,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         return self.model
 
-    def update_model_from_thread(self, widget: int, value: float) -> None:
+    def update_model_from_thread(self, row: int, value: float) -> None:
         """
         Update the model in the main thread
         """
@@ -509,7 +509,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         except TypeError:
             pass
         item = QtGui.QStandardItem(str(value))
-        self.model.setItem(widget, item)
+        self.model.setItem(row, item)
         self.mapper.toLast()
 
     def onStatus(self):
@@ -914,7 +914,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         self.mapper.toFirst()
 
-    def setData(self, data_item: QtGui.QStandardItem, is_batch: bool=False):
+    def setData(self, data_item: QtGui.QStandardItem=None, is_batch: bool=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
@@ -1034,7 +1034,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         :return: {invariant-state}
         """
         # Get all parameters from page
-        param_dict = self.serealizeState()
+        param_dict = self.serializeState()
         if self._data:
             param_dict['data_name'] = str(self._data.name)
             param_dict['data_id'] = str(self._data.id)
