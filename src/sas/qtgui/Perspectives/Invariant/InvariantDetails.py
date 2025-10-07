@@ -98,7 +98,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         self.txtQDataErr.setText(self._model.item(WIDGETS.D_DATA_QSTAR_ERR).text())
         try:
             self.progress_data_qstar = (self.qdata / self.qstar_total) * 100.0
-        except:
+        except ZeroDivisionError:
             self.progress_data_qstar = "error"
 
         # Low-Q
@@ -109,7 +109,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             self.txtQLowQErr.setText(self._model.item(WIDGETS.D_LOW_QSTAR_ERR).text())
             try:
                 self.progress_low_qstar = (self.qlow / self.qstar_total) * 100.0
-            except:
+            except ZeroDivisionError:
                 self.progress_low_qstar = "error"
 
         # High-Q
@@ -120,7 +120,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             self.txtQHighQErr.setText(self._model.item(WIDGETS.D_HIGH_QSTAR_ERR).text())
             try:
                 self.progress_high_qstar = (self.qhigh / self.qstar_total) * 100.0
-            except:
+            except ZeroDivisionError:
                 self.progress_high_qstar = "error"
 
         # check values and display warning
@@ -174,7 +174,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         if self.progress_low_qstar == "error":
             try:
                 float(self.qlow)
-            except:
+            except ValueError:
                 msg += "Error occurred when computing extrapolated invariant"
                 msg += " at low-Q region.\n"
 
@@ -192,7 +192,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         if self.progress_high_qstar == "error":
             try:
                 float(self.qhigh)
-            except:
+            except ValueError:
                 msg += "Error occurred when computing extrapolated"
                 msg += " invariant at high-Q region.\n"
 
