@@ -360,7 +360,7 @@ class Extrapolator:
                 cov = np.linalg.pinv(inv_cov)
                 err_matrix = np.fabs(residuals) * cov
                 err = [np.sqrt(err_matrix[0][0]), np.sqrt(err_matrix[1][1])]
-            except:
+            except Exception:
                 err = [-1.0, -1.0]
 
             return p, err
@@ -1020,8 +1020,8 @@ class InvariantCalculator:
         """
         # until contrast and porod_constant are given with uncertainties set
         # them to 0
-        dcontrast = None
-        dporod_const = None
+        # dcontrast = None
+        # dporod_const = None
         # IMPORTATN: the porod constant (and eventually its uncertainty) are
         # given in units of cm^-1 A^-4.  We need to be mindfult of units when
         # writing equations. Thus for computing ds both the porod constant and
