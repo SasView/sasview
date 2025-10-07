@@ -1000,13 +1000,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
 
         try:
             name = data.name
-        except:
+        except (AttributeError, TypeError):
             msg = "No data name chosen."
             raise ValueError(msg)
         try:
             qmin = min(self._data.x)
             qmax = max(self._data.x)
-        except:
+        except (AttributeError, TypeError, ValueError):
             msg = "Unable to find q min/max of \n data named %s" % data.name
             raise ValueError(msg)
 
