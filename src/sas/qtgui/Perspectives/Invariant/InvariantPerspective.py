@@ -293,7 +293,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self.communicate.plotRequestedSignal.emit(plots, None)
 
         # Update the details dialog in case it is open
-        self.update_details_widget(model)
+        self.update_details_widget()
 
     def update_details_widget(self) -> None:
         """
