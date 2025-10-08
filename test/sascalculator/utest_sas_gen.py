@@ -225,8 +225,9 @@ class sas_gen_test(unittest.TestCase):
         """
         Test that the Debye algorithm supplied by the external AUSAXS library agrees with the default implementation.
         """
-        from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye, sasview_sans_debye
         from pyausaxs import AUSAXS
+
+        from sas.sascalc.calculator.ausaxs import ausaxs_sans_debye, sasview_sans_debye
 
         rng = np.random.default_rng(1984)
         ausaxs = AUSAXS()

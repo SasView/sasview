@@ -1,8 +1,9 @@
-import numpy as np
 import logging
+
 from pyausaxs import AUSAXS
 
 from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
+
 
 def evaluate_sans_debye(q, coords, w):
     """
