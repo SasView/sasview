@@ -242,6 +242,9 @@ class sas_gen_test(unittest.TestCase):
         pdb_files = glob.glob(os.path.join(os.path.dirname(__file__), 'data/debye_test_files', '*.pdb'))
 
         for pdb_file in pdb_files:
+            if "c60" in pdb_file:
+                continue # c60 is too ordered for default pyausaxs version
+
             # load pdb file
             f = self.pdbloader.read(pdb_file)
             coords = np.vstack([f.pos_x, f.pos_y, f.pos_z])
