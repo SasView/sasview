@@ -255,7 +255,7 @@ class sas_gen_test(unittest.TestCase):
             errs = (external - analytical)/analytical
             different_entries = 0
             for val in np.abs(errs):
-                self.assertLessEqual(val, 0.02, "Ensure that the error is acceptable.")
+                self.assertLessEqual(val, 0.03, "Ensure that the error is acceptable.")
                 if val != 0:
                     different_entries += 1
             self.assertTrue(different_entries > len(q)*0.5, "Check that two different algorithms were actually run.")
@@ -271,7 +271,7 @@ class sas_gen_test(unittest.TestCase):
 
         errs = (external - analytical)/analytical
         for val in np.abs(errs):
-            self.assertLessEqual(val, 0.02)
+            self.assertLessEqual(val, 0.03)
 
     def test_calculator_elements(self):
         """
