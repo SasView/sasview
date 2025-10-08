@@ -33,6 +33,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             margin: 1px;
         }
         """
+        self.setWindowTitle('Status')
         self.progressBarLowQ.setStyleSheet(DEFAULT_STYLE)
         self.progressBarData.setStyleSheet(DEFAULT_STYLE)
         self.progressBarHighQ.setStyleSheet(DEFAULT_STYLE)
@@ -66,6 +67,12 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         self.progress_low_qstar = 0.0
         self.progress_high_qstar = 0.0
         self.progress_data_qstar = 100.0
+
+    def closeEvent(self, event):
+        """Re-enables the status button when closed"""
+        parent = self.parent()
+        parent.cmdStatus.setEnabled(True)
+        super().closeEvent(event)
 
     def setModel(self, model):
         """ """
