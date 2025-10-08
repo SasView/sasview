@@ -63,7 +63,7 @@ if platform.system() == 'Windows':
 a = Analysis(
     ['sasview.py'],
     pathex=[],
-    binaries=[('../src/sas/sascalc/calculator/ausaxs/lib', 'sas/sascalc/calculator/ausaxs/lib')],
+    binaries=[],
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
