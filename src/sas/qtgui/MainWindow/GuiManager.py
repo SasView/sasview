@@ -115,12 +115,12 @@ class GuiManager:
         handler.postman.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
-        logging.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
+        logger.info(f" --- SasView session started, version {SASVIEW_VERSION}, {SASVIEW_RELEASE_DATE} ---")
         # Log the python version
-        logging.info("Python: %s" % sys.version)
-        #logging.debug("Debug messages are shown.")
-        #logging.warn("Warnings are shown.")
-        #logging.error("Errors are shown.")
+        logger.info("Python: %s" % sys.version)
+        #logger.debug("Debug messages are shown.")
+        #logger.warn("Warnings are shown.")
+        #logger.error("Errors are shown.")
 
         # Set up the status bar
         self.statusBarSetup()
@@ -390,7 +390,7 @@ class GuiManager:
             setattr(cls, window_name, GuiUtils.showHelp(url_abs))
 
         except Exception as ex:
-            logging.warning("Cannot display help. %s" % ex)
+            logger.warning("Cannot display help. %s" % ex)
 
     def workspace(self):
         """
@@ -503,7 +503,7 @@ class GuiManager:
             self._current_perspective.setData(list(data.values()))
         else:
             msg = "No perspective is currently active."
-            logging.info(msg)
+            logger.info(msg)
 
     def communicator(self):
         """ Accessor for the communicator """
@@ -564,7 +564,7 @@ class GuiManager:
             self._current_perspective.setData(list(data.values()))
         else:
             msg = "Guiframe does not have a current perspective"
-            logging.info(msg)
+            logger.info(msg)
 
     def findItemFromFilename(self, filename):
         """
@@ -604,7 +604,7 @@ class GuiManager:
         """
         latest_version = get_current_release_version()
         if latest_version is None:
-            logging.info("Failed to connect to www.sasview.org:")
+            logger.info("Failed to connect to www.sasview.org:")
         self.processVersion(latest_version)
 
     def log_installed_packages(self):
@@ -644,7 +644,7 @@ class GuiManager:
         except:
             msg = "guiframe: could not get latest application"
             msg += " version number\n  %s" % sys.exc_info()[1]
-            logging.error(msg)
+            logger.error(msg)
             msg = "Could not connect to the application server."
             msg += " Please try again later."
             self.communicate.statusBarUpdateSignal.emit(msg)
@@ -909,7 +909,7 @@ class GuiManager:
             report_data = self._current_perspective.getReport()
 
             if report_data is None:
-                logging.info("Report data is empty, dialog not shown")
+                logger.info("Report data is empty, dialog not shown")
             else:
                 self.report_dialog = ReportDialog(report_data=report_data, parent=self._parent)
                 self.report_dialog.show()
@@ -919,7 +919,7 @@ class GuiManager:
     def actionReset(self):
         """
         """
-        logging.warning(" *** actionOpen_Analysis logging *******")
+        logger.warning(" *** actionOpen_Analysis logging *******")
         print("actionReset print TRIGGERED")
         sys.stderr.write("STDERR - TRIGGERED")
 
@@ -1041,7 +1041,7 @@ class GuiManager:
         try:
             self.ResolutionCalculator.show()
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     def actionGeneric_Scattering_Calculator(self):
@@ -1056,14 +1056,14 @@ class GuiManager:
             self.updateStatusBar("The Generic Scattering Calculator is open, but it sometimes opens behind the main "
                                  "window.")
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     def actionShape2SAS_Calculator(self):
         try:
             self.Shape2SASCalculator.show()
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     def actionPython_Shell_Editor(self):
@@ -1101,7 +1101,7 @@ class GuiManager:
                 self.image_viewer.menubar.setNativeMenuBar(False)
             self.image_viewer.show()
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     def actionFile_Converter(self):
@@ -1111,7 +1111,7 @@ class GuiManager:
         try:
             self.FileConverter.show()
         except Exception as ex:
-            logging.error(str(ex))
+            logger.error(str(ex))
             return
 
     #============ FITTING =================

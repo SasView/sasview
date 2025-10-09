@@ -660,7 +660,7 @@ class SizeDistributionWindow(QtWidgets.QDialog, Ui_SizeDistribution, Perspective
         # re-enable the fit buttons
         self.is_calculating = False
         self.enableButtons()
-        logging.exception("Fitting failed", exc_info=(etype, value, traceback))
+        logger.exception("Fitting failed", exc_info=(etype, value, traceback))
 
     def fitComplete(self, result: MaxEntResult) -> None:
         """
