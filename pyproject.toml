@@ -78,6 +78,7 @@ include = [
   "build_tools",
   "build/lib/doc/build",
   "docs/sphinx-docs/source",
+  "docs/sphinx-docs/*.py",
   "src",
   "test",
 ]
