@@ -279,7 +279,7 @@ class GPUOptions(PreferencesWidget, Ui_GPUOptions):
         self.progressBar.setVisible(False)
         self.testButton.setEnabled(True)
 
-        logging.error(str(msg))
+        logger.error(str(msg))
 
     def testCompleted(self, msg):
         """

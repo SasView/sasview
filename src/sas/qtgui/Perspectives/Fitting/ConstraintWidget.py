@@ -822,7 +822,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         try:
             menu.exec_(self.tblTabList.viewport().mapToGlobal(position))
         except AttributeError as ex:
-            logging.error("Error generating context menu: %s" % ex)
+            logger.error("Error generating context menu: %s" % ex)
         return
 
     def showConstrContextMenu(self, position):
@@ -861,7 +861,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         try:
             menu.exec_(self.tblConstraints.viewport().mapToGlobal(position))
         except AttributeError as ex:
-            logging.error("Error generating context menu: %s" % ex)
+            logger.error("Error generating context menu: %s" % ex)
         return
 
     def selectConstraints(self):
@@ -939,7 +939,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         model = fit_page.logic.kernel_module
 
         if model is None:
-            logging.warning("No model selected")
+            logger.warning("No model selected")
             return
 
         tab_name = tab
