@@ -33,6 +33,8 @@ from bumps.mapper import MPMapper, SerialMapper
 from sas.sascalc.fit.AbstractFitEngine import FitEngine, FResult
 from sas.sascalc.fit.expression import compile_constraints
 
+logger = logging.getLogger(__name__)
+
 # patch uncertainties.core.AffineScalarFunc to work with float() conversion
 uncertainties.core.AffineScalarFunc.__float__ = lambda self: float(self.nominal_value)
 
@@ -355,7 +357,7 @@ class BumpsFit(FitEngine):
             if miss_uncertainty:
                 uncertainty_warning = True
                 for p in miss_uncertainty:
-                    logging.warning(p.name + " uncertainty could not be calculated.")
+                    logger.warning(p.name + " uncertainty could not be calculated.")
 
            # TODO: Let the GUI decided how to handle success/failure.
             if not fitting_result.success:
@@ -367,7 +369,7 @@ class BumpsFit(FitEngine):
         all_results[0].mesg = result['errors']
 
         if uncertainty_warning:
-            logging.warning("Consider checking related constraint definitions and status of parameters used there.")
+            logger.warning("Consider checking related constraint definitions and status of parameters used there.")
 
         if q is not None:
             q.put(all_results)

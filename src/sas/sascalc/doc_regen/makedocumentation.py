@@ -51,6 +51,8 @@ from sas.system.user import (
 #     IMAGES_DIRECTORY_LOCATION,
 # )
 
+logger = logging.getLogger(__name__)
+
 
 def get_py(directory: Path) -> list[Path]:
     """Find all python files within a directory that are meant for sphinx and return those file-paths as a list.
@@ -226,7 +228,7 @@ def make_documentation(target: PATH_LIKE = ".") -> subprocess.Popen[bytes]:
         call_one_file(target)
         return generate_html()
     except Exception as e:
-        logging.warning("Error in generating documentation for %s: %s\nRegenerating all model documentation...", target, e)
+        logger.warning("Error in generating documentation for %s: %s\nRegenerating all model documentation...", target, e)
         call_all_files()  # Regenerate all RSTs
         return generate_html()  # Regenerate all HTML
 

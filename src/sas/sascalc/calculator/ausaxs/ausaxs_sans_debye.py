@@ -8,6 +8,7 @@ import numpy as np
 
 from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
 
+logger = logging.gerLogger(__name__)
 
 # we need to be able to differentiate between being uninitialized and failing to load
 class lib_state(Enum):
@@ -25,7 +26,7 @@ def _attach_hooks():
     with resources.as_file(resources.files("sas.sascalc.calculator.ausaxs.lib")) as loc:
         ext = get_shared_lib_extension()
         if (ext == ""):
-            logging.info("AUSAXS: Unsupported OS. Using default Debye implementation.")
+            logger.info("AUSAXS: Unsupported OS. Using default Debye implementation.")
             return None, lib_state.FAILED
 
         path = loc.joinpath("libausaxs" + ext)
@@ -48,7 +49,7 @@ def _attach_hooks():
             ausaxs_state = lib_state.READY
         except Exception as e:
             ausaxs_state = lib_state.FAILED
-            logging.warning("AUSAXS: Failed to hook into external library; using default Debye implementation")
+            logger.warning("AUSAXS: Failed to hook into external library; using default Debye implementation")
             print(e)
     return ausaxs, ausaxs_state
 
@@ -121,7 +122,7 @@ def evaluate_sans_debye(q, coords, w):
             status = queue.get_nowait()
             first_time = False
         else:
-            logging.warning(f"AUSAXS: External library seems to have crashed (exit code \"{p.exitcode}\"). Using default Debye implementation instead.")
+            logger.warning(f"AUSAXS: External library seems to have crashed (exit code \"{p.exitcode}\"). Using default Debye implementation instead.")
             ausaxs_state = lib_state.FAILED
             return sasview_sans_debye(q, coords, w)
 
@@ -135,7 +136,7 @@ def evaluate_sans_debye(q, coords, w):
         Iq, status = _invoke(q, coords, w)
 
     if (status != 0):
-        logging.warning(f"AUSAXS: External library evaluation terminated unexpectedly (error code \"{status}\"). Using default Debye implementation instead.")
+        logger.warning(f"AUSAXS: External library evaluation terminated unexpectedly (error code \"{status}\"). Using default Debye implementation instead.")
         return sasview_sans_debye(q, coords, w)
 
     return Iq
