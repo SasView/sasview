@@ -10,6 +10,8 @@ from platformdirs import PlatformDirs
 
 from sas.system.version import __version__
 
+logger = logging.getLogger(__name__)
+
 sasview_version = Version(__version__).base_version
 
 # Create separate versioned and unversioned file locations
@@ -143,7 +145,7 @@ def copy_old_files_to_new_location():
             try:
                 os.remove(old_path)
             except Exception as e:
-                logging.error(f"Failed to remove {old_path}: {e}")
+                logger.error(f"Failed to remove {old_path}: {e}")
 
 
 def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
@@ -170,11 +172,11 @@ def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
             # recurse into the directory
             module_copytree(module, s_name, f_name)
         elif resource.is_file() and not f_name.exists():
-            logging.debug("Copied: %s", s_name)
+            logger.debug("Copied: %s", s_name)
             with open(f_name, "wb") as dh:
                 dh.write(resource.read_bytes())
         else:
-            logging.warning("Skipping %s (unknown type)", str(s_name))
+            logger.warning("Skipping %s (unknown type)", str(s_name))
 
 
 def is_copy_successful() -> bool:
@@ -184,7 +186,7 @@ def is_copy_successful() -> bool:
     # for sphinx so check that it exists; checking that the file exists and
     # not just the directory protects against empty directories
     if importlib.resources.files("sas").joinpath("docs-source/conf.py").is_file():
-        logging.info("Extracting docs from sas module")
+        logger.info("Extracting docs from sas module")
         module_copytree("sas", "docs-source", MAIN_DOC_SRC)
         module_copytree("sas", "docs", MAIN_BUILD_SRC / "html")
         module_copytree("sas", "example_data", EXAMPLE_DATA_DIR)
@@ -217,7 +219,7 @@ def locate_unpacked_resources() -> tuple[Path, Path]:
         source_dir = exe_dir / "docs" / "sphinx-docs" / "source-temp"
         build_dir = exe_dir / "build" / "doc"
 
-    logging.info(
+    logger.info(
         "Extracting docs from on-disk locations: source=%s, build=%s",
         source_dir, build_dir
     )
@@ -244,13 +246,13 @@ def copy_resources() -> None:
         if source_dir.exists():
             shutil.copytree(source_dir, MAIN_DOC_SRC)
         else:
-            logging.error("Could not find source for documentation")
+            logger.error("Could not find source for documentation")
 
     if not MAIN_BUILD_SRC.exists():
         if build_dir.exists():
             shutil.copytree(build_dir, MAIN_BUILD_SRC)
         else:
-            logging.error("Could not find pre-built documentation")
+            logger.error("Could not find pre-built documentation")
 
 
 def create_user_files_if_needed() -> None:

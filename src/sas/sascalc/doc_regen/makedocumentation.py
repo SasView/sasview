@@ -21,7 +21,9 @@ from sas.system.user import (
     create_user_files_if_needed,
 )
 
-# logging.debug("""
+logger = logging.getLogger(__name__)
+
+# logger.debug("""
 # APP_DIRECTORY = %s
 # USER_DOC_BASE = %s
 # USER_DOC_SRC = %s
@@ -50,9 +52,6 @@ from sas.system.user import (
 #     RECOMPILE_DOC_LOCATION,
 #     IMAGES_DIRECTORY_LOCATION,
 # )
-
-logger = logging.getLogger(__name__)
-
 
 def get_py(directory: Path) -> list[Path]:
     """Find all python files within a directory that are meant for sphinx and return those file-paths as a list.
