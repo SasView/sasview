@@ -15,6 +15,8 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.sascalc.fit.AbstractFitEngine import FitData1D, FResult
 
+logger = logging.getLogger(__name__)
+
 
 class BatchOutputPanelTest:
     '''Test the batch output dialog'''
@@ -79,15 +81,15 @@ Chi2,Data,scale,background,radius_equat_core,x_core,thick_shell,x_polar_shell,sl
 1917.8,cyl_400_40.txt,1,0.001,20,3,30,1,-85.088,-97.636,-92.797,0,0,\n
 2.6169,cyl_400_20.txt,1,0.001,20,3,30,1,914.64,906.09,905.67,0,0,\n
 """))
-        mocker.patch.object(logging, 'info')
+        mocker.patch.object(logger, 'info')
         mocker.patch.object(widget, 'setupTableFromCSV')
 
         # No filename given
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value=[""])
         widget.actionLoadData()
         # Assure parser wasn't called and logging got a message
-        assert logging.info.called_once()
-        assert "No data" in logging.info.call_args[0][0]
+        assert logger.info.called_once()
+        assert "No data" in logger.info.call_args[0][0]
 
         # Filename given
         mocker.patch.object(QtWidgets.QFileDialog, 'getOpenFileName', return_value="test")

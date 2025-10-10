@@ -17,6 +17,7 @@ VOLUME_TEXT = """volume = M_4PI_3 * {0}**3
 return volume
 """
 
+logger = logging.getLogger(__name__)
 
 def remove_empty_table_rows(tbl: QtWidgets.QTableWidget):
     """A helper function to remove empty rows in a PySide Table, if there are more than two empty rows at the end.
@@ -336,7 +337,7 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
                     item = QtWidgets.QTableWidgetItem(str(param[column]))
                     param_table.setItem(row, column, item)
                 else:
-                    logging.info(f"Missing data for Row {row}, Column {column}")
+                    logger.info(f"Missing data for Row {row}, Column {column}")
 
         param_table.blockSignals(False)
 

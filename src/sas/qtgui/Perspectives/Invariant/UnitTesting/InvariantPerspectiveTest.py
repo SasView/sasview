@@ -13,6 +13,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
+logger = logging.getLogger(__name__)
+
 
 class InvariantPerspectiveTest:
     """Test the Invariant Perspective Window"""
@@ -231,7 +233,7 @@ class InvariantPerspectiveTest:
         Test validator for number of points for extrapolation
          Error if it is larger than the distribution length
         """
-        mocker.patch.object(logging, 'warning')
+        mocker.patch.object(logger, 'warning')
         widget.txtNptsLowQ.setEnabled(True)
 
         widget.setData([self.fakeData])
@@ -241,7 +243,7 @@ class InvariantPerspectiveTest:
         BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
         # Ensure a warning is issued in the GUI that the number of points is too large
         assert BG_COLOR_ERR in widget.txtNptsLowQ.styleSheet()
-        assert logging.warning.called_once_with()
+        assert logger.warning.called_once_with()
         assert not widget.cmdCalculate.isEnabled()
 
     def testExtrapolationQRange(self, widget):

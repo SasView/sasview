@@ -24,6 +24,8 @@ from sas.qtgui.Plotting.Slicers.WedgeSlicer import WedgeInteractorPhi, WedgeInte
 # Local UI
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 
+logger = logging.getLogger(__name__)
+
 
 class FittingType(Enum):
     NO_FITTING: int = 0
@@ -324,7 +326,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         # Assure filename uniqueness
         dst_filename = GuiUtils.findNextFilename(filename_ext, self.save_location)
         if not dst_filename:
-            logging.error("Could not find appropriate filename for " + filename_ext)
+            logger.error("Could not find appropriate filename for " + filename_ext)
             return
         filepath = os.path.join(self.save_location, dst_filename)
         return filepath

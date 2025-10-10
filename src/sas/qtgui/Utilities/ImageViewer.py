@@ -23,6 +23,9 @@ from sas.qtgui.Utilities.UI.ImageViewerUI import Ui_ImageViewerUI
 
 matplotlib.interactive(False)
 
+logger = logging.getLogger(__name__)
+
+
 class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
     """
     Implemented as QMainWindow to enable easy menus
@@ -133,7 +136,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
             self.convertImage(image, xmin, xmax, ymin, ymax, zscale)
         except Exception as ex:
             err_msg = "Error occurred while converting Image to Data: " + str(ex)
-            logging.error(err_msg)
+            logger.error(err_msg)
 
     def actionHowTo(self):
         ''' Send the image viewer help URL to the help viewer '''
@@ -191,11 +194,11 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
             self.plotter.draw()
         except OSError as ex:
             err_msg = "Failed to load '%s'.\n" % self.filename
-            logging.error(err_msg+str(ex))
+            logger.error(err_msg+str(ex))
             return
         except Exception as ex:
             err_msg = "Failed to show '%s'.\n" % self.filename
-            logging.error(err_msg+str(ex))
+            logger.error(err_msg+str(ex))
             return
 
         # Loading successful - enable menu items
@@ -243,7 +246,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
             output = reader2D_converter(output)
         except Exception as ex:
             err_msg = "Image conversion failed: '%s'.\n" % str(ex)
-            logging.error(err_msg)
+            logger.error(err_msg)
 
         # Create item and add to the data explorer
         try:
@@ -251,7 +254,7 @@ class ImageViewer(QtWidgets.QMainWindow, Ui_ImageViewerUI):
             self.parent.communicate.updateModelFromPerspectiveSignal.emit(item)
         except Exception as ex:
             err_msg = "Failed to create new index '%s'.\n" % str(ex)
-            logging.error(err_msg)
+            logger.error(err_msg)
 
     def rgb2gray(self, rgb):
         """

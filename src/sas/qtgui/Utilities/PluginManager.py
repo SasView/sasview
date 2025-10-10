@@ -10,6 +10,8 @@ from sas.qtgui.Utilities.ModelEditors.TabbedEditor.TabbedModelEditor import Tabb
 from sas.qtgui.Utilities.UI.PluginManagerUI import Ui_PluginManagerUI
 from sas.sascalc.fit import models
 
+logger = logging.getLogger(__name__)
+
 
 class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
     """
@@ -118,7 +120,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         # check if valid model
         try:
             model_results = GuiUtils.checkModel(plugin_file)
-            logging.info(model_results)
+            logger.info(model_results)
         # We can't guarantee the type of the exception coming from
         # Sasmodels, so need the overreaching general Exception
         except Exception:
@@ -161,7 +163,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
 
         self.parent.communicate.customModelDirectoryChanged.emit()
         log_msg = "New plugin added: %s" % file_name
-        logging.info(log_msg)
+        logger.info(log_msg)
 
     def onDuplicate(self):
         """
@@ -184,7 +186,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
 
             dst_filename = GuiUtils.findNextFilename(src_filename, plugin_dir)
             if not dst_filename:
-                logging.error("Could not find appropriate filename for "+src_file)
+                logger.error("Could not find appropriate filename for "+src_file)
             dst_file = os.path.join(plugin_dir, dst_filename)
             copyfile(src_file, dst_file)
             self.parent.communicate.customModelDirectoryChanged.emit()

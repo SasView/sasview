@@ -13,6 +13,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 # Local
 from sas.qtgui.Utilities.Reports.ReportDialog import ReportDialog
 
+logger = logging.getLogger(__name__)
+
 
 class ReportDialogTest:
     '''Test the report dialog'''
@@ -152,10 +154,10 @@ class ReportDialogTest:
         # Try to raise somewhere
         pisa.CreatePDF.side_effect = Exception("Failed")
 
-        mocker.patch.object(logging, 'error')
+        mocker.patch.object(logger, 'error')
 
         #run the method
         return_value = widget.save_pdf(data, "c")
 
-        assert logging.error.called
-        #logging.error.assert_called_with("Error creating pdf")
+        assert logger.error.called
+        #logger.error.assert_called_with("Error creating pdf")
