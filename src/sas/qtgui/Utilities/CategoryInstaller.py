@@ -15,6 +15,8 @@ from collections import OrderedDict, defaultdict
 
 from sas.system.user import get_config_dir
 
+logger = logging.getLogger(__name__)
+
 USER_FILE = 'categories.json'
 
 class CategoryInstaller:
@@ -75,7 +77,7 @@ class CategoryInstaller:
 
     @staticmethod
     def get_default_file():
-        logging.warning("CategoryInstaller.get_default_file is deprecated.")
+        logger.warning("CategoryInstaller.get_default_file is deprecated.")
 
     @staticmethod
     def check_install(homedir = None, model_list=None):
