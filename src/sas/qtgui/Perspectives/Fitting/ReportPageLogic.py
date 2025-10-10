@@ -16,6 +16,8 @@ from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.system.version import __version__ as SASVIEW_VERSION
 
+logger = logging.getLogger(__name__)
+
 
 # TODO: Integrate with other reports
 class ReportPageLogic:
@@ -109,7 +111,7 @@ class ReportPageLogic:
                 else:
                     fig.savefig(png_output, format="png", dpi=75)
             except PermissionError as ex:
-                logging.error("Creating of the report failed: %s"%str(ex))
+                logger.error("Creating of the report failed: %s"%str(ex))
                 return
             data64 = base64.b64encode(png_output.getvalue())
             data_to_print = urllib.parse.quote(data64)
@@ -153,7 +155,7 @@ class ReportPageLogic:
                     param += " Function: " + par_dispersion_type
             except IndexError as ex:
                 # corrupted model. Complain and skip the line
-                logging.error("Error in parsing parameters: "+str(ex))
+                logger.error("Error in parsing parameters: "+str(ex))
                 continue
             report += CENTRE % param + "\n"
 

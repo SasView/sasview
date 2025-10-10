@@ -21,6 +21,8 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities import GuiUtils
 from sas.sascalc.fit.models import ModelManager, ModelManagerBase
 
+logger = logging.getLogger(__name__)
+
 
 class dummy_manager:
     HELP_DIRECTORY_LOCATION = "html"
@@ -837,10 +839,10 @@ class FittingWidgetTest:
         # Test no fitting params
         widget.main_params_to_fit = []
 
-        mocker.patch.object(logging, 'error')
+        mocker.patch.object(logger, 'error')
 
         widget.onFit()
-        assert logging.error.called_with('no fitting parameters')
+        assert logger.error.called_with('no fitting parameters')
         widget.close()
 
     @pytest.mark.xfail(reason="2022-09 already broken")
@@ -866,11 +868,11 @@ class FittingWidgetTest:
         # Test no fitting params
         widget.main_params_to_fit = []
 
-        mocker.patch.object(logging, 'error')
+        mocker.patch.object(logger, 'error')
 
         widget.onFit()
-        assert logging.error.called_once()
-        assert logging.error.called_with('no fitting parameters')
+        assert logger.error.called_once()
+        assert logger.error.called_with('no fitting parameters')
         widget.close()
 
     def notestOnFit1D(self, widget, mocker):
@@ -1242,14 +1244,14 @@ class FittingWidgetTest:
         widget.cbModel.setCurrentIndex(model_index)
 
         # No selection
-        mocker.patch.object(logging, 'error')
+        mocker.patch.object(logger, 'error')
         mocker.patch.object(widget, 'showModelDescription')
         # Show the menu
         widget.showModelContextMenu(QtCore.QPoint(10,20))
 
         # Assure the description menu is shown
         assert widget.showModelDescription.called
-        assert not logging.error.called
+        assert not logger.error.called
 
         # "select" two rows
         index1 = widget.lstParams.model().index(1, 0, QtCore.QModelIndex())
@@ -1259,12 +1261,12 @@ class FittingWidgetTest:
         selection_model.select(index2, selection_model.Select | selection_model.Rows)
 
         mocker.patch.object(QtWidgets.QMenu, 'exec_')
-        mocker.patch.object(logging, 'error')
+        mocker.patch.object(logger, 'error')
         # Show the menu
         widget.showModelContextMenu(QtCore.QPoint(10,20))
 
         # Assure the menu is shown
-        assert not logging.error.called
+        assert not logger.error.called
         assert QtWidgets.QMenu.exec_.called
 
     def testShowMultiConstraint(self, widget, mocker):

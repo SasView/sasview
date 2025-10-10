@@ -37,6 +37,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D, DataRole
 from sas.qtgui.Utilities import GuiUtils
 from sas.system.version import __version__ as SASVIEW_VERSION
 
+logger = logging.getLogger(__name__)
+
 
 class DataManager:
     """
@@ -159,7 +161,7 @@ class DataManager:
             if id  in self.stored_data:
                 msg = "Data manager already stores %s" % str(data.name)
                 msg += ""
-                logging.info(msg)
+                logger.info(msg)
                 data_state = self.stored_data[id]
                 data_state.data = data
             else:
@@ -401,7 +403,7 @@ class DataManager:
                 return add_type(content, type(o))
 
             # not supported
-            logging.info("data cannot be serialized to json: %s" % type(o))
+            logger.info("data cannot be serialized to json: %s" % type(o))
             return None
 
         json.dump(self.stored_data, fp, indent=2, sort_keys=True, default=jdefault)
@@ -439,7 +441,7 @@ class DataManager:
             try:
                 cls = lookup[type]
             except KeyError:
-                logging.info('unknown type: %s' % type)
+                logger.info('unknown type: %s' % type)
                 return None
 
             # tuples and sets
@@ -466,7 +468,7 @@ class DataManager:
                 buffer.seek(0)
                 return np.load(buffer)
 
-            logging.info('not implemented: %s, %s' % (type, cls))
+            logger.info('not implemented: %s, %s' % (type, cls))
             return None
 
         def generate(data, level):
@@ -497,7 +499,7 @@ class DataManager:
             try:
                 new_stored_data[id] = generate(data, 0)
             except TooComplexException:
-                logging.info('unable to load %s' % id)
+                logger.info('unable to load %s' % id)
 
         self.stored_data = new_stored_data
 

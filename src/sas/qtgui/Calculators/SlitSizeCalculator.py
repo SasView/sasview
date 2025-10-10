@@ -14,6 +14,8 @@ from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
 from .UI.SlitSizeCalculator import Ui_SlitSizeCalculator
 
+logger = logging.getLogger(__name__)
+
 
 class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
     """
@@ -60,7 +62,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
             data = data[0]
         # Can return multiple exceptions - gather them all under one umbrella and complain
         except Exception as ex:
-            logging.error(ex)
+            logger.error(ex)
             return
 
         self.data_file.setText(os.path.basename(path_str))
@@ -98,13 +100,13 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         if data is None:
             self.clearResults()
             msg = "ERROR: Data hasn't been loaded correctly"
-            logging.error(msg)
+            logger.error(msg)
             return
 
         if data.__class__.__name__ == 'Data2D':
             self.clearResults()
             msg = "Slit Length cannot be computed for 2D Data"
-            logging.error(msg)
+            logger.error(msg)
             return
 
         #compute the slit size
@@ -113,7 +115,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
             ydata = data.y
             if xdata is None or len(xdata) == 0 or ydata is None or len(ydata) == 0:
                 msg = "The current data is empty please check x and y"
-                logging.error(msg)
+                logger.error(msg)
                 return
             slit_length_calculator = SlitlengthCalculator()
             slit_length_calculator.set_data(x=xdata, y=ydata)
@@ -121,7 +123,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         except:
             self.clearResults()
             msg = "Slit Size Calculator: %s" % (sys.exc_info()[1])
-            logging.error(msg)
+            logger.error(msg)
             return
 
         slit_length_str = f"{slit_length:.5f}"

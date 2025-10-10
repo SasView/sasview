@@ -30,6 +30,8 @@ _SOURCE_MASS = {'Alpha': 6.64465620E-24,
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
+logger = logging.getLogger(__name__)
+
 
 class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel):
     """
@@ -130,7 +132,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 if input_wavelength is None:
                     text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
-                    logging.info('Wavelength has to be a number.')
+                    logger.info('Wavelength has to be a number.')
                 else:
                     text_edit.setStyleSheet(BG_WHITE)
                     self.cmdCompute.setEnabled(True)
@@ -141,7 +143,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 if interval_wavelength is None:
                     text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
-                    logging.info("Wavelength's input has to be an interval: "
+                    logger.info("Wavelength's input has to be an interval: "
                                  "min - max.")
                 else:
                     # check on min < max
@@ -151,7 +153,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                     if float(wavelength_min) >= float(wavelength_max):
                         text_edit.setStyleSheet(BG_RED)
                         self.cmdCompute.setEnabled(False)
-                        logging.info("Wavelength: min must be smaller than max.")
+                        logger.info("Wavelength: min must be smaller than max.")
 
                     else:
                         text_edit.setStyleSheet(BG_WHITE)
@@ -172,7 +174,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 if wavelength_spread_input is None:
                     text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
-                    logging.info('Wavelength spread has to be specified: '
+                    logger.info('Wavelength spread has to be specified: '
                                  'single value or value; integer number of bins.')
 
                 else:
@@ -188,7 +190,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 if wavelength_spread_input is None:
                     text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
-                    logging.info("Wavelength spread has to be specified: "
+                    logger.info("Wavelength spread has to be specified: "
                                  "doublet separated by '-' with optional "
                                  "number of bins (given after ';'). "
                                  "For example, 0.1 - 0.1 (; 20).")
@@ -213,7 +215,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
             if pixels_input is None:
                 text_edit.setStyleSheet(BG_RED)
                 self.cmdCompute.setEnabled(False)
-                logging.info('The input for the detector should contain 2 '
+                logger.info('The input for the detector should contain 2 '
                              'values separated by a comma.')
 
             else:
@@ -231,7 +233,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
             if q_input is None:
                 text_edit.setStyleSheet(BG_RED)
                 self.cmdCompute.setEnabled(False)
-                logging.info('Qx and Qy should contain one or more comma-separated numbers.')
+                logger.info('Qx and Qy should contain one or more comma-separated numbers.')
             else:
                 text_edit.setStyleSheet(BG_WHITE)
                 self.cmdCompute.setEnabled(True)
@@ -249,7 +251,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 elif len(qx) != len(qy):
                     text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
-                    logging.info(
+                    logger.info(
                         'Qx and Qy should have the same number of elements.')
 
                 else:
@@ -269,7 +271,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
             if aperture_input is None:
                 text_edit.setStyleSheet(BG_RED)
                 self.cmdCompute.setEnabled(False)
-                logging.info('A circular aperture is defined by a single '
+                logger.info('A circular aperture is defined by a single '
                              'value (diameter). A rectangular aperture is '
                              'defined by 2 values separated by a comma.')
 
@@ -319,7 +321,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 "All files (*.*)", None)[0]
 
             if datafile is None or str(datafile) == '':
-                logging.info("No spectral distribution data chosen.")
+                logger.info("No spectral distribution data chosen.")
                 self.cbCustomSpectrum.setCurrentIndex(0)
                 self.resolution.set_spectrum(self.spectrum_dic['Flat'])
                 return
@@ -341,7 +343,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                     wavelength.append(wave)
                     intensity.append(intens)
                 except:
-                    logging.info('Could not extract values from file')
+                    logger.info('Could not extract values from file')
             if wavelength and intensity:
                 if basename not in list(self.spectrum_dic.keys()):
                     self.cbCustomSpectrum.addItem(basename)
@@ -483,7 +485,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         except:
             msg = "An error occurred during the resolution computation."
             msg += "Please check your inputs..."
-            logging.warning(msg)
+            logger.warning(msg)
             return
 
         # Validate the q inputs
@@ -524,7 +526,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
     def calculateFailed(self, reason):
         self.cmdCompute.setText('Compute')
         self.cmdCompute.setEnabled(True)
-        logging.error(str(reason))
+        logger.error(str(reason))
 
     def complete(self, image):
         """
@@ -599,7 +601,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 new_numbers_list = [float(item) for item in string_split]
             else:
                 msg = "The numbers must be one or two (separated by ',')"
-                logging.info(msg)
+                logger.info(msg)
                 raise RuntimeError(msg)
 
         return new_numbers_list
@@ -614,7 +616,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         try:
             new_list = [float(t) for t in string_split]
         except:
-            logging.error(sys.exc_info()[1])
+            logger.error(sys.exc_info()[1])
         return new_list
 
     def _str2longlist(self, input_string):
@@ -628,7 +630,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
             return out
         except:
             if self.cbWaveColor.currentText() == 'Monochromatic':
-                logging.warning("Wrong format of inputs.")
+                logger.warning("Wrong format of inputs.")
             else:
                 try:
                     # has a '-'
@@ -654,7 +656,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                         out = self._string2inputlist(input_string)
                         return out
                 except:
-                    logging.error(sys.exc_info()[1])
+                    logger.error(sys.exc_info()[1])
 
     def _validate_q_input(self, qx, qy):
         """
@@ -792,7 +794,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                         self.formatNumber(detector_qy_max))
                 msg += " is ignored in computation.\n"
 
-                logging.warning(msg)
+                logger.warning(msg)
 
         # Draw zero axis lines.
         if qy_min < 0 <= qy_max:

@@ -1,4 +1,3 @@
-
 from logging import getLogger
 
 import matplotlib.pylab as pl
