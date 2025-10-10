@@ -1162,7 +1162,7 @@ class PDBReader:
     PDB reader class: limited for reading the lines starting with 'ATOM'
     """
 
-    logger = logger.getLogger("sas_gen.PDBReader")
+    logger = logging.getLogger("sas_gen.PDBReader")
 
     type_name = "PDB"
     ## Wildcards
