@@ -13,6 +13,61 @@ Release Notes
 Features
 ========
 
+New in Version 6.1.1
+--------------------
+
+This is a minor bug fix release of SasView. It is built with Sasmodels v1.0.11, Sasdata v0.11.0, and Bumps v1.0.2.
+
+Bug fixes
+^^^^^^^^^
+
+* Fix the magnetic fitting widget functionality by @rozyczko in https://github.com/SasView/sasview/pull/3581
+* Fix for PD plotting by @krzywon in https://github.com/SasView/sasview/pull/3505
+* Ensure plugin models are removed from the original user directory when moved by @krzywon in https://github.com/SasView/sasview/pull/3538
+* Fix new version available widget on non-Windows systems by @jamescrake-merani in https://github.com/SasView/sasview/pull/3552
+* Overide Qdialog closeEvent method to force kill(x) button to behave like the close button by @butlerpd in https://github.com/SasView/sasview/pull/3465
+* Move the example data to the user directory and clean up by @krzywon in https://github.com/SasView/sasview/pull/3535
+* Ensure the example data directory is in the same location as the tutorial says it is by @krzywon in https://github.com/SasView/sasview/pull/3585
+* Clear the calculated values in the Inversion perspective when a lone data entry is removed by @DrPaulSharp in https://github.com/SasView/sasview/pull/3567
+* Enable batch slicing to P(r) inversion by @dehoni and @jamescrake-merani in https://github.com/SasView/sasview/pull/3512
+* Various fixes to batch P(r)  by @jamescrake-merani in https://github.com/SasView/sasview/pull/3563
+* Ensure the external libausaxs is downloaded when building installers by @klytje in https://github.com/SasView/sasview/pull/3554
+
+Documentation fixes
+^^^^^^^^^^^^^^^^^^^
+
+* Fixed MumMag typo (should be MuMag) by @krzywon in https://github.com/SasView/sasview/pull/3514
+* Update corfunc-theory.rst by @lucas-wilkins in https://github.com/SasView/sasview/pull/3565
+
+Linting changes
+^^^^^^^^^^^^^^^
+
+* Applies automatic fixes from the default ruff ruleset by @DrPaulSharp in https://github.com/SasView/sasview/pull/3507
+* Adds ability to automatically apply ruff linting fixes to CI by @DrPaulSharp in https://github.com/SasView/sasview/pull/3520
+* Applies fixes for Ruff linting errors by @DrPaulSharp in https://github.com/SasView/sasview/pull/3539
+* Adds isort (I) ruleset to ruff linter by @DrPaulSharp in https://github.com/SasView/sasview/pull/3555
+* Adds Pyupgrade (UP) ruleset and rules SIM118 & SIM300 to ruff linter by @DrPaulSharp in https://github.com/SasView/sasview/pull/3560
+* Fixes whitespace errors by @DrPaulSharp in https://github.com/SasView/sasview/pull/3561
+
+Infrastructure Changes
+^^^^^^^^^^^^^^^^^^^^^^
+
+* Fixes fatal access violation in Windows tests by @DrPaulSharp in https://github.com/SasView/sasview/pull/3497
+* Disable dependabot for python dependency checks - Disable Dependabot by @krzywon in https://github.com/SasView/sasview/pull/3517
+* Stop new version dialogue from appearing in test by @llimeht in https://github.com/SasView/sasview/pull/3364
+* Speed up CI with faster python module installation with uv by @llimeht in https://github.com/SasView/sasview/pull/3351
+* Update tarball name in nightly flow to match CI.yml by @llimeht in https://github.com/SasView/sasview/pull/3334
+* Clean out nightly files by @llimeht in https://github.com/SasView/sasview/pull/3337
+* Suppress signature errors when CI run on PRs from forks by @llimeht in https://github.com/SasView/sasview/pull/3355
+* Publish wheels along side other installers in nightly-builds action by @llimeht in https://github.com/SasView/sasview/pull/3335
+* Specify a requirement of at least Python 3.11 in the pyproject.toml  by @jamescrake-merani in https://github.com/SasView/sasview/pull/3508
+* Use requirements-dev.txt instead of list of dependencies by @krzywon in https://github.com/SasView/sasview/pull/3515
+* Fix Invariant Test Warnings by @krzywon in https://github.com/SasView/sasview/pull/3509
+
+
+**Full Changelog**: https://github.com/SasView/sasview/compare/v6.1.0...v6.1.1
+
+
 New in Version 6.1.0
 --------------------
 
