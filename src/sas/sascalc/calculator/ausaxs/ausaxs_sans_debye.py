@@ -8,7 +8,7 @@ import numpy as np
 
 from sas.sascalc.calculator.ausaxs.sasview_sans_debye import sasview_sans_debye
 
-logger = logging.gerLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # we need to be able to differentiate between being uninitialized and failing to load
 class lib_state(Enum):
