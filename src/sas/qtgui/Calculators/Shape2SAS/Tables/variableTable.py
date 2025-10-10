@@ -58,6 +58,7 @@ class VariableTable(QWidget, Ui_VariableTable):
 
         self.initializeVariableModel()
         self.setDefaultLayout()
+        self.on_item_changed_callback = None
 
 
     def initializeVariableModel(self):
@@ -99,8 +100,13 @@ class VariableTable(QWidget, Ui_VariableTable):
         itemNum.setTextAlignment(Qt.AlignCenter)
         itemNum.setFont(font)
         self.variableModel.insertRow(numrow, [itemName, itemNum])
+        self.variableModel.itemChanged.connect(self.onItemChanged)
         itemNum.setFlags(itemNum.flags() & ~Qt.ItemIsSelectable & ~Qt.ItemIsEditable)
 
+    def onItemChanged(self, item):
+        """Handle item changes in the variable table"""
+        if self.on_item_changed_callback:
+            self.on_item_changed_callback(item)
 
     def removeTableData(self, row):
         """Remove data from table"""
