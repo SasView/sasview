@@ -1555,7 +1555,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         else:
             msg = "Incorrect value in the Selection Option"
-            # Change this to a proper logging action
+            logger.error(msg)
             raise Exception(msg)
 
     def contextMenu(self):

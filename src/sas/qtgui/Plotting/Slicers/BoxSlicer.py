@@ -7,6 +7,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
+logger = logging.getLogger(__name__)
+
 
 class BoxInteractor(BaseInteractor, SlicerModel):
     """
@@ -232,7 +234,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         try:
             boxavg = box(self.data)
         except ValueError as ve:
-            logging.warning(str(ve))
+            logger.warning(str(ve))
             self.restore(ev=None)
             self.update()
             self.draw()
@@ -401,33 +403,33 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             # there remains no points to average in the ROI. We leave this
             # second check to manipulations.py
             if param_value <= 0:
-                logging.warning("The box width is too small. Please adjust.")
+                logger.warning("The box width is too small. Please adjust.")
                 isValid = False
         elif param_name =='half_height':
             # Can't be negative for sure. Also, it should not be so small that
             # there remains no points to average in the ROI. We leave this
             # second check to manipulations.py
             if param_value <= 0:
-                logging.warning("The box height is too small. Please adjust.")
+                logger.warning("The box height is too small. Please adjust.")
                 isValid = False
         elif param_name == 'nbins':
             # Can't be negative or 0
             if param_value < 1:
-                logging.warning("Number of bins cannot be less than or equal"\
+                logger.warning("Number of bins cannot be less than or equal"\
                                  "to 0. Please adjust.")
                 isValid = False
         elif param_name == 'center_x':
             # Keep the full ROI box within the data (only moving x here)
             if (param_value + self.half_width) >= self.data.xmax or \
                     (param_value- self.half_width) <= self.data.xmin:
-                logging.warning("The ROI must be fully contained within the"\
+                logger.warning("The ROI must be fully contained within the"\
                                 "2D data. Please adjust")
                 isValid = False
         elif param_name == 'center_y':
             # Keep the full ROI box within the data (only moving y here)
             if (param_value + self.half_height) >= self.data.ymax or \
                     (param_value - self.half_height) <= self.data.ymin:
-                logging.warning("The ROI must be fully contained within the"\
+                logger.warning("The ROI must be fully contained within the"\
                                 "2D data. Please adjust")
                 isValid = False
         return isValid
@@ -730,7 +732,7 @@ class VerticalDoubleLine(BaseInteractor):
         else:
             if self.valid_move:
                 self.valid_move = False
-                logging.warning("the ROI cannot be negative")
+                logger.warning("the ROI cannot be negative")
 
     def setCursor(self, x, y):
         """
@@ -912,7 +914,7 @@ class HorizontalDoubleLine(BaseInteractor):
         else:
             if self.valid_move:
                 self.valid_move = False
-                logging.warning("the ROI cannot be negative")
+                logger.warning("the ROI cannot be negative")
 
     def setCursor(self, x, y):
         """
