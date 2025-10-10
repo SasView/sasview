@@ -37,6 +37,9 @@ from .SaveExtrapolatedPopup import SaveExtrapolatedPopup
 from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .util import WIDGETS, safe_float
 
+RED = "QLineEdit { background-color: rgb(244, 170, 164) }"
+NORMAL = ""
+
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     """Displays the correlation function analysis of sas data."""
@@ -129,9 +132,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             show_warning = False
 
         if show_warning:
-            self.txtBackground.setStyleSheet("QLineEdit { background-color: rgb(255,255,0) }")
+            self.txtBackground.setStyleSheet(RED)
         else:
-            self.txtBackground.setStyleSheet("")
+            self.txtBackground.setStyleSheet(NORMAL)
 
     def isSerializable(self):
         """
@@ -158,6 +161,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtLowerQMax.textEdited.connect(self.on_extrapolation_text_changed_1)
         self.txtUpperQMin.textEdited.connect(self.on_extrapolation_text_changed_2)
         self.txtUpperQMax.textEdited.connect(self.on_extrapolation_text_changed_3)
+        self.txtLowerQMax.editingFinished.connect(self.on_extrapolation_text_finished_1)
+        self.txtUpperQMin.editingFinished.connect(self.on_extrapolation_text_finished_2)
+        self.txtUpperQMax.editingFinished.connect(self.on_extrapolation_text_finished_3)
         self.txtLowerQMax.setValidator(QDoubleValidator(bottom=0))
         self.txtUpperQMin.setValidator(QDoubleValidator(bottom=0))
         self.txtUpperQMax.setValidator(QDoubleValidator(bottom=0))
@@ -454,10 +460,19 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             msg = "Data is already loaded into the Corfunc perspective. Sending a new data set "
             msg += f"will remove the Corfunc analysis for {self._path}. Continue?"
             dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setWindowTitle("Data already loaded")
+
+            # checkbox to reset Q range to defaults
+            checkbox = QtWidgets.QCheckBox("Reset Q range to defaults")
+            dialog.setCheckBox(checkbox)
+            checkbox.setChecked(False)
+
             dialog.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
             retval = dialog.exec_()
             if retval == QtWidgets.QMessageBox.Cancel:
                 return
+
+            reset_q_range = checkbox.isChecked()
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
@@ -495,12 +510,24 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         def fractional_position(f):
             return math.exp(f*log_data_max + (1-f)*log_data_min)
 
-        self.model.setItem(WIDGETS.W_QMIN,
-                           QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
-        self.model.setItem(WIDGETS.W_QMAX,
-                           QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
-        self.model.setItem(WIDGETS.W_QCUTOFF,
-                           QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
+        # If we have data, check if any of the Q range values are missing or non-finite, or out of range
+        if self.has_data:
+            prev_q1 = safe_float(self.model.item(WIDGETS.W_QMIN).text())     if self.model.item(WIDGETS.W_QMIN)     else None
+            prev_q2 = safe_float(self.model.item(WIDGETS.W_QMAX).text())     if self.model.item(WIDGETS.W_QMAX)     else None
+            prev_q3 = safe_float(self.model.item(WIDGETS.W_QCUTOFF).text())  if self.model.item(WIDGETS.W_QCUTOFF)  else None
+
+            # If any are missing or non-finite, or out of range fall back to defaults
+            q_range = [WIDGETS.W_QMIN, WIDGETS.W_QMAX, WIDGETS.W_QCUTOFF]
+            q_frac = [0.2, 0.7, 0.8]
+            for i, x in enumerate([prev_q1, prev_q2, prev_q3]):
+                if any([x <= min(self.data.x), x >= max(self.data.x), not math.isfinite(x), x is None]):
+                    self.model.setItem(q_range[i], QtGui.QStandardItem("%.7g"%fractional_position(q_frac[i])))
+
+        # If no data or clear data, set to defaults
+        if not self.has_data or reset_q_range:
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("%.7g"%fractional_position(0.2)))
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("%.7g"%fractional_position(0.7)))
+            self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem("%.7g"%fractional_position(0.8)))
 
 
         # Reconnect model
@@ -589,35 +616,49 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self._q_space_plot.update_lines(ExtrapolationInteractionState(params))
         self.notify_extrapolation_text_box_validity(params)
 
-    def notify_extrapolation_text_box_validity(self, params):
+    def on_extrapolation_text_finished_1(self):
+        """ Editing finished in LowerQMax - show dialog if out of range"""
+        params = self.extrapolation_paramameters
+        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+
+    def on_extrapolation_text_finished_2(self):
+        """ Editing finished in UpperQMin - show dialog if out of range"""
+        params = self.extrapolation_paramameters
+        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+
+    def on_extrapolation_text_finished_3(self):
+        """ Editing finished in UpperQMax - show dialog if out of range"""
+        params = self.extrapolation_paramameters
+        self.notify_extrapolation_text_box_validity(params, show_dialog=True)
+
+    def notify_extrapolation_text_box_validity(self, params, show_dialog=False):
         """ Set the colour of the text boxes to red if they have bad parameter definitions"""
-        box_1_style = ""
-        box_2_style = ""
-        box_3_style = ""
-        red = "QLineEdit { background-color: rgb(255,0,0); color: rgb(255,255,255) }"
 
-        if params.point_1 <= params.data_q_min:
-            box_1_style = red
+        # Round values to 8 significant figures to avoid floating point precision issues
+        p1 = float(f"{params.point_1:.8g}")
+        p2 = float(f"{params.point_2:.8g}")
+        p3 = float(f"{params.point_3:.8g}")
+        qmin = float(f"{params.data_q_min:.8g}")
+        qmax = float(f"{params.data_q_max:.8g}")
 
-        if params.point_2 <= params.point_1:
-            box_1_style = red
-            box_2_style = red
+        # Determine validity flags such that data_q_min < point_1 < point_2 < point_3 < data_q_max
+        invalid_1 = p1 <= qmin or p1 >= p2
+        invalid_2 = p2 <= p1 or p2 >= p3
+        invalid_3 = p3 <= p2 or p3 >= qmax
 
-        if params.point_3 <= params.point_2:
-            box_2_style = red
-            box_3_style = red
+        # Make the background red if the text box is invalid
+        self.txtLowerQMax.setStyleSheet(RED if invalid_1 else NORMAL)
+        self.txtUpperQMin.setStyleSheet(RED if invalid_2 else NORMAL)
+        self.txtUpperQMax.setStyleSheet(RED if invalid_3 else NORMAL)
 
-        if params.data_q_max <= params.point_3:
-            box_3_style = red
-
-        # if v3 < v1 and v2, all three will go red (because of transitivity of <=), but this is good
-        if params.point_3 <= params.point_1:
-            box_1_style = red
-            box_3_style = red
-
-        self.txtLowerQMax.setStyleSheet(box_1_style)
-        self.txtUpperQMin.setStyleSheet(box_2_style)
-        self.txtUpperQMax.setStyleSheet(box_3_style)
+        # Show dialog if requested and values are out of range
+        if show_dialog and (p1 < qmin or p3 > qmax):
+            msg = "The slider values are out of range.\n"
+            msg += f"The minimum value is {qmin:.8g} and the maximum value is {qmax:.8g}"
+            dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setWindowTitle("Value out of range")
+            dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            dialog.exec_()
 
     def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
         """ Slider state changed"""
@@ -628,6 +669,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                            QtGui.QStandardItem(format_string%state.point_2))
         self.model.setItem(WIDGETS.W_QCUTOFF,
                            QtGui.QStandardItem(format_string%state.point_3))
+
+        # Check validity of the text boxes
+        self.notify_extrapolation_text_box_validity(state)
 
     def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
         """ Slider is being moved about"""
