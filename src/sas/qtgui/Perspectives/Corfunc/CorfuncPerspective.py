@@ -303,6 +303,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         calculator.fit_guinier = self.fitGuinier.isChecked()
         calculator.fit_porod = self.fitPorod.isChecked()
 
+        # Set text fields to read-only if the corresponding fit is enabled
+        self.txtBackground.setReadOnly(True) if calculator.fit_background else self.txtBackground.setReadOnly(False)
+        self.txtGuinierA.setReadOnly(True)   if calculator.fit_guinier    else self.txtGuinierA.setReadOnly(False)
+        self.txtGuinierB.setReadOnly(True)   if calculator.fit_guinier    else self.txtGuinierB.setReadOnly(False)
+        self.txtPorodK.setReadOnly(True)     if calculator.fit_porod      else self.txtPorodK.setReadOnly(False)
+        self.txtPorodSigma.setReadOnly(True) if calculator.fit_porod      else self.txtPorodSigma.setReadOnly(False)
 
         if not calculator.fit_background:
             calculator.background = safe_float(self.txtBackground.text())
