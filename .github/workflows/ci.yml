@@ -138,7 +138,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install uv utilities to speed up python module installation
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           prune-cache: false
