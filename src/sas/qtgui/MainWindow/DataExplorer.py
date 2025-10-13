@@ -816,6 +816,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if len(selected_items) < 1:
             return
 
+        # Check that only one item is selected when sending to perspectives that don't support batch mode
+        if len(selected_items) > 1 and not self._perspective().allowBatch():
+            title = self._perspective().name
+            msg = title + " does not allow sending multiple data files. Please select only one file"
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
+            return
+
         # Notify the GuiManager about the send request
         try:
             self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
