@@ -135,6 +135,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         if show_warning:
             self.txtBackground.setStyleSheet(RED)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setWindowTitle('Warning')
+            msgbox.setText('Background is higher than the minimum extrapolated value')
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            _ = msgbox.exec_()
         else:
             self.txtBackground.setStyleSheet(NORMAL)
 
@@ -308,12 +314,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         calculator.fit_guinier = self.fitGuinier.isChecked()
         calculator.fit_porod = self.fitPorod.isChecked()
 
-        # Set text fields to read-only if the corresponding fit is enabled
-        self.txtBackground.setReadOnly(True) if calculator.fit_background else self.txtBackground.setReadOnly(False)
-        self.txtGuinierA.setReadOnly(True)   if calculator.fit_guinier    else self.txtGuinierA.setReadOnly(False)
-        self.txtGuinierB.setReadOnly(True)   if calculator.fit_guinier    else self.txtGuinierB.setReadOnly(False)
-        self.txtPorodK.setReadOnly(True)     if calculator.fit_porod      else self.txtPorodK.setReadOnly(False)
-        self.txtPorodSigma.setReadOnly(True) if calculator.fit_porod      else self.txtPorodSigma.setReadOnly(False)
+        self.update_readonly()
 
         if not calculator.fit_background:
             calculator.background = safe_float(self.txtBackground.text())
@@ -408,6 +409,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtGuinierB.setReadOnly(True)   if self.fitGuinier.isChecked()    else self.txtGuinierB.setReadOnly(False)
         self.txtPorodK.setReadOnly(True)     if self.fitPorod.isChecked()      else self.txtPorodK.setReadOnly(False)
         self.txtPorodSigma.setReadOnly(True) if self.fitPorod.isChecked()      else self.txtPorodSigma.setReadOnly(False)
+        self.cmdExtract.setEnabled(True) if (self.fitBackground.isChecked() or self.fitGuinier.isChecked() or self.fitPorod.isChecked()) else self.cmdExtract.setEnabled(False)
 
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
