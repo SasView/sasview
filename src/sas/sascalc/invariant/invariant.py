@@ -1,11 +1,11 @@
 # pylint: disable=invalid-name
-#####################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
-#See the license text in license.txt
-#copyright 2010, University of Tennessee
-######################################################################
+###########################################################################
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
+# See the license text in license.txt
+# copyright 2010, University of Tennessee
+###########################################################################
 """
 This module implements invariant and its related computations.
 
@@ -30,6 +30,7 @@ Q_MAXIMUM = 10
 
 # Number of steps in the extrapolation
 INTEGRATION_NSTEPS = 1000
+
 
 class Transform:
     """
@@ -56,10 +57,11 @@ class Transform:
         # Transform the data
         data_points = zip(data.x, data.y, dy)
 
-        output_points = [(self.linearize_q_value(p[0]),
-                          math.log(p[1]),
-                          p[2] / p[1]) for p in data_points if p[0] > 0 and \
-                          p[1] > 0 and p[2] > 0]
+        output_points = [
+            (self.linearize_q_value(p[0]), math.log(p[1]), p[2] / p[1])
+            for p in data_points
+            if p[0] > 0 and p[1] > 0 and p[2] > 0
+        ]
 
         x_out, y_out, dy_out = zip(*output_points)
 
@@ -78,8 +80,7 @@ class Transform:
 
         :param data: Data1D object
         """
-        return [p[0] > 0 and p[1] > 0 and p[2] > 0 for p in zip(data.x, data.y,
-                                                                data.dy)]
+        return [p[0] > 0 and p[1] > 0 and p[2] > 0 for p in zip(data.x, data.y, data.dy)]
 
     def linearize_q_value(self, value):
         """
@@ -105,11 +106,13 @@ class Transform:
         """
         return NotImplemented
 
+
 class Guinier(Transform):
     """
     class of type Transform that performs operations related to guinier
     function
     """
+
     def __init__(self, scale=1, radius=60):
         Transform.__init__(self)
         self.scale = scale
@@ -162,10 +165,13 @@ class Guinier(Transform):
 
         :param x: array of q-values
         """
-        p1 = np.array([self.dscale * math.exp(-((self.radius * q) ** 2 / 3)) \
-                          for q in x])
-        p2 = np.array([self.scale * math.exp(-((self.radius * q) ** 2 / 3))\
-                     * (-(q ** 2 / 3)) * 2 * self.radius * self.dradius for q in x])
+        p1 = np.array([self.dscale * math.exp(-((self.radius * q) ** 2 / 3)) for q in x])
+        p2 = np.array(
+            [
+                self.scale * math.exp(-((self.radius * q) ** 2 / 3)) * (-(q**2 / 3)) * 2 * self.radius * self.dradius
+                for q in x
+            ]
+        )
         diq2 = p1 * p1 + p2 * p2
         return np.array([math.sqrt(err) for err in diq2])
 
@@ -191,11 +197,13 @@ class Guinier(Transform):
         value = np.array([math.exp(-((self.radius * i) ** 2 / 3)) for i in x])
         return self.scale * value
 
+
 class PowerLaw(Transform):
     """
     class of type transform that perform operation related to power_law
     function
     """
+
     def __init__(self, scale=1, power=4):
         Transform.__init__(self)
         self.scale = scale
@@ -239,8 +247,7 @@ class PowerLaw(Transform):
         :param x: array of q-values
         """
         p1 = np.array([self.dscale * math.pow(q, -self.power) for q in x])
-        p2 = np.array([self.scale * self.power * math.pow(q, -self.power - 1)\
-                           * self.dpower for q in x])
+        p2 = np.array([self.scale * self.power * math.pow(q, -self.power - 1) * self.dpower for q in x])
         diq2 = p1 * p1 + p2 * p2
         return np.array([math.sqrt(err) for err in diq2])
 
@@ -268,10 +275,12 @@ class PowerLaw(Transform):
         value = np.array([math.pow(i, -self.power) for i in x])
         return self.scale * value
 
+
 class Extrapolator:
     """
     Extrapolate I(q) distribution using a given model
     """
+
     def __init__(self, data, model=None):
         """
         Determine a and b given a linear equation y = ax + b
@@ -313,9 +322,7 @@ class Extrapolator:
         fx = np.zeros(len(self.data.x))
 
         # Uncertainty
-        if isinstance(self.data.dy, np.ndarray) and \
-            len(self.data.dy) == len(self.data.x) and \
-                np.all(self.data.dy > 0):
+        if isinstance(self.data.dy, np.ndarray) and len(self.data.dy) == len(self.data.x) and np.all(self.data.dy > 0):
             sigma = self.data.dy
         else:
             sigma = np.ones(len(self.data.x))
@@ -325,25 +332,17 @@ class Extrapolator:
 
         # Linearize the data
         if self.model is not None:
-            linearized_data = self.model.linearize_data(\
-                                            LoaderData1D(self.data.x[idx],
-                                                         fx[idx],
-                                                         dy=sigma[idx]))
+            linearized_data = self.model.linearize_data(LoaderData1D(self.data.x[idx], fx[idx], dy=sigma[idx]))
         else:
-            linearized_data = LoaderData1D(self.data.x[idx],
-                                           fx[idx],
-                                           dy=sigma[idx])
+            linearized_data = LoaderData1D(self.data.x[idx], fx[idx], dy=sigma[idx])
 
         ##power is given only for function = power_law
         if power is not None:
             sigma2 = linearized_data.dy * linearized_data.dy
             a = -(power)
-            b = (np.sum(linearized_data.y / sigma2) \
-                 - a * np.sum(linearized_data.x / sigma2)) / np.sum(1.0 / sigma2)
+            b = (np.sum(linearized_data.y / sigma2) - a * np.sum(linearized_data.x / sigma2)) / np.sum(1.0 / sigma2)
 
-
-            deltas = linearized_data.x * a + \
-                     np.ones(len(linearized_data.x)) * b - linearized_data.y
+            deltas = linearized_data.x * a + np.ones(len(linearized_data.x)) * b - linearized_data.y
             residuals = np.sum(deltas * deltas / sigma2)
 
             err = np.fabs(residuals) / np.sum(1.0 / sigma2)
@@ -352,8 +351,7 @@ class Extrapolator:
             A = np.vstack([linearized_data.x / linearized_data.dy, 1.0 / linearized_data.dy]).T
             # CRUFT: numpy>=1.14.0 allows rcond=None for the following default
             rcond = np.finfo(float).eps * max(A.shape)
-            p, residuals, _, _ = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy,
-                                                 rcond=rcond)
+            p, residuals, _, _ = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy, rcond=rcond)
 
             # Get the covariance matrix, defined as inv_cov = a_transposed * a
             err = np.zeros(2)
@@ -379,6 +377,7 @@ class InvariantCalculator:
 
     :note: Some computations depends on each others.
     """
+
     def __init__(self, data, background=0, scale=1):
         """
         Initialize variables.
@@ -451,17 +450,20 @@ class InvariantCalculator:
         :return: new data = self._scale x data - self._background
         """
         if not issubclass(data.__class__, LoaderData1D):
-            #Process only data that inherited from DataLoader.Data_info.Data1D
+            # Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError("Data must be of type DataLoader.Data1D")
-        #from copy import deepcopy
+        # from copy import deepcopy
         new_data = (self._scale * data) - self._background
 
         # Check that the vector lengths are equal
         assert len(new_data.x) == len(new_data.y)
 
         # Verify that the errors are set correctly
-        if new_data.dy is None or len(new_data.x) != len(new_data.dy) or \
-            (min(new_data.dy) == 0 and max(new_data.dy) == 0):
+        if (
+            new_data.dy is None
+            or len(new_data.x) != len(new_data.dy)
+            or (min(new_data.dy) == 0 and max(new_data.dy) == 0)
+        ):
             new_data.dy = np.ones(len(new_data.x))
         return new_data
 
@@ -485,8 +487,7 @@ class InvariantCalculator:
         extrapolator = Extrapolator(data=self._data, model=model)
         p, dp = extrapolator.fit(power=power, qmin=qmin, qmax=qmax)
 
-        return model.extract_model_parameters(constant=p[1], slope=p[0],
-                                              dconstant=dp[1], dslope=dp[0])
+        return model.extract_model_parameters(constant=p[1], slope=p[0], dconstant=dp[1], dslope=dp[0])
 
     def _get_qstar(self, data):
         """
@@ -522,9 +523,9 @@ class InvariantCalculator:
                 gx = data.dxl * data.x
 
             n = len(data.x) - 1
-            #compute the first delta q
+            # compute the first delta q
             dx0 = (data.x[1] - data.x[0]) / 2
-            #compute the last delta q
+            # compute the last delta q
             dxn = (data.x[n] - data.x[n - 1]) / 2
             total = 0
             total += gx[0] * data.y[0] * dx0
@@ -533,8 +534,7 @@ class InvariantCalculator:
             if len(data.x) == 2:
                 return total
             else:
-                #iterate between for element different
-                #from the first and the last
+                # iterate between for element different from the first and the last
                 for i in range(1, n - 1):
                     dxi = (data.x[i + 1] - data.x[i - 1]) / 2
                     total += gx[i] * data.y[i] * dxi
@@ -557,9 +557,12 @@ class InvariantCalculator:
         :param data:
         :note: if data doesn't contain dy return "None"
         """
-        if len(data.x) <= 1 or len(data.y) <= 1 or \
-            len(data.x) != len(data.y) or \
-            (data.dy is not None and (len(data.dy) != len(data.y))):
+        if (
+            len(data.x) <= 1
+            or len(data.y) <= 1
+            or len(data.x) != len(data.y)
+            or (data.dy is not None and (len(data.dy) != len(data.y)))
+        ):
             msg = "Length of data.x and data.y must be equal"
             msg += " and greater than 1; got x=%s, y=%s" % (len(data.x), len(data.y))
             raise ValueError(msg)
@@ -579,9 +582,9 @@ class InvariantCalculator:
                 gx = data.dxl * data.x
 
             n = len(data.x) - 1
-            #compute the first delta
+            # compute the first delta
             dx0 = (data.x[1] - data.x[0]) / 2
-            #compute the last delta
+            # compute the last delta
             dxn = (data.x[n] - data.x[n - 1]) / 2
             total = 0
             total += (gx[0] * dy[0] * dx0) ** 2
@@ -589,23 +592,18 @@ class InvariantCalculator:
             if len(data.x) == 2:
                 return math.sqrt(total)
             else:
-                #iterate between for element different
-                #from the first and the last
+                # iterate between for element different from the first and the last
                 for i in range(1, n - 1):
                     dxi = (data.x[i + 1] - data.x[i - 1]) / 2
                     total += (gx[i] * dy[i] * dxi) ** 2
                 return math.sqrt(total)
 
-    def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS,
-                               q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
+    def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS, q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
         """
         :return: extrapolate data create from data
         """
-        #create new Data1D to compute the invariant
-        q = np.linspace(start=q_start,
-                           stop=q_end,
-                           num=npts,
-                           endpoint=True)
+        # create new Data1D to compute the invariant
+        q = np.linspace(start=q_start, stop=q_end, num=npts, endpoint=True)
         iq = model.evaluate_model(q)
         diq = model.evaluate_model_errors(q)
 
@@ -620,12 +618,12 @@ class InvariantCalculator:
         """
         return self._data
 
-    def get_extrapolation_power(self, range='high'):
+    def get_extrapolation_power(self, range="high"):
         """
         :return: the fitted power for power law function for a given
             extrapolation range
         """
-        if range == 'low':
+        if range == "low":
             return self._low_extrapolation_power_fitted
         return self._high_extrapolation_power_fitted
 
@@ -651,15 +649,14 @@ class InvariantCalculator:
         self._low_q_limit = low_q_limit if low_q_limit else Q_MINIMUM
 
         # Extrapolate the low-Q data
-        p, _ = self._fit(model=self._low_extrapolation_function,
-                         qmin=qmin,
-                         qmax=qmax,
-                         power=self._low_extrapolation_power)
+        p, _ = self._fit(
+            model=self._low_extrapolation_function, qmin=qmin, qmax=qmax, power=self._low_extrapolation_power
+        )
         self._low_extrapolation_power_fitted = p[0]
 
         data = self._get_extrapolated_data(
-            model=self._low_extrapolation_function,
-            npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmin)
+            model=self._low_extrapolation_function, npts=INTEGRATION_NSTEPS, q_start=self._low_q_limit, q_end=qmin
+        )
 
         # Systematic error
         # If we have smearing, the shape of the I(q) distribution at low Q will
@@ -690,16 +687,15 @@ class InvariantCalculator:
         high_q_limit = high_q_limit if high_q_limit else Q_MAXIMUM
 
         # fit the data with a model to get the appropriate parameters
-        p, _ = self._fit(model=self._high_extrapolation_function,
-                         qmin=qmin,
-                         qmax=qmax,
-                         power=self._high_extrapolation_power)
+        p, _ = self._fit(
+            model=self._high_extrapolation_function, qmin=qmin, qmax=qmax, power=self._high_extrapolation_power
+        )
         self._high_extrapolation_power_fitted = p[0]
 
-        #create new Data1D to compute the invariant
+        # create new Data1D to compute the invariant
         data = self._get_extrapolated_data(
-            model=self._high_extrapolation_function,
-            npts=INTEGRATION_NSTEPS, q_start=qmax, q_end=high_q_limit)
+            model=self._high_extrapolation_function, npts=INTEGRATION_NSTEPS, q_start=qmax, q_end=high_q_limit
+        )
 
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
 
@@ -729,10 +725,9 @@ class InvariantCalculator:
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
 
-        return self._get_extrapolated_data(\
-                                    model=self._low_extrapolation_function,
-                                    npts=npts,
-                                    q_start=q_start, q_end=q_end)
+        return self._get_extrapolated_data(
+            model=self._low_extrapolation_function, npts=npts, q_start=q_start, q_end=q_end
+        )
 
     def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, npts=20):
         """
@@ -757,10 +752,9 @@ class InvariantCalculator:
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
 
-        return self._get_extrapolated_data(\
-                                model=self._high_extrapolation_function,
-                                npts=npts,
-                                q_start=q_start, q_end=q_end)
+        return self._get_extrapolated_data(
+            model=self._high_extrapolation_function, npts=npts, q_start=q_start, q_end=q_end
+        )
 
     def set_extrapolation(self, range, npts=4, function=None, power=None):
         """
@@ -777,22 +771,22 @@ class InvariantCalculator:
 
         """
         range = range.lower()
-        if range not in ['high', 'low']:
+        if range not in ["high", "low"]:
             raise ValueError("Extrapolation range should be 'high' or 'low'")
         function = function.lower()
-        if function not in ['power_law', 'guinier']:
+        if function not in ["power_law", "guinier"]:
             msg = "Extrapolation function should be 'guinier' or 'power_law'"
             raise ValueError(msg)
 
-        if range == 'high':
-            if function != 'power_law':
+        if range == "high":
+            if function != "power_law":
                 msg = "Extrapolation only allows a power law at high Q"
                 raise ValueError(msg)
             self._high_extrapolation_npts = npts
             self._high_extrapolation_power = power
             self._high_extrapolation_power_fitted = power
         else:
-            if function == 'power_law':
+            if function == "power_law":
                 self._low_extrapolation_function = PowerLaw()
             else:
                 self._low_extrapolation_function = Guinier()
@@ -835,8 +829,7 @@ class InvariantCalculator:
             qs_hi, dqs_hi = self.get_qstar_high()
 
         self._qstar += qs_low + qs_hi
-        self._qstar_err = math.sqrt(self._qstar_err * self._qstar_err \
-                                    + dqs_low * dqs_low + dqs_hi * dqs_hi)
+        self._qstar_err = math.sqrt(self._qstar_err * self._qstar_err + dqs_low * dqs_low + dqs_hi * dqs_hi)
 
         return self._qstar
 
@@ -880,7 +873,7 @@ class InvariantCalculator:
         # convert porod_const to units of A^-5 instead of cm^-1 A^-4 so that
         # s is returned in units of 1/A.
         _porod_const = 1.0e-8 * porod_const
-        return _porod_const / (2 * math.pi * math.fabs(contrast)**2)
+        return _porod_const / (2 * math.pi * math.fabs(contrast) ** 2)
 
     def get_volume_fraction(self, contrast, extrapolation=None):
         """
@@ -919,7 +912,7 @@ class InvariantCalculator:
             raise RuntimeError(msg)
 
         # Compute intermediate constant
-        k = 1.e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
+        k = 1.0e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
         # Check discriminant value
         discrim = 1 - 4 * k
 
@@ -984,16 +977,14 @@ class InvariantCalculator:
         volume = self.get_volume_fraction(contrast, extrapolation)
 
         # Compute error
-        k = 1.e-8 * self._qstar / (2 * (math.pi * \
-                                        math.fabs(float(contrast)))** 2)
+        k = 1.0e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
         # Check value inside the sqrt function
         value = 1 - k * self._qstar
         if (value) <= 0:
             uncertainty = -1
         else:
             # Compute uncertainty
-            uncertainty = math.fabs((k * self._qstar_err)
-                                    / (self._qstar * math.sqrt(1 - 4 * k)))
+            uncertainty = math.fabs((k * self._qstar_err) / (self._qstar * math.sqrt(1 - 4 * k)))
 
         return volume, uncertainty
 
@@ -1027,15 +1018,15 @@ class InvariantCalculator:
         """
         # until contrast and porod_constant are given with uncertainties set
         # them to 0
-        dcontrast = None
-        dporod_const = None
-        # IMPORTATN: the porod constant (and eventually its uncertainty) are
-        # given in units of cm^-1 A^-4.  We need to be mindfult of units when
+        # dcontrast = None
+        # dporod_const = None
+        # IMPORTANT: the porod constant (and eventually its uncertainty) are
+        # given in units of cm^-1 A^-4.  We need to be mindful of units when
         # writing equations. Thus for computing ds both the porod constant and
         # its uncertainty need to be converted to A^-5 so they play well with
         # the contrast which is in A-2.
         # Note that the porod constant is converted in self.get_surface method
-        #so do NOT convert before calling here
+        # so do NOT convert before calling here
         s = self.get_surface(contrast=contrast, porod_const=porod_const)
         # Until uncertainties in contrast and the Porod Constant are provided
         # just return nothing.
@@ -1049,7 +1040,7 @@ class InvariantCalculator:
         #    dcontrast = 0.
         # For this new computation we DO need to convert the units
         # _porod_const = porod_const * 1e-8
-        #ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const *
+        # ds = math.sqrt((_dporod_const**2 * contrast**2 + 4 * (_porod_const *
         #                 dcontrast)**2 / (4 * math.pi**2 * constrast**6))
 
         return s, ds

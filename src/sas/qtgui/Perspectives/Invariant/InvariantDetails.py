@@ -9,12 +9,14 @@ from .UI.InvariantDetailsUI import Ui_Dialog
 # EXTRAPOLATION_COLOR = wx.Colour(169, 169, 168, 128)
 # INVARIANT_COLOR = wx.Colour(67, 208, 128, 128)
 
+
 class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
     """
     This class stores some values resulting from invariant calculations.
     Given the value of total invariant, this class can also
     determine the percentage of invariants resulting from extrapolation.
     """
+
     def __init__(self, parent):
         super(DetailsDialog, self).__init__(parent)
 
@@ -72,7 +74,7 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         self._model = model
 
     def showDialog(self):
-        """ Fill the dialog with values of calculated Q, progress bars"""
+        """Fill the dialog with values of calculated Q, progress bars"""
         # Pull out data from the model
         self.qstar_total = float(self._model.item(WIDGETS.W_INVARIANT).text())
 
@@ -89,16 +91,15 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         self.txtQHighQ.setText(None)
         self.txtQHighQErr.setText(None)
 
-
         # Q* from data
         self.qdata = float(self._model.item(WIDGETS.D_DATA_QSTAR).text())
 
         self.txtQData.setText(str(self.qdata))
         self.txtQDataErr.setText(self._model.item(WIDGETS.D_DATA_QSTAR_ERR).text())
         try:
-            self.progress_data_qstar = (self.qdata/self.qstar_total)*100.0
-        except:
-            self.progress_data_qstar = 'error'
+            self.progress_data_qstar = (self.qdata / self.qstar_total) * 100.0
+        except ZeroDivisionError:
+            self.progress_data_qstar = "error"
 
         # Low-Q
         if self._model.item(WIDGETS.W_ENABLE_LOWQ).text() == "true":
@@ -107,9 +108,9 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             self.txtQLowQ.setText(str(self.qlow))
             self.txtQLowQErr.setText(self._model.item(WIDGETS.D_LOW_QSTAR_ERR).text())
             try:
-                self.progress_low_qstar = (self.qlow/self.qstar_total)*100.0
-            except:
-                self.progress_low_qstar = 'error'
+                self.progress_low_qstar = (self.qlow / self.qstar_total) * 100.0
+            except ZeroDivisionError:
+                self.progress_low_qstar = "error"
 
         # High-Q
         if self._model.item(WIDGETS.W_ENABLE_HIGHQ).text() == "true":
@@ -118,28 +119,28 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             self.txtQHighQ.setText(str(self.qhigh))
             self.txtQHighQErr.setText(self._model.item(WIDGETS.D_HIGH_QSTAR_ERR).text())
             try:
-                self.progress_high_qstar = (self.qhigh/self.qstar_total)*100.0
-            except:
-                self.progress_high_qstar = 'error'
+                self.progress_high_qstar = (self.qhigh / self.qstar_total) * 100.0
+            except ZeroDivisionError:
+                self.progress_high_qstar = "error"
 
         # check values and display warning
         if self.checkValues():
             self.lblWarning.setText(self.checkValues())
 
         # update progress bars
-        if self.progress_low_qstar == 'error':
+        if self.progress_low_qstar == "error":
             self.progressBarLowQ.setValue(0)
         else:
             self.progressBarLowQ.setValue(int(self.progress_low_qstar))
             self.progressBarLowQ.setFormat("%.2f %%" % self.progress_low_qstar)
 
-        if self.progress_high_qstar == 'error':
+        if self.progress_high_qstar == "error":
             self.progressBarHighQ.setValue(0)
         else:
             self.progressBarHighQ.setValue(int(self.progress_high_qstar))
             self.progressBarHighQ.setFormat("%.2f %%" % self.progress_high_qstar)
 
-        if self.progress_data_qstar == 'error':
+        if self.progress_data_qstar == "error":
             self.progressBarData.setValue(0)
         else:
             self.progressBarData.setValue(int(self.progress_data_qstar))
@@ -157,13 +158,12 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             warning_msg = "Invariant not calculated.\n"
             return warning_msg
         elif self.qstar_total == 0:
-            warning_msg = "Invariant is zero. \n " \
-                          "The calculations are likely to be unreliable!\n"
+            warning_msg = "Invariant is zero. \n The calculations are likely to be unreliable!\n"
             return warning_msg
 
-        msg = ''
-        if self.progress_data_qstar == 'error':
-            msg += 'Error occurred when computing invariant from data.\n '
+        msg = ""
+        if self.progress_data_qstar == "error":
+            msg += "Error occurred when computing invariant from data.\n "
         try:
             if float(self.progress_data_qstar) > 100:
                 msg += "Invariant Q contribution is greater than 100% .\n"
@@ -171,51 +171,43 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             # Text message, skip msg update
             pass
 
-        if self.progress_low_qstar == 'error':
+        if self.progress_low_qstar == "error":
             try:
                 float(self.qlow)
-            except:
-                msg += "Error occurred when computing extrapolated invariant"
-                msg += " at low-Q region.\n"
+            except ValueError:
+                msg += "Error occurred when computing extrapolated invariant at low-Q region.\n"
 
         elif self.progress_low_qstar is not None:
             if self.progress_low_qstar >= 5:
-                msg += "Extrapolated contribution at Low Q is higher "
-                msg += "than 5% of the invariant.\n"
+                msg += "Extrapolated contribution at Low Q is higher than 5% of the invariant.\n"
             elif self.progress_low_qstar < 0:
                 msg += "Extrapolated contribution at Low Q < 0.\n"
             elif self.progress_low_qstar > 100:
-                msg += "Extrapolated contribution at Low Q is greater "
-                msg += "than 100% .\n"
+                msg += "Extrapolated contribution at Low Q is greater than 100% .\n"
 
         # High-Q
-        if self.progress_high_qstar == 'error':
+        if self.progress_high_qstar == "error":
             try:
                 float(self.qhigh)
-            except:
-                msg += 'Error occurred when computing extrapolated'
-                msg += ' invariant at high-Q region.\n'
+            except ValueError:
+                msg += "Error occurred when computing extrapolated invariant at high-Q region.\n"
 
         elif self.progress_high_qstar is not None:
             if self.progress_high_qstar >= 5:
-                msg += "Extrapolated contribution at High Q is higher " \
-                       "than 5% of the invariant.\n"
+                msg += "Extrapolated contribution at High Q is higher than 5% of the invariant.\n"
             elif self.progress_high_qstar < 0:
-
                 msg += "Extrapolated contribution at High Q < 0.\n"
             elif self.progress_high_qstar > 100:
+                msg += "Extrapolated contribution at High Q is greater than 100% .\n"
 
-                msg += "Extrapolated contribution at High Q is greater " \
-                       "than 100% .\n"
+        if (
+            (self.progress_low_qstar not in [None, "error"])
+            and (self.progress_high_qstar not in [None, "error"])
+            and self.progress_low_qstar + self.progress_high_qstar >= 5
+        ):
+            msg += "The sum of all extrapolated contributions is higher than 5% of the invariant.\n"
 
-        if (self.progress_low_qstar not in [None, "error"]) and \
-            (self.progress_high_qstar not in [None, "error"])\
-            and self.progress_low_qstar + self.progress_high_qstar >= 5:
-
-            msg += "The sum of all extrapolated contributions is higher " \
-                   "than 5% of the invariant.\n"
-
-        if msg == '':
+        if msg == "":
             msg = "No Warnings to report\n"
 
         return msg
