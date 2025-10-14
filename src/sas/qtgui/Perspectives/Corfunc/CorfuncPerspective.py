@@ -191,6 +191,11 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.txtPorodK.setValidator(QDoubleValidator())
         self.txtPorodSigma.setValidator(QDoubleValidator())
 
+        # Connect checkboxes to update_readonly
+        self.fitBackground.stateChanged.connect(self.update_readonly)
+        self.fitGuinier.stateChanged.connect(self.update_readonly)
+        self.fitPorod.stateChanged.connect(self.update_readonly)
+
     def set_text_enable(self, state: bool):
         self.txtLowerQMax.setEnabled(state)
         self.txtUpperQMin.setEnabled(state)
@@ -393,6 +398,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self._running = False
 
+        self.update_readonly()
+
+
+    def update_readonly(self):
+        # Set text fields to read-only if the corresponding fit is enabled
+        self.txtBackground.setReadOnly(True) if self.fitBackground.isChecked() else self.txtBackground.setReadOnly(False)
+        self.txtGuinierA.setReadOnly(True)   if self.fitGuinier.isChecked()    else self.txtGuinierA.setReadOnly(False)
+        self.txtGuinierB.setReadOnly(True)   if self.fitGuinier.isChecked()    else self.txtGuinierB.setReadOnly(False)
+        self.txtPorodK.setReadOnly(True)     if self.fitPorod.isChecked()      else self.txtPorodK.setReadOnly(False)
+        self.txtPorodSigma.setReadOnly(True) if self.fitPorod.isChecked()      else self.txtPorodSigma.setReadOnly(False)
 
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
