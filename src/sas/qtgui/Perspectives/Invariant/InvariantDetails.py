@@ -175,26 +175,22 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
             try:
                 float(self.qlow)
             except ValueError:
-                msg += "Error occurred when computing extrapolated invariant"
-                msg += " at low-Q region.\n"
+                msg += "Error occurred when computing extrapolated invariant at low-Q region.\n"
 
         elif self.progress_low_qstar is not None:
             if self.progress_low_qstar >= 5:
-                msg += "Extrapolated contribution at Low Q is higher "
-                msg += "than 5% of the invariant.\n"
+                msg += "Extrapolated contribution at Low Q is higher than 5% of the invariant.\n"
             elif self.progress_low_qstar < 0:
                 msg += "Extrapolated contribution at Low Q < 0.\n"
             elif self.progress_low_qstar > 100:
-                msg += "Extrapolated contribution at Low Q is greater "
-                msg += "than 100% .\n"
+                msg += "Extrapolated contribution at Low Q is greater than 100% .\n"
 
         # High-Q
         if self.progress_high_qstar == "error":
             try:
                 float(self.qhigh)
             except ValueError:
-                msg += "Error occurred when computing extrapolated"
-                msg += " invariant at high-Q region.\n"
+                msg += "Error occurred when computing extrapolated invariant at high-Q region.\n"
 
         elif self.progress_high_qstar is not None:
             if self.progress_high_qstar >= 5:

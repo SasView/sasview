@@ -1007,7 +1007,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             qmin = min(self._data.x)
             qmax = max(self._data.x)
         except (AttributeError, TypeError, ValueError):
-            msg = "Unable to find q min/max of \n data named %s" % data.name
+            msg = "Unable to find q min/max of data named %s" % data.name
             raise ValueError(msg)
 
         # update model with input form files: name, qmin, qmax

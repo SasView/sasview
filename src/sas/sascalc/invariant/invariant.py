@@ -1,11 +1,11 @@
 # pylint: disable=invalid-name
-#####################################################################
+###########################################################################
 # This software was developed by the University of Tennessee as part of the
 # Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
 # project funded by the US National Science Foundation.
 # See the license text in license.txt
 # copyright 2010, University of Tennessee
-######################################################################
+###########################################################################
 """
 This module implements invariant and its related computations.
 
@@ -360,7 +360,7 @@ class Extrapolator:
                 cov = np.linalg.pinv(inv_cov)
                 err_matrix = np.fabs(residuals) * cov
                 err = [np.sqrt(err_matrix[0][0]), np.sqrt(err_matrix[1][1])]
-            except Exception:
+            except:
                 err = [-1.0, -1.0]
 
             return p, err
@@ -534,8 +534,7 @@ class InvariantCalculator:
             if len(data.x) == 2:
                 return total
             else:
-                # iterate between for element different
-                # from the first and the last
+                # iterate between for element different from the first and the last
                 for i in range(1, n - 1):
                     dxi = (data.x[i + 1] - data.x[i - 1]) / 2
                     total += gx[i] * data.y[i] * dxi
@@ -593,8 +592,7 @@ class InvariantCalculator:
             if len(data.x) == 2:
                 return math.sqrt(total)
             else:
-                # iterate between for element different
-                # from the first and the last
+                # iterate between for element different from the first and the last
                 for i in range(1, n - 1):
                     dxi = (data.x[i + 1] - data.x[i - 1]) / 2
                     total += (gx[i] * dy[i] * dxi) ** 2
@@ -1022,8 +1020,8 @@ class InvariantCalculator:
         # them to 0
         # dcontrast = None
         # dporod_const = None
-        # IMPORTATN: the porod constant (and eventually its uncertainty) are
-        # given in units of cm^-1 A^-4.  We need to be mindfult of units when
+        # IMPORTANT: the porod constant (and eventually its uncertainty) are
+        # given in units of cm^-1 A^-4.  We need to be mindful of units when
         # writing equations. Thus for computing ds both the porod constant and
         # its uncertainty need to be converted to A^-5 so they play well with
         # the contrast which is in A-2.
