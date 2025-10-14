@@ -822,6 +822,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msg = title + " does not allow sending multiple data files. Please select only one file"
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+            msgbox.setWindowTitle('Error')
             msgbox.setText(msg)
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
