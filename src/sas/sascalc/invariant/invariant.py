@@ -933,6 +933,49 @@ class InvariantCalculator:
             msg = "Could not compute the volume fraction: inconsistent results"
             raise RuntimeError(msg)
 
+    def get_SLD_contrast(self, volume, extrapolation=None):
+        """
+        Compute contrast is deduced as follows: ::
+
+            q_star = 2*(pi*contrast)**2* volume(1- volume)
+            contrast**2 = 10^(-8) * q_star / (2 * pi**2 * volume * (1- volume))
+            we get |contrast| = sqrt(10^(-8) * q_star / (2 * pi**2 * volume * (1- volume)))
+
+                10^(-8) converts from cm^-1 to A^-1
+
+            q_star: the invariant value included extrapolation is applied
+                         unit  1/A^(3)*1/cm
+                    q_star = self.get_qstar()
+
+            the result returned will be 0 <= |contrast|
+
+        :param volume: volume fraction provided by the user of type float.
+                 volume must be between 0 and 1
+                 volume must have no unit
+        :param extrapolation: string to apply optional extrapolation
+
+        :return: contrast
+
+        :note: contrast is returned in units of 1/A^(2) = 10^(16)cm^(2)
+        """
+        if volume <= 0 or volume >= 1:
+            raise ValueError("The volume fraction must be between 0 and 1")
+
+        # Make sure Q star is up to date
+        self.get_qstar(extrapolation)
+
+        if self._qstar <= 0:
+            msg = "Invalid invariant: Invariant Q* must be greater than zero\n"
+            msg += "Please check if scale and background values are correct"
+            raise RuntimeError(msg)
+
+        try:
+            contrast = math.sqrt(1.e-8 * self._qstar / (2 * math.pi**2 * volume * (1 - volume)))
+            return contrast
+        except (ValueError, ZeroDivisionError):
+            msg = "Could not compute the contrast: invalid volume fraction"
+            raise RuntimeError(msg)
+
     def get_qstar_with_error(self, extrapolation=None):
         """
         Compute the invariant uncertainty.
@@ -987,6 +1030,41 @@ class InvariantCalculator:
             uncertainty = math.fabs((k * self._qstar_err) / (self._qstar * math.sqrt(1 - 4 * k)))
 
         return volume, uncertainty
+
+    def get_contrast_with_error(self, volume, extrapolation=None):
+        """
+        Compute uncertainty on contrast value as well as the contrast
+        This uncertainty is given by the following equation: ::
+
+            sigcontrast = dcontrast/dq_star * sigq_star
+
+        so that: ::
+
+            sigcontrast = (|contrast| * sigq_star) / (2 * q_star)
+
+        Notes:
+
+        - q_star: the invariant, in cm^-1A^-3, including extrapolated values
+          if they have been requested
+        - dq_star: the invariant uncertainty
+        - dcontrast: the contrast uncertainty
+
+        The uncertainty will be set to -1 if it can't be computed.
+
+        :param volume: volume fraction value
+        :param extrapolation: string to apply optional extrapolation
+
+        :return: contrast, dcontrast = contrast, error on contrast
+        """
+        contrast = self.get_contrast(volume, extrapolation)
+
+        # Compute error
+        try:
+            uncertainty = math.fabs((contrast * self._qstar_err) / (2 * self._qstar))
+        except (ZeroDivisionError, ValueError):
+            uncertainty = -1
+
+        return contrast, uncertainty
 
     def get_surface_with_error(self, contrast, porod_const, extrapolation=None):
         """
