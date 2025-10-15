@@ -9,6 +9,8 @@ from sasdata.dataloader.loader import Loader
 
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 
+logger = logging.getLogger(__name__)
+
 
 class SlitSizeCalculatorTest:
     """Test the SlitSizeCalculator"""
@@ -84,12 +86,12 @@ class SlitSizeCalculatorTest:
         loader = Loader()
         data = loader.load(filename)[0]
 
-        mocker.patch.object(logging, 'error')
+        mocker.patch.object(logger, 'error')
 
         widget.calculateSlitSize(data)
 
-        assert logging.error.called_once()
+        assert logger.error.called_once()
 
         data = None
         widget.calculateSlitSize(data)
-        assert logging.error.call_count == 2
+        assert logger.error.call_count == 2

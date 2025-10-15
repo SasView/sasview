@@ -15,6 +15,8 @@ connect() function:
       - parses the file, and looks up for all possible proxies
 '''
 
+logger = logging.getLogger(__name__)
+
 
 class ConnectionProxy:
 
@@ -69,13 +71,13 @@ class ConnectionProxy:
         '''
         proxy_url_list = []
         for this_pac_url in pac_urls_list:
-            logging.debug('Trying pac file (%s)...' % this_pac_url)
+            logger.debug('Trying pac file (%s)...' % this_pac_url)
             try:
                 response = urllib.request.urlopen(
                     this_pac_url, timeout=self.timeout)
-                logging.debug('Succeeded (%s)...' % this_pac_url)
+                logger.debug('Succeeded (%s)...' % this_pac_url)
             except Exception:
-                logging.debug('Failled (%s)...' % this_pac_url)
+                logger.debug('Failed (%s)...' % this_pac_url)
                 continue
             pacStr = response.read()
             possProxies = re.findall(
@@ -115,32 +117,32 @@ class ConnectionProxy:
         req = urllib.request.Request(self.url)
         response = None
         try:
-            logging.debug("Trying Direct connection to %s..."%self.url)
+            logger.debug("Trying direct connection to %s..."%self.url)
             response = urllib.request.urlopen(req, timeout=self.timeout)
         except Exception as e:
-            logging.debug("Failed!")
-            logging.debug(e)
+            logger.debug("Failed!")
+            logger.debug(e)
             try:
-                logging.debug("Trying to use system proxy if it exists...")
+                logger.debug("Trying to use system proxy if it exists...")
                 self._set_proxy()
                 response = urllib.request.urlopen(req, timeout=self.timeout)
             except Exception as e:
-                logging.debug("Failed!")
-                logging.debug(e)
+                logger.debug("Failed!")
+                logger.debug(e)
                 pac_urls = self._get_addresses_of_proxy_pac()
                 proxy_urls = self._parse_proxy_pac(pac_urls)
                 for proxy in proxy_urls:
                     try:
-                        logging.debug("Trying to use the proxy %s found in proxy.pac configuration"%proxy)
+                        logger.debug("Trying to use the proxy %s found in proxy.pac configuration"%proxy)
                         self._set_proxy(proxy)
                         response = urllib.request.urlopen(req, timeout=self.timeout)
                     except Exception as e:
-                        logging.debug("Failed!")
-                        logging.debug(e)
+                        logger.debug("Failed!")
+                        logger.debug(e)
         if response is not None:
-            logging.debug("The connection to %s was successful."%self.url)
+            logger.debug("The connection to %s was successful. "%self.url)
         else:
-            logging.warning("Connection to %s failed..."%self.url)
+            logger.warning("Connection to %s failed... "%self.url)
         return response
 
 

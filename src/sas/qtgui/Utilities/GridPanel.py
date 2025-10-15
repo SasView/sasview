@@ -13,6 +13,9 @@ from sas.qtgui.Utilities.UI.GridPanelUI import Ui_GridPanelUI
 
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
+logger = logging.getLogger(__name__)
+
+
 class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
     """
     Class for stateless grid-like printout of model parameters for multiple models
@@ -85,7 +88,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             QtWidgets.QFileDialog.DontUseNativeDialog)[0]
 
         if not datafile:
-            logging.info("No data file chosen.")
+            logger.info("No data file chosen.")
             return
 
         with open(datafile) as csv_file:
@@ -123,7 +126,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         try:
             menu.exec_(self.currentTable().viewport().mapToGlobal(position))
         except AttributeError as ex:
-            logging.error("Error generating context menu: %s" % ex)
+            logger.error("Error generating context menu: %s" % ex)
         return
 
     def addTabPage(self, name=None):
@@ -211,7 +214,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
                 QtWidgets.QApplication.processEvents()
             except (IndexError, AttributeError):
                 # data messed up.
-                logging.error('Issue with data')
+                logger.error('Issue with data')
                 return
 
     @classmethod
@@ -499,7 +502,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
                 f"{filename}"))
             if out is None:
-                logging.warning(f"P(r) for {filename} did not converge.")
+                logger.warning(f"P(r) for {filename} did not converge.")
                 continue
             try:
                 self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(

@@ -30,6 +30,8 @@ HTML_404 = '''
 </html>
 '''
 
+logger = logging.getLogger(__name__)
+
 
 class DocGenThread(CalcThread):
     """Thread performing the fit """
@@ -67,7 +69,7 @@ class DocGenThread(CalcThread):
                     time.sleep(0.5)
                     self.communicate.documentationUpdateLogSignal.emit()
         except KeyboardInterrupt as msg:
-            logging.log(0, msg)
+            logger.log(0, msg)
         finally:
             self.close()
 
@@ -168,9 +170,9 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
     def onDownloadFinished(self, item):
         _filename = item.downloadFileName()
         if item.state() == item.DownloadState.DownloadCompleted:
-            logging.warning(f"your file: {_filename} was downloaded to your default download directory")
+            logger.warning(f"your file: {_filename} was downloaded to your default download directory")
         else:
-            logging.error(f"FAILED TO DOWNLOAD: {_filename} is unavailable")
+            logger.error(f"FAILED TO DOWNLOAD: {_filename} is unavailable")
 
     def regenerateIfNeeded(self):
         """
@@ -267,7 +269,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
             self.setWindowTitle(f"Documentation—{current_path.strip()}") # Try to add the filepath to the window title
         except (AttributeError, TypeError, ValueError) as ex:
             self.setWindowTitle("Documentation")
-            logging.warning(f"Error updating documentation window title: {ex}")
+            logger.warning(f"Error updating documentation window title: {ex}")
 
     def load404(self):
         self.webEngineViewer.setHtml(HTML_404)
@@ -304,7 +306,7 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
 
         :param file_name: A file-path like object that needs regeneration.
         """
-        logging.info("Starting documentation regeneration...")
+        logger.info("Starting documentation regeneration...")
         self.communicate.documentationRegenInProgressSignal.emit()
         d = threads.deferToThread(self.regenerateDocs, target=file_name)
         d.addCallback(self.docRegenComplete)
@@ -329,5 +331,5 @@ class DocViewWindow(QtWidgets.QDialog, Ui_DocViewerWindow):
         """
         self.loadHtml()
         self.communicate.documentationRegeneratedSignal.emit()
-        logging.info("Documentation regeneration completed.")
+        logger.info("Documentation regeneration completed.")
         self.regen_in_progress = False

@@ -2628,7 +2628,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         try:
             ER_mode = int(self._model_model.item(ER_mode_row, 1).text())
         except ValueError:
-            logging.error("radius_effective_mode was set to an invalid value.")
+            logger.error("radius_effective_mode was set to an invalid value.")
             return
 
         if ER_mode == 0:
@@ -2638,7 +2638,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # ensure the ER value cannot be modified by user
             self.setParamEditableByRow(ER_row, False)
         else:
-            logging.error("radius_effective_mode was set to an invalid value.")
+            logger.error("radius_effective_mode was set to an invalid value.")
 
     def setParamEditableByRow(self, row: int, editable: bool = True) -> None:
         """
@@ -3006,7 +3006,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         try:
             ER_mode = int(self._model_model.item(ER_mode_row, 1).text())
         except ValueError:
-            logging.error("radius_effective_mode was set to an invalid value.")
+            logger.error("radius_effective_mode was set to an invalid value.")
             return
         if ER_mode < 1:
             # does not need updating if it is not being computed
@@ -3203,9 +3203,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Try to limit shell_par, if possible
             if float(shell_par.limits[1])==np.inf:
                 shell_max = 9
-            logging.warning("Limiting shell count to 9.")
+            logger.warning("Limiting shell count to 9.")
         except Exception as ex:
-            logging.error("Badly defined multiplicity: "+ str(ex))
+            logger.error("Badly defined multiplicity: "+ str(ex))
             return
         # don't update the kernel here - this data is display only
         self._model_model.blockSignals(True)
@@ -3281,7 +3281,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             x, y = self.logic.kernel_module.getProfile()
         except TypeError:
             msg = "SLD profile calculation failed."
-            logging.error(msg)
+            logger.error(msg)
             return
 
         y *= 1.0e6

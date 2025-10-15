@@ -14,6 +14,8 @@ from sas.qtgui.Plotting.PlotterData import Data1D, Data2D
 # Tested module
 from sas.qtgui.Utilities import GuiUtils
 
+logger = logging.getLogger(__name__)
+
 
 class GuiUtilsTest:
     '''Test the GUI Utilities methods'''
@@ -402,7 +404,7 @@ class GuiUtilsTest:
         name_full = name if name_full == "" else name_full
 
         if caplog:
-            with caplog.at_level(logging.WARNING):
+            with caplog.at_level(logger.WARNING):
                 saveMethod(data)
                 #assert len(cm.output) == 1
                 assert (f"Unknown file type specified when saving {name}."

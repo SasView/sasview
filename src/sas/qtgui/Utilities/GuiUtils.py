@@ -546,7 +546,7 @@ def retrieveData1d(data):
     except:
         msg = "Unable to find min/max of \n data named %s" % \
                     data.filename
-        #logging.error(msg)
+        #logger.error(msg)
         raise ValueError(msg)
 
     text = data.__str__()
@@ -1168,7 +1168,7 @@ def saveData(fp, data):
             return o.value
 
         # not supported
-        logging.info("data cannot be serialized to json: %s" % type(o))
+        logger.info("data cannot be serialized to json: %s" % type(o))
         return None
 
     json.dump(data, fp, indent=2, sort_keys=True, default=jdefault)
@@ -1206,7 +1206,7 @@ def readDataFromFile(fp):
         try:
             cls = lookup[type]
         except KeyError:
-            logging.info('unknown type: %s' % type)
+            logger.info('unknown type: %s' % type)
             return None
 
         # tuples and sets
@@ -1245,7 +1245,7 @@ def readDataFromFile(fp):
         if cls == types.FunctionType:
             return cls
 
-        logging.info('not implemented: %s, %s' % (type, cls))
+        logger.info('not implemented: %s, %s' % (type, cls))
         return None
 
     def generate(data, level):
@@ -1276,7 +1276,7 @@ def readDataFromFile(fp):
         try:
             new_stored_data[id] = generate(data, 0)
         except TooComplexException:
-            logging.info('unable to load %s' % id)
+            logger.info('unable to load %s' % id)
 
     return new_stored_data
 
@@ -1468,4 +1468,4 @@ def showHelp(url: PATH_LIKE):
         # Return the window so the caller can keep it in scope to prevent garbage collection
         return help_window
     except Exception as ex:
-        logging.warning(f"Cannot display help: {ex}")
+        logger.warning(f"Cannot display help: {ex}")

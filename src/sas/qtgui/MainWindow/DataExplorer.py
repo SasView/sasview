@@ -496,7 +496,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # disregard malformed SVS and try to recover whatever
                 # is available
                 msg = "Error while reading the project file: " + str(ex)
-                logging.error(msg)
+                logger.error(msg)
                 pass
             # Convert fitpage properties and update the dict
             try:
@@ -504,14 +504,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             except Exception as ex:
                 # disregard malformed SVS and try to recover regardless
                 msg = "Error while converting the project file: " + str(ex)
-                logging.error(msg)
+                logger.error(msg)
                 pass
         else:
             with open(filename) as infile:
                 try:
                     all_data = GuiUtils.readDataFromFile(infile)
                 except Exception as ex:
-                    logging.error("Project load failed with " + str(ex))
+                    logger.error("Project load failed with " + str(ex))
                     return
         cs_keys = []
         visible_perspective = config.DEFAULT_PERSPECTIVE
@@ -800,7 +800,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self._perspective().swapData(selected_items[0])
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
-            logging.error(ex, exc_info=True)
+            logger.error(ex, exc_info=True)
             msg = str(ex)
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
@@ -821,7 +821,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
-            logging.error(ex, exc_info=True)
+            logger.error(ex, exc_info=True)
             msg = str(ex)
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
@@ -844,7 +844,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self._perspective().setData(data_item=selected_items, is_batch=False, tab_index=tab_index)
         except Exception as ex:
             msg = "%s perspective returned the following message: \n%s\n" % (self._perspective().name, str(ex))
-            logging.error(msg)
+            logger.error(msg)
             msg = str(ex)
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Critical)
@@ -1405,7 +1405,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 log_msg += """Please try to open that file from "open project" """
                 log_msg += """or "open analysis" menu\n"""
                 error_message = log_msg + "\n"
-                logging.info(log_msg)
+                logger.info(log_msg)
                 continue
 
             try:
@@ -1436,11 +1436,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                             error_message += f"\tError: {error_data}\n"
                     else:
 
-                        logging.error("Loader returned an invalid object:\n %s" % str(item))
+                        logger.error("Loader returned an invalid object:\n %s" % str(item))
                         data_error = True
 
             except Exception as ex:
-                logging.error(str(ex) + str(sys.exc_info()[1]))
+                logger.error(str(ex) + str(sys.exc_info()[1]))
 
                 any_error = True
             if any_error or data_error or error_message != "":
@@ -1464,7 +1464,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.communicator.progressBarUpdateSignal.emit(current_percentage)
 
         if any_error or error_message:
-            logging.error(error_message)
+            logger.error(error_message)
             status_bar_message = "Errors occurred while loading %s" % format(basename)
             self.communicator.statusBarUpdateSignal.emit(status_bar_message)
 
@@ -1555,7 +1555,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         else:
             msg = "Incorrect value in the Selection Option"
-            # Change this to a proper logging action
+            logger.error(msg)
             raise Exception(msg)
 
     def contextMenu(self):
@@ -1773,7 +1773,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 msg.exec_()
                 return
         except Exception as ex:
-            logging.error(str(ex) + str(sys.exc_info()[1]))
+            logger.error(str(ex) + str(sys.exc_info()[1]))
             msg.exec_()
             return
 
@@ -1911,7 +1911,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.plot_widgets[plot_id].close()
                 self.plot_widgets.pop(plot_id, None)
             except AttributeError as ex:
-                logging.error("Closing of %s failed:\n %s" % (plot_id, str(ex)))
+                logger.error("Closing of %s failed:\n %s" % (plot_id, str(ex)))
 
     def minimizeAllPlots(self):
         """
@@ -1955,7 +1955,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         self.plot_widgets[plot_name].close()
                         self.plot_widgets.pop(plot_name, None)
                     except AttributeError as ex:
-                        logging.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
+                        logger.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
 
         pass  # debugger anchor
 

@@ -18,6 +18,8 @@ from sas.qtgui.Utilities.ModelEditors.TabbedEditor.UI.TabbedModelEditor import U
 from sas.sascalc.fit import models
 from sas.system.user import MAIN_DOC_SRC, find_plugins_dir
 
+logger = logging.getLogger(__name__)
+
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
@@ -174,7 +176,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Load the file
         if not filename:
-            logging.info("No data file chosen.")
+            logger.info("No data file chosen.")
             return
 
         # remove c-plugin tab, if present.
@@ -408,7 +410,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Notify the user
         msg = "Custom model " + filename + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
-        logging.info(msg)
+        logger.info(msg)
 
     def createOrUpdateTab(self, filename: str | Path, widget: QtWidgets.QWidget):
         """Check if the widget is already included in the list of tabs. Add it, if it isn't already present
@@ -455,13 +457,13 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         except Exception as ex:
             msg = "Error building model: " + str(ex)
-            logging.error(msg)
+            logger.error(msg)
             # print four last lines of the stack trace
             # this will point out the exact line failing
             all_lines = traceback.format_exc().split("\n")
             last_lines = all_lines[-4:]
             traceback_to_show = "\n".join(last_lines)
-            logging.error(traceback_to_show)
+            logger.error(traceback_to_show)
 
             # Set the status bar message
             # GuiUtils.Communicate.statusBarUpdateSignal.emit("Model check failed")
@@ -501,7 +503,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         filename = self.filename_py if w.is_python else self.filename_c
         # make sure we have the file handle ready
         if not filename:
-            logging.error("No file name was provided for your plugin model. No file was written.")
+            logger.error("No file name was provided for your plugin model. No file was written.")
             return
 
         # Retrieve model string
@@ -549,7 +551,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # notify the user
         msg = f"{str(filename)} successfully saved."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
-        logging.info(msg)
+        logger.info(msg)
         if self.is_documentation:
             self.regenerateDocumentation()
 

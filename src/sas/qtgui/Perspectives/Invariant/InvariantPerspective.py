@@ -31,6 +31,8 @@ DEFAULT_POWER_LOW = 4
 BG_DEFAULT = ""
 BG_RED = "background-color: rgb(244, 170, 164);"
 
+logger = logging.getLogger(__name__)
+
 
 class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
     # The controller which is responsible for managing signal slots connections
@@ -237,7 +239,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         d.addErrback(self.on_calculation_failed)
 
     def on_calculation_failed(self, reason) -> None:
-        logging.error("calculation failed: ", reason)
+        logger.error("calculation failed: ", reason)
         self.allow_calculation()
 
     def deferredPlot(self, model: QtGui.QStandardItemModel) -> None:
@@ -346,7 +348,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 qstar_low, qstar_low_err = self._calculator.get_qstar_low(qmin)
                 low_calculation_pass = True
             except Exception as ex:
-                logging.warning(f"Low-q calculation failed: {str(ex)}")
+                logger.warning(f"Low-q calculation failed: {str(ex)}")
                 qstar_low = "ERROR"
                 qstar_low_err = "ERROR"
         if self.low_extrapolation_plot and not low_calculation_pass:
@@ -375,7 +377,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 qstar_high, qstar_high_err = self._calculator.get_qstar_high(qmax)
                 high_calculation_pass = True
             except Exception as ex:
-                logging.warning(f"High-q calculation failed: {str(ex)}")
+                logger.warning(f"High-q calculation failed: {str(ex)}")
                 qstar_high = "ERROR"
                 qstar_high_err = "ERROR"
         if self.high_extrapolation_plot and not high_calculation_pass:
@@ -431,7 +433,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Early exit if calculations failed
         if calculation_failed:
             self.cmdStatus.setEnabled(False)
-            logging.warning(f"Calculation failed: {msg}")
+            logger.warning(f"Calculation failed: {msg}")
             return self.model
 
         if low_calculation_pass:
@@ -613,7 +615,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         if self._data:
             if len(self._data.x) < int_value:
                 self.sender().setStyleSheet(BG_RED)
-                logging.warning(f"The number of points must be smaller than {len(self._data.x)}")
+                logger.warning(f"The number of points must be smaller than {len(self._data.x)}")
             else:
                 self.sender().setStyleSheet(BG_DEFAULT)
                 self.allow_calculation()
@@ -678,7 +680,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # No data, number of points too large/small, or unable to convert number of points to int
             pass
         except Exception as e:
-            logging.error(f"{e}")
+            logger.error(f"{e}")
         try:
             # Set high extrapolation upper bound to negative infinity if Q max input empty
             q_high_max = float(self.txtExtrapolQMax.text())
@@ -686,7 +688,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # Couldn't convert Q min for extrapolation to a float
             pass
         except Exception as e:
-            logging.error(f"{e}")
+            logger.error(f"{e}")
         try:
             # Set low extrapolation lower bound to infinity if Q min input empty
             q_low_min = float(self.txtExtrapolQMin.text())
@@ -694,7 +696,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # Couldn't convert Q min for extrapolation to a float
             pass
         except Exception as e:
-            logging.error(f"{e}")
+            logger.error(f"{e}")
         try:
             # Set high extrapolation lower bound to infinity if no data, or if number points undefined
             q_low_max = self._data.x[int(self.txtNptsLowQ.text())]
@@ -702,7 +704,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             # No data, number of points too large/small, or unable to convert number of points to int
             pass
         except Exception as e:
-            logging.error(f"{e}")
+            logger.error(f"{e}")
 
         calculate = (
             (q_low_min < q_low_max)
@@ -946,7 +948,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         assert data_item is not None
 
         if self.txtName.text() == data_item[0].text():
-            logging.info("This file is already loaded in Invariant panel.")
+            logger.info("This file is already loaded in Invariant panel.")
             return
 
         if not isinstance(data_item, list):

@@ -14,6 +14,8 @@ import numpy as np
 from periodictable import formula, nsf
 from scipy.spatial.transform import Rotation
 
+logger = logging.getLogger(__name__)
+
 
 def decode(s):
     return s.decode() if isinstance(s, bytes) else s
@@ -318,12 +320,12 @@ class GenSAS:
         # ensure both files are point or element type- not a mixture
         if (nuc_data.is_elements and not mag_data.is_elements) or \
            (not nuc_data.is_elements and mag_data.is_elements):
-            logging.error("ERROR: files must both be point-wise or element-wise")
+            logger.error("ERROR: files must both be point-wise or element-wise")
             return False
 
         # check each file has the same number of coords
         if nuc_data.pos_x.size != mag_data.pos_x.size:
-            logging.error("ERROR: files have a different number of data points")
+            logger.error("ERROR: files have a different number of data points")
             return False
 
         # check the coords match up 1-to-1
@@ -373,12 +375,12 @@ class GenSAS:
                     points_already_match = False
             else:
                 # if sorted lists not equal then data points aren't equal
-                logging.error("ERROR: files have different real space position data")
+                logger.error("ERROR: files have different real space position data")
                 return False
 
         if nuc_data.are_elements_array != mag_data.are_elements_array:
             # If files don't have the same value for this they do not match anyway.
-            logging.error("ERROR: files must contain the same elements")
+            logger.error("ERROR: files must contain the same elements")
             return False
         if nuc_data.are_elements_array: # already in np array - can check rapidly
             if points_already_match:
@@ -406,7 +408,7 @@ class GenSAS:
             nuc_elements_sort_order = np.lexsort(np.transpose(nuc_elements_sort))
             mag_elements_sort_order = np.lexsort(np.transpose(mag_elements_sort))
             if not np.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
-                logging.error("ERROR: files must contain the same elements")
+                logger.error("ERROR: files must contain the same elements")
                 return False
 
             # if the sorted elements did match we must reposition all the 'per cell' values so the files match
@@ -452,7 +454,7 @@ class GenSAS:
             nuc_lengths = [len(i) for i in nuc_elements]
             mag_lengths = [len(i) for i in mag_elements]
             if max(nuc_lengths) != max(mag_lengths): # if files have different lengthed elements cannot match
-                logging.error("ERROR: files must contain the same elements")
+                logger.error("ERROR: files must contain the same elements")
                 return False
 
             # sort element vertices into a np array with '-1' filling up the empty slots
@@ -467,7 +469,7 @@ class GenSAS:
             nuc_elements_sort_order = np.lexsort(np.transpose(nuc_elements_sort))
             mag_elements_sort_order = np.lexsort(np.transpose(mag_elements_sort))
             if not np.array_equal(nuc_elements_sort[nuc_elements_sort_order, :], mag_elements_sort[mag_elements_sort_order, :]):
-                logging.error("ERROR: files must contain the same elements")
+                logger.error("ERROR: files must contain the same elements")
                 return False
 
             # if the sorted elements did match we must reposition all the 'per cell' values so the files match
@@ -523,32 +525,32 @@ class VTKReader:
             #first lines should be a file type of the form "# vtk DataFile Version x.x"
             header = next(lines)
             if len(header) < 23:
-                logging.error("not a vtk file")
+                logger.error("not a vtk file")
                 return None
             elif header[:23] != "# vtk DataFile Version ":
-                logging.error("not a vtk file")
+                logger.error("not a vtk file")
                 return None
             elif float(header[23:]) > 3:
-                logging.error("vtk file version > 3.0")
+                logger.error("vtk file version > 3.0")
                 return None
             #skip title
             next(lines)
             #check file is ascii not binary
             if next(lines)[:5].upper() != "ASCII":
-                logging.error("cannot read binary vtk")
+                logger.error("cannot read binary vtk")
                 return None
             # determine dataset format and call appropriate loader to return a MagSLD of suitable type
             dataset_format = [item.strip() for item in next(lines).split()]
             if dataset_format[0].upper() != "DATASET":
-                logging.error("vtk file must have geometry section to be used in calulator")
+                logger.error("vtk file must have geometry section to be used in calulator")
                 return None
             if dataset_format[1].upper() == "UNSTRUCTURED_GRID":
                 return self.unstructured_grid_read(lines, path)
             else:
-                logging.error("vtk dataset format " + dataset_format + " is not supported")
+                logger.error("vtk dataset format " + dataset_format + " is not supported")
                 return None
         except Exception as error:
-            logging.exception(error)
+            logger.exception(error)
             return None
 
     def unstructured_grid_read(self, lines, path):
@@ -565,7 +567,7 @@ class VTKReader:
         # get information on points
         point_data = next(lines).split()
         if point_data[0].upper() != "POINTS":
-            logging.error("Expected POINTS as next section in vtk file format unstructured grid")
+            logger.error("Expected POINTS as next section in vtk file format unstructured grid")
         num_points = int(point_data[1])
         # ignore datatype  - all can be read as float in python
         # cannot read in with np as data not guaranteed to be on a grid with new lines after each point - although this is standard
@@ -578,7 +580,7 @@ class VTKReader:
         # read in the element data
         element_data = next(lines).split()
         if element_data[0].upper() != "CELLS":
-            logging.error("Expected CELLS as next section in vtk file format unstructured grid")
+            logger.error("Expected CELLS as next section in vtk file format unstructured grid")
         num_elements = int(element_data[1])
         len_elements = int(element_data[2])
         # must load and store carfeully: filetype does not guarantee that elements are line by line
@@ -597,16 +599,16 @@ class VTKReader:
             index+=element_size+1
         #sanity check the file has the same number of elements as stated
         if num_elements != len(elements_sorted):
-            logging.error("error while reading cells - specified number is inconsistent with data")
+            logger.error("error while reading cells - specified number is inconsistent with data")
             return None
         #get information on the element types
         element_type_data = next(lines).split()
         if element_type_data[0].upper() != "CELL_TYPES":
-            logging.error("Expected CELL_TYPES as next section in vtk file format unstructured grid")
+            logger.error("Expected CELL_TYPES as next section in vtk file format unstructured grid")
         num_element_types = int(element_type_data[1])
         # sanity check same number of element types as elements
         if num_element_types != num_elements:
-            logging.error("error while reading cell types - specified number is inconsistent with cells")
+            logger.error("error while reading cell types - specified number is inconsistent with cells")
             return None
         element_types = []
         while len(element_types) < num_element_types:
@@ -634,7 +636,7 @@ class VTKReader:
                     i += 1
         #convert point data to element data - for now a standard mean function
         if len(point_data) > 0:
-            logging.info("Attributes provided per point - averaging to produce 'per cell' data")
+            logger.info("Attributes provided per point - averaging to produce 'per cell' data")
             if max(elements_sizes) != min(elements_sizes):
                 # If the number of vertices per cell is not constant then add 'dummy values'
                 # so that array is not jagged - even with additional points np can calulate
@@ -670,7 +672,7 @@ class VTKReader:
             elif element_data[0][2] == 3:
                 sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
             else:
-                logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear or magnetic SLD")
+                logger.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear or magnetic SLD")
                 return None
         elif len(element_data) == 2:
             if element_data[0][2] == 1 and element_data[1][2] == 3:
@@ -680,10 +682,10 @@ class VTKReader:
                 sld_n = element_data[1][0]
                 sld_mx, sld_my, sld_mz = np.hsplit(element_data[0][0], 3)
             else:
-                logging.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear and magnetic SLDs")
+                logger.error("Data attributes did not have 1 or 3 components - cannot interpret as nuclear and magnetic SLDs")
                 return None
         else:
-            logging.error("Data attributes cannot be interpreted as nuclear and/or magnetic SLDs")
+            logger.error("Data attributes cannot be interpreted as nuclear and/or magnetic SLDs")
             return None
         # need to flatten as hsplit leaves a length 1 axis
         output = MagSLD(pos_x.flatten(), pos_y.flatten(), pos_z.flatten(), sld_n.flatten(), sld_mx.flatten(), sld_my.flatten(), sld_mz.flatten())
@@ -727,16 +729,16 @@ class VTKReader:
             first_set = [num_points, "POINT_DATA", "points"]
             second_set = [num_elements, "CELL_DATA", "cells"]
         else:
-            logging.error("error while reading file line: " + data_type_info + ". Expected data attributes POINT_DATA or CELL_DATA")
+            logger.error("error while reading file line: " + data_type_info + ". Expected data attributes POINT_DATA or CELL_DATA")
             return None
         if int(data_type_info[1]) != first_set[0]:
-            logging.error("error while reading " + first_set[1] + " attributes - incompatible with number of " + first_set[2])
+            logger.error("error while reading " + first_set[1] + " attributes - incompatible with number of " + first_set[2])
             return None
         first_data, nextLine = self.load_attribute(lines, first_set[0])
         if first_data is None:
             return None
         if int(nextLine.split()[1]) != second_set[0]:
-            logging.error("error while reading " + second_set[1] + " attributes - incompatible with number of " + second_set[2])
+            logger.error("error while reading " + second_set[1] + " attributes - incompatible with number of " + second_set[2])
             return None
         second_data, _ = self.load_attribute(lines, second_set[0]) # cell_data already read by prev. function so starts from correct position
         if second_data is None:
@@ -785,7 +787,7 @@ class VTKReader:
                 dataName = nextLineSplit[1].strip()
                 components = 3
             else:
-                logging.error("Data type " + nextLineSplit[0].strip() + " is not currently accepted")
+                logger.error("Data type " + nextLineSplit[0].strip() + " is not currently accepted")
                 return None, None
             while len(attribute) < size*components:
                 #casting to int and float can handle whitespace - shouldn't need to strip()
@@ -835,7 +837,7 @@ class VTKReader:
                     [e[2], e[3], e[4]],
                     [e[1], e[2], e[4]]]
         else:
-            logging.error("element type (CELL_TYPE=" + str(element_type) + ") is not supported - skipping element")
+            logger.error("element type (CELL_TYPE=" + str(element_type) + ") is not supported - skipping element")
             return None
 
     def get_vols(self, e, element_type, v):
@@ -953,7 +955,7 @@ class OMF2SLD:
                 z_dir2 *= z_dir2
                 mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
             except Exception as exc:
-                logging.error(exc)
+                logger.error(exc)
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask],
                              self.pos_z[mask], self.sld_n[mask],
                              self.mx[mask], self.my[mask], self.mz[mask])
@@ -1052,7 +1054,7 @@ class OMFReader:
                         mz.append(_mz)
                     except Exception as exc:
                         # Skip non-data lines
-                        logging.error(str(exc)+" when processing %r"%line)
+                        logger.error(str(exc)+" when processing %r"%line)
                 elif line:
                 # Reading Header; Segment count ignored
                     s_line = line.split(":", 1)
@@ -1073,7 +1075,7 @@ class OMFReader:
                         if meshunit.count("m") < 1:
                             msg = "Error: \n"
                             msg += "We accept only m as meshunit"
-                            logging.error(msg)
+                            logger.error(msg)
                             return None
                     if s_line[0].lower().count("xbase") > 0:
                         xbase = s_line[1].strip()
@@ -1110,7 +1112,7 @@ class OMFReader:
                         if valueunit.count("mT") < 1 and valueunit.count("A/m") < 1:
                             msg = "Error: \n"
                             msg += "We accept only mT or A/m as valueunit"
-                            logging.error(msg)
+                            logger.error(msg)
                             return None
                         elif "mT" in valueunit or "A/m" in valueunit:
                             valueunit = valueunit.split(" ", 1)
@@ -1152,7 +1154,7 @@ class OMFReader:
         except Exception:
             msg = "%s is not supported: \n" % path
             msg += "We accept only Text format OMF file."
-            logging.warning(msg)
+            logger.warning(msg)
             return None
 
 class PDBReader:
@@ -1349,7 +1351,7 @@ class SLDReader:
         except Exception:
             data = None
         if data is None or data.shape[0] not in (4, 6, 7, 8):
-            logging.error("%r is not an sld file" % path)
+            logger.error("%r is not an sld file" % path)
             return None
         if data.shape[0] == 4:
             x, y, z, sld = data[:4]
@@ -1379,7 +1381,7 @@ class SLDReader:
         if data is None:
             raise ValueError("Missing the data to save.")
         if data.is_elements:
-            logging.error("cannot save finite element data as a .sld file")
+            logger.error("cannot save finite element data as a .sld file")
             return
         x, y, z = data.pos_x, data.pos_y, data.pos_z
         sld_n = data.sld_n if data.sld_n is not None else np.zeros_like(x)
@@ -2203,7 +2205,7 @@ def _setup_realspace_path():
                                  '..', '..', '..', '..', '..',
                                  'sasmodels', 'explore'))
         sys.path.insert(0, path)
-        logging.info("inserting %r into python path for realspace", path)
+        logger.info("inserting %r into python path for realspace", path)
 
 if __name__ == "__main__":
     _setup_realspace_path()

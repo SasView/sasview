@@ -15,6 +15,8 @@ from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 BG_WHITE = "background-color: rgb(255, 255, 255); color: rgb(0, 0, 0);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
+logger = logging.getLogger(__name__)
+
 
 class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def __init__(self, parent=None):
@@ -131,7 +133,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             data2 = self.data2
             output = eval("data1 %s data2" % operator)
         except Exception as ex:
-            logging.error(ex)
+            logger.error(ex)
             return
 
         self.output = output
@@ -267,13 +269,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
             if input_to_check is None or input_to_check == '':
                 msg = 'DataOperation: Number requires a float number'
-                logging.warning(msg)
+                logger.warning(msg)
                 self.txtNumber.setStyleSheet(BG_RED)
 
             elif float(self.txtNumber.text()) == 0.:
                 # should be check that 0 is not chosen
                 msg = 'DataOperation: Number requires a non zero number'
-                logging.warning(msg)
+                logger.warning(msg)
                 self.txtNumber.setStyleSheet(BG_RED)
 
             else:
@@ -296,13 +298,13 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
                 print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
-                logging.error('Cannot compute data of different dimensions')
+                logger.error('Cannot compute data of different dimensions')
                 return False
 
             elif self.data1.__class__.__name__ == 'Data1D'\
                     and (len(self.data2.x) != len(self.data1.x) or
                              not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
-                logging.error('Cannot compute 1D data of different lengths')
+                logger.error('Cannot compute 1D data of different lengths')
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
                 return False
@@ -317,7 +319,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
                          ):
                 self.cbData1.setStyleSheet(BG_RED)
                 self.cbData2.setStyleSheet(BG_RED)
-                logging.error('Cannot compute 2D data of different lengths')
+                logger.error('Cannot compute 2D data of different lengths')
                 return False
 
             else:
@@ -332,12 +334,12 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
 
         if name_to_check is None or name_to_check == '':
             self.txtOutputData.setStyleSheet(BG_RED)
-            logging.warning('No output name')
+            logger.warning('No output name')
             return False
 
         elif name_to_check in self.list_data_items:
             self.txtOutputData.setStyleSheet(BG_RED)
-            logging.warning('The Output data name already exists')
+            logger.warning('The Output data name already exists')
             return False
 
         else:
