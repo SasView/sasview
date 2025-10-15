@@ -415,22 +415,19 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         elif param_name == 'nbins':
             # Can't be negative or 0
             if param_value < 1:
-                logger.warning("Number of bins cannot be less than or equal"\
-                                 "to 0. Please adjust.")
+                logger.warning("Number of bins cannot be less than or equal to 0. Please adjust.")
                 isValid = False
         elif param_name == 'center_x':
             # Keep the full ROI box within the data (only moving x here)
             if (param_value + self.half_width) >= self.data.xmax or \
                     (param_value- self.half_width) <= self.data.xmin:
-                logger.warning("The ROI must be fully contained within the"\
-                                "2D data. Please adjust")
+                logger.warning("The ROI must be fully contained within the 2D data. Please adjust")
                 isValid = False
         elif param_name == 'center_y':
             # Keep the full ROI box within the data (only moving y here)
             if (param_value + self.half_height) >= self.data.ymax or \
                     (param_value - self.half_height) <= self.data.ymin:
-                logger.warning("The ROI must be fully contained within the"\
-                                "2D data. Please adjust")
+                logger.warning("The ROI must be fully contained within the 2D data. Please adjust")
                 isValid = False
         return isValid
 

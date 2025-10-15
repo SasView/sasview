@@ -186,7 +186,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
 
             dst_filename = GuiUtils.findNextFilename(src_filename, plugin_dir)
             if not dst_filename:
-                logger.error("Could not find appropriate filename for "+src_file)
+                logger.error("Could not find appropriate filename for " + src_file)
             dst_file = os.path.join(plugin_dir, dst_filename)
             copyfile(src_file, dst_file)
             self.parent.communicate.customModelDirectoryChanged.emit()

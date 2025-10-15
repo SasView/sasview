@@ -77,7 +77,7 @@ class ConnectionProxy:
                     this_pac_url, timeout=self.timeout)
                 logger.debug('Succeeded (%s)...' % this_pac_url)
             except Exception:
-                logger.debug('Failled (%s)...' % this_pac_url)
+                logger.debug('Failed (%s)...' % this_pac_url)
                 continue
             pacStr = response.read()
             possProxies = re.findall(
@@ -117,7 +117,7 @@ class ConnectionProxy:
         req = urllib.request.Request(self.url)
         response = None
         try:
-            logger.debug("Trying Direct connection to %s..."%self.url)
+            logger.debug("Trying direct connection to %s..."%self.url)
             response = urllib.request.urlopen(req, timeout=self.timeout)
         except Exception as e:
             logger.debug("Failed!")
@@ -140,9 +140,9 @@ class ConnectionProxy:
                         logger.debug("Failed!")
                         logger.debug(e)
         if response is not None:
-            logger.debug("The connection to %s was successful."%self.url)
+            logger.debug("The connection to %s was successful. "%self.url)
         else:
-            logger.warning("Connection to %s failed..."%self.url)
+            logger.warning("Connection to %s failed... "%self.url)
         return response
 
 
