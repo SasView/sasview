@@ -1,5 +1,4 @@
 # Alphabetized list of OS and version agnostic dependencies
-appdirs
 bumps
 cffi
 docutils
