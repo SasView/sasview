@@ -2,7 +2,6 @@ AccessControl==7.2
 Acquisition==6.1
 alabaster==1.0.0
 altgraph==0.17.4
-appdirs==1.4.4
 arabic-reshaper==3.0.0
 asn1crypto==1.5.1
 astroid==3.3.9
