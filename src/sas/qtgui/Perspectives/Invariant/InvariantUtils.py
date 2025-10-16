@@ -8,6 +8,8 @@ WIDGETS = enum(
     "W_SCALE",
     "W_CONTRAST",
     "W_POROD_CST",
+    "W_VOL_FRAC_1",
+    "W_VOL_FRAC_2",
     "W_EX_QMIN",
     "W_EX_QMAX",
     "W_ENABLE_LOWQ",
@@ -25,6 +27,8 @@ WIDGETS = enum(
     # results
     "W_VOLUME_FRACTION",
     "W_VOLUME_FRACTION_ERR",
+    "W_CONTRAST_OUT",
+    "W_CONTRAST_OUT_ERR",
     "W_SPECIFIC_SURFACE",
     "W_SPECIFIC_SURFACE_ERR",
     "W_INVARIANT",
