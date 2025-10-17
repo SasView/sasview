@@ -132,8 +132,81 @@ jobs:
            ~/.cache/cache-wheel/*.whl
           if-no-files-found: error
 
+  build-sasview:
+    needs: [build-dependencies]
+
+    name: Build wheel sasview
+
+    env:
+      UV_SYSTEM_PYTHON: 1
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obtain SasView source from git
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.11
+
+      - name: Install uv utilities to speed up python module installation
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          prune-cache: false
+
+      ### Installation of build-dependencies
+
+      - name: Install system library build-dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev libcairo2-dev
+
+      - name: Fetch wheels of sibling projects
+        uses: actions/download-artifact@v5
+        with:
+          path: dist/
+          pattern: build-dependency-*-wheel
+          merge-multiple: true
+
+      - name: Install correct versions of sibling projects
+        run: |
+          uv pip install dist/*whl
+
+      - name: Install Python dependencies
+        run: |
+          uv pip install -r build_tools/requirements-dev.txt
+
+      ### Actual building of sasview
+
+      - name: Build sasview
+        run: |
+          python -m build --no-isolation --sdist --wheel
+
+      - name: Publish sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: sasview-sdist
+          path: |
+            dist/sasview*tar*
+          if-no-files-found: error
+
+      - name: Publish wheel package
+        uses: actions/upload-artifact@v4
+        with:
+          name: sasview-wheel
+          path: |
+            dist/sasview*whl
+          if-no-files-found: error
+
   build-matrix:
-    needs: [matrix, build-dependencies]
+    needs: [matrix, build-sasview]
 
     strategy:
       fail-fast: false
@@ -212,26 +285,16 @@ jobs:
         if: ${{ env.RELEASE_BRANCH_BUILD }}
         run: |
           uv pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
-
-      ### Actual building of sasview
-
-      - name: Build sasview
-        run: |
-          python -m build --no-isolation --sdist --wheel
+      - name: Fetch sasview wheel
+        uses: actions/download-artifact@v5
+        with:
+          path: dist/
+          pattern: sasview-wheel
+          merge-multiple: true
 
       - name: Install sasview wheel
         run: |
           uv pip install dist/sasview*whl
-
-      - name: Publish sdist and wheel package
-        uses: actions/upload-artifact@v4
-        if: ${{ matrix.installer && startsWith(matrix.os, 'ubuntu') }}
-        with:
-          name: sasview-wheel
-          path: |
-            dist/sasview*whl
-            dist/sasview*tar*
-          if-no-files-found: ignore
 
       ### Run tests (if enabled)
 
