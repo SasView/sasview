@@ -1,12 +1,12 @@
-from PySide6.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QMainWindow, QDockWidget
-from PySide6.QtCore import Qt
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
-from typing import List
-import matplotlib.figure
-from PlotTreeItems import PlottableItem
-from PlotModifiers import PlotModifier, ModifierLinecolor, ModifierLinestyle, ModifierColormap
 
+import matplotlib.figure
 import numpy as np
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
+from PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle, PlotModifier
+from PlotTreeItems import PlottableItem
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QDockWidget, QMainWindow, QTabWidget, QVBoxLayout, QWidget
+
 
 class ClickableCanvas(FigureCanvasQTAgg):
     """
@@ -57,7 +57,7 @@ class SubTabs(QTabWidget):
         super().__init__()
 
         self.datacollector = datacollector
-        self.figures: List[matplotlib.figure] = []
+        self.figures: list[matplotlib.figure] = []
         # iterate through subtabs
         for i in range(tabitem.childCount()):
             # add subplots

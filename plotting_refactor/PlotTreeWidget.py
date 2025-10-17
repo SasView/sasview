@@ -1,9 +1,11 @@
-from PySide6.QtWidgets import QTreeWidget
-from PySide6.QtCore import QRect, Signal, QMimeData, QByteArray
-from PySide6.QtGui import QDrag
-from PlotTreeItems import PlotItem, PlottableItem
-from PlotModifiers import PlotModifier
 import ctypes
+
+from PlotModifiers import PlotModifier
+from PlotTreeItems import PlotItem, PlottableItem
+from PySide6.QtCore import QByteArray, QMimeData, QRect, Signal
+from PySide6.QtGui import QDrag
+from PySide6.QtWidgets import QTreeWidget
+
 
 class PlotTreeWidget(QTreeWidget):
     dropSignal = Signal(int, int)

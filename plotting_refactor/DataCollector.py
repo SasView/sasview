@@ -1,6 +1,7 @@
-from PySide6 import QtWidgets
 import RandomDatasetCreator
 from Dataset import Dataset
+from PySide6 import QtWidgets
+
 
 class DataCollector:
     """
