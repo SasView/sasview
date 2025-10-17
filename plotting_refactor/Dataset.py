@@ -1,5 +1,6 @@
 import time
 
+
 class Dataset:
     """
     Generic dataset class to hold all of the generated data for one fitpage with its generated id in one place.
