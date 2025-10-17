@@ -154,7 +154,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """Connect the buttons to their appropriate slots."""
 
         self.cmdExtract.clicked.connect(self._run)
-        self.cmdExtract.setEnabled(False)
+        self.disable_go_button("No data loaded")
 
         self.cmdSave.clicked.connect(self.on_save_transformed)
         self.cmdSave.setEnabled(False)
@@ -302,6 +302,16 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def _run(self):
 
+        self.update_readonly()
+
+        if self.go_disabled:
+            msg = "Go Button disabled."
+            msg += "\nReason: " + self.go_disabled_reason
+            dialog = QtWidgets.QMessageBox(self, text=msg)
+            dialog.setWindowTitle("Go Button disabled")
+            dialog.exec()
+            return
+
         if self._running:
             return
 
@@ -410,14 +420,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def enable_go_button(self):
         self.cmdExtract.setEnabled(True)
+        self.cmdExtract.setText("Go")
+        self.go_disabled = False
+        self.go_disabled_reason = None
 
     def disable_go_button(self, reason: str):
-        self.cmdExtract.setEnabled(False)
-        msg = "Go Button disabled."
-        msg += "\nReason: " + reason
-        dialog = QtWidgets.QMessageBox(self, text=msg)
-        dialog.setWindowTitle("Go Button disabled")
-        dialog.exec()
+        self.cmdExtract.setText("Go (disabled)")
+        self.go_disabled = True
+        self.go_disabled_reason = reason
 
     def check_extrapolation_entry(self, fits_enabled: list[str]):
         """ Disable Go button if extrapolation ranges empty or invalid """
@@ -427,17 +437,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         if "background" in fits_enabled:
             if self.txtBackground.text() == "":
-                self.disable_go_button("Background not set")
+                self.disable_go_button("Extrapolation values not set")
                 return
 
         if "guinier" in fits_enabled:
             if (self.txtGuinierA.text() == "" or self.txtGuinierB.text() == ""):
-                self.disable_go_button("Guinier not set")
+                self.disable_go_button("Extrapolation values not set")
                 return
 
         if "porod" in fits_enabled:
             if (self.txtPorodK.text() == "" or self.txtPorodSigma.text() == ""):
-                self.disable_go_button("Porod not set")
+                self.disable_go_button("Extrapolation values not set")
                 return
 
         self.enable_go_button()
