@@ -62,19 +62,20 @@ jobs:
         run: python .github/workflows/matrix.py >> $GITHUB_OUTPUT
 
 
-  builddeps:
+  build-dependencies:
     needs: [ruff]
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        package: [
-          ["sasdata", "sasdata"],
-          ["sasmodels", "sasmodels"]
-        ]
+        dependency:
+          # the ref can be a branch or a tag
+          - { name: "sasdata", url: "https://github.com/SasView/sasdata.git", ref: "master" }
+          - { name: "sasmodels",  url: "https://github.com/SasView/sasmodels.git", ref: "master" }
+          # - { name: "bumps", url: "https://github.com/bumps/bumps.git", ref: "v1.0.3" }
 
-    name: Build wheel "${{ matrix.package[0] }}"
+    name: Build wheel ${{ matrix.dependency.name }}
 
     steps:
       - name: Set up Python
@@ -82,22 +83,57 @@ jobs:
         with:
           python-version: 3.11
 
-      ### Compilation of build-dependencies
+      ### Check if this wheel is already cached
 
-      - name: Build wheel of ${{ matrix.package[0] }}
+      - name: Get latest commit SHA for ${{ matrix.dependency.name }}
+        id: get-sha
         run: |
-          python -m pip wheel --verbose ${{ matrix.package[1] }}
+          REF="${{ matrix.dependency.ref }}"
+          URL="${{ matrix.dependency.url }}"
 
-      - name: Store wheel for use
+          # Try as branch first, then as tag
+          SHA=$(git ls-remote "$URL" "refs/heads/$REF" | cut -f1)
+          if [ -z "$SHA" ]; then
+            SHA=$(git ls-remote "$URL" "refs/tags/$REF" | cut -f1)
+          fi
+
+          echo "Using $REF ($SHA)"
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+
+      - name: Obtain wheel cache
+        id: cache-wheel
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/cache-wheel/
+          key: wheel-${{ matrix.dependency.name }}-${{ steps.get-sha.outputs.sha }}
+
+      ### Build the wheel for the build-dependency
+
+
+      - name: Install build tools (cache miss)
+        if: steps.cache-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+
+      - name: Build wheel for ${{ matrix.dependency.name }} (cache miss)
+        if: steps.cache-wheel.outputs.cache-hit != 'true'
+        run: |
+          git clone --branch ${{ matrix.dependency.ref }} ${{ matrix.dependency.url }} ${{ matrix.dependency.name }}
+          cd ${{ matrix.dependency.name }}
+          python -m build --wheel
+          mkdir -p  ~/.cache/cache-wheel/
+          cp dist/*whl ~/.cache/cache-wheel/
+
+      - name: Store wheel of ${{ matrix.dependency.name }} for use
         uses: actions/upload-artifact@v4
         with:
-          name: sasview-wheel-${{ matrix.package[0] }}
+          name: build-dependency-${{ matrix.dependency.name }}-wheel
           path: |
-            ${{ matrix.package[0] }}*whl
-          if-no-files-found: ignore
+           ~/.cache/cache-wheel/*.whl
+          if-no-files-found: error
 
   build-matrix:
-    needs: [matrix, builddeps]
+    needs: [matrix, build-dependencies]
 
     strategy:
       fail-fast: false
@@ -157,7 +193,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           path: dist/
-          pattern: sasview-wheel-*
+          pattern: build-dependency-*-wheel
           merge-multiple: true
 
       - name: Install correct versions of sibling projects
