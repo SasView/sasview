@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QTreeWidgetItem
 
+
 class PlotPageItem(QTreeWidgetItem):
     def __init__(self, parent, name, fitpage_index, data_id):
         super().__init__(parent, name)
