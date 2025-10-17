@@ -138,7 +138,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Warning)
             msgbox.setWindowTitle('Warning')
-            msgbox.setText('Background is higher than the minimum extrapolated value')
+            msgbox.setText('Background is higher than the minimum extrapolated value. Subtracting background value will result in negative intensities')
             msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             _ = msgbox.exec_()
         else:
@@ -202,6 +202,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.fitGuinier.stateChanged.connect(self.update_readonly)
         self.fitPorod.stateChanged.connect(self.update_readonly)
 
+        # Connect text fields to update_readonly
+        self.txtBackground.textEdited.connect(self.update_readonly)
+        self.txtGuinierA.textEdited.connect(self.update_readonly)
+        self.txtGuinierB.textEdited.connect(self.update_readonly)
+        self.txtPorodK.textEdited.connect(self.update_readonly)
+        self.txtPorodSigma.textEdited.connect(self.update_readonly)
+
     def set_text_enable(self, state: bool):
         self.txtLowerQMax.setEnabled(state)
         self.txtUpperQMin.setEnabled(state)
@@ -234,17 +241,17 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_QCUTOFF,
                            QtGui.QStandardItem("0.22"))
         self.model.setItem(WIDGETS.W_BACKGROUND,
-                           QtGui.QStandardItem("0"))
+                           QtGui.QStandardItem(""))
         #self.model.setItem(W.W_TRANSFORM,
         #                   QtGui.QStandardItem("Fourier"))
         self.model.setItem(WIDGETS.W_GUINIERA,
-                           QtGui.QStandardItem("0.0"))
+                           QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_GUINIERB,
-                           QtGui.QStandardItem("0.0"))
+                           QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PORODK,
-                           QtGui.QStandardItem("0.0"))
+                           QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PORODSIGMA,
-                           QtGui.QStandardItem("0.0"))
+                           QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_CORETHICK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_INTTHICK, QtGui.QStandardItem(str(0)))
         self.model.setItem(WIDGETS.W_HARDBLOCK, QtGui.QStandardItem(str(0)))
@@ -401,15 +408,67 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
         self.update_readonly()
 
+    def enable_go_button(self):
+        self.cmdExtract.setEnabled(True)
+
+    def disable_go_button(self, reason: str):
+        self.cmdExtract.setEnabled(False)
+        msg = "Go Button disabled."
+        msg += "\nReason: " + reason
+        dialog = QtWidgets.QMessageBox(self, text=msg)
+        dialog.setWindowTitle("Go Button disabled")
+        dialog.exec()
+
+    def check_extrapolation_entry(self, fits_enabled: list[str]):
+        """ Disable Go button if extrapolation ranges empty or invalid """
+        if fits_enabled == []:
+            self.disable_go_button("No fits enabled")
+            return
+
+        if "background" in fits_enabled:
+            if self.txtBackground.text() == "":
+                self.disable_go_button("Background not set")
+                return
+
+        if "guinier" in fits_enabled:
+            if (self.txtGuinierA.text() == "" or self.txtGuinierB.text() == ""):
+                self.disable_go_button("Guinier not set")
+                return
+
+        if "porod" in fits_enabled:
+            if (self.txtPorodK.text() == "" or self.txtPorodSigma.text() == ""):
+                self.disable_go_button("Porod not set")
+                return
+
+        self.enable_go_button()
 
     def update_readonly(self):
-        # Set text fields to read-only if the corresponding fit is enabled
-        self.txtBackground.setReadOnly(True) if self.fitBackground.isChecked() else self.txtBackground.setReadOnly(False)
-        self.txtGuinierA.setReadOnly(True)   if self.fitGuinier.isChecked()    else self.txtGuinierA.setReadOnly(False)
-        self.txtGuinierB.setReadOnly(True)   if self.fitGuinier.isChecked()    else self.txtGuinierB.setReadOnly(False)
-        self.txtPorodK.setReadOnly(True)     if self.fitPorod.isChecked()      else self.txtPorodK.setReadOnly(False)
-        self.txtPorodSigma.setReadOnly(True) if self.fitPorod.isChecked()      else self.txtPorodSigma.setReadOnly(False)
-        self.cmdExtract.setEnabled(True) if (self.fitBackground.isChecked() or self.fitGuinier.isChecked() or self.fitPorod.isChecked()) else self.cmdExtract.setEnabled(False)
+        """
+        Disable text fields if the corresponding fit is enabled.
+        Disable Go button if any of the text fields are empty.
+        """
+        fits_enabled = []
+        if self.fitBackground.isChecked():
+            fits_enabled.append("background")
+            self.txtBackground.setEnabled(True)
+        else:
+            self.txtBackground.setEnabled(False)
+        if self.fitGuinier.isChecked():
+            fits_enabled.append("guinier")
+            self.txtGuinierA.setEnabled(True)
+            self.txtGuinierB.setEnabled(True)
+        else:
+            self.txtGuinierA.setEnabled(False)
+            self.txtGuinierB.setEnabled(False)
+        if self.fitPorod.isChecked():
+            fits_enabled.append("porod")
+            self.txtPorodK.setEnabled(True)
+            self.txtPorodSigma.setEnabled(True)
+        else:
+            self.txtPorodK.setEnabled(False)
+            self.txtPorodSigma.setEnabled(False)
+
+        self.check_extrapolation_entry(fits_enabled)
 
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
@@ -488,7 +547,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             dialog.setWindowTitle("Data already loaded")
 
             # checkbox to reset Q range to defaults
-            checkbox = QtWidgets.QCheckBox("Reset Q range to defaults")
+            checkbox = QtWidgets.QCheckBox("Reset extrapolation ranges to dataset defaults")
             dialog.setCheckBox(checkbox)
             checkbox.setChecked(False)
 
@@ -530,7 +589,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         log_data_min = math.log(min(self.data.x))
         log_data_max = math.log(max(self.data.x))
 
-        self.cmdExtract.setEnabled(True)
+        self.enable_go_button()
 
         def fractional_position(f):
             return math.exp(f*log_data_max + (1-f)*log_data_min)
