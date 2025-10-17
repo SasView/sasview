@@ -1,13 +1,12 @@
-from PySide6 import QtWidgets
-
-from UI.DataViewerUI import Ui_DataViewer
-from PlotWidget import PlotWidget
-from DataTreeWidget import DataTreeWidget
-from PlotTreeWidget import PlotTreeWidget
 from DataCollector import DataCollector
-from DataTreeItems import PlotPageItem, DataItem
-from PlotTreeItems import TabItem, SubTabItem, PlotItem, PlottableItem
-from PlotModifiers import ModifierLinecolor, ModifierLinestyle, ModifierColormap
+from DataTreeItems import DataItem, PlotPageItem
+from DataTreeWidget import DataTreeWidget
+from PlotModifiers import ModifierColormap, ModifierLinecolor, ModifierLinestyle
+from PlotTreeItems import PlotItem, PlottableItem, SubTabItem, TabItem
+from PlotTreeWidget import PlotTreeWidget
+from PlotWidget import PlotWidget
+from PySide6 import QtWidgets
+from UI.DataViewerUI import Ui_DataViewer
 
 
 class DataViewer(QtWidgets.QWidget, Ui_DataViewer):

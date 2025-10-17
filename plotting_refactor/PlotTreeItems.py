@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QTreeWidgetItem
 
+
 class TabItem(QTreeWidgetItem):
     """
     Class for representation in the PlotTreeWidget. Saves the fitpage index to know, which data needs to be plotted

@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QTabWidget
 from SubTabs import SubTabs
 
+
 class PlotWidget(QTabWidget):
     def __init__(self, dataviewer, datacollector):
         super().__init__()
