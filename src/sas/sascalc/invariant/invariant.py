@@ -933,7 +933,7 @@ class InvariantCalculator:
             msg = "Could not compute the volume fraction: inconsistent results"
             raise RuntimeError(msg)
 
-    def get_SLD_contrast(self, volume, extrapolation=None):
+    def get_contrast(self, volume, extrapolation=None):
         """
         Compute contrast is deduced as follows: ::
 
