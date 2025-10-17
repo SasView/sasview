@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QTreeWidgetItem
 
+
 class PlotModifier(QTreeWidgetItem):
     def __init__(self, parent, name):
         super().__init__(parent, name)
