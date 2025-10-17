@@ -39,6 +39,7 @@ from .util import WIDGETS, safe_float
 
 RED = "QLineEdit { background-color: rgb(244, 170, 164) }"
 NORMAL = ""
+logger = logging.getLogger(__name__)
 
 
 class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
@@ -353,7 +354,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
                 calculator.run()
 
             except CalculationError as e:
-                logging.error("CorfuncCalculator could not complete. " + e.msg)
+                logger.error("CorfuncCalculator could not complete. " + e.msg)
 
             self._calculator = calculator
 
@@ -404,7 +405,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             self.cmdSaveExtrapolation.setEnabled(True)
 
         except ValueError as e:
-            logging.error(repr(e))
+            logger.error(repr(e))
             self.cmdSave.setEnabled(False)
             self.cmdSaveExtrapolation.setEnabled(False)
             self.set_background_warning()
@@ -775,12 +776,12 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         """
 
         if self._calculator is None:
-            logging.error("Save transformed: No calculation present")
+            logger.error("Save transformed: No calculation present")
             return
 
         transformed = self._calculator.transformed
         if transformed is None:
-            logging.error("Save transformed: No transformed data present")
+            logger.error("Save transformed: No transformed data present")
             return
 
         caption = "Save As"
@@ -813,10 +814,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
     def on_save_extrapolation(self):
 
         if self.data is None:
-            logging.error("Save extrapolation: No data present")
+            logger.error("Save extrapolation: No data present")
 
         if self._calculator is None:
-            logging.error("Save extrapolation: No calculation present")
+            logger.error("Save extrapolation: No calculation present")
             return
 
         if self._calculator.extrapolation_function is not None:
@@ -824,7 +825,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
             window = SaveExtrapolatedPopup(q, self._calculator.extrapolation_function)
             window.exec_()
         else:
-            logging.error("Save extrapolation: No extrapolation function present")
+            logger.error("Save extrapolation: No extrapolation function present")
 
 
 

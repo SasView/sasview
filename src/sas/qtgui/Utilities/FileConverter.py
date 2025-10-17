@@ -21,6 +21,8 @@ from sas.system import version
 
 from .UI.FileConverterUI import Ui_FileConverterUI
 
+logger = logging.getLogger(__name__)
+
 
 class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
     """
@@ -139,10 +141,10 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
 
         except (OSError, ValueError) as ex:
             msg = str(ex)
-            logging.error(msg)
+            logger.error(msg)
             return
         # everything converted, notify the user
-        logging.info("File successfully converted.")
+        logger.info("File successfully converted.")
         self.parent.communicate.statusBarUpdateSignal.emit("File converted successfully.")
 
         # Optionally, load the freshly converted file into Data Explorer
@@ -189,7 +191,7 @@ class FileConverterWidget(QtWidgets.QDialog, Ui_FileConverterUI):
                 self, "Choose a file", "", "All files (*.*)")[0]
         except (OSError, RuntimeError) as ex:
             log_msg = f"File Converter failed with: {ex}"
-            logging.error(log_msg)
+            logger.error(log_msg)
             raise
         return datafile
 

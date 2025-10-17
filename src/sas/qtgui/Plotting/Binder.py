@@ -4,6 +4,8 @@ Extension to MPL to support the binding of artists to key/mouse events.
 import logging
 import sys
 
+logger = logging.getLogger(__name__)
+
 
 class Selection:
     """
@@ -61,7 +63,7 @@ class BindArtist:
                 canvas.mpl_connect('scroll_event', self._onScroll)
             ]
         except:
-            print("bypassing scroll_event: wrong matplotlib version")
+            logger.error("bypassing scroll_event: wrong matplotlib version")
             self._connections = [
                 canvas.mpl_connect('motion_notify_event', self._onMotion),
                 canvas.mpl_connect('button_press_event', self._onClick),
@@ -122,7 +124,7 @@ class BindArtist:
             for cid in self._connections:
                 self.canvas.mpl_disconnect(cid)
         except:
-            logging.error("Error disconnection canvas: %s" % sys.exc_info()[1])
+            logger.error("Error disconnection canvas: %s" % sys.exc_info()[1])
         self._connections = []
 
     def __del__(self):

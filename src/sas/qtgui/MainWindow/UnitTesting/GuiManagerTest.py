@@ -16,6 +16,8 @@ from sas.qtgui.Utilities.HidableDialog import HidableDialog
 from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
 from sas.system import config
 
+logger = logging.getLogger(__name__)
+
 
 class GuiManagerTest:
     '''Test the Main Window functionality'''
@@ -75,10 +77,9 @@ class GuiManagerTest:
         assert message in manager.logDockWidget.widget().toPlainText()
 
         # And finally, send a log message
-        import logging
         message = "from logging"
         message_logged = "ERROR: " + message
-        logging.error(message)
+        logger.error(message)
         assert message_logged in manager.logDockWidget.widget().toPlainText()
 
     @pytest.mark.skip("2022-09 already broken - generates runtime error")
@@ -193,14 +194,14 @@ class GuiManagerTest:
 
         # 4. couldn't load version
         version_info = {}
-        mocker.patch.object(logging, 'error')
+        mocker.patch.object(logger, 'error')
         spy_status_update = QtSignalSpy(manager, manager.communicate.statusBarUpdateSignal)
 
         manager.processVersion(version_info)
 
         # Retrieve and compare arguments of the mocked call
         message = "guiframe: could not get latest application version number"
-        args, _ = logging.error.call_args
+        args, _ = logger.error.call_args
         assert message in args[0]
 
         # Check the signal message

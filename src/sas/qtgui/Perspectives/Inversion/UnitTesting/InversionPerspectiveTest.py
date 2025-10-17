@@ -13,6 +13,8 @@ from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import Communicate
 
+logger = logging.getLogger(__name__)
+
 
 class InversionTest:
     """ Test the Inversion Perspective GUI """
@@ -228,13 +230,13 @@ class InversionTest:
         widget.noOfTermsInput.setText("980")
         assert widget.getNFunc() == 980
         # Empty
-        with caplog.at_level(logging.ERROR):
+        with caplog.at_level(logger.ERROR):
             widget.noOfTermsInput.setText("")
             n = widget.getNFunc()
         assert 'Incorrect number of terms specified:' in caplog.text
         assert widget.getNFunc() == 10
         # string
-        with caplog.at_level(logging.ERROR):
+        with caplog.at_level(logger.ERROR):
             widget.noOfTermsInput.setText("Nordvest Pizza")
             n = widget.getNFunc()
         assert "Incorrect number of terms specified: Nordvest Pizza" in caplog.text

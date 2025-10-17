@@ -26,6 +26,9 @@ except ImportError:
         # Otherwise we have @njit(...), so return the identity decorator.
         return lambda fn: fn
 
+logger = logging.getLogger(__name__)
+
+
 def Iq(q, x, y, z, sld, vol, is_avg=False):
     """
     Computes 1D isotropic.
@@ -518,7 +521,7 @@ def radius_of_gyration(nuc_sl_data: MagSLD | OMF2SLD) -> tuple[str, str, float]:
     if rog_den <= 0: #Should never happen as there are no zero or negative mass atoms
         rog_mass = "NaN"
         r_g_mass = 0.0
-        logging.warning("Atomic Mass is zero for all atoms in the system.")
+        logger.warning("Atomic Mass is zero for all atoms in the system.")
     else:
         r_g_mass = np.sqrt(rog_num/rog_den)
         rog_mass = (str(round(np.sqrt(rog_num/rog_den),1)) + " Å")
@@ -526,10 +529,10 @@ def radius_of_gyration(nuc_sl_data: MagSLD | OMF2SLD) -> tuple[str, str, float]:
     #Avoid division by zero - May occur through contrast matching
     if guinier_den == 0:
         guinier_value = "NaN"
-        logging.warning("Effective Coherent Scattering Length is zero for all atoms in the system.")
+        logger.warning("Effective Coherent Scattering Length is zero for all atoms in the system.")
     elif (guinier_num/guinier_den) < 0:
         guinier_value = (str(round(np.sqrt(-guinier_num/guinier_den), 1)) + " Å")
-        logging.warning("Radius of Gyration Squared is negative. R(G)^2 is assumed to be |R(G)|* R(G).")
+        logger.warning("Radius of Gyration Squared is negative. R(G)^2 is assumed to be |R(G)|* R(G).")
     else:
         guinier_value = (str(round(np.sqrt(guinier_num/guinier_den), 1)) + " Å")
 

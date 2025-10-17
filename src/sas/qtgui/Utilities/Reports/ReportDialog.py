@@ -9,6 +9,8 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Utilities.Reports.reportdata import ReportData
 from sas.qtgui.Utilities.Reports.UI.ReportDialogUI import Ui_ReportDialogUI
 
+logger = logging.getLogger(__name__)
+
 
 class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
     """
@@ -60,7 +62,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
             document.print_(printer)
         except Exception as ex:
             # Printing can return various exceptions, let's catch them all
-            logging.error("Print report failed with: " + str(ex))
+            logger.error("Print report failed with: " + str(ex))
 
     def onSave(self):
         """
@@ -93,7 +95,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
             ext = extension[extension.find("(")+2:extension.find(")")]
         except IndexError as ex:
             # (ext) not found...
-            logging.error("Error while saving report. " + str(ex))
+            logger.error("Error while saving report. " + str(ex))
             return
         basename, extension = os.path.splitext(filename)
         if not extension:
@@ -110,7 +112,7 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
             self.save_pdf(html_utf, filename)
 
         else:
-            logging.error(f"Unknown file extension: {ext.lower()}")
+            logger.error(f"Unknown file extension: {ext.lower()}")
 
 
 
@@ -143,8 +145,8 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
                 return pisaStatus.err
 
         except Exception:
-            # logging.error("Error creating pdf: " + str(ex))
-            logging.error("Error creating pdf: " + traceback.format_exc())
+            # logger.error("Error creating pdf: " + str(ex))
+            logger.error("Error creating pdf: " + traceback.format_exc())
         return False
 
 

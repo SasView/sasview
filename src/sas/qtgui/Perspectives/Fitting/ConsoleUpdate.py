@@ -3,6 +3,8 @@ import time
 
 from sas.sascalc.fit import FitHandler
 
+logger = logging.getLogger(__name__)
+
 
 class ConsoleUpdate(FitHandler):
     """
@@ -87,7 +89,7 @@ class ConsoleUpdate(FitHandler):
         Print result object
         """
         msg = " \n %s \n" % str(self.result)
-        logging.info(msg)
+        logger.info(msg)
 
     def error(self, msg):
         """
@@ -97,7 +99,7 @@ class ConsoleUpdate(FitHandler):
             self.update_fit()
 
         message = str(msg) + " \n %s \n" % self.result.__str__()
-        logging.error(message)
+        logger.error(message)
 
     def stop(self, msg):
         """
@@ -107,7 +109,7 @@ class ConsoleUpdate(FitHandler):
             self.update_fit()
 
         message = str(msg) + " \n %s \n" % self.result.__str__()
-        logging.info(message)
+        logger.info(message)
 
     def finalize(self):
         """
@@ -154,7 +156,7 @@ class ConsoleUpdate(FitHandler):
                 msg += str(self.result)
                 msg += "\n"
 
-            logging.info(msg)
+            logger.info(msg)
 
     def set_result(self, result):
         """
