@@ -5,9 +5,21 @@ requires = [
     "hatch-requirements-txt",
     "hatch-sphinx",
     "hatch-vcs",
+    # For documentation
+    "bumps",
+    "dominate",
+    "html2text",
+    "numpy",
+    "periodictable",
+    "pyopengl",
     "pyside6",
+    "qtconsole",
+    "scipy",
+    "superqt",
     "sasdata",
     "sasmodels",
+    "twisted",
+    "uncertainties",
 ]
 build-backend = "hatchling.build"
 
