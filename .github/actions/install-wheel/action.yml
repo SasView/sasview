@@ -1,0 +1,88 @@
+# Reusable snippet for installing the wheel ready for either testing
+# or creating the installer
+
+name: Install SasView wheel into current environment
+
+inputs:
+  python-version:
+    required: true
+  os:
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Configuration of this job
+      shell: bash
+      run: |
+        echo 'python-version = ${{ inputs.python-version }}'
+        echo 'os = ${{ inputs.os }}'
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install uv utilities to speed up python module installation
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        prune-cache: false
+
+    ### Installation of build-dependencies
+
+    - name: Install X11 libraries (Linux)
+      if: ${{ startsWith(inputs.os, 'ubuntu') }}
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      shell: bash
+      run: |
+        sudo apt-get update
+        # libcairo2-dev is for building a wheel for pycairo if not cached
+        # rest are for loading Qt widgets
+        sudo apt-get -y install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils xvfb libegl-dev libcairo2-dev
+
+    - name: Fetch wheels of sibling projects
+      uses: actions/download-artifact@v5
+      with:
+        path: dist/
+        pattern: build-dependency-*-wheel
+        merge-multiple: true
+
+    - name: Install correct versions of sibling projects
+      shell: bash
+      run: |
+        uv pip install dist/*whl
+
+    - name: Install Python dependencies
+      if: ${{ ! env.RELEASE_BRANCH_BUILD }}
+      shell: bash
+      run: |
+        uv pip install -r build_tools/requirements.txt
+        uv pip install -r build_tools/requirements-dev.txt
+
+    ### For pull_requests with the release branch as the base -or- branches with the name *release*
+
+    - name: Install Python dependencies for release branches
+      if: ${{ env.RELEASE_BRANCH_BUILD }}
+      shell: bash
+      run: |
+        uv pip install --no-deps -r build_tools/requirements-release-${{ matrix.os }}.txt
+
+    - name: Fetch sasview wheel
+      uses: actions/download-artifact@v5
+      with:
+        path: dist/
+        pattern: sasview-wheel
+        merge-multiple: true
+
+    - name: Install sasview wheel
+      shell: bash
+      run: |
+        uv pip install dist/sasview*whl
+
+    - name: Python package version list
+      shell: bash
+      run: |
+        python -m pip freeze
