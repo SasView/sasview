@@ -18,5 +18,5 @@ def evaluate_sans_debye(q, coords, w):
         Iq = ausaxs.debye(q, coords[0,:], coords[1,:], coords[2,:], w)
         return Iq
     except Exception as e:
-        logging.warning(f"AUSAXS Debye calculation failed: {e}. Falling back to default implementation.")
+        logging.warning("AUSAXS Debye calculation failed: %s. Falling back to default implementation.", e)
         return sasview_sans_debye(q, coords, w)

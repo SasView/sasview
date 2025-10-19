@@ -233,9 +233,7 @@ class sas_gen_test(unittest.TestCase):
         ausaxs = AUSAXS()
 
         # ensure the library is available and ready to run on all CI systems
-        if not ausaxs.ready():
-            self.assertTrue(False, "AUSAXS library not available, test cannot be run.")
-            return
+        assert ausaxs.ready(), "AUSAXS library not available, test cannot be run."
 
         # get all pdb files in the data folder
         import glob
@@ -257,11 +255,12 @@ class sas_gen_test(unittest.TestCase):
             # compare the two
             errs = (external - analytical)/analytical
             different_entries = 0
-            for val in np.abs(errs):
-                self.assertLessEqual(val, 0.03, "Ensure that the error is acceptable.")
-                if val != 0:
-                    different_entries += 1
-            self.assertTrue(different_entries > len(q)*0.5, "Check that two different algorithms were actually run.")
+            np.testing.assert_allclose(
+                external, analytical, rtol=0.03, atol=1e-6,
+                err_msg=f"Debye calculations do not agree for file {os.path.basename(pdb_file)}"
+            )
+            different_entries = np.sum(np.abs(errs) > 1e-12)
+            assert different_entries > len(q)*0.5, "The two calculations appear identical, test may be invalid."
 
         # test a larger q-range
         f = self.pdbloader.read(os.path.join(os.path.dirname(__file__), "data/debye_test_files/SASDPP4.pdb"))
@@ -273,8 +272,10 @@ class sas_gen_test(unittest.TestCase):
         external = ausaxs_sans_debye.evaluate_sans_debye(q, coords, w)
 
         errs = (external - analytical)/analytical
-        for val in np.abs(errs):
-            self.assertLessEqual(val, 0.03)
+        np.testing.assert_allclose(
+            external, analytical, rtol=0.03, atol=1e-6,
+            err_msg="Debye calculations do not agree for larger q-range"
+        )
 
     def test_calculator_elements(self):
         """
