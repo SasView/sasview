@@ -7,7 +7,9 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from twisted.internet import reactor, threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Perspectives.Corfunc.CorfuncSlider import CorfuncSlider
 from sas.qtgui.Plotting.PlotterData import Data1D, DataRole
+from sas.sascalc.corfunc.calculation_data import ExtrapolationInteractionState, ExtrapolationParameters
 
 # sas-global
 from sas.sascalc.invariant import invariant
@@ -15,7 +17,7 @@ from sas.sascalc.invariant import invariant
 # local
 from ..perspective import Perspective
 from .InvariantDetails import DetailsDialog
-from .InvariantUtils import WIDGETS
+from .InvariantUtils import WIDGETS, safe_float
 from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 
 # The minimum q-value to be used when extrapolating
@@ -84,6 +86,9 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.high_extrapolation_plot = None
         self.low_extrapolation_plot = None
 
+        self.slider = CorfuncSlider()
+        self.sliderLayout.insertWidget(1, self.slider)
+
         # no reason to have this widget resizable
         self.resize(self.minimumSizeHint())
 
@@ -140,10 +145,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtPorodCst.setValidator(GuiUtils.DoubleValidator())
         self.txtVolFrac1.setValidator(GuiUtils.DoubleValidator())
         self.txtVolFrac2.setValidator(GuiUtils.DoubleValidator())
-
-        # validator: integer number
-        self.txtNptsLowQ.setValidator(QtGui.QIntValidator())
-        self.txtNptsHighQ.setValidator(QtGui.QIntValidator())
+        self.txtNptsLowQ.setValidator(QtGui.QDoubleValidator())
+        self.txtNptsHighQ.setValidator(QtGui.QDoubleValidator())
         self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
         self.txtPowerHighQ.setValidator(GuiUtils.DoubleValidator())
 
@@ -151,6 +154,17 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.allow_calculation()
 
         self.mapper.toFirst()
+
+    @property
+    def extrapolation_paramameters(self) -> ExtrapolationParameters | None:
+        if self.data is not None:
+            return ExtrapolationParameters(
+                min(self.data.x),
+                safe_float(self.model.item(WIDGETS.W_QMIN).text()),
+                safe_float(self.model.item(WIDGETS.W_QMAX).text()),
+                safe_float(self.model.item(WIDGETS.W_QCUTOFF).text()), 10 * max(self.data.x))
+        else:
+            return None
 
     def get_low_q_extrapolation_upper_limit(self):
         q_value = self._data.x[int(self.txtNptsLowQ.text()) - 1]
@@ -635,6 +649,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         self.txtNptsHighQ.editingFinished.connect(self.checkQRange)
         self.txtNptsHighQ.textChanged.connect(self.checkQRange)
 
+        self.slider.valueEdited.connect(self.on_extrapolation_slider_changed)
+        self.slider.valueEditing.connect(self.on_extrapolation_slider_changing)
+
+    def on_extrapolation_slider_changed(self, state: ExtrapolationParameters):
+        format_string = "%.8g"
+        self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(format_string%state.point_1))
+        self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(format_string%state.point_2))
+        self.model.setItem(WIDGETS.W_QCUTOFF, QtGui.QStandardItem(format_string%state.point_3))
+
+    def on_extrapolation_slider_changing(self, state: ExtrapolationInteractionState):
+        pass
+        #self._q_space_plot.update_lines(state)
+        ##SS
+
     def stateChanged(self):
         """
         Catch modifications from low- and high-Q extrapolation check boxes
@@ -678,6 +706,10 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             toggle = str(item.text()) == "true"
             self._high_extrapolate = toggle
             self.highQToggle(toggle)
+
+        self.slider.extrapolation_parameters = self.extrapolation_paramameters
+        self.high_extrapolation_plot.draw_data()
+        self.low_extrapolation_plot.draw_data()
 
     def checkQExtrapolatedData(self):
         """
@@ -1201,12 +1233,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "scale": self.txtScale.text(),
             "porod": self.txtPorodCst.text(),
             "low_extrapolate": self.chkLowQ.isChecked(),
-            "low_points": self.txtNptsLowQ.text(),
+            "guinier_end_low_q": self.txtNptsLowQ.text(),
             "low_guinier": self.rbGuinier.isChecked(),
             "low_fit_rb": self.rbFitLowQ.isChecked(),
             "low_power_value": self.txtPowerLowQ.text(),
             "high_extrapolate": self.chkHighQ.isChecked(),
-            "high_points": self.txtNptsHighQ.text(),
+            "porod_start_high_q": self.txtNptsHighQ.text(),
             "high_fit_rb": self.rbFitHighQ.isChecked(),
             "high_power_value": self.txtPowerHighQ.text(),
             "total_q_min": self.txtTotalQMin.text(),
