@@ -42,4 +42,19 @@ WIDGETS = enum(
     "D_LOW_QSTAR_ERR",
     "D_HIGH_QSTAR",
     "D_HIGH_QSTAR_ERR",
+    #extrapolation tab
+    "W_EX_QMAX_LOWQ",
+    "W_EX_QMIN_HIGHQ",
+    "W_EX_QMAX_HIGHQ",
+    "W_POWER_LOWQ",
+    "W_POWER_HIGHQ",
+    "W_FILENAME"
 )
+
+def safe_float(x: str):
+    """ String to float method that returns zero if parsing failed """
+
+    try:
+        return float(x)
+    except:
+        return 0.0
