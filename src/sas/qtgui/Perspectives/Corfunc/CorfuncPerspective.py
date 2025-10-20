@@ -120,6 +120,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         # Set up the mapper
         self.setup_mapper()
 
+        self.update_readonly()
+
     def set_background_warning(self):
         if (self._calculator is None or
             self._calculator.background is None or
@@ -431,21 +433,21 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
 
     def check_extrapolation_entry(self, fits_enabled: list[str]):
         """ Disable Go button if extrapolation ranges empty or invalid """
-        if fits_enabled == []:
-            self.disable_go_button("No fits enabled")
-            return
+        # if fits_enabled == []:
+        #     self.disable_go_button("No fits enabled")
+        #     return
 
-        if "background" in fits_enabled:
+        if "background" not in fits_enabled:
             if self.txtBackground.text() == "":
                 self.disable_go_button("Extrapolation values not set")
                 return
 
-        if "guinier" in fits_enabled:
+        if "guinier" not in fits_enabled:
             if (self.txtGuinierA.text() == "" or self.txtGuinierB.text() == ""):
                 self.disable_go_button("Extrapolation values not set")
                 return
 
-        if "porod" in fits_enabled:
+        if "porod" not in fits_enabled:
             if (self.txtPorodK.text() == "" or self.txtPorodSigma.text() == ""):
                 self.disable_go_button("Extrapolation values not set")
                 return
@@ -460,23 +462,25 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         fits_enabled = []
         if self.fitBackground.isChecked():
             fits_enabled.append("background")
-            self.txtBackground.setEnabled(True)
-        else:
             self.txtBackground.setEnabled(False)
+        else:
+            self.txtBackground.setEnabled(True)
+
         if self.fitGuinier.isChecked():
             fits_enabled.append("guinier")
-            self.txtGuinierA.setEnabled(True)
-            self.txtGuinierB.setEnabled(True)
-        else:
             self.txtGuinierA.setEnabled(False)
             self.txtGuinierB.setEnabled(False)
+        else:
+            self.txtGuinierA.setEnabled(True)
+            self.txtGuinierB.setEnabled(True)
+
         if self.fitPorod.isChecked():
             fits_enabled.append("porod")
-            self.txtPorodK.setEnabled(True)
-            self.txtPorodSigma.setEnabled(True)
-        else:
             self.txtPorodK.setEnabled(False)
             self.txtPorodSigma.setEnabled(False)
+        else:
+            self.txtPorodK.setEnabled(True)
+            self.txtPorodSigma.setEnabled(True)
 
         self.check_extrapolation_entry(fits_enabled)
 
