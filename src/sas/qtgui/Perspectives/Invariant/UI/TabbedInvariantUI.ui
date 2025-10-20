@@ -30,7 +30,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>500</width>
+     <width>547</width>
      <height>500</height>
     </rect>
    </property>
@@ -47,7 +47,7 @@
     </size>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tabMain">
     <attribute name="title">
@@ -803,6 +803,200 @@ while extrapolating the low-Q region</string>
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QWidget" name="tabExtrapolation">
+    <attribute name="title">
+     <string>Page</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>9</y>
+       <width>511</width>
+       <height>241</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Extrapolation</string>
+     </property>
+     <widget class="QWidget" name="horizontalLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>20</y>
+        <width>491</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <item>
+        <widget class="QLabel" name="labelName">
+         <property name="text">
+          <string>Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="txtFileName"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>110</y>
+        <width>491</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="5">
+        <widget class="QLineEdit" name="txtPorodEnd"/>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="txtGuinierEnd"/>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="txtPorodStart"/>
+       </item>
+       <item row="0" column="4">
+        <widget class="QLabel" name="labelPorodEnd">
+         <property name="text">
+          <string>Porod End:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="labelPorodStart">
+         <property name="text">
+          <string>Porod Start:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelGuinierEnd">
+         <property name="text">
+          <string>Guinier End:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QLabel" name="labelUnits">
+         <property name="text">
+          <string>Å-1</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>60</y>
+        <width>491</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="sliderLayout">
+      <property name="leftMargin">
+        <number>5</number>
+        </property>
+        <property name="topMargin">
+        <number>10</number>
+        </property>
+        <property name="rightMargin">
+        <number>5</number>
+        </property>
+        <property name="bottomMargin">
+        <number>10</number>
+        </property>
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Adjust:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="gridLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>9</x>
+       <y>150</y>
+       <width>491</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_9">
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="lowQ">
+        <property name="text">
+         <string>Low-Q</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QRadioButton" name="lowQGuinier">
+        <property name="text">
+         <string>Guinier</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QRadioButton" name="highQFit">
+        <property name="text">
+         <string>Fit</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="highQ">
+        <property name="text">
+         <string>High-Q</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QRadioButton" name="lowQPower">
+        <property name="text">
+         <string>Power</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QRadioButton" name="highQFix">
+        <property name="text">
+         <string>Fix</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Extrapolation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="txtLowQPower"/>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="txtHighQPower"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>Power:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </widget>
   <widget class="QWidget" name="layoutWidget">
