@@ -419,19 +419,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         reactor.callFromThread(self.update_model_from_thread, WIDGETS.D_DATA_QSTAR_ERR, qstar_data_err)
 
         # Volume Fraction calculations
-<<<<<<< HEAD
-        try:
-            volume_fraction, volume_fraction_error = self._calculator.get_volume_fraction_with_error(
-                self._contrast, extrapolation=extrapolation
-            )
-        except Exception as ex:
-            calculation_failed = True
-            msg += str(ex)
-            volume_fraction = "ERROR"
-            volume_fraction_error = "ERROR"
-        reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_VOLUME_FRACTION, volume_fraction)
-        reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_VOLUME_FRACTION_ERR, volume_fraction_error)
-=======
         if self.rbContrast.isChecked():
             try:
                 volume_fraction, volume_fraction_error = self._calculator.get_volume_fraction_with_error(self._contrast, extrapolation=extrapolation)
@@ -460,7 +447,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         else:
             reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_CONTRAST_OUT, "")
             reactor.callFromThread(self.update_model_from_thread, WIDGETS.W_CONTRAST_OUT_ERR, "")
->>>>>>> b680eebf7 (Connects the UI to calculation functions and populates fields)
 
         # Surface Error calculations
         if self._porod:
@@ -799,7 +785,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
                 self.cmdCalculate.setEnabled(False)
 
     def updateFromGui(self):
-<<<<<<< HEAD
         """Update model when new user inputs"""
         possible_senders = [
             "txtBackgd",
@@ -807,6 +792,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "txtPorodCst",
             "txtScale",
             "txtPowerLowQ",
+            "txtVolFrac1",
+            "txtVolFrac2",
             "txtPowerHighQ",
             "txtNptsLowQ",
             "txtNptsHighQ",
@@ -817,6 +804,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             WIDGETS.W_CONTRAST,
             WIDGETS.W_POROD_CST,
             WIDGETS.W_SCALE,
+            WIDGETS.W_VOLFRAC1,
+            WIDGETS.W_VOLFRAC2,
             WIDGETS.W_LOWQ_POWER_VALUE,
             WIDGETS.W_HIGHQ_POWER_VALUE,
             WIDGETS.W_NPTS_LOWQ,
@@ -828,31 +817,13 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             self._contrast,
             self._porod,
             self._scale,
+            self._volfrac1,
+            self._volfrac2,
             self._low_power_value,
             self._high_power_value,
             self._low_points,
             self._high_points,
         ]
-=======
-        """ Update model when new user inputs """
-        possible_senders = ['txtBackgd', 'txtContrast', 'txtPorodCst',
-                            'txtScale', 'txtVolFrac1', 'txtVolFrac2',
-                            'txtPowerLowQ', 'txtPowerHighQ',
-                            'txtNptsLowQ', 'txtNptsHighQ']
-
-        related_widgets = [WIDGETS.W_BACKGROUND, WIDGETS.W_CONTRAST,
-                           WIDGETS.W_POROD_CST, WIDGETS.W_SCALE,
-                           WIDGETS.W_VOLFRAC1, WIDGETS.W_VOLFRAC2,
-                           WIDGETS.W_LOWQ_POWER_VALUE, WIDGETS.W_HIGHQ_POWER_VALUE,
-                           WIDGETS.W_NPTS_LOWQ, WIDGETS.W_NPTS_HIGHQ]
-
-        related_internal_values = [self._background, self._contrast,
-                                   self._porod, self._scale,
-                                   self._volfrac1, self._volfrac2,
-                                   self._low_power_value,
-                                   self._high_power_value,
-                                   self._low_points, self._high_points]
->>>>>>> b680eebf7 (Connects the UI to calculation functions and populates fields)
 
         item = QtGui.QStandardItem(self.sender().text())
 
@@ -1215,11 +1186,12 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
         # Be sure model has been updated
         self.updateFromModel()
         return {
-<<<<<<< HEAD
             "extrapolated_q_min": self.txtExtrapolQMin.text(),
             "extrapolated_q_max": self.txtExtrapolQMax.text(),
             "vol_fraction": self.txtVolFract.text(),
             "vol_fraction_err": self.txtVolFractErr.text(),
+            "contrast_out": self.txtContrastOut.text(),
+            "contrast_out_err": self.txtContrastOutErr.text(),
             "specific_surface": self.txtSpecSurf.text(),
             "specific_surface_err": self.txtSpecSurfErr.text(),
             "invariant_total": self.txtInvariantTot.text(),
@@ -1239,33 +1211,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             "high_power_value": self.txtPowerHighQ.text(),
             "total_q_min": self.txtTotalQMin.text(),
             "total_q_max": self.txtTotalQMax.text(),
-=======
-            'extrapolated_q_min': self.txtExtrapolQMin.text(),
-            'extrapolated_q_max': self.txtExtrapolQMax.text(),
-            'vol_fraction': self.txtVolFract.text(),
-            'vol_fraction_err': self.txtVolFractErr.text(),
-            'contrast_out': self.txtContrastOut.text(),
-            'contrast_out_err': self.txtContrastOutErr.text(),
-            'specific_surface': self.txtSpecSurf.text(),
-            'specific_surface_err': self.txtSpecSurfErr.text(),
-            'invariant_total': self.txtInvariantTot.text(),
-            'invariant_total_err': self.txtInvariantTotErr.text(),
-            'background': self.txtBackgd.text(),
-            'contrast': self.txtContrast.text(),
-            'scale': self.txtScale.text(),
-            'porod': self.txtPorodCst.text(),
-            'low_extrapolate': self.chkLowQ.isChecked(),
-            'low_points': self.txtNptsLowQ.text(),
-            'low_guinier': self.rbGuinier.isChecked(),
-            'low_fit_rb': self.rbFitLowQ.isChecked(),
-            'low_power_value': self.txtPowerLowQ.text(),
-            'high_extrapolate': self.chkHighQ.isChecked(),
-            'high_points': self.txtNptsHighQ.text(),
-            'high_fit_rb': self.rbFitHighQ.isChecked(),
-            'high_power_value': self.txtPowerHighQ.text(),
-            'total_q_min': self.txtTotalQMin.text(),
-            'total_q_max': self.txtTotalQMax.text(),
->>>>>>> b680eebf7 (Connects the UI to calculation functions and populates fields)
         }
 
     def updateFromParameters(self, params):
@@ -1280,34 +1225,18 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI, Perspective):
             msg = "Invariant.updateFromParameters expects a dictionary"
             raise TypeError(f"{msg}: {c_name} received")
         # Assign values to 'Invariant' tab inputs - use defaults if not found
-<<<<<<< HEAD
         self.txtTotalQMin.setText(str(params.get("total_q_min", "0.0")))
         self.txtTotalQMax.setText(str(params.get("total_q_max", "0.0")))
         self.txtExtrapolQMax.setText(str(params.get("extrapolated_q_max", Q_MAXIMUM)))
         self.txtExtrapolQMin.setText(str(params.get("extrapolated_q_min", Q_MINIMUM)))
         self.txtVolFract.setText(str(params.get("vol_fraction", "")))
         self.txtVolFractErr.setText(str(params.get("vol_fraction_err", "")))
+        self.txtContrastOut.setText(str(params.get("contrast_out", "")))
+        self.txtContrastOutErr.setText(str(params.get("contrast_out_err", "")))
         self.txtSpecSurf.setText(str(params.get("specific_surface", "")))
         self.txtSpecSurfErr.setText(str(params.get("specific_surface_err", "")))
         self.txtInvariantTot.setText(str(params.get("invariant_total", "")))
         self.txtInvariantTotErr.setText(str(params.get("invariant_total_err", "")))
-=======
-        self.txtTotalQMin.setText(str(params.get('total_q_min', '0.0')))
-        self.txtTotalQMax.setText(str(params.get('total_q_max', '0.0')))
-        self.txtExtrapolQMax.setText(str(params.get('extrapolated_q_max',
-                                                    Q_MAXIMUM)))
-        self.txtExtrapolQMin.setText(str(params.get('extrapolated_q_min',
-                                                    Q_MINIMUM)))
-        self.txtVolFract.setText(str(params.get('vol_fraction', '')))
-        self.txtVolFractErr.setText(str(params.get('vol_fraction_err', '')))
-        self.txtContrastOut.setText(str(params.get('contrast_out', '')))
-        self.txtContrastOutErr.setText(str(params.get('contrast_out_err', '')))
-        self.txtSpecSurf.setText(str(params.get('specific_surface', '')))
-        self.txtSpecSurfErr.setText(str(params.get('specific_surface_err', '')))
-        self.txtInvariantTot.setText(str(params.get('invariant_total', '')))
-        self.txtInvariantTotErr.setText(
-            str(params.get('invariant_total_err', '')))
->>>>>>> b680eebf7 (Connects the UI to calculation functions and populates fields)
         # Assign values to 'Options' tab inputs - use defaults if not found
         self.txtBackgd.setText(str(params.get("background", "0.0")))
         self.txtScale.setText(str(params.get("scale", "1.0")))
