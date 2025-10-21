@@ -171,10 +171,11 @@ def module_copytree(module: str, src: PATH_LIKE, dest: PATH_LIKE) -> None:
         if resource.is_dir():
             # recurse into the directory
             module_copytree(module, s_name, f_name)
-        elif resource.is_file() and not f_name.exists():
-            logger.debug("Copied: %s", s_name)
-            with open(f_name, "wb") as dh:
-                dh.write(resource.read_bytes())
+        elif resource.is_file():
+            if not f_name.exists():
+                logger.debug("Copied: %s", s_name)
+                with open(f_name, "wb") as dh:
+                    dh.write(resource.read_bytes())
         else:
             logger.warning("Skipping %s (unknown type)", str(s_name))
 
