@@ -950,7 +950,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         def visit_FunctionDef(self, node):
             """
             Extract the source code of the function with the given name.
-            NOTE: Do NOT change the name of this method-- visit_ is a prefix that ast.NodeVisitor uses
+            NOTE: Do NOT change the name of this method; ``visit_`` is a prefix that ast.NodeVisitor uses
             """
             if node.name == self.function_name:
                 body = node.body
