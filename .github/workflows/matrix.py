@@ -27,7 +27,7 @@ jobs = []
 #   https://pyinstaller.readthedocs.io/en/stable/usage.html#making-gnu-linux-apps-forward-compatible
 os_release_list = [
     'ubuntu-22.04',
-    'windows-latest',
+    'windows-2022',
     'macos-latest',
 ]
 
