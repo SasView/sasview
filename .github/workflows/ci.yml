@@ -251,6 +251,9 @@ jobs:
         env:
           PYOPENCL_COMPILER_OUTPUT: 1
         run: |
+          # run the tests against the installed package
+          cp -r test pyproject.toml conftest.py $RUNNER_TEMP
+          cd $RUNNER_TEMP
           python -m pytest -v -s test
 
       # - name: Test GUI (Linux)
