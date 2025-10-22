@@ -15,6 +15,7 @@ datas = []
 datas.append((os.path.join(PYTHON_PACKAGES, 'debugpy'), 'debugpy'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'jedi'), 'jedi'))
 datas.append((os.path.join(PYTHON_PACKAGES, 'zmq'), 'zmq'))
+datas.append(('../src/sas/example_data', './example_data'))
 
 def add_data(data):
     for component in data:

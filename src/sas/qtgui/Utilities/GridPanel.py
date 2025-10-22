@@ -29,8 +29,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         self.setupUi(self)
 
         self.parent = parent
-        if hasattr(self.parent, "commuicator"):
-            self.communicate = parent.communicator
+        self.communicate = GuiUtils.communicate
 
         self.addToolbarActions()
 
@@ -161,7 +160,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         """
         # pull out page name from results
         page_name = None
-        results = results.get(DICT_KEYS[0])
         if len(results)>=2:
             if isinstance(results[-1], str):
                 page_name = results[-1]
@@ -196,18 +194,16 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         rows = [s.row() for s in self.currentTable().selectionModel().selectedRows()]
         if not rows:
             msg = "Nothing to plot!"
-            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            self.communicate.statusBarUpdateSignal.emit(msg)
             return
         data = self.dataFromTable(self.currentTable())
         # data['Data'] -> ['filename1', 'filename2', ...]
         # look for the 'Data' column and extract the filename
         for row in rows:
             try:
-                name = data['Filename'][row]
-                self.prPlot = self.batch_results[name].get(DICT_KEYS[1])
-                self.dataPlot = self.batch_results[name].get(DICT_KEYS[2])
+                name = data['Data'][row]
                 # emit a signal so the plots are being shown
-                self.parent.showPlots(self.batch_results[name]['Result'])
+                self.communicate.plotFromNameSignal.emit(name)
                 # This is an important processEvent.
                 # This allows charts to be properly updated in order
                 # of plots being applied.
@@ -225,14 +221,8 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         assert(isinstance(table, QtWidgets.QTableWidget))
         params = {}
         for column in range(table.columnCount()):
-            value = []
+            value = [table.item(row, column).data(0) for row in range(table.rowCount())]
             key = table.horizontalHeaderItem(column).data(0)
-            for row in range(table.rowCount()):
-                item = table.item(row, column)
-                if item is not None:
-                    value.append(item.data(0))
-                else:
-                    value.append(" ")
             params[key] = value
         return params
 
@@ -329,7 +319,6 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
 
         if data is None or widget is None:
             return
-        data = data.get(DICT_KEYS[0])
         # Figure out the headers
         model = data[0][0]
 
@@ -585,9 +574,36 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         self.tabWidget.addTab(tableItem, tab_name)
         self.tabWidget.setCurrentIndex(self.tab_number-1)
 
+    def onPlot(self):
+        """
+        Plot selected fits by sending signal to the parent
+        """
+        rows = [s.row() for s in self.currentTable().selectionModel().selectedRows()]
+        if not rows:
+            msg = "Nothing to plot!"
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            return
+        data = self.dataFromTable(self.currentTable())
+        # data['Data'] -> ['filename1', 'filename2', ...]
+        # look for the 'Data' column and extract the filename
+        for row in rows:
+            try:
+                name = data['Filename'][row]
+                self.prPlot = self.batch_results[name].get(DICT_KEYS[1])
+                self.dataPlot = self.batch_results[name].get(DICT_KEYS[2])
+                # emit a signal so the plots are being shown
+                self.parent.showPlots(self.batch_results[name]['Result'])
+                # This is an important processEvent.
+                # This allows charts to be properly updated in order
+                # of plots being applied.
+                QtWidgets.QApplication.processEvents()
+            except (IndexError, AttributeError):
+                # data messed up.
+                logging.error('Issue with data')
+                return
+
     def onHelp(self):
         self.parent.onHelp()
-
 
     def closeEvent(self, event):
         """Tell the parent window the window closed"""
