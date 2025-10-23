@@ -595,6 +595,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog, Perspective):
         self.model.setItem(WIDGETS.W_POLY_RYAN, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_POLY_STRIBECK, QtGui.QStandardItem(""))
         self.model.setItem(WIDGETS.W_PERIOD, QtGui.QStandardItem(""))
+        self.model.setItem(WIDGETS.W_BACKGROUND, QtGui.QStandardItem(""))
 
         self._q_space_plot.data = data
         self._q_space_plot.extrap = None
