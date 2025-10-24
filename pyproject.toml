@@ -33,7 +33,7 @@ dynamic = [
 ]
 description = "SasView application"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "BSD-3-Clause" }
 authors = [
     {name = "SasView Team", email = "developers@sasview.org"},
